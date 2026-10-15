@@ -10,7 +10,7 @@ import type { Audio, SfxName } from './audio';
 import { SAVE_KEY } from '../save/save';
 import { TELEMETRY_KEY } from '../telemetry/telemetry';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, showFarmManageAll, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -57,6 +57,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const nav = h(`<nav class="actions">
     <button data-nav="market"><img src="${A('icon-market.svg')}" alt="">Market<span class="badge" hidden></span></button>
     <button data-nav="upgrades"><img src="${A('icon-upgrade.svg')}" alt="">Upgrades<span class="badge" hidden></span></button>
+    <button class="btn manage farm-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button>
     <button data-nav="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
@@ -126,6 +127,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
     dirty = true;
   };
+  const farmMA = nav.querySelector('.farm-manage-all') as HTMLButtonElement, yawnSfx = new YawnSfx();
+  farmMA.addEventListener('click', e => { e.stopPropagation(); if (farmMA.getAttribute('aria-disabled') === 'true') return cantAfford(farmMA); g.dispatch({ type: 'manageAll' }); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
   $('.tabs').addEventListener('click', e => { const t = (e.target as HTMLElement).closest('button')?.dataset.tab; if (t) { tab = t as any; dirty = true; } });
@@ -359,6 +362,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     (nav.querySelector('[data-nav=market] .badge') as HTMLElement).hidden = !(s.customers.length && s.basket >= 1);
     (nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement).hidden = !canUp;
+    // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
+    const fma = showFarmManageAll(s, b) || (farmMA.hidden === false && s.manageCdS > 1e-9);
+    farmMA.hidden = !fma;
+    if (fma) { const cd = s.manageCdS > 1e-9; farmMA.classList.toggle('is-cooldown', cd); setDisabled(farmMA, cd); const r = ringHtml(s, b), slot = farmMA.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r; }
+    if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);

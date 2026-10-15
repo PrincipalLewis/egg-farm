@@ -20,4 +20,9 @@ await shot('m2-workers-tab', mk(Date.now(), { workers: { market_hand: { energy: 
   await p.locator('[data-nav=upgrades]').click(); await p.locator('[data-tab=workers]').click(); await p.waitForTimeout(400);
 });
 await shot('qa-rc2-2-debug-vs-welcome-back', mk(Date.now() - 3600_000, {}), '?debug=1', async p => { await p.waitForTimeout(300); });
+// M2 §4.6: shared cooldown ring mid-cooldown (Manage all + every Manage), and the Farm View Manage-all icon.
+await shot('m2-workers-ring-cooldown', mk(Date.now(), { workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 38, cdS: 0 }, hawker: { energy: 55, cdS: 0 }, grader: { energy: 90, cdS: 0 } }, graderTier: 4, manageCdS: 16 }), '', async p => {
+  await p.locator('[data-nav=upgrades]').click(); await p.locator('[data-tab=workers]').click(); await p.waitForTimeout(400);
+});
+await shot('m2-farm-manage-all', mk(Date.now(), { workers: { market_hand: { energy: 80, cdS: 0 }, coop_hand: { energy: 38, cdS: 0 }, hawker: { energy: 70, cdS: 0 }, grader: { energy: 90, cdS: 0 } }, graderTier: 4 }), '', async p => { await p.waitForTimeout(300); });
 await browser.close(); kill(); process.exit(0);

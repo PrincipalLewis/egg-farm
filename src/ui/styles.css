@@ -183,3 +183,18 @@ img{user-select:none;-webkit-user-drag:none}
 .btn.manage-all{position:sticky;top:0;z-index:2;width:calc(100% - 24px);margin:0 12px 6px;min-height:44px;border-radius:22px;background:var(--c-meadow,#5a9);color:#fff}
 .btn.manage-all.glow{box-shadow:0 0 10px var(--c-yolk-dark,#d99a1e)}
 @media (prefers-reduced-motion:reduce){.wk .yawn-ov{animation:none;opacity:1}}
+
+/* M2 §4.6: cooldown ring wraps the 44px icon area of Manage / Manage all (no conic fallback) */
+.btn.manage{display:inline-flex;align-items:center;gap:6px}
+.manage-ico{position:relative;display:inline-grid;place-items:center;width:44px;height:44px;flex:none}
+.manage .ring-cooldown{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);pointer-events:none;display:none}
+.manage.is-cooldown .ring-cooldown{display:block}
+.ring-progress{stroke-dashoffset:var(--ring-offset,0);transition:stroke-dashoffset 1s linear}
+.rm .ring-progress,.reduced-motion .ring-progress{transition:none}
+@media (prefers-reduced-motion:reduce){.ring-progress{transition:none}}
+.btn.manage-all{justify-content:center}
+.actions .farm-manage-all{flex:0 0 52px;padding:0;margin:4px 0;border-radius:50%;background:var(--c-meadow,#5a9)}
+.actions .farm-manage-all img{width:28px;height:28px}
+.actions .farm-manage-all[hidden]{display:none}
+nav.actions button.btn.farm-manage-all{flex:0 0 44px;width:44px;min-width:0;height:44px;min-height:0;padding:0;align-self:center;margin:0 4px;border-radius:50%;box-shadow:none}
+nav.actions button.btn.farm-manage-all .manage-ico{width:44px;height:44px}

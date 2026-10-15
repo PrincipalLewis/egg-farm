@@ -70,3 +70,33 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(resume(249).workers.market_hand!.unpaid).toBe(true); // W1 needs $2.50
   });
 });
+import { ringOffset, ringHtml, YawnSfx, showFarmManageAll } from '../src/ui/workers-ui';
+describe('M2 UI logic (§4.4, §4.6)', () => {
+  const cd = b.workers.energy.manage_cooldown_s;
+  it('ring offset = 100 x (1 - remaining / cooldown), clamped', () => {
+    expect(ringOffset(cd, cd)).toBe(0); expect(ringOffset(15, 30)).toBe(50); expect(ringOffset(0, 30)).toBe(100);
+    expect(ringOffset(-1, 30)).toBe(100); expect(ringOffset(40, 30)).toBe(0); expect(ringOffset(20, 30)).toBe(33.3);
+  });
+  it('one shared ring drives Manage and Manage all; is-cooldown only while cooling down', () => {
+    const s = base({ workers: { hawker: wk(20), grader: wk(50), market_hand: wk(60) }, graderTier: 1, manageCdS: 14.2 });
+    expect(ringHtml(s, b)).toContain(`--ring-offset:${ringOffset(15, cd)}`);
+    const html = workersHtml(s, b);
+    expect(html.match(/class="ring-cooldown"/g)).toHaveLength(4); // Manage all + 3 cards
+    expect(html.match(/is-cooldown/g)).toHaveLength(4); expect(html).not.toContain('conic');
+    expect(workersHtml({ ...s, manageCdS: 0 }, b)).not.toContain('is-cooldown');
+  });
+  it('Farm View Manage all: >= 3 hired and someone yawning', () => {
+    expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80) } }), b)).toBe(false);
+    expect(showFarmManageAll(base({ workers: { hawker: wk(80), grader: wk(80), market_hand: wk(90) } }), b)).toBe(false);
+    expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80), market_hand: wk(90) } }), b)).toBe(true);
+  });
+  it('yawn sfx: global 6 s throttle, first yawning worker in card order, never Asleep/Unpaid', () => {
+    const y = new YawnSfx();
+    const s = base({ workers: { market_hand: wk(35, true), coop_hand: wk(0), hawker: wk(38), grader: wk(20) } });
+    expect(y.pick(s, b, 0)).toBe('hawker'); // market_hand Unpaid, coop_hand Asleep skipped; grader later in order
+    expect(y.pick(s, b, 5999)).toBeNull(); expect(y.pick(s, b, 6000)).toBe('hawker');
+    const none = base({ workers: { market_hand: wk(35, true), coop_hand: wk(0), hawker: wk(90) } });
+    const y2 = new YawnSfx(); expect(y2.pick(none, b, 0)).toBeNull();
+    expect(y2.pick(s, b, 1)).toBe('hawker'); // no yawn consumed the throttle
+  });
+});

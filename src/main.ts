@@ -7,7 +7,7 @@ import { Audio } from './ui/audio';
 
 const VERSION = 'M1 dev';
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
-  'icon-offline-earnings', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
+  'icon-offline-earnings', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
 const root = document.getElementById('app')!;
 const audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/`);
 

@@ -3,6 +3,7 @@ export const SFX = {
   tapStart: 'sfx-tap-start', collect: 'sfx-collect-pop', sell: 'sfx-sell-coin', upgrade: 'sfx-upgrade',
   cantAfford: 'sfx-cant-afford', customerArrive: 'sfx-customer-arrive', customerLeave: 'sfx-customer-leave',
   coopFull: 'sfx-coop-full', uiOpen: 'sfx-ui-open', uiClose: 'sfx-ui-close', welcomeBack: 'sfx-welcome-back',
+  workerYawn: 'sfx-worker-yawn',
 } as const;
 export type SfxName = keyof typeof SFX;
 export class Audio {
