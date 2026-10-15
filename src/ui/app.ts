@@ -1,3 +1,4 @@
+import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
@@ -575,7 +576,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
-  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; (window as any).eggfarmOnb = onbFlow; // QA handle
+  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.

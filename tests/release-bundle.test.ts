@@ -17,4 +17,9 @@ describe('release bundle', () => {
     expect(qa).toMatch(/get\("ios"\)/);
     expect(rel).not.toMatch(/get\("ios"\)/);
   }, 120_000);
+  it('has no window.eggfarmOnb onboarding debug handle (QA builds only)', async () => {
+    const rel = await js('production'), qa = await js('qa');
+    expect(qa).toMatch(/eggfarmOnb/);
+    expect(rel).not.toMatch(/eggfarmOnb/);
+  }, 120_000);
 });
