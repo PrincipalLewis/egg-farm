@@ -5,7 +5,7 @@ import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
 import { save, load, KV } from './save/save';
-import { Telemetry } from './telemetry/telemetry';
+import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 export class Game {
@@ -14,14 +14,15 @@ export class Game {
   resetting = false;
   /** True when no save existed at load (drives onboarding). */
   isNewGame = false;
-  telemetry: Telemetry; private coopFullSince: number | null = null;
+  installId = ''; telemetry: Telemetry; private coopFullSince: number | null = null;
   private listeners: ((e: GameEvent) => void)[] = [];
   /** Subscribe to sim/game events (UI feedback, sfx). Returns unsubscribe. */
   on(fn: (e: GameEvent) => void) { this.listeners.push(fn); return () => { this.listeners = this.listeners.filter(f => f !== fn); }; }
   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
-  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number) {
+  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev') {
     this.telemetry = new Telemetry(kv, b.telemetry, now);
-    this.telemetry.track('session_start');
+    this.installId = installId(kv);
+    this.telemetry.track('session_start', { install_id: this.installId, build });
     const f = load(kv, b);
     this.isNewGame = !f;
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));

@@ -5,7 +5,7 @@ import { startAutosave } from './save/autosave';
 import { mountApp } from './ui/app';
 import { Audio } from './ui/audio';
 
-const VERSION = 'M1 dev';
+const VERSION = 'm3-pt1';
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
   'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
 const root = document.getElementById('app')!;
@@ -28,7 +28,7 @@ function showError() {
 }
 function boot() {
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined);
+  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame });

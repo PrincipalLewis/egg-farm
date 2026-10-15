@@ -7,8 +7,8 @@ import * as S from '../sim/state';
 import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
-import { SAVE_KEY } from '../save/save';
-import { TELEMETRY_KEY } from '../telemetry/telemetry';
+import { resetProgress } from '../save/save';
+import { exportLog } from './export-log';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
@@ -199,6 +199,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button><h2>Settings</h2>
       <label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
+      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
     modal.classList.add('open'); sfx('uiOpen');
   };
@@ -206,8 +207,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const t = e.target as HTMLElement;
     if (modalKind === 'welcome') { if (t.id === 'wbCollect') grantWelcome(true); else if (t === modal || t.closest('.close')) grantWelcome(false); return; }
     if (t === modal || t.closest('.close') || t.id === 'cCancel') { closeModal(); sfx('uiClose'); return; }
+    if (t.id === 'sExport') { void exportLog(g.telemetry.exportJSON(), `eggfarm-log-${g.installId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`).then(m => { const el = $('#sExportMsg'); if (el) el.textContent = m; }); return; }
     if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
-    if (t.id === 'cReset') { g.resetting = true; [SAVE_KEY, TELEMETRY_KEY, UI_KEY].forEach(k => localStorage.removeItem(k)); location.reload(); }
+    if (t.id === 'cReset') { g.resetting = true; resetProgress(localStorage); location.reload(); }
   });
   modal.addEventListener('change', e => {
     const t = e.target as HTMLInputElement;

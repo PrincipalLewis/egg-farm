@@ -19,7 +19,10 @@ export function migrate(d: any, b: Balance): SaveFile {
   while (d.version < SAVE_VERSION) { const m = migrations[d.version]; if (!m) throw new Error(`no migration from v${d.version}`); d = m(d); }
   return { version: d.version, savedAt: d.savedAt, state: { ...initialState(b), ...d.state } };
 }
-export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; }
+export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
+/** Settings > Reset save: progress, telemetry and UI flags. eggfarm.install_id is deliberately kept (M3-AC7). */
+export const RESET_KEYS = [SAVE_KEY, 'eggfarm.telemetry', 'eggfarm.ui'] as const;
+export function resetProgress(kv: KV) { for (const k of RESET_KEYS) kv.removeItem?.(k); }
 export function save(kv: KV, state: GameState, now = Date.now()) {
   const f: SaveFile = { version: SAVE_VERSION, savedAt: now, state };
   kv.setItem(SAVE_KEY, JSON.stringify(f));
