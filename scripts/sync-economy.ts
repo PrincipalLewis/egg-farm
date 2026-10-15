@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from 'node:url';
 import { tableRow, type EconomyParams } from '../src/config/formulas';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
-export const CSV_PATH = here('../../product/economy.csv');
+export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max'];
