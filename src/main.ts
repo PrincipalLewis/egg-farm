@@ -32,7 +32,7 @@ function boot() {
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
-  const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame });
+  const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
   function frame() { g.frame(); ui.render(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);

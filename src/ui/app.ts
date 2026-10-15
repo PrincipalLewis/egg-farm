@@ -9,6 +9,8 @@ import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress } from '../save/save';
 import { exportLog } from './export-log';
+import { showRecoveryDialog } from './save-recovery';
+import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
@@ -22,7 +24,7 @@ const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textC
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
-export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean } = { newGame: false }) {
+export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null } = { newGame: false }) {
   const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') };
   const saveFlags = () => localStorage.setItem(UI_KEY, JSON.stringify(flags));
   saveFlags();
@@ -497,6 +499,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   void introBStage;
   // ---------- Onboarding (new games only, once, skippable) ----------
   let onbUpdate: (() => boolean) | null = null;
+  const startOnboarding = () => {
   if ((opts.newGame && !flags.onboardingDone) || flags.replayOnboarding) {
     const finish = () => { flags.onboardingDone = true; flags.replayOnboarding = false; saveFlags(); };
     const flow = new OnboardingFlow({
@@ -516,8 +519,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       : st === 1 ? (open === 'market' || docked.matches ? 'Tap <b>Sell</b> to earn coins.' : 'A customer! Tap them to sell eggs.')
       : open === 'upgrades' || docked.matches ? 'Tap <b>Buy</b>.' : 'Spend coins to collect more eggs per tap.', A('ui-pointer-hand.svg'), A('ui-pointer-hand-down.svg'));
   }
-  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; renderWorkersIntro(); };
-  renderAll();
-  showWelcome();
-  return { render: renderAll, showWelcome, openPanel };
+  };
+  let recoveryOpen = !!opts.recovery;
+  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; if (!recoveryOpen) renderWorkersIntro(); };
+  if (opts.recovery) {
+    // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
+    renderAll();
+    void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case })).then(() => {
+      recoveryOpen = false; startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus();
+    });
+  } else { startOnboarding(); renderAll(); showWelcome(); }
+  return { render: renderAll, showWelcome, openPanel, get recoveryOpen() { return recoveryOpen; } };
 }

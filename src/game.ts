@@ -4,7 +4,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, load, KV } from './save/save';
+import { save, loadSafe, KV, type Recovery } from './save/save';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
@@ -14,6 +14,10 @@ export class Game {
   resetting = false;
   /** True when no save existed at load (drives onboarding). */
   isNewGame = false;
+  /** rc0 AC14b: set when the stored save could not be opened (drives the recovery dialog). */
+  recovery: Recovery | null = null;
+  /** QA case 2: after a fresh start, `.bak` rotation waits for a valid save + progress (1 purchase or 60 s played). */
+  private bakAllowed = true; private playedMs = 0;
   installId = ''; telemetry: Telemetry; private coopFullSince: number | null = null;
   private listeners: ((e: GameEvent) => void)[] = [];
   /** Subscribe to sim/game events (UI feedback, sfx). Returns unsubscribe. */
@@ -23,8 +27,14 @@ export class Game {
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
-    const f = load(kv, b);
-    this.isNewGame = !f;
+    const r = loadSafe(kv, b, now()); const f = r.file;
+    this.recovery = r.recovery; this.isNewGame = !f;
+    if (r.recovery) {
+      const { reason, had_backup, restored_from_backup, copy_failed } = r.recovery;
+      this.telemetry.track('save_corrupt', { reason, had_backup, restored_from_backup, build, ...(copy_failed ? { copy_failed: true } : {}) });
+      this.telemetry.flush(true);
+      if (!restored_from_backup) this.bakAllowed = false;
+    }
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
@@ -55,11 +65,16 @@ export class Game {
     if (full && this.coopFullSince === null) { this.coopFullSince = this.now(); this.telemetry.track('coop_full', { phase: 'start' }); this.notify({ type: 'coop_full', phase: 'start' }); }
     else if (!full && this.coopFullSince !== null) { this.telemetry.track('coop_full', { phase: 'end', durationMs: this.now() - this.coopFullSince }); this.coopFullSince = null; this.notify({ type: 'coop_full', phase: 'end' }); }
   }
-  save() { if (this.resetting) return; save(this.kv, this.state, this.now()); this.telemetry.flush(); }
+  save() {
+    if (this.resetting) return;
+    try { save(this.kv, this.state, this.now(), this.b, this.bakAllowed); } catch { /* storage full: keep playing, retry next autosave */ }
+    this.telemetry.flush();
+  }
   endSession() {
     if (this.resetting) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();
+    if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
   }
   /**
@@ -78,10 +93,14 @@ export class Game {
   }
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
   debugBackdateSave(ms: number) { this.save(); save(this.kv, this.state, this.now() - ms); this.resetting = true; }
+  /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */
+  private allowBackup() { this.bakAllowed = true; }
+  get backupAllowed() { return this.bakAllowed; }
   frame() {
     const t = this.now(), gap = t - this.lastFrameAt; this.lastFrameAt = t;
     const maxMs = this.b.offline.offlineMinSeconds * 1000;
     if (gap > 0) {
+      if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
       const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
     }
