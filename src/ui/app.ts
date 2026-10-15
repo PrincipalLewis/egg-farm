@@ -15,7 +15,7 @@ import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
-import { OnboardingFlow, mountOnboarding } from './onboarding';
+import { OnboardingFlow, mountOnboarding, collectLabel } from './onboarding';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
@@ -424,7 +424,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // Empty-nest fix (Art & UX): eggs overlay only when the coop holds >= 1 whole egg.
     const ne = $('#nestEggs'); if (ne.hidden !== (coopWhole < 1)) ne.hidden = coopWhole < 1;
     // No "+0": below one whole egg the button reads "Collect" and is aria-disabled (still tappable -> shake + "Empty").
-    setText(collectBtn, coopWhole >= 1 ? `Collect +${fmtCount(Math.min(coopWhole, S.eggsPerTap(s.collectionLevel, b)))}` : 'Collect');
+    setText(collectBtn, collectLabel(coopWhole, S.eggsPerTap(s.collectionLevel, b), fmtCount));
     setDisabled(collectBtn, coopWhole < 1);
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
@@ -534,9 +534,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const flow = new OnboardingFlow({
       step: (n, name) => { g.telemetry.onboardingStep(n, name); flags.onbStep = n; saveFlags(); },
       skip: (n) => { g.telemetry.onboardingSkip(n); finish(); goalHidden = false; goalNow = true; },
+      timeout: (n, name) => { g.telemetry.onboardingStep(n, name, { timeout: true }); },
       done: () => { g.telemetry.onboardingStep(4, 'complete'); finish(); goalHidden = false; goalNow = true; render(); showGoalIntro(); },
     });
-    g.on(e => flow.onEvent(e));
+    g.on(e => flow.onEvent(e)); onbFlow = flow;
     flow.start(); goalHidden = true; // strip introduced at step 4 (m3-ftue-spec §2)
     onbUpdate = mountOnboarding(flow, (st) => {
       if (modalKind) return null;
@@ -564,7 +565,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
     if (iosTip) { const hide = recoveryOpen || !!modalKind || !!open || !!onbUpdate; if (iosTip.hidden !== hide) iosTip.hidden = hide; }
   };
-  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
+  let gateT = 0; let onbFlow: OnboardingFlow | null = null;
+  const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
+  const renderAll = () => { const t = performance.now(); if (onbFlow && !modalKind) onbFlow.gateTick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0); gateT = t;
+    render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();

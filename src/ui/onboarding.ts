@@ -9,7 +9,22 @@ export const STEPS = [
   { name: 'sell', caption: 'A customer is waiting! Tap them, then Sell your eggs.' },
   { name: 'upgrade', caption: 'Spend your coins: open Upgrades and buy your first one.' },
 ] as const;
-export interface OnboardingHooks { step(n: number, name: string): void; skip(atStep: number): void; done(): void }
+export interface OnboardingHooks { step(n: number, name: string): void; skip(atStep: number): void; done(): void; timeout?(n: number, name: string): void }
+/** m3-ftue-spec v1.1 §2.1: what the current step's gate sees. */
+export interface GateCtx { coop: number; eggsPerTap: number; customers: number; basket: number; coinsCents: number; costCents: number; nextCustomerInS: number }
+export type Gate = { open: boolean; hint: string };
+export const HINT_HIDE_S = 15, GATE_TIMEOUT_S = 60;
+const usd = (c: number) => `$${Math.ceil(c / 100).toLocaleString('en-US')}`;
+/** §2.1: a coach mark only when its action is possible; otherwise a neutral wait hint. */
+export function ftueGate(name: string, c: GateCtx): Gate {
+  if (name === 'collect') return { open: Math.floor(c.coop) >= c.eggsPerTap, hint: 'Your hens are laying eggs…' };
+  if (name === 'sell') {
+    if (c.customers < 1) return { open: false, hint: 'A customer is on the way…' + (c.nextCustomerInS <= 10 ? ` ${Math.max(1, Math.ceil(c.nextCustomerInS))} s` : '') };
+    return { open: c.basket >= 1, hint: 'Collect some eggs to sell.' };
+  }
+  return { open: c.coinsCents >= c.costCents, hint: `Sell a few more eggs to afford it · ${usd(c.costCents - c.coinsCents)} to go` };
+}
+export type GateMode = 'mark' | 'hint' | 'none';
 export class OnboardingFlow {
   /** 0-based current step; STEPS.length = finished. */
   step = 0; finished = false;
@@ -20,9 +35,24 @@ export class OnboardingFlow {
     const want = STEPS[this.step].name;
     const hit = (want === 'collect' && e.type === 'collect' && e.eggs > 0) || (want === 'sell' && e.type === 'sell' && e.by === 'player') || (want === 'upgrade' && e.type === 'upgrade');
     if (!hit) return;
-    this.step++;
+    this.step++; this.closedS = 0;
     if (this.step >= STEPS.length) { this.finished = true; this.hooks.done(); }
     else this.hooks.step(this.step + 1, STEPS[this.step].name);
+  }
+  private closedS = 0; mode: GateMode = 'mark'; hint = '';
+  /** §2.1 per-frame gating: mark when open; hint while closed (auto-hides after 15 s, back when the gate opens);
+   *  a gate closed for 60 s skips that step silently (hooks.timeout -> ftue_step {timeout:true}). */
+  gateTick(c: GateCtx, dtS: number): GateMode {
+    if (this.finished) return this.mode = 'none';
+    const g = ftueGate(STEPS[this.step].name, c); this.hint = g.hint;
+    if (g.open) { this.closedS = 0; return this.mode = 'mark'; }
+    this.closedS += dtS;
+    if (this.closedS >= GATE_TIMEOUT_S) {
+      const n = this.step + 1; this.hooks.timeout?.(n, STEPS[this.step].name); this.closedS = 0; this.step++;
+      if (this.step >= STEPS.length) { this.finished = true; this.hooks.done(); return this.mode = 'none'; }
+      this.hooks.step(this.step + 1, STEPS[this.step].name); return this.gateTick(c, 0);
+    }
+    return this.mode = this.closedS < HINT_HIDE_S ? 'hint' : 'none';
   }
   skip() { if (this.finished) return; this.finished = true; this.hooks.skip(this.step + 1); }
 }
@@ -138,9 +168,10 @@ export function mountOnboarding(
   };
   return function update() {
     if (flow.finished) { layer.remove(); document.removeEventListener('keydown', esc, true); return false; }
-    const el = target(flow.step);
-    const text = caption(flow.step); if (text !== last) { txt.innerHTML = text; dotEl.textContent = dots(flow.step); last = text; }
-    if (!el) { ring.style.display = hand.style.display = 'none'; cap.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)'; return true; }
+    const mode = flow.mode; layer.classList.toggle('hint', mode !== 'mark'); cap.hidden = mode === 'none';
+    const el = mode === 'mark' ? target(flow.step) : null;
+    const text = mode === 'mark' ? caption(flow.step) : flow.hint; if (text !== last) { txt.innerHTML = text; dotEl.textContent = dots(flow.step); last = text; }
+    if (!el) { ring.style.display = hand.style.display = 'none'; cap.style.cssText = mode === 'mark' ? 'left:50%;top:40%;transform:translateX(-50%)' : 'left:50%;top:96px;transform:translateX(-50%)'; return true; }
     const r = el.getBoundingClientRect(), pad = 6;
     ring.style.display = hand.style.display = '';
     Object.assign(ring.style, { left: `${r.left - pad}px`, top: `${r.top - pad}px`, width: `${r.width + pad * 2}px`, height: `${r.height + pad * 2}px` });
@@ -162,3 +193,7 @@ export function mountOnboarding(
     return true;
   };
 }
+
+/** m3-ftue-spec v1.1 §2.2: the label always shows the real per-tap value; with less in the coop the capped amount is secondary. */
+export const collectLabel = (coopWhole: number, perTap: number, fmt: (n: number) => string = String) =>
+  coopWhole >= perTap ? `Collect +${fmt(perTap)}` : `Collect +${fmt(perTap)} · ${fmt(Math.max(0, coopWhole))} ready`;
