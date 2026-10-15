@@ -1,0 +1,382 @@
+/**
+ * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
+ */
+import type { Balance } from '../config/balance';
+import type { Game, GameEvent } from '../game';
+import * as S from '../sim/state';
+import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
+import { TapFx, Throttle } from './fx';
+import type { Audio, SfxName } from './audio';
+import { SAVE_KEY } from '../save/save';
+import { TELEMETRY_KEY } from '../telemetry/telemetry';
+
+const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
+const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
+export const UI_KEY = 'eggfarm.ui';
+interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean }
+const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
+const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
+const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
+const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
+
+export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string) {
+  const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') };
+  const saveFlags = () => localStorage.setItem(UI_KEY, JSON.stringify(flags));
+  saveFlags();
+  const sysRM = matchMedia('(prefers-reduced-motion: reduce)');
+  const rm = () => flags.reducedMotion || sysRM.matches;
+  const applyRM = () => { document.documentElement.classList.toggle('reduced-motion', rm()); root.classList.toggle('rm', rm()); };
+  audio.enabled = flags.sfx; applyRM();
+  const sfx = (n: SfxName) => audio.play(n);
+  const now = () => performance.now();
+  const income = new IncomeRate(60_000);
+  const tapFx = new TapFx({ ...b.feel, flightMs: b.feel.egg_flight_ms }, now);
+  const qfullCue = new Throttle(b.feel.queue_full_cue_min_gap_ms, now);
+
+  root.innerHTML = '';
+  // ---------- HUD ----------
+  const hud = h(`<header class="hud">
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="num" id="coins"></span></div>
+    <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
+    <div class="sr" aria-live="polite" id="live"></div></header>`);
+  // ---------- Farm ----------
+  const farm = h(`<main class="farm">
+    <div class="queue" id="queue" aria-label="Customer queue"></div>
+    <div class="scene" id="scene" role="button" aria-label="Collect eggs">
+      <img class="coop" id="coop" alt=""><img class="nest" src="${A('icon-nest.svg')}" alt=""><div class="nest-eggs" id="nestEggs"></div>
+      <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" hidden></div>
+    </div>
+    <div class="collectbar">
+      <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
+      <button class="btn xl" id="collect"></button>
+    </div></main>`);
+  const nav = h(`<nav class="actions">
+    <button data-nav="market"><img src="${A('icon-market.svg')}" alt="">Market<span class="badge" hidden></span></button>
+    <button data-nav="upgrades"><img src="${A('icon-upgrade.svg')}" alt="">Upgrades<span class="badge" hidden></span></button>
+    <button data-nav="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></nav>`);
+  // ---------- Panels ----------
+  const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
+    <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
+      <div class="body" id="mRows"></div><div class="foot"><button class="btn" id="sellAll"></button></div></section>
+    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
+      <div class="body"><div class="tabs" role="tablist">
+        <button role="tab" data-tab="collection" class="active"><img src="${A('icon-nest.svg')}" alt="">Collection</button>
+        <button role="tab" data-tab="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></div>
+        <div id="uRow"></div></div></section></div>`);
+  const modal = h(`<div id="modal-layer"></div>`);
+  const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
+  const toast = h(`<div class="toast" role="status"></div>`);
+  root.append(hud, farm, nav, panelLayer); document.body.append(modal, fxLayer, toast);
+  const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
+  const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
+  const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
+  const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
+  const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
+
+  // ---------- FX budget (≤30 live elements, oldest recycled) ----------
+  const live: HTMLElement[] = [];
+  const spawn = (el: HTMLElement, ms: number) => {
+    if (live.length >= 30) live.shift()?.remove();
+    fxLayer.append(el); live.push(el);
+    setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms);
+    return el;
+  };
+  const center = (el: Element) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+  const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void) => {
+    const a = center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
+    const dx = (Math.random() - .5) * 30;
+    el.animate([{ transform: `translate(${a.x - size / 2 + dx}px,${a.y - size / 2}px) scale(.6)` }, { transform: `translate(${(a.x + z.x) / 2}px,${Math.min(a.y, z.y) - 60}px) scale(1)`, offset: .45 },
+      { transform: `translate(${z.x - size / 2}px,${z.y - size / 2}px) scale(.8)` }], { duration: b.feel.egg_flight_ms, delay: i * 40, easing: 'ease-in', fill: 'both' })
+      .finished.then(() => onArrive?.()).catch(() => {});
+    spawn(el, b.feel.egg_flight_ms + i * 40 + 50);
+  };
+  let floater: { el: HTMLElement; until: number } | null = null;
+  const floatText = (text: string, at: Element, cls = '', merge = false) => {
+    const t = now();
+    if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); floater.until = t + 700; return; }
+    const c = center(at), el = h(`<div class="floater ${cls}" style="left:${c.x}px;top:${c.y - 40}px;translate:-50% 0">${text}</div>`);
+    spawn(el, 750); if (!cls) floater = { el, until: t + 700 };
+  };
+  const sparkle = (at: Element, n: number) => {
+    if (rm()) return; const c = center(at);
+    for (let i = 0; i < n; i++) { const ang = (i / n) * Math.PI * 2; spawn(h(`<i class="spark" style="left:${c.x}px;top:${c.y}px;--dx:${Math.cos(ang) * 36}px;--dy:${Math.sin(ang) * 36}px"></i>`), 520); }
+  };
+  let toastTimer = 0;
+  const showToast = (text: string) => { toast.textContent = text; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
+  const pulse = (el: Element) => retrigger(el, 'pulse');
+
+  // ---------- Panels ----------
+  let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' = 'collection';
+  const openPanel = (p: typeof open) => {
+    if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
+    if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
+    open = p; panelLayer.classList.toggle('open', !!p);
+    $('#p-market').hidden = p !== 'market'; $('#p-upgrades').hidden = p !== 'upgrades';
+    nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
+    dirty = true;
+  };
+  nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
+  panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
+  $('.tabs').addEventListener('click', e => { const t = (e.target as HTMLElement).closest('button')?.dataset.tab; if (t) { tab = t as any; dirty = true; } });
+
+  // ---------- Actions ----------
+  const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
+  const collect = () => {
+    const before = g.state.coop; g.dispatch({ type: 'collect' });
+    const k = Math.floor(before) - Math.floor(g.state.coop) + (g.state.basket ? 0 : 0);
+    const got = Math.min(Math.floor(before), S.eggsPerTap(g.state.collectionLevel, b));
+    retrigger(collectBtn, 'squash');
+    if (got <= 0) { retrigger(collectBtn, 'shake'); floatText('Empty', collectBtn); return; }
+    void k; sfx('collect');
+    const d = tapFx.tap(got);
+    if (!rm()) { let first = true; for (let i = 0; i < d.flyers; i++) fly(A('icon-egg.svg'), $('.nest'), basketEl.parentElement!, i, 24, () => { if (first) { first = false; pulse(basketEl.parentElement!); } }); }
+    else pulse(basketEl.parentElement!);
+    floatText(`+${fmtCount(d.floaterTotal)}`, collectBtn, '', d.combine);
+  };
+  collectBtn.addEventListener('click', collect);
+  scene.addEventListener('click', collect);
+  queueEl.addEventListener('click', e => { if ((e.target as HTMLElement).closest('.chip:not(.empty)')) openPanel('market'); });
+  let lastSellSource: Element | null = null;
+  mRows.addEventListener('click', e => {
+    const bt = (e.target as HTMLElement).closest('button[data-id]') as HTMLElement | null; if (!bt) return;
+    if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
+    lastSellSource = bt; g.dispatch({ type: 'sell', customerId: +bt.dataset.id! });
+  });
+  sellAllBtn.addEventListener('click', () => { if (sellAllBtn.getAttribute('aria-disabled') === 'true') return cantAfford(sellAllBtn); lastSellSource = sellAllBtn; g.dispatch({ type: 'sellAll' }); });
+  uRow.addEventListener('click', e => {
+    const t = e.target as HTMLElement;
+    if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
+    const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
+    if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
+    lastBuyBtn = bt; g.dispatch({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' });
+    setDisabled(bt, true); // F5: no double buy within the same frame
+  });
+  let lastBuyBtn: HTMLElement | null = null;
+
+  // ---------- Modals ----------
+  const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null; };
+  let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
+  const showWelcome = () => {
+    const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
+    modalKind = 'welcome';
+    modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
+      <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
+      <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
+      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
+      <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)} eggs</div>
+      <button class="btn" id="wbCollect">Collect</button></div>`;
+    modal.classList.add('open'); sfx('welcomeBack');
+  };
+  const grantWelcome = (withFlyers: boolean) => {
+    const eggs = g.state.pendingOfflineEggs; const btn = $('#wbCollect');
+    if (withFlyers && btn && !rm()) for (let i = 0; i < Math.min(eggs, b.feel.max_flying_eggs); i++) fly(A('icon-egg.svg'), btn, basketEl.parentElement!, i, 24);
+    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); pulse(basketEl.parentElement!); sfx('collect');
+  };
+  const showSettings = () => {
+    modalKind = 'settings';
+    modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="Settings">
+      <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button><h2>Settings</h2>
+      <label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>
+      <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
+      <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
+    modal.classList.add('open'); sfx('uiOpen');
+  };
+  modal.addEventListener('click', e => {
+    const t = e.target as HTMLElement;
+    if (modalKind === 'welcome') { if (t.id === 'wbCollect') grantWelcome(true); else if (t === modal || t.closest('.close')) grantWelcome(false); return; }
+    if (t === modal || t.closest('.close') || t.id === 'cCancel') { closeModal(); sfx('uiClose'); return; }
+    if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
+    if (t.id === 'cReset') { g.resetting = true; [SAVE_KEY, TELEMETRY_KEY, UI_KEY].forEach(k => localStorage.removeItem(k)); location.reload(); }
+  });
+  modal.addEventListener('change', e => {
+    const t = e.target as HTMLInputElement;
+    if (t.id === 'sSfx') { flags.sfx = t.checked; audio.enabled = t.checked; }
+    if (t.id === 'sRm') { flags.reducedMotion = t.checked; applyRM(); }
+    saveFlags();
+  });
+  $('#settings').addEventListener('click', showSettings);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else openPanel(null); } });
+
+  // ---------- Queue strip ----------
+  const chips = new Map<number, HTMLElement>();
+  let qTagShown = false;
+  const ghost = (at: DOMRect | null, cls: string, bubble?: { text: string; cls: string }) => {
+    const q = queueEl.getBoundingClientRect(); const r = at ?? new DOMRect(q.right - 64, q.top, 64, 72);
+    const el = h(`<div class="ghost ${cls}" style="left:${r.left}px;top:${r.top - 12}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
+    if (rm() && bubble) el.querySelector('img')!.remove(); // reduced motion: bubble fade only
+    spawn(el, 1500);
+  };
+  const renderQueue = () => {
+    const s = g.state, slots = S.queueMax(s.farmLevel, b), patience = S.patienceS(s.farmLevel, b);
+    queueEl.classList.toggle('five', slots >= 5);
+    // remove chips for customers gone
+    const ids = new Set(s.customers.map(c => c.id));
+    for (const [id, el] of chips) if (!ids.has(id)) { el.remove(); chips.delete(id); }
+    const kids: HTMLElement[] = [];
+    for (const c of s.customers) {
+      let el = chips.get(c.id);
+      if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
+      setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
+      el.style.setProperty('--p', String(Math.min(1, c.waitedS / patience)));
+      kids.push(el);
+    }
+    const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
+    const needEmpty = Math.max(0, slots - s.customers.length);
+    while (empties.length < needEmpty) empties.push(h(`<div class="chip empty" aria-hidden="true"></div>`));
+    empties.length = needEmpty;
+    const want = [...kids, ...empties];
+    if (want.some((el, i) => queueEl.children[i] !== el) || queueEl.children.length !== want.length + (qTagShown ? 1 : 0)) {
+      queueEl.replaceChildren(...want); qTagShown = false;
+    }
+    // Queue full cue (amber outline + tag), informational
+    const full = s.customers.length >= slots;
+    queueEl.classList.toggle('full', full);
+    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag">Queue full</span>`)); qTagShown = true; }
+    // Slot unlock moment (first reach of a new slot count; once, persisted)
+    if (slots > flags.seenSlots) {
+      flags.seenSlots = slots; saveFlags();
+      const newSlot = empties[empties.length - 1] ?? queueEl.lastElementChild;
+      if (newSlot && !rm()) { retrigger(newSlot, 'unlock'); sparkle(newSlot, 4); }
+      slotToastPending = true;
+    }
+  };
+  let slotToastPending = false;
+
+  // ---------- Game events ----------
+  g.on((e: GameEvent) => {
+    switch (e.type) {
+      case 'sell': {
+        income.add(now(), e.k * e.price); sfx('sell');
+        const src = lastSellSource ?? sellAllBtn;
+        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
+        else pulse(coinsEl.parentElement!);
+        floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
+      }
+      case 'customer_arrive': sfx('customerArrive'); break;
+      case 'customer_partial': { const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
+      case 'customer_lost':
+        if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
+        else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff', { text: 'Queue full!', cls: 'qfull' }); sfx('customerLeave'); }
+        break;
+      case 'upgrade': {
+        sfx('upgrade'); const src = lastBuyBtn ?? uRow;
+        if (!rm()) { const c = center(src); spawn(h(`<img class="riser" src="${A('icon-upgrade.svg')}" alt="" style="left:${c.x - 20}px;top:${c.y - 20}px">`), 500); sparkle(src, 6); }
+        if (e.upgrade === 'farm' && !rm()) retrigger(scene, 'bump');
+        pendingLvPop = true; break;
+      }
+      case 'coop_full': if (e.phase === 'start') sfx('coopFull'); break;
+    }
+    dirty = true;
+  });
+  let pendingLvPop = false;
+
+  // ---------- Render ----------
+  let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
+  coopImg.src = A(COOP_SPRITES[lastTier]);
+  const upRowHtml = (kind: 'collection' | 'farm') => {
+    const s = g.state, C = s.collectionLevel, F = s.farmLevel, isF = kind === 'farm', L = isF ? F : C, max = L >= b.maxLevel;
+    const cost = isF ? S.farmCost(F, b) : S.collectionCost(C, b), can = s.coinsCents >= cost * 100;
+    const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
+    const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
+    const fx = isF ? [
+      `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
+      `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
+      `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
+      `Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
+      `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`,
+    ] : [
+      `Eggs per tap ${arrow(fmtCount(S.eggsPerTap(C, b)), fmtCount(S.eggsPerTap(C + 1, b)))}`,
+      `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
+    ];
+    const nextTier = [5, 10, 20].find(t => t > F);
+    let hint = '';
+    if (!max && !can) {
+      if (isF) {
+        const secs = income.secondsToAfford(now(), cost * 100 - s.coinsCents);
+        hint = secs === null ? `<div class="hint"><img src="${A('icon-coin.svg')}" alt="">Sell eggs to earn coins</div>`
+          : `<div class="hint ${secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">Ready in ${fmtTimeToAfford(secs).replace(/^~/, '~')}</div>`;
+      } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
+    } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
+    // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
+    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
+      hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
+    return `<div class="up">
+      <div class="ic"><img src="${A(isF ? 'icon-coop.svg' : 'icon-nest.svg')}" alt=""><span class="lv">L${L}</span></div>
+      <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
+      ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
+      <ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      <div class="meta">Level ${L} / ${b.maxLevel}</div>
+      ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
+        `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
+      <div>${hint}</div></div></div>`;
+  };
+  let lastUp = '', lastMarket = '';
+  function render() {
+    const s = g.state, F = s.farmLevel, cap = S.coopCapacity(F, b), coopWhole = Math.floor(s.coop);
+    setText(coinsEl, fmtMoney(s.coinsCents)); setText(basketEl, fmtCount(s.basket));
+    // coop tier + celebration (once per first reach, persisted in save)
+    const tier = S.coopTier(F);
+    if (tier !== lastTier) { coopImg.src = A(COOP_SPRITES[tier]); lastTier = tier; }
+    if (tier > s.celebratedTier) {
+      g.dispatch({ type: 'markCelebrated', tier });
+      if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
+      showToast(slotToastPending ? 'Coop upgraded! +1 customer slot' : 'Coop upgraded!'); slotToastPending = false;
+    }
+    renderQueue();
+    if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
+    // hens
+    const hn = Math.min(S.hens(F, b), 12);
+    if (hn !== henCount) {
+      const order = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
+      const slots = Array.from({ length: 12 }, (_, i) => `<span>${order.indexOf(i) < hn ? `<img class="hen ${i % 3 === 2 ? 'flip' : ''} ${henCount >= 0 && order.indexOf(i) >= henCount ? 'pop' : ''}" style="animation-delay:${(i * .15).toFixed(2)}s" src="${A('char-chicken.svg')}" alt="">` : ''}</span>`);
+      yard.innerHTML = slots.join(''); henCount = hn;
+    }
+    const hp = $('#henpill'); hp.hidden = S.hens(F, b) <= 12; setText(hp, `×${fmtCount(S.hens(F, b))} hens`);
+    // meter, nest, full badge, collect label
+    const atCap = s.coop >= cap;
+    meterFill.style.width = `${Math.min(100, (s.coop / cap) * 100)}%`; meter.classList.toggle('atcap', atCap);
+    setText(meterText, `${fmtCount(coopWhole)} / ${fmtCount(cap)}`);
+    $('#full').hidden = !atCap;
+    const stack = coopWhole <= 0 ? 0 : atCap ? 3 : s.coop >= cap / 2 ? 2 : 1;
+    const ne = $('#nestEggs'); if (ne.childElementCount !== stack) ne.innerHTML = `<img src="${A('icon-egg.svg')}" alt="">`.repeat(stack);
+    setText(collectBtn, `Collect +${fmtCount(Math.min(coopWhole, S.eggsPerTap(s.collectionLevel, b)))}`);
+    // nav badges
+    const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
+    (nav.querySelector('[data-nav=market] .badge') as HTMLElement).hidden = !(s.customers.length && s.basket >= 1);
+    (nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement).hidden = !canUp;
+    // market panel
+    if (open === 'market' || docked.matches) {
+      const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
+      const key = JSON.stringify([basket, s.customers.map(c => [c.id, c.filled]), s.farmLevel, s.collectionLevel]);
+      if (key !== lastMarket) {
+        lastMarket = key;
+        mRows.innerHTML = s.customers.length ? s.customers.map(c => {
+          const rem = c.demand - c.filled, k = Math.min(basket, rem), st = k === 0 ? '' : k === rem ? 'buy affordable' : 'partial';
+          return `<div class="row" data-row="${c.id}"><div class="av"><img src="${A('icon-customer.svg')}" alt=""></div>
+            <div><b>Wants ${fmtCount(rem)}${c.filled ? ` of ${fmtCount(c.demand)}` : ''} eggs</b><small><img src="${A('icon-coin.svg')}" alt="">pays ${fmtMoney(k * S.eggPriceCents(F, s.collectionLevel, b))}</small></div>
+            <button class="btn ${st}" data-id="${c.id}" aria-disabled="${k === 0}">Sell ${fmtCount(k)}/${fmtCount(rem)}</button></div>`;
+        }).join('') : `<div class="empty-state"><img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p></div>`;
+      }
+      mRows.querySelectorAll<HTMLElement>('.row').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) (r.querySelector('.av') as HTMLElement).style.setProperty('--p', String(Math.min(1, c.waitedS / patience))); });
+      const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
+      let left = basket, eggs = 0, cents = 0; const price = S.eggPriceCents(F, s.collectionLevel, b);
+      for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }
+      setText(sellAllBtn, `Sell all (${fmtCount(eggs)} eggs · ${fmtMoney(cents)})`); setDisabled(sellAllBtn, eggs === 0);
+    }
+    if (open === 'upgrades' || docked.matches) {
+      document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      const html = upRowHtml(tab);
+      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+    }
+    pendingLvPop = false;
+    // aria-live throttled 1/s
+    const t = now(); if (t - lastLive > 1000) { lastLive = t; setText($('#live'), `${fmtMoney(s.coinsCents)}, ${fmtCount(s.basket)} eggs`); }
+    dirty = false;
+  }
+  void dirty;
+  render();
+  showWelcome();
+  return { render, showWelcome };
+}

@@ -3,8 +3,8 @@ import { balance as b } from '../src/config/balance';
 import { Telemetry, TELEMETRY_KEY } from '../src/telemetry/telemetry';
 import { Game } from '../src/game';
 import { save, SAVE_KEY } from '../src/save/save';
-import { initialState } from '../src/sim/state';
-import { mem } from './helpers';
+import { initialState, eggPriceCents } from '../src/sim/state';
+import { mem, expOffline } from './helpers';
 const clock = () => { const c = { t: 1_000_000 }; return { c, now: () => c.t }; };
 describe('telemetry', () => {
   it('events carry ts + sessionMs', () => {
@@ -34,7 +34,7 @@ describe('telemetry', () => {
   it('game emits session, sell, customer, upgrade, offline_grant, coop_full events', () => {
     const kv = mem(); save(kv, { ...initialState(b, 3), coinsCents: 1000 }, 0);
     const { c, now } = clock(); c.t = 120_000; const g = new Game(b, kv, now);
-    g.dispatch({ type: 'dismissOffline' }); // basket 60
+    g.dispatch({ type: 'dismissOffline' }); g.state = { ...g.state, basket: Math.max(g.state.basket, 60) };
     g.dispatch({ type: 'buyCollection' });
     c.t += 10_000; g.frame(); // first customer
     g.dispatch({ type: 'sellAll' });
@@ -44,9 +44,9 @@ describe('telemetry', () => {
     const ev = JSON.parse(kv.getItem(TELEMETRY_KEY)!) as any[]; const types = ev.map(e => e.type);
     for (const t of ['session_start', 'offline_grant', 'upgrade', 'customer_arrive', 'sell', 'customer_served', 'coop_full', 'tap', 'session_end']) expect(types).toContain(t);
     expect(ev.find(e => e.type === 'upgrade')).toMatchObject({ upgrade: 'collection', newLevel: 1, cost: 1000, coinsBefore: 1000 });
-    expect(ev.find(e => e.type === 'offline_grant')).toMatchObject({ secondsAway: 120, eggs: 60 });
+    expect(ev.find(e => e.type === 'offline_grant')).toMatchObject({ secondsAway: 120, eggs: expOffline(120) });
     expect(ev.filter(e => e.type === 'coop_full').map(e => e.phase)).toEqual(['start', 'end']);
-    expect(ev.find(e => e.type === 'sell')).toMatchObject({ price: 100 });
+    expect(ev.find(e => e.type === 'sell')!.price).toBe(eggPriceCents(0, 1, b));
     expect(kv.getItem(SAVE_KEY)).not.toBeNull();
   });
 });

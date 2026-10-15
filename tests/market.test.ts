@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { balance as b, validateBalance } from '../src/config/balance';
-import { initialState, customerIntervalS, GameState } from '../src/sim/state';
+import { initialState, customerIntervalS, GameState, eggPriceCents, demandRange, farmCost, queueMax } from '../src/sim/state';
 import { step, advance } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import type { SimEvent } from '../src/sim/events';
@@ -9,22 +9,26 @@ const cust = (id: number, demand: number, filled = 0, waitedS = 0) => ({ id, dem
 const run = (s: GameState, ms: number, ev?: SimEvent[]) => advance(s, ms, 0, b, ev).state;
 describe('config tunables (economy.md names)', () => {
   it('has market + feel tunables', () => {
-    expect(b.customers).toMatchObject({ customer_patience_s: 30, queue_max: 3, first_customer_s: 10 });
-    expect(b.feel).toEqual({ tap_combine_window_ms: 250, max_flying_eggs: 5 });
+    expect(b.customers).toEqual({ customer_patience_s: 30, first_customer_s: 10, queue_max_base: 3, queue_max_cap: 5, queue_max_step_levels: 10 });
+    expect(b.feel).toMatchObject({ tap_combine_window_ms: 250, max_flying_eggs: 5 });
   });
   it.each([
-    ['queue_max non-integer', (x: any) => { x.customers.queue_max = 2.5; }],
-    ['queue_max 0', (x: any) => { x.customers.queue_max = 0; }],
-    ['patience missing', (x: any) => { delete x.customers.customer_patience_s; }],
+    ['queue base non-integer', (x: any) => { x.customers.queue_max_base = 2.5; }],
+    ['queue cap 0', (x: any) => { x.customers.queue_max_cap = 0; }],
+    ['queue cap < base', (x: any) => { x.customers.queue_max_cap = 2; }],
+    ['patience 0', (x: any) => { x.customers.customer_patience_s = 0; }],
     ['negative first arrival', (x: any) => { x.customers.first_customer_s = -1; }],
+    ['demand lo > hi', (x: any) => { x.farm.demandLoFactor = 2; }],
+    ['cost growth < 1', (x: any) => { x.collection.costGrowth = 0.9; }],
     ['tap window 0', (x: any) => { x.feel.tap_combine_window_ms = 0; }],
     ['flying eggs 1.5', (x: any) => { x.feel.max_flying_eggs = 1.5; }],
     ['string value', (x: any) => { x.feel.max_flying_eggs = '5'; }],
   ])('rejects %s', (_n, mut) => { const x = structuredClone(b); mut(x); expect(() => validateBalance(x)).toThrow(); });
   it('reads values from config (MK-15)', () => {
-    const x = structuredClone(b); x.customers.first_customer_s = 4; x.customers.queue_max = 1;
+    const x = structuredClone(b); x.customers.first_customer_s = 4; x.customers.queue_max_base = 1; x.customers.queue_max_cap = 1;
     expect(run(initialState(b, 1), 4000).customers).toHaveLength(0);
     expect(advance(initialState(x, 1), 4000, 0, x).state.customers).toHaveLength(1);
+    expect(advance(initialState(x, 1), 60_000, 0, x).state.customers.length).toBeLessThanOrEqual(1);
   });
 });
 describe('market spec MK-*', () => {
@@ -43,8 +47,9 @@ describe('market spec MK-*', () => {
   it('MK-4 demand distribution at L0 (10k seeded spawns)', () => {
     let s = s0(7); const counts: Record<number, number> = {};
     for (let i = 0; i < 10_000; i++) { s = step({ ...s, customers: [], nextCustomerInS: 0 }, 0.001, b); const d = s.customers[0].demand; counts[d] = (counts[d] ?? 0) + 1; }
-    expect(Object.keys(counts).map(Number).sort()).toEqual([3, 4, 5, 6, 7, 8]);
-    for (const v of Object.values(counts)) expect(Math.abs(v / 10_000 - 1 / 6)).toBeLessThan(0.015);
+    const [lo, hi] = demandRange(0, b); const n = hi - lo + 1;
+    expect(Object.keys(counts).map(Number).sort((x, y) => x - y)).toEqual(Array.from({ length: n }, (_, i) => lo + i));
+    for (const v of Object.values(counts)) expect(Math.abs(v / 10_000 - 1 / n)).toBeLessThan(0.015 * 6 / n + 0.005);
   });
   it('MK-5 same seed same demands, different seed differs', () => {
     const seq = (seed: number) => run(s0(seed), 29_000).customers.map(c => c.demand).concat(run({ ...s0(seed), farmLevel: 20 }, 9000).customers.map(c => c.demand));
@@ -54,24 +59,32 @@ describe('market spec MK-*', () => {
     const s = apply({ ...s0(), basket: 2, customers: [cust(1, 6, 0, 12)] }, { type: 'sell', customerId: 1 }, b);
     expect(s.customers).toEqual([cust(1, 6, 2, 12)]);
   });
-  it('partly served customer never walks away; unserved one leaves at 30s', () => {
-    let s = { ...s0(), customers: [cust(1, 6, 2, 0), cust(2, 6, 0, 0)], nextCustomerInS: 1e9 };
-    s = run(s, 120_000); expect(s.customers.map(c => c.id)).toEqual([1]);
-    s = apply({ ...s, basket: 10 }, { type: 'sell', customerId: 1 }, b); expect(s.customers).toEqual([]);
+  it('MK-10 partly served customer leaves 30s after ARRIVAL; partial coins kept; logs customer_partial', () => {
+    const ev: SimEvent[] = [];
+    let s = { ...s0(), basket: 2, customers: [cust(1, 6, 0, 0)], nextCustomerInS: 1e9 };
+    s = run(s, 10_000); s = apply(s, { type: 'sell', customerId: 1 }, b); expect(s.coinsCents).toBe(2 * eggPriceCents(0, 0, b)); expect(s.customers[0].filled).toBe(2);
+    s = run(s, 19_900, ev); expect(s.customers).toHaveLength(1);
+    s = run(s, 100, ev); expect(s.customers).toHaveLength(0); expect(s.coinsCents).toBe(2 * eggPriceCents(0, 0, b));
+    expect(ev).toContainEqual({ type: 'customer_partial', id: 1, N: 6, filled: 2 }); expect(ev.some(e => e.type === 'customer_lost')).toBe(false);
   });
-  it('served_customer_ignores_patience=0 restores MK-10 timeout behaviour', () => {
-    const x = structuredClone(b); x.customers.served_customer_ignores_patience = 0;
-    const ev: SimEvent[] = []; const s = advance({ ...s0(), customers: [cust(1, 6, 2, 0)], nextCustomerInS: 1e9 }, 30_000, 0, x, ev).state;
-    expect(s.customers).toEqual([]); expect(ev).toContainEqual({ type: 'customer_lost', reason: 'timeout', id: 1, N: 6, filled: 2 });
+  it('MK-10 unserved customer timeout is not partial', () => {
+    const ev: SimEvent[] = []; run({ ...s0(), customers: [cust(1, 6)], nextCustomerInS: 1e9 }, 30_000, ev);
+    expect(ev).toContainEqual({ type: 'customer_lost', reason: 'timeout', id: 1, N: 6 });
+  });
+  it('F8 queue size = min(cap, base + floor(F/step)) from config, 3/4/5 at L9/L10/L20', () => {
+    const fill = (L: number) => run({ ...s0(), farmLevel: L, nextCustomerInS: 0.05 }, 25_000).customers.length;
+    for (const L of [0, 9, 10, 19, 20, 30]) expect(fill(L)).toBe(queueMax(L, b));
+    expect([9, 10, 20, 30].map(L => queueMax(L, b))).toEqual([3, 4, 5, 5]);
+    const x = structuredClone(b); x.customers.queue_max_step_levels = 5; expect(queueMax(10, x)).toBe(5);
   });
   it('MK-12 / Q3 price at sale time after farm upgrade; queued N unchanged', () => {
-    let s = { ...s0(), coinsCents: 2500, basket: 5, customers: [cust(1, 5)] };
+    let s = { ...s0(), coinsCents: farmCost(0, b) * 100, basket: 5, customers: [cust(1, 5)] };
     s = apply(s, { type: 'buyFarm' }, b); expect(s.customers[0].demand).toBe(5);
-    s = apply(s, { type: 'sell', customerId: 1 }, b); expect(s.coinsCents).toBe(5 * 110);
+    s = apply(s, { type: 'sell', customerId: 1 }, b); expect(s.coinsCents).toBe(5 * eggPriceCents(1, 0, b));
   });
   it('MK-9 sell all front-to-back stops at empty basket', () => {
     const s = apply({ ...s0(), basket: 9, customers: [cust(1, 4), cust(2, 4), cust(3, 4)] }, { type: 'sellAll' }, b);
-    expect(s.customers).toEqual([cust(3, 4, 1)]); expect(s.basket).toBe(0); expect(s.coinsCents).toBe(900);
+    expect(s.customers).toEqual([cust(3, 4, 1)]); expect(s.basket).toBe(0); expect(s.coinsCents).toBe(9 * eggPriceCents(0, 0, b));
   });
   it('MK-11 sell to departed customer / zero basket is a no-op', () => {
     const s = { ...s0(), basket: 5, customers: [cust(1, 4)] };

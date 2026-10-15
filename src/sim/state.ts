@@ -6,21 +6,20 @@ export interface GameState {
   collectionLevel: number; farmLevel: number;
   customers: Customer[]; nextCustomerInS: number; nextCustomerId: number;
   rng: number; pendingOfflineEggs: number;
+  /** Highest coop tier already celebrated (feature-spec F3); never replays on reload. */
+  celebratedTier: number;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,
   customers: [], nextCustomerInS: b.customers.first_customer_s, nextCustomerId: 1,
-  rng: seed >>> 0 || 1, pendingOfflineEggs: 0,
+  rng: seed >>> 0 || 1, pendingOfflineEggs: 0, celebratedTier: 0,
 });
-const F = (b: Balance) => b.farm;
-export const collectionCost = (L: number, b: Balance) => Math.floor(b.collection.baseCost * Math.pow(b.collection.costGrowth, L));
-export const farmCost = (L: number, b: Balance) => Math.floor(F(b).baseCost * Math.pow(F(b).costGrowth, L));
-export const eggsPerTap = (L: number, b: Balance) => b.collection.eggsPerTapBase + b.collection.eggsPerTapPerLevel * L;
-export const hens = (L: number, b: Balance) => F(b).hensBase + F(b).hensPerLevel * L;
-export const eggsPerSec = (L: number, b: Balance) => F(b).eggsPerHenPerSec * hens(L, b);
-export const coopCapacity = (L: number, b: Balance) => F(b).coopCapacityBase + F(b).coopCapacityPerLevel * L;
-export const eggPriceCents = (L: number, b: Balance) => F(b).eggPriceCentsBase + F(b).eggPriceCentsPerLevel * L;
-export const customerIntervalS = (L: number, b: Balance) => Math.max(F(b).customerIntervalMinS, F(b).customerIntervalBaseS * Math.pow(F(b).customerIntervalDecay, L));
-export const demandRange = (L: number, b: Balance) => [F(b).demandMinBase + F(b).demandMinPerLevel * L, F(b).demandMaxBase + F(b).demandMaxPerLevel * L] as const;
+/** Per-level stats: formulas in config/formulas.ts, params from balance.json (generated from economy.csv, MK-15). */
+export {
+  collectionCost, eggsPerTap, farmCost, hens, eggsPerSec, coopCapacity, eggPriceCents, customerIntervalS,
+  demandRange, queueMax, patienceS, collectionPriceBonus, farmPriceCents,
+} from '../config/formulas';
 /** xorshift32, state stored in GameState so sim stays pure/deterministic */
 export function nextRand(x: number): [number, number] { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return [x, x / 4294967296]; }
+/** Coop sprite tier: L0-4 -> 0, L5-9 -> 1, L10-19 -> 2, L20+ -> 3 (layout-spec 4.3). */
+export const coopTier = (L: number) => (L >= 20 ? 3 : L >= 10 ? 2 : L >= 5 ? 1 : 0);

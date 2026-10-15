@@ -2,9 +2,9 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { save, load, SAVE_KEY, SAVE_VERSION } from '../src/save/save';
 import { startAutosave } from '../src/save/autosave';
-import { initialState } from '../src/sim/state';
+import { initialState, collectionCost, farmCost } from '../src/sim/state';
 import { Game } from '../src/game';
-import { mem } from './helpers';
+import { mem, expOffline } from './helpers';
 describe('save/load + migrations', () => {
   it('AC8 round-trips coins, coop, basket, levels', () => {
     const kv = mem(); const s = { ...initialState(b), coinsCents: 4250, coop: 17.3, basket: 9, collectionLevel: 2, farmLevel: 4 };
@@ -43,7 +43,7 @@ describe('autosave', () => {
   });
   it('saves immediately on every upgrade purchase', () => {
     const kv = mem(); let t = 1000; const g = new Game(b, kv, () => t);
-    g.state = { ...g.state, coinsCents: 100_00 }; const spy = vi.spyOn(kv, 'setItem');
+    g.state = { ...g.state, coinsCents: (collectionCost(0, b) + farmCost(0, b)) * 100 }; const spy = vi.spyOn(kv, 'setItem');
     const saves = () => spy.mock.calls.filter(c => c[0] === SAVE_KEY).length;
     g.dispatch({ type: 'collect' }); expect(saves()).toBe(0);
     g.dispatch({ type: 'buyCollection' }); expect(saves()).toBe(1); expect(load(kv, b)!.state.collectionLevel).toBe(1);
@@ -51,8 +51,15 @@ describe('autosave', () => {
   });
   it('offline modal not granted twice for one absence', () => {
     const kv = mem(); save(kv, initialState(b), 0);
-    const g1 = new Game(b, kv, () => 600_000); expect(g1.state.pendingOfflineEggs).toBe(300);
+    const g1 = new Game(b, kv, () => 600_000); expect(g1.state.pendingOfflineEggs).toBe(expOffline(600));
     g1.dispatch({ type: 'collectOffline' });
-    const g2 = new Game(b, kv, () => 600_010); expect(g2.state.pendingOfflineEggs).toBe(0); expect(g2.state.basket).toBe(300);
+    const g2 = new Game(b, kv, () => 600_010); expect(g2.state.pendingOfflineEggs).toBe(0); expect(g2.state.basket).toBe(expOffline(600));
+  });
+});
+describe('v4 celebratedTier', () => {
+  it('v3 save at farm L12 migrates with tier 2 celebrated', async () => {
+    const { mem } = await import('./helpers'); const kv = mem();
+    kv.setItem(SAVE_KEY, JSON.stringify({ version: 3, savedAt: 0, state: { ...initialState(b), farmLevel: 12, celebratedTier: undefined } }));
+    expect(load(kv, b)!.state.celebratedTier).toBe(2);
   });
 });
