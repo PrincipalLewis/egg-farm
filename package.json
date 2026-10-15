@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build",
+    "build": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist",
     "test": "vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",
