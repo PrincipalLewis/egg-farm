@@ -66,7 +66,8 @@ export function placeHand(
     const peak = handRect(left, dir === 'down' ? top + BOB : top - BOB);
     for (const box of [rest, peak]) {
       if (viewport && (box.left < 0 || box.right > viewport.width || box.top < 0 || box.bottom > viewport.height)) return true;
-      if (avoid.some(r => rectOverlaps(box, r))) return true;
+      // 1px pad so bob-peak tip doesn't kiss the meter/label box edge.
+      if (avoid.some(r => rectOverlaps(box, { left: r.left, top: r.top - 1, right: r.right, bottom: r.bottom + 1 }))) return true;
     }
     return false;
   };
@@ -122,11 +123,12 @@ export function mountOnboarding(
   const txt = layer.querySelector('.onb-txt') as HTMLElement, dotEl = layer.querySelector('.onb-dots') as HTMLElement;
   let last = '';
   /** Avoid meter/label *text* only (m3-ftue-spec §1); full-width bars would force a distant tip. */
-  const avoidRects = (): Rect[] => {
+  const avoidRects = (exclude: Element | null): Rect[] => {
     const out: Rect[] = [];
-    for (const sel of ['#meterText', '.goal-label', '.goal-status']) {
+    for (const sel of ['#meterText', '.goal-label', '.goal-status', 'nav button']) {
       document.querySelectorAll(sel).forEach(node => {
         const el = node as HTMLElement;
+        if (el === exclude || el.contains(exclude) || exclude?.contains(el)) return;
         if (el.hidden || (el.closest('#goal') as HTMLElement | null)?.hidden) return;
         const r = el.getBoundingClientRect();
         if (r.width > 0 && r.height > 0) out.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom });
@@ -146,7 +148,7 @@ export function mountOnboarding(
     const p = placeHand(
       { left: r.left, top: r.top, right: r.right, bottom: r.bottom },
       prefer,
-      avoidRects(),
+      avoidRects(el),
       { width: innerWidth, height: innerHeight },
     );
     hand.classList.toggle('down', p.dir === 'down');

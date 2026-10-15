@@ -104,7 +104,7 @@ describe('M3 pointer anchoring (m3-ftue-spec §1)', () => {
     const peak = handRect(p.left, p.top + BOB);
     expect(rectOverlaps(peak, meterText)).toBe(false);
     expect(rectOverlaps(handRect(p.left, p.top), meterText)).toBe(false);
-    expect(p.tipY).toBeLessThanOrEqual(meterText.top - BOB);
+    expect(p.tipY).toBeLessThan(meterText.top - BOB);
     expect(collect.top - tipAtBobPeak(p)).toBeGreaterThanOrEqual(TIP_CLEARANCE);
     expect(collect.top - p.tipY).toBeGreaterThanOrEqual(REST_GAP);
   });
