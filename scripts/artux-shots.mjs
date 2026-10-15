@@ -51,6 +51,27 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   const step = await p.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui') || '{}').onboardingDone);
   await p.locator('.onb-skip').click(); await p.waitForTimeout(300); const skipped = await p.evaluate(() => (!window.eggfarmOnb || window.eggfarmOnb.finished) && !document.querySelector('.onb:not([hidden]) .onb-skip'));
   ok('R1 FTUE bubble/Skip hidden under Settings; after close: visible, step timer continues, Skip works', before && !during && after && !step && tB === tA && tC > tB2 && skipped, { before, during, after, tA, tB, tB2, tC, skipped, t0 }); await ctx.close(); }
+// R1 (all dialog types): open/close each in turn on one FTUE session; bubble+Skip hidden and timer frozen while open, visible + timer running after close; Skip works at the end
+{ const ctx = await br.newContext({ viewport: { width: 360, height: 640 }, hasTouch: true, isMobile: eng === 'chromium' }); const p = await ctx.newPage();
+  await p.goto(`http://127.0.0.1:${port}/`); await p.getByText('Tap to start').click(); await p.waitForFunction(() => window.eggfarm && window.eggfarmOnb); await p.waitForTimeout(500);
+  const vis = () => p.evaluate(() => { const o = document.querySelector('.onb'); const sk = document.querySelector('.onb-skip'); return !!o && !o.hidden && getComputedStyle(o).display !== 'none' && !!sk && sk.getBoundingClientRect().width > 0; });
+  const hold = () => p.evaluate(() => { window.eggfarm.state.coop = 0; }); // keep the Collect gate closed so the step timer runs
+  const tm = () => p.evaluate(() => window.eggfarmOnb.closedFor);
+  const kinds = {
+    settings: [async () => { await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); }, async () => { await p.keyboard.press('Escape'); }],
+    'save recovery': [async () => { await p.evaluate(() => { window.eggfarmQaRecovery(); }); await p.waitForSelector('.recovery-layer'); }, async () => { await p.locator('#rcGo').click(); await p.waitForSelector('.recovery-layer', { state: 'detached' }); }],
+    'rotate prompt': [async () => { await p.setViewportSize({ width: 640, height: 360 }); await p.waitForSelector('#rotate-prompt:not([hidden])'); }, async () => { await p.setViewportSize({ width: 360, height: 640 }); await p.waitForSelector('#rotate-prompt', { state: 'hidden' }); }],
+    alertdialog: [async () => { await p.evaluate(() => { const d = document.createElement('div'); d.id = 'qa-ad'; d.setAttribute('role', 'alertdialog'); d.textContent = 'QA'; document.body.append(d); }); }, async () => { await p.evaluate(() => document.querySelector('#qa-ad').remove()); }],
+  };
+  const res = {};
+  for (const [k, [openD, closeD]] of Object.entries(kinds)) {
+    await hold(); await p.waitForTimeout(100); await openD(); await p.waitForTimeout(300); const during = await vis(); const tA = await tm(); await p.waitForTimeout(800); const tB = await tm();
+    await closeD(); await p.waitForTimeout(300); await hold(); const after = await vis(); const tC = await tm(); await p.waitForTimeout(500); await hold(); const tD = await tm();
+    res[k] = { during, after, frozen: tA === tB, runs: tD > tC, step: await p.evaluate(() => window.eggfarmOnb.step) };
+  }
+  await p.locator('.onb-skip').click(); await p.waitForTimeout(300); const skipped = await p.evaluate(() => (!window.eggfarmOnb || window.eggfarmOnb.finished) && !document.querySelector('.onb:not([hidden]) .onb-skip'));
+  const good = Object.values(res).every(r => !r.during && r.after && r.frozen && r.runs && r.step === 0);
+  ok('R1 every dialog type (Settings, save recovery, rotate prompt, alertdialog): hidden+frozen while open, visible+running after, Skip works', good && skipped, { ...res, skipped }); await ctx.close(); }
 // Font credits in Settings
 { const { ctx, p } = await open({ viewport: { width: 360, height: 640 } }, null); await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); await p.waitForTimeout(500);
   const r = await p.evaluate(() => { const e = document.querySelector('.font-credits'); e?.scrollIntoView(); const a = e?.querySelector('a'); const rs = a ? [...a.getClientRects()] : []; const range = document.createRange(); range.selectNodeContents(e); const lines = new Set([...range.getClientRects()].map(x => Math.round(x.top))).size;

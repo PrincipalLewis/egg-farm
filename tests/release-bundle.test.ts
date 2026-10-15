@@ -21,5 +21,6 @@ describe('release bundle', () => {
     const rel = await js('production'), qa = await js('qa');
     expect(qa).toMatch(/eggfarmOnb/);
     expect(rel).not.toMatch(/eggfarmOnb/);
+    expect(qa).toMatch(/eggfarmQaRecovery/); expect(rel).not.toMatch(/eggfarmQaRecovery/);
   }, 120_000);
 });
