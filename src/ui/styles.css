@@ -290,3 +290,10 @@ img.onb-hand.down{animation:handdown 1s ease-in-out infinite}
   .tabs button{box-sizing:border-box;min-height:44px;min-width:44px;margin-block:-4px;padding:4px 0;align-self:stretch}
   .tabs button .tab-pill{padding:0 var(--s-3);box-sizing:border-box}
 }
+/* B6: desktop docked: the farm column can't grow past its track (min-content of the queue/yard/Collect label used to
+   push it under the panel), and the Collect bar is centred at the goal chip's 560px width, clear of the panel edge. */
+@media (min-width:960px) and (orientation:landscape){
+  #app{grid-template-columns:minmax(0,1fr) 400px}
+  .farm{min-width:0}
+  .collectbar{width:100%;max-width:560px;margin-inline:auto}
+}
