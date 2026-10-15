@@ -100,3 +100,13 @@ describe('M2 UI logic (§4.4, §4.6)', () => {
     expect(y2.pick(s, b, 1)).toBe('hawker'); // no yawn consumed the throttle
   });
 });
+import { farmManageAllVisible } from '../src/ui/workers-ui';
+describe('Farm View Manage all visibility (mobile nav + desktop docked share it)', () => {
+  const three = (e: number, cd = 0) => base({ workers: { hawker: wk(e), grader: wk(80), market_hand: wk(90) }, graderTier: 1, manageCdS: cd });
+  it('shows on the rule, stays through its cooldown, hides after', () => {
+    expect(farmManageAllVisible(three(39), b, false)).toBe(true);
+    expect(farmManageAllVisible(three(100, 25), b, true)).toBe(true); // just tapped: everyone refilled, ring running
+    expect(farmManageAllVisible(three(100, 25), b, false)).toBe(false); // never shown -> cooldown alone doesn't show it
+    expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false);
+  });
+});

@@ -155,6 +155,9 @@ img{user-select:none;-webkit-user-drag:none}
   #panel-layer .scrim,.sheet .close{display:none}
   .sheet{position:static;height:auto;transform:none!important;border-radius:0;box-shadow:none;min-height:0;margin:0;width:auto}
   .sheet[hidden]{display:flex!important}
+  /* desktop: Farm View Manage all sits next to the Upgrades header (Art & UX approved), same 44px style as mobile */
+  #p-upgrades header{justify-content:flex-start;gap:12px}
+  #p-upgrades header button.btn.desk-manage-all:not([hidden]){display:inline-flex}
 }
 /* onboarding (layout-spec 3.7): pointer-events pass through so the highlighted control stays usable */
 .onb{position:fixed;inset:0;z-index:25;pointer-events:none}
@@ -198,3 +201,8 @@ img{user-select:none;-webkit-user-drag:none}
 .actions .farm-manage-all[hidden]{display:none}
 nav.actions button.btn.farm-manage-all{flex:0 0 44px;width:44px;min-width:0;height:44px;min-height:0;padding:0;align-self:center;margin:0 4px;border-radius:50%;box-shadow:none}
 nav.actions button.btn.farm-manage-all .manage-ico{width:44px;height:44px}
+
+/* desktop docked copy of the Farm View Manage all: same look as the nav button, hidden outside the docked layout */
+.sheet header button.btn.desk-manage-all{display:none;flex:0 0 44px;width:44px;min-width:0;height:44px;min-height:0;padding:0;border-radius:50%;box-shadow:none;background:var(--c-meadow,#5a9)}
+.sheet header button.btn.desk-manage-all .manage-ico{width:44px;height:44px}
+.sheet header button.btn.desk-manage-all img{width:28px;height:28px}
