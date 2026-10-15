@@ -10,6 +10,7 @@ import type { Audio, SfxName } from './audio';
 import { resetProgress } from '../save/save';
 import { exportLog } from './export-log';
 import { showRecoveryDialog } from './save-recovery';
+import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
@@ -18,7 +19,7 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean }
+interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
@@ -26,8 +27,12 @@ const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void
 
 export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null } = { newGame: false }) {
   const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') };
-  const saveFlags = () => localStorage.setItem(UI_KEY, JSON.stringify(flags));
+  const saveFlags = () => { try { localStorage.setItem(UI_KEY, JSON.stringify(flags)); } catch { /* full */ } };
+  flags.sessions = (flags.sessions ?? 0) + 1; // AC14g session_count (one per page load / Tap to start)
   saveFlags();
+  const nav_ = navigator as Navigator & { standalone?: boolean };
+  const iosKind = resolveIos({ ua: nav_.userAgent, platform: nav_.platform, maxTouchPoints: nav_.maxTouchPoints, standalone: nav_.standalone,
+    displayStandalone: matchMedia('(display-mode: standalone)').matches }, location.search);
   const sysRM = matchMedia('(prefers-reduced-motion: reduce)');
   const rm = () => flags.reducedMotion || sysRM.matches;
   const applyRM = () => { document.documentElement.classList.toggle('reduced-motion', rm()); root.classList.toggle('rm', rm()); };
@@ -195,13 +200,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (withFlyers && btn && !rm()) for (let i = 0; i < Math.min(eggs, b.feel.max_flying_eggs); i++) fly(A('icon-egg.svg'), btn, basketEl.parentElement!, i, 24);
     g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); pulse(basketEl.parentElement!); sfx('collect');
   };
+  const settingsIosLine = () => iosKind === 'standalone' ? `<div class="settings-ios ok">Installed on Home Screen ✔</div>`
+    : iosKind ? `<div class="settings-ios">${SHARE_SVG} ${TIP_TITLE} ${howTo(iosKind, '')}</div>`.replace(' ,', ',').replace('  ', ' ') : '';
   const showSettings = () => {
     modalKind = 'settings';
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="Settings">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button><h2>Settings</h2>
       <label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
-      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>
+      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${settingsIosLine()}
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
     modal.classList.add('open'); sfx('uiOpen');
   };
@@ -521,7 +528,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   }
   };
   let recoveryOpen = !!opts.recovery;
-  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; if (!recoveryOpen) renderWorkersIntro(); };
+  // ---------- AC14g iOS Home Screen tip ----------
+  let iosTip: HTMLElement | null = null, iosTipLive = false; // live = shown this session and not dismissed
+  const renderIosTip = () => {
+    if (!iosTipLive && shouldShowIosTip(iosKind, flags.sessions ?? 1, !!onbUpdate, !!flags.iosHomeShown) && !recoveryOpen && !modalKind && !open) {
+      flags.iosHomeShown = true; saveFlags(); iosTipLive = true; g.telemetry.track('ios_home_tip_shown', { browser: iosKind });
+      const k = iosKind as 'safari' | 'chrome';
+      iosTip = h(`<aside class="ios-tip" role="status" aria-live="polite" data-browser="${k}"><img src="${A('icon-coop.svg')}" alt="">
+        <div><b>${TIP_TITLE}</b><p>${howTo(k, SHARE_SVG)}</p></div>
+        <button class="icon-btn" aria-label="Dismiss tip"><img src="${A('icon-close.svg')}" alt=""></button></aside>`);
+      iosTip.querySelector('button')!.addEventListener('click', () => { g.telemetry.track('ios_home_tip_dismissed'); iosTip?.remove(); iosTip = null; iosTipLive = false; });
+      document.body.append(iosTip);
+    }
+    if (iosTip) { const hide = recoveryOpen || !!modalKind || !!open || !!onbUpdate; if (iosTip.hidden !== hide) iosTip.hidden = hide; }
+  };
+  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();

@@ -12,8 +12,11 @@ function buildId(): string {
 
 const BUILD = buildId();
 
-export default defineConfig({
+/** Debug URL flags (?ios=) exist only outside release builds: `vite build` (mode production) compiles them out;
+ *  `vite build --mode qa` / dev keep them (AC14g). */
+export default defineConfig(({ mode }) => ({
   define: {
     __BUILD__: JSON.stringify(BUILD),
+    __IOS_FLAG__: JSON.stringify(mode !== 'production'),
   },
-});
+}));
