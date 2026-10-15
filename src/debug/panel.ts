@@ -2,6 +2,7 @@
 import type { Game } from '../game';
 import type { Balance } from '../config/balance';
 import * as S from '../sim/state';
+import { resetProgress } from '../save/save';
 export function mountDebug(g: Game, b: Balance) {
   const el = document.createElement('details'); el.className = 'dbg'; el.open = true;
   el.innerHTML = `<summary>debug</summary><pre id="dbgInfo"></pre><div>
@@ -33,7 +34,7 @@ export function mountDebug(g: Game, b: Balance) {
         const k = 'eggfarm.ui'; const f = JSON.parse(localStorage.getItem(k) ?? '{}'); f.replayOnboarding = true; localStorage.setItem(k, JSON.stringify(f));
         g.save(); location.reload(); break; }
       case 'tele': { const u = URL.createObjectURL(new Blob([g.telemetry.exportJSON()], { type: 'application/json' })); const l = document.createElement('a'); l.href = u; l.download = 'eggfarm-telemetry.json'; l.click(); break; }
-      case 'reset': g.resetting = true; ['eggfarm.save', 'eggfarm.telemetry', 'eggfarm.ui'].forEach(k => localStorage.removeItem(k)); location.reload(); break;
+      case 'reset': g.resetting = true; g.telemetry.track('save_reset'); g.telemetry.flush(true); resetProgress(localStorage); location.reload(); break;
     }
   });
   let last = 0, frames = 0, fps = 0;

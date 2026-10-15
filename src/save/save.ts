@@ -20,9 +20,18 @@ export function migrate(d: any, b: Balance): SaveFile {
   return { version: d.version, savedAt: d.savedAt, state: { ...initialState(b), ...d.state } };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
-/** Settings > Reset save: progress, telemetry and UI flags. eggfarm.install_id is deliberately kept (M3-AC7). */
-export const RESET_KEYS = [SAVE_KEY, 'eggfarm.telemetry', 'eggfarm.ui'] as const;
-export function resetProgress(kv: KV) { for (const k of RESET_KEYS) kv.removeItem?.(k); }
+/** Settings > Reset save: only the progress save. eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
+export const RESET_KEYS = [SAVE_KEY] as const;
+export const UI_KEY = 'eggfarm.ui';
+/** Clear the save; keep telemetry + install_id; keep sfx/reducedMotion, drop FTUE/progress UI flags (PT1-2). */
+export function resetProgress(kv: KV) {
+  for (const k of RESET_KEYS) kv.removeItem?.(k);
+  try {
+    const raw = kv.getItem(UI_KEY); if (raw == null) return;
+    const f = JSON.parse(raw);
+    kv.setItem(UI_KEY, JSON.stringify({ sfx: f.sfx ?? true, reducedMotion: !!f.reducedMotion }));
+  } catch { kv.removeItem?.(UI_KEY); }
+}
 export function save(kv: KV, state: GameState, now = Date.now()) {
   const f: SaveFile = { version: SAVE_VERSION, savedAt: now, state };
   kv.setItem(SAVE_KEY, JSON.stringify(f));

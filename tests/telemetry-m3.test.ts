@@ -35,9 +35,19 @@ describe('M3-AC7 install_id + build', () => {
     expect(BUILD_ID).toMatch(BUILD_ID_RE);
     expect(BUILD_ID).toBe(`m3-pt1+${short}`);
   });
-  it('save reset keeps the install id unchanged', () => {
-    const s = kv(); const id = new Game(b, s, () => 0).installId; new Game(b, s, () => 0).save();
-    resetProgress(s); expect(s.getItem(SAVE_KEY)).toBeNull(); expect(s.getItem(TELEMETRY_KEY)).toBeNull();
+  it('save reset keeps install_id, telemetry and sfx/reducedMotion; clears save and FTUE flags (PT1-2)', () => {
+    const s = kv(); const g0 = new Game(b, s, () => 0, 1, 'm3-pt1+test'); const id = g0.installId;
+    g0.telemetry.track('upgrade', { upgrade: 'farm' }); g0.telemetry.track('save_reset'); g0.telemetry.flush(true);
+    s.setItem('eggfarm.ui', JSON.stringify({ sfx: false, reducedMotion: true, onboardingDone: true, workersIntroA: true, workersIntroB: true, seenSlots: 5 }));
+    resetProgress(s);
+    expect(s.getItem(SAVE_KEY)).toBeNull();
+    expect(s.getItem(TELEMETRY_KEY)).not.toBeNull();
+    const ev = JSON.parse(s.getItem(TELEMETRY_KEY)!);
+    expect(ev.some((e: any) => e.type === 'upgrade')).toBe(true);
+    expect(ev.some((e: any) => e.type === 'save_reset')).toBe(true);
+    expect(isPinned('save_reset')).toBe(true);
+    const ui = JSON.parse(s.getItem('eggfarm.ui')!);
+    expect(ui).toEqual({ sfx: false, reducedMotion: true });
     const g = new Game(b, s, () => 0); expect(g.isNewGame).toBe(true); expect(g.installId).toBe(id);
   });
   it('corrupt-save fallback keeps the install id unchanged', () => {
