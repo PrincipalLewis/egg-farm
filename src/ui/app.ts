@@ -10,6 +10,9 @@ import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
 import { showRecoveryDialog } from './save-recovery';
+import { visibleOrders, stripSplit, slotPreview } from './orders';
+import { OrderList } from './order-list';
+import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
@@ -75,7 +78,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
-      <div class="body" id="mRows"></div><div class="foot"><button class="btn" id="sellAll"></button></div></section>
+      <div class="body order-list" id="mRows"></div><p class="sr" aria-live="polite" id="ordersLive"></p><div class="foot"><button class="btn" id="sellAll"></button></div></section>
     <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" aria-label="Collection" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
@@ -90,6 +93,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
   const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
   const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
+  const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
+  (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
@@ -135,6 +140,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
+    if (open === 'market' && p !== 'market') ordersExpanded = false;
     open = p; panelLayer.classList.toggle('open', !!p);
     $('#p-market').hidden = p !== 'market'; $('#p-upgrades').hidden = p !== 'upgrades';
     nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
@@ -168,9 +174,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   collectBtn.addEventListener('click', collect);
   scene.addEventListener('click', collect);
-  queueEl.addEventListener('click', e => { if ((e.target as HTMLElement).closest('.chip:not(.empty)')) openPanel('market'); });
+  queueEl.addEventListener('click', e => { if ((e.target as HTMLElement).closest('.chip:not(.empty)')) openPanel('market'); }); // incl. the "+N" chip
   let lastSellSource: Element | null = null;
   mRows.addEventListener('click', e => {
+    if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
     const bt = (e.target as HTMLElement).closest('button[data-id]') as HTMLElement | null; if (!bt) return;
     if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
     lastSellSource = bt; g.dispatch({ type: 'sell', customerId: +bt.dataset.id! });
@@ -238,6 +245,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
 
   // ---------- Queue strip ----------
   const chips = new Map<number, HTMLElement>();
+  const moreChip = h(`<button class="chip more" type="button"></button>`);
   let qTagShown = false;
   const ghost = (at: DOMRect | null, cls: string, bubble?: { text: string; cls: string }) => {
     const q = queueEl.getBoundingClientRect(); const r = at ?? new DOMRect(q.right - 64, q.top, 64, 72);
@@ -247,12 +255,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   const renderQueue = () => {
     const s = g.state, slots = S.queueMax(s.farmLevel, b), patience = S.patienceS(s.farmLevel, b);
-    queueEl.classList.toggle('five', slots >= 5);
+    const split = stripSplit(s.customers.length), stripSlots = Math.min(5, slots);
+    queueEl.classList.toggle('five', stripSlots >= 5);
     // remove chips for customers gone
     const ids = new Set(s.customers.map(c => c.id));
     for (const [id, el] of chips) if (!ids.has(id)) { el.remove(); chips.delete(id); }
     const kids: HTMLElement[] = [];
-    for (const c of s.customers) {
+    for (const c of s.customers.slice(0, split.shown)) {
       let el = chips.get(c.id);
       if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
       setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
@@ -260,7 +269,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       kids.push(el);
     }
     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
-    const needEmpty = Math.max(0, slots - s.customers.length);
+    if (split.more) { moreChip.textContent = `+${split.more}`; moreChip.setAttribute('aria-label', `${split.more} more customers waiting, open Market`); kids.push(moreChip); }
+    const needEmpty = Math.max(0, stripSlots - kids.length);
     while (empties.length < needEmpty) empties.push(h(`<div class="chip empty" aria-hidden="true"></div>`));
     empties.length = needEmpty;
     const want = [...kids, ...empties];
@@ -351,12 +361,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const cost = isF ? S.farmCost(F, b) : S.collectionCost(C, b), can = s.coinsCents >= cost * 100;
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
+    const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
     const fx = isF ? [
       `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
       `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
       `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
-      `Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
-      `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`,
+      ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
+      `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
     ] : [
       `Eggs per tap ${arrow(fmtCount(S.eggsPerTap(C, b)), fmtCount(S.eggsPerTap(C + 1, b)))}`,
       `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
@@ -377,13 +388,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
-      <ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div></div></div>`;
   };
-  let lastUp = '', lastMarket = '';
+  let lastUp = '', ordersExpanded = false;
   function render() {
     const s = g.state, F = s.farmLevel, cap = S.coopCapacity(F, b), coopWhole = Math.floor(s.coop);
     setText(coinsEl, fmtMoney(s.coinsCents)); setText(basketEl, fmtCount(s.basket));
@@ -429,17 +440,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
-      const key = JSON.stringify([basket, s.customers.map(c => [c.id, c.filled]), s.farmLevel, s.collectionLevel]);
-      if (key !== lastMarket) {
-        lastMarket = key;
-        mRows.innerHTML = s.customers.length ? s.customers.map(c => {
-          const rem = c.demand - c.filled, k = Math.min(basket, rem), st = k === 0 ? '' : k === rem ? 'buy affordable' : 'partial';
-          return `<div class="row" data-row="${c.id}"><div class="av"><img src="${A('icon-customer.svg')}" alt=""></div>
-            <div><b><span class="o-long">Wants ${fmtCount(rem)}${c.filled ? ` of ${fmtCount(c.demand)}` : ''} eggs</span><span class="o-short">Wants ${fmtCount(rem)}${c.filled ? `/${fmtCount(c.demand)}` : ''} <img src="${A('icon-egg.svg')}" alt="eggs"></span></b><small><img src="${A('icon-coin.svg')}" alt="">pays ${fmtMoney(k * S.eggPriceCents(F, s.collectionLevel, b))}</small></div>
-            <button class="btn ${st}" data-id="${c.id}" aria-disabled="${k === 0}">Sell ${fmtCount(k)}/${fmtCount(rem)}</button></div>`;
-        }).join('') : `<div class="empty-state"><img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p></div>`;
-      }
-      mRows.querySelectorAll<HTMLElement>('.row').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) (r.querySelector('.av') as HTMLElement).style.setProperty('--p', String(Math.min(1, c.waitedS / patience))); });
+      const unit = S.eggPriceCents(F, s.collectionLevel, b) * graderMult(s.workers, s.graderTier, b);
+      const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
+      if (s.customers.length <= vis) ordersExpanded = false;
+      orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm() });
+      mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) (r.querySelector('.av') as HTMLElement).style.setProperty('--p', String(Math.min(1, c.waitedS / patience))); });
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
       let left = basket, eggs = 0, cents = 0; const price = S.eggPriceCents(F, s.collectionLevel, b);
       for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }

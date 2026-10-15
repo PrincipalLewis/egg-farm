@@ -336,3 +336,33 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (max-width:390px){.row .o-long{display:none}.row .o-short{display:inline}}
 /* keep PT1-8 desktop tab hit areas (the Bug 9 patch resets .tabs button min-width) */
 @media (min-width:960px){.tabs button{min-width:44px}}
+/* P1q/P2 order cards + "+N waiting" (art-ux/m3-customer-queue-spec.md v1.0); visibility is set in JS (same 384px rule) */
+.order-list{display:flex;flex-direction:column;gap:var(--s-2)}
+.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md)}
+.order[hidden]{display:none}
+.order>.txt{min-width:0}.order .av{width:40px;height:40px}.order .av img{width:100%;height:100%}
+.order .l1{display:flex;font:800 16px/1.2 var(--f-body);white-space:nowrap;font-variant-numeric:tabular-nums;color:#3E2C23;min-width:0}
+.order .l1 .e{flex:none}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.order .bar{height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
+.order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
+.order .sell{min-width:88px;max-width:42%;min-height:44px;border-radius:22px;padding:0 var(--s-3)}
+.order.ready{border:3px solid #3D7F33}
+.order.wait .sell{background:#fff;color:#6B5D52;border:2px solid #6B5D52;box-shadow:none}
+.queue-more{align-self:center;min-height:44px;padding:0 16px;border-radius:22px;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0;cursor:pointer}
+.queue-more:focus-visible{outline:2px solid #2B79A8;outline-offset:2px}
+@media (min-width:960px) and (orientation:landscape){#p-market .body{overflow:auto}.order .sell{min-width:112px}}
+.reduced-motion .order .bar>i{transition:none}
+/* farm strip "+N" chip (5th slot) */
+.chip.more{display:grid;place-items:center;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0}
+/* v1.1 §5 anti-churn: fixed heights/widths, transform/opacity-only animations */
+.order{height:60px;min-height:0;contain:layout paint;overflow:hidden}
+.order .sell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.order-list{overflow-anchor:auto}
+.queue-more{min-width:9ch;font-variant-numeric:tabular-nums;transition:none;flex:none}
+#sellAll{min-width:min(100%,280px);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order.enter{animation:orderIn .24s ease-out}@keyframes orderIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.order.leaving{animation:orderOut .24s ease-out forwards;pointer-events:none}@keyframes orderOut{to{opacity:0;transform:scale(.96)}}
+.reduced-motion .order.enter,.reduced-motion .order.leaving{animation:none}
+/* §6 farm row: +1 customer slot */
+.fx li.slot{font:800 14px var(--f-body);color:#3E2C23;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fx li.slot img{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
+.fx li.slot .m{color:#6B5D52;font-weight:700}.fx li.orders{font:700 12px var(--f-body);color:#6B5D52;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
