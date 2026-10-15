@@ -343,7 +343,7 @@ html,body{overflow-x:hidden;max-width:100%}
 .order>.txt{min-width:0}.order .av{width:40px;height:40px}.order .av img{width:100%;height:100%}
 .order .l1{display:flex;font:800 16px/1.2 var(--f-body);white-space:nowrap;font-variant-numeric:tabular-nums;color:#3E2C23;min-width:0}
 .order .l1 .e{flex:none}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.order .bar{height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
+.order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
 .order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
 .order .sell{min-width:88px;max-width:42%;min-height:44px;border-radius:22px;padding:0 var(--s-3)}
 .order.ready{border:3px solid #3D7F33}
@@ -398,3 +398,7 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Font credits (art-ux/font-credits.md): Nunito 12px #6B5D52, 44px tap row for the licence link */
 .font-credits{font:400 12px/1.4 var(--f-body);color:#6B5D52;margin:8px 0 0}
 .font-credits a{display:inline-flex;align-items:center;min-height:44px;color:#6B5D52;text-decoration:underline}
+/* F1: below the strip the toast fades in place (a slide-up exit would cross the strip and the Queue full badge) */
+.toast.below{transform:translate(-50%,-8px)}.toast.below.show{transform:translate(-50%,0)}
+/* AC14c/AC14d save notice */
+.save-warn{position:fixed;z-index:40;left:12px;right:12px;bottom:calc(var(--nav-h) + 8px);max-width:480px;margin-inline:auto;background:#3E2C23;color:#fff;font:700 14px/1.35 var(--f-body);padding:10px 14px;border-radius:12px;text-align:center;pointer-events:none}

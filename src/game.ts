@@ -65,9 +65,15 @@ export class Game {
     if (full && this.coopFullSince === null) { this.coopFullSince = this.now(); this.telemetry.track('coop_full', { phase: 'start' }); this.notify({ type: 'coop_full', phase: 'start' }); }
     else if (!full && this.coopFullSince !== null) { this.telemetry.track('coop_full', { phase: 'end', durationMs: this.now() - this.coopFullSince }); this.coopFullSince = null; this.notify({ type: 'coop_full', phase: 'end' }); }
   }
+  /** AC14c: set once when a save write throws (QuotaExceededError / Safari private mode); the UI warns once. */
+  storageFailed = false; onStorageFail: (() => void) | null = null;
+  /** AC14d: a second tab is read-only and never writes the save. */
+  readOnly = false;
   save() {
-    if (this.resetting) return;
-    try { save(this.kv, this.state, this.now(), this.b, this.bakAllowed); } catch { /* storage full: keep playing, retry next autosave */ }
+    if (this.resetting || this.readOnly) return;
+    try { save(this.kv, this.state, this.now(), this.b, this.bakAllowed); }
+    catch (e) { /* keep playing, retry next autosave; warn once */
+      if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
   endSession() {

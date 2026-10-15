@@ -124,3 +124,6 @@ export function loadSafe(kv: KV, b: Balance, now = Date.now()): { file: SaveFile
   if (bakRaw !== null) preserve(kv, bakRaw, now + 1);
   return { file: null, recovery: { case: copied ? 'F' : 'Q', reason: v.reason, had_backup, restored_from_backup: false, copy_failed: !copied, raw } };
 }
+
+/** AC14d: the second tab reads the save but every write is dropped (also the load-time save and .bak rotation). */
+export const readOnlyKV = (kv: KV): KV => ({ getItem: k => kv.getItem(k), setItem: () => {}, removeItem: () => {} });

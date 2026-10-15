@@ -63,7 +63,7 @@ export class Telemetry {
   poll() { if (this.sumWin && this.now() - this.sumWin.start >= (this.cfg.worker_summary_s ?? 60) * 1000) this.closeSumWindow(); if (this.tapWin && this.now() - this.tapWin.start >= this.cfg.tap_batch_ms) this.closeTapWindow(); }
   flush(force = false) {
     if (force) { this.closeTapWindow(); this.closeSumWindow(); } else this.poll();
-    if (!this.dirty) return; this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++;
+    if (!this.dirty) return; try { this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++; } catch { /* AC14c: quota/private mode; keep the buffer in memory */ }
   }
   events(): readonly TEvent[] { return this.buf; }
   exportJSON(): string { this.closeTapWindow(); this.closeSumWindow(); return JSON.stringify({ exportedAt: this.now(), events: this.buf }, null, 2); }

@@ -2,6 +2,8 @@ import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
 import { startAutosave } from './save/autosave';
+import { bus, guardTabs } from './save/tab-guard';
+import { readOnlyKV } from './save/save';
 import { mountApp } from './ui/app';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 
@@ -27,11 +29,27 @@ function showError() {
   start.querySelector('.bar')?.remove(); start.querySelector('button')?.remove();
   const b = document.createElement('button'); b.className = 'btn secondary'; b.textContent = "Couldn't load — Retry"; b.onclick = () => location.reload(); start.append(b);
 }
-function boot() {
+/** AC14c/AC14d: one persistent, polite notice (shown once). */
+function saveNotice(text: string) {
+  if (document.querySelector('.save-warn')) return;
+  const n = document.createElement('div'); n.className = 'save-warn'; n.setAttribute('role', 'status'); n.textContent = text; document.body.append(n);
+}
+export const TWO_TAB_TEXT = "Egg Farm is open in another tab. Progress in this tab won't be saved.";
+export const NO_STORAGE_TEXT = "Your browser isn't letting us save right now (low space or private mode), so progress won't be saved.";
+/** AC14d: ask other tabs before the Game is built, so a second tab never writes the save (even the load-time save). */
+async function probeTabs(): Promise<{ second: boolean }> {
+  const t = guardTabs(bus(), () => {});
+  await new Promise(r => setTimeout(r, 200));
+  return { second: t.second };
+}
+async function boot() {
+  const tabs = await probeTabs();
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
+  const g = new Game(balance, tabs.second ? readOnlyKV(localStorage) : localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
+  if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
+  g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
   { const q = new URLSearchParams(location.search); if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q)); }
