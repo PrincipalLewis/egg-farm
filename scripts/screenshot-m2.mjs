@@ -9,8 +9,8 @@ setTimeout(() => { kill(); process.exit(2); }, 60000).unref();
 await new Promise(r => setTimeout(r, 2000));
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const mk = (savedAt, st) => ({ version: 5, savedAt, state: { coinsCents: 5_000_000, coop: 0, basket: 50, collectionLevel: 12, farmLevel: 24, customers: [], nextCustomerInS: 5, nextCustomerId: 1, rng: 99, pendingOfflineEggs: 0, celebratedTier: 3, workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0, ...st } });
-async function shot(name, save, q, after) {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+async function shot(name, save, q, after, desktop = false) {
+  const ctx = await browser.newContext(desktop ? { viewport: { width: 1280, height: 800 } } : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.addInitScript(([s]) => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem('eggfarm.save', JSON.stringify(s)); localStorage.setItem('eggfarm.ui', JSON.stringify({ seenSlots: 5, onboardingDone: true })); sessionStorage.setItem('seeded', '1'); } }, [save]);
   await page.goto(base + q); await page.getByText('Tap to start').click(); await page.waitForTimeout(500);
@@ -25,4 +25,7 @@ await shot('m2-workers-ring-cooldown', mk(Date.now(), { workers: { market_hand: 
   await p.locator('[data-nav=upgrades]').click(); await p.locator('[data-tab=workers]').click(); await p.waitForTimeout(400);
 });
 await shot('m2-farm-manage-all', mk(Date.now(), { workers: { market_hand: { energy: 80, cdS: 0 }, coop_hand: { energy: 38, cdS: 0 }, hawker: { energy: 70, cdS: 0 }, grader: { energy: 90, cdS: 0 } }, graderTier: 4 }), '', async p => { await p.waitForTimeout(300); });
+await shot('m2-desktop-manage-all', mk(Date.now(), { workers: { market_hand: { energy: 80, cdS: 0 }, coop_hand: { energy: 38, cdS: 0 }, hawker: { energy: 70, cdS: 0 }, grader: { energy: 90, cdS: 0 } }, graderTier: 4 }), '', async p => {
+  const r = await p.locator('.desk-manage-all').boundingBox(); if (!r || r.width !== 44 || r.height !== 44) throw new Error('desktop Manage all not 44px: ' + JSON.stringify(r));
+}, true);
 await browser.close(); kill(); process.exit(0);

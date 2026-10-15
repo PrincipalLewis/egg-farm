@@ -10,7 +10,7 @@ import type { Audio, SfxName } from './audio';
 import { SAVE_KEY } from '../save/save';
 import { TELEMETRY_KEY } from '../telemetry/telemetry';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, showFarmManageAll, ringHtml } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -63,7 +63,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body" id="mRows"></div><div class="foot"><button class="btn" id="sellAll"></button></div></section>
-    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
+    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="btn manage farm-manage-all desk-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" data-tab="collection" class="active"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</button>
         <button role="tab" data-tab="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button>
@@ -127,8 +127,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
     dirty = true;
   };
-  const farmMA = nav.querySelector('.farm-manage-all') as HTMLButtonElement, yawnSfx = new YawnSfx();
-  farmMA.addEventListener('click', e => { e.stopPropagation(); if (farmMA.getAttribute('aria-disabled') === 'true') return cantAfford(farmMA); g.dispatch({ type: 'manageAll' }); sfx('upgrade'); dirty = true; });
+  // Farm View Manage all: mobile nav button + desktop docked copy next to the Upgrades header (same rule/action/cooldown/ring)
+  const farmMAs = [nav.querySelector('.farm-manage-all'), panelLayer.querySelector('.desk-manage-all')] as HTMLButtonElement[], yawnSfx = new YawnSfx();
+  let farmMAShown = false;
+  for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (fb.getAttribute('aria-disabled') === 'true') return cantAfford(fb); g.dispatch({ type: 'manageAll' }); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
   $('.tabs').addEventListener('click', e => { const t = (e.target as HTMLElement).closest('button')?.dataset.tab; if (t) { tab = t as any; dirty = true; } });
@@ -363,9 +365,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     (nav.querySelector('[data-nav=market] .badge') as HTMLElement).hidden = !(s.customers.length && s.basket >= 1);
     (nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement).hidden = !canUp;
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
-    const fma = showFarmManageAll(s, b) || (farmMA.hidden === false && s.manageCdS > 1e-9);
-    farmMA.hidden = !fma;
-    if (fma) { const cd = s.manageCdS > 1e-9; farmMA.classList.toggle('is-cooldown', cd); setDisabled(farmMA, cd); const r = ringHtml(s, b), slot = farmMA.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r; }
+    farmMAShown = farmManageAllVisible(s, b, farmMAShown);
+    for (const fb of farmMAs) {
+      fb.hidden = !farmMAShown;
+      if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r; }
+    }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
     // market panel
     if (open === 'market' || docked.matches) {

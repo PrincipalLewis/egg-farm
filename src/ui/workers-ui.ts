@@ -20,6 +20,9 @@ const manageIcon = (s: GameState, b: Balance, icon: string) =>
   `<span class="manage-ico"><img src="${ASSET(icon)}" width="22" height="22" alt="">${ringHtml(s, b)}</span>`;
 /** Farm View Manage-all button (§4.4): >= manage_all_min_workers hired and any worker yawning (<= yawn_at_pct). */
 export const showFarmManageAll = (s: GameState, b: Balance) => showManageAll(s.workers, b) && WORKERS.some(id => isYawning(s.workers[id], b));
+/** Visibility of the Farm View button(s): show rule, and stay visible (with ring) while the cooldown it started runs. */
+export const farmManageAllVisible = (s: GameState, b: Balance, wasShown: boolean) =>
+  showFarmManageAll(s, b) || (wasShown && s.manageCdS > 1e-9);
 /** Yawn sfx (§4.6): one global 6 s throttle; only the FIRST yawning worker in card order; never Asleep/Unpaid
  *  (isYawning excludes both). Returns the worker that "yawns" now, or null. SFX toggle is applied by Audio.enabled. */
 export class YawnSfx {
