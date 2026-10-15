@@ -28,7 +28,7 @@ describe('wall-clock resume', () => {
     expect(g.state.coop).toBe(50); expect(g.state.pendingOfflineEggs).toBe(0);
     expect(g.state.nextCustomerId).toBe(12); // P1q: arrivals at 10, 15 .. 60 s only (11), not 120 over 600 s
     expect(g.state.nextCustomerInS).toBeCloseTo(5, 6); // P1q L0 interval 5 s; frozen mid-cycle, resumes from here
-    expect(g.state.customers.map(c => c.waitedS)).toEqual([expect.closeTo(20, 6), expect.closeTo(10, 6), expect.closeTo(0, 6)]);
+    expect(g.state.customers.map(c => c.waitedS)).toEqual([25, 20, 15, 10, 5, 0].map(w => expect.closeTo(w, 6))); // P1q: queue 6, one every 5 s
   });
   it('gap exactly 90s with uncapped coop shows 60s of production', () => {
     const { g, c } = mk(); const x = g as any; x.b = structuredClone(x.b); x.b.farm.coopCapacityBase = 10_000;
