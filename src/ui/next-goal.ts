@@ -62,5 +62,9 @@ export class GoalHold {
     return this.shown;
   }
 }
+const UNIT: Record<string, string> = { s: 'second', min: 'minute', h: 'hour' };
+/** "~1 min 5 s" -> "1 minute 5 seconds" (B3: singular for 1). */
+export const spokenDuration = (status: string) =>
+  status.replace('~', '').replace(/(\d+)\s*(min|s|h)\b/g, (_, n: string, u: string) => `${n} ${UNIT[u]}${n === '1' ? '' : 's'}`).trim();
 export const goalAria = (g: Goal) => g.state === 'done' ? 'Next goal: all upgrades done.' :
-  `Next goal: ${g.label.replace(':', ',')}. ${g.state === 'ready' ? 'Ready now.' : g.state === 'noincome' ? 'Sell eggs to earn coins.' : `Ready in about ${g.status.replace('~', '').replace(/\bmin\b/g, 'minutes').replace(/\bs\b/g, 'seconds').replace(/\bh\b/g, 'hours')}.`}`;
+  `Next goal: ${g.label.replace(':', ',')}. ${g.state === 'ready' ? 'Ready now.' : g.state === 'noincome' ? 'Sell eggs to earn coins.' : `Ready in about ${spokenDuration(g.status)}.`}`;

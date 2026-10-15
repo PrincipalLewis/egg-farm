@@ -65,3 +65,15 @@ describe('next-goal anti-flicker hold', () => {
     expect(z.status).not.toBe(a.status); void fc;
   });
 });
+import { spokenDuration, goalAria as goalAria2 } from '../src/ui/next-goal';
+describe('B3 goal chip screen-reader text', () => {
+  it('pluralises correctly', () => {
+    expect(spokenDuration('~1 min')).toBe('1 minute'); expect(spokenDuration('~2 min')).toBe('2 minutes');
+    expect(spokenDuration('~1 min 1 s')).toBe('1 minute 1 second'); expect(spokenDuration('~45 s')).toBe('45 seconds');
+    expect(spokenDuration('~1 h 10 min')).toBe('1 hour 10 minutes');
+  });
+  it('aria text has the same target and timer as the visible chip', () => {
+    const g = { key: 'FARM', state: 'saving', label: 'Farm L4: $120', status: '~1 min', costCents: 12000, tab: 'farm' } as any;
+    expect(goalAria2(g)).toBe('Next goal: Farm L4, $120. Ready in about 1 minute.');
+  });
+});

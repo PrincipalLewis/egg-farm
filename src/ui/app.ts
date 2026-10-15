@@ -307,7 +307,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let pendingLvPop = false;
   // ---------- M3-AC5 next-goal strip ----------
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
-  let hlSel = '', hlUntil = 0;
+  let hlSel = '', hlUntil = 0, goalLiveT = 0;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
@@ -318,7 +318,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
-      if (prev.key !== gl.key) { setText(goalLive, goalAria(gl)); if (!rm()) retrigger(goalLbl, 'xfade'); }
+      if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
+      // B3: announce the CURRENT goal (same text as the chip's aria-label) on target or state change, then clear the
+      // live region so a screen reader browsing later never reads a stale target/timer.
+      setText(goalLive, goalAria(gl)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
       if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (live.length <= 26) sparkle(goalSt, 4); }
       if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
     }
