@@ -2,3 +2,4 @@ node_modules
 dist
 dist-qa
 vite.config.ts.timestamp-*
+qa-out/

@@ -40,6 +40,17 @@ export class OrderList {
     el.innerHTML = `<div class="av"><img src="${this.avatar}" alt=""></div><div class="txt"><div class="l1"><span class="e"></span><span class="v"></span></div><div class="bar" role="progressbar" aria-valuemin="0"><i></i></div></div><button data-id="${v.id}"></button>`;
     this.fill(el, v); this.stats.created++; return el;
   }
+  /** §5.7 (QA 15): removal = one layout step, but the cards below glide up with a compensating transform (FLIP),
+   *  so nothing jumps visually and Layout Instability (CLS) records no shift. */
+  private flipRemove(els: HTMLElement[], rm: boolean) {
+    const rest = [...this.list.querySelectorAll<HTMLElement>('.order[data-row], .queue-more')].filter(e => !els.includes(e) && !e.hidden);
+    const before = rest.map(e => e.getBoundingClientRect().top);
+    for (const e of els) e.remove();
+    rest.forEach((e, k) => { const d = before[k] - e.getBoundingClientRect().top; if (Math.abs(d) < 0.5) return;
+      e.style.transition = 'none'; e.style.transform = `translateY(${d}px)`;
+      if (rm) { e.style.transform = ''; return; }
+      requestAnimationFrame(() => requestAnimationFrame(() => { e.style.transition = 'transform .2s ease-out'; e.style.transform = ''; setTimeout(() => { e.style.transition = ''; }, 220); })); });
+  }
   private apply(i: ListInput) {
     const t = this.now(), frozen = this.frozen;
     const ids = new Set(i.customers.map(c => c.id));
@@ -49,10 +60,12 @@ export class OrderList {
     if (!frozen) {
       const gone = [...this.nodes.keys()].filter(id => !shownSet.has(id));
       const animate = !i.rm && gone.length === 1 && ids.has(gone[0]) === false && t - this.lastLeave >= 240;
+      const drop: HTMLElement[] = [];
       for (const id of gone) {
         const el = this.nodes.get(id)!; this.nodes.delete(id); this.stats.removed++;
-        if (animate) { this.lastLeave = t; el.classList.add('leaving'); el.removeAttribute('data-row'); setTimeout(() => el.remove(), 240); } else el.remove();
+        if (animate) { this.lastLeave = t; el.classList.add('leaving'); el.removeAttribute('data-row'); setTimeout(() => this.flipRemove([el], i.rm), 240); } else drop.push(el);
       }
+      if (drop.length) this.flipRemove(drop, i.rm);
     }
     // updates + additions in FIFO order (new visible orders only ever append at the end)
     for (const c of i.customers) {
