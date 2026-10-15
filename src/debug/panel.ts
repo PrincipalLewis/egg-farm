@@ -29,7 +29,9 @@ export function mountDebug(g: Game, b: Balance) {
       case 'c+': case 'c-': set({ collectionLevel: clampL(s.collectionLevel + (a === 'c+' ? 1 : -1)) }); break;
       case 'off1h': g.debugBackdateSave(3_600_000); location.reload(); break;
       case 'off3h': g.debugBackdateSave(3 * 3_600_000); location.reload(); break;
-      case 'onb': { const k = 'eggfarm.ui'; const f = JSON.parse(localStorage.getItem(k) ?? '{}'); f.onboardingDone = false; localStorage.setItem(k, JSON.stringify(f)); g.resetting = true; localStorage.removeItem('eggfarm.save'); location.reload(); break; }
+      case 'onb': { // keeps the save: only flags the overlay to replay on next load
+        const k = 'eggfarm.ui'; const f = JSON.parse(localStorage.getItem(k) ?? '{}'); f.replayOnboarding = true; localStorage.setItem(k, JSON.stringify(f));
+        g.save(); location.reload(); break; }
       case 'tele': { const u = URL.createObjectURL(new Blob([g.telemetry.exportJSON()], { type: 'application/json' })); const l = document.createElement('a'); l.href = u; l.download = 'eggfarm-telemetry.json'; l.click(); break; }
       case 'reset': g.resetting = true; ['eggfarm.save', 'eggfarm.telemetry', 'eggfarm.ui'].forEach(k => localStorage.removeItem(k)); location.reload(); break;
     }

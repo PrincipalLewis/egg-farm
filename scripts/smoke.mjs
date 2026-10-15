@@ -12,6 +12,8 @@ await page.getByText('Tap to start').click();
 await page.waitForFunction(() => window.eggfarm);
 if (!(await page.locator('.onb').isVisible())) fail('onboarding overlay not shown on new game');
 if (!(await page.locator('.onb-cap').textContent()).includes('Collect')) fail('onboarding step 1 caption');
+{ const lbl = await page.locator('#collect').textContent(); const dis = await page.locator('#collect').getAttribute('aria-disabled');
+  if (/\+0\b/.test(lbl) || (await page.evaluate(() => window.eggfarm.state.coop)) < 1 && dis !== 'true') fail(`collect at empty coop: "${lbl}" disabled=${dis}`); }
 await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 40 }; });
 for (let i = 0; i < 4; i++) await page.locator('#collect').click();
 await page.waitForTimeout(100);
@@ -44,7 +46,12 @@ if (tele.join() !== 'collect,sell,upgrade,complete') fail('onboarding telemetry:
 await page.goto(`http://127.0.0.1:${port}/?debug=1`); await page.getByText('Tap to start').click();
 await page.waitForSelector('.dbg');
 const before = await page.evaluate(() => window.eggfarm.state.coinsCents); await page.locator('.dbg [data-a=coins100]').click();
-if ((await page.evaluate(() => window.eggfarm.state.coinsCents)) - before !== 10000) fail('debug +$100');
+{ const lvl = await page.evaluate(() => window.eggfarm.state.collectionLevel);
+  await page.locator('.dbg [data-a=onb]').click(); await page.waitForLoadState(); await page.getByText('Tap to start').click(); await page.waitForTimeout(200);
+  if (!(await page.locator('.onb').count())) fail('replay onboarding did not show overlay');
+  if ((await page.evaluate(() => window.eggfarm.state.collectionLevel)) !== lvl || lvl < 1) fail('replay onboarding lost the save');
+  await page.locator('.onb-skip').click(); }
+if ((await page.evaluate(() => window.eggfarm.state.coinsCents)) < before + 10000) fail('debug +$100');
 await page.goto(`http://127.0.0.1:${port}/`); await page.getByText('Tap to start').click(); await page.waitForTimeout(200);
 if (await page.locator('.dbg').count()) fail('debug panel visible without ?debug=1');
 if (errors.length) fail('page errors: ' + errors.join(' | '));

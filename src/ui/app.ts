@@ -14,7 +14,7 @@ import { OnboardingFlow, mountOnboarding } from './onboarding';
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean }
+interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
@@ -342,7 +342,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     $('#full').hidden = !atCap;
     const stack = coopWhole <= 0 ? 0 : atCap ? 3 : s.coop >= cap / 2 ? 2 : 1;
     const ne = $('#nestEggs'); if (ne.childElementCount !== stack) ne.innerHTML = `<img src="${A('icon-egg.svg')}" alt="">`.repeat(stack);
-    setText(collectBtn, `Collect +${fmtCount(Math.min(coopWhole, S.eggsPerTap(s.collectionLevel, b)))}`);
+    // No "+0": below one whole egg the button reads "Collect" and is aria-disabled (still tappable -> shake + "Empty").
+    setText(collectBtn, coopWhole >= 1 ? `Collect +${fmtCount(Math.min(coopWhole, S.eggsPerTap(s.collectionLevel, b)))}` : 'Collect');
+    setDisabled(collectBtn, coopWhole < 1);
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     (nav.querySelector('[data-nav=market] .badge') as HTMLElement).hidden = !(s.customers.length && s.basket >= 1);
@@ -379,8 +381,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   void dirty;
   // ---------- Onboarding (new games only, once, skippable) ----------
   let onbUpdate: (() => boolean) | null = null;
-  if (opts.newGame && !flags.onboardingDone) {
-    const finish = () => { flags.onboardingDone = true; saveFlags(); };
+  if ((opts.newGame && !flags.onboardingDone) || flags.replayOnboarding) {
+    const finish = () => { flags.onboardingDone = true; flags.replayOnboarding = false; saveFlags(); };
     const flow = new OnboardingFlow({
       step: (n, name) => g.telemetry.onboardingStep(n, name),
       skip: (n) => { g.telemetry.onboardingSkip(n); finish(); },
