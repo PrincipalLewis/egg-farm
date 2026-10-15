@@ -402,3 +402,6 @@ html,body{overflow-x:hidden;max-width:100%}
 .toast.below{transform:translate(-50%,-8px)}.toast.below.show{transform:translate(-50%,0)}
 /* AC14c/AC14d save notice */
 .save-warn{position:fixed;z-index:40;left:12px;right:12px;bottom:calc(var(--nav-h) + 8px);max-width:480px;margin-inline:auto;background:#3E2C23;color:#fff;font:700 14px/1.35 var(--f-body);padding:10px 14px;border-radius:12px;text-align:center;pointer-events:none}
+/* Recovery dialog v1.1: Q export = full-width outlined secondary button below the primary */
+.recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:8px;border-radius:999px;background:#fff;color:#3E2C23;border:2px solid #3E2C23;box-shadow:none;font:600 16px var(--f-display)}
+.recovery-card .rc-link{min-height:44px}

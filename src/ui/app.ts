@@ -9,7 +9,7 @@ import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
-import { showRecoveryDialog } from './save-recovery';
+import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRecoveryDialog } from './save-recovery';
 import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
@@ -228,7 +228,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button><h2>Settings</h2>
       <label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
-      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
+      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${oldSaveForSession() ? `<button class="btn secondary" type="button" id="sOldSave">Export old save</button><div class="version" id="sOldMsg" role="status" aria-live="polite"></div>` : ''}${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
     modal.classList.add('open'); sfx('uiOpen');
   };
@@ -236,6 +236,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const t = e.target as HTMLElement;
     if (modalKind === 'welcome') { if (t.id === 'wbCollect') grantWelcome(true); else if (t === modal || t.closest('.close')) grantWelcome(false); return; }
     if (t === modal || t.closest('.close') || t.id === 'cCancel') { closeModal(); sfx('uiClose'); return; }
+    if (t.id === 'sOldSave') { const raw = oldSaveForSession(); if (raw) void exportOldSave(raw, exportName(new Date())).then(ok => { $('#sOldMsg').textContent = ok ? OK_MSG : FAIL_MSG; }); return; }
     if (t.id === 'sExport') { void exportLog(g.telemetry.exportJSON(), `eggfarm-log-${g.installId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`).then(m => { const el = $('#sExportMsg'); if (el) el.textContent = m; }); return; }
     if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
     if (t.id === 'cReset') { g.resetting = true; g.telemetry.track('save_reset'); g.telemetry.flush(true); resetProgress(localStorage); location.reload(); }
