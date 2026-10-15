@@ -2,7 +2,7 @@ import type { Balance } from '../config/balance';
 import { GameState, eggsPerSec, eggsPerTap, coopCapacity, customerIntervalS, demandRange, nextRand, queueMax, patienceS } from './state';
 import type { Sink } from './events';
 import { sellTo } from './actions';
-import { Workers, WORKERS, mood, isOff, hawkerDemandMult, wageCents, resumeNeedCents } from './workers';
+import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCents, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
@@ -16,6 +16,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink): GameState
       const w0 = s.workers[id]; if (!w0) continue;
       const before = mood(w0, b), w = { ...w0, energy: before === 'asleep' ? 0 : before === 'unpaid' ? w0.energy : Math.max(0, w0.energy - dt / E.drain_s_per_pct) };
       const after = mood(w, b); if (after !== before) ev?.push({ type: 'worker_state', worker: id, state: after! });
+      if (!isYawning(w0, b) && isYawning(w, b)) ev?.push({ type: 'worker_yawn', worker_id: id, energy_pct: Math.round(w.energy * 10) / 10, farm_level: L });
       workers[id] = w;
     }
   }

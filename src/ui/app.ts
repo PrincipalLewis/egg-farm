@@ -67,7 +67,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" data-tab="collection" class="active"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</button>
         <button role="tab" data-tab="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button>
-        <button role="tab" data-tab="workers">Workers</button></div>
+        <button role="tab" data-tab="workers"><img src="${A('icon-hire.svg')}" alt="">Workers</button></div>
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);

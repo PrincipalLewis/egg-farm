@@ -209,3 +209,6 @@ nav.actions button.btn.farm-manage-all .manage-ico{width:44px;height:44px}
 .sheet header button.btn.desk-manage-all{display:none;flex:0 0 44px;width:44px;min-width:0;height:44px;min-height:0;padding:0;border-radius:50%;box-shadow:none;background:var(--c-meadow,#5a9)}
 .sheet header button.btn.desk-manage-all .manage-ico{width:44px;height:44px}
 .sheet header button.btn.desk-manage-all img{width:28px;height:28px}
+
+/* post-rc1 m-1: every Manage all copy greys out during the shared cooldown exactly like a disabled Manage button; ring + countdown stay */
+.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}

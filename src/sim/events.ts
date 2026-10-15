@@ -13,6 +13,7 @@ export type SimEvent =
   | { type: 'worker_manage'; worker: WorkerId; energyBefore: number }
   | { type: 'worker_manage_all'; workers: WorkerId[]; energyBefore: number[] } // one tap = one Manage action (AC-W5)
   | { type: 'worker_state'; worker: WorkerId; state: WorkerMood }
+  | { type: 'worker_yawn'; worker_id: WorkerId; energy_pct: number; farm_level: number } // once per entry into Yawning (<= yawn_at_pct)
   | { type: 'wage'; worker: WorkerId; cents: number }
   | { type: 'grader_tier'; tier: number; mult: number; cost: number };
 export type Sink = SimEvent[] | undefined;
