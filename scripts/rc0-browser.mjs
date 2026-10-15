@@ -1,9 +1,11 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
-// Env: ENGINE=chromium|webkit (default chromium), HEADED=1.
+// Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit (default chromium; CLI wins). HEADED=1.
 import { chromium, webkit } from 'playwright-core';
 import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync } from 'node:fs';
-const ENGINE = process.env.ENGINE ?? 'chromium', headless = !process.env.HEADED;
+const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
+if (!['chromium', 'webkit'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
+const headless = !process.env.HEADED;
 const port = 4181; const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
 await new Promise(r => setTimeout(r, 1500));
@@ -85,8 +87,11 @@ sections.b2 = async () => {
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
     await page.waitForTimeout(300); const shown = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { top: r.top, vis: getComputedStyle(e).visibility, text: e.textContent }; });
     await page.waitForTimeout(2200);
+    const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const below = w < 960;
     const after = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { bottom: r.bottom, vis: getComputedStyle(e).visibility, op: getComputedStyle(e).opacity }; });
-    ok(`B2 L5 toast shows then is fully gone: off-screen, or (Art & UX F1, below the strip) faded out in place (${w})`, shown.top >= 0 && shown.vis === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && (after.bottom <= 0 || after.op === '0'), JSON.stringify({ shown, after }));
+    // QA precheck-2fae4c4 §1: width-aware. <960: sits 8px below the queue strip (F1) and fades in place; docked: slides off the top.
+    ok(`B2 L5 toast shows then is fully gone (${below ? 'below strip, faded' : 'off the top'}) (${w})`, shown.vis === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
+      && (below ? Math.abs(shown.top - (qb + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, after, qb }));
     await ctx.close();
   }
 };
