@@ -1,16 +1,8 @@
 import { defineConfig } from 'vite';
-import { execSync } from 'node:child_process';
+import { gitBuildId } from './scripts/build-id';
 
-/** Injected into session_start.build as m3-pt1+<short> (QA PT1-1). */
-function buildId(): string {
-  try {
-    const short = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-    if (/^[0-9a-f]{7,}$/.test(short)) return `m3-pt1+${short}`;
-  } catch { /* fall through */ }
-  return 'm3-pt1+unknown';
-}
-
-const BUILD = buildId();
+/** Injected into session_start.build as m3-rc0+<short>[+dirty] (QA PT1-1, rc0 item 6). */
+const BUILD = gitBuildId();
 
 /** Debug URL flags (?ios=) exist only outside release builds: `vite build` (mode production) compiles them out;
  *  `vite build --mode qa` / dev keep them (AC14g). */
