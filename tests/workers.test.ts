@@ -30,7 +30,7 @@ describe('M2 workers (m2-proposal v1.1)', () => {
     expect(ev.filter(e => e.type === 'worker_state').map(e => (e as any).state)).toEqual(['tired', 'asleep']);
   });
   it('Manage refills to 100% with one shared 30 s cooldown', () => {
-    let s = apply(apply(rich(), { type: 'hire', worker: 'hawker' }, b), { type: 'hire', worker: 'grader' }, b); s = run(s, 400);
+    let s = apply(apply(rich(), { type: 'hire', worker: 'hawker' }, b), { type: 'hire', worker: 'grader' }, b); s = run(s, 600); // P4: Manage needs <= 40% (100% - 600 s / 9 s per % = 33%)
     s = apply(s, { type: 'manage', worker: 'hawker' }, b); expect(s.workers.hawker!.energy).toBe(100); expect(s.manageCdS).toBe(W.energy.manage_cooldown_s);
     expect(apply(s, { type: 'manage', worker: 'grader' }, b).workers.grader!.energy).toBeLessThan(100);
     s = run(s, 30); expect(apply(s, { type: 'manage', worker: 'grader' }, b).workers.grader!.energy).toBe(100);

@@ -31,9 +31,10 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
     sellT += sellEvery;
     s = apply(s, { type: 'sellAll' }, b, ev); drain(t, s.farmLevel);
     if (managed && s.manageCdS <= 1e-9) {
-      const low = (Object.entries(s.workers) as [WorkerId, { energy: number }][]).filter(([, w]) => w.energy <= b.workers.energy.tired_below_pct).sort((a, c) => a[1].energy - c[1].energy);
-      // v1.1 (economy_sim.py run_m2 manage_all): one Manage all tap once >= manage_all_min_workers are hired
-      if (low.length) { s = apply(s, showManageAll(s.workers, b) ? { type: 'manageAll' } : { type: 'manage', worker: low[0][0] }, b); manages++; }
+      // P4 (pt1_resim.py manage_at = 40, manage_all_low_only): Manage only at <= manage_prompt_threshold; Manage all when
+      // >= manage_all_min_workers are that low (refills only those), else Manage the lowest one.
+      const low = (Object.entries(s.workers) as [WorkerId, { energy: number }][]).filter(([, w]) => w.energy <= b.workers.energy.manage_prompt_threshold * 100).sort((a, c) => a[1].energy - c[1].energy);
+      if (low.length) { s = apply(s, showManageAll(s.workers, b) && low.length >= b.workers.energy.manage_all_min_workers ? { type: 'manageAll' } : { type: 'manage', worker: low[0][0] }, b); manages++; }
     }
     for (let guard = 0; guard < 200; guard++) {
       let bought = false;

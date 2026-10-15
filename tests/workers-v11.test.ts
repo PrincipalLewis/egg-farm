@@ -26,14 +26,14 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     const three = base({ workers: { hawker: wk(20), grader: wk(50), market_hand: wk(100) }, graderTier: 1 });
     expect(manageAllHtml(three, b)).toContain('(1 need it)'); // B5: only hawker (20%) is <= 40%; grader at 50% isn't counted
     const ev: SimEvent[] = []; const m = apply(three, { type: 'manageAll' }, b, ev);
-    expect([m.workers.hawker!.energy, m.workers.grader!.energy, m.workers.market_hand!.energy]).toEqual([100, 100, 100]);
+    expect([m.workers.hawker!.energy, m.workers.grader!.energy, m.workers.market_hand!.energy]).toEqual([100, 50, 100]); // P4: refills only <= 40%
     expect(m.manageCdS).toBe(E.manage_cooldown_s);
     expect(ev.filter(e => e.type === 'worker_manage_all')).toHaveLength(1); // one tap = one Manage action (AC-W5)
     const tired = { ...m, workers: { ...m.workers, hawker: wk(10) } };
     expect(apply(tired, { type: 'manage', worker: 'hawker' }, b)).toBe(tired); // individual Manage shares the cooldown
     const single = apply({ ...three, manageCdS: 0 }, { type: 'manage', worker: 'hawker' }, b);
     expect(apply(single, { type: 'manageAll' }, b)).toBe(single); // and vice versa
-    expect(manageAllHtml(single, b)).toBe(''); // B5: hawker refilled -> N = 0 -> pill hidden (cooldown shown on the per-worker Manage)
+    expect(manageAllHtml(single, b)).toMatch(/aria-disabled="true".*0:30/); // PT1-10: shown greyed during the cooldown
     expect(manageAllHtml({ ...single, workers: { ...single.workers, grader: wk(30) } }, b)).toMatch(/aria-disabled="true".*0:30/);
   });
   it('ruling 4 + B5: Manage all hidden when N is 0 (nobody at <= manage_prompt_threshold), starts no cooldown', () => {
@@ -61,7 +61,7 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(workersHtml(s, b)).toContain('Unpaid');
   });
   it('ruling 2: Manage / Manage all refill an Unpaid worker; it stays Unpaid', () => {
-    const s = base({ workers: { market_hand: wk(50, true), hawker: wk(50), grader: wk(50) }, graderTier: 1 });
+    const s = base({ workers: { market_hand: wk(30, true), hawker: wk(30), grader: wk(50) }, graderTier: 1 }); // P4: <= 40% to be managed
     const m1 = apply(s, { type: 'manage', worker: 'market_hand' }, b);
     expect(m1.workers.market_hand).toEqual({ energy: 100, cdS: 0, unpaid: true });
     const m2 = apply(s, { type: 'manageAll' }, b); expect(m2.workers.market_hand!.unpaid).toBe(true); expect(m2.workers.market_hand!.energy).toBe(100);
@@ -114,10 +114,14 @@ describe('M2 UI logic (§4.4, §4.6)', () => {
 import { farmManageAllVisible } from '../src/ui/workers-ui';
 describe('Farm View Manage all visibility (mobile nav + desktop docked share it)', () => {
   const three = (e: number, cd = 0) => base({ workers: { hawker: wk(e), grader: wk(80), market_hand: wk(90) }, graderTier: 1, manageCdS: cd });
-  it('shows on the rule (N > 0), hidden whenever N is 0 (B5)', () => {
-    expect(farmManageAllVisible(three(39), b, false)).toBe(true);
-    expect(farmManageAllVisible(three(100, 25), b, true)).toBe(false); // B5: N = 0 after the refill -> hidden even mid-cooldown
-    expect(farmManageAllVisible(three(100, 25), b, false)).toBe(false); // never shown -> cooldown alone doesn't show it
-    expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false);
+  it('PT1-10 (Product final): always shown greyed during the cooldown; after it, hidden iff no worker <= 40%', () => {
+    for (const e of [100, 41, 40, 10]) {
+      expect(farmManageAllVisible(three(e, 25), b, false)).toBe(true); // cooldown: shown whatever the energies
+      expect(manageAllHtml(three(e, 25), b)).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true">.*ring-cooldown.*Manage all 0:25/);
+    }
+    expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false); expect(manageAllHtml(three(100, 0), b)).toBe('');
+    expect(farmManageAllVisible(three(41, 0), b, true)).toBe(false);
+    expect(farmManageAllVisible(three(40, 0), b, false)).toBe(true); expect(manageAllHtml(three(40, 0), b)).toMatch(/aria-disabled="false"/);
+    expect(farmManageAllVisible({ ...three(10, 25), workers: { hawker: wk(10) } }, b, true)).toBe(false); // < 3 hired: never
   });
 });

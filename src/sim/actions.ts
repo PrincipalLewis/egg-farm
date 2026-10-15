@@ -1,7 +1,7 @@
 import type { Balance } from '../config/balance';
 import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents } from './state';
 import type { Sink } from './events';
-import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, needManage } from './workers';
+import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
@@ -46,12 +46,12 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
       return { ...s, coinsCents: s.coinsCents - cost, graderTier: i + 1 }; // energy unchanged (PM Q6)
     }
     case 'manage': {
-      const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || w.energy >= 100) return s;
+      const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || !canManageWorker(w, b)) return s; // P4: only at <= 40%
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
       return { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
     }
-    case 'manageAll': { // v1.1: 3+ hired; refills every hired worker < 100% (Unpaid stays Unpaid, ruling 2); one shared cooldown.
-      const need = needManage(s.workers); // ruling 4: nothing below 100% -> disabled, no cooldown started
+    case 'manageAll': { // v1.1 + P4: 3+ hired; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+      const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
       const workers = { ...s.workers };
       for (const id of need) workers[id] = { ...workers[id]!, energy: 100 };
