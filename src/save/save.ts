@@ -23,13 +23,19 @@ export interface KV { getItem(k: string): string | null; setItem(k: string, v: s
 /** Settings > Reset save: only the progress save. eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
 export const RESET_KEYS = [SAVE_KEY] as const;
 export const UI_KEY = 'eggfarm.ui';
+/** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
+export function keepPrefsOnly(f: any): Record<string, unknown> {
+  const o: Record<string, unknown> = { sfx: f?.sfx ?? true, reducedMotion: !!f?.reducedMotion };
+  if (typeof f?.sessions === 'number') o.sessions = f.sessions;
+  if (f?.iosHomeShown) o.iosHomeShown = true;
+  return o;
+}
 /** Clear the save; keep telemetry + install_id; keep sfx/reducedMotion, drop FTUE/progress UI flags (PT1-2). */
 export function resetProgress(kv: KV) {
   for (const k of RESET_KEYS) kv.removeItem?.(k);
   try {
     const raw = kv.getItem(UI_KEY); if (raw == null) return;
-    const f = JSON.parse(raw);
-    kv.setItem(UI_KEY, JSON.stringify({ sfx: f.sfx ?? true, reducedMotion: !!f.reducedMotion }));
+    kv.setItem(UI_KEY, JSON.stringify(keepPrefsOnly(JSON.parse(raw))));
   } catch { kv.removeItem?.(UI_KEY); }
 }
 export const BAK_KEY = 'eggfarm.save.bak';

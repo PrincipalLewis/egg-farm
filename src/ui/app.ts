@@ -7,7 +7,7 @@ import * as S from '../sim/state';
 import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
-import { resetProgress } from '../save/save';
+import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
 import { showRecoveryDialog } from './save-recovery';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
@@ -19,14 +19,17 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
+interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
 export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null } = { newGame: false }) {
-  const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') };
+  let stored: any = {}; try { stored = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') ?? {}; } catch { /* bad flags: defaults */ }
+  // PT1-4: a fresh-start fallback (AC14b F/Q) is a new farm: drop FTUE / Workers-tip progress flags, keep prefs.
+  if (opts.recovery && !opts.recovery.restored_from_backup) stored = keepPrefsOnly(stored);
+  const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...stored };
   const saveFlags = () => { try { localStorage.setItem(UI_KEY, JSON.stringify(flags)); } catch { /* full */ } };
   flags.sessions = (flags.sessions ?? 0) + 1; // AC14g session_count (one per page load / Tap to start)
   saveFlags();
@@ -45,7 +48,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
 
   root.innerHTML = '';
   // ---------- HUD ----------
-  const hud = h(`<header class="hud">
+  const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
     <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="num" id="coins"></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
     <div class="spacer"></div>
@@ -53,8 +56,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <div class="sr" aria-live="polite" id="live"></div></header>`);
   // ---------- Farm ----------
   const farm = h(`<main class="farm">
-    <div class="queue" id="queue" aria-label="Customer queue"></div>
-    <div class="scene" id="scene" role="button" aria-label="Collect eggs">
+    <div class="queue" id="queue" role="group" aria-label="Customer queue"></div>
+    <div class="scene" id="scene" aria-hidden="true">
       <img class="coop" id="coop" alt=""><span class="nest"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" id="nestEggs" src="${A('nest-eggs.svg')}" alt="" hidden></span>
       <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" hidden></div>
     </div>
@@ -453,7 +456,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- FTUE step 4 + Workers intro (m3-ftue-spec §2 step 4, §3; M3-AC4) ----------
   const coach = (text: string, at: Element | null, ms: number, cls = '') => {
     document.querySelectorAll('.coach').forEach(e => e.remove());
-    const el = h(`<div class="coach ${cls}" role="dialog" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
+    const el = h(`<div class="coach ${cls}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     document.body.append(el);
     const handImg = el.querySelector('.coach-hand') as HTMLImageElement;
     const place = () => { if (!el.isConnected) return; const r = at?.getBoundingClientRect(); if (!r || !r.width) { el.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)'; return; }
@@ -507,10 +510,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- Onboarding (new games only, once, skippable) ----------
   let onbUpdate: (() => boolean) | null = null;
   const startOnboarding = () => {
+  // PT1-5: reload mid-onboarding (save exists, FTUE never finished): log where it was abandoned, once.
+  if (!opts.newGame && !flags.onboardingDone && !flags.replayOnboarding && flags.onbStep !== undefined) {
+    g.telemetry.track('onboarding_abandon', { atStep: flags.onbStep, reason: 'reload' }); g.telemetry.flush(true);
+    flags.onboardingDone = true; delete flags.onbStep; saveFlags();
+  }
   if ((opts.newGame && !flags.onboardingDone) || flags.replayOnboarding) {
-    const finish = () => { flags.onboardingDone = true; flags.replayOnboarding = false; saveFlags(); };
+    const finish = () => { flags.onboardingDone = true; flags.replayOnboarding = false; delete flags.onbStep; saveFlags(); };
     const flow = new OnboardingFlow({
-      step: (n, name) => g.telemetry.onboardingStep(n, name),
+      step: (n, name) => { g.telemetry.onboardingStep(n, name); flags.onbStep = n; saveFlags(); },
       skip: (n) => { g.telemetry.onboardingSkip(n); finish(); goalHidden = false; goalNow = true; },
       done: () => { g.telemetry.onboardingStep(4, 'complete'); finish(); goalHidden = false; goalNow = true; render(); showGoalIntro(); },
     });

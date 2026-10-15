@@ -104,3 +104,10 @@ describe('recovery dialog copy', () => {
   });
   it('export file name', () => { expect(exportName(new Date(2026, 9, 15, 9, 5))).toBe('eggfarm-old-save-20261015-0905.json'); });
 });
+describe('PT1-4 flags on fresh fallback', () => {
+  it('keepPrefsOnly drops FTUE/Workers-tip flags, keeps prefs + install-level tip state', async () => {
+    const { keepPrefsOnly } = await import('../src/save/save');
+    expect(keepPrefsOnly({ sfx: false, reducedMotion: true, onboardingDone: true, workersIntroA: true, workersIntroB: true, seenSlots: 5, onbStep: 2, sessions: 4, iosHomeShown: true }))
+      .toEqual({ sfx: false, reducedMotion: true, sessions: 4, iosHomeShown: true });
+  });
+});

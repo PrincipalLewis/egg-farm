@@ -114,7 +114,7 @@ export function mountOnboarding(
   handSrcDown = '',
 ) {
   const layer = document.createElement('div'); layer.className = 'onb';
-  layer.innerHTML = `<div class="onb-ring"></div><img class="onb-hand" aria-hidden="true" alt="" src="${handSrc}" width="40" height="40"><div class="onb-cap" role="dialog" aria-live="polite"><span class="onb-txt"></span><span class="onb-dots" aria-hidden="true"></span></div><button class="onb-skip">Skip</button>`;
+  layer.innerHTML = `<div class="onb-ring"></div><img class="onb-hand" aria-hidden="true" alt="" src="${handSrc}" width="40" height="40"><div class="onb-cap" role="dialog" aria-label="Tutorial" aria-live="polite"><span class="onb-txt"></span><span class="onb-dots" aria-hidden="true"></span></div><button class="onb-skip">Skip</button>`;
   document.body.append(layer);
   const ring = layer.querySelector('.onb-ring') as HTMLElement, cap = layer.querySelector('.onb-cap') as HTMLElement, hand = layer.querySelector('.onb-hand') as HTMLImageElement;
   layer.querySelector('.onb-skip')!.addEventListener('click', () => { flow.skip(); });

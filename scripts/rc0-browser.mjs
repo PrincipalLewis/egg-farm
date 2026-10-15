@@ -34,6 +34,37 @@ sections.tabs = async () => {
     await ctx.close();
   }
 };
+// ---------- PT1-4 / PT1-5 / PT1-6 ----------
+sections.pt1 = async () => {
+  { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm
+    const { ctx, page } = await open({ ls: { 'eggfarm.save': fx('corrupt-truncated.json'), 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    await page.locator('#rcGo').click(); await page.waitForTimeout(200);
+    const ui = await page.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui')));
+    ok('PT1-4 fresh fallback resets onboarding + Workers-tip flags', (await page.locator('.onb').count()) === 1 && !ui.onboardingDone && !ui.workersIntroA && !ui.workersIntroB && ui.sfx === false, JSON.stringify(ui));
+    await ctx.close();
+  }
+  { // PT1-5: reload mid-onboarding logs onboarding_abandon {atStep}
+    const { ctx, page } = await open();
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 40 }; }); await page.locator('#collect').click(); await page.waitForTimeout(150);
+    await page.evaluate(() => window.eggfarm.save()); await page.reload(); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm); await page.waitForTimeout(150);
+    const ev = await page.evaluate(() => JSON.parse(window.eggfarmExportTelemetry()).events.filter(e => e.type === 'onboarding_abandon'));
+    ok('PT1-5 reload mid-onboarding logs onboarding_abandon', ev.length === 1 && ev[0].atStep >= 1, JSON.stringify(ev));
+    ok('PT1-5 overlay not left half-running after reload', (await page.locator('.onb').count()) === 0);
+    await ctx.close();
+  }
+  { // PT1-6: axe serious/critical on farm, onboarding, sheets
+    const axe = readFileSync('/tmp/axe/node_modules/axe-core/axe.min.js', 'utf8');
+    const run = async (page, tag) => { await page.addScriptTag({ content: axe }); return (await page.evaluate(async () => (await axe.run(document, { resultTypes: ['violations'] })).violations.map(v => ({ id: v.id, impact: v.impact, t: v.nodes[0]?.target?.join(' ') })))).map(v => ({ ...v, tag })); };
+    const { ctx, page } = await open(); let v = await run(page, 'onboarding');
+    await page.locator('.onb-skip').click(); v = v.concat(await run(page, 'farm'));
+    await page.locator('[data-nav=upgrades]').click(); v = v.concat(await run(page, 'upgrades'));
+    const bad = v.filter(x => x.impact === 'serious' || x.impact === 'critical'), target = bad.filter(x => /queue|scene|onb-cap/.test(x.t ?? '') || ['aria-prohibited-attr', 'label-content-name-mismatch', 'aria-dialog-name'].includes(x.id));
+    ok('PT1-6 axe: no serious issue on #queue/#scene/onboarding dialog', target.length === 0, JSON.stringify(target));
+    ok('PT1-6 axe: page-has-heading-one fixed', !v.some(x => x.id === 'page-has-heading-one'));
+    results.push({ name: 'axe other serious/critical (info)', pass: true, info: JSON.stringify(bad.filter(x => !target.includes(x))) });
+    await ctx.close();
+  }
+};
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); srv.kill();
