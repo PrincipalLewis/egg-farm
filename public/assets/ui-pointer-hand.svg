@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48"><path d="M20 6 a3.5 3.5 0 0 1 7 0 v16 l3-1 a3.5 3.5 0 0 1 4 2 l4 1 a3.5 3.5 0 0 1 3 4 v6 q0 9-9 11 h-6 q-6 0-9-5 l-7-10 a3.5 3.5 0 0 1 5-5 l5 4z" fill="#F6C99B" stroke="#3E2C23" stroke-width="2" stroke-linejoin="round"/><path d="M27 22 v6 M33 23 v6" stroke="#3E2C23" stroke-width="1.6" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48"><title>ui-pointer-hand (index points up; anchor = fingertip at 24,0)</title>
+  <!-- cuff -->
+  <rect x="17" y="40.5" width="22" height="6.5" rx="3" fill="#8FD3F4" stroke="#3E2C23" stroke-width="2"/>
+  <!-- palm / fist -->
+  <rect x="15" y="20" width="26" height="23" rx="8" fill="#F6C99B" stroke="#3E2C23" stroke-width="2"/>
+  <!-- index finger: tip apex exactly at (24,1) -->
+  <path d="M20 26 V5 a4 4 0 0 1 8 0 V26" fill="#F6C99B" stroke="#3E2C23" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M21.5 5.5 a2.5 2.5 0 0 1 2.5 -2.5" fill="none" stroke="#FFF6E5" stroke-width="1.4" stroke-linecap="round"/>
+  <!-- curled fingers (knuckles, right of index) -->
+  <rect x="27" y="20" width="14" height="7.5" rx="3.75" fill="#F6C99B" stroke="#3E2C23" stroke-width="2"/>
+  <rect x="27" y="27" width="14" height="7.5" rx="3.75" fill="#F6C99B" stroke="#3E2C23" stroke-width="2"/>
+  <rect x="27" y="34" width="13" height="7" rx="3.5" fill="#F6C99B" stroke="#3E2C23" stroke-width="2"/>
+  <!-- thumb folded across the front -->
+  <path d="M10 25 a4 4 0 0 1 6.5 -3 L27 31 a3.8 3.8 0 0 1 -4.5 6 L11.5 29 a4 4 0 0 1 -1.5 -4z" fill="#F6C99B" stroke="#3E2C23" stroke-width="2" stroke-linejoin="round"/>
+</svg>

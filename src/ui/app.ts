@@ -444,11 +444,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- FTUE step 4 + Workers intro (m3-ftue-spec §2 step 4, §3; M3-AC4) ----------
   const coach = (text: string, at: Element | null, ms: number, cls = '') => {
     document.querySelectorAll('.coach').forEach(e => e.remove());
-    const el = h(`<div class="coach ${cls}" role="dialog" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
+    const el = h(`<div class="coach ${cls}" role="dialog" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     document.body.append(el);
+    const handImg = el.querySelector('.coach-hand') as HTMLImageElement;
     const place = () => { if (!el.isConnected) return; const r = at?.getBoundingClientRect(); if (!r || !r.width) { el.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)'; return; }
       const above = r.top >= 120, cx = Math.min(Math.max(r.left + r.width / 2, 156), innerWidth - 156);
-      el.style.cssText = above ? `left:${cx}px;bottom:${innerHeight - r.top + 12}px;transform:translateX(-50%)` : `left:${cx}px;top:${r.bottom + 12}px;transform:translateX(-50%)`; el.classList.toggle('below', !above); };
+      el.style.cssText = above ? `left:${cx}px;bottom:${innerHeight - r.top + 12}px;transform:translateX(-50%)` : `left:${cx}px;top:${r.bottom + 12}px;transform:translateX(-50%)`;
+      el.classList.toggle('below', !above);
+      handImg.src = above ? A('ui-pointer-hand-down.svg') : A('ui-pointer-hand.svg'); };
     place(); const iv = window.setInterval(place, 250);
     const close = () => { clearInterval(iv); el.remove(); };
     el.addEventListener('click', close); window.setTimeout(close, ms); return close;
@@ -511,7 +514,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
     }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'
       : st === 1 ? (open === 'market' || docked.matches ? 'Tap <b>Sell</b> to earn coins.' : 'A customer! Tap them to sell eggs.')
-      : open === 'upgrades' || docked.matches ? 'Tap <b>Buy</b>.' : 'Spend coins to collect more eggs per tap.', A('ui-pointer-hand.svg'));
+      : open === 'upgrades' || docked.matches ? 'Tap <b>Buy</b>.' : 'Spend coins to collect more eggs per tap.', A('ui-pointer-hand.svg'), A('ui-pointer-hand-down.svg'));
   }
   const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; renderWorkersIntro(); };
   renderAll();
