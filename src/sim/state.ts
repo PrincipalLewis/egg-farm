@@ -1,5 +1,7 @@
 import type { Balance } from '../config/balance';
-/** demand = original order; filled = eggs sold so far. filled > 0 => served: never walks away. */
+import type { Workers } from './workers';
+/** demand = original order; filled = eggs sold so far. MK-10: a partly served customer (filled > 0) still leaves
+ *  customer_patience_s after arrival (logged customer_partial); the timer is never reset by a sale. */
 export interface Customer { id: number; demand: number; filled: number; waitedS: number; }
 export interface GameState {
   coinsCents: number; coop: number; basket: number;
@@ -8,11 +10,16 @@ export interface GameState {
   rng: number; pendingOfflineEggs: number;
   /** Highest coop tier already celebrated (feature-spec F3); never replays on reload. */
   celebratedTier: number;
+  /** M2: hired workers (absent = not hired), Egg Grader tiers bought (0..5), shared Manage cooldown. */
+  workers: Workers; graderTier: number; manageCdS: number;
+  /** M2: seconds the coop has been full (Coop Hand tip); session-only, not meaningful across loads. */
+  coopFullS: number;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,
   customers: [], nextCustomerInS: b.customers.first_customer_s, nextCustomerId: 1,
   rng: mixSeed(seed), pendingOfflineEggs: 0, celebratedTier: 0,
+  workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0,
 });
 /** Per-level stats: formulas in config/formulas.ts, params from balance.json (generated from economy.csv, MK-15). */
 export {

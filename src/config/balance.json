@@ -13,7 +13,68 @@
   "telemetry": {
     "ring_size": 5000,
     "flush_interval_s": 5,
-    "tap_batch_ms": 1000
+    "tap_batch_ms": 1000,
+    "worker_summary_s": 60
+  },
+  "workers": {
+    "_note": "M2 Workers v1.0 (product/workers/m2-proposal.md); hand-set, not from economy.csv. Wages in $ per Farm level per minute.",
+    "energy": {
+      "start_pct": 100,
+      "drain_s_per_pct": 6,
+      "tired_below_pct": 50,
+      "manage_cooldown_s": 30
+    },
+    "market_hand": {
+      "unlock_farm": 3,
+      "hire_cost": 40,
+      "wage_per_farm_per_min": 0.25,
+      "every_s": 1,
+      "tired_every_s": 3
+    },
+    "coop_hand": {
+      "unlock_farm": 7,
+      "hire_cost": 150,
+      "wage_per_farm_per_min": 0.5,
+      "every_s": 2,
+      "tired_every_s": 4
+    },
+    "hawker": {
+      "unlock_farm": 8,
+      "hire_cost": 800,
+      "demand_mult": 1.25,
+      "tired_demand_mult": 1.1
+    },
+    "grader": {
+      "tiers": [
+        {
+          "farm": 18,
+          "mult": 1.5
+        },
+        {
+          "farm": 19,
+          "mult": 2
+        },
+        {
+          "farm": 21,
+          "mult": 2.5
+        },
+        {
+          "farm": 22,
+          "mult": 3
+        },
+        {
+          "farm": 24,
+          "mult": 4
+        }
+      ],
+      "tier_cost_share_of_farm_cost": 0.5,
+      "tired_bonus_share": 0.5,
+      "asleep_bonus_share": 0.25
+    },
+    "tips": {
+      "coop_hand_tip_full_s": 10,
+      "coop_hand_tip_min_farm": 7
+    }
   },
   "maxLevel": 30,
   "collection": {

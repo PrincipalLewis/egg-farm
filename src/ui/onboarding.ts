@@ -17,7 +17,7 @@ export class OnboardingFlow {
   onEvent(e: GameEvent) {
     if (this.finished) return;
     const want = STEPS[this.step].name;
-    const hit = (want === 'collect' && e.type === 'collect' && e.eggs > 0) || (want === 'sell' && e.type === 'sell') || (want === 'upgrade' && e.type === 'upgrade');
+    const hit = (want === 'collect' && e.type === 'collect' && e.eggs > 0) || (want === 'sell' && e.type === 'sell' && e.by === 'player') || (want === 'upgrade' && e.type === 'upgrade');
     if (!hit) return;
     this.step++;
     if (this.step >= STEPS.length) { this.finished = true; this.hooks.done(); }

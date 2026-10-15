@@ -10,6 +10,7 @@ import type { Audio, SfxName } from './audio';
 import { SAVE_KEY } from '../save/save';
 import { TELEMETRY_KEY } from '../telemetry/telemetry';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -64,7 +65,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" data-tab="collection" class="active"><img src="${A('icon-nest.svg')}" alt="">Collection</button>
-        <button role="tab" data-tab="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></div>
+        <button role="tab" data-tab="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button>
+        <button role="tab" data-tab="workers">Workers</button></div>
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
@@ -104,12 +106,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (rm()) return; const c = center(at);
     for (let i = 0; i < n; i++) { const ang = (i / n) * Math.PI * 2; spawn(h(`<i class="spark" style="left:${c.x}px;top:${c.y}px;--dx:${Math.cos(ang) * 36}px;--dy:${Math.sin(ang) * 36}px"></i>`), 520); }
   };
+  // M2 placeholder Coop Hand tip: tap opens Upgrades > Workers.
+  const showTip = () => {
+    const el = h(`<button class="cooptip" role="status">${COOP_TIP_TEXT}</button>`); document.body.append(el);
+    el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
+    window.setTimeout(() => el.remove(), 8000);
+  };
   let toastTimer = 0;
   const showToast = (text: string) => { toast.textContent = text; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
-  let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' = 'collection';
+  let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
@@ -151,6 +159,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
     if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
+    const act = bt.dataset.act, wid = bt.dataset.w as any;
+    if (act) { g.dispatch(act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : { type: 'buyGraderTier' }); dirty = true; return; }
     lastBuyBtn = bt; g.dispatch({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' });
     setDisabled(bt, true); // F5: no double buy within the same frame
   });
@@ -370,10 +380,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-      const html = upRowHtml(tab);
+      const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
       if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
+    if (shouldShowCoopTip(s, b, coopTipShown)) { coopTipShown = true; g.telemetry.track('coop_hand_tip', { phase: 'shown', farm: F }); showTip(); }
     // aria-live throttled 1/s
     const t = now(); if (t - lastLive > 1000) { lastLive = t; setText($('#live'), `${fmtMoney(s.coinsCents)}, ${fmtCount(s.basket)} eggs`); }
     dirty = false;

@@ -43,6 +43,9 @@ export class Game {
     for (const e of evs) {
       this.notify(e);
       if (e.type === 'collect') this.telemetry.tap(e.eggs);
+      else if (e.type === 'wage') this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
+      else if (e.type === 'worker_collect') this.telemetry.sum('coop_hand_eggs', e.eggs);
+      else if (e.type === 'sell' && e.by === 'market_hand') { this.telemetry.sum('market_hand_eggs', e.k); this.telemetry.sum('market_hand_cents', e.value); }
       else { const { type, ...rest } = e; this.telemetry.track(type, rest); }
     }
   }

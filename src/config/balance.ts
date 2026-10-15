@@ -22,6 +22,16 @@ export function validateBalance(b: Balance): Balance {
   if (!(b.farm.customerIntervalDecay > 0 && b.farm.customerIntervalDecay <= 1)) throw new Error('balance.farm.customerIntervalDecay must be in (0,1]');
   if (!(b.farm.demandLoFactor > 0 && b.farm.demandHiFactor >= b.farm.demandLoFactor)) throw new Error('balance.farm demand factors: 0 < lo <= hi');
   if (b.customers.queue_max_cap < b.customers.queue_max_base) throw new Error('balance.customers.queue_max_cap < queue_max_base');
+  // M2 workers
+  for (const p of ['workers.energy.drain_s_per_pct', 'workers.energy.tired_below_pct', 'workers.energy.manage_cooldown_s', 'workers.energy.start_pct',
+    'workers.market_hand.every_s', 'workers.market_hand.tired_every_s', 'workers.coop_hand.every_s', 'workers.coop_hand.tired_every_s',
+    'workers.market_hand.hire_cost', 'workers.coop_hand.hire_cost', 'workers.hawker.hire_cost', 'workers.grader.tier_cost_share_of_farm_cost', 'workers.tips.coop_hand_tip_full_s']) pos(b, p);
+  const W = b.workers;
+  if (W.energy.tired_below_pct > 100 || W.energy.start_pct > 100) throw new Error('balance.workers.energy pct must be <= 100');
+  if (W.hawker.demand_mult < W.hawker.tired_demand_mult || W.hawker.tired_demand_mult < 1) throw new Error('balance.workers.hawker: 1 <= tired_demand_mult <= demand_mult');
+  if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))
+    throw new Error('balance.workers.grader.tiers: farm and mult must increase, mult > 1');
+  for (const k of ['tired_bonus_share', 'asleep_bonus_share'] as const) if (W.grader[k] > 1) throw new Error(`balance.workers.grader.${k} must be <= 1`);
   return b;
 }
 export const balance: Balance = validateBalance(raw as Balance);

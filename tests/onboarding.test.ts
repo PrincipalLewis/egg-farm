@@ -12,7 +12,7 @@ describe('onboarding flow', () => {
     f.onEvent({ type: 'collect', eggs: 0 }); expect(f.step).toBe(0); // empty tap doesn't count
     f.onEvent({ type: 'upgrade', upgrade: 'farm', newLevel: 1, cost: 1, coinsBefore: 1 }); expect(f.step).toBe(0); // out of order ignored
     f.onEvent({ type: 'collect', eggs: 5 }); expect(h.step).toHaveBeenLastCalledWith(2, 'sell');
-    f.onEvent({ type: 'sell', id: 1, k: 3, N: 8, price: 100 }); expect(h.step).toHaveBeenLastCalledWith(3, 'upgrade');
+    f.onEvent({ type: 'sell', id: 1, k: 3, N: 8, price: 100, value: 0, by: 'player' }); expect(h.step).toHaveBeenLastCalledWith(3, 'upgrade');
     f.onEvent({ type: 'upgrade', upgrade: 'collection', newLevel: 1, cost: 1000, coinsBefore: 1000 });
     expect(f.finished).toBe(true); expect(h.done).toHaveBeenCalledOnce(); expect(h.skip).not.toHaveBeenCalled();
     expect(STEPS.map(s => s.name)).toEqual(['collect', 'sell', 'upgrade']);
@@ -20,7 +20,7 @@ describe('onboarding flow', () => {
   it('skip logs the step it was skipped at and ends the flow', () => {
     const h = hooks(); const f = new OnboardingFlow(h); f.start(); f.onEvent({ type: 'collect', eggs: 5 }); f.skip(); f.skip();
     expect(h.skip).toHaveBeenCalledOnce(); expect(h.skip).toHaveBeenCalledWith(2); expect(f.finished).toBe(true);
-    f.onEvent({ type: 'sell', id: 1, k: 1, N: 1, price: 1 }); expect(h.step).toHaveBeenCalledTimes(2);
+    f.onEvent({ type: 'sell', id: 1, k: 1, N: 1, price: 1, value: 0, by: 'player' }); expect(h.step).toHaveBeenCalledTimes(2);
   });
   it('telemetry hooks record onboarding_step / onboarding_skip on the Game', () => {
     const g = new Game(b, mem(), () => 0); expect(g.isNewGame).toBe(true);

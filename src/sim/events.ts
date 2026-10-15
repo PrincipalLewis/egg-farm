@@ -1,10 +1,17 @@
+import type { WorkerId, WorkerMood } from './workers';
 /** Events the pure sim reports to an optional sink (telemetry lives outside the sim). */
 export type SimEvent =
   | { type: 'customer_arrive'; id: number; N: number }
   | { type: 'customer_served'; id: number; N: number; partial: boolean }
   | { type: 'customer_partial'; id: number; N: number; filled: number }
   | { type: 'customer_lost'; reason: 'timeout' | 'full_queue'; id?: number; N?: number }
-  | { type: 'sell'; id: number; k: number; N: number; price: number }
+  | { type: 'sell'; id: number; k: number; N: number; price: number; value: number; by: 'player' | 'market_hand' }
   | { type: 'upgrade'; upgrade: 'collection' | 'farm'; newLevel: number; cost: number; coinsBefore: number }
-  | { type: 'collect'; eggs: number };
+  | { type: 'collect'; eggs: number }
+  | { type: 'worker_collect'; eggs: number }
+  | { type: 'worker_hire'; worker: WorkerId; cost: number; farm: number }
+  | { type: 'worker_manage'; worker: WorkerId; energyBefore: number }
+  | { type: 'worker_state'; worker: WorkerId; state: WorkerMood }
+  | { type: 'wage'; worker: WorkerId; cents: number }
+  | { type: 'grader_tier'; tier: number; mult: number; cost: number };
 export type Sink = SimEvent[] | undefined;

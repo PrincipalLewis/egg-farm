@@ -3,6 +3,7 @@ import { balance as b } from '../src/config/balance';
 import { initialState, coopCapacity, eggPriceCents, demandRange, farmCost } from '../src/sim/state';
 import { step, advance } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
+import type { SimEvent } from '../src/sim/events';
 const s0 = () => initialState(b, 42);
 describe('fixed 10 Hz tick', () => {
   it('runs whole 100 ms ticks and keeps the remainder', () => { const r = advance(s0(), 250, 0, b); expect(r.ticks).toBe(2); expect(r.accMs).toBeCloseTo(50); });
@@ -35,5 +36,17 @@ describe('actions', () => {
     expect(apply(s0(), { type: 'buyFarm' }, b).farmLevel).toBe(0);
     expect(apply({ ...s0(), coinsCents: farmCost(0, b) * 100 + 100 }, { type: 'buyFarm' }, b)).toMatchObject({ farmLevel: 1, coinsCents: 100 });
     expect(apply({ ...s0(), coinsCents: farmCost(0, b) * 100 - 1 }, { type: 'buyFarm' }, b).farmLevel).toBe(0);
+  });
+});
+import { patienceS as pS, queueMax as qM } from '../src/sim/state';
+describe('AC3 tick order (QA-RC2-1)', () => {
+  it('timeouts are processed before arrivals in the same tick: a leaver frees the slot for the newcomer', () => {
+    const b2 = b, P = pS(0, b2), cap = qM(0, b2);
+    const full = Array.from({ length: cap }, (_, i) => ({ id: i + 1, demand: 1, filled: 0, waitedS: i === 0 ? P - 0.1 : 1 }));
+    const s = { ...initialState(b2), customers: full, nextCustomerInS: 0.1, nextCustomerId: cap + 1 };
+    const ev: SimEvent[] = []; const r = step(s, 0.1, b2, ev);
+    expect(ev.map(e => e.type)).toEqual(['customer_lost', 'customer_arrive']);
+    expect((ev[0] as any).reason).toBe('timeout');
+    expect(r.customers.map(c => c.id)).toEqual([...full.slice(1).map(c => c.id), cap + 1]);
   });
 });
