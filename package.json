@@ -10,7 +10,8 @@
     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",
     "screenshot": "node scripts/screenshot.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "@fontsource/fredoka": "^5.3.0",
