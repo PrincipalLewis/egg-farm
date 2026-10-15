@@ -3,7 +3,7 @@ import { OnboardingFlow, STEPS } from '../src/ui/onboarding';
 import { Game } from '../src/game';
 import { balance as b } from '../src/config/balance';
 import { save } from '../src/save/save';
-import { initialState } from '../src/sim/state';
+import { initialState, eggsPerSec } from '../src/sim/state';
 import { mem } from './helpers';
 const hooks = () => ({ step: vi.fn(), skip: vi.fn(), done: vi.fn() });
 describe('onboarding flow', () => {
@@ -31,10 +31,10 @@ describe('onboarding flow', () => {
   it('existing save is not a new game (no onboarding)', () => { const kv = mem(); save(kv, initialState(b), 0); expect(new Game(b, kv, () => 1).isNewGame).toBe(false); });
 });
 describe('debug hooks', () => {
-  it('debugAdvance runs the normal tick path', () => { const g = new Game(b, mem(), () => 0); g.debugAdvance(5000); expect(g.state.coop).toBeCloseTo(5 * 1.0, 6); });
+  it('debugAdvance runs the normal tick path', () => { const g = new Game(b, mem(), () => 0); g.debugAdvance(5000); expect(g.state.coop).toBeCloseTo(5 * eggsPerSec(0, b), 6); });
   it('debugBackdateSave produces an offline grant on next load', () => {
     const kv = mem(); let t = 10_000_000; const g = new Game(b, kv, () => t); g.debugBackdateSave(3_600_000); g.save(); // further saves suppressed
-    const g2 = new Game(b, kv, () => t); expect(g2.state.pendingOfflineEggs).toBe(Math.floor(3600 * b.offline.offlineRateMultiplier * 1.0));
+    const g2 = new Game(b, kv, () => t); expect(g2.state.pendingOfflineEggs).toBe(Math.floor(3600 * b.offline.offlineRateMultiplier * eggsPerSec(0, b)));
   });
 });
 describe('M3 FTUE / Workers intro telemetry (AC4)', () => {

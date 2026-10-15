@@ -9,13 +9,13 @@ const cust = (id: number, demand: number, filled = 0, waitedS = 0) => ({ id, dem
 const run = (s: GameState, ms: number, ev?: SimEvent[]) => advance(s, ms, 0, b, ev).state;
 describe('config tunables (economy.md names)', () => {
   it('has market + feel tunables', () => {
-    expect(b.customers).toEqual({ customer_patience_s: 30, first_customer_s: 10, queue_max_base: 3, queue_max_cap: 5, queue_max_step_levels: 10 });
+    expect(b.customers).toEqual({ customer_patience_s: 30, first_customer_s: 10, queue_max_base: 6, queue_max_cap: 10, queue_max_step_levels: 5 });
     expect(b.feel).toMatchObject({ tap_combine_window_ms: 250, max_flying_eggs: 5 });
   });
   it.each([
     ['queue base non-integer', (x: any) => { x.customers.queue_max_base = 2.5; }],
     ['queue cap 0', (x: any) => { x.customers.queue_max_cap = 0; }],
-    ['queue cap < base', (x: any) => { x.customers.queue_max_cap = 2; }],
+    ['queue cap < base', (x: any) => { x.customers.queue_max_cap = 5; }],
     ['patience 0', (x: any) => { x.customers.customer_patience_s = 0; }],
     ['negative first arrival', (x: any) => { x.customers.first_customer_s = -1; }],
     ['demand lo > hi', (x: any) => { x.farm.demandLoFactor = 2; }],
@@ -39,8 +39,8 @@ describe('market spec MK-*', () => {
   });
   it('MK-3 / Q2 arrival to a full queue is lost, no burst later', () => {
     const ev: SimEvent[] = [];
-    let s = { ...s0(), customers: [cust(1, 5, 1), cust(2, 5, 1), cust(3, 5, 1)], nextCustomerInS: 0.05 };
-    s = step(s, 0.1, b, ev); expect(s.customers).toHaveLength(3); expect(ev).toContainEqual({ type: 'customer_lost', reason: 'full_queue' });
+    let s = { ...s0(), customers: Array.from({ length: queueMax(0, b) }, (_, i) => cust(i + 1, 5, 1)), nextCustomerInS: 0.05 };
+    s = step(s, 0.1, b, ev); expect(s.customers).toHaveLength(queueMax(0, b)); expect(ev).toContainEqual({ type: 'customer_lost', reason: 'full_queue' });
     s = apply({ ...s, basket: 100 }, { type: 'sellAll' }, b); expect(s.customers).toHaveLength(0);
     s = step(s, 0.1, b); expect(s.customers).toHaveLength(0); // no backlog
   });
@@ -71,11 +71,11 @@ describe('market spec MK-*', () => {
     const ev: SimEvent[] = []; run({ ...s0(), customers: [cust(1, 6)], nextCustomerInS: 1e9 }, 30_000, ev);
     expect(ev).toContainEqual({ type: 'customer_lost', reason: 'timeout', id: 1, N: 6 });
   });
-  it('F8 queue size = min(cap, base + floor(F/step)) from config, 3/4/5 at L9/L10/L20', () => {
-    const fill = (L: number) => run({ ...s0(), farmLevel: L, nextCustomerInS: 0.05 }, 25_000).customers.length;
+  it('F8 queue size = min(cap, base + floor(F/step)) from config, P1q 6..10: 6/7/8/10 at L4/L5/L10/L20', () => {
+    const fill = (L: number) => run({ ...s0(), farmLevel: L, nextCustomerInS: 0.05 }, 60_000).customers.length;
     for (const L of [0, 9, 10, 19, 20, 30]) expect(fill(L)).toBe(queueMax(L, b));
-    expect([9, 10, 20, 30].map(L => queueMax(L, b))).toEqual([3, 4, 5, 5]);
-    const x = structuredClone(b); x.customers.queue_max_step_levels = 5; expect(queueMax(10, x)).toBe(5);
+    expect([4, 5, 10, 20, 30].map(L => queueMax(L, b))).toEqual([6, 7, 8, 10, 10]);
+    const x = structuredClone(b); x.customers.queue_max_step_levels = 10; expect(queueMax(10, x)).toBe(7);
   });
   it('MK-12 / Q3 price at sale time after farm upgrade; queued N unchanged', () => {
     let s = { ...s0(), coinsCents: farmCost(0, b) * 100, basket: 5, customers: [cust(1, 5)] };
