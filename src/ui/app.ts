@@ -488,7 +488,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         introA?.remove(); introA = null;
       });
     }
-    if (introA && modalKind === 'welcome') introA.hidden = true; else if (introA) introA.hidden = false;
+    // B1: the "New helper!" banner is about hiring the Market Hand: drop it as soon as one is hired (any path).
+    if (introA && s.workers.market_hand) { introA.remove(); introA = null; }
+    if (introA) { const hide = modalKind === 'welcome' || !!open; if (introA.hidden !== hide) introA.hidden = hide; }
   };
   const unlockFarmMH = b.workers.market_hand.unlock_farm, hireCostMH = b.workers.market_hand.hire_cost * 100;
   // Part B: first hire (any worker) -> energy bar, then Manage. Once per save.

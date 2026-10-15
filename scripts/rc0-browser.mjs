@@ -65,6 +65,18 @@ sections.pt1 = async () => {
     await ctx.close();
   }
 };
+const DONE = JSON.stringify({ onboardingDone: true });
+// ---------- B1 hire banner ----------
+sections.b1 = async () => {
+  const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 3, coinsCents: 1e7 }; }); await page.waitForTimeout(200);
+  const before = await page.locator('.intro-a').count();
+  await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' })); await page.waitForTimeout(200);
+  await page.evaluate(() => window.eggfarm.debugAdvance(30_000)); await page.waitForTimeout(300);
+  ok('B1 "New helper!" banner shows before hiring and is gone after hiring (+30 s)', before === 1 && (await page.locator('.intro-a').count()) === 0, `before=${before}`);
+  await ctx.close();
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); srv.kill();
