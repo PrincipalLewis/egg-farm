@@ -580,7 +580,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case })).then(() => {
-      recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus();
+      recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
   return { render: renderAll, showWelcome, openPanel, get recoveryOpen() { return recoveryOpen; } };

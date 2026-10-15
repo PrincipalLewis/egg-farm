@@ -39,13 +39,17 @@ export function showRecoveryDialog(r: Recovery, asset: (f: string) => string, in
   window.addEventListener('popstate', onPop);
   document.addEventListener('keydown', onKey, true);
   layer.addEventListener('click', e => e.stopPropagation()); // scrim taps do nothing
+  const keep = () => setTimeout(() => { if (layer.isConnected && !layer.contains(document.activeElement)) go.focus(); }, 0); // focus never leaves the dialog
+  layer.addEventListener('focusout', keep); const onFocusIn = (e: FocusEvent) => { if (!layer.contains(e.target as Node)) go.focus(); };
+  document.addEventListener('focusin', onFocusIn, true);
+  layer.addEventListener('mousedown', e => { if (!(e.target as HTMLElement).closest('button')) e.preventDefault(); }); // scrim/card taps never pull focus out of the dialog
   layer.querySelector('#rcExport')?.addEventListener('click', () => {
     onExport?.();
     void exportLog(r.raw, exportName(new Date())).then(() => { layer.querySelector('#rcMsg')!.textContent = 'Saved a copy.'; });
   });
   go.focus();
   return new Promise(res => go.addEventListener('click', () => {
-    document.removeEventListener('keydown', onKey, true); window.removeEventListener('popstate', onPop);
+    document.removeEventListener('keydown', onKey, true); window.removeEventListener('popstate', onPop); document.removeEventListener('focusin', onFocusIn, true); layer.removeEventListener('focusout', keep);
     for (const el of inertEls) el.inert = false;
     layer.remove(); res();
   }, { once: true }));
