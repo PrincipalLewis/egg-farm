@@ -23,10 +23,17 @@ describe('M3-AC7 telemetry retention', () => {
 });
 describe('M3-AC7 install_id + build', () => {
   it('session_start carries install_id and build; id stored under its own key, not in the save', () => {
-    const s = kv(); const g = new Game(b, s, () => 0, 1, 'm3-pt1');
+    const s = kv(); const g = new Game(b, s, () => 0, 1, 'm3-pt1+abcdef0');
     const ss = g.telemetry.events().find(e => e.type === 'session_start')!;
-    expect(ss.build).toBe('m3-pt1'); expect(ss.install_id).toBe(s.getItem(INSTALL_ID_KEY)); expect(String(ss.install_id).length).toBeGreaterThan(8);
+    expect(ss.build).toBe('m3-pt1+abcdef0'); expect(ss.install_id).toBe(s.getItem(INSTALL_ID_KEY)); expect(String(ss.install_id).length).toBeGreaterThan(8);
     g.save(); expect(s.getItem(SAVE_KEY)).not.toContain(String(ss.install_id));
+  });
+  it('BUILD_ID is m3-pt1+<short git hash> matching HEAD (Vite define)', async () => {
+    const { BUILD_ID, BUILD_ID_RE } = await import('../src/build-id');
+    const { execSync } = await import('node:child_process');
+    const short = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    expect(BUILD_ID).toMatch(BUILD_ID_RE);
+    expect(BUILD_ID).toBe(`m3-pt1+${short}`);
   });
   it('save reset keeps the install id unchanged', () => {
     const s = kv(); const id = new Game(b, s, () => 0).installId; new Game(b, s, () => 0).save();

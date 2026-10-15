@@ -5,7 +5,8 @@ import { startAutosave } from './save/autosave';
 import { mountApp } from './ui/app';
 import { Audio } from './ui/audio';
 
-const VERSION = 'm3-pt1';
+import { BUILD_ID } from './build-id';
+const VERSION = BUILD_ID;
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
   'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
 const root = document.getElementById('app')!;
