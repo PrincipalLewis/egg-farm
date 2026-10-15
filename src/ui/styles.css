@@ -397,7 +397,8 @@ html,body{overflow-x:hidden;max-width:100%}
 .reduced-motion #rotate-prompt img{animation:none}
 /* Font credits (art-ux/font-credits.md): Nunito 12px #6B5D52, 44px tap row for the licence link */
 .font-credits{font:400 12px/1.4 var(--f-body);color:#6B5D52;margin:8px 0 0}
-.font-credits a{display:inline-flex;align-items:center;min-height:44px;color:#6B5D52;text-decoration:underline}
+/* R2/R4: one paragraph in normal line flow; the link's tap area is 44px tall via vertical padding (inline, so no line break) */
+.font-credits a{display:inline;padding:14px 0;line-height:16px;color:#6B5D52;text-decoration:underline;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 /* F1: below the strip the toast fades in place (a slide-up exit would cross the strip and the Queue full badge) */
 .toast.below{transform:translate(-50%,-8px)}.toast.below.show{transform:translate(-50%,0)}
 /* AC14c/AC14d save notice */
@@ -406,3 +407,5 @@ html,body{overflow-x:hidden;max-width:100%}
 .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:8px;border-radius:999px;background:#fff;color:#3E2C23;border:2px solid #3E2C23;box-shadow:none;font:600 16px var(--f-display)}
 .recovery-card .rc-link{min-height:44px}
 .onb[hidden]{display:none!important}
+/* R3: the rotate icon always renders at 64px (beat generic img sizing) */
+#rotate-prompt img{width:64px!important;height:64px!important;min-width:64px;flex:none}

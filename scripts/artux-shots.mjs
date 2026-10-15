@@ -34,9 +34,9 @@ for (const [F, want] of [[19, 'Coop upgraded! +1 customer slot'], [24, 'Coop upg
 for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 640, height: 360 }, hasTouch: true, isMobile: eng !== 'webkit' || true }, true], ['1024x768 touch tablet', { viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true }, false], ['1280x720 mouse', { viewport: { width: 1280, height: 720 } }, false], ['844x390 mouse', { viewport: { width: 844, height: 390 } }, false]]) {
   const { ctx, p } = await open(opt, null);
   const r = await p.evaluate(() => { const e = document.querySelector('#rotate-prompt'); return { shown: !!e && !e.hidden && getComputedStyle(e).display !== 'none', inert: document.querySelector('#app').inert, coarse: matchMedia('(pointer:coarse)').matches }; });
-  if (want) { const before = await p.evaluate(() => window.eggfarm.state.basket); await p.mouse.click(320, 300); await p.waitForTimeout(200); r.tapBlocked = (await p.evaluate(() => window.eggfarm.state.basket)) === before;
+  if (want) { const before = await p.evaluate(() => window.eggfarm.state.basket); await p.mouse.click(320, 300); await p.waitForTimeout(200); r.tapBlocked = (await p.evaluate(() => window.eggfarm.state.basket)) === before; r.icon = await p.evaluate(() => { const i = document.querySelector('#rotate-prompt img').getBoundingClientRect(); return [Math.round(i.width), Math.round(i.height)]; });
     await p.screenshot({ path: `${OUT}/rotate-prompt-640x360-${eng}.png` }); }
-  ok(`rotate prompt ${name}`, r.shown === want && r.inert === want && (!want || r.tapBlocked), r); await ctx.close(); }
+  ok(`rotate prompt ${name}`, r.shown === want && r.inert === want && (!want || (r.tapBlocked && r.icon.join() === '64,64')), r); await ctx.close(); }
 // R1: FTUE bubble + Skip hidden while Settings is open, back after it closes (new save, FTUE running)
 { const ctx = await br.newContext({ viewport: { width: 360, height: 640 } }); const p = await ctx.newPage();
   await p.goto(`http://127.0.0.1:${port}/`); await p.getByText('Tap to start').click(); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(600);
@@ -48,8 +48,9 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   ok('R1 FTUE bubble/Skip hidden under Settings, resumes after', before && !during && after && !step, { before, during, after, onboardingDone: !!step, t0 }); await ctx.close(); }
 // Font credits in Settings
 { const { ctx, p } = await open({ viewport: { width: 360, height: 640 } }, null); await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); await p.waitForTimeout(500);
-  const r = await p.evaluate(() => { const e = document.querySelector('.font-credits'); e?.scrollIntoView(); const a = e?.querySelector('a'); return { text: e?.textContent, href: a?.getAttribute('href'), h: a && Math.round(a.getBoundingClientRect().height) }; });
+  const r = await p.evaluate(() => { const e = document.querySelector('.font-credits'); e?.scrollIntoView(); const a = e?.querySelector('a'); const rs = a ? [...a.getClientRects()] : []; const range = document.createRange(); range.selectNodeContents(e); const lines = new Set([...range.getClientRects()].map(x => Math.round(x.top))).size;
+    const words = [...e.childNodes].length; return { text: e?.textContent, href: a?.getAttribute('href'), h: a && Math.round(Math.min(...rs.map(x => x.height))), tag: e?.tagName, blocks: e ? [...e.children].filter(c => getComputedStyle(c).display !== 'inline').length : -1, authorsAlone: /\n\s*Authors\./.test(e?.innerText ?? '') }; });
   await p.screenshot({ path: `${OUT}/settings-font-credits-360-${eng}.png` });
   const lic = await (await fetch(`http://127.0.0.1:${port}/fonts/OFL.txt`)).text();
-  ok('font credits line + OFL link (44px)', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
+  ok('R2/R4 font credits: one <p>, inline link with >=44px tap target, OFL ships', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && r.tag === 'P' && r.blocks === 0 && !r.authorsAlone && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
 await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
