@@ -44,8 +44,13 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   const before = await vis(); await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); await p.waitForTimeout(400); const during = await vis();
   const t0 = await p.evaluate(() => document.querySelector('.onb-txt')?.textContent);
   await p.screenshot({ path: `${OUT}/r1-settings-over-ftue-360-${eng}.png` });
-  await p.keyboard.press('Escape'); await p.waitForTimeout(400); const after = await vis(); const step = await p.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui') || '{}').onboardingDone);
-  ok('R1 FTUE bubble/Skip hidden under Settings, resumes after', before && !during && after && !step, { before, during, after, onboardingDone: !!step, t0 }); await ctx.close(); }
+  const tm = () => p.evaluate(() => window.eggfarmOnb.closedFor); const tA = await tm(); await p.waitForTimeout(1500); const tB = await tm(); // frozen while open
+  await p.keyboard.press('Escape'); await p.waitForTimeout(400); const after = await vis();
+  // keep the Collect gate closed (coop < eggs/tap) so the step timer runs rather than resetting on an open gate
+  await p.evaluate(() => { window.eggfarm.state.coop = 0; }); await p.waitForTimeout(100); const tB2 = await tm(); await p.waitForTimeout(400); await p.evaluate(() => { window.eggfarm.state.coop = 0; }); await p.waitForTimeout(100); const tC = await tm(); // continues after close
+  const step = await p.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui') || '{}').onboardingDone);
+  await p.locator('.onb-skip').click(); await p.waitForTimeout(300); const skipped = await p.evaluate(() => (!window.eggfarmOnb || window.eggfarmOnb.finished) && !document.querySelector('.onb:not([hidden]) .onb-skip'));
+  ok('R1 FTUE bubble/Skip hidden under Settings; after close: visible, step timer continues, Skip works', before && !during && after && !step && tB === tA && tC > tB2 && skipped, { before, during, after, tA, tB, tB2, tC, skipped, t0 }); await ctx.close(); }
 // Font credits in Settings
 { const { ctx, p } = await open({ viewport: { width: 360, height: 640 } }, null); await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); await p.waitForTimeout(500);
   const r = await p.evaluate(() => { const e = document.querySelector('.font-credits'); e?.scrollIntoView(); const a = e?.querySelector('a'); const rs = a ? [...a.getClientRects()] : []; const range = document.createRange(); range.selectNodeContents(e); const lines = new Set([...range.getClientRects()].map(x => Math.round(x.top))).size;

@@ -51,3 +51,13 @@ describe('R1 FTUE pauses under any dialog', () => {
     expect(dialogOpen({ querySelector: () => null } as any)).toBe(false);
   });
 });
+describe('R1 resume after the dialog closes', () => {
+  it('step timer freezes while paused and continues from the same value after close; Skip still works', () => {
+    const { f, log } = mk(); f.onEvent({ type: 'collect', eggs: 5 } as any); // sell step, gate closed (no customer)
+    f.tick(C(), 3, false); expect(f.closedFor).toBe(3);
+    for (let i = 0; i < 100; i++) f.tick(C(), 1, true); // 100 s with Settings open
+    expect(f.closedFor).toBe(3); expect(f.step).toBe(1); expect(log.some(e => e[0] === 'timeout')).toBe(false);
+    expect(f.tick(C(), 2, false)).toBe('hint'); expect(f.closedFor).toBe(5); // continues, bubble back
+    f.skip(); expect(log.at(-1)).toEqual(['skip', 2]); expect(f.finished).toBe(true);
+  });
+});

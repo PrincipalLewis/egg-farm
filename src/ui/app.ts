@@ -575,7 +575,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
-  const renderAll = () => { const t = performance.now(); if (onbFlow && !modalKind && !dialogOpen()) onbFlow.gateTick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0); gateT = t;
+  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; (window as any).eggfarmOnb = onbFlow; // QA handle
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.

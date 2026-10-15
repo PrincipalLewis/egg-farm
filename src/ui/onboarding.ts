@@ -54,6 +54,10 @@ export class OnboardingFlow {
     }
     return this.mode = this.closedS < HINT_HIDE_S ? 'hint' : 'none';
   }
+  /** Seconds the current step's gate has been closed (the step timer). */
+  get closedFor() { return this.closedS; }
+  /** R1: one frame; while a dialog is open the step timer is frozen and nothing advances; it continues on close. */
+  tick(c: GateCtx, dtS: number, paused: boolean): GateMode { return paused ? this.mode : this.gateTick(c, dtS); }
   skip() { if (this.finished) return; this.finished = true; this.hooks.skip(this.step + 1); }
 }
 
