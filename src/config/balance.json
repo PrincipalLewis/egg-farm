@@ -25,7 +25,8 @@
       "yawn_at_pct": 40,
       "manage_cooldown_s": 30,
       "manage_all_min_workers": 3,
-      "unpaid_resume_wage_min": 1
+      "unpaid_resume_wage_min": 1,
+      "manage_prompt_threshold": 0.4
     },
     "market_hand": {
       "unlock_farm": 3,

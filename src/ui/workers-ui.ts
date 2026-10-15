@@ -3,7 +3,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
-import { WORKERS, WorkerId, mood, isYawning, showManageAll, needManage, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
+import { WORKERS, WorkerId, Worker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -18,11 +18,14 @@ export function ringHtml(s: GameState, b: Balance): string {
 /** 44px icon area of a Manage / Manage all button; the ring wraps it while the shared cooldown runs. */
 const manageIcon = (s: GameState, b: Balance, icon: string) =>
   `<span class="manage-ico"><img src="${ASSET(icon)}" width="22" height="22" alt="">${ringHtml(s, b)}</span>`;
-/** Farm View Manage-all button (§4.4): >= manage_all_min_workers hired and any worker yawning (<= yawn_at_pct). */
-export const showFarmManageAll = (s: GameState, b: Balance) => showManageAll(s.workers, b) && WORKERS.some(id => isYawning(s.workers[id], b));
-/** Visibility of the Farm View button(s): show rule, and stay visible (with ring) while the cooldown it started runs. */
-export const farmManageAllVisible = (s: GameState, b: Balance, wasShown: boolean) =>
-  showFarmManageAll(s, b) || (wasShown && s.manageCdS > 1e-9);
+/** B5 (Product, Oct 15): a worker "needs" Manage only at energy <= manage_prompt_threshold (0.4 = Yawning). */
+export const needsPrompt = (w: Worker | undefined, b: Balance) => !!w && w.energy <= b.workers.energy.manage_prompt_threshold * 100;
+/** Workers counted by "Manage all (N need it)". */
+export const promptManage = (s: GameState, b: Balance) => WORKERS.filter(id => needsPrompt(s.workers[id], b));
+/** Farm View Manage-all button (§4.4): >= manage_all_min_workers hired and N > 0 (hidden when N is 0, B5). */
+export const showFarmManageAll = (s: GameState, b: Balance) => showManageAll(s.workers, b) && promptManage(s, b).length > 0;
+/** Visibility of the Farm View button: B5 hides it whenever N is 0 (including the cooldown right after Manage all). */
+export const farmManageAllVisible = (s: GameState, b: Balance, _wasShown: boolean) => showFarmManageAll(s, b);
 /** Yawn sfx (§4.6): one global 6 s throttle; only the FIRST yawning worker in card order; never Asleep/Unpaid
  *  (isYawning excludes both). Returns the worker that "yawns" now, or null. SFX toggle is applied by Audio.enabled. */
 export class YawnSfx {
@@ -35,10 +38,11 @@ export class YawnSfx {
     return id;
   }
 }
-/** v1.1 Manage all pill (layout §4.4): hidden < manage_all_min_workers; "All rested" (disabled) when nobody is below 100%. */
+/** Manage all pill (layout §4.4): hidden < manage_all_min_workers, and hidden when N (workers <= threshold) is 0 (B5). */
 export function manageAllHtml(s: GameState, b: Balance): string {
   if (!showManageAll(s.workers, b)) return '';
-  const n = needManage(s.workers).length, cd = Math.ceil(s.manageCdS), glow = n > 0 && WORKERS.some(id => isYawning(s.workers[id], b));
+  const n = promptManage(s, b).length; if (n === 0) return '';
+  const cd = Math.ceil(s.manageCdS), glow = n > 0 && WORKERS.some(id => isYawning(s.workers[id], b));
   const label = cd > 0 ? `Manage all 0:${String(cd).padStart(2, '0')}` : n === 0 ? 'All rested' : `Manage all <small>(${n} need it)</small>`;
   return `<button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0 || n === 0}">${manageIcon(s, b, 'icon-manage-all.svg')}<span>${label}</span></button>`;
 }
@@ -50,7 +54,7 @@ export function workersHtml(s: GameState, b: Balance): string {
       return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>
         ${locked ? `<div class="hint">Unlocks at Farm L${unlockFarm(id, b)}</div>` : `<button class="btn buy ${can ? 'affordable' : ''}" data-act="hire" data-w="${id}" aria-disabled="${!can}">Hire ${fmtMoney(cost)}</button>`}</div>`;
     }
-    const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && w.energy < 100;
+    const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b); // B5: enabled only <= threshold
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid ⚠' : 'Asleep 💤';
     const yawn = isYawning(w, b); // v1.1 yawn cue at <= yawn_at_pct: amber ring + overlay-yawn.svg (layout §4.1)
     let extra = '';

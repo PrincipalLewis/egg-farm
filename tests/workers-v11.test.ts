@@ -24,7 +24,7 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(showManageAll(two.workers, b)).toBe(false); expect(manageAllHtml(two, b)).toBe('');
     expect(apply(two, { type: 'manageAll' }, b)).toBe(two);
     const three = base({ workers: { hawker: wk(20), grader: wk(50), market_hand: wk(100) }, graderTier: 1 });
-    expect(manageAllHtml(three, b)).toContain('(2 need it)');
+    expect(manageAllHtml(three, b)).toContain('(1 need it)'); // B5: only hawker (20%) is <= 40%; grader at 50% isn't counted
     const ev: SimEvent[] = []; const m = apply(three, { type: 'manageAll' }, b, ev);
     expect([m.workers.hawker!.energy, m.workers.grader!.energy, m.workers.market_hand!.energy]).toEqual([100, 100, 100]);
     expect(m.manageCdS).toBe(E.manage_cooldown_s);
@@ -33,12 +33,23 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(apply(tired, { type: 'manage', worker: 'hawker' }, b)).toBe(tired); // individual Manage shares the cooldown
     const single = apply({ ...three, manageCdS: 0 }, { type: 'manage', worker: 'hawker' }, b);
     expect(apply(single, { type: 'manageAll' }, b)).toBe(single); // and vice versa
-    expect(manageAllHtml(single, b)).toMatch(/0:30.*|aria-disabled="true"/);
+    expect(manageAllHtml(single, b)).toBe(''); // B5: hawker refilled -> N = 0 -> pill hidden (cooldown shown on the per-worker Manage)
+    expect(manageAllHtml({ ...single, workers: { ...single.workers, grader: wk(30) } }, b)).toMatch(/aria-disabled="true".*0:30/);
   });
-  it('ruling 4: Manage all disabled ("All rested") when everyone is at 100%, starts no cooldown', () => {
+  it('ruling 4 + B5: Manage all hidden when N is 0 (nobody at <= manage_prompt_threshold), starts no cooldown', () => {
     const full = base({ workers: { hawker: wk(100), grader: wk(100), market_hand: wk(100) }, graderTier: 1 });
     expect(apply(full, { type: 'manageAll' }, b)).toBe(full);
-    expect(manageAllHtml(full, b)).toContain('All rested'); expect(manageAllHtml(full, b)).toContain('aria-disabled="true"');
+    expect(manageAllHtml(full, b)).toBe('');
+    expect(b.workers.energy.manage_prompt_threshold).toBe(0.4);
+    const edge = base({ workers: { hawker: wk(40), grader: wk(41), market_hand: wk(81) }, graderTier: 1 });
+    expect(manageAllHtml(edge, b)).toContain('(1 need it)'); // exactly 40% counts; 41% and 81% don't
+    const hi = base({ workers: { hawker: wk(81), grader: wk(98), market_hand: wk(90) }, graderTier: 1 });
+    expect(manageAllHtml(hi, b)).toBe(''); // the playtest case: 81-98% never "need it"
+  });
+  it('B5: individual Manage is enabled only at <= 40%', () => {
+    const s = base({ workers: { hawker: wk(41), grader: wk(40) }, graderTier: 1 }), h = workersHtml(s, b);
+    expect(h).toMatch(/data-act="manage" data-w="hawker" aria-disabled="true"/);
+    expect(h).toMatch(/data-act="manage" data-w="grader" aria-disabled="false"/);
   });
   it('wage short -> Unpaid: no charge, no action, acts as Asleep, no drain (ruling 1)', () => {
     const ev: SimEvent[] = [];
@@ -103,9 +114,9 @@ describe('M2 UI logic (§4.4, §4.6)', () => {
 import { farmManageAllVisible } from '../src/ui/workers-ui';
 describe('Farm View Manage all visibility (mobile nav + desktop docked share it)', () => {
   const three = (e: number, cd = 0) => base({ workers: { hawker: wk(e), grader: wk(80), market_hand: wk(90) }, graderTier: 1, manageCdS: cd });
-  it('shows on the rule, stays through its cooldown, hides after', () => {
+  it('shows on the rule (N > 0), hidden whenever N is 0 (B5)', () => {
     expect(farmManageAllVisible(three(39), b, false)).toBe(true);
-    expect(farmManageAllVisible(three(100, 25), b, true)).toBe(true); // just tapped: everyone refilled, ring running
+    expect(farmManageAllVisible(three(100, 25), b, true)).toBe(false); // B5: N = 0 after the refill -> hidden even mid-cooldown
     expect(farmManageAllVisible(three(100, 25), b, false)).toBe(false); // never shown -> cooldown alone doesn't show it
     expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false);
   });
