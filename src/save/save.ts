@@ -1,12 +1,14 @@
 import type { Balance } from '../config/balance';
 import { GameState, initialState } from '../sim/state';
 export const SAVE_KEY = 'eggfarm.save';
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 export interface SaveFile { version: number; savedAt: number; state: GameState; }
 /** migrations[n] upgrades a version-n save to n+1 */
 const migrations: Record<number, (d: any) => any> = {
   // v1 stored coins as float dollars; v2 stores integer cents.
   1: (d) => { const { coins = 0, ...rest } = d.state ?? {}; return { ...d, version: 2, state: { ...rest, coinsCents: Math.round(coins * 100) } }; },
+  // v3 adds Customer.filled (partial service).
+  2: (d) => ({ ...d, version: 3, state: { ...d.state, customers: (d.state?.customers ?? []).map((c: any) => ({ filled: 0, ...c })) } }),
 };
 export function migrate(d: any, b: Balance): SaveFile {
   if (!d || typeof d.version !== 'number' || d.version > SAVE_VERSION) throw new Error('bad save');

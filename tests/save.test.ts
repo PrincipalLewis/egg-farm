@@ -17,7 +17,11 @@ describe('save/load + migrations', () => {
   });
   it('migrates v1 (float dollars) -> v2 (cents) and fills new fields', () => {
     const kv = mem(); kv.setItem(SAVE_KEY, JSON.stringify({ version: 1, savedAt: 5, state: { coins: 12.34, coop: 3, basket: 1, collectionLevel: 1, farmLevel: 2 } }));
-    const f = load(kv, b)!; expect(f.version).toBe(2); expect(f.state).toMatchObject({ coinsCents: 1234, farmLevel: 2, customers: [], pendingOfflineEggs: 0 });
+    const f = load(kv, b)!; expect(f.version).toBe(SAVE_VERSION); expect(f.state).toMatchObject({ coinsCents: 1234, farmLevel: 2, customers: [], pendingOfflineEggs: 0 });
+  });
+  it('migrates v2 customers (no filled) -> v3', () => {
+    const kv = mem(); kv.setItem(SAVE_KEY, JSON.stringify({ version: 2, savedAt: 5, state: { ...initialState(b), customers: [{ id: 3, demand: 7, waitedS: 4 }] } }));
+    expect(load(kv, b)!.state.customers).toEqual([{ id: 3, demand: 7, filled: 0, waitedS: 4 }]);
   });
 });
 describe('autosave', () => {
@@ -40,9 +44,10 @@ describe('autosave', () => {
   it('saves immediately on every upgrade purchase', () => {
     const kv = mem(); let t = 1000; const g = new Game(b, kv, () => t);
     g.state = { ...g.state, coinsCents: 100_00 }; const spy = vi.spyOn(kv, 'setItem');
-    g.dispatch({ type: 'collect' }); expect(spy).not.toHaveBeenCalled();
-    g.dispatch({ type: 'buyCollection' }); expect(spy).toHaveBeenCalledTimes(1); expect(load(kv, b)!.state.collectionLevel).toBe(1);
-    g.dispatch({ type: 'buyFarm' }); expect(spy).toHaveBeenCalledTimes(2); expect(load(kv, b)!.state.farmLevel).toBe(1);
+    const saves = () => spy.mock.calls.filter(c => c[0] === SAVE_KEY).length;
+    g.dispatch({ type: 'collect' }); expect(saves()).toBe(0);
+    g.dispatch({ type: 'buyCollection' }); expect(saves()).toBe(1); expect(load(kv, b)!.state.collectionLevel).toBe(1);
+    g.dispatch({ type: 'buyFarm' }); expect(saves()).toBe(2); expect(load(kv, b)!.state.farmLevel).toBe(1);
   });
   it('offline modal not granted twice for one absence', () => {
     const kv = mem(); save(kv, initialState(b), 0);

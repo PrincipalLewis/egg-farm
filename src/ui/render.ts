@@ -6,21 +6,24 @@ const money = (c: number) => '$' + (c / 100).toFixed(2);
 /** Placeholder UI — Art & UX owns layout. Reads state, dispatches actions only. */
 export function mountUI(root: HTMLElement, g: Game, b: Balance) {
   root.innerHTML = `<h1>Egg Farm</h1><div id="modal"></div><p id="stats"></p>
-  <button id="collect">Collect</button> <button id="sellAll">Sell all</button>
+  <button id="collect">Collect</button> <button id="sellAll">Sell all</button> <button id="export">Export telemetry</button>
   <ul id="queue"></ul><button id="col"></button> <button id="farm"></button>`;
   const $ = (q: string) => root.querySelector(q) as HTMLElement;
   $('#collect').onclick = () => g.dispatch({ type: 'collect' });
   $('#sellAll').onclick = () => g.dispatch({ type: 'sellAll' });
+  $('#export').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([g.telemetry.exportJSON()], { type: 'application/json' })); a.download = 'eggfarm-telemetry.json'; a.click(); };
   $('#col').onclick = () => g.dispatch({ type: 'buyCollection' });
   $('#farm').onclick = () => g.dispatch({ type: 'buyFarm' });
   $('#queue').onclick = (e) => { const id = (e.target as HTMLElement).dataset.id; if (id) g.dispatch({ type: 'sell', customerId: +id }); };
-  $('#modal').onclick = (e) => { if ((e.target as HTMLElement).id === 'offCollect') g.dispatch({ type: 'collectOffline' }); };
+  $('#modal').onclick = (e) => { const id = (e.target as HTMLElement).id;
+    if (id === 'offCollect') g.dispatch({ type: 'collectOffline' }); else if (id === 'offClose') g.dispatch({ type: 'dismissOffline' }); };
   return () => {
     const s = g.state, cL = s.collectionLevel, fL = s.farmLevel, cap = S.coopCapacity(fL, b);
     $('#modal').innerHTML = s.pendingOfflineEggs > 0
-      ? `<p>Welcome back! Away ${Math.round(g.offline.awayS / 60)} min: +${fmt(s.pendingOfflineEggs)} eggs <button id="offCollect">Collect</button></p>` : '';
+      ? `<p>Welcome back! Away ${Math.floor(g.offline.awayS / 3600)}h ${Math.floor(g.offline.awayS % 3600 / 60)}m: +${fmt(s.pendingOfflineEggs)} eggs <button id="offCollect">Collect</button> <button id="offClose" aria-label="Close">×</button></p>` : '';
     $('#stats').textContent = `Coins ${money(s.coinsCents)} · Coop ${fmt(s.coop)}/${cap}${s.coop >= cap ? ' Full!' : ''} · Basket ${fmt(s.basket)} · ${S.eggsPerSec(fL, b).toFixed(1)} eggs/s`;
-    $('#queue').innerHTML = s.customers.map(c => `<li><button data-id="${c.id}" ${s.basket < 1 ? 'disabled' : ''}>Sell ${Math.min(Math.floor(s.basket), c.demand)}/${c.demand}</button></li>`).join('');
+    $('#queue').innerHTML = s.customers.map(c => `<li><button data-id="${c.id}" ${s.basket < 1 ? 'disabled' : ''}>Sell ${Math.min(Math.floor(s.basket), c.demand - c.filled)}/${c.demand}</button> wants ${c.demand - c.filled}/${c.demand}${c.filled ? '' : ` · ${Math.ceil(b.customers.customer_patience_s - c.waitedS)}s`}<button hidden></button></li>`).join('');
+    ($('#sellAll') as HTMLButtonElement).disabled = s.basket < 1;
     const btn = (el: HTMLElement, L: number, cost: number, label: string) => {
       const max = L >= b.maxLevel; el.textContent = max ? `${label} MAX` : `${label} L${L}→${L + 1} — $${cost}`;
       (el as HTMLButtonElement).disabled = max || s.coinsCents < cost * 100;

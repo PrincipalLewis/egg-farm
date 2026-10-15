@@ -1,17 +1,52 @@
 {
-  "_source": "product/economy.md v1 (2026-10-15)",
+  "_source": "product/economy.md v1 (2026-10-15, incl. P4 market + Collection feel tunables)",
   "tickHz": 10,
   "maxLevel": 30,
-  "collection": { "baseCost": 10, "costGrowth": 1.15, "eggsPerTapBase": 5, "eggsPerTapPerLevel": 5 },
-  "farm": {
-    "baseCost": 25, "costGrowth": 1.35,
-    "hensBase": 5, "hensPerLevel": 5, "eggsPerHenPerSec": 0.2,
-    "coopCapacityBase": 50, "coopCapacityPerLevel": 50,
-    "eggPriceCentsBase": 100, "eggPriceCentsPerLevel": 10,
-    "customerIntervalBaseS": 10, "customerIntervalDecay": 0.95, "customerIntervalMinS": 3,
-    "demandMinBase": 3, "demandMinPerLevel": 1, "demandMaxBase": 8, "demandMaxPerLevel": 2
+  "collection": {
+    "baseCost": 10,
+    "costGrowth": 1.15,
+    "eggsPerTapBase": 5,
+    "eggsPerTapPerLevel": 5
   },
-  "customers": { "maxQueue": 3, "patienceS": 30, "firstCustomerS": 10 },
-  "save": { "autosaveIntervalS": 5 },
-  "offline": { "offlineCapSeconds": 7200, "offlineRateMultiplier": 0.5, "offlineMinSeconds": 60 }
+  "farm": {
+    "baseCost": 25,
+    "costGrowth": 1.35,
+    "hensBase": 5,
+    "hensPerLevel": 5,
+    "eggsPerHenPerSec": 0.2,
+    "coopCapacityBase": 50,
+    "coopCapacityPerLevel": 50,
+    "eggPriceCentsBase": 100,
+    "eggPriceCentsPerLevel": 10,
+    "customerIntervalBaseS": 10,
+    "customerIntervalDecay": 0.95,
+    "customerIntervalMinS": 3,
+    "demandMinBase": 3,
+    "demandMinPerLevel": 1,
+    "demandMaxBase": 8,
+    "demandMaxPerLevel": 2
+  },
+  "customers": {
+    "customer_patience_s": 30,
+    "queue_max": 3,
+    "first_customer_s": 10,
+    "served_customer_ignores_patience": 1
+  },
+  "save": {
+    "autosaveIntervalS": 5
+  },
+  "offline": {
+    "offlineCapSeconds": 7200,
+    "offlineRateMultiplier": 0.5,
+    "offlineMinSeconds": 60
+  },
+  "feel": {
+    "tap_combine_window_ms": 250,
+    "max_flying_eggs": 5
+  },
+  "telemetry": {
+    "ring_size": 5000,
+    "flush_interval_s": 5,
+    "tap_batch_ms": 1000
+  }
 }

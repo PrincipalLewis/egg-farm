@@ -20,7 +20,7 @@ describe('fixed 10 Hz tick', () => {
     const s = advance(s0(), 29_000, 0, b).state; expect(s.customers.length).toBeLessThanOrEqual(3);
     for (const c of s.customers) { expect(c.demand).toBeGreaterThanOrEqual(3); expect(c.demand).toBeLessThanOrEqual(8); }
   });
-  it('customers leave after 30s', () => { const s = step({ ...s0(), customers: [{ id: 1, demand: 5, waitedS: 29.95 }], nextCustomerInS: 99 }, 0.1, b); expect(s.customers).toEqual([]); });
+  it('customers leave after 30s', () => { const s = step({ ...s0(), customers: [{ id: 1, demand: 5, filled: 0, waitedS: 29.95 }], nextCustomerInS: 99 }, 0.1, b); expect(s.customers).toEqual([]); });
 });
 describe('actions', () => {
   it('AC2 collect moves min(coop, per tap)', () => {
@@ -28,8 +28,8 @@ describe('actions', () => {
     expect(apply({ ...s0(), coop: 20 }, { type: 'collect' }, b)).toMatchObject({ coop: 15, basket: 5 });
   });
   it('AC4 sale credits sold x price, partial fill', () => {
-    const s = { ...s0(), basket: 4, farmLevel: 1, customers: [{ id: 7, demand: 6, waitedS: 0 }] };
-    expect(apply(s, { type: 'sell', customerId: 7 }, b)).toMatchObject({ basket: 0, coinsCents: 4 * 110, customers: [] });
+    const s = { ...s0(), basket: 4, farmLevel: 1, customers: [{ id: 7, demand: 6, filled: 0, waitedS: 0 }] };
+    expect(apply(s, { type: 'sell', customerId: 7 }, b)).toMatchObject({ basket: 0, coinsCents: 4 * 110, customers: [{ id: 7, demand: 6, filled: 4 }] });
   });
   it('AC5 upgrade deducts exact cost only when affordable', () => {
     expect(apply(s0(), { type: 'buyFarm' }, b).farmLevel).toBe(0);

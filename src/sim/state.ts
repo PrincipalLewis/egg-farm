@@ -1,5 +1,6 @@
 import type { Balance } from '../config/balance';
-export interface Customer { id: number; demand: number; waitedS: number; }
+/** demand = original order; filled = eggs sold so far. filled > 0 => served: never walks away. */
+export interface Customer { id: number; demand: number; filled: number; waitedS: number; }
 export interface GameState {
   coinsCents: number; coop: number; basket: number;
   collectionLevel: number; farmLevel: number;
@@ -8,7 +9,7 @@ export interface GameState {
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,
-  customers: [], nextCustomerInS: b.customers.firstCustomerS, nextCustomerId: 1,
+  customers: [], nextCustomerInS: b.customers.first_customer_s, nextCustomerId: 1,
   rng: seed >>> 0 || 1, pendingOfflineEggs: 0,
 });
 const F = (b: Balance) => b.farm;
