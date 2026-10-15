@@ -6,7 +6,7 @@ import { initialState, collectionCost, farmCost, GameState } from '../src/sim/st
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import type { SimEvent } from '../src/sim/events';
-import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents } from '../src/sim/workers';
+import { WorkerId, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../src/sim/workers';
 import type { Model } from './bot';
 export interface M2Opts {
   model: Model; T?: number; sellEvery?: number;
@@ -32,7 +32,8 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
     s = apply(s, { type: 'sellAll' }, b, ev); drain(t, s.farmLevel);
     if (managed && s.manageCdS <= 1e-9) {
       const low = (Object.entries(s.workers) as [WorkerId, { energy: number }][]).filter(([, w]) => w.energy <= b.workers.energy.tired_below_pct).sort((a, c) => a[1].energy - c[1].energy);
-      if (low.length) { s = apply(s, { type: 'manage', worker: low[0][0] }, b); manages++; }
+      // v1.1 (economy_sim.py run_m2 manage_all): one Manage all tap once >= manage_all_min_workers are hired
+      if (low.length) { s = apply(s, showManageAll(s.workers, b) ? { type: 'manageAll' } : { type: 'manage', worker: low[0][0] }, b); manages++; }
     }
     for (let guard = 0; guard < 200; guard++) {
       let bought = false;

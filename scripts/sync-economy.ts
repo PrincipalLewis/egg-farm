@@ -75,8 +75,54 @@ export function verify(rows: Row[], p: EconomyParams) {
     }
   }
 }
+/** M2 Workers (v1.1): scalar columns must be constant on every row; per-level columns (wages, costs, Grader tiers)
+ *  are checked against the formulas the sim uses. Hand-set extras not in the CSV (e.g. tips.coop_hand_tip_min_farm) are kept. */
+export function fitWorkers(rows: Row[], prev: any) {
+  const R = rows, has = (c: string) => c in R[0];
+  const one = (c: string) => {
+    if (!has(c)) throw new Error(`sync-economy: economy.csv is missing workers column ${c}`);
+    const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`);
+    return v;
+  };
+  const W = prev.workers ?? {};
+  const perFarmWage = (col: string, unlock: number) => {
+    const r = R.find(x => x.level === unlock)!; const v = r4(r[col] / unlock);
+    for (const x of R) { const want = x.level >= unlock ? r4(v * x.level) : 0; if (Math.abs(x[col] - want) > 1e-9) throw new Error(`sync-economy: economy.csv L${x.level} ${col}=${x[col]}, expected ${want}`); }
+    return v;
+  };
+  const hire = (col: string, unlock: number) => {
+    const v = Math.max(...R.map(r => r[col]));
+    for (const r of R) if (r[col] !== (r.level >= unlock ? v : 0)) throw new Error(`sync-economy: economy.csv L${r.level} ${col}=${r[col]}, expected ${r.level >= unlock ? v : 0}`);
+    return v;
+  };
+  const u1 = one('w1_unlock_farm'), u2 = one('w2_unlock_farm'), u3 = one('w3_unlock_farm');
+  const tiers: { farm: number; mult: number }[] = [];
+  for (const r of R) if (r.w4_tier > tiers.length) { if (r.w4_tier !== tiers.length + 1) throw new Error(`sync-economy: w4_tier skips at L${r.level}`); tiers.push({ farm: r.level, mult: r.w4_price_mult }); }
+  return {
+    ...W,
+    _note: 'M2 Workers v1.1 (product/workers/m2-proposal.md §10) GENERATED from product/economy.csv; wages in $ per Farm level per minute.',
+    energy: { start_pct: one('energy_start_pct'), drain_s_per_pct: one('drain_s_per_pct'), tired_below_pct: one('tired_below_pct'),
+      yawn_at_pct: one('yawn_at_pct'), manage_cooldown_s: one('manage_cooldown_s'), manage_all_min_workers: one('manage_all_min_workers'),
+      unpaid_resume_wage_min: one('unpaid_resume_wage_min') },
+    market_hand: { ...W.market_hand, unlock_farm: u1, hire_cost: hire('w1_cost', u1), wage_per_farm_per_min: perFarmWage('w1_wage_per_min', u1), every_s: one('w1_every_s'), tired_every_s: one('w1_tired_every_s') },
+    coop_hand: { ...W.coop_hand, unlock_farm: u2, hire_cost: hire('w2_cost', u2), wage_per_farm_per_min: perFarmWage('w2_wage_per_min', u2), every_s: one('w2_every_s'), tired_every_s: one('w2_tired_every_s') },
+    hawker: { ...W.hawker, unlock_farm: u3, hire_cost: hire('w3_cost', u3), demand_mult: one('w3_demand_mult'), tired_demand_mult: one('w3_tired_demand_mult') },
+    grader: { ...W.grader, tiers, tier_cost_share_of_farm_cost: one('w4_tier_cost_share'), tired_bonus_share: one('w4_tired_bonus_share'), asleep_bonus_share: one('w4_asleep_bonus_share') },
+    tips: { ...W.tips, coop_hand_tip_full_s: one('coop_full_tip_s') },
+  };
+}
+/** w4_tier_cost = floor(share x farm_cost(tier farm)) of the CURRENT tier on each row. */
+function verifyGraderCosts(rows: Row[], w: any) {
+  const fc = (L: number) => rows[L].farm_cost;
+  for (const r of rows) {
+    const want = r.w4_tier ? Math.floor(w.grader.tier_cost_share_of_farm_cost * fc(w.grader.tiers[r.w4_tier - 1].farm)) : 0;
+    if (r.w4_tier_cost !== want) throw new Error(`sync-economy: economy.csv L${r.level} w4_tier_cost=${r.w4_tier_cost}, expected ${want}`);
+  }
+}
 export function buildBalance(rows: Row[], prev: any) {
   const p = fitParams(rows, prev);
+  const workers = fitWorkers(rows, prev); verifyGraderCosts(rows, workers);
+  prev = { ...prev, workers };
   const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, ...rest } = prev;
   return { ...rest, _source: 'economy params GENERATED from product/economy.csv by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks', ...p };
 }

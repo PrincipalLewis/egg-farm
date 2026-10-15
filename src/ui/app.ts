@@ -160,7 +160,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
     if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
     const act = bt.dataset.act, wid = bt.dataset.w as any;
-    if (act) { g.dispatch(act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : { type: 'buyGraderTier' }); dirty = true; return; }
+    if (act) { g.dispatch(act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : act === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' }); dirty = true; return; }
     lastBuyBtn = bt; g.dispatch({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' });
     setDisabled(bt, true); // F5: no double buy within the same frame
   });

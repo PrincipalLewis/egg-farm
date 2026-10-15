@@ -13,5 +13,4 @@ describe('M2 pacing: unmanaged + slow tapper', () => {
     expect(min(slowNoCH, 18) - min(slow, 18)).toBeGreaterThanOrEqual(4);
     expect(med(slow, r => r.incomeAt(21)) / med(slowNoCH, r => r.incomeAt(21))).toBeGreaterThanOrEqual(1.15);
   });
-  it.todo('AC-W1 casual (Poisson arrivals, demand x0.75, sell every 20 s): needs sim-only arrival/demand hooks, see m2-questions Q7');
 }, 300_000);

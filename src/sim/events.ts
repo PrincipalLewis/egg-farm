@@ -11,6 +11,7 @@ export type SimEvent =
   | { type: 'worker_collect'; eggs: number }
   | { type: 'worker_hire'; worker: WorkerId; cost: number; farm: number }
   | { type: 'worker_manage'; worker: WorkerId; energyBefore: number }
+  | { type: 'worker_manage_all'; workers: WorkerId[]; energyBefore: number[] } // one tap = one Manage action (AC-W5)
   | { type: 'worker_state'; worker: WorkerId; state: WorkerMood }
   | { type: 'wage'; worker: WorkerId; cents: number }
   | { type: 'grader_tier'; tier: number; mult: number; cost: number };

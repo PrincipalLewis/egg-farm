@@ -1,11 +1,11 @@
 import type { Balance } from '../config/balance';
 import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents } from './state';
 import type { Sink } from './events';
-import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents } from './workers';
+import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, needManage } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
-  | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'buyGraderTier' };
+  | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' };
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm';
 /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
 export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
@@ -49,6 +49,14 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
       const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || w.energy >= 100) return s;
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
       return { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
+    }
+    case 'manageAll': { // v1.1: 3+ hired; refills every hired worker < 100% (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+      const need = needManage(s.workers); // ruling 4: nothing below 100% -> disabled, no cooldown started
+      if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
+      const workers = { ...s.workers };
+      for (const id of need) workers[id] = { ...workers[id]!, energy: 100 };
+      ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
+      return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
     // Closing the welcome-back modal without tapping Collect still grants the eggs.

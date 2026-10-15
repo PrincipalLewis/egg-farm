@@ -17,12 +17,15 @@
     "worker_summary_s": 60
   },
   "workers": {
-    "_note": "M2 Workers v1.0 (product/workers/m2-proposal.md); hand-set, not from economy.csv. Wages in $ per Farm level per minute.",
+    "_note": "M2 Workers v1.1 (product/workers/m2-proposal.md §10) GENERATED from product/economy.csv; wages in $ per Farm level per minute.",
     "energy": {
       "start_pct": 100,
-      "drain_s_per_pct": 6,
-      "tired_below_pct": 50,
-      "manage_cooldown_s": 30
+      "drain_s_per_pct": 9,
+      "tired_below_pct": 30,
+      "yawn_at_pct": 40,
+      "manage_cooldown_s": 30,
+      "manage_all_min_workers": 3,
+      "unpaid_resume_wage_min": 1
     },
     "market_hand": {
       "unlock_farm": 3,
@@ -69,7 +72,7 @@
       ],
       "tier_cost_share_of_farm_cost": 0.5,
       "tired_bonus_share": 0.5,
-      "asleep_bonus_share": 0.25
+      "asleep_bonus_share": 0.15
     },
     "tips": {
       "coop_hand_tip_full_s": 10,
