@@ -146,9 +146,10 @@ img{user-select:none;-webkit-user-drag:none}
 .spark{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--c-yolk);animation:spark 500ms ease-out forwards}
 @keyframes spark{to{transform:translate(var(--dx),var(--dy));opacity:0}}
 .riser{position:absolute;width:40px;animation:riser 480ms ease-out forwards}@keyframes riser{to{transform:translateY(-48px);opacity:0}}
-.toast{position:fixed;left:50%;top:calc(var(--hud-h) + 8px);transform:translate(-50%,-80px);background:var(--c-meadow-strong);color:#fff;font:700 var(--fs-base) var(--f-display);
-  padding:6px 16px;border-radius:var(--r-pill);z-index:31;pointer-events:none;transition:transform var(--t-med);white-space:nowrap}
-.toast.show{transform:translate(-50%,0)}
+/* B2: hidden state is fully off-screen (not -80px, which left ~20px of a tall toast visible) and invisible */
+.toast{position:fixed;left:50%;top:calc(var(--hud-h) + 8px);transform:translate(-50%,calc(-100% - var(--hud-h) - 16px));opacity:0;visibility:hidden;background:var(--c-meadow-strong);color:#fff;font:700 var(--fs-base) var(--f-display);
+  padding:6px 16px;border-radius:var(--r-pill);z-index:31;pointer-events:none;transition:transform var(--t-med),opacity var(--t-med),visibility 0s linear var(--t-med);white-space:nowrap;max-width:calc(100vw - 24px)}
+.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform var(--t-med),opacity var(--t-med),visibility 0s}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 /* desktop docked */
 @media (min-width:960px) and (orientation:landscape){

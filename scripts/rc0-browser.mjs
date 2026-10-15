@@ -77,6 +77,19 @@ sections.b1 = async () => {
   await ctx.close();
 };
 
+// ---------- B2 Farm L5 toast ----------
+sections.b2 = async () => {
+  for (const w of [390, 1280]) {
+    const { ctx, page } = await open({ w, h: w > 900 ? 800 : 844, ls: { 'eggfarm.ui': DONE } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
+    await page.waitForTimeout(300); const shown = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { top: r.top, vis: getComputedStyle(e).visibility, text: e.textContent }; });
+    await page.waitForTimeout(2200);
+    const after = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { bottom: r.bottom, vis: getComputedStyle(e).visibility, op: getComputedStyle(e).opacity }; });
+    ok(`B2 L5 toast shows then leaves the screen fully (${w})`, shown.top >= 0 && shown.vis === 'visible' && /Coop upgraded/.test(shown.text) && after.bottom <= 0 && after.vis === 'hidden', JSON.stringify({ shown, after }));
+    await ctx.close();
+  }
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); srv.kill();
