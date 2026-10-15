@@ -43,3 +43,11 @@ describe('FTUE v1.1 §2.2 Collect label', () => {
     expect(collectLabel(7, 10)).toBe('Collect +10 · 7 ready');
   });
 });
+import { dialogOpen, DIALOG_SEL } from '../src/ui/onboarding';
+describe('R1 FTUE pauses under any dialog', () => {
+  it('selector covers Settings/welcome modal, save recovery, rotate prompt and other alertdialogs (not the FTUE bubble itself)', () => {
+    expect(DIALOG_SEL).toContain('#modal-layer.open'); expect(DIALOG_SEL).toContain('.recovery-layer'); expect(DIALOG_SEL).toContain('#rotate-prompt:not([hidden])'); expect(DIALOG_SEL).toContain(':not(.onb-cap)');
+    expect(dialogOpen({ querySelector: (s: string) => (s === DIALOG_SEL ? {} : null) } as any)).toBe(true);
+    expect(dialogOpen({ querySelector: () => null } as any)).toBe(false);
+  });
+});

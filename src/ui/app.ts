@@ -16,7 +16,7 @@ import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
-import { OnboardingFlow, mountOnboarding, collectLabel } from './onboarding';
+import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
@@ -575,7 +575,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
-  const renderAll = () => { const t = performance.now(); if (onbFlow && !modalKind) onbFlow.gateTick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0); gateT = t;
+  const renderAll = () => { const t = performance.now(); if (onbFlow && !modalKind && !dialogOpen()) onbFlow.gateTick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0); gateT = t;
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.

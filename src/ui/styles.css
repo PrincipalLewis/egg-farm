@@ -405,3 +405,4 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Recovery dialog v1.1: Q export = full-width outlined secondary button below the primary */
 .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:8px;border-radius:999px;background:#fff;color:#3E2C23;border:2px solid #3E2C23;box-shadow:none;font:600 16px var(--f-display)}
 .recovery-card .rc-link{min-height:44px}
+.onb[hidden]{display:none!important}

@@ -37,6 +37,15 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   if (want) { const before = await p.evaluate(() => window.eggfarm.state.basket); await p.mouse.click(320, 300); await p.waitForTimeout(200); r.tapBlocked = (await p.evaluate(() => window.eggfarm.state.basket)) === before;
     await p.screenshot({ path: `${OUT}/rotate-prompt-640x360-${eng}.png` }); }
   ok(`rotate prompt ${name}`, r.shown === want && r.inert === want && (!want || r.tapBlocked), r); await ctx.close(); }
+// R1: FTUE bubble + Skip hidden while Settings is open, back after it closes (new save, FTUE running)
+{ const ctx = await br.newContext({ viewport: { width: 360, height: 640 } }); const p = await ctx.newPage();
+  await p.goto(`http://127.0.0.1:${port}/`); await p.getByText('Tap to start').click(); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(600);
+  const vis = () => p.evaluate(() => { const o = document.querySelector('.onb'); const sk = document.querySelector('.onb-skip'); return !!o && !o.hidden && getComputedStyle(o).display !== 'none' && !!sk && sk.getBoundingClientRect().width > 0; });
+  const before = await vis(); await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); await p.waitForTimeout(400); const during = await vis();
+  const t0 = await p.evaluate(() => document.querySelector('.onb-txt')?.textContent);
+  await p.screenshot({ path: `${OUT}/r1-settings-over-ftue-360-${eng}.png` });
+  await p.keyboard.press('Escape'); await p.waitForTimeout(400); const after = await vis(); const step = await p.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui') || '{}').onboardingDone);
+  ok('R1 FTUE bubble/Skip hidden under Settings, resumes after', before && !during && after && !step, { before, during, after, onboardingDone: !!step, t0 }); await ctx.close(); }
 // Font credits in Settings
 { const { ctx, p } = await open({ viewport: { width: 360, height: 640 } }, null); await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); await p.waitForTimeout(500);
   const r = await p.evaluate(() => { const e = document.querySelector('.font-credits'); e?.scrollIntoView(); const a = e?.querySelector('a'); return { text: e?.textContent, href: a?.getAttribute('href'), h: a && Math.round(a.getBoundingClientRect().height) }; });

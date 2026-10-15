@@ -57,6 +57,9 @@ export class OnboardingFlow {
   skip() { if (this.finished) return; this.finished = true; this.hooks.skip(this.step + 1); }
 }
 
+/** R1: any dialog open (Settings/welcome modal, save recovery, rotate prompt, other alertdialogs) pauses and hides the FTUE. */
+export const DIALOG_SEL = '#modal-layer.open, .recovery-layer, #rotate-prompt:not([hidden]), [role=alertdialog]:not(.onb-cap):not([hidden])';
+export const dialogOpen = (doc: Pick<Document, 'querySelector'> = document) => !!doc.querySelector(DIALOG_SEL);
 /** Display size of the pointer hand (matches CSS / img width). */
 export const HAND_SIZE = 40;
 /** Min fingertip→edge gap at the furthest point of the bob (m3-ftue-spec §1). */
@@ -148,7 +151,7 @@ export function mountOnboarding(
   document.body.append(layer);
   const ring = layer.querySelector('.onb-ring') as HTMLElement, cap = layer.querySelector('.onb-cap') as HTMLElement, hand = layer.querySelector('.onb-hand') as HTMLImageElement;
   layer.querySelector('.onb-skip')!.addEventListener('click', () => { flow.skip(); });
-  const esc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !flow.finished && !document.querySelector('#modal-layer.open')) { e.stopImmediatePropagation(); flow.skip(); } };
+  const esc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !flow.finished && !dialogOpen()) { e.stopImmediatePropagation(); flow.skip(); } };
   document.addEventListener('keydown', esc, true);
   const txt = layer.querySelector('.onb-txt') as HTMLElement, dotEl = layer.querySelector('.onb-dots') as HTMLElement;
   let last = '';
@@ -168,6 +171,7 @@ export function mountOnboarding(
   };
   return function update() {
     if (flow.finished) { layer.remove(); document.removeEventListener('keydown', esc, true); return false; }
+    const paused = dialogOpen(); if (layer.hidden !== paused) layer.hidden = paused; if (paused) return true; // R1: resume when the dialog closes
     const mode = flow.mode; layer.classList.toggle('hint', mode !== 'mark'); cap.hidden = mode === 'none';
     const el = mode === 'mark' ? target(flow.step) : null;
     const text = mode === 'mark' ? caption(flow.step) : flow.hint; if (text !== last) { txt.innerHTML = text; dotEl.textContent = dots(flow.step); last = text; }
