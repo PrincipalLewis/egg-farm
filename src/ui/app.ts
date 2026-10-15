@@ -9,6 +9,7 @@ import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { SAVE_KEY } from '../save/save';
 import { TELEMETRY_KEY } from '../telemetry/telemetry';
+import { OnboardingFlow, mountOnboarding } from './onboarding';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -19,7 +20,7 @@ const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textC
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
-export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string) {
+export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean } = { newGame: false }) {
   const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') };
   const saveFlags = () => localStorage.setItem(UI_KEY, JSON.stringify(flags));
   saveFlags();
@@ -376,7 +377,26 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     dirty = false;
   }
   void dirty;
-  render();
+  // ---------- Onboarding (new games only, once, skippable) ----------
+  let onbUpdate: (() => boolean) | null = null;
+  if (opts.newGame && !flags.onboardingDone) {
+    const finish = () => { flags.onboardingDone = true; saveFlags(); };
+    const flow = new OnboardingFlow({
+      step: (n, name) => g.telemetry.onboardingStep(n, name),
+      skip: (n) => { g.telemetry.onboardingSkip(n); finish(); },
+      done: () => { g.telemetry.onboardingStep(4, 'complete'); finish(); },
+    });
+    g.on(e => flow.onEvent(e));
+    flow.start();
+    onbUpdate = mountOnboarding(flow, (st) => {
+      if (modalKind) return null;
+      if (st === 0) return collectBtn;
+      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
+      return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
+    });
+  }
+  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; };
+  renderAll();
   showWelcome();
-  return { render, showWelcome };
+  return { render: renderAll, showWelcome, openPanel };
 }

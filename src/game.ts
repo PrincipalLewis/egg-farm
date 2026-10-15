@@ -12,6 +12,8 @@ export class Game {
   state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
   /** Set during "Reset save" so pagehide doesn't write the old state back. */
   resetting = false;
+  /** True when no save existed at load (drives onboarding). */
+  isNewGame = false;
   telemetry: Telemetry; private coopFullSince: number | null = null;
   private listeners: ((e: GameEvent) => void)[] = [];
   /** Subscribe to sim/game events (UI feedback, sfx). Returns unsubscribe. */
@@ -21,6 +23,7 @@ export class Game {
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.telemetry.track('session_start');
     const f = load(kv, b);
+    this.isNewGame = !f;
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
@@ -64,6 +67,13 @@ export class Game {
    *  Closed/unloaded game: last save -> next load >= 60 s goes through the offline grant (AC11), in the constructor.
    * See engineering/sim-rules.md.
    */
+  /** Debug/QA: simulate `ms` of online play immediately (same tick path as frame()). */
+  debugAdvance(ms: number) {
+    const ev: SimEvent[] = []; const r = advance(this.state, ms, this.accMs, this.b, ev);
+    this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull();
+  }
+  /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
+  debugBackdateSave(ms: number) { this.save(); save(this.kv, this.state, this.now() - ms); this.resetting = true; }
   frame() {
     const t = this.now(), gap = t - this.lastFrameAt; this.lastFrameAt = t;
     const maxMs = this.b.offline.offlineMinSeconds * 1000;

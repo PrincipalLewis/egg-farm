@@ -22,5 +22,8 @@ await shot('m1-market-portrait-390x844', t => base(t), async p => { await p.loca
 await shot('m1-upgrades-portrait-390x844', t => base(t, { coinsCents: 4200 }), async p => { await p.locator('[data-nav=upgrades]').click(); await p.waitForTimeout(400); });
 await shot('m1-farm-tab-portrait-390x844', t => base(t, { coinsCents: 4200 }), async p => { await p.locator('[data-nav=upgrades]').click(); await p.locator('[data-tab=farm]').click(); await p.waitForTimeout(400); });
 await shot('m1-welcome-back-portrait-390x844', t => base(t - 4_320_000), async p => p.waitForTimeout(200));
+{ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage(); await page.goto(url); await page.getByText('Tap to start').click(); await page.waitForTimeout(500);
+  await page.screenshot({ path: `${OUT}m1-onboarding-portrait-390x844.png` }); console.log('saved onboarding'); await ctx.close(); }
 await browser.close(); srv.kill();
 if (errors.length) { console.error('page errors:\n' + errors.join('\n')); process.exit(1); }

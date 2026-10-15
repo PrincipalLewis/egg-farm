@@ -31,7 +31,8 @@ function boot() {
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined);
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
-  const ui = mountApp(root, g, balance, audio, VERSION);
+  const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame });
+  if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
   function frame() { g.frame(); ui.render(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
   setInterval(() => g.frame(), 1000); // keep sim moving if rAF is paused but timers still fire
