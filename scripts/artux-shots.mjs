@@ -54,8 +54,15 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
 // Font credits in Settings
 { const { ctx, p } = await open({ viewport: { width: 360, height: 640 } }, null); await p.locator('[aria-label=Settings], #settingsBtn, .settings').first().click(); await p.waitForTimeout(500);
   const r = await p.evaluate(() => { const e = document.querySelector('.font-credits'); e?.scrollIntoView(); const a = e?.querySelector('a'); const rs = a ? [...a.getClientRects()] : []; const range = document.createRange(); range.selectNodeContents(e); const lines = new Set([...range.getClientRects()].map(x => Math.round(x.top))).size;
-    const words = [...e.childNodes].length; return { text: e?.textContent, href: a?.getAttribute('href'), h: a && Math.round(Math.min(...rs.map(x => x.height))), tag: e?.tagName, blocks: e ? [...e.children].filter(c => getComputedStyle(c).display !== 'inline').length : -1, authorsAlone: /\n\s*Authors\./.test(e?.innerText ?? '') }; });
+    const words = [...e.childNodes].length; return { text: e?.textContent, href: a?.getAttribute('href'), h: a && Math.round(Math.min(...rs.map(x => x.height))), tag: e?.tagName, blocks: e ? [...e.children].filter(c => c.tagName !== 'A' && getComputedStyle(c).display !== 'inline').length : -1, authorsAlone: /\n\s*Authors\./.test(e?.innerText ?? '') }; });
   await p.screenshot({ path: `${OUT}/settings-font-credits-360-${eng}.png` });
+  // D1: link box >=44px tall, no overlap with Reset save, and taps at its corners land on the link
+  const d1 = await p.evaluate(() => { const a = document.querySelector('.font-credits a'); a.scrollIntoView({ block: 'center' }); const b = a.getBoundingClientRect(); const rs = document.querySelector('#sReset').getBoundingClientRect();
+    const overlap = !(b.right <= rs.left || rs.right <= b.left || b.bottom <= rs.top || rs.bottom <= b.top);
+    const pts = [[b.left + 1, b.top + 1], [b.right - 1, b.top + 1], [b.left + 1, b.bottom - 1], [b.right - 1, b.bottom - 1]];
+    const hits = pts.map(([x, y]) => document.elementFromPoint(x, y)?.closest('a') === a);
+    return { box: [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)], reset: [Math.round(rs.left), Math.round(rs.top), Math.round(rs.width), Math.round(rs.height)], display: getComputedStyle(a).display, overlap, hits }; });
+  ok('D1 OFL link inline-block >=44px, no overlap with Reset save, corner taps land on it', d1.display === 'inline-block' && d1.box[3] >= 44 && !d1.overlap && d1.hits.every(Boolean), d1);
   const lic = await (await fetch(`http://127.0.0.1:${port}/fonts/OFL.txt`)).text();
-  ok('R2/R4 font credits: one <p>, inline link with >=44px tap target, OFL ships', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && r.tag === 'P' && r.blocks === 0 && !r.authorsAlone && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
+  ok('R2/R4 font credits: one <p>, link with >=44px tap target, OFL ships', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && r.tag === 'P' && r.blocks === 0 && !r.authorsAlone && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
 await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);

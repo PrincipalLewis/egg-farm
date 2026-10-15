@@ -398,7 +398,7 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Font credits (art-ux/font-credits.md): Nunito 12px #6B5D52, 44px tap row for the licence link */
 .font-credits{font:400 12px/1.4 var(--f-body);color:#6B5D52;margin:8px 0 0}
 /* R2/R4: one paragraph in normal line flow; the link's tap area is 44px tall via vertical padding (inline, so no line break) */
-.font-credits a{display:inline;padding:14px 0;line-height:16px;color:#6B5D52;text-decoration:underline;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.font-credits a{display:inline-block;min-height:44px;line-height:44px;vertical-align:middle;padding:0;color:#6B5D52;text-decoration:underline;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 /* F1: below the strip the toast fades in place (a slide-up exit would cross the strip and the Queue full badge) */
 .toast.below{transform:translate(-50%,-8px)}.toast.below.show{transform:translate(-50%,0)}
 /* AC14c/AC14d save notice */
