@@ -1,0 +1,17 @@
+{
+  "_source": "product/economy.md v1 (2026-10-15)",
+  "tickHz": 10,
+  "maxLevel": 30,
+  "collection": { "baseCost": 10, "costGrowth": 1.15, "eggsPerTapBase": 5, "eggsPerTapPerLevel": 5 },
+  "farm": {
+    "baseCost": 25, "costGrowth": 1.35,
+    "hensBase": 5, "hensPerLevel": 5, "eggsPerHenPerSec": 0.2,
+    "coopCapacityBase": 50, "coopCapacityPerLevel": 50,
+    "eggPriceCentsBase": 100, "eggPriceCentsPerLevel": 10,
+    "customerIntervalBaseS": 10, "customerIntervalDecay": 0.95, "customerIntervalMinS": 3,
+    "demandMinBase": 3, "demandMinPerLevel": 1, "demandMaxBase": 8, "demandMaxPerLevel": 2
+  },
+  "customers": { "maxQueue": 3, "patienceS": 30, "firstCustomerS": 10 },
+  "save": { "autosaveIntervalS": 5 },
+  "offline": { "offlineCapSeconds": 7200, "offlineRateMultiplier": 0.5, "offlineMinSeconds": 60 }
+}
