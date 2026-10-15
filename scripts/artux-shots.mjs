@@ -1,7 +1,7 @@
 // Art & UX rc0 review shots + rotate-prompt checks (art-ux/m3-rotate-portrait-prompt.md §6.2/§6.3). Usage: node scripts/artux-shots.mjs [webkit|chromium]
 import { chromium, webkit } from 'playwright-core';
 import { spawn } from 'node:child_process'; import { mkdirSync } from 'node:fs';
-const eng = process.argv[2] || 'chromium'; const OUT = '../engineering/screenshots/rc0-artux'; mkdirSync(OUT, { recursive: true });
+const eng = process.argv[2] || 'chromium'; const OUT = process.env.OUT ?? '../engineering/screenshots/rc1-pending-artux'; mkdirSync(OUT, { recursive: true });
 const port = 5100 + Math.floor(Math.random() * 200);
 const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
