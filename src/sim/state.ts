@@ -12,13 +12,20 @@ export interface GameState {
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,
   customers: [], nextCustomerInS: b.customers.first_customer_s, nextCustomerId: 1,
-  rng: seed >>> 0 || 1, pendingOfflineEggs: 0, celebratedTier: 0,
+  rng: mixSeed(seed), pendingOfflineEggs: 0, celebratedTier: 0,
 });
 /** Per-level stats: formulas in config/formulas.ts, params from balance.json (generated from economy.csv, MK-15). */
 export {
   collectionCost, eggsPerTap, farmCost, hens, eggsPerSec, coopCapacity, eggPriceCents, customerIntervalS,
   demandRange, queueMax, patienceS, collectionPriceBonus, farmPriceCents,
 } from '../config/formulas';
+/** Scramble a user/time seed into xorshift32 state (murmur3 fmix32). Without this, small seeds (1, 2, 3...) give
+ *  first draws near 0, e.g. seed 1 -> r = 0.0000025, so the first customer always wanted demand_min. */
+export function mixSeed(seed: number): number {
+  let h = (seed >>> 0) ^ 0x9e3779b9;
+  h = Math.imul(h ^ (h >>> 16), 0x85ebca6b); h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35); h ^= h >>> 16;
+  return (h >>> 0) || 1;
+}
 /** xorshift32, state stored in GameState so sim stays pure/deterministic */
 export function nextRand(x: number): [number, number] { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return [x, x / 4294967296]; }
 /** Coop sprite tier: L0-4 -> 0, L5-9 -> 1, L10-19 -> 2, L20+ -> 3 (layout-spec 4.3). */

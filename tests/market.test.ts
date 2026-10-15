@@ -92,3 +92,11 @@ describe('market spec MK-*', () => {
     const z = { ...s, basket: 0 }; expect(apply(z, { type: 'sell', customerId: 1 }, b)).toBe(z);
   });
 });
+describe('RNG seeding', () => {
+  it('first demand is not pinned to demand_min for small seeds (bug: unmixed xorshift seed)', () => {
+    const [lo, hi] = demandRange(0, b);
+    const firsts = Array.from({ length: 50 }, (_, i) => run({ ...initialState(b, i + 1), nextCustomerInS: 0.05 }, 100).customers[0].demand);
+    expect(firsts.filter(d => d === lo).length).toBeLessThan(50 * 0.3);
+    expect(Math.max(...firsts)).toBeGreaterThan(lo + (hi - lo) / 2);
+  });
+});
