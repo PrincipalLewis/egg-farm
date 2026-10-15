@@ -70,13 +70,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const nav = h(`<nav class="actions">
     <button data-nav="market"><img src="${A('icon-market.svg')}" alt="">Market<span class="badge" hidden></span></button>
     <button data-nav="upgrades"><img src="${A('icon-upgrade.svg')}" alt="">Upgrades<span class="badge" hidden></span></button>
-    <button class="btn manage farm-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button>
+    <button class="btn manage farm-manage-all desk-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button>
     <button data-nav="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body" id="mRows"></div><div class="foot"><button class="btn" id="sellAll"></button></div></section>
-    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="btn manage farm-manage-all desk-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
+    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
         <button role="tab" data-tab="farm"><span class="tab-pill"><img src="${A('icon-coop.svg')}" alt="">Farm</span></button>
@@ -141,7 +141,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     dirty = true;
   };
   // Farm View Manage all: mobile nav button + desktop docked copy next to the Upgrades header (same rule/action/cooldown/ring)
-  const farmMAs = [nav.querySelector('.farm-manage-all'), panelLayer.querySelector('.desk-manage-all')] as HTMLButtonElement[], yawnSfx = new YawnSfx();
+  // B8: ONE Farm View Manage-all button, moved between the mobile nav and the docked Upgrades header (no hidden duplicate).
+  const farmMA = nav.querySelector('.farm-manage-all') as HTMLButtonElement, farmMAs = [farmMA], yawnSfx = new YawnSfx();
+  const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
+  const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
+  placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
   let farmMAShown = false;
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (fb.getAttribute('aria-disabled') === 'true') return cantAfford(fb); g.dispatch({ type: 'manageAll' }); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
