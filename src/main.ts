@@ -3,7 +3,7 @@ import { balance } from './config/balance';
 import { Game } from './game';
 import { startAutosave } from './save/autosave';
 import { mountApp } from './ui/app';
-import { Audio } from './ui/audio';
+import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 
 import { BUILD_ID } from './build-id';
 const VERSION = BUILD_ID;
@@ -43,6 +43,6 @@ function boot() {
 preload().then(() => {
   start.querySelector('.bar')?.remove();
   const b = document.createElement('button'); b.className = 'btn'; b.style.cssText = 'width:240px;min-height:56px'; b.textContent = 'Tap to start';
-  b.onclick = async () => { b.disabled = true; await audio.unlock(); audio.play('tapStart'); start.remove(); boot(); };
+  b.onclick = async () => { b.disabled = true; await withTimeout(audio.unlock(), AUDIO_UNLOCK_MS); audio.play('tapStart'); start.remove(); boot(); };
   start.append(b);
 }, showError);
