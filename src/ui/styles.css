@@ -280,3 +280,12 @@ img.onb-hand.down{animation:handdown 1s ease-in-out infinite}
 @keyframes iosIn{from{opacity:0;translate:0 -8px}to{opacity:1;translate:0 0}}
 .reduced-motion .ios-tip{animation:rcFade var(--t-med)}
 .settings-ios{font:14px/1.4 var(--f-body);color:#6B5D52;text-align:center}.settings-ios.ok{color:#3D7F33}
+/* PT1-8 (layout-spec §3.5): the pill visual lives on .tab-pill; on desktop (>=960) each tab button is a >=44x44 hit area,
+   padded 4px past the 36px pill (visual unchanged); buttons are siblings in a flex row, so hit areas never overlap. */
+.tab-pill{display:flex;gap:6px;align-items:center;justify-content:center;width:100%;height:100%;border-radius:var(--r-pill)}
+.tabs .active{background:transparent}.tabs .active .tab-pill{background:var(--c-yolk)}
+@media (min-width:960px){
+  .tabs{overflow:visible}
+  .tabs button{box-sizing:border-box;min-height:44px;min-width:44px;margin-block:-4px;padding:4px 0;align-self:stretch}
+  .tabs button .tab-pill{padding:0 var(--s-3);box-sizing:border-box}
+}

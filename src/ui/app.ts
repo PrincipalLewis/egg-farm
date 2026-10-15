@@ -75,9 +75,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="body" id="mRows"></div><div class="foot"><button class="btn" id="sellAll"></button></div></section>
     <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="btn manage farm-manage-all desk-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
-        <button role="tab" data-tab="collection" class="active"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</button>
-        <button role="tab" data-tab="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button>
-        <button role="tab" data-tab="workers"><img src="${A('icon-hire.svg')}" alt="">Workers</button></div>
+        <button role="tab" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
+        <button role="tab" data-tab="farm"><span class="tab-pill"><img src="${A('icon-coop.svg')}" alt="">Farm</span></button>
+        <button role="tab" data-tab="workers"><span class="tab-pill"><img src="${A('icon-hire.svg')}" alt="">Workers</span></button></div>
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
