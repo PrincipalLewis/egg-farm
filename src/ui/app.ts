@@ -78,9 +78,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="body" id="mRows"></div><div class="foot"><button class="btn" id="sellAll"></button></div></section>
     <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
-        <button role="tab" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
-        <button role="tab" data-tab="farm"><span class="tab-pill"><img src="${A('icon-coop.svg')}" alt="">Farm</span></button>
-        <button role="tab" data-tab="workers"><span class="tab-pill"><img src="${A('icon-hire.svg')}" alt="">Workers</span></button></div>
+        <button role="tab" aria-label="Collection" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
+        <button role="tab" aria-label="Farm" data-tab="farm"><span class="tab-pill"><img src="${A('icon-coop.svg')}" alt="">Farm</span></button>
+        <button role="tab" aria-label="Workers" data-tab="workers"><span class="tab-pill"><img src="${A('icon-hire.svg')}" alt="">Workers</span></button></div>
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
@@ -435,7 +435,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         mRows.innerHTML = s.customers.length ? s.customers.map(c => {
           const rem = c.demand - c.filled, k = Math.min(basket, rem), st = k === 0 ? '' : k === rem ? 'buy affordable' : 'partial';
           return `<div class="row" data-row="${c.id}"><div class="av"><img src="${A('icon-customer.svg')}" alt=""></div>
-            <div><b>Wants ${fmtCount(rem)}${c.filled ? ` of ${fmtCount(c.demand)}` : ''} eggs</b><small><img src="${A('icon-coin.svg')}" alt="">pays ${fmtMoney(k * S.eggPriceCents(F, s.collectionLevel, b))}</small></div>
+            <div><b><span class="o-long">Wants ${fmtCount(rem)}${c.filled ? ` of ${fmtCount(c.demand)}` : ''} eggs</span><span class="o-short">Wants ${fmtCount(rem)}${c.filled ? `/${fmtCount(c.demand)}` : ''} <img src="${A('icon-egg.svg')}" alt="eggs"></span></b><small><img src="${A('icon-coin.svg')}" alt="">pays ${fmtMoney(k * S.eggPriceCents(F, s.collectionLevel, b))}</small></div>
             <button class="btn ${st}" data-id="${c.id}" aria-disabled="${k === 0}">Sell ${fmtCount(k)}/${fmtCount(rem)}</button></div>`;
         }).join('') : `<div class="empty-state"><img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p></div>`;
       }

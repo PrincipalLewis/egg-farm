@@ -4,7 +4,8 @@ import { chromium, webkit } from 'playwright-core';
 import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync } from 'node:fs';
 const ENGINE = process.env.ENGINE ?? 'chromium', headless = !process.env.HEADED;
-const port = 4181; const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+const port = 4181; const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
 await new Promise(r => setTimeout(r, 1500));
 const SHOTS = '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
@@ -17,7 +18,7 @@ async function open({ w = 390, h = 844, ls = {}, q = '', touch = false } = {}) {
   const page = await ctx.newPage(); const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, ls);
-  await page.goto(URL0 + q); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
+  await page.goto(URL0 + q, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
   await page.waitForTimeout(150);
   return { ctx, page, errors };
 }
@@ -146,8 +147,31 @@ sections.b58 = async () => {
   }
 };
 
+// ---------- Bug 9 narrow phones (360/375/390; 375x600 forces a desktop scrollbar in headed windows) ----------
+const lateSave = () => JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 123456789, coop: 50, basket: 200, collectionLevel: 15, farmLevel: 15,
+  customers: [1, 2, 3, 4, 5].map(i => ({ id: i, demand: 113, filled: i % 2 ? 26 : 0, waitedS: 3 })), nextCustomerInS: 5, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2,
+  workers: { market_hand: { energy: 30, cdS: 1 }, coop_hand: { energy: 35, cdS: 1 }, hawker: { energy: 20, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+sections.bug9 = async () => {
+  for (const [w, h] of [[360, 640], [375, 812], [375, 600], [390, 844]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.save': lateSave(), 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    const cl = page.locator('#modal-layer.open .close'); if (await cl.count()) await cl.click();
+    const m = () => page.evaluate(() => { const d = document.documentElement; const wide = [...document.querySelectorAll('#app *, #panel-layer *')].filter(e => { const r = e.getBoundingClientRect(); return r.width && r.right > d.clientWidth + 0.5 && getComputedStyle(e).visibility !== 'hidden'; }).length; return { sw: d.scrollWidth, cw: d.clientWidth, bsw: document.body.scrollWidth, wide }; });
+    const res = { farm: await m() };
+    await page.locator('[data-nav=market]').click(); await page.waitForTimeout(300); res.market = await m();
+    const rows = await page.$$eval('#mRows .row', rs => rs.map(r => { const a = r.getBoundingClientRect(), b = r.querySelector('.btn').getBoundingClientRect(), t = r.querySelector('b').getBoundingClientRect(); return { inside: b.right <= a.right - 8 + 0.5 && b.left >= a.left, lines: Math.round(t.height / 19), text: r.querySelector('b').innerText, dbg: [...r.querySelectorAll('b span')].map(x => x.className + ':' + getComputedStyle(x).display).join(',') }; }));
+    if (shot && w === 375 && h === 812) await page.screenshot({ path: `${SHOTS}/m3-rc0-bug9-375-market.png` });
+    await page.locator('.sheet:not([hidden]) .close').click(); await page.locator('[data-nav=upgrades]').click(); await page.waitForTimeout(200); res.upgrades = await m();
+    await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(200); res.workers = await m();
+    const tabs = await page.$$eval('.tabs button', bs => bs.map(b => b.scrollWidth <= b.clientWidth + 1));
+    ok(`Bug9 no sideways scroll on farm/market/upgrades/workers at ${w}x${h}`, Object.values(res).every(r => r.sw <= r.cw && r.bsw <= r.cw && r.wide === 0), JSON.stringify(res));
+    ok(`Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at ${w}`, rows.length > 0 && rows.every(r => r.inside && r.lines <= 2) && rows.some(r => /^Wants \d+\/\d+/.test(r.text)), JSON.stringify(rows.slice(0, 2)));
+    ok(`Bug9 tab labels not clipped at ${w}`, tabs.every(Boolean), JSON.stringify(tabs));
+    await ctx.close();
+  }
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
-await browser.close(); srv.kill();
+await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);
 console.log(`${results.filter(r => r.pass).length}/${results.length} passed`);

@@ -297,3 +297,42 @@ img.onb-hand.down{animation:handdown 1s ease-in-out infinite}
   .farm{min-width:0}
   .collectbar{width:100%;max-width:560px;margin-inline:auto}
 }
+
+/* ===== Bug 9 (layout-spec §9), from art-ux/fixes/bug9-375.css ===== */
+/* 1. Guard (belt): never allow sideways page scroll. Root-cause fixes below are still required. */
+html,body{overflow-x:hidden;max-width:100%}
+/* 2. Root cause A: #app min-width:360px forces overflow whenever the usable width < 360
+      (device-toolbar scrollbar steals ~15px, safe-area insets, 320px phones). Let the grid shrink instead. */
+#app{min-width:0;width:100%}
+#app>*{min-width:0}
+/* 3. Root cause B (Market sheet): .row is 48px | 1fr | auto, and the Sell button is min-width:112px + nowrap
+      "Sell 20/87", so the auto column wins and the 1fr text column collapses ("Wants 113 eggs" one word per line). */
+.row{grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);padding:var(--s-2) var(--s-3)}
+.row .av{width:40px;height:40px}
+.row>div{min-width:0}
+.row b{white-space:normal;overflow-wrap:anywhere;line-height:1.2} /* wrap to max 2 lines, never 1 word per line */
+.row .btn{min-width:88px;max-width:42vw;padding:0 var(--s-3);font-size:var(--fs-base)}
+/* 4. Tabs: labels must fit at 360px; floor 13px, then icon-only fallback below 340px. */
+.tabs button{min-width:0;font-size:clamp(13px,3.8vw,16px);gap:4px;white-space:nowrap}
+.tabs button img{width:20px;flex:none}
+@media (max-width:339px){.tabs button{font-size:0}.tabs button img{width:24px}}
+/* 5. Generic flex/grid shrink fixes for the other cut-offs (chip Ready pill, Manage all, HUD). */
+.btn{min-width:0}
+.btn.xl,.btn.buy{min-width:0}
+.goal-status{max-width:none;flex:none}
+.hud .pill{min-width:0}
+.queue{min-width:0;overflow:visible}
+@media (max-width:390px){
+  .farm{padding:var(--s-2);gap:var(--s-2)}
+  .manage-all{font-size:var(--fs-base);white-space:nowrap}
+  .manage-all small,.manage-all .count{display:none} /* keep "Manage all"; count moves to the badge */
+}
+/* Bug 9 root cause (Engineering, measured in a headed 375x600 Chromium window): #app min-height:640px forces a
+   vertical scrollbar, which takes 15px, so the usable width drops to 360 and the #app min-width:360px plus
+   .btn/.pill.coins min-widths push content past it. Drop the min-height too; the grid already fits 100dvh. */
+#app{min-height:0}
+/* Market short order copy at <=390px: "Wants 87/113" / "Wants 113" + egg icon */
+.row .o-short{display:none}.row .o-short img{width:16px;height:16px;vertical-align:-3px}
+@media (max-width:390px){.row .o-long{display:none}.row .o-short{display:inline}}
+/* keep PT1-8 desktop tab hit areas (the Bug 9 patch resets .tabs button min-width) */
+@media (min-width:960px){.tabs button{min-width:44px}}
