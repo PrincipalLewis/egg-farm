@@ -37,3 +37,13 @@ describe('debug hooks', () => {
     const g2 = new Game(b, kv, () => t); expect(g2.state.pendingOfflineEggs).toBe(Math.floor(3600 * b.offline.offlineRateMultiplier * 1.0));
   });
 });
+describe('M3 FTUE / Workers intro telemetry (AC4)', () => {
+  it('onboarding_step carries the AC4 names and an action', () => {
+    const g = new Game(b, mem(), () => 0);
+    g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'shown' }); g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' });
+    expect(g.telemetry.events().filter(e => e.type === 'onboarding_step').map(e => [e.name, e.action])).toEqual([['workers_hire_tip', 'shown'], ['workers_coach', 'done']]);
+  });
+  it('step dots show the current of 3 steps', async () => {
+    const { dots } = await import('../src/ui/onboarding'); expect(dots(0)).toBe('● ○ ○'); expect(dots(2)).toBe('○ ○ ●');
+  });
+});

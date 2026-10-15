@@ -52,6 +52,6 @@ export class Telemetry {
   events(): readonly TEvent[] { return this.buf; }
   exportJSON(): string { this.closeTapWindow(); this.closeSumWindow(); return JSON.stringify({ exportedAt: this.now(), events: this.buf }, null, 2); }
   // Onboarding hooks: wired now, called by the onboarding overlay when it lands.
-  onboardingStep(step: number, name: string) { this.track('onboarding_step', { step, name }); }
+  onboardingStep(step: number, name: string, extra: Record<string, unknown> = {}) { this.track('onboarding_step', { step, name, ...extra }); }
   onboardingSkip(atStep: number) { this.track('onboarding_skip', { atStep }); }
 }

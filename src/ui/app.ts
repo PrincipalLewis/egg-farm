@@ -16,7 +16,7 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean }
+interface UiFlags { sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
@@ -439,25 +439,79 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     dirty = false;
   }
   void dirty;
+  // ---------- FTUE step 4 + Workers intro (m3-ftue-spec §2 step 4, §3; M3-AC4) ----------
+  const coach = (text: string, at: Element | null, ms: number, cls = '') => {
+    document.querySelectorAll('.coach').forEach(e => e.remove());
+    const el = h(`<div class="coach ${cls}" role="dialog" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
+    document.body.append(el);
+    const place = () => { if (!el.isConnected) return; const r = at?.getBoundingClientRect(); if (!r || !r.width) { el.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)'; return; }
+      const above = r.top >= 120, cx = Math.min(Math.max(r.left + r.width / 2, 156), innerWidth - 156);
+      el.style.cssText = above ? `left:${cx}px;bottom:${innerHeight - r.top + 12}px;transform:translateX(-50%)` : `left:${cx}px;top:${r.bottom + 12}px;transform:translateX(-50%)`; el.classList.toggle('below', !above); };
+    place(); const iv = window.setInterval(place, 250);
+    const close = () => { clearInterval(iv); el.remove(); };
+    el.addEventListener('click', close); window.setTimeout(close, ms); return close;
+  };
+  const showGoalIntro = () => { g.telemetry.onboardingStep(5, 'next_goal_intro'); coach('Your next goal is always shown here.', goalBtn, 4000, 'toastlike'); };
+  let introA: HTMLElement | null = null, introBStage = 0;
+  const workerRow = (id: string) => uRow.querySelector(`[data-w=${id}]`);
+  const renderWorkersIntro = () => {
+    const s = g.state, ftueBusy = !!onbUpdate || modalKind !== null;
+    // Part A: Market Hand unlocked AND affordable, FTUE done/skipped, no modal; once per save (UI flags).
+    if (!flags.workersIntroA && !introA && !ftueBusy && !s.workers.market_hand && s.farmLevel >= unlockFarmMH && s.coinsCents >= hireCostMH) {
+      flags.workersIntroA = true; saveFlags(); g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'shown' });
+      introA = h(`<div class="intro-a" role="dialog" aria-label="New helper"><img src="${A('char-market-hand.svg')}" width="40" height="40" alt="">
+        <div><b>New helper!</b><p>Hire a <b>Market Hand</b> to sell to customers for you.</p></div>
+        <button class="btn small" id="iaOpen">See workers</button><button class="icon-btn" id="iaX" aria-label="Dismiss"><img src="${A('icon-close.svg')}" alt=""></button></div>`);
+      document.body.append(introA);
+      introA.addEventListener('click', e => {
+        const t = (e.target as HTMLElement).closest('button'); if (!t) return;
+        if (t.id === 'iaOpen') { g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'open' }); tab = 'workers'; dirty = true; openPanel('upgrades'); render();
+          const row = workerRow('market_hand'); row?.scrollIntoView({ block: 'center' }); coach(`Hire them for ${fmtMoney(hireCostMH)}. They work while you play.`, row?.querySelector('button.btn') ?? row ?? null, 8000); }
+        else g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'dismiss' });
+        introA?.remove(); introA = null;
+      });
+    }
+    if (introA && modalKind === 'welcome') introA.hidden = true; else if (introA) introA.hidden = false;
+  };
+  const unlockFarmMH = b.workers.market_hand.unlock_farm, hireCostMH = b.workers.market_hand.hire_cost * 100;
+  // Part B: first hire (any worker) -> energy bar, then Manage. Once per save.
+  g.on(e => {
+    if (e.type !== 'worker_hire' || flags.workersIntroB) return;
+    flags.workersIntroB = true; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
+    document.querySelectorAll('.coach').forEach(c => c.remove());
+    window.setTimeout(() => {
+      tab = 'workers'; dirty = true; render(); const row = workerRow(e.worker);
+      coach('Workers get tired over time.', row?.querySelector('.ebar') ?? row ?? null, 3000);
+      window.setTimeout(() => {
+        const r2 = workerRow(e.worker), full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
+        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
+        introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' });
+      }, 3100);
+    }, 50);
+  });
+  void introBStage;
   // ---------- Onboarding (new games only, once, skippable) ----------
   let onbUpdate: (() => boolean) | null = null;
   if ((opts.newGame && !flags.onboardingDone) || flags.replayOnboarding) {
     const finish = () => { flags.onboardingDone = true; flags.replayOnboarding = false; saveFlags(); };
     const flow = new OnboardingFlow({
       step: (n, name) => g.telemetry.onboardingStep(n, name),
-      skip: (n) => { g.telemetry.onboardingSkip(n); finish(); },
-      done: () => { g.telemetry.onboardingStep(4, 'complete'); finish(); },
+      skip: (n) => { g.telemetry.onboardingSkip(n); finish(); goalHidden = false; goalNow = true; },
+      done: () => { g.telemetry.onboardingStep(4, 'complete'); finish(); goalHidden = false; goalNow = true; render(); showGoalIntro(); },
     });
     g.on(e => flow.onEvent(e));
-    flow.start();
+    flow.start(); goalHidden = true; // strip introduced at step 4 (m3-ftue-spec §2)
     onbUpdate = mountOnboarding(flow, (st) => {
       if (modalKind) return null;
       if (st === 0) return collectBtn;
       if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
+      if (docked.matches) { tab = 'collection'; return uRow.querySelector('.btn.buy'); }
       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
-    });
+    }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'
+      : st === 1 ? (open === 'market' || docked.matches ? 'Tap <b>Sell</b> to earn coins.' : 'A customer! Tap them to sell eggs.')
+      : open === 'upgrades' || docked.matches ? 'Tap <b>Buy</b>.' : 'Spend coins to collect more eggs per tap.', A('ui-pointer-hand.svg'));
   }
-  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; };
+  const renderAll = () => { render(); if (onbUpdate && !onbUpdate()) onbUpdate = null; renderWorkersIntro(); };
   renderAll();
   showWelcome();
   return { render: renderAll, showWelcome, openPanel };

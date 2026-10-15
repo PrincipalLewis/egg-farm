@@ -39,7 +39,7 @@ const q = await page.evaluate(() => ({ tag: !!document.querySelector('.qtag'), b
 if (!q.tag) fail('no Queue full tag'); if (!q.bubble) fail('no Queue full! walk-off bubble');
 if (await page.locator('.onb').count()) fail('onboarding not closed after collect/sell/upgrade');
 const tele = await page.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'onboarding_step').map(e => e.name));
-if (tele.join() !== 'collect,sell,upgrade,complete') fail('onboarding telemetry: ' + tele);
+if (!tele.join().startsWith('collect,sell,upgrade,complete')) fail('onboarding telemetry: ' + tele);
 { // skip path in a fresh profile
   const p2 = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
   await p2.goto(`http://127.0.0.1:${port}/`); await p2.getByText('Tap to start').click(); await p2.locator('.onb-skip').click(); await p2.waitForTimeout(100);
