@@ -12,6 +12,11 @@ await page.getByText('Tap to start').click();
 await page.waitForFunction(() => window.eggfarm);
 if (!(await page.locator('.onb').isVisible())) fail('onboarding overlay not shown on new game');
 if (!(await page.locator('.onb-cap').textContent()).includes('Collect')) fail('onboarding step 1 caption');
+{ // empty-nest: an empty coop shows no eggs (overlay hidden); >= 1 whole egg shows them
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 0.4 }; }); await page.waitForTimeout(50);
+  if (await page.locator('#nestEggs').isVisible()) fail('empty coop shows eggs in nest');
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 3 }; }); await page.waitForTimeout(50);
+  if (!(await page.locator('#nestEggs').isVisible())) fail('coop with eggs shows empty nest'); }
 { const lbl = await page.locator('#collect').textContent(); const dis = await page.locator('#collect').getAttribute('aria-disabled');
   if (/\+0\b/.test(lbl) || (await page.evaluate(() => window.eggfarm.state.coop)) < 1 && dis !== 'true') fail(`collect at empty coop: "${lbl}" disabled=${dis}`); }
 await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 40 }; });

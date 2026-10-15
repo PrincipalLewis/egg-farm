@@ -47,7 +47,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const farm = h(`<main class="farm">
     <div class="queue" id="queue" aria-label="Customer queue"></div>
     <div class="scene" id="scene" role="button" aria-label="Collect eggs">
-      <img class="coop" id="coop" alt=""><img class="nest" src="${A('icon-nest.svg')}" alt=""><div class="nest-eggs" id="nestEggs"></div>
+      <img class="coop" id="coop" alt=""><span class="nest"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" id="nestEggs" src="${A('nest-eggs.svg')}" alt="" hidden></span>
       <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" hidden></div>
     </div>
     <div class="collectbar">
@@ -65,7 +65,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="body" id="mRows"></div><div class="foot"><button class="btn" id="sellAll"></button></div></section>
     <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
-        <button role="tab" data-tab="collection" class="active"><img src="${A('icon-nest.svg')}" alt="">Collection</button>
+        <button role="tab" data-tab="collection" class="active"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</button>
         <button role="tab" data-tab="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button>
         <button role="tab" data-tab="workers">Workers</button></div>
         <div id="uRow"></div></div></section></div>`);
@@ -317,7 +317,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
       hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
     return `<div class="up">
-      <div class="ic"><img src="${A(isF ? 'icon-coop.svg' : 'icon-nest.svg')}" alt=""><span class="lv">L${L}</span></div>
+      <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       <ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>
@@ -353,8 +353,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     meterFill.style.width = `${Math.min(100, (s.coop / cap) * 100)}%`; meter.classList.toggle('atcap', atCap);
     setText(meterText, `${fmtCount(coopWhole)} / ${fmtCount(cap)}`);
     $('#full').hidden = !atCap;
-    const stack = coopWhole <= 0 ? 0 : atCap ? 3 : s.coop >= cap / 2 ? 2 : 1;
-    const ne = $('#nestEggs'); if (ne.childElementCount !== stack) ne.innerHTML = `<img src="${A('icon-egg.svg')}" alt="">`.repeat(stack);
+    // Empty-nest fix (Art & UX): eggs overlay only when the coop holds >= 1 whole egg.
+    const ne = $('#nestEggs'); if (ne.hidden !== (coopWhole < 1)) ne.hidden = coopWhole < 1;
     // No "+0": below one whole egg the button reads "Collect" and is aria-disabled (still tappable -> shake + "Empty").
     setText(collectBtn, coopWhole >= 1 ? `Collect +${fmtCount(Math.min(coopWhole, S.eggsPerTap(s.collectionLevel, b)))}` : 'Collect');
     setDisabled(collectBtn, coopWhole < 1);
