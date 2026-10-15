@@ -48,6 +48,7 @@ describe('M3-AC7 install_id + build', () => {
     sh('git init -q && git -c user.name=t -c user.email=t@t commit -q --allow-empty -m init');
     const short = sh('git rev-parse --short HEAD').trim();
     expect(gitBuildId(d)).toBe(`m3-rc0+${short}`);
+    writeFileSync(join(d, 'vite.config.ts.timestamp-1792099697515-abc.mjs'), 'x'); expect(gitBuildId(d)).toBe(`m3-rc0+${short}`); // PT1-9
     writeFileSync(join(d, 'x.txt'), '1'); expect(gitBuildId(d)).toBe(`m3-rc0+${short}+dirty`);
   });
   it('save reset keeps install_id, telemetry and sfx/reducedMotion; clears save and FTUE flags (PT1-2)', () => {
@@ -69,4 +70,11 @@ describe('M3-AC7 install_id + build', () => {
     const s = kv(); const id = new Game(b, s, () => 0).installId; s.setItem(SAVE_KEY, '{"version":4,"sta');
     const g = new Game(b, s, () => 0); expect(g.isNewGame).toBe(true); expect(g.installId).toBe(id);
   });
+});
+import { isDirty } from '../scripts/build-id';
+import { it as it2, expect as ex2 } from 'vitest';
+it2('PT1-9 isDirty ignores Vite timestamp files only', () => {
+  ex2(isDirty('?? vite.config.ts.timestamp-1792099697515-1a2b.mjs\n')).toBe(false);
+  ex2(isDirty(' M src/main.ts\n?? vite.config.ts.timestamp-1-2.mjs\n')).toBe(true);
+  ex2(isDirty('')).toBe(false);
 });
