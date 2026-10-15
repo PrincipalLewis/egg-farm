@@ -10,6 +10,7 @@ import type { Audio, SfxName } from './audio';
 import { SAVE_KEY } from '../save/save';
 import { TELEMETRY_KEY } from '../telemetry/telemetry';
 import { OnboardingFlow, mountOnboarding } from './onboarding';
+import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -52,6 +53,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
+      <button class="goal" id="goal" type="button" aria-live="off"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></button>
+      <div class="sr" aria-live="polite" id="goalLive"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
   const nav = h(`<nav class="actions">
@@ -280,13 +283,44 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         sfx('upgrade'); const src = lastBuyBtn ?? uRow;
         if (!rm()) { const c = center(src); spawn(h(`<img class="riser" src="${A('icon-upgrade.svg')}" alt="" style="left:${c.x - 20}px;top:${c.y - 20}px">`), 500); sparkle(src, 6); }
         if (e.upgrade === 'farm' && !rm()) retrigger(scene, 'bump');
-        pendingLvPop = true; break;
+        pendingLvPop = true; goalNow = true; break;
       }
+      case 'worker_hire': case 'grader_tier': goalNow = true; break;
       case 'coop_full': if (e.phase === 'start') sfx('coopFull'); break;
     }
     dirty = true;
   });
   let pendingLvPop = false;
+  // ---------- M3-AC5 next-goal strip ----------
+  const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
+  let hlSel = '', hlUntil = 0;
+  const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+  const renderGoal = () => {
+    const t = now();
+    if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
+    const imm = goalNow; goalNow = false; goalTickAt = t;
+    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
+    setText(goalLbl, gl.label); setText(goalSt, gl.status);
+    goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
+    goalBtn.setAttribute('aria-label', goalAria(gl));
+    if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
+      if (prev.key !== gl.key) { setText(goalLive, goalAria(gl)); if (!rm()) retrigger(goalLbl, 'xfade'); }
+      if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (live.length <= 26) sparkle(goalSt, 4); }
+      if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
+    }
+  };
+  /** Tap never buys: open the target's tab, scroll the row into view, highlight it, focus its Buy (spec §4). */
+  const openGoal = () => {
+    const gl = goalShown; if (!gl) return;
+    g.telemetry.track('goal_tap', { target: gl.key ?? 'DONE', state: gl.state });
+    tab = gl.tab; dirty = true; openPanel('upgrades'); render();
+    const sel = gl.key === 'FARM' || gl.key === 'COLL' ? '.up' : gl.key === 'W1' ? '[data-w=market_hand]' : gl.key === 'W2' ? '[data-w=coop_hand]' : gl.key === 'W3' ? '[data-w=hawker]' : gl.key === 'W4' ? '[data-w=grader]' : '.wk';
+    const row = uRow.querySelector<HTMLElement>(sel); if (!row) return;
+    row.scrollIntoView({ block: 'center', behavior: rm() ? 'auto' : 'smooth' });
+    hlSel = sel; hlUntil = now() + 1200; retrigger(row, 'goal-hl');
+    row.querySelector<HTMLElement>('button.btn')?.focus({ preventScroll: true });
+  };
+  goalBtn.addEventListener('click', e => { e.stopPropagation(); openGoal(); });
 
   // ---------- Render ----------
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
@@ -393,9 +427,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
-      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
+    renderGoal();
+    if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
+    { const hide = goalHidden; if (goalBtn.hidden !== hide) goalBtn.hidden = hide; }
     if (shouldShowCoopTip(s, b, coopTipShown)) { coopTipShown = true; g.telemetry.track('coop_hand_tip', { phase: 'shown', farm: F }); showTip(); }
     // aria-live throttled 1/s
     const t = now(); if (t - lastLive > 1000) { lastLive = t; setText($('#live'), `${fmtMoney(s.coinsCents)}, ${fmtCount(s.basket)} eggs`); }
