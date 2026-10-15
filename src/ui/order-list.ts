@@ -3,7 +3,7 @@
  *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
 import { orderView, moreLabel, moreName, type OrderView } from './orders';
-export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; }
+export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
   private lastSlide = -Infinity; private lastLeave = -Infinity; private frozenUntil = 0; private pointer = false;
@@ -28,7 +28,7 @@ export class OrderList {
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
-    if (E.textContent !== e) E.textContent = e; if (V.textContent !== ` · ${val}`) V.textContent = ` · ${val}`;
+    if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`; // F4: NBSP survives flex whitespace trimming
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
     if (btn.textContent !== v.button) btn.textContent = v.button;
@@ -78,10 +78,10 @@ export class OrderList {
     }
     this.empty.hidden = i.customers.length > 0;
     // chip + live region: <= 1 write / 2 s (trailing, latest value); never animated
-    const hidden = Math.max(0, i.customers.length - i.visible), want = hidden > 0 ? `${moreLabel(hidden, i.expanded)}|${moreName(hidden, i.expanded)}|${i.expanded}` : '';
+    const hidden = Math.max(0, (i.waitingLen ?? i.customers.length) - i.visible), want = hidden > 0 ? `${moreLabel(hidden, i.expanded)}|${moreName(hidden, i.expanded)}|${i.expanded}` : '';
     if (want !== this.chipShown) {
       const write = () => {
-        const cur = this.pending ? Math.max(0, this.pending.customers.length - this.pending.visible) : hidden, ex = this.pending?.expanded ?? i.expanded;
+        const cur = this.pending ? Math.max(0, (this.pending.waitingLen ?? this.pending.customers.length) - this.pending.visible) : hidden, ex = this.pending?.expanded ?? i.expanded;
         this.chip.hidden = cur === 0; this.chip.textContent = moreLabel(cur, ex); this.chip.setAttribute('aria-label', moreName(cur, ex)); this.chip.setAttribute('aria-expanded', String(ex));
         this.chipShown = cur > 0 ? `${moreLabel(cur, ex)}|${moreName(cur, ex)}|${ex}` : ''; this.chipAt = this.now(); this.stats.chipWrites++;
         if (cur > 0 && cur !== this.liveShown) { this.live.textContent = `${cur} more customers waiting`; this.stats.liveWrites++; } this.liveShown = cur; this.chipTimer = 0;

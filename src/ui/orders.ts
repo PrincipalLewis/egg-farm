@@ -1,5 +1,6 @@
 /** P1q/P2 order cards + "+N waiting" chip (art-ux/m3-customer-queue-spec.md v1.0). Pure helpers, unit-tested. */
-import type { Customer } from '../sim/state';
+import { queueMax, type Customer } from '../sim/state';
+import type { Balance } from '../config/balance';
 import { fmtCount, fmtMoney } from './format';
 /** Spec §2.1: eggs >= 1,000 -> 1.2K (compact, 1 decimal). */
 const eggs = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n) : String(n);
@@ -37,3 +38,22 @@ export function slotPreview(qNow: number, qNext: number, dNow: [number, number],
   const same = dNow[0] === dNext[0] && dNow[1] === dNext[1];
   return lead + (same ? '' : `<li class="orders">Orders ${r(dNow)} → ${r(dNext)} eggs</li>`);
 }
+
+/** F5: one queue length shared by the farm strip "+N" and the Market "+N waiting", updated at most once per `ms`
+ *  (trailing: the latest value lands once the window passes). Each place subtracts what it shows itself. */
+export class Coalesce {
+  private v: number | null = null; private at = -Infinity;
+  constructor(private ms: number, private now = () => performance.now()) {}
+  read(latest: number): number {
+    const t = this.now();
+    if (this.v === null || latest <= 5 || this.v <= 5 || t - this.at >= this.ms) { if (latest !== this.v) { this.v = latest; this.at = t; } }
+    return this.v;
+  }
+}
+/** Strip split with live chips but the "+N" taken from the coalesced length. */
+export const stripSplitAt = (live: number, coalesced: number) => { const s = stripSplit(live); return s.more ? { shown: s.shown, more: Math.max(1, coalesced - s.shown) } : s; };
+/** F1: the "+1 customer slot" toast only on a level that really adds a slot (queue_max(F) > queue_max(F-1)). */
+export const slotAdded = (F: number, b: Balance) => F > 0 && queueMax(F, b) > queueMax(F - 1, b);
+/** F2: never "$0.00": a greyed Sell all reads "No eggs to sell". */
+export const sellAllLabel = (eggs: number, cents: number, fc: (n: number) => string, fm: (c: number) => string) =>
+  eggs > 0 ? `Sell all (${fc(eggs)} eggs\u00a0· ${fm(cents)})` : 'No eggs to sell';

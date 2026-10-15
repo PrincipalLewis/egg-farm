@@ -10,12 +10,14 @@ import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
 import { showRecoveryDialog } from './save-recovery';
-import { visibleOrders, stripSplit, slotPreview } from './orders';
+import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
+const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel } from './onboarding';
+import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
@@ -132,7 +134,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     window.setTimeout(() => el.remove(), 8000);
   };
   let toastTimer = 0;
-  const showToast = (text: string) => { toast.textContent = text; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
+  /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
+  const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
+  /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
+  const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
+  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it */ const qb = queueEl.getBoundingClientRect().bottom; if (qb > 0 && !docked.matches) toast.style.top = `${Math.round(qb + 8)}px`; else toast.style.top = ''; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
@@ -222,7 +228,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button><h2>Settings</h2>
       <label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
-      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${settingsIosLine()}
+      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
     modal.classList.add('open'); sfx('uiOpen');
   };
@@ -255,7 +261,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   const renderQueue = () => {
     const s = g.state, slots = S.queueMax(s.farmLevel, b), patience = S.patienceS(s.farmLevel, b);
-    const split = stripSplit(s.customers.length), stripSlots = Math.min(5, slots);
+    const split = stripSplitAt(s.customers.length, waiting.read(s.customers.length)), stripSlots = Math.min(5, slots);
     queueEl.classList.toggle('five', stripSlots >= 5);
     // remove chips for customers gone
     const ids = new Set(s.customers.map(c => c.id));
@@ -265,11 +271,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       let el = chips.get(c.id);
       if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
       setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
-      el.style.setProperty('--p', String(Math.min(1, c.waitedS / patience)));
+      setP(el, c.waitedS / patience);
       kids.push(el);
     }
     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
-    if (split.more) { moreChip.textContent = `+${split.more}`; moreChip.setAttribute('aria-label', `${split.more} more customers waiting, open Market`); kids.push(moreChip); }
+    if (split.more) { setText(moreChip, `+${split.more}`); const al = `${split.more} more customers waiting, open Market`; if (moreChip.getAttribute('aria-label') !== al) moreChip.setAttribute('aria-label', al); kids.push(moreChip); }
     const needEmpty = Math.max(0, stripSlots - kids.length);
     while (empties.length < needEmpty) empties.push(h(`<div class="chip empty" aria-hidden="true"></div>`));
     empties.length = needEmpty;
@@ -286,7 +292,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       flags.seenSlots = slots; saveFlags();
       const newSlot = empties[empties.length - 1] ?? queueEl.lastElementChild;
       if (newSlot && !rm()) { retrigger(newSlot, 'unlock'); sparkle(newSlot, 4); }
-      slotToastPending = true;
+      slotToastPending = slotAdded(s.farmLevel, b);
     }
   };
   let slotToastPending = false;
@@ -415,12 +421,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const slots = Array.from({ length: 12 }, (_, i) => `<span>${order.indexOf(i) < hn ? `<img class="hen ${i % 3 === 2 ? 'flip' : ''} ${henCount >= 0 && order.indexOf(i) >= henCount ? 'pop' : ''}" style="animation-delay:${(i * .15).toFixed(2)}s" src="${A('char-chicken.svg')}" alt="">` : ''}</span>`);
       yard.innerHTML = slots.join(''); henCount = hn;
     }
-    const hp = $('#henpill'); hp.hidden = S.hens(F, b) <= 12; setText(hp, `×${fmtCount(S.hens(F, b))} hens`);
+    const hp = $('#henpill'); setHidden(hp, S.hens(F, b) <= 12); setText(hp, `×${fmtCount(S.hens(F, b))} hens`);
     // meter, nest, full badge, collect label
     const atCap = s.coop >= cap;
     meterFill.style.width = `${Math.min(100, (s.coop / cap) * 100)}%`; meter.classList.toggle('atcap', atCap);
     setText(meterText, `${fmtCount(coopWhole)} / ${fmtCount(cap)}`);
-    $('#full').hidden = !atCap;
+    setHidden($('#full'), !atCap);
     // Empty-nest fix (Art & UX): eggs overlay only when the coop holds >= 1 whole egg.
     const ne = $('#nestEggs'); if (ne.hidden !== (coopWhole < 1)) ne.hidden = coopWhole < 1;
     // No "+0": below one whole egg the button reads "Collect" and is aria-disabled (still tappable -> shake + "Empty").
@@ -428,12 +434,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     setDisabled(collectBtn, coopWhole < 1);
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
-    (nav.querySelector('[data-nav=market] .badge') as HTMLElement).hidden = !(s.customers.length && s.basket >= 1);
-    (nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement).hidden = !canUp;
+    setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
+    setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
-      fb.hidden = !farmMAShown;
+      setHidden(fb, !farmMAShown);
       if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r; }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
@@ -443,12 +449,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const unit = S.eggPriceCents(F, s.collectionLevel, b) * graderMult(s.workers, s.graderTier, b);
       const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
       if (s.customers.length <= vis) ordersExpanded = false;
-      orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm() });
-      mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) (r.querySelector('.av') as HTMLElement).style.setProperty('--p', String(Math.min(1, c.waitedS / patience))); });
+      orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
+      mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
       let left = basket, eggs = 0, cents = 0; const price = S.eggPriceCents(F, s.collectionLevel, b);
       for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }
-      setText(sellAllBtn, `Sell all (${fmtCount(eggs)} eggs · ${fmtMoney(cents)})`); setDisabled(sellAllBtn, eggs === 0);
+      setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
     }
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
@@ -551,6 +557,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   }
   };
   let recoveryOpen = !!opts.recovery;
+  const rotate = mountRotatePrompt($('#app') as HTMLElement, A('icon-rotate-phone.svg'), () => recoveryOpen, () => queueMicrotask(() => renderIosTip()));
   // ---------- AC14g iOS Home Screen tip ----------
   let iosTip: HTMLElement | null = null, iosTipLive = false; // live = shown this session and not dismissed
   const renderIosTip = () => {
@@ -563,7 +570,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       iosTip.querySelector('button')!.addEventListener('click', () => { g.telemetry.track('ios_home_tip_dismissed'); iosTip?.remove(); iosTip = null; iosTipLive = false; });
       document.body.append(iosTip);
     }
-    if (iosTip) { const hide = recoveryOpen || !!modalKind || !!open || !!onbUpdate; if (iosTip.hidden !== hide) iosTip.hidden = hide; }
+    if (iosTip) { const hide = recoveryOpen || !!modalKind || !!open || !!onbUpdate || rotate.shown; if (iosTip.hidden !== hide) iosTip.hidden = hide; }
   };
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
@@ -573,7 +580,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case })).then(() => {
-      recoveryOpen = false; startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus();
+      recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
   return { render: renderAll, showWelcome, openPanel, get recoveryOpen() { return recoveryOpen; } };
