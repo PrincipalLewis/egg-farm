@@ -2,7 +2,7 @@
 // - build id must not carry "+dirty" (built from uncommitted changes) or "+unknown". Run after `vite build` / build:html.
 // - single-file .html: the one embedded build id must equal --build-id / EXPECT_BUILD_ID, else <BUILD_PREFIX>+<HEAD short>.
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs'; import { execSync } from 'node:child_process';
-import { ALLOWED_GLOBALS, findGlobalWrites, findExternalRefs, findBuildIds, extractScripts } from './release-scan.mjs';
+import { ALLOWED_GLOBALS, findGlobalWrites, findExternalRefs, findBuildIds, extractScripts, findUnresolvedRefs, findBuildIdMarkup } from './release-scan.mjs';
 const fail = msg => { console.error(`check-release-build: ${msg}`); process.exit(1); };
 const args = process.argv.slice(2); let expectId = process.env.EXPECT_BUILD_ID; const rest = [];
 for (let i = 0; i < args.length; i++) {
@@ -43,6 +43,15 @@ if (single || expectId) {
   }
   console.log(`check-release-build: build id ${ids[0]} matches ${expectId ? 'expected' : 'HEAD'} ok`);
 }
+// F-META: single file carries exactly one <meta name="build-id"> and one data-build-id, both = the script id (and --build-id).
+if (single) {
+  const { metas, attrs } = findBuildIdMarkup(html);
+  if (metas.length !== 1) fail(`expected exactly one <meta name="build-id">, found ${metas.length}`);
+  if (attrs.length !== 1) fail(`expected exactly one data-build-id attribute, found ${attrs.length}`);
+  if (metas[0] !== ids[0]) fail(`<meta name="build-id"> content "${metas[0]}" != script build id ${ids[0]}`);
+  if (attrs[0] !== ids[0]) fail(`data-build-id "${attrs[0]}" != script build id ${ids[0]}`);
+  console.log(`check-release-build: build-id meta + data-build-id = ${ids[0]} ok`);
+}
 // The m3-rc0 name belongs to the m3-rc0 tag only (16176a3): any other HEAD must not ship as m3-rc0.
 const RC0_TAG_COMMIT = process.env.RC0_TAG_COMMIT ?? '16176a3';
 const rc0 = ids.filter(i => i.startsWith('m3-rc0+'));
@@ -61,6 +70,8 @@ const extra = findGlobalWrites(js);
 if (extra.length) fail(`window globals not on the allowlist: ${[...new Set(extra.map(e => `${e.key} (${e.src})`))].join(', ')} (allowed: ${ALLOWED_GLOBALS.join(', ')})`);
 console.log('check-release-build: window global writes only ' + ALLOWED_GLOBALS.join(', ') + ' ok');
 // No external references: the release (esp. the offline single file) loads nothing from other hosts.
+if (single) { const un = findUnresolvedRefs(html, js.split('\n')); if (un.length) fail(`unresolved (not inlined) asset/font URLs in single file: ${[...new Set(un.map(u => `${u.kind} ${u.url}`))].slice(0, 20).join(', ')}`);
+  console.log('check-release-build: every asset/font URL inlined (data:) ok'); }
 if (maps.length) fail(`source maps in release: ${maps.join(', ')}`);
 const ext = findExternalRefs(single ? html : [js, css, html].join('\n'));
 if (ext.length) fail(`external references: ${[...new Set(ext.map(e => `${e.kind} ${e.url}`))].join(', ')}`);

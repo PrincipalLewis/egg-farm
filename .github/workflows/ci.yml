@@ -41,3 +41,9 @@ jobs:
       - run: npm ci
       - name: Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
         run: npm run build:html
+      - name: check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+        run: |
+          prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
+          node scripts/check-release-build.mjs dist-html/egg-farm.html --build-id "$prefix+$(git rev-parse --short HEAD)"
+      - uses: actions/upload-artifact@v4
+        with: { name: egg-farm-html, path: dist-html/egg-farm.html }

@@ -4,7 +4,9 @@ import { it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'; import { tmpdir } from 'node:os'; import { join } from 'node:path';
 // @ts-expect-error plain .mjs helper without types
-import { findGlobalWrites, findExternalRefs, constKey, extractScripts } from '../scripts/release-scan.mjs';
+import { inlineAssetRefs } from '../scripts/build-html.mjs';
+// @ts-expect-error plain .mjs helper without types
+import { findGlobalWrites, findExternalRefs, constKey, extractScripts, findUnresolvedRefs } from '../scripts/release-scan.mjs';
 const script = new URL('../scripts/check-release-build.mjs', import.meta.url).pathname;
 const fx = (n: string) => new URL(`./fixtures/release-html/${n}.html`, import.meta.url).pathname;
 const exec = (...a: string[]) => spawnSync('node', [script, ...a], { env: { ...process.env, HEAD_COMMIT: 'abc1234deadbeef' }, encoding: 'utf8' });
@@ -16,6 +18,8 @@ it('--build-id <id> and --build-id=<id>', () => {
   expect(run('pass', '--build-id', 'm3-rc1-pre+0000000').status).toBe(1); expect(run('pass', '--build-id=m3-rc1-pre+0000000').status).toBe(1);
   const r = run('pass', '--build-id'); expect(r.status).toBe(1); expect(r.stderr).toMatch(/needs a value/);
   expect(run('pass', '--build-id=').status).toBe(1);
+  // meta = data-build-id = script id, but all != --build-id
+  expect(run('pass', '--build-id=m3-rc1-pre+def5678').stderr).toMatch(/!= expected m3-rc1-pre\+def5678/);
 });
 it.each([
   ['fail-computed-key', /eggfarmDbg/], ['fail-template-key', /computed `eggfarm\$\{x\}`/],
@@ -26,6 +30,12 @@ it.each([
   ['fail-css-url', /css url\(\) https:\/\/cdn/], ['fail-css-import', /@import https:\/\/fonts/],
   ['fail-wrong-build-id', /does not match m3-rc1-pre\+abc1234/], ['fail-dirty-build-id', /\+dirty/],
   ['fail-unknown-build-id', /\+unknown/], ['fail-multiple-build-ids', /exactly one build id/],
+  ['fail-meta-missing', /exactly one <meta name="build-id">, found 0/], ['fail-meta-duplicate', /exactly one <meta name="build-id">, found 2/],
+  ['fail-data-attr-missing', /exactly one data-build-id attribute, found 0/], ['fail-data-attr-duplicate', /exactly one data-build-id attribute, found 2/],
+  ['fail-meta-mismatch', /<meta name="build-id"> content "m3-rc1-pre\+def5678" != script build id/], ['fail-data-attr-mismatch', /data-build-id "m3-rc1-pre\+def5678" != script/],
+  ['fail-url-dot-data', /unresolved .*url\(\) \.data:/], ['fail-relative-font-url', /unresolved .*url\(\) \.\.\/fonts\/fredoka/],
+  ['fail-relative-asset-href', /unresolved .*href \.\/fonts\/nunito/], ['fail-js-asset-path', /unresolved .*js asset path \.\/assets\/icon-egg\.svg/],
+  ['fail-regex-in-key', /unparsed key/],
   ['fail-qa-hook', /debug\/QA code.*eggfarmPerf/], ['fail-debug-global-ui', /eggfarmUi/], ['fail-script-close', /unbalanced <script>/],
 ])('%s fails', (n, msg) => { const r = run(n); expect(r.status).toBe(1); expect(r.stderr).toMatch(msg); });
 const dist = (files: Record<string, string>) => { const d = mkdtempSync(join(tmpdir(), 'rbd-')); mkdirSync(join(d, 'assets'));
@@ -63,4 +73,21 @@ it('external-ref shapes', () => {
 it('script extraction fails closed on a stray </script>', () => {
   expect(extractScripts('<script>a</script><script type="module">b</script>')).toEqual(['a', 'b']);
   expect(() => extractScripts('<script>const s="</script>";</script>')).toThrow(/unbalanced/);
+});
+it('build-html rewrite: ./, ../ and ../../ font/asset URLs all become data: (QA F1)', () => {
+  const map = { 'fonts/x.woff2': 'data:font/woff2;base64,AA#fonts/x.woff2', 'assets/i.svg': 'data:image/svg+xml;base64,AA#assets/i.svg' };
+  const css = '@font-face{src:url(../fonts/x.woff2) format("woff2")}a{background:url(../../assets/i.svg)}b{background:url("./assets/i.svg")}'
+    + "c{background:url('../../../fonts/x.woff2')}d{background:url(/assets/i.svg)}";
+  const html = `<html><head><link rel="preload" href="./fonts/x.woff2"><link rel="icon" href="/assets/i.svg"><style>${css}</style></head><body><img src="../assets/i.svg"></body></html>`;
+  const [out, n] = inlineAssetRefs(html, map);
+  expect(n).toBe(8); expect(out).not.toMatch(/\.data:/);
+  const urls = [...out.matchAll(/url\(\s*["']?([^"')]*)/g), ...out.matchAll(/(?:href|src)="([^"]*)"/g)].map(m => m[1]);
+  expect(urls.length).toBe(8); for (const u of urls) expect(u, u).toMatch(/^data:/);
+  expect(findUnresolvedRefs(out)).toEqual([]);
+  expect(findUnresolvedRefs(html).length).toBe(8);
+});
+it('N1/N2: unbalanced, over-long or regex-literal keys fail closed', () => {
+  expect(keys('window[/]/.source]=1')).toEqual(['[unparsed key]']);
+  expect(keys(`window["${'x'.repeat(5000)}"]=1`)).toEqual(['[unparsed key]']);
+  expect(keys('window[a/2].y=1;x=window[a/b];c[0]=1')).toEqual([]);
 });

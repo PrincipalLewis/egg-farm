@@ -20,9 +20,10 @@ export function constKey(expr) {
   return out;
 }
 /** Index just past the bracket/brace/paren matching s[i]; -1 if unbalanced. Skips simple string literals. */
+export const MAX_KEY = 4000;
 function close(s, i) {
   const open = s[i], shut = { '[': ']', '{': '}', '(': ')' }[open]; let d = 0;
-  for (let j = i; j < s.length && j < i + 4000; j++) {
+  for (let j = i; j < s.length && j < i + MAX_KEY; j++) {
     const c = s[j];
     if (c === '"' || c === "'" || c === '`') { const q = c; for (j++; j < s.length && s[j] !== q; j++) if (s[j] === '\\') j++; continue; }
     if (c === open) d++; else if (c === shut && --d === 0) return j + 1;
@@ -67,8 +68,16 @@ export function findGlobalWrites(src, allowed = ALLOWED_GLOBALS) {
   for (const m of js.matchAll(new RegExp(`(?<![\\w$.])(?:${A})\\.(eggfarm[\\w$]*)\\s*${ASSIGN}`, 'g'))) hit(m[1], m[0]);
   // bracket writes (balanced, so window[a[0]]= is seen)
   for (const [base, isRoot] of [[R, true], [A, false]]) for (const m of js.matchAll(new RegExp(`(?<![\\w$.])(?:${base})\\s*(?=\\[)`, 'g'))) {
-    const i = m.index + m[0].length, j = close(js, i); if (j < 0) continue;
-    if (!new RegExp(`^\\s*${ASSIGN}`).test(js.slice(j, j + 5))) continue;
+    const i = m.index + m[0].length, j = close(js, i);
+    // N1/N2 (CCR): unbalanced or over-long key (regex literal with ], huge expression) - fail closed, flag as unparsed.
+    if (j < 0) { if (isRoot || /['"`]eggfarm/.test(js.slice(i, i + 200))) hits.push({ key: '[unparsed key]', src: js.slice(m.index, m.index + 60) }); continue; }
+    if (!new RegExp(`^\\s*${ASSIGN}`).test(js.slice(j, j + 5))) {
+      // N1 (CCR): a regex literal in the key (window[/]/.source]=, window[k.replace(/[\]]/g,'')]=) ends the bracket early;
+      // if a `]=` follows in the same statement, fail closed.
+      if (js.slice(i, j).includes('/') && new RegExp(`^[^;\\n]{0,${MAX_KEY}}?\\]\\s*${ASSIGN}`).test(js.slice(j, j + MAX_KEY)) && (isRoot || /['"`]eggfarm/.test(js.slice(i, i + 200))))
+        hits.push({ key: '[unparsed key]', src: js.slice(m.index, m.index + 60) });
+      continue;
+    }
     const expr = js.slice(i + 1, j - 1), k = constKey(expr), s = js.slice(m.index, j + 3);
     if (isRoot) hit(k ?? `[computed ${expr.trim()}]`, s);
     else if (k !== null ? isEgg(k) : /['"`]eggfarm/.test(expr)) hit(k ?? `[computed ${expr.trim()}]`, s);
@@ -124,4 +133,33 @@ export function extractScripts(html) {
   if (opens !== closes || bodies.length !== opens) throw new Error(`unbalanced <script> tags (${opens} open, ${closes} close) - a literal "</script" inside inline JS? escape it as <\\/script`);
   if (bodies.some(b => /<script\b/i.test(b))) throw new Error('nested "<script" inside an inline script - escape it as <\\/script / <\\script');
   return bodies;
+}
+
+/** Single-file only: any asset/font URL that was not inlined (QA F1). Markup + CSS: every url(), src, href, srcset, poster,
+ *  <object data> must be data:/blob:/#/about:/javascript:/mailto: (external http(s) is findExternalRefs' job). JS: string
+ *  literals naming a concrete asset file (./assets/x.svg, ../fonts/x.woff2) left behind. `url(.data:` is caught as relative. */
+export function findUnresolvedRefs(html, scripts = []) {
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '<script></script>');
+  const ok = u => /^(?:data:|blob:|#|about:|javascript:|mailto:|(?:https?:|wss?:)?\/\/)/i.test(u) || u === '';
+  const out = [];
+  for (const m of markup.matchAll(/\burl\(\s*(["']?)([^"')]*)\1\s*\)/gi)) if (!ok(m[2].trim())) out.push({ kind: 'url()', url: m[2] });
+  for (const m of markup.matchAll(/@import\s+(["'])([^"']+)\1/gi)) if (!ok(m[2])) out.push({ kind: '@import', url: m[2] });
+  for (const m of markup.matchAll(/<[a-z][^>]*>/gi)) for (const a of m[0].matchAll(/\s(src|href|poster|data|srcset)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)) {
+    if (a[1].toLowerCase() === 'data' && !/^<object\b/i.test(m[0])) continue;
+    const v = (a[2] ?? a[3] ?? a[4]).trim();
+    const urls = a[1].toLowerCase() === 'srcset' ? v.split(/,\s+/).map(x => x.trim().split(/\s+/)[0]) : [v];
+    for (const u of urls) if (!ok(u)) out.push({ kind: a[1], url: u });
+  }
+  const ASSET = /(["'`])((?:\.{1,2}\/|\/)*(?:assets|fonts)\/[A-Za-z0-9._\-/]+\.(?:svg|woff2?|ttf|otf|png|webp|jpe?g|gif|mp3|ogg|wav))\1(?!\s*:)/g; // `"assets/x.svg":` = a key of the inlined-asset map, not a ref
+  for (const s of scripts) for (const m of s.matchAll(ASSET)) out.push({ kind: 'js asset path', url: m[2] });
+  return out;
+}
+
+/** Single-file only: <meta name="build-id" content> and data-build-id values (F-META). */
+export function findBuildIdMarkup(html) {
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '<script></script>');
+  const metas = [...markup.matchAll(/<meta\b[^>]*>/gi)].map(m => m[0]).filter(t => /\bname\s*=\s*["']?build-id["'\s>/]/i.test(t))
+    .map(t => (/\bcontent\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(t) ?? []).slice(1).find(x => x !== undefined) ?? null);
+  const attrs = [...markup.matchAll(/\sdata-build-id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)].map(m => m[1] ?? m[2] ?? m[3]);
+  return { metas, attrs };
 }
