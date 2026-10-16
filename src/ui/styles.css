@@ -481,3 +481,8 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .qdot[hidden]{display:none}
 .qdot.qdpulse{animation:qdpulse 600ms ease-in-out 1}@keyframes qdpulse{50%{transform:scale(1.12)}}
 .rm .qdot.qdpulse{animation:none}
+/* Art & UX review rc1-ui-fc8e1cf #1: the phone-nav Refill icon greys out during cooldown (timer text stays #5A4C42) */
+.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55}
+nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55} /* beats the S2-5 filter:none reset */
+/* #2: docked Upgrades-header Refill pill never under 44px tall */
+@media (min-width:960px) and (orientation:landscape){.sheet header button.desk-manage-all:not([hidden]){min-height:44px;box-sizing:border-box}}

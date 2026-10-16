@@ -154,16 +154,18 @@ sections.s289 = async () => {
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
     await page.waitForTimeout(1300);
     const r = await page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, shook: e.classList.contains('rshake') }; });
-    ok('S2-8 negative net rate: "▼−$0.xx/s", 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$0\.\d\d\/s$/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus \d+ cents per second$/.test(r.aria) && r.shook, JSON.stringify(r));
+    ok('S2-8 negative net rate: "▼−$x.xx/min|/s" (U+2212, no hyphen), 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$\d+\.\d\d\/(s|min)$/.test(r.text) && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus [\d.]+ (cents|dollars) per (second|minute)$/.test(r.aria) && r.shook, JSON.stringify(r));
     if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-rate-negative-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
     await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
     const wl = await page.evaluate(() => [...document.querySelectorAll('#uRow .wk .wage')].map(e => e.textContent));
-    ok('S2-8 wage lines on worker and hire cards', wl.length >= 2 && wl.every(t => /^Wage \$[\d.]+\/s$/.test(t)), JSON.stringify(wl));
+    ok('S2-8 wage lines on worker and hire cards', wl.length >= 2 && wl.every(t => /^Wage \$[\d.]+\/(s|min)$/.test(t)), JSON.stringify(wl));
     if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-hire-card-wage-390.png` });
     await ctx.close(); }
   { const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 0, customers: Array.from({ length: 6 }, (_, i) => ({ id: 600 + i, demand: 5, filled: 0, waitedS: 0 })), nextCustomerInS: 1e9 }; });
     await page.waitForTimeout(400);
+    const dotPaint = await page.evaluate(() => { const e = document.querySelector('.qdot'), cs = getComputedStyle(e); return { box: [e.offsetWidth, e.offsetHeight], /* layout box; the rect is scaled mid-pulse */ bg: cs.backgroundColor, bw: cs.borderTopWidth, bc: cs.borderTopColor, shadow: cs.boxShadow, outline: cs.outlineStyle, content: [getComputedStyle(e, '::before').content, getComputedStyle(e, '::after').content] }; });
+    ok('Review #3: Market dot = 10px #B83B37 fill inside a 2px white ring, 14px box, nothing else painted', dotPaint.box.join() === '14,14' && dotPaint.bg === 'rgb(184, 59, 55)' && dotPaint.bw === '2px' && dotPaint.bc === 'rgb(255, 255, 255)' && dotPaint.shadow === 'none' && dotPaint.outline === 'none' && dotPaint.content.every(c => c === 'none' || c === 'normal'), JSON.stringify(dotPaint));
     const a = await page.evaluate(() => ({ dot: !document.querySelector('.qdot').hidden, aria: document.querySelector('[data-nav=market]').getAttribute('aria-label'), sheet: !document.querySelector('#p-market').hidden }));
     if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-9-market-dot-390.png`, clip: { x: 0, y: 0, width: 390, height: 844 } });
     await page.locator('[data-nav=market]').click(); await page.waitForTimeout(200); await page.locator('.sheet:not([hidden]) .close').click(); await page.waitForTimeout(200);
@@ -279,7 +281,9 @@ sections.s25 = async () => {
   const r2 = await read(); check(r2, 'after reload');
   ok('S2-5 exactly one worker button in the DOM after reload', (await page.locator('[data-act=manageAll]').count()) === 1);
   await page.locator('nav [data-act=manageAll]').click(); await page.waitForTimeout(300);
-  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'); return { label: b.querySelector('.nav-lbl').textContent, aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled') }; });
+  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
+  ok('Review #1: nav Refill icon greyed during cooldown (grayscale(1), opacity .55)', cd.filter === 'grayscale(1)' && cd.op === '0.55', JSON.stringify(cd));
+  if (shot) await page.screenshot({ path: `${SHOTS}/rc1-review1-nav-refill-cooldown-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
   ok('S2-5 cooldown: label "0:NN", aria "Refill available in N seconds", aria-disabled', /^0:\d\d$/.test(cd.label) && /^Refill available in \d+ seconds$/.test(cd.aria) && cd.dis === 'true', JSON.stringify(cd));
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-5-nav-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
   await ctx.close();
@@ -298,6 +302,11 @@ sections.b58 = async () => {
     if (w > 900) { const bb = await page.locator('.farm-manage-all').boundingBox(); ok('B8 desktop Manage sits in the Upgrades header, 44px tall, labelled (S2-5)', bb && bb.width >= 44 && bb.height === 44 && /Refill tired \(\d\)/.test(await page.locator('.farm-manage-all').innerText()) && (await page.locator('#p-upgrades header .farm-manage-all').count()) === 1, JSON.stringify(bb)); }
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
+    if (w > 900) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await page.waitForTimeout(400);
+      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText }; });
+      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && /^Ready in \d+s$/.test(d.text.trim()), JSON.stringify(d));
+      if (shot) await page.screenshot({ path: `${SHOTS}/rc1-review2-docked-refill-cooldown-${w}.png`, clip: { x: 560, y: 300, width: 720, height: 140 } });
+      await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, manageCdS: 0 }; }); await page.waitForTimeout(300); }
     const pill = await page.locator('#uRow .manage-all').textContent().catch(() => '');
     ok(`B5 one worker <= 40% -> Farm View button visible + "Refill tired (1)" (${w})`, vis2 === 1 && /Refill tired \(1\)/.test(pill), `vis=${vis2} pill=${pill}`);
     await ctx.close();
