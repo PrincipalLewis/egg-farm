@@ -66,6 +66,18 @@ export class Telemetry {
     if (!this.dirty) return; try { this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++; } catch { /* AC14c: quota/private mode; keep the buffer in memory */ }
   }
   events(): readonly TEvent[] { return this.buf; }
+  /** Fields never returned by the console export (window.eggfarmExportTelemetry): the per-install id. */
+  static readonly REDACT = ['install_id'] as const;
+  /** Read-only export for the window.eggfarmExportTelemetry console global: no side effects (open tap/worker windows are
+   *  appended as virtual events without being closed, nothing is written to storage), install_id removed.
+   *  Settings > Export log keeps exportJSON() (M3-AC7 playtest log, includes install_id). */
+  snapshotJSON(): string {
+    const t = this.now(), extra: TEvent[] = [];
+    if (this.tapWin) extra.push({ type: 'tap', ts: this.tapWin.start, sessionMs: this.tapWin.start - this.sessionStart, count: this.tapWin.count, eggs: this.tapWin.eggs, open: true });
+    if (this.sumWin) extra.push({ ...this.sumWin.v, type: 'worker_summary', ts: this.sumWin.start, sessionMs: this.sumWin.start - this.sessionStart, windowMs: t - this.sumWin.start, open: true });
+    const events = [...this.buf, ...extra].map(e => { const o: Record<string, unknown> = { ...e }; for (const k of Telemetry.REDACT) delete o[k]; return o; });
+    return JSON.stringify({ exportedAt: t, events }, null, 2);
+  }
   exportJSON(): string { this.closeTapWindow(); this.closeSumWindow(); return JSON.stringify({ exportedAt: this.now(), events: this.buf }, null, 2); }
   // Onboarding hooks: wired now, called by the onboarding overlay when it lands.
   onboardingStep(step: number, name: string, extra: Record<string, unknown> = {}) { this.track('onboarding_step', { step, name, ...extra }); }
