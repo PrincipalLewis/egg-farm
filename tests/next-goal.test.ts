@@ -8,12 +8,12 @@ import { secondsToAffordSteady } from '../src/econ/income';
 const st = (o: any = {}) => ({ ...initialState(b, 1), ...o });
 
 describe('next-goal selection (bestBuy)', () => {
-  it('start state: Collection, waiting with Affordable in (UC17)', () => {
+  it('start state: Collection, waiting with short ~m:ss eta (v1.4)', () => {
     const g = selectGoal(st({ coinsCents: 0 }), b);
     expect(g.key).toBe('COLL');
     expect(g.tab).toBe('collection');
     expect(g.state).toBe('waiting');
-    expect(g.status.startsWith('Affordable') || g.status === '—').toBe(true);
+    expect(g.status === '—' || /^~\d/.test(g.status)).toBe(true);
     expect(secondsToAffordSteady(st(), b, 10 * 100)!).toBeLessThanOrEqual(60);
   });
   it('Ready when coins cover best buy', () => {

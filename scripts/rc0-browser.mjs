@@ -354,7 +354,7 @@ sections.b58 = async () => {
     ok(`B5 workers at 81-98% -> no Manage all shown (${w})`, vis1 === 0, `dom=${n1}`);
     await set([30, 41, 98]); await page.waitForTimeout(300);
     const vis2 = await page.locator('.farm-manage-all:visible').count();
-    if (w > 900) { const bb = await page.locator('.farm-manage-all').boundingBox(); ok('B8 desktop Manage sits in the Upgrades header, 44px tall, labelled (S2-5)', bb && bb.width >= 44 && bb.height === 44 && /Refill tired \(\d\)/.test(await page.locator('.farm-manage-all').innerText()) && (await page.locator('#p-upgrades header .farm-manage-all').count()) === 1, JSON.stringify(bb)); }
+    if (w > 900) { const bb = await page.locator('.farm-manage-all').boundingBox(); ok('B8 desktop Manage sits in the Upgrades header, 44px tall, labelled (S2-5)', bb && bb.width >= 44 && bb.height === 44 && /Refill \d+ tired workers?/.test(await page.locator('.farm-manage-all').innerText()) && (await page.locator('#p-upgrades header .farm-manage-all').count()) === 1, JSON.stringify(bb)); }
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
     if (w > 900) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await page.waitForTimeout(400);
@@ -367,7 +367,7 @@ sections.b58 = async () => {
         if (shot) { const x = Math.max(0, bb.x - pad), y = Math.max(0, bb.y - pad); await page.screenshot({ path: `${SHOTS}/rc1-review2-docked-refill-cooldown-${w}.png`, clip: { x, y, width: Math.min(w - x, bb.width + 2 * pad), height: bb.height + 2 * pad } }); } }
       await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, manageCdS: 0 }; }); await page.waitForTimeout(300); }
     const pill = await page.locator('#uRow .manage-all').textContent().catch(() => '');
-    ok(`B5 one worker <= 40% -> Farm View button visible + "Refill tired (1)" (${w})`, vis2 === 1 && /Refill tired \(1\)/.test(pill), `vis=${vis2} pill=${pill}`);
+    ok(`B5 one worker <= 40% -> Farm View button visible + "Refill 1 tired worker" (${w})`, vis2 === 1 && /Refill 1 tired worker/.test(pill), `vis=${vis2} pill=${pill}`);
     await ctx.close();
   }
 };
@@ -468,7 +468,7 @@ sections.p1toast = async () => {
 
 // ---------- Art & UX Oct 16: per-worker Refill (nav glyph, >=44px, muted+disabled never hidden) at 360 ----------
 sections.p1refill = async () => {
-  for (const [name, energy, cd, cap] of [['available', 30, 0, ''], ['not-tired', 90, 0, 'Not tired yet'], ['cooldown', 30, 12, 'Ready in 12s']]) {
+  for (const [name, energy, cd, cap] of [['available', 30, 0, ''], ['not-tired', 90, 0, 'Rested, refill below 40%'], ['cooldown', 30, 12, 'Ready in 12s']]) {
     const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 500000, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 5, customers: [], nextCustomerInS: 50, nextCustomerId: 1, rng: 5, pendingOfflineEggs: 0, celebratedTier: 1,
       workers: { market_hand: { energy, cdS: 1 } }, graderTier: 0, manageCdS: cd, coopFullS: 0 } });
     const { ctx, page } = await open({ w: 360, h: 800, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });

@@ -53,7 +53,7 @@ describe('S2-5 nav labels (session2-ui-triage (b))', async () => {
   });
   it('ready: "Refill" + N badge; aria "Refill N tired workers"', () => {
     expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Refill', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
-    expect(navManageView(2, 0, true, P, 0).label).toBe('Refill tired (2)');
+    expect(navManageView(2, 0, true, P, 0).label).toBe('Refill 2 tired workers');
   });
   it('cooldown: "0:28", no badge; aria text changes at most every 5 s', () => {
     const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe('');
@@ -69,21 +69,24 @@ describe('Workers v1.3 (m2-workers-layout §4.4, m2-proposal §8 #19-20)', async
   const { initialState } = await import('../src/sim/state');
   const S = (e: number[], cd = 0): any => ({ ...initialState(b, 3), farmLevel: 10, manageCdS: cd, graderTier: 1,
     workers: Object.fromEntries((['market_hand', 'coop_hand', 'hawker', 'grader'] as const).slice(0, e.length).map((id, i) => [id, { energy: e[i], cdS: 0 }])) });
-  it('"Refill tired (N)", N = workers at <= 40%; aria "Refill N tired workers"', () => {
-    const h = manageAllHtml(S([40, 41, 10]), b); expect(h).toContain('Refill tired (2)'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested/);
+  it('AC-R9: "Refill N tired workers", N = workers at <= 40%; hidden at N=0', () => {
+    const h = manageAllHtml(S([40, 41, 10]), b); expect(h).toContain('Refill 2 tired workers'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested|1 tired workers|Refill tired \(/);
+    expect(manageAllHtml(S([40, 41, 90]), b)).toContain('Refill 1 tired worker');
   });
-  it('locked under 3 hired; shown at N>=1; hidden at N=0 unless cooling down (then greyed + ring + "Ready in Ns")', () => {
+  it('AC-R9: locked under 3 hired; shown at N>=1; hidden at N=0 (including during cooldown)', () => {
     expect(manageAllHtml(S([10, 10]), b)).toBe(''); expect(farmManageAllVisible(S([10, 10]), b, false)).toBe(false);
     expect(manageAllHtml(S([90, 90, 90]), b)).toBe('');
-    const cd = manageAllHtml(S([90, 90, 90], 12.2), b);
-    expect(cd).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true"/); expect(cd).toContain('ring-cooldown'); expect(cd).toContain('Ready in 13s');
+    expect(manageAllHtml(S([90, 90, 90], 12.2), b)).toBe(''); // N=0 → hidden (Addendum 2)
+    const cd = manageAllHtml(S([10, 90, 90], 12.2), b);
+    expect(cd).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true"/); expect(cd).toContain('ring-cooldown'); expect(cd).toContain('Ready in 13s'); expect(cd).toContain('Refill 1 tired worker');
   });
-  it('per-worker Manage enabled only at <= 40%; greyed caption "Not tired yet" / "Ready in Ns"', () => {
+  it('AC-R8: greyed caption "Rested, refill below 40%" / "Ready in Ns"; energy reason wins when both', () => {
     const h = workersHtml(S([40, 41, 90]), b);
     expect(h).toMatch(/data-w="market_hand" aria-disabled="false"/); expect(h).toMatch(/data-w="coop_hand" aria-disabled="true" aria-describedby="cap-coop_hand"/);
-    expect(h).toContain('<div class="wk-cap num" id="cap-coop_hand">Not tired yet</div>'); expect(h).not.toContain('id="cap-market_hand"');
+    expect(h).toContain('<div class="wk-cap num" id="cap-coop_hand">Rested, refill below 40%</div>'); expect(h).not.toContain('id="cap-market_hand"');
     expect(manageCaption({ energy: 10, cdS: 0 } as any, 7, b)).toBe('Ready in 7s');
-    expect(workersHtml(S([10, 90, 90], 7), b).match(/Ready in 7s/g)!.length).toBe(4); // pill + 3 workers
+    expect(manageCaption({ energy: 90, cdS: 0 } as any, 7, b)).toBe('Rested, refill below 40%'); // energy first
+    expect(workersHtml(S([10, 90, 90], 7), b).match(/Ready in 7s/g)!.length).toBe(2); // pill (N=1) + tired worker
   });
 });
 
@@ -259,3 +262,72 @@ describe('Art & UX review rc1-ui-fc8e1cf #1/#2', () => {
     expect(css).toMatch(/\.sheet header button\.desk-manage-all:not\(\[hidden\]\)\{min-height:44px;box-sizing:border-box\}/);
   });
 });
+
+describe('C-AC26 Collection price-first copy (feature-spec §12)', async () => {
+  const { collectionFxLines, collectionSummary, collectionDeltas, isBareTapOnly } = await import('../src/ui/collection-copy');
+  const { balance: b } = await import('../src/config/balance');
+  const { labelFor, goalLabelParts } = await import('../src/ui/next-goal');
+  const { initialState } = await import('../src/sim/state');
+  const appSrc = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+  const wkSrc = readFileSync(new URL('../src/ui/workers-ui.ts', import.meta.url), 'utf8');
+  const ngSrc = readFileSync(new URL('../src/ui/next-goal.ts', import.meta.url), 'utf8');
+  it('deltas come from balance (12 and 5), not hard-coded literals in the helper', () => {
+    const d = collectionDeltas(b);
+    expect(d.pricePct).toBe(Math.round(b.collection.pricePercentPerLevel * 100));
+    expect(d.tap).toBe(b.collection.eggsPerTapPerLevel);
+    expect(d.pricePct).toBe(12); expect(d.tap).toBe(5);
+  });
+  it('fx list: Egg price +{12L}% → +{12(L+1)}% first, then Eggs per tap {5+5L} → {5+5(L+1)}', () => {
+    expect(collectionFxLines(4, b)).toEqual(['Egg price +48% → +60%', 'Eggs per tap 25 → 30']);
+    expect(collectionFxLines(0, b)[0]).toMatch(/^Egg price/);
+  });
+  it('short summary reads "+12% egg price · +5/tap"', () => {
+    expect(collectionSummary(b)).toBe('+12% egg price · +5/tap');
+  });
+  it('goal strip format ★ Collection L{n} · +X% income', () => {
+    const s = { ...initialState(b, 3), collectionLevel: 4, farmLevel: 5 } as any;
+    expect(labelFor('COLL', s, b, 12)).toBe('★ Collection L5 · +12% income');
+  });
+  it('no UI string is bare "+5/tap" / "+N/tap" without price', () => {
+    for (const src of [appSrc, wkSrc, ngSrc]) {
+      for (const m of src.matchAll(/['"`]([^'"`]*\/tap[^'"`]*)['"`]/g)) {
+        expect(isBareTapOnly(m[1]), m[1]).toBe(false);
+      }
+    }
+    expect(isBareTapOnly('+5/tap')).toBe(true);
+    expect(isBareTapOnly('+12% egg price · +5/tap')).toBe(false);
+  });
+  it('v1.4 goal label parts: ★ + track + gain; short Coll.', () => {
+    const s = { ...initialState(b, 3), collectionLevel: 24 } as any;
+    const p = goalLabelParts('COLL', s, 12);
+    expect(p).toEqual({ star: '★ ', track: 'Collection L25', shortTrack: 'Coll. L25', gain: ' · +12% income' });
+    expect(labelFor('COLL', s, b, 12)).toBe('★ Collection L25 · +12% income');
+  });
+  it('v1.4 overflow CSS: g-gain no shrink, g-track ellipsis', () => {
+    expect(css).toMatch(/\.goal-label \.g-gain\{flex:0 0 auto/);
+    expect(css).toMatch(/\.goal-label \.g-track\{min-width:0;overflow:hidden;text-overflow:ellipsis/);
+    expect(app).toContain('fitGoalLabelEl');
+    expect(app).toContain('paintGoalLabel');
+  });
+});
+
+describe('rc1-upgrade-value v1.4 tokens + best-buy outline', () => {
+  it('meadow-text/tint, danger→barn-ui, no fake surface-2/text-muted', () => {
+    expect(css).toMatch(/--c-meadow-text:#2F6B27/);
+    expect(css).toMatch(/--c-meadow-tint:#E8F4E4/);
+    expect(css).toMatch(/--c-barn-ui:#B83B37/);
+    expect(css).toMatch(/--c-danger:var\(--c-barn-ui\)/);
+    expect(css).not.toMatch(/--c-surface-2|--c-text-muted|--c-vchip-|--c-banner-fail/);
+    expect(css).toMatch(/\.vchip\.eff\{background:var\(--c-meadow-tint\);color:var\(--c-meadow-text\)\}/);
+    expect(css).toMatch(/\.vchip\.pb\{background:var\(--c-cream\)/);
+    expect(css).toMatch(/\.vchip\.muted\{background:var\(--c-cream\);color:var\(--c-muted\)\}/);
+    expect(css).toMatch(/\.up\.best-buy\{outline:2px solid var\(--c-yolk-dark\);outline-offset:2px\}/);
+    expect(css).toMatch(/\.btn\.maxed\{background:var\(--c-yolk\);color:var\(--c-text\)/);
+  });
+  it('asleep banner 32px danger; Refill ≥44×88; Ready! yolk 20px', () => {
+    expect(css).toMatch(/\.wk-banner\{[^}]*height:32px[^}]*background:var\(--c-danger\)/);
+    expect(css).toMatch(/\.wk \.btn\.manage\{min-height:44px;min-width:88px\}/);
+    expect(css).toMatch(/\.goal-status\.chip\{[^}]*height:20px[^}]*background:var\(--c-yolk\);color:var\(--c-text\)/);
+  });
+});
+

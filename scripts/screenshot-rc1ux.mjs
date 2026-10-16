@@ -50,6 +50,8 @@ async function shot(name, save, viewport, after) {
     goal: document.querySelector('#goal .goal-label')?.textContent,
     status: document.querySelector('#goal .goal-status')?.textContent,
     chips: [...document.querySelectorAll('.vchip')].map(e => e.textContent),
+    sum: document.querySelector('.up .sum')?.textContent,
+    fx: [...document.querySelectorAll('.up .fx li')].map(e => e.textContent),
     best: !!document.querySelector('.up.best-buy'),
     asleepBadge: document.querySelector('.asleep-badge')?.textContent,
     banner: document.querySelector('.wk-banner')?.textContent,
@@ -82,10 +84,46 @@ const openUpgrades = async (p, tab = 'collection') => {
   await p.waitForTimeout(500);
 };
 await shot('360', mk({}), { width: 360, height: 640 }, p => openUpgrades(p, 'collection'));
+await shot('375', mk({}), { width: 375, height: 667 }, p => openUpgrades(p, 'collection'));
 await shot('1280', mk({}), { width: 1280, height: 720 }, p => openUpgrades(p, 'collection'));
 await shot('asleep-360', mk({
   farmLevel: 7, collectionLevel: 5, coinsCents: 5000,
   workers: { coop_hand: { energy: 0, cdS: 0 }, market_hand: { energy: 100, cdS: 0 } },
 }), { width: 360, height: 640 }, p => openUpgrades(p, 'workers'));
+// C-AC26b: L25 goal strip at 360 — measure Fredoka widths with/without ★
+await shot('goalstrip-L25-360', mk({
+  farmLevel: 20, collectionLevel: 24, coinsCents: 50,
+  workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 } },
+}), { width: 360, height: 640 }, async (p) => {
+  await p.waitForTimeout(300);
+  await p.evaluate(async () => { await document.fonts.ready; });
+  const widths = await p.evaluate(() => {
+    const el = document.querySelector('.goal-label');
+    const cs = getComputedStyle(el);
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const full = '★ Collection L25 · +12% income';
+    const noStar = 'Collection L25 · +12% income';
+    const withStar = ctx.measureText(full).width;
+    const withoutStar = ctx.measureText(noStar).width;
+    // Apply the same C-AC26b rule the app uses, then paint so the shot shows L25.
+    const fitted = withStar > 200 ? noStar : full;
+    el.textContent = fitted;
+    return { font: ctx.font, withStar, withoutStar, painted: fitted, budget: 200 };
+  });
+  console.log('C-AC26b L25 widths', JSON.stringify(widths));
+  const dropCheck = await p.evaluate(() => {
+    const el = document.querySelector('.goal-label');
+    const cs = getComputedStyle(el);
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const long = '★ Collection L30 · +999% income';
+    const w = ctx.measureText(long).width;
+    const fitted = w > 200 ? long.slice(2) : long;
+    return { long, w, fitted, dropped: fitted !== long };
+  });
+  console.log('C-AC26b drop-path check', JSON.stringify(dropCheck));
+  await p.waitForTimeout(100);
+});
 await browser.close(); kill();
 console.log('done');

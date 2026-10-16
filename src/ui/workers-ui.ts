@@ -43,15 +43,20 @@ export class YawnSfx {
   }
 }
 /** Manage all pill (layout §4.4): hidden < manage_all_min_workers, and hidden when N (workers <= threshold) is 0 (B5). */
+export const refillTiredLabel = (n: number) =>
+  n === 1 ? 'Refill 1 tired worker' : `Refill ${n} tired workers`;
+
 export function manageAllHtml(s: GameState, b: Balance): string {
   if (!showManageAll(s.workers, b)) return '';
-  const n = promptManage(s, b).length, cd = Math.ceil(s.manageCdS); if (n === 0 && cd === 0) return ''; // PT1-10
-  const glow = n > 0 && WORKERS.some(id => isYawning(s.workers[id], b));
-  // v1.3 (m2-workers-layout §4.4): "Refill tired (N)"; during the shared cooldown greyed + ring + "Ready in Ns" caption.
-  return `<div class="refill-wrap"><button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0}" aria-label="Refill ${n} tired workers"${cd > 0 ? ' aria-describedby="refillCap"' : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>Refill tired (${n})</span></button>${cd > 0 ? `<div class="wk-cap num" id="refillCap">Ready in ${cd}s</div>` : ''}</div>`;
+  const n = promptManage(s, b).length, cd = Math.ceil(s.manageCdS);
+  if (n === 0) return ''; // AC-R9: hidden when N=0
+  const glow = WORKERS.some(id => isYawning(s.workers[id], b));
+  const label = refillTiredLabel(n);
+  return `<div class="refill-wrap"><button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0}" aria-label="${label}"${cd > 0 ? ' aria-describedby="refillCap"' : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>${label}</span></button>${cd > 0 ? `<div class="wk-cap num" id="refillCap">Ready in ${cd}s</div>` : ''}</div>`;
 }
 /** v1.3 §4.4: caption under a greyed per-worker Manage: "Ready in Ns" during the shared cooldown, else "Not tired yet" above 40%. */
-export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) => cdS > 0 ? `Ready in ${cdS}s` : !needsPrompt(w, b) ? 'Not tired yet' : '';
+export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) =>
+  !needsPrompt(w, b) ? 'Rested, refill below 40%' : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
 export function workersHtml(s: GameState, b: Balance): string {
   return manageAllHtml(s, b) + WORKERS.map(id => {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
@@ -101,5 +106,5 @@ export function navManageView(n: number, cdS: number, docked: boolean, prev: Nav
     const fresh = prev.text.startsWith('Refill available in') && nowMs - prev.at < 5000;
     return { label, badge: '', aria: fresh ? prev : { text: `Refill available in ${cd} seconds`, at: nowMs } };
   }
-  return { label: docked ? `Refill tired (${n})` : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: `Refill ${n} tired workers`, at: nowMs } };
+  return { label: docked ? refillTiredLabel(n) : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
 }

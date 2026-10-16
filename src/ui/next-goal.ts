@@ -2,7 +2,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { coopTier } from '../sim/state';
-import { fmtAffordableIn } from './format';
+import { fmtAffordableIn, fmtGoalEta } from './format';
 import { bestBuy, bestBuyNeedsRefill, optionGain, options as buyOptions, type BuyKey, BUY_ORDER } from '../econ/best-buy';
 import { incomePerSec, secondsToAffordSteady } from '../econ/income';
 
@@ -55,10 +55,68 @@ function levelFor(key: GoalKey, s: GameState): number {
   }
 }
 
+export type GoalLabelParts = { star: string; track: string; shortTrack: string; gain: string };
+
+function shortTrackName(key: GoalKey): string {
+  switch (key) {
+    case 'COLL': return 'Coll.';
+    case 'FARM': return 'Farm';
+    case 'W1': return 'M. Hand';
+    case 'W2': return 'C. Hand';
+    case 'W3': return 'Hawker';
+    case 'W4': return 'Grader';
+  }
+}
+
+/** Structured goal label parts (art-ux rc1-upgrade-value v1.4 §4). */
+export function goalLabelParts(key: GoalKey, s: GameState, pct: number): GoalLabelParts {
+  const n = levelFor(key, s);
+  if (key === 'FARM' || key === 'COLL') {
+    return { star: '★ ', track: `${trackName(key)} L${n}`, shortTrack: `${shortTrackName(key)} L${n}`, gain: ` · +${pct}% income` };
+  }
+  if (key === 'W4') {
+    return { star: '★ ', track: `Grader tier ${n}`, shortTrack: `Grader ${n}`, gain: ` · +${pct}% income` };
+  }
+  return { star: '★ ', track: `Hire ${trackName(key)}`, shortTrack: `Hire ${shortTrackName(key)}`, gain: ` · +${pct}% income` };
+}
+
 export function labelFor(key: GoalKey, s: GameState, _b: Balance, pct: number): string {
-  if (key === 'FARM' || key === 'COLL') return `★ ${trackName(key)} L${levelFor(key, s)} · +${pct}% income`;
-  if (key === 'W4') return `★ Grader tier ${levelFor(key, s)} · +${pct}% income`;
-  return `★ Hire ${trackName(key)} · +${pct}% income`;
+  const p = goalLabelParts(key, s, pct);
+  return `${p.star}${p.track}${p.gain}`;
+}
+
+/** Paint .g-star / .g-track / .g-gain into the goal-label element. */
+export function paintGoalLabel(el: HTMLElement, parts: GoalLabelParts | null, plain: string): void {
+  if (!parts) { el.textContent = plain; return; }
+  el.replaceChildren();
+  const star = document.createElement('span'); star.className = 'g-star'; star.textContent = parts.star;
+  const track = document.createElement('span'); track.className = 'g-track';
+  track.dataset.full = parts.track; track.dataset.short = parts.shortTrack; track.textContent = parts.track;
+  const gain = document.createElement('span'); gain.className = 'g-gain'; gain.textContent = parts.gain;
+  el.append(star, track, gain);
+}
+
+/**
+ * v1.4 §4 overflow (supersedes C-AC26b drop-★-only): measure once per render.
+ * Order: hide ★ → short track name → CSS ellipsis on .g-track. .g-gain never shrinks.
+ */
+export function fitGoalLabelEl(el: HTMLElement): void {
+  const star = el.querySelector('.g-star') as HTMLElement | null;
+  const track = el.querySelector('.g-track') as HTMLElement | null;
+  if (!star || !track) return;
+  star.hidden = false;
+  track.textContent = track.dataset.full ?? track.textContent;
+  if (el.scrollWidth <= el.clientWidth + 0.5) return;
+  star.hidden = true;
+  if (el.scrollWidth <= el.clientWidth + 0.5) return;
+  track.textContent = track.dataset.short ?? track.textContent;
+}
+
+/** @deprecated kept for tests that check the old budget helper */
+export const GOAL_LABEL_BUDGET_PX = 200;
+export function fitGoalLabel(label: string, widthPx: number, budget = GOAL_LABEL_BUDGET_PX): string {
+  if (widthPx <= budget) return label;
+  return label.startsWith('★ ') ? label.slice(2) : label;
 }
 
 function tabFor(key: GoalKey): Goal['tab'] {
@@ -81,7 +139,7 @@ function goalFrom(key: GoalKey, s: GameState, b: Balance, payback: number): Goal
   const inc = incomePerSec(s, b);
   const secs = ready ? 0 : secondsToAffordSteady(s, b, costCents - coins);
   const state: GoalState = ready ? 'ready' : (secs === null || inc <= 0) ? 'noincome' : 'waiting';
-  const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtAffordableIn(secs);
+  const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtGoalEta(secs);
   return { key, state, label: labelFor(key, s, b, pct), status, costCents, tab: tabFor(key), payback, pct };
 }
 

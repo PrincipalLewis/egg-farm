@@ -5,6 +5,9 @@
 :root{
   --c-yolk:#FFC93C;--c-yolk-dark:#F29E1F;--c-barn:#B83B37;--c-meadow:#6BBF59;--c-sky:#8FD3F4;--c-cream:#FFF6E5;--c-white:#FFFFFF;--c-wood:#A86B3C;
   --c-text:#3E2C23;--c-muted:#6B5D52;--c-meadow-strong:#3D7F33;--c-wood-text:#8A5528;--c-focus:#2B79A8;--c-slot-outline:#6B5D52;--c-floater:#3E2C23;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
+  /* rc1-upgrade-value v1.4 */
+  --c-meadow-text:#2F6B27;--c-meadow-tint:#E8F4E4;
+  --c-barn-ui:#B83B37;--c-danger:var(--c-barn-ui);
   --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-pill:999px;
   --bw:2px;--shadow:0 4px 0 rgb(62 44 35 / .25);
   --f-display:"Fredoka",system-ui,sans-serif;--f-body:"Nunito",system-ui,sans-serif;
@@ -36,7 +39,7 @@ img{user-select:none;-webkit-user-drag:none}
 @keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(61 127 51/.35)}}
 .btn.secondary{background:var(--c-white);min-height:44px}.btn.danger{background:var(--c-barn);color:#fff;min-height:44px}
 .btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
-.btn.maxed{background:var(--c-gold);pointer-events:none;box-shadow:none}
+.btn.maxed{background:var(--c-yolk);color:var(--c-text);pointer-events:none;box-shadow:none}
 .btn img{width:20px;height:20px}
 .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
 .icon-btn{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;display:grid;place-items:center;padding:0}.icon-btn img{width:28px;height:28px}
@@ -221,9 +224,9 @@ nav.actions button.btn.farm-manage-all .manage-ico{width:44px;height:44px}
 .goal[hidden]{display:none}
 .goal:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
 .goal-ic{width:var(--goal-icon);height:var(--goal-icon)}
-.goal-label{font:600 14px var(--f-display);color:var(--c-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.goal-label{display:flex;align-items:baseline;min-width:0;overflow:hidden;font:600 14px var(--f-display);color:var(--c-text);white-space:nowrap}.goal-label .g-star{flex:0 0 auto}.goal-label .g-track{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.goal-label .g-gain{flex:0 0 auto;white-space:nowrap}
 .goal-status{font:700 13px var(--f-body);color:var(--c-muted);max-width:var(--goal-status-max);white-space:nowrap;justify-self:end}
-.goal-status.chip{display:inline-grid;place-items:center;height:24px;padding:0 10px;border-radius:var(--r-pill);background:var(--c-meadow-strong);color:#fff;font:600 12px var(--f-display);max-width:none}
+.goal-status.chip{display:inline-grid;place-items:center;height:20px;padding:0 10px;border-radius:var(--r-pill);background:var(--c-yolk);color:var(--c-text);font:600 12px var(--f-display);max-width:none}
 .goal-chev{font-size:16px;color:var(--c-muted);text-align:center}
 .goal[data-state=ready]{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
 @keyframes goalglow{0%,85%,100%{box-shadow:var(--shadow)}92%{box-shadow:var(--shadow),0 0 0 4px rgb(61 127 51/.3)}}
@@ -501,26 +504,38 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 .hud .spacer{display:flex;justify-content:flex-end;align-items:center;min-width:0}
 .build-tag{pointer-events:none;-webkit-user-select:none;user-select:none;font:600 11px var(--f-body);color:rgb(255 246 229 / .8);white-space:nowrap;padding-inline:4px}
 
-/* rc1 upgrade-value chips (art-ux/rc1-upgrade-value.md v1.3) */
+/* rc1 upgrade-value chips (art-ux/rc1-upgrade-value.md v1.4) */
 .chips{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0}
 .vchip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:var(--r-pill);font:700 12px var(--f-body);white-space:nowrap;pointer-events:none;line-height:20px}
 .vchip img{width:12px;height:12px}
-.vchip.eff{background:#E8F4E4;color:var(--c-meadow-strong)}
-.vchip.pb{background:#FFF6E0;color:var(--c-text);border:1px solid #E6D9C3;line-height:18px}
-.vchip.bb{background:var(--c-yolk,#FFC93C);color:var(--c-text)}
-.vchip.muted{background:var(--c-surface,#fff8ee);color:var(--c-muted)}
-.up.best-buy{outline:3px solid var(--c-focus);outline-offset:2px}
+.vchip.eff{background:var(--c-meadow-tint);color:var(--c-meadow-text)}
+.vchip.pb{background:var(--c-cream);color:var(--c-text);line-height:20px}
+.vchip.bb{background:var(--c-yolk);color:var(--c-text)}
+.vchip.muted{background:var(--c-cream);color:var(--c-muted)}
+.up.best-buy{outline:2px solid var(--c-yolk-dark);outline-offset:2px}
+.up.best-buy:focus-visible{outline:3px solid var(--c-focus);outline-offset:5px}
 .up.best-buy .btn.buy.affordable{box-shadow:var(--shadow),0 0 0 3px rgb(107 191 89/.35)}
+.up .btn.buy{position:relative;z-index:1}
 
-/* Asleep / Unpaid card (Art v1.3) */
-.wk-banner{grid-column:1/-1;margin:-10px -10px 6px;padding:6px 10px;background:var(--c-barn);color:#fff;font:700 14px var(--f-body);border-radius:12px 12px 0 0}
+/* Asleep / Unpaid card (Art v1.4 §7) */
+.wk-banner{grid-column:1/-1;margin:-10px -10px 6px;height:32px;box-sizing:border-box;display:flex;align-items:center;padding:0 10px;background:var(--c-danger);color:#fff;font:800 14px var(--f-body);border-radius:12px 12px 0 0}
 .wk.is-off .wk-body{opacity:.5}
-.wk.is-off .wk-refill{opacity:1}
+.wk.is-off .wk-banner,.wk.is-off .wk-refill{opacity:1}
+.wk.is-off{opacity:1} /* override legacy .wk.asleep/.unpaid opacity */
+.wk.asleep,.wk.unpaid{opacity:1}
 .wk{position:relative}
+.wk .btn.manage{min-height:44px;min-width:88px}
 
-/* Bottom-nav asleep badge on Upgrades (Workers entry) */
-.asleep-badge{position:absolute;top:4px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-barn);color:#fff;font:700 11px/18px var(--f-body);text-align:center;z-index:2}
+/* Asleep badge: Upgrades nav + Workers tab */
+.asleep-badge{position:absolute;top:4px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-danger);color:#fff;font:700 12px/18px var(--f-display);text-align:center;z-index:2;box-sizing:border-box}
+.tabs [data-tab=workers]{position:relative}
+.tabs [data-tab=workers] .asleep-badge{top:2px;right:4px}
 nav [data-nav=upgrades]{position:relative}
 .asleep-badge.badge-pulse{animation:badgePulse 400ms ease-out}
 @keyframes badgePulse{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
-.pill .rate.neg,.rate.neg{color:var(--c-barn)!important}
+@media (prefers-reduced-motion:reduce){.asleep-badge.badge-pulse{animation:none}}
+.pill .rate.neg,.rate.neg{color:var(--c-danger)!important}
+.up .sum{font:700 12px var(--f-body);color:var(--c-wood-text);margin:0}
+/* UC12 Limited by collecting — visual 16px, 44px hit via padding/neg margin */
+.hint.coop .link,.hint .link{appearance:none;border:0;background:none;padding-block:14px;margin-block:-14px;padding-inline:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:44px;box-sizing:content-box}
+.hint.coop{color:var(--c-wood-text);padding-bottom:12px}

@@ -23,7 +23,8 @@ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
-import { selectGoal, GoalHysteresis, goalAria, type Goal } from './next-goal';
+import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, type Goal } from './next-goal';
+import { collectionFxLines, collectionSummary, collectionDeltas } from './collection-copy';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navManageView, type NavAria } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -345,23 +346,32 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
   const goalHold = new GoalHysteresis(5000); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+  let goalLabelSig = '';
   const renderGoal = () => {
     const t = now();
     if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
     const imm = goalNow; goalNow = false; goalTickAt = t;
     const prev = goalShown, gl = goalHold.tick(g.state, b, t, imm || goalImm); goalImm = false; goalShown = gl;
-    setText(goalLbl, gl.label); setText(goalSt, gl.status);
+    // v1.4 §4: paint structured label; measure overflow once per content change (not every tick).
+    const sig = `${gl.key}|${gl.label}|${gl.pct}`;
+    if (sig !== goalLabelSig) {
+      goalLabelSig = sig;
+      const parts = gl.key && gl.state !== 'done' && gl.state !== 'refill' ? goalLabelParts(gl.key, g.state, gl.pct) : null;
+      paintGoalLabel(goalLbl, parts, gl.label);
+      // fit after layout
+      requestAnimationFrame(() => fitGoalLabelEl(goalLbl));
+    }
+    setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
       if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
-      // B3: announce the CURRENT goal (same text as the chip's aria-label) on target or state change, then clear the
-      // live region so a screen reader browsing later never reads a stale target/timer.
       setText(goalLive, goalAria(gl)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
       if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (live.length <= 26) sparkle(goalSt, 4); }
       if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
     }
   };
+  void document.fonts.ready.then(() => { goalNow = true; renderGoal(); });
   /** Tap never buys: open the target's tab, scroll the row into view, highlight it, focus its Buy (spec §4). */
   const openGoal = () => {
     const gl = goalShown; if (!gl) return;
@@ -385,16 +395,20 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
     const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg'), S.coopTier(F + 1) !== S.coopTier(F)) : null;
+    // C-AC26: Collection leads with price % (from balance), then eggs/tap — never +N/tap alone.
+    const { pricePct: dPct, tap: tapDelta } = collectionDeltas(b);
+    const collSummary = !isF && !max ? collectionSummary(b) : '';
     const fx = isF ? [
       `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
       `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
       `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
       ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
       `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
-    ] : [
-      `Eggs per tap ${arrow(fmtCount(S.eggsPerTap(C, b)), fmtCount(S.eggsPerTap(C + 1, b)))}`,
-      `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
-    ];
+    ] : collectionFxLines(C, b).map(line => {
+      const m = /^(Egg price |Eggs per tap )(.+) → (.+)$/.exec(line);
+      if (!m) return line;
+      return max ? `${m[1]}${m[2]}` : `${m[1]}${m[2]} <span class="arrow">→</span> ${m[3]}`;
+    });
     const nextTier = [5, 10, 20].find(t => t > F);
     const key = isF ? 'FARM' as const : 'COLL' as const;
     const og = max ? null : optionGain(s, b, key);
@@ -405,7 +419,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     let chips = '';
     if (!max && og) {
       const effect = baseInc > 0 && og.gain > 0 ? `<span class="vchip eff">+${pct}% income</span>`
-        : `<span class="vchip eff">${isF ? `+${fmtCount(S.eggsPerSec(F + 1, b) - S.eggsPerSec(F, b))} eggs/s` : `+${S.eggsPerTap(C + 1, b) - S.eggsPerTap(C, b)} eggs/tap`}</span>`;
+        : `<span class="vchip eff">${isF ? `+${fmtCount(S.eggsPerSec(F + 1, b) - S.eggsPerSec(F, b))} eggs/s` : collectionSummary(b)}</span>`;
       let pb = '';
       if (og.gain > 0) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">Pays back in ${fmtTimeToAfford(og.payback)}</span>`;
       else if (og.bundlePayback != null) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">With next buys: ${fmtTimeToAfford(og.bundlePayback)}</span>`;
@@ -421,9 +435,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const secs = hold.tick(raw, incomePerSec(s, b), s.coinsCents);
       hint = `<div class="hint eta ${secs != null && secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(secs)}</div>`;
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
-    // Limited by collecting → Collection (HoP D4 / UC12)
-    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
-      hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by collecting · <button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades.">Go to Collection →</button></div>`;
+    // UC12 / v1.4: Farm row "Limited by collecting ›" → Collection (44px hit via CSS padding)
+    if (isF && !max && S.eggsPerTap(C, b) <= 0.5 * S.coopCapacity(F, b))
+      hint += `<div class="hint coop"><button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades."><img src="${A('icon-nest.svg')}" alt="" width="14" height="14">Limited by collecting ›</button></div>`;
     const aria = !max && og && baseInc > 0 && og.gain > 0
       ? `${isF ? 'Farm level' : 'Collect per tap'}, level ${L}. Adds ${pct} percent income. ${og.gain > 0 ? `Pays back in about ${fmtTimeToAfford(og.payback).replace('~', '')}.` : ''} ${isBest ? 'Best buy.' : ''} Buy for ${fmtMoney(cost * 100)}.`
       : '';
@@ -431,6 +445,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
+      ${collSummary ? `<div class="sum">${collSummary}</div>` : ''}
       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
       ${chips}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
@@ -485,12 +500,22 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
-    setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);
-    // Asleep/Unpaid badge on bottom-nav Upgrades (= Workers entry). Art v1.3: red, white count, ≥18px, top-right.
-    { const n = asleepOrUnpaidCount(s, b); let ab = nav.querySelector('[data-nav=upgrades] .asleep-badge') as HTMLElement | null;
-      if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; nav.querySelector('[data-nav=upgrades]')!.append(ab); }
-      const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
-      if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
+    // v1.4 §7: asleep count badge on Upgrades nav + Workers tab; replaces affordable dot while count > 0.
+    { const n = asleepOrUnpaidCount(s, b);
+      setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, n > 0 || !canUp);
+      const ensure = (host: Element | null) => {
+        if (!host) return null;
+        let ab = host.querySelector('.asleep-badge') as HTMLElement | null;
+        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(ab); }
+        return ab;
+      };
+      const navAb = ensure(nav.querySelector('[data-nav=upgrades]'));
+      const tabAb = ensure(document.querySelector('.tabs [data-tab=workers]'));
+      for (const ab of [navAb, tabAb]) {
+        if (!ab) continue;
+        const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
+        if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
+      }
       const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement;
       const al = n > 0 ? `Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
       if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al); }

@@ -36,6 +36,17 @@ export const fmtAffordableIn = (seconds: number | null) => {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60, p = (n: number) => String(n).padStart(2, '0');
   return `Affordable in ~${h ? `${h}:${p(m)}` : m}:${p(r)}`;
 };
+/** Goal-strip status (art-ux rc1-upgrade-value v1.4): short ~m:ss / ~1h 59m / — (Ready! is separate). */
+export const fmtGoalEta = (seconds: number | null) => {
+  if (seconds === null || !isFinite(seconds)) return '—';
+  const s = Math.max(0, Math.ceil(seconds));
+  if (s < 3600) {
+    const m = Math.floor(s / 60), r = s % 60;
+    return `~${m}:${String(r).padStart(2, '0')}`;
+  }
+  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  return m ? `~${h}h ${m}m` : `~${h}h`;
+};
 /** C-AC25 (Product + Art & UX Oct 16): Welcome-back gain, N = pendingOfflineEggs (eggs actually added to the Basket).
  *  Hero "+N": thousands separators up to 9,999,999, then short form (+12.3M); line 2 "egg(s) added to your basket". */
 export const offlineEggsParts = (n: number) => {

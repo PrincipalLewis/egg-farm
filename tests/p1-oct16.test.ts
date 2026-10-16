@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { fmtAffordableIn } from '../src/ui/format';
+import { fmtAffordableIn, fmtGoalEta } from '../src/ui/format';
 import { OnboardingFlow, ftueGate } from '../src/ui/onboarding';
 describe('upgrade-card ETA "Affordable in" (Product Oct 16)', () => {
   it('5 s -> a moment', () => expect(fmtAffordableIn(5)).toBe('Affordable in a moment'));
@@ -40,4 +40,14 @@ describe('C-AC25 Welcome-back copy', () => {
   it('N=9,999,999 still separators', () => expect(offlineEggsParts(9999999).hero).toBe('+9,999,999'));
   it('N=12,345,678 short form', () => expect(offlineEggsParts(12345678).hero).toBe('+12.3M'));
   it('fractional pending eggs floor to whole eggs actually added', () => expect(offlineEggsParts(1.7)).toEqual({ hero: '+1', line2: 'egg added to your basket' }));
+});
+
+describe('fmtGoalEta (rc1-upgrade-value v1.4 goal status)', () => {
+  it('short ~m:ss under 1h; ~Hh Mm at/over 1h; — when no income', () => {
+    expect(fmtGoalEta(null)).toBe('—');
+    expect(fmtGoalEta(65)).toBe('~1:05');
+    expect(fmtGoalEta(9)).toBe('~0:09');
+    expect(fmtGoalEta(3600 + 59 * 60)).toBe('~1h 59m');
+    expect(fmtGoalEta(7200)).toBe('~2h');
+  });
 });
