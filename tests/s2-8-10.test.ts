@@ -7,6 +7,7 @@ import { apply } from '../src/sim/actions';
 import { save, migrate, SAVE_VERSION } from '../src/save/save';
 import { Game } from '../src/game';
 import { wageCentsPerSec, listedWageCentsPerSec, totalWageCentsPerSec, netCentsPerSec, queueFull, queueTapOpens } from '../src/ui/rates';
+import { incomePerSec } from '../src/econ/income';
 import { mem } from './helpers';
 
 const mh = (energy = 100) => ({ market_hand: { energy, cdS: 0 } });
@@ -89,5 +90,18 @@ describe('S2-9 Market never opens by itself', () => {
     expect(queueTapOpens(a, a, 100)).toBe(false);   // chip arrived under the finger
     expect(queueTapOpens(null, a, 400)).toBe(false); // finger went down on an empty slot / elsewhere
     expect(queueTapOpens(a, c, 400)).toBe(false);   // strip reflowed between down and up
+  });
+});
+describe('S2-8 ui.rates() composition (merge fix: incomePerSec is already net)', () => {
+  it('Farm 3 + Market Hand: reconstructing gross then netCentsPerSec matches incomePerSec (no double wage)', () => {
+    const s: any = { ...initialState(b, 1), farmLevel: 3, workers: mh(), basket: 0, coop: 50, customers: [], nextCustomerInS: 1e9 };
+    const wages = totalWageCentsPerSec(s, b);
+    const net = incomePerSec(s, b) * 100;
+    const inc = net + wages; // app.ts rates() reconstructs gross this way
+    expect(wageCentsPerSec('market_hand', s, b)).toBe(1.25);
+    expect(wages).toBe(1.25);
+    expect(netCentsPerSec(inc, s, b)).toBeCloseTo(net, 9);
+    // regression guard: feeding already-net into netCentsPerSec subtracts wages twice
+    expect(netCentsPerSec(net, s, b)).toBeCloseTo(net - wages, 9);
   });
 });

@@ -1,7 +1,7 @@
 /** S2-8 header net rate + wage lines, S2-9 Market queue-full dot (Art & UX approved visuals, Oct 16).
  *  HUD rate + aria both come from rateView over incomePerSec (T6 / MK-39 critic: one formatter). */
 import type { Balance } from '../config/balance';
-import { queueMax, type GameState } from '../sim/state';
+import { type GameState } from '../sim/state';
 import type { WorkerId } from '../sim/workers';
 /** STUB (s2-money): wage in cents per second for a worker at Farm level F; 0 for workers without a wage. */
 export const wagePerSecCents = (id: WorkerId, farm: number, b: Balance) =>
@@ -12,8 +12,8 @@ export function netRateCents(incomeCps: number, s: GameState, b: Balance) {
   for (const id of ['market_hand', 'coop_hand'] as const) { const w = s.workers[id]; if (w && !w.unpaid && w.energy > 0) wages += wagePerSecCents(id, s.farmLevel, b); }
   return incomeCps - wages;
 }
-/** STUB (s2-money): queue-full flag. */
-export const queueFull = (s: GameState, b: Balance) => s.customers.length >= queueMax(s.farmLevel, b);
+/** Queue-full flag — single source in ./rates (re-exported so QueueDot / older imports stay stable). */
+export { queueFull } from './rates';
 /** "$0.03" under $1, "$1.2" under $100, then whole dollars with K/M. */
 export function fmtRateAbs(cents: number) {
   const d = Math.abs(cents) / 100;

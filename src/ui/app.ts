@@ -244,7 +244,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const grantWelcome = (withFlyers: boolean) => {
     const eggs = g.state.pendingOfflineEggs; const btn = $('#wbCollect');
     if (withFlyers && btn && !rm()) for (let i = 0; i < Math.min(eggs, b.feel.max_flying_eggs); i++) fly(A('icon-egg.svg'), btn, basketEl.parentElement!, i, 24);
-    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); pulse(basketEl.parentElement!); sfx('collect');
+    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); dirty = true; render(); /* S2-10 */ pulse(basketEl.parentElement!); sfx('collect');
   };
   const settingsIosLine = () => iosKind === 'standalone' ? `<div class="settings-ios ok">Installed on Home Screen ✔</div>`
     : iosKind ? `<div class="settings-ios">${SHARE_SVG} ${TIP_TITLE} ${howTo(iosKind, '')}</div>`.replace(' ,', ',').replace('  ', ' ') : '';
@@ -324,7 +324,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       queueEl.replaceChildren(...want); qTagShown = false;
     }
     // Queue full cue (amber outline + tag), informational
-    const full = s.customers.length >= slots;
+    const full = queueFull(s, b);
     queueEl.classList.toggle('full', full);
     if (full && !qTagShown) { queueEl.append(h(`<span class="qtag"><span class="q-long">Queue full</span><span class="q-short">Full</span></span>`)); qTagShown = true; }
     // S2-3b (layout-spec §4.6b, queue spec v1.2 §6): a queue-size step pulses the "+N" chip once (1 -> 1.12 -> 1, 600ms);
@@ -722,9 +722,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
-  /** S2-8/S2-9 values for QA / Art & UX: net rate, per-worker wage, queue-full flag. */
-  const rates = () => { const s = g.state, inc = incomePerSec(s, b) * 100;
-    return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
+  /** S2-8/S2-9 values for QA / Art & UX: net rate, per-worker wage, queue-full flag.
+   *  incomePerSec is already net of wages (econ/income.ts); reconstruct gross so netCentsPerSec subtracts wages once (matches main 737c2cf). */
+  const rates = () => {
+    const s = g.state, wages = totalWageCentsPerSec(s, b), net = incomePerSec(s, b) * 100, inc = net + wages;
+    return { incomeCentsPerSec: inc, wageCentsPerSec: wages, netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }

@@ -122,10 +122,22 @@ sections.s24c = async () => {
     const css = await page.evaluate(() => { const e = document.querySelector('#wbSold'); return e && [getComputedStyle(e).fontSize, getComputedStyle(e).color]; });
     if (mh && shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-4c-welcome-sold-390.png` });
     const b0 = await page.evaluate(() => window.eggfarm.state.basket + window.eggfarm.state.pendingOfflineEggs);
-    if (await page.locator('#wbCollect').count()) await page.locator('#wbCollect').click();
+    if (mh && await page.locator('#wbCollect').count()) {
+      // S2-10 (main e57bf4f): #basket must update in the same task as the Collect click (no RenderPump wait).
+      const sync = await page.evaluate(() => {
+        const before = document.querySelector('#basket')?.textContent ?? '';
+        const pending = window.eggfarm.state.pendingOfflineEggs;
+        document.querySelector('#wbCollect').click();
+        return { before, after: document.querySelector('#basket')?.textContent ?? '', pending, pendingAfter: window.eggfarm.state.pendingOfflineEggs, basket: window.eggfarm.state.basket };
+      });
+      ok('S2-10 welcome Collect updates #basket in the same task', sync.pending > 0 && sync.pendingAfter === 0 && sync.after !== sync.before && sync.basket === sync.pending, JSON.stringify(sync));
+    } else if (await page.locator('#wbCollect').count()) {
+      await page.locator('#wbCollect').click();
+    }
     await page.waitForTimeout(3000);
     const sold = await page.evaluate(() => JSON.parse(window.eggfarmExportTelemetry()).events.filter(e => e.type === 'sale' || e.type === 'sell').length);
-    if (mh) ok('S2-4c line "Market Hand sold N right away · +$…", 14px #6B5D52', line && /^Market Hand sold \d+ right away\u00a0· \+\$/.test(line) && css[0] === '14px' && css[1] === 'rgb(107, 93, 82)', JSON.stringify({ line, css, b0, sold }));
+    // 366 = queue demand 200+139 plus MK-22 (main 16d0fe3): collectOffline sets nextCustomerInS=0 so one more customer arrives in the Market Hand window.
+    if (mh) ok('S2-4c line "Market Hand sold 366 right away · +$…", 14px #6B5D52', line && /^Market Hand sold 366 right away\u00a0· \+\$/.test(line) && css[0] === '14px' && css[1] === 'rgb(107, 93, 82)', JSON.stringify({ line, css, b0, sold }));
     else ok('S2-4c no Market Hand -> line hidden', line === null, JSON.stringify({ line }));
     await ctx.close();
   }
@@ -461,7 +473,7 @@ sections.s2810 = async () => {
   ok('S2-9 queue full: Market sheet does not open by itself; queue-full flag exposed', !q.market && q.flag === 'true' && q.rates === true, JSON.stringify(q));
   // S2-8: rates readable
   const r = await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: { market_hand: { energy: 100, cdS: 0 } } }; return window.eggfarmUi.rates(); });
-  ok('S2-8 ui.rates(): Market Hand wage 1.25 c/s (exact) at L3, net rate readable', r.workers.market_hand.wageCentsPerSec === 1.25 && typeof r.netCentsPerSec === 'number', JSON.stringify(r));
+  ok('S2-8 ui.rates(): Market Hand wage 1.25 c/s (exact) at L3; net = income - wages (no double subtract)', r.workers.market_hand.wageCentsPerSec === 1.25 && Math.abs(r.netCentsPerSec - (r.incomeCentsPerSec - r.wageCentsPerSec)) < 1e-6 && r.netCentsPerSec > r.incomeCentsPerSec - 2 * r.wageCentsPerSec - 1e-6, JSON.stringify(r));
   // S2-10: redraw right after an action, even with rAF stalled
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 5, collectionLevel: 3, coinsCents: 5e6, workers: {}, customers: [] }; });
   await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(200);
