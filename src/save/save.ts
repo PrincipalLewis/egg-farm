@@ -16,6 +16,12 @@ const migrations: Record<number, (d: any) => any> = {
   // v6 (S2-8): exact wages carry the leftover fraction of a cent; older saves start with nothing owed.
   5: (d) => ({ ...d, version: 6, state: { ...d.state, wageFracCents: {} } }),
 };
+/** M4-safety: the save version when a stored save is from a NEWER build (version > SAVE_VERSION), else null.
+ *  Such a save is never migrated, preserved, overwritten or cleared by this build (and neither is .bak / IndexedDB). */
+export function newerSaveVersion(raw: string | null | undefined): number | null {
+  if (!raw) return null; let d: any; try { d = JSON.parse(raw); } catch { return null; }
+  return d && typeof d === 'object' && typeof d.version === 'number' && Number.isFinite(d.version) && d.version > SAVE_VERSION ? d.version : null;
+}
 export function migrate(d: any, b: Balance): SaveFile {
   if (!d || typeof d.version !== 'number' || d.version > SAVE_VERSION) throw new Error('bad save');
   while (d.version < SAVE_VERSION) { const m = migrations[d.version]; if (!m) throw new Error(`no migration from v${d.version}`); d = m(d); }
@@ -64,7 +70,7 @@ export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, ro
   const raw = serialize(state, now);
   if (rotate && b) {
     const cur = kv.getItem(SAVE_KEY);
-    if (cur && validate(cur, b).ok) { try { kv.setItem(BAK_KEY, cur); } catch { /* full: keep old .bak */ } }
+    if (cur && validate(cur, b).ok && newerSaveVersion(kv.getItem(BAK_KEY)) === null) { try { kv.setItem(BAK_KEY, cur); } catch { /* full: keep old .bak */ } }
   }
   kv.setItem(SAVE_KEY, raw);
   return raw;
@@ -116,9 +122,10 @@ export function preserveCorrupt(kv: KV, raw: string, ts: number): boolean {
  * - main bad: preserve it; restore from a valid .bak (case R), else start fresh (F; Q when the copy failed).
  *   A bad .bak is preserved as well (QA case 1).
  */
-export function loadSafe(kv: KV, b: Balance, now = Date.now()): { file: SaveFile | null; recovery: Recovery | null } {
+export function loadSafe(kv: KV, b: Balance, now = Date.now()): { file: SaveFile | null; recovery: Recovery | null; newer?: number } {
   const raw = kv.getItem(SAVE_KEY);
   if (raw === null) return { file: null, recovery: null };
+  const newer = newerSaveVersion(raw); if (newer !== null) return { file: null, recovery: null, newer }; // refuse, touch nothing
   const v = validate(raw, b);
   if (v.ok) return { file: v.file, recovery: null };
   const copied = preserveCorrupt(kv, raw, now);

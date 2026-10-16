@@ -31,7 +31,7 @@ describe('validate', () => {
 });
 describe('loadSafe', () => {
   it('no save -> new game, no recovery', () => { expect(loadSafe(kvm(), b)).toEqual({ file: null, recovery: null }); });
-  for (const f of Object.keys(reasons)) it(`${f}: no backup -> case F, raw preserved`, () => {
+  for (const f of Object.keys(reasons).filter(f => f !== 'corrupt-version-99.json' /* M4-safety: newer saves are refused untouched, see newer-save.test.ts */)) it(`${f}: no backup -> case F, raw preserved`, () => {
     const k = kvm(); k.setItem(SAVE_KEY, fx(f)); k.setItem('eggfarm.install_id', 'iid');
     const r = loadSafe(k, b, 5000);
     expect(r.file).toBeNull(); expect(r.recovery).toMatchObject({ case: 'F', reason: reasons[f], had_backup: false, restored_from_backup: false, copy_failed: false });

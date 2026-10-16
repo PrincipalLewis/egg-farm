@@ -267,6 +267,27 @@ sections.fastcollect = async () => {
   await ctx.close();
 };
 
+// ---------- M4-safety: a save from a newer build is refused untouched (no game, no autosave, .bak/IndexedDB untouched) ----------
+sections.newersave = async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  const m4 = JSON.stringify({ version: 99, savedAt: Date.now(), state: { coinsCents: 4242, futureField: 1 } });
+  const bak = JSON.stringify({ version: 99, savedAt: Date.now() - 5000, state: { coinsCents: 4000 } });
+  await page.addInitScript(([a, c]) => { if (sessionStorage.getItem('seeded')) return; localStorage.setItem('eggfarm.save', a); localStorage.setItem('eggfarm.save.bak', c); sessionStorage.setItem('seeded', '1'); }, [m4, bak]);
+  await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click();
+  await page.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 });
+  const title = await page.textContent('.newer-save h2');
+  await page.waitForTimeout(3500); // > one autosave tick and a few frames
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  const st = await page.evaluate(async () => { const keys = Object.keys(localStorage).filter(k => k.startsWith('eggfarm.save'));
+    const idb = await new Promise(res => { const r = indexedDB.open('eggfarm'); r.onsuccess = () => { const db = r.result; if (!db.objectStoreNames.contains('save')) return res(null); const g = db.transaction('save').objectStore('save').get('main'); g.onsuccess = () => res(g.result ?? null); g.onerror = () => res('err'); }; r.onerror = () => res('err'); });
+    return { save: localStorage.getItem('eggfarm.save'), bak: localStorage.getItem('eggfarm.save.bak'), keys, idb, collect: !!document.querySelector('#collect'), game: 'eggfarm' in window }; });
+  ok('M4 newer save: "This save is from a newer version" shown, no game started', title === 'This save is from a newer version' && !st.collect && !st.game, JSON.stringify({ title, collect: st.collect, game: st.game }));
+  ok('M4 newer save: localStorage save + .bak byte-identical, no corrupt copies, IndexedDB not written', st.save === m4 && st.bak === bak && st.keys.sort().join() === 'eggfarm.save,eggfarm.save.bak' && st.idb === null, JSON.stringify({ keys: st.keys, idb: st.idb, same: st.save === m4, bakSame: st.bak === bak }));
+  await page.click('#nsRetry'); await page.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 }).catch(() => {});
+  ok('M4 newer save: "Try again" reload still refuses and keeps the save', (await page.evaluate(() => localStorage.getItem('eggfarm.save'))) === m4 && errors.length === 0, errors.join(' | '));
+  await ctx.close();
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();

@@ -5,7 +5,7 @@ import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
-import { showTabGuardDialog } from './ui/save-recovery';
+import { showTabGuardDialog, showNewerSaveDialog } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
@@ -61,6 +61,9 @@ async function boot() {
   const mirror = await IdbMirror.open(); if (mirror) { try { restored = reconcile(localStorage, await mirror.read(), balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror);
+  if (g.newerSave !== null) { // M4-safety: refuse a newer-build save; no UI, sim, autosave or pagehide save in this tab
+    lease.release(); showNewerSaveDialog(a => `${import.meta.env.BASE_URL}assets/${a}`, g.newerSave, () => location.reload()); return;
+  }
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   if (restored) g.telemetry.track('save_restore', { source: 'idb' });
