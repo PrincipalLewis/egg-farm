@@ -1,6 +1,7 @@
 // L30+ (product/farm/l30plus-spec.md v0.2 + HoP 23:37): data-driven clamps (Farm 50, Hens/Egg value 55), per-row caps
 // (F+3 below L40, F+5 from L40), L30-17 extra-level surcharge, L30-18 no near-zero increase. All expected values are read
-// from data/staging/economy.l30plus.csv (= product/economy.l30plus-candidate.csv, sha256 77a68a6131895ba1...).
+// from data/staging/economy.l30plus.csv (shipping: product/economy.l30plus-polish.csv sha256 b59c4e0d...;
+// baseline/fallback: data/staging/economy.l30plus-baseline.csv = economy.l30plus-candidate.csv sha256 3e3d61fd...). Every check runs on both.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parseEconomyCsv, fitM4, farmMaxOf, readEconomyConfig } from '../scripts/sync-economy';
@@ -12,7 +13,8 @@ import { initialState } from '../src/sim/state';
 import { apply } from '../src/sim/actions';
 import { fxArrow } from '../src/ui/tracks-ui';
 import { fmtMoneyShort, fmtCount } from '../src/ui/format';
-const R = parseEconomyCsv(readFileSync(new URL('../data/staging/economy.l30plus.csv', import.meta.url), 'utf8'));
+function suite(file: string) {
+const R = parseEconomyCsv(readFileSync(new URL(`../data/staging/${file}`, import.meta.url), 'utf8'));
 const cfg = readEconomyConfig();
 const farmMax = farmMaxOf(R, cfg);
 // Live params + the L30+ M4 block and Farm prices from the table (full L30+ param fit waits for Economy's merge, D5).
@@ -20,7 +22,7 @@ const b: Balance = validateBalance({ ...live, maxLevel: farmMax, m4: { ...fitM4(
   farm: { ...live.farm, costOverrides: Object.fromEntries(R.slice(0, farmMax + 1).map(r => [r.level, r.farm_cost])) } } as Balance);
 const st = (F: number, H: number, V = 0, coins = 1e15) => ({ ...initialState(b, 1), farmLevel: F, hensLevel: H, eggValueLevel: V, coinsCents: coins, tracksV7: 1 } as any);
 const fc = (F: number) => R[F].farm_cost, share = (F: number) => R[F].hv_extra_cost_farm_share;
-describe('L30+ D1 clamps from data', () => {
+describe(`${file}: L30+ D1 clamps from data`, () => {
   it('Farm max 50 (config), Hens/Egg value max 55 (CSV rows)', () => {
     expect(R.length).toBe(56); expect(farmMax).toBe(50);
     expect(trackMaxLevel('hens', b)).toBe(R.length - 1); expect(trackMaxLevel('eggValue', b)).toBe(55);
@@ -37,7 +39,7 @@ describe('L30+ D1 clamps from data', () => {
   });
   it('live table (31 rows) still clamps at 30', () => { expect(live.maxLevel).toBe(30); expect(trackMaxLevel('hens', live)).toBe(30); });
 });
-describe('L30-13/17 buy gate', () => {
+describe(`${file}: L30-13/17 buy gate`, () => {
   it('L39: cap F+3 from the row, no surcharge', () => {
     expect(R[39].hens_cap_over_farm).toBe(3); expect(share(39)).toBe(0);
     expect(trackLock(st(39, 42), 'hens', b)).toBe('cap');
@@ -63,7 +65,7 @@ describe('L30-13/17 buy gate', () => {
     expect(s.coinsCents - after.coinsCents).toBe(trackBuyCost(s, 'hens', b) * 100);
   });
 });
-describe('L30-16 sync-economy carries per-row caps and hv_extra_cost_farm_share', () => {
+describe(`${file}: L30-16 sync-economy carries per-row caps and hv_extra_cost_farm_share`, () => {
   const m = fitM4(R, live, cfg)!;
   it('per-row columns reach the build', () => {
     expect(m.hens.capOverFarmByFarm).toEqual(R.slice(0, 51).map(r => r.hens_cap_over_farm));
@@ -79,12 +81,12 @@ describe('L30-16 sync-economy carries per-row caps and hv_extra_cost_farm_share'
     expect(farmMaxOf(R, cfg)).toBe(cfg.farmMaxLevel); expect((fitM4(R, live, cfg) as any).extraSecondLevelMult).toBe(cfg.hvExtraSecondLevelMult);
     expect(() => farmMaxOf(R2.map(r => r.level === 3 ? { ...r, farm_max_level: 47 } : r), cfg)).toThrow(/farm_max_level must be constant/);
   });
-  it('fails loudly without hvExtraSecondLevelMult', () => { expect(() => fitM4(R, live, { ...cfg, hvExtraSecondLevelMult: undefined })).toThrow(/hvExtraSecondLevelMult/); });
+  it('fails loudly without hvExtraSecondLevelMult', () => { expect(() => fitM4(R.map(({ hv_extra_second_markup: _m, ...r }) => r as any), live, { ...cfg, hvExtraSecondLevelMult: undefined })).toThrow(/hvExtraSecondLevelMult/); });
   it('live CSV (constant caps, no share column) produces the unchanged scalar block', () => {
     expect(live.m4!.hens.capOverFarmByFarm).toBeUndefined(); expect((live.m4 as any).extraCostFarmShareByFarm).toBeUndefined();
   });
 });
-describe('Hens production from data, never gated by Farm (HoP 23:49)', () => {
+describe(`${file}: Hens production from data, never gated by Farm (HoP 23:49)`, () => {
   it('L51-55 (and every level) produce at their own CSV row', () => {
     for (let H = 0; H <= 55; H++) expect(trackEggsPerSec(H, b)).toBe(R[H].eggs_per_sec);
     for (const H of [51, 52, 53, 54, 55]) expect(prodEggsPerSec(st(50, H), b)).toBe(R[H].eggs_per_sec);
@@ -97,7 +99,7 @@ describe('Hens production from data, never gated by Farm (HoP 23:49)', () => {
     }
   });
 });
-describe('L30-18 no near-zero increase in the UI', () => {
+describe(`${file}: L30-18 no near-zero increase in the UI`, () => {
   it('fxArrow hides an increase that formats to zero', () => {
     expect(fxArrow('$1.2M', '$1.2M')).toBe('$1.2M');
     expect(fxArrow('$1.2M', '$1.3M')).toContain('→');
@@ -113,3 +115,30 @@ describe('L30-18 no near-zero increase in the UI', () => {
     }
   });
 });
+describe(`${file}: Economy 00:04 data checks`, () => {
+  const S = parseEconomyCsv(readFileSync(new URL('./fixtures/economy.f1-m4cols-86f0e80e.csv', import.meta.url), 'utf8'));
+  it('rows L0-29 equal staging rev 86f0e80e exactly (every staging column)', () => {
+    for (let L = 0; L < 30; L++) for (const c of Object.keys(S[0])) expect(R[L][c], `L${L} ${c}`).toBe(S[L][c]);
+  });
+  it('collection_cost = floor(10 x 1.6^L), strictly rising through L55', () => {
+    R.forEach((r, L) => { expect(r.collection_cost).toBe(Math.floor(10 * 1.6 ** L)); if (L) expect(r.collection_cost).toBeGreaterThan(R[L - 1].collection_cost); });
+    expect(R.length - 1).toBe(55);
+  });
+  it('Hens L51-55 have real rates (rising, > L50)', () => { for (let L = 51; L <= 55; L++) expect(R[L].eggs_per_sec).toBeGreaterThan(R[L - 1].eggs_per_sec); });
+  it('farm_max_level and hv_extra_second_markup are read from the CSV (no config needed)', () => {
+    expect(farmMaxOf(R, {})).toBe(50); expect(R[0].farm_max_level).toBe(50);
+    expect((fitM4(R, live, { hvExtraSecondLevelMult: 9 }) as any).extraSecondLevelMult).toBe(1 + R[0].hv_extra_second_markup);
+    expect(R[0].hv_extra_second_markup).toBe(0.1);
+  });
+  it('extra-level price REPLACES the row cost with no max(): it can be lower than the row', () => {
+    // find a real case in this table; if none, force one by lowering the share in data only
+    let RR = R, hit = [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50].find(F => Math.floor(share(F) * fc(F)) < R[F + 3].hens_cost);
+    if (hit === undefined) { RR = R.map(r => r.level === 40 ? { ...r, hv_extra_cost_farm_share: 0.01 } : r); hit = 40; }
+    const bb = { ...b, m4: { ...b.m4!, ...fitM4(RR, live, cfg)!, enabled: 1 } } as Balance;
+    const price = trackBuyCost(st(hit, hit + 3), 'hens', bb);
+    expect(price).toBe(Math.floor(RR[hit].hv_extra_cost_farm_share * fc(hit)));
+    expect(price).toBeLessThan(R[hit + 3].hens_cost);
+  });
+});
+}
+for (const f of ['economy.l30plus.csv', 'economy.l30plus-baseline.csv']) suite(f);
