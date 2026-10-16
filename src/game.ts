@@ -6,12 +6,13 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, serialize, loadSafe, writeV6Backup, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery } from './save/save';
+import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, newerSaveVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, idbAbortReason, TRACKS_MARKER_PATH } from './save/save';
+import { IdbMirror, type IdbFactory } from './save/idb-mirror';
+import { migrateTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
-export interface GameOpts { /** Result of boot's IndexedDB v6_backup write ('ok' = stored or already there). */ idbV6Backup?: 'ok' | 'failed' }
-/** The same balance with the M4 flag off: an aborted track migration runs this session as plain v6. */
+/** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
 export const tracksOff = (b: Balance): Balance => (b.m4 ? { ...b, m4: { ...b.m4, enabled: 0 } } : b);
 export class Game {
   state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
@@ -34,35 +35,23 @@ export class Game {
   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
   /** D2: durable mirror of every save (IndexedDB, durability 'strict'); none in tests, second tabs or without IndexedDB. */
   mirror: { write(raw: string): unknown; clear(): Promise<void>; newer?: number | null; onNewer?: ((v: number) => void) | null } | null;
-  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null, opts: GameOpts = {}) {
+  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null) {
     this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
-    let r = loadSafe(kv, b, now(), idbRaw); let f = r.file;
+    const r = loadSafe(kv, b, now(), idbRaw); const f = r.file;
     if (f && !validSavedAt(f.savedAt, now())) f.savedAt = NaN; // QA BUG-1: <= 0 / pre-2020 savedAt -> 0 offline, re-stamped below
     this.recovery = r.recovery; this.recoveryOutcome = r.outcome; this.isNewGame = !f;
     // M4-safety: a save from a newer build is refused untouched; this Game never writes (no new game autosaves over it).
     if (r.newer !== undefined) { this.newerSave = r.newer; this.readOnly = true; this.isNewGame = false; this.mirror = null; this.telemetry.track('save_newer_version', { version: r.newer, build }); }
     else if (this.mirror) this.mirror.onNewer = v => this.refuseNewer(v);
-    // Interim track migration (m4a-spec M4A-31(a)/(f)1; HoE + Architect 2026-10-16 21:24): the raw pre-migration bytes
-    // must be in v6_backup in localStorage AND IndexedDB before the migrated farm is used. Runs after the newer-save
-    // refusal (above) and, in boot, after the lease claim (m1). If either write fails: abort. The migrated state is
-    // discarded, this session runs and saves plain v6 with the M4 flag off (no tracksV7 marker), and the migration is
-    // retried on the next load only. save_migration_aborted{store, reason} (ADR M4-12, engineering/decisions.md on arch/m4-design); no extra notice (the normal v6 save path shows
-    // the "Can't save" notice once if it fails too).
-    // Accepted risk (review m3): write-once keeps the FIRST backup. A farm that loses its marker and is migrated again
-    // keeps the older bytes; the newer pre-migration bytes are not backed up. Rare until S-4 replaces the marker.
-    const pre = f?.preTracksRaw;
-    if (typeof pre === 'string' && pre.length > 0 && r.newer === undefined) {
-      const ls = writeV6Backup(kv, pre);
-      const why = ls === 'failed' ? 'ls' as const : this.mirror && opts.idbV6Backup !== 'ok' ? 'idb' as const : null;
-      if (why) {
-        this.telemetry.track('save_migration_aborted', { store: why, reason: 'backup_write_failed' }); this.tracksMigrationAborted = why; // ADR M4-12 shape
-        b = this.b = tracksOff(b); r = loadSafe(kv, b, now(), idbRaw); f = r.file;
-        if (f && !validSavedAt(f.savedAt, now())) f.savedAt = NaN;
-        this.recovery = r.recovery; this.recoveryOutcome = r.outcome; this.isNewGame = !f;
-      }
+    // m4-design §3c (ADR M4-14..17): an unmarked v6 farm with M4 on boots as plain v6 under flag-off rules. The
+    // backup + in-session commit run later in startTracksMigration(); nothing about backups is touched on load (N2).
+    // Accepted risk (review m3): a farm that loses its marker is migrated again with a fresh backup (overwrites).
+    if (f?.tracksMigrated && f.v6State && f.preTracksRaw && r.newer === undefined) {
+      this.tracksPending = { raw: f.preTracksRaw, on: b, v6Keys: f.v6Keys ?? Object.keys(f.v6State) };
+      f.state = f.v6State; b = this.b = tracksOff(b);
     }
     if (r.recovery) {
       const { reason, had_backup, restored_from_backup, copy_failed } = r.recovery;
@@ -122,19 +111,69 @@ export class Game {
   private held() { return this.now() < this.holdUntil; }
   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
-  /** Set when the interim track migration was aborted this session (the session runs flag-off v6). */
-  tracksMigrationAborted: 'ls' | 'idb' | null = null;
-  /** The balance this session runs on (flag-off copy when the track migration was aborted); the UI must use it. */
+  /** Pending interim migration (unmarked v6, M4 on): the validated raw bytes loaded (M4-17), the flag-on balance, and the
+   *  v6 state keys (only those are written while pending, so no track levels reach the v6 save). null once committed. */
+  private tracksPending: { raw: string; on: Balance; v6Keys: string[] } | null = null;
+  /** Set when this session's migration was aborted (M4-12/M4-16); the session stays flag-off v6 (M4-14). */
+  tracksMigrationAborted: string | null = null;
+  /** UI hook: the migration committed in-session; M4 rules/UI are live from now on. */
+  onTracksCommitted: (() => void) | null = null;
+  /** The balance this session runs on right now (flag off until the migration commits); the UI reads it live. */
   get balance(): Balance { return this.b; }
+  get tracksMigrationPending() { return this.tracksPending !== null; }
+  private persisted(): GameState {
+    const p = this.tracksPending; if (!p) return this.state;
+    const o: any = {}; for (const k of p.v6Keys) if (k in this.state) o[k] = (this.state as any)[k]; return o;
+  }
+  private abortTracks(store: 'ls' | 'idb', reason: string): 'aborted' {
+    this.tracksPending = null; this.tracksMigrationAborted = reason; // M4-14: flag-off for the rest of the session
+    this.telemetry.track('save_migration_aborted', { store, reason, path: TRACKS_MARKER_PATH }); this.telemetry.flush(true);
+    return 'aborted';
+  }
+  private canCommit() { return !this.resetting && !this.readOnly && !this.inactive && !(this.canWrite && !this.canWrite()) && !this.newerGuard(); }
+  /** m4-design §3c interim path (F-0), called by boot after the lease claim (m1). Order:
+   *  1. IndexedDB: own open (mirror timeout); 'absent' (no indexedDB / private-mode or security error) => localStorage
+   *     only; timeout / other error / failed read of main => abort, no write anywhere (ruling N1). A newer save in IDB =>
+   *     refuse as usual.
+   *  2. localStorage record {migrationId, raw}: overwrites a leftover (only here, N2); read back, migrationId must match
+   *     (readback_mismatch). 3. IndexedDB put + read-back; failure => abort, our own records removed (M4-13).
+   *  4. Commit at once: migrate the LIVE v6 state, tracksV7 + v6BackupId (N3), save, flag-on rules from now.
+   *  `newId` is injectable for goldens (N7; default from save/). */
+  async startTracksMigration(idbFactory: IdbFactory | undefined, newId: () => string = newMigrationId): Promise<'none' | 'committed' | 'aborted'> {
+    const p = this.tracksPending; if (!p || !this.canCommit()) return 'none';
+    const o = await IdbMirror.openForBackup(idbFactory);
+    if (o.open === 'timeout' || o.open === 'error') return this.abortTracks('idb', idbAbortReason(o.open));
+    if (o.mirror) {
+      const main = await o.mirror.readMainForBackup();
+      if (main === undefined) return this.abortTracks('idb', idbAbortReason('read_error'));
+      const nv = newerSaveVersion(main); if (nv !== null) { this.tracksPending = null; this.refuseNewer(nv); return 'none'; }
+    }
+    if (this.tracksPending !== p || !this.canCommit()) return 'none';
+    const id = newId(), rec = encodeBackup({ migrationId: id, raw: p.raw });
+    try { this.kv.setItem(V6_BACKUP_KEY, rec); } catch (e) { return this.abortTracks('ls', (e as Error)?.name || 'write_failed'); }
+    const back = decodeBackup(this.kv.getItem(V6_BACKUP_KEY));
+    if (!back || back.migrationId !== id || back.raw !== p.raw) return this.abortTracks('ls', 'readback_mismatch');
+    if (o.mirror && !(await o.mirror.putV6Backup(rec))) {
+      try { if (this.kv.getItem(V6_BACKUP_KEY) === rec) this.kv.removeItem?.(V6_BACKUP_KEY); } catch { /* best effort */ }
+      void o.mirror.deleteV6Backup(); return this.abortTracks('idb', 'write_failed');
+    }
+    if (this.tracksPending !== p || !this.canCommit()) return 'none'; // record stays a leftover; the next migration overwrites it
+    const m = migrateTracksV7(this.state, p.on);
+    this.state = { ...m.state, tracksV7: 1, v6BackupId: id }; this.b = p.on; this.tracksPending = null;
+    this.save();
+    this.telemetry.track('save_migrated', { from: 6, to: 6, migration: TRACKS_MARKER_PATH, refund_cents: 0, farm_level: this.state.farmLevel, idb: o.mirror ? 'ok' : 'absent' });
+    this.telemetry.flush(true); this.onTracksCommitted?.();
+    return 'committed';
+  }
   save() {
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     if (this.newerGuard()) return;
     const t = this.now();
-    try { const raw = save(this.kv, this.state, t, this.b, this.bakAllowed); this.mirror?.write(raw); }
+    try { const raw = save(this.kv, this.persisted(), t, this.b, this.bakAllowed); this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror) try { this.mirror.write(serialize(this.state, t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror) try { this.mirror.write(serialize(this.persisted(), t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
@@ -180,7 +219,7 @@ export class Game {
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
   /** Dev only. Goes through the same load-time backup gate as any save (review n2): the v6 backup is written (or the
    *  migration aborted) in the constructor, before any save, so a backdated write can never skip it. */
-  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.state, this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
+  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.persisted(), this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
   /** Reset save: drop the IndexedDB copy too (resolves when committed, or after 1 s), then the caller reloads. */
   clearMirror(): Promise<void> { return this.mirror ? Promise.race([this.mirror.clear(), new Promise<void>(r => setTimeout(r, 1000))]) : Promise.resolve(); }
   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */

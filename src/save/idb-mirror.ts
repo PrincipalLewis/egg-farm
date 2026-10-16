@@ -11,6 +11,8 @@ import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersi
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** ADR M4-11: IDB copy of the one-time v6 backup (same bytes as localStorage eggfarm.save.v6_backup). */
 export const IDB_V6_BACKUP_KEY = 'v6_backup';
+/** rc1 D2 mirror open timeout; also the migration-backup open timeout (M4-16 ruling N1). */
+export const IDB_OPEN_TIMEOUT_MS = 1500;
 /** The subset of IDBFactory we use (lets unit tests pass a fake). */
 export type IdbFactory = Pick<IDBFactory, 'open'>;
 const req = <T>(r: IDBRequest<T>) => new Promise<T>((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -20,7 +22,7 @@ export class IdbMirror {
   pending = 0; failed = false;
   constructor(private db: IDBDatabase) {}
   /** Open (or create) the mirror database; null when IndexedDB is missing, blocked, errors or takes > ms. */
-  static async open(factory: IdbFactory | undefined = (globalThis as any).indexedDB, ms = 1500): Promise<IdbMirror | null> {
+  static async open(factory: IdbFactory | undefined = (globalThis as any).indexedDB, ms = IDB_OPEN_TIMEOUT_MS): Promise<IdbMirror | null> {
     if (!factory) return null;
     try {
       const r = factory.open(IDB_NAME, 1);
@@ -29,6 +31,27 @@ export class IdbMirror {
       return new IdbMirror(db);
     } catch { return null; }
   }
+  /** Migration backup only (M4-16 ruling N1): 'absent' = no factory, or open throws/rejects with SecurityError /
+   *  InvalidStateError (private mode); 'timeout' after ms; 'error' for anything else. */
+  static async openForBackup(factory: IdbFactory | undefined, ms = IDB_OPEN_TIMEOUT_MS): Promise<{ mirror: IdbMirror | null; open: 'ok' | 'absent' | 'timeout' | 'error' }> {
+    if (!factory) return { mirror: null, open: 'absent' };
+    const priv = (e: unknown) => ['SecurityError', 'InvalidStateError'].includes((e as any)?.name);
+    try {
+      const r = factory.open(IDB_NAME, 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains(IDB_STORE)) r.result.createObjectStore(IDB_STORE); };
+      const db = await timeout(req(r).catch(e => { throw (r as any).error ?? e; }), ms);
+      return { mirror: new IdbMirror(db), open: 'ok' };
+    } catch (e) {
+      if ((e as Error)?.message === 'idb timeout') return { mirror: null, open: 'timeout' };
+      return { mirror: null, open: priv(e) ? 'absent' : 'error' };
+    }
+  }
+  /** Migration only: read IndexedDB main; undefined on a failed read (caller aborts, idb_read_error). */
+  async readMainForBackup(ms = IDB_OPEN_TIMEOUT_MS): Promise<string | null | undefined> {
+    try { const v = await timeout(req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)), ms); return typeof v === 'string' ? v : null; }
+    catch { return undefined; }
+  }
+
   private tx(mode: IDBTransactionMode) { return this.db.transaction(IDB_STORE, mode, { durability: 'strict' } as IDBTransactionOptions); }
   async read(ms = 1500): Promise<string | null> {
     try { const v = await timeout(req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)), ms); if (typeof v !== 'string') return null; this.seeNewer(v); return v; }
@@ -49,14 +72,23 @@ export class IdbMirror {
       return new Promise(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) this.failed = true; res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
     } catch { this.failed = true; return Promise.resolve(); }
   }
-  /** M4A-31(a)/(f)1: write-once of the v6 backup (add() never overwrites an existing key). Resolves true when the key
-   *  holds a backup after the transaction (written or already there), false on any failure (the caller aborts). Never throws. */
-  writeV6Backup(raw: string): Promise<boolean> {
+  /** m4-design §3c: write the backup record (overwrites a leftover); resolves true only when the transaction committed
+   *  and a read-back in the same transaction matched; false on failure (the caller aborts). Never throws. */
+  putV6Backup(record: string): Promise<boolean> {
     try {
-      const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE);
-      const g = os.get(IDB_V6_BACKUP_KEY); g.onsuccess = () => { if (g.result === undefined) os.add(raw, IDB_V6_BACKUP_KEY); };
-      return new Promise(res => { t.oncomplete = () => res(true); t.onerror = t.onabort = () => res(false); });
+      const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); let same = false;
+      const p = os.put(record, IDB_V6_BACKUP_KEY); p.onsuccess = () => { const g = os.get(IDB_V6_BACKUP_KEY); g.onsuccess = () => { same = g.result === record; }; };
+      return new Promise<boolean>(res => { t.oncomplete = () => res(same); t.onerror = t.onabort = () => res(false); });
     } catch { return Promise.resolve(false); }
+  }
+  /** M4-13/M4-15 cleanup (best effort, never throws): remove a leftover / aborted-attempt record. */
+  deleteV6Backup(): Promise<void> {
+    try { const t = this.tx('readwrite'); t.objectStore(IDB_STORE).delete(IDB_V6_BACKUP_KEY); return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
+    catch { return Promise.resolve(); }
+  }
+  readV6Backup(): Promise<string | null> {
+    try { const g = this.tx('readonly').objectStore(IDB_STORE).get(IDB_V6_BACKUP_KEY); return new Promise(res => { g.onsuccess = () => res(typeof g.result === 'string' ? g.result : null); g.onerror = () => res(null); }); }
+    catch { return Promise.resolve(null); }
   }
   /** Reset save: remove the mirror copy (resolves once committed or failed). */
   clear(): Promise<void> {

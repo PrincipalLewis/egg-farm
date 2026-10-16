@@ -5,23 +5,38 @@ import { migrateTracksV7 } from '../sim/migrate-v7';
 export const SAVE_KEY = 'eggfarm.save';
 export const SAVE_VERSION = 6;
 export interface SaveFile { version: number; savedAt: number; state: GameState;
-  /** Set by validate() when this load ran the interim track migration (M4 on, no tracksV7 marker): the stored raw
-   *  bytes before the in-place change, for the one-time v6 backup (Game writes V6_BACKUP_KEY before its first save). */
-  preTracksRaw?: string;
-  /** Set by migrate() when the interim track migration ran on this load. */
-  tracksMigrated?: true; }
-/** M4A-27..31 interim (ADR M4-8): the pre-migration save bytes, written once, never overwritten. */
+  /** Set by migrate() when the interim track migration applies to this save (M4 on, no tracksV7 marker). `state` is
+   *  then the migrated preview; Game runs `v6State` under flag-off rules until the backup commits (m4-design §3c). */
+  tracksMigrated?: true; v6State?: GameState; /** keys of the stored v6 state (what a pending session may write) */ v6Keys?: string[];
+  /** Set by validate() with tracksMigrated: the validated raw bytes of the copy loaded (M4-17), i.e. the backup payload. */
+  preTracksRaw?: string; }
+/** ADR M4-11 name; m4-design §3c record `{"migrationId","raw"}` (M4-15). Committed when its id = live state.v6BackupId. */
 export const V6_BACKUP_KEY = 'eggfarm.save.v6_backup';
-/** Write the one-time v6 backup: only when the key is empty (exactly once), before the migrated state is saved.
- *  Returns 'written' | 'kept' (already there) | 'failed' (storage threw; the caller keeps the save untouched). */
-/** Boot helper: the raw main bytes that the interim track migration will back up on this load, or null. */
-export function pendingTracksBackup(kv: Pick<KV, 'getItem'>, b: Balance): string | null {
-  const raw = kv.getItem(SAVE_KEY); if (!raw) return null;
-  const v = validate(raw, b); return v.ok && v.file.preTracksRaw ? v.file.preTracksRaw : null;
+export interface V6BackupRecord { migrationId: string; raw: string }
+export const MIGRATION_ID_HEX = 16;
+export function newMigrationId(rnd: (n: number) => Uint8Array = n => crypto.getRandomValues(new Uint8Array(n))): string {
+  return Array.from(rnd(MIGRATION_ID_HEX / 2), x => x.toString(16).padStart(2, '0')).join('');
 }
-export function writeV6Backup(kv: KV, raw: string): 'written' | 'kept' | 'failed' {
-  if (kv.getItem(V6_BACKUP_KEY) !== null) return 'kept';
-  try { kv.setItem(V6_BACKUP_KEY, raw); return kv.getItem(V6_BACKUP_KEY) === raw ? 'written' : 'failed'; } catch { return 'failed'; }
+export const encodeBackup = (r: V6BackupRecord) => JSON.stringify({ migrationId: r.migrationId, raw: r.raw });
+/** Parse a stored record; anything else (old raw-string format from 677317d, junk) is null = leftover. */
+export function decodeBackup(text: unknown): V6BackupRecord | null {
+  if (typeof text !== 'string') return null; let d: any; try { d = JSON.parse(text); } catch { return null; }
+  return d && typeof d === 'object' && typeof d.migrationId === 'string' && d.migrationId.length === MIGRATION_ID_HEX && typeof d.raw === 'string' ? { migrationId: d.migrationId, raw: d.raw } : null;
+}
+/** M4-16 as ruled (Architect N1, 2026-10-16 21:59): IndexedDB is "absent" only when there is no indexedDB global or the
+ *  open throws/rejects with a private-mode or security error; then the migration proceeds on localStorage alone. Any
+ *  other failure (open timeout at the mirror's 1.5 s, other open error, a failed read) means NO migration this session:
+ *  stay v6 under flag-off rules, save_migration_aborted{reason}, retry on the next load (IndexedDB may hold a newer save). */
+export type IdbBackupOpen = 'ok' | 'absent' | 'timeout' | 'error';
+export const idbAbortReason = (o: Exclude<IdbBackupOpen, 'ok' | 'absent'> | 'read_error') => (o === 'timeout' ? 'idb_timeout' : 'idb_read_error');
+/** Telemetry `path` for the interim marker migration (vs. the S-4 v7 path later). */
+export const TRACKS_MARKER_PATH = 'tracksV7_marker';
+/** M4-15: a stored record is committed only when its id equals the live save's v6BackupId. */
+export const isCommittedBackup = (text: unknown, liveId: string | undefined) => { const r = decodeBackup(text); return !!r && !!liveId && r.migrationId === liveId; };
+/** M4-17 restore source: LS record, else IDB record; only a committed record whose raw passes validation (checksum, ranges). */
+export function committedBackupRaw(lsText: unknown, idbText: unknown, liveId: string | undefined, b: Balance): string | null {
+  for (const t of [lsText, idbText]) { const r = decodeBackup(t); if (r && liveId && r.migrationId === liveId && validate(r.raw, b).ok) return r.raw; }
+  return null;
 }
 /** migrations[n] upgrades a version-n save to n+1 */
 const migrations: Record<number, (d: any) => any> = {
@@ -56,8 +71,8 @@ export function migrate(d: any, b: Balance): SaveFile {
   // M4-A (M4A-27..29): with the flag on, a pre-M4 farm (any version, no tracksV7 marker) is price-matched once:
   // H = F, lowest V with price >= v6, milestones seeded silently. SAVE_VERSION stays 6 so main can still read the save.
   const tracks = m4On(b) && !state.tracksV7;
-  if (tracks) state = { ...migrateTracksV7(state, b).state, tracksV7: 1 };
-  return { version: d.version, savedAt: d.savedAt, state, ...(tracks ? { tracksMigrated: true as const } : {}) };
+  if (!tracks) return { version: d.version, savedAt: d.savedAt, state };
+  return { version: d.version, savedAt: d.savedAt, state: { ...migrateTracksV7(state, b).state, tracksV7: 1 }, tracksMigrated: true, v6State: state, v6Keys: Object.keys(d.state ?? {}) };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
 /** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
