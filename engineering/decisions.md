@@ -35,3 +35,9 @@
 - Applies to the interim marker path (F-0) and the S-4 v7 path: the backup must succeed in both stores before the migration commits.
 - Tests: an injected quota failure in each store → the save stays v6 and nothing is lost across a page close.
 - Plan: the Export button is ZW-2, a separate Saves PR before S-2; S-2 ETA Sat 22:00.
+
+## 2026-10-16 21:55 ADR M4-13 Partial backup failure + QA testability rules (HoQA review pr1-m4-design-review-96e895b; Senior Software Architect)
+- If the `v6_backup` write succeeds in one store and fails in the other (LS ok + IDB fails, or the reverse), the aborted attempt removes the backup it wrote, so no `v6_backup` from that attempt remains. The retry on the next load writes a fresh backup in both stores from the unmarked v6 save. Write-once applies only to a backup whose migration committed. Refines M4-11/M4-12.
+- Zero-writes rule (QA ZW-3..6) adopted: save keys (`eggfarm.save`, `.bak`, `.v6_backup`, `.corrupt.*`), `eggfarm.ui` and IDB `save/main|v6_backup` stay byte-identical; only `eggfarm.lease`, `eggfarm.tab`, `eggfarm.telemetry` may be written, none holding a serialized save; `eggfarm.install_id` create-if-absent only (m4-design §3b).
+- ZW-2 (Export save) is its own Saves PR before S-2 and a prerequisite of S-2 and S-4; QA flips ZW-2 to PASS on that PR's SHA.
+- Flag-off = main means the sim trace hash (sha256 of the JSON trace, m4a-flag-off harness) plus a storage-bytes golden over tests/fixtures/saves, both pinned to a01faea (m4-design §4). Backup-failure tests assert no dialog while the v6 save succeeds and `save_migration_aborted{store}`.
