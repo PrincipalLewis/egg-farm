@@ -140,3 +140,30 @@ describe('AC14b save-recovery dialog v1.2 (UI only)', () => {
 describe('S2-1 toast duration (Art & UX 08:47)', () => {
   it('"Coop upgraded!" stays 2.5 s; other toasts keep 1.3 s', () => { expect(app).toContain('export const COOP_TOAST_MS = 2500;'); expect(app).toContain("showToast('Coop upgraded!', COOP_TOAST_MS)"); expect(app).toContain('(text: string, ms = 1300)'); });
 });
+
+describe('S2-4c welcome-back sold line (Art & UX 08:47)', async () => {
+  const { instantSale, saleLine, compact } = await import('../src/ui/welcome-sale');
+  const { balance: b } = await import('../src/config/balance');
+  const { initialState } = await import('../src/sim/state');
+  const { apply } = await import('../src/sim/actions');
+  const { step } = await import('../src/sim/tick');
+  const fm = (c: number) => `$${(c / 100).toFixed(2)}`;
+  const mk = (mh: boolean, pending: number) => ({ ...initialState(b, 3), farmLevel: 10, coinsCents: 1e9, basket: 0, pendingOfflineEggs: pending, nextCustomerInS: 1e9,
+    customers: [{ id: 1, demand: 200, filled: 0, waitedS: 0 }, { id: 2, demand: 139, filled: 0, waitedS: 0 }], workers: mh ? { market_hand: { energy: 100, cdS: 0 } } : {} } as any);
+  it('copy, compact count, hidden at 0', () => {
+    expect(saleLine({ eggs: 339, cents: 127900 }, compact, fm)).toBe('Market Hand sold 339 right away\u00a0· +$1279.00');
+    expect(compact(1234)).toBe('1.2K'); expect(compact(3_456_789)).toBe('3.4M');
+    expect(saleLine({ eggs: 0, cents: 0 }, compact, fm)).toBe('');
+  });
+  it('real numbers: equals what the sim sells after Collect; nothing without a Market Hand; state untouched', () => {
+    const s = mk(true, 2278), before = JSON.stringify(s), r = instantSale(s, b);
+    expect(JSON.stringify(s)).toBe(before);
+    let t = apply(s, { type: 'collectOffline' }, b); const ev: any[] = [];
+    for (let i = 0; i < Math.round(b.workers.market_hand.every_s * b.tickHz); i++) t = step(t, 1 / b.tickHz, b, ev);
+    const sold = ev.filter(e => e.type === 'sell' && e.by === 'market_hand').reduce((a, e) => a + e.k, 0);
+    expect(r.eggs).toBe(sold); expect(r.eggs).toBe(339); expect(r.cents).toBeGreaterThan(0);
+    expect(instantSale(mk(false, 2278), b)).toEqual({ eggs: 0, cents: 0 });
+    expect(instantSale(mk(true, 0), b)).toEqual({ eggs: 0, cents: 0 });
+  });
+  it('card renders the line only when something sold', () => expect(app).toContain('${sale ? `<div class="wb-sold num" id="wbSold">${sale}</div>` : \'\'}'));
+});

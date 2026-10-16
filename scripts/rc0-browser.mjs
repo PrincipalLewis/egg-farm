@@ -111,6 +111,25 @@ sections.ac14b = async () => {
     await ctx.close();
   }
 };
+// ---------- S2-4c welcome-back "Market Hand sold N right away" line: real numbers, hidden when nothing sold ----------
+sections.s24c = async () => {
+  for (const mh of [true, false]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now() - 2 * 3600e3, state: { coinsCents: 1e9, coop: 0, basket: 0, collectionLevel: 10, farmLevel: 10, customers: [{ id: 1, demand: 200, filled: 0, waitedS: 0 }, { id: 2, demand: 139, filled: 0, waitedS: 0 }],
+      nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2, workers: mh ? { market_hand: { energy: 100, cdS: 0 } } : {}, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    await page.waitForTimeout(200);
+    const line = await page.evaluate(() => document.querySelector('#wbSold')?.textContent ?? null);
+    const css = await page.evaluate(() => { const e = document.querySelector('#wbSold'); return e && [getComputedStyle(e).fontSize, getComputedStyle(e).color]; });
+    if (mh && shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-4c-welcome-sold-390.png` });
+    const b0 = await page.evaluate(() => window.eggfarm.state.basket + window.eggfarm.state.pendingOfflineEggs);
+    if (await page.locator('#wbCollect').count()) await page.locator('#wbCollect').click();
+    await page.waitForTimeout(3000);
+    const sold = await page.evaluate(() => JSON.parse(window.eggfarmExportTelemetry()).events.filter(e => e.type === 'sale' || e.type === 'sell').length);
+    if (mh) ok('S2-4c line "Market Hand sold 339 right away · +$…", 14px #6B5D52', line && /^Market Hand sold 339 right away\u00a0· \+\$/.test(line) && css[0] === '14px' && css[1] === 'rgb(107, 93, 82)', JSON.stringify({ line, css, b0, sold }));
+    else ok('S2-4c no Market Hand -> line hidden', line === null, JSON.stringify({ line }));
+    await ctx.close();
+  }
+};
 // ---------- PT1-4 / PT1-5 / PT1-6 ----------
 sections.pt1 = async () => {
   { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm

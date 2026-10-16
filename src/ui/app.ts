@@ -14,6 +14,7 @@ import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRec
 import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
+import { instantSale, saleLine, compact } from './welcome-sale';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
@@ -210,12 +211,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
-    modalKind = 'welcome';
+    modalKind = 'welcome'; const sale = saleLine(instantSale(g.state, b), compact, fmtMoney); // S2-4c
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
       <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
-      <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)} eggs</div>
+      <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)} eggs</div>${sale ? `<div class="wb-sold num" id="wbSold">${sale}</div>` : ''}
       <button class="btn" id="wbCollect">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
   };

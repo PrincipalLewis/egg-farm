@@ -463,3 +463,5 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 /* S2-5: nav buttons are the full 64px (the 2px top rule is drawn over them instead of taking 2px of the track) */
 .actions{position:relative;border-top:0}
 .actions::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--bw);background:var(--c-outline);pointer-events:none;z-index:1}
+/* S2-4c: welcome-back "Market Hand sold N right away · +$X" line, 14px Nunito #6B5D52 */
+.card .wb-sold{font:400 14px/1.35 var(--f-body);color:#6B5D52;margin-top:-4px}
