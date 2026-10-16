@@ -44,8 +44,8 @@ const buy = p => p.evaluate(() => { const g = window.eggfarm; g.dispatch({ type:
   await B.waitForTimeout(500); const bCoins = (await saved(B)).coinsCents;
   await A.click('#tgPlay'); const loading = await A.evaluate(() => { const b = document.getElementById('tgPlay'); return b ? { t: b.textContent, d: b.disabled } : null; }).catch(() => ({ t: 'Loading…', d: true, navigated: true }));
   await A.waitForLoadState('load'); await A.getByText('Tap to start').click(); await A.waitForFunction(() => window.eggfarm); await A.waitForTimeout(800);
-  const aCoins = await coins(A), ev = await A.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'tab_guard_takeover').map(e => e.reason));
-  ok('TG-UI-6/TG-2 Play here -> "Loading…" disabled, reload shows exactly B\'s money, B shows the notice, takeover{play_here}', loading && /Loading/.test(loading.t) && loading.d && Math.abs(aCoins - bCoins) <= 0 + 0 && await shown(B) && !(await shown(A)) && ev.includes('play_here'), { loading, aCoins, bCoins, ev });
+  const bCoinsAfter = await coins(B); const aCoins = await coins(A), ev = await A.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'tab_guard_takeover').map(e => e.reason));
+  ok('TG-UI-6/TG-2 Play here -> "Loading…" disabled, reload shows exactly B\'s money, B shows the notice, takeover{play_here}', loading && /Loading/.test(loading.t) && loading.d && aCoins === bCoinsAfter && aCoins >= bCoins && await shown(B) && !(await shown(A)) && ev.includes('play_here'), { loading, aCoins, bCoinsAtTakeover: bCoinsAfter, bSavedBefore: bCoins, ev });
   await ctx.close(); }
 // ---- TG-4 owner killed: stale lease (>=6 s, never released) -> next load takes over without a notice
 { const ctx = await ctxWith(fx); const p = await ctx.newPage(); await p.goto(URL0); await p.evaluate(() => localStorage.setItem('eggfarm.lease', JSON.stringify({ id: 'killed-tab', at: Date.now() - 6500 }))); await p.close();
