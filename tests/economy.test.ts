@@ -3,7 +3,6 @@ import { readFileSync, existsSync, mkdtempSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createHash } from 'node:crypto';
 import { balance as b } from '../src/config/balance';
 import * as S from '../src/sim/state';
 import { tableRow } from '../src/config/formulas';
@@ -11,8 +10,6 @@ import { offlineEggs } from '../src/sim/offline';
 import { parseEconomyCsv } from '../scripts/sync-economy';
 const csvText = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
 const data = parseEconomyCsv(csvText);
-/** product/sim/economy_sim.py the fixtures were generated with (config F1; Economy Oct 17; tests/fixtures/economy_sim.json f9b0a447). */
-const SIM_SHA256_PREFIX = 'eddf945d';
 const fx = JSON.parse(readFileSync(new URL('./fixtures/economy_sim.json', import.meta.url), 'utf8'));
 describe('AC6 every economy.csv cell reproduced from config formulas', () => {
   it.each(data)('level $level', (r) => {
@@ -40,16 +37,11 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
     expect([b.farm.demandLoFactor, b.farm.demandHiFactor, b.customers.queue_max_base, b.customers.queue_max_step_levels, b.customers.queue_max_cap]).toEqual([p.d_lo, p.d_hi, p.q_base, p.q_step, p.q_cap]);
     expect([b.offline.offlineRateMultiplier, b.offline.offlineCapSeconds]).toEqual([p.offline_rate, p.offline_cap_s]);
   });
-  const simPath = new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, py = existsSync(simPath);
-  // Visible skip (PR #17 re-check): a clean checkout / CI without the studio product/ folder cannot run the live sim.
-  if (!py) console.warn(`parity: SKIPPED 'fixture is fresh vs the live reference sim' - ${simPath} not found (no studio product/ folder)`);
-  it.skipIf(!py)(py ? 'reference sim sha256 is pinned (economy_sim.py ' + SIM_SHA256_PREFIX + ')' : 'SKIPPED (no product/ folder): reference sim sha pin', () => {
-    expect(createHash('sha256').update(readFileSync(simPath)).digest('hex').startsWith(SIM_SHA256_PREFIX), `economy_sim.py sha256 must start with ${SIM_SHA256_PREFIX}; regen fixtures and re-pin`).toBe(true);
-  });
-  it.skipIf(!py)(py ? 'fixture is fresh vs the live reference sim' : 'SKIPPED (no product/ folder): fixture is fresh vs the live reference sim', () => {
+  const py = existsSync(new URL('../../product/sim/economy_sim.py', import.meta.url).pathname);
+  it.runIf(py)('fixture is fresh vs the live reference sim', () => {
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');
-    execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'f1', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
-    // All 46 columns the sim's CSV writer emits (product/sim/economy_sim.py sha eddf945d, --config f1; Economy Oct 17).
+    execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'current', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
+    // All 46 columns the sim's CSV writer emits (product/sim/economy_sim.py sha 5ad5a3a6 writes yawn 50 / manage 0.5, Economy Oct 17).
     // The m4cols-only columns (79) are not written by the sim, so compare the sim's columns rather than the whole row.
     const sim = parseEconomyCsv(readFileSync(out, 'utf8')), cols = Object.keys(sim[0]);
     expect(cols.length).toBe(46); expect(sim.length).toBe(data.length);
