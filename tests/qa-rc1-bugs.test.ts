@@ -120,7 +120,7 @@ describe('BUG-4/5: FX lifetimes', () => {
 describe('MK-24-1: Sell button CSS never ellipsises the amount', () => {
   const css = readFileSync('src/ui/styles.css', 'utf8');
   it('Art & UX sizing: auto width, min 88, max 45%, pad 12, nowrap, no ellipsis on amounts', () => {
-    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*width:auto/);
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*width:fit-content/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-width:88px/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*max-width:45%/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*padding-inline:12px/);
