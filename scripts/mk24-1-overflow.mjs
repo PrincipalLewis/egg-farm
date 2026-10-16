@@ -1,4 +1,4 @@
-/** MK-24-1 v3: always two-line Sell, shared width, money never truncates; shots + checks at 360/375/390/430/1280. */
+/** MK-24-1 v4 (delivered eggs) + v3 layout: always two-line Sell, shared width, money never truncates; shots + checks at 360/375/390/430/1280. */
 import { chromium } from 'playwright-core';
 import { spawn } from 'node:child_process';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -81,21 +81,25 @@ for (const w of widths) {
     const widths = rows.map((r) => r.cw);
     const sharedOk = widths.length <= 1 || widths.every((x) => Math.abs(x - widths[0]) <= 1);
     const l1 = [...document.querySelectorAll('.order .l1')].map((row) => {
-      const e = row.querySelector('.e');
+      const n = row.querySelector('.n');
+      const egg = row.querySelector('.egg');
       const v = row.querySelector('.v');
       const vcs = v ? getComputedStyle(v) : null;
+      const ncs = n ? getComputedStyle(n) : null;
       return {
-        e: e?.textContent ?? '',
+        e: `${n?.textContent ?? ''}${egg?.textContent ?? ''}`,
         v: v?.textContent ?? '',
-        eEllipsis: e ? getComputedStyle(e).textOverflow : '',
+        nShrink: ncs?.flexShrink,
+        eEllipsis: egg ? getComputedStyle(egg).textOverflow : '',
         vShrink: vcs?.flexShrink,
         vOverflow: vcs?.overflow,
         vEllipsis: vcs?.textOverflow,
         vTruncated: v ? v.scrollWidth > v.clientWidth + 1 : false,
+        nTruncated: n ? n.scrollWidth > n.clientWidth + 1 : false,
       };
     });
     const sellW = getComputedStyle(document.querySelector('.order-list') || document.body).getPropertyValue('--sell-w').trim();
-    // Row 2 fixture: demand 17 filled 4 basket 58 -> have 17/17, sell 13
+    // Row 2 fixture: demand 17 filled 4 basket 58 -> have 4/17 delivered, sell 13
     const row2 = [...document.querySelectorAll('.order')].map((el) => ({
       line: el.querySelector('.l1')?.textContent?.replace(/\s+/g, ' ').trim(),
       btn: el.querySelector('button')?.getAttribute('aria-label'),
@@ -117,11 +121,24 @@ for (const w of widths) {
     if (line.vShrink !== '0') { console.error('V FLEX-SHRINK', w, line); ok = false; }
     if (line.vTruncated) { console.error('V TRUNCATED', w, line); ok = false; }
     if (line.vEllipsis === 'ellipsis') { console.error('V ELLIPSIS', w, line); ok = false; }
+    if (line.nShrink !== '0') { console.error('N FLEX-SHRINK', w, line); ok = false; }
+    if (line.nTruncated) { console.error('N TRUNCATED', w, line); ok = false; }
   }
-  await p.screenshot({ path: `${OUT}mk24-1-v3-${w}.png` });
-  console.log('saved', `${OUT}mk24-1-v3-${w}.png`);
+  // Product/Art & UX: row 2 is delivered 4/17, not 17/17; Sell stays 13
+  const row2 = report.row2.find(r => (r.line || '').includes('/17'));
+  if (row2) {
+    if (!/^4\/17 eggs/.test(row2.line || '')) { console.error('ROW2 DELIVERED', w, row2); ok = false; }
+    if (!(row2.btn || '').includes('Sell 13')) { console.error('ROW2 SELL', w, row2); ok = false; }
+  }
+  if ([360, 390, 1280].includes(w)) {
+    await p.screenshot({ path: `${OUT}mk24-1-v4-${w}.png` });
+    console.log('saved', `${OUT}mk24-1-v4-${w}.png`);
+  } else {
+    await p.screenshot({ path: `${OUT}mk24-1-v3-${w}.png` });
+    console.log('saved', `${OUT}mk24-1-v3-${w}.png`);
+  }
   await ctx.close();
 }
 await browser.close(); kill();
-console.log(ok ? 'MK-24-1-v3 PASS' : 'MK-24-1-v3 FAIL', buildId);
+console.log(ok ? 'MK-24-1-v4 PASS' : 'MK-24-1-v4 FAIL', buildId);
 process.exit(ok ? 0 : 1);

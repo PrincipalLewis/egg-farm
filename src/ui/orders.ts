@@ -7,20 +7,23 @@ const eggs = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.flo
 export type OrderState = 'wait' | 'partial' | 'ready';
 export interface OrderView {
   id: number; have: number; want: number; sell: number;
-  /** Full order value (want eggs) — stays on the card line (P2 / HoP). */
+  /** Full order value (want eggs) — stays on the card line (P2 / HoP / MK-23). */
   valueCents: number;
   /** What THIS Sell pays (sell eggs) via the same payout as credit; 0 when wait. Shown on the Sell button (MK-24). */
   sellCents: number;
   state: OrderState; line: string;
+  /** Row aria: "4 of 17 eggs delivered, order worth $93.84" (Art & UX). */
+  lineAria: string;
   /** Visible Sell label: eggs + floored short money (HoP 15:14). */
   button: string;
   /** Exact amount for screen readers / aria-label (popup and Thanks stay exact too). */
   buttonAria: string;
 }
-/** have = eggs already sold + what Sell would sell now; want = full order; valueCents = full order; sellCents = this Sell. */
+/** have = filled (eggs already delivered); want = demand; valueCents = full order; sellCents = this Sell.
+ *  Product: card shows delivered eggs (e.g. 4/17), not filled+this-Sell. MK-23: progress filled/N; $ = full order. */
 /** priceCents: per-egg price, or k -> cents (sim/payout saleValueCents) so Sell button == credit. */
 export function orderView(c: Customer, basket: number, priceCents: number | ((k: number) => number)): OrderView {
-  const rem = c.demand - c.filled, sell = Math.max(0, Math.min(Math.floor(basket), rem)), have = c.filled + sell, want = c.demand;
+  const rem = c.demand - c.filled, sell = Math.max(0, Math.min(Math.floor(basket), rem)), have = c.filled, want = c.demand;
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
   const pay = (k: number) => typeof priceCents === 'function' ? priceCents(k) : k * priceCents;
   const valueCents = pay(want), sellCents = sell > 0 ? pay(sell) : 0;
@@ -32,7 +35,9 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
   const wait = `Need ${eggs(rem)}`;
   const button = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${preview(sellCents)}`;
   const buttonAria = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${exact(sellCents)}`;
-  return { id: c.id, have, want, sell, valueCents, sellCents, state, line: `${eggs(have)}/${eggs(want)} eggs · ${value}`, button, buttonAria };
+  const line = `${eggs(have)}/${eggs(want)} eggs · ${value}`;
+  const lineAria = `${eggs(have)} of ${eggs(want)} eggs delivered, order worth ${exact(valueCents)}`;
+  return { id: c.id, have, want, sell, valueCents, sellCents, state, line, lineAria, button, buttonAria };
 }
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
 export const visibleOrders = (viewportH: number, docked: boolean, n: number) =>
@@ -45,9 +50,10 @@ export function orderHtml(v: OrderView, avatar: string): string {
   const pct = v.want ? (v.have / v.want) * 100 : 0;
   const parts = v.button.split('\u00a0· ');
   const inner = v.state === 'wait' ? v.button : `<span class="sk">${parts[0]}</span><span class="sy">${parts[1] ?? ''}</span>`;
+  const count = `${eggs(v.have)}/${eggs(v.want)}`;
   return `<div class="order ${v.state}" data-row="${v.id}"><div class="av"><img src="${avatar}" alt=""></div>
-    <div class="txt"><div class="l1"><span class="e">${v.line.split(' · ')[0]}</span><span class="v"> · ${v.line.split(' · ')[1]}</span></div>
-    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${v.want}" aria-valuenow="${v.have}" aria-label="Order ${v.have} of ${v.want} eggs"><i style="width:${pct.toFixed(2)}%"></i></div></div>
+    <div class="txt" aria-label="${v.lineAria}"><div class="l1"><span class="n">${count}</span><span class="egg"> eggs</span><span class="v"> · ${v.line.split(' · ')[1]}</span></div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${v.want}" aria-valuenow="${v.have}" aria-label="${v.lineAria}"><i style="width:${pct.toFixed(2)}%"></i></div></div>
     <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}" aria-label="${v.buttonAria}">${inner}</button></div>`;
 }
 /** §6 Farm row preview when the next Farm level adds a customer slot (data-driven: queueMax(F+1) > queueMax(F)).
