@@ -7,10 +7,11 @@ const eggs = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.flo
 export type OrderState = 'wait' | 'partial' | 'ready';
 export interface OrderView { id: number; have: number; want: number; sell: number; valueCents: number; state: OrderState; line: string; button: string; }
 /** have = eggs already sold to it + what Sell would sell now (min(basket, remaining)); want = full order; value = full order. */
-export function orderView(c: Customer, basket: number, priceCents: number): OrderView {
+/** priceCents: per-egg price, or the payout function k -> cents (sim/payout saleValueCents) so the card equals the credit. */
+export function orderView(c: Customer, basket: number, priceCents: number | ((k: number) => number)): OrderView {
   const rem = c.demand - c.filled, sell = Math.max(0, Math.min(Math.floor(basket), rem)), have = c.filled + sell, want = c.demand;
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
-  const valueCents = want * priceCents;
+  const valueCents = typeof priceCents === 'function' ? priceCents(want) : want * priceCents;
   const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(valueCents)));
   return { id: c.id, have, want, sell, valueCents, state, line: `${eggs(have)}/${eggs(want)} eggs · ${value}`,
     button: state === 'wait' ? `Need ${eggs(rem)}` : state === 'partial' ? `Sell ${eggs(sell)}` : 'Sell' };

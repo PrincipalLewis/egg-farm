@@ -1,10 +1,15 @@
 /** Display formatters (layout-spec §1, feature-spec F7). Pure; unit-tested. */
+const TIERS: [number, string][] = [[1e3, 'K'], [1e6, 'M'], [1e9, 'B'], [1e12, 'T']];
+/** BUG-3: round first, then pick the suffix (999,960 -> "1M", never "1000K"). K: 1 decimal; M+: 2 under 10, else 1. */
 export const fmtCount = (n: number) => {
   n = Math.floor(n);
-  if (n >= 1e9) return (n / 1e9).toFixed(n >= 1e10 ? 1 : 2).replace(/\.?0+$/, '') + 'B';
-  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2).replace(/\.?0+$/, '') + 'M';
-  if (n >= 1e4) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
-  return n.toLocaleString('en-US');
+  if (n < 1e4) return n.toLocaleString('en-US');
+  let i = TIERS.length - 1; while (i > 0 && n < TIERS[i][0]) i--;
+  for (;; i++) {
+    const [d, u] = TIERS[i], v = n / d, dp = i === 0 || v >= 10 ? 1 : 2, r = v.toFixed(dp);
+    if (+r >= 1000 && i < TIERS.length - 1) continue;
+    return r.replace(/\.?0+$/, '') + u;
+  }
 };
 /** Coins: always 2 decimals under 1K ($12.40), "$1,234.50" under 10K, then $12.3K / $1.2M. */
 export const fmtMoney = (cents: number) => {
@@ -41,4 +46,4 @@ export class IncomeRate {
 }
 /** Art & UX compact money for pops/cards: "$12.50" under $1,000, then "$1.2K" / "$3.4M". */
 export const fmtMoneyShort = (cents: number) => { const d = cents / 100; if (d < 1000) return fmtMoney(cents);
-  const [v, u] = d >= 1e9 ? [d / 1e9, 'B'] : d >= 1e6 ? [d / 1e6, 'M'] : [d / 1e3, 'K']; return '$' + (Math.floor(v * 10) / 10).toFixed(1).replace(/\.0$/, '') + u; };
+  const [v, u] = d >= 1e12 ? [d / 1e12, 'T'] : d >= 1e9 ? [d / 1e9, 'B'] : d >= 1e6 ? [d / 1e6, 'M'] : [d / 1e3, 'K']; return '$' + (Math.floor(v * 10) / 10).toFixed(1).replace(/\.0$/, '') + u; };
