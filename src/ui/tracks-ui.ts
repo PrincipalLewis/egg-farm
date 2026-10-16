@@ -3,7 +3,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { balancedStrip, trackLock, trackCost, trackLevel } from '../sim/tracks';
-import { farmCost } from '../sim/state';
+import { options, bestPaybackAmong } from '../econ/best-buy';
 import { gradeMult } from '../config/formulas';
 const pct = (mult: number) => Math.round((mult - 1) * 100);
 export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
@@ -43,25 +43,44 @@ export function trackGoalLabel(t: 'hens' | 'eggValue', n: number, F: number, b: 
   return i >= 0 ? `Egg value L${n}: ${GRADE_NAMES[i]}` : `Egg value L${n}`;
 }
 export type RowKey = 'hens' | 'eggValue' | 'farm';
-/** M4A-18: the cheapest affordable Farm-tab row; ties Hens > Egg value > Farm; null if none affordable. */
-export function highlightRow(s: GameState, b: Balance): RowKey | null {
-  const rows: [RowKey, number | null][] = [
-    ['hens', trackLock(s, 'hens', b) ? null : trackCost(trackLevel(s, 'hens'), 'hens', b) * 100],
-    ['eggValue', trackLock(s, 'eggValue', b) ? null : trackCost(trackLevel(s, 'eggValue'), 'eggValue', b) * 100],
-    ['farm', s.farmLevel >= b.maxLevel ? null : farmCost(s.farmLevel, b) * 100]];
-  let best: [RowKey, number] | null = null;
-  for (const [k, c] of rows) if (c !== null && s.coinsCents >= c && (!best || c < best[1])) best = [k, c];
-  return best?.[0] ?? null;
+const ROW_KEY = { hens: 'HENS', eggValue: 'VALUE', farm: 'FARM' } as const;
+const KEY_ROW = { HENS: 'hens', VALUE: 'eggValue', FARM: 'farm' } as const;
+/** M4A-18 (HoP 15:29, one rule with the next-goal hint): the best-payback AFFORDABLE Farm-tab row (econ/best-buy.ts
+ *  bundle payback, ties lower cost then Farm > Hens > Egg value = BUY_ORDER). If none is affordable: the best-payback row
+ *  overall with affordable = false (the UI shows its ETA). null only when every row is capped / MAX. */
+export function highlightPick(s: GameState, b: Balance): { row: RowKey; affordable: boolean; costCents: number } | null {
+  const offered = options(s, b).filter(o => o.key in KEY_ROW);
+  const aff = offered.filter(o => s.coinsCents >= Math.round(o.cost * 100)).map(o => o.key);
+  const pick = bestPaybackAmong(s, b, aff.length ? aff : offered.map(o => o.key));
+  return pick ? { row: KEY_ROW[pick.key as keyof typeof KEY_ROW], affordable: aff.length > 0, costCents: Math.round(pick.cost * 100) } : null;
 }
+export const highlightRow = (s: GameState, b: Balance): RowKey | null => { const p = highlightPick(s, b); return p?.affordable ? p.row : null; };
+export { ROW_KEY };
 /** M4A-18 anti-flicker: a coins-only change is shown once it held for holdTicks consecutive 1 Hz ticks (next-goal.ts
  *  holdTicks = 2); a purchase / hire / level change (immediate) applies the same tick. */
-export class HighlightHold {
-  shown: RowKey | null | undefined = undefined; private pending: RowKey | null | undefined = undefined; private n = 0;
-  constructor(private holdTicks = 2) {}
-  tick(next: RowKey | null, immediate = false): RowKey | null {
-    if (this.shown === undefined || immediate || next === this.shown) { this.shown = next; this.pending = undefined; this.n = 0; return next; }
-    if (next === this.pending) this.n++; else { this.pending = next; this.n = 1; }
+export class HighlightHold<T = RowKey | null> {
+  shown: T | undefined = undefined; private pending: string | undefined = undefined; private n = 0;
+  constructor(private holdTicks = 2, private sig: (x: T) => string = x => JSON.stringify(x)) {}
+  tick(next: T, immediate = false): T {
+    if (this.shown === undefined || immediate || this.sig(next) === this.sig(this.shown)) { this.shown = next; this.pending = undefined; this.n = 0; return next; }
+    const k = this.sig(next);
+    if (k === this.pending) this.n++; else { this.pending = k; this.n = 1; }
     if (this.n >= this.holdTicks) { this.shown = next; this.pending = undefined; this.n = 0; }
     return this.shown;
   }
+}
+/** m4-tracks-copy.md v1.1: second-line milestone hint, only when the next milestone is 1..5 levels above L; hidden at a
+ *  milestone level itself (the toast covers it) and at MAX. Levels and mults from balance. */
+export const MILESTONE_HINT_WINDOW = 5;
+export function milestoneHint(t: 'hens' | 'eggValue', L: number, F: number, b: Balance): string | null {
+  if (L >= b.maxLevel) return null;
+  const M = b.m4!.milestones;
+  if (t === 'hens') {
+    if (M.hens.some(m => m.level === L)) return null;
+    const n = M.hens.find(m => m.level > L);
+    return n && n.level - L <= MILESTONE_HINT_WINDOW ? `Next at L${n.level}: bigger coop · offline ×${n.offlineMult}` : null;
+  }
+  if (M.grades.some(g => g.level === L && F >= g.minFarm)) return null;
+  const i = M.grades.findIndex(g => g.level > L);
+  return i >= 0 && M.grades[i].level - L <= MILESTONE_HINT_WINDOW ? `Next at L${M.grades[i].level}: ${GRADE_NAMES[i]} ×${M.grades[i].mult}` : null;
 }

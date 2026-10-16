@@ -8,6 +8,7 @@ import { fmtTimeToAfford } from './format';
 import { m4On } from '../config/formulas';
 import { trackLock, trackCost, trackLevel } from '../sim/tracks';
 import { trackGoalLabel } from './tracks-ui';
+import { bestPaybackAmong } from '../econ/best-buy';
 export type GoalKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
 export type GoalState = 'ready' | 'waiting' | 'noincome' | 'done';
 /** Tie-break order (spec §1; M4A-22): FARM > HENS > VALUE > COLL > W1 > W2 > W3 > W4. HENS/VALUE only exist with the M4 flag on. */
@@ -49,7 +50,10 @@ export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number): Goa
   const c = candidates(s, b);
   if (!c.length) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
   const coins = Math.round(s.coinsCents); // coins at 2 dp vs integer cost; equal = affordable
-  const aff = c.filter(x => coins >= x.costCents), ready = aff.length > 0, t = cheapest(ready ? aff : c)!;
+  const aff = c.filter(x => coins >= x.costCents), ready = aff.length > 0;
+  // M4-A (HoP 15:29): with the flag on, the hint follows the same best-payback rule as the Farm-tab highlight. Off = main.
+  const pool = ready ? aff : c, bp = m4On(b) ? bestPaybackAmong(s, b, pool.map(x => x.key)) : null;
+  const t = (bp ? pool.find(x => x.key === bp.key) : null) ?? cheapest(pool)!;
   const state: GoalState = ready ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
   const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtTimeToAfford((t.costCents - coins) / rateCentsPerS);
   return { key: t.key, state, label: labelFor(t.key, s, b), status, costCents: t.costCents, tab: t.key === 'FARM' || t.key === 'HENS' || t.key === 'VALUE' ? 'farm' : t.key === 'COLL' ? 'collection' : 'workers' };

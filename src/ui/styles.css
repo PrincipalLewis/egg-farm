@@ -443,3 +443,5 @@ html,body{overflow-x:hidden;max-width:100%}
 
 /* M4A-18 next-goal highlight on one Farm-tab row (static outline; no motion) */
 .tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
+.tracks .up .ms-hint{font:400 13px var(--f-body,'Nunito',inherit);color:var(--c-muted,#6b5e52)}
+.tracks .up.best.pending{outline-style:dashed}

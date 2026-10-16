@@ -6,7 +6,7 @@ import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
 import { fmtMoneyShort } from './format';
-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -18,7 +18,7 @@ import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
-import { highlightRow, HighlightHold, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+import { highlightPick, milestoneHint, HighlightHold, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -382,14 +382,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- M3-AC5 next-goal strip ----------
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
-  const hlHold = new HighlightHold(2); let rowHl: RowKey | null = null;
+  type Pick = ReturnType<typeof highlightPick>;
+  const hlHold = new HighlightHold<Pick>(2, p => p ? `${p.row}|${p.affordable}` : '-'); let rowPick: Pick = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
     if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
     const imm = goalNow; goalNow = false; goalTickAt = t;
     const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
-    if (m4On(b)) rowHl = hlHold.tick(highlightRow(g.state, b), imm); // M4A-18, same 1 Hz tick + hold as the goal strip
+    if (m4On(b)) { rowPick = hlHold.tick(highlightPick(g.state, b), imm); rowHl = rowPick?.row ?? null; } // M4A-18, same 1 Hz tick + hold as the goal strip
     setText(goalLbl, gl.label); setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
@@ -464,21 +465,23 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
     const arrow = (a: string, z: string) => lock ? a : `${a} <span class="arrow">→</span> ${z}`;
     const fx = t === 'hens'
-      ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`, ...(!lock && hensMilestone(H + 1, b)?.level === H + 1 ? [hensMilestoneEffect(H + 1, b)] : [])]
-      : [`Egg price ${arrow(fmtMoney(trackPriceCents(F, H, V, b)), fmtMoney(trackPriceCents(F, H, V + 1, b)))}`, ...(gradeMult(V + 1, F, b) > gradeMult(V, F, b) && !lock ? [gradeEffect(V + 1, F, b)] : [])];
+      ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`]
+      : [`Egg price ${arrow(fmtMoneyShort(trackPriceCents(F, H, V, b)), fmtMoneyShort(trackPriceCents(F, H, V + 1, b)))}`];
     const right = lock === 'max' ? `<button class="btn maxed" tabindex="-1">MAX</button>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${F + 1}.">${trackLockText(F)}</div>`
       : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
-    return `<div class="up track${rowHl === t ? ' best' : ''}" data-track="${t}">
+    const best = rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
+    const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
+    return `<div class="up track${best}" data-track="${t}">
       <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
-      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
   };
   const farmTabHtml = () => {
     const s = g.state, st = balancedStrip(s, b);
     const segs = balancedSegments(s, b).map(g => `<i class="${g.weakest ? 'weakest' : ''}" data-track="${g.track}"><b style="width:${Math.round(g.fill * 100)}%"></b></i>`).join('');
     return `<div class="tracks"><div class="balanced" role="img" aria-label="${balancedStripText(s, b, true)}"><div class="segs">${segs}</div><span>${balancedStripText(s, b)}</span></div>
-      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm').replace('<div class="up">', `<div class="up${rowHl === 'farm' ? ' best' : ''}" data-track="farm">`)}</div>`;
+      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm').replace('<div class="up">', `<div class="up${rowHl === 'farm' ? (rowPick?.affordable ? ' best' : ' best pending') : ''}" data-track="farm">`)}</div>`;
   };
   let lastUp = '', ordersExpanded = false;
   function render() {

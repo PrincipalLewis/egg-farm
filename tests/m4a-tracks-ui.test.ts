@@ -35,31 +35,78 @@ describe('M4-A track copy (art-ux/m4-tracks-copy.md)', () => {
     expect(trackGoalLabel('eggValue', 20, 14, on)).toBe('Egg value L20'); expect(trackGoalLabel('eggValue', 20, 15, on)).toBe('Egg value L20: Jumbo');
   });
 });
-import { highlightRow, HighlightHold } from '../src/ui/tracks-ui';
+import { vi } from 'vitest';
+import { highlightRow, highlightPick, HighlightHold, milestoneHint, MILESTONE_HINT_WINDOW } from '../src/ui/tracks-ui';
 import { candidates, selectGoal, GOAL_ORDER } from '../src/ui/next-goal';
-describe('M4A-18 highlight + M4A-22/23 next-goal', () => {
+import { bestPaybackAmong, paybackOf, BUY_ORDER } from '../src/econ/best-buy';
+import { fmtAffordableIn } from '../src/ui/format';
+describe('M4A-18 highlight = best payback (HoP 15:29) + next-goal', () => {
   const c = (F: number, H: number, V: number, coins: number) => ({ ...st(F, H, V), coinsCents: coins });
-  it('cheapest affordable row, ties H > V > F, none if none affordable', () => {
+  const ROWS = ['FARM', 'HENS', 'VALUE'] as const, RK = { FARM: 'farm', HENS: 'hens', VALUE: 'eggValue' } as const;
+  it('highlights the best-payback AFFORDABLE row; none affordable => no highlight, pick carries the best-payback row', () => {
     expect(highlightRow(c(0, 0, 0, 0), on)).toBeNull();
-    expect(highlightRow(c(0, 0, 0, on.m4!.hens.costs[0] * 100), on)).toBe('hens');
-    expect(highlightRow(c(0, 3, 0, 1e9), on)).toBe('eggValue'); // Hens capped at F+3
-    expect(highlightRow(c(0, 3, 3, 1e9), on)).toBe('farm');
-    const tie = { ...on, m4: { ...on.m4!, eggValue: { ...on.m4!.eggValue, costs: on.m4!.hens.costs } } };
-    expect(highlightRow(c(0, 0, 0, 1e9), tie)).toBe('hens');
+    const p0 = highlightPick(c(0, 0, 0, 0), on)!;
+    expect(p0.affordable).toBe(false);
+    expect(p0.row).toBe(RK[bestPaybackAmong(c(0, 0, 0, 0), on, [...ROWS])!.key as keyof typeof RK]);
+    for (const [F, H, V] of [[5, 5, 5], [10, 12, 9], [12, 10, 14], [20, 20, 20]]) {
+      const s = c(F, H, V, 1e12), pb = ROWS.map(k => paybackOf(s, on, k)), best = Math.min(...pb);
+      expect(paybackOf(s, on, ROW_OF(highlightRow(s, on)!))).toBe(best);
+    }
   });
-  it('anti-flicker: oscillation faster than 2 ticks never flips; sustained flips on the 2nd tick; purchase applies at once', () => {
-    const h = new HighlightHold(2); expect(h.tick('hens')).toBe('hens');
-    for (let i = 0; i < 6; i++) { expect(h.tick(i % 2 ? 'hens' : null)).toBe('hens'); }
-    expect(h.tick('farm')).toBe('hens'); expect(h.tick('farm')).toBe('farm');
-    expect(h.tick('eggValue', true)).toBe('eggValue');
+  const ROW_OF = (r: string) => (r === 'farm' ? 'FARM' : r === 'hens' ? 'HENS' : 'VALUE');
+  it('only affordable rows compete: when just one row is affordable it wins even with a worse payback', () => {
+    const s0 = c(5, 5, 5, 0), cheapest = Math.min(on.m4!.hens.costs[5], on.m4!.eggValue.costs[5]);
+    const p = highlightPick({ ...s0, coinsCents: cheapest * 100 }, on)!;
+    expect(p.affordable).toBe(true); expect(p.costCents).toBe(cheapest * 100);
   });
-  it('GOAL_ORDER; HENS/VALUE only with the flag on, never capped/MAX', () => {
+  it('deterministic tie-breaks: equal payback => lower cost, then BUY_ORDER (Farm > Hens > Egg value)', () => {
+    expect(BUY_ORDER.slice(0, 3)).toEqual(['FARM', 'HENS', 'VALUE']);
+    const s = c(0, 3, 3, 1e12); // Hens + Egg value capped at F+3 => only Farm offered
+    expect(highlightRow(s, on)).toBe('farm');
+    expect(highlightPick(c(30, 30, 30, 1e12), on)).toBeNull(); // all MAX
+    const a = highlightPick(c(7, 6, 8, 1e12), on), z = highlightPick(c(7, 6, 8, 1e12), on); expect(a).toEqual(z);
+  });
+  it('fake clock, 1 Hz: oscillation faster than 2 ticks never flips; sustained change flips on the 2nd tick; purchase at once', () => {
+    vi.useFakeTimers(); vi.setSystemTime(0);
+    const h = new HighlightHold<string | null>(2), seen: [number, string | null][] = [];
+    const feed = (v: string | null, imm = false) => { vi.advanceTimersByTime(1000); seen.push([Date.now(), h.tick(v, imm)]); };
+    feed('hens'); for (let i = 0; i < 6; i++) feed(i % 2 ? 'hens' : 'farm');
+    expect(seen.every(([, v]) => v === 'hens')).toBe(true);
+    feed('farm'); expect(seen.at(-1)![1]).toBe('hens'); feed('farm'); expect(seen.at(-1)).toEqual([9000, 'farm']);
+    feed('eggValue', true); expect(seen.at(-1)![1]).toBe('eggValue');
+    vi.useRealTimers();
+  });
+  it('ETA copy when nothing is affordable (fmtAffordableIn)', () => {
+    expect(fmtAffordableIn(null)).toBe('Affordable in —'); expect(fmtAffordableIn(5)).toBe('Affordable in a moment'); expect(fmtAffordableIn(75)).toBe('Affordable in ~1:15');
+  });
+  it('next-goal: GOAL_ORDER; HENS/VALUE only with the flag on, never capped/MAX; flag on uses the same best-payback pick', () => {
     expect(GOAL_ORDER.slice(0, 4)).toEqual(['FARM', 'HENS', 'VALUE', 'COLL']);
     expect(candidates(st(0, 0, 0), balance).map(x => x.key)).not.toContain('HENS');
     expect(candidates(st(0, 0, 0), on).map(x => x.key)).toEqual(expect.arrayContaining(['HENS', 'VALUE']));
     expect(candidates(st(0, 3, 3), on).map(x => x.key)).not.toContain('HENS');
     expect(candidates(st(30, 30, 30), on).map(x => x.key).filter(k => k === 'HENS' || k === 'VALUE')).toEqual([]);
-    const g = selectGoal({ ...st(0, 0, 0), collectionLevel: 30, coinsCents: on.m4!.hens.costs[0] * 100 }, on, 0);
-    expect(g).toMatchObject({ key: 'HENS', tab: 'farm', label: 'Hens L1' });
+    const s = { ...st(10, 10, 10), collectionLevel: 30, coinsCents: 0 };
+    const g = selectGoal(s, on, 100), want = bestPaybackAmong(s, on, candidates(s, on).map(x => x.key))!;
+    expect(g.key).toBe(want.key); expect(g.state).toBe('waiting');
+  });
+});
+describe('m4-tracks-copy v1.1 milestone hint', () => {
+  const H = on.m4!.milestones.hens, G = on.m4!.milestones.grades;
+  it('shown only within 5 levels of the next milestone (Hens)', () => {
+    const n = H[0].level;
+    expect(milestoneHint('hens', n - MILESTONE_HINT_WINDOW - 1, 0, on)).toBeNull();
+    expect(milestoneHint('hens', n - MILESTONE_HINT_WINDOW, 0, on)).toBe(`Next at L${n}: bigger coop · offline ×${H[0].offlineMult}`);
+    expect(milestoneHint('hens', n - 1, 0, on)).toBe(`Next at L${n}: bigger coop · offline ×${H[0].offlineMult}`);
+  });
+  it('hidden at the milestone level itself and at MAX', () => {
+    for (const m of H) expect(milestoneHint('hens', m.level, 30, on)).toBeNull();
+    expect(milestoneHint('hens', on.maxLevel, 30, on)).toBeNull(); expect(milestoneHint('eggValue', on.maxLevel, 30, on)).toBeNull();
+    expect(milestoneHint('eggValue', G[0].level, 30, on)).toBeNull();
+  });
+  it('Egg value grades: window and copy from balance', () => {
+    expect(milestoneHint('eggValue', 0, 0, on)).toBe(`Next at L${G[0].level}: Grade A ×${G[0].mult}`);
+    expect(milestoneHint('eggValue', G[1].level - 1, 0, on)).toBe(`Next at L${G[1].level}: Large ×${G[1].mult}`);
+    expect(milestoneHint('eggValue', G[1].level + 1, 0, on)).toBeNull(); // L11: next is L20, 9 levels away
+    expect(milestoneHint('eggValue', G[2].level - 2, 15, on)).toBe(`Next at L${G[2].level}: Jumbo ×${G[2].mult}`);
   });
 });
