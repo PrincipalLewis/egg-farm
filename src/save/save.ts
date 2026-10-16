@@ -58,12 +58,14 @@ export function serialize(state: GameState, now: number): string {
  * Write the save. With `rotate`, the current main save is first copied into `.bak`, but only if it is itself valid
  * (QA case 2: a fresh-start save never rotates until the caller allows it, and a bad main never overwrites `.bak`).
  */
-export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false) {
+export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
+  const raw = serialize(state, now);
   if (rotate && b) {
     const cur = kv.getItem(SAVE_KEY);
     if (cur && validate(cur, b).ok) { try { kv.setItem(BAK_KEY, cur); } catch { /* full: keep old .bak */ } }
   }
-  kv.setItem(SAVE_KEY, serialize(state, now));
+  kv.setItem(SAVE_KEY, raw);
+  return raw;
 }
 export function load(kv: KV, b: Balance): SaveFile | null {
   const raw = kv.getItem(SAVE_KEY); if (!raw) return null;
@@ -95,7 +97,7 @@ export interface Recovery {
 }
 const isQuota = (e: unknown) => e instanceof Error && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || /quota/i.test(e.message));
 /** Preserve raw bytes under eggfarm.save.corrupt.<ts>, keep the last CORRUPT_KEEP. One attempt, never retried. */
-function preserve(kv: KV, raw: string, ts: number): boolean {
+export function preserveCorrupt(kv: KV, raw: string, ts: number): boolean {
   let idx: string[] = [];
   try { const j = JSON.parse(kv.getItem(CORRUPT_INDEX_KEY) ?? '[]'); if (Array.isArray(j)) idx = j.filter(x => typeof x === 'string'); } catch { /* rebuild */ }
   let key = `${CORRUPT_PREFIX}${ts}`; for (let n = 1; idx.includes(key); n++) key = `${CORRUPT_PREFIX}${ts}-${n}`;
@@ -117,11 +119,11 @@ export function loadSafe(kv: KV, b: Balance, now = Date.now()): { file: SaveFile
   if (raw === null) return { file: null, recovery: null };
   const v = validate(raw, b);
   if (v.ok) return { file: v.file, recovery: null };
-  const copied = preserve(kv, raw, now);
+  const copied = preserveCorrupt(kv, raw, now);
   const bakRaw = kv.getItem(BAK_KEY), had_backup = bakRaw !== null;
   const bv = bakRaw !== null ? validate(bakRaw, b) : null;
   if (bv?.ok) return { file: bv.file, recovery: { case: 'R', reason: v.reason, had_backup, restored_from_backup: true, copy_failed: !copied, raw } };
-  if (bakRaw !== null) preserve(kv, bakRaw, now + 1);
+  if (bakRaw !== null) preserveCorrupt(kv, bakRaw, now + 1);
   return { file: null, recovery: { case: copied ? 'F' : 'Q', reason: v.reason, had_backup, restored_from_backup: false, copy_failed: !copied, raw } };
 }
 

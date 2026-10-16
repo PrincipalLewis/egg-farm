@@ -4,7 +4,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, loadSafe, KV, type Recovery } from './save/save';
+import { save, serialize, loadSafe, KV, type Recovery } from './save/save';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
@@ -23,7 +23,10 @@ export class Game {
   /** Subscribe to sim/game events (UI feedback, sfx). Returns unsubscribe. */
   on(fn: (e: GameEvent) => void) { this.listeners.push(fn); return () => { this.listeners = this.listeners.filter(f => f !== fn); }; }
   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
-  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev') {
+  /** D2: durable mirror of every save (IndexedDB, durability 'strict'); none in tests, second tabs or without IndexedDB. */
+  mirror: { write(raw: string): unknown; clear(): Promise<void> } | null;
+  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null) {
+    this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
@@ -71,8 +74,10 @@ export class Game {
   readOnly = false;
   save() {
     if (this.resetting || this.readOnly) return;
-    try { save(this.kv, this.state, this.now(), this.b, this.bakAllowed); }
-    catch (e) { /* keep playing, retry next autosave; warn once */
+    const t = this.now();
+    try { this.mirror?.write(save(this.kv, this.state, t, this.b, this.bakAllowed)); }
+    catch (e) { /* localStorage failed: the IndexedDB copy still gets this save */
+      if (this.mirror) try { this.mirror.write(serialize(this.state, t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
@@ -98,7 +103,9 @@ export class Game {
     this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull();
   }
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
-  debugBackdateSave(ms: number) { this.save(); save(this.kv, this.state, this.now() - ms); this.resetting = true; }
+  debugBackdateSave(ms: number) { this.save(); this.mirror?.write(save(this.kv, this.state, this.now() - ms)); this.resetting = true; }
+  /** Reset save: drop the IndexedDB copy too (resolves when committed, or after 1 s), then the caller reloads. */
+  clearMirror(): Promise<void> { return this.mirror ? Promise.race([this.mirror.clear(), new Promise<void>(r => setTimeout(r, 1000))]) : Promise.resolve(); }
   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */
   private allowBackup() { this.bakAllowed = true; }
   get backupAllowed() { return this.bakAllowed; }
