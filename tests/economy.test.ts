@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync, mkdtempSync } from 'node:fs';
+import { readFileSync, mkdtempSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -37,11 +38,17 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
     expect([b.farm.demandLoFactor, b.farm.demandHiFactor, b.customers.queue_max_base, b.customers.queue_max_step_levels, b.customers.queue_max_cap]).toEqual([p.d_lo, p.d_hi, p.q_base, p.q_step, p.q_cap]);
     expect([b.offline.offlineRateMultiplier, b.offline.offlineCapSeconds]).toEqual([p.offline_rate, p.offline_cap_s]);
   });
-  const py = existsSync(new URL('../../product/sim/economy_sim.py', import.meta.url).pathname);
-  it.runIf(py)('fixture is fresh vs the live reference sim', () => {
+  // Vendored, sha-pinned reference sim (vendor/economy-sim). Never reads anything outside the repo.
+  const vdir = new URL('../vendor/economy-sim/', import.meta.url);
+  const pins = readFileSync(new URL('SHA256SUMS', vdir), 'utf8').trim().split('\n').map(l => l.split(/\s+/));
+  it('vendored reference sim matches its sha256 pins', () => {
+    expect(pins.map(([, f]) => f).sort()).toEqual(['economy.f1-m4cols.csv', 'sim/economy_sim.py']);
+    for (const [h, f] of pins) expect([f, createHash('sha256').update(readFileSync(new URL(f, vdir))).digest('hex')]).toEqual([f, h]);
+  });
+  it('fixture is fresh vs the vendored reference sim', () => {
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');
-    execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'current', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
-    expect(parseEconomyCsv(readFileSync(out, 'utf8'))).toEqual(data); // reference sim table == economy.csv
+    execFileSync('python3', [new URL('sim/economy_sim.py', vdir).pathname, '--config', 'current', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
+    expect(parseEconomyCsv(readFileSync(out, 'utf8'))).toEqual(data); // vendored sim table == economy.csv
   });
 });
 describe('price formula', () => {
