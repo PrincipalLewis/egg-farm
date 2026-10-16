@@ -74,4 +74,14 @@ describe('single-tab guard', () => {
     expect(t - readLease(kv)!.at).toBeLessThanOrEqual(2000); expect(A.g.inactive).toBe(false); expect(A.shown).not.toHaveBeenCalled();
     expect(kv.getItem(LEASE_KEY)).toContain(A.lease.id);
   });
+  it('hand-over: the new tab asks the owner to flush, so unsaved in-memory progress is not lost', async () => {
+    const kv = mem(), h = hub(); let t = 1_000; const now = () => t; save(kv, rich(), t);
+    const A = tab(kv, h(), now); A.lease.onFlush = () => A.g.flushForHandover();
+    t += 3000; A.g.frame(); A.g.state = { ...A.g.state, coinsCents: A.g.state.coinsCents + 777 }; // unsaved progress
+    const lb = new TabLease(kv, h(), () => {}, now); await lb.requestFlush(50);
+    expect(load(kv, b)!.state.coinsCents).toBe(A.g.state.coinsCents);
+    const frozen = A.g.state.coinsCents; t += 500; A.g.frame(); A.g.dispatch({ type: 'buyFarm' }); expect(A.g.state.coinsCents).toBe(frozen); // held
+    lb.claim(); expect(A.g.inactive).toBe(true);
+    const solo = new TabLease(mem(), null, () => {}, now); await expect(solo.requestFlush(10)).resolves.toBeUndefined();
+  });
 });

@@ -19,7 +19,18 @@ export class TabLease {
   constructor(private kv: LeaseStore, private ch: LeaseChannel | null, private onLost: () => void, private now = () => Date.now(),
     readonly id = Math.random().toString(36).slice(2) + Date.now().toString(36),
     private heartbeatMs = GUARD_HEARTBEAT_S * 1000, private staleMs = GUARD_STALE_S * 1000) {
-    if (ch) ch.onmessage = e => { const m = e.data; if (m?.t === 'claim' && m.id !== this.id) this.lose(); };
+    if (ch) ch.onmessage = e => { const m = e.data; if (!m || m.id === this.id) return;
+      if (m.t === 'claim') this.lose();
+      else if (m.t === 'flush' && this.owns()) { this.onFlush?.(); ch.postMessage({ t: 'flushed', id: this.id, to: m.id }); }
+      else if (m.t === 'flushed' && m.to === this.id) this.flushed?.(); };
+  }
+  /** Owner side of a hand-over: save now and hold (no sim/saves) until the claim arrives. */
+  onFlush: (() => void) | null = null; private flushed: (() => void) | null = null;
+  /** New tab, before claim + load: ask the current owner to write its latest state, so nothing unsaved is lost.
+   *  Resolves on the owner's ack or after `ms` (no owner / killed / no BroadcastChannel). */
+  requestFlush(ms = 300): Promise<void> {
+    if (!this.ch) return Promise.resolve();
+    return new Promise(res => { const t = setTimeout(done, ms); function done() { clearTimeout(t); res(); } this.flushed = () => { this.flushed = null; done(); }; this.ch!.postMessage({ t: 'flush', id: this.id }); });
   }
   /** Take ownership (newest tab wins). Returns why the previous owner (if any) lost it. */
   claim(playHere = false): TakeoverReason | null {
