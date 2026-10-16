@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
 import { SAVE_KEY, serialize, CORRUPT_INDEX_KEY, load } from '../src/save/save';
-import { IdbMirror, pickNewest, reconcile, IDB_STORE } from '../src/save/idb-mirror';
+import { IdbMirror, pickNewest, reconcile, restoreSource, IDB_STORE } from '../src/save/idb-mirror';
 import { initialState } from '../src/sim/state';
 import { Game } from '../src/game';
 import { mem } from './helpers';
@@ -100,4 +100,15 @@ describe('D2 IndexedDB mirror', () => {
     await expect(new Game(b, mem(), () => 5).clearMirror()).resolves.toBeUndefined();
   });
   it('store name is stable (save compatibility across builds)', () => { expect(IDB_STORE).toBe('save'); });
+  it('save_restore source: idb when the IndexedDB copy is restored, localStorage when it loses, none when nothing differs', () => {
+    const old = serialize(st({ farmLevel: 3 }), 1000), neu = serialize(st({ farmLevel: 4 }), 2000);
+    expect(restoreSource(old, neu, b)).toBe('idb');
+    expect(restoreSource(null, neu, b)).toBe('idb');
+    expect(restoreSource('{"trunc', neu, b)).toBe('idb');
+    expect(restoreSource(neu, old, b)).toBe('localStorage');
+    expect(restoreSource(old, '{"bad', b)).toBe('localStorage');
+    expect(restoreSource(old, old, b)).toBeNull();
+    expect(restoreSource(old, null, b)).toBeNull();
+    expect(restoreSource(null, null, b)).toBeNull();
+  });
 });
