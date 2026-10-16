@@ -45,10 +45,13 @@ export class OrderList {
     }
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}`; if (btn.className !== bc) btn.className = bc;
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
-    // Art & UX: if one-line content still exceeds max-width 45%, switch to two-line stack (never ellipsis).
-    if (v.state !== 'wait') {
+    // Art & UX: prefer one line; stack only when the row layout still overflows max-width 45%.
+    if (v.state !== 'wait' && btn.isConnected) {
       btn.classList.remove('sell-stack');
-      if (btn.scrollWidth > btn.clientWidth + 0.5) btn.classList.add('sell-stack');
+      // Force row metrics (≤375 stacks via CSS media query anyway).
+      const maxPx = btn.parentElement ? btn.parentElement.clientWidth * 0.45 : 0;
+      const need = btn.scrollWidth; // content width in current (row) mode
+      if (maxPx > 0 && need > maxPx + 0.5) btn.classList.add('sell-stack');
     }
   }
   private make(v: OrderView) {

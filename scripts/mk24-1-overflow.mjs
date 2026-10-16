@@ -1,7 +1,7 @@
 /** MK-24-1: Sell button never truncates; screenshots + scrollWidth<=clientWidth at 360/375/390/430/1280. */
 import { chromium } from 'playwright-core';
 import { spawn } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 const OUT = new URL('../../engineering/screenshots/', import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 const port = 4189, base = `http://127.0.0.1:${port}/`;
@@ -9,8 +9,12 @@ const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist', '--port', Strin
 const kill = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch {} };
 setTimeout(() => { kill(); process.exit(2); }, 180_000).unref();
 await new Promise(r => setTimeout(r, 2500));
+// Build id from the release check marker / index chunk
+const html = readFileSync('dist/index.html', 'utf8');
+const jsName = (html.match(/assets\/(index-[^"]+\.js)/) || [])[1];
+const js = jsName ? readFileSync(`dist/assets/${jsName}`, 'utf8') : '';
+const buildId = (js.match(/m3-rc1-pre\+[0-9a-f]{7,}(?:\+dirty)?/) || ['m3-rc1-pre+unknown'])[0];
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
-// High basket + long exact-under-1K and short-above-1K labels on several rows.
 const save = {
   version: 6, savedAt: Date.now(),
   state: {
@@ -26,7 +30,7 @@ const save = {
   },
 };
 const widths = [360, 375, 390, 430, 1280];
-let ok = true, buildId = '';
+let ok = true;
 for (const w of widths) {
   const desktop = w >= 960;
   const ctx = await browser.newContext(desktop
@@ -44,14 +48,6 @@ for (const w of widths) {
   await p.getByText('Tap to start').click();
   await p.waitForTimeout(600);
   if (!desktop) { await p.locator('[data-nav=market]').click(); await p.waitForTimeout(500); }
-  // Read build id from Settings, then overlay it so the market shot shows it.
-  if (!buildId) {
-    await p.locator('[data-nav=settings]').click(); await p.waitForTimeout(300);
-    const ver = await p.locator('.version').last().textContent();
-    buildId = (ver || '').replace(/^Egg Farm\s+/, '').trim() || 'unknown';
-    if (!desktop) { await p.locator('[data-nav=market]').click(); await p.waitForTimeout(400); }
-    else { await p.keyboard.press('Escape').catch(() => {}); await p.waitForTimeout(200); }
-  }
   await p.evaluate((id) => {
     let el = document.getElementById('mk24-build');
     if (!el) {
@@ -64,27 +60,27 @@ for (const w of widths) {
   }, buildId);
   await p.waitForTimeout(100);
   const rows = await p.locator('.order .btn.sell').evaluateAll((btns) => btns.map((b) => {
-    const sk = b.querySelector('.sk')?.textContent ?? '';
-    const sy = b.querySelector('.sy')?.textContent ?? '';
+    const sk = b.querySelector('.sk');
+    const sy = b.querySelector('.sy');
+    const measure = (el) => el ? { sw: el.scrollWidth, cw: el.clientWidth, t: el.textContent } : { sw: 0, cw: 0, t: '' };
     const cs = getComputedStyle(b);
     return {
       label: b.getAttribute('aria-label'),
-      text: `${sk}|${sy}`,
+      text: `${measure(sk).t}|${measure(sy).t}`,
       sw: b.scrollWidth, cw: b.clientWidth,
-      skSw: b.querySelector('.sk')?.scrollWidth ?? 0,
-      skCw: b.querySelector('.sk')?.clientWidth ?? 0,
-      sySw: b.querySelector('.sy')?.scrollWidth ?? 0,
-      syCw: b.querySelector('.sy')?.clientWidth ?? 0,
+      sk: measure(sk), sy: measure(sy),
       ellipsis: cs.textOverflow,
+      overflow: cs.overflow,
       maxW: cs.maxWidth,
-      width: cs.width,
+      flexDir: cs.flexDirection,
     };
   }));
-  console.log(w, buildId, rows);
+  console.log(w, buildId, JSON.stringify(rows, null, 0));
+  if (!rows.length) { console.error('NO SELL BUTTONS', w); ok = false; }
   for (const r of rows) {
     if (r.sw > r.cw + 1) { console.error('OVERFLOW btn', w, r); ok = false; }
-    if (r.skSw > r.skCw + 1 || r.sySw > r.syCw + 1) { console.error('OVERFLOW span', w, r); ok = false; }
-    if (/\u2026|\.\.\./.test(r.text) || /Se…|Se\.\.\./.test(r.text)) { console.error('ELLIPSIS', w, r); ok = false; }
+    if (r.sk.sw > r.sk.cw + 1 || r.sy.sw > r.sy.cw + 1) { console.error('OVERFLOW span', w, r); ok = false; }
+    if (/\u2026|\.\.\./.test(r.text) || /Se…/.test(r.text)) { console.error('ELLIPSIS', w, r); ok = false; }
   }
   await p.screenshot({ path: `${OUT}mk24-1-${w}.png` });
   console.log('saved', `${OUT}mk24-1-${w}.png`);
