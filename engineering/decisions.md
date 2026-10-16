@@ -16,3 +16,7 @@
 - m4/m4a-tracks-v2 @ 3351d6c price-matches pre-M4 saves inside the v6 format and marks them `tracksV7: 1` (SAVE_VERSION stays 6). **Kept as an interim step for playtest and M4-flagged builds only, never in a release default.**
 - S-4 does the real v6→v7 bump and must accept unmarked v6 (migrate), marked v6 (idempotent: no re-migrate, no re-refund) and v7. S-6 adds marked-v6 fixtures. F-9 removes the marker path.
 - Flag-off builds ignore or keep the marker fields on load and never strip them on write. S-2 (zero-writes refusal) is unaffected, because a marked save is still v6.
+
+## 2026-10-16 20:29 ADR M4-9 Flag-off builds refuse v7 saves (HoE decision 9.7; recorded by Senior Software Architect)
+- A flag-off build treats a v7 save exactly like a newer save: the existing newer-save dialog and S-2 zero-writes rules. It never writes v6 over a v7 save and never silently drops M4 progress. The v6 .bak stays as the escape hatch; export stays available. Refines M4-4 (flag-off reads v6 only).
+- Test: "flag-off refuses v7: zero writes, .bak intact, export works" (S-2/S-4). Also 9.5: QA Saves 33ec1b55 owns qa/m3-scripts/rc1-guard-save-qa-m4.mjs.
