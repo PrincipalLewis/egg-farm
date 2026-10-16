@@ -119,6 +119,8 @@ export function trackExtraCost(t: 'hens' | 'eggValue', L: number, F: number, p: 
   const k = L + 1 - (F + p.m4![t].capOverFarm); if (k <= 0) return 0;
   const share = p.m4!.extraCostFarmShareByFarm?.[clampL(F, p)] ?? 0; if (!share) return 0;
   // ADDITIVE markup (Economy/HoP 00:28, late_curve.py ab928dc96d1c:71): 1 + hv_extra_second_markup x (extra - 1)
+  // NB: linear 1 + m x (extra - 1) and compound (1 + m)^(extra - 1) only differ past two extra levels (F+5 cap today);
+  // a future cap raise must be re-checked against late_curve.py:71.
   const mult = 1 + ((p.m4!.extraSecondLevelMult ?? 1) - 1) * (k - 1);
   return floorSafe(share * farmCost(F, p) * mult);
 }
