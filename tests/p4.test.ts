@@ -1,4 +1,4 @@
-// P4 (product/playtest1-resim.md): Manage only at <= 40%, Manage all refills only those; Economy expects W4 5.5, W4b 7.5, 5.62 Manage / 15 min.
+// P4 (product/playtest1-resim.md): Manage only at <= 40%, Manage all refills only those; Economy expects W4 4.5, W4b 5.25 (F1 m4cols re-sim, Economy ruling logged in decisions.md; was 5.5 / 7.5), 5.62 Manage / 15 min.
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { runs, med } from './m2-runs';
@@ -9,8 +9,8 @@ describe('P4 build numbers vs Economy re-sim', () => {
   const man = runs({ model: 'seller15' }), manC = runs({ model: 'cheapest' });
   const w4 = med(man, r => r.maxStep(18, 25)) / 60, w4b = med(manC, r => r.maxStep(18, 25)) / 60, per15 = med(man, r => r.manages) / 8;
   it('report', () => console.log('P4 build', { W4: +w4.toFixed(2), W4b: +w4b.toFixed(2), managePer15: +per15.toFixed(2) }));
-  it('W4 ~5.5, W4b ~7.5, Manage ~5.62 / 15 min (20 seeds vs Economy 100; +-0.3 min / +-10%)', () => {
-    expect(Math.abs(w4 - 5.5)).toBeLessThanOrEqual(0.3); expect(Math.abs(w4b - 7.5)).toBeLessThanOrEqual(0.3);
+  it('W4 ~4.5, W4b ~5.25, Manage ~5.62 / 15 min (20 seeds vs Economy 100; +-0.3 min / +-10%)', () => {
+    expect(Math.abs(w4 - 4.5)).toBeLessThanOrEqual(0.3); expect(Math.abs(w4b - 5.25)).toBeLessThanOrEqual(0.3);
     expect(Math.abs(per15 - 5.62) / 5.62).toBeLessThanOrEqual(0.1);
   });
 });

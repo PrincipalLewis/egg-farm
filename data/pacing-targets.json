@@ -1,0 +1,5 @@
+{
+  "_note": "Product pacing targets read by tests/pacing.test.ts. ac7_level_at_30min: decisions.md:47 (HoP 2026-10-16 02:18, F1 re-baseline; replaces 'L18 at 24-36 min'). l18_minutes_sanity: decisions.md:111 (Product 12:42, L18 within +-10% of the F1 time ~19.8 min), non-gating.",
+  "ac7_level_at_30min": { "min": 18, "max": 22, "target": 20, "at_s": 1800 },
+  "l18_minutes_sanity": { "center": 19.8, "tolerance_share": 0.1 }
+}
