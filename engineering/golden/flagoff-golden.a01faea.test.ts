@@ -10,6 +10,13 @@ import { apply } from '../src/sim/actions';
 import { applyOffline } from '../src/sim/offline';
 import { runBot } from '../tests/bot';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
+const PINS: Record<string, string> = {
+  'm1-rc2-v4-12min': 'b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9',
+  'm2-rc1-v5-12min': '2ac7070d0c5e7ea2d8fcdd1642732cf44871fe9c5b126d1b5873fcd8244f3a00',
+  'm2-rc1-v5-40min': '4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431',
+  'm2-rc1-v5-40min-edge': '652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb',
+};
+const GOLDEN_MAIN_A01FAEA = '50a87ddbf89c44751ef33a008541022e146c48c0fed8e16d5114e6d787809de0';
 const FIX = ['m1-rc2-v4-12min', 'm2-rc1-v5-12min', 'm2-rc1-v5-40min', 'm2-rc1-v5-40min-edge'];
 const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
 describe('golden', () => {
@@ -24,6 +31,7 @@ describe('golden', () => {
       out[f] = sha(kv.getItem(SAVE_KEY)!);
     }
     console.log('GOLDEN2 ' + JSON.stringify(out));
+    for (const f of FIX) expect(out[f], f).toBe(PINS[f]);
   });
   it('sim trace', () => {
     const b = balance; const out: unknown[] = [];
@@ -43,6 +51,7 @@ describe('golden', () => {
     const off = applyOffline(s, 5_400_000, b);
     const { hensLevel, eggValueLevel, celebratedMilestones, ...core } = s;
     out.push(core, ev, off.eggs);
-    console.log('GOLDEN1 ' + sha(JSON.stringify(out)));
+    const h = sha(JSON.stringify(out)); console.log('GOLDEN1 ' + h);
+    expect(h).toBe(GOLDEN_MAIN_A01FAEA);
   }, 120_000);
 });
