@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { fmtAffordableIn } from '../src/ui/format';
 import { OnboardingFlow, ftueGate } from '../src/ui/onboarding';
+describe('upgrade-card ETA "Affordable in" (Product Oct 16)', () => {
+  it('5 s -> a moment', () => expect(fmtAffordableIn(5)).toBe('Affordable in a moment'));
+  it('9.2 s rounds up to 10 s', () => expect(fmtAffordableIn(9.2)).toBe('Affordable in ~0:10'));
+  it('10 s -> ~0:10', () => expect(fmtAffordableIn(10)).toBe('Affordable in ~0:10'));
+  it('80 s -> ~1:20', () => expect(fmtAffordableIn(80)).toBe('Affordable in ~1:20'));
+  it('59:59 -> ~59:59', () => expect(fmtAffordableIn(3599)).toBe('Affordable in ~59:59'));
+  it('1:00:00 -> ~1:00:00', () => expect(fmtAffordableIn(3600)).toBe('Affordable in ~1:00:00'));
+  it('1:05:00 -> ~1:05:00', () => expect(fmtAffordableIn(3900)).toBe('Affordable in ~1:05:00'));
+  it('no income -> —', () => { expect(fmtAffordableIn(null)).toBe('Affordable in —'); expect(fmtAffordableIn(Infinity)).toBe('Affordable in —'); });
+});
 describe('P1 FTUE sell step never points at a missing customer / never softlocks', () => {
   const C = { coop: 0, eggsPerTap: 5, customers: 0, basket: 5, coinsCents: 0, costCents: 1000, nextCustomerInS: 2 };
   it('no customer: gate closed, wait hint (not "customer is waiting")', () => {

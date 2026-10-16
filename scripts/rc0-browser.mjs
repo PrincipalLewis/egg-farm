@@ -428,6 +428,24 @@ sections.p1caret = async () => {
   }
 };
 
+// ---------- Product Oct 16: upgrade-card ETA "Affordable in …" at 360 (one line, muted grey, clock icon) ----------
+sections.p1eta = async () => {
+  const { ctx, page } = await open({ w: 360, h: 800, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+  await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click(); await page.waitForSelector('#uRow .hint.eta', { timeout: 5000 });
+  const muted = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--c-muted').trim());
+  for (const [name, text] of [['noincome', null], ['1h05', 'Affordable in ~1:05:00'], ['moment', 'Affordable in a moment']]) {
+    if (text) await page.evaluate(t => { window.__etaStub = t; }, text);
+    await page.waitForTimeout(150);
+    const r = await page.evaluate(() => { const h = document.querySelector('#uRow .hint.eta'); if (window.__etaStub) { h.lastChild.textContent = window.__etaStub; }
+      const img = h.querySelector('img'); const cs = getComputedStyle(h); const range = document.createRange(); range.selectNodeContents(h.lastChild); const lines = range.getClientRects().length;
+      const card = h.closest('.up') ?? h.parentElement; const c = card.getBoundingClientRect(), hr = h.getBoundingClientRect();
+      return { text: h.textContent.trim(), lines, color: cs.color, icon: img?.getAttribute('src')?.includes('offline-earnings') || /offline-earnings/.test(img?.src ?? ''), inside: hr.right <= c.right + 0.5 && hr.left >= c.left - 0.5, card: [c.x, c.y, c.width, c.height] }; });
+    const hex = muted.replace('#', ''); const rgb = `rgb(${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)})`;
+    ok(`ETA ${name} at 360: ${text ?? 'Affordable in —'} one line, muted grey, clock icon`, r.text === (text ?? 'Affordable in —') && r.lines === 1 && r.color === rgb && r.icon && r.inside, JSON.stringify(r));
+    if (shot) { const [x, y, w, h] = r.card; await page.screenshot({ path: `${SHOTS}/eta-360-${name}.png`, clip: { x: Math.max(0, x - 8), y: Math.max(0, y - 8), width: Math.min(360 - Math.max(0, x - 8), w + 16), height: h + 16 } }); }
+  }
+  await ctx.close();
+};
 
 // ---------- P1 Vadim playtest: "Coop upgraded!" toast fully visible below the HUD (1280, 390) ----------
 sections.p1toast = async () => {

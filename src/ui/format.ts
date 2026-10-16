@@ -28,6 +28,14 @@ export const fmtTimeToAfford = (seconds: number | null) => {
   const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
   return m ? `~${h} h ${m} min` : `~${h} h`;
 };
+/** Upgrade-card ETA (Product copy, Oct 16): "Affordable in a moment" under 10 s; "Affordable in ~m:ss"; "~h:mm:ss" from 1 h; no income "Affordable in —". Same seconds as fmtTimeToAfford. */
+export const fmtAffordableIn = (seconds: number | null) => {
+  if (seconds === null || !isFinite(seconds)) return 'Affordable in —';
+  const s = Math.max(0, Math.ceil(seconds));
+  if (s < 10) return 'Affordable in a moment';
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60, p = (n: number) => String(n).padStart(2, '0');
+  return `Affordable in ~${h ? `${h}:${p(m)}` : m}:${p(r)}`;
+};
 /** Rolling income over the last windowMs of play (coins/s), for the time-to-afford hint. */
 export class IncomeRate {
   private ev: { t: number; cents: number }[] = [];

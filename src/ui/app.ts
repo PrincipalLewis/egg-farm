@@ -5,7 +5,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, IncomeRate } from './format';
 import { TapFx, Throttle, clampToSafe } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -395,8 +395,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (!max && !can) {
       if (isF) {
         const secs = income.secondsToAfford(now(), cost * 100 - s.coinsCents);
-        hint = secs === null ? `<div class="hint"><img src="${A('icon-coin.svg')}" alt="">Sell eggs to earn coins</div>`
-          : `<div class="hint ${secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">Ready in ${fmtTimeToAfford(secs).replace(/^~/, '~')}</div>`;
+        hint = secs === null ? `<div class="hint eta"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(null)}</div>`
+          : `<div class="hint eta ${secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(secs)}</div>`;
       } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.

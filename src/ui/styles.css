@@ -489,3 +489,4 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 /* P1 (Vadim playtest): no text caret / selection when clicking the farm. Game surface is not text; real inputs stay editable. */
 #app,#scene,#yard,.onb{-webkit-user-select:none;user-select:none;caret-color:transparent}
 #app input,#app textarea,#app select,#app [contenteditable=true]{-webkit-user-select:text;user-select:text;caret-color:auto}
+.hint.eta{color:var(--c-muted);white-space:nowrap} /* Art & UX: waiting ETA always muted grey, one line */
