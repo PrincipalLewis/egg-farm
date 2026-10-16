@@ -16,7 +16,7 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
-import { hireNudgeHtml, hireNudgeDismissHtml, newDotHtml, nextHire, pickHint } from './hire-nudge';
+import { hireNudgeHtml, newDotHtml, nextHire, pickHint } from './hire-nudge';
 import { m4On, trackMaxLevel, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackBuyCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
@@ -208,6 +208,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   sellAllBtn.addEventListener('click', () => { lastSellSource = sellAllBtn; if (!act({ type: 'sellAll' })) cantAfford(sellAllBtn); });
   uRow.addEventListener('click', e => {
     const t = e.target as HTMLElement;
+    if (t.closest('.hire-nudge-x')) { g.hireNudgeDismiss('l25'); renderHireNudge(); render(); return; }
+    if (t.closest('.hire-nudge')) { openHire(); return; }
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
@@ -382,26 +384,24 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   });
   let pendingLvPop = false;
   // ---------- M3-AC5 next-goal strip ----------
-  // L30-19b hire nudge: one hint line under the goal button + New dot/pulse on Upgrades nav and the Workers tab.
-  const nudgeEl = h(`<div class="hire-nudge-line">${hireNudgeHtml(A('icon-hire.svg'))}${hireNudgeDismissHtml()}</div>`) as HTMLElement; nudgeEl.hidden = true;
+  // L30-19b hire nudge (art-ux/rc2-workers-copy.md §5): hint line under the Farm card's Buy button + New dot/pulse.
   const navUp = nav.querySelector<HTMLElement>('[data-nav="upgrades"]')!, wTab = root.querySelector<HTMLElement>('.tabs [data-tab="workers"]');
   const dots = [navUp, wTab].filter(Boolean).map(t => { const d = h(newDotHtml()) as HTMLElement; d.hidden = true; t!.append(d); return d; });
-  let coopTipEl: HTMLElement | null = null;
+  let coopTipEl: HTMLElement | null = null, nudgeOn = false;
   const renderHireNudge = () => {
     const on = pickHint({ coop_full: !!coopTipEl?.isConnected, hire_nudge: g.hireNudgeActive }) === 'hire_nudge', active = g.hireNudgeActive;
-    if (nudgeEl.hidden !== !on) nudgeEl.hidden = !on;
+    if (on !== nudgeOn) { nudgeOn = on; dirty = true; }
     for (const d of dots) if (d.hidden !== !active) d.hidden = !active;
     navUp.classList.toggle('pulse', active); wTab?.classList.toggle('pulse', active);
   };
-  nudgeEl.querySelector('.hire-nudge-x')!.addEventListener('click', () => { g.hireNudgeDismiss('l25'); renderHireNudge(); });
-  nudgeEl.querySelector('.hire-nudge')!.addEventListener('click', () => {
+  const openHire = () => {
     g.hireNudgeClicked('l25'); tab = 'workers'; dirty = true; openPanel('upgrades'); render();
     const id = nextHire(g.state, b), sel = id ? `.wk[data-w="${id}"]` : '.wk', row = uRow.querySelector<HTMLElement>(sel); if (!row) return;
     row.scrollIntoView({ block: 'center', behavior: rm() ? 'auto' : 'smooth' }); hlSel = sel; hlUntil = now() + 1200; retrigger(row, 'goal-hl');
     row.querySelector<HTMLElement>('button.btn')?.focus({ preventScroll: true });
-  });
+  };
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
-  let hlSel = '', hlUntil = 0, goalLiveT = 0; goalBtn.after(nudgeEl);
+  let hlSel = '', hlUntil = 0, goalLiveT = 0;
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
   const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
@@ -478,7 +478,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
-      <div>${hint}</div></div></div>`;
+      ${isF && nudgeOn ? hireNudgeHtml(A('icon-hire.svg')) : ''}<div>${hint}</div></div></div>`;
   };
   /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
   const trackRowHtml = (t: Track) => {

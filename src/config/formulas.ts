@@ -113,11 +113,14 @@ export const eggValueCap = (F: number, p: EconomyParams) => Math.min(trackMaxLev
 /** L30-17 (D8, Economy correction 23:49): price of a level above the BASE cap (F + capOverFarm, the L0 row: F+3) =
  *  floor(share[F] x farmCost(F)) [x extraSecondLevelMult = 1 + hv_extra_second_markup for the 2nd extra level]; it REPLACES
  *  the row cost. 0 = not an extra level (within F+3, or share 0 below L40). */
+/** Integer-safe floor: snap to 1e-6 first so an exact-integer product (e.g. 0.29 x 100 = 28.999999999999996) never loses a coin. */
+export const floorSafe = (x: number) => Math.floor(Math.round(x * 1e6) / 1e6);
 export function trackExtraCost(t: 'hens' | 'eggValue', L: number, F: number, p: EconomyParams): number {
   const k = L + 1 - (F + p.m4![t].capOverFarm); if (k <= 0) return 0;
   const share = p.m4!.extraCostFarmShareByFarm?.[clampL(F, p)] ?? 0; if (!share) return 0;
-  const mult = k >= 2 ? (p.m4!.extraSecondLevelMult ?? 1) ** (k - 1) : 1;
-  return Math.floor(share * farmCost(F, p) * mult);
+  // ADDITIVE markup (Economy/HoP 00:28, late_curve.py ab928dc96d1c:71): 1 + hv_extra_second_markup x (extra - 1)
+  const mult = 1 + ((p.m4!.extraSecondLevelMult ?? 1) - 1) * (k - 1);
+  return floorSafe(share * farmCost(F, p) * mult);
 }
 const best = <T extends { level: number }>(xs: T[], L: number, ok: (x: T) => boolean = () => true) => xs.filter(x => L >= x.level && ok(x)).pop();
 /** M4A-8: highest Hens milestone reached (null below the first). */

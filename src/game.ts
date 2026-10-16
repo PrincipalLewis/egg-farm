@@ -105,13 +105,14 @@ export class Game {
   private hireNudgeShown = false;
   /** HoP 00:04: dismissible, once per session. Session-only (never persisted): shows again next session while workers = 0. */
   private hireNudgeDismissedThisSession = false;
-  get hireNudgeActive() { return !this.hireNudgeDismissedThisSession && hireNudgeEligible(this.state, this.b); }
+  /** PR #12 review: gated entirely behind the M4 flag (flag off = main: no render, no telemetry, no hireNudgeDone write). */
+  get hireNudgeActive() { return m4On(this.b) && !this.hireNudgeDismissedThisSession && hireNudgeEligible(this.state, this.b); }
   hireNudgeDismiss(source: HireNudgeSource = 'l25') {
     if (!this.hireNudgeActive) return; this.hireNudgeDismissedThisSession = true;
     this.telemetry.track('hire_nudge_dismissed', { source, farm_level: this.state.farmLevel }); this.notify({ type: 'hire_nudge', phase: 'cleared' });
   }
   private checkHireNudge() {
-    if (this.state.hireNudgeDone) return;
+    if (!m4On(this.b) || this.state.hireNudgeDone) return;
     if (hasWorker(this.state)) { this.state = { ...this.state, hireNudgeDone: 1 }; if (this.hireNudgeShown) this.notify({ type: 'hire_nudge', phase: 'cleared' }); this.hireNudgeShown = false; return; }
     if (!this.hireNudgeShown && this.hireNudgeActive) {
       this.hireNudgeShown = true; this.telemetry.track('hire_nudge_shown', { source: 'l25' as HireNudgeSource, farm_level: this.state.farmLevel });

@@ -7,12 +7,14 @@ import type { GameState } from '../sim/state';
 import { WORKERS, unlockFarm } from '../sim/workers';
 import type { WorkerId } from '../sim/workers';
 const NB = '\u00a0';
-/** Final copy (rc2-workers-copy.md); swap here only. */
-export const HIRE_NUDGE_TEXT = `Busy farm!${NB}·${NB}Hire a worker`;
-export const HIRE_NUDGE_CHEVRON = '›';
+/** Final copy (art-ux/rc2-workers-copy.md §5 v1.1); swap here only. Lead is dropped first on overflow; the chevron never. */
+export const HIRE_NUDGE_LEAD = `Busy farm!${NB}·${NB}`;
+export const HIRE_NUDGE_CORE = 'Hire a worker';
+export const HIRE_NUDGE_CHEVRON = '\u203a';
+export const HIRE_NUDGE_TEXT = `${HIRE_NUDGE_LEAD}${HIRE_NUDGE_CORE}${NB}${HIRE_NUDGE_CHEVRON}`;
 export const HIRE_NUDGE_ARIA = 'Your farm is busy. Hire a worker. Opens Workers.';
 export const NEW_DOT_ARIA = 'New: workers can be hired';
-export const HIRE_NUDGE_DISMISS_ARIA = 'Dismiss';
+export const HIRE_NUDGE_DISMISS_ARIA = 'Dismiss hire hint';
 export type HireNudgeSource = 'f3' | 'l25';
 export const hireNudgeLevel = (b: Balance) => b.workers.tips.hire_nudge_farm_level;
 export const hasWorker = (s: GameState) => WORKERS.some(id => !!s.workers[id]);
@@ -25,7 +27,10 @@ export const nextHire = (s: GameState, b: Balance): WorkerId | null => WORKERS.f
 export const HINT_ORDER = ['coop_full', 'hire_nudge', 'uc25', 'm4'] as const;
 export type HintKey = typeof HINT_ORDER[number];
 export const pickHint = (on: Partial<Record<HintKey, boolean>>): HintKey | null => HINT_ORDER.find(k => on[k]) ?? null;
+/** §5: hint line under the Farm card's Buy button. The whole hint is ONE button (opens Workers): 14px Workers icon, 4px gap,
+ *  text. The separate dismiss button (HoP 00:04) sits outside it. */
 export const hireNudgeHtml = (icon: string) =>
-  `<button class="hire-nudge" data-testid="hire-nudge" aria-label="${HIRE_NUDGE_ARIA}"><img src="${icon}" alt="" aria-hidden="true">${HIRE_NUDGE_TEXT}<span class="chev" aria-hidden="true">${HIRE_NUDGE_CHEVRON}</span></button>`;
-export const hireNudgeDismissHtml = () => `<button class="hire-nudge-x" data-testid="hire-nudge-dismiss" aria-label="${HIRE_NUDGE_DISMISS_ARIA}">×</button>`;
+  `<div class="hire-nudge-line" data-testid="hire-nudge-line"><button type="button" class="hire-nudge" data-testid="hire-nudge" aria-label="${HIRE_NUDGE_ARIA}">`
+  + `<img class="hn-ic" src="${icon}" width="14" height="14" alt="" aria-hidden="true"><span class="hn-txt"><span class="hn-lead">${HIRE_NUDGE_LEAD}</span>${HIRE_NUDGE_CORE}${NB}${HIRE_NUDGE_CHEVRON}</span></button>`
+  + `<button type="button" class="hire-nudge-x" data-testid="hire-nudge-dismiss" aria-label="${HIRE_NUDGE_DISMISS_ARIA}">×</button></div>`;
 export const newDotHtml = () => `<span class="new-dot" data-testid="new-dot" role="img" aria-label="${NEW_DOT_ARIA}"></span>`;

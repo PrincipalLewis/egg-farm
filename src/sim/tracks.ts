@@ -17,8 +17,12 @@ export const coopCap = (s: GameState, b: Balance) => m4On(b) ? trackCoopCapacity
 export const offlineMult = (s: GameState, b: Balance) => m4On(b) ? hensOfflineMult(s.hensLevel, b) : 1;
 /** Unit price in cents BEFORE sale multipliers (Grader etc.). payout.ts (fix/rc1-qa-bugs) must take its base from here. */
 export const salePriceCents = (s: GameState, b: Balance) => m4On(b) ? trackPriceCents(s.farmLevel, s.hensLevel, s.eggValueLevel, b) : eggPriceCents(s.farmLevel, s.collectionLevel, b);
-/** Price of the next level at the current Farm level: the L30-17 extra-level price REPLACES the row cost above F+3. */
-export const trackBuyCost = (s: GameState, t: Track, b: Balance) => trackExtraCost(t, trackLevel(s, t), s.farmLevel, b) || trackCost(trackLevel(s, t), t, b);
+/** Price of the next level at the current Farm level. Above F+3 from L40 (Economy option (b), HoP 00:28; late_curve.py
+ *  ab928dc96d1c:71): max(row cost, floor(share x current farm_cost x (1 + markup x (extra - 1)))). */
+export const trackBuyCost = (s: GameState, t: Track, b: Balance) => {
+  const row = trackCost(trackLevel(s, t), t, b), x = trackExtraCost(t, trackLevel(s, t), s.farmLevel, b);
+  return Math.max(row, x);
+};
 export const trackLevel = (s: GameState, t: Track) => t === 'hens' ? s.hensLevel : s.eggValueLevel;
 export const trackCap = (s: GameState, t: Track, b: Balance) => (t === 'hens' ? hensCap : eggValueCap)(s.farmLevel, b);
 export const trackCost = (L: number, t: Track, b: Balance) => (t === 'hens' ? hensCost : eggValueCost)(L, b);

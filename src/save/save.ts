@@ -189,6 +189,8 @@ export function validate(raw: string, b: Balance, now = 0): { ok: true; file: Sa
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
   if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };
   if (!Array.isArray(s.customers) || !s.workers || typeof s.workers !== 'object') return { ok: false, reason: 'invalid_state' };
+  // L30-19b (PR #12 nit): hireNudgeDone is 1 or absent; any other value is junk and is treated as absent (nudge stays eligible).
+  if ('hireNudgeDone' in s && s.hireNudgeDone !== 1) delete s.hireNudgeDone;
   // BUG-6 / QA BUG-1+5: a missing, null, non-finite or <= 0 savedAt becomes NaN (Game grants 0 offline and re-stamps now).
   // The pre-2020 floor and the future check need a clock: they apply only when the caller passes `now` (pickNewest passes
   // now + SAVED_AT_SKEW_MS; Game re-checks with its own clock). With the default now = 0 neither applies.
