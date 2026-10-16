@@ -460,3 +460,6 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .toast{z-index:35}
 /* AC14b v1.2: Export old save is a <button> with a 44x44 minimum tap area in every case */
 .recovery-card #rcExport{min-height:44px;min-width:44px}
+/* S2-5: nav buttons are the full 64px (the 2px top rule is drawn over them instead of taking 2px of the track) */
+.actions{position:relative;border-top:0}
+.actions::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--bw);background:var(--c-outline);pointer-events:none;z-index:1}

@@ -51,15 +51,15 @@ describe('S2-5 nav labels (session2-ui-triage (b))', async () => {
     expect(btns).toHaveLength(4);
     for (const b of btns) { expect(b).toMatch(/aria-label="[^"]+"/); expect(b).toMatch(/<img /); expect(b).toMatch(/class="nav-lbl[^"]*">[^<]+</); }
   });
-  it('ready: "Manage" + N badge; aria "Manage tired workers, N tired"', () => {
-    expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Manage', badge: '2', aria: { text: 'Manage tired workers, 2 tired', at: 0 } });
+  it('ready: "Refill" + N badge; aria "Refill N tired workers"', () => {
+    expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Refill', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
     expect(navManageView(2, 0, true, P, 0).label).toBe('Refill tired (2)');
   });
   it('cooldown: "0:28", no badge; aria text changes at most every 5 s', () => {
     const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe('');
-    expect(a.aria.text).toBe('Manage tired workers, available in 28 seconds');
+    expect(a.aria.text).toBe('Refill available in 28 seconds');
     expect(navManageView(1, 25.1, false, a.aria, 3000).aria).toBe(a.aria);
-    expect(navManageView(1, 22.9, false, a.aria, 6100).aria.text).toBe('Manage tired workers, available in 23 seconds');
+    expect(navManageView(1, 22.9, false, a.aria, 6100).aria.text).toBe('Refill available in 23 seconds');
   });
 });
 

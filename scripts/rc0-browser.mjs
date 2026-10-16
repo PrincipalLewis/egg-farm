@@ -210,15 +210,15 @@ sections.s25 = async () => {
   const st = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 1e6, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 10, customers: [], nextCustomerInS: 1e9, nextCustomerId: 1, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2,
     workers: { market_hand: { energy: 30, cdS: 1 }, coop_hand: { energy: 90, cdS: 1 }, hawker: { energy: 95, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
   const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.save': st, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
-  const read = () => page.evaluate(() => [...document.querySelectorAll('nav.actions button')].filter(b => !b.hidden).map(b => { const r = b.getBoundingClientRect(); return { aria: b.getAttribute('aria-label'), label: b.querySelector('.nav-lbl')?.textContent, icon: !!b.querySelector('img'), w: Math.round(r.width), h: Math.round(r.height) }; }));
-  const check = (r, tag) => ok(`S2-5 nav ${tag}: 4 buttons, each icon + visible label + aria-label, >=64x44`, r.length === 4 && r.every(x => x.icon && x.label && x.aria && x.w >= 64 && x.h >= 44) && r[2].label === 'Manage' && r[2].aria === 'Manage tired workers, 1 tired', JSON.stringify(r));
+  const read = () => page.evaluate(() => [...document.querySelectorAll('nav.actions button')].filter(b => !b.hidden).map(b => { const r = b.getBoundingClientRect(); return { aria: b.getAttribute('aria-label'), label: b.querySelector('.nav-lbl')?.textContent, icon: !!b.querySelector('img'), badge: b.querySelector('.count-badge:not([hidden])')?.textContent, w: Math.round(r.width), h: Math.round(r.height) }; }));
+  const check = (r, tag) => ok(`S2-5 nav ${tag}: 4 buttons, each icon + visible label + aria-label, >=64x44`, r.length === 4 && r.every(x => x.icon && x.label && x.aria && x.w >= 64 && x.h >= 44) && r[2].label === 'Refill' && r[2].aria === 'Refill 1 tired workers' && r[2].h === 64 && r[2].badge === '1', JSON.stringify(r));
   await page.waitForTimeout(300); check(await read(), 'fresh load');
   await page.evaluate(() => window.eggfarm.save()); await page.reload(); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm); await page.waitForTimeout(400);
   const r2 = await read(); check(r2, 'after reload');
   ok('S2-5 exactly one worker button in the DOM after reload', (await page.locator('[data-act=manageAll]').count()) === 1);
   await page.locator('nav [data-act=manageAll]').click(); await page.waitForTimeout(300);
   const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'); return { label: b.querySelector('.nav-lbl').textContent, aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled') }; });
-  ok('S2-5 cooldown: label "0:NN", aria "available in N seconds", aria-disabled', /^0:\d\d$/.test(cd.label) && /available in \d+ seconds/.test(cd.aria) && cd.dis === 'true', JSON.stringify(cd));
+  ok('S2-5 cooldown: label "0:NN", aria "Refill available in N seconds", aria-disabled', /^0:\d\d$/.test(cd.label) && /^Refill available in \d+ seconds$/.test(cd.aria) && cd.dis === 'true', JSON.stringify(cd));
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-5-nav-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
   await ctx.close();
 };

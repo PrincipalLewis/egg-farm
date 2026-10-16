@@ -82,15 +82,15 @@ export function shouldShowCoopTip(s: GameState, b: Balance, shownThisSession: bo
   return !shownThisSession && !s.workers.coop_hand && s.farmLevel >= t.coop_hand_tip_min_farm && s.coopFullS >= t.coop_hand_tip_full_s;
 }
 export const COOP_TIP_TEXT = 'Coop full! Hire a Coop Hand to collect eggs for you.';
-/** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav: "Manage" / "0:28" + N badge; docked header: "Refill tired (N)" /
- *  "Ready in Ns". aria-label "Manage tired workers, N tired" / "..., available in N seconds"; the cooldown aria text changes at most every 5 s. */
+/** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav (Art & UX 08:47, v1.3 copy): "Refill" / "0:28" + N badge; docked header: "Refill tired (N)" /
+ *  "Ready in Ns". aria-label "Refill N tired workers" / "Refill available in N seconds"; the cooldown aria text changes at most every 5 s. */
 export interface NavAria { text: string; at: number }
 export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; badge: string; aria: NavAria } {
   const cd = Math.ceil(cdS - 1e-9);
   if (cd > 0) {
     const label = docked ? `Ready in ${cd}s` : `0:${String(cd).padStart(2, '0')}`;
-    const fresh = prev.text.includes('available in') && nowMs - prev.at < 5000;
-    return { label, badge: '', aria: fresh ? prev : { text: `Manage tired workers, available in ${cd} seconds`, at: nowMs } };
+    const fresh = prev.text.startsWith('Refill available in') && nowMs - prev.at < 5000;
+    return { label, badge: '', aria: fresh ? prev : { text: `Refill available in ${cd} seconds`, at: nowMs } };
   }
-  return { label: docked ? `Refill tired (${n})` : 'Manage', badge: docked || n < 1 ? '' : String(n), aria: { text: `Manage tired workers, ${n} tired`, at: nowMs } };
+  return { label: docked ? `Refill tired (${n})` : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: `Refill ${n} tired workers`, at: nowMs } };
 }
