@@ -4,7 +4,8 @@
   "save": {
     "autosaveIntervalS": 5,
     "lsHeadroomFactor": 2,
-    "lsHeadroomMarginBytes": 65536
+    "lsHeadroomMarginBytes": 65536,
+    "migrationAttemptsCap": 3
   },
   "feel": {
     "tap_combine_window_ms": 250,

@@ -6,7 +6,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, STUCK_ATTEMPTS, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateTracksV7 } from './sim/migrate-v7';
@@ -144,10 +144,15 @@ export class Game {
   private mirrorResumeOnSave = false;
   /** The raw this Game last wrote to localStorage main (M4-20 change detection), or the boot bytes before any write. */
   private lastMainRaw: string | null = null;
-  private attempts(): number { try { const n = Number(this.kv.getItem(MIGRATION_ATTEMPTS_KEY)); return Number.isInteger(n) && n > 0 ? n : 0; } catch { return 0; } }
+  /** Head of QA (2): plain integer, capped at balance.save.migrationAttemptsCap; anything that isn't an integer is reset to 0. */
+  private attempts(): number {
+    try { const r = this.kv.getItem(MIGRATION_ATTEMPTS_KEY); if (r === null) return 0;
+      if (!/^\d+$/.test(r)) { this.kv.setItem(MIGRATION_ATTEMPTS_KEY, '0'); return 0; }
+      return Math.min(Number(r), this.tracksCap()); } catch { return 0; } }
+  private tracksCap() { return (this.tracksPending?.on ?? this.b).save.migrationAttemptsCap; }
   /** Deferral (M4-16/M4-20/M4-24): stay v6 under flag-off rules, attempt counter +1, retry next load. */
   private deferTracks(store: 'ls' | 'idb', reason: string): 'deferred' {
-    const n = this.attempts() + 1; try { this.kv.setItem(MIGRATION_ATTEMPTS_KEY, String(n)); } catch { /* counter is best effort */ }
+    const n = Math.min(this.attempts() + 1, this.tracksCap()); try { this.kv.setItem(MIGRATION_ATTEMPTS_KEY, String(n)); } catch { /* counter is best effort */ }
     this.endTracks(store, reason, n); return 'deferred';
   }
   /** Abort (M4-12): the counter is reported unchanged; my own LS record (if written) is removed (M4-13 under §3d). */
@@ -160,7 +165,7 @@ export class Game {
     // N6 (doc v0.3.2): the mirror resumes after any abort/deferral except an IndexedDB-unknown deferral (boot read not definite).
     // HoE correction: it resumes on the NEXT normal save (save() below), not here.
     this.mirrorResumeOnSave = !(store === 'idb' && this.opts.idbBoot === 'unknown');
-    this.telemetry.track('save_migration_aborted', { store, reason, path: TRACKS_MARKER_PATH, attempt_count: n, ...(n >= STUCK_ATTEMPTS ? { stuck_on_v6: true } : {}) });
+    this.telemetry.track('save_migration_aborted', { store, reason, path: TRACKS_MARKER_PATH, attempt_count: n, ...(n >= this.tracksCap() ? { stuck_on_v6: true } : {}) });
     this.telemetry.flush(true);
   }
   private canCommit() { return !this.resetting && !this.readOnly && !this.inactive && !this.held() && !(this.canWrite && !this.canWrite()) && !this.newerGuard(); }
@@ -178,6 +183,8 @@ export class Game {
   async startTracksMigration(): Promise<'none' | 'committed' | 'aborted' | 'deferred'> {
     const p = this.tracksPending; if (!p || !this.canCommit()) return 'none';
     const boot = this.opts.idbBoot ?? 'absent', idb = this.pausedMirror as (Game['mirror'] & { readStrict?(ms?: number): Promise<string | null | undefined> }) | null;
+    // Head of QA (2): at the cap (config) stay stuck_on_v6: no further attempt, counter not raised.
+    if (this.attempts() >= p.on.save.migrationAttemptsCap) { this.endTracks('ls', 'stuck_on_v6', this.attempts()); return 'deferred'; }
     if (boot === 'unknown') return this.deferTracks('idb', this.opts.idbAbsentReason ?? 'idb_read_error');
     if (boot === 'absent') this.telemetry.track('save_backup_idb_unavailable', { reason: this.opts.idbAbsentReason ?? 'no_global', path: TRACKS_MARKER_PATH });
     const lsMain = this.kv.getItem(SAVE_KEY);
@@ -195,6 +202,8 @@ export class Game {
     }
     if (this.tracksPending !== p || !this.canCommit() || this.kv.getItem(SAVE_KEY) !== lsMain) return this.abortTracks('ls', 'commit_write_failed', rec);
     const migrated = { ...migrateTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
+    // Head of QA (1): read v6_backup back right before the marker/v7 write; its migrationId must be state.v6BackupId.
+    if (decodeBackup(this.kv.getItem(V6_BACKUP_KEY))?.migrationId !== migrated.v6BackupId) return this.abortTracks('ls', 'readback_mismatch', rec);
     const raw = commitWrite(this.kv, migrated, this.now(), p.on);
     const confirmed = raw !== null && this.kv.getItem(SAVE_KEY) === raw && decodeBackup(this.kv.getItem(V6_BACKUP_KEY))?.migrationId === id;
     if (!confirmed) return this.abortTracks('ls', 'commit_write_failed', rec);

@@ -118,7 +118,10 @@ describe('(b) m4-design §3c/§3d interim marker path (ADR M4-14..24, spec v1.10
       expect(!!e.stuck_on_v6).toBe(n >= 3); expect(w).toEqual([]); expect(kv.getItem(V6_BACKUP_KEY)).toBe(before);
       expect(JSON.parse(kv.getItem(SAVE_KEY)).state.tracksV7).toBeUndefined();
     }
-    const g4 = boot(kv, {}, T0 + 9000); expect(await g4.startTracksMigration()).toBe('committed'); expect(kv.getItem(MIGRATION_ATTEMPTS_KEY)).toBeNull();
+    // Head of QA (2): at the cap, stuck_on_v6: no further attempt, counter stays 3, no marker
+    const g4 = boot(kv, {}, T0 + 9000); expect(await g4.startTracksMigration()).toBe('deferred');
+    expect(ev(g4, 'save_migration_aborted').at(-1)).toMatchObject({ reason: 'stuck_on_v6', attempt_count: 3, stuck_on_v6: true });
+    expect(kv.getItem(MIGRATION_ATTEMPTS_KEY)).toBe('3'); expect(kv.getItem(V6_BACKUP_KEY)).toBeNull(); expect(JSON.parse(kv.getItem(SAVE_KEY)).state.tracksV7).toBeUndefined();
   });
   it('IndexedDB definitely absent (no_global / security) -> save_backup_idb_unavailable, commits on localStorage', async () => {
     for (const reason of ['no_global', 'security']) {
@@ -252,6 +255,25 @@ describe('(b) m4-design §3c/§3d interim marker path (ADR M4-14..24, spec v1.10
     expect([saveSeqOf(mk({ saveSeq: 'x' })), saveSeqOf(null), saveSeqOf('{')]).toEqual([0, 0, 0]);
     const { kv } = seed(); const g = boot(kv, { idbBoot: 'unknown' }); const q1 = saveSeqOf(kv.getItem(SAVE_KEY)); g.save();
     expect(q1).toBeGreaterThanOrEqual(1); expect(saveSeqOf(kv.getItem(SAVE_KEY))).toBe(q1 + 1); expect(validate(kv.getItem(SAVE_KEY)!, off).ok).toBe(true);
+  });
+  it('Head of QA (2): migration_attempts is a plain integer capped by config; non-integers reset to 0', async () => {
+    expect(on.save.migrationAttemptsCap).toBe(3);
+    for (const bad of ['abc', '1.5', '-2', '', '2x']) {
+      const { kv } = seed(); kv.setItem(MIGRATION_ATTEMPTS_KEY, bad); const g = boot(kv, { idbBoot: 'unknown' });
+      expect(await g.startTracksMigration()).toBe('deferred'); expect(kv.getItem(MIGRATION_ATTEMPTS_KEY)).toBe('1');
+      expect(ev(g, 'save_migration_aborted').at(-1).attempt_count).toBe(1);
+    }
+    const { kv } = seed(); kv.setItem(MIGRATION_ATTEMPTS_KEY, '17'); const g = boot(kv);
+    expect(await g.startTracksMigration()).toBe('deferred'); expect(ev(g, 'save_migration_aborted').at(-1)).toMatchObject({ reason: 'stuck_on_v6', attempt_count: 3 });
+    const c = { ...on, save: { ...on.save, migrationAttemptsCap: 5 } }; const s2 = seed(); s2.kv.setItem(MIGRATION_ATTEMPTS_KEY, '3');
+    const g2 = new Game(c, s2.kv, () => T0, undefined, 'dev', null, null, { idbBoot: 'ok', newId: ids(ID1) }); expect(await g2.startTracksMigration()).toBe('committed');
+  });
+  it('Head of QA (1): v6_backup read back right before the marker/v7 write; id != state.v6BackupId -> readback_mismatch, v6, no marker', async () => {
+    const { kv } = seed(); const idb = fakeIdb(); const m = new IdbMirror(idb.db); const g = boot(kv, {}, T0, m);
+    const rs = m.readStrict.bind(m); (m as any).readStrict = async (ms?: number) => { kv.setItem(V6_BACKUP_KEY, encodeBackup({ migrationId: ID3, raw: 'other tab' })); return rs(ms); };
+    expect(await g.startTracksMigration()).toBe('aborted'); expect(ev(g, 'save_migration_aborted').at(-1)).toMatchObject({ store: 'ls', reason: 'readback_mismatch' });
+    const main = JSON.parse(kv.getItem(SAVE_KEY)); expect([main.version, main.state.tracksV7, main.state.v6BackupId]).toEqual([6, undefined, undefined]);
+    expect(g.balance.m4!.enabled).toBe(0); expect(decodeBackup(kv.getItem(V6_BACKUP_KEY))!.migrationId).toBe(ID3); // the other record is not mine: kept
   });
   it('M4-17: a corrupt / out-of-range v6 is never backed up or migrated', async () => {
     const kv = kvOf(); kv.setItem(SAVE_KEY, raw6({ ...mainState(10, 7), farmLevel: 99 }));

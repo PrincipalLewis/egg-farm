@@ -28,6 +28,7 @@ export const headroomNeed = (saveBytes: number, backupBytes: number, s: { lsHead
 export const HEADROOM_PROBE_KEY = 'eggfarm.save.headroom_probe';
 /** M4-16 attempt counter: deferrals only; removed on commit; cleared by Reset. attempt_count >= STUCK_ATTEMPTS => stuck_on_v6. */
 export const MIGRATION_ATTEMPTS_KEY = 'eggfarm.save.migration_attempts';
+/** @deprecated use balance.save.migrationAttemptsCap (Head of QA: config constant). */
 export const STUCK_ATTEMPTS = 3;
 /** Probe `bytes` of free localStorage under the scratch key, removed at once. true = it fits. */
 export function probeHeadroom(kv: KV, bytes: number): boolean {
