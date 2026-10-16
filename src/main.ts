@@ -6,6 +6,7 @@ import { bus, guardTabs } from './save/tab-guard';
 import { readOnlyKV } from './save/save';
 import { mountApp } from './ui/app';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
+import { RenderPump } from './ui/render-pump';
 
 import { BUILD_ID } from './build-id';
 const VERSION = BUILD_ID;
@@ -53,9 +54,8 @@ async function boot() {
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
   { const q = new URLSearchParams(location.search); if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q)); }
-  function frame() { g.frame(); ui.render(); requestAnimationFrame(frame); }
-  requestAnimationFrame(frame);
-  setInterval(() => g.frame(), 1000); // keep sim moving if rAF is paused but timers still fire
+  // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).
+  new RenderPump(() => { g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
   window.addEventListener('pagehide', () => g.endSession());
   startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
 }
