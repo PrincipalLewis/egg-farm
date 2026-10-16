@@ -506,6 +506,18 @@ sections.p1welcome = async () => {
   }
 };
 
+// ---------- Product Oct 16: visible "build <sha>" tag, readable, outside tap areas ----------
+sections.p1build = async () => {
+  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    const r = await page.evaluate(() => { const t = document.querySelector('#buildTag'); const a = t.getBoundingClientRect(); const cs = getComputedStyle(t);
+      const hits = [...document.querySelectorAll('button, a, [data-act], .chip, input')].filter(e => { const b = e.getBoundingClientRect(); return b.width && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; }).map(e => e.id || e.className);
+      return { text: t.textContent, w: a.width, full: t.scrollWidth <= t.clientWidth + 1, inView: a.left >= 0 && a.right <= innerWidth && a.top >= 0, pe: cs.pointerEvents, fs: parseFloat(cs.fontSize), hits }; });
+    ok(`Build tag "build <sha>" visible, not truncated, no tap overlap (${w})`, /^build [0-9a-f]{7,}$/.test(r.text) && r.w > 0 && r.full && r.inView && r.pe === 'none' && r.fs >= 10 && r.hits.length === 0, JSON.stringify(r));
+    if (shot && w !== 390) await page.screenshot({ path: `${SHOTS}/build-tag-hud-${w}.png`, clip: { x: 0, y: 0, width: w, height: 64 } });
+    await ctx.close();
+  }
+};
 
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }

@@ -61,7 +61,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
     <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">$0/s</span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
-    <div class="spacer"></div>
+    <div class="spacer"><span class="build-tag num" id="buildTag" title="Build">build ${(version.match(/\+([0-9a-f]{7,})/) ?? [, version])[1]}</span></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
     <div class="sr" aria-live="polite" id="live"></div></header>`);
   // ---------- Farm ----------

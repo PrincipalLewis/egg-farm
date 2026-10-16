@@ -497,3 +497,6 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 .wb-hero{display:flex;align-items:center;justify-content:center;gap:8px;font:700 var(--fs-xl) var(--f-display);white-space:nowrap;overflow:visible;text-overflow:clip;animation:popin 300ms var(--ease-pop)}.wb-hero img{width:32px}
 .wb-line2{font:400 var(--fs-base) var(--f-body);white-space:normal;overflow:visible;text-overflow:clip}
 .rm .wb-hero{animation:none}
+/* Product Oct 16: visible build hash, small + muted, in the HUD spacer, never a tap target */
+.hud .spacer{display:flex;justify-content:flex-end;align-items:center;min-width:0}
+.build-tag{pointer-events:none;-webkit-user-select:none;user-select:none;font:600 11px var(--f-body);color:rgb(255 246 229 / .8);white-space:nowrap;padding-inline:4px}
