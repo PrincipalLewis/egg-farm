@@ -422,3 +422,12 @@ html,body{overflow-x:hidden;max-width:100%}
 .goal-pill>*{min-width:0}
 @media (max-width:379px){.goal-pill{grid-template-columns:var(--goal-icon) minmax(0,1fr) auto}}
 @media (min-width:960px) and (orientation:landscape){.goal{min-height:var(--goal-h-lg);padding:0;margin-bottom:0;height:auto}.goal-pill{height:var(--goal-h-lg)}}
+/* S2-6 (layout-spec §3.3, rc1): the "Queue full" tag straddles the strip's top outline, never over a chip or the "+N" tile; "Full" below 380px */
+.qtag{top:-9px;right:8px;height:18px;line-height:16px;z-index:1;pointer-events:none;white-space:nowrap;box-sizing:border-box;border:1px solid transparent}
+.qtag .q-short{display:none}
+@media (max-width:379px){.qtag .q-long{display:none}.qtag .q-short{display:inline}}
+@media (max-width:390px){.farm{padding-top:10px}} /* room for the tag's 9px overhang above the strip (farm padding is 8px here) */
+/* S2-6 (QA s2-7-bd0dc66: tag over the "+N" tile at 375/390 with 9/9): the strip reserves a 9px top band, so the tag's lower
+   half sits in it and never reaches a chip or the "+N" tile, at any chip size (64/56) or strip height. */
+.queue{padding-top:9px;min-height:81px}
+@media (max-height:699px){.queue{min-height:73px}}

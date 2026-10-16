@@ -6,9 +6,10 @@ import { readFileSync, mkdirSync } from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
 if (!['chromium', 'webkit'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
-const port = +(process.env.PORT ?? 4300 + Math.floor(Math.random() * 600)); // was fixed 4181: parallel worktrees collided on it const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+// PORT: was a fixed 4181, which collided with parallel worktrees
+const port = +(process.env.PORT ?? 4300 + Math.floor(Math.random() * 600)); const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
-for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+for (let i = 0; i < 240; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const SHOTS = '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
 const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
@@ -45,6 +46,22 @@ sections.taps = async () => {
     ok(`rc1 tap areas >=44px incl. button.goal (${w}x${h})`, r.length >= 5 && r.some(x => x.k === 'goal') && r.every(x => x.w >= 44 && x.h >= 44), JSON.stringify(r.map(x => [x.k, Math.round(x.w), Math.round(x.h)])));
     const g = await page.evaluate(() => { const q = s => document.querySelector(s).getBoundingClientRect(); return { hit: q('#goal').height, pill: q('#goal .goal-pill').height, gap: Math.round(q('#collect').top - q('#goal').bottom) }; });
     ok(`D5 goal hit 44 / pill 40 / gap below 4 (row 48) (${w})`, g.hit === 44 && g.pill === 40 && g.gap === 4, JSON.stringify(g));
+    await ctx.close();
+  }
+};
+// ---------- S2-6 Queue full tag on the strip's top edge, no overlap (360/375/390) ----------
+sections.qtag = async () => {
+  for (const [w, h] of [[360, 640], [375, 667], [375, 812], [390, 844]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, seenSlots: 10 }) } });
+    for (const [F, n] of [[0, 6], [15, 9], [0, 4]]) { // full 6/6 at F0 and 9/9 at F15 (QA s2-7-bd0dc66), 4/6 not full
+      await page.evaluate(([F, n]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, customers: Array.from({ length: n }, (_, i) => ({ id: 500 + i, demand: 5, filled: 0, waitedS: 0 })), nextCustomerInS: 1e9 }; }, [F, n]); await page.waitForTimeout(2300);
+      const r = await page.evaluate(() => { const t = document.querySelector('.qtag'); if (!t) return { tag: null }; const a = t.getBoundingClientRect(), q = document.querySelector('#queue').getBoundingClientRect(), f = document.querySelector('.farm').getBoundingClientRect();
+        const hits = [...document.querySelectorAll('#queue .chip')].map(c => c.getBoundingClientRect()).filter(c => !(a.right <= c.left || c.right <= a.left || a.bottom <= c.top || c.bottom <= a.top)).length;
+        return { tag: t.innerText.trim(), hits, straddle: a.top < q.top && a.bottom > q.top, clipped: a.top < f.top }; });
+      if (n !== 4) ok(`S2-6 ${n}/${n} tag on strip top edge, no chip/+N overlap, "${w < 380 ? 'Full' : 'Queue full'}" (${w}x${h})`, r.tag === (w < 380 ? 'Full' : 'Queue full') && r.hits === 0 && r.straddle && !r.clipped, JSON.stringify(r));
+      else ok(`S2-6 no tag when not full (${w}x${h})`, r.tag === null, JSON.stringify(r));
+      if (n === 9 && shot && (h === 667 || h === 844)) await page.screenshot({ path: `${SHOTS}/rc1-s2-6-qtag-9of9-${w}.png`, clip: { x: 0, y: 0, width: w, height: 200 } });
+    }
     await ctx.close();
   }
 };
