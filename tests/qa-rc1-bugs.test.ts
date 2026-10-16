@@ -137,7 +137,7 @@ describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates'
     expect(listSrc).not.toMatch(/sell-stack/);
     expect(listSrc).toMatch(/syncSellWidth/);
   });
-  it('2: shared --sell-w, min 88, max 45cqw, pad 12, no ellipsis on button', () => {
+  it('2: shared --sell-w, min 88, max 45cqw, pad 10, no ellipsis on button', () => {
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*width:var\(--sell-w,88px\)/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-width:88px/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*max-width:45cqw/);
@@ -162,8 +162,8 @@ describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates'
 describe('S2-REL-1 / exact money wiring', () => {
   const app = readFileSync('src/ui/app.ts', 'utf8');
   const main = readFileSync('src/main.ts', 'utf8');
-  it('eggfarmOrderList is DEV-only; eggfarm is IOS_FLAG-only', () => {
-    expect(app).toMatch(/if \(import\.meta\.env\.DEV\) \(window as any\)\.eggfarmOrderList/);
+  it('eggfarmOrderList and eggfarm are IOS_FLAG-only', () => {
+    expect(app).toMatch(/if \(IOS_FLAG_ENABLED\) \(window as any\)\.eggfarmOrderList/);
     expect(app).not.toMatch(/^\s*\(window as any\)\.eggfarmOrderList/m);
     expect(main).toMatch(/if \(IOS_FLAG_ENABLED\) \(window as any\)\.eggfarm =/);
   });
