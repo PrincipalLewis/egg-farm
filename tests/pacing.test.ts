@@ -4,13 +4,24 @@ import { runBot, median } from './bot';
 import { runM2 } from './bot-m2';
 // AC7 (core-loop-spec, M1-R1; HoP 23:15 standard, product/ac7-qa-threshold-changes.md): 30 seeds (P95 needs >= 30),
 // seller15 + cheapest robustness. Pacing gates: P95 + worst-seed guard; other checks stay medians.
-const SEEDS = Array.from({ length: 30 }, (_, i) => i + 1);
+/** HoP P95 standard: nearest-rank P95 needs at least this many seeds */
+const MIN_SEEDS_P95 = 30;
+const SEEDS = Array.from({ length: MIN_SEEDS_P95 }, (_, i) => i + 1);
 /** nearest-rank quantile (q=0.95 -> the P95-high seed, q=0.05 -> the P95-low seed) */
-const quant = (xs: number[], q: number) => { const a = [...xs].sort((p, r) => p - r); return a[Math.min(a.length - 1, Math.max(0, Math.ceil(q * a.length) - 1))]; };
+export const quant = (xs: number[], q: number) => { const a = [...xs].sort((p, r) => p - r); return a[Math.min(a.length - 1, Math.max(0, Math.ceil(q * a.length) - 1))]; };
 const levelAt = (reach: Map<number, number>, t: number) => Math.max(1, ...[...reach].filter(([, s]) => s <= t).map(([L]) => L));
 const seller = SEEDS.map(s => runBot(b, s, 'seller15'));
 const cheap = SEEDS.map(s => runBot(b, s, 'cheapest'));
 const med = (rs: typeof seller, f: (r: (typeof seller)[number]) => number | null) => median(rs.map(r => f(r) ?? Infinity));
+describe('AC7 pacing harness', () => {
+  it(`seed count >= ${MIN_SEEDS_P95} (P95 standard)`, () => { expect(SEEDS.length).toBeGreaterThanOrEqual(MIN_SEEDS_P95); });
+  it('quant nearest-rank on synthetic data', () => {
+    const r30 = Array.from({ length: 30 }, (_, i) => 30 - i); // 30..1, unsorted on purpose
+    expect(quant(r30, 0.95)).toBe(29); expect(quant(r30, 0.05)).toBe(2);
+    const r20 = Array.from({ length: 20 }, (_, i) => i + 1);
+    expect(quant(r20, 0.95)).toBe(19); expect(quant(r20, 0.05)).toBe(1);
+  });
+});
 describe('AC7 pacing bot on the real sim', () => {
   it('report', () => {
     console.log('AC7 seller15:', { first: med(seller, r => r.firstUpgradeS), up5: med(seller, r => r.upgradesAt(300)), f10m: med(seller, r => r.farmAt(600)),
