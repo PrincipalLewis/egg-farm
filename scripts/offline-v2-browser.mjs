@@ -25,7 +25,7 @@ const popup = async (page, eggs, awayS) => {
 const measure = page => page.evaluate(() => {
   const card = document.querySelector('.welcome-v2'), r = e => e && e.getBoundingClientRect(), btn = document.querySelector('#wbCollect'), cs = getComputedStyle(card);
   const contentW = card.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const lines = [...card.children].filter(e => !e.classList.contains('sr-only') && !e.classList.contains('close'));
+  const lines = [...card.children].filter(e => !e.classList.contains('sr') && !e.classList.contains('close'));
   const trunc = lines.some(e => e.scrollWidth > e.clientWidth + 1 || getComputedStyle(e).textOverflow === 'ellipsis');
   return { contentW, card: r(card).toJSON(), cardSH: card.scrollHeight, cardCH: card.clientHeight, btn: r(btn).toJSON(), a: r(card.querySelector('.wb-a')).toJSON(), hero: r(card.querySelector('.wb-hero')).toJSON(),
     heroText: card.querySelector('#wbN').textContent, rateHidden: card.querySelector('.wb-rate').hidden, text: card.innerText, trunc, vh: innerHeight,
