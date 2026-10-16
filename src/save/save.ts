@@ -1,5 +1,7 @@
 import type { Balance } from '../config/balance';
 import { GameState, initialState, coopTier } from '../sim/state';
+import { m4On } from '../config/formulas';
+import { migrateTracksV7 } from '../sim/migrate-v7';
 export const SAVE_KEY = 'eggfarm.save';
 export const SAVE_VERSION = 6;
 export interface SaveFile { version: number; savedAt: number; state: GameState; }
@@ -32,7 +34,11 @@ export function newerStoredVersion(kv: Pick<KV, 'getItem'>, idbRaw: string | nul
 export function migrate(d: any, b: Balance): SaveFile {
   if (!d || typeof d.version !== 'number' || d.version > SAVE_VERSION) throw new Error('bad save');
   while (d.version < SAVE_VERSION) { const m = migrations[d.version]; if (!m) throw new Error(`no migration from v${d.version}`); d = m(d); }
-  return { version: d.version, savedAt: d.savedAt, state: { ...initialState(b), ...d.state } };
+  let state: GameState = { ...initialState(b), ...d.state };
+  // M4-A (M4A-27..29): with the flag on, a pre-M4 farm (any version, no tracksV7 marker) is price-matched once:
+  // H = F, lowest V with price >= v6, milestones seeded silently. SAVE_VERSION stays 6 so main can still read the save.
+  if (m4On(b) && !state.tracksV7) state = { ...migrateTracksV7(state, b).state, tracksV7: 1 };
+  return { version: d.version, savedAt: d.savedAt, state };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
 /** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */

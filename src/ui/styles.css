@@ -448,3 +448,19 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
 .reduced-motion .tab-guard .recovery-card{animation:none}
 .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
+
+/* M4-A 3-row Farm screen (Option A) */
+.tracks{display:flex;flex-direction:column;gap:var(--s-3)}
+.tracks .balanced{display:flex;flex-direction:column;gap:var(--s-1);font:700 14px var(--f-body,inherit)}
+.tracks .balanced .segs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tracks .balanced .segs i{height:8px;border-radius:4px;background:var(--c-dust,#d9cfc4);border:2px solid var(--c-outline);overflow:hidden;display:block}
+.tracks .balanced .segs i b{display:block;height:100%;background:var(--c-yolk,#f6c445)}
+.tracks .balanced .segs i.weakest{outline:2px solid var(--c-yolk-dark,#c8901a);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){.tracks .balanced .segs i b{transition:none}}
+.up .lock{min-height:44px;display:flex;align-items:center;justify-content:flex-end;color:var(--c-ink,#3E2C23);font-weight:700}
+.up .lock::before{content:'🔒';margin-right:6px}
+
+/* M4A-18 next-goal highlight on one Farm-tab row (static outline; no motion) */
+.tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
+.tracks .up .ms-hint{font:400 13px var(--f-body,'Nunito',inherit);color:var(--c-muted,#6b5e52)}
+.tracks .up.best.pending{outline-style:dashed}

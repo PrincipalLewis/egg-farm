@@ -1,11 +1,11 @@
 import raw from './balance.json';
-import type { EconomyParams } from './formulas';
+import { validateCostGrowthSegments, type EconomyParams } from './formulas';
 /** TEST-ONLY scenario hooks (m2-proposal §8 item 17, AC-W1 casual). Never in balance.json; rejected in production builds. */
 export interface SimTestHooks { poisson_arrivals?: boolean; demand_scale?: number; }
 export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
 function check(o: any, path: string) {
   for (const [k, v] of Object.entries(o)) {
-    if (k.startsWith('_') || (path === '' && k === 'sim_test')) continue;
+    if (k.startsWith('_') || (path === '' && k === 'sim_test') || (path === '.farm' && (k === 'costGrowthSegments' || k === 'costOverrides'))) continue;
     if (v && typeof v === 'object') check(v, `${path}.${k}`);
     else if (v === undefined || typeof v !== 'number' || !isFinite(v) || v < 0) throw new Error(`balance${path}.${k} invalid`);
   }
@@ -22,6 +22,9 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
   if (b.save.autosaveIntervalS > 5) throw new Error('balance.save.autosaveIntervalS must be <= 5 (AC8)');
   for (const p of ['collection.baseCost', 'farm.baseCost', 'farm.eggsPerHenPerSec', 'farm.customerIntervalMinS', 'farm.customerIntervalBaseS', 'customers.customer_patience_s']) pos(b, p);
   for (const p of ['customers.queue_max_base', 'customers.queue_max_cap', 'customers.queue_max_step_levels']) int(b, p);
+  validateCostGrowthSegments((b.farm as any).costGrowthSegments);
+  const ov = (b.farm as any).costOverrides as Record<string, number> | undefined;
+  if (ov) for (const [L, c] of Object.entries(ov)) if (!Number.isInteger(+L) || +L < 0 || +L > b.maxLevel || !Number.isInteger(c) || c <= 0) throw new Error(`balance.farm.costOverrides[${L}] must be a positive integer at a level 0..maxLevel`);
   if (b.collection.costGrowth < 1 || b.farm.costGrowth < 1) throw new Error('balance cost growth must be >= 1');
   if (!(b.farm.customerIntervalDecay > 0 && b.farm.customerIntervalDecay <= 1)) throw new Error('balance.farm.customerIntervalDecay must be in (0,1]');
   if (!(b.farm.demandLoFactor > 0 && b.farm.demandHiFactor >= b.farm.demandLoFactor)) throw new Error('balance.farm demand factors: 0 < lo <= hi');
@@ -37,6 +40,16 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
   if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))
     throw new Error('balance.workers.grader.tiers: farm and mult must increase, mult > 1');
   for (const k of ['tired_bonus_share', 'asleep_bonus_share'] as const) if (W.grader[k] > 1) throw new Error(`balance.workers.grader.${k} must be <= 1`);
+  // M4-A tracks (flag + costs + caps + milestones)
+  if (b.m4) {
+    const m = b.m4;
+    if (m.enabled !== 0 && m.enabled !== 1) throw new Error('balance.m4.enabled must be 0 or 1');
+    for (const t of [m.hens, m.eggValue]) if (t.costs.length !== b.maxLevel + 1 || t.costs.some((c, i, a) => !Number.isInteger(c) || c <= 0 || (i > 0 && c <= a[i - 1]))) throw new Error('balance.m4 track costs must be maxLevel+1 rising positive integers');
+    for (const p of ['m4.hens.capOverFarm', 'm4.eggValue.capOverFarm']) int(b, p);
+    const inc = (xs: { level: number }[], k: string) => { if (xs.some((x, i) => !Number.isInteger(x.level) || (i > 0 && x.level <= xs[i - 1].level))) throw new Error(`balance.m4.milestones.${k}: levels must be increasing integers`); };
+    inc(m.milestones.hens, 'hens'); inc(m.milestones.grades, 'grades'); inc(m.milestones.balanced, 'balanced');
+    if (m.milestones.hens.some(x => x.coopMult < 1 || x.offlineMult < 1) || m.milestones.grades.some(x => x.mult < 1)) throw new Error('balance.m4.milestones mult must be >= 1');
+  }
   return b;
 }
 export const balance: Balance = validateBalance(raw as Balance);

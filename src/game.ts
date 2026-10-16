@@ -1,5 +1,7 @@
+import { m4On } from './config/formulas';
 import type { Balance } from './config/balance';
-import { GameState, initialState, coopCapacity } from './sim/state';
+import { GameState, initialState } from './sim/state';
+import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
@@ -47,6 +49,7 @@ export class Game {
       if (!restored_from_backup) this.bakAllowed = false;
     }
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
+    if (!f && m4On(b)) this.state = { ...this.state, tracksV7: 1 }; // new M4 farm: tracks start at 0, never re-migrated
     this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
@@ -74,7 +77,7 @@ export class Game {
     }
   }
   private checkCoopFull() {
-    const full = this.state.coop >= coopCapacity(this.state.farmLevel, this.b);
+    const full = this.state.coop >= coopCap(this.state, this.b);
     if (full && this.coopFullSince === null) { this.coopFullSince = this.now(); this.telemetry.track('coop_full', { phase: 'start' }); this.notify({ type: 'coop_full', phase: 'start' }); }
     else if (!full && this.coopFullSince !== null) { this.telemetry.track('coop_full', { phase: 'end', durationMs: this.now() - this.coopFullSince }); this.coopFullSince = null; this.notify({ type: 'coop_full', phase: 'end' }); }
   }

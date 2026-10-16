@@ -42,3 +42,11 @@ export class IncomeRate {
 /** Art & UX compact money for pops/cards: "$12.50" under $1,000, then "$1.2K" / "$3.4M". */
 export const fmtMoneyShort = (cents: number) => { const d = cents / 100; if (d < 1000) return fmtMoney(cents);
   const [v, u] = d >= 1e9 ? [d / 1e9, 'B'] : d >= 1e6 ? [d / 1e6, 'M'] : [d / 1e3, 'K']; return '$' + (Math.floor(v * 10) / 10).toFixed(1).replace(/\.0$/, '') + u; };
+/** Upgrade-card ETA (Product copy, Oct 16; same as rc1/ux-clarity format.ts): "Affordable in a moment" under 10 s; "Affordable in ~m:ss"; "~h:mm:ss" from 1 h; no income "Affordable in —". */
+export const fmtAffordableIn = (seconds: number | null) => {
+  if (seconds === null || !isFinite(seconds)) return 'Affordable in —';
+  const s = Math.max(0, Math.ceil(seconds));
+  if (s < 10) return 'Affordable in a moment';
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60, p = (n: number) => String(n).padStart(2, '0');
+  return `Affordable in ~${h ? `${h}:${p(m)}` : m}:${p(r)}`;
+};
