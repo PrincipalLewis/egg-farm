@@ -26,11 +26,17 @@ export class OrderList {
   private kick() { if (!this.raf) this.raf = this.schedule(() => { this.raf = 0; if (this.pending) this.apply(this.pending); }) || 1; }
   private fill(el: HTMLElement, v: OrderView) {
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
-    const [e, val] = v.line.split(' · ');
-    const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
-    if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`; // F4: NBSP survives flex whitespace trimming
+    const [countPart, val] = v.line.split(' · '); // "4/17 eggs" · "$93.84"
+    const count = countPart.replace(/ eggs$/, '');
+    const N = el.querySelector('.n')!, Egg = el.querySelector('.egg')!, V = el.querySelector('.v')!, txt = el.querySelector('.txt') as HTMLElement;
+    const bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
+    if (N.textContent !== count) N.textContent = count;
+    if (Egg.textContent !== ' eggs') Egg.textContent = ' eggs';
+    if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`; // F4: NBSP survives flex whitespace trimming
+    if (txt.getAttribute('aria-label') !== v.lineAria) txt.setAttribute('aria-label', v.lineAria);
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
-    if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
+    if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); }
+    if (bar.getAttribute('aria-label') !== v.lineAria) bar.setAttribute('aria-label', v.lineAria);
     if (btn.getAttribute('aria-label') !== v.buttonAria || (v.state !== 'wait' && !btn.querySelector('.sk'))) {
       // MK-24-1 v3: always two-line "Sell k" / "+$X"; wait stays a single label.
       if (v.state === 'wait') btn.textContent = v.button;
@@ -64,7 +70,7 @@ export class OrderList {
   }
   private make(v: OrderView) {
     const el = document.createElement('div'); el.dataset.row = String(v.id); el.dataset.id = String(v.id);
-    el.innerHTML = `<div class="av"><img src="${this.avatar}" alt=""></div><div class="txt"><div class="l1"><span class="e"></span><span class="v"></span></div><div class="bar" role="progressbar" aria-valuemin="0"><i></i></div></div><button data-id="${v.id}"></button>`;
+    el.innerHTML = `<div class="av"><img src="${this.avatar}" alt=""></div><div class="txt"><div class="l1"><span class="n"></span><span class="egg"></span><span class="v"></span></div><div class="bar" role="progressbar" aria-valuemin="0"><i></i></div></div><button data-id="${v.id}"></button>`;
     this.fill(el, v); this.stats.created++; return el;
   }
   /** §5.7 (QA 15): removal = one layout step, but the cards below glide up with a compensating transform (FLIP),

@@ -10,7 +10,10 @@ describe('F1 slot toast only when a slot is added', () => {
 describe('F2 greyed Sell all', () => {
   it('"No eggs to sell", never $0.00', () => { expect(sellAllLabel(0, 0, String, c => `$${c / 100}`)).toBe('No eggs to sell'); expect(sellAllLabel(3, 300, String, c => `$${c / 100}`)).toBe('Sell all (3 eggs\u00a0· $3)'); });
 });
-describe('F4 separator', () => { it('" · " with spaces on both sides', () => { expect(orderView({ id: 1, demand: 50, filled: 0, waitedS: 0 }, 48, 748).line).toMatch(/^48\/50 eggs · \$/); }); });
+describe('F4 separator', () => { it('" · " with spaces on both sides', () => {
+  expect(orderView({ id: 1, demand: 50, filled: 48, waitedS: 0 }, 0, 748).line).toMatch(/^48\/50 eggs · \$/);
+  expect(orderView({ id: 1, demand: 50, filled: 0, waitedS: 0 }, 48, 748).line).toMatch(/^0\/50 eggs · \$/); // basket does not inflate delivered count
+}); });
 describe('F5 shared coalesced waiting count', () => {
   it('one value for strip and Market, <= 1 change / 2 s, trailing', () => {
     let t = 0; const c = new Coalesce(2000, () => t);
