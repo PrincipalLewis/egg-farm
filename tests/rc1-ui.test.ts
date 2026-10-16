@@ -222,8 +222,10 @@ describe('S2-8 net rate + wages, S2-9 queue-full dot (stubbed data seam)', async
     expect(E.queueFull({ ...initialState(b, 3), farmLevel: 0, customers: Array(6).fill({}) } as any, b)).toBe(true);
   });
   it('the Market sheet only opens from a tap (nav, strip chip or goal)', () => {
-    expect(app.match(/openPanel\('market'\)/g)!.length).toBe(1); // strip chip click handler only
-    expect(app).toMatch(/queueEl\.addEventListener\('click', e => \{ if \(\(e\.target as HTMLElement\)\.closest\('\.chip:not\(\.empty\)'\)\) openPanel\('market'\)/);
+    // S2-9 (main): deliberate chip tap via queueTapOpens — only one openPanel('market') call site in the strip handler.
+    expect(app.match(/openPanel\('market'\)/g)!.length).toBe(1);
+    expect(app).toMatch(/queueTapOpens\(/);
+    expect(app).toMatch(/queueEl\.addEventListener\('click', e => \{ const c = custChip\(e\.target\); const ok = queueTapOpens/);
   });
   it('styles: 11px/700 #3D7F33 rate, #B83B37 negative, 300 ms ±2px shake off under RM; 10px dot + 2px white ring', () => {
     expect(css).toMatch(/\.rate\{font:700 11px\/13px var\(--f-body\);color:#3D7F33/); expect(css).toContain('.rate[data-sign=neg]{color:#B83B37}');
