@@ -451,7 +451,8 @@ html,body{overflow-x:hidden;max-width:100%}
 /* B-1 coop full (art-ux/b1-coop-full-copy.md v1.0): white on #B83B37 = 5.65:1; hint #B83B37 on #FFF6E5 = 5.26:1 */
 .pill.rate .num{font-variant-numeric:tabular-nums}
 .pill.rate.neg .num{color:#B83B37}
+.pill.rate.zero .num{color:#6B5D52}
 .ratechip{display:inline-flex;align-items:center;gap:3px;height:14px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--c-danger,#B83B37);color:#fff;font:700 11px/14px Fredoka,system-ui,sans-serif;white-space:nowrap;vertical-align:1px}
 .ratechip[hidden]{display:none}
-.coophint{position:absolute;left:50%;top:6px;translate:-50% 0;background:#FFF6E5;color:#B83B37;border-radius:10px;padding:3px 8px;font:700 14px Nunito,system-ui,sans-serif;white-space:nowrap;z-index:3;pointer-events:none}
+.coophint{position:absolute;left:50%;top:calc(6% + 30px);translate:-50% 0;background:#FFF6E5;color:#B83B37;border-radius:10px;padding:3px 8px;font:700 14px Nunito,system-ui,sans-serif;white-space:nowrap;z-index:3;pointer-events:none}
 .coophint[hidden]{display:none}

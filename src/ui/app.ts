@@ -476,8 +476,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     setText(meterText, `${fmtCount(coopWhole)} / ${fmtCount(cap)}`);
     setHidden($('#full'), !atCap);
     // B-1: top-bar realized net rate + coop-full chip + one hint (all read the shared selector)
-    { const n = net(), el = $('#rate'), neg = n < 0 || (atCap && n <= 0);
-      setText($('#rateNum'), `${n < 0 ? '−' : '+'}${fmtMoney(Math.abs(Math.round(n)))}/s`); el.classList.toggle('neg', neg);
+    { const n = Math.round(net()), el = $('#rate');
+      setText($('#rateNum'), `${n < 0 ? '−' : n > 0 ? '+' : ''}${fmtMoney(Math.abs(n))}/s`); el.classList.toggle('neg', n < 0); el.classList.toggle('zero', n === 0);
       setHidden($('#rateChip'), !atCap); const ar = rateAria(n, atCap); if (el.getAttribute('aria-label') !== ar) el.setAttribute('aria-label', ar);
       const ht = coopFullHint(s, b), he = $('#coopHint'); setHidden(he, !ht); setText($('#coopHintText'), ht);
       const ha = ht ? COOP_FULL_COPY.hintAria[coopFullHintVariant(s, b)] : ''; if (he.getAttribute('aria-label') !== ha) he.setAttribute('aria-label', ha); }
