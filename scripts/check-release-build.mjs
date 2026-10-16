@@ -15,6 +15,6 @@ if (rc0.length && !(head && (head.startsWith(RC0_TAG_COMMIT) || RC0_TAG_COMMIT.s
 // D3/D4 + AC14g: QA/debug hooks are compiled out of release (same __IOS_FLAG__ flag): no sampler/panel chunk, no hook names.
 const files = readdirSync(`${dir}/assets`);
 const chunks = files.filter(f => /^(frame-sampler|panel)-.*\.js$/.test(f));
-const hooks = ['eggfarmOnb', 'eggfarmQaRecovery', 'eggfarmPerf', 'perf-ov', 'dbgInfo', 'get("debug")', 'get("perf")', 'get("ios")'].filter(h => js.includes(h));
+const hooks = [/\.eggfarm\s*=/.test(js) ? 'window.eggfarm' : '', 'eggfarmOnb', 'eggfarmQaRecovery', 'eggfarmPerf', 'perf-ov', 'dbgInfo', 'get("debug")', 'get("perf")', 'get("ios")'].filter(h => h && (h === 'window.eggfarm' || js.includes(h)));
 if (chunks.length || hooks.length) { console.error(`check-release-build: debug/QA code in release bundle: ${[...chunks, ...hooks].join(', ')}`); process.exit(1); }
 console.log('check-release-build: no ?debug/?perf/?ios/QA hooks ok');
