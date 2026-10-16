@@ -15,6 +15,7 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coa
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { instantSale, saleLine, compact } from './welcome-sale';
+import { netRateCents, rateView, queueFull, QueueDot } from './s2-economy-ui';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
@@ -58,7 +59,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.innerHTML = '';
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
-    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="num" id="coins"></span></div>
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">$0/s</span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
@@ -78,7 +79,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     </div></main>`);
   // S2-5 (art-ux/reviews/session2-ui-triage.md (b)): every nav button = icon + visible label + aria-label.
   const nav = h(`<nav class="actions" aria-label="Main">
-    <button data-nav="market" aria-label="Market"><img src="${A('icon-market.svg')}" alt=""><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
+    <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""><span class="qdot" hidden></span></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
     <button data-nav="upgrades" aria-label="Upgrades"><img src="${A('icon-upgrade.svg')}" alt=""><span class="nav-lbl">Upgrades</span><span class="badge" hidden></span></button>
     <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span><span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
@@ -369,7 +370,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   goalBtn.addEventListener('click', e => { e.stopPropagation(); openGoal(); });
 
   // ---------- Render ----------
-  let coopFxPending = false;
+  let coopFxPending = false, rateAt = -Infinity; const rateEl = $('#rate'), qDot = new QueueDot(), navMarket = nav.querySelector('[data-nav=market]') as HTMLElement, qDotEl = nav.querySelector('.qdot') as HTMLElement;
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
   coopImg.src = A(COOP_SPRITES[lastTier]);
   const upRowHtml = (kind: 'collection' | 'farm') => {
@@ -444,6 +445,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // No "+0": below one whole egg the button reads "Collect" and is aria-disabled (still tappable -> shake + "Empty").
     setText(collectBtn, collectLabel(coopWhole, S.eggsPerTap(s.collectionLevel, b), fmtCount));
     setDisabled(collectBtn, coopWhole < 1);
+    // S2-8 header net rate (<= 1 update/s); first negative tick shakes the line (not under reduced motion)
+    if (now() - rateAt >= 1000) { rateAt = now(); const v = rateView(netRateCents(income.centsPerSec(now()), s, b));
+      setText(rateEl, v.sign === 'neg' ? `▼${v.text}` : v.text); if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
+      if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
+    // S2-9 queue-full dot on the Market tab (the sheet never opens by itself)
+    { const d = qDot.update(queueFull(s, b), open === 'market', now(), rm()); setHidden(qDotEl, !d.show); if (d.pulse) retrigger(qDotEl, 'qdpulse');
+      const al = d.show ? 'Market, queue full' : 'Market'; if (navMarket.getAttribute('aria-label') !== al) navMarket.setAttribute('aria-label', al); }
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));

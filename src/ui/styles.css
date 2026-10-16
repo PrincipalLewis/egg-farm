@@ -467,3 +467,17 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .card .wb-sold{font:400 14px/1.35 var(--f-body);color:#6B5D52;margin-top:-4px}
 /* particle safe area (read by app.ts clampToSafe) */
 :root{--sa-t:env(safe-area-inset-top,0px);--sa-r:env(safe-area-inset-right,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px)}
+/* S2-8: net rate under the money, wage lines */
+.coins-col{display:flex;flex-direction:column;line-height:1;min-width:0}
+.coins-col #coins{line-height:18px}
+.rate{font:700 11px/13px var(--f-body);color:#3D7F33;white-space:nowrap}
+.rate[data-sign=neg]{color:#B83B37}.rate[data-sign=zero]{color:#6B5D52}
+.rate.rshake{animation:rshake 300ms linear 1}@keyframes rshake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.rm .rate.rshake,.reduced-motion .rate.rshake{animation:none}
+.wage{display:flex;align-items:center;gap:4px;font:400 12px/16px var(--f-body);color:#6B5D52}.wage img{width:12px;height:12px}
+/* S2-9: Market tab queue-full dot */
+.nav-ic{position:relative;display:inline-block;width:28px;height:28px}
+.qdot{position:absolute;top:-3px;right:-5px;width:14px;height:14px;box-sizing:border-box;border-radius:50%;background:#B83B37;border:2px solid #fff}
+.qdot[hidden]{display:none}
+.qdot.qdpulse{animation:qdpulse 600ms ease-in-out 1}@keyframes qdpulse{50%{transform:scale(1.12)}}
+.rm .qdot.qdpulse{animation:none}

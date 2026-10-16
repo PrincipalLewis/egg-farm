@@ -147,6 +147,30 @@ sections.fx = async () => {
   ok('FX particles never in the top-left corner (375x667), none left 1 s after the animations', r.bad.length === 0 && r.maxLive > 0 && r.left === 0, JSON.stringify(r));
   await ctx.close();
 };
+// ---------- S2-8 header net rate / wage lines, S2-9 Market queue-full dot ----------
+sections.s289 = async () => {
+  const UI = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true });
+  { const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
+    await page.waitForTimeout(1300);
+    const r = await page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, shook: e.classList.contains('rshake') }; });
+    ok('S2-8 negative net rate: "▼−$0.xx/s", 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$0\.\d\d\/s$/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus \d+ cents per second$/.test(r.aria) && r.shook, JSON.stringify(r));
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-rate-negative-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
+    await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
+    const wl = await page.evaluate(() => [...document.querySelectorAll('#uRow .wk .wage')].map(e => e.textContent));
+    ok('S2-8 wage lines on worker and hire cards', wl.length >= 2 && wl.every(t => /^Wage \$[\d.]+\/s$/.test(t)), JSON.stringify(wl));
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-hire-card-wage-390.png` });
+    await ctx.close(); }
+  { const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 0, customers: Array.from({ length: 6 }, (_, i) => ({ id: 600 + i, demand: 5, filled: 0, waitedS: 0 })), nextCustomerInS: 1e9 }; });
+    await page.waitForTimeout(400);
+    const a = await page.evaluate(() => ({ dot: !document.querySelector('.qdot').hidden, aria: document.querySelector('[data-nav=market]').getAttribute('aria-label'), sheet: !document.querySelector('#p-market').hidden }));
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-9-market-dot-390.png`, clip: { x: 0, y: 0, width: 390, height: 844 } });
+    await page.locator('[data-nav=market]').click(); await page.waitForTimeout(200); await page.locator('.sheet:not([hidden]) .close').click(); await page.waitForTimeout(200);
+    const b2 = await page.evaluate(() => ({ dot: !document.querySelector('.qdot').hidden, aria: document.querySelector('[data-nav=market]').getAttribute('aria-label') }));
+    ok('S2-9 queue full: dot + "Market, queue full", sheet stays closed; dot clears once Market opened', a.dot && a.aria === 'Market, queue full' && !a.sheet && !b2.dot && b2.aria === 'Market', JSON.stringify({ a, b2 }));
+    await ctx.close(); }
+};
 // ---------- PT1-4 / PT1-5 / PT1-6 ----------
 sections.pt1 = async () => {
   { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm

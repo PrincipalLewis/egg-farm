@@ -3,6 +3,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
+import { wagePerSecCents, wageLine } from './s2-economy-ui';
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
@@ -56,7 +57,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
     if (!w) {
       const locked = F < unlockFarm(id, b), cost = hireCostCents(id, b), can = !locked && s.coinsCents >= cost;
-      return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>
+      return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}
         ${locked ? `<div class="hint">Unlocks at Farm L${unlockFarm(id, b)}</div>` : `<button class="btn buy ${can ? 'affordable' : ''}" data-act="hire" data-w="${id}" aria-disabled="${!can}">Hire ${fmtMoney(cost)}</button>`}</div>`;
     }
     const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b); // B5: enabled only <= threshold
@@ -73,7 +74,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     return `<div class="wk ${m}${yawn ? ' yawn' : ''}" data-w="${id}">${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}
-      <button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>Manage</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}</div>`;
+      <button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>Manage</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}</div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */
