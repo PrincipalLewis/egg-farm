@@ -6,7 +6,8 @@ import { readFileSync } from 'node:fs';
 import { parseEconomyCsv, fitM4, farmMaxOf, readEconomyConfig } from '../scripts/sync-economy';
 import { balance as live, validateBalance, type Balance } from '../src/config/balance';
 import { trackMaxLevel, hensCap, eggValueCap, trackPriceCents, trackEggsPerSec } from '../src/config/formulas';
-import { trackLock, trackBuyCost } from '../src/sim/tracks';
+import { trackLock, trackBuyCost, prodEggsPerSec } from '../src/sim/tracks';
+import { m4OfflineEggs } from '../src/sim/offline';
 import { initialState } from '../src/sim/state';
 import { apply } from '../src/sim/actions';
 import { fxArrow } from '../src/ui/tracks-ui';
@@ -42,19 +43,19 @@ describe('L30-13/17 buy gate', () => {
     expect(trackLock(st(39, 42), 'hens', b)).toBe('cap');
     expect(trackBuyCost(st(39, 41), 'hens', b)).toBe(R[41].hens_cost);
   });
-  it('L40: cap F+5; first extra level = row cost + floor(share x current Farm cost)', () => {
+  it('L40: cap F+5; first extra level = floor(share x current Farm cost), replacing the row cost', () => {
     expect(R[40].hens_cap_over_farm).toBe(5); expect(share(40)).toBe(0.15);
     expect(trackBuyCost(st(40, 42), 'hens', b)).toBe(R[42].hens_cost); // within F+3: no surcharge
     expect(trackLock(st(40, 43), 'hens', b)).toBeNull();
-    expect(trackBuyCost(st(40, 43), 'hens', b)).toBe(R[43].hens_cost + Math.floor(share(40) * fc(40)));
-    expect(trackBuyCost(st(40, 0, 43), 'eggValue', b)).toBe(R[43].egg_value_cost + Math.floor(share(40) * fc(40)));
+    expect(trackBuyCost(st(40, 43), 'hens', b)).toBe(Math.floor(share(40) * fc(40)));
+    expect(trackBuyCost(st(40, 0, 43), 'eggValue', b)).toBe(Math.floor(share(40) * fc(40)));
   });
-  it('+2 level costs 10% more surcharge; F+5 locks', () => {
-    expect(trackBuyCost(st(40, 44), 'hens', b)).toBe(R[44].hens_cost + Math.floor(share(40) * fc(40) * cfg.hvExtraSecondLevelMult!));
+  it('+2 level = first extra x (1 + markup); F+5 locks', () => {
+    expect(trackBuyCost(st(40, 44), 'hens', b)).toBe(Math.floor(share(40) * fc(40) * cfg.hvExtraSecondLevelMult!));
     expect(trackLock(st(40, 45), 'hens', b)).toBe('cap');
   });
   it('surcharge follows the CURRENT Farm level', () => {
-    expect(trackBuyCost(st(45, 48), 'hens', b)).toBe(R[48].hens_cost + Math.floor(share(45) * fc(45)));
+    expect(trackBuyCost(st(45, 48), 'hens', b)).toBe(Math.floor(share(45) * fc(45)));
     expect(trackBuyCost(st(46, 48), 'hens', b)).toBe(R[48].hens_cost); // F+3 = 49 now
   });
   it('buying charges the surcharged price', () => {
@@ -72,9 +73,28 @@ describe('L30-16 sync-economy carries per-row caps and hv_extra_cost_farm_share'
     const m2 = fitM4(R.map(r => r.level === 39 ? { ...r, hens_cap_over_farm: 4, hv_extra_cost_farm_share: 0.2 } : r), live, cfg)!;
     expect(m2.hens.capOverFarmByFarm![39]).toBe(4); expect((m2 as any).extraCostFarmShareByFarm[39]).toBe(0.2);
   });
+  it('farm_max_level / hv_extra_second_markup CSV columns win over config when present', () => {
+    const R2 = R.map(r => ({ ...r, farm_max_level: 48, hv_extra_second_markup: 0.2 }) as Record<string, number>);
+    expect(farmMaxOf(R2, cfg)).toBe(48); expect((fitM4(R2, live, cfg) as any).extraSecondLevelMult).toBe(1.2);
+    expect(farmMaxOf(R, cfg)).toBe(cfg.farmMaxLevel); expect((fitM4(R, live, cfg) as any).extraSecondLevelMult).toBe(cfg.hvExtraSecondLevelMult);
+    expect(() => farmMaxOf(R2.map(r => r.level === 3 ? { ...r, farm_max_level: 47 } : r), cfg)).toThrow(/farm_max_level must be constant/);
+  });
   it('fails loudly without hvExtraSecondLevelMult', () => { expect(() => fitM4(R, live, { ...cfg, hvExtraSecondLevelMult: undefined })).toThrow(/hvExtraSecondLevelMult/); });
   it('live CSV (constant caps, no share column) produces the unchanged scalar block', () => {
     expect(live.m4!.hens.capOverFarmByFarm).toBeUndefined(); expect((live.m4 as any).extraCostFarmShareByFarm).toBeUndefined();
+  });
+});
+describe('Hens production from data, never gated by Farm (HoP 23:49)', () => {
+  it('L51-55 (and every level) produce at their own CSV row', () => {
+    for (let H = 0; H <= 55; H++) expect(trackEggsPerSec(H, b)).toBe(R[H].eggs_per_sec);
+    for (const H of [51, 52, 53, 54, 55]) expect(prodEggsPerSec(st(50, H), b)).toBe(R[H].eggs_per_sec);
+    expect(R[55].eggs_per_sec).toBeGreaterThan(R[50].eggs_per_sec);
+  });
+  it('Farm level does not change production or offline at a given Hens level', () => {
+    for (const F of [0, 10, 39, 40, 50]) {
+      expect(prodEggsPerSec(st(F, 53), b)).toBe(R[53].eggs_per_sec);
+      expect(m4OfflineEggs(3600, 53, b)).toBe(Math.floor(Math.min(3600 * R[53].offline_eggs_per_sec, R[53].offline_max_eggs_2h)));
+    }
   });
 });
 describe('L30-18 no near-zero increase in the UI', () => {

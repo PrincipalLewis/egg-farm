@@ -30,7 +30,7 @@ export interface M4Params {
   /** costs[L] = price of L -> L+1 (CSV hens_cost / egg_value_cost, verbatim). */
   /** L30+ (l30plus-spec D2/D4/D8): capOverFarmByFarm[F] = the CSV row's cap (absent = constant capOverFarm, the L0 value);
    *  extraCostFarmShareByFarm[F] = hv_extra_cost_farm_share row (absent = 0). Track max level = costs.length - 1 (CSV rows). */
-  hens: { costs: number[]; capOverFarm: number; capOverFarmByFarm?: number[] };
+  hens: { costs: number[]; capOverFarm: number; capOverFarmByFarm?: number[]; eggsPerSec?: number[] };
   extraCostFarmShareByFarm?: number[];
   /** Multiplier on the 2nd extra level's surcharge (data/economy-config.json hvExtraSecondLevelMult). */
   extraSecondLevelMult?: number;
@@ -110,8 +110,9 @@ export const capOverFarmAt = (t: 'hens' | 'eggValue', F: number, p: EconomyParam
 /** M4A-2: buy cap min(maxLevel, F + *_cap_over_farm). Enforced at purchase only (migrated levels may exceed it, M4A-27/28). */
 export const hensCap = (F: number, p: EconomyParams) => Math.min(trackMaxLevel('hens', p), F + capOverFarmAt('hens', F, p));
 export const eggValueCap = (F: number, p: EconomyParams) => Math.min(trackMaxLevel('eggValue', p), F + capOverFarmAt('eggValue', F, p));
-/** L30-17 (D8): surcharge for a level above the BASE cap (F + capOverFarm, the L0 row: F+3) = floor(share[F] x farmCost(F)),
- *  x extraSecondLevelMult for the 2nd extra level. 0 when share is 0 (below L40) or the level is within the base cap. */
+/** L30-17 (D8, Economy correction 23:49): price of a level above the BASE cap (F + capOverFarm, the L0 row: F+3) =
+ *  floor(share[F] x farmCost(F)) [x extraSecondLevelMult = 1 + hv_extra_second_markup for the 2nd extra level]; it REPLACES
+ *  the row cost. 0 = not an extra level (within F+3, or share 0 below L40). */
 export function trackExtraCost(t: 'hens' | 'eggValue', L: number, F: number, p: EconomyParams): number {
   const k = L + 1 - (F + p.m4![t].capOverFarm); if (k <= 0) return 0;
   const share = p.m4!.extraCostFarmShareByFarm?.[clampL(F, p)] ?? 0; if (!share) return 0;
@@ -129,7 +130,8 @@ export const gradeMult = (V: number, F: number, p: EconomyParams) => best(p.m4!.
 export const balancedMult = (F: number, H: number, V: number, p: EconomyParams) => best(p.m4!.milestones.balanced, Math.min(F, H, V))?.mult ?? 1;
 export const balancedTier = (F: number, H: number, V: number, p: EconomyParams) => p.m4!.milestones.balanced.filter(t => Math.min(F, H, V) >= t.level).length;
 /** M4A-4: in-tab lay rate = CSV eggs_per_sec at H, no milestone multiplier (M1). */
-export const trackEggsPerSec = (H: number, p: EconomyParams) => eggsPerSec(H, p);
+/** Hens production at H = the CSV eggs_per_sec row H, clamped to the Hens track max only (never the Farm max/level). */
+export const trackEggsPerSec = (H: number, p: EconomyParams) => { const r = p.m4?.hens.eggsPerSec; return r ? r[Math.max(0, Math.min(H, r.length - 1))] : eggsPerSec(H, p); };
 /** M4A-4/M4A-8: coop capacity at F x the Hens coop milestone. */
 export const trackCoopCapacity = (F: number, H: number, p: EconomyParams) => Math.floor(coopCapacity(F, p) * hensCoopMult(H, p));
 /** M4A-5: unit price before the Grader, in integer cents, one half-up rounding at the end:

@@ -6,7 +6,7 @@ import { m4On, clampL } from '../config/formulas';
  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
 export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1): number {
   const o = b.offline, t = b.m4!.offline!; if (!isFinite(awayS) || awayS < o.offlineMinSeconds) return 0;
-  const L = clampL(hensLevel, b);
+  const L = Math.max(0, Math.min(hensLevel, t.eggsPerSec.length - 1)); // Hens row, clamped to the data's last row, not the Farm max
   return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * t.eggsPerSec[L], t.maxEggs2h[L]) * mult);
 }
 /** AC11: eggs = floor(min(away,cap) * mult * eggs_per_sec(saved farm L)); <60s or negative => 0. */

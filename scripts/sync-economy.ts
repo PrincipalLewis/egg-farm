@@ -158,7 +158,14 @@ export const M4_COLS = ['hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'eg
 export const isM4Col = (c: string) => (M4_COLS as readonly string[]).includes(c) || /^(tc_|hens_ms\d|egg_grade\d|balanced\d|egg_value_base_step$|egg_value_level_bonus$)/.test(c);
 /** hens_cost / egg_value_cost are floor(base x growth^L) per row; caps, milestone/grade/Balanced/price-term and tc_* are constant.
  *  A CSV with no M4 columns at all produces no m4 block. Only the flag (`enabled`) is kept from balance.json. */
-export const farmMaxOf = (rows: Row[], cfg: EconomyConfig = {}) => Math.min(rows.length - 1, cfg.farmMaxLevel ?? Infinity);
+/** CSV column when present (must be constant), else the economy-config fallback (seamless switch to CSV). */
+const csvOrCfg = (rows: Row[], c: string, fallback: number | undefined) => {
+  if (!(c in rows[0])) return fallback;
+  const v = rows[0][c]; for (const r of rows) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`);
+  return v;
+};
+export const farmMaxOf = (rows: Row[], cfg: EconomyConfig = {}) => Math.min(rows.length - 1, csvOrCfg(rows, 'farm_max_level', cfg.farmMaxLevel) ?? Infinity);
+const secondMultOf = (rows: Row[], cfg: EconomyConfig) => { const mk = csvOrCfg(rows, 'hv_extra_second_markup', undefined); return mk !== undefined ? r4(1 + mk) : cfg.hvExtraSecondLevelMult; };
 export function fitM4(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const farmMax = farmMaxOf(rows, cfg);
   const R = rows, has = (c: string) => c in R[0];
@@ -176,7 +183,7 @@ export function fitM4(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const extra = () => {
     if (!has('hv_extra_cost_farm_share')) return {};
     const xs = R.slice(0, farmMax + 1).map(r => { const v = r.hv_extra_cost_farm_share; if (!(v >= 0 && v <= 1)) throw new Error(`sync-economy: economy.csv L${r.level} hv_extra_cost_farm_share must be in 0..1`); return v; });
-    const m = cfg.hvExtraSecondLevelMult; if (m === undefined || !(m >= 1)) throw new Error('sync-economy: economy-config.hvExtraSecondLevelMult (>= 1) is required with hv_extra_cost_farm_share');
+    const m = secondMultOf(R, cfg); if (m === undefined || !(m >= 1)) throw new Error('sync-economy: hv_extra_second_markup (CSV) or economy-config.hvExtraSecondLevelMult (>= 1) is required with hv_extra_cost_farm_share');
     return { extraCostFarmShareByFarm: xs, extraSecondLevelMult: m };
   };
   const tc: Record<string, number> = {};
@@ -187,7 +194,7 @@ export function fitM4(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
     return out;
   };
   return { enabled: prev.m4?.enabled ?? 0,
-    hens: { ...geo('hens_cost'), ...caps('hens_cap_over_farm') },
+    hens: { ...geo('hens_cost'), ...caps('hens_cap_over_farm'), eggsPerSec: R.map(r => r.eggs_per_sec) }, // HoP 23:49: Hens L0-55 produce at their own row, never gated by Farm
     ...extra(),
     offline: { eggsPerSec: R.map(r => r.offline_eggs_per_sec), maxEggs2h: R.map(r => r.offline_max_eggs_2h) }, // spec v1.14 M4A-4
     eggValue: { ...geo('egg_value_cost'), ...caps('egg_value_cap_over_farm'), baseStep: one('egg_value_base_step'), levelBonus: one('egg_value_level_bonus') },
