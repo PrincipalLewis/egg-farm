@@ -1,5 +1,16 @@
 import type { KV } from '../save/save';
 export const TELEMETRY_KEY = 'eggfarm.telemetry';
+/** M3-AC7: random per-install id under its OWN key (never in the save), so it survives a save reset and the corrupt-save fallback. */
+export const INSTALL_ID_KEY = 'eggfarm.install_id';
+export function installId(kv: KV, rnd: () => string = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`)): string {
+  let id: string | null = null; try { id = kv.getItem(INSTALL_ID_KEY); } catch { /* storage blocked */ }
+  if (!id) { id = rnd(); try { kv.setItem(INSTALL_ID_KEY, id); } catch { /* private mode: id lives for this session */ } }
+  return id;
+}
+/** M3-AC7 retention (proposal §4): these events are kept for the whole playtest and never evicted by the ring;
+ *  only the other (high-rate: tap, customer_*, sell, worker_summary...) events are ring-trimmed to ring_size. */
+export const isPinned = (type: string) => type === 'session_start' || type === 'session_end' || type === 'upgrade' || type.startsWith('onboarding_')
+  || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset';
 export interface TEvent { type: string; ts: number; sessionMs: number; [k: string]: unknown; }
 export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; }
 /**
@@ -16,7 +27,12 @@ export class Telemetry {
     try { const raw = kv.getItem(TELEMETRY_KEY); this.buf = raw ? JSON.parse(raw) : []; if (!Array.isArray(this.buf)) this.buf = []; } catch { this.buf = []; }
     this.trim();
   }
-  private trim() { if (this.buf.length > this.cfg.ring_size) this.buf.splice(0, this.buf.length - this.cfg.ring_size); }
+  /** Evict the oldest NON-pinned events until the trimmable part fits ring_size. Pinned events are never dropped. */
+  private trim() {
+    const cap = this.cfg.ring_size; let free = 0; for (const e of this.buf) if (!isPinned(e.type)) free++;
+    if (free <= cap) return;
+    let drop = free - cap; this.buf = this.buf.filter(e => { if (drop > 0 && !isPinned(e.type)) { drop--; return false; } return true; });
+  }
   track(type: string, data: Record<string, unknown> = {}) {
     if (type !== 'tap') this.closeTapWindow();
     const t = this.now(); this.buf.push({ ...data, type, ts: t, sessionMs: t - this.sessionStart }); this.trim(); this.dirty = true;
@@ -47,11 +63,11 @@ export class Telemetry {
   poll() { if (this.sumWin && this.now() - this.sumWin.start >= (this.cfg.worker_summary_s ?? 60) * 1000) this.closeSumWindow(); if (this.tapWin && this.now() - this.tapWin.start >= this.cfg.tap_batch_ms) this.closeTapWindow(); }
   flush(force = false) {
     if (force) { this.closeTapWindow(); this.closeSumWindow(); } else this.poll();
-    if (!this.dirty) return; this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++;
+    if (!this.dirty) return; try { this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++; } catch { /* AC14c: quota/private mode; keep the buffer in memory */ }
   }
   events(): readonly TEvent[] { return this.buf; }
   exportJSON(): string { this.closeTapWindow(); this.closeSumWindow(); return JSON.stringify({ exportedAt: this.now(), events: this.buf }, null, 2); }
   // Onboarding hooks: wired now, called by the onboarding overlay when it lands.
-  onboardingStep(step: number, name: string) { this.track('onboarding_step', { step, name }); }
+  onboardingStep(step: number, name: string, extra: Record<string, unknown> = {}) { this.track('onboarding_step', { step, name, ...extra }); }
   onboardingSkip(atStep: number) { this.track('onboarding_skip', { atStep }); }
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
-import { initialState, coopCapacity, eggPriceCents, demandRange, farmCost } from '../src/sim/state';
+import { initialState, coopCapacity, eggPriceCents, demandRange, farmCost, eggsPerSec, queueMax } from '../src/sim/state';
 import { step, advance } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import type { SimEvent } from '../src/sim/events';
@@ -11,14 +11,14 @@ describe('fixed 10 Hz tick', () => {
     let a = s0(), acc = 0; for (let i = 0; i < 1000; i++) { const r = advance(a, 33, acc, b); a = r.state; acc = r.accMs; }
     const one = advance(s0(), 33000, 0, b).state; expect(a.coop).toBeCloseTo(one.coop, 6); expect(a.customers).toEqual(one.customers.map((c, i) => ({ ...c, waitedS: a.customers[i].waitedS })));
   });
-  it('AC1 coop grows at eggs_per_sec (1.0 at L0) and caps at capacity', () => {
-    expect(advance(s0(), 5000, 0, b).state.coop).toBeCloseTo(5, 6);
+  it('AC1 coop grows at eggs_per_sec (1.5 at L0 after P3) and caps at capacity', () => {
+    expect(advance(s0(), 5000, 0, b).state.coop).toBeCloseTo(5 * eggsPerSec(0, b), 6);
     expect(advance(s0(), 600_000, 0, b).state.coop).toBe(coopCapacity(0, b));
   });
-  it('AC3 first customer at 10s, queue <= 3, demand within range', () => {
+  it('AC3 first customer at 10s, queue <= queueMax(0), demand within range', () => {
     expect(advance(s0(), 9900, 0, b).state.customers.length).toBe(0);
     expect(advance(s0(), 10000, 0, b).state.customers.length).toBe(1);
-    const s = advance(s0(), 29_000, 0, b).state; expect(s.customers.length).toBeLessThanOrEqual(3);
+    const s = advance(s0(), 29_000, 0, b).state; expect(s.customers.length).toBeLessThanOrEqual(queueMax(0, b));
     const [lo, hi] = demandRange(0, b); for (const c of s.customers) { expect(c.demand).toBeGreaterThanOrEqual(lo); expect(c.demand).toBeLessThanOrEqual(hi); }
   });
   it('customers leave after 30s', () => { const s = step({ ...s0(), customers: [{ id: 1, demand: 5, filled: 0, waitedS: 29.95 }], nextCustomerInS: 99 }, 0.1, b); expect(s.customers).toEqual([]); });

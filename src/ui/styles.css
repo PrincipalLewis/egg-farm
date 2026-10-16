@@ -3,8 +3,8 @@
 @font-face{font-family:"Nunito";font-weight:400;font-display:swap;src:url(/fonts/nunito-latin-400-normal.woff2) format("woff2")}
 @font-face{font-family:"Nunito";font-weight:700;font-display:swap;src:url(/fonts/nunito-latin-700-normal.woff2) format("woff2")}
 :root{
-  --c-yolk:#FFC93C;--c-yolk-dark:#F29E1F;--c-barn:#D9534F;--c-meadow:#6BBF59;--c-sky:#8FD3F4;--c-cream:#FFF6E5;--c-white:#FFFFFF;--c-wood:#A86B3C;
-  --c-text:#3E2C23;--c-muted:#8A7B6E;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
+  --c-yolk:#FFC93C;--c-yolk-dark:#F29E1F;--c-barn:#B83B37;--c-meadow:#6BBF59;--c-sky:#8FD3F4;--c-cream:#FFF6E5;--c-white:#FFFFFF;--c-wood:#A86B3C;
+  --c-text:#3E2C23;--c-muted:#6B5D52;--c-meadow-strong:#3D7F33;--c-wood-text:#8A5528;--c-focus:#2B79A8;--c-slot-outline:#6B5D52;--c-floater:#3E2C23;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
   --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-pill:999px;
   --bw:2px;--shadow:0 4px 0 rgb(62 44 35 / .25);
   --f-display:"Fredoka",system-ui,sans-serif;--f-body:"Nunito",system-ui,sans-serif;
@@ -19,7 +19,7 @@ html,body{margin:0;height:100%;background:var(--c-cream);color:var(--c-text);fon
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 img{user-select:none;-webkit-user-drag:none}
 .num{font-variant-numeric:tabular-nums}
-#app{display:grid;grid-template-rows:var(--hud-h) 1fr var(--nav-h);height:100dvh;min-width:360px;min-height:640px;background:var(--c-cream);
+#app{display:grid;grid-template-rows:var(--hud-h) 1fr var(--nav-h);height:100dvh;min-width:0;min-height:640px;background:var(--c-cream);
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 /* loading */
 .start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s-5);background:var(--c-cream);z-index:50}
@@ -29,11 +29,11 @@ img{user-select:none;-webkit-user-drag:none}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);min-height:48px;min-width:120px;padding:0 var(--s-5);border-radius:var(--r-pill);
   background:var(--c-yolk);border:var(--bw) solid var(--c-outline);box-shadow:var(--shadow);font:700 var(--fs-md) var(--f-display);color:var(--c-text);transition:transform var(--t-fast)}
 .btn:active{transform:translateY(2px) scale(.97);box-shadow:0 2px 0 rgb(62 44 35/.25)}
-.btn:focus-visible,.icon-btn:focus-visible{outline:3px solid var(--c-sky);outline-offset:2px}
+.btn:focus-visible,.icon-btn:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
 .btn.xl{min-height:64px;width:100%;font-size:22px}
-.btn.buy{background:var(--c-meadow);color:#fff;min-width:112px}
+.btn.buy{background:var(--c-meadow-strong);color:#fff;min-width:112px}
 .btn.buy.affordable{animation:glow 1.6s infinite}
-@keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(107 191 89/.35)}}
+@keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(61 127 51/.35)}}
 .btn.secondary{background:var(--c-white);min-height:44px}.btn.danger{background:var(--c-barn);color:#fff;min-height:44px}
 .btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
 .btn.maxed{background:var(--c-gold);pointer-events:none;box-shadow:none}
@@ -50,13 +50,13 @@ img{user-select:none;-webkit-user-drag:none}
 .farm{display:grid;grid-template-rows:auto 1fr auto;padding:var(--s-3);gap:var(--s-3);background:linear-gradient(var(--c-sky) 0 35%,#BFE6A8 35%);overflow:hidden;min-height:0}
 .queue{position:relative;display:flex;gap:var(--s-2);height:72px;align-items:center;border-radius:var(--r-md);outline:2px solid transparent;outline-offset:2px;transition:outline-color var(--t-med)}
 .queue.full{outline-color:var(--c-yolk-dark)}
-.qtag{position:absolute;right:0;top:-6px;font:700 var(--fs-xs) var(--f-display);background:var(--c-yolk-dark);color:var(--c-text);padding:1px 8px;border-radius:var(--r-pill)}
+.qtag{position:absolute;right:8px;top:4px;font:700 var(--fs-xs) var(--f-display);background:var(--c-yolk-dark);color:var(--c-text);padding:1px 8px;border-radius:var(--r-pill)}
 .chip{position:relative;width:64px;height:72px;border-radius:var(--r-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   border:3px solid transparent;background:linear-gradient(var(--c-white),var(--c-white)) padding-box,conic-gradient(var(--c-yolk-dark) calc(var(--p,0)*1turn),var(--c-meadow) 0) border-box;padding:0}
 .queue.five .chip{width:56px;height:64px}
 .chip img.cust{width:40px;height:40px}.queue.five .chip img.cust{width:34px;height:34px}
 .tag{display:flex;align-items:center;gap:2px;font:700 var(--fs-sm) var(--f-display);background:var(--c-white);border-radius:var(--r-pill);padding:0 4px}.tag img{width:16px;height:16px}
-.chip.empty{background:transparent;border:2px dashed var(--c-disabled)}
+.chip.empty{background:transparent;border:2px dashed var(--c-slot-outline)}
 .chip.arrive{animation:arrive var(--t-med) ease-out}@keyframes arrive{from{transform:translateX(60px);opacity:0}}
 .chip.unlock{animation:unlock 300ms var(--ease-pop),flash 600ms 300ms 2}@keyframes unlock{from{transform:scale(0)}}@keyframes flash{50%{border-color:var(--c-meadow)}}
 .ghost{position:absolute;pointer-events:none;display:flex;flex-direction:column;align-items:center;width:64px}
@@ -108,7 +108,7 @@ img{user-select:none;-webkit-user-drag:none}
 .sheet .foot{padding:var(--s-3) var(--s-4) calc(var(--s-3) + env(safe-area-inset-bottom));flex:none}
 .sheet .foot .btn{width:100%;min-height:56px}
 @media (min-width:600px){.sheet{left:50%;right:auto;width:var(--panel-max-w);margin-left:calc(var(--panel-max-w)/-2)}}
-.row{display:grid;grid-template-columns:48px 1fr auto;gap:var(--s-3);align-items:center;padding:var(--s-3);background:var(--c-white);border:var(--bw) solid var(--c-outline);border-radius:var(--r-md);min-height:72px}
+.row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:var(--s-3);align-items:center;padding:var(--s-3);background:var(--c-white);border:var(--bw) solid var(--c-outline);border-radius:var(--r-md);min-height:72px}
 .row .av{width:48px;height:48px;border-radius:50%;padding:3px;background:conic-gradient(var(--c-yolk-dark) calc(var(--p,0)*1turn),var(--c-meadow) 0)}
 .row .av img{width:100%;height:100%;background:var(--c-white);border-radius:50%}
 .row b{display:block;font-size:var(--fs-base)}.row small{color:var(--c-muted);font-size:var(--fs-sm);display:flex;align-items:center;gap:4px}.row small img{width:16px}
@@ -117,18 +117,18 @@ img{user-select:none;-webkit-user-drag:none}
 .tabs{display:flex;background:var(--c-white);border-radius:var(--r-pill);border:var(--bw) solid var(--c-outline);padding:2px;height:44px}
 .tabs button{flex:1;border:0;border-radius:var(--r-pill);background:transparent;display:flex;gap:6px;align-items:center;justify-content:center;font:700 var(--fs-base) var(--f-display)}
 .tabs button img{width:24px}.tabs .active{background:var(--c-yolk)}
-.up{display:grid;grid-template-columns:56px 1fr;gap:var(--s-3);align-items:start;padding:var(--s-4);background:var(--c-white);border:var(--bw) solid var(--c-outline);border-radius:var(--r-md)}
+.up{display:grid;grid-template-columns:56px minmax(0,1fr);gap:var(--s-3);align-items:start;padding:var(--s-4);background:var(--c-white);border:var(--bw) solid var(--c-outline);border-radius:var(--r-md)}
 .up .ic{position:relative;width:56px;height:56px}.up .ic > img{width:56px;height:56px}
 .up .col{display:flex;flex-direction:column;gap:var(--s-2);min-width:0}
 .lv{position:absolute;right:-6px;bottom:-4px;background:var(--c-yolk);font:700 var(--fs-xs) var(--f-display);padding:0 6px;border-radius:var(--r-pill);border:1px solid var(--c-outline)}
 .lv.pop{animation:pulse 300ms var(--ease-pop)}
 .up h3{margin:0;font:700 var(--fs-md) var(--f-display)}
-.fx{margin:0;padding:0;list-style:none;font-size:var(--fs-sm);white-space:nowrap}.fx li{overflow:hidden;text-overflow:ellipsis}.fx .arrow{color:var(--c-meadow);font-weight:700}
-.meta{font-size:var(--fs-xs);color:var(--c-muted)}.tier{font-size:var(--fs-xs);color:var(--c-wood);display:flex;align-items:center;gap:4px}.tier img{width:12px}
+.fx{margin:0;padding:0;list-style:none;font-size:var(--fs-sm);white-space:nowrap}.fx li{overflow:hidden;text-overflow:ellipsis}.fx .arrow{color:var(--c-meadow-strong);font-weight:700}
+.meta{font-size:var(--fs-xs);color:var(--c-muted)}.tier{font-size:var(--fs-xs);color:var(--c-wood-text);display:flex;align-items:center;gap:4px}.tier img{width:12px}
 .up .btn{width:100%}
 @media (min-width:600px){.up .btn{width:160px;align-self:flex-end}.up .hint{align-self:flex-end}}
 .hint{display:flex;align-items:center;gap:var(--s-1);min-height:var(--hint-h);font:700 var(--fs-hint) var(--f-body);color:var(--c-hint)}.hint img{width:14px}
-.hint.coop{color:var(--c-wood)}.hint.long{font-style:italic}.hint .link{border:0;background:none;padding:0;color:var(--c-wood);text-decoration:underline;font:inherit}
+.hint.coop{color:var(--c-wood-text)}.hint.long{font-style:italic}.hint .link{border:0;background:none;padding:0;color:var(--c-wood-text);text-decoration:underline;font:inherit}
 .btn.pulse2{animation:glow 600ms 2}
 /* modals */
 #modal-layer{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:var(--c-scrim)}#modal-layer.open{display:grid}
@@ -140,15 +140,16 @@ img{user-select:none;-webkit-user-drag:none}
 /* fx */
 #fx-layer{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
 .flyer{position:absolute;left:0;top:0;width:24px;height:24px;will-change:transform}
-.floater{position:absolute;font:700 var(--fs-lg) var(--f-display);color:var(--c-yolk-dark);-webkit-text-stroke:2px #fff;paint-order:stroke fill;animation:rise 700ms ease-out forwards;white-space:nowrap}
-.floater.coin{color:var(--c-gold)}
+.floater{position:absolute;font:700 var(--fs-lg) var(--f-display);color:var(--c-floater);-webkit-text-stroke:2px var(--c-yolk);paint-order:stroke fill;animation:rise 700ms ease-out forwards;white-space:nowrap}
+.floater.coin{color:var(--c-floater)}
 @keyframes rise{to{transform:translateY(-40px);opacity:0}}
 .spark{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--c-yolk);animation:spark 500ms ease-out forwards}
 @keyframes spark{to{transform:translate(var(--dx),var(--dy));opacity:0}}
 .riser{position:absolute;width:40px;animation:riser 480ms ease-out forwards}@keyframes riser{to{transform:translateY(-48px);opacity:0}}
-.toast{position:fixed;left:50%;top:calc(var(--hud-h) + 8px);transform:translate(-50%,-80px);background:var(--c-meadow);color:#fff;font:700 var(--fs-base) var(--f-display);
-  padding:6px 16px;border-radius:var(--r-pill);z-index:31;pointer-events:none;transition:transform var(--t-med);white-space:nowrap}
-.toast.show{transform:translate(-50%,0)}
+/* B2: hidden state is fully off-screen (not -80px, which left ~20px of a tall toast visible) and invisible */
+.toast{position:fixed;left:50%;top:calc(var(--hud-h) + 8px);transform:translate(-50%,calc(-100% - var(--hud-h) - 16px));opacity:0;visibility:hidden;background:var(--c-meadow-strong);color:#fff;font:700 var(--fs-base) var(--f-display);
+  padding:6px 16px;border-radius:var(--r-pill);z-index:31;pointer-events:none;transition:transform var(--t-med),opacity var(--t-med),visibility 0s linear var(--t-med);white-space:nowrap;max-width:calc(100vw - 24px)}
+.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform var(--t-med),opacity var(--t-med),visibility 0s}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 /* desktop docked */
 @media (min-width:960px) and (orientation:landscape){
@@ -186,7 +187,7 @@ img{user-select:none;-webkit-user-drag:none}
 .wk.yawn{box-shadow:0 0 0 3px var(--c-yolk-dark,#d99a1e)}
 .wk .yawn-ov{position:absolute;top:6px;right:8px;animation:yawn 6s infinite}
 @keyframes yawn{0%,80%{opacity:0}82%,98%{opacity:1;transform:scaleY(1.08) rotate(4deg)}100%{opacity:0}}
-.btn.manage-all{position:sticky;top:0;z-index:2;width:calc(100% - 24px);margin:0 12px 6px;min-height:44px;border-radius:22px;background:var(--c-meadow,#5a9);color:#fff}
+.btn.manage-all{position:sticky;top:0;z-index:2;width:calc(100% - 24px);margin:0 12px 6px;min-height:44px;border-radius:22px;background:var(--c-meadow-strong);color:#fff}
 .btn.manage-all.glow{box-shadow:0 0 10px var(--c-yolk-dark,#d99a1e)}
 @media (prefers-reduced-motion:reduce){.wk .yawn-ov{animation:none;opacity:1}}
 
@@ -199,16 +200,232 @@ img{user-select:none;-webkit-user-drag:none}
 .rm .ring-progress,.reduced-motion .ring-progress{transition:none}
 @media (prefers-reduced-motion:reduce){.ring-progress{transition:none}}
 .btn.manage-all{justify-content:center}
-.actions .farm-manage-all{flex:0 0 52px;padding:0;margin:4px 0;border-radius:50%;background:var(--c-meadow,#5a9)}
+.actions .farm-manage-all{flex:0 0 52px;padding:0;margin:4px 0;border-radius:50%;background:var(--c-meadow-strong)}
 .actions .farm-manage-all img{width:28px;height:28px}
 .actions .farm-manage-all[hidden]{display:none}
 nav.actions button.btn.farm-manage-all{flex:0 0 44px;width:44px;min-width:0;height:44px;min-height:0;padding:0;align-self:center;margin:0 4px;border-radius:50%;box-shadow:none}
 nav.actions button.btn.farm-manage-all .manage-ico{width:44px;height:44px}
 
 /* desktop docked copy of the Farm View Manage all: same look as the nav button, hidden outside the docked layout */
-.sheet header button.btn.desk-manage-all{display:none;flex:0 0 44px;width:44px;min-width:0;height:44px;min-height:0;padding:0;border-radius:50%;box-shadow:none;background:var(--c-meadow,#5a9)}
+.sheet header button.btn.desk-manage-all{display:none;flex:0 0 44px;width:44px;min-width:0;height:44px;min-height:0;padding:0;border-radius:50%;box-shadow:none;background:var(--c-meadow-strong)}
 .sheet header button.btn.desk-manage-all .manage-ico{width:44px;height:44px}
 .sheet header button.btn.desk-manage-all img{width:28px;height:28px}
 
 /* post-rc1 m-1: every Manage all copy greys out during the shared cooldown exactly like a disabled Manage button; ring + countdown stay */
 .btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
+
+/* M3-AC5 next-goal strip (m3-next-goal-spec §3/§5) */
+:root{--goal-h:40px;--goal-h-lg:44px;--goal-icon:24px;--goal-status-max:72px}
+.goal{display:grid;grid-template-columns:var(--goal-icon) minmax(0,1fr) auto 16px;gap:var(--s-2);align-items:center;width:100%;height:var(--goal-h);padding:0 var(--s-3);
+  border-radius:var(--r-pill);background:var(--c-white);border:2px solid var(--c-outline);box-shadow:var(--shadow);text-align:left}
+.goal[hidden]{display:none}
+.goal:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
+.goal-ic{width:var(--goal-icon);height:var(--goal-icon)}
+.goal-label{font:600 14px var(--f-display);color:var(--c-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.goal-status{font:700 13px var(--f-body);color:var(--c-muted);max-width:var(--goal-status-max);white-space:nowrap;justify-self:end}
+.goal-status.chip{display:inline-grid;place-items:center;height:24px;padding:0 10px;border-radius:var(--r-pill);background:var(--c-meadow-strong);color:#fff;font:600 12px var(--f-display);max-width:none}
+.goal-chev{font-size:16px;color:var(--c-muted);text-align:center}
+.goal[data-state=ready]{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
+@keyframes goalglow{0%,85%,100%{box-shadow:var(--shadow)}92%{box-shadow:var(--shadow),0 0 0 4px rgb(61 127 51/.3)}}
+.goal-status.pop{animation:gpop 240ms var(--ease-pop)}@keyframes gpop{from{transform:scale(0)}}
+.goal-label.xfade{animation:xfade 200ms ease}@keyframes xfade{from{opacity:0}}
+.rm .goal,.rm .goal *{animation:none!important}
+@media (max-width:379px){.goal{grid-template-columns:var(--goal-icon) minmax(0,1fr) auto}.goal-chev{display:none}}
+@media (max-height:699px){.queue{height:64px}}
+.goal-hl{outline:3px solid var(--c-focus);outline-offset:2px;animation:hlpulse 600ms 2}
+.goal-hl.no-anim{animation:none}
+@keyframes hlpulse{50%{box-shadow:0 0 0 6px rgb(43 121 168/.35)}}
+@media (min-width:960px) and (orientation:landscape){
+  .goal{height:var(--goal-h-lg);max-width:560px;margin-inline:auto}.goal-label{font-size:16px}.goal-status{font-size:14px}
+}
+
+/* M3 FTUE coach mark (m3-ftue-spec §1): pointer hand 40px, bob 6px/1 s toward target; up/down SVG variants — never CSS-rotate/mirror */
+img.onb-hand{position:fixed;width:40px;height:40px;background:none;border:0;border-radius:0;animation:handup 1s ease-in-out infinite}
+img.onb-hand.down{animation:handdown 1s ease-in-out infinite}
+@keyframes handup{50%{translate:0 -6px}}@keyframes handdown{50%{translate:0 6px}}
+.rm img.onb-hand,.rm .coach-hand{animation:none}
+.onb-cap{display:flex;flex-direction:column;gap:6px;align-items:center}
+.onb-dots{font-size:8px;letter-spacing:4px;color:var(--c-muted)}
+.onb-ring{outline:0;border:3px solid var(--c-yolk)}
+.coach{position:fixed;z-index:27;max-width:280px;background:var(--c-white);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:var(--s-3);font:16px var(--f-body);color:var(--c-text);
+  display:flex;gap:8px;align-items:center;box-shadow:var(--shadow);width:max-content}
+.coach-hand{width:40px;height:40px;flex:none;animation:handdown 1s ease-in-out infinite}
+.coach.below .coach-hand{animation-name:handup}
+@media (min-width:960px){.coach{max-width:320px}}
+.intro-a{position:fixed;z-index:26;left:12px;right:12px;top:calc(var(--hud-h) + 8px);max-width:480px;margin-inline:auto;display:grid;grid-template-columns:40px minmax(0,1fr) auto 44px;gap:8px;align-items:center;
+  background:var(--c-yolk);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:8px 8px 8px 12px;box-shadow:var(--shadow)}
+.intro-a[hidden]{display:none}.intro-a b{font:600 16px var(--f-display)}.intro-a p{margin:2px 0 0;font-size:14px}
+.btn.small{min-height:44px;min-width:0;padding:0 12px;font-size:14px;background:var(--c-white)}
+/* M3 AC14b save-recovery dialog (art-ux/m3-save-recovery-dialog.md) */
+.recovery-layer{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgb(62 44 35/.55);overflow:auto}
+.recovery-card{box-sizing:border-box;width:min(440px,calc(100vw - 48px));background:#fff;color:#3E2C23;border:3px solid rgb(62 44 35/.8);border-radius:16px;box-shadow:0 4px 0 rgba(62,44,35,.3);padding:24px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:rcPop .2s cubic-bezier(.34,1.56,.64,1)}
+@media (max-width:360px){.recovery-card{width:calc(100vw - 48px)}}
+@media (max-height:479px){.recovery-layer{place-items:start center;padding-top:16px}.recovery-card{max-height:calc(100dvh - 32px);overflow:auto}}
+.recovery-card h2{margin:0;font:700 24px var(--f-display)}.recovery-card p{margin:0;font:16px/1.4 var(--f-body, Nunito, sans-serif)}
+.recovery-card .note{font-size:14px;color:#6B5D52}
+.recovery-card .rc-primary{width:100%;min-height:48px;border-radius:999px;background:#3D7F33;color:#fff;font:600 18px var(--f-display)}
+.rc-link{background:none;border:0;min-height:44px;padding:0 12px;font:14px var(--f-body, Nunito, sans-serif);color:#8A5528;text-decoration:underline;cursor:pointer}
+.recovery-card :focus-visible{outline:3px solid #2B79A8;outline-offset:3px}
+.rc-msg{font-size:14px;color:#6B5D52;min-height:0}
+@keyframes rcPop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.reduced-motion .recovery-card{animation:rcFade .15s ease-out}@keyframes rcFade{from{opacity:0}to{opacity:1}}
+/* SM-9 perf overlay (test hook ?perf=1) */
+.perf-ov{position:fixed;left:4px;bottom:4px;z-index:60;pointer-events:none;white-space:pre;font:11px/1.3 ui-monospace,monospace;background:rgb(0 0 0/.75);color:#fff;padding:4px 6px;border-radius:6px}
+.perf-ov[data-pass=false]{background:#9b1c1c}.perf-ov[data-pass=true]{background:#1f6f2b}
+/* M3 AC14g iOS Home Screen tip */
+.ios-tip{position:fixed;z-index:12;top:calc(var(--hud-h) + var(--s-2) + env(safe-area-inset-top));left:max(var(--s-3),env(safe-area-inset-left));right:max(var(--s-3),env(safe-area-inset-right));box-sizing:border-box;background:#fff;border:3px solid #2B79A8;border-radius:var(--r-md);box-shadow:var(--shadow);padding:12px;display:grid;grid-template-columns:32px 1fr 44px;gap:8px;align-items:start;animation:iosIn var(--t-med) ease-out}
+.ios-tip>img{width:32px;height:32px}.ios-tip b{display:block;font:700 16px/22px var(--f-body);color:#3E2C23}.ios-tip p{margin:0;font:600 14px/20px var(--f-body);color:#6B5D52}
+.ios-tip .share-ic{vertical-align:-2px}.ios-tip .icon-btn{width:44px;height:44px;margin:-6px -6px 0 0}.ios-tip .icon-btn img{width:24px;height:24px}
+@media (min-width:600px){.ios-tip{max-width:480px;left:50%;right:auto;width:calc(100% - 24px);transform:translateX(-50%)}}
+@media (min-width:960px) and (orientation:landscape){.ios-tip{max-width:560px}}
+@keyframes iosIn{from{opacity:0;translate:0 -8px}to{opacity:1;translate:0 0}}
+.reduced-motion .ios-tip{animation:rcFade var(--t-med)}
+.settings-ios{font:14px/1.4 var(--f-body);color:#6B5D52;text-align:center}.settings-ios.ok{color:#3D7F33}
+/* PT1-8 (layout-spec §3.5): the pill visual lives on .tab-pill; on desktop (>=960) each tab button is a >=44x44 hit area,
+   padded 4px past the 36px pill (visual unchanged); buttons are siblings in a flex row, so hit areas never overlap. */
+.tab-pill{display:flex;gap:6px;align-items:center;justify-content:center;width:100%;height:100%;border-radius:var(--r-pill)}
+.tabs .active{background:transparent}.tabs .active .tab-pill{background:var(--c-yolk)}
+@media (min-width:960px){
+  .tabs{overflow:visible}
+  .tabs button{box-sizing:border-box;min-height:44px;min-width:44px;margin-block:-4px;padding:4px 0;align-self:stretch}
+  .tabs button .tab-pill{padding:0 var(--s-3);box-sizing:border-box}
+}
+/* B6: desktop docked: the farm column can't grow past its track (min-content of the queue/yard/Collect label used to
+   push it under the panel), and the Collect bar is centred at the goal chip's 560px width, clear of the panel edge. */
+@media (min-width:960px) and (orientation:landscape){
+  #app{grid-template-columns:minmax(0,1fr) 400px}
+  .farm{min-width:0}
+  .collectbar{box-sizing:border-box;width:100%;max-width:min(560px, calc(100% - 24px));margin-inline:auto}
+}
+
+/* ===== Bug 9 (layout-spec §9), from art-ux/fixes/bug9-375.css ===== */
+/* 1. Guard (belt): never allow sideways page scroll. Root-cause fixes below are still required. */
+html,body{overflow-x:hidden;max-width:100%}
+/* 2. Root cause A: #app min-width:360px forces overflow whenever the usable width < 360
+      (device-toolbar scrollbar steals ~15px, safe-area insets, 320px phones). Let the grid shrink instead. */
+#app{min-width:0;width:100%}
+#app>*{min-width:0}
+/* 3. Root cause B (Market sheet): .row is 48px | 1fr | auto, and the Sell button is min-width:112px + nowrap
+      "Sell 20/87", so the auto column wins and the 1fr text column collapses ("Wants 113 eggs" one word per line). */
+.row{grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);padding:var(--s-2) var(--s-3)}
+.row .av{width:40px;height:40px}
+.row>div{min-width:0}
+.row b{white-space:normal;overflow-wrap:anywhere;line-height:1.2} /* wrap to max 2 lines, never 1 word per line */
+.row .btn{min-width:88px;max-width:42vw;padding:0 var(--s-3);font-size:var(--fs-base)}
+/* 4. Tabs: labels must fit at 360px; floor 13px, then icon-only fallback below 340px. */
+.tabs button{min-width:0;font-size:clamp(13px,3.8vw,16px);gap:4px;white-space:nowrap}
+.tabs button img{width:20px;flex:none}
+@media (max-width:339px){.tabs button{font-size:0}.tabs button img{width:24px}}
+/* 5. Generic flex/grid shrink fixes for the other cut-offs (chip Ready pill, Manage all, HUD). */
+.btn{min-width:0}
+.btn.xl,.btn.buy{min-width:0}
+.goal-status{max-width:none;flex:none}
+.hud .pill{min-width:0}
+.queue{min-width:0;overflow:visible}
+@media (max-width:390px){
+  .farm{padding:var(--s-2);gap:var(--s-2)}
+  .manage-all{font-size:var(--fs-base);white-space:nowrap}
+  .manage-all small,.manage-all .count{display:none} /* keep "Manage all"; count moves to the badge */
+}
+/* Bug 9 root cause (Engineering, measured in a headed 375x600 Chromium window): #app min-height:640px forces a
+   vertical scrollbar, which takes 15px, so the usable width drops to 360 and the #app min-width:360px plus
+   .btn/.pill.coins min-widths push content past it. Drop the min-height too; the grid already fits 100dvh. */
+#app{min-height:0}
+/* Market short order copy at <=390px: "Wants 87/113" / "Wants 113" + egg icon */
+.row .o-short{display:none}.row .o-short img{width:16px;height:16px;vertical-align:-3px}
+@media (max-width:390px){.row .o-long{display:none}.row .o-short{display:inline}}
+/* keep PT1-8 desktop tab hit areas (the Bug 9 patch resets .tabs button min-width) */
+@media (min-width:960px){.tabs button{min-width:44px}}
+/* P1q/P2 order cards + "+N waiting" (art-ux/m3-customer-queue-spec.md v1.0); visibility is set in JS (same 384px rule) */
+.order-list{display:flex;flex-direction:column;gap:var(--s-2)}
+.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md)}
+.order[hidden]{display:none}
+.order>.txt{min-width:0}.order .av{width:40px;height:40px}.order .av img{width:100%;height:100%}
+.order .l1{display:flex;font:800 16px/1.2 var(--f-body);white-space:nowrap;font-variant-numeric:tabular-nums;color:#3E2C23;min-width:0}
+.order .l1 .e{flex:none}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
+.order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
+.order .sell{min-width:88px;max-width:42%;min-height:44px;border-radius:22px;padding:0 var(--s-3)}
+.order.ready{border:3px solid #3D7F33}
+.order.wait .sell{background:#fff;color:#6B5D52;border:2px solid #6B5D52;box-shadow:none}
+.queue-more{align-self:center;min-height:44px;padding:0 16px;border-radius:22px;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0;cursor:pointer}
+.queue-more:focus-visible{outline:2px solid #2B79A8;outline-offset:2px}
+@media (min-width:960px) and (orientation:landscape){#p-market .body{overflow:auto}.order .sell{min-width:112px}}
+.reduced-motion .order .bar>i{transition:none}
+/* farm strip "+N" chip (5th slot) */
+.chip.more{display:grid;place-items:center;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0}
+/* v1.1 §5 anti-churn: fixed heights/widths, transform/opacity-only animations */
+.order{height:60px;min-height:0;contain:layout paint;overflow:hidden}
+.order .sell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.order-list{overflow-anchor:auto}
+.queue-more{min-width:9ch;font-variant-numeric:tabular-nums;transition:none;flex:none}
+#sellAll{min-width:min(100%,280px);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order.enter{animation:orderIn .24s ease-out}@keyframes orderIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.order.leaving{animation:orderOut .24s ease-out forwards;pointer-events:none}@keyframes orderOut{to{opacity:0;transform:scale(.96)}}
+.reduced-motion .order.enter,.reduced-motion .order.leaving{animation:none}
+/* §6 farm row: +1 customer slot */
+.fx li.slot{font:800 14px var(--f-body);color:#3E2C23;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fx li.slot img{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
+.fx li.slot .m{color:#6B5D52;font-weight:700}.fx li.orders{font:700 12px var(--f-body);color:#6B5D52;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* PT1-12 (B6 follow-up): the queue wraps inside the farm column instead of widening it; the Collect bar never exceeds it */
+@media (max-width:959px){.collectbar{max-width:calc(100% - 24px);box-sizing:border-box}}
+.queue{flex-wrap:wrap;max-width:100%;height:auto;min-height:72px}
+@media (max-height:699px){.queue{min-height:64px}}
+/* §5.1/§5.8 (QA 15/16): cards never flex-shrink when a leaving card is still in the list; Sell button width fixed so "Sell 3" -> "Sell" never moves the target */
+.order-list .order{flex:none;box-sizing:border-box}
+.order .btn.sell{width:88px;min-width:88px;padding-inline:0;justify-content:center;font-variant-numeric:tabular-nums}
+.order .btn.sell{max-width:none}
+.order.ready{border-width:2px;box-shadow:inset 0 0 0 1px #3D7F33;border-color:#3D7F33}
+/* PT1-13 (WebKit 375/SE overflow; layout-spec §9, bug9-375.css): single mobile column can never grow past the viewport */
+#app{width:100%;max-width:100vw;box-sizing:border-box}
+.farm{grid-template-columns:minmax(0,1fr)}
+@media not ((min-width:960px) and (orientation:landscape)){#app{grid-template-columns:minmax(0,1fr)}}
+#app>*,.farm,.collectbar,.collectbar>*,.goal,.goal>*,.hud>*,.queue,.row>*,.order>*{min-width:0}
+.goal-label,.goal-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.collectbar{box-sizing:border-box}
+@media (max-width:375px){#collect,.collectbar .btn,.order .sell,.order .btn.sell,.row .btn{min-width:0;max-width:96px}.order .btn.sell{width:80px}#collect{max-width:none}}
+/* PT1-14: greyed Manage all = #5A4C42 on #CFC6BA (4.88:1); focus ring unchanged */
+.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{color:#5A4C42;background:#CFC6BA}
+/* Rotate-to-portrait prompt (art-ux/m3-rotate-portrait-prompt.md §5); shown/hidden in JS from the same media query */
+#rotate-prompt{display:flex;position:fixed;inset:0;z-index:1000;background:#FFF6E5;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);color:#3E2C23}
+#rotate-prompt[hidden]{display:none}
+#rotate-prompt img{width:64px;height:64px;color:#3E2C23;animation:rp-wobble .3s ease-in-out 2}
+#rotate-prompt h2{margin:0;font:700 24px var(--f-display);color:#3E2C23}
+#rotate-prompt p{margin:0;font:600 16px var(--f-body);color:#6B5D52}
+#rotate-prompt:focus{outline:none}
+@keyframes rp-wobble{0%{transform:rotate(-15deg)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){#rotate-prompt img{animation:none}}
+.reduced-motion #rotate-prompt img{animation:none}
+/* Font credits (art-ux/font-credits.md): Nunito 12px #6B5D52, 44px tap row for the licence link */
+.font-credits{font:400 12px/1.4 var(--f-body);color:#6B5D52;margin:8px 0 0}
+/* R2/R4: one paragraph in normal line flow; the link's tap area is 44px tall via vertical padding (inline, so no line break) */
+/* N1 (rc1-pending-d0e4169 review): 44px hit box via padding, cancelled by negative margin so the line box (and paragraph spacing) stays normal */
+.font-credits a{display:inline-block;line-height:16px;padding-block:14px;margin-block:-14px;vertical-align:baseline;color:#6B5D52;text-decoration:underline;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* F1: below the strip the toast fades in place (a slide-up exit would cross the strip and the Queue full badge) */
+.toast.below{transform:translate(-50%,-8px)}.toast.below.show{transform:translate(-50%,0)}
+/* AC14c/AC14d save notice */
+.save-warn{position:fixed;z-index:40;left:12px;right:12px;bottom:calc(var(--nav-h) + 8px);max-width:480px;margin-inline:auto;background:#3E2C23;color:#fff;font:700 14px/1.35 var(--f-body);padding:10px 14px;border-radius:12px;text-align:center;pointer-events:none}
+/* Recovery dialog v1.1: Q export = full-width outlined secondary button below the primary */
+.recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:8px;border-radius:999px;background:#fff;color:#3E2C23;border:2px solid #3E2C23;box-shadow:none;font:600 16px var(--f-display)}
+.recovery-card .rc-link{min-height:44px}
+.onb[hidden]{display:none!important}
+/* R3: the rotate icon always renders at 64px (beat generic img sizing) */
+#rotate-prompt img{width:64px!important;height:64px!important;min-width:64px;flex:none}
+.font-credits{padding-bottom:14px} /* N1: room for the link hit box overhang so it never overlaps Reset save */
+
+/* S2-3a served dwell card (MK-16/19): static, not tappable */
+.chip.served{pointer-events:none;width:64px;height:72px;background:#E3F1DC;border:3px solid #E3F1DC;gap:0;transition:opacity 200ms ease,transform 200ms ease}
+.queue.five .chip.served{width:64px;height:72px}
+.chip.served .cust-wrap{position:relative;line-height:0}.chip.served img.cust{width:30px;height:30px}
+.chip.served .smile{position:absolute;right:-6px;bottom:-2px;width:16px;height:16px}
+.chip.served .thx{font:800 12px/1.1 var(--f-body);color:#3D7F33}
+.chip.served .amt{font:600 14px/1.1 var(--f-display);color:#3E2C23;white-space:nowrap}
+.chip.served.leaving{opacity:0;transform:translateY(-8px)}
+.rm .chip.served,.reduced-motion .chip.served{transition:none}
+/* full-queue "+$X" pop (Art & UX): Yolk with outline, rises 24px over 600 ms; reduced motion = static fade */
+.qpop{position:fixed;z-index:31;pointer-events:none;translate:-50% -50%;font:700 16px var(--f-display);color:var(--c-yolk);
+  -webkit-text-stroke:1.5px #3E2C23;paint-order:stroke fill;text-shadow:0 1px 0 #3E2C23;animation:qpop 600ms ease-out forwards;white-space:nowrap}
+@keyframes qpop{from{transform:translateY(0);opacity:1}70%{opacity:1}to{transform:translateY(-24px);opacity:0}}
+.reduced-motion .qpop,.rm .qpop{animation:qpopRm 600ms linear forwards}@keyframes qpopRm{from{opacity:1}to{opacity:0}}
+.chip.served.squeeze{transition:opacity 120ms linear}.chip.served.squeeze.gone{opacity:0}
+/* Fast Collect taps (session 2): no double-tap-zoom/dblclick delay anywhere in the game, incl. the scene (a div) that also collects */
+#app,.scene,.queue{touch-action:manipulation}

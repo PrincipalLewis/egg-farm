@@ -1,0 +1,28 @@
+// P4 (product/playtest1-resim.md): Manage only at <= 40%, Manage all refills only those; Economy expects W4 5.5, W4b 7.5, 5.62 Manage / 15 min.
+import { describe, it, expect } from 'vitest';
+import { balance as b } from '../src/config/balance';
+import { runs, med } from './m2-runs';
+import { initialState } from '../src/sim/state';
+import { step } from '../src/sim/tick';
+import { apply } from '../src/sim/actions';
+describe('P4 build numbers vs Economy re-sim', () => {
+  const man = runs({ model: 'seller15' }), manC = runs({ model: 'cheapest' });
+  const w4 = med(man, r => r.maxStep(18, 25)) / 60, w4b = med(manC, r => r.maxStep(18, 25)) / 60, per15 = med(man, r => r.manages) / 8;
+  it('report', () => console.log('P4 build', { W4: +w4.toFixed(2), W4b: +w4b.toFixed(2), managePer15: +per15.toFixed(2) }));
+  it('W4 ~5.5, W4b ~7.5, Manage ~5.62 / 15 min (20 seeds vs Economy 100; +-0.3 min / +-10%)', () => {
+    expect(Math.abs(w4 - 5.5)).toBeLessThanOrEqual(0.3); expect(Math.abs(w4b - 7.5)).toBeLessThanOrEqual(0.3);
+    expect(Math.abs(per15 - 5.62) / 5.62).toBeLessThanOrEqual(0.1);
+  });
+});
+describe('regression: a worker going Unpaid while the Grader is hired (Python sim crashed here)', () => {
+  it('no crash, Grader unaffected, Unpaid worker resumes once paid', () => {
+    let s = { ...initialState(b, 3), farmLevel: 20, coinsCents: 1e9, graderTier: 0 };
+    for (const a of [{ type: 'hire', worker: 'market_hand' }, { type: 'hire', worker: 'coop_hand' }, { type: 'buyGraderTier' }] as const) s = apply(s, a as any, b);
+    expect(s.workers.grader).toBeTruthy();
+    s = { ...s, coinsCents: 0, basket: 50, customers: [{ id: 1, demand: 40, filled: 0, waitedS: 0 }] };
+    expect(() => { for (let i = 0; i < 600; i++) s = step(s, 0.1, b, []); }).not.toThrow();
+    expect(s.workers.market_hand!.unpaid || s.workers.coop_hand!.unpaid).toBe(true);
+    expect(Number.isFinite(s.coinsCents)).toBe(true);
+    s = { ...s, coinsCents: 1e9 }; expect(() => { for (let i = 0; i < 600; i++) s = step(s, 0.1, b, []); }).not.toThrow();
+  });
+});

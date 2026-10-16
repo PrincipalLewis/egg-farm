@@ -10,6 +10,8 @@ export interface EconomyParams {
     coopCapacityBase: number; coopCapacityPerLevel: number; eggPriceCentsBase: number; eggPriceCentsPerLevel: number;
     customerIntervalBaseS: number; customerIntervalDecay: number; customerIntervalMinS: number;
     demandLoFactor: number; demandHiFactor: number;
+    /** P3 (PT1-11, Economy's approach): L0 eggs/s from the CSV row; hens stay formula-driven. Absent = formula. */
+    eggsPerSecL0?: number;
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
   offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
@@ -22,7 +24,8 @@ export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerT
 export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
 export const farmCost = (F: number, p: EconomyParams) => Math.floor(p.farm.baseCost * p.farm.costGrowth ** clampL(F, p));
 export const hens = (F: number, p: EconomyParams) => p.farm.hensBase + p.farm.hensPerLevel * clampL(F, p);
-export const eggsPerSec = (F: number, p: EconomyParams) => roundHalfUp(hens(F, p) * p.farm.eggsPerHenPerSec, 4);
+export const eggsPerSec = (F: number, p: EconomyParams) =>
+  clampL(F, p) === 0 && p.farm.eggsPerSecL0 !== undefined ? p.farm.eggsPerSecL0 : roundHalfUp(hens(F, p) * p.farm.eggsPerHenPerSec, 4);
 export const coopCapacity = (F: number, p: EconomyParams) => p.farm.coopCapacityBase + p.farm.coopCapacityPerLevel * clampL(F, p);
 /** Farm part of the egg price in cents (CSV egg_price x 100). */
 export const farmPriceCents = (F: number, p: EconomyParams) => p.farm.eggPriceCentsBase + p.farm.eggPriceCentsPerLevel * clampL(F, p);

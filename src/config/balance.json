@@ -1,5 +1,5 @@
 {
-  "_source": "economy params GENERATED from product/economy.csv by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks",
+  "_source": "economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks",
   "tickHz": 10,
   "save": {
     "autosaveIntervalS": 5
@@ -8,7 +8,8 @@
     "tap_combine_window_ms": 250,
     "max_flying_eggs": 5,
     "queue_full_cue_min_gap_ms": 3000,
-    "egg_flight_ms": 500
+    "egg_flight_ms": 500,
+    "served_dwell_ms": 1500
   },
   "telemetry": {
     "ring_size": 5000,
@@ -17,7 +18,7 @@
     "worker_summary_s": 60
   },
   "workers": {
-    "_note": "M2 Workers v1.1 (product/workers/m2-proposal.md §10) GENERATED from product/economy.csv; wages in $ per Farm level per minute.",
+    "_note": "M2 Workers v1.1 (product/workers/m2-proposal.md §10) GENERATED from data/economy.csv (copied from product/economy.csv); wages in $ per Farm level per minute.",
     "energy": {
       "start_pct": 100,
       "drain_s_per_pct": 9,
@@ -25,7 +26,8 @@
       "yawn_at_pct": 40,
       "manage_cooldown_s": 30,
       "manage_all_min_workers": 3,
-      "unpaid_resume_wage_min": 1
+      "unpaid_resume_wage_min": 1,
+      "manage_prompt_threshold": 0.4
     },
     "market_hand": {
       "unlock_farm": 3,
@@ -97,18 +99,19 @@
     "coopCapacityPerLevel": 50,
     "eggPriceCentsBase": 100,
     "eggPriceCentsPerLevel": 5,
-    "customerIntervalBaseS": 10,
+    "customerIntervalBaseS": 5,
     "customerIntervalDecay": 0.95,
-    "customerIntervalMinS": 3,
+    "customerIntervalMinS": 1.5,
     "demandLoFactor": 0.8,
-    "demandHiFactor": 1.6
+    "demandHiFactor": 1.6,
+    "eggsPerSecL0": 1.5
   },
   "customers": {
     "customer_patience_s": 30,
     "first_customer_s": 10,
-    "queue_max_base": 3,
-    "queue_max_cap": 5,
-    "queue_max_step_levels": 10
+    "queue_max_base": 6,
+    "queue_max_cap": 10,
+    "queue_max_step_levels": 5
   },
   "offline": {
     "offlineCapSeconds": 7200,

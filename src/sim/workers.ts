@@ -16,8 +16,10 @@ export const isOff = (m: WorkerMood | null) => m === 'asleep' || m === 'unpaid';
 export const isYawning = (w: Worker | undefined, b: Balance) => !!w && !w.unpaid && w.energy > 0 && w.energy <= b.workers.energy.yawn_at_pct;
 export const hiredCount = (ws: Workers) => WORKERS.filter(id => ws[id]).length;
 export const showManageAll = (ws: Workers, b: Balance) => hiredCount(ws) >= b.workers.energy.manage_all_min_workers;
-/** Hired workers below 100% ("(n need it)"). Manage all is disabled when this is 0 (ruling 4: no cooldown started). */
-export const needManage = (ws: Workers) => WORKERS.filter(id => ws[id] && ws[id]!.energy < 100);
+/** P4 / B5: Manage is allowed only at energy <= manage_prompt_threshold (0.4 = Yawning). */
+export const canManageWorker = (w: Worker | undefined, b: Balance) => !!w && w.energy <= b.workers.energy.manage_prompt_threshold * 100;
+/** P4: workers Manage all refills / "(n need it)" counts: hired and <= threshold. 0 -> no action, no cooldown (ruling 4). */
+export const needManage = (ws: Workers, b: Balance) => WORKERS.filter(id => canManageWorker(ws[id], b));
 /** 1 minute (x unpaid_resume_wage_min) of a wage-paying worker's wage at Farm F, cents. */
 export const resumeNeedCents = (id: 'market_hand' | 'coop_hand', farm: number, b: Balance) =>
   Math.round(b.workers[id].wage_per_farm_per_min * farm * b.workers.energy.unpaid_resume_wage_min * 100);
@@ -41,3 +43,11 @@ export function hawkerDemandMult(ws: Workers, b: Balance): number {
 /** Full wage for one action interval, cents (rounded). Caller makes the worker Unpaid if coins < this. */
 export const wageCents = (id: 'market_hand' | 'coop_hand', farm: number, intervalS: number, b: Balance) =>
   Math.round(b.workers[id].wage_per_farm_per_min * farm * intervalS / 60 * 100);
+/** S2-8: exact wage for one action interval in cents (economy.csv rate, unrounded). */
+export const wageExactCents = (id: 'market_hand' | 'coop_hand', farm: number, intervalS: number, b: Balance) =>
+  b.workers[id].wage_per_farm_per_min * farm * intervalS / 60 * 100;
+/** S2-8: charge = whole cents of (carried fraction + exact wage); the rest carries to the next action. */
+export function wageCharge(id: 'market_hand' | 'coop_hand', farm: number, intervalS: number, fracCents: number, b: Balance) {
+  const due = (fracCents || 0) + wageExactCents(id, farm, intervalS, b), cents = Math.floor(due + 1e-9);
+  return { cents, frac: Math.max(0, due - cents) };
+}

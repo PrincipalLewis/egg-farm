@@ -1,5 +1,5 @@
 /**
- * MK-15: fit balance.json economy params from product/economy.csv, verify EVERY row/column is reproduced by
+ * MK-15: fit balance.json economy params from data/economy.csv (copied from product/economy.csv), verify EVERY row/column is reproduced by
  * src/config/formulas.ts, then write. Hand-set blocks (tickHz, save, feel, telemetry, offline cap/min) are preserved.
  * Usage: npm run sync-economy [-- --check]
  */
@@ -42,7 +42,7 @@ export function fitParams(rows: Row[], prev: any): EconomyParams {
     maxLevel: n,
     collection: { baseCost: R[0].collection_cost, costGrowth: 0, eggsPerTapBase: tap.base, eggsPerTapPerLevel: tap.per, pricePercentPerLevel: r4(R[1].collection_price_bonus ?? 0) },
     farm: {
-      baseCost: R[0].farm_cost, costGrowth: 0, hensBase: hn.base, hensPerLevel: hn.per, eggsPerHenPerSec: r4(R[0].eggs_per_sec / R[0].hens),
+      baseCost: R[0].farm_cost, costGrowth: 0, hensBase: hn.base, hensPerLevel: hn.per, eggsPerHenPerSec: r4(R[1].eggs_per_sec / R[1].hens),
       coopCapacityBase: cap.base, coopCapacityPerLevel: cap.per,
       eggPriceCentsBase: Math.round(R[0].egg_price * 100), eggPriceCentsPerLevel: Math.round((R[1].egg_price - R[0].egg_price) * 100),
       customerIntervalBaseS: R[0].customer_interval_s, customerIntervalDecay: 0, customerIntervalMinS: Math.min(...R.map(r => r.customer_interval_s)),
@@ -53,8 +53,10 @@ export function fitParams(rows: Row[], prev: any): EconomyParams {
       queue_max_base: R[0].queue_max, queue_max_cap: Math.max(...R.map(r => r.queue_max)),
       queue_max_step_levels: (R.find(r => r.queue_max > R[0].queue_max)?.level ?? n + 1) - 0,
     },
-    offline: { ...prev.offline, offlineRateMultiplier: r4(R[0].offline_eggs_per_sec / R[0].eggs_per_sec) },
+    offline: { ...prev.offline, offlineRateMultiplier: r4(R[1].offline_eggs_per_sec / R[1].eggs_per_sec) },
   };
+  // P3: an L0 eggs/s off the eggs/s = rate x hens line becomes the eggsPerSecL0 param (verified with every other cell).
+  if (Math.abs(R[0].eggs_per_sec - r4(R[0].hens * p.farm.eggsPerHenPerSec)) > 1e-9) p.farm.eggsPerSecL0 = R[0].eggs_per_sec;
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
   p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
   p.farm.costGrowth = fit('farm costGrowth', (R[n].farm_cost / R[0].farm_cost) ** (1 / n), 0.0001, 0.05, v => col('farm_cost')({ ...p, farm: { ...p.farm, costGrowth: v } }));
@@ -100,10 +102,12 @@ export function fitWorkers(rows: Row[], prev: any) {
   for (const r of R) if (r.w4_tier > tiers.length) { if (r.w4_tier !== tiers.length + 1) throw new Error(`sync-economy: w4_tier skips at L${r.level}`); tiers.push({ farm: r.level, mult: r.w4_price_mult }); }
   return {
     ...W,
-    _note: 'M2 Workers v1.1 (product/workers/m2-proposal.md §10) GENERATED from product/economy.csv; wages in $ per Farm level per minute.',
+    _note: 'M2 Workers v1.1 (product/workers/m2-proposal.md §10) GENERATED from data/economy.csv (copied from product/economy.csv); wages in $ per Farm level per minute.',
     energy: { start_pct: one('energy_start_pct'), drain_s_per_pct: one('drain_s_per_pct'), tired_below_pct: one('tired_below_pct'),
       yawn_at_pct: one('yawn_at_pct'), manage_cooldown_s: one('manage_cooldown_s'), manage_all_min_workers: one('manage_all_min_workers'),
-      unpaid_resume_wage_min: one('unpaid_resume_wage_min') },
+      unpaid_resume_wage_min: one('unpaid_resume_wage_min'),
+      // B5 (Product, Oct 15; 0.4 = Yawning): Manage / 'Manage all (N need it)' count a worker only at energy <= this share.
+      ...(has('manage_prompt_threshold') ? { manage_prompt_threshold: one('manage_prompt_threshold') } : {}) },
     market_hand: { ...W.market_hand, unlock_farm: u1, hire_cost: hire('w1_cost', u1), wage_per_farm_per_min: perFarmWage('w1_wage_per_min', u1), every_s: one('w1_every_s'), tired_every_s: one('w1_tired_every_s') },
     coop_hand: { ...W.coop_hand, unlock_farm: u2, hire_cost: hire('w2_cost', u2), wage_per_farm_per_min: perFarmWage('w2_wage_per_min', u2), every_s: one('w2_every_s'), tired_every_s: one('w2_tired_every_s') },
     hawker: { ...W.hawker, unlock_farm: u3, hire_cost: hire('w3_cost', u3), demand_mult: one('w3_demand_mult'), tired_demand_mult: one('w3_tired_demand_mult') },
@@ -124,5 +128,5 @@ export function buildBalance(rows: Row[], prev: any) {
   const workers = fitWorkers(rows, prev); verifyGraderCosts(rows, workers);
   prev = { ...prev, workers };
   const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, ...rest } = prev;
-  return { ...rest, _source: 'economy params GENERATED from product/economy.csv by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks', ...p };
+  return { ...rest, _source: 'economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks', ...p };
 }

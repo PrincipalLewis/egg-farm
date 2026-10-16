@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build",
-    "test": "vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
+    "build": "node scripts/check-economy-copy.mjs && vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist",
+    "test": "node scripts/check-economy-copy.mjs && vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",
     "screenshot": "node scripts/screenshot.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:qa": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build --mode qa --outDir dist-qa",
+    "check-economy-copy": "node scripts/check-economy-copy.mjs"
   },
   "devDependencies": {
     "@fontsource/fredoka": "^5.3.0",

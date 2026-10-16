@@ -143,3 +143,7 @@ Copy this into the issue:
 - Game balance lives in `data/economy.csv`; `src/config/balance.json` is generated from it with `npm run sync-economy`.
 - Add `?debug=1` to the URL for the debug panel.
 - `npm test` runs the unit and pacing tests.
+
+## Credits
+- Fonts: [Fredoka](https://github.com/hafontia/Fredoka-One) © 2016 The Fredoka Project Authors and [Nunito](https://github.com/googlefonts/nunito) © 2014 The Nunito Project Authors, licensed under the [SIL Open Font License 1.1](public/fonts/OFL.txt).
+- Art, icons and UI: original work by Egg Farm Studio.

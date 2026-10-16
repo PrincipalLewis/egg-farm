@@ -6,15 +6,23 @@ export const SFX = {
   workerYawn: 'sfx-worker-yawn',
 } as const;
 export type SfxName = keyof typeof SFX;
+
+/** PT1-3: never block boot on a hung AudioContext.resume / buffer load. */
+export const AUDIO_UNLOCK_MS = 500;
+export const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T | undefined> =>
+  Promise.race([p.then(v => v as T | undefined), new Promise<undefined>(r => setTimeout(r, ms))]);
+
 export class Audio {
   private ctx: AudioContext | null = null; private buffers = new Map<string, AudioBuffer>(); private lastPlay = new Map<string, number>();
   enabled = true;
   constructor(private base: string) {}
-  /** Must be called from a user gesture. */
+  /** Must be called from a user gesture. Returns within ~AUDIO_UNLOCK_MS even if resume hangs (PT1-3). */
   async unlock() {
     const AC = window.AudioContext || (window as any).webkitAudioContext; if (!AC) return;
-    this.ctx ??= new AC(); if (this.ctx.state === 'suspended') await this.ctx.resume().catch(() => {});
-    await Promise.all(Object.values(SFX).map(async f => {
+    this.ctx ??= new AC();
+    if (this.ctx.state === 'suspended') await withTimeout(this.ctx.resume().catch(() => {}), AUDIO_UNLOCK_MS);
+    // Buffer loads continue in the background; missing buffers make play() a no-op.
+    void Promise.all(Object.values(SFX).map(async f => {
       try { const r = await fetch(`${this.base}${f}.mp3`); this.buffers.set(f, await this.ctx!.decodeAudioData(await r.arrayBuffer())); } catch { /* missing sfx is non-fatal */ }
     }));
   }

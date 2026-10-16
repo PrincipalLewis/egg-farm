@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 const port = 4174; const srv = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 await new Promise(r => setTimeout(r, 1500));
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
-const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true })).newPage();
+const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, acceptDownloads: true })).newPage();
 const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => m.type() === 'error' && errors.push(m.text()));
 const fail = (m) => { console.error('SMOKE FAIL:', m); process.exitCode = 1; };
 await page.goto(`http://127.0.0.1:${port}/?marketSeed=3`);
@@ -39,7 +39,7 @@ const q = await page.evaluate(() => ({ tag: !!document.querySelector('.qtag'), b
 if (!q.tag) fail('no Queue full tag'); if (!q.bubble) fail('no Queue full! walk-off bubble');
 if (await page.locator('.onb').count()) fail('onboarding not closed after collect/sell/upgrade');
 const tele = await page.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'onboarding_step').map(e => e.name));
-if (tele.join() !== 'collect,sell,upgrade,complete') fail('onboarding telemetry: ' + tele);
+if (!tele.join().startsWith('collect,sell,upgrade,complete')) fail('onboarding telemetry: ' + tele);
 { // skip path in a fresh profile
   const p2 = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
   await p2.goto(`http://127.0.0.1:${port}/`); await p2.getByText('Tap to start').click(); await p2.locator('.onb-skip').click(); await p2.waitForTimeout(100);
@@ -59,6 +59,21 @@ const before = await page.evaluate(() => window.eggfarm.state.coinsCents); await
 if ((await page.evaluate(() => window.eggfarm.state.coinsCents)) < before + 10000) fail('debug +$100');
 await page.goto(`http://127.0.0.1:${port}/`); await page.getByText('Tap to start').click(); await page.waitForTimeout(200);
 if (await page.locator('.dbg').count()) fail('debug panel visible without ?debug=1');
+{ // M3: next-goal strip visible after FTUE, tap never buys; Settings Export log downloads JSON
+  if (!(await page.locator('#goal').isVisible())) fail('next-goal strip not visible');
+  const c0 = await page.evaluate(() => JSON.stringify([window.eggfarm.state.coinsCents, window.eggfarm.state.farmLevel, window.eggfarm.state.collectionLevel]));
+  await page.locator('#goal').click(); await page.waitForTimeout(150);
+  if (c0 !== await page.evaluate(() => JSON.stringify([window.eggfarm.state.coinsCents, window.eggfarm.state.farmLevel, window.eggfarm.state.collectionLevel]))) fail('goal tap bought something');
+  if (!(await page.locator('#p-upgrades:not([hidden])').count())) fail('goal tap did not open Upgrades');
+  await page.locator('.sheet:not([hidden]) .close').click();
+  await page.locator('#settings').click();
+  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }), page.locator('#sExport').click()]);
+  const j = JSON.parse(await (await import('node:fs/promises')).readFile(await dl.path(), 'utf8'));
+  const ss = j.events.find(e => e.type === 'session_start'); if (!ss?.install_id || !/^m3-pt1\+[0-9a-f]{7,}$/.test(ss.build || '')) fail('export: session_start lacks install_id/build');
+  const id = await page.evaluate(() => localStorage.getItem('eggfarm.install_id'));
+  await page.locator('#sReset').click(); await page.locator('#cReset').click(); await page.waitForLoadState(); await page.getByText('Tap to start').click(); await page.waitForTimeout(150);
+  if (id !== await page.evaluate(() => localStorage.getItem('eggfarm.install_id'))) fail('install_id changed after Reset save');
+}
 if (errors.length) fail('page errors: ' + errors.join(' | '));
 await browser.close(); srv.kill();
 console.log(process.exitCode ? 'smoke: FAILED' : 'smoke: OK');

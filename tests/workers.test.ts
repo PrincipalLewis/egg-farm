@@ -4,7 +4,7 @@ import { initialState, GameState, eggPriceCents } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { applyOffline } from '../src/sim/offline';
-import { migrate } from '../src/save/save';
+import { migrate, SAVE_VERSION } from '../src/save/save';
 import { mood, graderMult, graderTierCostCents, hireCostCents } from '../src/sim/workers';
 import type { SimEvent } from '../src/sim/events';
 const W = b.workers;
@@ -30,7 +30,7 @@ describe('M2 workers (m2-proposal v1.1)', () => {
     expect(ev.filter(e => e.type === 'worker_state').map(e => (e as any).state)).toEqual(['tired', 'asleep']);
   });
   it('Manage refills to 100% with one shared 30 s cooldown', () => {
-    let s = apply(apply(rich(), { type: 'hire', worker: 'hawker' }, b), { type: 'hire', worker: 'grader' }, b); s = run(s, 400);
+    let s = apply(apply(rich(), { type: 'hire', worker: 'hawker' }, b), { type: 'hire', worker: 'grader' }, b); s = run(s, 600); // P4: Manage needs <= 40% (100% - 600 s / 9 s per % = 33%)
     s = apply(s, { type: 'manage', worker: 'hawker' }, b); expect(s.workers.hawker!.energy).toBe(100); expect(s.manageCdS).toBe(W.energy.manage_cooldown_s);
     expect(apply(s, { type: 'manage', worker: 'grader' }, b).workers.grader!.energy).toBeLessThan(100);
     s = run(s, 30); expect(apply(s, { type: 'manage', worker: 'grader' }, b).workers.grader!.energy).toBe(100);
@@ -78,9 +78,9 @@ describe('M2 workers (m2-proposal v1.1)', () => {
     const r = applyOffline({ ...s, workers: { market_hand: { energy: 60, cdS: 0 } } }, 3_600_000, b);
     expect(r.state.workers.market_hand!.energy).toBe(60); expect(r.state.coinsCents).toBe(s.coinsCents);
   });
-  it('save v4 -> v5 migration: no workers, tier 0', () => {
+  it('save v4 -> current migration (v5: no workers, tier 0; v6: no wage fraction)', () => {
     const v4 = { version: 4, savedAt: 1, state: { ...initialState(b), workers: undefined, graderTier: undefined, manageCdS: undefined } };
-    const m = migrate(JSON.parse(JSON.stringify(v4)), b); expect(m.version).toBe(5);
+    const m = migrate(JSON.parse(JSON.stringify(v4)), b); expect(m.version).toBe(SAVE_VERSION); expect(m.state.wageFracCents).toEqual({});
     expect(m.state.workers).toEqual({}); expect(m.state.graderTier).toBe(0); expect(m.state.manageCdS).toBe(0);
   });
 });

@@ -51,3 +51,9 @@ describe('price formula', () => {
     expect(S.eggPriceCents(1, 1, b)).toBe(Math.round((1 + b.farm.eggPriceCentsPerLevel / 100) * (1 + b.collection.pricePercentPerLevel) * 100 + 1e-7));
   });
 });
+import { parseEconomyCsv as pCsv } from '../scripts/sync-economy';
+import { readFileSync as rf } from 'node:fs';
+it('economy.csv parses the same with CRLF (product/economy.csv) and LF (sim output) line endings', () => {
+  const lf = rf(new URL('../data/economy.csv', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  expect(pCsv(lf.replace(/\n/g, '\r\n'))).toEqual(pCsv(lf));
+});
