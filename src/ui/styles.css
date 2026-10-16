@@ -411,3 +411,10 @@ html,body{overflow-x:hidden;max-width:100%}
 /* R3: the rotate icon always renders at 64px (beat generic img sizing) */
 #rotate-prompt img{width:64px!important;height:64px!important;min-width:64px;flex:none}
 .font-credits{padding-bottom:14px} /* N1: room for the link hit box overhang so it never overlaps Reset save */
+/* Single-tab guard notice (art-ux/single-tab-guard/spec.md): game behind frozen + dimmed */
+.tab-guard-frozen #app{filter:saturate(.6)}
+.tab-guard-frozen #app *, .tab-guard-frozen #app *::before, .tab-guard-frozen #app *::after{animation-play-state:paused!important;transition:none!important}
+.recovery-layer.tab-guard{z-index:1000}
+.tab-guard .rc-primary:disabled{opacity:1;cursor:progress}
+@media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
+.reduced-motion .tab-guard .recovery-card{animation:none}

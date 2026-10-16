@@ -5,6 +5,7 @@ import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
+import { showTabGuardDialog } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 
@@ -36,17 +37,14 @@ function saveNotice(text: string) {
   const n = document.createElement('div'); n.className = 'save-warn'; n.setAttribute('role', 'status'); n.textContent = text; document.body.append(n);
 }
 export const NO_STORAGE_TEXT = "Your browser isn't letting us save right now (low space or private mode), so progress won't be saved.";
-export const OTHER_TAB_TEXT = 'Game open in another tab';
-/** Single-tab guard: shown in the older tab. No close button; "Play here" reloads from the latest save and claims it. */
+/** Single-tab guard: this tab lost the save. Sim/saving already stopped (Game.deactivate); freeze render, mute, show notice. */
+let frozen = false;
 function otherTabModal() {
-  if (document.querySelector('.tab-guard')) return;
-  document.getElementById('app')?.setAttribute('inert', '');
-  const m = document.createElement('div'); m.className = 'tab-guard'; m.setAttribute('role', 'alertdialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'tgTitle');
-  m.style.cssText = 'position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:rgba(0,0,0,.55)';
-  m.innerHTML = `<div class="card" style="background:#fff;border-radius:16px;padding:24px;max-width:300px;text-align:center"><h2 id="tgTitle" style="margin:0 0 16px">${OTHER_TAB_TEXT}</h2><button class="btn" id="tgPlay" type="button" style="min-height:48px;min-width:160px">Play here</button></div>`;
-  document.body.append(m);
-  const b = m.querySelector('#tgPlay') as HTMLButtonElement; b.focus();
-  b.onclick = () => { try { sessionStorage.setItem('eggfarm.playHere', '1'); } catch { /* ignore */ } location.reload(); };
+  frozen = true; audio.mute();
+  showTabGuardDialog(f => `${import.meta.env.BASE_URL}assets/${f}`, [root], () => {
+    try { sessionStorage.setItem('eggfarm.playHere', '1'); } catch { /* ignore */ }
+    setTimeout(() => location.reload(), 0); // let "Loading…" paint first
+  });
 }
 async function boot() {
   // Single-tab guard: this (newest) tab claims the save BEFORE reading it, so an older tab's next save is blocked and
@@ -73,7 +71,7 @@ async function boot() {
     if (q.get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
     if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q));
   }
-  function frame() { g.frame(); ui.render(); requestAnimationFrame(frame); }
+  function frame() { if (frozen) return; g.frame(); ui.render(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
   setInterval(() => g.frame(), 1000); // keep sim moving if rAF is paused but timers still fire
   window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });

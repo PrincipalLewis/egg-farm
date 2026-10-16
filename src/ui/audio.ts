@@ -26,6 +26,8 @@ export class Audio {
       try { const r = await fetch(`${this.base}${f}.mp3`); this.buffers.set(f, await this.ctx!.decodeAudioData(await r.arrayBuffer())); } catch { /* missing sfx is non-fatal */ }
     }));
   }
+  /** Single-tab guard: silence everything until reload. */
+  mute() { this.enabled = false; try { void this.ctx?.suspend(); } catch { /* ignore */ } }
   play(name: SfxName, minGapMs = 60) {
     if (!this.enabled || !this.ctx) return; const f = SFX[name], buf = this.buffers.get(f); if (!buf) return;
     const t = performance.now(); if (t - (this.lastPlay.get(f) ?? -1e9) < minGapMs) return; this.lastPlay.set(f, t);
