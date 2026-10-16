@@ -1,6 +1,6 @@
 // P4 (product/playtest1-resim.md): Manage only at <= 40%, Manage all refills only those; Economy expects W4 5.5, W4b 7.5, 5.62 Manage / 15 min.
 import { describe, it, expect } from 'vitest';
-import { balance as b } from '../src/config/balance';
+import { rc1Balance as b } from './rc1-balance'; // rc1 economy (main); this branch's CSV is f1-m4cols
 import { runs, med } from './m2-runs';
 import { initialState } from '../src/sim/state';
 import { step } from '../src/sim/tick';

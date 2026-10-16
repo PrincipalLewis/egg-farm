@@ -53,23 +53,28 @@
       "tiers": [
         {
           "farm": 18,
-          "mult": 1.5
+          "mult": 1.5,
+          "cost": 5538
         },
         {
           "farm": 19,
-          "mult": 2
+          "mult": 2,
+          "cost": 9100
         },
         {
           "farm": 21,
-          "mult": 2.5
+          "mult": 2.5,
+          "cost": 20959
         },
         {
           "farm": 22,
-          "mult": 3
+          "mult": 3,
+          "cost": 28294
         },
         {
           "farm": 24,
-          "mult": 4
+          "mult": 4,
+          "cost": 51567
         }
       ],
       "tier_cost_share_of_farm_cost": 0.5,
@@ -104,7 +109,30 @@
     "customerIntervalMinS": 1.5,
     "demandLoFactor": 0.8,
     "demandHiFactor": 1.6,
-    "eggsPerSecL0": 1.5
+    "eggsPerSecL0": 1.5,
+    "costGrowthSegments": [
+      {
+        "from": 6,
+        "to": 14,
+        "growth": 1.25
+      },
+      {
+        "from": 15,
+        "to": 20,
+        "growth": 1.45
+      }
+    ],
+    "costOverrides": {
+      "18": 11076,
+      "19": 18201,
+      "23": 68756,
+      "24": 72194,
+      "25": 97461,
+      "26": 131573,
+      "27": 177624,
+      "28": 239792,
+      "29": 323719
+    }
   },
   "customers": {
     "customer_patience_s": 30,

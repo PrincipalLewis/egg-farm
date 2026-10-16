@@ -2,7 +2,8 @@
 // and an offline grant hash identically to origin/main 4aadcbf (golden computed there with the same code, 2026-10-16).
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { balance } from '../src/config/balance';
+import { balance as live } from '../src/config/balance';
+import { rc1Balance } from './rc1-balance';
 import { initialState } from '../src/sim/state';
 import { apply } from '../src/sim/actions';
 import { step } from '../src/sim/tick';
@@ -10,8 +11,10 @@ import { applyOffline } from '../src/sim/offline';
 import { runBot } from './bot';
 const GOLDEN_MAIN_4AADCBF = '50a87ddbf89c44751ef33a008541022e146c48c0fed8e16d5114e6d787809de0';
 describe('M4-A flag off = main', () => {
-  it('balance.m4.enabled ships 0', () => { expect(balance.m4!.enabled).toBe(0); });
-  it('sim trace hash equals main', () => {
+  it('balance.m4.enabled ships 0', () => { expect(live.m4!.enabled).toBe(0); });
+  // Code parity: this branch's code with the rc1 economy (main's CSV) and the M4 flag off reproduces main exactly.
+  const balance = { ...rc1Balance, m4: { ...live.m4!, enabled: 0 } };
+  it('sim trace hash equals main (rc1 economy, flag off)', () => {
     const out: unknown[] = [];
 for (const model of ['seller15', 'cheapest']) for (let seed = 1; seed <= 6; seed++) {
   const r = runBot(balance, seed, model as any, 1800); out.push([model, seed, r.firstUpgradeS, Array.from({ length: 31 }, (_, i) => [r.farmAt(i * 60), r.upgradesAt(i * 60)])]);
