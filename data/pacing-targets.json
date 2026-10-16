@@ -1,5 +1,5 @@
 {
-  "_note": "Product pacing targets read by tests/pacing.test.ts. ac7_level_at_30min: decisions.md:47 (HoP 2026-10-16 02:18, F1 re-baseline; replaces 'L18 at 24-36 min'). l18_minutes_sanity: decisions.md:111 (Product 12:42, L18 within +-10% of the F1 time ~19.8 min), non-gating. l10_minutes: product/ac7-qa-threshold-changes.md:7 (HoP 23:15 standard: keep the 8-12 min band, judge at P95 on >=30 seeds; the doc states the P95 seed <= 12 explicitly, the lower bound 8 on the fastest (P05) seed is carried from the band and has no separate written source).",
+  "_note": "Product pacing targets read by tests/pacing.test.ts. ac7_level_at_30min: decisions.md:47 (HoP 2026-10-16 02:18, F1 re-baseline; replaces 'L18 at 24-36 min'). l18_minutes_sanity: decisions.md:111 (Product 12:42, L18 within +-10% of the F1 time ~19.8 min), non-gating. l10_minutes: product/ac7-qa-threshold-changes.md:7 (HoP 23:15 standard: keep the 8-12 min band, judge at P95 on >=30 seeds; the doc states the P95 seed <= 12 explicitly, the lower bound 8 on the fastest (P05) seed is confirmed by Economy's ruling Oct 17 01:14: band 8-12 min, fastest seed >= 8 min guards the fast tail).",
   "ac7_level_at_30min": {
     "min": 18,
     "max": 22,
