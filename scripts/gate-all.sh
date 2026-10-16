@@ -24,6 +24,7 @@ BROWSER_TIMEOUT="${BROWSER_TIMEOUT:-900}"; PORT_BASE="${PORT_BASE:-$((7000 + RAN
 LOG="${GATE_LOG_DIR:-$(mktemp -d /tmp/gate-all.XXXX)}"; mkdir -p "$LOG"
 export SHOTS="${SHOTS:-$LOG/screenshots}"
 BROWSER_TEST_LOCK="${BROWSER_TEST_LOCK:-/workspace/egg-farm-studio/.browser-test.lock}"
+mkdir -p "$(dirname "$BROWSER_TEST_LOCK")"
 VITEST_WORKERS="${VITEST_WORKERS:-2}"
 read -r -a VPOOL <<< "${VITEST_POOL_ARGS:---poolOptions.forks.maxForks=$VITEST_WORKERS --poolOptions.forks.minForks=1}"
 declare -a RES; FAIL=0; FLAKY=0
@@ -51,7 +52,8 @@ brun() { local name="$1"; shift; local t0=$SECONDS
   local wait=""
   if "$@" >"$LOG/$name.log" 2>&1; then wait=$(grep -oE "lock-wait-s [0-9.]+" "$LOG/$name.log" 2>/dev/null | head -1 | cut -d' ' -f2); RES+=("PASS  $name ($((SECONDS-t0))s, lock wait ${wait:-?}s)")
   elif [[ -n "$RETRY" ]] && mv "$LOG/$name.log" "$LOG/$name.try1.log" && "$@" >"$LOG/$name.log" 2>&1; then
-    RES+=("FLAKY $name (failed 1/2, passed on retry; log kept: $LOG/$name.try1.log)"); FLAKY=1
+    wait=$(grep -oE "lock-wait-s [0-9.]+" "$LOG/$name.log" 2>/dev/null | head -1 | cut -d' ' -f2)
+    RES+=("FLAKY $name ($((SECONDS-t0))s, lock wait ${wait:-?}s; failed 1/2, passed on retry; log kept: $LOG/$name.try1.log)"); FLAKY=1
   else RES+=("FAIL  $name ($((SECONDS-t0))s${RETRY:+, also failed retry})  -> $LOG/$name.log"); FAIL=1; fi
   stop_if_failed; }
 
