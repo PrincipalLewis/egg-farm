@@ -7,4 +7,4 @@ reference sim in `vendor/economy-sim/` (pins in `vendor/economy-sim/SHA256SUMS`)
 `/workspace/product`, so an edit there cannot turn main red.
 
 Economy updates the copy through a PR, together with the CSV: replace the vendored files,
-update `SHA256SUMS`, and regenerate `data/economy.csv` in the same PR (`npm run sync-economy -- --check` must pass).
+update `SHA256SUMS` and `SOURCE` (source path, full sha256, vendoring date), and regenerate `data/economy.csv` in the same PR (`npm run sync-economy -- --check` must pass).

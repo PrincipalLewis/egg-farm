@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, mkdtempSync } from 'node:fs';
+import { readFileSync, mkdtempSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -44,6 +44,22 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
   it('vendored reference sim matches its sha256 pins', () => {
     expect(pins.map(([, f]) => f).sort()).toEqual(['economy.f1-m4cols.csv', 'sim/economy_sim.py']);
     for (const [h, f] of pins) expect([f, createHash('sha256').update(readFileSync(new URL(f, vdir))).digest('hex')]).toEqual([f, h]);
+  });
+  const srcLines = readFileSync(new URL('SOURCE', vdir), 'utf8').split('\n').filter(l => l.trim() && !l.startsWith('#'));
+  const srcDate = srcLines.find(l => l.startsWith('vendored:'))?.slice(9).trim();
+  const src = srcLines.filter(l => !l.startsWith('vendored:')).map(l => l.trim().split(/\s+/));
+  it('vendored SOURCE provenance equals the SHA256SUMS pins (unmodified copies)', () => {
+    expect(srcDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    for (const [h, f, from] of src) console.info(`economy-sim vendored ${f} from ${from} sha256 ${h} on ${srcDate}`);
+    expect(src.map(([h, f]) => [f, h]).sort()).toEqual(pins.map(([h, f]) => [f, h]).sort());
+    // Advisory only, never fails: warn if a local live copy has drifted from the vendored one.
+    for (const [h, , from] of src) {
+      const live = new URL(`../../${from}`, import.meta.url);
+      if (existsSync(live)) {
+        const lh = createHash('sha256').update(readFileSync(live)).digest('hex');
+        if (lh !== h) console.warn(`economy-sim: local ${from} sha256 ${lh} differs from vendored ${h} (advisory; Economy updates vendor/economy-sim via PR)`);
+      }
+    }
   });
   it('fixture is fresh vs the vendored reference sim', () => {
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');
