@@ -49,7 +49,8 @@ export class IdbMirror {
       return new Promise(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) this.failed = true; res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
     } catch { this.failed = true; return Promise.resolve(); }
   }
-  /** ADR M4-10/11 interim: best-effort write-once of the v6 backup (add() never overwrites an existing key). Never throws. */
+  /** M4A-31(a)/(f)1: write-once of the v6 backup (add() never overwrites an existing key). Resolves true when the key
+   *  holds a backup after the transaction (written or already there), false on any failure (the caller aborts). Never throws. */
   writeV6Backup(raw: string): Promise<boolean> {
     try {
       const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE);
@@ -59,7 +60,7 @@ export class IdbMirror {
   }
   /** Reset save: remove the mirror copy (resolves once committed or failed). */
   clear(): Promise<void> {
-    try { const t = this.tx('readwrite'); t.objectStore(IDB_STORE).delete(IDB_KEY); return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
+    try { const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); os.delete(IDB_KEY); os.delete(IDB_V6_BACKUP_KEY); /* review m4 */ return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
     catch { return Promise.resolve(); }
   }
 }

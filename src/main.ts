@@ -1,7 +1,7 @@
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
-import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
+import { newerStoredVersion, storageBlockedRecovery, serialize, pendingTracksBackup, writeV6Backup, V6_BACKUP_KEY } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile } from './save/idb-mirror';
@@ -84,7 +84,19 @@ async function boot() {
   let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
   if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
-  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw);
+  // M4A-31(a)/(f)1 interim track migration: AFTER the newer-save checks and the lease claim (review m1), write the v6
+  // backup to localStorage first, then IndexedDB (the stored localStorage bytes, review m2). Game aborts the migration
+  // unless both hold it. This is the one await between the claim and new Game, so ownership and newer saves are re-checked.
+  let idbV6Backup: 'ok' | 'failed' | undefined;
+  { let pend: string | null = null; try { pend = pendingTracksBackup(localStorage, balance); } catch { /* blocked: Game reports it */ }
+    if (pend !== null && mirror) {
+      let stored: string | null = null; try { if (writeV6Backup(localStorage, pend) !== 'failed') stored = localStorage.getItem(V6_BACKUP_KEY); } catch { /* blocked */ }
+      idbV6Backup = stored !== null && await mirror.writeV6Backup(stored) ? 'ok' : 'failed';
+      let nv: number | null = null; try { nv = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
+      if (nv !== null || mirror.newer != null) { lease.release(); lease.stop(); refuseNewer(nv ?? mirror.newer!, idbRaw); return; }
+      if (!lease.owns()) { otherTabModal(); return; }
+    } }
+  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw, { idbV6Backup });
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
@@ -103,14 +115,14 @@ async function boot() {
   (window as any).eggfarmExportTelemetry = () => g.telemetry.snapshotJSON();
   if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
-  const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
+  const ui = mountApp(root, g, g.balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   // CEO ruling: debug globals stay out of release. ui.rates() remains on the mountApp() return for m3/rc1-ui.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmUi = ui; // dev/QA builds only (__IOS_FLAG__), checked by check-release-build
   // D3/D4 (rc1): ?debug=1 cheat panel and ?perf=1 SM-9 sampler exist only in QA/dev builds. Same build-time flag as the
   // eggfarmOnb/eggfarmQaRecovery hooks (__IOS_FLAG__ = mode !== 'production'): release dead-code-eliminates both chunks.
   if (IOS_FLAG_ENABLED) {
     const q = new URLSearchParams(location.search);
-    if (q.get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
+    if (q.get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, g.balance));
     if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q));
   }
   // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).

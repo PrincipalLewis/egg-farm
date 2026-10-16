@@ -7,11 +7,18 @@ export const SAVE_VERSION = 6;
 export interface SaveFile { version: number; savedAt: number; state: GameState;
   /** Set by validate() when this load ran the interim track migration (M4 on, no tracksV7 marker): the stored raw
    *  bytes before the in-place change, for the one-time v6 backup (Game writes V6_BACKUP_KEY before its first save). */
-  preTracksRaw?: string; }
+  preTracksRaw?: string;
+  /** Set by migrate() when the interim track migration ran on this load. */
+  tracksMigrated?: true; }
 /** M4A-27..31 interim (ADR M4-8): the pre-migration save bytes, written once, never overwritten. */
 export const V6_BACKUP_KEY = 'eggfarm.save.v6_backup';
 /** Write the one-time v6 backup: only when the key is empty (exactly once), before the migrated state is saved.
  *  Returns 'written' | 'kept' (already there) | 'failed' (storage threw; the caller keeps the save untouched). */
+/** Boot helper: the raw main bytes that the interim track migration will back up on this load, or null. */
+export function pendingTracksBackup(kv: Pick<KV, 'getItem'>, b: Balance): string | null {
+  const raw = kv.getItem(SAVE_KEY); if (!raw) return null;
+  const v = validate(raw, b); return v.ok && v.file.preTracksRaw ? v.file.preTracksRaw : null;
+}
 export function writeV6Backup(kv: KV, raw: string): 'written' | 'kept' | 'failed' {
   if (kv.getItem(V6_BACKUP_KEY) !== null) return 'kept';
   try { kv.setItem(V6_BACKUP_KEY, raw); return kv.getItem(V6_BACKUP_KEY) === raw ? 'written' : 'failed'; } catch { return 'failed'; }
@@ -50,11 +57,11 @@ export function migrate(d: any, b: Balance): SaveFile {
   // H = F, lowest V with price >= v6, milestones seeded silently. SAVE_VERSION stays 6 so main can still read the save.
   const tracks = m4On(b) && !state.tracksV7;
   if (tracks) state = { ...migrateTracksV7(state, b).state, tracksV7: 1 };
-  return { version: d.version, savedAt: d.savedAt, state, ...(tracks ? { preTracksRaw: '' } : {}) };
+  return { version: d.version, savedAt: d.savedAt, state, ...(tracks ? { tracksMigrated: true as const } : {}) };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
 /** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
-export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak'] as const; // QA BUG-4: .bak too, so reset progress can't come back
+export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak', 'eggfarm.save.v6_backup'] as const; // review m4: Reset clears the v6 backup too (V6_BACKUP_KEY) // QA BUG-4: .bak too, so reset progress can't come back
 export const UI_KEY = 'eggfarm.ui';
 /** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
 export function keepPrefsOnly(f: any): Record<string, unknown> {
@@ -130,7 +137,7 @@ export function validate(raw: string, b: Balance, now = 0): { ok: true; file: Sa
   if (typeof d.state !== 'object' || Array.isArray(d.state)) return { ok: false, reason: 'wrong_type' };
   if (d.sum !== undefined && d.sum !== checksum(JSON.stringify(d.state))) return { ok: false, reason: 'checksum' };
   let f: SaveFile; try { f = migrate(d, b); } catch { return { ok: false, reason: 'version' }; }
-  if (f.preTracksRaw !== undefined) f.preTracksRaw = raw;
+  if (f.tracksMigrated) f.preTracksRaw = raw; // n1: only validate() knows the raw bytes; migrate() just flags it
   const s: any = f.state;
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
   if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };
