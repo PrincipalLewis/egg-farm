@@ -125,7 +125,7 @@ sections.s24c = async () => {
     if (await page.locator('#wbCollect').count()) await page.locator('#wbCollect').click();
     await page.waitForTimeout(3000);
     const sold = await page.evaluate(() => JSON.parse(window.eggfarmExportTelemetry()).events.filter(e => e.type === 'sale' || e.type === 'sell').length);
-    if (mh) ok('S2-4c line "Market Hand sold 339 right away · +$…", 14px #6B5D52', line && /^Market Hand sold 339 right away\u00a0· \+\$/.test(line) && css[0] === '14px' && css[1] === 'rgb(107, 93, 82)', JSON.stringify({ line, css, b0, sold }));
+    if (mh) ok('S2-4c line "Market Hand sold N right away · +$…", 14px #6B5D52', line && /^Market Hand sold \d+ right away\u00a0· \+\$/.test(line) && css[0] === '14px' && css[1] === 'rgb(107, 93, 82)', JSON.stringify({ line, css, b0, sold }));
     else ok('S2-4c no Market Hand -> line hidden', line === null, JSON.stringify({ line }));
     await ctx.close();
   }

@@ -546,6 +546,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-9 queue-full dot on the Market tab (the sheet never opens by itself)
     { const d = qDot.update(queueFull(s, b), open === 'market', now(), rm()); setHidden(qDotEl, !d.show); if (d.pulse) retrigger(qDotEl, 'qdpulse');
       const al = d.show ? 'Market, queue full' : 'Market'; if (navMarket.getAttribute('aria-label') !== al) navMarket.setAttribute('aria-label', al); }
+    { const qf = queueFull(s, b) ? 'true' : 'false'; if (navMarket.dataset.queueFull !== qf) navMarket.dataset.queueFull = qf; } // S2-9 badge hook
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
