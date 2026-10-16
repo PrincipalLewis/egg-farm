@@ -1,17 +1,17 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
-// Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit (default chromium; CLI wins). HEADED=1.
-import { chromium, webkit } from 'playwright-core';
+// Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
+import { chromium, webkit, firefox } from 'playwright-core';
 import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync } from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
-if (!['chromium', 'webkit'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
+if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
 const port = 4181; const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
 await new Promise(r => setTimeout(r, 1500));
 const SHOTS = '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
-const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
+const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
 const results = []; const ok = (name, pass, info = '') => { results.push({ name, pass: !!pass, info }); if (!pass) process.exitCode = 1; };
 const URL0 = `http://127.0.0.1:${port}/`;
 const fx = f => readFileSync(new URL(`../tests/fixtures/saves/${f}`, import.meta.url), 'utf8');
