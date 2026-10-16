@@ -175,6 +175,31 @@ sections.bug9 = async () => {
   }
 };
 
+// ---------- S2-4a / S2-4b (playtest session 2) ----------
+sections.s2money = async () => {
+  const { ctx, page, errors } = await open({ w: 375, h: 700, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+  const setL11 = c => page.evaluate(c => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 11, collectionLevel: 9, coinsCents: c, basket: 3000, coop: 0, nextCustomerInS: 0.3,
+    workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 }, hawker: { energy: 100, cdS: 0 } } }; g.save(); }, c);
+  await setL11(100); await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(200);
+  // greyed tap: freeze the economy for the tap (no workers), compare state + save before/after
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: {}, customers: [], nextCustomerInS: 999, coinsCents: 100 }; g.save(); });
+  await page.waitForTimeout(100);
+  const pre = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, dis: document.querySelector('#uRow .btn.buy').getAttribute('aria-disabled'), sv: localStorage.getItem('eggfarm.save') }));
+  await page.locator('#uRow .btn.buy').click({ force: true, timeout: 5000 }); await page.waitForTimeout(300);
+  const post = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, hdr: document.querySelector('#coins').textContent, sv: localStorage.getItem('eggfarm.save') }));
+  ok('S2-4a greyed Farm L12 tap: money, level, header and save unchanged', pre.dis === 'true' && post.c === pre.c && post.F === 11 && post.hdr === '$1.00' && JSON.parse(post.sv).state.coinsCents === JSON.parse(pre.sv).state.coinsCents, JSON.stringify({ pre: { c: pre.c, dis: pre.dis }, post: { c: post.c, F: post.F, hdr: post.hdr } }));
+  // live sheet with rAF stalled (occluded / throttled window)
+  await setL11(131_800); await page.waitForTimeout(200);
+  await page.evaluate(() => { window.requestAnimationFrame = () => 0; });
+  const a = await page.evaluate(() => ({ hdr: document.querySelector('#coins').textContent, hint: document.querySelector('#uRow .hint')?.textContent ?? '' }));
+  await page.waitForTimeout(4000);
+  const z = await page.evaluate(() => { const s = window.eggfarm.state; const d = s.coinsCents / 100; return { hdr: document.querySelector('#coins').textContent, want: '$' + d.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), hint: document.querySelector('#uRow .hint')?.textContent ?? '' }; });
+  const num = t => +t.replace(/[$,]/g, '');
+  ok('S2-4b header + sheet live with rAF stalled (within one tick of state)', z.hdr !== a.hdr && Math.abs(num(z.hdr) - num(z.want)) < 50 && z.hint !== a.hint, JSON.stringify({ a, z }));
+  ok('S2-4 no page errors', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
