@@ -68,7 +68,7 @@ describe('PickHysteresis rule', () => {
     const p = start({ FARM: { cost: 500, pb: 100, lv: 1 }, HENS: { cost: 100, pb: 105, lv: 1 }, VALUE: undefined });
     expect(p.tick(S(1000), on, t)!.key).toBe('FARM'); clock(100);
     expect(p.tick(S(400), on, t)).toMatchObject({ key: 'HENS', affordable: true });
-    clock(100); expect(p.tick(S(50), on, t)).toMatchObject({ key: 'VALUE', affordable: false }); // none affordable: best overall // none affordable: best overall
+    clock(100); expect(p.tick(S(50), on, t)).toMatchObject({ key: 'FARM', affordable: false }); // none affordable: best overall
   });
   it('6. with no state change the 5 s re-check runs once', () => {
     const p = start({ FARM: { cost: 100, pb: 100, lv: 1 }, HENS: undefined, VALUE: undefined });
