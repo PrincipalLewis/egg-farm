@@ -8,7 +8,7 @@ import * as S from '../src/sim/state';
 import { tableRow } from '../src/config/formulas';
 import { offlineEggs } from '../src/sim/offline';
 import { parseEconomyCsv } from '../scripts/sync-economy';
-const csvText = readFileSync(new URL('../../product/economy.csv', import.meta.url), 'utf8');
+const csvText = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
 const data = parseEconomyCsv(csvText);
 const fx = JSON.parse(readFileSync(new URL('./fixtures/economy_sim.json', import.meta.url), 'utf8'));
 describe('AC6 every economy.csv cell reproduced from config formulas', () => {
