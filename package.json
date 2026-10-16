@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/check-economy-copy.mjs && vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist",
+    "build:html": "node scripts/check-economy-copy.mjs && vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && node scripts/build-html.mjs dist-html && node scripts/check-release-build.mjs dist-html/egg-farm.html",
     "test": "node scripts/check-economy-copy.mjs && vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",

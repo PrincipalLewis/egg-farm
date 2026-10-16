@@ -1,18 +1,30 @@
 // Release gate. Usage: node scripts/check-release-build.mjs <dist-dir | single-file-release.html> [--build-id <id>]
 // - build id must not carry "+dirty" (built from uncommitted changes) or "+unknown". Run after `vite build` / build:html.
 // - single-file .html: the one embedded build id must equal --build-id / EXPECT_BUILD_ID, else <BUILD_PREFIX>+<HEAD short>.
-import { readdirSync, readFileSync, statSync } from 'node:fs'; import { execSync } from 'node:child_process';
-import { ALLOWED_GLOBALS, findGlobalWrites, findExternalRefs, findBuildIds } from './release-scan.mjs';
-const args = process.argv.slice(2); const bi = args.indexOf('--build-id');
-const expectId = bi >= 0 ? args.splice(bi, 2)[1] : process.env.EXPECT_BUILD_ID;
-const target = args[0] || 'dist';
+import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs'; import { execSync } from 'node:child_process';
+import { ALLOWED_GLOBALS, findGlobalWrites, findExternalRefs, findBuildIds, extractScripts } from './release-scan.mjs';
+const fail = msg => { console.error(`check-release-build: ${msg}`); process.exit(1); };
+const args = process.argv.slice(2); let expectId = process.env.EXPECT_BUILD_ID; const rest = [];
+for (let i = 0; i < args.length; i++) {
+  const a = args[i];
+  if (a === '--build-id') { const v = args[++i]; if (!v || v.startsWith('--')) fail('--build-id needs a value (--build-id <id> or --build-id=<id>)'); expectId = v; }
+  else if (a.startsWith('--build-id=')) { expectId = a.slice(11); if (!expectId) fail('--build-id= needs a value'); }
+  else if (a.startsWith('--')) fail(`unknown option ${a}`);
+  else rest.push(a);
+}
+const target = rest[0] || 'dist';
+if (!existsSync(target)) fail(`${target} does not exist`);
 const single = statSync(target).isFile();
 const dir = target;
-const fail = msg => { console.error(`check-release-build: ${msg}`); process.exit(1); };
-const html = single ? readFileSync(target, 'utf8') : (() => { try { return readFileSync(`${dir}/index.html`, 'utf8'); } catch { return ''; } })();
+if (!single && !existsSync(`${dir}/index.html`)) fail(`${dir}/index.html missing - not a release build dir`);
+const html = readFileSync(single ? target : `${dir}/index.html`, 'utf8');
+const walk = d => readdirSync(d, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`]);
+const all = single ? [] : walk(dir);
 const files = single ? [] : readdirSync(`${dir}/assets`);
-// single file: JS = inline <script> bodies (inlined CSS may legitimately name classes like perf-ov)
-const js = single ? [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m => m[1]).join('\n') : files.filter(f => f.endsWith('.js')).map(f => readFileSync(`${dir}/assets/${f}`, 'utf8')).join('\n');
+// single file: JS = inline <script> bodies (inlined CSS may legitimately name classes like perf-ov); fails closed on ambiguous markup.
+const js = single ? (() => { try { return extractScripts(html).join('\n'); } catch (e) { fail(e.message); } })() : files.filter(f => f.endsWith('.js')).map(f => readFileSync(`${dir}/assets/${f}`, 'utf8')).join('\n');
+const css = single ? '' : all.filter(f => f.endsWith('.css')).map(f => readFileSync(f, 'utf8')).join('\n');
+const maps = all.filter(f => f.endsWith('.map'));
 if (single) console.log(`check-release-build: single-file ${target} (${html.length} bytes)`);
 const head = process.env.HEAD_COMMIT ?? (() => { try { return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim(); } catch { return ''; } })();
 const ids = findBuildIds(js);
@@ -49,6 +61,7 @@ const extra = findGlobalWrites(js);
 if (extra.length) fail(`window globals not on the allowlist: ${[...new Set(extra.map(e => `${e.key} (${e.src})`))].join(', ')} (allowed: ${ALLOWED_GLOBALS.join(', ')})`);
 console.log('check-release-build: window global writes only ' + ALLOWED_GLOBALS.join(', ') + ' ok');
 // No external references: the release (esp. the offline single file) loads nothing from other hosts.
-const ext = findExternalRefs(single ? html : js + '\n' + html);
+if (maps.length) fail(`source maps in release: ${maps.join(', ')}`);
+const ext = findExternalRefs(single ? html : [js, css, html].join('\n'));
 if (ext.length) fail(`external references: ${[...new Set(ext.map(e => `${e.kind} ${e.url}`))].join(', ')}`);
-console.log('check-release-build: no external src/href/import/fetch ok');
+console.log('check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok');
