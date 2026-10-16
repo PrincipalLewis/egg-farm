@@ -456,3 +456,5 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .chip.more.qflash{animation:qflash 600ms linear 1}@keyframes qflash{50%{background:var(--c-yolk);color:var(--c-text)}}
 .rm .chip.more.qpulse{animation:qflash 600ms linear 1}
 .fx li.coopnew{font:800 14px var(--f-body);color:var(--c-wood-text)}
+/* S2-1 (layout-spec §4.7): the toast always paints above the sheets/scrim (#panel-layer z10) and modals (z20) */
+.toast{z-index:35}

@@ -112,3 +112,13 @@ describe('S2-3b + §3.3 synced to P1q (queue spec v1.2 §6)', async () => {
     expect(css).toMatch(/\.chip\.more\.qflash\{animation:qflash 600ms/);
   });
 });
+
+describe('S2-1 coop tiers + toast (session2-ui-triage (c), layout-spec §4.7)', () => {
+  it('ships Art & UX\'s new coop-l5/l10/l20 SVGs byte-for-byte', () => {
+    for (const f of ['coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'])
+      expect(readFileSync(new URL(`../public/assets/${f}`, import.meta.url), 'utf8')).toBe(readFileSync(new URL(`../../art-ux/assets/${f}`, import.meta.url), 'utf8'));
+  });
+  it('toast above #panel-layer (10) and modals (20); coop FX deferred while a sheet covers the coop', () => {
+    expect(css).toMatch(/\.toast\{z-index:35\}/); expect(app).toContain('coopFxPending = true');
+  });
+});

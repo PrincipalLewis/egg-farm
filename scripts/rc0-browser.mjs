@@ -76,6 +76,24 @@ sections.s23b = async () => {
     await ctx.close();
   }
 };
+// ---------- S2-1 coop tiers swap at F4->5, F9->10, F19->20; toast above the open Upgrades sheet ----------
+sections.s21 = async () => {
+  const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': DONE } });
+  await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click();
+  for (const [F, sprite] of [[4, 'coop-l5.svg'], [9, 'coop-l10.svg'], [19, 'coop-l20.svg']]) {
+    await page.evaluate(F => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1][F] ?? 2, coinsCents: 1e15 }; }, F); await page.waitForTimeout(300);
+    await page.evaluate(() => window.eggfarm.dispatch({ type: 'buyFarm' })); await page.waitForTimeout(300);
+    const r = await page.evaluate(() => { const t = document.querySelector('.toast'), tr = t.getBoundingClientRect(), pz = +getComputedStyle(document.querySelector('#panel-layer')).zIndex;
+      return { src: document.querySelector('#coop').getAttribute('src').split('/').pop(), sheet: !document.querySelector('#p-upgrades').hidden, text: t.textContent, vis: getComputedStyle(t).visibility, z: +getComputedStyle(t).zIndex, pz, inView: tr.top >= 0 && tr.bottom <= innerHeight }; });
+    ok(`S2-1 F${F}->${F + 1}: ${sprite}, "Coop upgraded!" visible above the open sheet`, r.src === sprite && r.sheet && r.text === 'Coop upgraded!' && r.vis === 'visible' && r.z > r.pz && r.inView, JSON.stringify(r));
+    if (shot && F === 4) await page.screenshot({ path: `${SHOTS}/rc1-s2-1-toast-over-sheet-390.png` });
+    await page.waitForTimeout(1600);
+  }
+  await page.locator('.sheet:not([hidden]) .close').click(); await page.waitForTimeout(100);
+  ok('S2-1 coop bounce plays once the sheet closes', await page.evaluate(() => document.querySelector('#coop').classList.contains('bounce')));
+  if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-1-coop-l20-390.png` });
+  await ctx.close();
+};
 // ---------- PT1-4 / PT1-5 / PT1-6 ----------
 sections.pt1 = async () => {
   { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm

@@ -361,6 +361,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   goalBtn.addEventListener('click', e => { e.stopPropagation(); openGoal(); });
 
   // ---------- Render ----------
+  let coopFxPending = false;
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
   coopImg.src = A(COOP_SPRITES[lastTier]);
   const upRowHtml = (kind: 'collection' | 'farm') => {
@@ -410,9 +411,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (tier !== lastTier) { coopImg.src = A(COOP_SPRITES[tier]); lastTier = tier; }
     if (tier > s.celebratedTier) {
       g.dispatch({ type: 'markCelebrated', tier });
-      if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
+      // S2-1 (layout-spec §4.7 rc1): the toast shows now, above any open sheet (z-index over #panel-layer); the bounce +
+      // sparkle wait until the coop is visible (sheet closed; docked plays at once).
+      if (!rm()) { if (open && !docked.matches) coopFxPending = true; else { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); } }
       showToast('Coop upgraded!'); // §4.7: plain copy, only at the L5/L10/L20 tier steps
     }
+    if (coopFxPending && (!open || docked.matches)) { coopFxPending = false; if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); } }
     renderQueue();
     // hens
     const hn = Math.min(S.hens(F, b), 12);
