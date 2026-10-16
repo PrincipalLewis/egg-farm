@@ -122,3 +122,18 @@ describe('S2-1 coop tiers + toast (session2-ui-triage (c), layout-spec §4.7)', 
     expect(css).toMatch(/\.toast\{z-index:35\}/); expect(app).toContain('coopFxPending = true');
   });
 });
+
+describe('AC14b save-recovery dialog v1.2 (UI only)', () => {
+  const src = readFileSync(new URL('../src/ui/save-recovery.ts', import.meta.url), 'utf8');
+  it('alertdialog; buttons are type=button; Export old save is a <button> with a 44px tap area', () => {
+    expect(src).toContain('role="alertdialog" aria-modal="true"'); expect(src).toContain('id="rcGo" type="button"');
+    expect(src).toMatch(/<button class="\$\{r\.copy_failed \? 'btn rc-export-q' : 'rc-link'\}" id="rcExport" type="button">Export old save<\/button>/);
+    expect(css).toMatch(/#rcExport\{min-height:44px;min-width:44px\}/);
+  });
+  it('Esc / Back / outside taps are swallowed; storage-full keeps the old save in memory only (no storage write in the dialog)', () => {
+    expect(src).toMatch(/e\.key === 'Escape'\) \{ e\.preventDefault\(\); e\.stopImmediatePropagation\(\)/);
+    expect(src).toContain("window.addEventListener('popstate', onPop)");
+    expect(src).toContain('if (r.copy_failed && r.raw) sessionOldSave = r.raw;');
+    expect(src).not.toMatch(/localStorage|setItem|indexedDB/);
+  });
+});

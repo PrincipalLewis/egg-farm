@@ -94,6 +94,22 @@ sections.s21 = async () => {
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-1-coop-l20-390.png` });
   await ctx.close();
 };
+// ---------- AC14b save-recovery dialog v1.2: alertdialog, outside tap / Esc / Back inert, Export button 44px ----------
+sections.ac14b = async () => {
+  for (const w of [360, 960]) {
+    const { ctx, page } = await open({ w, h: w > 900 ? 600 : 640, ls: { 'eggfarm.save': fx('corrupt-truncated.json'), 'eggfarm.ui': DONE } });
+    const card = page.locator('.recovery-card');
+    const role = await card.getAttribute('role');
+    await page.mouse.click(5, 5); await page.keyboard.press('Escape'); await page.goBack().catch(() => {}); await page.waitForTimeout(300);
+    const still = await card.count();
+    const ex = await page.evaluate(() => { const e = document.querySelector('#rcExport'); const r = e?.getBoundingClientRect(); return e && { tag: e.tagName, type: e.getAttribute('type'), text: e.textContent, w: r.width, h: r.height }; });
+    ok(`AC14b (${w}): role=alertdialog; outside tap, Esc and Back don't close; Export old save <button> >=44px`, role === 'alertdialog' && still === 1 && ex && ex.tag === 'BUTTON' && ex.type === 'button' && ex.text === 'Export old save' && ex.w >= 44 && ex.h >= 44, JSON.stringify({ role, still, ex }));
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc1-ac14b-f-${w}.png` });
+    await page.locator('#rcGo').click(); await page.waitForTimeout(200);
+    ok(`AC14b (${w}): primary button closes it`, (await card.count()) === 0);
+    await ctx.close();
+  }
+};
 // ---------- PT1-4 / PT1-5 / PT1-6 ----------
 sections.pt1 = async () => {
   { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm

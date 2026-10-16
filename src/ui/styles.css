@@ -458,3 +458,5 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .fx li.coopnew{font:800 14px var(--f-body);color:var(--c-wood-text)}
 /* S2-1 (layout-spec §4.7): the toast always paints above the sheets/scrim (#panel-layer z10) and modals (z20) */
 .toast{z-index:35}
+/* AC14b v1.2: Export old save is a <button> with a 44x44 minimum tap area in every case */
+.recovery-card #rcExport{min-height:44px;min-width:44px}
