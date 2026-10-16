@@ -427,3 +427,5 @@ html,body{overflow-x:hidden;max-width:100%}
 @keyframes qpop{from{transform:translateY(0);opacity:1}70%{opacity:1}to{transform:translateY(-24px);opacity:0}}
 .reduced-motion .qpop,.rm .qpop{animation:qpopRm 600ms linear forwards}@keyframes qpopRm{from{opacity:1}to{opacity:0}}
 .chip.served.squeeze{transition:opacity 120ms linear}.chip.served.squeeze.gone{opacity:0}
+/* Fast Collect taps (session 2): no double-tap-zoom/dblclick delay anywhere in the game, incl. the scene (a div) that also collects */
+#app,.scene,.queue{touch-action:manipulation}

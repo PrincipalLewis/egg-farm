@@ -248,6 +248,22 @@ sections.s2810 = async () => {
   await ctx.close();
 };
 
+// ---------- Fast Collect taps: 10 taps 50 ms apart -> 10 collects (or as many as eggs allow) ----------
+sections.fastcollect = async () => {
+  const { ctx, page, errors } = await open({ w: 375, h: 700, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+  for (const [target, coop] of [['#collect', 500], ['#scene', 500], ['#collect', 23]]) {
+    const exp = await page.evaluate(coop => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 0, collectionLevel: 0, coop, basket: 0, workers: {}, customers: [], nextCustomerInS: 1e9 };
+      window.__n = 0; if (!window.__fc) { window.__fc = 1; g.on(e => { if (e.type === 'collect' && e.eggs > 0) window.__n++; }); }
+      const per = 5; return Math.min(10, Math.floor(coop / per) + (coop % per ? 1 : 0)); }, coop);
+    const b = await page.locator(target).boundingBox(); const x = b.x + b.width / 2, y = b.y + Math.min(b.height / 2, 60);
+    for (let i = 0; i < 10; i++) { await page.touchscreen.tap(x, y); await page.waitForTimeout(50); }
+    await page.waitForTimeout(300); const n = await page.evaluate(() => window.__n);
+    ok(`Fast Collect: 10 taps on ${target} 50 ms apart (coop ${coop}) -> ${exp} collects`, n === exp, `got ${n}`);
+  }
+  ok('Fast Collect no page errors', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
