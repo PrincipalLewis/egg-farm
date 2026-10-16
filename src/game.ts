@@ -6,7 +6,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery } from './save/save';
+import { save, serialize, loadSafe, writeV6Backup, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery } from './save/save';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
@@ -48,7 +48,16 @@ export class Game {
       this.telemetry.flush(true);
       if (!restored_from_backup) this.bakAllowed = false;
     }
+    // Interim track migration (ADR M4-8): back up the pre-migration bytes exactly once, before the first save writes the
+    // migrated state over them. If the backup can't be written, run this session on the unmigrated save and write
+    // nothing over it (no autosave), so the migration retries on the next load (M4A-31(a)1).
+    let backupFailed = false;
+    if (f?.preTracksRaw !== undefined && r.newer === undefined) {
+      const w = writeV6Backup(kv, f.preTracksRaw);
+      if (w === 'failed') { backupFailed = true; this.telemetry.track('save_migration_aborted', { reason: 'backup_failed' }); }
+    }
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
+    if (backupFailed) { this.readOnly = true; this.mirror = null; }
     if (!f && m4On(b)) this.state = { ...this.state, tracksV7: 1 }; // new M4 farm: tracks start at 0, never re-migrated
     this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
     if (f) {
