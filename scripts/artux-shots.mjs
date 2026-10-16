@@ -119,7 +119,7 @@ for (const [w, h] of [[360, 640], [375, 667], [390, 844], [960, 600], [1280, 800
     const r = await p.evaluate(() => { const t = document.querySelector('.qtag').getBoundingClientRect(); return { tag: document.querySelector('.qtag').innerText.trim(), hits: [...document.querySelectorAll('#queue .chip')].map(c => c.getBoundingClientRect()).filter(c => !(t.right <= c.left || c.right <= t.left || t.bottom <= c.top || c.bottom <= t.top)).length }; });
     ok(`rc1-ui full queue tag, no overlap (${sz})`, r.hits === 0 && r.tag === (w < 380 ? 'Full' : 'Queue full'), r); await ctx.close(); }
   for (const [F, tierName] of [[4, 'l5'], [9, 'l10'], [19, 'l20']]) {
-    const { ctx, p } = await open({ viewport: { width: w, height: h } }, (F) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: F === 4 ? 0 : F === 9 ? 1 : 2, coinsCents: 1e15, customers: [], nextCustomerInS: 1e9 }; });
+    const { ctx, p } = await open({ viewport: { width: w, height: h } }, null);
     await p.evaluate(F => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: F === 4 ? 0 : F === 9 ? 1 : 2, coinsCents: 1e15 }; }, F);
     if (!dock) { await p.locator('[data-nav=upgrades]').click(); }
     await p.locator('[data-tab=farm]').click(); await p.waitForTimeout(400);
