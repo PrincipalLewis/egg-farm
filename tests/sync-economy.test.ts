@@ -32,6 +32,13 @@ describe('sync-economy (MK-15)', () => {
     const { yawn_at_pct: _y, ...noYawn } = rows[0] as any;
     expect(() => buildBalance(rows.map(r => { const { yawn_at_pct: _, ...o } = r as any; return o; }), balance)).toThrow(/missing workers column yawn_at_pct/);
   });
+  it('fails loudly when farm_cost is flat or decreasing (strictly increasing over L0..maxLevel)', () => {
+    const flat = rows.map(r => r.level === 23 ? { ...r, farm_cost: rows[22].farm_cost } : r);
+    expect(() => buildBalance(flat, balance)).toThrow(/farm_cost must be strictly increasing: L23=56589 <= L22=56589/);
+    const down = rows.map(r => r.level === 5 ? { ...r, farm_cost: rows[4].farm_cost - 1 } : r);
+    expect(() => buildBalance(down, balance)).toThrow(/strictly increasing: L5=/);
+    expect(() => buildBalance(down, balance, {})).toThrow(/strictly increasing/); // curve mode too
+  });
   it('rejects malformed CSV', () => {
     expect(() => parseEconomyCsv(csv.replace(/^1,(\d+),/m, '1,abc,'))).toThrow(/not a number/);
     expect(() => parseEconomyCsv(csv.replace(/^1,(\d+),/m, '1,11.5,'))).toThrow(/integer/);

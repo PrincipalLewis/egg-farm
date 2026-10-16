@@ -41,6 +41,9 @@ function fit(name: string, guess: number, step: number, span: number, ok: (v: nu
 }
 export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): EconomyParams {
   const R = rows, n = R.length - 1, all = (f: (r: Row) => boolean) => R.every(f);
+  // PR #17 review: every Farm level must cost strictly more than the one before (L0..maxLevel), in both curve and per-level mode.
+  for (let i = 1; i < R.length; i++) if (!(R[i].farm_cost > R[i - 1].farm_cost))
+    throw new Error(`sync-economy: economy.csv farm_cost must be strictly increasing: L${R[i].level}=${R[i].farm_cost} <= L${R[i - 1].level}=${R[i - 1].farm_cost}`);
   const lin = (col: string) => ({ base: R[0][col], per: r4(R[1][col] - R[0][col]) });
   const tap = lin('eggs_per_tap'), hn = lin('hens'), cap = lin('coop_capacity');
   const p: EconomyParams = {
