@@ -71,17 +71,32 @@ sections.pt1 = async () => {
 };
 const DONE = JSON.stringify({ onboardingDone: true });
 // ---------- B1 hire banner ----------
-// ---------- QA B-2: first-hire 'Workers get tired' tip never covers the Upgrades tablist, stays in the viewport (1280x720, 1280x600, 390x640) ----------
+// ---------- B-2 amended (rc2-notes §B-2 A-C, 00:49 FAIL on 572864a): in both flows the tired tip never intersects the tablist or the
+// worker row (name, energy bar, Energy label, Refill/Manage), stays in the viewport, and never shows with the Workers sheet closed ----------
 sections.b2tip = async () => {
-  for (const [w, h] of [[1280, 720], [1280, 600], [390, 640]]) {
-    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true }) } });
-    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 5e6 }; g.dispatch({ type: 'hire', worker: 'market_hand' }); });
-    await page.waitForFunction(() => [...document.querySelectorAll('.coach')].some(c => c.textContent.includes('tired')), null, { timeout: 6000 }).catch(() => {}); await page.waitForTimeout(400);
-    const r = await page.evaluate(() => { const c = document.querySelector('.coach'); if (!c) return null; const b = c.getBoundingClientRect();
-      const hit = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect()).filter(t => t.width && t.height).some(t => Math.min(b.right, t.right) > Math.max(b.left, t.left) && Math.min(b.bottom, t.bottom) > Math.max(b.top, t.top));
-      return { text: c.textContent, top: Math.round(b.top), bottom: Math.round(b.bottom), hit, vh: innerHeight }; });
-    ok(`B-2 tired tip: no tablist overlap, inside the viewport (${w}x${h})`, !!r && /tired/.test(r.text) && !r.hit && r.top >= 0 && r.bottom <= r.vh, JSON.stringify(r));
-    if (shot) await page.screenshot({ path: `${SHOTS}/rc2-b2-tired-tip-${w}x${h}.png` });
+  const sizes = (process.env.B2_SIZES ?? '1280x720,1280x600,1280x800,1024x474,390x640,360x740').split(',').map(x => x.split('x').map(Number));
+  const SNAP = () => { const R = e => e.getBoundingClientRect(), ar = (a, c) => Math.max(0, Math.min(a.right, c.right) - Math.max(a.left, c.left)) * Math.max(0, Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top));
+    const c = [...document.querySelectorAll('.coach')].find(x => /tired/.test(x.textContent) && getComputedStyle(x).visibility !== 'hidden' && R(x).width); if (!c) return null; const b = R(c);
+    const tabs = [...document.querySelectorAll('[role=tablist]')].map(R).filter(t => t.width && t.height), row = document.querySelector('#uRow [data-w=market_hand]');
+    const parts = row ? [row, ...row.querySelectorAll('*')].filter(x => R(x).width && R(x).height) : [];
+    const sheet = matchMedia('(min-width:960px) and (orientation:landscape)').matches || !!document.querySelector('#panel-layer.open');
+    return { t: Math.round(b.top), b: Math.round(b.bottom), l: Math.round(b.left), r: Math.round(b.right), tabOv: Math.round(tabs.reduce((s, t) => s + ar(b, t), 0)), rowOv: parts.filter(x => ar(b, R(x)) > 0).map(x => x.className || x.tagName).slice(0, 4), inVp: b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth, rowVis: !!row && R(row).height > 0 && R(row).top < innerHeight && R(row).bottom > 0, sheet }; };
+  for (const mode of ['direct', 'normal']) for (const [w, h] of sizes) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify(mode === 'direct' ? { onboardingDone: true, workersIntroA: true } : { onboardingDone: true }) } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 5e6 }; }); await page.waitForTimeout(400);
+    if (mode === 'normal') await page.locator('#iaOpen').click({ timeout: 8000 }).catch(() => {}), await page.waitForTimeout(400);
+    await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' }));
+    const S = []; let shotDone = false, opened = false; const t0 = Date.now();
+    while (Date.now() - t0 < 5500) { const c = await page.evaluate(SNAP); if (c) S.push(c);
+      if (c && !shotDone && shot) { await page.waitForTimeout(120); await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}.png` }); shotDone = true; }
+      // direct flow on phones: sheet stays closed for 1.5s (tip must stay hidden), then the player opens Upgrades and the deferred tip shows
+      if (!opened && Date.now() - t0 > 1500 && w < 960) { opened = true; await page.locator('[data-nav=upgrades]').click().catch(() => {}); }
+      await page.waitForTimeout(100); }
+    const bad = S.filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet);
+    const info = JSON.stringify({ n: S.length, first: S[0] ?? 'deferred (not shown)', bad: bad[0] ?? null, errors });
+    ok(`B-2 tired tip ${mode} ${w}x${h}: clear of tablist + worker row, in viewport, only with the row on screen`, !bad.length && !errors.length, info);
+    if (shot && !shotDone) await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}-deferred.png` });
+    console.log(`b2tip ${mode} ${w}x${h} ${info}`);
     await ctx.close();
   }
 };
