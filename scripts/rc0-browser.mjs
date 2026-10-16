@@ -75,8 +75,8 @@ const DONE = JSON.stringify({ onboardingDone: true });
 // worker row (name, energy bar, Energy label, Refill/Manage), stays in the viewport, and never shows with the Workers sheet closed ----------
 sections.b2tip = async () => {
   const sizes = (process.env.B2_SIZES ?? '1280x720,1280x600,1280x800,1024x474,390x640,360x740').split(',').map(x => x.split('x').map(Number));
-  const SNAP = () => { const R = e => e.getBoundingClientRect(), ar = (a, c) => Math.max(0, Math.min(a.right, c.right) - Math.max(a.left, c.left)) * Math.max(0, Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top));
-    const c = [...document.querySelectorAll('.coach')].find(x => /tired/.test(x.textContent) && getComputedStyle(x).visibility !== 'hidden' && R(x).width); if (!c) return null; const b = R(c);
+  const SNAP = (re = 'tired') => { const R = e => e.getBoundingClientRect(), ar = (a, c) => Math.max(0, Math.min(a.right, c.right) - Math.max(a.left, c.left)) * Math.max(0, Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top));
+    const c = [...document.querySelectorAll('.coach')].find(x => new RegExp(re).test(x.textContent) && getComputedStyle(x).visibility !== 'hidden' && R(x).width); if (!c) return null; const b = R(c);
     const tabs = [...document.querySelectorAll('[role=tablist]')].map(R).filter(t => t.width && t.height), row = document.querySelector('#uRow [data-w=market_hand]');
     const parts = row ? [row, ...row.querySelectorAll('*')].filter(x => R(x).width && R(x).height) : [];
     const sheet = matchMedia('(min-width:960px) and (orientation:landscape)').matches || !!document.querySelector('#panel-layer.open');
@@ -94,9 +94,12 @@ sections.b2tip = async () => {
       await page.waitForTimeout(100); }
     const bad = S.filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet);
     // review 6a9ede1 #1: deferral is only allowed where no clean spot exists (docked short heights: the row sits right under the tabs with no room below)
-    const mayDefer = (w === 1280 && h <= 720) || (w === 1024 && h === 474);
-    const manage = await page.evaluate(() => [...document.querySelectorAll('.coach')].some(c => /Manage/.test(c.textContent) && getComputedStyle(c).visibility !== 'hidden'));
-    const info = JSON.stringify({ n: S.length, mayDefer, manage, first: S[0] ?? 'deferred (not shown)', bad: bad[0] ?? null, errors });
+    const mayDefer = (w === 1280 && h <= 720) || (w === 1024 && h === 474); // measured: row 521..645 under tabs 459..503 at 1280x720 -> no 8px-clear spot (see `why`)
+    const M = await page.evaluate(SNAP, 'Manage'), manage = !!M; if (M && (M.tabOv > 0 || !M.inVp)) bad.push({ manageTip: M });
+    // rerender: force a Workers list rebuild and check the Manage tip survives (review 5877e0f #2)
+    let afterRerender = null; if (M) { await page.evaluate(() => { const u = document.querySelector('#uRow'); u.innerHTML = u.innerHTML + ''; }); await page.waitForTimeout(600); afterRerender = !!(await page.evaluate(SNAP, 'Manage')); if (!afterRerender) bad.push({ manageGoneAfterRerender: true }); }
+    const why = S.length ? null : await page.evaluate(() => { const R = e => { const b = e.getBoundingClientRect(); return [b.top, b.bottom].map(Math.round); }; const row = document.querySelector('#uRow [data-w=market_hand]'); return { vh: innerHeight, row: row && R(row), body: row && R(row.closest('.body')), tabs: [...document.querySelectorAll('[role=tablist]')].map(R) }; });
+    const info = JSON.stringify({ n: S.length, mayDefer, manage, why, first: S[0] ?? 'deferred (not shown)', bad: bad[0] ?? null, errors });
     ok(`B-2 tired tip ${mode} ${w}x${h}: clear of tablist + worker row, in viewport, only with the row on screen; shows where a clean spot exists, then Manage`, !bad.length && !errors.length && (mayDefer ? (!S.length || manage) : S.length > 0 && manage), info);
     if (shot && !shotDone) await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}-deferred.png` });
     console.log(`b2tip ${mode} ${w}x${h} ${info}`);

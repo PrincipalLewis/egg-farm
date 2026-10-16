@@ -71,4 +71,18 @@ describe('B-2 amended (rc2-notes A-C): safeCoachPlacement', () => {
     expect(safeCoachPlacement({ ...o, clip: box(0, 100, 390, 250) })).toBeNull();
     expect(safeCoachPlacement({ ...o, clip: box(0, 100, 390, 600) })?.side).toBe('below');
   });
+  it('top margin: above that fits only without the 8px top margin is refused', () => {
+    // row 80..144 -> above top = 4 (< 8) refused; vp too short for below (152+68=220 > 212)
+    expect(run(scene({ w: 390, h: 220 }, [], 80, 8, 374))).toBeNull();
+    expect(run(scene({ w: 390, h: 220 }, [], 84, 8, 374))).toEqual({ side: 'above', top: 8 });
+  });
+  it('touching edges do not count as overlap (tip bottom == tab top; tip top == tab bottom)', () => {
+    const s = scene({ w: 390, h: 740 }, [box(0, 440, 390, 44)], 300, 8, 374); // below band 372..440
+    expect(run(s)?.side).toBe('below');
+    const s2 = scene({ w: 390, h: 740 }, [box(0, 441 - 1 - 1, 390, 44)], 300, 8, 374); expect(run(s2)?.side).not.toBe('below');
+  });
+  it('COACH_MIN_TOP boundary: target.top = 120 prefers above', () => {
+    expect(safeCoachPlacement({ target: box(100, 120 + 80, 100, 44), tip: TIP, cx: 150, vp: { w: 400, h: 900 }, tabs: [], visible: true })?.side).toBe('above');
+    expect(safeCoachPlacement({ target: box(100, 120, 100, 44), tip: { w: 276, h: 20 }, cx: 150, vp: { w: 400, h: 900 }, tabs: [], visible: true })?.side).toBe('above');
+  });
 });

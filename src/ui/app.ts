@@ -527,19 +527,22 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // rc2-notes §B-2 amendment A-C (00:55): every tip runs the tablist + viewport check via the pure safeCoachPlacement();
   // when no clean spot exists (or the anchor isn't laid out/in view) the tip stays hidden and is re-checked every 250ms;
   // its `ms` life starts on first show. `row` = tired-tip mode: anchored 8px under the whole worker row, Workers sheet open only.
-  const coach = (text: string, at: Element | null, ms: number, cls = '', rowId: string | null = null, onShow?: () => void) => {
+  const coach = (text: string, anchor: Element | null | (() => Element | null), ms: number, cls = '', rowId: string | null = null, onShow?: () => void) => {
     document.querySelectorAll('.coach').forEach(e => e.remove());
     const el = h(`<div class="coach ${cls}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     el.style.visibility = 'hidden'; el.style.left = '0'; el.style.top = '0'; document.body.append(el);
     const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, centred = false;
     const inVp = (r: DOMRect) => r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
+    let at: Element | null = null; const born = Date.now();
     const place = () => { if (!el.isConnected) { close(); return; } // dropped by another tip: stop the re-check loop
+      if (!shown && Date.now() - born > 15000) { close(); return; } // max defer 15s: never pop up minutes later out of context
+      at = typeof anchor === 'function' ? anchor() : anchor; // getters re-resolve each tick (the list re-renders ~every 9s)
       const row = rowId ? workerRow(rowId) : null; if (rowId) at = row?.querySelector('.ebar') ?? null; // tired tip: row/bar re-queried each tick (re-rendered, or not built yet while the sheet is closed)
       const r = at?.getBoundingClientRect(), rr = row?.getBoundingClientRect();
       const sheetOk = !rowId || ((docked.matches || open === 'upgrades') && tab === 'workers');
       const hw = Math.ceil((el.offsetWidth || 320) / 2) + 4, cx = r ? Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw) : innerWidth / 2;
       const tabs = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect());
-      const p = r ? safeCoachPlacement({ target: r, tip: { w: el.offsetWidth, h: el.offsetHeight }, cx, vp: { w: innerWidth, h: innerHeight }, tabs, row: rr, clip: rowId ? uRow.parentElement?.getBoundingClientRect() : undefined, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
+      const p = r ? safeCoachPlacement({ target: r, tip: { w: el.offsetWidth, h: el.offsetHeight }, cx, vp: { w: innerWidth, h: innerHeight }, tabs, row: rr, clip: rowId ? uRow.closest('.body')?.getBoundingClientRect() : undefined, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
       // no clean spot yet but the sheet is open: bring the row to the middle of its scroller once, so there is room under it
       if (!p) { el.style.visibility = 'hidden'; if (row && sheetOk && rr?.height && !centred) { centred = true; row.scrollIntoView({ block: 'center' }); } return; }
       el.style.cssText = `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
@@ -565,7 +568,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       introA.addEventListener('click', e => {
         const t = (e.target as HTMLElement).closest('button'); if (!t) return;
         if (t.id === 'iaOpen') { g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'open' }); tab = 'workers'; dirty = true; openPanel('upgrades'); render();
-          const row = workerRow('market_hand'); row?.scrollIntoView({ block: 'center' }); coach(`Hire them for ${fmtMoney(hireCostMH)}. They work while you play.`, row?.querySelector('button.btn') ?? row ?? null, 8000); }
+          const row = workerRow('market_hand'); row?.scrollIntoView({ block: 'center' }); coach(`Hire them for ${fmtMoney(hireCostMH)}. They work while you play.`, () => workerRow('market_hand')?.querySelector('button.btn') ?? null, 8000); }
         else g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'dismiss' });
         introA?.remove(); introA = null;
       });
@@ -583,8 +586,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     window.setTimeout(() => {
       tab = 'workers'; dirty = true; render();
       coach('Workers get tired over time.', null, 3000, '', e.worker, () => window.setTimeout(() => { // B-2: Manage tip follows once the tired tip has actually shown
-        const r2 = workerRow(e.worker), full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
-        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000, '', null, () => { // 'done' only once the Manage tip has actually shown
+        const full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
+        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', () => workerRow(e.worker)?.querySelector('[data-act=manage]') ?? null, 6000, '', null, () => { // 'done' only once the Manage tip has actually shown
           introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); });
       }, 3100));
     }, 50);
