@@ -18,3 +18,9 @@ const chunks = files.filter(f => /^(frame-sampler|panel)-.*\.js$/.test(f));
 const hooks = [/\.eggfarm\s*=/.test(js) ? 'window.eggfarm' : '', 'eggfarmOnb', 'eggfarmQaRecovery', 'eggfarmPerf', 'perf-ov', 'dbgInfo', 'get("debug")', 'get("perf")', 'get("ios")'].filter(h => h && (h === 'window.eggfarm' || js.includes(h)));
 if (chunks.length || hooks.length) { console.error(`check-release-build: debug/QA code in release bundle: ${[...chunks, ...hooks].join(', ')}`); process.exit(1); }
 console.log('check-release-build: no ?debug/?perf/?ios/QA hooks ok');
+// Window globals allowlist: the release bundle may assign exactly these own properties on window.
+const ALLOWED_GLOBALS = ['eggfarmExportTelemetry'];
+const assigned = [...new Set([...js.matchAll(/\b(?:window|globalThis|self)\.([A-Za-z_$][\w$]*)\s*=(?!=)/g)].map(m => m[1]))];
+const extra = assigned.filter(k => !ALLOWED_GLOBALS.includes(k));
+if (extra.length) { console.error(`check-release-build: window globals not on the allowlist: ${extra.join(', ')} (allowed: ${ALLOWED_GLOBALS.join(', ')})`); process.exit(1); }
+console.log(`check-release-build: window globals ${assigned.join(', ') || '(none)'} ok`);
