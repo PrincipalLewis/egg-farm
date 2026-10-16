@@ -1,4 +1,3 @@
-import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
