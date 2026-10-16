@@ -72,8 +72,17 @@ export class Game {
   storageFailed = false; onStorageFail: (() => void) | null = null;
   /** AC14d: a second tab is read-only and never writes the save. */
   readOnly = false;
+  /** Single-tab guard: checked before EVERY save (purchase, autosave, pagehide, load-time). False -> write skipped. */
+  canWrite: (() => boolean) | null = null;
+  /** Single-tab guard: another tab owns the save; sim and saving stop until "Play here" reloads. */
+  inactive = false;
+  /** Called once when the guard first blocks a write. */
+  onInactive: (() => void) | null = null;
+  /** Stop sim + saving (another tab took the save). */
+  deactivate() { if (this.inactive) return; this.inactive = true; this.onInactive?.(); }
   save() {
-    if (this.resetting || this.readOnly) return;
+    if (this.resetting || this.readOnly || this.inactive) return;
+    if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     const t = this.now();
     try { const raw = save(this.kv, this.state, t, this.b, this.bakAllowed); this.mirror?.write(raw); }
     catch (e) { /* localStorage failed: the IndexedDB copy still gets this save */
@@ -82,8 +91,9 @@ export class Game {
     this.telemetry.flush();
   }
   endSession() {
-    if (this.resetting) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    if (this.resetting || this.inactive) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
+    if (this.inactive) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();
     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
@@ -110,6 +120,7 @@ export class Game {
   private allowBackup() { this.bakAllowed = true; }
   get backupAllowed() { return this.bakAllowed; }
   frame() {
+    if (this.inactive) { this.lastFrameAt = this.now(); return; }
     const t = this.now(), gap = t - this.lastFrameAt; this.lastFrameAt = t;
     const maxMs = this.b.offline.offlineMinSeconds * 1000;
     if (gap > 0) {
