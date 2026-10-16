@@ -464,3 +464,23 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
 .tracks .up .ms-hint{font:400 13px var(--f-body,'Nunito',inherit);color:var(--c-muted,#6b5e52)}
 .tracks .up.best.pending{outline-style:dashed}
+/* D5 (m3-next-goal-spec v1.0.1): button.goal is a 44px hit area (2px transparent padding-block); the visible 40px pill is
+   the inner span.goal-pill. The gap below goes 8px -> 4px (margin-bottom:-4px against the 8px column gap), so the row stays 48px. */
+:root{--goal-h:40px;--goal-hit:44px}
+.goal{display:block;height:auto;min-height:var(--goal-hit);padding:2px 0;margin-bottom:-4px;background:transparent;border:0;box-shadow:none;border-radius:var(--r-pill);animation:none}
+.goal-pill{display:grid;grid-template-columns:var(--goal-icon) minmax(0,1fr) auto 16px;gap:var(--s-2);align-items:center;width:100%;height:var(--goal-h);padding:0 var(--s-3);box-sizing:border-box;
+  border-radius:var(--r-pill);background:var(--c-white);border:2px solid var(--c-outline);box-shadow:var(--shadow);text-align:left;min-width:0}
+.goal[data-state=ready]{animation:none}
+.goal[data-state=ready] .goal-pill{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
+.goal-pill>*{min-width:0}
+@media (max-width:379px){.goal-pill{grid-template-columns:var(--goal-icon) minmax(0,1fr) auto}}
+@media (min-width:960px) and (orientation:landscape){.goal{min-height:var(--goal-h-lg);padding:0;margin-bottom:0;height:auto}.goal-pill{height:var(--goal-h-lg)}}
+/* S2-6 (layout-spec §3.3, rc1): the "Queue full" tag straddles the strip's top outline, never over a chip or the "+N" tile; "Full" below 380px */
+.qtag{top:-9px;right:8px;height:18px;line-height:16px;z-index:1;pointer-events:none;white-space:nowrap;box-sizing:border-box;border:1px solid transparent}
+.qtag .q-short{display:none}
+@media (max-width:379px){.qtag .q-long{display:none}.qtag .q-short{display:inline}}
+@media (max-width:390px){.farm{padding-top:10px}} /* room for the tag's 9px overhang above the strip (farm padding is 8px here) */
+/* S2-6 (QA s2-7-bd0dc66: tag over the "+N" tile at 375/390 with 9/9): the strip reserves a 9px top band, so the tag's lower
+   half sits in it and never reaches a chip or the "+N" tile, at any chip size (64/56) or strip height. */
+.queue{padding-top:9px;min-height:81px}
+@media (max-height:699px){.queue{min-height:73px}}

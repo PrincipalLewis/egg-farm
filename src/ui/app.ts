@@ -319,7 +319,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // Queue full cue (amber outline + tag), informational
     const full = s.customers.length >= slots;
     queueEl.classList.toggle('full', full);
-    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag">Queue full</span>`)); qTagShown = true; }
+    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag"><span class="q-long">Queue full</span><span class="q-short">Full</span></span>`)); qTagShown = true; }
     // Slot unlock moment (first reach of a new slot count; once, persisted)
     if (slots > flags.seenSlots) {
       flags.seenSlots = slots; saveFlags();
