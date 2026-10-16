@@ -32,7 +32,7 @@ export class OrderList {
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
     if (btn.getAttribute('aria-label') !== v.buttonAria || (v.state !== 'wait' && !btn.querySelector('.sk'))) {
-      // MK-24: stack "Sell k" over "+$X" when narrow / overflow; wait stays a single label.
+      // MK-24-1 v3: always two-line "Sell k" / "+$X"; wait stays a single label.
       if (v.state === 'wait') btn.textContent = v.button;
       else {
         const parts = v.button.split('\u00a0· ');
@@ -45,14 +45,22 @@ export class OrderList {
     }
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}`; if (btn.className !== bc) btn.className = bc;
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
-    // Art & UX: prefer one line; stack only when the row layout still overflows max-width 45%.
-    if (v.state !== 'wait' && btn.isConnected) {
-      btn.classList.remove('sell-stack');
-      // Force row metrics (≤375 stacks via CSS media query anyway).
-      const maxPx = btn.parentElement ? btn.parentElement.clientWidth * 0.45 : 0;
-      const need = btn.scrollWidth; // content width in current (row) mode
-      if (maxPx > 0 && need > maxPx + 0.5) btn.classList.add('sell-stack');
+  }
+  /** Art & UX MK-24-1 v3: one shared Sell button width = max(88, widest content), capped by 45% of the row. */
+  private syncSellWidth() {
+    const btns = [...this.list.querySelectorAll<HTMLButtonElement>('.order .btn.sell')];
+    if (!btns.length) { this.list.style.removeProperty('--sell-w'); return; }
+    let max = 88;
+    for (const b of btns) {
+      const prev = b.style.width;
+      b.style.width = 'max-content';
+      max = Math.max(max, b.scrollWidth);
+      b.style.width = prev;
     }
+    const order = this.list.querySelector('.order') as HTMLElement | null;
+    const cap = order && order.clientWidth > 0 ? order.clientWidth * 0.45 : max;
+    const w = Math.min(Math.max(88, max), Math.max(88, cap));
+    this.list.style.setProperty('--sell-w', `${Math.ceil(w)}px`);
   }
   private make(v: OrderView) {
     const el = document.createElement('div'); el.dataset.row = String(v.id); el.dataset.id = String(v.id);
@@ -109,6 +117,7 @@ export class OrderList {
       if (firstOrToggle || t - this.chipAt >= 2000) { clearTimeout(this.chipTimer); write(); }
       else if (!this.chipTimer) this.chipTimer = window.setTimeout(write, 2000 - (t - this.chipAt));
     }
+    this.syncSellWidth();
     if (frozen) setTimeout(() => this.kick(), 320);
   }
   node(id: number) { return this.nodes.get(id); }
