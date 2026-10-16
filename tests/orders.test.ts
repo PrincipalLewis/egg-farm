@@ -31,6 +31,32 @@ describe('order card (P2)', () => {
     expect(orderHtml(orderView(c(5), 0, 100), 'a.svg')).toContain('aria-disabled="true"');
   });
   it('big numbers stay compact', () => { expect(orderView(c(1500, 0), 1200, 226667).line).toBe('1.2K/1.5K eggs · $3.4M'); });
+  it('Sell button floors short money; aria keeps exact (HoP 15:14)', () => {
+    // cents = dollars * 100. Below $1K: exact on button and aria.
+    expect(orderView(c(5), 3, 100).button).toBe('Sell 3\u00a0· +$3.00');
+    expect(orderView(c(5), 3, 100).buttonAria).toBe('Sell 3\u00a0· +$3.00');
+    // $999.99 exact
+    const under = orderView(c(1), 1, 99999);
+    expect(under.button).toBe('Sell 1\u00a0· +$999.99');
+    expect(under.buttonAria).toBe('Sell 1\u00a0· +$999.99');
+    // $1,000 -> $1K (floor)
+    const k = orderView(c(1), 1, 100_000);
+    expect(k.button).toBe('Sell 1\u00a0· +$1K');
+    expect(k.buttonAria).toBe('Sell 1\u00a0· +$1,000.00');
+    // $1,299.99 -> $1.2K not $1.3K; aria exact
+    const floor = orderView(c(1), 1, 129_999);
+    expect(floor.button).toBe('Sell 1\u00a0· +$1.2K');
+    expect(floor.buttonAria).toBe('Sell 1\u00a0· +$1,299.99');
+    expect(floor.sellCents).toBe(129_999);
+    // $9,999.99 -> $9.9K
+    const nines = orderView(c(1), 1, 999_999);
+    expect(nines.button).toBe('Sell 1\u00a0· +$9.9K');
+    expect(nines.buttonAria).toBe('Sell 1\u00a0· +$9,999.99');
+    // $1.23M -> $1.2M
+    const mil = orderView(c(1), 1, 123_000_000);
+    expect(mil.button).toBe('Sell 1\u00a0· +$1.2M');
+    expect(mil.buttonAria).toBe('Sell 1\u00a0· +$1.23M');
+  });
 });
 describe('queue display (P1q)', () => {
   it('4 cards at 360x640/375x667, 5 at 390x844, all on desktop', () => {

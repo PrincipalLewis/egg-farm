@@ -7,7 +7,7 @@ import { apply } from '../src/sim/actions';
 import type { SimEvent as GameEvent } from '../src/sim/events';
 import { saleValueCents, sellAllPreview, saleMultipliers } from '../src/sim/payout';
 import { orderView, sellAllLabel } from '../src/ui/orders';
-import { fmtCount, fmtMoney, fmtMoneyShort } from '../src/ui/format';
+import { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview } from '../src/ui/format';
 
 const graded = (tier: number, basket: number, demands: [number, number][]): GameState => ({
   ...initialState(b), farmLevel: 20, collectionLevel: 7, basket, coinsCents: 500_000,
@@ -40,7 +40,8 @@ describe('BUG-1/2: every money preview equals the amount credited, to the cent',
       expect(e1.k).toBe(card.sell);
       expect(e1.value).toBe(card.sellCents);
       expect(r1.coinsCents - s.coinsCents).toBe(card.sellCents);
-      expect(card.button).toContain(`+${fmtMoney(card.sellCents)}`);
+      expect(card.button).toContain(`+${fmtMoneyPreview(card.sellCents)}`);
+      expect(card.buttonAria).toContain(`+${fmtMoney(card.sellCents)}`);
     }
   });
   it('single-row Sell: popup == coin delta == Sell button with Grader (QA repro 58 eggs)', () => {
@@ -65,7 +66,8 @@ describe('BUG-1/2: every money preview equals the amount credited, to the cent',
       expect(card.sellCents).toBe(r.coinsCents - s.coinsCents);
       expect(card.valueCents).toBe(saleValueCents(s, 17, b));
       expect(card.valueCents).toBeGreaterThan(card.sellCents); // card shows more than next Sell; button shows the Sell amount
-      expect(card.button).toBe(`Sell 3\u00a0· +${fmtMoney(e.value)}`);
+      expect(card.button).toBe(`Sell 3\u00a0· +${fmtMoneyPreview(e.value)}`);
+      expect(card.buttonAria).toBe(`Sell 3\u00a0· +${fmtMoney(e.value)}`);
       expect(card.line).toContain(fmtMoney(card.valueCents));
     }
   });
@@ -85,6 +87,20 @@ describe('BUG-3: round first, then pick the suffix', () => {
     for (const base of [1e6, 1e9, 1e12]) for (let d = -100; d <= 100; d++) expect(fmtCount(base + d * base / 1e5)).not.toMatch(/^1000(\.\d)?[KMB]$/);
   });
   it('money', () => { expect(fmtMoney(99_996_000)).toBe('$1M'); expect(fmtMoney(1_234_500)).toBe('$12.3K'); expect(fmtMoneyShort(1e14)).toBe('$1T'); });
+  it('fmtMoneyPreview floors at $1K+ and never exceeds credit', () => {
+    expect(fmtMoneyPreview(99_999)).toBe('$999.99');
+    expect(fmtMoneyPreview(100_000)).toBe('$1K');
+    expect(fmtMoneyPreview(129_999)).toBe('$1.2K'); // not $1.3K
+    expect(fmtMoneyPreview(999_999)).toBe('$9.9K');
+    expect(fmtMoneyPreview(123_000_000)).toBe('$1.2M');
+    // Displayed short value in dollars <= exact dollars
+    for (const c of [99_999, 100_000, 129_999, 999_999, 1_234_567, 123_000_000]) {
+      const shown = fmtMoneyPreview(c);
+      if (shown.endsWith('K')) expect(parseFloat(shown.slice(1)) * 1e3).toBeLessThanOrEqual(c / 100 + 1e-9);
+      else if (shown.endsWith('M')) expect(parseFloat(shown.slice(1)) * 1e6).toBeLessThanOrEqual(c / 100 + 1e-9);
+      else expect(shown).toBe(fmtMoney(c));
+    }
+  });
 });
 
 describe('BUG-4/5: FX lifetimes', () => {
@@ -98,5 +114,22 @@ describe('BUG-4/5: FX lifetimes', () => {
   it('merged +N floater re-arms its removal timer', () => {
     expect(app).toMatch(/retrigger\(floater\.el, 'floater'\); expire\(floater\.el, 750\)/);
     expect(app).toMatch(/clearTimeout\(timers\.get\(el\)\)/);
+  });
+});
+
+describe('MK-24-1: Sell button CSS never ellipsises the amount', () => {
+  const css = readFileSync('src/ui/styles.css', 'utf8');
+  it('Art & UX sizing: auto width, min 88, max 45%, pad 12, nowrap, no ellipsis on amounts', () => {
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*width:auto/);
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-width:88px/);
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*max-width:45%/);
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*padding-inline:12px/);
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*white-space:nowrap/);
+    expect(css).toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*flex-shrink:0/);
+    expect(css).not.toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*text-overflow:ellipsis/);
+    expect(css).toMatch(/\.order \.btn\.sell\.sell-stack/);
+  });
+  it('≤375 does not cap the Sell button at 96px', () => {
+    expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell[^}]*max-width:96px/);
   });
 });
