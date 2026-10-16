@@ -98,3 +98,9 @@
 
 ## 2026-10-16 23:40 ADR M4-19 revision 3: equal saveSeq (HoQA dcbd59e MUST F2-EQ, option (a); recorded by Senior Software Architect)
 - Same saveSeq, byte-identical ⇒ not diverged, nothing moves. Same saveSeq, different bytes ⇒ diverged (checked before the both-unknown rule): the later valid savedAt wins; equal savedAt ⇒ the LS copy wins (primary store). The loser goes byte for byte into the slot with read-back before any overwrite; existing slot rules apply (replace only for higher saveSeq, else skip and leave the loser store untouched).
+
+## 2026-10-16 23:55 ADR M4-19 revision 4: two recovery slots (HoQA ab4ca9f MUST SK-1; Saves design adopted per HoE; HoQA conditions; recorded by Senior Software Architect)
+- Supersedes the one-slot/skip rule of rev 2–3. Slots: IDB `eggfarm/save/diverged` and `eggfarm/save/diverged2`; pre-SQ-1 builds never touch either.
+- Loser goes to an empty slot, else replaces the lower-`saveSeq` slot (equal ⇒ `diverged`); equal by `sum` + state ⇒ dedupe, no write. Every slot write is read back; the loser store is overwritten only after a successful read-back; if both slot writes fail, nothing is overwritten.
+- No skip path, so a rollback build can never destroy the only copy of a loser. Residual: a third divergence without Export evicts the lower-seq slot copy (not rollback-related); notice offers Export when both slots are full.
+- `save_recovery_slot` gains `slot`. `diverged2` is on the §3b zero-writes list. Compatible with M4-24 (commit path untouched), F2-EQ, and check → slot write + read-back → overwrite.
