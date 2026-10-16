@@ -36,6 +36,13 @@ export const fmtAffordableIn = (seconds: number | null) => {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60, p = (n: number) => String(n).padStart(2, '0');
   return `Affordable in ~${h ? `${h}:${p(m)}` : m}:${p(r)}`;
 };
+/** C-AC25 (Product + Art & UX Oct 16): Welcome-back gain, N = pendingOfflineEggs (eggs actually added to the Basket).
+ *  Hero "+N": thousands separators up to 9,999,999, then short form (+12.3M); line 2 "egg(s) added to your basket". */
+export const offlineEggsParts = (n: number) => {
+  const k = Math.max(0, Math.floor(n));
+  return { hero: `+${k <= 9_999_999 ? k.toLocaleString('en-US') : fmtCount(k)}`, line2: `${k === 1 ? 'egg' : 'eggs'} added to your basket` };
+};
+export const offlineEggsLine = (n: number) => { const p = offlineEggsParts(n); return `${p.hero} ${p.line2}`; };
 /** Rolling income over the last windowMs of play (coins/s), for the time-to-afford hint. */
 export class IncomeRate {
   private ev: { t: number; cents: number }[] = [];

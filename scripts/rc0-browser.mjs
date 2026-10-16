@@ -485,6 +485,26 @@ sections.p1refill = async () => {
   }
 };
 
+// ---------- C-AC25 Welcome-back "+N / eggs added to your basket" (360) ----------
+sections.p1welcome = async () => {
+  for (const [n, hero, l2] of [[1234567, '+1,234,567', 'eggs added to your basket'], [1, '+1', 'egg added to your basket'], [9999999, '+9,999,999', 'eggs added to your basket'], [12345678, '+12.3M', 'eggs added to your basket']]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now() - 3600e3, state: { coinsCents: 0, coop: 0, basket: 7, collectionLevel: 0, farmLevel: 0, customers: [], nextCustomerInS: 50, nextCustomerId: 1, rng: 5, pendingOfflineEggs: n, celebratedTier: 0,
+      workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w: 360, h: 800, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    await page.waitForSelector('#wbGain', { timeout: 5000 }); // natural offline popup first; then pin N exactly via the QA hook
+    await page.evaluate(n => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: n }; window.eggfarmQaWelcome(); }, n); await page.waitForTimeout(400);
+    const r = await page.evaluate(() => { const g = document.querySelector('#wbGain'), h = g.querySelector('.wb-hero'), l = g.querySelector('.wb-line2'); const card = g.closest('.card').getBoundingClientRect();
+      const fit = e => e.scrollWidth <= e.clientWidth + 1 && getComputedStyle(e).textOverflow !== 'ellipsis'; const hr = h.getBoundingClientRect(), lr = l.getBoundingClientRect();
+      return { hero: h.textContent.trim(), l2: l.textContent.trim(), font: getComputedStyle(h).fontFamily, weight: getComputedStyle(h).fontWeight, anim: getComputedStyle(h).animationName, fit: fit(h) && fit(l), twoLines: lr.top >= hr.bottom - 1,
+        centred: Math.abs((hr.left + hr.right) / 2 - (card.left + card.right) / 2) < 3 && Math.abs((lr.left + lr.right) / 2 - (card.left + card.right) / 2) < 3, inside: hr.left >= card.left && hr.right <= card.right && lr.left >= card.left && lr.right <= card.right,
+        pend: window.eggfarm.state.pendingOfflineEggs, basket: window.eggfarm.state.basket }; });
+    ok(`C-AC25 N=${n}: "${hero}" / "${l2}", two centred lines, Fredoka bold + pop, no truncation (360)`, r.hero === hero && r.l2 === l2 && /Fredoka/i.test(r.font) && +r.weight >= 700 && r.anim === 'popin' && r.fit && r.twoLines && r.centred && r.inside, JSON.stringify(r));
+    if (shot && n === 1234567) await page.screenshot({ path: `${SHOTS}/c-ac25-welcome-360-1234567.png` });
+    const before = await page.evaluate(() => window.eggfarm.state.basket); await page.click('#wbCollect'); const after = await page.evaluate(() => window.eggfarm.state.basket);
+    ok(`C-AC25(d) N=${n}: Collect adds exactly N to the Basket`, after - before === r.pend, `before=${before} after=${after} N=${r.pend}`);
+    await ctx.close();
+  }
+};
 
 
 // SECTIONS

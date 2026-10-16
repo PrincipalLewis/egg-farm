@@ -492,3 +492,8 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 .hint.eta{color:var(--c-muted);white-space:nowrap} /* Art & UX: waiting ETA always muted grey, one line */
 .wk .btn.manage{min-height:var(--tap-min);min-width:var(--tap-min)} /* Refill: tap target >=44px in every state */
 .wk .btn.manage .manage-ico img{width:28px;height:28px;filter:none} /* nav Refill glyph, same size/colour as nav */
+/* C-AC25(e): Welcome-back gain, two centred lines, never truncated/ellipsised; hero +N in Fredoka bold with the number pop */
+.wb-gain{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;max-width:100%}
+.wb-hero{display:flex;align-items:center;justify-content:center;gap:8px;font:700 var(--fs-xl) var(--f-display);white-space:nowrap;overflow:visible;text-overflow:clip;animation:popin 300ms var(--ease-pop)}.wb-hero img{width:32px}
+.wb-line2{font:400 var(--fs-base) var(--f-body);white-space:normal;overflow:visible;text-overflow:clip}
+.rm .wb-hero{animation:none}

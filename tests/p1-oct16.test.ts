@@ -32,3 +32,12 @@ describe('P1 FTUE sell step never points at a missing customer / never softlocks
     expect(readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8')).not.toMatch(/contenteditable/i);
   });
 });
+import { offlineEggsParts, offlineEggsLine } from '../src/ui/format';
+describe('C-AC25 Welcome-back copy', () => {
+  it('N=1 singular', () => { expect(offlineEggsParts(1)).toEqual({ hero: '+1', line2: 'egg added to your basket' }); expect(offlineEggsLine(1)).toBe('+1 egg added to your basket'); });
+  it('N=2,278 (spec example)', () => expect(offlineEggsLine(2278)).toBe('+2,278 eggs added to your basket'));
+  it('N=1,234,567', () => expect(offlineEggsParts(1234567)).toEqual({ hero: '+1,234,567', line2: 'eggs added to your basket' }));
+  it('N=9,999,999 still separators', () => expect(offlineEggsParts(9999999).hero).toBe('+9,999,999'));
+  it('N=12,345,678 short form', () => expect(offlineEggsParts(12345678).hero).toBe('+12.3M'));
+  it('fractional pending eggs floor to whole eggs actually added', () => expect(offlineEggsParts(1.7)).toEqual({ hero: '+1', line2: 'egg added to your basket' }));
+});

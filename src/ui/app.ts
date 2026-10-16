@@ -5,7 +5,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
-import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, offlineEggsParts, IncomeRate } from './format';
 import { TapFx, Throttle, clampToSafe } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -223,7 +223,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
       <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
-      <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)} eggs</div>${sale ? `<div class="wb-sold num" id="wbSold">${sale}</div>` : ''}
+      ${(() => { const p = offlineEggsParts(eggs); return `<div class="wb-gain" id="wbGain"><div class="wb-hero num"><img src="${A('icon-egg.svg')}" alt="">${p.hero}</div><div class="wb-line2">${p.line2}</div></div>`; })()}${sale ? `<div class="wb-sold num" id="wbSold">${sale}</div>` : ''}
       <button class="btn" id="wbCollect">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
   };
@@ -599,6 +599,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
+  if (IOS_FLAG_ENABLED) (window as any).eggfarmQaWelcome = () => showWelcome(); // QA-only (C-AC25 copy checks), compiled out of release
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
