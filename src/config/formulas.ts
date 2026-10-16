@@ -29,6 +29,8 @@ export interface M4Params {
   enabled: number;
   /** costs[L] = price of L -> L+1 (CSV hens_cost / egg_value_cost, verbatim). */
   hens: { costs: number[]; capOverFarm: number };
+  /** spec v1.14 M4A-4: offline grant per Hens level, verbatim from economy.csv (offline_eggs_per_sec, offline_max_eggs_2h). */
+  offline?: { eggsPerSec: number[]; maxEggs2h: number[] };
   eggValue: { costs: number[]; capOverFarm: number; baseStep: number; levelBonus: number };
   milestones: {
     /** M1 (HoP 14:45): Hens milestones raise coop capacity and offline eggs only, never the in-tab lay rate. */

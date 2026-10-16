@@ -171,6 +171,7 @@ export function fitM4(rows: Row[], prev: any) {
   };
   return { enabled: prev.m4?.enabled ?? 0,
     hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
+    offline: { eggsPerSec: R.map(r => r.offline_eggs_per_sec), maxEggs2h: R.map(r => r.offline_max_eggs_2h) }, // spec v1.14 M4A-4
     eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm'), baseStep: one('egg_value_base_step'), levelBonus: one('egg_value_level_bonus') },
     milestones: {
       hens: list('hens_ms', { level: 'level', coopMult: 'coop_mult', offlineMult: 'offline_mult' }),
