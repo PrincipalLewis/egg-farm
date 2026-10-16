@@ -5,10 +5,14 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from 'node:url';
-import { tableRow, type EconomyParams } from '../src/config/formulas';
+import { tableRow, validateCostGrowthSegments, type EconomyParams, type CostGrowthSegment } from '../src/config/formulas';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
+/** Hand-set economy shape config (F1): farm cost growth segments. Not fitted from the CSV; every farm_cost row is verified against them. */
+export const ECON_CONFIG_PATH = here('../data/economy-config.json');
+export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[] }
+export const readEconomyConfig = (path = ECON_CONFIG_PATH): EconomyConfig => JSON.parse(readFileSync(path, 'utf8'));
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max'];
 export function parseEconomyCsv(text: string): Row[] {
@@ -34,7 +38,7 @@ function fit(name: string, guess: number, step: number, span: number, ok: (v: nu
   for (let i = 0; i <= n; i++) for (const s of i ? [1, -1] : [1]) { const v = r4(guess + s * i * step); if (v > 0 && ok(v)) return v; }
   throw new Error(`sync-economy: could not fit ${name} from economy.csv (formula changed? update src/config/formulas.ts)`);
 }
-export function fitParams(rows: Row[], prev: any): EconomyParams {
+export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): EconomyParams {
   const R = rows, n = R.length - 1, all = (f: (r: Row) => boolean) => R.every(f);
   const lin = (col: string) => ({ base: R[0][col], per: r4(R[1][col] - R[0][col]) });
   const tap = lin('eggs_per_tap'), hn = lin('hens'), cap = lin('coop_capacity');
@@ -57,9 +61,15 @@ export function fitParams(rows: Row[], prev: any): EconomyParams {
   };
   // P3: an L0 eggs/s off the eggs/s = rate x hens line becomes the eggsPerSecL0 param (verified with every other cell).
   if (Math.abs(R[0].eggs_per_sec - r4(R[0].hens * p.farm.eggsPerHenPerSec)) > 1e-9) p.farm.eggsPerSecL0 = R[0].eggs_per_sec;
+  const segs = cfg.farmCostGrowthSegments;
+  validateCostGrowthSegments(segs, 'economy-config.farmCostGrowthSegments');
+  if (segs && segs.length) p.farm.costGrowthSegments = segs.map(s => ({ from: s.from, to: s.to, growth: s.growth }));
+  const inSeg = (L: number) => !!segs?.some(s => L >= s.from && L <= s.to);
+  const plain = R.find(r => r.level > 0 && r.level <= n && !inSeg(r.level));
+  const farmGuess = segs && segs.length && plain ? R[plain.level].farm_cost / R[plain.level - 1].farm_cost : (R[n].farm_cost / R[0].farm_cost) ** (1 / n);
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
   p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
-  p.farm.costGrowth = fit('farm costGrowth', (R[n].farm_cost / R[0].farm_cost) ** (1 / n), 0.0001, 0.05, v => col('farm_cost')({ ...p, farm: { ...p.farm, costGrowth: v } }));
+  p.farm.costGrowth = fit('farm costGrowth', farmGuess, 0.0001, 0.05, v => col('farm_cost')({ ...p, farm: { ...p.farm, costGrowth: v } }));
   p.farm.customerIntervalDecay = fit('customerIntervalDecay', R[1].customer_interval_s / R[0].customer_interval_s, 0.0001, 0.02, v => col('customer_interval_s')({ ...p, farm: { ...p.farm, customerIntervalDecay: v } }));
   const k0 = R[0].eggs_per_sec * R[0].customer_interval_s;
   p.farm.demandLoFactor = fit('demandLoFactor', R[0].demand_min / k0, 0.01, 1, v => col('demand_min')({ ...p, farm: { ...p.farm, demandLoFactor: v, demandHiFactor: 99 } }));
@@ -123,8 +133,8 @@ function verifyGraderCosts(rows: Row[], w: any) {
     if (r.w4_tier_cost !== want) throw new Error(`sync-economy: economy.csv L${r.level} w4_tier_cost=${r.w4_tier_cost}, expected ${want}`);
   }
 }
-export function buildBalance(rows: Row[], prev: any) {
-  const p = fitParams(rows, prev);
+export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
+  const p = fitParams(rows, prev, cfg);
   const workers = fitWorkers(rows, prev); verifyGraderCosts(rows, workers);
   prev = { ...prev, workers };
   const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, ...rest } = prev;

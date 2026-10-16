@@ -1,0 +1,4 @@
+{
+  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1).",
+  "farmCostGrowthSegments": []
+}
