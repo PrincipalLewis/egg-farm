@@ -6,6 +6,7 @@ import { bus, guardTabs } from './save/tab-guard';
 import { readOnlyKV } from './save/save';
 import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
+import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 
 import { BUILD_ID } from './build-id';
@@ -55,8 +56,13 @@ async function boot() {
   if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
-  if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
-  { const q = new URLSearchParams(location.search); if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q)); }
+  // D3/D4 (rc1): ?debug=1 cheat panel and ?perf=1 SM-9 sampler exist only in QA/dev builds. Same build-time flag as the
+  // eggfarmOnb/eggfarmQaRecovery hooks (__IOS_FLAG__ = mode !== 'production'): release dead-code-eliminates both chunks.
+  if (IOS_FLAG_ENABLED) {
+    const q = new URLSearchParams(location.search);
+    if (q.get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
+    if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q));
+  }
   function frame() { g.frame(); ui.render(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
   setInterval(() => g.frame(), 1000); // keep sim moving if rAF is paused but timers still fire
