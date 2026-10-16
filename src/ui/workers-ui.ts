@@ -3,7 +3,10 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
-import { wagePerSecCents, wageLine } from './s2-economy-ui';
+import { wageLine } from './s2-economy-ui';
+import { listedWageCentsPerSec, WAGE_WORKERS, type WageWorker } from './rates';
+/** Reviewer m1 (rc2): card wage = the exact economy.csv listed rate from ./rates (single source), not the s2-money stub. */
+const cardWage = (id: WorkerId, s: GameState, b: Balance) => (WAGE_WORKERS as string[]).includes(id) ? listedWageCentsPerSec(id as WageWorker, s, b) : 0;
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
@@ -62,7 +65,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
     if (!w) {
       const locked = F < unlockFarm(id, b), cost = hireCostCents(id, b), can = !locked && s.coinsCents >= cost;
-      return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}
+      return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>${wageLine(cardWage(id, s, b), ASSET('icon-coin.svg'))}
         ${locked ? `<div class="hint">Unlocks at Farm L${unlockFarm(id, b)}</div>` : `<button class="btn buy ${can ? 'affordable' : ''}" data-act="hire" data-w="${id}" aria-disabled="${!can}">Hire ${fmtMoney(cost)}</button>`}</div>`;
     }
     const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b); // B5: enabled only <= threshold
@@ -85,7 +88,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}
-      ${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}`;
+      ${wageLine(cardWage(id, s, b), ASSET('icon-coin.svg'))}`;
     const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}`;
     return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
