@@ -1,6 +1,7 @@
 /** S2-8 header net rate + wage lines, S2-9 Market queue-full dot (Art & UX approved visuals, Oct 16).
  *  DATA SEAM: net rate, per-worker wage and the queue-full flag are meant to come from m3/rc1-s2-money. Until that lands
- *  they are derived here from existing sim data (same formulas as tick.ts wages / queueMax); swap these three functions. */
+ *  they are derived here; values match origin/m3/rc1-s2-money 9c3d47b src/ui/rates.ts (listedWageCentsPerSec / wageCentsPerSec /
+ *  netCentsPerSec / queueFull, exposed as ui.rates()): wage = wage_per_farm_per_min x F / 60 exact, 0 when Asleep or Unpaid. */
 import type { Balance } from '../config/balance';
 import { queueMax, type GameState } from '../sim/state';
 import type { WorkerId } from '../sim/workers';
@@ -23,21 +24,21 @@ export function fmtRateAbs(cents: number) {
   if (d < 1000) return `$${Math.round(d)}`;
   return d < 1e6 ? `$${(Math.floor(d / 100) / 10).toFixed(1)}K` : `$${(Math.floor(d / 1e5) / 10).toFixed(1)}M`;
 }
-/** Product ruling (Oct 16): show the exact rate charged. Under $0.10/s it reads per minute ("$0.75/min"), else per second. */
+/** Wage labels (Product + Art & UX, Oct 16): the exact rate charged; under $0.10/s per minute ("$0.75/min"), from $0.10/s per second. */
 export function fmtExactRate(centsPerSec: number) {
   const a = Math.abs(centsPerSec);
   return a < 10 ? `$${(Math.round(a * 60) / 100).toFixed(2)}/min` : `${fmtRateAbs(a)}/s`;
 }
 export type RateSign = 'pos' | 'neg' | 'zero';
+/** Art & UX display ruling (Oct 16 09:41): the money-pill net rate is always per second with two decimals ("−$0.07/s"). */
 export function rateView(cps: number): { text: string; sign: RateSign; aria: string } {
-  const perMinCents = Math.round(Math.abs(cps) * 60);
-  if (perMinCents === 0) return { text: '$0/s', sign: 'zero', aria: 'Net income zero per second' };
-  const t = fmtExactRate(cps), perMin = t.endsWith('/min');
-  const cents = perMin ? perMinCents : Math.round(Math.abs(cps));
-  const amount = cents < 100 ? `${cents} cent${cents === 1 ? '' : 's'}` : `${(perMin ? `$${(cents / 100).toFixed(2)}` : fmtRateAbs(cents)).replace('$', '')} dollars`;
-  const unit = perMin ? 'minute' : 'second';
-  return cps > 0 ? { text: `+${t}`, sign: 'pos', aria: `Net income plus ${amount} per ${unit}` }
-    : { text: `\u2212${t}`, sign: 'neg', aria: `Net income minus ${amount} per ${unit}` };
+  const c = Math.sign(cps) * Math.round(Math.abs(cps)); // whole cents per second = two decimals, half away from zero
+  if (c === 0) return { text: '$0.00/s', sign: 'zero', aria: 'Net income zero per second' };
+  const abs = Math.abs(c), d = (abs / 100).toFixed(2);
+  const money = abs >= 1e5 ? fmtRateAbs(abs) : `$${Number(d).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const amount = abs < 100 ? `${abs} cent${abs === 1 ? '' : 's'}` : `${d} dollars`;
+  return c > 0 ? { text: `+${money}/s`, sign: 'pos', aria: `Net income plus ${amount} per second` }
+    : { text: `\u2212${money}/s`, sign: 'neg', aria: `Net income minus ${amount} per second` };
 }
 /** Wage line markup (hire cards under the effect line; worker cards at the bottom). '' for unwaged workers. */
 export const wageLine = (cents: number, coinIcon: string) => cents > 0 ? `<div class="wage num"><img src="${coinIcon}" width="12" height="12" alt="">Wage ${fmtExactRate(cents)}</div>` : '';

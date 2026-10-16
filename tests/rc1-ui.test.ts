@@ -188,9 +188,9 @@ describe('S2-8 net rate + wages, S2-9 queue-full dot (stubbed data seam)', async
   const { initialState } = await import('../src/sim/state');
   const { workersHtml } = await import('../src/ui/workers-ui');
   it('rate text / sign / aria', () => {
-    expect(E.rateView(120)).toEqual({ text: '+$1.2/s', sign: 'pos', aria: 'Net income plus 1.2 dollars per second' });
-    expect(E.rateView(-3)).toEqual({ text: '\u2212$1.80/min', sign: 'neg', aria: 'Net income minus 1.80 dollars per minute' }); // < $0.10/s: exact per minute
-    expect(E.rateView(0.001).text).toBe('$0/s'); expect(E.rateView(0.3).text).toBe('+$0.18/min'); expect(E.rateView(0).sign).toBe('zero');
+    expect(E.rateView(120)).toEqual({ text: '+$1.20/s', sign: 'pos', aria: 'Net income plus 1.20 dollars per second' });
+    expect(E.rateView(-3)).toEqual({ text: '\u2212$0.03/s', sign: 'neg', aria: 'Net income minus 3 cents per second' });
+    expect(E.rateView(0.3).text).toBe('$0.00/s'); expect(E.rateView(-7.5).text).toBe('\u2212$0.08/s'); expect(E.rateView(99999).text).toBe('+$999.99/s'); expect(E.rateView(0).sign).toBe('zero');
   });
   it('wage per second = wage_per_farm_per_min x F / 60; unwaged workers have no line', () => {
     expect(E.wagePerSecCents('market_hand', 1, b)).toBeCloseTo(b.workers.market_hand.wage_per_farm_per_min / 60 * 100);
@@ -235,9 +235,15 @@ describe('S2-8 exact rate (Product ruling: under $0.10/s per minute)', async () 
     expect(E.fmtExactRate(1.25)).toBe('$0.75/min'); expect(E.fmtExactRate(50)).toBe('$0.50/s');
     expect(E.wageLine(1.25, 'c')).toContain('Wage $0.75/min'); expect(E.wageLine(50, 'c')).toContain('Wage $0.50/s');
   });
-  it('net-rate line uses the same exact value', () => {
-    expect(E.rateView(-1.25)).toEqual({ text: '\u2212$0.75/min', sign: 'neg', aria: 'Net income minus 75 cents per minute' });
-    expect(E.rateView(50).text).toBe('+$0.50/s'); expect(E.rateView(10).text).toBe('+$0.10/s'); expect(E.rateView(9.99).text).toBe('+$5.99/min');
+  it('wage format switches at $0.10/s; net rate stays per second, 2 decimals (Art & UX 09:41)', () => {
+    expect(E.fmtExactRate(9.99)).toBe('$5.99/min'); expect(E.fmtExactRate(10)).toBe('$0.10/s');
+    expect(E.rateView(-1.25).text).toBe('\u2212$0.01/s'); expect(E.rateView(50).text).toBe('+$0.50/s');
+  });
+  it('stub matches s2-money 9c3d47b rates.ts: Market Hand at L3 = 1.25 c/s exact ("$0.75/min"); 0 when Asleep/Unpaid', async () => {
+    const { balance: b } = await import('../src/config/balance'); const { initialState } = await import('../src/sim/state');
+    expect(E.wagePerSecCents('market_hand', 3, b)).toBe(1.25); expect(E.fmtExactRate(E.wagePerSecCents('market_hand', 3, b))).toBe('$0.75/min');
+    const s: any = { ...initialState(b, 3), farmLevel: 3, workers: { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 50, cdS: 0, unpaid: true } } };
+    expect(E.netRateCents(0, s, b)).toBe(0);
   });
 });
 describe('Art & UX review rc1-ui-fc8e1cf #1/#2', () => {
