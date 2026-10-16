@@ -36,7 +36,8 @@ img{user-select:none;-webkit-user-drag:none}
 @keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(61 127 51/.35)}}
 .btn.secondary{background:var(--c-white);min-height:44px}.btn.danger{background:var(--c-barn);color:#fff;min-height:44px}
 .btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
-.btn.maxed{background:var(--c-gold);pointer-events:none;box-shadow:none}
+/* MAX is a label, not a button (m4-tracks-copy.md line 10, layout-spec.md lines 110/159): yolk pill, --c-text, no shadow, no press, not focusable */
+.maxed{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:var(--r-pill);background:var(--c-yolk);color:var(--c-text);font:700 var(--fs-base) var(--f-display);box-shadow:none;pointer-events:none;user-select:none}
 .btn img{width:20px;height:20px}
 .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
 .icon-btn{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;display:grid;place-items:center;padding:0}.icon-btn img{width:28px;height:28px}

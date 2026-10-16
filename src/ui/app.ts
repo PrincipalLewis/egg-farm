@@ -451,13 +451,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
     if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * coopCap(s, b))
       hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
-    return `<div class="up">
+    return `<div class="up"${max ? ` role="group" aria-label="${isF ? 'Farm level' : 'Collect per tap'}, level ${L}, max."` : ''}>
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
-      ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
+      ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div></div></div>`;
   };
@@ -469,12 +469,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const fx = t === 'hens'
       ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`]
       : [`Egg price ${arrow(fmtMoneyShort(trackPriceCents(F, H, V, b)), fmtMoneyShort(trackPriceCents(F, H, V + 1, b)))}`];
-    const right = lock === 'max' ? `<button class="btn maxed" tabindex="-1">MAX</button>`
+    const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${F + 1}.">${trackLockText(F)}</div>`
       : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
     const best = rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
-    return `<div class="up track${best}" data-track="${t}">
+    return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : ''}>
       <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
       <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
@@ -483,7 +483,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const s = g.state, st = balancedStrip(s, b);
     const segs = balancedSegments(s, b).map(g => `<i class="${g.weakest ? 'weakest' : ''}" data-track="${g.track}"><b style="width:${Math.round(g.fill * 100)}%"></b></i>`).join('');
     return `<div class="tracks"><div class="balanced" role="img" aria-label="${balancedStripText(s, b, true)}"><div class="segs">${segs}</div><span>${balancedStripText(s, b)}</span></div>
-      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm').replace('<div class="up">', `<div class="up${rowHl === 'farm' ? (rowPick?.affordable ? ' best' : ' best pending') : ''}" data-track="farm">`)}</div>`;
+      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm').replace('<div class="up"', `<div class="up${rowHl === 'farm' ? (rowPick?.affordable ? ' best' : ' best pending') : ''}" data-track="farm"`)}</div>`;
   };
   let lastUp = '', ordersExpanded = false;
   function render() {
