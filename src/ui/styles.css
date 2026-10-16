@@ -480,5 +480,9 @@ html,body{overflow-x:hidden;max-width:100%}
 .hire-nudge-x{flex:none;margin-left:auto;width:44px;height:44px;padding:0;border:0;background:none;font:700 12px/1 var(--f-body);color:var(--c-wood-text);cursor:pointer}
 .new-dot{position:absolute;top:4px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--c-barn);box-shadow:0 0 0 2px var(--c-white)}.new-dot[hidden]{display:none}
 [data-nav="upgrades"],.tabs [data-tab="workers"]{position:relative}
+/* PR #12 (UI Designer, Head of Art & UX): on the Workers tab the dot lives inside the label as a flex item right after the
+   text: 2px from the text + 8px dot = 10px right padding on the label, dot at the label's top-right, no overlap with "Workers".
+   Hidden dot = display:none = no space, so the flag-off build (dot never shown) renders exactly as before. */
+.tabs .tab-pill > .new-dot{position:static;flex:none;align-self:flex-start;width:8px;height:8px;margin:8px 0 0 -4px;box-shadow:none}
 .pulse{animation:nudge-pulse 1.6s ease-in-out infinite}@keyframes nudge-pulse{50%{transform:scale(1.06)}}
 @media (prefers-reduced-motion:reduce){.pulse{animation:none}}

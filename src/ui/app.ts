@@ -386,7 +386,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- M3-AC5 next-goal strip ----------
   // L30-19b hire nudge (art-ux/rc2-workers-copy.md §5): hint line under the Farm card's Buy button + New dot/pulse.
   const navUp = nav.querySelector<HTMLElement>('[data-nav="upgrades"]')!, wTab = root.querySelector<HTMLElement>('.tabs [data-tab="workers"]');
-  const dots = [navUp, wTab].filter(Boolean).map(t => { const d = h(newDotHtml()) as HTMLElement; d.hidden = true; t!.append(d); return d; });
+  // Workers tab: the dot sits inside the tab label (.tab-pill), at the label text's top-right (art-ux PR #12 fix).
+  const dots = [navUp, wTab?.querySelector<HTMLElement>('.tab-pill') ?? wTab].filter(Boolean).map(t => { const d = h(newDotHtml()) as HTMLElement; d.hidden = true; t!.append(d); return d; });
   let coopTipEl: HTMLElement | null = null, nudgeOn = false;
   const renderHireNudge = () => {
     const on = pickHint({ coop_full: !!coopTipEl?.isConnected, hire_nudge: g.hireNudgeActive }) === 'hire_nudge', active = g.hireNudgeActive;
