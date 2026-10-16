@@ -65,3 +65,9 @@ export function reconcile(kv: KV, idbRaw: string | null, b: Balance, now = Date.
   }
   return w;
 }
+/** save_restore telemetry: null when there is nothing to choose between (no IndexedDB copy, or both copies identical);
+ *  otherwise the copy that was loaded: 'idb' (silent restore from IndexedDB) or 'localStorage' (IndexedDB copy older/invalid). */
+export function restoreSource(lsRaw: string | null, idbRaw: string | null, b: Balance): 'idb' | 'localStorage' | null {
+  if (idbRaw === null || idbRaw === lsRaw) return null;
+  return pickNewest(lsRaw, idbRaw, b) === 'idb' ? 'idb' : 'localStorage';
+}
