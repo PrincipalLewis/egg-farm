@@ -1,7 +1,9 @@
 /**
  * D2 (rc1): a second, durable copy of the save in IndexedDB. localStorage is written synchronously but the browser
  * flushes it to disk lazily (QA: purchases lost on a browser kill 0.1-3 s later). Each save is also put into IndexedDB in
- * a readwrite transaction with durability 'strict' (the commit waits for the disk flush). On boot the newest valid copy
+ * a readwrite transaction with durability 'strict' (the commit waits for the disk flush), except the pagehide/beforeunload
+ * write (SD5-1), which is 'relaxed' so it is in the engine before the document goes away (it survives a browser kill once
+ * handed to the OS; a power loss right after a tab close can lose it). On boot the newest valid copy
  * (version + checksum via validate()) wins and is written back to localStorage before the Game loads, so the existing
  * synchronous load, migrations and recovery paths are unchanged. No IndexedDB (private mode, blocked, error, timeout):
  * localStorage only, as in rc0.
@@ -28,8 +30,9 @@ export class IdbMirror {
     } catch { return null; }
   }
   private tx(mode: IDBTransactionMode, durability: 'strict' | 'relaxed' = 'strict') { return this.db.transaction(IDB_STORE, mode, { durability } as IDBTransactionOptions); }
-  /** SD5-1: raw of the last write queued (dedupe; identical bytes are already on their way to disk). */
-  private lastRaw: string | null = null;
+  /** SD5-1 m2: raw of the last CLOSE write whose put was issued (its own key: a stuck normal write never suppresses it);
+   *  cleared on failure, on a normal write and on clear(). */
+  private lastUnloadRaw: string | null = null;
   async read(ms = 1500): Promise<string | null> {
     try { const v = await timeout(req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)), ms); if (typeof v !== 'string') return null; this.seeNewer(v); return v; }
     catch { return null; }
@@ -40,27 +43,34 @@ export class IdbMirror {
   onNewer: ((v: number) => void) | null = null;
   private seeNewer(raw: unknown) { const v = typeof raw === 'string' ? newerSaveVersion(raw) : null; if (v !== null && this.newer === null) { this.newer = v; this.onNewer?.(v); } return v; }
   /** Fire-and-forget durable write; transactions on one store commit in order, so the last save wins. Never throws.
-   *  BUG-2: get + check + put run in ONE readwrite transaction, so a newer-build copy is never overwritten (no put).
-   *  SD5-1 (Firefox): a transaction still waiting for its get when the page is torn down never completes, so the save
-   *  written on visibilitychange→hidden / pagehide was lost. `unload` writes put at once (no get round-trip; the Game's
-   *  newerGuard has already checked the mirror's cached result), use durability 'relaxed' and commit() explicitly, so the
-   *  transaction is in the engine before the document goes away. The promise resolves on the transaction's complete. */
+   *  BUG-2 / M4-19: every write runs get + newer-check + put in ONE readwrite transaction, so a newer-build copy is never
+   *  overwritten.
+   *  - normal (autosave, visibilitychange→hidden; the page survives): put issued in the get's onsuccess, durability 'strict'.
+   *  - `unload` (pagehide / beforeunload / endSession only; SD5-1 Firefox: a transaction whose put was still waiting for
+   *    the get when the page was torn down never completed): get AND put are queued synchronously in the same
+   *    transaction, durability 'relaxed'; the get's onsuccess abort()s the transaction when the stored copy is from a newer
+   *    build, which rolls the put back. No explicit commit() (it would forbid that abort); the put-only tail auto-commits.
+   *  The promise resolves on complete/abort/error. A newer-build abort is not a failure. */
   write(raw: string, opts: { unload?: boolean } = {}): Promise<void> {
     if (this.newer !== null) return Promise.resolve();
-    // dedupe only unload bursts (hidden + pagehide + beforeunload of one state); a normal write always re-runs the BUG-2 check
-    if (opts.unload && raw === this.lastRaw) return Promise.resolve();
+    const close = !!opts.unload;
+    if (close && raw === this.lastUnloadRaw) return Promise.resolve(); // pagehide + beforeunload of one state
+    if (!close) this.lastUnloadRaw = null;
+    let skipped = false;
     try {
-      const t = this.tx('readwrite', opts.unload ? 'relaxed' : 'strict'); const os = t.objectStore(IDB_STORE); this.pending++;
-      const p = new Promise<void>(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) { this.failed = true; if (this.lastRaw === raw) this.lastRaw = null; } res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
-      this.lastRaw = raw;
-      if (opts.unload) { os.put(raw, IDB_KEY); (t as IDBTransaction & { commit?: () => void }).commit?.(); }
-      else { const g = os.get(IDB_KEY); g.onsuccess = () => { if (this.seeNewer(g.result) === null) os.put(raw, IDB_KEY); else this.lastRaw = null; }; }
+      const t = this.tx('readwrite', close ? 'relaxed' : 'strict'); const os = t.objectStore(IDB_STORE); this.pending++;
+      const p = new Promise<void>(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) { if (!skipped) this.failed = true; if (this.lastUnloadRaw === raw) this.lastUnloadRaw = null; } res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
+      const g = os.get(IDB_KEY);
+      if (close) {
+        g.onsuccess = () => { if (this.seeNewer(g.result) !== null) { skipped = true; try { t.abort(); } catch { /* already finished */ } } };
+        os.put(raw, IDB_KEY); this.lastUnloadRaw = raw;
+      } else g.onsuccess = () => { if (this.seeNewer(g.result) === null) os.put(raw, IDB_KEY); };
       return p;
-    } catch { this.failed = true; return Promise.resolve(); }
+    } catch { this.failed = true; if (this.lastUnloadRaw === raw) this.lastUnloadRaw = null; return Promise.resolve(); }
   }
   /** Reset save: remove the mirror copy (resolves once committed or failed). */
   clear(): Promise<void> {
-    this.lastRaw = null;
+    this.lastUnloadRaw = null;
     try { const t = this.tx('readwrite'); t.objectStore(IDB_STORE).delete(IDB_KEY); return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
     catch { return Promise.resolve(); }
   }

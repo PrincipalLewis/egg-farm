@@ -97,7 +97,7 @@ export class Game {
   private held() { return this.now() < this.holdUntil; }
   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
-  /** SD5-1: the page is being hidden or unloaded (visibilitychange→hidden, pagehide, beforeunload): same guarded save, but
+  /** SD5-1: the page is being unloaded (pagehide, beforeunload; NOT visibilitychange→hidden): same guarded save, but
    *  the IndexedDB copy is written so it commits before the document is torn down (see IdbMirror.write unload). */
   saveForUnload() { this.save(true); }
   save(unload = false) {

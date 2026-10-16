@@ -523,6 +523,24 @@ sections.unloadmirror = async () => {
   await ctx.close();
 };
 
+// SD5-1 review M1/M2 (contention row for unloadmirror): another tab's NEWER-build copy lands only in IndexedDB after this tab
+// booted (its cached newer result is stale; the lease does not stop it). Hiding (strict checked write) or closing (unload
+// write: get + put in one transaction, abort when the stored copy is newer) must leave that copy byte-identical.
+sections.unloadnewer = async () => {
+  for (const how of ['hidden', 'close']) {
+    const { ctx, page } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, sessions: 3, workersIntroA: true, workersIntroB: true }), 'eggfarm.save': fx('m2-rc1-v5-40min.json') } });
+    const wb = page.locator('#wbCollect'); if (await wb.isVisible().catch(() => false)) await wb.click(); await page.waitForTimeout(200);
+    const v7 = JSON.stringify({ version: 7, savedAt: Date.now() + 1000, state: { coinsCents: 70707, futureField: how } });
+    await putIdbMain(page, v7); // "tab B": its localStorage write was refused, so the copy exists only in IndexedDB
+    if (how === 'hidden') await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
+    else await page.close({ runBeforeUnload: true });
+    const p2 = how === 'hidden' ? page : await ctx.newPage(); if (how === 'close') await p2.goto(URL0, { waitUntil: 'domcontentloaded' });
+    let idb; for (let i = 0; i < 20; i++) { await p2.waitForTimeout(100); idb = await idbMain(p2); }
+    ok(`SD5-1 M1 ${how}: a newer-build IndexedDB-only copy survives byte for byte`, idb === v7, JSON.stringify({ same: idb === v7, idb: String(idb).slice(0, 80) }));
+    await ctx.close();
+  }
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
