@@ -59,7 +59,7 @@ export function showRecoveryDialog(r: Recovery | null, asset: (f: string) => str
   const focusables = () => [...layer.querySelectorAll<HTMLElement>('button')];
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); return; } // Esc does nothing
-    if (e.key === 'Tab') { const f = focusables(), i = f.indexOf(document.activeElement as HTMLElement); e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus(); }
+    if (e.key === 'Tab') { layer.classList.add('kbd'); const f = focusables(), i = f.indexOf(document.activeElement as HTMLElement); e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus(); }
   };
   // Back gesture / browser back: push a state and re-push on popstate so Back can't close it.
   const onPop = () => history.pushState({ eggfarmRecovery: 1 }, '');
@@ -70,6 +70,9 @@ export function showRecoveryDialog(r: Recovery | null, asset: (f: string) => str
   const keep = () => setTimeout(() => { if (layer.isConnected && !layer.contains(document.activeElement)) go.focus(); }, 0); // focus never leaves the dialog
   layer.addEventListener('focusout', keep); const onFocusIn = (e: FocusEvent) => { if (!layer.contains(e.target as Node)) go.focus(); };
   document.addEventListener('focusin', onFocusIn, true);
+  // Firefox doesn't mark the trap's programmatic refocus as :focus-visible (lone-button Restored case), so keyboard use is
+  // tracked here too; any pointer use drops back to the :focus-visible-only ring.
+  layer.addEventListener('pointerdown', () => layer.classList.remove('kbd'), true);
   layer.addEventListener('mousedown', e => { if (!(e.target as HTMLElement).closest('button')) e.preventDefault(); }); // scrim/card taps never pull focus out of the dialog
   if (r.copy_failed && r.raw) sessionOldSave = r.raw;
   const msg = layer.querySelector<HTMLElement>('#rcMsg');

@@ -451,9 +451,21 @@ async function recoveryCase(kind, lsOverride, label = kind) {
     ok(`${tag}: card width ${w === 360 ? 312 : 440}, body <=2 lines, nothing clipped`, st.w === (w === 360 ? 312 : 440) && st.bodyLines <= 2 && !st.clipped, JSON.stringify({ w: st.w, lines: st.bodyLines }));
     ok(`${tag}: every control >=44 tall (primary >=48, link >=120 wide)`, st.ctl.every(c => c.h >= 44) && st.ctl.find(c => c.id === 'rcGo').h >= 48 && (!exp || exp.cls !== 'rc-link' || exp.w >= 120), JSON.stringify(st.ctl.map(c => [c.id, Math.round(c.w), c.h])));
     ok(`${tag}: initial focus on primary`, st.focus === 'rcGo', st.focus);
-    if (shot && !lsOverride) await page.screenshot({ path: `${SHOTS}/save-recovery-${kind}-${w}.png` });
+    if (shot && !lsOverride) await page.screenshot({ path: `${SHOTS}/save-recovery-v4-${kind}-${w}.png` });
     if (w === 360) {
       const seq = []; for (const k of ['Tab', 'Tab', 'Shift+Tab']) { await page.keyboard.press(k); seq.push(await page.evaluate(() => document.activeElement?.id)); }
+      // Art & UX 16:2x: keyboard focus ring on both buttons and the Export link: visible, >=2px, >=3:1 against the card.
+      const ring = async () => page.evaluate(() => { const el = document.activeElement, cs = getComputedStyle(el), card = getComputedStyle(el.closest('.recovery-card'));
+        const rgb = c => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number), lum = ([r, g, b]) => { const f = v => (v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+        const a = lum(rgb(cs.outlineColor)), b = lum(rgb(card.backgroundColor)), cr = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        return { id: el.id, fv: el.matches(':focus-visible'), style: cs.outlineStyle, w: parseFloat(cs.outlineWidth), off: parseFloat(cs.outlineOffset), color: cs.outlineColor, bg: card.backgroundColor, cr: Math.round(cr * 100) / 100 }; });
+      const rings = []; const ids = E.exp ? ['rcExport', 'rcGo'] : ['rcGo'];
+      await page.keyboard.press('Tab'); // enter keyboard modality (the initial focus is programmatic)
+      for (const id of ids) { while ((await page.evaluate(() => document.activeElement?.id)) !== id) await page.keyboard.press('Tab'); rings.push(await ring()); }
+      await page.keyboard.press('Tab'); if (E.exp) await page.keyboard.press('Tab'); // back to a neutral state before the wrap check
+      while ((await page.evaluate(() => document.activeElement?.id)) !== 'rcGo') await page.keyboard.press('Tab');
+      ok(`${tag}: keyboard focus ring visible, >=2px, >=3:1 on ${ids.join('+')}`, rings.every(r => r.style !== 'none' && r.w >= 2 && r.cr >= 3), JSON.stringify(rings));
+      console.log('FOCUSRING', label, w, JSON.stringify(rings));
       ok(`${tag}: Tab/Shift+Tab wrap inside the dialog`, E.exp ? seq.join() === 'rcExport,rcGo,rcExport' : seq.every(x => x === 'rcGo'), seq.join());
       await page.keyboard.press('Escape'); await page.mouse.click(5, 5); await page.goBack().catch(() => {}); await page.waitForTimeout(300);
       ok(`${tag}: Esc, scrim tap and Back don't close it`, await page.locator('.recovery-layer').count() === 1);
@@ -478,6 +490,17 @@ sections.recoveryRestored = () => recoveryCase('restored');
 sections.recoveryFresh = () => recoveryCase('fresh');
 sections.recoveryBadBakOnly = () => recoveryCase('fresh', { 'eggfarm.ui': DONE, 'eggfarm.save.bak': '{"version":5,"sav' }, 'fresh (SD4-3 main missing + bad .bak)');
 sections.recoveryStorage = () => recoveryCase('storage');
+// v4 f6: the lease write is refused (storage full) with a valid save -> the lone tab keeps playing and shows the v2.1 Storage dialog.
+sections.recoveryLeaseBlocked = async () => { const save = await getValidSave();
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 640 } }); const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.addInitScript(o => { if (!sessionStorage.getItem('seeded')) { for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }
+    const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'eggfarm.lease') throw new DOMException('full', 'QuotaExceededError'); return set.call(this, k, v); }; }, { 'eggfarm.ui': DONE, 'eggfarm.save': save });
+  await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
+  await page.waitForSelector('.recovery-layer', { timeout: 5000 }).catch(() => {});
+  const st = await page.evaluate(() => ({ outcome: document.querySelector('.recovery-layer')?.dataset.outcome ?? null, g: window.eggfarm.recoveryOutcome, title: document.querySelector('#rcT')?.textContent, exp: document.querySelector('#rcExport')?.className ?? null, tabGuard: !!document.querySelector('.tab-guard'), basket: window.eggfarm.state.basket }));
+  ok('v4 storageBlocked: Storage dialog (v2.1), export offered, never "another tab", save kept', st.outcome === 'storage' && st.g === 'storage' && st.title === RC.storage.title && st.exp === 'rc-export-q' && !st.tabGuard && st.basket === 15, JSON.stringify(st));
+  if (shot) await page.screenshot({ path: `${SHOTS}/save-recovery-v4-leaseblocked-360.png` });
+  ok('v4 storageBlocked: no page errors', !errors.length, errors.join(' | ').slice(0, 200)); await ctx.close(); };
 sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE, 'eggfarm.save': await getValidSave() } }); await page.waitForTimeout(300);
   ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };
 

@@ -38,7 +38,7 @@ const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void
 export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null } = { newGame: false }) {
   let stored: any = {}; try { stored = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') ?? {}; } catch { /* bad flags: defaults */ }
   // PT1-4: a fresh-start fallback (AC14b F/Q) is a new farm: drop FTUE / Workers-tip progress flags, keep prefs.
-  if (opts.recovery && !opts.recovery.restored_from_backup) stored = keepPrefsOnly(stored);
+  if (opts.recovery && !opts.recovery.restored_from_backup && opts.newGame) stored = keepPrefsOnly(stored);
   const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...stored };
   const saveFlags = () => { try { localStorage.setItem(UI_KEY, JSON.stringify(flags)); } catch { /* full */ } };
   flags.sessions = (flags.sessions ?? 0) + 1; // AC14g session_count (one per page load / Tap to start)

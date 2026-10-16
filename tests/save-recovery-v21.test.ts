@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
-import { loadSafe, serialize, recoveryOutcome, SAVE_KEY, BAK_KEY, type Recovery } from '../src/save/save';
+import { loadSafe, serialize, recoveryOutcome, storageBlockedRecovery, SAVE_KEY, BAK_KEY, type Recovery } from '../src/save/save';
 import { initialState } from '../src/sim/state';
 import { recoveryCopy, showRecoveryDialog, EXPORT_ARIA } from '../src/ui/save-recovery';
 const kvm = (quota = false) => { const m = new Map<string, string>(); let quotaHits = 0;
@@ -59,5 +59,19 @@ describe('AC14b v2.1 outcome -> dialog', () => {
     expect(css).toMatch(/\.recovery-card \.rc-link\{[^}]*min-width:120px;min-height:44px/);
     expect(css).toMatch(/\.recovery-card \.rc-primary\{[^}]*min-height:48px/);
     expect(css).toMatch(/\.recovery-card :focus-visible\{outline:3px solid var\(--c-focus\);outline-offset:3px\}/);
+  });
+});
+
+describe('v4 storageBlocked routes through the v2.1 Storage dialog', () => {
+  it('synthesized recovery is the storage outcome with the current main bytes for Export', () => {
+    const kv = kvm(); const raw = good(); kv.m.set(SAVE_KEY, raw);
+    const r = storageBlockedRecovery(kv); expect(recoveryOutcome(r)).toBe('storage');
+    expect(r.raw).toBe(raw); expect(recoveryCopy(r)!.outcome).toBe('storage'); expect(recoveryCopy(r)!.exportStyle).toBe('secondary');
+  });
+  it('blocked localStorage still yields a storage recovery', () => {
+    const r = storageBlockedRecovery({ getItem: () => { throw new Error('blocked'); } } as any); expect(recoveryOutcome(r)).toBe('storage'); expect(r.raw).toBe('');
+  });
+  it('main.ts sets g.recovery so app.ts opens the dialog', () => {
+    const src = readFileSync('src/main.ts', 'utf8'); expect(src).toMatch(/lease\.storageBlocked[\s\S]{0,200}g\.recovery = storageBlockedRecovery\(localStorage\)/);
   });
 });

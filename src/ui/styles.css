@@ -417,6 +417,7 @@ html,body{overflow-x:hidden;max-width:100%}
 .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:12px;border-radius:999px;background:var(--c-white);color:var(--c-wood-text);border:2px solid var(--c-wood-text);box-shadow:none;font:700 16px var(--f-body, Nunito, sans-serif);cursor:pointer}
 .recovery-card .rc-msg{margin-top:8px}.recovery-card .rc-msg:empty{margin-top:0}
 .recovery-card :focus-visible{outline:3px solid var(--c-focus);outline-offset:3px}
+.recovery-layer.kbd .recovery-card button:focus{outline:3px solid var(--c-focus);outline-offset:3px}
 .onb[hidden]{display:none!important}
 /* R3: the rotate icon always renders at 64px (beat generic img sizing) */
 #rotate-prompt img{width:64px!important;height:64px!important;min-width:64px;flex:none}
