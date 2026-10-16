@@ -1,10 +1,26 @@
 // Art & UX rc0 review shots + rotate-prompt checks (art-ux/m3-rotate-portrait-prompt.md §6.2/§6.3). Usage: node scripts/artux-shots.mjs [webkit|chromium]
 import { chromium, webkit } from 'playwright-core';
-import { spawn } from 'node:child_process'; import { mkdirSync } from 'node:fs';
-const eng = process.argv[2] || 'chromium'; const OUT = process.env.OUT ?? '../engineering/screenshots/rc1-pending-artux'; mkdirSync(OUT, { recursive: true });
-const port = 5100 + Math.floor(Math.random() * 200);
+import { spawn } from 'node:child_process'; import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+const eng = process.argv[2] || 'chromium'; const port = 5100 + Math.floor(Math.random() * 200);
 const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+// Output folder comes from the served build's version string: engineering/screenshots/artux-<release>-<hash>/.
+// Refuses a +dirty build, and any existing folder whose README names a different commit (or has no README).
+// OUT= is allowed only if that folder's README names the served build's hash.
+const die = m => { console.error(`artux-shots: ${m}`); process.kill(-srv.pid); process.exit(2); };
+const html = await (await fetch(`http://127.0.0.1:${port}/`)).text();
+const srcs = [...html.matchAll(/src="([^"]+\.js)"/g)].map(m => m[1]);
+let ver = null; for (const u of srcs) { const m = (await (await fetch(`http://127.0.0.1:${port}${u}`)).text()).match(/["'`](m\d+-[a-z0-9-]+)\+([0-9a-f]{7,40})(\+dirty)?["'`]/); if (m) { ver = m; break; } }
+if (!ver) die('no version string found in the served build');
+const [, release, hash, dirty] = ver; if (dirty) die(`served build ${ver[0]} is +dirty; commit, rebuild (npm run build:qa) and re-run`);
+const OUT = process.env.OUT ?? `../engineering/screenshots/artux-${release}-${hash}`;
+const README = `${OUT}/README.txt`;
+if (existsSync(OUT)) {
+  const named = existsSync(README) ? [...readFileSync(README, 'utf8').matchAll(/\b[0-9a-f]{7,40}\b/g)].map(m => m[0]) : [];
+  if (!named.some(h => h.startsWith(hash) || hash.startsWith(h))) die(`${OUT} ${existsSync(README) ? `README names ${named.join(', ') || 'no commit'}` : 'has no README'}; served build is ${hash}. Refusing to write.`);
+} else if (process.env.OUT) die(`OUT=${OUT} does not exist; OUT= may only target an existing folder whose README names ${hash}`);
+else { mkdirSync(OUT, { recursive: true }); writeFileSync(README, `Images from commit ${hash} (build ${release}+${hash}), artux-shots, first written ${new Date().toString()}.\n`); }
+console.log(`artux-shots: build ${release}+${hash} -> ${OUT}`);
 const br = eng === 'webkit' ? await webkit.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); let bad = 0;
 const ok = (k, v, d) => { if (!v) bad++; console.log(k, v ? 'PASS' : 'FAIL', JSON.stringify(d ?? '')); };
 const open = async (opt, st) => { const ctx = await br.newContext(opt); const p = await ctx.newPage();
