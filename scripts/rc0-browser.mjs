@@ -660,6 +660,23 @@ sections.orderNeed = async () => {
   }
   await ctx.close();
 };
+// ---------- Art & UX 23:25: sticky refill bar opaque + full width + 8px padding; cards scroll-margin (360, 1280 docked) ----------
+sections.refillBar = async () => {
+  for (const [w, h] of [[360, 800], [1280, 800]]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 10, farmLevel: 12, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2,
+      workers: { market_hand: { energy: 0, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click();
+    const has = await page.waitForSelector('#uRow > .refill-wrap', { timeout: 5000 }).then(() => true, () => false);
+    if (!has) { ok(`Refill bar ${w}: sticky bar present`, false, 'no #uRow > .refill-wrap in this state'); await ctx.close(); continue; }
+    const r = await page.evaluate(() => { const b = document.querySelector('#uRow > .refill-wrap'), row = document.querySelector('#uRow'), cs = getComputedStyle(b), a = b.getBoundingClientRect(), rr = row.getBoundingClientRect();
+      const card = document.querySelector('#uRow .wk'); return { bg: cs.backgroundColor, pt: cs.paddingTop, pb: cs.paddingBottom, full: a.width >= row.clientWidth - 1, sm: card ? parseFloat(getComputedStyle(card).scrollMarginTop) : null, barH: a.height }; });
+    const opaque = /^rgb\(/.test(r.bg) || /, 1\)$/.test(r.bg);
+    ok(`Refill bar ${w}: opaque cream, full width, 8px vertical padding; cards scroll-margin >= bar height`, opaque && r.pt === '8px' && r.pb === '8px' && r.full && r.sm >= r.barH, JSON.stringify(r));
+    const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); await page.evaluate(() => { const row = document.querySelector('#uRow'); const sc = row.closest('.body') ?? row.parentElement; sc.scrollTop = 120; }); await page.waitForTimeout(200); await page.screenshot({ path: `${FCS}/cuta3-refillbar-${w}-${ENGINE}.png` }); }
+    await ctx.close();
+  }
+};
 // ---------- m3-customer-queue-spec §2.4: order line drops " eggs" when it doesn't fit, never mid-word (360) ----------
 sections.orderFit = async () => {
   const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 30, customers: [{ id: 1, demand: 1.8e6, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }],

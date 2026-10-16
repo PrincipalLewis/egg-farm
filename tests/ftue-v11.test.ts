@@ -12,7 +12,7 @@ describe('FTUE v1.1 §2.1 gates', () => {
     expect(ftueGate('sell', C({ customers: 1, basket: 1 })).open).toBe(true);
   });
   it('Buy needs coins >= cost (PT1: "Tap Buy" while $2 short)', () => {
-    expect(ftueGate('upgrade', C({ coinsCents: 800 }))).toEqual({ open: false, hint: 'Sell a few more eggs to afford it · $2 to go' });
+    expect(ftueGate('upgrade', C({ coinsCents: 800 }))).toEqual({ open: false, hint: 'Sell a few more eggs to afford it\u00a0·\u00a0$2\u00a0to\u00a0go' });
     expect(ftueGate('upgrade', C({ coinsCents: 1000 })).open).toBe(true);
   });
   it('each step waits for its own event; pointer hides if the gate closes while shown', () => {

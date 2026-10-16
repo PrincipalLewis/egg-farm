@@ -22,7 +22,7 @@ export function ftueGate(name: string, c: GateCtx): Gate {
     if (c.customers < 1) return { open: false, hint: 'A customer is on the way…' + (c.nextCustomerInS <= 10 ? ` ${Math.max(1, Math.ceil(c.nextCustomerInS))} s` : '') };
     return { open: c.basket >= 1, hint: 'Collect some eggs to sell.' };
   }
-  return { open: c.coinsCents >= c.costCents, hint: `Sell a few more eggs to afford it · ${usd(c.costCents - c.coinsCents)} to go` };
+  return { open: c.coinsCents >= c.costCents, hint: `Sell a few more eggs to afford it\u00a0·\u00a0${usd(c.costCents - c.coinsCents)}\u00a0to\u00a0go` }; // Art & UX 23:25: '· $2 to go' never breaks
 }
 export type GateMode = 'mark' | 'hint' | 'none';
 export class OnboardingFlow {
