@@ -16,11 +16,11 @@ export interface GameState {
   coopFullS: number;
   /** S2-8 (Product): wage cents owed but not yet charged (fraction < 1 per worker); charged exactly at the economy.csv rate over time. v6. */
   wageFracCents: { market_hand?: number; coop_hand?: number };
-  /** M4-A tracks (sim/tracks.ts; live only with balance.m4.enabled). Saved since v7 (migration pending: H = V = F). */
+  /** M4-A tracks (sim/tracks.ts; live only with balance.m4.enabled). Saved in the v6 file (SAVE_VERSION stays 6); a pre-M4 farm is price-matched once on load (H = F, V per M4A-28). */
   hensLevel: number; eggValueLevel: number;
-  /** M4-A: set once the tracks exist for this farm (new M4 game or migrated by migrateTracksV7). Absent = pre-M4 farm. */
+  /** M4-A: set once the tracks exist for this farm (new M4 game or migrated by migrateTracksV7). A marker in the v6 save, not a save version. Absent = pre-M4 farm. */
   tracksV7?: 1;
-  /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the v7 migration). */
+  /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the interim track migration). */
   celebratedMilestones: string[];
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
