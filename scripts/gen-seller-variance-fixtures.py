@@ -50,5 +50,11 @@ out = dict(source='product/sim/seller_variance_sim.py run/run_m2 policy=seller15
            proposal_sha256=sha(os.path.join(SIM, 'seller-variance-proposal.md')), economy_csv_sha256=sha(CSV), config='P1Q + spec_from_csv(data/economy.csv)',
            python=sys.version.split()[0], T=T, seeds=SEEDS, var=S.VAR_DEFAULT, draws=draws, traces=traces, runs=runs)
 path = os.path.join(ROOT, 'tests', 'fixtures', 'seller_variance.json')
-json.dump(out, open(path, 'w'), indent=0, sort_keys=True); open(path, 'a').write('\n')
+# compact: minified, one line per run/seed and per trace (diff-friendly)
+J = lambda x: json.dumps(x, sort_keys=True, separators=(',', ':'))
+def block(d, ind): return '{\n' + ',\n'.join(f'{ind}{J(k)}:{v}' for k, v in d.items()) + '\n' + ind[:-1] + '}'
+body = {k: J(v) for k, v in out.items() if k not in ('runs', 'traces')}
+body['traces'] = block({k: J(v) for k, v in out['traces'].items()}, '  ')
+body['runs'] = block({k: block({sd: J(r) for sd, r in v.items()}, '   ') for k, v in out['runs'].items()}, '  ')
+open(path, 'w').write(block(body, ' ') + '\n')
 print('wrote', path)

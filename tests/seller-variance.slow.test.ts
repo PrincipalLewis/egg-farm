@@ -1,3 +1,5 @@
+// SLOW (~80 s): *.slow.test.ts is excluded from default `vitest run` / `npm test` (vite.config.ts test.exclude).
+// Run it with `npm run test:slow` (vitest.slow.config.ts); CI always runs it in the ci.yml `slow` job. Seeds stay at 100.
 // Seller15 variance bot (product/sim/seller-variance-proposal.md, sha256 17877b41; HoQA F-1): TS vs Python parity.
 // Expected values: tests/fixtures/seller_variance.json, produced by scripts/gen-seller-variance-fixtures.py running the
 // Python reference product/sim/seller_variance_sim.py (run / run_m2, policy seller15, 100 seeds, 60 min) on this repo's
@@ -15,6 +17,7 @@
 //           P95/P50 spread within 2 percentage points; plus proposal targets 1-2 on the TS bot itself.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { balance as b } from '../src/config/balance';
 import { runBot } from './bot';
 import { runM2 } from './bot-m2';
@@ -31,6 +34,7 @@ const lvlAt = (r: Record<string, number>, t: number) => Math.max(0, ...Object.en
 const REL_EPS = 1e-12;
 const near = (a: number, e: number) => a === e || Math.abs(a - e) <= REL_EPS * Math.max(Math.abs(a), Math.abs(e));
 const t18 = (r: Record<string, number>) => (r['18'] ?? Infinity) / 60;
+const LVL30: Partial<Record<'m1' | 'm2', number[]>> = {};
 const RUN = {
   m1: (s: number, v?: typeof VAR_DEFAULT) => reachOf(runBot(b, s, 'seller15', fx.T, 15, v).reach),
   m2: (s: number, v?: typeof VAR_DEFAULT) => reachOf(runM2(b, s, { model: 'seller15', T: fx.T, variance: v }).reach),
@@ -67,6 +71,21 @@ describe('old deterministic bot (variance off) = Python var=None', () => {
   it('m1: per-seed reach times exact, 100 seeds', () => {
     for (const s of fx.seeds) expect(RUN.m1(s), `seed ${s}`).toEqual(fx.runs['m1/old'][String(s)].reach);
   }, 120_000);
+  // m2: no per-seed bit-exactness even with variance off (pre-existing on main, not from this port): the workers economy is
+  // partly demand-bound and the game's demand RNG is not Python's. Asserted: same levels reached, level at 30:00 equal per
+  // seed, every reach time within one 15 s sell step, and the old bot still degenerate (<= 2 distinct t18) on both sides.
+  it('m2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds', () => {
+    let exact = 0; const tT: number[] = [], tP: number[] = [];
+    for (const s of fx.seeds) {
+      const got = RUN.m2(s), exp = fx.runs['m2/old'][String(s)].reach;
+      expect(Object.keys(got), `seed ${s}`).toEqual(Object.keys(exp));
+      expect(lvlAt(got, 1800), `seed ${s} L@30`).toBe(lvlAt(exp, 1800));
+      for (const L of Object.keys(exp)) expect(Math.abs(got[L] - exp[L]), `seed ${s} L${L}`).toBeLessThanOrEqual(15);
+      if (JSON.stringify(got) === JSON.stringify(exp)) exact++; tT.push(t18(got)); tP.push(t18(exp));
+    }
+    expect(new Set(tT).size).toBeLessThanOrEqual(2); expect(new Set(tP).size).toBeLessThanOrEqual(2);
+    console.log(`m2 old: ${exact}/100 seeds bit-exact`);
+  }, 120_000);
 });
 
 for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, ${fx.seeds.length} seeds (distribution)`, () => {
@@ -81,6 +100,26 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, 
     expect(Math.abs(spread(tT) - spread(tP))).toBeLessThanOrEqual(2);
     expect(new Set(tT).size).toBeGreaterThanOrEqual(50); expect(q(tT, 0.95)).not.toBe(q(tT, 0.5)); // target 1
     expect(spread(tT)).toBeGreaterThanOrEqual(3); expect(spread(tT)).toBeLessThanOrEqual(15);        // target 2
+    expect(new Set(tP).size).toBeGreaterThanOrEqual(50); expect(q(tP, 0.95)).not.toBe(q(tP, 0.5));   // targets 1-2 on the Python fixture too
+    expect(spread(tP)).toBeGreaterThanOrEqual(3); expect(spread(tP)).toBeLessThanOrEqual(15);
+    expect(new Set(tT.slice(0, 30)).size).toBeGreaterThanOrEqual(15);                                   // target 1, '15 of 30 seeds' variant
+    expect(new Set(tP.slice(0, 30)).size).toBeGreaterThanOrEqual(15);
+    LVL30[wk] = ts.map(r => lvlAt(r, 1800));
     console.log(`${wk} variance t18 P5/P50/P95 TS ${[.05, .5, .95].map(p => q(tT, p).toFixed(2)).join('/')} PY ${[.05, .5, .95].map(p => q(tP, p).toFixed(2)).join('/')}; spread TS ${spread(tT).toFixed(1)}% PY ${spread(tP).toFixed(1)}%; L@30 P5/P95 ${q(ts.map(r => lvlAt(r, 1800)), .05)}/${q(ts.map(r => lvlAt(r, 1800)), .95)}`);
+  }, 300_000);
+});
+
+// AC7 band on the variance bot (proposal §AC7 with variance; CCR PR #19 M1). Judged at P5/P95 of level at 30:00.
+// Tied to the economy CSV: it only holds on F1 (economy.f1-m4cols.csv 86f0e80e). On main's pre-F1 data/economy.csv
+// (57d964d5) it is expected to fail -> it.fails, reason 'needs #17 economy.f1-m4cols 86f0e80e'. When data/economy.csv is
+// 86f0e80e it becomes a hard assert automatically (regenerate the fixture first: scripts/gen-seller-variance-fixtures.py).
+const F1_CSV = '86f0e80e';
+const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
+const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const; // no workers L18-22, with workers L20-24
+describe(`AC7 band, variance bot (data/economy.csv ${csvSha})`, () => {
+  const ac7 = csvSha === F1_CSV ? it : it.fails; // expected-fail until F1: 'needs #17 economy.f1-m4cols 86f0e80e'
+  for (const wk of ['m1', 'm2'] as const) ac7(`${wk}: L@30 P5 >= ${BAND[wk].lo}, P95 <= ${BAND[wk].hi}${csvSha === F1_CSV ? '' : ' [expected-fail: needs #17 economy.f1-m4cols 86f0e80e]'}`, () => {
+    const l = LVL30[wk] ?? fx.seeds.map(s => lvlAt(RUN[wk](s, VAR_DEFAULT), 1800));
+    expect(q(l, 0.05)).toBeGreaterThanOrEqual(BAND[wk].lo); expect(q(l, 0.95)).toBeLessThanOrEqual(BAND[wk].hi);
   }, 300_000);
 });
