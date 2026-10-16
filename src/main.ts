@@ -4,7 +4,7 @@ import { Game } from './game';
 import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
-import { IdbMirror, reconcile } from './save/idb-mirror';
+import { IdbMirror, reconcile, IDB_BOOT_READ_TIMEOUT_MS } from './save/idb-mirror';
 import { mountApp } from './ui/app';
 import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
@@ -62,8 +62,10 @@ async function boot() {
   // M4A-31(b)/(f)6 + review M1: the newer-save check runs FIRST, before the flush request, the lease claim, reconcile or
   // any Game write. It covers localStorage main, .bak and the IndexedDB copy. A refused tab never joins the single-tab
   // guard (so a live tab is never frozen or made to save by it) and writes no save key anywhere.
-  const mirror = await IdbMirror.open();
-  let idbRaw: string | null = null; if (mirror) idbRaw = await mirror.read();
+  // M4-20: the boot read's outcome (ok / absent / unknown) is carried into the migration decision.
+  const bootIdb = await IdbMirror.openForBoot();
+  const mirror = bootIdb.mirror; let idbRaw: string | null = bootIdb.raw;
+  let idbBoot = bootIdb.status, idbReason = bootIdb.reason;
   let preNewer: number | null = null; try { preNewer = newerStoredVersion(localStorage, idbRaw); } catch { /* localStorage blocked: Game reports it */ }
   if (preNewer !== null) { refuseNewer(preNewer, idbRaw); return; }
   // Single-tab guard: this (newest) tab claims the save BEFORE reading it, so an older tab's next save is blocked and
@@ -76,7 +78,7 @@ async function boot() {
   // before this read, so the read sees it). Review minor main.ts:79-80: re-check for a newer save here too, so a newer
   // build that saved during the flush is refused BEFORE we claim, and the live tab never flashes 'Game open in another tab'.
   // From here to `new Game` there is no await, so nothing else can save in between.
-  if (mirror) idbRaw = (await mirror.read()) ?? idbRaw; // Reviewer N3: a failed/timed-out re-read keeps the first read
+  if (mirror) { const r2 = await mirror.readStrict(IDB_BOOT_READ_TIMEOUT_MS); if (r2 === undefined) { idbBoot = 'unknown'; idbReason = 'idb_read_error'; } else if (r2 !== null) idbRaw = r2; } // Reviewer N3: a failed/timed-out re-read keeps the first read (and defers the migration, M4-20)
   let preNewer2: number | null = null; try { preNewer2 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
   if (preNewer2 !== null) { lease.stop(); refuseNewer(preNewer2, idbRaw); return; }
   const takeover = lease.claim(playHere);
@@ -84,7 +86,7 @@ async function boot() {
   let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
   if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
-  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw);
+  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw, { idbBoot, idbAbsentReason: idbReason });
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
@@ -121,7 +123,7 @@ async function boot() {
   new RenderPump(() => { if (frozen) return; g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
   window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
   // §3c interim path: backup (LS + IndexedDB) then in-session commit; after the lease claim and newer checks (m1).
-  if (g.tracksMigrationPending) void g.startTracksMigration((globalThis as any).indexedDB).then(r => { if (r === 'committed') ui.render?.(); });
+  if (g.tracksMigrationPending) void g.startTracksMigration().then(r => { if (r === 'committed') ui.render?.(); });
   stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
 }
 preload().then(() => {

@@ -23,12 +23,42 @@ export function decodeBackup(text: unknown): V6BackupRecord | null {
   if (typeof text !== 'string') return null; let d: any; try { d = JSON.parse(text); } catch { return null; }
   return d && typeof d === 'object' && typeof d.migrationId === 'string' && d.migrationId.length === MIGRATION_ID_HEX && typeof d.raw === 'string' ? { migrationId: d.migrationId, raw: d.raw } : null;
 }
-/** M4-16 as ruled (Architect N1, 2026-10-16 21:59): IndexedDB is "absent" only when there is no indexedDB global or the
- *  open throws/rejects with a private-mode or security error; then the migration proceeds on localStorage alone. Any
- *  other failure (open timeout at the mirror's 1.5 s, other open error, a failed read) means NO migration this session:
- *  stay v6 under flag-off rules, save_migration_aborted{reason}, retry on the next load (IndexedDB may hold a newer save). */
-export type IdbBackupOpen = 'ok' | 'absent' | 'timeout' | 'error';
-export const idbAbortReason = (o: Exclude<IdbBackupOpen, 'ok' | 'absent'> | 'read_error') => (o === 'timeout' ? 'idb_timeout' : 'idb_read_error');
+/** quota_headroom (spec v1.10 + HoE): free localStorage >= max(lsHeadroomFactor x (save + backup), save + backup + lsHeadroomMarginBytes). */
+export const headroomNeed = (saveBytes: number, backupBytes: number, s: { lsHeadroomFactor: number; lsHeadroomMarginBytes: number }) => Math.max(s.lsHeadroomFactor * (saveBytes + backupBytes), saveBytes + backupBytes + s.lsHeadroomMarginBytes);
+export const HEADROOM_PROBE_KEY = 'eggfarm.save.headroom_probe';
+/** M4-16 attempt counter: deferrals only; removed on commit; cleared by Reset. attempt_count >= STUCK_ATTEMPTS => stuck_on_v6. */
+export const MIGRATION_ATTEMPTS_KEY = 'eggfarm.save.migration_attempts';
+export const STUCK_ATTEMPTS = 3;
+/** Probe `bytes` of free localStorage under the scratch key, removed at once. true = it fits. */
+export function probeHeadroom(kv: KV, bytes: number): boolean {
+  try { kv.setItem(HEADROOM_PROBE_KEY, 'x'.repeat(Math.max(0, Math.ceil(bytes)))); return true; } catch { return false; }
+  finally { try { kv.removeItem?.(HEADROOM_PROBE_KEY); } catch { /* best effort */ } }
+}
+/** M4-19 rank of a stored copy: [version, committed (tracksV7 + v6BackupId) ? 1 : 0]; savedAt is the caller's tie-break. */
+/** HoE correction: a main save's write sequence; missing / invalid reads as 0. */
+export const saveSeqOf = (raw: unknown): number => { if (typeof raw !== 'string') return 0; try { const n = JSON.parse(raw)?.saveSeq; return Number.isSafeInteger(n) && n > 0 ? n : 0; } catch { return 0; } };
+export function rankOf(raw: unknown): [number, number, number] {
+  if (typeof raw !== 'string') return [-1, 0, 0]; let d: any; try { d = JSON.parse(raw); } catch { return [-1, 0, 0]; }
+  const v = Number.isInteger(d?.version) ? d.version : -1, st = d?.state;
+  return [v, st && st.tracksV7 === 1 && typeof st.v6BackupId === 'string' && st.v6BackupId !== '' ? 1 : 0, saveSeqOf(raw)];
+}
+/** M4-19 (HoE correction): > 0 when a outranks b by version, then committed migrationId, then saveSeq, then savedAt. */
+export function rankCompare(a: unknown, b: unknown, now = Date.now()): number {
+  const [va, ca, qa] = rankOf(a), [vb, cb, qb] = rankOf(b); if (va !== vb) return va - vb; if (ca !== cb) return ca - cb; if (qa !== qb) return qa - qb;
+  const t = (x: unknown) => { try { return savedAtRank(JSON.parse(x as string).savedAt, now); } catch { return -Infinity; } };
+  const ta = t(a), tb = t(b); return ta === tb ? 0 : ta > tb ? 1 : -1;
+}
+/** M4-18/M4-21: the write version for the session (m4Active). M4-A's interim marker path writes v6 either way. */
+export const writeVersion = (_m4Active: boolean) => SAVE_VERSION;
+/** M4-21 dedicated commit write (not Game.save): .bak rotation of the current valid main, then main; read back.
+ *  localStorage only (M4-24), no IndexedDB fallback. Returns the committed raw, or null on any failure. */
+export function commitWrite(kv: KV, state: GameState, now: number, b: Balance): string | null {
+  try {
+    if (newerStoredVersion(kv) !== null) return null;
+    const cur = kv.getItem(SAVE_KEY); if (cur && validate(cur, b).ok) kv.setItem(BAK_KEY, cur);
+    const raw = serialize(state, now, saveSeqOf(cur) + 1); kv.setItem(SAVE_KEY, raw); return kv.getItem(SAVE_KEY) === raw ? raw : null;
+  } catch { return null; }
+}
 /** Telemetry `path` for the interim marker migration (vs. the S-4 v7 path later). */
 export const TRACKS_MARKER_PATH = 'tracksV7_marker';
 /** M4-15: a stored record is committed only when its id equals the live save's v6BackupId. */
@@ -76,7 +106,7 @@ export function migrate(d: any, b: Balance): SaveFile {
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
 /** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
-export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak', 'eggfarm.save.v6_backup'] as const; // review m4: Reset clears the v6 backup too (V6_BACKUP_KEY) // QA BUG-4: .bak too, so reset progress can't come back
+export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak', 'eggfarm.save.v6_backup', 'eggfarm.save.migration_attempts', 'eggfarm.save.headroom_probe'] as const; // N3: probe key too // review m4: Reset clears the v6 backup too (V6_BACKUP_KEY) // QA BUG-4: .bak too, so reset progress can't come back
 export const UI_KEY = 'eggfarm.ui';
 /** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
 export function keepPrefsOnly(f: any): Record<string, unknown> {
@@ -105,16 +135,17 @@ export function checksum(text: string): string {
   return (h >>> 0).toString(16).padStart(8, '0');
 }
 /** Serialise a save; `sum` covers the state JSON. */
-export function serialize(state: GameState, now: number): string {
+export function serialize(state: GameState, now: number, saveSeq?: number): string {
   const st = JSON.stringify(state);
-  return `{"version":${SAVE_VERSION},"savedAt":${now},"sum":"${checksum(st)}","state":${st}}`;
+  return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
 }
 /**
  * Write the save. With `rotate`, the current main save is first copied into `.bak`, but only if it is itself valid
  * (QA case 2: a fresh-start save never rotates until the caller allows it, and a bad main never overwrites `.bak`).
  */
 export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
-  const raw = serialize(state, now);
+  let prev: string | null = null; try { prev = kv.getItem(SAVE_KEY); } catch { /* blocked: the write below throws */ }
+  const raw = serialize(state, now, saveSeqOf(prev) + 1); // HoE correction: saveSeq on main (missing = 0)
   // BUG-2: never write over a newer-build save in main or .bak (callers check first; this is the last line of defence).
   const nv = newerStoredVersion(kv); if (nv !== null) throw new NewerSaveError(nv);
   if (rotate && b) {

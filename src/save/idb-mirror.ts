@@ -7,10 +7,13 @@
  * localStorage only, as in rc0.
  */
 import type { Balance } from '../config/balance';
-import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, savedAtRank, type KV } from './save';
+import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, savedAtRank, rankCompare, type KV } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** ADR M4-11: IDB copy of the one-time v6 backup (same bytes as localStorage eggfarm.save.v6_backup). */
-export const IDB_V6_BACKUP_KEY = 'v6_backup';
+export type IdbBoot = 'ok' | 'absent' | 'unknown';
+/** Spec v1.10: the 1500 ms rule is the OPEN timeout (IDB_OPEN_TIMEOUT_MS). Boot reads keep rc1's existing 1.5 s read
+ *  timeout (unchanged behaviour; a boot can't hang on a stuck read); the migration's pre-commit re-read has none. */
+export const IDB_BOOT_READ_TIMEOUT_MS = 1500;
 /** rc1 D2 mirror open timeout; also the migration-backup open timeout (M4-16 ruling N1). */
 export const IDB_OPEN_TIMEOUT_MS = 1500;
 /** The subset of IDBFactory we use (lets unit tests pass a fake). */
@@ -31,24 +34,30 @@ export class IdbMirror {
       return new IdbMirror(db);
     } catch { return null; }
   }
-  /** Migration backup only (M4-16 ruling N1): 'absent' = no factory, or open throws/rejects with SecurityError /
-   *  InvalidStateError (private mode); 'timeout' after ms; 'error' for anything else. */
-  static async openForBackup(factory: IdbFactory | undefined, ms = IDB_OPEN_TIMEOUT_MS): Promise<{ mirror: IdbMirror | null; open: 'ok' | 'absent' | 'timeout' | 'error' }> {
-    if (!factory) return { mirror: null, open: 'absent' };
-    const priv = (e: unknown) => ['SecurityError', 'InvalidStateError'].includes((e as any)?.name);
+  /** m4-design §3d / M4-20: open + read IndexedDB main at boot with a definite outcome for the migration.
+   *  'absent' = no indexedDB global, or open throws/rejects SecurityError/InvalidStateError (private mode; M4-16
+   *  "security"); 'unknown' = open timeout, blocked, any other error or a failed read (the migration defers);
+   *  'ok' = read succeeded (raw may be null = no IDB copy). */
+  static async openForBoot(factory: IdbFactory | undefined = (globalThis as any).indexedDB, ms = IDB_OPEN_TIMEOUT_MS): Promise<{ mirror: IdbMirror | null; status: IdbBoot; raw: string | null; reason?: string }> {
+    if (!factory) return { mirror: null, status: 'absent', raw: null, reason: 'no_global' };
+    const sec = (e: unknown) => ['SecurityError', 'InvalidStateError'].includes((e as any)?.name);
+    let db: IDBDatabase, blocked = false;
     try {
       const r = factory.open(IDB_NAME, 1);
       r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains(IDB_STORE)) r.result.createObjectStore(IDB_STORE); };
-      const db = await timeout(req(r).catch(e => { throw (r as any).error ?? e; }), ms);
-      return { mirror: new IdbMirror(db), open: 'ok' };
+      (r as any).onblocked = () => { blocked = true; };
+      db = await timeout(req(r).catch(e => { throw (r as any).error ?? e; }), ms);
     } catch (e) {
-      if ((e as Error)?.message === 'idb timeout') return { mirror: null, open: 'timeout' };
-      return { mirror: null, open: priv(e) ? 'absent' : 'error' };
+      if (sec(e)) return { mirror: null, status: 'absent', raw: null, reason: 'security' };
+      return { mirror: null, status: 'unknown', raw: null, reason: blocked ? 'idb_blocked' : (e as Error)?.message === 'idb timeout' ? 'idb_timeout' : 'idb_read_error' };
     }
+    const m = new IdbMirror(db); const v = await m.readStrict(IDB_BOOT_READ_TIMEOUT_MS);
+    if (v === undefined) return { mirror: m, status: 'unknown', raw: null, reason: 'idb_read_error' };
+    return { mirror: m, status: 'ok', raw: v };
   }
-  /** Migration only: read IndexedDB main; undefined on a failed read (caller aborts, idb_read_error). */
-  async readMainForBackup(ms = IDB_OPEN_TIMEOUT_MS): Promise<string | null | undefined> {
-    try { const v = await timeout(req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)), ms); return typeof v === 'string' ? v : null; }
+  /** Read IndexedDB main: the string, null (no copy) or undefined (the read failed / timed out). Never throws. */
+  async readStrict(ms?: number): Promise<string | null | undefined> {
+    try { const g = req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)); const v = await (ms === undefined ? g : timeout(g, ms)); if (typeof v !== 'string') return null; this.seeNewer(v); return v; }
     catch { return undefined; }
   }
 
@@ -68,31 +77,13 @@ export class IdbMirror {
     if (this.newer !== null) return Promise.resolve();
     try {
       const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); this.pending++;
-      const g = os.get(IDB_KEY); g.onsuccess = () => { if (this.seeNewer(g.result) === null) os.put(raw, IDB_KEY); };
+      const g = os.get(IDB_KEY); g.onsuccess = () => { if (this.seeNewer(g.result) === null && !(typeof g.result === 'string' && rankCompare(g.result, raw) > 0)) os.put(raw, IDB_KEY); }; // M4-19: never over a higher-ranked copy
       return new Promise(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) this.failed = true; res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
     } catch { this.failed = true; return Promise.resolve(); }
   }
-  /** m4-design §3c: write the backup record (overwrites a leftover); resolves true only when the transaction committed
-   *  and a read-back in the same transaction matched; false on failure (the caller aborts). Never throws. */
-  putV6Backup(record: string): Promise<boolean> {
-    try {
-      const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); let same = false;
-      const p = os.put(record, IDB_V6_BACKUP_KEY); p.onsuccess = () => { const g = os.get(IDB_V6_BACKUP_KEY); g.onsuccess = () => { same = g.result === record; }; };
-      return new Promise<boolean>(res => { t.oncomplete = () => res(same); t.onerror = t.onabort = () => res(false); });
-    } catch { return Promise.resolve(false); }
-  }
-  /** M4-13/M4-15 cleanup (best effort, never throws): remove a leftover / aborted-attempt record. */
-  deleteV6Backup(): Promise<void> {
-    try { const t = this.tx('readwrite'); t.objectStore(IDB_STORE).delete(IDB_V6_BACKUP_KEY); return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
-    catch { return Promise.resolve(); }
-  }
-  readV6Backup(): Promise<string | null> {
-    try { const g = this.tx('readonly').objectStore(IDB_STORE).get(IDB_V6_BACKUP_KEY); return new Promise(res => { g.onsuccess = () => res(typeof g.result === 'string' ? g.result : null); g.onerror = () => res(null); }); }
-    catch { return Promise.resolve(null); }
-  }
   /** Reset save: remove the mirror copy (resolves once committed or failed). */
   clear(): Promise<void> {
-    try { const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); os.delete(IDB_KEY); os.delete(IDB_V6_BACKUP_KEY); /* review m4 */ return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
+    try { const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); os.delete(IDB_KEY); return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
     catch { return Promise.resolve(); }
   }
 }
@@ -105,6 +96,8 @@ export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balan
   const lv = validate(lsRaw, b); if (!lv.ok) return 'idb';
   // v4 (QA e3, Reviewer N2): a savedAt invalid for offline earnings (missing, null, <= 0, pre-2020, or in the future beyond
   // SAVED_AT_SKEW_MS) is the OLDEST copy and never beats a valid one; both invalid -> tie -> localStorage.
+  // M4-19: version, then committed (tracksV7 + v6BackupId), then savedAt as the tie-break only.
+  const c = rankCompare(idbRaw, lsRaw, now); if (c !== 0) return c > 0 ? 'idb' : 'ls';
   return savedAtRank(iv.file.savedAt, now) > savedAtRank(lv.file.savedAt, now) ? 'idb' : 'ls';
 }
 /** Boot step, before `new Game`: write the IndexedDB copy back into localStorage when it is the newest valid one.
