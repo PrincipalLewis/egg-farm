@@ -22,6 +22,7 @@ it('scanner units', () => {
   expect(findGlobalWrites('self.foo=1').map((h: { key: string }) => h.key)).toEqual(['foo']);
   expect(findGlobalWrites('Object.defineProperty(window,"eggfarmDbg",{})').map((h: { key: string }) => h.key)).toEqual(['eggfarmDbg']);
   expect(findGlobalWrites('window.a==1;w.x=1;o[k]=2')).toEqual([]);
+  expect(findGlobalWrites('t=window;t.onclick=f;t[i]=1;t.innerHTML=s')).toEqual([]);
   expect(findExternalRefs('<svg xmlns="http://www.w3.org/2000/svg"></svg><a href="./x">')).toEqual([]);
   expect(findExternalRefs('import x from "https://h/m.js"').length).toBe(1);
 });

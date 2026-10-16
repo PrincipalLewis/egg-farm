@@ -11,7 +11,8 @@ const dir = target;
 const fail = msg => { console.error(`check-release-build: ${msg}`); process.exit(1); };
 const html = single ? readFileSync(target, 'utf8') : (() => { try { return readFileSync(`${dir}/index.html`, 'utf8'); } catch { return ''; } })();
 const files = single ? [] : readdirSync(`${dir}/assets`);
-const js = single ? html : files.filter(f => f.endsWith('.js')).map(f => readFileSync(`${dir}/assets/${f}`, 'utf8')).join('\n');
+// single file: JS = inline <script> bodies (inlined CSS may legitimately name classes like perf-ov)
+const js = single ? [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m => m[1]).join('\n') : files.filter(f => f.endsWith('.js')).map(f => readFileSync(`${dir}/assets/${f}`, 'utf8')).join('\n');
 if (single) console.log(`check-release-build: single-file ${target} (${html.length} bytes)`);
 const head = process.env.HEAD_COMMIT ?? (() => { try { return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim(); } catch { return ''; } })();
 const ids = findBuildIds(js);

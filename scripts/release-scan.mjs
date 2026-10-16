@@ -15,12 +15,15 @@ export function constKey(expr) {
 /** Window-global writes: `window.x=`, `window['a'+'b']=`, `window[`a${x}`]=`, aliases (`h=window; h[k]=`), defineProperty/assign. */
 export function findGlobalWrites(js, allowed = ALLOWED_GLOBALS) {
   const aliases = new Set([...js.matchAll(new RegExp(`(?:^|[^\\w$.])(${ID})\\s*=\\s*(?:${ROOTS.join('|')})(?![\\w$.\\[])`, 'g'))].map(m => m[1]));
-  const bases = [...ROOTS, ...aliases].map(esc).join('|');
-  const pre = `(?<![\\w$.])(?:${bases})`;
+  const roots = ROOTS.join('|'), al = [...aliases].map(esc).join('|') || '(?!)';
   const hits = [];
-  for (const m of js.matchAll(new RegExp(`${pre}\\.(${ID})\\s*=(?!=)`, 'g'))) hits.push({ key: m[1], src: m[0] });
-  for (const m of js.matchAll(new RegExp(`${pre}\\[([^\\]]{1,200})\\]\\s*=(?!=)`, 'g'))) hits.push({ key: constKey(m[1]) ?? `[computed ${m[1].trim()}]`, src: m[0] });
-  for (const m of js.matchAll(new RegExp(`Object\\.(?:defineProperty|defineProperties|assign)\\(\\s*(?:${bases})\\s*,\\s*([^,)]{0,200})`, 'g'))) {
+  for (const m of js.matchAll(new RegExp(`(?<![\\w$.])(?:${roots})\\.(${ID})\\s*=(?!=)`, 'g'))) hits.push({ key: m[1], src: m[0] });
+  for (const m of js.matchAll(new RegExp(`(?<![\\w$.])(?:${roots})\\[([^\\]]{1,200})\\]\\s*=(?!=)`, 'g'))) hits.push({ key: constKey(m[1]) ?? `[computed ${m[1].trim()}]`, src: m[0] });
+  // Minifiers reuse short names, so an alias (h=window) is only trusted for global-looking writes:
+  // h.eggfarm*= or h[<key built from a string literal>]= (h['eggfarm'+'Dbg'], h[`eggfarm${x}`]).
+  for (const m of js.matchAll(new RegExp(`(?<![\\w$.])(?:${al})\\.(eggfarm[\\w$]*)\\s*=(?!=)`, 'g'))) hits.push({ key: m[1], src: m[0] });
+  for (const m of js.matchAll(new RegExp(`(?<![\\w$.])(?:${al})\\[([^\\]]{0,200}['"\`][^\\]]{0,200})\\]\\s*=(?!=)`, 'g'))) hits.push({ key: constKey(m[1]) ?? `[computed ${m[1].trim()}]`, src: m[0] });
+  for (const m of js.matchAll(new RegExp(`Object\\.(?:defineProperty|defineProperties|assign)\\(\\s*(?:${roots})\\s*,\\s*([^,)]{0,200})`, 'g'))) {
     const k = constKey(m[1]); hits.push({ key: k ?? `[defineProperty/assign ${m[1].trim().slice(0, 60)}]`, src: m[0] });
   }
   return hits.filter(h => !allowed.includes(h.key));
