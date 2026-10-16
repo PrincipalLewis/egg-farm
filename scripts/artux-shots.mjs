@@ -110,4 +110,39 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   ok('D1 OFL link inline-block >=44px, no overlap with Reset save, corner taps land on it', d1.display === 'inline-block' && d1.box[3] >= 44 && !d1.overlap && d1.hits.every(Boolean), d1);
   const lic = await (await fetch(`http://127.0.0.1:${port}/fonts/OFL.txt`)).text();
   ok('R2/R4 font credits: one <p>, link with >=44px tap target, OFL ships', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && r.tag === 'P' && r.blocks === 0 && !r.authorsAlone && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
+// rc1-ui review set (Art & UX, Oct 16): 360/375/390/960/1280 x {full queue 9/9, coop L5/L10/L20, toast over open sheet,
+// Refill during cooldown, welcome-back sold line}
+for (const [w, h] of [[360, 640], [375, 667], [390, 844], [960, 600], [1280, 800]]) {
+  const sz = `${w}x${h}`, dock = w >= 960;
+  { const { ctx, p } = await open({ viewport: { width: w, height: h } }, () => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 15, celebratedTier: 3, customers: Array.from({ length: 9 }, (_, i) => ({ id: 800 + i, demand: 20 + i, filled: 0, waitedS: i * 3 })), nextCustomerInS: 1e9 }; });
+    await p.waitForTimeout(2300); await p.screenshot({ path: `${OUT}/rc1-queue-full-9of9-${sz}-${eng}.png` });
+    const r = await p.evaluate(() => { const t = document.querySelector('.qtag').getBoundingClientRect(); return { tag: document.querySelector('.qtag').innerText.trim(), hits: [...document.querySelectorAll('#queue .chip')].map(c => c.getBoundingClientRect()).filter(c => !(t.right <= c.left || c.right <= t.left || t.bottom <= c.top || c.bottom <= t.top)).length }; });
+    ok(`rc1-ui full queue tag, no overlap (${sz})`, r.hits === 0 && r.tag === (w < 380 ? 'Full' : 'Queue full'), r); await ctx.close(); }
+  for (const [F, tierName] of [[4, 'l5'], [9, 'l10'], [19, 'l20']]) {
+    const { ctx, p } = await open({ viewport: { width: w, height: h } }, (F) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: F === 4 ? 0 : F === 9 ? 1 : 2, coinsCents: 1e15, customers: [], nextCustomerInS: 1e9 }; });
+    await p.evaluate(F => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: F === 4 ? 0 : F === 9 ? 1 : 2, coinsCents: 1e15 }; }, F);
+    if (!dock) { await p.locator('[data-nav=upgrades]').click(); }
+    await p.locator('[data-tab=farm]').click(); await p.waitForTimeout(400);
+    await p.evaluate(() => window.eggfarm.dispatch({ type: 'buyFarm' })); await p.waitForTimeout(350);
+    const t = await p.evaluate(() => ({ text: document.querySelector('.toast').textContent, vis: getComputedStyle(document.querySelector('.toast')).visibility }));
+    await p.screenshot({ path: `${OUT}/rc1-toast-over-sheet-coop-${tierName}-${sz}-${eng}.png` });
+    if (!dock) { await p.locator('.sheet:not([hidden]) .close').click(); }
+    await p.waitForTimeout(700); await p.screenshot({ path: `${OUT}/rc1-coop-${tierName}-${sz}-${eng}.png` });
+    const src = await p.evaluate(() => document.querySelector('#coop').getAttribute('src').split('/').pop());
+    ok(`rc1-ui coop ${tierName} + toast over sheet (${sz})`, src === `coop-${tierName}.svg` && t.text === 'Coop upgraded!' && t.vis === 'visible', { src, t }); await ctx.close(); }
+  { const { ctx, p } = await open({ viewport: { width: w, height: h } }, () => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 10, coinsCents: 1e9, workers: { market_hand: { energy: 30, cdS: 1 }, coop_hand: { energy: 35, cdS: 1 }, hawker: { energy: 90, cdS: 0 } }, manageCdS: 0 }; });
+    await p.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await p.waitForTimeout(400);
+    await p.screenshot({ path: `${OUT}/rc1-refill-cooldown-farm-${sz}-${eng}.png` });
+    if (!dock) await p.locator('[data-nav=upgrades]').click(); await p.locator('[data-tab=workers]').click(); await p.waitForTimeout(400);
+    await p.screenshot({ path: `${OUT}/rc1-refill-cooldown-workers-${sz}-${eng}.png` });
+    const r = await p.evaluate(() => ({ cap: document.querySelector('#refillCap')?.textContent, nav: document.querySelector('[data-act=manageAll].farm-manage-all .nav-lbl')?.textContent }));
+    ok(`rc1-ui Refill cooldown (${sz})`, /^Ready in \d+s$/.test(r.cap ?? '') && (dock ? /^Ready in \d+s$/ : /^0:\d\d$/).test(r.nav ?? ''), r); await ctx.close(); }
+  { const sv = JSON.stringify({ version: 5, savedAt: Date.now() - 2 * 3600e3, state: { coinsCents: 1e9, coop: 0, basket: 0, collectionLevel: 10, farmLevel: 10, customers: [{ id: 1, demand: 200, filled: 0, waitedS: 0 }, { id: 2, demand: 139, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2, workers: { market_hand: { energy: 100, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+    const ctx = await br.newContext({ viewport: { width: w, height: h } }); const p = await ctx.newPage();
+    await p.addInitScript(sv => { if (sessionStorage.getItem('s')) return; sessionStorage.setItem('s', '1'); localStorage.setItem('eggfarm.save', sv); localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true })); }, sv);
+    await p.goto(`http://127.0.0.1:${port}/`); await p.getByText('Tap to start').click({ force: true }).catch(() => {}); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(500);
+    await p.screenshot({ path: `${OUT}/rc1-welcome-sold-line-${sz}-${eng}.png` });
+    const line = await p.evaluate(() => document.querySelector('#wbSold')?.textContent);
+    ok(`rc1-ui welcome-back sold line (${sz})`, /^Market Hand sold 339 right away/.test(line ?? ''), line); await ctx.close(); }
+}
 await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
