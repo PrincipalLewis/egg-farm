@@ -8,8 +8,7 @@ import * as S from '../src/sim/state';
 import { tableRow } from '../src/config/formulas';
 import { offlineEggs } from '../src/sim/offline';
 import { parseEconomyCsv } from '../scripts/sync-economy';
-const csvText = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
-const data = parseEconomyCsv(csvText);
+const csvText = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');const data = parseEconomyCsv(csvText);
 const fx = JSON.parse(readFileSync(new URL('./fixtures/economy_sim.json', import.meta.url), 'utf8'));
 describe('AC6 every economy.csv cell reproduced from config formulas', () => {
   it.each(data)('level $level', (r) => {
@@ -37,6 +36,8 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
     expect([b.farm.demandLoFactor, b.farm.demandHiFactor, b.customers.queue_max_base, b.customers.queue_max_step_levels, b.customers.queue_max_cap]).toEqual([p.d_lo, p.d_hi, p.q_base, p.q_step, p.q_cap]);
     expect([b.offline.offlineRateMultiplier, b.offline.offlineCapSeconds]).toEqual([p.offline_rate, p.offline_cap_s]);
   });
+  const live = new URL('../../product/economy.csv', import.meta.url).pathname;
+  it.runIf(existsSync(live))('vendored tests/fixtures/product/economy.csv equals the live product/economy.csv', () => { expect(csvText).toBe(readFileSync(live, 'utf8')); });
   const py = existsSync(new URL('../../product/sim/economy_sim.py', import.meta.url).pathname);
   it.runIf(py)('fixture is fresh vs the live reference sim', () => {
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');

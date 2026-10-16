@@ -3,6 +3,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
+import { wagePerSecCents, wageLine } from './s2-economy-ui';
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
@@ -16,8 +17,8 @@ export function ringHtml(s: GameState, b: Balance): string {
   return `<svg class="ring-cooldown" viewBox="0 0 48 48" aria-hidden="true" style="--ring-offset:${ringOffset(rem, b.workers.energy.manage_cooldown_s)}"><circle cx="24" cy="24" r="21" fill="none" stroke="#CFC6BA" stroke-width="3"/><circle class="ring-progress" cx="24" cy="24" r="21" fill="none" stroke="#6BBF59" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" transform="rotate(-90 24 24)"/></svg>`;
 }
 /** 44px icon area of a Manage / Manage all button; the ring wraps it while the shared cooldown runs. */
-const manageIcon = (s: GameState, b: Balance, icon: string) =>
-  `<span class="manage-ico"><img src="${ASSET(icon)}" width="22" height="22" alt="">${ringHtml(s, b)}</span>`;
+const manageIcon = (s: GameState, b: Balance, icon: string, px = 22) =>
+  `<span class="manage-ico"><img src="${ASSET(icon)}" width="${px}" height="${px}" alt="">${ringHtml(s, b)}</span>`;
 /** B5 (Product, Oct 15): a worker "needs" Manage only at energy <= manage_prompt_threshold (0.4 = Yawning). */
 export const needsPrompt = (w: Worker | undefined, b: Balance) => canManageWorker(w, b);
 /** Workers counted by "Manage all (N need it)". */
@@ -42,24 +43,38 @@ export class YawnSfx {
   }
 }
 /** Manage all pill (layout §4.4): hidden < manage_all_min_workers, and hidden when N (workers <= threshold) is 0 (B5). */
+export const refillTiredLabel = (n: number) =>
+  n === 1 ? 'Refill 1 tired worker' : `Refill ${n} tired workers`;
+
 export function manageAllHtml(s: GameState, b: Balance): string {
   if (!showManageAll(s.workers, b)) return '';
-  const n = promptManage(s, b).length, cd = Math.ceil(s.manageCdS); if (n === 0 && cd === 0) return ''; // PT1-10
-  const glow = n > 0 && WORKERS.some(id => isYawning(s.workers[id], b));
-  const label = cd > 0 ? `Manage all 0:${String(cd).padStart(2, '0')}` : n === 0 ? 'All rested' : `Manage all <small>(${n} need it)</small>`;
-  return `<button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0 || n === 0}">${manageIcon(s, b, 'icon-manage-all.svg')}<span>${label}</span></button>`;
+  const n = promptManage(s, b).length, cd = Math.ceil(s.manageCdS);
+  if (n === 0) return ''; // AC-R9: hidden when N=0
+  const glow = WORKERS.some(id => isYawning(s.workers[id], b));
+  const label = refillTiredLabel(n);
+  return `<div class="refill-wrap"><button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0}" aria-label="${label}"${cd > 0 ? ' aria-describedby="refillCap"' : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>${label}</span></button>${cd > 0 ? `<div class="wk-cap num" id="refillCap">Ready in ${cd}s</div>` : ''}</div>`;
 }
+/** v1.3 §4.4: caption under a greyed per-worker Manage: "Ready in Ns" during the shared cooldown, else "Not tired yet" above 40%. */
+export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) =>
+  !needsPrompt(w, b) ? 'Rested, refill below 40%' : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
 export function workersHtml(s: GameState, b: Balance): string {
   return manageAllHtml(s, b) + WORKERS.map(id => {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
     if (!w) {
       const locked = F < unlockFarm(id, b), cost = hireCostCents(id, b), can = !locked && s.coinsCents >= cost;
-      return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>
+      return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}
         ${locked ? `<div class="hint">Unlocks at Farm L${unlockFarm(id, b)}</div>` : `<button class="btn buy ${can ? 'affordable' : ''}" data-act="hire" data-w="${id}" aria-disabled="${!can}">Hire ${fmtMoney(cost)}</button>`}</div>`;
     }
     const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b); // B5: enabled only <= threshold
+    const cap = manageCaption(w, cd, b);
+    const off = m === 'asleep' || m === 'unpaid';
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid ⚠' : 'Asleep 💤';
-    const yawn = isYawning(w, b); // v1.1 yawn cue at <= yawn_at_pct: amber ring + overlay-yawn.svg (layout §4.1)
+    const banner = m === 'unpaid' ? `<div class="wk-banner unpaid" role="status">⚠ Unpaid, production stopped</div>`
+      : m === 'asleep' ? (id === 'grader'
+        ? `<div class="wk-banner asleep" role="status">💤 Asleep, bonus down to 15%</div>`
+        : `<div class="wk-banner asleep" role="status">💤 Asleep, production stopped</div>`)
+      : '';
+    const yawn = isYawning(w, b);
     let extra = '';
     if (id === 'grader') {
       const tiers = b.workers.grader.tiers, i = s.graderTier;
@@ -67,10 +82,12 @@ export function workersHtml(s: GameState, b: Balance): string {
         ? F < tiers[i].farm ? `<div class="hint">Next grade ×${tiers[i].mult} at Farm L${tiers[i].farm}</div>`
           : `<button class="btn buy ${s.coinsCents >= graderTierCostCents(i, b) ? 'affordable' : ''}" data-act="tier" aria-disabled="${s.coinsCents < graderTierCostCents(i, b)}">Grade ×${tiers[i].mult} ${fmtMoney(graderTierCostCents(i, b))}</button>` : '');
     }
-    return `<div class="wk ${m}${yawn ? ' yawn' : ''}" data-w="${id}">${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
+    const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}
-      <button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}">${manageIcon(s, b, 'icon-manage.svg')}<span>${cd > 0 ? `Manage 0:${String(cd).padStart(2, '0')}` : 'Manage'}</span></button></div>`;
+      ${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}`;
+    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}`;
+    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */
@@ -79,3 +96,15 @@ export function shouldShowCoopTip(s: GameState, b: Balance, shownThisSession: bo
   return !shownThisSession && !s.workers.coop_hand && s.farmLevel >= t.coop_hand_tip_min_farm && s.coopFullS >= t.coop_hand_tip_full_s;
 }
 export const COOP_TIP_TEXT = 'Coop full! Hire a Coop Hand to collect eggs for you.';
+/** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav (Art & UX 08:47, v1.3 copy): "Refill" / "0:28" + N badge; docked header: "Refill tired (N)" /
+ *  "Ready in Ns". aria-label "Refill N tired workers" / "Refill available in N seconds"; the cooldown aria text changes at most every 5 s. */
+export interface NavAria { text: string; at: number }
+export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; badge: string; aria: NavAria } {
+  const cd = Math.ceil(cdS - 1e-9);
+  if (cd > 0) {
+    const label = docked ? `Ready in ${cd}s` : `0:${String(cd).padStart(2, '0')}`;
+    const fresh = prev.text.startsWith('Refill available in') && nowMs - prev.at < 5000;
+    return { label, badge: '', aria: fresh ? prev : { text: `Refill available in ${cd} seconds`, at: nowMs } };
+  }
+  return { label: docked ? refillTiredLabel(n) : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
+}

@@ -42,7 +42,7 @@ export function showRecoveryDialog(r: Recovery, asset: (f: string) => string, in
   layer.innerHTML = `<div class="recovery-card" role="alertdialog" aria-modal="true" aria-labelledby="rcT" aria-describedby="rcB${c.note ? ' rcN' : ''}">
     <img src="${asset(c.icon)}" width="72" height="72" alt="">
     <h2 id="rcT">${c.title}</h2><p id="rcB">${c.body}</p>${c.note ? `<p class="note" id="rcN">${c.note}</p>` : ''}
-    <button class="btn rc-primary" id="rcGo">${c.button}</button>
+    <button class="btn rc-primary" id="rcGo" type="button">${c.button}</button>
     ${r.raw ? `<button class="${r.copy_failed ? 'btn rc-export-q' : 'rc-link'}" id="rcExport" type="button">Export old save</button>` : ''}<div class="rc-msg" aria-live="polite" id="rcMsg"></div></div>`;
   document.body.append(layer);
   for (const el of inertEls) el.inert = true;
@@ -57,7 +57,8 @@ export function showRecoveryDialog(r: Recovery, asset: (f: string) => string, in
   try { history.pushState({ eggfarmRecovery: 1 }, ''); } catch { /* sandboxed */ }
   window.addEventListener('popstate', onPop);
   document.addEventListener('keydown', onKey, true);
-  layer.addEventListener('click', e => e.stopPropagation()); // scrim taps do nothing
+  for (const t of ['click', 'pointerdown', 'touchstart'] as const) layer.addEventListener(t, e => { if (!(e.target as HTMLElement).closest('button')) e.stopPropagation(); }, { passive: true }); // scrim taps do nothing
+  layer.addEventListener('click', e => e.stopPropagation());
   const keep = () => setTimeout(() => { if (layer.isConnected && !layer.contains(document.activeElement)) go.focus(); }, 0); // focus never leaves the dialog
   layer.addEventListener('focusout', keep); const onFocusIn = (e: FocusEvent) => { if (!layer.contains(e.target as Node)) go.focus(); };
   document.addEventListener('focusin', onFocusIn, true);

@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parseEconomyCsv, buildBalance } from '../scripts/sync-economy';
 import { balance } from '../src/config/balance';
-const csv = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
-const rows = parseEconomyCsv(csv);
+const csv = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');const rows = parseEconomyCsv(csv);
 describe('sync-economy (MK-15)', () => {
   it('balance.json is exactly what the CSV generates', () => { expect(buildBalance(rows, balance)).toEqual(balance); });
   it('a consistent CSV change (new cost curve) changes config without code changes', () => {

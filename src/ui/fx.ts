@@ -25,3 +25,8 @@ export class Throttle {
   constructor(private minGapMs: number, private now: () => number) {}
   ready() { const t = this.now(); if (t - this.last < this.minGapMs) return false; this.last = t; return true; }
 }
+/** Particles never start or end outside the safe area: clamp to the viewport minus the safe-area insets and an 8px margin. */
+export function clampToSafe(p: { x: number; y: number }, w: number, h: number, inset = { t: 0, r: 0, b: 0, l: 0 }, m = 8) {
+  const cl = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+  return { x: cl(p.x, inset.l + m, w - inset.r - m), y: cl(p.y, inset.t + m, h - inset.b - m) };
+}

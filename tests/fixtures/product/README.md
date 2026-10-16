@@ -1,0 +1,1 @@
+Vendored copy of product/economy.csv (Product owns the source). Unit tests read this so they run from any clone; tests/economy.test.ts checks it still equals ../../product/economy.csv whenever that file exists. Refresh it together with npm run sync-economy.

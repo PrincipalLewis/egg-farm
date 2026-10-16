@@ -24,7 +24,7 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(showManageAll(two.workers, b)).toBe(false); expect(manageAllHtml(two, b)).toBe('');
     expect(apply(two, { type: 'manageAll' }, b)).toBe(two);
     const three = base({ workers: { hawker: wk(20), grader: wk(50), market_hand: wk(100) }, graderTier: 1 });
-    expect(manageAllHtml(three, b)).toContain('(1 need it)'); // B5: only hawker (20%) is <= 40%; grader at 50% isn't counted
+    expect(manageAllHtml(three, b)).toContain('Refill 1 tired worker'); // B5: only hawker (20%) is <= 40%; grader at 50% isn't counted
     const ev: SimEvent[] = []; const m = apply(three, { type: 'manageAll' }, b, ev);
     expect([m.workers.hawker!.energy, m.workers.grader!.energy, m.workers.market_hand!.energy]).toEqual([100, 50, 100]); // P4: refills only <= 40%
     expect(m.manageCdS).toBe(E.manage_cooldown_s);
@@ -33,8 +33,8 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(apply(tired, { type: 'manage', worker: 'hawker' }, b)).toBe(tired); // individual Manage shares the cooldown
     const single = apply({ ...three, manageCdS: 0 }, { type: 'manage', worker: 'hawker' }, b);
     expect(apply(single, { type: 'manageAll' }, b)).toBe(single); // and vice versa
-    expect(manageAllHtml(single, b)).toMatch(/aria-disabled="true".*0:30/); // PT1-10: shown greyed during the cooldown
-    expect(manageAllHtml({ ...single, workers: { ...single.workers, grader: wk(30) } }, b)).toMatch(/aria-disabled="true".*0:30/);
+    expect(manageAllHtml(single, b)).toBe(''); // AC-R9: N=0 → hidden even on cooldown
+    expect(manageAllHtml({ ...single, workers: { ...single.workers, grader: wk(30) } }, b)).toMatch(/aria-disabled="true".*Refill 1 tired worker.*Ready in 30s/);
   });
   it('ruling 4 + B5: Manage all hidden when N is 0 (nobody at <= manage_prompt_threshold), starts no cooldown', () => {
     const full = base({ workers: { hawker: wk(100), grader: wk(100), market_hand: wk(100) }, graderTier: 1 });
@@ -42,7 +42,7 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(manageAllHtml(full, b)).toBe('');
     expect(b.workers.energy.manage_prompt_threshold).toBe(0.4);
     const edge = base({ workers: { hawker: wk(40), grader: wk(41), market_hand: wk(81) }, graderTier: 1 });
-    expect(manageAllHtml(edge, b)).toContain('(1 need it)'); // exactly 40% counts; 41% and 81% don't
+    expect(manageAllHtml(edge, b)).toContain('Refill 1 tired worker'); // exactly 40% counts; 41% and 81% don't
     const hi = base({ workers: { hawker: wk(81), grader: wk(98), market_hand: wk(90) }, graderTier: 1 });
     expect(manageAllHtml(hi, b)).toBe(''); // the playtest case: 81-98% never "need it"
   });
@@ -114,11 +114,14 @@ describe('M2 UI logic (§4.4, §4.6)', () => {
 import { farmManageAllVisible } from '../src/ui/workers-ui';
 describe('Farm View Manage all visibility (mobile nav + desktop docked share it)', () => {
   const three = (e: number, cd = 0) => base({ workers: { hawker: wk(e), grader: wk(80), market_hand: wk(90) }, graderTier: 1, manageCdS: cd });
-  it('PT1-10 (Product final): always shown greyed during the cooldown; after it, hidden iff no worker <= 40%', () => {
+  it('PT1-10 + AC-R9: farm nav stays on during cooldown; sheet pill hidden at N=0; plural label when N>=1', () => {
     for (const e of [100, 41, 40, 10]) {
-      expect(farmManageAllVisible(three(e, 25), b, false)).toBe(true); // cooldown: shown whatever the energies
-      expect(manageAllHtml(three(e, 25), b)).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true">.*ring-cooldown.*Manage all 0:25/);
+      expect(farmManageAllVisible(three(e, 25), b, false)).toBe(true); // farm nav: shown on cooldown
     }
+    expect(manageAllHtml(three(100, 25), b)).toBe(''); // N=0
+    expect(manageAllHtml(three(41, 25), b)).toBe('');
+    expect(manageAllHtml(three(40, 25), b)).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true"[^>]*>.*ring-cooldown.*Refill 1 tired worker.*Ready in 25s/);
+    expect(manageAllHtml(three(10, 25), b)).toMatch(/Refill 1 tired worker.*Ready in 25s/);
     expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false); expect(manageAllHtml(three(100, 0), b)).toBe('');
     expect(farmManageAllVisible(three(41, 0), b, true)).toBe(false);
     expect(farmManageAllVisible(three(40, 0), b, false)).toBe(true); expect(manageAllHtml(three(40, 0), b)).toMatch(/aria-disabled="false"/);

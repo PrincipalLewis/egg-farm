@@ -1,3 +1,4 @@
+import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
@@ -14,6 +15,11 @@ const VERSION = BUILD_ID;
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
   'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
 const root = document.getElementById('app')!;
+// S2-REL-1 / ops smoke: build id via meta + data attribute only (no window global).
+root.dataset.buildId = BUILD_ID;
+{ const m = document.head.querySelector('meta[name="build-id"]') as HTMLMetaElement | null
+    ?? Object.assign(document.head.appendChild(document.createElement('meta')), { name: 'build-id' }) as HTMLMetaElement;
+  m.content = BUILD_ID; }
 const audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/`);
 
 // 3.1 Loading / Tap to start (the tap is the audio-unlock gesture)
@@ -49,7 +55,7 @@ async function boot() {
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
   const g = new Game(balance, tabs.second ? readOnlyKV(localStorage) : localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
-  (window as any).eggfarm = g; // debug/QA handle
+  if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (QA-RC1UI-2)
   if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });

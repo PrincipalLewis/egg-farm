@@ -5,30 +5,36 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
-import { fmtMoneyShort } from './format';
-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
-import { TapFx, Throttle } from './fx';
+import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, offlineEggsParts, fmtTimeToAfford, fmtMoneyShort } from './format';
+import { TapFx, Throttle, clampToSafe } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
 import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRecoveryDialog } from './save-recovery';
-import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
+import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
+import { instantSale, saleLine, compact } from './welcome-sale';
+import { rateView, QueueDot } from './s2-economy-ui';
+import { incomePerSec, secondsToAffordSteady, EtaHold, asleepOrUnpaidCount, productionStopped } from '../econ/income';
+import { optionGain, bestBuy } from '../econ/best-buy';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
-import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
+import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, type Goal } from './next-goal';
+import { collectionFxLines, collectionSummary, collectionDeltas } from './collection-copy';
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navManageView, type NavAria } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
+/** S2-1 (Art & UX 2026-10-16 08:47): the coop toast stays 2.5 s (layout-spec §4.7 still says 1.5 s). */
+export const COOP_TOAST_MS = 2500;
 interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
@@ -52,16 +58,17 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   audio.enabled = flags.sfx; applyRM();
   const sfx = (n: SfxName) => audio.play(n);
   const now = () => performance.now();
-  const income = new IncomeRate(60_000);
+  const farmEta = new EtaHold(), collEta = new EtaHold();
+  let goalImm = false;
   const tapFx = new TapFx({ ...b.feel, flightMs: b.feel.egg_flight_ms }, now);
   const qfullCue = new Throttle(b.feel.queue_full_cue_min_gap_ms, now);
 
   root.innerHTML = '';
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
-    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="num" id="coins"></span></div>
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">$0/s</span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
-    <div class="spacer"></div>
+    <div class="spacer"><span class="build-tag num" id="buildTag" title="Build">build ${(version.match(/\+([0-9a-f]{7,})/) ?? [, version])[1]}</span></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
     <div class="sr" aria-live="polite" id="live"></div></header>`);
   // ---------- Farm ----------
@@ -73,15 +80,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
-      <button class="goal" id="goal" type="button" aria-live="off"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></button>
+      <button class="goal" id="goal" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
       <div class="sr" aria-live="polite" id="goalLive"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
-  const nav = h(`<nav class="actions">
-    <button data-nav="market"><img src="${A('icon-market.svg')}" alt="">Market<span class="badge" hidden></span></button>
-    <button data-nav="upgrades"><img src="${A('icon-upgrade.svg')}" alt="">Upgrades<span class="badge" hidden></span></button>
-    <button class="btn manage farm-manage-all desk-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button>
-    <button data-nav="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></nav>`);
+  // S2-5 (art-ux/reviews/session2-ui-triage.md (b)): every nav button = icon + visible label + aria-label.
+  const nav = h(`<nav class="actions" aria-label="Main">
+    <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""><span class="qdot" hidden></span></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
+    <button data-nav="upgrades" aria-label="Upgrades"><img src="${A('icon-upgrade.svg')}" alt=""><span class="nav-lbl">Upgrades</span><span class="badge" hidden></span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span><span class="count-badge num" hidden></span></button>
+    <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
@@ -98,10 +106,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.append(hud, farm, nav, panelLayer); document.body.append(modal, fxLayer, toast);
   const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
+  const coinPill = $('.pill.coins'), coinIcon = $('.pill.coins > img'); // S2-8: #coins sits in .coins-col now
   const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
   const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
-  (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts
+  if (IOS_FLAG_ENABLED) (window as any).eggfarmOrderList = orderList; // compiled out of release (QA-RC1UI-2); QA §7.17 node identity / write counts
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
@@ -109,16 +118,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const spawn = (el: HTMLElement, ms: number) => {
     if (live.length >= 30) live.shift()?.remove();
     fxLayer.append(el); live.push(el);
-    setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms);
+    // QA (bd0dc66, 375px top-left fragment): every particle also leaves on its own animationend, the timer is the backstop.
+    const kill = () => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); };
+    el.addEventListener('animationend', kill, { once: true }); setTimeout(kill, ms);
     return el;
   };
-  const center = (el: Element) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+  /** Particle anchor: the element's centre clamped to the safe area; a hidden (0x0) source falls back to the coop scene,
+   *  so nothing ever flies from the page origin (QA bd0dc66: coin flyers from the closed Market's Sell all started at 0,0). */
+  const safeInsets = () => { const cs = getComputedStyle(document.documentElement); const n = (v: string) => parseFloat(cs.getPropertyValue(v)) || 0; return { t: n('--sa-t'), r: n('--sa-r'), b: n('--sa-b'), l: n('--sa-l') }; };
+  const center = (el: Element) => { let r = el.getBoundingClientRect(); if (!r.width && !r.height) r = scene.getBoundingClientRect(); return clampToSafe({ x: r.left + r.width / 2, y: r.top + r.height / 2 }, innerWidth, innerHeight, safeInsets()); };
   const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void) => {
     const a = center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
     const dx = (Math.random() - .5) * 30;
     el.animate([{ transform: `translate(${a.x - size / 2 + dx}px,${a.y - size / 2}px) scale(.6)` }, { transform: `translate(${(a.x + z.x) / 2}px,${Math.min(a.y, z.y) - 60}px) scale(1)`, offset: .45 },
       { transform: `translate(${z.x - size / 2}px,${z.y - size / 2}px) scale(.8)` }], { duration: b.feel.egg_flight_ms, delay: i * 40, easing: 'ease-in', fill: 'both' })
-      .finished.then(() => onArrive?.()).catch(() => {});
+      .finished.then(() => { onArrive?.(); el.remove(); const k = live.indexOf(el); if (k >= 0) live.splice(k, 1); }).catch(() => {});
     spawn(el, b.feel.egg_flight_ms + i * 40 + 50);
   };
   let floater: { el: HTMLElement; until: number } | null = null;
@@ -143,7 +157,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
+  const showToast = (text: string, ms = 1300) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), ms); };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
@@ -163,7 +177,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
-  let farmMAShown = false;
+  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity };
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
@@ -188,8 +202,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   collectBtn.addEventListener('click', collect);
   scene.addEventListener('click', collect);
-  // S2-9: the Market sheet opens only from a deliberate tap on a customer chip (or "+N") that was under the finger at
-  // pointerdown and already on screen >= 250 ms; nothing else opens it (no auto-open when the queue fills).
+  // S2-9: Market opens only from a deliberate tap on a customer chip (or "+N") under the finger at pointerdown, on screen >= 250 ms.
   const chipBorn = new WeakMap<Element, number>(); let downChip: Element | null = null;
   const custChip = (t: EventTarget | null) => (t as HTMLElement | null)?.closest?.('.chip:not(.empty):not(.served)') ?? null;
   queueEl.addEventListener('pointerdown', e => { downChip = custChip(e.target); });
@@ -203,13 +216,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   sellAllBtn.addEventListener('click', () => { lastSellSource = sellAllBtn; if (!act({ type: 'sellAll' })) cantAfford(sellAllBtn); });
   uRow.addEventListener('click', e => {
     const t = e.target as HTMLElement;
+    const goto = t.closest('[data-goto]') as HTMLElement | null;
+    if (goto?.dataset.goto === 'collection') { tab = 'collection'; dirty = true; render(); return; }
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
-    if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
-    lastBuyBtn = bt; if (!act({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
-    // F5: one tap = one dispatch; act() has already redrawn the sheet with the new level/price (S2-10).
+    if (kind) { goalImm = true; goalNow = true; if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
+    lastBuyBtn = bt; goalImm = true; goalNow = true; if (!act({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
   });
   let lastBuyBtn: HTMLElement | null = null;
 
@@ -218,19 +232,19 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
-    modalKind = 'welcome';
+    modalKind = 'welcome'; const sale = saleLine(instantSale(g.state, b), compact, fmtMoney); // S2-4c
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
       <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
-      <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)} eggs</div>
+      ${(() => { const p = offlineEggsParts(eggs); return `<div class="wb-gain" id="wbGain"><div class="wb-hero num"><img src="${A('icon-egg.svg')}" alt="">${p.hero}</div><div class="wb-line2">${p.line2}</div></div>`; })()}${sale ? `<div class="wb-sold num" id="wbSold">${sale}</div>` : ''}
       <button class="btn" id="wbCollect">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
   };
   const grantWelcome = (withFlyers: boolean) => {
     const eggs = g.state.pendingOfflineEggs; const btn = $('#wbCollect');
     if (withFlyers && btn && !rm()) for (let i = 0; i < Math.min(eggs, b.feel.max_flying_eggs); i++) fly(A('icon-egg.svg'), btn, basketEl.parentElement!, i, 24);
-    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); dirty = true; render(); /* S2-10 */ pulse(basketEl.parentElement!); sfx('collect');
+    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); pulse(basketEl.parentElement!); sfx('collect');
   };
   const settingsIosLine = () => iosKind === 'standalone' ? `<div class="settings-ios ok">Installed on Home Screen ✔</div>`
     : iosKind ? `<div class="settings-ios">${SHARE_SVG} ${TIP_TITLE} ${howTo(iosKind, '')}</div>`.replace(' ,', ',').replace('  ', ' ') : '';
@@ -288,12 +302,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       setP(el, c.waitedS / patience);
       kids.push(el);
     }
-    // S2-3a: dwelling "Thanks!" cards, in free strip room after the live customers (not tappable, aria-hidden).
-    // Product ruling: no free strip slot -> the served customer leaves at once with only a "+$X" pop (no card, no extra slot).
-    const lay = dwell.layout(now(), split.more ? 0 : Math.max(0, stripSlots - kids.length), /* "+N waiting" shown = strip full */ d => {
+    // S2-3a: dwelling "Thanks!" cards in free strip room (Product: no free slot -> +$X pop only).
+    const lay = dwell.layout(now(), split.more ? 0 : Math.max(0, stripSlots - kids.length), d => {
       const el = dwellEls.get(d.id); dwellEls.delete(d.id); leaveCard(el); });
     for (const d of lay.popped) queuePop(d.cents);
-    // S2-3a-1 (final spec): a live customer needs the slot -> card opacity fades 120 ms (no slide) and the pop fires from its slot; reduced motion cuts it.
     for (const d of lay.squeezed) { const el = dwellEls.get(d.id); dwellEls.delete(d.id); queuePop(d.cents, el); squeezeCard(el); }
     for (const [id, el] of [...dwellEls]) if (!lay.shown.some(d => d.id === id)) { dwellEls.delete(id); el.remove(); }
     for (const d of lay.shown) {
@@ -314,24 +326,22 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // Queue full cue (amber outline + tag), informational
     const full = s.customers.length >= slots;
     queueEl.classList.toggle('full', full);
-    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag">Queue full</span>`)); qTagShown = true; }
-    // Slot unlock moment (first reach of a new slot count; once, persisted)
+    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag"><span class="q-long">Queue full</span><span class="q-short">Full</span></span>`)); qTagShown = true; }
+    // S2-3b (layout-spec §4.6b, queue spec v1.2 §6): a queue-size step pulses the "+N" chip once (1 -> 1.12 -> 1, 600ms);
+    // reduced motion = colour flash. Replaces the old L10/L20 slot grow-in (§3.3 synced to P1q). Once per step, persisted.
     if (slots > flags.seenSlots) {
       flags.seenSlots = slots; saveFlags();
-      const newSlot = empties[empties.length - 1] ?? queueEl.lastElementChild;
-      if (newSlot && !rm()) { retrigger(newSlot, 'unlock'); sparkle(newSlot, 4); }
-      slotToastPending = slotAdded(s.farmLevel, b);
+      if (moreChip.isConnected) retrigger(moreChip, rm() ? 'qflash' : 'qpulse');
     }
   };
-  let slotToastPending = false;
-  /** Dwell end (Art & UX): fade + slide up 8px over 200 ms at the card's spot; reduced motion = gone instantly. */
+
+  /** Dwell end (Art & UX): fade + slide up 8px over 200 ms; reduced motion = gone instantly. */
   const leaveCard = (el: HTMLElement | undefined) => {
     if (!el?.isConnected) return; if (rm()) { el.remove(); return; }
     const r = el.getBoundingClientRect(); const c = el.cloneNode(true) as HTMLElement; el.remove();
     c.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;margin:0`; spawn(c, 260);
     requestAnimationFrame(() => c.classList.add('leaving'));
   };
-  /** Full-queue "+$X" pop (Art & UX): from the strip's last chip, coins fly to the money pill (same path as sales); clamped to the safe area. */
   const squeezeCard = (el: HTMLElement | undefined) => {
     if (!el?.isConnected) return; if (rm()) { el.remove(); return; }
     const r = el.getBoundingClientRect(); const c = el.cloneNode(true) as HTMLElement; el.remove();
@@ -342,7 +352,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const from = (at?.isConnected ? at : queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
     const x = Math.min(Math.max(c.x, 48), innerWidth - 48), y = Math.max(c.y - 20, 40);
     spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyShort(cents)}</div>`), 650);
-    if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
+    if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinPill, i, 20, i === 0 ? () => pulse(coinPill) : undefined);
   };
 
   // ---------- Game events ----------
@@ -350,10 +360,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     switch (e.type) {
       case 'sell': {
         dwell.sold(e.id, e.value);
-        income.add(now(), e.k * e.price); sfx('sell');
+        sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
-        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
-        else pulse(coinsEl.parentElement!);
+        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinIcon, i, 20, i === 0 ? () => pulse(coinPill) : undefined);
+        else pulse(coinPill);
         floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
@@ -378,24 +388,39 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- M3-AC5 next-goal strip ----------
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
-  const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+  const goalHold = new GoalHysteresis(5000); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+  let goalLabelSig = '';
   const renderGoal = () => {
     const t = now();
     if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
     const imm = goalNow; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
-    setText(goalLbl, gl.label); setText(goalSt, gl.status);
+    const prev = goalShown, gl = goalHold.tick(g.state, b, t, imm || goalImm); goalImm = false; goalShown = gl;
+    // v1.4 §4: paint structured label; measure overflow once per content change (not every tick).
+    const sig = `${gl.key}|${gl.label}|${gl.pct}`;
+    if (sig !== goalLabelSig) {
+      goalLabelSig = sig;
+      const parts = gl.key && gl.state !== 'done' && gl.state !== 'refill' ? goalLabelParts(gl.key, g.state, gl.pct) : null;
+      paintGoalLabel(goalLbl, parts, gl.label);
+      // fit after layout
+      requestAnimationFrame(() => {
+        fitGoalLabelEl(goalLbl);
+        const v = `${goalLbl.textContent ?? ''} ${goalSt.textContent ?? ''}`.replace(/\s+/g, ' ').trim();
+        if (v) goalBtn.setAttribute('aria-label', `${v}. ${goalAria(gl)}`);
+      });
+    }
+    setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
-    goalBtn.setAttribute('aria-label', goalAria(gl));
+    // Visible name must be in the accessible name (axe label-content-name-mismatch).
+    const vis = `${goalLbl.textContent ?? ''} ${gl.status}`.replace(/\s+/g, ' ').trim();
+    goalBtn.setAttribute('aria-label', vis ? `${vis}. ${goalAria(gl)}` : goalAria(gl));
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
       if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
-      // B3: announce the CURRENT goal (same text as the chip's aria-label) on target or state change, then clear the
-      // live region so a screen reader browsing later never reads a stale target/timer.
       setText(goalLive, goalAria(gl)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
       if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (live.length <= 26) sparkle(goalSt, 4); }
       if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
     }
   };
+  void document.fonts.ready.then(() => { goalNow = true; renderGoal(); });
   /** Tap never buys: open the target's tab, scroll the row into view, highlight it, focus its Buy (spec §4). */
   const openGoal = () => {
     const gl = goalShown; if (!gl) return;
@@ -410,6 +435,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   goalBtn.addEventListener('click', e => { e.stopPropagation(); openGoal(); });
 
   // ---------- Render ----------
+  let coopFxPending = false, rateAt = -Infinity; const rateEl = $('#rate'), qDot = new QueueDot(), navMarket = nav.querySelector('[data-nav=market]') as HTMLElement, qDotEl = nav.querySelector('.qdot') as HTMLElement;
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
   coopImg.src = A(COOP_SPRITES[lastTier]);
   const upRowHtml = (kind: 'collection' | 'farm') => {
@@ -417,34 +443,60 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const cost = isF ? S.farmCost(F, b) : S.collectionCost(C, b), can = s.coinsCents >= cost * 100;
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
-    const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
+    const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg'), S.coopTier(F + 1) !== S.coopTier(F)) : null;
+    // C-AC26: Collection leads with price % (from balance), then eggs/tap — never +N/tap alone.
+    const { pricePct: dPct, tap: tapDelta } = collectionDeltas(b);
+    const collSummary = !isF && !max ? collectionSummary(b) : '';
     const fx = isF ? [
       `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
       `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
       `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
       ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
       `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
-    ] : [
-      `Eggs per tap ${arrow(fmtCount(S.eggsPerTap(C, b)), fmtCount(S.eggsPerTap(C + 1, b)))}`,
-      `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
-    ];
+    ] : collectionFxLines(C, b).map(line => {
+      const m = /^(Egg price |Eggs per tap )(.+) → (.+)$/.exec(line);
+      if (!m) return line;
+      return max ? `${m[1]}${m[2]}` : `${m[1]}${m[2]} <span class="arrow">→</span> ${m[3]}`;
+    });
     const nextTier = [5, 10, 20].find(t => t > F);
+    const key = isF ? 'FARM' as const : 'COLL' as const;
+    const og = max ? null : optionGain(s, b, key);
+    const baseInc = incomePerSec(s, b, { assumeWorking: true });
+    const pct = og && baseInc > 0 && og.gain > 0 ? Math.round(100 * og.gain / baseInc) : 0;
+    const bb = bestBuy(s, b);
+    const isBest = !!(bb && bb.key === key && !max);
+    let chips = '';
+    if (!max && og) {
+      const effect = baseInc > 0 && og.gain > 0 ? `<span class="vchip eff">+${pct}% income</span>`
+        : `<span class="vchip eff">${isF ? `+${fmtCount(S.eggsPerSec(F + 1, b) - S.eggsPerSec(F, b))} eggs/s` : collectionSummary(b)}</span>`;
+      let pb = '';
+      if (og.gain > 0) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">Pays back in ${fmtTimeToAfford(og.payback)}</span>`;
+      else if (og.bundlePayback != null) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">With next buys: ${fmtTimeToAfford(og.bundlePayback)}</span>`;
+      else if (isF) pb = `<span class="vchip pb"><img src="${A('icon-customer.svg')}" alt="">Unlocks more customers</span>`;
+      const best = isBest ? `<span class="vchip bb">★ Best buy</span>` : '';
+      chips = `<div class="chips">${effect}${pb}${best}</div>`;
+    }
     let hint = '';
     if (!max && !can) {
-      if (isF) {
-        const secs = income.secondsToAfford(now(), cost * 100 - s.coinsCents);
-        hint = secs === null ? `<div class="hint"><img src="${A('icon-coin.svg')}" alt="">Sell eggs to earn coins</div>`
-          : `<div class="hint ${secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">Ready in ${fmtTimeToAfford(secs).replace(/^~/, '~')}</div>`;
-      } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
+      const need = cost * 100 - s.coinsCents;
+      const raw = secondsToAffordSteady(s, b, need);
+      const hold = isF ? farmEta : collEta;
+      const secs = hold.tick(raw, incomePerSec(s, b), s.coinsCents);
+      hint = `<div class="hint eta ${secs != null && secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(secs)}</div>`;
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
-    // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
-    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
-      hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
-    return `<div class="up">
+    // UC12 / v1.4: Farm row "Limited by collecting ›" → Collection (44px hit via CSS padding)
+    if (isF && !max && S.eggsPerTap(C, b) <= 0.5 * S.coopCapacity(F, b))
+      hint += `<div class="hint coop"><button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades."><img src="${A('icon-nest.svg')}" alt="" width="14" height="14">Limited by collecting ›</button></div>`;
+    const aria = !max && og && baseInc > 0 && og.gain > 0
+      ? `${isF ? 'Farm level' : 'Collect per tap'}, level ${L}. Adds ${pct} percent income. ${og.gain > 0 ? `Pays back in about ${fmtTimeToAfford(og.payback).replace('~', '')}.` : ''} ${isBest ? 'Best buy.' : ''} Buy for ${fmtMoney(cost * 100)}.`
+      : '';
+    return `<div class="up${isBest ? ' best-buy' : ''}"${aria ? ` aria-label="${aria.replace(/"/g, '&quot;')}"` : ''}>
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
+      ${collSummary ? `<div class="sum">${collSummary}</div>` : ''}
       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      ${chips}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
@@ -459,11 +511,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (tier !== lastTier) { coopImg.src = A(COOP_SPRITES[tier]); lastTier = tier; }
     if (tier > s.celebratedTier) {
       g.dispatch({ type: 'markCelebrated', tier });
-      if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
-      showToast(slotToastPending ? 'Coop upgraded! +1 customer slot' : 'Coop upgraded!'); slotToastPending = false;
+      // S2-1 (layout-spec §4.7 rc1): the toast shows now, above any open sheet (z-index over #panel-layer); the bounce +
+      // sparkle wait until the coop is visible (sheet closed; docked plays at once).
+      if (!rm()) { if (open && !docked.matches) coopFxPending = true; else { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); } }
+      showToast('Coop upgraded!', COOP_TOAST_MS); // §4.7: plain copy, only at the L5/L10/L20 tier steps
     }
+    if (coopFxPending && (!open || docked.matches)) { coopFxPending = false; if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); } }
     renderQueue();
-    if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
     // hens
     const hn = Math.min(S.hens(F, b), 12);
     if (hn !== henCount) {
@@ -482,16 +536,46 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // No "+0": below one whole egg the button reads "Collect" and is aria-disabled (still tappable -> shake + "Empty").
     setText(collectBtn, collectLabel(coopWhole, S.eggsPerTap(s.collectionLevel, b), fmtCount));
     setDisabled(collectBtn, coopWhole < 1);
+    // S2-8 header net rate (<= 1 update/s); first negative tick shakes the line (not under reduced motion)
+    if (now() - rateAt >= 1000) { rateAt = now();
+      const cps = incomePerSec(s, b) * 100; // $/s → cents/s for rateView
+      const v = rateView(cps, { stopped: productionStopped(s, b) });
+      setText(rateEl, v.sign === 'neg' ? `⚠ ▼ ${v.text.replace(/^⚠ /, '')}` : v.text); rateEl.classList.toggle('neg', v.sign === 'neg');
+      if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
+      if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
+    // S2-9 queue-full dot on the Market tab (the sheet never opens by itself)
+    { const d = qDot.update(queueFull(s, b), open === 'market', now(), rm()); setHidden(qDotEl, !d.show); if (d.pulse) retrigger(qDotEl, 'qdpulse');
+      const al = d.show ? 'Market, queue full' : 'Market'; if (navMarket.getAttribute('aria-label') !== al) navMarket.setAttribute('aria-label', al); }
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
-    { const mk = nav.querySelector('[data-nav=market]') as HTMLElement, qf = queueFull(s, b) ? 'true' : 'false'; if (mk.dataset.queueFull !== qf) mk.dataset.queueFull = qf; } // S2-9 badge hook (Art & UX styles it)
-    setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);
+    // v1.4 §7: asleep count badge on Upgrades nav + Workers tab; replaces affordable dot while count > 0.
+    { const n = asleepOrUnpaidCount(s, b);
+      setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, n > 0 || !canUp);
+      const ensure = (host: Element | null) => {
+        if (!host) return null;
+        let ab = host.querySelector('.asleep-badge') as HTMLElement | null;
+        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(ab); }
+        return ab;
+      };
+      const navAb = ensure(nav.querySelector('[data-nav=upgrades]'));
+      const tabAb = ensure(document.querySelector('.tabs [data-tab=workers]'));
+      for (const ab of [navAb, tabAb]) {
+        if (!ab) continue;
+        const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
+        if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
+      }
+      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement;
+      const al = n > 0 ? `Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
+      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al); }
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
       setHidden(fb, !farmMAShown);
-      if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r; }
+      if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
+        const v = navManageView(promptManage(s, b).length, s.manageCdS, docked.matches, maAria, now());
+        setText(fb.querySelector('.nav-lbl')!, v.label); const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+        maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
     // market panel
@@ -562,7 +646,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (introA) { const hide = modalKind === 'welcome' || !!open; if (introA.hidden !== hide) introA.hidden = hide; }
   };
   const unlockFarmMH = b.workers.market_hand.unlock_farm, hireCostMH = b.workers.market_hand.hire_cost * 100;
-  // Part B: first hire (any worker) -> energy bar, then Manage. Once per save.
+  // Part B: first hire (any worker) -> energy bar, then Refill. Once per save.
   g.on(e => {
     if (e.type !== 'worker_hire' || flags.workersIntroB) return;
     flags.workersIntroB = true; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
@@ -572,7 +656,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       coach('Workers get tired over time.', row?.querySelector('.ebar') ?? row ?? null, 3000);
       window.setTimeout(() => {
         const r2 = workerRow(e.worker), full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
-        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
+        coach(full ? 'Tap <b>Refill</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Refill</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
         introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' });
       }, 3100);
     }, 50);
@@ -599,7 +683,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     onbUpdate = mountOnboarding(flow, (st) => {
       if (modalKind) return null;
       if (st === 0) return collectBtn;
-      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
+      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)'); // P1: never spotlight an empty queue
       if (docked.matches) { tab = 'collection'; return uRow.querySelector('.btn.buy'); }
       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
     }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'
@@ -626,6 +710,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
+  if (IOS_FLAG_ENABLED) (window as any).eggfarmQaWelcome = () => showWelcome(); // QA-only (C-AC25 copy checks), compiled out of release
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
@@ -636,8 +721,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
-  /** S2-8/S2-9 values for the UI (Art & UX visuals on m3/rc1-ui): net rate, per-worker wage, queue-full flag. */
-  const rates = () => { const s = g.state, inc = income.centsPerSec(now());
+  /** S2-8/S2-9 values for QA / Art & UX: net rate, per-worker wage, queue-full flag. */
+  const rates = () => { const s = g.state, inc = incomePerSec(s, b) * 100;
     return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };

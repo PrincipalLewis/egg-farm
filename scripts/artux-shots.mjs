@@ -1,5 +1,5 @@
 // Art & UX rc0 review shots + rotate-prompt checks (art-ux/m3-rotate-portrait-prompt.md §6.2/§6.3). Usage: node scripts/artux-shots.mjs [webkit|chromium]
-import { chromium, webkit } from 'playwright-core';
+import { chromium, webkit, firefox } from 'playwright-core';
 import { spawn } from 'node:child_process'; import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 const eng = process.argv[2] || 'chromium'; const port = 5100 + Math.floor(Math.random() * 200);
 const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
@@ -21,7 +21,7 @@ if (existsSync(OUT)) {
 } else if (process.env.OUT) die(`OUT=${OUT} does not exist; OUT= may only target an existing folder whose README names ${hash}`);
 else { mkdirSync(OUT, { recursive: true }); writeFileSync(README, `Images from commit ${hash} (build ${release}+${hash}), artux-shots, first written ${new Date().toString()}.\n`); }
 console.log(`artux-shots: build ${release}+${hash} -> ${OUT}`);
-const br = eng === 'webkit' ? await webkit.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); let bad = 0;
+const br = eng === 'webkit' ? await webkit.launch() : eng === 'firefox' ? await firefox.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); let bad = 0;
 const ok = (k, v, d) => { if (!v) bad++; console.log(k, v ? 'PASS' : 'FAIL', JSON.stringify(d ?? '')); };
 const open = async (opt, st) => { const ctx = await br.newContext(opt); const p = await ctx.newPage();
   await p.addInitScript(() => localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, seenSlots: 6 })));
@@ -38,14 +38,14 @@ const F24 = () => { const g = window.eggfarm; g.state = { ...g.state, farmLevel:
   await p.evaluate(() => document.querySelector('nav [data-nav=market]').click()); await p.waitForTimeout(600);
   const m = await p.evaluate(() => document.querySelector('#mRows .queue-more').textContent); ok('F5 strip "+N" == Market "+N waiting" at 360', strip === m.split(' ')[0], { strip, m }); await ctx.close(); }
 // F1: toast below the strip, slot copy only on a slot level
-for (const [F, want] of [[19, 'Coop upgraded! +1 customer slot'], [24, 'Coop upgraded!']]) {
+for (const [F, want] of [[19, 'Coop upgraded!'], [24, 'Coop upgraded!']]) { // §4.7 rc1: plain copy, never a '+1 customer slot' suffix
   const { ctx, p } = await open({ viewport: { width: 360, height: 640 } }, null);
   const r = await p.evaluate(async F => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: 0, coinsCents: 1e15, customers: Array.from({ length: 9 }, (_, i) => ({ id: i + 1, demand: 5, filled: 0, waitedS: 0 })), nextCustomerInS: 1e9 };
     await new Promise(r => setTimeout(r, 300)); g.dispatch({ type: 'buyFarm' }); const seen = new Set(); const end = performance.now() + 1500; let top = 0;
     while (performance.now() < end) { await new Promise(r => requestAnimationFrame(r)); const t = document.querySelector('.toast.show'); if (t) { seen.add(t.textContent); top = t.getBoundingClientRect().top; } }
     return { seen: [...seen], toastTop: Math.round(top), stripBottom: Math.round(document.querySelector('.queue').getBoundingClientRect().bottom) }; }, F);
   if (F === 19) await p.screenshot({ path: `${OUT}/toast-below-strip-360-${eng}.png` });
-  ok(`F1 toast at F${F + 1}`, r.seen.includes(want) && !r.seen.includes(F === 24 ? 'Coop upgraded! +1 customer slot' : '__') && r.toastTop >= r.stripBottom, r); await ctx.close(); }
+  ok(`F1 toast at F${F + 1}`, r.seen.includes(want) && !r.seen.some(t => /customer slot/.test(t)) && r.toastTop >= r.stripBottom, r); await ctx.close(); }
 // Rotate prompt §6.2/§6.3
 for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 640, height: 360 }, hasTouch: true, isMobile: eng !== 'webkit' || true }, true], ['1024x768 touch tablet', { viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true }, false], ['1280x720 mouse', { viewport: { width: 1280, height: 720 } }, false], ['844x390 mouse', { viewport: { width: 844, height: 390 } }, false]]) {
   const { ctx, p } = await open(opt, null);
@@ -53,6 +53,14 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   if (want) { const before = await p.evaluate(() => window.eggfarm.state.basket); await p.mouse.click(320, 300); await p.waitForTimeout(200); r.tapBlocked = (await p.evaluate(() => window.eggfarm.state.basket)) === before; r.icon = await p.evaluate(() => { const i = document.querySelector('#rotate-prompt img').getBoundingClientRect(); return [Math.round(i.width), Math.round(i.height)]; });
     await p.screenshot({ path: `${OUT}/rotate-prompt-640x360-${eng}.png` }); }
   ok(`rotate prompt ${name}`, r.shown === want && r.inert === want && (!want || (r.tapBlocked && r.icon.join() === '64,64')), r); await ctx.close(); }
+// D7: the rotate prompt traps keyboard focus while open and restores it on close
+{ const { ctx, p } = await open({ viewport: { width: 360, height: 640 }, hasTouch: true, isMobile: true }, null);
+  await p.evaluate(() => document.querySelector('#collect').focus());
+  await p.setViewportSize({ width: 640, height: 360 }); await p.waitForSelector('#rotate-prompt:not([hidden])');
+  const seen = []; for (const k of ['Tab', 'Tab', 'Shift+Tab', 'Tab']) { await p.keyboard.press(k); seen.push(await p.evaluate(() => document.activeElement?.id || document.activeElement?.tagName)); }
+  await p.setViewportSize({ width: 360, height: 640 }); await p.waitForSelector('#rotate-prompt', { state: 'hidden' });
+  const back = await p.evaluate(() => document.activeElement?.id);
+  ok('D7 rotate prompt traps Tab/Shift+Tab, restores focus to Collect on close', seen.every(x => x === 'rotate-prompt') && back === 'collect', { seen, back }); await ctx.close(); }
 // R1: FTUE bubble + Skip hidden while Settings is open, back after it closes (new save, FTUE running)
 { const ctx = await br.newContext({ viewport: { width: 360, height: 640 } }); const p = await ctx.newPage();
   await p.goto(`http://127.0.0.1:${port}/`); await p.getByText('Tap to start').click(); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(600);
@@ -102,4 +110,39 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   ok('D1 OFL link inline-block >=44px, no overlap with Reset save, corner taps land on it', d1.display === 'inline-block' && d1.box[3] >= 44 && !d1.overlap && d1.hits.every(Boolean), d1);
   const lic = await (await fetch(`http://127.0.0.1:${port}/fonts/OFL.txt`)).text();
   ok('R2/R4 font credits: one <p>, link with >=44px tap target, OFL ships', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && r.tag === 'P' && r.blocks === 0 && !r.authorsAlone && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
+// rc1-ui review set (Art & UX, Oct 16): 360/375/390/960/1280 x {full queue 9/9, coop L5/L10/L20, toast over open sheet,
+// Refill during cooldown, welcome-back sold line}
+for (const [w, h] of [[360, 640], [375, 667], [390, 844], [960, 600], [1280, 800]]) {
+  const sz = `${w}x${h}`, dock = w >= 960;
+  { const { ctx, p } = await open({ viewport: { width: w, height: h } }, () => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 15, celebratedTier: 3, customers: Array.from({ length: 9 }, (_, i) => ({ id: 800 + i, demand: 20 + i, filled: 0, waitedS: i * 3 })), nextCustomerInS: 1e9 }; });
+    await p.waitForTimeout(2300); await p.screenshot({ path: `${OUT}/rc1-queue-full-9of9-${sz}-${eng}.png` });
+    const r = await p.evaluate(() => { const t = document.querySelector('.qtag').getBoundingClientRect(); return { tag: document.querySelector('.qtag').innerText.trim(), hits: [...document.querySelectorAll('#queue .chip')].map(c => c.getBoundingClientRect()).filter(c => !(t.right <= c.left || c.right <= t.left || t.bottom <= c.top || c.bottom <= t.top)).length }; });
+    ok(`rc1-ui full queue tag, no overlap (${sz})`, r.hits === 0 && r.tag === (w < 380 ? 'Full' : 'Queue full'), r); await ctx.close(); }
+  for (const [F, tierName] of [[4, 'l5'], [9, 'l10'], [19, 'l20']]) {
+    const { ctx, p } = await open({ viewport: { width: w, height: h } }, null);
+    await p.evaluate(F => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: F === 4 ? 0 : F === 9 ? 1 : 2, coinsCents: 1e15 }; }, F);
+    if (!dock) { await p.locator('[data-nav=upgrades]').click(); }
+    await p.locator('[data-tab=farm]').click(); await p.waitForTimeout(400);
+    await p.evaluate(() => window.eggfarm.dispatch({ type: 'buyFarm' })); await p.waitForTimeout(350);
+    const t = await p.evaluate(() => ({ text: document.querySelector('.toast').textContent, vis: getComputedStyle(document.querySelector('.toast')).visibility }));
+    await p.screenshot({ path: `${OUT}/rc1-toast-over-sheet-coop-${tierName}-${sz}-${eng}.png` });
+    if (!dock) { await p.locator('.sheet:not([hidden]) .close').click(); }
+    await p.waitForTimeout(700); await p.screenshot({ path: `${OUT}/rc1-coop-${tierName}-${sz}-${eng}.png` });
+    const src = await p.evaluate(() => document.querySelector('#coop').getAttribute('src').split('/').pop());
+    ok(`rc1-ui coop ${tierName} + toast over sheet (${sz})`, src === `coop-${tierName}.svg` && t.text === 'Coop upgraded!' && t.vis === 'visible', { src, t }); await ctx.close(); }
+  { const { ctx, p } = await open({ viewport: { width: w, height: h } }, () => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 10, coinsCents: 1e9, workers: { market_hand: { energy: 30, cdS: 1 }, coop_hand: { energy: 35, cdS: 1 }, hawker: { energy: 90, cdS: 0 } }, manageCdS: 0 }; });
+    await p.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await p.waitForTimeout(400);
+    await p.screenshot({ path: `${OUT}/rc1-refill-cooldown-farm-${sz}-${eng}.png` });
+    if (!dock) await p.locator('[data-nav=upgrades]').click(); await p.locator('[data-tab=workers]').click(); await p.waitForTimeout(400);
+    await p.screenshot({ path: `${OUT}/rc1-refill-cooldown-workers-${sz}-${eng}.png` });
+    const r = await p.evaluate(() => ({ cap: document.querySelector('#refillCap')?.textContent, nav: document.querySelector('[data-act=manageAll].farm-manage-all .nav-lbl')?.textContent }));
+    ok(`rc1-ui Refill cooldown (${sz})`, /^Ready in \d+s$/.test(r.cap ?? '') && (dock ? /^Ready in \d+s$/ : /^0:\d\d$/).test(r.nav ?? ''), r); await ctx.close(); }
+  { const sv = JSON.stringify({ version: 5, savedAt: Date.now() - 2 * 3600e3, state: { coinsCents: 1e9, coop: 0, basket: 0, collectionLevel: 10, farmLevel: 10, customers: [{ id: 1, demand: 200, filled: 0, waitedS: 0 }, { id: 2, demand: 139, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2, workers: { market_hand: { energy: 100, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+    const ctx = await br.newContext({ viewport: { width: w, height: h } }); const p = await ctx.newPage();
+    await p.addInitScript(sv => { if (sessionStorage.getItem('s')) return; sessionStorage.setItem('s', '1'); localStorage.setItem('eggfarm.save', sv); localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true })); }, sv);
+    await p.goto(`http://127.0.0.1:${port}/`); await p.getByText('Tap to start').click({ force: true }).catch(() => {}); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(500);
+    await p.screenshot({ path: `${OUT}/rc1-welcome-sold-line-${sz}-${eng}.png` });
+    const line = await p.evaluate(() => document.querySelector('#wbSold')?.textContent);
+    ok(`rc1-ui welcome-back sold line (${sz})`, /^Market Hand sold 339 right away/.test(line ?? ''), line); await ctx.close(); }
+}
 await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);

@@ -5,6 +5,9 @@
 :root{
   --c-yolk:#FFC93C;--c-yolk-dark:#F29E1F;--c-barn:#B83B37;--c-meadow:#6BBF59;--c-sky:#8FD3F4;--c-cream:#FFF6E5;--c-white:#FFFFFF;--c-wood:#A86B3C;
   --c-text:#3E2C23;--c-muted:#6B5D52;--c-meadow-strong:#3D7F33;--c-wood-text:#8A5528;--c-focus:#2B79A8;--c-slot-outline:#6B5D52;--c-floater:#3E2C23;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
+  /* rc1-upgrade-value v1.4 */
+  --c-meadow-text:#2F6B27;--c-meadow-tint:#E8F4E4;
+  --c-barn-ui:#B83B37;--c-danger:var(--c-barn-ui);
   --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-pill:999px;
   --bw:2px;--shadow:0 4px 0 rgb(62 44 35 / .25);
   --f-display:"Fredoka",system-ui,sans-serif;--f-body:"Nunito",system-ui,sans-serif;
@@ -36,7 +39,7 @@ img{user-select:none;-webkit-user-drag:none}
 @keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(61 127 51/.35)}}
 .btn.secondary{background:var(--c-white);min-height:44px}.btn.danger{background:var(--c-barn);color:#fff;min-height:44px}
 .btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
-.btn.maxed{background:var(--c-gold);pointer-events:none;box-shadow:none}
+.btn.maxed{background:var(--c-yolk);color:var(--c-text);pointer-events:none;box-shadow:none}
 .btn img{width:20px;height:20px}
 .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
 .icon-btn{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;display:grid;place-items:center;padding:0}.icon-btn img{width:28px;height:28px}
@@ -221,9 +224,9 @@ nav.actions button.btn.farm-manage-all .manage-ico{width:44px;height:44px}
 .goal[hidden]{display:none}
 .goal:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
 .goal-ic{width:var(--goal-icon);height:var(--goal-icon)}
-.goal-label{font:600 14px var(--f-display);color:var(--c-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.goal-label{display:flex;align-items:baseline;min-width:0;overflow:hidden;font:600 14px var(--f-display);color:var(--c-text);white-space:nowrap}.goal-label .g-star{flex:0 0 auto;margin-right:4px}.goal-label .g-track{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.goal-label .g-gain{flex:0 0 auto;white-space:pre}
 .goal-status{font:700 13px var(--f-body);color:var(--c-muted);max-width:var(--goal-status-max);white-space:nowrap;justify-self:end}
-.goal-status.chip{display:inline-grid;place-items:center;height:24px;padding:0 10px;border-radius:var(--r-pill);background:var(--c-meadow-strong);color:#fff;font:600 12px var(--f-display);max-width:none}
+.goal-status.chip{display:inline-grid;place-items:center;height:20px;padding:0 10px;border-radius:var(--r-pill);background:var(--c-yolk);color:var(--c-text);font:600 12px var(--f-display);max-width:none}
 .goal-chev{font-size:16px;color:var(--c-muted);text-align:center}
 .goal[data-state=ready]{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
 @keyframes goalglow{0%,85%,100%{box-shadow:var(--shadow)}92%{box-shadow:var(--shadow),0 0 0 4px rgb(61 127 51/.3)}}
@@ -285,10 +288,13 @@ img.onb-hand.down{animation:handdown 1s ease-in-out infinite}
    padded 4px past the 36px pill (visual unchanged); buttons are siblings in a flex row, so hit areas never overlap. */
 .tab-pill{display:flex;gap:6px;align-items:center;justify-content:center;width:100%;height:100%;border-radius:var(--r-pill)}
 .tabs .active{background:transparent}.tabs .active .tab-pill{background:var(--c-yolk)}
+/* Art FIX4: Collection/Farm/Workers tab hit ≥44px at all widths (pill visual unchanged) */
+.tabs{overflow:visible}
+.tabs button{box-sizing:border-box;min-height:44px;margin-block:-4px;padding:4px 0;align-self:stretch}
+.tabs button .tab-pill{box-sizing:border-box}
 @media (min-width:960px){
-  .tabs{overflow:visible}
-  .tabs button{box-sizing:border-box;min-height:44px;min-width:44px;margin-block:-4px;padding:4px 0;align-self:stretch}
-  .tabs button .tab-pill{padding:0 var(--s-3);box-sizing:border-box}
+  .tabs button{min-width:44px}
+  .tabs button .tab-pill{padding:0 var(--s-3)}
 }
 /* B6: desktop docked: the farm column can't grow past its track (min-content of the queue/yard/Collect label used to
    push it under the panel), and the Collect bar is centred at the goal chip's 560px width, clear of the panel edge. */
@@ -429,3 +435,128 @@ html,body{overflow-x:hidden;max-width:100%}
 .chip.served.squeeze{transition:opacity 120ms linear}.chip.served.squeeze.gone{opacity:0}
 /* Fast Collect taps (session 2): no double-tap-zoom/dblclick delay anywhere in the game, incl. the scene (a div) that also collects */
 #app,.scene,.queue{touch-action:manipulation}
+/* D5 (m3-next-goal-spec v1.0.1): button.goal is a 44px hit area (2px transparent padding-block); the visible 40px pill is
+   the inner span.goal-pill. The gap below goes 8px -> 4px (margin-bottom:-4px against the 8px column gap), so the row stays 48px. */
+:root{--goal-h:40px;--goal-hit:44px}
+.goal{display:block;height:auto;min-height:var(--goal-hit);padding:2px 0;margin-bottom:-4px;background:transparent;border:0;box-shadow:none;border-radius:var(--r-pill);animation:none}
+.goal-pill{display:grid;grid-template-columns:var(--goal-icon) minmax(0,1fr) auto 16px;gap:var(--s-2);align-items:center;width:100%;height:var(--goal-h);padding:0 var(--s-3);box-sizing:border-box;
+  border-radius:var(--r-pill);background:var(--c-white);border:2px solid var(--c-outline);box-shadow:var(--shadow);text-align:left;min-width:0}
+.goal[data-state=ready]{animation:none}
+.goal[data-state=ready] .goal-pill{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
+.goal-pill>*{min-width:0}
+@media (max-width:379px){.goal-pill{grid-template-columns:var(--goal-icon) minmax(0,1fr) auto}}
+@media (min-width:960px) and (orientation:landscape){.goal{min-height:var(--goal-h-lg);padding:0;margin-bottom:0;height:auto}.goal-pill{height:var(--goal-h-lg)}}
+/* S2-6 (layout-spec §3.3, rc1): the "Queue full" tag straddles the strip's top outline, never over a chip or the "+N" tile; "Full" below 380px */
+.qtag{top:-9px;right:8px;height:18px;line-height:16px;z-index:1;pointer-events:none;white-space:nowrap;box-sizing:border-box;border:1px solid transparent}
+.qtag .q-short{display:none}
+@media (max-width:379px){.qtag .q-long{display:none}.qtag .q-short{display:inline}}
+@media (max-width:390px){.farm{padding-top:10px}} /* room for the tag's 9px overhang above the strip (farm padding is 8px here) */
+/* S2-6 (QA s2-7-bd0dc66: tag over the "+N" tile at 375/390 with 9/9): the strip reserves a 9px top band, so the tag's lower
+   half sits in it and never reaches a chip or the "+N" tile, at any chip size (64/56) or strip height. */
+.queue{padding-top:9px;min-height:81px}
+@media (max-height:699px){.queue{min-height:73px}}
+/* S2-5 (session2-ui-triage (b)): nav buttons share one anatomy (icon 28px + 12px label); Manage is a 4th equal column, no green fill */
+.actions .nav-lbl{font:700 12px/1.2 var(--f-body);color:var(--c-text);white-space:nowrap}
+nav.actions button.nav-manage{flex:1;min-width:64px;height:auto;min-height:0;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--c-text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+nav.actions button.nav-manage[hidden]{display:none}
+nav.actions button.nav-manage .manage-ico{width:32px;height:32px}
+nav.actions button.nav-manage .manage-ico img{width:28px;height:28px;filter:none}
+nav.actions button.nav-manage[aria-disabled=true]{background:transparent;color:#5A4C42}
+nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
+.count-badge{position:absolute;top:6px;right:calc(50% - 26px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#B83B37;color:#fff;font:700 11px/16px var(--f-body);text-align:center;box-sizing:border-box}
+.count-badge[hidden]{display:none}
+@media (min-width:960px) and (orientation:landscape){
+  .sheet header button.nav-manage:not([hidden]){display:inline-flex;flex-direction:row;align-items:center;gap:6px;height:44px;min-height:44px;width:auto;padding:0 12px 0 0;border-radius:22px;border:2px solid var(--c-outline);background:var(--c-white);box-shadow:none;font:600 14px var(--f-display);color:var(--c-text)}
+  .sheet header button.nav-manage .nav-lbl{font:600 14px var(--f-display)}
+  .sheet header button.nav-manage .manage-ico{width:44px;height:40px}
+  .sheet header button.nav-manage[aria-disabled=true]{background:#CFC6BA;color:#5A4C42}
+}
+/* Workers v1.3 captions (m2-workers-layout §4.4): 12px Nunito #5A4C42, one line under the button */
+.wk-cap{font:400 12px/16px var(--f-body);color:#5A4C42;white-space:nowrap}
+.refill-wrap{position:sticky;top:0;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 6px}
+.refill-wrap .btn.manage-all{position:static;margin:0;width:calc(100% - 24px)}
+/* S2-3b: one-time "+N" chip pulse on a queue step (1 -> 1.12 -> 1 over 600ms); reduced motion: brown -> Yolk -> brown colour flash */
+.chip.more.qpulse{animation:qpulse 600ms ease-in-out 1}@keyframes qpulse{50%{transform:scale(1.12)}}
+.chip.more.qflash{animation:qflash 600ms linear 1}@keyframes qflash{50%{background:var(--c-yolk);color:var(--c-text)}}
+.rm .chip.more.qpulse{animation:qflash 600ms linear 1}
+.fx li.coopnew{font:800 14px var(--f-body);color:var(--c-wood-text)}
+/* S2-1 (layout-spec §4.7): the toast always paints above the sheets/scrim (#panel-layer z10) and modals (z20) */
+.toast{z-index:35}
+/* AC14b v1.2: Export old save is a <button> with a 44x44 minimum tap area in every case */
+.recovery-card #rcExport{min-height:44px;min-width:44px}
+/* S2-5: nav buttons are the full 64px (the 2px top rule is drawn over them instead of taking 2px of the track) */
+.actions{position:relative;border-top:0}
+.actions::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--bw);background:var(--c-outline);pointer-events:none;z-index:1}
+/* S2-4c: welcome-back "Market Hand sold N right away · +$X" line, 14px Nunito #6B5D52 */
+.card .wb-sold{font:400 14px/1.35 var(--f-body);color:#6B5D52;margin-top:-4px}
+/* particle safe area (read by app.ts clampToSafe) */
+:root{--sa-t:env(safe-area-inset-top,0px);--sa-r:env(safe-area-inset-right,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px)}
+/* S2-8: net rate under the money, wage lines */
+.coins-col{display:flex;flex-direction:column;line-height:1;min-width:0}
+.coins-col #coins{line-height:18px}
+.rate{font:700 11px/13px var(--f-body);color:#3D7F33;white-space:nowrap}
+.rate[data-sign=neg]{color:#B83B37}.rate[data-sign=zero]{color:#6B5D52}
+.rate.rshake{animation:rshake 300ms linear 1}@keyframes rshake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.rm .rate.rshake,.reduced-motion .rate.rshake{animation:none}
+.wage{display:flex;align-items:center;gap:4px;white-space:nowrap;font:400 12px/16px var(--f-body);color:#6B5D52}.wage img{width:12px;height:12px}
+/* S2-9: Market tab queue-full dot */
+.nav-ic{position:relative;display:inline-block;width:28px;height:28px}
+.qdot{position:absolute;top:-3px;right:-5px;width:14px;height:14px;box-sizing:border-box;border-radius:50%;background:#B83B37;border:2px solid #fff}
+.qdot[hidden]{display:none}
+.qdot.qdpulse{animation:qdpulse 600ms ease-in-out 1}@keyframes qdpulse{50%{transform:scale(1.12)}}
+.rm .qdot.qdpulse{animation:none}
+/* Art & UX review rc1-ui-fc8e1cf #1: the phone-nav Refill icon greys out during cooldown (timer text stays #5A4C42) */
+.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55}
+nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55} /* beats the S2-5 filter:none reset */
+/* #2: docked Upgrades-header Refill pill never under 44px tall */
+@media (min-width:960px) and (orientation:landscape){.sheet header button.desk-manage-all:not([hidden]){min-height:44px;box-sizing:border-box}}
+/* P1 (Vadim playtest): no text caret / selection when clicking the farm. Game surface is not text; real inputs stay editable. */
+#app,#scene,#yard,.onb{-webkit-user-select:none;user-select:none;caret-color:transparent}
+#app input,#app textarea,#app select,#app [contenteditable=true]{-webkit-user-select:text;user-select:text;caret-color:auto}
+.hint.eta{color:var(--c-muted);white-space:nowrap} /* Art & UX: waiting ETA always muted grey, one line */
+.wk .btn.manage{min-height:var(--tap-min);min-width:var(--tap-min)} /* Refill: tap target >=44px in every state */
+.wk .btn.manage .manage-ico img{width:28px;height:28px;filter:none} /* nav Refill glyph, same size/colour as nav */
+/* C-AC25(e): Welcome-back gain, two centred lines, never truncated/ellipsised; hero +N in Fredoka bold with the number pop */
+.wb-gain{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;max-width:100%}
+.wb-hero{display:flex;align-items:center;justify-content:center;gap:8px;font:700 var(--fs-xl) var(--f-display);white-space:nowrap;overflow:visible;text-overflow:clip;animation:popin 300ms var(--ease-pop)}.wb-hero img{width:32px}
+.wb-line2{font:400 var(--fs-base) var(--f-body);white-space:normal;overflow:visible;text-overflow:clip}
+.rm .wb-hero{animation:none}
+/* Product Oct 16: visible build hash, small + muted, in the HUD spacer, never a tap target */
+.hud .spacer{display:flex;justify-content:flex-end;align-items:center;min-width:0}
+.build-tag{pointer-events:none;-webkit-user-select:none;user-select:none;font:600 11px var(--f-body);color:rgb(255 246 229 / .8);white-space:nowrap;padding-inline:4px}
+
+/* rc1 upgrade-value chips (art-ux/rc1-upgrade-value.md v1.4) */
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0}
+.vchip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:var(--r-pill);font:700 12px var(--f-body);white-space:nowrap;pointer-events:none;line-height:20px}
+.vchip img{width:12px;height:12px}
+.vchip.eff{background:var(--c-meadow-tint);color:var(--c-meadow-text)}
+.vchip.pb{background:var(--c-cream);color:var(--c-text);line-height:20px}
+.vchip.bb{background:var(--c-yolk);color:var(--c-text)}
+.vchip.muted{background:var(--c-cream);color:var(--c-muted)}
+.up.best-buy{outline:2px solid var(--c-yolk-dark);outline-offset:2px}
+.up.best-buy:focus-visible{outline:3px solid var(--c-focus);outline-offset:5px}
+.up.best-buy .btn.buy.affordable{box-shadow:var(--shadow),0 0 0 3px rgb(107 191 89/.35)}
+.up .btn.buy{position:relative;z-index:1}
+
+/* Asleep / Unpaid card (Art v1.4 §7) */
+.wk-banner{grid-column:1/-1;margin:-10px -10px 6px;height:32px;box-sizing:border-box;display:flex;align-items:center;padding:0 10px;background:var(--c-danger);color:#fff;font:800 14px var(--f-body);border-radius:12px 12px 0 0}
+.wk.is-off .wk-body{opacity:.5}
+.wk.is-off .wk-banner,.wk.is-off .wk-refill{opacity:1}
+.wk.is-off{opacity:1} /* override legacy .wk.asleep/.unpaid opacity */
+.wk.asleep,.wk.unpaid{opacity:1}
+.wk{position:relative}
+.wk .btn.manage{min-height:44px;min-width:88px}
+
+/* Asleep badge: Upgrades nav + Workers tab (Art FIX1: top-right corner, overlaps pill border) */
+.asleep-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-danger);color:#fff;font:700 12px/18px var(--f-display);text-align:center;z-index:2;box-sizing:border-box}
+.tabs{overflow:visible}
+.tabs [data-tab=workers]{position:relative}
+nav [data-nav=upgrades]{position:relative}
+.asleep-badge.badge-pulse{animation:badgePulse 400ms ease-out}
+@keyframes badgePulse{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.asleep-badge.badge-pulse{animation:none}}
+.pill .rate.neg,.rate.neg{color:var(--c-danger)!important}
+.up .sum{font:700 12px var(--f-body);color:var(--c-wood-text);margin:0}
+/* UC12 Limited by collecting — visual 16px, 44px hit via padding/neg margin */
+.hint.coop .link,.hint .link{appearance:none;border:0;background:none;padding-block:14px;margin-block:-14px;padding-inline:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:44px;box-sizing:content-box}
+.hint.coop{color:var(--c-wood-text);padding-bottom:12px}

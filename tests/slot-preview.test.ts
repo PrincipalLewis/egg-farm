@@ -8,8 +8,8 @@ const text = (h: string | null) => h && h.replace(/<[^>]+>/g, '|').split('|').fi
 describe('slotPreview (§6)', () => {
   it('lead line exactly at F4, F9, F14, F19 (next = 5/10/15/20), with n -> n+1', () => {
     for (const [F, n] of [[4, 6], [9, 7], [14, 8], [19, 9]]) {
-      const h = row(F)!; expect(h).toContain(`+1 customer slot<span class="m"> (${n} → ${n + 1})</span>`);
-      expect(h).toContain(`aria-label="Next level: plus 1 customer slot, ${n} to ${n + 1}"`); expect(h).toContain('<img src="i.svg" alt="">');
+      const h = row(F)!; expect(h).toContain(`+1 customer<span class="m"> (max ${n + 1})</span>`); // v1.2 S2-3b
+      expect(h).toContain(`aria-label="Next level: plus 1 customer, queue holds up to ${n + 1}"`); expect(h).toContain('<img src="i.svg" alt="">');
     }
   });
   it('absent at F3, F20+ and every non-boundary level', () => {

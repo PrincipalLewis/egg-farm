@@ -70,6 +70,9 @@ if (await page.locator('.dbg').count()) fail('debug panel visible without ?debug
   const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }), page.locator('#sExport').click()]);
   const j = JSON.parse(await (await import('node:fs/promises')).readFile(await dl.path(), 'utf8'));
   const ss = j.events.find(e => e.type === 'session_start'); if (!ss?.install_id || !/^m3-pt1\+[0-9a-f]{7,}$/.test(ss.build || '')) fail('export: session_start lacks install_id/build');
+  // Page build id (ops/claude/smoke.mjs): meta[name=build-id] + #app[data-build-id], not a window global (S2-REL-1).
+  const pageBuild = await page.evaluate(() => document.querySelector('meta[name="build-id"]')?.content || document.querySelector('#app')?.dataset.buildId || '');
+  if (!pageBuild || !/\+[0-9a-f]{7,}/.test(pageBuild)) fail(`page build-id missing/bad: ${pageBuild}`);
   const id = await page.evaluate(() => localStorage.getItem('eggfarm.install_id'));
   await page.locator('#sReset').click(); await page.locator('#cReset').click(); await page.waitForLoadState(); await page.getByText('Tap to start').click(); await page.waitForTimeout(150);
   if (id !== await page.evaluate(() => localStorage.getItem('eggfarm.install_id'))) fail('install_id changed after Reset save');
