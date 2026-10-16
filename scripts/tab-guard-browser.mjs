@@ -56,8 +56,10 @@ const buy = p => p.evaluate(() => { const g = window.eggfarm; g.dispatch({ type:
   const bCoinsAfter = await coins(B); const aCoins = await A.evaluate(() => window.eggfarm.loaded.coinsCents), ev = await A.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'tab_guard_takeover').map(e => e.reason));
   const ac1 = await A.evaluate(() => window.__ac.map(c => c.state)); const n1 = await A.evaluate(() => window.__sfx);
   await A.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 50 }; }); await A.locator('#collect').click(); await A.waitForTimeout(800);
-  const n2 = await A.evaluate(() => window.__sfx);
-  ok('TG-UI-9b sound returns after the Play here reload (AudioContext running, a tap plays sfx)', ac1.includes('running') && n2 > n1, { ac: ac1, before: n1, after: n2 });
+  const n2 = await A.evaluate(() => window.__sfx); const ac2 = await A.evaluate(() => window.__ac.map(c => c.state));
+  // Headless Firefox here never moves an AudioContext to 'running' (no audio output device), even before the guard; there
+  // only the sfx start count is checked. Chromium/WebKit must also report 'running'.
+  ok(`TG-UI-9b sound returns after the Play here reload (a tap starts sfx${ENGINE === 'firefox' ? '; ctx state not checked in headless Firefox' : ', AudioContext running'})`, (ENGINE === 'firefox' || ac2.includes('running')) && n2 > n1, { acAfterStart: ac1, acAfterTap: ac2, before: n1, after: n2 });
   ok('TG-UI-6/TG-2 Play here -> "Loading…" disabled, reload shows exactly B\'s money, B shows the notice, takeover{play_here}', loading && /Loading/.test(loading.t) && loading.d && aCoins === bCoinsAfter && await shown(B) && !(await shown(A)) && ev.includes('play_here'), { loading, aCoins, bCoinsAtTakeover: bCoinsAfter, bSavedBefore: bCoins, ev });
   await ctx.close(); }
 // ---- TG-4 owner killed: stale lease (>=6 s, never released) -> next load takes over without a notice
