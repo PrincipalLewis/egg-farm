@@ -21,10 +21,12 @@ export interface EconomyParams {
 export interface M4Params {
   /** Feature flag: 0 = off (pre-M4 game, Farm drives eggs/s and price), 1 = Hens/Egg value tracks live. */
   enabled: number;
-  hens: { baseCost: number; costGrowth: number; capOverFarm: number };
-  eggValue: { baseCost: number; costGrowth: number; capOverFarm: number; pricePerLevel: number; collectionBonusPerLevel: number };
+  /** costs[L] = price of L -> L+1 (CSV hens_cost / egg_value_cost, verbatim). */
+  hens: { costs: number[]; capOverFarm: number };
+  eggValue: { costs: number[]; capOverFarm: number; baseStep: number; levelBonus: number };
   milestones: {
-    hens: { level: number; mult: number }[];
+    /** M1 (HoP 14:45): Hens milestones raise coop capacity and offline eggs only, never the in-tab lay rate. */
+    hens: { level: number; coopMult: number; offlineMult: number }[];
     grades: { level: number; mult: number; minFarm: number }[];
     /** mult on the unit price (1.10 = +10%), CSV balancedN_mult. */
     balanced: { level: number; mult: number }[];
@@ -34,7 +36,7 @@ export interface M4Params {
 }
 /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
 export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };
-const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p.maxLevel));
+export const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p.maxLevel));
 export const collectionCost = (C: number, p: EconomyParams) => Math.floor(p.collection.baseCost * p.collection.costGrowth ** clampL(C, p));
 export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerTapBase + p.collection.eggsPerTapPerLevel * clampL(C, p);
 export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
@@ -59,26 +61,33 @@ export const demandRange = (F: number, p: EconomyParams): readonly [number, numb
 export const queueMax = (F: number, p: EconomyParams) =>
   Math.min(p.customers.queue_max_cap, p.customers.queue_max_base + Math.floor(clampL(F, p) / p.customers.queue_max_step_levels));
 export const patienceS = (_F: number, p: EconomyParams) => p.customers.customer_patience_s;
-// ---------- M4-A tracks ----------
-/** Cost in coins to buy Hens/Egg value level L -> L+1: floor(base x growth^L). */
-export const hensCost = (H: number, p: EconomyParams) => Math.floor(p.m4!.hens.baseCost * p.m4!.hens.costGrowth ** clampL(H, p));
-export const eggValueCost = (V: number, p: EconomyParams) => Math.floor(p.m4!.eggValue.baseCost * p.m4!.eggValue.costGrowth ** clampL(V, p));
-/** Track cap: min(F + capOverFarm, maxLevel) (decisions 2026-10-16 13:50). */
+// ---------- M4-A tracks (product/farm/m4a-spec.md v1.2) ----------
+/** M4A-1: cost in coins of Hens/Egg value level L -> L+1 (CSV column at L). */
+export const hensCost = (H: number, p: EconomyParams) => p.m4!.hens.costs[clampL(H, p)];
+export const eggValueCost = (V: number, p: EconomyParams) => p.m4!.eggValue.costs[clampL(V, p)];
+/** M4A-2: buy cap min(maxLevel, F + *_cap_over_farm). Enforced at purchase only (migrated levels may exceed it, M4A-27/28). */
 export const hensCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.hens.capOverFarm);
 export const eggValueCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.eggValue.capOverFarm);
 const best = <T extends { level: number }>(xs: T[], L: number, ok: (x: T) => boolean = () => true) => xs.filter(x => L >= x.level && ok(x)).pop();
-/** Hens milestone laying multiplier (H10/20/30). */
-export const hensMilestoneMult = (H: number, p: EconomyParams) => best(p.m4!.milestones.hens, H)?.mult ?? 1;
-/** Egg grade multiplier; a grade with minFarm stays locked (falls back to the previous grade) until Farm reaches it. */
+/** M4A-8: highest Hens milestone reached (null below the first). */
+export const hensMilestone = (H: number, p: EconomyParams) => best(p.m4!.milestones.hens, H) ?? null;
+export const hensCoopMult = (H: number, p: EconomyParams) => hensMilestone(H, p)?.coopMult ?? 1;
+export const hensOfflineMult = (H: number, p: EconomyParams) => hensMilestone(H, p)?.offlineMult ?? 1;
+/** M4A-9: egg grade multiplier; a grade with a Farm gate falls back to the lower grade until F reaches it. */
 export const gradeMult = (V: number, F: number, p: EconomyParams) => best(p.m4!.milestones.grades, V, g => F >= g.minFarm)?.mult ?? 1;
-/** Balanced-farm income bonus on min(F,H,V). */
+/** M4A-10: Balanced-farm price multiplier on min(F,H,V) (Collection not included). */
 export const balancedMult = (F: number, H: number, V: number, p: EconomyParams) => best(p.m4!.milestones.balanced, Math.min(F, H, V))?.mult ?? 1;
 export const balancedTier = (F: number, H: number, V: number, p: EconomyParams) => p.m4!.milestones.balanced.filter(t => Math.min(F, H, V) >= t.level).length;
-/** M4 eggs/s: the Hens curve (CSV hens/eggs_per_sec columns read at H) x milestone. */
-export const trackEggsPerSec = (H: number, p: EconomyParams) => roundHalfUp(eggsPerSec(H, p) * hensMilestoneMult(H, p), 4);
-/** M4 sale price in cents: round_half_up((1.00 + 0.05V)(1 + 0.12V) x grade x (1 + balanced), 2 dp). */
-export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParams) =>
-  Math.round(roundHalfUp((1 + p.m4!.eggValue.pricePerLevel * clampL(V, p)) * (1 + p.m4!.eggValue.collectionBonusPerLevel * clampL(V, p)) * gradeMult(V, F, p) * balancedMult(F, H, V, p), 2) * 100);
+/** M4A-4: in-tab lay rate = CSV eggs_per_sec at H, no milestone multiplier (M1). */
+export const trackEggsPerSec = (H: number, p: EconomyParams) => eggsPerSec(H, p);
+/** M4A-4/M4A-8: coop capacity at F x the Hens coop milestone. */
+export const trackCoopCapacity = (F: number, H: number, p: EconomyParams) => Math.floor(coopCapacity(F, p) * hensCoopMult(H, p));
+/** M4A-5: unit price before the Grader, in integer cents, one half-up rounding at the end:
+ *  (1 + baseStep*V) x (1 + levelBonus*V) x grade x Balanced. Collection never enters. */
+export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParams) => {
+  const v = clampL(V, p), e = p.m4!.eggValue;
+  return Math.round(Number((100 * (1 + e.baseStep * v) * (1 + e.levelBonus * v) * gradeMult(v, F, p) * balancedMult(F, H, v, p)).toPrecision(12)));
+};
 export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
 /** One row in economy.csv column format, for verification/parity. */
 export function tableRow(L: number, p: EconomyParams) {

@@ -123,38 +123,41 @@ function verifyGraderCosts(rows: Row[], w: any) {
     if (r.w4_tier_cost !== want) throw new Error(`sync-economy: economy.csv L${r.level} w4_tier_cost=${r.w4_tier_cost}, expected ${want}`);
   }
 }
-/** M4-A: hens_cost / egg_value_cost are floor(base x growth^L) per row; cap columns and tc_* scalars are constant.
- *  A CSV without the M4 columns (pre-M4 product/economy.csv) keeps the hand-set m4 block. Milestones and the flag are
- *  never in the CSV and are always kept from balance.json. */
+/** M4-A columns. Until Economy merges them into product/economy.csv (spec O1) they come from Economy's published
+ *  data/economy.m4-candidate.csv (vendored copy of product/economy.m4-candidate.csv, checked by check-economy-copy):
+ *  only these columns are grafted, by level; every other column stays economy.csv's. */
+export const M4_CSV_PATH = here('../data/economy.m4-candidate.csv');
 export const M4_COLS = ['hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'] as const;
+export const isM4Col = (c: string) => (M4_COLS as readonly string[]).includes(c) || /^(tc_|hens_ms\d|egg_grade\d|balanced\d|egg_value_base_step$|egg_value_level_bonus$)/.test(c);
+export function graftM4(rows: Row[], m4Rows: Row[] | null): Row[] {
+  if (!m4Rows || M4_COLS.some(c => c in rows[0])) return rows;
+  if (m4Rows.length !== rows.length) throw new Error(`sync-economy: economy.m4-candidate.csv has ${m4Rows.length} rows, economy.csv ${rows.length}`);
+  return rows.map((r, i) => { if (m4Rows[i].level !== r.level) throw new Error('sync-economy: m4 level mismatch'); const o = { ...r }; for (const [k, v] of Object.entries(m4Rows[i])) if (isM4Col(k)) o[k] = v; return o; });
+}
+/** hens_cost / egg_value_cost are floor(base x growth^L) per row; caps, milestone/grade/Balanced/price-term and tc_* are constant.
+ *  A CSV with no M4 columns at all produces no m4 block. Only the flag (`enabled`) is kept from balance.json. */
 export function fitM4(rows: Row[], prev: any) {
-  const R = rows, n = R.length - 1, has = (c: string) => c in R[0], P = prev.m4;
-  if (!M4_COLS.some(has)) return P;
+  const R = rows, has = (c: string) => c in R[0];
+  if (!M4_COLS.some(has)) return undefined;
   for (const c of M4_COLS) if (!has(c)) throw new Error(`sync-economy: economy.csv is missing M4 column ${c}`);
-  if (!P) throw new Error('sync-economy: balance.json has no m4 block (milestones/flag are hand-set)');
-  const one = (c: string) => { const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`); return v; };
-  const geo = (c: string) => {
-    const base = R[0][c];
-    const costGrowth = fit(c, (R[n][c] / base) ** (1 / n), 0.0001, 0.05, v => R.every(r => Math.floor(base * v ** r.level) === r[c]));
-    return { baseCost: base, costGrowth };
-  };
+  const one = (c: string) => { if (!has(c)) throw new Error(`sync-economy: economy.csv is missing M4 column ${c}`); const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`); return v; };
+  // Per-level cost tables, read verbatim (egg_value_cost carries the M3 L23-29 taper, so it is not one geometric curve).
+  const geo = (c: string) => { R.forEach((r, i) => { if (!Number.isInteger(r[c]) || r[c] <= 0 || (i > 0 && r[c] <= R[i - 1][c])) throw new Error(`sync-economy: economy.csv ${c} must be positive integers, strictly rising (L${r.level})`); }); return { costs: R.map(r => r[c]) }; };
   const tc: Record<string, number> = {};
   for (const c of Object.keys(R[0]).filter(c => c.startsWith('tc_')).sort()) tc[c.slice(3)] = one(c);
-  // G1 milestone/price columns (numbered scalars); absent => keep the hand-set values.
   const list = (pre: string, keys: Record<string, string>) => {
     const out: any[] = []; for (let i = 1; has(`${pre}${i}_level`); i++) { const o: any = {}; for (const [k, suf] of Object.entries(keys)) o[k] = one(`${pre}${i}_${suf}`); out.push(o); }
-    return out.length ? out : null;
+    if (!out.length) throw new Error(`sync-economy: economy.csv has no ${pre}1_level column`);
+    return out;
   };
-  const ms = {
-    hens: list('hens_ms', { level: 'level', mult: 'mult' }) ?? P.milestones.hens,
-    grades: list('egg_grade', { level: 'level', mult: 'mult', minFarm: 'farm_gate' }) ?? P.milestones.grades,
-    balanced: list('balanced', { level: 'level', mult: 'mult' }) ?? P.milestones.balanced,
-  };
-  const pv = has('egg_value_price_per_level') ? one('egg_value_price_per_level') : P.eggValue.pricePerLevel;
-  const cb = has('egg_value_collection_bonus_per_level') ? one('egg_value_collection_bonus_per_level') : P.eggValue.collectionBonusPerLevel;
-  return { ...P, hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
-    eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm'), pricePerLevel: pv, collectionBonusPerLevel: cb },
-    milestones: ms, ...(Object.keys(tc).length ? { tc } : {}) };
+  return { enabled: prev.m4?.enabled ?? 0,
+    hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
+    eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm'), baseStep: one('egg_value_base_step'), levelBonus: one('egg_value_level_bonus') },
+    milestones: {
+      hens: list('hens_ms', { level: 'level', coopMult: 'coop_mult', offlineMult: 'offline_mult' }),
+      grades: list('egg_grade', { level: 'level', mult: 'mult', minFarm: 'farm_gate' }),
+      balanced: list('balanced', { level: 'level', mult: 'mult' }),
+    }, tc };
 }
 export function buildBalance(rows: Row[], prev: any) {
   const p = fitParams(rows, prev);

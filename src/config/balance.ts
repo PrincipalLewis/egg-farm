@@ -41,12 +41,11 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
   if (b.m4) {
     const m = b.m4;
     if (m.enabled !== 0 && m.enabled !== 1) throw new Error('balance.m4.enabled must be 0 or 1');
-    for (const p of ['m4.hens.baseCost', 'm4.eggValue.baseCost']) pos(b, p);
+    for (const t of [m.hens, m.eggValue]) if (t.costs.length !== b.maxLevel + 1 || t.costs.some((c, i, a) => !Number.isInteger(c) || c <= 0 || (i > 0 && c <= a[i - 1]))) throw new Error('balance.m4 track costs must be maxLevel+1 rising positive integers');
     for (const p of ['m4.hens.capOverFarm', 'm4.eggValue.capOverFarm']) int(b, p);
-    if (m.hens.costGrowth < 1 || m.eggValue.costGrowth < 1) throw new Error('balance.m4 cost growth must be >= 1');
     const inc = (xs: { level: number }[], k: string) => { if (xs.some((x, i) => !Number.isInteger(x.level) || (i > 0 && x.level <= xs[i - 1].level))) throw new Error(`balance.m4.milestones.${k}: levels must be increasing integers`); };
     inc(m.milestones.hens, 'hens'); inc(m.milestones.grades, 'grades'); inc(m.milestones.balanced, 'balanced');
-    if (m.milestones.hens.some(x => x.mult < 1) || m.milestones.grades.some(x => x.mult < 1)) throw new Error('balance.m4.milestones mult must be >= 1');
+    if (m.milestones.hens.some(x => x.coopMult < 1 || x.offlineMult < 1) || m.milestones.grades.some(x => x.mult < 1)) throw new Error('balance.m4.milestones mult must be >= 1');
   }
   return b;
 }

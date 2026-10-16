@@ -1,41 +1,36 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { parseEconomyCsv, buildBalance } from '../scripts/sync-economy';
+import { parseEconomyCsv, buildBalance, graftM4 } from '../scripts/sync-economy';
 import { balance } from '../src/config/balance';
 import { hensCost, eggValueCost } from '../src/config/formulas';
-// M4-A: product/economy.m4-candidate.csv (Head of Product 13:25, source of truth for M4 numbers), copied as a fixture.
-// Its farm_cost / w4_tier_cost are the F1 piecewise table (f1/cost-segments, not on main), so the M4 columns
-// (hens_cost..tc_*) are grafted onto the live data/economy.csv rows; the other columns are main's.
-const full = parseEconomyCsv(readFileSync(new URL('./fixtures/economy.m4-candidate.csv', import.meta.url), 'utf8'));
+// M4-A columns come from data/economy.m4-candidate.csv (vendored copy of product/economy.m4-candidate.csv) until
+// Economy merges them into product/economy.csv (spec O1); only M4 columns are grafted, other columns stay economy.csv's.
 const live = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
-const cand = live.map((r, i) => { const o: Record<string, number> = { ...r }; for (const [k, v] of Object.entries(full[i])) if (!(k in r)) o[k] = v; return o; });
+const m4 = parseEconomyCsv(readFileSync(new URL('../data/economy.m4-candidate.csv', import.meta.url), 'utf8'));
+const cand = graftM4(live, m4);
 describe('sync-economy M4 columns', () => {
   const nb = buildBalance(cand, balance);
-  it('fits Hens 36x1.30^H and Egg value 48x1.33^V, caps F+3, from the candidate CSV', () => {
-    expect(nb.m4.hens).toEqual({ baseCost: 36, costGrowth: 1.3, capOverFarm: 3 });
-    expect(nb.m4.eggValue).toEqual({ baseCost: 48, costGrowth: 1.33, capOverFarm: 3, pricePerLevel: 0.05, collectionBonusPerLevel: 0.12 });
+  it('balance.json m4 block is exactly what the CSVs generate (flag kept off)', () => {
+    expect(balance.m4).toEqual(nb.m4); expect(nb.m4.enabled).toBe(0);
   });
-  it('every hens_cost / egg_value_cost cell is reproduced by the formulas', () => {
-    for (const r of cand) { expect(hensCost(r.level, nb)).toBe(r.hens_cost); expect(eggValueCost(r.level, nb)).toBe(r.egg_value_cost); }
+  it('graft keeps every non-M4 column from economy.csv', () => {
+    cand.forEach((r, i) => { for (const k of Object.keys(live[i])) expect(r[k]).toBe(live[i][k]); });
+    expect(cand[23].farm_cost).toBe(live[23].farm_cost);
   });
-  it('the hand-set m4 block matches what the candidate CSV generates (costs/caps)', () => {
-    expect(balance.m4!.hens).toEqual(nb.m4.hens); expect(balance.m4!.eggValue).toEqual(nb.m4.eggValue); expect(balance.m4!.milestones).toEqual(nb.m4.milestones);
+  it('every hens_cost / egg_value_cost cell is reproduced (incl. the M3 L23-29 taper)', () => {
+    for (const r of m4) { expect(hensCost(r.level, nb)).toBe(r.hens_cost); expect(eggValueCost(r.level, nb)).toBe(r.egg_value_cost); }
+    expect(eggValueCost(23, nb)).toBe(30484);
   });
-  it('milestones/grades/Balanced come from the G1 columns; the hand-set block equals them; flag kept; tc_* carried', () => {
-    expect(nb.m4.milestones.hens).toEqual([{ level: 10, mult: 1.25 }, { level: 20, mult: 1.5 }, { level: 30, mult: 2 }]);
-    expect(nb.m4.milestones.grades[2]).toEqual({ level: 20, mult: 1.5, minFarm: 15 });
-    expect(nb.m4.milestones.balanced.map((t: any) => t.mult)).toEqual([1.1, 1.15, 1.2, 1.25, 1.3]);
-    expect(balance.m4!.milestones).toEqual(nb.m4.milestones);
-    expect(() => buildBalance(cand.map(r => r.level === 3 ? { ...r, balanced2_mult: 1.2 } : r), balance)).toThrow(/balanced2_mult must be constant/);
-    expect(nb.m4.enabled).toBe(0);
-    expect(nb.m4.tc.streak_cap).toBe(0.4); expect(nb.m4.tc.frenzy_price_mult).toBe(2); expect(Object.keys(nb.m4.tc)).toHaveLength(23);
+  it('M1 milestones: coop + offline mult columns; grades; Balanced; price terms', () => {
+    expect(nb.m4.milestones.hens).toEqual([10, 20, 30].map((level, i) => ({ level, coopMult: m4[0][`hens_ms${i + 1}_coop_mult`], offlineMult: m4[0][`hens_ms${i + 1}_offline_mult`] })));
+    expect(nb.m4.milestones.grades[2]).toEqual({ level: m4[0].egg_grade3_level, mult: m4[0].egg_grade3_mult, minFarm: m4[0].egg_grade3_farm_gate });
+    expect(nb.m4.milestones.balanced).toHaveLength(5);
+    expect(nb.m4.eggValue.baseStep).toBe(m4[0].egg_value_base_step); expect(nb.m4.eggValue.levelBonus).toBe(m4[0].egg_value_level_bonus);
   });
-  it('a pre-M4 CSV (no M4 columns) keeps the m4 block unchanged', () => {
-    expect(buildBalance(live, balance).m4).toEqual(balance.m4);
-  });
-  it('fails loudly on an M4 cell no formula explains, a partial M4 column set, or a non-constant cap', () => {
-    expect(() => buildBalance(cand.map(r => r.level === 12 ? { ...r, hens_cost: r.hens_cost + 1 } : r), balance)).toThrow(/hens_cost/);
-    expect(() => buildBalance(cand.map(r => { const { egg_value_cost: _, ...o } = r as any; return o; }), balance)).toThrow(/missing M4 column egg_value_cost/);
-    expect(() => buildBalance(cand.map(r => r.level === 4 ? { ...r, hens_cap_over_farm: 4 } : r), balance)).toThrow(/hens_cap_over_farm must be constant/);
+  it('a pre-M4 CSV with no overlay produces no m4 block', () => { expect(buildBalance(live, balance).m4).toBeUndefined(); });
+  it('fails loudly on non-rising costs, a missing column, or a non-constant scalar', () => {
+    expect(() => buildBalance(cand.map(r => r.level === 12 ? { ...r, hens_cost: 1 } : r), balance)).toThrow(/hens_cost/);
+    expect(() => buildBalance(cand.map(r => { const { egg_value_level_bonus: _, ...o } = r as any; return o; }), balance)).toThrow(/egg_value_level_bonus/);
+    expect(() => buildBalance(cand.map(r => r.level === 3 ? { ...r, balanced2_mult: 9 } : r), balance)).toThrow(/balanced2_mult must be constant/);
   });
 });
