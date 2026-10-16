@@ -2,7 +2,7 @@
  *  frame, chip + live region coalesced to <= 1 / 2 s, enter slide only into a visible slot (<= 1 / 240 ms), list frozen
  *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
-import { orderView, moreLabel, moreName, type OrderView } from './orders';
+import { orderView, fitOrderEggs, moreLabel, moreName, type OrderView } from './orders';
 export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
@@ -28,7 +28,8 @@ export class OrderList {
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
-    if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`; // F4: NBSP survives flex whitespace trimming
+    if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`;
+    { const l1 = E.parentElement as HTMLElement; const fe = fitOrderEggs(e, t => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; }); if (E.textContent !== fe) E.textContent = fe; } // F4: NBSP survives flex whitespace trimming
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
     if (btn.textContent !== v.button) btn.textContent = v.button;

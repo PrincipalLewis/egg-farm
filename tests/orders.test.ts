@@ -37,3 +37,12 @@ describe('queue display (P1q)', () => {
     expect(stripSplit(5)).toEqual({ shown: 5, more: 0 }); expect(stripSplit(6)).toEqual({ shown: 4, more: 2 }); expect(stripSplit(10)).toEqual({ shown: 4, more: 6 });
   });
 });
+
+import { fitOrderEggs } from '../src/ui/orders';
+describe('fitOrderEggs (m3-customer-queue-spec §2.4)', () => {
+  it('keeps " eggs" when it fits', () => { expect(fitOrderEggs('0/5 eggs', () => true)).toBe('0/5 eggs'); });
+  it('drops the whole word " eggs" when it does not fit, never mid-word', () => {
+    const seen: string[] = []; const out = fitOrderEggs('0/1.8M eggs', s => { seen.push(s); return s.length <= 6; });
+    expect(out).toBe('0/1.8M'); expect(seen).toEqual(['0/1.8M eggs']); expect(out).not.toMatch(/eg$|…/);
+  });
+});

@@ -15,6 +15,8 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
   return { id: c.id, have, want, sell, valueCents, state, line: `${eggs(have)}/${eggs(want)} eggs · ${value}`,
     button: state === 'wait' ? `Need ${eggs(rem)}` : state === 'partial' ? `Sell ${eggs(sell)}` : 'Sell' };
 }
+/** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
+export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
 export const visibleOrders = (viewportH: number, docked: boolean, n: number) =>
   docked ? n : Math.min(n, 0.75 * viewportH - 56 - 72 - 24 >= 384 ? 5 : 4);
