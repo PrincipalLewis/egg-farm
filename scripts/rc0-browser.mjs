@@ -628,6 +628,22 @@ sections.p1build = async () => {
     await ctx.close();
   }
 };
+// ---------- v1.6.1 §4 goal label at 360: 1 line if it fits, else 2 lines breaking only before the gain, else short name; never ellipsis; strip 40px ----------
+sections.goalLabel161 = async () => {
+  const { ctx, page } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+  await page.waitForSelector('.goal-label'); await page.waitForTimeout(300);
+  for (const [name, full, short, fs, want] of [['one-line', 'Farm L30', 'Farm L30', 0, { lines: 1, track: 'Farm L30' }], ['two-line', 'Collection L30', 'Coll. L30', 0, { lines: 2, track: 'Collection L30' }], ['short-name', 'Grader tier 3', 'Grader T3', 21, { lines: 2, track: 'Grader T3' }]]) {
+    const r = await page.evaluate(async ([full, short, fs]) => { const el = document.querySelector('.goal-label'); el.style.fontSize = fs ? fs + 'px' : ''; el.style.lineHeight = fs ? Math.round(fs * 17 / 14) + 'px' : '';
+      el.innerHTML = `<span class="g-head"><span class="g-star">★ </span><span class="g-track" data-full="${full}" data-short="${short}">${full}</span></span><span class="g-gain" data-full=" · +999% income"> · +999% income</span>`;
+      window.eggfarmQaFitGoal(); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const cs = getComputedStyle(el), lh = parseFloat(cs.lineHeight), t = el.querySelector('.g-track'), gn = el.querySelector('.g-gain'), pill = el.closest('.goal-pill') ?? el.closest('.goal');
+      const gr = gn.getClientRects().length; const lines = Math.round(el.getBoundingClientRect().height / lh);
+      return { track: t.textContent, gain: gn.textContent.trim(), lines, gainRects: gr, lh, w: el.clientWidth, sw: el.scrollWidth, to: cs.textOverflow, ws: cs.whiteSpace, ell: /…/.test(el.textContent), pillH: Math.round(pill.getBoundingClientRect().height), star: el.querySelector('.g-star')?.textContent === '★ ', gainBelow: gn.offsetTop > t.offsetTop + 2 }; }, [full, short, fs]);
+    ok(`Goal label v1.6.1 ${name} at 360: "${want.track}", ${want.lines} line(s), gain unsplit, no ellipsis, strip 40px`, r.track === want.track && r.lines === want.lines && r.gainRects === 1 && r.gain === '· +999% income' && r.to !== 'ellipsis' && !r.ell && r.sw <= r.w + 0.5 && r.star && (want.lines === 2 ? r.gainBelow : !r.gainBelow) && (fs || (r.lh === 17 && r.pillH === 40)), JSON.stringify(r));
+    const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); const bb = await page.locator('.goal').boundingBox(); await page.screenshot({ path: `${FCS}/cuta3-goal-${name}-360-${ENGINE}.png`, clip: { x: 0, y: Math.max(0, bb.y - 8), width: 360, height: bb.height + 16 } }); }
+  }
+  await ctx.close();
+};
 // ---------- m3-customer-queue-spec §2.4: order line drops " eggs" when it doesn't fit, never mid-word (360) ----------
 sections.orderFit = async () => {
   const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 30, customers: [{ id: 1, demand: 1.8e6, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }],

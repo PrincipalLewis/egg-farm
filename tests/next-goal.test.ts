@@ -62,3 +62,18 @@ describe('GoalHold legacy + GoalHysteresis', () => {
     expect(g2.key).toBeTruthy();
   });
 });
+
+import { goalLabelParts as glp } from '../src/ui/next-goal';
+import { initialState as initS } from '../src/sim/state';
+describe('goal label v1.6.1 §4 short names', () => {
+  const s = { ...initS(b), farmLevel: 29, collectionLevel: 29, graderTier: 2 } as any;
+  it('short names follow the §4 table, full name kept separately, no ellipsis', () => {
+    expect(glp('COLL', s, 999).shortTrack).toMatch(/^Coll\. L\d+$/);
+    expect(glp('FARM', s, 999).shortTrack).toMatch(/^Farm L\d+$/);
+    expect(glp('W1', s, 5).shortTrack).toBe('Hire M. Hand');
+    expect(glp('W2', s, 5).shortTrack).toBe('Hire C. Hand');
+    expect(glp('W3', s, 5).shortTrack).toBe('Hire Hawker');
+    expect(glp('W4', s, 5).shortTrack).toMatch(/^Grader T[1-5]$/);
+    for (const k of ['COLL', 'FARM', 'W1', 'W2', 'W3', 'W4'] as const) { const p = glp(k, s, 999); expect(p.gain).toBe(' · +999% income'); expect(p.track + p.shortTrack + p.gain).not.toMatch(/…/); }
+  });
+});

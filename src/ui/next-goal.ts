@@ -75,7 +75,7 @@ export function goalLabelParts(key: GoalKey, s: GameState, pct: number): GoalLab
     return { star: '★ ', track: `${trackName(key)} L${n}`, shortTrack: `${shortTrackName(key)} L${n}`, gain: ` · +${pct}% income` };
   }
   if (key === 'W4') {
-    return { star: '★ ', track: `Grader tier ${n}`, shortTrack: `Grader ${n}`, gain: ` · +${pct}% income` };
+    return { star: '★ ', track: `Grader tier ${n}`, shortTrack: `Grader T${n}`, gain: ` · +${pct}% income` };
   }
   return { star: '★ ', track: `Hire ${trackName(key)}`, shortTrack: `Hire ${shortTrackName(key)}`, gain: ` · +${pct}% income` };
 }
@@ -104,7 +104,7 @@ export function paintGoalLabel(el: HTMLElement, parts: GoalLabelParts | null, pl
 export function fitGoalLabelEl(el: HTMLElement): void {
   const track = el.querySelector('.g-track') as HTMLElement | null, gain = el.querySelector('.g-gain') as HTMLElement | null;
   if (!track || !gain) return;
-  const lh = parseFloat(getComputedStyle(el).lineHeight) || 18;
+  const lh = parseFloat(getComputedStyle(el).lineHeight) || 17;
   const fits = () => el.scrollWidth <= el.clientWidth + 0.5 && el.scrollHeight <= 2 * lh + 1;
   const trim = () => { const wrapped = gain.offsetTop > track.offsetTop + 2; const g = gain.dataset.full ?? gain.textContent ?? ''; gain.textContent = wrapped ? g.trimStart() : g; };
   track.textContent = track.dataset.full ?? track.textContent; gain.textContent = gain.dataset.full ?? gain.textContent; trim();
