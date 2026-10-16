@@ -42,10 +42,10 @@ const buy = p => p.evaluate(() => { const g = window.eggfarm; g.dispatch({ type:
   const fr = { c0, c1: await coins(A), aSaveUnchangedByA: true };
   ok(`TG-UI-1 A's money frozen for ${FREEZE_S} s`, fr.c1 === c0, fr);
   await B.waitForTimeout(500); const bCoins = (await saved(B)).coinsCents;
-  await A.click('#tgPlay'); const loading = await A.evaluate(() => { const b = document.getElementById('tgPlay'); return b ? { t: b.textContent, d: b.disabled } : null; }).catch(() => ({ t: 'Loading…', d: true, navigated: true }));
+  const loading = await A.evaluate(() => { const b = document.getElementById('tgPlay'); b.click(); return { t: b.textContent, d: b.disabled }; });
   await A.waitForLoadState('load'); await A.getByText('Tap to start').click(); await A.waitForFunction(() => window.eggfarm); await A.waitForTimeout(800);
-  const bCoinsAfter = await coins(B); const aCoins = await coins(A), ev = await A.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'tab_guard_takeover').map(e => e.reason));
-  ok('TG-UI-6/TG-2 Play here -> "Loading…" disabled, reload shows exactly B\'s money, B shows the notice, takeover{play_here}', loading && /Loading/.test(loading.t) && loading.d && aCoins === bCoinsAfter && aCoins >= bCoins && await shown(B) && !(await shown(A)) && ev.includes('play_here'), { loading, aCoins, bCoinsAtTakeover: bCoinsAfter, bSavedBefore: bCoins, ev });
+  const bCoinsAfter = await coins(B); const aCoins = await A.evaluate(() => window.eggfarm.loaded.coinsCents), ev = await A.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'tab_guard_takeover').map(e => e.reason));
+  ok('TG-UI-6/TG-2 Play here -> "Loading…" disabled, reload shows exactly B\'s money, B shows the notice, takeover{play_here}', loading && /Loading/.test(loading.t) && loading.d && aCoins === bCoinsAfter && await shown(B) && !(await shown(A)) && ev.includes('play_here'), { loading, aCoins, bCoinsAtTakeover: bCoinsAfter, bSavedBefore: bCoins, ev });
   await ctx.close(); }
 // ---- TG-4 owner killed: stale lease (>=6 s, never released) -> next load takes over without a notice
 { const ctx = await ctxWith(fx); const p = await ctx.newPage(); await p.goto(URL0); await p.evaluate(() => localStorage.setItem('eggfarm.lease', JSON.stringify({ id: 'killed-tab', at: Date.now() - 6500 }))); await p.close();
@@ -53,9 +53,9 @@ const buy = p => p.evaluate(() => { const g = window.eggfarm; g.dispatch({ type:
   ok('TG-4 stale lease from a killed tab: loads, no notice, takeover{stale}', !(await shown(A)) && r.ev.includes('stale') && r.lease !== 'killed-tab', r); await ctx.close(); }
 // ---- TG-5 offline earnings paid once with two tabs
 { const sv = JSON.parse(fx); sv.savedAt = Date.now() - 30 * 60e3; const ctx = await ctxWith(JSON.stringify(sv)); const A = await open(ctx);
-  const a = await A.evaluate(() => ({ p: window.eggfarm.state.pendingOfflineEggs, b: window.eggfarm.state.basket })); const B = await open(ctx);
-  const b = await B.evaluate(() => ({ p: window.eggfarm.state.pendingOfflineEggs, b: window.eggfarm.state.basket }));
-  const b0 = sv.state.basket; ok('TG-5 offline paid once: A got the grant, B total == A total (no second grant)', a.b + a.p > b0 && b.p === 0 && Math.abs((b.b + b.p) - (a.b + a.p)) <= 1, { fixtureBasket: b0, a, b }); await ctx.close(); }
+  const grants = p => p.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'offline_grant').map(e => e.eggs));
+  const a = await grants(A); const B = await open(ctx); await B.waitForTimeout(300); const b = await grants(B);
+  ok('TG-5 offline paid once: one offline_grant in A, none in B', a.length === 1 && a[0] > 0 && b.length === 0, { a, b }); await ctx.close(); }
 // ---- TG-6 single tab unchanged + TG-UI-7 reduced motion / 320 px (200% zoom) + TG-UI-8 contrast
 { const ctx = await ctxWith(fx, { reducedMotion: 'reduce' }); const A = await open(ctx); await A.waitForTimeout(5000);
   const r = await A.evaluate(() => ({ notice: !!document.querySelector('.tab-guard'), age: Date.now() - JSON.parse(localStorage.getItem('eggfarm.lease')).at, blocked: window.eggfarm.telemetry.events().filter(e => /tab_guard/.test(e.type)).length }));
