@@ -529,7 +529,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     document.body.append(el);
     const handImg = el.querySelector('.coach-hand') as HTMLImageElement;
     const place = () => { if (!el.isConnected) return; const r = at?.getBoundingClientRect(); if (!r || !r.width) { el.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)'; return; }
-      const above = r.top >= 120, cx = Math.min(Math.max(r.left + r.width / 2, 156), innerWidth - 156);
+      const eh = el.offsetHeight, tl = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect()).filter(t => t.width); /* B-2: an 'above' tip must not cover a tab bar (1280 docked Workers tab) */
+      const above = r.top >= 120 && !tl.some(t => t.bottom > r.top - 12 - eh && t.top < r.top - 12), cx = Math.min(Math.max(r.left + r.width / 2, 156), innerWidth - 156);
       el.style.cssText = above ? `left:${cx}px;bottom:${innerHeight - r.top + 12}px;transform:translateX(-50%)` : `left:${cx}px;top:${r.bottom + 12}px;transform:translateX(-50%)`;
       el.classList.toggle('below', !above);
       handImg.src = above ? A('ui-pointer-hand-down.svg') : A('ui-pointer-hand.svg'); };
