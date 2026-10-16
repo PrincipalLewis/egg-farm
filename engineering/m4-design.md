@@ -1,4 +1,4 @@
-# M4 design and task split — Senior Software Architect · v0.2.6 (HoQA review pr1-m4-design-review-96e895b M-1..M-7, N-2, N-3; HoE-approved decisions 9.1–9.10; review m4-design-v0.2-ad10a08; Saves QA guard-prep answers §3a) · 2026-10-16
+# M4 design and task split — Senior Software Architect · v0.2.7 (HoQA recheck 2e86a6e M-5, M-6, R-1, R-3, N-1, N-4, N-5; HoQA review pr1-m4-design-review-96e895b M-1..M-7, N-2, N-3; HoE-approved decisions 9.1–9.10; review m4-design-v0.2-ad10a08; Saves QA guard-prep answers §3a) · 2026-10-16
 
 Base: `origin/main` @ `a01faea` (save v4 `aaaa91a` + save-recovery dialog). M4-A baseline: `m4/m4a-tracks` @ `04e2709`
 (19 commits on merge-base `4aadcbf`; `m4/m4a-tracks-v2` not pushed yet). Inputs: engineering/stack-and-architecture.md,
@@ -82,7 +82,8 @@ Emit `save_migration_aborted {store: 'ls'|'idb', reason}` (§5). Tests: an injec
 ### 3b. Zero-writes rule (HoQA ruling; QA guard ZW-3..6; applies to S-2, ZW-2, flag-off v7 refusal)
 Key names from code on main `a01faea`. During a refused load (newer save, or flag-off + v7), through autosave, `pagehide`, Export and a second tab:
 - **Must stay byte-identical (or stay absent):** `eggfarm.save` (`SAVE_KEY`), `eggfarm.save.bak` (`BAK_KEY`), `eggfarm.save.v6_backup` (once it exists), every `eggfarm.save.corrupt.*` key and `eggfarm.save.corrupt.index`, `eggfarm.ui` (`UI_KEY`), and IndexedDB `eggfarm`/`save` keys `main` and `v6_backup`.
-- **May be written:** only `eggfarm.lease` (`LEASE_KEY`, tab-lease.ts), `eggfarm.tab` (`TAB_KEY`, tab-guard.ts) and `eggfarm.telemetry` (`TELEMETRY_KEY`). None of them may contain a serialized save object or any copy of save bytes.
+- **May be written:** only these localStorage keys, exactly (grep of `setItem` in src/ @ `a01faea`; no wildcards): `eggfarm.lease` (`LEASE_KEY`, tab-lease.ts), `eggfarm.tab` (`TAB_KEY`, tab-guard.ts), `eggfarm.telemetry` (`TELEMETRY_KEY`, telemetry.ts; the only telemetry key). **Telemetry has no IndexedDB store:** the only IndexedDB database the code opens is `eggfarm` (`IDB_NAME`) with the single object store `save` (`IDB_STORE`), keys `main` (and `v6_backup` from S-3), all in the byte-identical list. Any other IDB database, store or key appearing is a FAIL. (`eggfarm-recovery-closed` is a DOM event name and `eggfarm-save` / `eggfarm-tabs` are BroadcastChannel names, not storage.)
+- **No serialized save in an allowed key.** A *serialized save object* is any JSON object (at any depth, or any string that parses to one) that has **all three** of `version`, `savedAt` and a `state` object, i.e. the `serialize()` shape `{"version","savedAt","sum","state"}`; a raw copy of `eggfarm.save`/`.bak`/`v6_backup` bytes also counts. **Telemetry event snapshot fields are allowed**: scalar fields such as `farm_level`, `hens_level`, `egg_value_level`, `collection_level`, `coinsBefore`, `newLevel`, `cost`, `refund_cents` (§5) are not a save copy, as long as no event carries a `state` block next to `version` and `savedAt`.
 - `eggfarm.install_id` (`INSTALL_ID_KEY`) may only be **created if absent**; an existing value must stay byte-identical.
 - sessionStorage `eggfarm.playHere` (main.ts tab-takeover flag) is outside localStorage and not a save; it is not asserted.
 - Any other key appearing is a FAIL. S-2's own test must assert exactly this list, so S-2 cannot pass while failing QA's guard.
@@ -91,12 +92,12 @@ Key names from code on main `a01faea`. During a refused load (newer save, or fla
 M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still refuse v7 with zero writes (S-2).
 
 **Tests:**
-- chain v1..v6 → v7 (M4 on); all 21 spec fixtures + the 961-save sweep; refund via the lowered-max table.
-- idempotent reload; offline order (19800/24750, 9900/12375).
-- **flag-off write test: load v6 → save → stored bytes are v6** (part of the flag-off golden).
-- **M4-on write test: load v6 → save → `main` is v7, and the `.bak`/`v6_backup` holds the original v6 bytes after N autosaves.**
-- **flag-off refuses v7: zero writes per §3b (the QA zero-writes rule), `.bak` intact, export works.**
-- marked v6 (interim): M4 on → v7 with identical levels, refund 0 added, no events; flag off → loads, and the marker + track fields are preserved byte-for-byte on write.
+- [S-4] chain v1..v6 → v7 (M4 on); all 21 spec fixtures + the 961-save sweep; refund via the lowered-max table.
+- [S-4/S-5] idempotent reload; offline order (19800/24750, 9900/12375).
+- [A-0, S-4] **flag-off write test: load v6 → save → stored bytes are v6** (part of the flag-off golden).
+- [S-4; PENDING-S4 before it, at 3351d6c expect v6 + `tracksV7:1`] **M4-on write test: load v6 → save → `main` is v7, and the `.bak`/`v6_backup` holds the original v6 bytes after N autosaves.**
+- [S-2] **flag-off refuses v7: zero writes per §3b (the QA zero-writes rule), `.bak` intact, export works.**
+- [F-0b flag-off half; S-4 M4-on half] marked v6 (interim): M4 on → v7 with identical levels, refund 0 added, no events; flag off → loads, and the marker + track fields are preserved byte-for-byte on write.
 - **backup failure (ADR M4-12/M4-13; S-3, F-0; run once per store: `ls`, then `idb`, each with an injected quota failure in that store only):**
   1. stored `eggfarm.save` stays `version: 6` with **no `tracksV7` marker** (and no v7 anywhere);
   2. `save_migration_aborted {store}` fires once with the failing store;
@@ -104,7 +105,7 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
   4. a purchase made after load survives a page close (reload shows it, still v6);
   5. no `v6_backup` is left in either store after the abort (M4-13);
   6. the next load (failure removed) retries: backup written fresh in both stores from the unmarked v6, migration commits.
-- `m4-v7-*` fixtures + SHA256SUMS; 3-engine test: rc1 build × v7 fixtures → storage byte-identical.
+- [S-6] `m4-v7-*` fixtures + SHA256SUMS; 3-engine test: rc1 build × v7 fixtures → storage byte-identical.
 
 ### 3a. Save facts for the M4 guard (Saves QA m4-guard-prep-notes; from code on main `a01faea` and v2 `3351d6c`)
 "CODE" = what the code does today. "DECISION" = new rule set here (Architect, ADR M4-11), to be implemented by the owner named.
@@ -112,7 +113,7 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
    The v0.2 down-projection text was replaced in v0.2.2.
 2. **Newer-save dialog**
    - CODE (`src/ui/save-recovery.ts` `showNewerSaveDialog`, identical on both SHAs):
-     - layer `div.recovery-layer.newer-save[data-version="<n>"]`;
+     - layer `div.recovery-layer.newer-save[data-version="<n>"]`, where `<n>` = the **highest** newer version across LS main, `.bak` and IDB main (`newerStoredVersion`);
      - card `.recovery-card[role=alertdialog][aria-modal=true][aria-labelledby=nsT]`;
      - title `h2#nsT`, text exactly `This save is from a newer version of Egg Farm. Open the newer build to keep playing.` (`NEWER_SAVE_STRINGS.title`; body empty, no `#nsB`);
      - one button `button#nsRetry.btn.rc-primary`, text `Try again` (reloads).
@@ -121,7 +122,7 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
      - `Try again` (`#nsRetry`) stays.
    - Guard selectors: `NEWER_SEL='.recovery-layer.newer-save [role=alertdialog]'`, `NEWER_TXT` = the title above, `EXPORT_SEL='[data-testid=newer-save-export]'`. ZW-2 stays expected-FAIL until the **ZW-2 PR**; QA flips ZW-2 to PASS on that PR's SHA (not S-2's).
 3. **Export format (answer to QA question 3)**
-   - DECISION (HoE 21:18): the newer-save export is the **raw stored save string, exactly as stored**: no wrapper, no migration, zero storage writes. ZW-2's "exact v7 bytes" is the right assertion.
+   - DECISION (HoE 21:18): the newer-save export is the **raw stored save string, exactly as stored**: no wrapper, no migration, zero storage writes. ZW-2's "exact v7 bytes" is the right assertion. **Which copy (N-4, DECISION):** export the stored copy that carries that highest newer version (the `data-version` one); on a tie prefer LS `eggfarm.save`, then `.bak`, then IDB main. So a newer save found only in `.bak` or IDB is still exported, never an older `eggfarm.save`.
    - CODE today: the existing exports (`exportOldSave`) already export raw strings as a `Blob` (`application/json`), delivered by download, the iOS share sheet, or the clipboard as a fallback.
    - The bytes are the save file `serialize()` writes: `{"version":<n>,"savedAt":<ms>,"sum":"<fnv>","state":{...}}`.
    - The "Can't save" variant exports a fresh `serialize()` of the live farm, which is a different case.
@@ -147,7 +148,7 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
   `check-release-build` asserts the committed default.
 - Per-flag golden ("flag-off matches main", testable form): **not** a build-artifact hash (the code differs, so it cannot match). It is two checks:
   1. **Sim trace hash** (`tests/m4a-flag-off.test.ts`): sha256 hex of `JSON.stringify(out)`, where `out` = bot pacing for models `seller15` and `cheapest` × seeds 1..6 × 1800 s (farm/upgrades sampled every 60 s), plus a 10 Hz scripted trace of **6000 ticks** (dt 0.1 s, seed 7, every action type, events included) with M4 fields `hensLevel/eggValueLevel/celebratedMilestones` stripped, plus `applyOffline` over 5 400 000 ms. Economy = `tests/rc1-balance` with `m4.enabled = 0`. The golden is **re-pinned to main `a01faea`** (computed there with the same harness; the current `GOLDEN_MAIN_4AADCBF` constant is replaced in A-0 and renamed `GOLDEN_MAIN_A01FAEA`).
-  2. **Storage bytes**: for each fixture in `tests/fixtures/saves` (`m1-rc2-v4-12min`, `m2-rc1-v5-12min`, `m2-rc1-v5-40min`, `m2-rc1-v5-40min-edge`, SHA256SUMS-checked), load → 600 ticks (60 s) → save with a fixed clock; the stored `eggfarm.save` bytes (sha256) equal those produced by `a01faea` with the same clock. Plus "a v6 write". Flag-off also refuses v7 saves (newer-save path, ADR M4-9).
+  2. **Storage bytes**: for each fixture in `tests/fixtures/saves` (`m1-rc2-v4-12min`, `m2-rc1-v5-12min`, `m2-rc1-v5-40min`, `m2-rc1-v5-40min-edge`, SHA256SUMS-checked; all have `savedAt: 1792087200000`), load → 600 ticks (60 s) → save, with the clock fixed at **`now = 1792087260000`** (fixture savedAt + 60 000 ms; **chosen here**, no existing test pins one). Expected: `version: 6`, `savedAt: 1792087260000`, and the state **includes the M4 defaults `hensLevel: 0, eggValueLevel: 0, celebratedMilestones: []`**. This is intended flag-off behaviour: `migrate()` spreads `initialState(b)` (src/sim/state.ts:22-33 on the M4 branch) into every loaded save, so flag-off saves carry those defaults and **no `tracksV7`**. The expected bytes are therefore pinned per fixture as golden files generated on the M4 branch (flag off) and **verified against `a01faea`** by: the a01faea bytes for the same fixture/clock equal the golden with exactly those three keys removed and `sum` recomputed. Plus "a v6 write". Flag-off also refuses v7 saves (newer-save path, ADR M4-9).
 - Removal (F-9): one release after M4 reaches Latest, delete the flag-off path, make v7 the only write version, and drop the v6 `.bak` retention rule.
 
 ## 5. Telemetry fields (M4A-34 + proposal §8)
@@ -185,7 +186,7 @@ gate-all also does a preflight check (`run npm ci`, exit 2), fails fast (`KEEP_G
 ### 6a. AC → test map
 | AC / decision | Test | Slice / owner |
 |---|---|---|
-| M4A-27 SAVE_VERSION 7, chain to v7 | chain v1..v6 → v7, 21 spec fixtures + 961-save sweep, validator ranges | S-4 · SAV |
+| M4A-27 `readMax`/`writeVersion` = 7 **only with M4 on** (flag-off stays 6, v7 written only with M4 on), chain to v7 | chain v1..v6 → v7, 21 spec fixtures + 961-save sweep, validator ranges | S-4 · SAV |
 | M4A-28 price-matched start | `migrateTracksV7` unit tests, frozen price table, C ≥ F+5 fixtures; marked v6 idempotent | S-1/S-4 · SAV (F-0 interim · FE) |
 | M4A-29 cap-and-refund | lowered-max refund table; refund 0 on current data | S-4 · SAV |
 | M4A-30 order on load | 19800/24750, 9900/12375 offline order; first grant ×1.0 | S-5 · SAV |
