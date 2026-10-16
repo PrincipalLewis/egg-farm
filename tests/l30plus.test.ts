@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parseEconomyCsv, fitM4, farmMaxOf, readEconomyConfig } from '../scripts/sync-economy';
 import { balance as live, validateBalance, type Balance } from '../src/config/balance';
-import { floorSafe, trackExtraCost, trackMaxLevel, hensCap, eggValueCap, trackPriceCents, trackEggsPerSec } from '../src/config/formulas';
+import { farmCost, hensCost, eggValueCost, floorSafe, trackExtraCost, trackMaxLevel, hensCap, eggValueCap, trackPriceCents, trackEggsPerSec } from '../src/config/formulas';
 import { trackLock, trackBuyCost, prodEggsPerSec } from '../src/sim/tracks';
 import { m4OfflineEggs } from '../src/sim/offline';
 import { initialState } from '../src/sim/state';
@@ -114,6 +114,20 @@ describe(`${file}: L30-18 no near-zero increase in the UI`, () => {
         expect(html).not.toMatch(/\+\$?0(\.0+)?(%|\b)/);
       }
     }
+  });
+});
+describe(`${file}: prices equal the shipping CSV exactly (pricing frozen; test only)`, () => {
+  it('Farm cost L0-50 = CSV row on every level (verbatim, no growth formula)', () => {
+    expect(b.maxLevel).toBe(50);
+    for (let L = 0; L <= 50; L++) expect(farmCost(L, b), `Farm L${L}`).toBe(R[L].farm_cost);
+    expect(Object.keys(b.farm.costOverrides!).length).toBe(51); // every level read from the row
+  });
+  it('Hens / Egg value row cost L0-55 = CSV row', () => {
+    for (let L = 0; L <= trackMaxLevel('hens', b); L++) expect(hensCost(L, b), `Hens L${L}`).toBe(R[L].hens_cost);
+    for (let L = 0; L <= trackMaxLevel('eggValue', b); L++) expect(eggValueCost(L, b), `Egg value L${L}`).toBe(R[L].egg_value_cost);
+  });
+  it('live build: Farm / Hens / Egg value costs L0-29 already equal the shipping rows', () => {
+    for (let L = 0; L < 30; L++) { expect(farmCost(L, live), `Farm L${L}`).toBe(R[L].farm_cost); expect(live.m4!.hens.costs[L]).toBe(R[L].hens_cost); expect(live.m4!.eggValue.costs[L]).toBe(R[L].egg_value_cost); }
   });
 });
 describe(`${file}: integer-safe floor (PR #12)`, () => {

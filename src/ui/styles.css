@@ -466,16 +466,18 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks .up.best.pending{outline-style:dashed}
 
 /* L30-19b hire nudge (art-ux/rc2-workers-copy.md §5 v1.1 = UC25 style): Nunito 700 12px/16px, --c-wood-text, 44px hit area
-   via ::before (-14px above/below the 16px line). Overflow: the container query drops the lead ("Busy farm! · ") first;
-   never ellipsized, the chevron never dropped; wraps only as a last resort. No warning glyph. */
-.hire-nudge-line{display:flex;align-items:center;gap:var(--s-1);container-type:inline-size;width:100%}
+   via ::before (-14px above/below the 16px line). §5a: × is a sibling, flush right, 12px glyph in a 44x44 hit area, 8px gap.
+   Drop rule: reserve 52px (44 + 8) first; the lead ("Busy farm! · ") drops when the hint gets < 170px, i.e. row < 222px.
+   Never ellipsized, the chevron never dropped, the × never squeezed; wraps only as a last resort. No warning glyph. */
+.hire-nudge-line{display:flex;align-items:center;gap:8px;container-type:inline-size;width:100%}
 .hire-nudge-line[hidden]{display:none}
 .hire-nudge{position:relative;display:inline-flex;align-items:center;gap:4px;padding:0;border:0;background:none;cursor:pointer;
   font:700 12px/16px var(--f-body);color:var(--c-wood-text);text-align:left;white-space:normal;overflow:visible;text-overflow:clip}
 .hire-nudge::before{content:"";position:absolute;inset:-14px 0}
 .hire-nudge .hn-ic{width:14px;height:14px;flex:none}
-@container (max-width:169px){.hire-nudge .hn-lead{display:none}}
-.hire-nudge-x{position:relative;min-width:44px;min-height:44px;border:0;background:none;font:700 16px var(--f-body);color:var(--c-hint)}
+@container (max-width:221px){.hire-nudge .hn-lead{display:none}}
+.hire-nudge{flex:0 1 auto;min-width:0}
+.hire-nudge-x{flex:none;margin-left:auto;width:44px;height:44px;padding:0;border:0;background:none;font:700 12px/1 var(--f-body);color:var(--c-wood-text);cursor:pointer}
 .new-dot{position:absolute;top:4px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--c-barn);box-shadow:0 0 0 2px var(--c-white)}.new-dot[hidden]{display:none}
 [data-nav="upgrades"],.tabs [data-tab="workers"]{position:relative}
 .pulse{animation:nudge-pulse 1.6s ease-in-out infinite}@keyframes nudge-pulse{50%{transform:scale(1.06)}}

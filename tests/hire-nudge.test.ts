@@ -11,7 +11,7 @@ import { migrateTracksV7 } from '../src/sim/migrate-v7';
 import { initialState } from '../src/sim/state';
 import { SAVE_VERSION } from '../src/save/save';
 import { mem } from './helpers';
-import { HIRE_NUDGE_TEXT, HIRE_NUDGE_ARIA, NEW_DOT_ARIA, hireNudgeHtml, newDotHtml, pickHint, nextHire, hireNudgeLevel } from '../src/ui/hire-nudge';
+import { HIRE_NUDGE_DISMISS_ARIA, FARM_BUY_SELECTOR, focusAfterDismiss, DISMISS_RESERVE_PX, HINT_FULL_MIN_PX, dropLead, HIRE_NUDGE_TEXT, HIRE_NUDGE_ARIA, NEW_DOT_ARIA, hireNudgeHtml, newDotHtml, pickHint, nextHire, hireNudgeLevel } from '../src/ui/hire-nudge';
 import { parseEconomyCsv, buildBalance, readEconomyConfig } from '../scripts/sync-economy';
 import { readFileSync } from 'node:fs';
 const T0 = 1.8e12;
@@ -94,9 +94,23 @@ describe('L30-19b hire nudge', () => {
     expect(r).toContain('text-overflow:clip'); expect(r).not.toMatch(/ellipsis|#[0-9a-f]{3,6}/i);
     expect(rule('.hire-nudge::before')).toContain('inset:-14px 0'); // 16px line + 2 x 14px = 44px
     expect(rule('.hire-nudge .hn-ic')).toContain('width:14px');
-    expect(css).toMatch(/@container \(max-width:169px\)\{\.hire-nudge \.hn-lead\{display:none\}\}/);
+    expect(css).toMatch(/@container \(max-width:221px\)\{\.hire-nudge \.hn-lead\{display:none\}\}/); // 170 + 52 reserve
+    const x = rule('.hire-nudge-x');
+    for (const d of ['flex:none', 'margin-left:auto', 'width:44px', 'height:44px', 'font:700 12px/1 var(--f-body)', 'color:var(--c-wood-text)']) expect(x).toContain(d);
+    expect(rule('.hire-nudge-line')).toContain('gap:8px');
     expect(css).toMatch(/--f-body:"Nunito"/); expect(css).toMatch(/--c-wood-text:#8A5528/);
     const block = css.slice(css.indexOf('/* L30-19b hire nudge')); expect(block.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/#[0-9a-fA-F]{3,6}\b/); // tokens only
+  });
+  it('§5a dismiss: aria "Dismiss hire hint", sibling of the hint button; focus moves to the Farm Buy button', () => {
+    expect(HIRE_NUDGE_DISMISS_ARIA).toBe('Dismiss hire hint');
+    expect(hireNudgeHtml('i.svg')).toContain('class="hire-nudge-x" data-testid="hire-nudge-dismiss" aria-label="Dismiss hire hint">×</button></div>');
+    const calls: string[] = []; const root = { querySelector: (sel: string) => (calls.push(sel), { focus: () => calls.push('focus') }) };
+    focusAfterDismiss(root); expect(calls).toEqual([FARM_BUY_SELECTOR, 'focus']); expect(FARM_BUY_SELECTOR).toBe('button.btn.buy[data-kind="farm"]');
+    expect(() => focusAfterDismiss({ querySelector: () => null })).not.toThrow();
+  });
+  it('§5a drop rule: reserve 52px for the × first, drop the lead when the hint gets < 170px', () => {
+    expect(DISMISS_RESERVE_PX).toBe(52); expect(HINT_FULL_MIN_PX).toBe(170);
+    expect(dropLead(240)).toBe(false); expect(dropLead(222)).toBe(false); expect(dropLead(221)).toBe(true); expect(dropLead(150)).toBe(true);
   });
   it('hint precedence: coop-full > hire nudge > UC25 > M4, one at a time', () => {
     expect(pickHint({ coop_full: true, hire_nudge: true, uc25: true, m4: true })).toBe('coop_full');

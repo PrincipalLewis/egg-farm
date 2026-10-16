@@ -16,7 +16,7 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
-import { hireNudgeHtml, newDotHtml, nextHire, pickHint } from './hire-nudge';
+import { hireNudgeHtml, focusAfterDismiss, newDotHtml, nextHire, pickHint } from './hire-nudge';
 import { m4On, trackMaxLevel, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackBuyCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
@@ -208,7 +208,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   sellAllBtn.addEventListener('click', () => { lastSellSource = sellAllBtn; if (!act({ type: 'sellAll' })) cantAfford(sellAllBtn); });
   uRow.addEventListener('click', e => {
     const t = e.target as HTMLElement;
-    if (t.closest('.hire-nudge-x')) { g.hireNudgeDismiss('l25'); renderHireNudge(); render(); return; }
+    if (t.closest('.hire-nudge-x')) { g.hireNudgeDismiss('l25'); renderHireNudge(); render(); focusAfterDismiss(uRow); return; }
     if (t.closest('.hire-nudge')) { openHire(); return; }
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
