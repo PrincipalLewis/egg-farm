@@ -1,6 +1,6 @@
 // v3 (HoE): (a) a flag-off build saving a marked save keeps tracksV7 and the track fields byte-for-byte;
 // (b) the interim track migration writes a v6 backup exactly once, before the in-place change.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
 import { headroomNeed, saveSeqOf, validate, serialize, checksum, migrate, SAVE_KEY, BAK_KEY, V6_BACKUP_KEY, SAVE_VERSION, RESET_KEYS, resetProgress, decodeBackup, encodeBackup, newMigrationId, committedBackupRaw, MIGRATION_ATTEMPTS_KEY, HEADROOM_PROBE_KEY, rankCompare } from '../src/save/save';
@@ -52,7 +52,7 @@ describe('(a) flag off keeps a marked v6 save\'s track data byte-for-byte', () =
     const marked = { ...initialState(on), farmLevel: 12, collectionLevel: 9, hensLevel: 11, eggValueLevel: 14, celebratedMilestones: ['hens:10'], tracksV7: 1 as const };
     const kv = mem() as any; kv.setItem(SAVE_KEY, raw6(marked));
     const { db, data } = fakeIdb(); const m = new IdbMirror(db);
-    const g = new Game(off, kv, () => 1760000000500, undefined, 'dev', m); g.save(); await settle();
+    const g = new Game(off, kv, () => 1760000000500, undefined, 'dev', m); g.save(); await vi.waitFor(() => expect(data.has(IDB_KEY)).toBe(true), { timeout: 2000 }); // was a fixed 5 ms settle: flaky under load (rank-checked get+put)
     expect(trackPart(kv.getItem(BAK_KEY))).toBe(trackPart(raw6(marked)));        // .bak = rotated copy of the marked save
     expect(trackPart(data.get(IDB_KEY) as string)).toBe(trackPart(raw6(marked))); // IDB mirror write
     const kv2 = mem() as any; expect(reconcile(kv2, data.get(IDB_KEY) as string, off)).toBe('idb');
