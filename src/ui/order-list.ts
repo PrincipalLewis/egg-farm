@@ -31,7 +31,18 @@ export class OrderList {
     if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`; // F4: NBSP survives flex whitespace trimming
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
-    if (btn.textContent !== v.button) btn.textContent = v.button;
+    if (btn.getAttribute('aria-label') !== v.button) {
+      // MK-24: stack "Sell k" over "+$X" (layout-spec §4.4); wait stays a single label.
+      if (v.state === 'wait') btn.textContent = v.button;
+      else {
+        const parts = v.button.split('\u00a0· ');
+        btn.replaceChildren(
+          Object.assign(document.createElement('span'), { className: 'sk', textContent: parts[0] }),
+          Object.assign(document.createElement('span'), { className: 'sy', textContent: parts[1] ?? '' }),
+        );
+      }
+      btn.setAttribute('aria-label', v.button);
+    }
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}`; if (btn.className !== bc) btn.className = bc;
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
   }
