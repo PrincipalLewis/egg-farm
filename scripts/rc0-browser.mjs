@@ -395,6 +395,61 @@ sections.bug9 = async () => {
   }
 };
 
+// ---------- P1 Vadim playtest: FTUE sell step with no customer (1280) + no caret after clicking the farm ----------
+sections.p1ftue = async () => {
+  const { ctx, page } = await open({ w: 1280, h: 800 });
+  const st = () => page.evaluate(() => { const c = document.querySelector('#collect').getBoundingClientRect(); const top = document.elementFromPoint(c.x + c.width / 2, c.y + c.height / 2);
+    const ring = document.querySelector('.onb-ring'); return { step: window.eggfarmOnb?.step, mode: window.eggfarmOnb?.mode, cap: document.querySelector('.onb-txt')?.textContent ?? '', ring: ring ? getComputedStyle(ring).display : 'gone',
+      collectTop: !!top && (top.id === 'collect' || !!top.closest('#collect')), cust: window.eggfarm.state.customers.length }; });
+  await page.waitForFunction(() => window.eggfarm.state.coop >= 5, null, { timeout: 30000 }); await page.click('#collect'); await page.waitForTimeout(200);
+  await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, customers: [], nextCustomerInS: 30 }; }); await page.waitForTimeout(400);
+  const a = await st();
+  ok('P1 FTUE sell step, no customer: wait hint, no spotlight, no "customer is waiting"', a.step === 1 && a.mode !== 'mark' && a.ring === 'none' && !/waiting|Tap them/i.test(a.cap), JSON.stringify(a));
+  ok('P1 FTUE no customer: Collect is the top element (not blocked)', a.collectTop, JSON.stringify(a));
+  await page.click('#collect', { timeout: 2000 }); ok('P1 FTUE no customer: Collect click works', true);
+  await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, nextCustomerInS: 0.5 }; });
+  await page.waitForFunction(() => window.eggfarm.state.customers.length > 0 && window.eggfarmOnb?.mode === 'mark', null, { timeout: 5000 }).catch(() => {});
+  const b = await st();
+  ok('P1 FTUE customer arrives: spotlight returns and Collect still clickable', b.mode === 'mark' && b.ring !== 'none' && b.collectTop, JSON.stringify(b));
+  const sell = page.locator('#mRows button[data-id]').first(); await sell.click({ timeout: 3000 }); await page.waitForTimeout(200);
+  ok('P1 FTUE sell completes step 2 (no softlock)', (await st()).step === 2, JSON.stringify(await st()));
+  await ctx.close();
+};
+sections.p1caret = async () => {
+  for (const [w, h] of [[1280, 800], [390, 844]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    const sc = await page.locator('#scene').boundingBox();
+    for (const [fx, fy] of [[0.5, 0.7], [0.2, 0.85], [0.8, 0.6]]) await page.mouse.click(sc.x + sc.width * fx, sc.y + sc.height * fy);
+    await page.mouse.dblclick(sc.x + sc.width * 0.5, sc.y + sc.height * 0.8);
+    const r = await page.evaluate(() => { const s = getSelection(), sc = document.querySelector('#scene'); const inScene = !!s && s.rangeCount > 0 && sc.contains(s.anchorNode);
+      const cs = getComputedStyle(sc); return { inScene, type: s?.type, text: String(s), ce: document.querySelectorAll('#app [contenteditable]:not([contenteditable=false])').length, us: cs.userSelect || cs.webkitUserSelect, caret: cs.caretColor, active: document.activeElement?.isContentEditable }; });
+    ok(`P1 caret: clicking the farm leaves no caret/selection in the scene (${w})`, !r.inScene && !r.text && r.ce === 0 && r.us === 'none' && /rgba\(0, 0, 0, 0\)|transparent/.test(r.caret) && !r.active, JSON.stringify(r));
+    await ctx.close();
+  }
+};
+
+
+// ---------- P1 Vadim playtest: "Coop upgraded!" toast fully visible below the HUD (1280, 390) ----------
+sections.p1toast = async () => {
+  for (const [w, h] of [[1280, 800], [390, 844]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, farmLevel: 4, coinsCents: 1e9 }; });
+    if (w < 960) await page.locator('[data-nav=upgrades]').click();
+    await page.locator('[data-tab=farm]').click(); await page.locator('#uRow .btn.buy').click();
+    await page.waitForSelector('.toast.show', { timeout: 3000 }); await page.waitForTimeout(450);
+    const r = await page.evaluate(() => { const t = [...document.querySelectorAll('.toast.show')].find(e => /Coop upgraded/.test(e.textContent)); const hud = document.querySelector('.hud');
+      const a = t.getBoundingClientRect(), b = hud.getBoundingClientRect(); const cx = a.left + a.width / 2, cy = a.top + a.height / 2; const pe = t.style.pointerEvents; t.style.pointerEvents = 'auto'; const top = document.elementFromPoint(cx, cy); t.style.pointerEvents = pe; /* toast is pointer-events:none; probe paint order */
+      return { t: [a.left, a.top, a.right, a.bottom].map(Math.round), hud: [b.left, b.top, b.right, b.bottom].map(Math.round), vw: innerWidth, vh: innerHeight, z: getComputedStyle(t).zIndex, hudZ: getComputedStyle(hud).zIndex, onTop: !!top && t.contains(top) }; });
+    const [l, tp, rr, bt] = r.t;
+    ok(`P1 toast "Coop upgraded!" fully inside viewport, below HUD, on top (${w})`, l >= 0 && tp >= 0 && rr <= r.vw && bt <= r.vh && tp >= r.hud[3] && r.onTop, JSON.stringify(r));
+    if (shot) await page.screenshot({ path: `${SHOTS}/p1-toast-coop-upgraded-${w}.png` });
+    await ctx.close();
+  }
+};
+
+
+
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();

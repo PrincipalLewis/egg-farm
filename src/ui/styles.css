@@ -486,3 +486,6 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55} /* beats the S2-5 filter:none reset */
 /* #2: docked Upgrades-header Refill pill never under 44px tall */
 @media (min-width:960px) and (orientation:landscape){.sheet header button.desk-manage-all:not([hidden]){min-height:44px;box-sizing:border-box}}
+/* P1 (Vadim playtest): no text caret / selection when clicking the farm. Game surface is not text; real inputs stay editable. */
+#app,#scene,#yard,.onb{-webkit-user-select:none;user-select:none;caret-color:transparent}
+#app input,#app textarea,#app select,#app [contenteditable=true]{-webkit-user-select:text;user-select:text;caret-color:auto}

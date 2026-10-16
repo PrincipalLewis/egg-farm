@@ -103,7 +103,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
   const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
-  (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts
+  if (IOS_FLAG_ENABLED) (window as any).eggfarmOrderList = orderList; // compiled out of release (QA-RC1UI-2); QA §7.17 node identity / write counts
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
@@ -572,7 +572,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     onbUpdate = mountOnboarding(flow, (st) => {
       if (modalKind) return null;
       if (st === 0) return collectBtn;
-      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
+      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)'); // P1: never spotlight an empty queue
       if (docked.matches) { tab = 'collection'; return uRow.querySelector('.btn.buy'); }
       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
     }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'
