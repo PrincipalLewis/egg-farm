@@ -15,6 +15,11 @@ for (let i = 0; i < 10; i++) { await p.locator('#collect').click({ force: true }
 await p.locator('#settings').click({ force: true }).catch(() => {}); await p.waitForTimeout(2500);
 const extra = (await own(p)).filter(k => !base.has(k)).sort();
 const ids = await p.evaluate(() => [...document.querySelectorAll('[id],[name]')].map(e => e.id || e.getAttribute('name')).filter(n => /egg/i.test(n)));
-const bad = extra.filter(k => !ALLOWED.includes(k));
+// Review 8669522 m4: also gate the refused (newer-save) boot path on real window keys, not just the bundle regex.
+const r = await ctx.newPage(); await r.addInitScript(() => { localStorage.setItem('eggfarm.save', JSON.stringify({ version: 7, savedAt: Date.now(), state: {} })); });
+await r.goto(srv.url); await r.getByText('Tap to start').click(); await r.waitForSelector('.newer-save'); await r.waitForTimeout(1000);
+const extraR = (await own(r)).filter(k => !base.has(k)).sort(); const badR = extraR.filter(k => !ALLOWED.includes(k));
+console.log(`${badR.length ? 'FAIL' : 'PASS'} [${ENGINE}] refused newer-save boot window globals vs blank page: ${JSON.stringify(extraR)}`);
+const bad = [...extra.filter(k => !ALLOWED.includes(k)), ...badR];
 console.log(`${bad.length ? 'FAIL' : 'PASS'} [${ENGINE}] release window globals vs blank page: ${JSON.stringify(extra)}; allowed ${JSON.stringify(ALLOWED)}; not allowed ${JSON.stringify(bad)}; 'eggfarm' in window=${await p.evaluate(() => 'eggfarm' in window)}; egg ids/names ${JSON.stringify(ids)}`);
 await br.close(); srv.stop(); process.exit(bad.length ? 1 : 0);

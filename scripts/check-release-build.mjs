@@ -22,6 +22,7 @@ const hooks = [/\.eggfarm\s*=/.test(js) ? 'window.eggfarm' : '', 'eggfarmOnb', '
 if (chunks.length || hooks.length) { console.error(`check-release-build: debug/QA code in release bundle: ${[...chunks, ...hooks].join(', ')}`); process.exit(1); }
 console.log('check-release-build: no ?debug/?perf/?ios/QA hooks ok');
 // Window globals allowlist: the release bundle may assign exactly these own properties on window.
+// Heuristic only (misses aliases/bracket/defineProperty): the gate is the runtime check, npm run check-globals <engine>.
 const ALLOWED_GLOBALS = ['eggfarmExportTelemetry'];
 const assigned = [...new Set([...js.matchAll(/\b(?:window|globalThis|self)\.([A-Za-z_$][\w$]*)\s*=(?!=)/g)].map(m => m[1]))];
 const extra = assigned.filter(k => !ALLOWED_GLOBALS.includes(k));

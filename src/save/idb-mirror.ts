@@ -7,7 +7,7 @@
  * localStorage only, as in rc0.
  */
 import type { Balance } from '../config/balance';
-import { SAVE_KEY, validate, preserveCorrupt, newerSaveVersion, type KV } from './save';
+import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, type KV } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** The subset of IDBFactory we use (lets unit tests pass a fake). */
 export type IdbFactory = Pick<IDBFactory, 'open'>;
@@ -58,7 +58,7 @@ export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balan
  *  A corrupt localStorage save it replaces is preserved first (eggfarm.save.corrupt.<ts>, AC14b). Returns which won. */
 export function reconcile(kv: KV, idbRaw: string | null, b: Balance, now = Date.now()): Pick_ {
   const lsRaw = kv.getItem(SAVE_KEY);
-  if (newerSaveVersion(lsRaw) !== null || newerSaveVersion(idbRaw) !== null) return 'ls'; // M4 save present: never overwrite either copy
+  if (newerStoredVersion(kv, idbRaw) !== null) return 'ls'; // M4 save in main, .bak or IndexedDB: never write any copy
   const w = pickNewest(lsRaw, idbRaw, b);
   if (w === 'idb') {
     if (lsRaw !== null && !validate(lsRaw, b).ok) preserveCorrupt(kv, lsRaw, now);

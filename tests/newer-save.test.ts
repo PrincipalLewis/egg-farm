@@ -1,8 +1,9 @@
 // M4-safety: a save from a newer build (version > SAVE_VERSION) is refused untouched.
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
-import { loadSafe, save, serialize, newerSaveVersion, SAVE_KEY, BAK_KEY, SAVE_VERSION, CORRUPT_PREFIX } from '../src/save/save';
+import { loadSafe, save, serialize, newerSaveVersion, newerStoredVersion, validate, SAVE_KEY, BAK_KEY, SAVE_VERSION, CORRUPT_PREFIX } from '../src/save/save';
 import { reconcile } from '../src/save/idb-mirror';
+import { NEWER_SAVE_STRINGS } from '../src/ui/save-recovery';
 import { initialState } from '../src/sim/state';
 import { Game } from '../src/game';
 const kvm = () => { const m = new Map<string, string>(); const writes: string[] = [];
@@ -37,5 +38,50 @@ describe('fixture corrupt-version-99.json (was case F) is now refused untouched'
   it('no preserve copy, no fresh start, save bytes unchanged', () => {
     const raw = readFileSync(new URL('./fixtures/saves/corrupt-version-99.json', import.meta.url), 'utf8');
     const k = kvm(); k.m.set(SAVE_KEY, raw); expect(loadSafe(k, b, 1).newer).toBe(99); expect(k.writes).toEqual([]); expect(k.m.get(SAVE_KEY)).toBe(raw);
+  });
+});
+
+describe('review 8669522 fixes', () => {
+  const v7 = JSON.stringify({ version: SAVE_VERSION + 1, savedAt: 9, state: { coinsCents: 777 } });
+  it('B1: newerStoredVersion sees main, .bak and the IndexedDB copy', () => {
+    const k = kvm(); expect(newerStoredVersion(k)).toBeNull(); expect(newerStoredVersion(k, v7)).toBe(SAVE_VERSION + 1);
+    k.m.set(BAK_KEY, v7); expect(newerStoredVersion(k)).toBe(SAVE_VERSION + 1);
+  });
+  it('B1: v7 only in IndexedDB, localStorage holds valid v6 -> loadSafe refuses, Game writes nothing, mirror never written', () => {
+    const k = kvm(); const o = older(); k.m.set(SAVE_KEY, o);
+    expect(loadSafe(k, b, 9e12, v7).newer).toBe(SAVE_VERSION + 1);
+    expect(reconcile(k, v7, b)).toBe('ls');
+    const idbWrites: string[] = []; const mirror = { write: (r: string) => { idbWrites.push(r); }, clear: async () => {} };
+    const g = new Game(b, k, () => 9e12, undefined, 'test', mirror, v7);
+    expect(g.newerSave).toBe(SAVE_VERSION + 1); g.save(); g.dispatch({ type: 'collect' } as any); g.frame(); g.endSession(); g.flushForHandover();
+    expect(saveKeys(k.writes)).toEqual([]); expect(idbWrites).toEqual([]); expect(k.m.get(SAVE_KEY)).toBe(o);
+  });
+  it('B1: v7 only in IndexedDB, no localStorage save -> refused, no new game, nothing written', () => {
+    const k = kvm(); const idbWrites: string[] = []; const mirror = { write: (r: string) => { idbWrites.push(r); }, clear: async () => {} };
+    const g = new Game(b, k, () => 9e12, undefined, 'test', mirror, v7); g.save(); g.endSession();
+    expect(g.newerSave).toBe(SAVE_VERSION + 1); expect(g.isNewGame).toBe(false); expect(saveKeys(k.writes)).toEqual([]); expect(idbWrites).toEqual([]);
+  });
+  it('B1: reconcile writes nothing when .bak is newer', () => {
+    const k = kvm(); k.m.set(BAK_KEY, v7); expect(reconcile(k, older(), b)).toBe('ls'); expect(k.writes).toEqual([]);
+  });
+  it('m1: non-integer versions are not "newer"; they go down the corrupt path', () => {
+    for (const v of [6.5, 7.5, SAVE_VERSION + 0.1]) {
+      const raw = JSON.stringify({ version: v, savedAt: 1, state: { coinsCents: 1 } });
+      expect(newerSaveVersion(raw)).toBeNull(); expect(validate(raw, b)).toEqual({ ok: false, reason: 'version' });
+      const k = kvm(); k.m.set(SAVE_KEY, raw); const r = loadSafe(k, b, 1); expect(r.newer).toBeUndefined(); expect(r.recovery?.reason).toBe('version');
+    }
+  });
+  it('m2: corrupt main + newer .bak -> refuse (no fresh start, no corrupt copies)', () => {
+    const k = kvm(); k.m.set(SAVE_KEY, '{garbage'); k.m.set(BAK_KEY, v7);
+    const r = loadSafe(k, b, 1); expect(r).toEqual({ file: null, recovery: null, newer: SAVE_VERSION + 1 }); expect(k.writes).toEqual([]);
+    const g = new Game(b, k, () => 9e12); g.save(); expect(g.newerSave).toBe(SAVE_VERSION + 1); expect(saveKeys(k.writes)).toEqual([]);
+  });
+  it('m3: refusal copy is exactly M4A-31(b), Try again kept', () => {
+    expect(NEWER_SAVE_STRINGS.title).toBe('This save is from a newer version of Egg Farm. Open the newer build to keep playing.'); expect(NEWER_SAVE_STRINGS.retry).toBe('Try again');
+  });
+  it('M1: main.ts runs the newer-save check before requestFlush / claim', () => {
+    const src = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8'); const boot = src.slice(src.indexOf('async function boot'));
+    const chk = boot.indexOf('newerStoredVersion('), ret = boot.indexOf('refuseNewer(preNewer'); expect(chk).toBeGreaterThan(0);
+    expect(ret).toBeLessThan(boot.indexOf('new TabLease')); expect(ret).toBeLessThan(boot.indexOf('requestFlush(')); expect(ret).toBeLessThan(boot.indexOf('.claim('));
   });
 });
