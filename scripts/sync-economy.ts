@@ -1,6 +1,6 @@
 /**
  * MK-15: fit balance.json economy params from data/economy.csv (copied from product/economy.csv), verify EVERY row/column is reproduced by
- * src/config/formulas.ts, then write. Hand-set blocks (tickHz, save, feel, telemetry, offline cap/min) are preserved.
+ * src/config/formulas.ts, then write. Hand-set blocks (tickHz, save, feel, telemetry, offline cap/min/hiddenSimMaxSeconds) are preserved.
  * Usage: npm run sync-economy [-- --check]
  */
 import { readFileSync, writeFileSync } from "node:fs";

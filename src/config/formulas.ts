@@ -14,7 +14,7 @@ export interface EconomyParams {
     eggsPerSecL0?: number;
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
-  offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
+  offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number; hiddenSimMaxSeconds: number };
 }
 /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
 export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };
