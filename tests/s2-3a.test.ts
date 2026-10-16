@@ -63,8 +63,8 @@ describe('MK-17/21 visibility re-run (L12, 1,500 eggs, Market Hand Working)', ()
 describe('MK-22 first customer as soon as the player returns', () => {
   it('closing the welcome-back modal (Collect or dismiss) brings a customer on the next tick', () => {
     for (const type of ['collectOffline', 'dismissOffline'] as const) {
-      const kv = mem(); save(kv, { ...initialState(b), farmLevel: 12, nextCustomerInS: 3.9 }, 0);
-      const g = new Game(b, kv, () => 3_600_000); expect(g.state.pendingOfflineEggs).toBeGreaterThan(0);
+      const kv = mem(); save(kv, { ...initialState(b), farmLevel: 12, nextCustomerInS: 3.9 }, T0);
+      const g = new Game(b, kv, () => T0 + 3_600_000); expect(g.state.pendingOfflineEggs).toBeGreaterThan(0);
       expect(g.state.nextCustomerInS).toBe(3.9); // unchanged while the modal is open
       const ev: any[] = []; g.on(e => ev.push(e)); g.dispatch({ type }); g.debugAdvance(1000 / b.tickHz);
       expect(ev.some(e => e.type === 'customer_arrive'), type).toBe(true);
@@ -73,7 +73,7 @@ describe('MK-22 first customer as soon as the player returns', () => {
   it('no grant pending -> timer untouched; settling a stale grant at load does not trigger it', () => {
     const s = { ...initialState(b), nextCustomerInS: 2.5 };
     expect(apply(s, { type: 'collectOffline' }, b).nextCustomerInS).toBe(2.5);
-    const kv = mem(); save(kv, { ...s, pendingOfflineEggs: 50 }, 0); const g = new Game(b, kv, () => 30_000);
+    const kv = mem(); save(kv, { ...s, pendingOfflineEggs: 50 }, T0); const g = new Game(b, kv, () => T0 + 30_000);
     expect(g.state.basket).toBe(50); expect(g.state.nextCustomerInS).toBe(2.5);
   });
 });
@@ -113,6 +113,7 @@ describe('Product ruling: strip full of waiting customers', () => {
 });
 
 import { fmtMoneyShort } from '../src/ui/format';
+const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 describe('Art & UX compact amount on the Thanks card / pop', () => {
   it('"$12.50" under $1K, then 1.2K style (floored, no trailing .0)', () => {
     expect(fmtMoneyShort(1250)).toBe('$12.50'); expect(fmtMoneyShort(99_999)).toBe('$999.99');

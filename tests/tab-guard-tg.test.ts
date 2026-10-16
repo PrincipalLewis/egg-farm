@@ -6,6 +6,7 @@ import { initialState } from '../src/sim/state';
 import { Game } from '../src/game';
 import { TabLease, LEASE_KEY, readLease, type LeaseChannel } from '../src/save/tab-lease';
 import { mem, expOffline } from './helpers';
+const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 afterEach(() => vi.useRealTimers());
 const hub = () => { const chs: LeaseChannel[] = []; return () => { const c: LeaseChannel = { onmessage: null, postMessage: m => chs.filter(x => x !== c).forEach(x => x.onmessage?.({ data: m })), close() {} }; chs.push(c); return c; }; };
 /** Boot a tab like main.ts: claim, then load, then gate every save on the lease. */
@@ -57,8 +58,8 @@ describe('single-tab guard', () => {
     const kv2 = mem(); const C = tab(kv2, null, now); C.lease.release(); expect(readLease(kv2)!.at).toBe(0); t += 1; expect(tab(kv2, null, now).reason).toBe('stale');
   });
   it('TG-5: returning with two tabs pays offline earnings only once', () => {
-    vi.useFakeTimers(); const kv = mem(), h = hub(); save(kv, initialState(b), 0);
-    let t = 600_000; const now = () => t;
+    vi.useFakeTimers(); const kv = mem(), h = hub(); save(kv, initialState(b), T0);
+    let t = T0 + 600_000; const now = () => t;
     const A = tab(kv, h(), now); expect(A.g.state.pendingOfflineEggs).toBe(expOffline(600));
     t += 50; const B = tab(kv, h(), now); expect(B.g.state.basket + B.g.state.pendingOfflineEggs).toBe(expOffline(600)); // A's grant settled, no second grant
     B.g.dispatch({ type: 'collectOffline' }); A.g.dispatch({ type: 'collectOffline' });

@@ -69,17 +69,27 @@ async function boot() {
   let gRef: Game | null = null;
   const lease = new TabLease(localStorage, channel(), () => gRef?.deactivate());
   await lease.requestFlush(300); // the current owner saves its latest state and holds
+  // D2: re-read IndexedDB BEFORE the claim (the owner may just have flushed into it; its write transaction was created
+  // before this read, so the read sees it). Review minor main.ts:79-80: re-check for a newer save here too, so a newer
+  // build that saved during the flush is refused BEFORE we claim, and the live tab never flashes 'Game open in another tab'.
+  // From here to `new Game` there is no await, so nothing else can save in between.
+  if (mirror) idbRaw = await mirror.read();
+  let preNewer2: number | null = null; try { preNewer2 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
+  if (preNewer2 !== null) { lease.stop(); refuseNewer(preNewer2, idbRaw); return; }
   const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  // D2: newest valid copy of localStorage / IndexedDB wins. Re-read IndexedDB: the owner may just have flushed into it.
   let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
-  if (mirror) { idbRaw = await mirror.read(); try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
+  if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw);
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
+  // QA BUG-2: a newer build saved while this tab was live (found right before a write). Game already stopped all writes
+  // and the sim; release the lease, stop autosave, freeze render and show the session-long .newer-save layer.
+  let stopAutosave: (() => void) | null = null;
+  g.onNewerSave = v => { lease.release(); lease.stop(); stopAutosave?.(); frozen = true; audio.mute(); showNewerSaveDialog(asset, v, () => location.reload()); };
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   if (restored) g.telemetry.track('save_restore', { source: 'idb' });
   // The only release global (allowlist in check-release-build): read-only, no install_id. See Telemetry.snapshotJSON.
@@ -100,7 +110,7 @@ async function boot() {
   // Tab guard: once frozen (older tab) neither the sim nor the UI advances.
   new RenderPump(() => { if (frozen) return; g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
   window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
-  startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
+  stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
 }
 preload().then(() => {
   start.querySelector('.bar')?.remove();

@@ -8,6 +8,7 @@ import { save, migrate, SAVE_VERSION } from '../src/save/save';
 import { Game } from '../src/game';
 import { wageCentsPerSec, listedWageCentsPerSec, totalWageCentsPerSec, netCentsPerSec, queueFull, queueTapOpens } from '../src/ui/rates';
 import { mem } from './helpers';
+const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 
 const mh = (energy = 100) => ({ market_hand: { energy, cdS: 0 } });
 
@@ -70,8 +71,8 @@ describe('S2-8 gate: wages draining money to $0', () => {
     expect(s.coop).toBeGreaterThan(0); expect(s.customers.length).toBeGreaterThan(0); expect(s.coinsCents).toBeGreaterThanOrEqual(0);
   });
   it('offline settlement at $0: grant pays no wages, money stays >= 0, Collect/Sell work after', () => {
-    const kv = mem(); save(kv, { ...broke(2), nextCustomerInS: 3 }, 0);
-    const g = new Game(b, kv, () => 3_600_000); expect(g.state.coinsCents).toBe(2); expect(g.state.pendingOfflineEggs).toBeGreaterThan(0);
+    const kv = mem(); save(kv, { ...broke(2), nextCustomerInS: 3 }, T0);
+    const g = new Game(b, kv, () => T0 + 3_600_000); expect(g.state.coinsCents).toBe(2); expect(g.state.pendingOfflineEggs).toBeGreaterThan(0);
     g.dispatch({ type: 'collectOffline' }); g.debugAdvance(60_000);
     expect(g.state.coinsCents).toBeGreaterThanOrEqual(0); expect(g.state.basket).toBeGreaterThan(0);
   });

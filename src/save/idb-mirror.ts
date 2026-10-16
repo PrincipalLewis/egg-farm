@@ -7,7 +7,7 @@
  * localStorage only, as in rc0.
  */
 import type { Balance } from '../config/balance';
-import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, type KV } from './save';
+import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, type KV } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** The subset of IDBFactory we use (lets unit tests pass a fake). */
 export type IdbFactory = Pick<IDBFactory, 'open'>;
@@ -29,14 +29,22 @@ export class IdbMirror {
   }
   private tx(mode: IDBTransactionMode) { return this.db.transaction(IDB_STORE, mode, { durability: 'strict' } as IDBTransactionOptions); }
   async read(ms = 1500): Promise<string | null> {
-    try { const v = await timeout(req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)), ms); return typeof v === 'string' ? v : null; }
+    try { const v = await timeout(req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)), ms); if (typeof v !== 'string') return null; this.seeNewer(v); return v; }
     catch { return null; }
   }
-  /** Fire-and-forget durable write; transactions on one store commit in order, so the last save wins. Never throws. */
+  /** BUG-2: version of a newer-build copy seen in IndexedDB (by read() or by a write's in-transaction check), else null. */
+  newer: number | null = null;
+  /** Called once when a write finds a newer-build copy in IndexedDB and skips the put. */
+  onNewer: ((v: number) => void) | null = null;
+  private seeNewer(raw: unknown) { const v = typeof raw === 'string' ? newerSaveVersion(raw) : null; if (v !== null && this.newer === null) { this.newer = v; this.onNewer?.(v); } return v; }
+  /** Fire-and-forget durable write; transactions on one store commit in order, so the last save wins. Never throws.
+   *  BUG-2: get + check + put run in ONE readwrite transaction, so a newer-build copy is never overwritten (no put). */
   write(raw: string): Promise<void> {
+    if (this.newer !== null) return Promise.resolve();
     try {
-      const t = this.tx('readwrite'); t.objectStore(IDB_STORE).put(raw, IDB_KEY); this.pending++;
-      return new Promise(res => { const done = (ok: boolean) => { this.pending--; if (!ok) this.failed = true; res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
+      const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); this.pending++;
+      const g = os.get(IDB_KEY); g.onsuccess = () => { if (this.seeNewer(g.result) === null) os.put(raw, IDB_KEY); };
+      return new Promise(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) this.failed = true; res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
     } catch { this.failed = true; return Promise.resolve(); }
   }
   /** Reset save: remove the mirror copy (resolves once committed or failed). */
@@ -52,7 +60,9 @@ export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balan
   const iv = validate(idbRaw, b); if (!iv.ok) return 'ls';
   if (lsRaw === null) return 'idb';
   const lv = validate(lsRaw, b); if (!lv.ok) return 'idb';
-  return iv.file.savedAt > lv.file.savedAt ? 'idb' : 'ls';
+  // Review minor: a missing/invalid savedAt (NaN after validate) is the OLDEST copy, never beats a valid one.
+  const t = (x: number) => Number.isFinite(x) ? x : -Infinity;
+  return t(iv.file.savedAt) > t(lv.file.savedAt) ? 'idb' : 'ls';
 }
 /** Boot step, before `new Game`: write the IndexedDB copy back into localStorage when it is the newest valid one.
  *  A corrupt localStorage save it replaces is preserved first (eggfarm.save.corrupt.<ts>, AC14b). Returns which won. */

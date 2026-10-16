@@ -337,28 +337,80 @@ sections.newerfrac = async () => {
   ok('m1 version 7.5: corrupt path (recovery reason=version, copy preserved), not .newer-save', !st.newer && st.rec === 'version' && st.corrupt, JSON.stringify(st));
   await ctx.close();
 };
-// M1 + (f)6 second tab: a refused build opened next to a live tab; the live tab keeps playing/saving, the refused tab writes nothing.
+// M1 + (f)6 second tab, updated for QA BUG-2 (save-durability-2959ba0): a refused build opened next to a live tab. The
+// refused tab writes nothing; the live tab's next write sees the newer copy, stops ALL writes, releases the lease and shows
+// .newer-save (it used to keep saving, which let it overwrite a newer main within ~3 s).
 sections.newertwotab = async () => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const errors = [];
   const a = await ctx.newPage(); a.on('pageerror', e => errors.push('A:' + e.message));
   await a.addInitScript(() => { if (sessionStorage.getItem('seeded')) return; localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true })); sessionStorage.setItem('seeded', '1'); });
   await a.goto(URL0, { waitUntil: 'domcontentloaded' }); await a.getByText('Tap to start').click(); await a.waitForFunction(() => window.eggfarm); await a.waitForTimeout(500);
   const v7 = JSON.stringify({ version: 7, savedAt: Date.now(), state: { coinsCents: 1 } });
-  await a.evaluate(c => localStorage.setItem('eggfarm.save.bak', c), v7); // a newer build's copy appears (rotation never overwrites it)
-  const leaseA = await a.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.lease')).id);
+  await a.evaluate(c => localStorage.setItem('eggfarm.save.bak', c), v7); // a newer build's copy appears
+  const mainBefore = await a.evaluate(() => localStorage.getItem('eggfarm.save'));
   const b = await ctx.newPage(); b.on('pageerror', e => errors.push('B:' + e.message)); await b.addInitScript(SPY);
   await b.goto(URL0, { waitUntil: 'domcontentloaded' }); await b.getByText('Tap to start').click();
   const shown = await b.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 }).then(() => true, () => false);
-  await a.bringToFront(); await a.waitForTimeout(1000);
-  const c0 = await a.evaluate(() => window.eggfarm.state.coinsCents + window.eggfarm.state.basket + window.eggfarm.state.coop);
-  await a.evaluate(() => window.eggfarm.dispatch({ type: 'collect' })); await a.evaluate(() => window.eggfarm.save());
-  await a.waitForTimeout(2500);
-  const sa = await a.evaluate(() => ({ modal: !!document.querySelector('.recovery-layer:not(.newer-save)'), inactive: window.eggfarm.inactive, held: window.eggfarm.holdUntil > Date.now(), lease: JSON.parse(localStorage.getItem('eggfarm.lease')).id, savedAt: JSON.parse(localStorage.getItem('eggfarm.save')).savedAt }));
+  await a.bringToFront(); await a.waitForTimeout(500);
+  await a.evaluate(() => { window.eggfarm.dispatch({ type: 'collect' }); window.eggfarm.save(); window.eggfarm.endSession(); });
+  const aShown = await a.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 }).then(() => true, () => false);
+  await a.waitForTimeout(6000); // > one autosave interval
+  const sa = await a.evaluate(() => ({ tabModal: !!document.querySelector('.recovery-layer:not(.newer-save)'), ro: window.eggfarm.readOnly, newer: window.eggfarm.newerSave, lease: JSON.parse(localStorage.getItem('eggfarm.lease')), main: localStorage.getItem('eggfarm.save'), bak: localStorage.getItem('eggfarm.save.bak') }));
   const sb = await b.evaluate(() => ({ w: window.__w, bc: window.__bc, game: 'eggfarm' in window }));
   ok('M1 refused tab next to live tab: refused tab shows .newer-save and posts no flush/claim', shown && sb.bc.length === 0 && !sb.game, JSON.stringify({ shown, bc: sb.bc }));
-  ok('M1 live tab keeps working: no tab-guard modal, not inactive/held, still owns the lease, still saving', !sa.modal && !sa.inactive && !sa.held && sa.lease === leaseA && Date.now() - sa.savedAt < 5000, JSON.stringify({ ...sa, leaseA }));
-  ok('(f)6 refused second tab writes nothing (no save/.bak/lease key, no IndexedDB put/delete)', sb.w.length === 0, JSON.stringify(sb.w));
-  ok('M1 newer .bak survives the live tab saving', (await a.evaluate(() => localStorage.getItem('eggfarm.save.bak'))) === v7 && errors.length === 0, errors.join(' | '));
+  ok('BUG-2 live tab: next write refuses, shows .newer-save (no tab-guard modal), read-only, lease released (at 0)', aShown && !sa.tabModal && sa.ro && sa.newer === 7 && sa.lease.at === 0, JSON.stringify({ aShown, ...sa, main: undefined, bak: undefined }));
+  ok('BUG-2 live tab wrote nothing after the newer copy appeared: main unchanged, newer .bak intact', sa.main === mainBefore && sa.bak === v7, JSON.stringify({ mainSame: sa.main === mainBefore, bakSame: sa.bak === v7 }));
+  ok('(f)6 refused second tab writes nothing (no save/.bak/lease key, no IndexedDB put/delete)', sb.w.length === 0 && errors.length === 0, JSON.stringify(sb.w) + errors.join(' | '));
+  await ctx.close();
+};
+// QA BUG-2 repro (sd.mjs a4): another tab writes a v99 MAIN save while tab 1 plays; tab 1's autosave must not overwrite it.
+sections.newermainlive = async () => {
+  const { ctx, page, errors } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+  const v99 = JSON.stringify({ version: 99, savedAt: Date.now(), state: { coinsCents: 4000 } });
+  await page.evaluate(c => localStorage.setItem('eggfarm.save', c), v99);
+  const shown = await page.waitForSelector('.recovery-layer.newer-save', { timeout: 9000 }).then(() => true, () => false); // next autosave (5 s)
+  await page.evaluate(() => { document.dispatchEvent(new Event('visibilitychange')); window.dispatchEvent(new Event('pagehide')); });
+  await page.waitForTimeout(6000);
+  const st = await page.evaluate(() => new Promise(res => { const r = indexedDB.open('eggfarm'); r.onsuccess = () => { const g = r.result.transaction('save').objectStore('save').get('main'); g.onsuccess = () => res({ main: localStorage.getItem('eggfarm.save'), idbV: JSON.parse(g.result).version, ver: document.querySelector('.newer-save')?.dataset.version }); }; }));
+  ok('BUG-2 v99 main written by another tab: autosave/visibility/pagehide never overwrite it; .newer-save shown (v99)', shown && st.main === v99 && st.ver === '99' && errors.length === 0, JSON.stringify({ shown, same: st.main === v99, ver: st.ver, idbV: st.idbV, errors }));
+  await ctx.close();
+};
+// QA BUG-1 (sd.mjs b-savedat-zero/negative) + BUG-5 (null): 0 offline, loaded (no recovery), re-stamped now.
+sections.savedatinvalid = async () => {
+  for (const v of ['0', '-5000000000000', '1000', 'null', String(Date.now() + 3_600_000) /* future: invalid (Product 15:15) */]) {
+    const { ctx, page } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+    const seeded = await page.evaluate(v => { const g = window.eggfarm; g.state = { ...g.state, basket: 15, coop: 0 }; g.save(); g.resetting = true;
+      const s = localStorage.getItem('eggfarm.save').replace(/"savedAt":\d+/, `"savedAt":${v}`); localStorage.setItem('eggfarm.save', s); return s; }, v);
+    const p2 = await ctx.newPage(); await page.close(); await p2.goto(URL0, { waitUntil: 'domcontentloaded' }); await p2.getByText('Tap to start').click(); await p2.waitForFunction(() => window.eggfarm);
+    await p2.waitForTimeout(300);
+    const st = await p2.evaluate(() => ({ off: window.eggfarm.offline.eggs, pend: window.eggfarm.state.pendingOfflineEggs, basket: window.eggfarm.state.basket, rec: window.eggfarm.recovery, savedAt: JSON.parse(localStorage.getItem('eggfarm.save')).savedAt, modal: !!document.querySelector('.recovery-layer') }));
+    ok(`BUG-1/5 savedAt=${v}: 0 offline, main loaded (basket 15, no recovery), savedAt re-stamped now`, st.off === 0 && st.pend === 0 && st.basket === 15 && !st.rec && !st.modal && Date.now() - st.savedAt < 10_000, JSON.stringify({ ...st, seeded: !!seeded }));
+    await ctx.close();
+  }
+};
+// QA BUG-3 (sd.mjs e1): main gone from localStorage AND IndexedDB, valid .bak -> restored, never overwritten by a fresh game.
+sections.bakrestore = async () => {
+  const { ctx, page } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 15, coop: 0 }; g.save(); g.save(); }); // 2nd save rotates main -> .bak
+  await page.evaluate(() => new Promise(res => { const g = window.eggfarm; g.resetting = true; localStorage.setItem('eggfarm.save.bak', localStorage.getItem('eggfarm.save')); localStorage.removeItem('eggfarm.save');
+    const r = indexedDB.open('eggfarm'); r.onsuccess = () => { const t = r.result.transaction('save', 'readwrite'); t.objectStore('save').delete('main'); t.oncomplete = () => res(); }; }));
+  const p2 = await ctx.newPage(); await page.close(); await p2.goto(URL0, { waitUntil: 'domcontentloaded' }); await p2.getByText('Tap to start').click(); await p2.waitForFunction(() => window.eggfarm);
+  await p2.waitForTimeout(8000); // QA saw .bak overwritten ~7 s after a fresh start
+  const st = await p2.evaluate(() => ({ basket: window.eggfarm.state.basket, newGame: window.eggfarm.isNewGame, rec: window.eggfarm.recovery && { case: window.eggfarm.recovery.case, reason: window.eggfarm.recovery.reason }, bakBasket: JSON.parse(localStorage.getItem('eggfarm.save.bak')).state.basket, mainBasket: JSON.parse(localStorage.getItem('eggfarm.save')).state.basket }));
+  ok('BUG-3 main missing everywhere + valid .bak: restored (basket 15, case R missing), .bak still holds progress after 8 s', st.basket >= 15 && !st.newGame && st.rec?.case === 'R' && st.rec?.reason === 'missing' && st.bakBasket >= 15 && st.mainBasket >= 15, JSON.stringify(st));
+  await ctx.close();
+};
+// QA BUG-4 (sd.mjs e2): Settings -> Reset clears .bak and the IndexedDB copy too.
+sections.resetbak = async () => {
+  const { ctx, page } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 15, coop: 0 }; g.save(); g.save(); });
+  const had = await page.evaluate(() => localStorage.getItem('eggfarm.save.bak') !== null);
+  // drive the real UI path: Settings -> Reset save -> Reset
+  await page.locator('#settings, [aria-label="Settings"], .settings-btn').first().click();
+  await page.locator('#sReset').click(); await page.locator('#cReset').click();
+  await page.getByText('Tap to start').click({ timeout: 15000 }); await page.waitForFunction(() => window.eggfarm, null, { timeout: 10000 }); await page.waitForTimeout(1500);
+  const st = await page.evaluate(() => new Promise(res => { const r = indexedDB.open('eggfarm'); r.onsuccess = () => { const g = r.result.transaction('save').objectStore('save').get('main'); g.onsuccess = () => res({ bak: localStorage.getItem('eggfarm.save.bak'), basket: window.eggfarm?.state.basket, idbBasket: g.result ? JSON.parse(g.result).state.basket : null }); }; }));
+  ok('BUG-4 Reset clears .bak and IndexedDB: no .bak, fresh state', had && st.bak === null && st.basket === 0 && (st.idbBasket === null || st.idbBasket === 0), JSON.stringify({ had, ...st }));
   await ctx.close();
 };
 

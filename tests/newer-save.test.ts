@@ -1,7 +1,7 @@
 // M4-safety: a save from a newer build (version > SAVE_VERSION) is refused untouched.
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
-import { loadSafe, save, serialize, newerSaveVersion, newerStoredVersion, validate, SAVE_KEY, BAK_KEY, SAVE_VERSION, CORRUPT_PREFIX } from '../src/save/save';
+import { loadSafe, save, serialize, NewerSaveError, newerSaveVersion, newerStoredVersion, validate, SAVE_KEY, BAK_KEY, SAVE_VERSION, CORRUPT_PREFIX } from '../src/save/save';
 import { reconcile } from '../src/save/idb-mirror';
 import { NEWER_SAVE_STRINGS } from '../src/ui/save-recovery';
 import { initialState } from '../src/sim/state';
@@ -15,7 +15,7 @@ describe('newer-version save (M4) is refused, never touched', () => {
   it('newerSaveVersion', () => { expect(newerSaveVersion(m4)).toBe(SAVE_VERSION + 1); expect(newerSaveVersion(older())).toBeNull(); expect(newerSaveVersion('{bad')).toBeNull(); expect(newerSaveVersion(null)).toBeNull(); });
   it('loadSafe: no file, no recovery, newer=version; no write/remove of save, .bak or corrupt keys', () => {
     const k = kvm(); k.m.set(SAVE_KEY, m4); k.m.set(BAK_KEY, older());
-    const r = loadSafe(k, b, 9e12); expect(r).toEqual({ file: null, recovery: null, newer: SAVE_VERSION + 1 });
+    const r = loadSafe(k, b, 9e12); expect(r).toEqual({ file: null, recovery: null, outcome: null, newer: SAVE_VERSION + 1 });
     expect(k.writes).toEqual([]); expect(k.m.get(SAVE_KEY)).toBe(m4); expect([...k.m.keys()].some(x => x.startsWith(CORRUPT_PREFIX))).toBe(false);
   });
   it('Game: refuses, read-only, constructor/save()/endSession() never write the save or .bak', () => {
@@ -30,7 +30,7 @@ describe('newer-version save (M4) is refused, never touched', () => {
   });
   it('a newer .bak is never overwritten by .bak rotation', () => {
     const k = kvm(); k.m.set(SAVE_KEY, older()); k.m.set(BAK_KEY, m4);
-    save(k, { ...initialState(b), coinsCents: 1 }, 2000, b, true); expect(k.m.get(BAK_KEY)).toBe(m4);
+    expect(() => save(k, { ...initialState(b), coinsCents: 1 }, 2000, b, true)).toThrow(NewerSaveError); expect(k.m.get(BAK_KEY)).toBe(m4); expect(k.m.get(SAVE_KEY)).toBe(older()); // BUG-2: no write at all
   });
 });
 import { readFileSync } from 'node:fs';
@@ -73,7 +73,7 @@ describe('review 8669522 fixes', () => {
   });
   it('m2: corrupt main + newer .bak -> refuse (no fresh start, no corrupt copies)', () => {
     const k = kvm(); k.m.set(SAVE_KEY, '{garbage'); k.m.set(BAK_KEY, v7);
-    const r = loadSafe(k, b, 1); expect(r).toEqual({ file: null, recovery: null, newer: SAVE_VERSION + 1 }); expect(k.writes).toEqual([]);
+    const r = loadSafe(k, b, 1); expect(r).toEqual({ file: null, recovery: null, outcome: null, newer: SAVE_VERSION + 1 }); expect(k.writes).toEqual([]);
     const g = new Game(b, k, () => 9e12); g.save(); expect(g.newerSave).toBe(SAVE_VERSION + 1); expect(saveKeys(k.writes)).toEqual([]);
   });
   it('m3: refusal copy is exactly M4A-31(b), Try again kept', () => {

@@ -4,7 +4,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, serialize, loadSafe, KV, type Recovery } from './save/save';
+import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery } from './save/save';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
@@ -18,6 +18,8 @@ export class Game {
   loaded: { coinsCents: number; farmLevel: number; collectionLevel: number; savedAt: number } | null = null;
   /** rc0 AC14b: set when the stored save could not be opened (drives the recovery dialog). */
   recovery: Recovery | null = null;
+  /** Single loader outcome for the AC14b dialog: 'restored' | 'fresh' | 'storage' | null. */
+  recoveryOutcome: import('./save/save').RecoveryOutcome = null;
   /** QA case 2: after a fresh start, `.bak` rotation waits for a valid save + progress (1 purchase or 60 s played). */
   private bakAllowed = true; private playedMs = 0;
   installId = ''; telemetry: Telemetry; private coopFullSince: number | null = null;
@@ -26,16 +28,18 @@ export class Game {
   on(fn: (e: GameEvent) => void) { this.listeners.push(fn); return () => { this.listeners = this.listeners.filter(f => f !== fn); }; }
   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
   /** D2: durable mirror of every save (IndexedDB, durability 'strict'); none in tests, second tabs or without IndexedDB. */
-  mirror: { write(raw: string): unknown; clear(): Promise<void> } | null;
+  mirror: { write(raw: string): unknown; clear(): Promise<void>; newer?: number | null; onNewer?: ((v: number) => void) | null } | null;
   constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null) {
     this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
     const r = loadSafe(kv, b, now(), idbRaw); const f = r.file;
-    this.recovery = r.recovery; this.isNewGame = !f;
+    if (f && !validSavedAt(f.savedAt, now())) f.savedAt = NaN; // QA BUG-1: <= 0 / pre-2020 savedAt -> 0 offline, re-stamped below
+    this.recovery = r.recovery; this.recoveryOutcome = r.outcome; this.isNewGame = !f;
     // M4-safety: a save from a newer build is refused untouched; this Game never writes (no new game autosaves over it).
     if (r.newer !== undefined) { this.newerSave = r.newer; this.readOnly = true; this.isNewGame = false; this.mirror = null; this.telemetry.track('save_newer_version', { version: r.newer, build }); }
+    else if (this.mirror) this.mirror.onNewer = v => this.refuseNewer(v);
     if (r.recovery) {
       const { reason, had_backup, restored_from_backup, copy_failed } = r.recovery;
       this.telemetry.track('save_corrupt', { reason, had_backup, restored_from_backup, build, ...(copy_failed ? { copy_failed: true } : {}) });
@@ -96,12 +100,31 @@ export class Game {
   save() {
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
+    if (this.newerGuard()) return;
     const t = this.now();
     try { const raw = save(this.kv, this.state, t, this.b, this.bakAllowed); this.mirror?.write(raw); }
-    catch (e) { /* localStorage failed: the IndexedDB copy still gets this save */
+    catch (e) {
+      if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
       if (this.mirror) try { this.mirror.write(serialize(this.state, t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
+  }
+  /** QA BUG-2: called when a newer-build save shows up while this tab is live (main, .bak or IndexedDB). */
+  onNewerSave: ((version: number) => void) | null = null;
+  /** BUG-2: re-check every copy right before a write. localStorage main + .bak synchronously; IndexedDB via the mirror's
+   *  cached result (its last read, or the in-transaction check of every write, which never puts over a newer copy). */
+  private newerGuard(): boolean {
+    let v: number | null = null; try { v = newerStoredVersion(this.kv); } catch { /* storage blocked: write fails below */ }
+    if (v === null && this.mirror?.newer != null) v = this.mirror.newer;
+    if (v === null) return false;
+    this.refuseNewer(v); return true;
+  }
+  /** Stop all writes for good (sim too), drop the mirror and hand control to main.ts (release lease, .newer-save layer). */
+  private refuseNewer(v: number) {
+    if (this.newerSave !== null && this.readOnly) return;
+    this.newerSave = v; this.readOnly = true; this.inactive = true; this.mirror = null;
+    this.telemetry.track('save_newer_version', { version: v, build: this.build, live: true });
+    this.onNewerSave?.(v);
   }
   endSession() {
     if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
@@ -126,7 +149,7 @@ export class Game {
     this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull();
   }
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
-  debugBackdateSave(ms: number) { this.save(); const raw = save(this.kv, this.state, this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
+  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.state, this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
   /** Reset save: drop the IndexedDB copy too (resolves when committed, or after 1 s), then the caller reloads. */
   clearMirror(): Promise<void> { return this.mirror ? Promise.race([this.mirror.clear(), new Promise<void>(r => setTimeout(r, 1000))]) : Promise.resolve(); }
   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */

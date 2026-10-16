@@ -35,8 +35,8 @@ export function migrate(d: any, b: Balance): SaveFile {
   return { version: d.version, savedAt: d.savedAt, state: { ...initialState(b), ...d.state } };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
-/** Settings > Reset save: only the progress save. eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
-export const RESET_KEYS = [SAVE_KEY] as const;
+/** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
+export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak'] as const; // QA BUG-4: .bak too, so reset progress can't come back
 export const UI_KEY = 'eggfarm.ui';
 /** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
 export function keepPrefsOnly(f: any): Record<string, unknown> {
@@ -75,6 +75,8 @@ export function serialize(state: GameState, now: number): string {
  */
 export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
   const raw = serialize(state, now);
+  // BUG-2: never write over a newer-build save in main or .bak (callers check first; this is the last line of defence).
+  const nv = newerStoredVersion(kv); if (nv !== null) throw new NewerSaveError(nv);
   if (rotate && b) {
     const cur = kv.getItem(SAVE_KEY);
     if (cur && validate(cur, b).ok && newerSaveVersion(kv.getItem(BAK_KEY)) === null) { try { kv.setItem(BAK_KEY, cur); } catch { /* full: keep old .bak */ } }
@@ -82,17 +84,24 @@ export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, ro
   kv.setItem(SAVE_KEY, raw);
   return raw;
 }
+/** Thrown by save() when a newer-build copy is in main or .bak: nothing was written. */
+export class NewerSaveError extends Error { constructor(readonly version: number) { super(`newer save v${version}`); this.name = 'NewerSaveError'; } }
+/** Product rule: savedAt must be a finite number > 0 and not before 2020-01-01 (else 0 offline + re-stamp). */
+export const MIN_SAVED_AT = Date.UTC(2020, 0, 1);
+/** `now` is the load clock: the pre-2020 floor applies only when the clock itself is past it (a device clock stuck before
+ *  2020, or a unit-test clock, can't judge "implausibly old"). validate() (no clock) checks finite and > 0. */
+export const validSavedAt = (t: unknown, now = Infinity): t is number => typeof t === 'number' && Number.isFinite(t) && t > 0 && (now < MIN_SAVED_AT || t >= MIN_SAVED_AT) && !(now > 0 && Number.isFinite(now) && t > now); // Product 15:15: future = invalid too
 export function load(kv: KV, b: Balance): SaveFile | null {
   const raw = kv.getItem(SAVE_KEY); if (!raw) return null;
   const v = validate(raw, b); return v.ok ? v.file : null;
 }
-export type CorruptReason = 'empty' | 'parse' | 'wrong_type' | 'version' | 'missing_state' | 'checksum' | 'invalid_state';
+export type CorruptReason = 'missing' | 'empty' | 'parse' | 'wrong_type' | 'version' | 'missing_state' | 'checksum' | 'invalid_state';
 const NUM_FIELDS = ['coinsCents', 'coop', 'basket', 'collectionLevel', 'farmLevel'] as const;
 /** Parse + checksum (when present; pre-rc0 saves have none) + state validation + migration. */
 export function validate(raw: string, b: Balance): { ok: true; file: SaveFile } | { ok: false; reason: CorruptReason } {
   if (!raw.trim()) return { ok: false, reason: 'empty' };
   let d: any; try { d = JSON.parse(raw); } catch { return { ok: false, reason: 'parse' }; }
-  if (!d || typeof d !== 'object' || Array.isArray(d) || typeof d.version !== 'number' || (d.savedAt !== undefined && typeof d.savedAt !== 'number')) return { ok: false, reason: 'wrong_type' };
+  if (!d || typeof d !== 'object' || Array.isArray(d) || typeof d.version !== 'number' || (d.savedAt !== undefined && d.savedAt !== null && typeof d.savedAt !== 'number')) return { ok: false, reason: 'wrong_type' };
   if (d.version > SAVE_VERSION || d.version < 1 || !Number.isInteger(d.version)) return { ok: false, reason: 'version' };
   if (d.state === undefined || d.state === null) return { ok: false, reason: 'missing_state' };
   if (typeof d.state !== 'object' || Array.isArray(d.state)) return { ok: false, reason: 'wrong_type' };
@@ -102,8 +111,9 @@ export function validate(raw: string, b: Balance): { ok: true; file: SaveFile } 
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
   if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };
   if (!Array.isArray(s.customers) || !s.workers || typeof s.workers !== 'object') return { ok: false, reason: 'invalid_state' };
-  // BUG-6: a missing or non-finite savedAt is NaN (was 0 = the full 2 h offline grant on every load). Game grants 0 and re-stamps.
-  if (typeof f.savedAt !== 'number' || !Number.isFinite(f.savedAt)) f.savedAt = NaN;
+  // BUG-6 / QA BUG-1+5: a missing, null, non-finite, <= 0 or pre-2020 savedAt is NaN. Game grants 0 offline and re-stamps now.
+  // (A string savedAt stays on the corrupt path above: wrong_type.)
+  if (!validSavedAt(f.savedAt, 0)) f.savedAt = NaN;
   return { ok: true, file: f };
 }
 export interface Recovery {
@@ -125,16 +135,30 @@ export function preserveCorrupt(kv: KV, raw: string, ts: number): boolean {
 }
 /**
  * rc0 hardened load (engineering/m3-rc0-save-hardening.md). Never touches eggfarm.install_id.
- * - no main save: new game, no recovery.
+ * - no main save: restore a valid .bak (case R, reason 'missing'), else new game.
  * - main valid: load it.
  * - main bad: preserve it; restore from a valid .bak (case R), else start fresh (F; Q when the copy failed).
  *   A bad .bak is preserved as well (QA case 1).
  */
-export function loadSafe(kv: KV, b: Balance, now = Date.now(), idbRaw: string | null = null): { file: SaveFile | null; recovery: Recovery | null; newer?: number } {
+/** Product 15:15: the single recovery outcome the AC14b dialog (art-ux/save-recovery-dialog.md v2.1) attaches to. */
+export type RecoveryOutcome = 'restored' | 'fresh' | 'storage' | null;
+export const recoveryOutcome = (r: Recovery | null): RecoveryOutcome => !r ? null : r.restored_from_backup ? 'restored' : r.case === 'Q' ? 'storage' : 'fresh';
+export function loadSafe(kv: KV, b: Balance, now = Date.now(), idbRaw: string | null = null): { file: SaveFile | null; recovery: Recovery | null; outcome: RecoveryOutcome; newer?: number } {
+  const r = loadSafeInner(kv, b, now, idbRaw); return { ...r, outcome: recoveryOutcome(r.recovery) };
+}
+function loadSafeInner(kv: KV, b: Balance, now: number, idbRaw: string | null): { file: SaveFile | null; recovery: Recovery | null; newer?: number } {
   // B1/m2: any newer copy (main, .bak or IndexedDB) refuses the load before any write, including corrupt-copy preservation.
   const newer = newerStoredVersion(kv, idbRaw); if (newer !== null) return { file: null, recovery: null, newer };
   const raw = kv.getItem(SAVE_KEY);
-  if (raw === null) return { file: null, recovery: null };
+  if (raw === null) {
+    // QA BUG-3: main missing (localStorage and IndexedDB; reconcile ran first) but .bak exists: restore it like case R,
+    // never start fresh over a valid .bak. A bad .bak is preserved, then a fresh start (it never rotates over the copy).
+    const bakRaw = kv.getItem(BAK_KEY); if (bakRaw === null) return { file: null, recovery: null };
+    const bv = validate(bakRaw, b);
+    if (bv.ok) return { file: bv.file, recovery: { case: 'R', reason: 'missing', had_backup: true, restored_from_backup: true, copy_failed: false, raw: '' } };
+    preserveCorrupt(kv, bakRaw, now + 1);
+    return { file: null, recovery: null };
+  }
   const v = validate(raw, b);
   if (v.ok) return { file: v.file, recovery: null };
   const copied = preserveCorrupt(kv, raw, now);
