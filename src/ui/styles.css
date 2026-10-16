@@ -418,3 +418,4 @@ html,body{overflow-x:hidden;max-width:100%}
 .tab-guard .rc-primary:disabled{opacity:1;cursor:progress}
 @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
 .reduced-motion .tab-guard .recovery-card{animation:none}
+.tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
