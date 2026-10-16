@@ -26,3 +26,11 @@ it('S2-REL-1: window.eggfarm assignment also fails', () => {
   expect(bad.status).toBe(1);
   expect(bad.stderr + bad.stdout).toMatch(/eggfarm/);
 });
+it('QA B-4: aliased eggfarmPerf write (const w = window) fails; any non-allowlisted eggfarm* identifier fails', () => {
+  const base = 'const B="m3-rc1-pre+abc1234"; window.eggfarmExportTelemetry=()=>{}; history.pushState({eggfarmRecovery:1},""); history.pushState({eggfarmTabGuard:1},"");';
+  expect(run(base).status).toBe(0);
+  const perf = run(base + ' const w=window; w.eggfarmPerf={done:false};');
+  expect(perf.status).toBe(1); expect(perf.stderr + perf.stdout).toMatch(/eggfarmPerf/);
+  const other = run(base + ' const x=self; x["eggfarmSecret"]=1;');
+  expect(other.status).toBe(1); expect(other.stderr + other.stdout).toMatch(/eggfarmSecret/);
+});

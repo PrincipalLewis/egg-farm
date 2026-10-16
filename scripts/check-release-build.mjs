@@ -28,3 +28,10 @@ const assigned = [...new Set([...js.matchAll(/\b(?:window|globalThis|self)\.([A-
 const extra = assigned.filter(k => !ALLOWED_GLOBALS.includes(k));
 if (extra.length) { console.error(`check-release-build: window globals not on the allowlist: ${extra.join(', ')} (allowed: ${ALLOWED_GLOBALS.join(', ')})`); process.exit(1); }
 console.log(`check-release-build: window globals ${assigned.join(', ') || '(none)'} ok`);
+// QA B-4: aliased writes (const w = window; w.eggfarmPerf = ...) slip past the assignment regex above. Any eggfarm*
+// identifier in the release bundle must be on this list. eggfarmRecovery/eggfarmTabGuard are history.state keys only.
+const ALLOWED_IDENTS = [...ALLOWED_GLOBALS, 'eggfarmRecovery', 'eggfarmTabGuard'];
+const idents = [...new Set(js.match(/\beggfarm[A-Za-z_$][\w$]*/g) ?? [])];
+const badIdents = idents.filter(k => !ALLOWED_IDENTS.includes(k));
+if (badIdents.length) { console.error(`check-release-build: non-allowlisted eggfarm* identifiers in release bundle: ${badIdents.join(', ')} (allowed: ${ALLOWED_IDENTS.join(', ')})`); process.exit(1); }
+console.log(`check-release-build: eggfarm* identifiers ${idents.join(', ') || '(none)'} ok`);

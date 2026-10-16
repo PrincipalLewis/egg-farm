@@ -14,6 +14,10 @@ const p = await ctx.newPage(); await p.goto(srv.url + '?debug=1&perf=1&ios=1'); 
 for (let i = 0; i < 10; i++) { await p.locator('#collect').click({ force: true }).catch(() => {}); await p.waitForTimeout(100); }
 await p.locator('#settings').click({ force: true }).catch(() => {}); await p.waitForTimeout(2500);
 const extra = (await own(p)).filter(k => !base.has(k)).sort();
+// QA B-4: with ?perf=1 the only eggfarm* global (own props and 'in window') is eggfarmExportTelemetry.
+const eggG = await p.evaluate(() => { const ks = new Set(Object.getOwnPropertyNames(window)); for (const k in window) ks.add(k); return [...ks].filter(k => /^eggfarm/i.test(k)).sort(); });
+const perfOk = JSON.stringify(eggG) === JSON.stringify(['eggfarmExportTelemetry']) && (await p.locator('.perf-ov').count()) === 0;
+console.log(`${perfOk ? 'PASS' : 'FAIL'} [${ENGINE}] B-4 release ?perf=1: eggfarm* globals ${JSON.stringify(eggG)}, no perf overlay`);
 const inWin = await p.evaluate(() => 'eggfarm' in window);
 const ids = await p.evaluate(() => [...document.querySelectorAll('[id],[name]')].map(e => e.id || e.getAttribute('name')).filter(n => /egg/i.test(n)));
 // Review 8669522 m4: also gate the refused (newer-save) boot path on real window keys, not just the bundle regex.
@@ -23,4 +27,4 @@ const extraR = (await own(r)).filter(k => !base.has(k)).sort(); const badR = ext
 console.log(`${badR.length ? 'FAIL' : 'PASS'} [${ENGINE}] refused newer-save boot window globals vs blank page: ${JSON.stringify(extraR)}`);
 const bad = [...extra.filter(k => !ALLOWED.includes(k)), ...badR];
 console.log(`${bad.length ? 'FAIL' : 'PASS'} [${ENGINE}] release window globals vs blank page: ${JSON.stringify(extra)}; allowed ${JSON.stringify(ALLOWED)}; not allowed ${JSON.stringify(bad)}; 'eggfarm' in window=${inWin}; egg ids/names ${JSON.stringify(ids)}`);
-await br.close(); srv.stop(); process.exit(bad.length ? 1 : 0);
+await br.close(); srv.stop(); process.exit(bad.length || !perfOk ? 1 : 0);
