@@ -154,7 +154,7 @@ sections.s289 = async () => {
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
     await page.waitForTimeout(1300);
     const r = await page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, shook: e.classList.contains('rshake') }; });
-    ok('S2-8 negative net rate: "▼−$x.xx/s" (U+2212, no hyphen, 2 decimals), 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$\d+\.\d\d\/s$/.test(r.text) && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus [\d.]+ (cents?|dollars) per second$/.test(r.aria) && r.shook, JSON.stringify(r));
+    ok('S2-8 negative net rate: "▼−$x.xx/s" (U+2212, no hyphen, 2 decimals), 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$\d+\.\d\d\/s$/.test(r.text) && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus \$[\d.,]+[KMB]? per second$/.test(r.aria) && r.shook, JSON.stringify(r));
     if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-rate-negative-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
     await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
     const wl = await page.evaluate(() => [...document.querySelectorAll('#uRow .wk .wage')].map(e => e.textContent));
@@ -433,8 +433,9 @@ sections.p1eta = async () => {
   const { ctx, page } = await open({ w: 360, h: 800, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
   await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click(); await page.waitForSelector('#uRow .hint.eta', { timeout: 5000 });
   const muted = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--c-muted').trim());
-  for (const [name, text] of [['noincome', null], ['1h05', 'Affordable in ~1:05:00'], ['moment', 'Affordable in a moment']]) {
-    if (text) await page.evaluate(t => { window.__etaStub = t; }, text);
+  // noincome: layout stub — steady-state incomePerSec is >0 at F0/C0 (UC13); '—' only when income ≤ 0 (unit-tested).
+  for (const [name, text] of [['noincome', 'Affordable in —'], ['1h05', 'Affordable in ~1:05:00'], ['moment', 'Affordable in a moment']]) {
+    await page.evaluate(t => { window.__etaStub = t; }, text);
     await page.waitForTimeout(150);
     const r = await page.evaluate(() => { const h = document.querySelector('#uRow .hint.eta'); if (window.__etaStub) { h.lastChild.textContent = window.__etaStub; }
       const img = h.querySelector('img'); const cs = getComputedStyle(h); const range = document.createRange(); range.selectNodeContents(h.lastChild); const lines = range.getClientRects().length;
