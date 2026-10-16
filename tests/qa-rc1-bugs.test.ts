@@ -117,17 +117,33 @@ describe('BUG-4/5: FX lifetimes', () => {
   });
 });
 
-describe('MK-24-1: Sell button CSS never ellipsises the amount', () => {
+describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates', () => {
   const css = readFileSync('src/ui/styles.css', 'utf8');
-  it('Art & UX sizing: auto width, min 88, max 45%, pad 12, nowrap, no ellipsis on amounts', () => {
-    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*width:max-content/);
+  const listSrc = readFileSync('src/ui/order-list.ts', 'utf8');
+  it('1: always two-line (column, 14px/12px); no one-line mode or sell-stack', () => {
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*flex-direction:column/);
+    expect(css).toMatch(/\.order \.btn\.sell \.sk\{[^}]*font:800 14px/);
+    expect(css).toMatch(/\.order \.btn\.sell \.sy\{[^}]*font:800 12px/);
+    expect(css).not.toMatch(/\.order \.btn\.sell\.sell-stack/);
+    expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell/);
+    expect(listSrc).not.toMatch(/sell-stack/);
+    expect(listSrc).toMatch(/syncSellWidth/);
+  });
+  it('2: shared --sell-w, min 88, max 45cqw, pad 12, no ellipsis on button', () => {
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*width:var\(--sell-w,88px\)/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-width:88px/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*max-width:45cqw/);
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-height:44px/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*padding-inline:12px/);
-    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*white-space:nowrap/);
     expect(css).toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*flex-shrink:0/);
     expect(css).not.toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*text-overflow:ellipsis/);
-    expect(css).toMatch(/\.order \.btn\.sell\.sell-stack/);
+    expect(listSrc).toMatch(/--sell-w/);
+  });
+  it('3: row $ amount never truncates; only .e (eggs) may ellipsize', () => {
+    expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
+    expect(css).toMatch(/\.order \.l1 \.v\{[^}]*overflow:visible/);
+    expect(css).not.toMatch(/\.order \.l1 \.v\{[^}]*text-overflow:ellipsis/);
+    expect(css).toMatch(/\.order \.l1 \.e\{[^}]*text-overflow:ellipsis/);
   });
   it('≤375 does not cap the Sell button at 96px', () => {
     expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell[^}]*max-width:96px/);

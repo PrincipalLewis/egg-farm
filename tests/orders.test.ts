@@ -17,6 +17,16 @@ describe('order card (P2)', () => {
     expect(ready).toMatchObject({ state: 'ready', sell: 5, sellCents: 500, valueCents: 500 });
     expect(ready.button).toBe('Sell 5\u00a0· +$5.00');
   });
+  it('row 2 fixture: 17/17 line with Sell 13 when order partly filled (Art & UX MK-24-1)', () => {
+    // demand 17, filled 4, basket 58 -> rem 13, sell min(58,13)=13, have=17
+    const v = orderView(c(17, 4), 58, 552); // ~$5.52/egg so full ~$93.84
+    expect(v).toMatchObject({ have: 17, want: 17, sell: 13, state: 'ready' });
+    expect(v.line).toMatch(/^17\/17 eggs · \$/);
+    expect(v.button).toMatch(/^Sell 13\u00a0· \+/);
+    expect(v.sellCents).toBe(13 * 552);
+    expect(v.valueCents).toBe(17 * 552);
+    expect(v.valueCents).toBeGreaterThan(v.sellCents); // card = full order; button = this Sell (customer rem)
+  });
   it('earlier partial sales count toward have (MK-8/MK-10 partial selling)', () => {
     const v = orderView(c(10, 4), 2, 100);
     expect(v).toMatchObject({ have: 6, want: 10, state: 'partial', sell: 2, sellCents: 200, valueCents: 1000 });
