@@ -632,8 +632,8 @@ sections.p1build = async () => {
 sections.goalLabel161 = async () => {
   const { ctx, page } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
   await page.waitForSelector('.goal-label'); await page.waitForTimeout(300);
-  for (const [name, full, short, fs, want] of [['one-line', 'Farm L30', 'Farm L30', 0, { lines: 1, track: 'Farm L30' }], ['two-line', 'Collection L30', 'Coll. L30', 0, { lines: 2, track: 'Collection L30' }], ['short-name', 'Grader tier 3', 'Grader T3', 21, { lines: 2, track: 'Grader T3' }]]) {
-    const r = await page.evaluate(async ([full, short, fs]) => { const el = document.querySelector('.goal-label'); el.style.fontSize = fs ? fs + 'px' : ''; el.style.lineHeight = fs ? Math.round(fs * 17 / 14) + 'px' : '';
+  for (const [name, full, short, fs, want] of [['one-line', 'Farm L30', 'Farm L30', 0, { lines: 1, track: 'Farm L30' }], ['two-line', 'Collection L30', 'Coll. L30', 0, { lines: 2, track: 'Collection L30' }], ['short-name', 'Collection L30', 'Coll. L30', 25, { lines: 2, track: 'Coll. L30' }]]) {
+    const r = await page.evaluate(async ([full, short, fs]) => { const el = document.querySelector('.goal-label'); el.style.width = el.style.maxWidth = '188px'; /* live 360 label box with a status chip = 188px (v1.6.1) */ el.style.fontSize = fs ? fs + 'px' : ''; el.style.lineHeight = fs ? Math.round(fs * 17 / 14) + 'px' : '';
       el.innerHTML = `<span class="g-head"><span class="g-star">★ </span><span class="g-track" data-full="${full}" data-short="${short}">${full}</span></span><span class="g-gain" data-full=" · +999% income"> · +999% income</span>`;
       window.eggfarmQaFitGoal(); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       const cs = getComputedStyle(el), lh = parseFloat(cs.lineHeight), t = el.querySelector('.g-track'), gn = el.querySelector('.g-gain'), pill = el.closest('.goal-pill') ?? el.closest('.goal');
@@ -649,13 +649,13 @@ sections.orderFit = async () => {
   const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 30, customers: [{ id: 1, demand: 1.8e6, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }],
     nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2, workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
   const { ctx, page } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
-  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 1, demand: 1.8e6, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9 }; });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 1, demand: 1.8e6, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }, { id: 3, demand: 9.99e6, filled: 1234567, waitedS: 0 }], nextCustomerInS: 1e9 }; });
   await page.locator('#queue .chip:not(.empty)').first().click({ force: true }).catch(() => {}); await page.waitForTimeout(400);
   if (!(await page.locator('.order .l1').count())) await page.locator('[data-nav=market]').click().catch(() => {});
   await page.waitForSelector('.order .l1', { timeout: 5000 }); await page.waitForTimeout(300);
   const r = await page.$$eval('.order .l1', ls => ls.map(l => { const e = l.querySelector('.e'), v = l.querySelector('.v'); return { e: e.textContent, v: v.textContent, eOver: e.scrollWidth > e.clientWidth + 0.5, vOver: v.scrollWidth > v.clientWidth + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5 }; }));
-  const big = r.find(x => /1\.8M/.test(x.e)), small = r.find(x => /^0\/5/.test(x.e));
-  ok('Order line at 360: 1.8M order reads "0/1.8M · $…" (drops " eggs", no mid-word cut), short order keeps " eggs"', big && big.e === '0/1.8M' && !big.eOver && !big.vOver && !big.lOver && !/…/.test(big.e + big.v) && small && small.e === '0/5 eggs', JSON.stringify(r));
+  const big = r.find(x => /^1\.23M\/9\.99M/.test(x.e)), mid = r.find(x => /^0\/1\.8M/.test(x.e)), small = r.find(x => /^0\/5/.test(x.e));
+  ok('Order line at 360: overflowing order drops " eggs" ("1.23M/9.99M · $…"), never mid-word; orders that fit keep " eggs"', big && big.e === '1.23M/9.99M' && mid && (mid.e === '0/1.8M eggs' || mid.e === '0/1.8M') && !mid.lOver && !mid.vOver && !big.eOver && !big.vOver && !big.lOver && !/…/.test(big.e + big.v) && small && small.e === '0/5 eggs', JSON.stringify(r));
   const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); await page.screenshot({ path: `${FCS}/cuta3-order-line-360-${ENGINE}.png` }); }
   await ctx.close();
 };
