@@ -82,16 +82,33 @@ describe('Product ruling: strip full of waiting customers', () => {
   it('a served customer with no free slot leaves at once as a "+$X" pop: never drawn, never shown later', () => {
     const d = new ServedDwell(b.feel.served_dwell_ms); d.sold(1, 900); d.served(1, 0);
     const r = d.layout(0, 0); expect(r.shown).toEqual([]); expect(r.popped.map(x => [x.id, x.cents])).toEqual([[1, 900]]);
-    expect(d.layout(100, 5)).toEqual({ shown: [], popped: [] }); // a slot frees up 100 ms later: still no card
+    expect(d.layout(100, 5)).toEqual({ shown: [], popped: [], squeezed: [] }); // a slot frees up 100 ms later: still no card
   });
   it('with room the card is drawn; extra served customers beyond the free slots pop; a drawn card keeps its slot', () => {
     const d = new ServedDwell(1500); d.served(1, 0); d.served(2, 0); d.served(3, 0);
     const r = d.layout(0, 1); expect(r.shown.map(x => x.id)).toEqual([1]); expect(r.popped.map(x => x.id)).toEqual([2, 3]);
     expect(d.layout(500, 1).shown.map(x => x.id)).toEqual([1]); expect(d.layout(1500, 1).shown).toEqual([]);
   });
-  it('a drawn card squeezed out by new waiting customers ends early without a second pop', () => {
-    const d = new ServedDwell(1500); d.served(7, 0); d.layout(0, 1);
-    expect(d.layout(200, 0)).toEqual({ shown: [], popped: [] }); expect(d.layout(300, 5).shown).toEqual([]);
+  it('S2-3a-1: a drawn card that loses its slot to a live customer is squeezed (fade + pop) once, then gone', () => {
+    const d = new ServedDwell(1500); d.sold(7, 4200); d.served(7, 0); d.layout(0, 1);
+    const r = d.layout(200, 0); expect(r.shown).toEqual([]); expect(r.popped).toEqual([]); expect(r.squeezed.map(x => [x.id, x.cents])).toEqual([[7, 4200]]);
+    expect(d.layout(300, 5)).toEqual({ shown: [], popped: [], squeezed: [] });
+  });
+  it('invariant: every served customer gets the full 1.5 s card or a pop - never nothing (random strip pressure)', () => {
+    let seed = 12345; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+    const d = new ServedDwell(1500), served = new Set<number>(), out = new Map<number, string>(), shownFrom = new Map<number, number>();
+    let id = 0, free = 3;
+    for (let t = 0; t < 300_000; t += 16) {
+      if (rnd() < 0.05) { d.served(++id, t); served.add(id); }
+      if (rnd() < 0.004) free = Math.floor(rnd() * 6); // strip pressure changes every few seconds
+      const r = d.layout(t, free, x => { out.set(x.id, 'full'); expect(t - (shownFrom.get(x.id) ?? 0)).toBeGreaterThanOrEqual(1500 - 16); });
+      for (const x of r.shown) if (!shownFrom.has(x.id)) shownFrom.set(x.id, x.until - 1500);
+      for (const x of r.popped) { expect(out.has(x.id)).toBe(false); out.set(x.id, 'pop'); }
+      for (const x of r.squeezed) { expect(out.has(x.id)).toBe(false); out.set(x.id, 'squeezed+pop'); }
+    }
+    d.layout(1e9, 6, x => out.set(x.id, 'full'));
+    for (const x of served) expect(out.get(x), `customer ${x}`).toBeDefined();
+    expect(new Set(out.values())).toEqual(new Set(['full', 'pop', 'squeezed+pop']));
   });
 });
 

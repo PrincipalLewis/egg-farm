@@ -17,17 +17,18 @@ export class ServedDwell {
    * Product ruling (Oct 16): place dwelling cards into `free` strip slots (after the waiting customers).
    * A card that has never been drawn and finds no free slot leaves right away: it is returned in `popped`
    * (UI shows only a "+$X" number pop) and never appears later. Drawn cards keep showing while room remains;
-   * if waiting customers take the room back, the card ends early (no second pop).
+   * if a live customer takes the room back, the card is `squeezed`: it fades out (120 ms) and the "+$X" pop fires from its slot.
+   * Invariant: every served customer ends as exactly one of { full dwell (expired), popped, squeezed } - never nothing.
    */
-  layout(now: number, free: number, expired?: (d: Dwell) => void): { shown: Dwell[]; popped: Dwell[] } {
-    const shown: Dwell[] = [], popped: Dwell[] = [];
+  layout(now: number, free: number, expired?: (d: Dwell) => void): { shown: Dwell[]; popped: Dwell[]; squeezed: Dwell[] } {
+    const shown: Dwell[] = [], popped: Dwell[] = [], squeezed: Dwell[] = [];
     for (const d of this.active(now, expired)) {
       if (shown.length < free) { d.drawn = true; shown.push(d); }
-      else if (!d.drawn) popped.push(d);
+      else (d.drawn ? squeezed : popped).push(d); // S2-3a-1: a drawn card that loses its slot to a live customer -> squeezed (fade + pop)
     }
-    const drop = new Set([...popped, ...this.list.filter(d => d.drawn && !shown.includes(d))]);
+    const drop = new Set([...popped, ...squeezed]);
     this.list = this.list.filter(d => !drop.has(d));
-    return { shown, popped };
+    return { shown, popped, squeezed };
   }
   /** Cards still dwelling at `now` (oldest first); expired ones are dropped and returned via `expired`. */
   active(now: number, expired?: (d: Dwell) => void): Dwell[] {

@@ -52,6 +52,7 @@ async function boot() {
   if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
+  (window as any).eggfarmUi = ui; // S2-8/S2-9: ui.rates() for the m3/rc1-ui visuals and QA
   if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
   { const q = new URLSearchParams(location.search); if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q)); }
   // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).

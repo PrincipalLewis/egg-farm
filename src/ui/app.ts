@@ -23,6 +23,7 @@ import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
+import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -163,12 +164,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
   let farmMAShown = false;
-  for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!tryDispatch(g, { type: 'manageAll' }, b)) return cantAfford(fb); sfx('upgrade'); dirty = true; });
+  for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
   $('.tabs').addEventListener('click', e => { const t = (e.target as HTMLElement).closest('button')?.dataset.tab; if (t) { tab = t as any; dirty = true; } });
 
   // ---------- Actions ----------
+  /** S2-10: every player action redraws synchronously, so the screen never waits for the next frame/timer to show it. */
+  const act = (a: Parameters<typeof g.dispatch>[0]): boolean => { const ok: boolean = tryDispatch(g, a, b); if (ok) { dirty = true; render(); } return ok; };
   const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
   const collect = () => {
     const before = g.state.coop; g.dispatch({ type: 'collect' });
@@ -181,29 +184,34 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (!rm()) { let first = true; for (let i = 0; i < d.flyers; i++) fly(A('icon-egg.svg'), $('.nest'), basketEl.parentElement!, i, 24, () => { if (first) { first = false; pulse(basketEl.parentElement!); } }); }
     else pulse(basketEl.parentElement!);
     floatText(`+${fmtCount(d.floaterTotal)}`, collectBtn, '', d.combine);
+    dirty = true; render(); // S2-10
   };
   collectBtn.addEventListener('click', collect);
   scene.addEventListener('click', collect);
-  queueEl.addEventListener('click', e => { if ((e.target as HTMLElement).closest('.chip:not(.empty):not(.served)')) openPanel('market'); }); // incl. the "+N" chip
+  // S2-9: the Market sheet opens only from a deliberate tap on a customer chip (or "+N") that was under the finger at
+  // pointerdown and already on screen >= 250 ms; nothing else opens it (no auto-open when the queue fills).
+  const chipBorn = new WeakMap<Element, number>(); let downChip: Element | null = null;
+  const custChip = (t: EventTarget | null) => (t as HTMLElement | null)?.closest?.('.chip:not(.empty):not(.served)') ?? null;
+  queueEl.addEventListener('pointerdown', e => { downChip = custChip(e.target); });
+  queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (ok) openPanel('market'); });
   let lastSellSource: Element | null = null;
   mRows.addEventListener('click', e => {
     if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
     const bt = (e.target as HTMLElement).closest('button[data-id]') as HTMLElement | null; if (!bt) return;
-    lastSellSource = bt; if (!tryDispatch(g, { type: 'sell', customerId: +bt.dataset.id! }, b)) return cantAfford(bt);
+    lastSellSource = bt; if (!act({ type: 'sell', customerId: +bt.dataset.id! })) return cantAfford(bt);
   });
-  sellAllBtn.addEventListener('click', () => { lastSellSource = sellAllBtn; if (!tryDispatch(g, { type: 'sellAll' }, b)) cantAfford(sellAllBtn); });
+  sellAllBtn.addEventListener('click', () => { lastSellSource = sellAllBtn; if (!act({ type: 'sellAll' })) cantAfford(sellAllBtn); });
   uRow.addEventListener('click', e => {
     const t = e.target as HTMLElement;
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
-    const act = bt.dataset.act, wid = bt.dataset.w as any;
-    if (act) { if (!tryDispatch(g, act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : act === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' }, b)) return cantAfford(bt); dirty = true; return; }
-    if (buyLock) return; // F5: one buy per rendered frame (no double buy from one tap); cleared by the next render
-    lastBuyBtn = bt; if (!tryDispatch(g, { type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' }, b)) return cantAfford(bt);
-    buyLock = true; lastUp = ''; // force the sheet to re-render with the new level/price (no sticky greyed button)
+    const kind = bt.dataset.act, wid = bt.dataset.w as any;
+    if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
+    lastBuyBtn = bt; if (!act({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
+    // F5: one tap = one dispatch; act() has already redrawn the sheet with the new level/price (S2-10).
   });
-  let lastBuyBtn: HTMLElement | null = null, buyLock = false;
+  let lastBuyBtn: HTMLElement | null = null;
 
   // ---------- Modals ----------
   const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null; };
@@ -222,7 +230,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const grantWelcome = (withFlyers: boolean) => {
     const eggs = g.state.pendingOfflineEggs; const btn = $('#wbCollect');
     if (withFlyers && btn && !rm()) for (let i = 0; i < Math.min(eggs, b.feel.max_flying_eggs); i++) fly(A('icon-egg.svg'), btn, basketEl.parentElement!, i, 24);
-    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); pulse(basketEl.parentElement!); sfx('collect');
+    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); dirty = true; render(); /* S2-10 */ pulse(basketEl.parentElement!); sfx('collect');
   };
   const settingsIosLine = () => iosKind === 'standalone' ? `<div class="settings-ios ok">Installed on Home Screen ✔</div>`
     : iosKind ? `<div class="settings-ios">${SHARE_SVG} ${TIP_TITLE} ${howTo(iosKind, '')}</div>`.replace(' ,', ',').replace('  ', ' ') : '';
@@ -285,6 +293,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const lay = dwell.layout(now(), split.more ? 0 : Math.max(0, stripSlots - kids.length), /* "+N waiting" shown = strip full */ d => {
       const el = dwellEls.get(d.id); dwellEls.delete(d.id); leaveCard(el); });
     for (const d of lay.popped) queuePop(d.cents);
+    // S2-3a-1 (final spec): a live customer needs the slot -> card opacity fades 120 ms (no slide) and the pop fires from its slot; reduced motion cuts it.
+    for (const d of lay.squeezed) { const el = dwellEls.get(d.id); dwellEls.delete(d.id); queuePop(d.cents, el); squeezeCard(el); }
     for (const [id, el] of [...dwellEls]) if (!lay.shown.some(d => d.id === id)) { dwellEls.delete(id); el.remove(); }
     for (const d of lay.shown) {
       let el = dwellEls.get(d.id);
@@ -298,6 +308,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     empties.length = needEmpty;
     const want = [...kids, ...empties];
     if (want.some((el, i) => queueEl.children[i] !== el) || queueEl.children.length !== want.length + (qTagShown ? 1 : 0)) {
+      for (const el of want) if (!chipBorn.has(el)) chipBorn.set(el, now());
       queueEl.replaceChildren(...want); qTagShown = false;
     }
     // Queue full cue (amber outline + tag), informational
@@ -321,8 +332,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     requestAnimationFrame(() => c.classList.add('leaving'));
   };
   /** Full-queue "+$X" pop (Art & UX): from the strip's last chip, coins fly to the money pill (same path as sales); clamped to the safe area. */
-  const queuePop = (cents: number) => {
-    const from = (queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
+  const squeezeCard = (el: HTMLElement | undefined) => {
+    if (!el?.isConnected) return; if (rm()) { el.remove(); return; }
+    const r = el.getBoundingClientRect(); const c = el.cloneNode(true) as HTMLElement; el.remove();
+    c.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;margin:0`; c.classList.add('squeeze'); spawn(c, 180);
+    requestAnimationFrame(() => c.classList.add('gone'));
+  };
+  const queuePop = (cents: number, at?: HTMLElement) => {
+    const from = (at?.isConnected ? at : queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
     const x = Math.min(Math.max(c.x, 48), innerWidth - 48), y = Math.max(c.y - 20, 40);
     spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyShort(cents)}</div>`), 650);
     if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
@@ -468,6 +485,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // nav badges
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
+    { const mk = nav.querySelector('[data-nav=market]') as HTMLElement, qf = queueFull(s, b) ? 'true' : 'false'; if (mk.dataset.queueFull !== qf) mk.dataset.queueFull = qf; } // S2-9 badge hook (Art & UX styles it)
     setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
@@ -494,7 +512,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
       if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
-    pendingLvPop = false; buyLock = false;
+    pendingLvPop = false;
     renderGoal();
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
     { const hide = goalHidden; if (goalBtn.hidden !== hide) goalBtn.hidden = hide; }
@@ -618,5 +636,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
-  return { render: renderAll, showWelcome, openPanel, get recoveryOpen() { return recoveryOpen; } };
+  /** S2-8/S2-9 values for the UI (Art & UX visuals on m3/rc1-ui): net rate, per-worker wage, queue-full flag. */
+  const rates = () => { const s = g.state, inc = income.centsPerSec(now());
+    return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
+      workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
+  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }
