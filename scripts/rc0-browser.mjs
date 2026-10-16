@@ -427,8 +427,8 @@ const getValidSave = async () => { if (validSave) return validSave;
   const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE } });
   validSave = await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 15, coop: 0 }; g.save(); return localStorage.getItem('eggfarm.save'); });
   await ctx.close(); return validSave; };
-async function recoveryCase(kind) {
-  const ls = kind === 'restored' ? { 'eggfarm.ui': DONE, 'eggfarm.save.bak': await getValidSave() } : { 'eggfarm.ui': DONE, 'eggfarm.save': fx('corrupt-truncated.json'), ...(kind === 'fresh' ? { 'eggfarm.save.bak': '{"version":5,"sav' } : {}) };
+async function recoveryCase(kind, lsOverride, label = kind) {
+  const ls = lsOverride ?? (kind === 'restored' ? { 'eggfarm.ui': DONE, 'eggfarm.save.bak': await getValidSave() } : { 'eggfarm.ui': DONE, 'eggfarm.save': fx('corrupt-truncated.json'), ...(kind === 'fresh' ? { 'eggfarm.save.bak': '{"version":5,"sav' } : {}) });
   const E = RC[kind];
   for (const [w, h] of [[360, 640], [1280, 800]]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, acceptDownloads: true }); const page = await ctx.newPage(); const errors = [];
@@ -443,7 +443,7 @@ async function recoveryCase(kind) {
         title: $('#rcT').textContent, body: $('#rcB').textContent, btn: $('#rcGo').textContent, badge: $('.rc-badge')?.textContent, iconHidden: $('.rc-icon')?.getAttribute('aria-hidden'), ctl, w: Math.round(r.width),
         bodyLines: Math.round($('#rcB').getBoundingClientRect().height / (parseFloat(getComputedStyle($('#rcB')).lineHeight) || 22.4)),
         clipped: r.left < 0 || r.right > innerWidth + 0.5 || c.scrollHeight > c.clientHeight + 1, focus: document.activeElement?.id, inert: document.getElementById('app')?.inert ?? null }; });
-    const tag = `AC14b ${kind} ${w}`;
+    const tag = `AC14b ${label} ${w}`;
     ok(`${tag}: outcome '${kind}', alertdialog modal labelled/described`, st.outcome === kind && st.gOutcome === kind && st.role === 'alertdialog' && st.modal === 'true' && st.lb === 'rcT' && st.db?.startsWith('rcB'), JSON.stringify({ o: st.outcome, g: st.gOutcome, db: st.db }));
     ok(`${tag}: exact v2.1 strings + badge, icon hidden`, st.title === E.title && st.body === E.body && st.btn === E.btn && st.badge === E.badge && st.iconHidden === 'true', JSON.stringify([st.title, st.body, st.btn, st.badge]));
     const exp = st.ctl.find(c => c.id === 'rcExport');
@@ -451,7 +451,7 @@ async function recoveryCase(kind) {
     ok(`${tag}: card width ${w === 360 ? 312 : 440}, body <=2 lines, nothing clipped`, st.w === (w === 360 ? 312 : 440) && st.bodyLines <= 2 && !st.clipped, JSON.stringify({ w: st.w, lines: st.bodyLines }));
     ok(`${tag}: every control >=44 tall (primary >=48, link >=120 wide)`, st.ctl.every(c => c.h >= 44) && st.ctl.find(c => c.id === 'rcGo').h >= 48 && (!exp || exp.cls !== 'rc-link' || exp.w >= 120), JSON.stringify(st.ctl.map(c => [c.id, Math.round(c.w), c.h])));
     ok(`${tag}: initial focus on primary`, st.focus === 'rcGo', st.focus);
-    if (shot) await page.screenshot({ path: `${SHOTS}/save-recovery-${kind}-${w}.png` });
+    if (shot && !lsOverride) await page.screenshot({ path: `${SHOTS}/save-recovery-${kind}-${w}.png` });
     if (w === 360) {
       const seq = []; for (const k of ['Tab', 'Tab', 'Shift+Tab']) { await page.keyboard.press(k); seq.push(await page.evaluate(() => document.activeElement?.id)); }
       ok(`${tag}: Tab/Shift+Tab wrap inside the dialog`, E.exp ? seq.join() === 'rcExport,rcGo,rcExport' : seq.every(x => x === 'rcGo'), seq.join());
@@ -476,6 +476,7 @@ async function recoveryCase(kind) {
 }
 sections.recoveryRestored = () => recoveryCase('restored');
 sections.recoveryFresh = () => recoveryCase('fresh');
+sections.recoveryBadBakOnly = () => recoveryCase('fresh', { 'eggfarm.ui': DONE, 'eggfarm.save.bak': '{"version":5,"sav' }, 'fresh (SD4-3 main missing + bad .bak)');
 sections.recoveryStorage = () => recoveryCase('storage');
 sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE, 'eggfarm.save': await getValidSave() } }); await page.waitForTimeout(300);
   ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };

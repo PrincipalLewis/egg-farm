@@ -26,6 +26,10 @@ describe('AC14b v2.1 outcome -> dialog', () => {
     expect(r.outcome).toBe('fresh'); const c = recoveryCopy(r.recovery!)!;
     expect([c.title, c.body, c.button, c.badge, c.badgeClass, c.icon, c.exportStyle]).toEqual(['A fresh start', "We couldn't open your farm. Your old save is kept safe.", 'Start farming', '\u2605', 'new', 'char-chicken.svg', 'link']);
   });
+  it('SD4-3 / N5: main missing + invalid .bak -> fresh (not silent), old bytes exportable', () => {
+    const k = kvm(); k.m.set(BAK_KEY, '{"v":'); const r = loadSafe(k, b, 2000);
+    expect(r.outcome).toBe('fresh'); expect(r.recovery!.raw).toBe('{"v":'); expect(recoveryCopy(r.recovery!)!.body).toBe("We couldn't open your farm. Your old save is kept safe.");
+  });
   it('storage: corrupt main, preserving the copy hits the quota once', () => {
     const k = kvm(true); k.m.set(SAVE_KEY, '{'); const r = loadSafe(k, b, 2000);
     expect(r.outcome).toBe('storage'); const c = recoveryCopy(r.recovery!)!;
