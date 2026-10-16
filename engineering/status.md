@@ -7,3 +7,4 @@
 - 2026-10-16 20:50 Senior Software Architect — **done:** m4-design v0.2.3 per HoE review (3351d6c sentence, ADR M4-10 interim backup, F-0 marked-save flag-off test, §9 order). **next:** X-1 review fixes. **blocked:** none.
 - 2026-10-16 21:05 Senior Software Architect — **done:** m4-design v0.2.4 §3a answers for Saves QA (dialog selectors/copy, raw-bytes export, tracksV7 shape, backup naming; ADR M4-11). **next:** X-1 gate run. **blocked:** none.
 - 2026-10-16 21:20 Senior Software Architect — **done:** §6 documents the CEO box-load rule (flock browser lock, vitest maxWorkers=2) and the gate-all review fixes. **next:** full gate-all run on X-1. **blocked:** none.
+- 2026-10-16 21:30 Senior Software Architect — **done:** ADR M4-12 (backup failure aborts to v6; supersedes M4-5/10/11 failure handling), §3/§3a.5/§7/§8 updated; ZW-2 export PR before S-2; S-2 ETA Sat 22:00. **next:** X-1 gate result. **blocked:** none.

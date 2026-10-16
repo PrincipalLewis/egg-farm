@@ -21,10 +21,17 @@
 - A flag-off build treats a v7 save exactly like a newer save: the existing newer-save dialog and S-2 zero-writes rules. It never writes v6 over a v7 save and never silently drops M4 progress. The v6 .bak stays as the escape hatch; export stays available. Refines M4-4 (flag-off reads v6 only).
 - Test: "flag-off refuses v7: zero writes, .bak intact, export works" (S-2/S-4). Also 9.5: QA Saves 33ec1b55 owns qa/m3-scripts/rc1-guard-save-qa-m4.mjs.
 
-## 2026-10-16 20:31 ADR M4-10 Interim path writes a v6 backup first (HoE review m4-design-v0.2-ad10a08 #3; recorded by Senior Software Architect)
+## 2026-10-16 20:31 ADR M4-10 (failure handling SUPERSEDED by M4-12) Interim path writes a v6 backup first (HoE review m4-design-v0.2-ad10a08 #3; recorded by Senior Software Architect)
 - On m4/m4a-tracks-v2 (interim tracksV7 marker, ADR M4-8), the caller of migrateTracksV7 writes the raw v6 save to `v6_backup` once (write-once, LS + IDB keys as in S-3), before the in-place price-match. Owner: Features 95daf662 (F-0).
 - F-0 also adds the missing test: a flag-off build saves a marked save without stripping tracksV7/hensLevel/eggValueLevel (review #1).
 
-## 2026-10-16 21:05 ADR M4-11 Backup naming and newer-save export (Saves QA guard-prep; Senior Software Architect)
+## 2026-10-16 21:05 ADR M4-11 (write timing/failure SUPERSEDED by M4-12; naming + export still valid) Backup naming and newer-save export (Saves QA guard-prep; Senior Software Architect)
 - One backup name: localStorage `eggfarm.save.v6_backup` + IndexedDB `eggfarm`/`save`/`v6_backup`. Holds the raw v6 bytes, write-once, kept until M4 reaches Latest (not in RESET_KEYS). Written once before the interim tracksV7 change (F-0) and before the first v7 write (S-4; v7 commit waits for the LS write). `eggfarm.save.bak` stays the rotation copy.
 - (HoE 21:18) The `.newer-save` dialog gets an `Export save` button `[data-testid=newer-save-export]`. It exports the raw stored save string exactly as stored: no wrapper, no migration, zero storage writes. `Try again` stays. Owner: S-2 (Saves 3ba38cf3). Facts in m4-design §3a.
+
+## 2026-10-16 21:24 ADR M4-12 Backup-write failure aborts the migration (HoE; spec M4A-31(a)/(f)1; review m4-m4a-tracks-v3-677317d M1). Supersedes the failure handling in M4-5 (9.1), M4-10 and M4-11
+- If the v6 backup write fails in localStorage or IndexedDB: discard the migrated state, keep the original v6 in memory, save v6 normally with no tracksV7 marker, and retry the migration on the next load.
+- Show the "Can't save" notice (once per session) only if that normal v6 save also fails.
+- Applies to the interim marker path (F-0) and the S-4 v7 path: the backup must succeed in both stores before the migration commits.
+- Tests: an injected quota failure in each store → the save stays v6 and nothing is lost across a page close.
+- Plan: the Export button is ZW-2, a separate Saves PR before S-2; S-2 ETA Sat 22:00.
