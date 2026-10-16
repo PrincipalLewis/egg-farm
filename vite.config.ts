@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import { gitBuildId } from './scripts/build-id';
 
-/** Injected into session_start.build as m3-rc0+<short>[+dirty] (QA PT1-1, rc0 item 6). */
+/** Injected into session_start.build as m3-rc1-pre+<short>[+dirty] (QA PT1-1, rc0 item 6). */
 const BUILD = gitBuildId();
 
 /** Debug URL flags (?ios=) exist only outside release builds: `vite build` (mode production) compiles them out;
