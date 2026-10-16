@@ -11,3 +11,8 @@
 - **M4-6 TR-5 is report-only.** It becomes blocking after 5 consecutive green runs with no flake; HoE flips it.
 - **M4-7 CI runs locally** via scripts/gate-all.sh. No hosted Actions minutes without CEO approval.
 - Also: the A-0 rebase onto origin/main a01faea is owned by HoE (tonight). Features branches from the v2 SHA.
+
+## 2026-10-16 20:28 ADR M4-8 Interim `tracksV7` marker in v6 (HoE decision; recorded by Senior Software Architect)
+- m4/m4a-tracks-v2 @ 3351d6c price-matches pre-M4 saves inside the v6 format and marks them `tracksV7: 1` (SAVE_VERSION stays 6). **Kept as an interim step for playtest and M4-flagged builds only, never in a release default.**
+- S-4 does the real v6→v7 bump and must accept unmarked v6 (migrate), marked v6 (idempotent: no re-migrate, no re-refund) and v7. S-6 adds marked-v6 fixtures. F-9 removes the marker path.
+- Flag-off builds ignore or keep the marker fields on load and never strip them on write. S-2 (zero-writes refusal) is unaffected, because a marked save is still v6.

@@ -1,4 +1,4 @@
-# M4 design and task split — Senior Software Architect · v0.2 (HoE-approved decisions 9.1–9.6) · 2026-10-16
+# M4 design and task split — Senior Software Architect · v0.2.1 (HoE-approved decisions 9.1–9.6, 9.8) · 2026-10-16
 
 Base: `origin/main` @ `a01faea` (save v4 `aaaa91a` + save-recovery dialog). M4-A baseline: `m4/m4a-tracks` @ `04e2709`
 (19 commits on merge-base `4aadcbf`; `m4/m4a-tracks-v2` not pushed yet). Inputs: engineering/stack-and-architecture.md,
@@ -42,13 +42,22 @@ best buy) used by UI and bots; it may import `config/` and `sim/` types but neve
 **Schema (v7 adds):** `hensLevel:int`, `eggValueLevel:int`, `celebratedMilestones:string[]`, `migrationRefundCents:int (default 0)`,
 `seenTracksExplainer:boolean`. Nothing else changes; `collectionLevel` keeps paid levels.
 
+**Interim (ADR M4-8, 9.8): `tracksV7` marker inside v6.** `m4/m4a-tracks-v2` @ `3351d6c` keeps `SAVE_VERSION = 6`. With M4 on, a save with no
+`tracksV7` marker (v1..v6) is price-matched once through `migrateTracksV7` and gets marked `tracksV7: 1`; new M4 farms are marked at creation.
+This is allowed **only in playtest and M4-flagged builds, never as a release default**. Flag-off builds must load a marked save normally
+(ignore or keep the marker and track fields) and must **never strip them on write**. S-2 is unaffected because a marked save is still v6.
+
 **Write version follows the flag (9.2):**
 - `m4.enabled = 0` (all shipping builds until M4 reaches Latest): the build **reads v6 and v7**, but **writes v6 only**. A v7 save opened in a flag-off
   build is down-projected in memory (track fields dropped). It is written back as v6 only if the user keeps playing. The v7 bytes stay in `.bak`/`v6_backup`; open Q.
 - `m4.enabled = 1`: reads v6/v7, migrates v6 → v7 and **writes v7**. The v6 `.bak` / `eggfarm.save.v6_backup` is **kept, never rotated away, until M4 reaches Latest**.
 - So `SAVE_VERSION` splits into `READ_MAX = 7` and `writeVersion(b) = m4On(b) ? 7 : 6`. The newer-save check uses `READ_MAX`.
 
-**Migration function** `migrations[6] = (d, b) => v7`, run only when `writeVersion(b) = 7`, calling pure `migrateTracksV7(state, b, opts?)`:
+**Migration function** (S-4, the real bump) `migrations[6] = (d, b) => v7`, run only when `writeVersion(b) = 7`. Three inputs:
+- **unmarked v6:** full migration (steps 1–5 below);
+- **marked v6** (`tracksV7: 1`, track fields present): just bump the version. Keep the levels, no new price-match, no second refund, no explainer or `save_migrated` replay. Idempotent;
+- **v7:** no-op.
+Steps for the unmarked path, calling pure `migrateTracksV7(state, b, opts?)`:
 1. `hensLevel = farmLevel`.
 2. `eggValueLevel` = lowest V in 0..30 (no F+3 cap, B1) with v7 price ≥ v6 price in integer cents (one half-up rounding, M4A-5).
 3. Clamp only above `maxLevel`; refund the removed levels at the CSV cost column into `coinsCents` + `migrationRefundCents` (0 with current data).
@@ -72,6 +81,7 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
 - **flag-off write test: load v6 → save → stored bytes are v6** (part of the flag-off golden).
 - **M4-on write test: load v6 → save → `main` is v7, and the `.bak`/`v6_backup` holds the original v6 bytes after N autosaves.**
 - v7 save in a flag-off build: v7 is read and v6 is written.
+- marked v6 (interim): M4 on → v7 with identical levels, refund 0 added, no events; flag off → loads, and the marker + track fields are preserved byte-for-byte on write.
 - backup failure: dialog once/session → toast; play continues; v7 not committed; succeeds on retry.
 - `m4-v7-*` fixtures + SHA256SUMS; 3-engine test: rc1 build × v7 fixtures → storage byte-identical.
 
@@ -127,13 +137,14 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 | ID | Task (PR) | Owner | Depends on | Size |
 |---|---|---|---|---|
 | A-0 | Rebase m4/m4a-tracks onto origin/main a01faea → `m4/m4a-tracks-v2` (tonight); resolve styles.css; regenerate the flag-off golden; all gates; send the v2 SHA | **HoE** | — | M |
+| U-0 | Turn /workspace/m4v2-tools/ (single.config.mjs, inline-public.mjs, smoke.mjs) into `npm run build:html` (single-file playtest HTML + smoke) | UI | A-0 | S |
 | X-1 | `scripts/gate-all.sh` + telemetry schema test skeleton | ARCH | — | S |
 | S-1 | Migration chain takes `balance`; move `migrate-v7.ts` → `save/migrations/v7.ts`; split `READ_MAX` / `writeVersion(b)` (still 6/6) | SAV | A-0 | S |
 | S-2 | Newer-save refusal = zero writes (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main** | SAV | — | M |
 | S-3 | `v6_backup` write-once (LS + IDB). On failure: "Can't save" dialog once per session → toast, keep playing, don't commit v7, retry at save points; unit tests | SAV | S-1 | M |
-| S-4 | Wire `migrations[6]`; READ_MAX 7; write v7 only when M4 is on; keep the v6 `.bak` until Latest; down-project v7 in flag-off builds; validator; flag-off v6-write + M4-on v7-write/.bak tests | SAV | S-1, S-3, S-2 | M |
+| S-4 | Real v6→v7 bump (replaces the interim marker). Handles unmarked v6, marked v6 (idempotent: no re-migrate, no re-refund) and v7. Wire `migrations[6]`; READ_MAX 7; write v7 only when M4 is on; keep the v6 `.bak` until Latest; down-project v7 in flag-off builds; validator; flag-off v6-write + M4-on v7-write/.bak tests | SAV | S-1, S-3, S-2 | M |
 | S-5 | Load order + first-offline-grant ×1.0 (M4A-30) tests | SAV | S-4 | S |
-| S-6 | `m4-v7-*` fixture files + SHA256SUMS; rc1-build × v7 rollback browser test (3 engines) | SAV | S-4 | M |
+| S-6 | `m4-v7-*` fixture files + **marked-v6 (`tracksV7: 1`) fixtures** + SHA256SUMS; rc1-build × v7 rollback browser test (3 engines) | SAV | S-4 | M |
 | F-1 | Merge O1/O3 CSV columns into economy.csv (with Economy); sync-economy --check | FE | A-0 | S |
 | F-2 | Telemetry: `upgrade.track`, new events, session/worker fields, pinned list | FE | A-0, X-1 | S |
 | F-3 | `save_migrated` emit | FE | S-4, F-2 | S |
@@ -145,7 +156,7 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 | U-4 | `tracks_explainer` telemetry + rc0 cases (3 engines) | UI | U-3, F-2 | S |
 | Q-1 | QA build flag-on + playtest; Code Reviewer pass; flip default only on PASS | FE (+QA) | all above | S |
 | F-6.. | M4-C Pause/Resume → M4-D market → M4-B golden egg → M4-E abilities/streak, each: sim PR (FE), UI PR (UI), save field PR if any (SAV, v7→v8 only if needed) | FE/UI/SAV | Q-1 | — |
-| F-9 | Remove M4-A flag-off path one release after default-on | FE | Q-1 + 1 release | S |
+| F-9 | Remove the M4-A flag-off path **and the `tracksV7` marker path** one release after default-on | FE | Q-1 + 1 release | S |
 
 **Ordering:** start now: A-0 (HoE, tonight), S-2 (Saves, ships on main first), X-1 (ARCH). Features (95daf662) branches from the v2 SHA once HoE sends it; every FE/UI M4-A task waits for it. Then S-1→S-3→S-4→S-5/S-6 (critical path, ~2–3 days);
 F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into main: S-2, X-1, A-0 (flag off), S-1, F-*, U-1/U-2, S-3, S-4+F-3 together, S-5, S-6, U-3/U-4, Q-1.
@@ -157,5 +168,6 @@ F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into
 4. **v2 base → decided:** origin/main `a01faea`. HoE owns the A-0 rebase tonight; Features branches from the v2 SHA.
 5. *(open)* Who bumps `rc1-guard-save-qa.mjs` (in qa/m3-scripts, outside the repo)? → QA.
 6. **CI → decided:** no hosted minutes (spend, needs CEO). Gates run locally via `gate-all.sh`. A hosted-CI proposal with costs is optional and comes later via HoE (ADR M4-7).
+8. **Interim marker → decided (HoE, 20:28):** v2 `3351d6c` migrates inside v6 via `tracksV7`. Kept for playtest and M4-flagged builds only, never in a release default. S-4 does the real bump; F-9 removes the marker (ADR M4-8).
 7. *(new, open)* In a flag-off build that opens a v7 save, should it write v6 (losing M4 progress) or refuse like a newer save? v0.2 assumes it writes v6, because the v7 reader accepts v6 and the .bak is kept. Needs HoE confirmation.
 
