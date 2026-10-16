@@ -294,11 +294,11 @@ sections.wage075 = async () => {
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 3, coinsCents: 1e5, workers: {}, customers: [], nextCustomerInS: 1e9 }; });
   await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
   const hire = await page.evaluate(() => document.querySelector('#uRow [data-w=market_hand] .wage')?.textContent);
-  if (shot) await page.locator('#uRow [data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-card-390.png` });
+  if (shot) await page.locator('#uRow div.wk[data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-card-390.png` });
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-sheet-390.png` });
   await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' })); await page.waitForTimeout(500);
   const panel = await page.evaluate(() => document.querySelector('#uRow [data-w=market_hand] .wage')?.textContent);
-  if (shot) await page.locator('#uRow [data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-worker-card-390.png` });
+  if (shot) await page.locator('#uRow div.wk[data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-worker-card-390.png` });
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-worker-panel-390.png` });
   ok('S2-8 Market Hand at L3: "Wage $0.75/min" on the hire card and the worker panel', hire === 'Wage $0.75/min' && panel === 'Wage $0.75/min', JSON.stringify({ hire, panel }));
   await ctx.close();
@@ -308,8 +308,8 @@ sections.wage075 = async () => {
     await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
     const r = await page.evaluate(() => { const e = document.querySelector('#uRow [data-w=market_hand] .wage'); if (!e) return null;
       const lh = parseFloat(getComputedStyle(e).lineHeight) || parseFloat(getComputedStyle(e).fontSize) * 1.3, rg = document.createRange(); rg.selectNodeContents(e);
-      return { text: e.textContent, lines: rg.getClientRects().length, h: e.getBoundingClientRect().height, lh, clipped: e.scrollWidth > e.clientWidth + 0.5 }; });
-    if (shot) await page.locator('#uRow [data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-card-360.png` });
+      return { text: e.textContent, lines: new Set([...rg.getClientRects()].filter(q => q.width > 0).map(q => Math.round(q.top))).size, h: e.getBoundingClientRect().height, lh, clipped: e.scrollWidth > e.clientWidth + 0.5 }; });
+    if (shot) await page.locator('#uRow div.wk[data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-card-360.png` });
     ok('S2-8 360: hire card "Wage $0.75/min" not truncated, one line', !!r && r.text === 'Wage $0.75/min' && r.lines === 1 && r.h < r.lh * 1.5 && !r.clipped, JSON.stringify(r));
     await ctx.close(); }
 };
