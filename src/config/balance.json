@@ -2,7 +2,10 @@
   "_source": "economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks",
   "tickHz": 10,
   "save": {
-    "autosaveIntervalS": 5
+    "autosaveIntervalS": 5,
+    "lsHeadroomFactor": 2,
+    "lsHeadroomMarginBytes": 65536,
+    "migrationAttemptsCap": 3
   },
   "feel": {
     "tap_combine_window_ms": 250,
