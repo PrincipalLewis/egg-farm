@@ -7,7 +7,7 @@
  * localStorage only, as in rc0.
  */
 import type { Balance } from '../config/balance';
-import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, type KV } from './save';
+import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, savedAtRank, type KV } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** The subset of IDBFactory we use (lets unit tests pass a fake). */
 export type IdbFactory = Pick<IDBFactory, 'open'>;
@@ -55,21 +55,21 @@ export class IdbMirror {
 }
 export type Pick_ = 'ls' | 'idb';
 /** Newest valid copy. Ties and an invalid/missing IndexedDB copy keep localStorage. */
-export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balance): Pick_ {
+export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balance, now = Date.now()): Pick_ {
   if (idbRaw === null || idbRaw === lsRaw) return 'ls';
   const iv = validate(idbRaw, b); if (!iv.ok) return 'ls';
   if (lsRaw === null) return 'idb';
   const lv = validate(lsRaw, b); if (!lv.ok) return 'idb';
-  // Review minor: a missing/invalid savedAt (NaN after validate) is the OLDEST copy, never beats a valid one.
-  const t = (x: number) => Number.isFinite(x) ? x : -Infinity;
-  return t(iv.file.savedAt) > t(lv.file.savedAt) ? 'idb' : 'ls';
+  // v4 (QA e3, Reviewer N2): a savedAt invalid for offline earnings (missing, null, <= 0, pre-2020, or in the future beyond
+  // SAVED_AT_SKEW_MS) is the OLDEST copy and never beats a valid one; both invalid -> tie -> localStorage.
+  return savedAtRank(iv.file.savedAt, now) > savedAtRank(lv.file.savedAt, now) ? 'idb' : 'ls';
 }
 /** Boot step, before `new Game`: write the IndexedDB copy back into localStorage when it is the newest valid one.
  *  A corrupt localStorage save it replaces is preserved first (eggfarm.save.corrupt.<ts>, AC14b). Returns which won. */
 export function reconcile(kv: KV, idbRaw: string | null, b: Balance, now = Date.now()): Pick_ {
   const lsRaw = kv.getItem(SAVE_KEY);
   if (newerStoredVersion(kv, idbRaw) !== null) return 'ls'; // M4 save in main, .bak or IndexedDB: never write any copy
-  const w = pickNewest(lsRaw, idbRaw, b);
+  const w = pickNewest(lsRaw, idbRaw, b, now);
   if (w === 'idb') {
     if (lsRaw !== null && !validate(lsRaw, b).ok) preserveCorrupt(kv, lsRaw, now);
     try { kv.setItem(SAVE_KEY, idbRaw!); } catch { /* quota: Game falls back to localStorage as-is */ return 'ls'; }
@@ -78,6 +78,6 @@ export function reconcile(kv: KV, idbRaw: string | null, b: Balance, now = Date.
 }
 /** save_restore telemetry (QA D1): 'idb' only when the IndexedDB copy wins and replaces localStorage; otherwise null
  *  (no copy, identical, or IndexedDB older/one save behind/invalid - the normal tab-close case). */
-export function restoreSource(lsRaw: string | null, idbRaw: string | null, b: Balance): 'idb' | null {
-  return idbRaw !== null && idbRaw !== lsRaw && pickNewest(lsRaw, idbRaw, b) === 'idb' ? 'idb' : null;
+export function restoreSource(lsRaw: string | null, idbRaw: string | null, b: Balance, now = Date.now()): 'idb' | null {
+  return idbRaw !== null && idbRaw !== lsRaw && pickNewest(lsRaw, idbRaw, b, now) === 'idb' ? 'idb' : null;
 }

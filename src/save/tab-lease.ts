@@ -36,21 +36,31 @@ export class TabLease {
   claim(playHere = false): TakeoverReason | null {
     const prev = readLease(this.kv);
     const reason: TakeoverReason | null = playHere ? 'play_here' : !prev || prev.id === this.id ? null : this.now() - prev.at >= this.staleMs ? 'stale' : 'new_tab';
-    try { this.kv.setItem(LEASE_KEY, JSON.stringify({ id: this.id, at: this.now() })); } catch { /* storage blocked: Game reports save failure */ }
+    this.storageBlocked = !this.write(this.now());
     this.ch?.postMessage({ t: 'claim', id: this.id });
     this.active = true; this.lost = false;
     if (!this.timer) this.timer = setInterval(() => this.beat(), this.heartbeatMs);
     return reason;
   }
+  /** v4 (QA f6): the lease record could not be written (quota error or read-back mismatch). This tab still OWNS the save
+   *  (a lone tab is never locked out by a stale record it cannot overwrite); only a channel claim takes it over. */
+  storageBlocked = false;
+  /** Write our lease record and read it back. False when storage refused it (threw, or silently kept another value). */
+  private write(at: number): boolean {
+    try { this.kv.setItem(LEASE_KEY, JSON.stringify({ id: this.id, at })); } catch { return false; }
+    const l = readLease(this.kv); return !!l && l.id === this.id && l.at === at;
+  }
   /** Before every save write. False (and inactive) when another tab has claimed the save since. */
   owns(): boolean {
     if (!this.active) return false;
+    if (this.storageBlocked) return true; // stale record we couldn't overwrite: not another tab
     const l = readLease(this.kv);
     if (l && l.id !== this.id) { this.lose(); return false; }
     return true;
   }
   private beat() {
     if (!this.owns()) return;
+    if (this.storageBlocked) { this.storageBlocked = !this.write(this.now()); return; } // retry; cleared once storage frees up
     try { this.kv.setItem(LEASE_KEY, JSON.stringify({ id: this.id, at: this.now() })); } catch { /* ignore */ }
   }
   private lose() {

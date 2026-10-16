@@ -28,6 +28,8 @@ function fakeIdb(opts: { failOpen?: boolean; hang?: boolean } = {}) {
   const factory: any = { open: () => { const r: any = {}; if (!opts.hang) later(() => { if (opts.failOpen) { r.error = new Error('blocked'); r.onerror?.(); return; } r.result = db; r.onupgradeneeded?.(); r.onsuccess?.(); }); return r; } };
   return { factory, data, txOpts, db };
 }
+/** v4: pickNewest/reconcile rank by the load clock; these tests use tiny epochs, so a pre-2020 clock (floor off). */
+const T = 5000;
 const flush = () => new Promise(r => setTimeout(r, 5));
 describe('D2 IndexedDB mirror', () => {
   it('every write uses a readwrite transaction with durability strict; read returns the last write', async () => {
@@ -49,21 +51,21 @@ describe('D2 IndexedDB mirror', () => {
   });
   it('pickNewest: newer valid IndexedDB wins; ties, older, invalid or missing IndexedDB keep localStorage', () => {
     const old = serialize(st({ farmLevel: 3 }), 1000), neu = serialize(st({ farmLevel: 4 }), 2000);
-    expect(pickNewest(old, neu, b)).toBe('idb');
-    expect(pickNewest(neu, old, b)).toBe('ls');
-    expect(pickNewest(neu, neu, b)).toBe('ls');
-    expect(pickNewest(serialize(st({ farmLevel: 4 }), 2000), serialize(st({ farmLevel: 5 }), 2000), b)).toBe('ls');
-    expect(pickNewest(old, null, b)).toBe('ls');
-    expect(pickNewest(old, '{"version":5,"savedAt":9e12,"state":{}', b)).toBe('ls'); // truncated
+    expect(pickNewest(old, neu, b, T)).toBe('idb');
+    expect(pickNewest(neu, old, b, T)).toBe('ls');
+    expect(pickNewest(neu, neu, b, T)).toBe('ls');
+    expect(pickNewest(serialize(st({ farmLevel: 4 }), 2000), serialize(st({ farmLevel: 5 }), 2000), b, T)).toBe('ls');
+    expect(pickNewest(old, null, b, T)).toBe('ls');
+    expect(pickNewest(old, '{"version":5,"savedAt":9e12,"state":{}', b, T)).toBe('ls'); // truncated
     const bad = JSON.parse(neu); bad.state.coinsCents += 1; // checksum mismatch
-    expect(pickNewest(old, JSON.stringify({ ...bad, savedAt: 9e12 }), b)).toBe('ls');
-    expect(pickNewest(old, fx('corrupt-version-99.json'), b)).toBe('ls');
-    expect(pickNewest(null, neu, b)).toBe('idb'); // Firefox case: whole localStorage save lost
+    expect(pickNewest(old, JSON.stringify({ ...bad, savedAt: 9e12 }), b, T)).toBe('ls');
+    expect(pickNewest(old, fx('corrupt-version-99.json'), b, T)).toBe('ls');
+    expect(pickNewest(null, neu, b, T)).toBe('idb'); // Firefox case: whole localStorage save lost
   });
   it('reconcile writes the IndexedDB copy back to localStorage; a corrupt localStorage save is preserved first', () => {
     const kv = mem(), neu = serialize(st({ farmLevel: 4 }), 2000);
     kv.setItem(SAVE_KEY, serialize(st({ farmLevel: 3 }), 1000));
-    expect(reconcile(kv, neu, b)).toBe('idb'); expect(load(kv, b)!.state.farmLevel).toBe(4);
+    expect(reconcile(kv, neu, b, T)).toBe('idb'); expect(load(kv, b)!.state.farmLevel).toBe(4);
     const kv2 = mem(); kv2.setItem(SAVE_KEY, '{"trunc');
     expect(reconcile(kv2, neu, b, 77)).toBe('idb');
     expect(kv2.getItem('eggfarm.save.corrupt.77')).toBe('{"trunc'); expect(JSON.parse(kv2.getItem(CORRUPT_INDEX_KEY)!)).toEqual(['eggfarm.save.corrupt.77']);
@@ -86,7 +88,7 @@ describe('D2 IndexedDB mirror', () => {
     let t = 10; const g = new Game(b, kv, () => t, 1, 'dev', m); const before = kv.getItem(SAVE_KEY)!;
     t = 20; g.dispatch({ type: 'buyFarm' }); await flush();
     kv.setItem(SAVE_KEY, before); // simulate localStorage's lazy flush losing the purchase
-    reconcile(kv, await m.read(), b); const g2 = new Game(b, kv, () => 30);
+    reconcile(kv, await m.read(), b, T); const g2 = new Game(b, kv, () => 30);
     expect(g2.state.farmLevel).toBe(1);
   });
   it('localStorage quota failure still mirrors the save; second tab (no mirror) writes nothing', () => {
@@ -102,15 +104,15 @@ describe('D2 IndexedDB mirror', () => {
   it('store name is stable (save compatibility across builds)', () => { expect(IDB_STORE).toBe('save'); });
   it('save_restore fires only when the IndexedDB copy wins (QA D1): never for an older/one-behind or invalid IndexedDB copy', () => {
     const old = serialize(st({ farmLevel: 3 }), 1000), neu = serialize(st({ farmLevel: 4 }), 2000);
-    expect(restoreSource(old, neu, b)).toBe('idb');
-    expect(restoreSource(null, neu, b)).toBe('idb');
-    expect(restoreSource('{"trunc', neu, b)).toBe('idb');
-    expect(restoreSource(neu, old, b)).toBeNull(); // IndexedDB one save behind: normal Firefox/WebKit tab close
-    expect(restoreSource(old, '{"bad', b)).toBeNull();
-    expect(restoreSource(old, old, b)).toBeNull();
-    expect(restoreSource(old, null, b)).toBeNull();
-    expect(restoreSource(null, null, b)).toBeNull();
+    expect(restoreSource(old, neu, b, T)).toBe('idb');
+    expect(restoreSource(null, neu, b, T)).toBe('idb');
+    expect(restoreSource('{"trunc', neu, b, T)).toBe('idb');
+    expect(restoreSource(neu, old, b, T)).toBeNull(); // IndexedDB one save behind: normal Firefox/WebKit tab close
+    expect(restoreSource(old, '{"bad', b, T)).toBeNull();
+    expect(restoreSource(old, old, b, T)).toBeNull();
+    expect(restoreSource(old, null, b, T)).toBeNull();
+    expect(restoreSource(null, null, b, T)).toBeNull();
     // main.ts fires on reconcile() === 'idb'; that must agree with restoreSource for every case
-    for (const [ls, idb] of [[old, neu], [neu, old], [old, '{"bad'], [old, old]] as const) { const k = mem(); k.setItem(SAVE_KEY, ls); expect(reconcile(k, idb, b) === 'idb').toBe(restoreSource(ls, idb, b) === 'idb'); }
+    for (const [ls, idb] of [[old, neu], [neu, old], [old, '{"bad'], [old, old]] as const) { const k = mem(); k.setItem(SAVE_KEY, ls); expect(reconcile(k, idb, b, T) === 'idb').toBe(restoreSource(ls, idb, b, T) === 'idb'); }
   });
 });

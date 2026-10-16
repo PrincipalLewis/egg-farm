@@ -89,8 +89,13 @@ export class NewerSaveError extends Error { constructor(readonly version: number
 /** Product rule: savedAt must be a finite number > 0 and not before 2020-01-01 (else 0 offline + re-stamp). */
 export const MIN_SAVED_AT = Date.UTC(2020, 0, 1);
 /** `now` is the load clock: the pre-2020 floor applies only when the clock itself is past it (a device clock stuck before
- *  2020, or a unit-test clock, can't judge "implausibly old"). validate() (no clock) checks finite and > 0. */
+ *  2020, or a unit-test clock, can't judge "implausibly old"). validate(raw, b, now) applies the same rule when given a clock (default 0: finite and > 0 only); pickNewest/reconcile pass the real clock. */
 export const validSavedAt = (t: unknown, now = Infinity): t is number => typeof t === 'number' && Number.isFinite(t) && t > 0 && (now < MIN_SAVED_AT || t >= MIN_SAVED_AT) && !(now > 0 && Number.isFinite(now) && t > now); // Product 15:15: future = invalid too
+/** v4 / Reviewer N2: clock skew tolerated before a savedAt counts as "in the future" when ranking copies. */
+export const SAVED_AT_SKEW_MS = 2 * 60_000;
+/** Rank of a copy's savedAt for newest-copy picks: any savedAt invalid for offline earnings (missing, null, <= 0, pre-2020
+ *  when the clock is past 2020, or more than SAVED_AT_SKEW_MS in the future) is the OLDEST (-Infinity). */
+export const savedAtRank = (t: unknown, now = Date.now()): number => validSavedAt(t, now + SAVED_AT_SKEW_MS) ? t : -Infinity;
 export function load(kv: KV, b: Balance): SaveFile | null {
   const raw = kv.getItem(SAVE_KEY); if (!raw) return null;
   const v = validate(raw, b); return v.ok ? v.file : null;
@@ -98,7 +103,7 @@ export function load(kv: KV, b: Balance): SaveFile | null {
 export type CorruptReason = 'missing' | 'empty' | 'parse' | 'wrong_type' | 'version' | 'missing_state' | 'checksum' | 'invalid_state';
 const NUM_FIELDS = ['coinsCents', 'coop', 'basket', 'collectionLevel', 'farmLevel'] as const;
 /** Parse + checksum (when present; pre-rc0 saves have none) + state validation + migration. */
-export function validate(raw: string, b: Balance): { ok: true; file: SaveFile } | { ok: false; reason: CorruptReason } {
+export function validate(raw: string, b: Balance, now = 0): { ok: true; file: SaveFile } | { ok: false; reason: CorruptReason } {
   if (!raw.trim()) return { ok: false, reason: 'empty' };
   let d: any; try { d = JSON.parse(raw); } catch { return { ok: false, reason: 'parse' }; }
   if (!d || typeof d !== 'object' || Array.isArray(d) || typeof d.version !== 'number' || (d.savedAt !== undefined && d.savedAt !== null && typeof d.savedAt !== 'number')) return { ok: false, reason: 'wrong_type' };
@@ -111,9 +116,11 @@ export function validate(raw: string, b: Balance): { ok: true; file: SaveFile } 
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
   if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };
   if (!Array.isArray(s.customers) || !s.workers || typeof s.workers !== 'object') return { ok: false, reason: 'invalid_state' };
-  // BUG-6 / QA BUG-1+5: a missing, null, non-finite, <= 0 or pre-2020 savedAt is NaN. Game grants 0 offline and re-stamps now.
+  // BUG-6 / QA BUG-1+5: a missing, null, non-finite or <= 0 savedAt becomes NaN (Game grants 0 offline and re-stamps now).
+  // The pre-2020 floor and the future check need a clock: they apply only when the caller passes `now` (pickNewest passes
+  // now + SAVED_AT_SKEW_MS; Game re-checks with its own clock). With the default now = 0 neither applies.
   // (A string savedAt stays on the corrupt path above: wrong_type.)
-  if (!validSavedAt(f.savedAt, 0)) f.savedAt = NaN;
+  if (!validSavedAt(f.savedAt, now)) f.savedAt = NaN;
   return { ok: true, file: f };
 }
 export interface Recovery {

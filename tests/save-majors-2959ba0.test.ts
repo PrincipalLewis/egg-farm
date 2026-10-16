@@ -89,10 +89,10 @@ describe('Review minor idb-mirror.ts:55: missing/invalid savedAt is the oldest c
   const valid = serialize(st({ farmLevel: 3 }), NOW);
   for (const v of ['null', '0', '-1']) {
     const bad = serialize(st({ farmLevel: 9 }), 1).replace('"savedAt":1,', `"savedAt":${v},`);
-    it(`ls savedAt ${v} vs valid IndexedDB -> idb; reverse -> ls`, () => { expect(pickNewest(bad, valid, b)).toBe('idb'); expect(pickNewest(valid, bad, b)).toBe('ls'); });
+    it(`ls savedAt ${v} vs valid IndexedDB -> idb; reverse -> ls`, () => { expect(pickNewest(bad, valid, b, NOW)).toBe('idb'); expect(pickNewest(valid, bad, b, NOW)).toBe('ls'); });
   }
   it('missing savedAt in localStorage loses to a valid IndexedDB copy', () => {
-    const d = JSON.parse(serialize(st({ farmLevel: 9 }), 1)); delete d.savedAt; expect(pickNewest(JSON.stringify(d), valid, b)).toBe('idb');
+    const d = JSON.parse(serialize(st({ farmLevel: 9 }), 1)); delete d.savedAt; expect(pickNewest(JSON.stringify(d), valid, b, NOW)).toBe('idb');
   });
 });
 

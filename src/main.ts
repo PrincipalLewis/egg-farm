@@ -73,7 +73,7 @@ async function boot() {
   // before this read, so the read sees it). Review minor main.ts:79-80: re-check for a newer save here too, so a newer
   // build that saved during the flush is refused BEFORE we claim, and the live tab never flashes 'Game open in another tab'.
   // From here to `new Game` there is no await, so nothing else can save in between.
-  if (mirror) idbRaw = await mirror.read();
+  if (mirror) idbRaw = (await mirror.read()) ?? idbRaw; // Reviewer N3: a failed/timed-out re-read keeps the first read
   let preNewer2: number | null = null; try { preNewer2 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
   if (preNewer2 !== null) { lease.stop(); refuseNewer(preNewer2, idbRaw); return; }
   const takeover = lease.claim(playHere);
@@ -85,6 +85,9 @@ async function boot() {
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
+  // v4 (QA f6): localStorage refused the lease write. This lone tab still owns the save (never 'Game open in another tab');
+  // report it as the storage-full outcome (art-ux/save-recovery-dialog.md v2.1 'storage') plus the no-storage notice.
+  if (lease.storageBlocked) { if (g.recoveryOutcome === null) g.recoveryOutcome = 'storage'; saveNotice(NO_STORAGE_TEXT); }
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   // QA BUG-2: a newer build saved while this tab was live (found right before a write). Game already stopped all writes
   // and the sim; release the lease, stop autosave, freeze render and show the session-long .newer-save layer.
