@@ -15,7 +15,7 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coa
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { instantSale, saleLine, compact } from './welcome-sale';
-import { rateView, QueueDot } from './s2-economy-ui';
+import { rateView, QueueDot, headerRateText } from './s2-economy-ui';
 import { incomePerSec, secondsToAffordSteady, EtaHold, asleepOrUnpaidCount, productionStopped } from '../econ/income';
 import { optionGain, bestBuy } from '../econ/best-buy';
 import { graderMult } from '../sim/workers';
@@ -540,7 +540,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (now() - rateAt >= 1000) { rateAt = now();
       const cps = incomePerSec(s, b) * 100; // $/s → cents/s for rateView
       const v = rateView(cps, { stopped: productionStopped(s, b) });
-      setText(rateEl, v.sign === 'neg' ? `⚠ ▼ ${v.text.replace(/^⚠ /, '')}` : v.text); rateEl.classList.toggle('neg', v.sign === 'neg');
+      setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
       if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
     // S2-9 queue-full dot on the Market tab (the sheet never opens by itself)
