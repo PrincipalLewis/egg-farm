@@ -75,8 +75,8 @@
 - eggfarm.save.migration_attempts is a plain non-negative integer capped at N = 3 (stops incrementing, stuck_on_v6 set, never forced); never a serialized save; a parse failure or non-integer resets it to 0. eggfarm.save.headroom_probe falls under the same no-save-object rule (m4-design §3b).
 
 ## 2026-10-16 22:45 ADR M4-19 amendment: divergent copies (Code Reviewer 96c4a1e N1; HoE + Saves rule; recorded by Senior Software Architect)
-- Each copy records base = {saveSeq read at boot, idbUnknownAtBoot}. Copies have diverged if one was written with idbUnknownAtBoot and its base ≤ the other's saveSeq. Not diverged ⇒ normal rank (version → committed → saveSeq → savedAt). Diverged ⇒ if exactly one copy has idbUnknownAtBoot, the other wins regardless of saveSeq; otherwise higher saveSeq, then savedAt.
-- The loser is never overwritten silently: kept in IDB eggfarm/save/diverged (one slot; if full keep the higher saveSeq, then later savedAt), save_copies_diverged emitted, offered via Export; Export of it or Reset clears the slot. Part of SQ-1 (Saves 3ba38cf3).
+- (SUPERSEDED 23:30, see revision below) Each copy records base = {saveSeq read at boot, idbUnknownAtBoot}. Copies have diverged if one was written with idbUnknownAtBoot and its base ≤ the other's saveSeq. Not diverged ⇒ normal rank (version → committed → saveSeq → savedAt). Diverged ⇒ if exactly one copy has idbUnknownAtBoot, the other wins regardless of saveSeq; otherwise higher saveSeq, then savedAt.
+- (SUPERSEDED 23:30) The loser is never overwritten silently: kept in IDB eggfarm/save/diverged (one slot; if full keep the higher saveSeq, then later savedAt), save_copies_diverged emitted, offered via Export; Export of it or Reset clears the slot. Part of SQ-1 (Saves 3ba38cf3).
 - F2: saveSeq is a safe integer 0..2^53-1 (else 0) in checksummed state, preserved by older/flag-off builds. F3: at the counter cap a one-time non-blocking notice offers Export save; stuck_on_v6 is a separate LS key not reset by the garbage-to-0 rule. Accepted: IDB main goes stale while the mirror is off. Restoring v6_backup also replaces IDB main (highest saveSeq).
 - Spec m4a-spec v1.12: every failed attempt ([abort] or [deferral]) increments attempt_count, AC (h)6.
 
@@ -85,3 +85,8 @@
 
 ## 2026-10-16 23:25 Note (HoQA 96c4a1e A-1..A-3; Senior Software Architect)
 - Counting per spec v1.12: every failed attempt increments migration_attempts (cap 3, stuck_on_v6). idb_main_changed is a deferral everywhere. save_migration_aborted reasons are tagged [abort]/[deferral] in m4-design §5.
+
+## 2026-10-16 23:30 ADR M4-19 revision (Code Reviewer BLOCKER 26f4024; HoE rulings 23:25; HoQA D-1/D-2; recorded by Senior Software Architect). Supersedes the 22:45 divergence/slot details
+- base = {seq, idbUnknownAtBoot, forSeq}; trusted only if forSeq === saveSeq (older/flag-off builds that keep the field but bump saveSeq ⇒ ignored, plain ranking). Diverged only if the trusted unknown-at-boot copy has base.seq < the other's saveSeq (strict); then the other copy wins. Both-unknown cannot occur (IDB main is never written in an IDB-unknown session).
+- One recovery slot IDB eggfarm/save/diverged holding the loser byte-for-byte. Order: newer-version check first (a refusing load never moves or writes/clears the slot, Export included) → slot write + read-back → only then overwrite the losing store. Slot replaced only by a higher-saveSeq loser; every replace/skip emits save_recovery_slot{action, seqs}. Slot write/read-back failure or skip ⇒ overwrite nothing, keep both copies, play the winner in memory, retry next load.
+- The stuck notice's show-once flag is its own LS key eggfarm.save.stuck_notice_shown, never written on a refused load, in RESET_KEYS.
