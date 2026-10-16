@@ -3,7 +3,7 @@
 // Usage: npm run build:qa && node scripts/tab-guard-browser.mjs [chromium|firefox|webkit]   (FREEZE_S=30)
 import pw from 'playwright-core'; import { spawn } from 'node:child_process'; import fs from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', port = +(process.env.PORT ?? 4740), FREEZE_S = +(process.env.FREEZE_S ?? 30);
-const srv = spawn('npx', ['vite', 'preview', '--outDir', process.env.DIST ?? 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+import { serveOwn } from './serve-own.mjs'; const own_ = await serveOwn(process.env.DIST ?? 'dist-qa', port); const srv = { pid: 0 };
 for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const URL0 = `http://127.0.0.1:${port}/`, fx = fs.readFileSync(new URL('../tests/fixtures/saves/m2-rc1-v5-40min.json', import.meta.url), 'utf8');
 const br = ENGINE === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[ENGINE].launch();
@@ -94,4 +94,4 @@ const buy = p => p.evaluate(() => { const g = window.eggfarm; g.dispatch({ type:
   await A.setViewportSize({ width: 320, height: 568 }); await A.waitForTimeout(100);
   ok('TG-UI-7 reduced motion: no animation; 320 px wide (200% zoom of 640): no clipping', m.anim === 'none' && !m.clip, m);
   ok('TG-UI-8 contrast: body >=4.5 (~13), button >=4.5 (~5.1), focus ring >=3', m.body >= 4.5 && m.btn >= 4.5 && m.ring >= 3, m); await ctx.close(); }
-await br.close(); try { process.kill(-srv.pid); } catch {} console.log(bad ? `FAILED ${bad}` : 'ALL PASS'); process.exit(bad ? 1 : 0);
+await br.close(); own_.stop(); console.log(bad ? `FAILED ${bad}` : 'ALL PASS'); process.exit(bad ? 1 : 0);
