@@ -16,6 +16,9 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
+import { m4On, trackEggsPerSec, trackPriceCents, hensMilestoneMult, gradeMult } from '../config/formulas';
+import { salePriceCents, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
+import { balancedStripText, milestoneToast, trackLockText } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -208,7 +211,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
-    lastBuyBtn = bt; if (!act({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
+    lastBuyBtn = bt; const bk = bt.dataset.kind;
+    if (!act(bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
     // F5: one tap = one dispatch; act() has already redrawn the sheet with the new level/price (S2-10).
   });
   let lastBuyBtn: HTMLElement | null = null;
@@ -418,15 +422,17 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
     const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
+    const M4 = m4On(b);
     const fx = isF ? [
-      `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
+      ...(M4 ? [`Hens & Egg value up to L${Math.min(b.maxLevel, F + 3)} ${max ? '' : `<span class="arrow">→</span> L${Math.min(b.maxLevel, F + 4)}`}`]
+        : [`Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`]),
       `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
-      `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
+      ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F + 1, C))}`]),
       ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
       `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
     ] : [
       `Eggs per tap ${arrow(fmtCount(S.eggsPerTap(C, b)), fmtCount(S.eggsPerTap(C + 1, b)))}`,
-      `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
+      ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F, C + 1))}`]),
     ];
     const nextTier = [5, 10, 20].find(t => t > F);
     let hint = '';
@@ -450,6 +456,28 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div></div></div>`;
   };
+  /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
+  const trackRowHtml = (t: Track) => {
+    const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
+    const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
+    const arrow = (a: string, z: string) => lock ? a : `${a} <span class="arrow">→</span> ${z}`;
+    const fx = t === 'hens'
+      ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`, ...(hensMilestoneMult(H + 1, b) > hensMilestoneMult(H, b) && !lock ? [`Laying boost ×${hensMilestoneMult(H + 1, b)}`] : [])]
+      : [`Egg price ${arrow(fmtMoney(trackPriceCents(F, H, V, b)), fmtMoney(trackPriceCents(F, H, V + 1, b)))}`, ...(gradeMult(V + 1, F, b) > gradeMult(V, F, b) && !lock ? [`Grade ×${gradeMult(V + 1, F, b)}`] : [])];
+    const right = lock === 'max' ? `<button class="btn maxed" tabindex="-1">MAX</button>`
+      : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${F + 1}.">${trackLockText(F)}</div>`
+      : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
+    return `<div class="up track" data-track="${t}">
+      <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
+      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
+  };
+  const farmTabHtml = () => {
+    const s = g.state, st = balancedStrip(s, b);
+    const segs = Array.from({ length: st.of }, (_, i) => `<i class="${i < st.n ? 'on' : ''}"></i>`).join('');
+    return `<div class="tracks"><div class="balanced" role="img" aria-label="${balancedStripText(s, b, true)}"><div class="segs">${segs}</div><span>${balancedStripText(s, b)}</span></div>
+      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm')}</div>`;
+  };
   let lastUp = '', ordersExpanded = false;
   function render() {
     const s = g.state, F = s.farmLevel, cap = S.coopCapacity(F, b), coopWhole = Math.floor(s.coop);
@@ -462,6 +490,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
       showToast(slotToastPending ? 'Coop upgraded! +1 customer slot' : 'Coop upgraded!'); slotToastPending = false;
     }
+    // M4-A milestone toasts: once per save (celebratedMilestones), never for ones seeded by the v7 migration.
+    { const pend = pendingMilestones(s, b); if (pend.length) { g.dispatch({ type: 'markMilestones', ids: pend }); showToast(milestoneToast(pend[pend.length - 1], b)); } }
     renderQueue();
     if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
     // hens
@@ -497,19 +527,19 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
-      const unit = S.eggPriceCents(F, s.collectionLevel, b) * graderMult(s.workers, s.graderTier, b);
+      const unit = salePriceCents(s, b) * graderMult(s.workers, s.graderTier, b);
       const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
       if (s.customers.length <= vis) ordersExpanded = false;
       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
       mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
-      let left = basket, eggs = 0, cents = 0; const price = S.eggPriceCents(F, s.collectionLevel, b);
+      let left = basket, eggs = 0, cents = 0; const price = salePriceCents(s, b);
       for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
     }
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-      const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
+      const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
       if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
