@@ -9,11 +9,24 @@ SIM = os.environ.get('SV_SIM_DIR', os.path.join(ROOT, '..', 'product', 'sim'))
 sys.path.insert(0, SIM)
 import seller_variance_sim as S  # noqa: E402
 CSV = os.path.join(ROOT, 'data', 'economy.csv')
-e = S.Eco(S.P1Q); W = S.spec_from_csv(CSV)
-# guard: the M1 formulas must reproduce data/economy.csv (otherwise the fixture compares different economies)
 import csv
-for r in csv.DictReader(open(CSV)):
+ROWS = list(csv.DictReader(open(CSV)))
+# Economy preset. P1Q formulas when they reproduce the CSV farm costs (main, pre-F1). Otherwise F1 (PR #17): farm_cost and
+# w4_tier_cost are per-level tables read from this CSV, mirroring #17's balance.farm.costTable overrides (= S.F1, but from
+# data/economy.csv instead of product/economy.f1-m4cols.csv). Every other M1 column must still match the P1Q formulas.
+p1q = S.Eco(S.P1Q)
+if all(p1q.fcost(int(r['level'])) == int(r['farm_cost']) for r in ROWS): PRESET, e = 'P1Q', p1q
+else:
+  PRESET = 'F1 (P1Q + farm_cost/w4_tier_cost tables from data/economy.csv)'
+  e = S.Eco(dict(S.P1Q, name=PRESET, farm_cost_table={int(r['level']): int(float(r['farm_cost'])) for r in ROWS},
+                 w4_cost_table={int(r['level']): int(float(r['w4_tier_cost'])) for r in ROWS}))
+W = S.spec_from_csv(CSV)
+# F1 merge: manage threshold from the CSV (run_m2 manage_at, default = tired_below)
+W['manage_at'] = round(float(ROWS[0]['manage_prompt_threshold']) * 100); W['manage_all_low_only'] = True; W['wage_carry'] = True
+# guard: the preset must reproduce data/economy.csv (otherwise the fixture compares different economies)
+for r in ROWS:
   L = int(r['level']); assert e.fcost(L) == int(r['farm_cost']) and e.ccost(L) == int(r['collection_cost']), L
+  assert abs(e.price(L) - float(r['egg_price'])) < 1e-9 and e.iv(L) == float(r['customer_interval_s']), L
 SEEDS = list(range(1, 101)); T = 3600; TRACE_SEEDS = SEEDS[:5]; TRACE_N = 400
 # Action trace: every variance-stream call in order. Its sequence is economy-independent (check-in/tap times, delay and
 # cheap-first rolls depend only on the stream and the clock), so TS must reproduce it exactly even where coins differ.
@@ -47,7 +60,7 @@ for s in range(4):
   draws[str(s)] = dict(skill=V.skill, seq=d)
 sha = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()[:8]
 out = dict(source='product/sim/seller_variance_sim.py run/run_m2 policy=seller15', sim_sha256=sha(os.path.join(SIM, 'seller_variance_sim.py')),
-           proposal_sha256=sha(os.path.join(SIM, 'seller-variance-proposal.md')), economy_csv_sha256=sha(CSV), config='P1Q + spec_from_csv(data/economy.csv)',
+           proposal_sha256=sha(os.path.join(SIM, 'seller-variance-proposal.md')), economy_csv_sha256=sha(CSV), config=PRESET + ' + spec_from_csv(data/economy.csv)',
            python=sys.version.split()[0], T=T, seeds=SEEDS, var=S.VAR_DEFAULT, draws=draws, traces=traces, runs=runs)
 path = os.path.join(ROOT, 'tests', 'fixtures', 'seller_variance.json')
 # compact: minified, one line per run/seed and per trace (diff-friendly)

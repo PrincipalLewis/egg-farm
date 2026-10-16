@@ -109,17 +109,36 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, 
   }, 300_000);
 });
 
-// AC7 band on the variance bot (proposal §AC7 with variance; CCR PR #19 M1). Judged at P5/P95 of level at 30:00.
-// Tied to the economy CSV: it only holds on F1 (economy.f1-m4cols.csv 86f0e80e). On main's pre-F1 data/economy.csv
-// (57d964d5) it is expected to fail -> it.fails, reason 'needs #17 economy.f1-m4cols 86f0e80e'. When data/economy.csv is
-// 86f0e80e it becomes a hard assert automatically (regenerate the fixture first: scripts/gen-seller-variance-fixtures.py).
-const F1_CSV = '86f0e80e';
+// AC7 band on the variance bot (proposal §AC7 with variance; CCR PR #19 M1/M2). Judged at P5/P95 of level at 30:00, switched
+// on the sha256 of data/economy.csv. Every branch is a hard `it`: a thrown error always fails.
+//  86f0e80e (F1, economy.f1-m4cols, PR #17): the band holds. No workers P5 >= 18 and P95 <= 22; workers P5 >= 20 and P95 <= 24.
+//  57d964d5 (main, pre-F1): the known failing values are asserted exactly (no workers L@30 P5 = 17; workers max L@30 = 18),
+//           so any drift (or a crash) fails. Needs #17 economy.f1-m4cols 86f0e80e for the real band.
+//  any other sha: fails with 'unknown economy CSV <sha>: update AC7 band test'.
+// After the CSV changes, regenerate the fixture first: scripts/gen-seller-variance-fixtures.py.
+export const F1_CSV = '86f0e80e', MAIN_PRE_F1_CSV = '57d964d5';
 const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
-const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const; // no workers L18-22, with workers L20-24
+const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const;
+export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): void {
+  if (sha === F1_CSV) for (const wk of ['m1', 'm2'] as const) {
+    expect(q(l30[wk], 0.05), `${wk} L@30 P5`).toBeGreaterThanOrEqual(BAND[wk].lo); expect(q(l30[wk], 0.95), `${wk} L@30 P95`).toBeLessThanOrEqual(BAND[wk].hi);
+  } else if (sha === MAIN_PRE_F1_CSV) { // known failing values on pre-F1 main (needs #17 economy.f1-m4cols 86f0e80e)
+    expect(q(l30.m1, 0.05), 'm1 L@30 P5 (pre-F1)').toBe(17); expect(Math.max(...l30.m2), 'm2 max L@30 (pre-F1)').toBe(18);
+  } else throw new Error(`unknown economy CSV ${sha}: update AC7 band test`);
+}
+const l30 = (wk: 'm1' | 'm2') => LVL30[wk] ?? fx.seeds.map(s => lvlAt(RUN[wk](s, VAR_DEFAULT), 1800));
 describe(`AC7 band, variance bot (data/economy.csv ${csvSha})`, () => {
-  const ac7 = csvSha === F1_CSV ? it : it.fails; // expected-fail until F1: 'needs #17 economy.f1-m4cols 86f0e80e'
-  for (const wk of ['m1', 'm2'] as const) ac7(`${wk}: L@30 P5 >= ${BAND[wk].lo}, P95 <= ${BAND[wk].hi}${csvSha === F1_CSV ? '' : ' [expected-fail: needs #17 economy.f1-m4cols 86f0e80e]'}`, () => {
-    const l = LVL30[wk] ?? fx.seeds.map(s => lvlAt(RUN[wk](s, VAR_DEFAULT), 1800));
-    expect(q(l, 0.05)).toBeGreaterThanOrEqual(BAND[wk].lo); expect(q(l, 0.95)).toBeLessThanOrEqual(BAND[wk].hi);
+  it(`band per CSV sha ${csvSha}${csvSha === F1_CSV ? ' (F1: hard band)' : csvSha === MAIN_PRE_F1_CSV ? ' (pre-F1: known values, needs #17)' : ' (UNKNOWN)'}`, () => {
+    ac7BandCheck(csvSha, { m1: l30('m1'), m2: l30('m2') });
   }, 300_000);
+  it('meta: unknown sha (appended newline, 168b74da) and a thrown error both fail', () => {
+    const ok = { m1: Array(100).fill(20), m2: Array(100).fill(21) };
+    expect(() => ac7BandCheck('168b74da', ok)).toThrow('unknown economy CSV 168b74da: update AC7 band test');
+    expect(() => ac7BandCheck(F1_CSV, ok)).not.toThrow();
+    expect(() => ac7BandCheck(F1_CSV, { ...ok, m1: Array(100).fill(17) })).toThrow();           // F1 band violated
+    expect(() => ac7BandCheck(MAIN_PRE_F1_CSV, ok)).toThrow();                                   // pre-F1 values drifted
+    expect(() => ac7BandCheck(F1_CSV, { m1: undefined as unknown as number[], m2: ok.m2 })).toThrow(); // crash inside -> throws, not masked
+    // and the sha itself: data/economy.csv + '\n' hashes to 168b74da on main
+    if (csvSha === MAIN_PRE_F1_CSV) expect(createHash('sha256').update(Buffer.concat([readFileSync(new URL('../data/economy.csv', import.meta.url)), Buffer.from('\n')])).digest('hex').slice(0, 8)).toBe('168b74da');
+  });
 });
