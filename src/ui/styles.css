@@ -411,3 +411,14 @@ html,body{overflow-x:hidden;max-width:100%}
 /* R3: the rotate icon always renders at 64px (beat generic img sizing) */
 #rotate-prompt img{width:64px!important;height:64px!important;min-width:64px;flex:none}
 .font-credits{padding-bottom:14px} /* N1: room for the link hit box overhang so it never overlaps Reset save */
+/* D5 (m3-next-goal-spec v1.0.1): button.goal is a 44px hit area (2px transparent padding-block); the visible 40px pill is
+   the inner span.goal-pill. The gap below goes 8px -> 4px (margin-bottom:-4px against the 8px column gap), so the row stays 48px. */
+:root{--goal-h:40px;--goal-hit:44px}
+.goal{display:block;height:auto;min-height:var(--goal-hit);padding:2px 0;margin-bottom:-4px;background:transparent;border:0;box-shadow:none;border-radius:var(--r-pill);animation:none}
+.goal-pill{display:grid;grid-template-columns:var(--goal-icon) minmax(0,1fr) auto 16px;gap:var(--s-2);align-items:center;width:100%;height:var(--goal-h);padding:0 var(--s-3);box-sizing:border-box;
+  border-radius:var(--r-pill);background:var(--c-white);border:2px solid var(--c-outline);box-shadow:var(--shadow);text-align:left;min-width:0}
+.goal[data-state=ready]{animation:none}
+.goal[data-state=ready] .goal-pill{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
+.goal-pill>*{min-width:0}
+@media (max-width:379px){.goal-pill{grid-template-columns:var(--goal-icon) minmax(0,1fr) auto}}
+@media (min-width:960px) and (orientation:landscape){.goal{min-height:var(--goal-h-lg);padding:0;margin-bottom:0;height:auto}.goal-pill{height:var(--goal-h-lg)}}

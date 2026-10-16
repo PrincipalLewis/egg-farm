@@ -37,6 +37,17 @@ sections.tabs = async () => {
     await ctx.close();
   }
 };
+// ---------- rc1 tap areas >=44px at phone widths (D5 next-goal button, nav, Collect, settings) ----------
+sections.taps = async () => {
+  for (const [w, h] of [[360, 640], [390, 844]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': DONE } });
+    const r = await page.evaluate(() => [...document.querySelectorAll('button.goal, nav.actions button:not([hidden]), #collect, #settings')].map(e => { const a = e.getBoundingClientRect(); return { k: e.id || e.dataset.nav || e.className, w: a.width, h: a.height }; }));
+    ok(`rc1 tap areas >=44px incl. button.goal (${w}x${h})`, r.length >= 5 && r.some(x => x.k === 'goal') && r.every(x => x.w >= 44 && x.h >= 44), JSON.stringify(r.map(x => [x.k, Math.round(x.w), Math.round(x.h)])));
+    const g = await page.evaluate(() => { const q = s => document.querySelector(s).getBoundingClientRect(); return { hit: q('#goal').height, pill: q('#goal .goal-pill').height, gap: Math.round(q('#collect').top - q('#goal').bottom) }; });
+    ok(`D5 goal hit 44 / pill 40 / gap below 4 (row 48) (${w})`, g.hit === 44 && g.pill === 40 && g.gap === 4, JSON.stringify(g));
+    await ctx.close();
+  }
+};
 // ---------- PT1-4 / PT1-5 / PT1-6 ----------
 sections.pt1 = async () => {
   { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm
