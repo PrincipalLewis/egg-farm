@@ -93,7 +93,7 @@
 
 ## 2026-10-16 23:35 ADR M4-19 revision 2 (HoQA 0cadbd5 D-1a; Code Reviewer 0cadbd5 F1/F2; recorded by Senior Software Architect)
 - Not diverged if both copies carry a trusted idbUnknownAtBoot: plain ranking, slot untouched. (Equal-saveSeq clause REVISED 23:40, see F2-EQ below.) Pre-SQ-1 (a01faea-era) builds preserve saveSeq and base unchanged, so these rules keep rollback copies out of divergence. Replaces the "both unknown cannot occur" note.
-- When the slot already holds a higher- (or equal-) saveSeq loser, the new loser is not moved and its store is not touched during divergence handling (save_recovery_slot{skip}).
+- **SUPERSEDED** (by rev 4, 2026-10-16 23:55, two slots, no skip path): when the slot already holds a higher- (or equal-) saveSeq loser, the new loser is not moved and its store is not touched during divergence handling (save_recovery_slot{skip}).
 - Guarantee wording: a loser is never overwritten except by a session continuing from it, or after it is durably in the slot. IDB save/diverged is in the m4-design §3b byte-identical list (exempt from the no-serialized-save rule as a save copy by design).
 
 ## 2026-10-16 23:40 ADR M4-19 revision 3: equal saveSeq (HoQA dcbd59e MUST F2-EQ, option (a); recorded by Senior Software Architect)
@@ -127,3 +127,10 @@
 - Export clears slots/tmp only after a confirmed save or share (share promise resolved, or explicit "I saved it" for plain downloads); cancel/failure/unconfirmed clears nothing.
 - Once-flag `eggfarm.save.diverged_notice_shown` = SHA-256 of the sorted `sum` set of present slot/tmp copies; re-shows when the set changes; plain value, never save data.
 - Telemetry: `save_recovery_slot.slot` adds `'tmp'`, `action` adds `'sweep'`.
+
+## 2026-10-17 00:20 ADR M4-19 revision 8 (Code Reviewer 3342918 a–d; HoQA 3342918 S-7..S-9; recorded by Senior Software Architect)
+- Slot/tmp record = `{bytes, exportedAt}`; comparisons on `bytes`. Export marks `exportedAt` after a confirmed share or "I saved it" and never deletes; exported copies are evicted first; non-exported copies are never deleted by Export.
+- Once-flag = `fnv1a:<hex>` FNV-1a over sorted `sum`s of non-exported copies (no crypto.subtle dependency); string compare; a legacy non-prefixed value re-shows once, then stable.
+- F2-EQ refined: equal saveSeq + different bytes with exactly one trusted `idbUnknownAtBoot` ⇒ not diverged, known copy wins; neither/both ⇒ diverged.
+- `write_failed` and the notice at most once per load; "Did you save?" only if starting the download didn't throw; clipboard fallback marks only on "I saved it".
+- Rev 2 one-slot skip bullet marked SUPERSEDED.
