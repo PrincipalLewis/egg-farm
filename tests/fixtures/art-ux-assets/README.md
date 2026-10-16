@@ -1,0 +1,1 @@
+Vendored from Art & UX's art-ux/assets (workspace copy, 2026-10-16). The S2-1 unit test compares public/assets against these so it runs from any checkout. Refresh them when Art & UX update the coop SVGs.
