@@ -16,9 +16,9 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
-import { m4On, trackEggsPerSec, trackPriceCents, hensMilestoneMult, gradeMult } from '../config/formulas';
-import { salePriceCents, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
-import { balancedStripText, milestoneToast, trackLockText } from './tracks-ui';
+import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
+import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
+import { highlightRow, HighlightHold, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -382,12 +382,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- M3-AC5 next-goal strip ----------
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
+  const hlHold = new HighlightHold(2); let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
     if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
     const imm = goalNow; goalNow = false; goalTickAt = t;
     const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
+    if (m4On(b)) rowHl = hlHold.tick(highlightRow(g.state, b), imm); // M4A-18, same 1 Hz tick + hold as the goal strip
     setText(goalLbl, gl.label); setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
@@ -424,9 +426,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
     const M4 = m4On(b);
     const fx = isF ? [
-      ...(M4 ? [`Hens & Egg value up to L${Math.min(b.maxLevel, F + 3)} ${max ? '' : `<span class="arrow">→</span> L${Math.min(b.maxLevel, F + 4)}`}`]
+      ...(M4 ? [`Hens & Egg value up to L${hensCap(F, b)} ${max ? '' : `<span class="arrow">→</span> L${hensCap(F + 1, b)}`}`]
         : [`Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`]),
-      `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
+      `Coop capacity ${arrow(fmtCount(M4 ? trackCoopCapacity(F, s.hensLevel, b) : S.coopCapacity(F, b)), fmtCount(M4 ? trackCoopCapacity(F + 1, s.hensLevel, b) : S.coopCapacity(F + 1, b)))}`,
       ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F + 1, C))}`]),
       ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
       `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
@@ -444,7 +446,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
-    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
+    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * coopCap(s, b))
       hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
     return `<div class="up">
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
@@ -462,25 +464,25 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
     const arrow = (a: string, z: string) => lock ? a : `${a} <span class="arrow">→</span> ${z}`;
     const fx = t === 'hens'
-      ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`, ...(hensMilestoneMult(H + 1, b) > hensMilestoneMult(H, b) && !lock ? [`Laying boost ×${hensMilestoneMult(H + 1, b)}`] : [])]
-      : [`Egg price ${arrow(fmtMoney(trackPriceCents(F, H, V, b)), fmtMoney(trackPriceCents(F, H, V + 1, b)))}`, ...(gradeMult(V + 1, F, b) > gradeMult(V, F, b) && !lock ? [`Grade ×${gradeMult(V + 1, F, b)}`] : [])];
+      ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`, ...(!lock && hensMilestone(H + 1, b)?.level === H + 1 ? [hensMilestoneEffect(H + 1, b)] : [])]
+      : [`Egg price ${arrow(fmtMoney(trackPriceCents(F, H, V, b)), fmtMoney(trackPriceCents(F, H, V + 1, b)))}`, ...(gradeMult(V + 1, F, b) > gradeMult(V, F, b) && !lock ? [gradeEffect(V + 1, F, b)] : [])];
     const right = lock === 'max' ? `<button class="btn maxed" tabindex="-1">MAX</button>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${F + 1}.">${trackLockText(F)}</div>`
       : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
-    return `<div class="up track" data-track="${t}">
+    return `<div class="up track${rowHl === t ? ' best' : ''}" data-track="${t}">
       <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
       <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>
       <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
   };
   const farmTabHtml = () => {
     const s = g.state, st = balancedStrip(s, b);
-    const segs = Array.from({ length: st.of }, (_, i) => `<i class="${i < st.n ? 'on' : ''}"></i>`).join('');
+    const segs = balancedSegments(s, b).map(g => `<i class="${g.weakest ? 'weakest' : ''}" data-track="${g.track}"><b style="width:${Math.round(g.fill * 100)}%"></b></i>`).join('');
     return `<div class="tracks"><div class="balanced" role="img" aria-label="${balancedStripText(s, b, true)}"><div class="segs">${segs}</div><span>${balancedStripText(s, b)}</span></div>
-      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm')}</div>`;
+      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm').replace('<div class="up">', `<div class="up${rowHl === 'farm' ? ' best' : ''}" data-track="farm">`)}</div>`;
   };
   let lastUp = '', ordersExpanded = false;
   function render() {
-    const s = g.state, F = s.farmLevel, cap = S.coopCapacity(F, b), coopWhole = Math.floor(s.coop);
+    const s = g.state, F = s.farmLevel, cap = coopCap(s, b), coopWhole = Math.floor(s.coop);
     setText(coinsEl, fmtMoney(s.coinsCents)); setText(basketEl, fmtCount(s.basket));
     // coop tier + celebration (once per first reach, persisted in save)
     const tier = S.coopTier(F);
