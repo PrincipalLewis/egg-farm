@@ -4,7 +4,8 @@ import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { balancedStrip, trackLock, trackCost, trackLevel } from '../sim/tracks';
 import { options, bestPaybackAmong } from '../econ/best-buy';
-import { gradeMult } from '../config/formulas';
+import { gradeMult, m4On } from '../config/formulas';
+import { farmCost } from '../sim/state';
 const pct = (mult: number) => Math.round((mult - 1) * 100);
 export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
 export const trackLockText = (F: number) => `Needs Farm L${F + 1}`;
@@ -71,4 +72,11 @@ export function milestoneHint(t: 'hens' | 'eggValue', L: number, F: number, b: B
   if (M.grades.some(g => g.level === L && F >= g.minFarm)) return null;
   const i = M.grades.findIndex(g => g.level > L);
   return i >= 0 && M.grades[i].level - L <= MILESTONE_HINT_WINDOW ? `Next at L${M.grades[i].level}: ${GRADE_NAMES[i]} ×${M.grades[i].mult}` : null;
+}
+
+/** M4A-20: any Farm-tab row (Farm, Hens, Egg value) buyable now: not capped / MAX and coins >= its cost. M4 on only. */
+export function farmRowAffordable(s: GameState, b: Balance): boolean {
+  if (!m4On(b)) return false;
+  return (s.farmLevel < b.maxLevel && s.coinsCents >= farmCost(s.farmLevel, b) * 100)
+    || (['hens', 'eggValue'] as const).some(t => !trackLock(s, t, b) && s.coinsCents >= trackCost(trackLevel(s, t), t, b) * 100);
 }

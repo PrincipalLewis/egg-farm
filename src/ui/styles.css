@@ -464,3 +464,6 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
 .tracks .up .ms-hint{font:400 13px var(--f-body,'Nunito',inherit);color:var(--c-muted,#6b5e52)}
 .tracks .up.best.pending{outline-style:dashed}
+
+/* M4A-20: Farm tab badge (same dot as the nav badge, anchored to the tab pill) */
+.tabs [data-tab=farm]{position:relative}.tabs .tab-badge{top:2px;right:calc(50% - 34px)}

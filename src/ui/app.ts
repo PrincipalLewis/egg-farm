@@ -19,7 +19,7 @@ import { graderMult } from '../sim/workers';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
-import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+import { farmRowAffordable, milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -523,7 +523,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
     { const mk = nav.querySelector('[data-nav=market]') as HTMLElement, qf = queueFull(s, b) ? 'true' : 'false'; if (mk.dataset.queueFull !== qf) mk.dataset.queueFull = qf; } // S2-9 badge hook (Art & UX styles it)
-    setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);
+    // M4A-20: with M4 on, the Upgrades nav badge and the Farm tab badge show when any Farm-tab row (Hens, Egg value,
+    // Farm) is affordable (existing badge rule, extended to three rows). Flag off: unchanged, no Farm tab badge element.
+    const farmRows = m4On(b) && farmRowAffordable(s, b);
+    setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !(canUp || farmRows));
+    { const ft = document.querySelector('.tabs [data-tab=farm]') as HTMLElement | null; let fb = ft?.querySelector('.badge') as HTMLElement | null;
+      if (ft && !fb && m4On(b)) { fb = h('<span class="badge tab-badge" aria-hidden="true" hidden></span>') as HTMLElement; ft.append(fb); }
+      if (fb) setHidden(fb, !farmRows); }
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
