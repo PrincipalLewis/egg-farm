@@ -1,10 +1,10 @@
-"""Generate parity fixtures from Product's reference sim (product/sim/economy_sim.py, config 'current').
+"""Generate parity fixtures from Product's reference sim (product/sim/economy_sim.py, config 'f1').
 Run: npm run gen-fixtures  -> tests/fixtures/economy_sim.json"""
 import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', '..', 'product', 'sim'))
 import economy_sim as m  # noqa: E402
-e = m.Eco(m.CURRENT)
+e = m.Eco(m.F1)
 N = 30
 rows = [dict(level=L, collection_cost=e.ccost(L), eggs_per_tap=e.tap(L), farm_cost=e.fcost(L), hens=e.hens(L), eggs_per_sec=e.rate(L),
              coop_capacity=e.cap(L), egg_price=e.price(L), customer_interval_s=e.iv(L), demand_min=e.dmin(L), demand_max=e.dmax(L),
