@@ -154,7 +154,7 @@ sections.s289 = async () => {
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
     await page.waitForTimeout(1300);
     const r = await page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, shook: e.classList.contains('rshake') }; });
-    ok('S2-8 negative net rate: "▼−$x.xx/min|/s" (U+2212, no hyphen), 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$\d+\.\d\d\/(s|min)$/.test(r.text) && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus [\d.]+ (cents|dollars) per (second|minute)$/.test(r.aria) && r.shook, JSON.stringify(r));
+    ok('S2-8 negative net rate: "▼−$x.xx/s" (U+2212, no hyphen, 2 decimals), 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$\d+\.\d\d\/s$/.test(r.text) && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus [\d.]+ (cents?|dollars) per second$/.test(r.aria) && r.shook, JSON.stringify(r));
     if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-rate-negative-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
     await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
     const wl = await page.evaluate(() => [...document.querySelectorAll('#uRow .wk .wage')].map(e => e.textContent));
@@ -287,6 +287,31 @@ sections.s25 = async () => {
   ok('S2-5 cooldown: label "0:NN", aria "Refill available in N seconds", aria-disabled', /^0:\d\d$/.test(cd.label) && /^Refill available in \d+ seconds$/.test(cd.aria) && cd.dis === 'true', JSON.stringify(cd));
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-5-nav-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
   await ctx.close();
+};
+// ---------- S2-8 sign-off: "Wage $0.75/min" for Market Hand at Farm L3 (hire card + worker panel, 390) ----------
+sections.wage075 = async () => {
+  const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 3, coinsCents: 1e5, workers: {}, customers: [], nextCustomerInS: 1e9 }; });
+  await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
+  const hire = await page.evaluate(() => document.querySelector('#uRow [data-w=market_hand] .wage')?.textContent);
+  if (shot) await page.locator('#uRow [data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-card-390.png` });
+  if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-sheet-390.png` });
+  await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' })); await page.waitForTimeout(500);
+  const panel = await page.evaluate(() => document.querySelector('#uRow [data-w=market_hand] .wage')?.textContent);
+  if (shot) await page.locator('#uRow [data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-worker-card-390.png` });
+  if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-worker-panel-390.png` });
+  ok('S2-8 Market Hand at L3: "Wage $0.75/min" on the hire card and the worker panel', hire === 'Wage $0.75/min' && panel === 'Wage $0.75/min', JSON.stringify({ hire, panel }));
+  await ctx.close();
+  // 360: hire card, wage line must be whole (no ellipsis/overflow) and on one line
+  { const { ctx, page } = await open({ w: 360, h: 800, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 3, coinsCents: 1e5, workers: {}, customers: [], nextCustomerInS: 1e9 }; });
+    await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
+    const r = await page.evaluate(() => { const e = document.querySelector('#uRow [data-w=market_hand] .wage'); if (!e) return null;
+      const lh = parseFloat(getComputedStyle(e).lineHeight) || parseFloat(getComputedStyle(e).fontSize) * 1.3, rg = document.createRange(); rg.selectNodeContents(e);
+      return { text: e.textContent, lines: rg.getClientRects().length, h: e.getBoundingClientRect().height, lh, clipped: e.scrollWidth > e.clientWidth + 0.5 }; });
+    if (shot) await page.locator('#uRow [data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-card-360.png` });
+    ok('S2-8 360: hire card "Wage $0.75/min" not truncated, one line', !!r && r.text === 'Wage $0.75/min' && r.lines === 1 && r.h < r.lh * 1.5 && !r.clipped, JSON.stringify(r));
+    await ctx.close(); }
 };
 // ---------- B5 / B8 Manage all ----------
 sections.b58 = async () => {
