@@ -220,6 +220,6 @@ F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into
 6. **CI → decided:** no hosted minutes (spend, needs CEO). Gates run locally via `gate-all.sh`. A hosted-CI proposal with costs is optional and comes later via HoE (ADR M4-7).
 7. **Flag-off opens v7 → decided: REFUSE** (ADR M4-9). Same as a newer save: newer-save dialog, zero writes, never v6 over v7, `.bak` escape hatch, export available.
 8. **Interim marker → decided (HoE, 20:28):** v2 `3351d6c` migrates inside v6 via `tracksV7`. Kept for playtest and M4-flagged builds only, never in a release default. S-4 does the real bump; F-9 removes the marker (ADR M4-8).
-10. **Backup failure aborts → decided (HoE 21:24; review m4-m4a-tracks-v3-677317d M1):** spec M4A-31(a)/(f)1 governs; see ADR M4-12. Supersedes the "keep playing migrated" part of 9.1.
 9. **Interim backup → decided (HoE review, 20:31):** the interim marked path writes a v6 backup once, before the in-place change. Owner: Features 95daf662 (task F-0, ADR M4-10).
+10. **Backup failure aborts → decided (HoE 21:24; review m4-m4a-tracks-v3-677317d M1):** spec M4A-31(a)/(f)1 governs; see ADR M4-12. Supersedes the "keep playing migrated" part of 9.1.
 
