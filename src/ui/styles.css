@@ -373,7 +373,7 @@ html,body{overflow-x:hidden;max-width:100%}
 /* §5.1/§5.8 (QA 15/16): cards never flex-shrink when a leaving card is still in the list; Sell button width fixed so "Sell 3" -> "Sell" never moves the target */
 .order-list .order{flex:none;box-sizing:border-box}
 /* MK-24-1 v3 / Art & UX: always two-line Sell ('Sell k' 14px over '+$X' 12px); shared width via --sell-w on .order-list (min 88, max 45cqw); never ellipsis the button. */
-.order .btn.sell{width:var(--sell-w,88px);min-width:88px;max-width:45cqw;min-height:44px;height:auto;padding:4px 12px;padding-inline:12px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:column;flex-wrap:nowrap;gap:0;white-space:normal;line-height:1.15;font-size:14px;font:800 14px var(--f-display);overflow:visible}
+.order .btn.sell{width:var(--sell-w,88px);min-width:88px;max-width:45cqw;min-height:44px;height:auto;padding:4px 10px;padding-inline:10px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:column;flex-wrap:nowrap;gap:0;white-space:normal;line-height:1.15;font-size:14px;font:800 14px var(--f-display);overflow:visible}
 .order .btn.sell .sk,.order .btn.sell .sy{display:block;flex-shrink:0;overflow:visible;text-overflow:clip;max-width:none;white-space:nowrap;text-align:center}
 .order .btn.sell .sk{font:800 14px var(--f-display)}
 .order .btn.sell .sk::after{content:none}

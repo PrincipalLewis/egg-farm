@@ -142,7 +142,7 @@ describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates'
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-width:88px/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*max-width:45cqw/);
     expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-height:44px/);
-    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*padding-inline:12px/);
+    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*padding-inline:10px/);
     expect(css).toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*flex-shrink:0/);
     expect(css).not.toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*text-overflow:ellipsis/);
     expect(listSrc).toMatch(/--sell-w/);
