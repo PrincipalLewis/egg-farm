@@ -63,7 +63,8 @@ async function boot() {
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   if (restored) g.telemetry.track('save_restore', { source: 'idb' });
-  (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
+  // The only release global (allowlist in check-release-build): read-only, no install_id. See Telemetry.snapshotJSON.
+  (window as any).eggfarmExportTelemetry = () => g.telemetry.snapshotJSON();
   if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
