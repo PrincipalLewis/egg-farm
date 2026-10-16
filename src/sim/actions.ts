@@ -1,7 +1,8 @@
 import type { Balance } from '../config/balance';
 import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents } from './state';
 import type { Sink } from './events';
-import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { saleValueCents } from './payout';
+import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
@@ -11,9 +12,8 @@ export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type ===
 export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
   const c = s.customers.find(c => c.id === id); if (!c) return s;
   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
-  const base = eggPriceCents(s.farmLevel, s.collectionLevel, b), gm = graderMult(s.workers, s.graderTier, b);
-  // Grader: sale value = round(k x price x mult) cents (exact k x price when no Grader).
-  const price = base, value = gm === 1 ? k * base : Math.round(k * base * gm), filled = c.filled + k, done = filled >= c.demand;
+  // One payout function (sim/payout.ts) for credit and every UI preview.
+  const price = eggPriceCents(s.farmLevel, s.collectionLevel, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);

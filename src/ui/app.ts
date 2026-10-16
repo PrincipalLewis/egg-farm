@@ -15,7 +15,7 @@ import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRec
 import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
-import { graderMult } from '../sim/workers';
+import { saleValueCents, sellAllPreview } from '../sim/payout';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -109,9 +109,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const spawn = (el: HTMLElement, ms: number) => {
     if (live.length >= 30) live.shift()?.remove();
     fxLayer.append(el); live.push(el);
-    setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms);
+    expire(el, ms);
     return el;
   };
+  // BUG-5: one removal timer per element; re-arming it (merged '+N' floater) cancels the old one so it can finish its rise.
+  const timers = new WeakMap<HTMLElement, number>();
+  function expire(el: HTMLElement, ms: number) {
+    clearTimeout(timers.get(el));
+    timers.set(el, window.setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms));
+  }
   const center = (el: Element) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
   const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void) => {
     const a = center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
@@ -124,7 +130,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let floater: { el: HTMLElement; until: number } | null = null;
   const floatText = (text: string, at: Element, cls = '', merge = false) => {
     const t = now();
-    if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); floater.until = t + 700; return; }
+    if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); expire(floater.el, 750); floater.until = t + 700; return; }
     const c = center(at), el = h(`<div class="floater ${cls}" style="left:${c.x}px;top:${c.y - 40}px;translate:-50% 0">${text}</div>`);
     spawn(el, 750); if (!cls) floater = { el, until: t + 700 };
   };
@@ -350,11 +356,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     switch (e.type) {
       case 'sell': {
         dwell.sold(e.id, e.value);
-        income.add(now(), e.k * e.price); sfx('sell');
+        income.add(now(), e.value); sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
         else pulse(coinsEl.parentElement!);
-        floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
+        floatText(`+${fmtMoney(e.value)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
       case 'customer_served': dwell.served(e.id, now()); break;
@@ -497,14 +503,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
-      const unit = S.eggPriceCents(F, s.collectionLevel, b) * graderMult(s.workers, s.graderTier, b);
+      const unit = (k: number) => saleValueCents(s, k, b);
       const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
       if (s.customers.length <= vis) ordersExpanded = false;
       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
       mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
-      let left = basket, eggs = 0, cents = 0; const price = S.eggPriceCents(F, s.collectionLevel, b);
-      for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }
+      const { eggs, cents } = sellAllPreview(s, b);
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
     }
     if (open === 'upgrades' || docked.matches) {
