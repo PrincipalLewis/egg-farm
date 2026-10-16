@@ -1,4 +1,4 @@
-# M4 design and task split — Senior Software Architect · draft v0.1 · 2026-10-16
+# M4 design and task split — Senior Software Architect · v0.2 (HoE-approved decisions 9.1–9.6) · 2026-10-16
 
 Base: `origin/main` @ `a01faea` (save v4 `aaaa91a` + save-recovery dialog). M4-A baseline: `m4/m4a-tracks` @ `04e2709`
 (19 commits on merge-base `4aadcbf`; `m4/m4a-tracks-v2` not pushed yet). Inputs: engineering/stack-and-architecture.md,
@@ -38,43 +38,49 @@ best buy) used by UI and bots; it may import `config/` and `sim/` types but neve
 | `ui/` | app.ts, next-goal, workers-ui, save-recovery… | `tracks-ui.ts`, `pick-hysteresis.ts`, bonus strip, milestone toast, explainer coach mark | No economics in UI: uses `econ/` + `sim/tracks.ts`. Copy strings only from Art & UX docs / economy copy check. Scope CSS (`.tracks-*`, avoid repeating R1 unscoped `.recovery-card`). |
 | `telemetry/` | ring + pinned events, JSON export | new events + fields (§5) | Only reads events/state snapshots; pinned list updated; schema test. |
 
-## 3. Save migration v6 → v7
+## 3. Save migration v6 → v7 (v0.2: dual-write by flag, ADR M4-4)
 **Schema (v7 adds):** `hensLevel:int`, `eggValueLevel:int`, `celebratedMilestones:string[]`, `migrationRefundCents:int (default 0)`,
-`seenTracksExplainer:boolean` (UI pref, stored with the save so it can't desync). Nothing else changes; `collectionLevel` keeps paid levels.
+`seenTracksExplainer:boolean`. Nothing else changes; `collectionLevel` keeps paid levels.
 
-**Migration function** `migrations[6] = (d, b) => v7` in the existing chain (save.ts), calling pure `migrateTracksV7(state, b, opts?)`
-already on m4a-tracks (`src/sim/migrate-v7.ts`):
+**Write version follows the flag (9.2):**
+- `m4.enabled = 0` (all shipping builds until M4 reaches Latest): the build **reads v6 and v7**, but **writes v6 only**. A v7 save opened in a flag-off
+  build is down-projected in memory (track fields dropped). It is written back as v6 only if the user keeps playing. The v7 bytes stay in `.bak`/`v6_backup`; open Q.
+- `m4.enabled = 1`: reads v6/v7, migrates v6 → v7 and **writes v7**. The v6 `.bak` / `eggfarm.save.v6_backup` is **kept, never rotated away, until M4 reaches Latest**.
+- So `SAVE_VERSION` splits into `READ_MAX = 7` and `writeVersion(b) = m4On(b) ? 7 : 6`. The newer-save check uses `READ_MAX`.
+
+**Migration function** `migrations[6] = (d, b) => v7`, run only when `writeVersion(b) = 7`, calling pure `migrateTracksV7(state, b, opts?)`:
 1. `hensLevel = farmLevel`.
-2. `eggValueLevel` = lowest V in 0..30 (no F+3 cap, B1) with integer-cents v7 price ≥ v6 price (one half-up rounding, M4A-5).
-3. Clamp above `maxLevel` only; refund removed levels at the CSV cost column into `coinsCents` and `migrationRefundCents` (0 with current data).
-4. Seed `celebratedMilestones = reachedMilestones(...)` silently.
-5. Mark load as "migrated this session" (drives explainer + first offline grant ×1.0); emit `save_migrated` once.
-Note: the chain must pass `balance` into migrations (today `migrations[n](d)` takes no balance) — small signature change, S-1.
-The migration runs **regardless of `m4.enabled`** (state schema is flag-independent; flag gates behaviour only), see ADR M4-2.
+2. `eggValueLevel` = lowest V in 0..30 (no F+3 cap, B1) with v7 price ≥ v6 price in integer cents (one half-up rounding, M4A-5).
+3. Clamp only above `maxLevel`; refund the removed levels at the CSV cost column into `coinsCents` + `migrationRefundCents` (0 with current data).
+4. Seed `celebratedMilestones` silently.
+5. Mark "migrated this session" (explainer + first offline grant ×1.0); emit `save_migrated` once.
+The chain must receive `balance` (S-1).
 
-**Load order (M4A-30):** read → newer-version check → `v6_backup` write → migrate → validate → offline grant (×1.0 on the first
-grant) → commit v7 at next save point.
+**Load order:** read → version > READ_MAX ⇒ refuse (zero writes) → if M4 on and v6: write `v6_backup` once → migrate → validate →
+offline grant (×1.0 on the first grant after migration) → commit at the next save point in `writeVersion(b)`.
 
-**Rollback (M4A-31):**
-- Backup: raw v6 bytes to `eggfarm.save.v6_backup` (localStorage) + IDB `eggfarm/save/v6_backup`, write-once; v7 committed only
-  after backup succeeds; if backup fails → abort migration, keep playing on v6 in memory, show the existing "Saving is paused" path? **(open Q3)**.
-- Older builds: rc1 already refuses `version > SAVE_VERSION` (`newerSaveVersion`, `.newer-save` layer). Gap: spec requires *zero writes*
-  while refused (no autosave, pagehide, .bak rotation, IDB mirror, second tab). Needs an audit + browser test on main **before** v7 ships.
-- Server-side rollback is impossible (no backend), so the flag cannot roll back a schema; rollback = ship a build whose v7 loader
-  ignores track fields when the flag is off (already true), never a build with SAVE_VERSION 6 again.
+**Backup-write failure (9.1):** no new UI. Show the existing v2.2 **"Can't save"** dialog **once per session**, then the persistent save-warning toast.
+Never block play, never drop in-memory state. Keep playing on the migrated in-memory state, but **do not commit v7 to `main`** while the backup is missing.
+Retry the backup at every save point; the first success commits v7.
 
-**Tests:** chain v1..v6 → v7; all 21 spec fixtures + 961-save sweep (exists); refund via lowered-max table (exists); idempotent reload
-(refund once, explainer once, milestones not replayed); offline order (19800/24750, 9900/12375); backup write-once + backup-failure abort;
-validator ranges; `m4-v7-*-F{f}-C{c}` fixture files + `SHA256SUMS.txt`; 3-engine browser test: rc1 build opens v7 fixtures → storage byte-identical.
+**Rollback:** flag-off builds never produce v7, so turning M4 off (shipping a flag-off build) is a real rollback for anyone who never ran an M4-on build.
+M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still refuse v7 with zero writes (S-2).
+
+**Tests:**
+- chain v1..v6 → v7 (M4 on); all 21 spec fixtures + the 961-save sweep; refund via the lowered-max table.
+- idempotent reload; offline order (19800/24750, 9900/12375).
+- **flag-off write test: load v6 → save → stored bytes are v6** (part of the flag-off golden).
+- **M4-on write test: load v6 → save → `main` is v7, and the `.bak`/`v6_backup` holds the original v6 bytes after N autosaves.**
+- v7 save in a flag-off build: v7 is read and v6 is written.
+- backup failure: dialog once/session → toast; play continues; v7 not committed; succeeds on retry.
+- `m4-v7-*` fixtures + SHA256SUMS; 3-engine test: rc1 build × v7 fixtures → storage byte-identical.
 
 ## 4. Feature-flag strategy
-- **Mechanism:** build-time config in `balance.json` (from `data/economy-config.json`), not runtime remote flags (no backend).
-  `m4.enabled` (0/1) gates all M4-A behaviour; later slices get `m4.features.{goldenEgg, pauseResume, marketBonus, abilities, streak, ads}`
-  each 0/1, all requiring `m4.enabled`.
-- **Defaults:** shipping default 0 until QA PASS + TR-5 PASS; QA/playtest builds flip via `build:qa` mode (`--mode qa` reads an override), never by
-  editing the CSV on main. Debug panel may toggle in dev builds only; `check-release-build` must assert release builds carry the committed default.
-- **Invariant tests:** per flag, a flag-off golden hash test like `m4a-flag-off.test.ts`; regenerate golden only with a reviewer-approved commit.
-- **Removal:** once a slice ships default-on for one release with no rollback, delete the off path and the golden (task F-9).
+- Set at build time in `balance.json`: `m4.enabled` gates M4-A **and the save write version** (ADR M4-4). Later: `m4.features.*`, each requiring `m4.enabled`.
+- Shipping default 0 until QA PASS. While the default is 0, TR-5 only reports (§6). QA/playtest builds turn the flag on via `build:qa` mode. The debug toggle exists in dev builds only.
+  `check-release-build` asserts the committed default.
+- Per-flag golden: the flag-off golden asserts both the sim trace hash **and a v6 write**.
+- Removal (F-9): one release after M4 reaches Latest, delete the flag-off path, make v7 the only write version, and drop the v6 `.bak` retention rule.
 
 ## 5. Telemetry fields (M4A-34 + proposal §8)
 | Event | Fields | Pinned |
@@ -95,19 +101,21 @@ Existing (must stay green on every PR): `vitest run` (464 on main), `tsc --noEmi
 New for M4:
 1. **flag-off golden** (`m4a-flag-off.test`) — required; golden is pinned to main's trace.
 2. **migration fixture suite** + SHA256SUMS check of `tests/fixtures/saves`.
-3. **TR-5 pacing gate** (bot 30 seeds, L@30 band; known FAIL at F25 for 60-min variant → run as *reporting* until Economy's L24–29 fix, then blocking).
+3. **TR-5 pacing gate: report-only (9.3).** It becomes blocking after **5 consecutive green runs with no flake**; Head of Engineering flips it.
 4. **rollback browser test** (rc1 build × v7 fixtures, 3 engines, storage byte-identical).
 5. **telemetry schema test**.
 6. **release-default check**: release build has `m4.enabled` = committed default and no debug toggles.
-No CI service is configured in-repo today (gates run locally by the merging engineer and recorded in status.md); proposing a
-`scripts/gate-all.sh` so everyone runs the identical list (task X-1).
+**CI runs locally on the box via `scripts/gate-all.sh` (9.6).** No hosted Actions minutes: that is spend and needs the CEO. A hosted-CI proposal with costs is optional, comes later, and goes via HoE.
 
 ## 7. Architecture risks
 1. **Version confusion (v4/v5/v6/v7)** across docs → wrong migration target. Mitigation: ADR M4-1, fix proposal text.
 2. **m4a-tracks is 19 commits behind main's save work** (based on `4aadcbf`, before save v4 + dialog); `merge-tree` shows a conflict in
    `src/ui/styles.css` and semantic overlap in save.ts/game.ts load path. Rebase (v2) must re-verify flag-off golden against *a01faea*, not 4aadcbf.
-3. **One-way door:** once a player's save is v7, rc1 cannot write it; any bug in the refusal "no writes" rule loses data. Must harden + test on main first (S-2 before S-3).
-4. **Backup storage quota**: doubles save footprint in localStorage; on quota failure the migration aborts → player stuck on v6 forever. Need retry policy.
+3. **One-way door (reduced by 9.2):** only M4-on builds write v7, and those keep the v6 `.bak` until Latest. Remaining risks:
+   - rc1 builds opening a v7 save must write nothing (S-2 ships on main first);
+   - dual write versions add code paths, each covered by a write test;
+   - progress made in M4-on is lost if the player goes back to a flag-off build (v7 is down-projected), but the save is never corrupted.
+4. **Backup storage quota:** the backup doubles the save footprint. On failure the player keeps playing in memory: the "Can't save" dialog shows once, then the toast, and the backup is retried at each save point (9.1). If it keeps failing, nothing is persisted.
 5. **Migration needs balance** (price-matched search depends on economy.csv); a later CSV change silently changes migration output for not-yet-migrated players. Mitigation: freeze the v6→v7 price table as a fixture snapshot in the migration test.
 6. **payout.ts base price** must come from `salePriceCents` (comment in tracks.ts) — fix/rc1-qa-bugs branches may reintroduce direct `eggPriceCents` calls. Add a grep/unit guard.
 7. **UI churn in app.ts** (65-line diff, shared with rc2 UI work by e80556fd) → merge conflicts. Keep M4 UI in `tracks-ui.ts`, app.ts only wires.
@@ -118,18 +126,18 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 
 | ID | Task (PR) | Owner | Depends on | Size |
 |---|---|---|---|---|
-| A-0 | Rebase m4/m4a-tracks onto a01faea → `m4/m4a-tracks-v2`; resolve styles.css; regenerate flag-off golden vs a01faea; all gates | FE | — | M |
+| A-0 | Rebase m4/m4a-tracks onto origin/main a01faea → `m4/m4a-tracks-v2` (tonight); resolve styles.css; regenerate the flag-off golden; all gates; send the v2 SHA | **HoE** | — | M |
 | X-1 | `scripts/gate-all.sh` + telemetry schema test skeleton | ARCH | — | S |
-| S-1 | Migration chain takes `balance`; move `migrate-v7.ts` → `save/migrations/v7.ts`; still not wired (SAVE_VERSION 6) | SAV | A-0 | S |
+| S-1 | Migration chain takes `balance`; move `migrate-v7.ts` → `save/migrations/v7.ts`; split `READ_MAX` / `writeVersion(b)` (still 6/6) | SAV | A-0 | S |
 | S-2 | Newer-save refusal = zero writes (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main** | SAV | — | M |
-| S-3 | `v6_backup` write-once (LS + IDB), abort-on-failure, unit tests | SAV | S-1 | M |
-| S-4 | Wire `migrations[6]`, SAVE_VERSION 7, validator ranges, `migrationRefundCents`, `seenTracksExplainer`; chain + idempotence tests | SAV | S-1, S-3, S-2 | M |
+| S-3 | `v6_backup` write-once (LS + IDB). On failure: "Can't save" dialog once per session → toast, keep playing, don't commit v7, retry at save points; unit tests | SAV | S-1 | M |
+| S-4 | Wire `migrations[6]`; READ_MAX 7; write v7 only when M4 is on; keep the v6 `.bak` until Latest; down-project v7 in flag-off builds; validator; flag-off v6-write + M4-on v7-write/.bak tests | SAV | S-1, S-3, S-2 | M |
 | S-5 | Load order + first-offline-grant ×1.0 (M4A-30) tests | SAV | S-4 | S |
 | S-6 | `m4-v7-*` fixture files + SHA256SUMS; rc1-build × v7 rollback browser test (3 engines) | SAV | S-4 | M |
 | F-1 | Merge O1/O3 CSV columns into economy.csv (with Economy); sync-economy --check | FE | A-0 | S |
 | F-2 | Telemetry: `upgrade.track`, new events, session/worker fields, pinned list | FE | A-0, X-1 | S |
 | F-3 | `save_migrated` emit | FE | S-4, F-2 | S |
-| F-4 | TR-5 gate test (reporting) + payout base-price guard | FE | F-1 | S |
+| F-4 | TR-5 gate test (report-only in gate-all) + payout base-price guard | FE | F-1 | S |
 | F-5 | Flag plumbing: `m4.features.*`, QA-mode override, release-default check | FE | A-0 | S |
 | U-1 | Rebased 3-row Farm tab + highlight + bonus strip polish, scoped CSS, screenshots 360/1280 | UI | A-0 | M |
 | U-2 | Milestone toast (once, never on migration) | UI | U-1 | S |
@@ -139,13 +147,15 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 | F-6.. | M4-C Pause/Resume → M4-D market → M4-B golden egg → M4-E abilities/streak, each: sim PR (FE), UI PR (UI), save field PR if any (SAV, v7→v8 only if needed) | FE/UI/SAV | Q-1 | — |
 | F-9 | Remove M4-A flag-off path one release after default-on | FE | Q-1 + 1 release | S |
 
-**Ordering:** parallel start: A-0 (FE), S-2 (SAV on main), X-1 (ARCH). Then S-1→S-3→S-4→S-5/S-6 (critical path, ~2–3 days);
+**Ordering:** start now: A-0 (HoE, tonight), S-2 (Saves, ships on main first), X-1 (ARCH). Features (95daf662) branches from the v2 SHA once HoE sends it; every FE/UI M4-A task waits for it. Then S-1→S-3→S-4→S-5/S-6 (critical path, ~2–3 days);
 F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into main: S-2, X-1, A-0 (flag off), S-1, F-*, U-1/U-2, S-3, S-4+F-3 together, S-5, S-6, U-3/U-4, Q-1.
 
-## 9. Open questions
-1. Backup-write failure: keep the session on v6 silently, or show the "Saving is paused" dialog? Retry each load? (HoE/Saves)
-2. Does `migrateTracksV7` run with flag off (my ADR says yes)? Confirms that a flag-off release still writes v7 — Product/HoE sign-off needed because it makes the rc1 → M4 build a one-way door even with the flag off. Alternative: gate the SAVE_VERSION bump with the flag (two save versions per build; I recommend against).
-3. TR-5 blocking vs reporting until the L24–29 ×0.70 fix lands. (QA/Economy)
-4. Is `m4/m4a-tracks-v2` rebased onto a01faea or aaaa91a? Golden must be regenerated on the final base.
-5. `rc1-guard-save-qa.mjs` lives in qa/m3-scripts outside the repo; needs v6→v7 bump owner (QA).
-6. Should CI move to a hosted runner (GitHub Actions) — no spend implied for public minutes, but private repo minutes may cost.
+## 9. Decisions (HoE, 2026-10-16 19:29) and remaining open questions
+1. **Backup write fails → decided:** no new UI. Reuse the v2.2 "Can't save" dialog once per session, then the persistent toast. Never block play; never drop in-memory state (ADR M4-5).
+2. **Flag-off writes → decided:** flag-off builds keep writing v6; v7 is written only with M4 on. The v6 `.bak` is kept until M4 reaches Latest, and the v7 reader accepts v6 (ADR M4-4, **supersedes M4-2**).
+3. **TR-5 → decided:** report-only. It becomes blocking after 5 green runs in a row with no flake; HoE flips it (ADR M4-6).
+4. **v2 base → decided:** origin/main `a01faea`. HoE owns the A-0 rebase tonight; Features branches from the v2 SHA.
+5. *(open)* Who bumps `rc1-guard-save-qa.mjs` (in qa/m3-scripts, outside the repo)? → QA.
+6. **CI → decided:** no hosted minutes (spend, needs CEO). Gates run locally via `gate-all.sh`. A hosted-CI proposal with costs is optional and comes later via HoE (ADR M4-7).
+7. *(new, open)* In a flag-off build that opens a v7 save, should it write v6 (losing M4 progress) or refuse like a newer save? v0.2 assumes it writes v6, because the v7 reader accepts v6 and the .bak is kept. Needs HoE confirmation.
+
