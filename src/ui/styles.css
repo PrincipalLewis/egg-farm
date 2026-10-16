@@ -474,7 +474,7 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .rate[data-sign=neg]{color:#B83B37}.rate[data-sign=zero]{color:#6B5D52}
 .rate.rshake{animation:rshake 300ms linear 1}@keyframes rshake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 .rm .rate.rshake,.reduced-motion .rate.rshake{animation:none}
-.wage{display:flex;align-items:center;gap:4px;font:400 12px/16px var(--f-body);color:#6B5D52}.wage img{width:12px;height:12px}
+.wage{display:flex;align-items:center;gap:4px;white-space:nowrap;font:400 12px/16px var(--f-body);color:#6B5D52}.wage img{width:12px;height:12px}
 /* S2-9: Market tab queue-full dot */
 .nav-ic{position:relative;display:inline-block;width:28px;height:28px}
 .qdot{position:absolute;top:-3px;right:-5px;width:14px;height:14px;box-sizing:border-box;border-radius:50%;background:#B83B37;border:2px solid #fff}
