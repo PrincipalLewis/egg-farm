@@ -75,7 +75,7 @@ export class Game {
   save() {
     if (this.resetting || this.readOnly) return;
     const t = this.now();
-    try { this.mirror?.write(save(this.kv, this.state, t, this.b, this.bakAllowed)); }
+    try { const raw = save(this.kv, this.state, t, this.b, this.bakAllowed); this.mirror?.write(raw); }
     catch (e) { /* localStorage failed: the IndexedDB copy still gets this save */
       if (this.mirror) try { this.mirror.write(serialize(this.state, t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
@@ -103,7 +103,7 @@ export class Game {
     this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull();
   }
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
-  debugBackdateSave(ms: number) { this.save(); this.mirror?.write(save(this.kv, this.state, this.now() - ms)); this.resetting = true; }
+  debugBackdateSave(ms: number) { this.save(); const raw = save(this.kv, this.state, this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
   /** Reset save: drop the IndexedDB copy too (resolves when committed, or after 1 s), then the caller reloads. */
   clearMirror(): Promise<void> { return this.mirror ? Promise.race([this.mirror.clear(), new Promise<void>(r => setTimeout(r, 1000))]) : Promise.resolve(); }
   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */
