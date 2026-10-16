@@ -92,6 +92,9 @@
 - The stuck notice's show-once flag is its own LS key eggfarm.save.stuck_notice_shown, never written on a refused load, in RESET_KEYS.
 
 ## 2026-10-16 23:35 ADR M4-19 revision 2 (HoQA 0cadbd5 D-1a; Code Reviewer 0cadbd5 F1/F2; recorded by Senior Software Architect)
-- Not diverged if both copies carry a trusted idbUnknownAtBoot or have the same saveSeq: plain ranking, slot untouched. Pre-SQ-1 (a01faea-era) builds preserve saveSeq and base unchanged, so these rules keep rollback copies out of divergence. Replaces the "both unknown cannot occur" note.
+- Not diverged if both copies carry a trusted idbUnknownAtBoot: plain ranking, slot untouched. (Equal-saveSeq clause REVISED 23:40, see F2-EQ below.) Pre-SQ-1 (a01faea-era) builds preserve saveSeq and base unchanged, so these rules keep rollback copies out of divergence. Replaces the "both unknown cannot occur" note.
 - When the slot already holds a higher- (or equal-) saveSeq loser, the new loser is not moved and its store is not touched during divergence handling (save_recovery_slot{skip}).
 - Guarantee wording: a loser is never overwritten except by a session continuing from it, or after it is durably in the slot. IDB save/diverged is in the m4-design §3b byte-identical list (exempt from the no-serialized-save rule as a save copy by design).
+
+## 2026-10-16 23:40 ADR M4-19 revision 3: equal saveSeq (HoQA dcbd59e MUST F2-EQ, option (a); recorded by Senior Software Architect)
+- Same saveSeq, byte-identical ⇒ not diverged, nothing moves. Same saveSeq, different bytes ⇒ diverged (checked before the both-unknown rule): the later valid savedAt wins; equal savedAt ⇒ the LS copy wins (primary store). The loser goes byte for byte into the slot with read-back before any overwrite; existing slot rules apply (replace only for higher saveSeq, else skip and leave the loser store untouched).
