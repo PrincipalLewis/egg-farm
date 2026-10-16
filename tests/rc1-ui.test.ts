@@ -360,7 +360,7 @@ describe('Art FIX1 asleep badge corner + FIX3 HUD ⚠ ▼ + FIX4 44px hits', () 
     expect(css).toMatch(/nav \[data-nav=upgrades\]\{position:relative\}/);
   });
   it('HUD neg rate keeps ⚠ and adds ▼ (asleep $0 → ⚠ ▼ $0.00/s)', () => {
-    expect(app).toMatch(/`⚠ ▼ \$\{v\.text\.replace\(\/\^⚠ \/\, ''\)\}`/);
+    expect(app).toContain('setText(rateEl, headerRateText(v))'); // reviewer m2: logic moved to s2-economy-ui headerRateText (tested in rc2-cuta-followups)
   });
   it('tabs have ≥44px hit via min-height + overhang padding at all widths', () => {
     expect(css).toMatch(/\.tabs button\{box-sizing:border-box;min-height:44px;margin-block:-4px;padding:4px 0/);
