@@ -19,3 +19,19 @@ describe('M4A-4 offline grant from data', () => {
   });
   it('the row read is the Hens level (H1 => CSV L1 0.5/s, 3600 cap)', () => { expect(m4OfflineEggs(3600, 1, on)).toBe(1800); expect(m4OfflineEggs(7200, 1, on)).toBe(3600); });
 });
+import { Game } from '../src/game';
+import { serialize, SAVE_KEY } from '../src/save/save';
+import { migrateTracksV7 } from '../src/sim/migrate-v7';
+describe('M4A-4 post-migration boot grant (one function, HoE 23:10)', () => {
+  const T0 = 1760000000000;
+  const kv = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => { m.set(k, v); }, removeItem: (k: string) => { m.delete(k); } }; };
+  it('a committed (migrated) H0 farm away 1h gets the CSV grant 1,368 at boot; 2h+ gets the CSV cap 2,700', () => {
+    for (const [away, want] of [[3600_000, 1368], [3 * 3600_000, 2700]] as const) {
+      const s = { ...migrateTracksV7({ ...initialState(on), farmLevel: 0, collectionLevel: 0 }, on).state, tracksV7: 1 as const, v6BackupId: 'a1b2c3d4e5f60718' };
+      const k = kv(); k.setItem(SAVE_KEY, serialize(s, T0 - away));
+      const g = new Game(on, k as any, () => T0, undefined, 'dev', null, null, { idbBoot: 'ok' });
+      expect(g.tracksMigrationPending).toBe(false); expect(g.state.hensLevel).toBe(0);
+      expect(g.offline?.eggs).toBe(want); expect(g.offline?.eggs).toBe(m4OfflineEggs(away / 1000, 0, on));
+    }
+  });
+});
