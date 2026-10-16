@@ -29,7 +29,7 @@ describe('font credits', () => {
   it('OFL bundled, Settings line verbatim, README credits', () => {
     expect(existsSync(new URL('../public/fonts/OFL.txt', import.meta.url))).toBe(true);
     const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
-    expect(app).toContain('Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt"');
+    expect(app).toContain('Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${assetUrl(\'fonts/OFL.txt\')}"');
     expect(readFileSync(new URL('../README.md', import.meta.url), 'utf8')).toContain('## Credits');
   });
 });
