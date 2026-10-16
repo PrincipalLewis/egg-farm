@@ -298,7 +298,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     for (const [id, el] of [...dwellEls]) if (!lay.shown.some(d => d.id === id)) { dwellEls.delete(id); el.remove(); }
     for (const d of lay.shown) {
       let el = dwellEls.get(d.id);
-      if (!el) { el = h(`<div class="chip served" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyShort(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
+      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyShort(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
       kids.push(el);
     }
     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
