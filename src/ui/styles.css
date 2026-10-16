@@ -550,6 +550,8 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 .asleep-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-danger);color:#fff;font:700 12px/18px var(--f-display);text-align:center;z-index:2;box-sizing:border-box}
 .tabs [data-tab=workers]{position:relative}
 nav [data-nav=upgrades]{position:relative}
+/* rc2 (Art & UX 15:22): Upgrades nav dot + asleep count anchor to the icon top-right (-6/-6), like the Workers tab */
+nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 .asleep-badge.badge-pulse{animation:badgePulse 400ms ease-out}
 @keyframes badgePulse{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.asleep-badge.badge-pulse{animation:none}}

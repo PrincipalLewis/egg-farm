@@ -87,7 +87,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // S2-5 (art-ux/reviews/session2-ui-triage.md (b)): every nav button = icon + visible label + aria-label.
   const nav = h(`<nav class="actions" aria-label="Main">
     <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""><span class="qdot" hidden></span></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
-    <button data-nav="upgrades" aria-label="Upgrades"><img src="${A('icon-upgrade.svg')}" alt=""><span class="nav-lbl">Upgrades</span><span class="badge" hidden></span></button>
+    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span><span class="nav-lbl">Upgrades</span></button>
     <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span><span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
@@ -559,7 +559,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(ab); }
         return ab;
       };
-      const navAb = ensure(nav.querySelector('[data-nav=upgrades]'));
+      const navAb = ensure(nav.querySelector('[data-nav=upgrades] .nav-ic')); // rc2: anchored to the icon's top-right (-6/-6), not the button's
       const tabAb = ensure(document.querySelector('.tabs [data-tab=workers]'));
       for (const ab of [navAb, tabAb]) {
         if (!ab) continue;
