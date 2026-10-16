@@ -9,6 +9,8 @@
 import type { Balance } from '../config/balance';
 import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, savedAtRank, type KV } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
+/** ADR M4-11: IDB copy of the one-time v6 backup (same bytes as localStorage eggfarm.save.v6_backup). */
+export const IDB_V6_BACKUP_KEY = 'v6_backup';
 /** The subset of IDBFactory we use (lets unit tests pass a fake). */
 export type IdbFactory = Pick<IDBFactory, 'open'>;
 const req = <T>(r: IDBRequest<T>) => new Promise<T>((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -46,6 +48,14 @@ export class IdbMirror {
       const g = os.get(IDB_KEY); g.onsuccess = () => { if (this.seeNewer(g.result) === null) os.put(raw, IDB_KEY); };
       return new Promise(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) this.failed = true; res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
     } catch { this.failed = true; return Promise.resolve(); }
+  }
+  /** ADR M4-10/11 interim: best-effort write-once of the v6 backup (add() never overwrites an existing key). Never throws. */
+  writeV6Backup(raw: string): Promise<boolean> {
+    try {
+      const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE);
+      const g = os.get(IDB_V6_BACKUP_KEY); g.onsuccess = () => { if (g.result === undefined) os.add(raw, IDB_V6_BACKUP_KEY); };
+      return new Promise(res => { t.oncomplete = () => res(true); t.onerror = t.onabort = () => res(false); });
+    } catch { return Promise.resolve(false); }
   }
   /** Reset save: remove the mirror copy (resolves once committed or failed). */
   clear(): Promise<void> {

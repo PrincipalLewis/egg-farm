@@ -48,16 +48,12 @@ export class Game {
       this.telemetry.flush(true);
       if (!restored_from_backup) this.bakAllowed = false;
     }
-    // Interim track migration (ADR M4-8): back up the pre-migration bytes exactly once, before the first save writes the
-    // migrated state over them. If the backup can't be written, run this session on the unmigrated save and write
-    // nothing over it (no autosave), so the migration retries on the next load (M4A-31(a)1).
-    let backupFailed = false;
-    if (f?.preTracksRaw !== undefined && r.newer === undefined) {
-      const w = writeV6Backup(kv, f.preTracksRaw);
-      if (w === 'failed') { backupFailed = true; this.telemetry.track('save_migration_aborted', { reason: 'backup_failed' }); }
-    }
+    // Interim track migration (ADR M4-8/M4-10/M4-11, m4-design §3 9.1): the raw pre-migration bytes go to v6_backup
+    // exactly once, before the first save writes the migrated state over main (localStorage first; IDB best effort).
+    // If the localStorage write fails: keep playing on the migrated in-memory state, never commit it to main, and retry
+    // the backup at every save point; the first success commits. (Can't-save dialog/toast for this case: S-3.)
+    if (f?.preTracksRaw !== undefined && r.newer === undefined) { this.pendingV6Backup = f.preTracksRaw; this.tryV6Backup(); }
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
-    if (backupFailed) { this.readOnly = true; this.mirror = null; }
     if (!f && m4On(b)) this.state = { ...this.state, tracksV7: 1 }; // new M4 farm: tracks start at 0, never re-migrated
     this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
     if (f) {
@@ -109,8 +105,21 @@ export class Game {
   private held() { return this.now() < this.holdUntil; }
   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
+  /** Raw v6 bytes still to back up before the migrated state may be committed (null = nothing pending). */
+  private pendingV6Backup: string | null = null;
+  private v6BackupFailReported = false;
+  private tryV6Backup(): boolean {
+    const raw = this.pendingV6Backup; if (raw === null) return true;
+    if (writeV6Backup(this.kv, raw) === 'failed') {
+      if (!this.v6BackupFailReported) { this.v6BackupFailReported = true; this.telemetry.track('save_migration_aborted', { reason: 'backup_failed' }); }
+      return false;
+    }
+    this.pendingV6Backup = null; void (this.mirror as { writeV6Backup?(r: string): Promise<boolean> } | null)?.writeV6Backup?.(raw);
+    return true;
+  }
   save() {
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
+    if (!this.tryV6Backup()) return; // never commit the migrated farm over main while its v6 backup is missing
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     if (this.newerGuard()) return;
     const t = this.now();

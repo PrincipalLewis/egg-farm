@@ -46,6 +46,12 @@ describe('(b) v6 backup: exactly once, before the in-place change', () => {
     expect(iB).toBeGreaterThanOrEqual(0); expect(iB).toBeLessThan(iM);
     expect(order.filter(k => k === V6_BACKUP_KEY)).toHaveLength(1);
   });
+  it('IDB copy: written once via the mirror after the localStorage backup succeeds', () => {
+    const before = raw6(mainState(10, 7)); const kv = mem() as any; kv.setItem(SAVE_KEY, before);
+    const idb: string[] = []; const mirror: any = { write() {}, clear: async () => {}, writeV6Backup: async (r: string) => { idb.push(r); return true; } };
+    const g = new Game(on, kv, () => 1760000000500, undefined, 'dev', mirror); g.save(); g.save();
+    expect(idb).toEqual([before]);
+  });
   it('later loads and saves never rewrite the backup', () => {
     const before = raw6(mainState(15, 12)); const kv = mem() as any; kv.setItem(SAVE_KEY, before);
     new Game(on, kv, () => 1760000000500).save();
@@ -55,13 +61,15 @@ describe('(b) v6 backup: exactly once, before the in-place change', () => {
     kv.setItem(SAVE_KEY, raw6(mainState(16, 12))); new Game(on, kv, () => 1760000010000);
     expect(writes).toBe(0); expect(kv.getItem(V6_BACKUP_KEY)).toBe(before);
   });
-  it('backup write fails -> main keeps the unmigrated bytes (nothing written over it); retried next load', () => {
+  it('backup write fails -> play continues on the migrated state, main keeps the v6 bytes; the next save point retries and commits', () => {
     const before = raw6(mainState(10, 7)); const kv = mem() as any; kv.setItem(SAVE_KEY, before);
     const set = kv.setItem.bind(kv); let fail = true;
     kv.setItem = (k: string, v: string) => { if (fail && k === V6_BACKUP_KEY) throw new DOMException('full', 'QuotaExceededError'); set(k, v); };
-    const g = new Game(on, kv, () => 1760000000500); g.save();
+    const g = new Game(on, kv, () => 1760000000500); g.save(); g.save();
+    expect(g.state.tracksV7).toBe(1); expect(g.state.hensLevel).toBe(10);
     expect(kv.getItem(SAVE_KEY)).toBe(before); expect(kv.getItem(V6_BACKUP_KEY)).toBeNull();
-    fail = false; new Game(on, kv, () => 1760000001000);
+    expect(g.telemetry.events().filter((e: any) => e.type === 'save_migration_aborted')).toHaveLength(1);
+    fail = false; g.save();
     expect(kv.getItem(V6_BACKUP_KEY)).toBe(before); expect(JSON.parse(kv.getItem(SAVE_KEY)).state.tracksV7).toBe(1);
   });
 });
