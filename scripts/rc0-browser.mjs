@@ -86,12 +86,13 @@ sections.s21 = async () => {
     const r = await page.evaluate(() => { const t = document.querySelector('.toast'), tr = t.getBoundingClientRect(), pz = +getComputedStyle(document.querySelector('#panel-layer')).zIndex;
       return { src: document.querySelector('#coop').getAttribute('src').split('/').pop(), sheet: !document.querySelector('#p-upgrades').hidden, text: t.textContent, vis: getComputedStyle(t).visibility, z: +getComputedStyle(t).zIndex, pz, inView: tr.top >= 0 && tr.bottom <= innerHeight }; });
     ok(`S2-1 F${F}->${F + 1}: ${sprite}, "Coop upgraded!" visible above the open sheet`, r.src === sprite && r.sheet && r.text === 'Coop upgraded!' && r.vis === 'visible' && r.z > r.pz && r.inView, JSON.stringify(r));
-    if (shot && F === 4) await page.screenshot({ path: `${SHOTS}/rc1-s2-1-toast-over-sheet-390.png` });
-    await page.waitForTimeout(1600);
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-1-toast-over-sheet-F${F + 1}-390.png` });
+    await page.locator('.sheet:not([hidden]) .close').click(); await page.waitForTimeout(150);
+    const bounce = await page.evaluate(() => document.querySelector('#coop').classList.contains('bounce'));
+    ok(`S2-1 F${F + 1}: coop bounce plays once the sheet closes`, bounce);
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-1-${sprite.replace('.svg', '')}-390.png` });
+    await page.waitForTimeout(2600); await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click();
   }
-  await page.locator('.sheet:not([hidden]) .close').click(); await page.waitForTimeout(100);
-  ok('S2-1 coop bounce plays once the sheet closes', await page.evaluate(() => document.querySelector('#coop').classList.contains('bounce')));
-  if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-1-coop-l20-390.png` });
   await ctx.close();
 };
 // ---------- AC14b save-recovery dialog v1.2: alertdialog, outside tap / Esc / Back inert, Export button 44px ----------
@@ -159,12 +160,13 @@ sections.b2 = async () => {
     const { ctx, page } = await open({ w, h: w > 900 ? 800 : 844, ls: { 'eggfarm.ui': DONE } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
     await page.waitForTimeout(300); const shown = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { top: r.top, vis: getComputedStyle(e).visibility, text: e.textContent }; });
-    await page.waitForTimeout(2200);
+    await page.waitForTimeout(1900); const mid = await page.locator('.toast').evaluate(e => getComputedStyle(e).visibility); // 2.2 s: still up (2.5 s)
+    await page.waitForTimeout(800);
     const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const below = w < 960;
     const after = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { bottom: r.bottom, vis: getComputedStyle(e).visibility, op: getComputedStyle(e).opacity }; });
     // QA precheck-2fae4c4 §1: width-aware. <960: sits 8px below the queue strip (F1) and fades in place; docked: slides off the top.
-    ok(`B2 L5 toast shows then is fully gone (${below ? 'below strip, faded' : 'off the top'}) (${w})`, shown.vis === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
-      && (below ? Math.abs(shown.top - (qb + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, after, qb }));
+    ok(`B2 L5 toast shows then is fully gone (${below ? 'below strip, faded' : 'off the top'}) (${w})`, shown.vis === 'visible' && mid === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
+      && (below ? Math.abs(shown.top - (qb + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, mid, after, qb }));
     await ctx.close();
   }
 };

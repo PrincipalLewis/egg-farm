@@ -106,7 +106,7 @@ describe('S2-3b + §3.3 synced to P1q (queue spec v1.2 §6)', async () => {
   });
   it('no slot grow-in and no "+1 customer slot" toast; the "+N" chip pulses once (reduced motion: colour flash)', () => {
     expect(app).not.toMatch(/'unlock'|customer slot|slotToastPending/);
-    expect(app).toContain("showToast('Coop upgraded!')");
+    expect(app).toContain("showToast('Coop upgraded!', COOP_TOAST_MS)");
     expect(app).toMatch(/retrigger\(moreChip, rm\(\) \? 'qflash' : 'qpulse'\)/);
     expect(css).toMatch(/\.chip\.more\.qpulse\{animation:qpulse 600ms[^}]*\}@keyframes qpulse\{50%\{transform:scale\(1\.12\)\}\}/);
     expect(css).toMatch(/\.chip\.more\.qflash\{animation:qflash 600ms/);
@@ -136,4 +136,7 @@ describe('AC14b save-recovery dialog v1.2 (UI only)', () => {
     expect(src).toContain('if (r.copy_failed && r.raw) sessionOldSave = r.raw;');
     expect(src).not.toMatch(/localStorage|setItem|indexedDB/);
   });
+});
+describe('S2-1 toast duration (Art & UX 08:47)', () => {
+  it('"Coop upgraded!" stays 2.5 s; other toasts keep 1.3 s', () => { expect(app).toContain('export const COOP_TOAST_MS = 2500;'); expect(app).toContain("showToast('Coop upgraded!', COOP_TOAST_MS)"); expect(app).toContain('(text: string, ms = 1300)'); });
 });

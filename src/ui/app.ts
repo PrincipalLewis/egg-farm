@@ -25,6 +25,8 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
+/** S2-1 (Art & UX 2026-10-16 08:47): the coop toast stays 2.5 s (layout-spec §4.7 still says 1.5 s). */
+export const COOP_TOAST_MS = 2500;
 interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
@@ -140,7 +142,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
+  const showToast = (text: string, ms = 1300) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), ms); };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
@@ -414,7 +416,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       // S2-1 (layout-spec §4.7 rc1): the toast shows now, above any open sheet (z-index over #panel-layer); the bounce +
       // sparkle wait until the coop is visible (sheet closed; docked plays at once).
       if (!rm()) { if (open && !docked.matches) coopFxPending = true; else { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); } }
-      showToast('Coop upgraded!'); // §4.7: plain copy, only at the L5/L10/L20 tier steps
+      showToast('Coop upgraded!', COOP_TOAST_MS); // §4.7: plain copy, only at the L5/L10/L20 tier steps
     }
     if (coopFxPending && (!open || docked.matches)) { coopFxPending = false; if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); } }
     renderQueue();
