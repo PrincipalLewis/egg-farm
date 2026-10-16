@@ -500,3 +500,27 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 /* Product Oct 16: visible build hash, small + muted, in the HUD spacer, never a tap target */
 .hud .spacer{display:flex;justify-content:flex-end;align-items:center;min-width:0}
 .build-tag{pointer-events:none;-webkit-user-select:none;user-select:none;font:600 11px var(--f-body);color:rgb(255 246 229 / .8);white-space:nowrap;padding-inline:4px}
+
+/* rc1 upgrade-value chips (art-ux/rc1-upgrade-value.md v1.3) */
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0}
+.vchip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:var(--r-pill);font:700 12px var(--f-body);white-space:nowrap;pointer-events:none;line-height:20px}
+.vchip img{width:12px;height:12px}
+.vchip.eff{background:#E8F4E4;color:var(--c-meadow-strong)}
+.vchip.pb{background:#FFF6E0;color:var(--c-text);border:1px solid #E6D9C3;line-height:18px}
+.vchip.bb{background:var(--c-yolk,#FFC93C);color:var(--c-text)}
+.vchip.muted{background:var(--c-surface,#fff8ee);color:var(--c-muted)}
+.up.best-buy{outline:3px solid var(--c-focus);outline-offset:2px}
+.up.best-buy .btn.buy.affordable{box-shadow:var(--shadow),0 0 0 3px rgb(107 191 89/.35)}
+
+/* Asleep / Unpaid card (Art v1.3) */
+.wk-banner{grid-column:1/-1;margin:-10px -10px 6px;padding:6px 10px;background:var(--c-barn);color:#fff;font:700 14px var(--f-body);border-radius:12px 12px 0 0}
+.wk.is-off .wk-body{opacity:.5}
+.wk.is-off .wk-refill{opacity:1}
+.wk{position:relative}
+
+/* Bottom-nav asleep badge on Upgrades (Workers entry) */
+.asleep-badge{position:absolute;top:4px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-barn);color:#fff;font:700 11px/18px var(--f-body);text-align:center;z-index:2}
+nav [data-nav=upgrades]{position:relative}
+.asleep-badge.badge-pulse{animation:badgePulse 400ms ease-out}
+@keyframes badgePulse{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.pill .rate.neg,.rate.neg{color:var(--c-barn)!important}

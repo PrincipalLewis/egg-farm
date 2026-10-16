@@ -5,7 +5,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
-import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, offlineEggsParts, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, offlineEggsParts, fmtTimeToAfford } from './format';
 import { TapFx, Throttle, clampToSafe } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -15,13 +15,15 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coa
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { instantSale, saleLine, compact } from './welcome-sale';
-import { netRateCents, rateView, queueFull, QueueDot } from './s2-economy-ui';
+import { rateView, queueFull, QueueDot } from './s2-economy-ui';
+import { incomePerSec, secondsToAffordSteady, EtaHold, asleepOrUnpaidCount, productionStopped } from '../econ/income';
+import { optionGain, bestBuy } from '../econ/best-buy';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
-import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
+import { selectGoal, GoalHysteresis, goalAria, type Goal } from './next-goal';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navManageView, type NavAria } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -52,7 +54,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   audio.enabled = flags.sfx; applyRM();
   const sfx = (n: SfxName) => audio.play(n);
   const now = () => performance.now();
-  const income = new IncomeRate(60_000);
+  const farmEta = new EtaHold(), collEta = new EtaHold();
+  let goalImm = false;
   const tapFx = new TapFx({ ...b.feel, flightMs: b.feel.egg_flight_ms }, now);
   const qfullCue = new Throttle(b.feel.queue_full_cue_min_gap_ms, now);
 
@@ -203,12 +206,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   sellAllBtn.addEventListener('click', () => { if (sellAllBtn.getAttribute('aria-disabled') === 'true') return cantAfford(sellAllBtn); lastSellSource = sellAllBtn; g.dispatch({ type: 'sellAll' }); });
   uRow.addEventListener('click', e => {
     const t = e.target as HTMLElement;
+    const goto = t.closest('[data-goto]') as HTMLElement | null;
+    if (goto?.dataset.goto === 'collection') { tab = 'collection'; dirty = true; render(); return; }
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
     if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
     const act = bt.dataset.act, wid = bt.dataset.w as any;
-    if (act) { g.dispatch(act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : act === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' }); dirty = true; return; }
-    lastBuyBtn = bt; g.dispatch({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' });
+    if (act) { goalImm = true; goalNow = true; g.dispatch(act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : act === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' }); dirty = true; return; }
+    lastBuyBtn = bt; goalImm = true; goalNow = true; g.dispatch({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' });
     setDisabled(bt, true); // F5: no double buy within the same frame
   });
   let lastBuyBtn: HTMLElement | null = null;
@@ -312,7 +317,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   g.on((e: GameEvent) => {
     switch (e.type) {
       case 'sell': {
-        income.add(now(), e.k * e.price); sfx('sell');
+        sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinIcon, i, 20, i === 0 ? () => pulse(coinPill) : undefined);
         else pulse(coinPill);
@@ -339,12 +344,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- M3-AC5 next-goal strip ----------
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
-  const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+  const goalHold = new GoalHysteresis(5000); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
     if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
     const imm = goalNow; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
+    const prev = goalShown, gl = goalHold.tick(g.state, b, t, imm || goalImm); goalImm = false; goalShown = gl;
     setText(goalLbl, gl.label); setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
@@ -391,22 +396,43 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
     ];
     const nextTier = [5, 10, 20].find(t => t > F);
+    const key = isF ? 'FARM' as const : 'COLL' as const;
+    const og = max ? null : optionGain(s, b, key);
+    const baseInc = incomePerSec(s, b, { assumeWorking: true });
+    const pct = og && baseInc > 0 && og.gain > 0 ? Math.round(100 * og.gain / baseInc) : 0;
+    const bb = bestBuy(s, b);
+    const isBest = !!(bb && bb.key === key && !max);
+    let chips = '';
+    if (!max && og) {
+      const effect = baseInc > 0 && og.gain > 0 ? `<span class="vchip eff">+${pct}% income</span>`
+        : `<span class="vchip eff">${isF ? `+${fmtCount(S.eggsPerSec(F + 1, b) - S.eggsPerSec(F, b))} eggs/s` : `+${S.eggsPerTap(C + 1, b) - S.eggsPerTap(C, b)} eggs/tap`}</span>`;
+      let pb = '';
+      if (og.gain > 0) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">Pays back in ${fmtTimeToAfford(og.payback)}</span>`;
+      else if (og.bundlePayback != null) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">With next buys: ${fmtTimeToAfford(og.bundlePayback)}</span>`;
+      else if (isF) pb = `<span class="vchip pb"><img src="${A('icon-customer.svg')}" alt="">Unlocks more customers</span>`;
+      const best = isBest ? `<span class="vchip bb">★ Best buy</span>` : '';
+      chips = `<div class="chips">${effect}${pb}${best}</div>`;
+    }
     let hint = '';
     if (!max && !can) {
-      if (isF) {
-        const secs = income.secondsToAfford(now(), cost * 100 - s.coinsCents);
-        hint = secs === null ? `<div class="hint eta"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(null)}</div>`
-          : `<div class="hint eta ${secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(secs)}</div>`;
-      } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
+      const need = cost * 100 - s.coinsCents;
+      const raw = secondsToAffordSteady(s, b, need);
+      const hold = isF ? farmEta : collEta;
+      const secs = hold.tick(raw, incomePerSec(s, b), s.coinsCents);
+      hint = `<div class="hint eta ${secs != null && secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(secs)}</div>`;
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
-    // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
+    // Limited by collecting → Collection (HoP D4 / UC12)
     if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
-      hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
-    return `<div class="up">
+      hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by collecting · <button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades.">Go to Collection →</button></div>`;
+    const aria = !max && og && baseInc > 0 && og.gain > 0
+      ? `${isF ? 'Farm level' : 'Collect per tap'}, level ${L}. Adds ${pct} percent income. ${og.gain > 0 ? `Pays back in about ${fmtTimeToAfford(og.payback).replace('~', '')}.` : ''} ${isBest ? 'Best buy.' : ''} Buy for ${fmtMoney(cost * 100)}.`
+      : '';
+    return `<div class="up${isBest ? ' best-buy' : ''}"${aria ? ` aria-label="${aria.replace(/"/g, '&quot;')}"` : ''}>
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      ${chips}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
@@ -447,8 +473,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     setText(collectBtn, collectLabel(coopWhole, S.eggsPerTap(s.collectionLevel, b), fmtCount));
     setDisabled(collectBtn, coopWhole < 1);
     // S2-8 header net rate (<= 1 update/s); first negative tick shakes the line (not under reduced motion)
-    if (now() - rateAt >= 1000) { rateAt = now(); const v = rateView(netRateCents(income.centsPerSec(now()), s, b));
-      setText(rateEl, v.sign === 'neg' ? `▼${v.text}` : v.text); if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
+    if (now() - rateAt >= 1000) { rateAt = now();
+      const cps = incomePerSec(s, b) * 100; // $/s → cents/s for rateView
+      const v = rateView(cps, { stopped: productionStopped(s, b) });
+      setText(rateEl, v.text); rateEl.classList.toggle('neg', v.sign === 'neg');
+      if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
     // S2-9 queue-full dot on the Market tab (the sheet never opens by itself)
     { const d = qDot.update(queueFull(s, b), open === 'market', now(), rm()); setHidden(qDotEl, !d.show); if (d.pulse) retrigger(qDotEl, 'qdpulse');
@@ -457,6 +486,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
     setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);
+    // Asleep/Unpaid badge on bottom-nav Upgrades (= Workers entry). Art v1.3: red, white count, ≥18px, top-right.
+    { const n = asleepOrUnpaidCount(s, b); let ab = nav.querySelector('[data-nav=upgrades] .asleep-badge') as HTMLElement | null;
+      if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; nav.querySelector('[data-nav=upgrades]')!.append(ab); }
+      const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
+      if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
+      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement;
+      const al = n > 0 ? `Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
+      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al); }
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
@@ -535,7 +572,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (introA) { const hide = modalKind === 'welcome' || !!open; if (introA.hidden !== hide) introA.hidden = hide; }
   };
   const unlockFarmMH = b.workers.market_hand.unlock_farm, hireCostMH = b.workers.market_hand.hire_cost * 100;
-  // Part B: first hire (any worker) -> energy bar, then Manage. Once per save.
+  // Part B: first hire (any worker) -> energy bar, then Refill. Once per save.
   g.on(e => {
     if (e.type !== 'worker_hire' || flags.workersIntroB) return;
     flags.workersIntroB = true; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
@@ -545,7 +582,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       coach('Workers get tired over time.', row?.querySelector('.ebar') ?? row ?? null, 3000);
       window.setTimeout(() => {
         const r2 = workerRow(e.worker), full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
-        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
+        coach(full ? 'Tap <b>Refill</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Refill</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
         introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' });
       }, 3100);
     }, 50);

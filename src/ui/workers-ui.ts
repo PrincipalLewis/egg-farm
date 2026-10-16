@@ -61,9 +61,15 @@ export function workersHtml(s: GameState, b: Balance): string {
         ${locked ? `<div class="hint">Unlocks at Farm L${unlockFarm(id, b)}</div>` : `<button class="btn buy ${can ? 'affordable' : ''}" data-act="hire" data-w="${id}" aria-disabled="${!can}">Hire ${fmtMoney(cost)}</button>`}</div>`;
     }
     const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b); // B5: enabled only <= threshold
-    const cap = manageCaption(w, cd, b); // v1.3: greyed Manage explains why
+    const cap = manageCaption(w, cd, b);
+    const off = m === 'asleep' || m === 'unpaid';
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid ⚠' : 'Asleep 💤';
-    const yawn = isYawning(w, b); // v1.1 yawn cue at <= yawn_at_pct: amber ring + overlay-yawn.svg (layout §4.1)
+    const banner = m === 'unpaid' ? `<div class="wk-banner unpaid" role="status">⚠ Unpaid, production stopped</div>`
+      : m === 'asleep' ? (id === 'grader'
+        ? `<div class="wk-banner asleep" role="status">💤 Asleep, bonus down to 15%</div>`
+        : `<div class="wk-banner asleep" role="status">💤 Asleep, production stopped</div>`)
+      : '';
+    const yawn = isYawning(w, b);
     let extra = '';
     if (id === 'grader') {
       const tiers = b.workers.grader.tiers, i = s.graderTier;
@@ -71,10 +77,12 @@ export function workersHtml(s: GameState, b: Balance): string {
         ? F < tiers[i].farm ? `<div class="hint">Next grade ×${tiers[i].mult} at Farm L${tiers[i].farm}</div>`
           : `<button class="btn buy ${s.coinsCents >= graderTierCostCents(i, b) ? 'affordable' : ''}" data-act="tier" aria-disabled="${s.coinsCents < graderTierCostCents(i, b)}">Grade ×${tiers[i].mult} ${fmtMoney(graderTierCostCents(i, b))}</button>` : '');
     }
-    return `<div class="wk ${m}${yawn ? ' yawn' : ''}" data-w="${id}">${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
+    const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}
-      <button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}</div>`;
+      ${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}`;
+    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}`;
+    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */

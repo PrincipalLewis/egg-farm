@@ -188,9 +188,9 @@ describe('S2-8 net rate + wages, S2-9 queue-full dot (stubbed data seam)', async
   const { initialState } = await import('../src/sim/state');
   const { workersHtml } = await import('../src/ui/workers-ui');
   it('rate text / sign / aria', () => {
-    expect(E.rateView(120)).toEqual({ text: '+$1.20/s', sign: 'pos', aria: 'Net income plus 1.20 dollars per second' });
-    expect(E.rateView(-3)).toEqual({ text: '\u2212$0.03/s', sign: 'neg', aria: 'Net income minus 3 cents per second' });
-    expect(E.rateView(0.3).text).toBe('$0.00/s'); expect(E.rateView(-7.5).text).toBe('\u2212$0.08/s'); expect(E.rateView(99999).text).toBe('+$999.99/s'); expect(E.rateView(0).sign).toBe('zero');
+    expect(E.rateView(120)).toMatchObject({ text: '+$1.20/s', sign: 'pos', money: '$1.20', aria: 'Net income plus $1.20 per second' });
+    expect(E.rateView(-3).text).toBe('⚠ \u2212$0.03/s'); expect(E.rateView(-3).aria).toBe('Net income minus $0.03 per second'); expect(E.rateView(-3).money).toBe('$0.03');
+    expect(E.rateView(0.3).text).toBe('⚠ $0.00/s'); expect(E.rateView(-7.5).text).toBe('⚠ \u2212$0.08/s'); expect(E.rateView(99999).text).toBe('+$999.99/s'); expect(E.rateView(0).sign).toBe('zero');
   });
   it('wage per second = wage_per_farm_per_min x F / 60; unwaged workers have no line', () => {
     expect(E.wagePerSecCents('market_hand', 1, b)).toBeCloseTo(b.workers.market_hand.wage_per_farm_per_min / 60 * 100);
@@ -237,7 +237,7 @@ describe('S2-8 exact rate (Product ruling: under $0.10/s per minute)', async () 
   });
   it('wage format switches at $0.10/s; net rate stays per second, 2 decimals (Art & UX 09:41)', () => {
     expect(E.fmtExactRate(9.99)).toBe('$5.99/min'); expect(E.fmtExactRate(10)).toBe('$0.10/s');
-    expect(E.rateView(-1.25).text).toBe('\u2212$0.01/s'); expect(E.rateView(50).text).toBe('+$0.50/s');
+    expect(E.rateView(-1.25).text).toBe('⚠ \u2212$0.01/s'); expect(E.rateView(50).text).toBe('+$0.50/s');
   });
   it('per-second wage labels: two decimals under $1,000/s, short form from $1,000/s (Product 10:12)', () => {
     expect(E.wageLine(50, 'c.svg')).toContain('Wage $0.50/s'); expect(E.wageLine(125, 'c.svg')).toContain('Wage $1.25/s');

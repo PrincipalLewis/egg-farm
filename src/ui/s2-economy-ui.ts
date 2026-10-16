@@ -1,7 +1,5 @@
 /** S2-8 header net rate + wage lines, S2-9 Market queue-full dot (Art & UX approved visuals, Oct 16).
- *  DATA SEAM: net rate, per-worker wage and the queue-full flag are meant to come from m3/rc1-s2-money. Until that lands
- *  they are derived here; values match origin/m3/rc1-s2-money 9c3d47b src/ui/rates.ts (listedWageCentsPerSec / wageCentsPerSec /
- *  netCentsPerSec / queueFull, exposed as ui.rates()): wage = wage_per_farm_per_min x F / 60 exact, 0 when Asleep or Unpaid. */
+ *  HUD rate + aria both come from rateView over incomePerSec (T6 / MK-39 critic: one formatter). */
 import type { Balance } from '../config/balance';
 import { queueMax, type GameState } from '../sim/state';
 import type { WorkerId } from '../sim/workers';
@@ -24,7 +22,6 @@ export function fmtRateAbs(cents: number) {
   if (d < 1000) return `$${Math.round(d)}`;
   return d < 1e6 ? `$${(Math.floor(d / 100) / 10).toFixed(1)}K` : `$${(Math.floor(d / 1e5) / 10).toFixed(1)}M`;
 }
-/** Wage labels (Product + Art & UX, Oct 16): the exact rate charged; under $0.10/s per minute ("$0.75/min"), from $0.10/s per second. */
 /** Two decimals below $1,000 ("$1.25", "$999.99"), else the short form ("$1.2K") — Product ruling Oct 16 10:12. */
 export function fmtMoney2(absCents: number) {
   const c = Math.round(absCents);
@@ -35,16 +32,43 @@ export function fmtExactRate(centsPerSec: number) {
   return a < 10 ? `$${(Math.round(a * 60) / 100).toFixed(2)}/min` : `${fmtMoney2(a)}/s`;
 }
 export type RateSign = 'pos' | 'neg' | 'zero';
-/** Art & UX display ruling (Oct 16 09:41): the money-pill net rate is always per second with two decimals ("−$0.07/s"). */
-export function rateView(cps: number): { text: string; sign: RateSign; aria: string } {
-  const c = Math.sign(cps) * Math.round(Math.abs(cps)); // whole cents per second = two decimals, half away from zero
-  if (c === 0) return { text: '$0.00/s', sign: 'zero', aria: 'Net income zero per second' };
-  const abs = Math.abs(c), d = (abs / 100).toFixed(2);
-  const money = fmtMoney2(abs);
-  const amount = abs < 100 ? `${abs} cent${abs === 1 ? '' : 's'}` : `${d} dollars`;
-  return c > 0 ? { text: `+${money}/s`, sign: 'pos', aria: `Net income plus ${amount} per second` }
-    : { text: `\u2212${money}/s`, sign: 'neg', aria: `Net income minus ${amount} per second` };
+
+/** Single money token shared by HUD text and aria (T6). Always "$X.XX" / short form — never a second toFixed path. */
+export function rateMoney(absCents: number): string {
+  return fmtMoney2(Math.abs(Math.round(absCents)));
 }
+
+/**
+ * HUD net-rate view. `text` and `aria` share `rateMoney` so the spoken amount always matches the visible one.
+ * AC-R2: never positive while production is stopped; ≤0 → red ⚠.
+ */
+export function rateView(cps: number, opts: { stopped?: boolean } = {}): { text: string; sign: RateSign; aria: string; money: string } {
+  let c = Math.sign(cps) * Math.round(Math.abs(cps));
+  if (opts.stopped && c > 0) c = 0;
+  if (c === 0) {
+    const money = rateMoney(0);
+    const aria = opts.stopped
+      ? `Net income ${money} per second, production stopped`
+      : `Net income ${money} per second`;
+    return { text: `⚠ ${money}/s`, sign: opts.stopped ? 'neg' : 'zero', aria, money };
+  }
+  const money = rateMoney(c);
+  if (c < 0) {
+    return {
+      text: `⚠ \u2212${money}/s`,
+      sign: 'neg',
+      aria: `Net income minus ${money} per second`,
+      money,
+    };
+  }
+  return {
+    text: `+${money}/s`,
+    sign: 'pos',
+    aria: `Net income plus ${money} per second`,
+    money,
+  };
+}
+
 /** Wage line markup (hire cards under the effect line; worker cards at the bottom). '' for unwaged workers. */
 export const wageLine = (cents: number, coinIcon: string) => cents > 0 ? `<div class="wage num"><img src="${coinIcon}" width="12" height="12" alt="">Wage ${fmtExactRate(cents)}</div>` : '';
 /** S2-9 dot state: shown while the queue is full and Market hasn't been opened during this full spell. */
