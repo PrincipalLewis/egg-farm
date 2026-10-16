@@ -52,13 +52,14 @@ async function boot() {
   let playHere = false; try { playHere = sessionStorage.getItem('eggfarm.playHere') === '1'; sessionStorage.removeItem('eggfarm.playHere'); } catch { /* ignore */ }
   let gRef: Game | null = null;
   const lease = new TabLease(localStorage, channel(), () => gRef?.deactivate());
+  await lease.requestFlush(300); // the current owner saves its latest state and holds
   const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
   // D2: newest valid copy of localStorage / IndexedDB wins.
   const mirror = await IdbMirror.open(); if (mirror) { try { reconcile(localStorage, await mirror.read(), balance); } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror);
-  gRef = g; g.canWrite = () => lease.owns(); g.onInactive = otherTabModal;
+  gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
