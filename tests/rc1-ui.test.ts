@@ -189,13 +189,13 @@ describe('S2-8 net rate + wages, S2-9 queue-full dot (stubbed data seam)', async
   const { workersHtml } = await import('../src/ui/workers-ui');
   it('rate text / sign / aria', () => {
     expect(E.rateView(120)).toEqual({ text: '+$1.2/s', sign: 'pos', aria: 'Net income plus 1.2 dollars per second' });
-    expect(E.rateView(-3)).toEqual({ text: '\u2212$0.03/s', sign: 'neg', aria: 'Net income minus 3 cents per second' });
-    expect(E.rateView(0.3).text).toBe('$0/s'); expect(E.rateView(0).sign).toBe('zero');
+    expect(E.rateView(-3)).toEqual({ text: '\u2212$1.80/min', sign: 'neg', aria: 'Net income minus 1.80 dollars per minute' }); // < $0.10/s: exact per minute
+    expect(E.rateView(0.001).text).toBe('$0/s'); expect(E.rateView(0.3).text).toBe('+$0.18/min'); expect(E.rateView(0).sign).toBe('zero');
   });
   it('wage per second = wage_per_farm_per_min x F / 60; unwaged workers have no line', () => {
     expect(E.wagePerSecCents('market_hand', 1, b)).toBeCloseTo(b.workers.market_hand.wage_per_farm_per_min / 60 * 100);
     expect(E.wagePerSecCents('hawker', 10, b)).toBe(0); expect(E.wageLine(0, 'c')).toBe('');
-    expect(E.wageLine(3, 'c.svg')).toBe('<div class="wage num"><img src="c.svg" width="12" height="12" alt="">Wage $0.03/s</div>');
+    expect(E.wageLine(3, 'c.svg')).toBe('<div class="wage num"><img src="c.svg" width="12" height="12" alt="">Wage $1.80/min</div>');
   });
   it('net rate subtracts wages of paid, awake workers only', () => {
     const s: any = { ...initialState(b, 3), farmLevel: 6, workers: { market_hand: { energy: 50, cdS: 0 }, coop_hand: { energy: 0, cdS: 0 } } };
@@ -205,7 +205,7 @@ describe('S2-8 net rate + wages, S2-9 queue-full dot (stubbed data seam)', async
     const s: any = { ...initialState(b, 3), farmLevel: 10, coinsCents: 1e9, workers: { coop_hand: { energy: 90, cdS: 0 } } };
     const h = workersHtml(s, b);
     expect(h).toMatch(/data-w="market_hand"><h3>Market Hand<\/h3><div class="meta">[^<]+<\/div><div class="wage num">/);
-    expect(h).toMatch(/data-w="coop_hand">[\s\S]*Wage \$[\d.]+\/s<\/div><\/div>/);
+    expect(h).toMatch(/data-w="coop_hand">[\s\S]*Wage \$[\d.]+\/(s|min)<\/div><\/div>/);
   });
   it('queue dot: shows while full, clears on Market open (until the queue un-fills), pulse <= 1 per 10 s, none under reduced motion', () => {
     const d = new E.QueueDot();
@@ -226,5 +226,23 @@ describe('S2-8 net rate + wages, S2-9 queue-full dot (stubbed data seam)', async
     expect(css).toMatch(/\.rate\{font:700 11px\/13px var\(--f-body\);color:#3D7F33/); expect(css).toContain('.rate[data-sign=neg]{color:#B83B37}');
     expect(css).toMatch(/rshake 300ms[^}]*\}@keyframes rshake\{25%\{transform:translateX\(-2px\)\}75%\{transform:translateX\(2px\)\}\}/);
     expect(css).toMatch(/\.qdot\{[^}]*width:14px;height:14px;box-sizing:border-box;border-radius:50%;background:#B83B37;border:2px solid #fff\}/);
+  });
+});
+
+describe('S2-8 exact rate (Product ruling: under $0.10/s per minute)', async () => {
+  const E = await import('../src/ui/s2-economy-ui');
+  it('0.0125 $/s -> "$0.75/min"; 0.5 $/s -> "$0.50/s"', () => {
+    expect(E.fmtExactRate(1.25)).toBe('$0.75/min'); expect(E.fmtExactRate(50)).toBe('$0.50/s');
+    expect(E.wageLine(1.25, 'c')).toContain('Wage $0.75/min'); expect(E.wageLine(50, 'c')).toContain('Wage $0.50/s');
+  });
+  it('net-rate line uses the same exact value', () => {
+    expect(E.rateView(-1.25)).toEqual({ text: '\u2212$0.75/min', sign: 'neg', aria: 'Net income minus 75 cents per minute' });
+    expect(E.rateView(50).text).toBe('+$0.50/s'); expect(E.rateView(10).text).toBe('+$0.10/s'); expect(E.rateView(9.99).text).toBe('+$5.99/min');
+  });
+});
+describe('Art & UX review rc1-ui-fc8e1cf #1/#2', () => {
+  it('nav Refill icon greyed during cooldown; docked pill min-height 44px', () => {
+    expect(css).toContain('.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55}');
+    expect(css).toMatch(/\.sheet header button\.desk-manage-all:not\(\[hidden\]\)\{min-height:44px;box-sizing:border-box\}/);
   });
 });

@@ -23,16 +23,24 @@ export function fmtRateAbs(cents: number) {
   if (d < 1000) return `$${Math.round(d)}`;
   return d < 1e6 ? `$${(Math.floor(d / 100) / 10).toFixed(1)}K` : `$${(Math.floor(d / 1e5) / 10).toFixed(1)}M`;
 }
+/** Product ruling (Oct 16): show the exact rate charged. Under $0.10/s it reads per minute ("$0.75/min"), else per second. */
+export function fmtExactRate(centsPerSec: number) {
+  const a = Math.abs(centsPerSec);
+  return a < 10 ? `$${(Math.round(a * 60) / 100).toFixed(2)}/min` : `${fmtRateAbs(a)}/s`;
+}
 export type RateSign = 'pos' | 'neg' | 'zero';
 export function rateView(cps: number): { text: string; sign: RateSign; aria: string } {
-  const c = Math.round(cps);
-  if (c === 0) return { text: '$0/s', sign: 'zero', aria: 'Net income zero per second' };
-  const abs = Math.abs(c), amount = abs < 100 ? `${abs} cent${abs === 1 ? '' : 's'}` : `${fmtRateAbs(abs).replace('$', '')} dollars`;
-  return c > 0 ? { text: `+${fmtRateAbs(c)}/s`, sign: 'pos', aria: `Net income plus ${amount} per second` }
-    : { text: `\u2212${fmtRateAbs(c)}/s`, sign: 'neg', aria: `Net income minus ${amount} per second` };
+  const perMinCents = Math.round(Math.abs(cps) * 60);
+  if (perMinCents === 0) return { text: '$0/s', sign: 'zero', aria: 'Net income zero per second' };
+  const t = fmtExactRate(cps), perMin = t.endsWith('/min');
+  const cents = perMin ? perMinCents : Math.round(Math.abs(cps));
+  const amount = cents < 100 ? `${cents} cent${cents === 1 ? '' : 's'}` : `${(perMin ? `$${(cents / 100).toFixed(2)}` : fmtRateAbs(cents)).replace('$', '')} dollars`;
+  const unit = perMin ? 'minute' : 'second';
+  return cps > 0 ? { text: `+${t}`, sign: 'pos', aria: `Net income plus ${amount} per ${unit}` }
+    : { text: `\u2212${t}`, sign: 'neg', aria: `Net income minus ${amount} per ${unit}` };
 }
 /** Wage line markup (hire cards under the effect line; worker cards at the bottom). '' for unwaged workers. */
-export const wageLine = (cents: number, coinIcon: string) => cents > 0 ? `<div class="wage num"><img src="${coinIcon}" width="12" height="12" alt="">Wage ${fmtRateAbs(cents)}/s</div>` : '';
+export const wageLine = (cents: number, coinIcon: string) => cents > 0 ? `<div class="wage num"><img src="${coinIcon}" width="12" height="12" alt="">Wage ${fmtExactRate(cents)}</div>` : '';
 /** S2-9 dot state: shown while the queue is full and Market hasn't been opened during this full spell. */
 export class QueueDot {
   private ack = false; private lastPulse = -Infinity;
