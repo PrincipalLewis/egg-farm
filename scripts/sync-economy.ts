@@ -10,7 +10,7 @@ const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
 type Row = Record<string, number>;
-const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max'];
+const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max', 'hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'];
 export function parseEconomyCsv(text: string): Row[] {
   const lines = text.trim().split(/\r?\n/).filter(Boolean);
   const head = lines[0].split(',').map(h => h.trim());
@@ -123,10 +123,31 @@ function verifyGraderCosts(rows: Row[], w: any) {
     if (r.w4_tier_cost !== want) throw new Error(`sync-economy: economy.csv L${r.level} w4_tier_cost=${r.w4_tier_cost}, expected ${want}`);
   }
 }
+/** M4-A: hens_cost / egg_value_cost are floor(base x growth^L) per row; cap columns and tc_* scalars are constant.
+ *  A CSV without the M4 columns (pre-M4 product/economy.csv) keeps the hand-set m4 block. Milestones and the flag are
+ *  never in the CSV and are always kept from balance.json. */
+export const M4_COLS = ['hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'] as const;
+export function fitM4(rows: Row[], prev: any) {
+  const R = rows, n = R.length - 1, has = (c: string) => c in R[0], P = prev.m4;
+  if (!M4_COLS.some(has)) return P;
+  for (const c of M4_COLS) if (!has(c)) throw new Error(`sync-economy: economy.csv is missing M4 column ${c}`);
+  if (!P) throw new Error('sync-economy: balance.json has no m4 block (milestones/flag are hand-set)');
+  const one = (c: string) => { const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`); return v; };
+  const geo = (c: string) => {
+    const base = R[0][c];
+    const costGrowth = fit(c, (R[n][c] / base) ** (1 / n), 0.0001, 0.05, v => R.every(r => Math.floor(base * v ** r.level) === r[c]));
+    return { baseCost: base, costGrowth };
+  };
+  const tc: Record<string, number> = {};
+  for (const c of Object.keys(R[0]).filter(c => c.startsWith('tc_')).sort()) tc[c.slice(3)] = one(c);
+  return { ...P, hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') }, eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm') },
+    ...(Object.keys(tc).length ? { tc } : {}) };
+}
 export function buildBalance(rows: Row[], prev: any) {
   const p = fitParams(rows, prev);
   const workers = fitWorkers(rows, prev); verifyGraderCosts(rows, workers);
+  const m4 = fitM4(rows, prev);
   prev = { ...prev, workers };
-  const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, ...rest } = prev;
-  return { ...rest, _source: 'economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks', ...p };
+  const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, m4: _m4, ...rest } = prev;
+  return { ...rest, _source: 'economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks', ...p, ...(m4 ? { m4 } : {}) };
 }

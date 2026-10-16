@@ -15,6 +15,21 @@ export interface EconomyParams {
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
   offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
+  /** M4-A three tracks (product/m4-manage-proposal.md §2.1-2.2). Optional so pre-M4 params stay valid. */
+  m4?: M4Params;
+}
+export interface M4Params {
+  /** Feature flag: 0 = off (pre-M4 game, Farm drives eggs/s and price), 1 = Hens/Egg value tracks live. */
+  enabled: number;
+  hens: { baseCost: number; costGrowth: number; capOverFarm: number };
+  eggValue: { baseCost: number; costGrowth: number; capOverFarm: number };
+  milestones: {
+    hens: { level: number; mult: number }[];
+    grades: { level: number; mult: number; minFarm: number }[];
+    balanced: { level: number; bonus: number }[];
+  };
+  /** Later-M4 scalar tunables (tc_* columns), carried through verbatim; unused by M4-A code. */
+  tc?: Record<string, number>;
 }
 /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
 export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };
@@ -43,6 +58,27 @@ export const demandRange = (F: number, p: EconomyParams): readonly [number, numb
 export const queueMax = (F: number, p: EconomyParams) =>
   Math.min(p.customers.queue_max_cap, p.customers.queue_max_base + Math.floor(clampL(F, p) / p.customers.queue_max_step_levels));
 export const patienceS = (_F: number, p: EconomyParams) => p.customers.customer_patience_s;
+// ---------- M4-A tracks ----------
+/** Cost in coins to buy Hens/Egg value level L -> L+1: floor(base x growth^L). */
+export const hensCost = (H: number, p: EconomyParams) => Math.floor(p.m4!.hens.baseCost * p.m4!.hens.costGrowth ** clampL(H, p));
+export const eggValueCost = (V: number, p: EconomyParams) => Math.floor(p.m4!.eggValue.baseCost * p.m4!.eggValue.costGrowth ** clampL(V, p));
+/** Track cap: min(F + capOverFarm, maxLevel) (decisions 2026-10-16 13:50). */
+export const hensCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.hens.capOverFarm);
+export const eggValueCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.eggValue.capOverFarm);
+const best = <T extends { level: number }>(xs: T[], L: number, ok: (x: T) => boolean = () => true) => xs.filter(x => L >= x.level && ok(x)).pop();
+/** Hens milestone laying multiplier (H10/20/30). */
+export const hensMilestoneMult = (H: number, p: EconomyParams) => best(p.m4!.milestones.hens, H)?.mult ?? 1;
+/** Egg grade multiplier; a grade with minFarm stays locked (falls back to the previous grade) until Farm reaches it. */
+export const gradeMult = (V: number, F: number, p: EconomyParams) => best(p.m4!.milestones.grades, V, g => F >= g.minFarm)?.mult ?? 1;
+/** Balanced-farm income bonus on min(F,H,V). */
+export const balancedBonus = (F: number, H: number, V: number, p: EconomyParams) => best(p.m4!.milestones.balanced, Math.min(F, H, V))?.bonus ?? 0;
+export const balancedTier = (F: number, H: number, V: number, p: EconomyParams) => p.m4!.milestones.balanced.filter(t => Math.min(F, H, V) >= t.level).length;
+/** M4 eggs/s: the Hens curve (CSV hens/eggs_per_sec columns read at H) x milestone. */
+export const trackEggsPerSec = (H: number, p: EconomyParams) => roundHalfUp(eggsPerSec(H, p) * hensMilestoneMult(H, p), 4);
+/** M4 sale price in cents: round_half_up((1.00 + 0.05V)(1 + 0.12V) x grade x (1 + balanced), 2 dp). */
+export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParams) =>
+  Math.round(roundHalfUp((farmPriceCents(V, p) / 100) * (1 + p.collection.pricePercentPerLevel * clampL(V, p)) * gradeMult(V, F, p) * (1 + balancedBonus(F, H, V, p)), 2) * 100);
+export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
 /** One row in economy.csv column format, for verification/parity. */
 export function tableRow(L: number, p: EconomyParams) {
   const [demand_min, demand_max] = demandRange(L, p);
