@@ -15,3 +15,9 @@ if (rc0.length && !(head && (head.startsWith(RC0_TAG_COMMIT) || RC0_TAG_COMMIT.s
 // CEO ruling (Oct 16): debug globals stay out of release. eggfarmUi is dev/QA-only (behind __IOS_FLAG__).
 for (const g of ['eggfarmUi']) if (js.includes(g)) { console.error(`check-release-build: debug global "${g}" found in the release bundle`); process.exit(1); }
 console.log('check-release-build: no eggfarmUi in release ok');
+// D3/D4 + AC14g: QA/debug hooks are compiled out of release (same __IOS_FLAG__ flag): no sampler/panel chunk, no hook names.
+const files = readdirSync(`${dir}/assets`);
+const chunks = files.filter(f => /^(frame-sampler|panel)-.*\.js$/.test(f));
+const hooks = ['eggfarmOnb', 'eggfarmQaRecovery', 'eggfarmPerf', 'perf-ov', 'dbgInfo', 'get("debug")', 'get("perf")', 'get("ios")'].filter(h => js.includes(h));
+if (chunks.length || hooks.length) { console.error(`check-release-build: debug/QA code in release bundle: ${[...chunks, ...hooks].join(', ')}`); process.exit(1); }
+console.log('check-release-build: no ?debug/?perf/?ios/QA hooks ok');
