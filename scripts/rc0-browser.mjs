@@ -311,6 +311,19 @@ sections.wage075 = async () => {
       return { text: e.textContent, lines: new Set([...rg.getClientRects()].filter(q => q.width > 0).map(q => Math.round(q.top))).size, h: e.getBoundingClientRect().height, lh, clipped: e.scrollWidth > e.clientWidth + 0.5 }; });
     if (shot) await page.locator('#uRow div.wk[data-w=market_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-075-hire-card-360.png` });
     ok('S2-8 360: hire card "Wage $0.75/min" not truncated, one line', !!r && r.text === 'Wage $0.75/min' && r.lines === 1 && r.h < r.lh * 1.5 && !r.clipped, JSON.stringify(r));
+
+    // Product 10:13: longest two-decimal wage. Real max = Coop Hand at Farm L30; format max = "$999.99/s" (stress, text injected)
+    const line = () => page.evaluate(() => { const e = document.querySelector('#uRow div.wk[data-w=coop_hand] .wage'); if (!e) return null; const t = [...e.childNodes].find(n => n.nodeType === 3), rg = document.createRange(); rg.selectNodeContents(t);
+      const card = e.closest('.wk').getBoundingClientRect(), r = e.getBoundingClientRect();
+      return { text: e.textContent, lines: new Set([...rg.getClientRects()].filter(q => q.width > 0).map(q => Math.round(q.top))).size, clipped: e.scrollWidth > e.clientWidth + 0.5, inCard: r.right <= card.right + 0.5 }; });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 30, coinsCents: 1e9 }; }); await page.waitForTimeout(500);
+    const l30 = await line();
+    if (shot) await page.locator('#uRow div.wk[data-w=coop_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-longest-L30-hire-card-360.png` });
+    ok('S2-8 360: longest real wage (Coop Hand, Farm L30) "Wage $0.25/s", one line, not clipped', !!l30 && l30.text === 'Wage $0.25/s' && l30.lines === 1 && !l30.clipped && l30.inCard, JSON.stringify(l30));
+    await page.evaluate(() => { const e = document.querySelector('#uRow div.wk[data-w=coop_hand] .wage'); [...e.childNodes].find(n => n.nodeType === 3).textContent = 'Wage $999.99/s'; });
+    const mx = await line();
+    if (shot) await page.locator('#uRow div.wk[data-w=coop_hand]').screenshot({ path: `${SHOTS}/rc1-s2-8-wage-longest-999.99-hire-card-360.png` });
+    ok('S2-8 360: longest two-decimal wage "Wage $999.99/s" (stress) stays on one line, not clipped', !!mx && mx.text === 'Wage $999.99/s' && mx.lines === 1 && !mx.clipped && mx.inCard, JSON.stringify(mx));
     await ctx.close(); }
 };
 // ---------- Art & UX 10:01: '▼−$0.01/s' double-dash check (code points, pseudo-elements, borders) + zoomed pill at 390 ----------
