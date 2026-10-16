@@ -116,3 +116,8 @@
 - Reset deletes `diverged`, `diverged2`, `diverged_tmp` and clears `eggfarm.save.diverged_notice_shown`.
 - Diverged notice specified (trigger, copy, once-flag `eggfarm.save.diverged_notice_shown`, every-load Export offer when both slots are full); Export downloads all slot copies then clears them.
 - All one-slot/skip wording removed doc-wide; M4-25 listed as §7 risk 13.
+
+## 2026-10-17 00:10 ADR M4-19 revision 6 (recorded by Senior Software Architect)
+- Boot sweep of `diverged_tmp` and the diverged notice run only after the refusal check; a refused load never sweeps, writes `eggfarm.save.diverged_notice_shown`, or touches any slot/tmp key.
+- The sweep never runs while a slot read-back is unverified; tmp is deleted only after a read-back confirms a `sum` + state duplicate in a slot or store. With both slots full the sweep keeps tmp and shows the notice; it never evicts.
+- §3b lists IDB `eggfarm/save/diverged_tmp` and allowlists `eggfarm.save.diverged_notice_shown` as a plain flag, never save data.
