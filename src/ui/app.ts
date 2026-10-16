@@ -18,7 +18,7 @@ import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
-import { PickHysteresis, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
+import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
@@ -384,15 +384,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
-  const picker = new PickHysteresis(); let rowPick: SharedPick | null = null; let rowHl: RowKey | null = null;
+  const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
-    const M4 = m4On(b), prevKey = rowPick?.key;
-    if (M4) { rowPick = picker.tick(g.state, b, t); rowHl = rowPick ? ROW_OF_KEY[rowPick.key] : null; } // every state change + 5 s re-check
-    if (!goalNow && t - goalTickAt < 1000 && !(M4 && rowPick?.key !== prevKey)) return; // 1 Hz text tick; purchases / pick changes bypass
+    const M4 = m4On(b), prevKey = hintPick?.key;
+    if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
+    if (!goalNow && t - goalTickAt < 1000 && !(M4 && hintPick?.key !== prevKey)) return; // 1 Hz text tick; purchases / pick changes bypass
     const imm = goalNow || M4; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? rowPick?.key : undefined), imm); goalShown = gl;
+    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined), imm); goalShown = gl;
     setText(goalLbl, gl.label); setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
