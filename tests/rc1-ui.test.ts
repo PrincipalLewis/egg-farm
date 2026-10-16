@@ -41,3 +41,24 @@ describe('S2-6 Queue full tag (layout-spec §3.3)', () => {
 describe('S2-6 QA s2-7-bd0dc66: tag never reaches a chip', () => {
   it('strip reserves a 9px top band (tag is 18px at top:-9px)', () => { expect(css).toMatch(/\.queue\{padding-top:9px;min-height:81px\}/); expect(css).toMatch(/max-height:699px\)\{\.queue\{min-height:73px\}/); });
 });
+
+describe('S2-5 nav labels (session2-ui-triage (b))', async () => {
+  const { navManageView } = await import('../src/ui/workers-ui');
+  const P = { text: '', at: -Infinity };
+  it('every nav button has an icon, a visible .nav-lbl and an aria-label', () => {
+    const navHtml = app.slice(app.indexOf('<nav class="actions"'), app.indexOf('</nav>'));
+    const btns = navHtml.split('<button').slice(1);
+    expect(btns).toHaveLength(4);
+    for (const b of btns) { expect(b).toMatch(/aria-label="[^"]+"/); expect(b).toMatch(/<img /); expect(b).toMatch(/class="nav-lbl[^"]*">[^<]+</); }
+  });
+  it('ready: "Manage" + N badge; aria "Manage tired workers, N tired"', () => {
+    expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Manage', badge: '2', aria: { text: 'Manage tired workers, 2 tired', at: 0 } });
+    expect(navManageView(2, 0, true, P, 0).label).toBe('Refill tired (2)');
+  });
+  it('cooldown: "0:28", no badge; aria text changes at most every 5 s', () => {
+    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe('');
+    expect(a.aria.text).toBe('Manage tired workers, available in 28 seconds');
+    expect(navManageView(1, 25.1, false, a.aria, 3000).aria).toBe(a.aria);
+    expect(navManageView(1, 22.9, false, a.aria, 6100).aria.text).toBe('Manage tired workers, available in 23 seconds');
+  });
+});

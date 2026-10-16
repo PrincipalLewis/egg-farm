@@ -431,3 +431,19 @@ html,body{overflow-x:hidden;max-width:100%}
    half sits in it and never reaches a chip or the "+N" tile, at any chip size (64/56) or strip height. */
 .queue{padding-top:9px;min-height:81px}
 @media (max-height:699px){.queue{min-height:73px}}
+/* S2-5 (session2-ui-triage (b)): nav buttons share one anatomy (icon 28px + 12px label); Manage is a 4th equal column, no green fill */
+.actions .nav-lbl{font:700 12px/1.2 var(--f-body);color:var(--c-text);white-space:nowrap}
+nav.actions button.nav-manage{flex:1;min-width:64px;height:auto;min-height:0;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--c-text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+nav.actions button.nav-manage[hidden]{display:none}
+nav.actions button.nav-manage .manage-ico{width:32px;height:32px}
+nav.actions button.nav-manage .manage-ico img{width:28px;height:28px;filter:none}
+nav.actions button.nav-manage[aria-disabled=true]{background:transparent;color:#5A4C42}
+nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
+.count-badge{position:absolute;top:6px;right:calc(50% - 26px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#B83B37;color:#fff;font:700 11px/16px var(--f-body);text-align:center;box-sizing:border-box}
+.count-badge[hidden]{display:none}
+@media (min-width:960px) and (orientation:landscape){
+  .sheet header button.nav-manage:not([hidden]){display:inline-flex;flex-direction:row;align-items:center;gap:6px;height:44px;min-height:44px;width:auto;padding:0 12px 0 0;border-radius:22px;border:2px solid var(--c-outline);background:var(--c-white);box-shadow:none;font:600 14px var(--f-display);color:var(--c-text)}
+  .sheet header button.nav-manage .nav-lbl{font:600 14px var(--f-display)}
+  .sheet header button.nav-manage .manage-ico{width:44px;height:40px}
+  .sheet header button.nav-manage[aria-disabled=true]{background:#CFC6BA;color:#5A4C42}
+}

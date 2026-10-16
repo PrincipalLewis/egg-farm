@@ -20,7 +20,7 @@ import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navManageView, type NavAria } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -73,11 +73,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="sr" aria-live="polite" id="goalLive"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
-  const nav = h(`<nav class="actions">
-    <button data-nav="market"><img src="${A('icon-market.svg')}" alt="">Market<span class="badge" hidden></span></button>
-    <button data-nav="upgrades"><img src="${A('icon-upgrade.svg')}" alt="">Upgrades<span class="badge" hidden></span></button>
-    <button class="btn manage farm-manage-all desk-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button>
-    <button data-nav="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></nav>`);
+  // S2-5 (art-ux/reviews/session2-ui-triage.md (b)): every nav button = icon + visible label + aria-label.
+  const nav = h(`<nav class="actions" aria-label="Main">
+    <button data-nav="market" aria-label="Market"><img src="${A('icon-market.svg')}" alt=""><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
+    <button data-nav="upgrades" aria-label="Upgrades"><img src="${A('icon-upgrade.svg')}" alt=""><span class="nav-lbl">Upgrades</span><span class="badge" hidden></span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Manage tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Manage</span><span class="count-badge num" hidden></span></button>
+    <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
@@ -159,7 +160,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
-  let farmMAShown = false;
+  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity };
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (fb.getAttribute('aria-disabled') === 'true') return cantAfford(fb); g.dispatch({ type: 'manageAll' }); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
@@ -442,7 +443,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
       setHidden(fb, !farmMAShown);
-      if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r; }
+      if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
+        const v = navManageView(promptManage(s, b).length, s.manageCdS, docked.matches, maAria, now());
+        setText(fb.querySelector('.nav-lbl')!, v.label); const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+        maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
     // market panel
