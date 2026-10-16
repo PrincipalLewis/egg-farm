@@ -134,3 +134,8 @@
 - F2-EQ refined: equal saveSeq + different bytes with exactly one trusted `idbUnknownAtBoot` ⇒ not diverged, known copy wins; neither/both ⇒ diverged.
 - `write_failed` and the notice at most once per load; "Did you save?" only if starting the download didn't throw; clipboard fallback marks only on "I saved it".
 - Rev 2 one-slot skip bullet marked SUPERSEDED.
+
+## 2026-10-17 00:25 ADR M4-19 revision 9 (HoQA 8a2150c M-6, S-10, S-11; data-loss fixes only; recorded by Senior Software Architect)
+- Supersedes rev 8's F2-EQ refinement: equal saveSeq + different bytes is always diverged. Exactly one trusted `idbUnknownAtBoot` ⇒ the known copy wins (flag decides, never savedAt), and the unknown loser takes the full slot path with `save_copies_diverged`. One ordering; F2-EQ never preempts slotting.
+- Plain-string slot/tmp values read as `{bytes: value, exportedAt: null}`, never dropped.
+- Export-mark write changes only `exportedAt`, is read back; on failure the record stays byte-identical.
