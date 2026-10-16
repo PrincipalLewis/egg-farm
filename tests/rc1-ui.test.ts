@@ -239,6 +239,13 @@ describe('S2-8 exact rate (Product ruling: under $0.10/s per minute)', async () 
     expect(E.fmtExactRate(9.99)).toBe('$5.99/min'); expect(E.fmtExactRate(10)).toBe('$0.10/s');
     expect(E.rateView(-1.25).text).toBe('\u2212$0.01/s'); expect(E.rateView(50).text).toBe('+$0.50/s');
   });
+  it('per-second wage labels: two decimals under $1,000/s, short form from $1,000/s (Product 10:12)', () => {
+    expect(E.wageLine(50, 'c.svg')).toContain('Wage $0.50/s'); expect(E.wageLine(125, 'c.svg')).toContain('Wage $1.25/s');
+    expect(E.wageLine(1234, 'c.svg')).toContain('Wage $12.34/s'); expect(E.wageLine(10, 'c.svg')).toContain('Wage $0.10/s');
+    expect(E.wageLine(99999, 'c.svg')).toContain('Wage $999.99/s'); expect(E.wageLine(120000, 'c.svg')).toContain('Wage $1.2K/s');
+    expect(E.fmtExactRate(120000)).toBe(E.rateView(120000).text.slice(1)); // same short form as the net rate
+    expect(E.fmtExactRate(1.25)).toBe('$0.75/min'); // per-minute labels unchanged
+  });
   it('stub matches s2-money 9c3d47b rates.ts: Market Hand at L3 = 1.25 c/s exact ("$0.75/min"); 0 when Asleep/Unpaid', async () => {
     const { balance: b } = await import('../src/config/balance'); const { initialState } = await import('../src/sim/state');
     expect(E.wagePerSecCents('market_hand', 3, b)).toBe(1.25); expect(E.fmtExactRate(E.wagePerSecCents('market_hand', 3, b))).toBe('$0.75/min');

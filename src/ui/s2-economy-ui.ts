@@ -25,9 +25,14 @@ export function fmtRateAbs(cents: number) {
   return d < 1e6 ? `$${(Math.floor(d / 100) / 10).toFixed(1)}K` : `$${(Math.floor(d / 1e5) / 10).toFixed(1)}M`;
 }
 /** Wage labels (Product + Art & UX, Oct 16): the exact rate charged; under $0.10/s per minute ("$0.75/min"), from $0.10/s per second. */
+/** Two decimals below $1,000 ("$1.25", "$999.99"), else the short form ("$1.2K") — Product ruling Oct 16 10:12. */
+export function fmtMoney2(absCents: number) {
+  const c = Math.round(absCents);
+  return c >= 1e5 ? fmtRateAbs(c) : `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 export function fmtExactRate(centsPerSec: number) {
   const a = Math.abs(centsPerSec);
-  return a < 10 ? `$${(Math.round(a * 60) / 100).toFixed(2)}/min` : `${fmtRateAbs(a)}/s`;
+  return a < 10 ? `$${(Math.round(a * 60) / 100).toFixed(2)}/min` : `${fmtMoney2(a)}/s`;
 }
 export type RateSign = 'pos' | 'neg' | 'zero';
 /** Art & UX display ruling (Oct 16 09:41): the money-pill net rate is always per second with two decimals ("−$0.07/s"). */
@@ -35,7 +40,7 @@ export function rateView(cps: number): { text: string; sign: RateSign; aria: str
   const c = Math.sign(cps) * Math.round(Math.abs(cps)); // whole cents per second = two decimals, half away from zero
   if (c === 0) return { text: '$0.00/s', sign: 'zero', aria: 'Net income zero per second' };
   const abs = Math.abs(c), d = (abs / 100).toFixed(2);
-  const money = abs >= 1e5 ? fmtRateAbs(abs) : `$${Number(d).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const money = fmtMoney2(abs);
   const amount = abs < 100 ? `${abs} cent${abs === 1 ? '' : 's'}` : `${d} dollars`;
   return c > 0 ? { text: `+${money}/s`, sign: 'pos', aria: `Net income plus ${amount} per second` }
     : { text: `\u2212${money}/s`, sign: 'neg', aria: `Net income minus ${amount} per second` };
