@@ -628,6 +628,21 @@ sections.p1build = async () => {
     await ctx.close();
   }
 };
+// ---------- m3-customer-queue-spec §2.4: order line drops " eggs" when it doesn't fit, never mid-word (360) ----------
+sections.orderFit = async () => {
+  const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 30, customers: [{ id: 1, demand: 1.8e6, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }],
+    nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2, workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+  const { ctx, page } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 1, demand: 1.8e6, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9 }; });
+  await page.locator('#queue .chip:not(.empty)').first().click({ force: true }).catch(() => {}); await page.waitForTimeout(400);
+  if (!(await page.locator('.order .l1').count())) await page.locator('[data-nav=market]').click().catch(() => {});
+  await page.waitForSelector('.order .l1', { timeout: 5000 }); await page.waitForTimeout(300);
+  const r = await page.$$eval('.order .l1', ls => ls.map(l => { const e = l.querySelector('.e'), v = l.querySelector('.v'); return { e: e.textContent, v: v.textContent, eOver: e.scrollWidth > e.clientWidth + 0.5, vOver: v.scrollWidth > v.clientWidth + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5 }; }));
+  const big = r.find(x => /1\.8M/.test(x.e)), small = r.find(x => /^0\/5/.test(x.e));
+  ok('Order line at 360: 1.8M order reads "0/1.8M · $…" (drops " eggs", no mid-word cut), short order keeps " eggs"', big && big.e === '0/1.8M' && !big.eOver && !big.vOver && !big.lOver && !/…/.test(big.e + big.v) && small && small.e === '0/5 eggs', JSON.stringify(r));
+  const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); await page.screenshot({ path: `${FCS}/cuta3-order-line-360-${ENGINE}.png` }); }
+  await ctx.close();
+};
 // ---------- Cut A v3 (QA Major): Farm card "Limited by collecting ›" never overlaps the "Pays back in" chip (360/375/390, all engines) ----------
 sections.farmLimit = async () => {
   const FCS = process.env.FC_SHOTS;
@@ -638,11 +653,11 @@ sections.farmLimit = async () => {
     if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); if (await page.locator('[data-tab=farm]').isVisible()) await page.locator('[data-tab=farm]').click(); await page.waitForSelector('#uRow .hint.limit .link', { timeout: 5000 }); await page.waitForTimeout(250);
     const r = await page.evaluate(() => { const L = document.querySelector('#uRow .hint.limit .link'), wrap = L.parentElement, card = L.closest('.up'), C = card.querySelector('.vchip.pb');
       const R = e => { const a = e.getBoundingClientRect(); return [a.left, a.top, a.right, a.bottom].map(v => Math.round(v * 10) / 10); };
-      const hit = R(L); const bs = getComputedStyle(L, '::before'); const bh = parseFloat(bs.height); const mid = (hit[1] + hit[3]) / 2; const hitBox = [hit[0], mid - bh / 2, hit[2], mid + bh / 2];
+      const hit = R(L); const bs = getComputedStyle(L, '::before'); const it = parseFloat(bs.top), ib = parseFloat(bs.bottom); const hitBox = [hit[0], hit[1] + it, hit[2], hit[3] - ib]; const bh = hitBox[3] - hitBox[1]; const B = R(card.querySelector('.btn')); const ms = getComputedStyle(L);
       const ov = (a, b) => !(a[2] <= b[0] || b[2] <= a[0] || a[3] <= b[1] || b[3] <= a[1]);
       return { link: hit, chip: C ? R(C) : null, card: R(card), pos: getComputedStyle(wrap).position, hitH: bh, text: L.textContent.trim(),
-        overlap: C ? ov(hit, R(C)) : false, hitOverlap: C ? ov(hitBox, R(C)) : false, inCard: hit[1] >= R(card)[1] && hit[3] <= R(card)[3], eta: !!card.querySelector('.hint.eta') }; });
-    ok(`Cut A v3 farm card ${name} at ${w}: limiter link (glyph + 44px hit) clear of "Pays back in" chip, in flow, inside card`, r.chip && !r.overlap && !r.hitOverlap && r.pos === 'static' && r.hitH >= 44 && r.inCard && r.text === 'Limited by collecting ›', JSON.stringify(r));
+        overlap: C ? ov(hit, R(C)) : false, hitOverlap: C ? ov(hitBox, R(C)) : false, inCard: hit[1] >= R(card)[1] && hit[3] <= R(card)[3], eta: !!card.querySelector('.hint.eta'), inset: [it, ib], negMargin: parseFloat(ms.marginTop) < 0 || parseFloat(ms.marginBottom) < 0, buy: B, gap: Math.round((hit[1] - B[3]) * 10) / 10, hitVsBuy: ov(hitBox, B) }; });
+    ok(`Cut A v3 farm card ${name} at ${w}: limiter link (glyph + 44px hit) clear of "Pays back in" chip, in flow, inside card, below Buy >=8px, ::before inset -14px`, r.chip && !r.overlap && !r.hitOverlap && r.pos === 'static' && r.hitH >= 44 && r.inset[0] === -14 && r.inset[1] === -14 && !r.negMargin && r.gap >= 8 && !r.hitVsBuy && r.inCard && r.text === 'Limited by collecting ›', JSON.stringify(r));
     if (FCS) { mkdirSync(FCS, { recursive: true }); const [x, y, x2, y2] = r.card; await page.screenshot({ path: `${FCS}/cuta3-farmcard-${name}-${w}-${ENGINE}.png`, clip: { x: Math.max(0, x - 8), y: Math.max(0, y - 8), width: Math.min(w - Math.max(0, x - 8), x2 - x + 16), height: y2 - y + 16 } }); if (name === 'affordable') await page.screenshot({ path: `${FCS}/cuta3-full-${w}-${ENGINE}.png` }); }
     await ctx.close();
   }

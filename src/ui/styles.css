@@ -560,6 +560,6 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 /* UC12 Limited by collecting — visual 16px, 44px hit via padding/neg margin */
 .hint.limit .link,.hint .link{appearance:none;border:0;background:none;padding-block:14px;margin-block:-14px;padding-inline:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:44px;box-sizing:content-box}
 /* Cut A v3: limiter link stays in flow; 44px hit area lives on ::before so it can't collapse (no negative margins), with or without the ETA line */
-.hint.limit{position:static;color:var(--c-wood-text);min-height:var(--hint-h);margin-top:4px}
+.hint.limit{position:static;color:var(--c-wood-text);min-height:var(--hint-h);margin-top:8px} /* Art & UX: below Buy, >=8px clear */
 .hint.limit .link{position:relative;padding:0;margin:0;min-height:var(--hint-h);box-sizing:border-box}
-.hint.limit .link::before{content:'';position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
+.hint.limit .link::before{content:'';position:absolute;inset:-14px 0} /* 16px line + 2x14 = 44px hit, no negative margin */
