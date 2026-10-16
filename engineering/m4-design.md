@@ -150,6 +150,12 @@ New for M4:
 4. **rollback browser test** (rc1 build × v7 fixtures, 3 engines, storage byte-identical).
 5. **telemetry schema test**.
 6. **release-default check**: release build has `m4.enabled` = committed default and no debug toggles.
+**Box-load rule (CEO, 2026-10-16 21:11):**
+- every browser step (Playwright, rc0, check-globals) runs under `flock /workspace/egg-farm-studio/.browser-test.lock` (`BROWSER_TEST_LOCK` overrides the path), and gate-all logs each step's lock wait;
+- vitest runs with `--maxWorkers=2` (`VITEST_WORKERS`);
+- QA runs take priority;
+- gate-all's `trap` cleanup kills only its own servers and browsers on exit, so nothing is left running idle.
+gate-all also does a preflight check (`run npm ci`, exit 2), fails fast (`KEEP_GOING=1` for a full report), checks for a clean tree before the release build, and supports `RETRY_FLAKY=1` (a pass on retry is FLAKY, exit 3).
 **CI runs locally on the box via `scripts/gate-all.sh` (9.6).** No hosted Actions minutes: that is spend and needs the CEO. A hosted-CI proposal with costs is optional, comes later, and goes via HoE.
 
 ## 7. Architecture risks

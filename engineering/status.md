@@ -6,3 +6,4 @@
 - 2026-10-16 20:40 Senior Software Architect — **done:** m4-design v0.2.2 (ADR M4-9 flag-off refuses v7; 9.5 QA guard owner; WebKit 375px flake on the watch list). **next:** review the v2 3351d6c / S-2 PRs. **blocked:** none.
 - 2026-10-16 20:50 Senior Software Architect — **done:** m4-design v0.2.3 per HoE review (3351d6c sentence, ADR M4-10 interim backup, F-0 marked-save flag-off test, §9 order). **next:** X-1 review fixes. **blocked:** none.
 - 2026-10-16 21:05 Senior Software Architect — **done:** m4-design v0.2.4 §3a answers for Saves QA (dialog selectors/copy, raw-bytes export, tracksV7 shape, backup naming; ADR M4-11). **next:** X-1 gate run. **blocked:** none.
+- 2026-10-16 21:20 Senior Software Architect — **done:** §6 documents the CEO box-load rule (flock browser lock, vitest maxWorkers=2) and the gate-all review fixes. **next:** full gate-all run on X-1. **blocked:** none.
