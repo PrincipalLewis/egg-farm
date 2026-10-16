@@ -55,7 +55,8 @@ const buy = p => p.evaluate(() => { const g = window.eggfarm; g.dispatch({ type:
 { const sv = JSON.parse(fx); sv.savedAt = Date.now() - 30 * 60e3; const ctx = await ctxWith(JSON.stringify(sv)); const A = await open(ctx);
   const grants = p => p.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'offline_grant').map(e => e.eggs));
   const a = await grants(A); const B = await open(ctx); await B.waitForTimeout(300); const b = await grants(B);
-  ok('TG-5 offline paid once: one offline_grant in A, none in B', a.length === 1 && a[0] > 0 && b.length === 0, { a, b }); await ctx.close(); }
+  const bs = await B.evaluate(() => window.eggfarm.state.pendingOfflineEggs);
+  ok('TG-5 offline paid once: shared telemetry has exactly one offline_grant after both tabs load, B has nothing pending', a.length === 1 && a[0] > 0 && b.length === 1 && bs === 0, { a, b, bPending: bs }); await ctx.close(); }
 // ---- TG-6 single tab unchanged + TG-UI-7 reduced motion / 320 px (200% zoom) + TG-UI-8 contrast
 { const ctx = await ctxWith(fx, { reducedMotion: 'reduce' }); const A = await open(ctx); await A.waitForTimeout(5000);
   const r = await A.evaluate(() => ({ notice: !!document.querySelector('.tab-guard'), age: Date.now() - JSON.parse(localStorage.getItem('eggfarm.lease')).at, blocked: window.eggfarm.telemetry.events().filter(e => /tab_guard/.test(e.type)).length }));
