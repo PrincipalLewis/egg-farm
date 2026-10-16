@@ -181,6 +181,6 @@ describe('QA TUT-1: docked tutorial Sell step', () => {
   });
   it('a docked card tap highlights its order row', () => {
     expect(app).toMatch(/if \(docked\.matches && c\) \{[^\n]*\.order\[data-row=/);
-    expect(app).toMatch(/retrigger\(row, 'goal-hl'\)/);
+    expect(app).toMatch(/row\.dataset\.hl = '1'/);
   });
 });

@@ -346,6 +346,7 @@ html,body{overflow-x:hidden;max-width:100%}
 .order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
 .order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
 .order .sell{min-height:44px;border-radius:22px}
+.order[data-hl]{outline:3px solid var(--c-focus);outline-offset:2px;animation:hlpulse 600ms 2}
 .order.ready{border:3px solid #3D7F33}
 .order.wait .sell{background:#fff;color:#6B5D52;border:2px solid #6B5D52;box-shadow:none}
 .queue-more{align-self:center;min-height:44px;padding:0 16px;border-radius:22px;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0;cursor:pointer}

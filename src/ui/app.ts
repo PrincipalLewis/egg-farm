@@ -201,7 +201,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (!ok) return; openPanel('market');
     // QA TUT-1: docked, the Market panel is always visible (openPanel keeps open=null), so a card tap highlights its order row.
     if (docked.matches && c) { const id = [...chips].find(([, el]) => el === c)?.[0]; const row = (id !== undefined ? mRows.querySelector<HTMLElement>(`.order[data-row="${id}"]`) : null) ?? mRows.querySelector<HTMLElement>('.order:not([hidden])');
-      if (row) { row.scrollIntoView({ block: 'nearest', behavior: rm() ? 'auto' : 'smooth' }); retrigger(row, 'goal-hl'); setTimeout(() => row.classList.remove('goal-hl'), 1200); } } });
+      if (row) { row.scrollIntoView({ block: 'nearest', behavior: rm() ? 'auto' : 'smooth' }); delete row.dataset.hl; void row.offsetWidth; row.dataset.hl = '1'; clearTimeout(Number(row.dataset.hlT)); row.dataset.hlT = String(setTimeout(() => { delete row.dataset.hl; }, 1200)); } } });
   let lastSellSource: Element | null = null;
   mRows.addEventListener('click', e => {
     if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
