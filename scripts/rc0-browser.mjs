@@ -627,6 +627,25 @@ sections.p1build = async () => {
     await ctx.close();
   }
 };
+// ---------- Cut A v3 (QA Major): Farm card "Limited by collecting ›" never overlaps the "Pays back in" chip (360/375/390, all engines) ----------
+sections.farmLimit = async () => {
+  const FCS = process.env.FC_SHOTS;
+  for (const [w, h] of [[360, 800], [375, 800], [390, 800], [1280, 800]]) for (const [name, coins] of [['affordable', 5e6], ['unaffordable', 995]]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: coins, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 6, customers: [],
+      nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2, workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); if (await page.locator('[data-tab=farm]').isVisible()) await page.locator('[data-tab=farm]').click(); await page.waitForSelector('#uRow .hint.limit .link', { timeout: 5000 }); await page.waitForTimeout(250);
+    const r = await page.evaluate(() => { const L = document.querySelector('#uRow .hint.limit .link'), wrap = L.parentElement, card = L.closest('.up'), C = card.querySelector('.vchip.pb');
+      const R = e => { const a = e.getBoundingClientRect(); return [a.left, a.top, a.right, a.bottom].map(v => Math.round(v * 10) / 10); };
+      const hit = R(L); const bs = getComputedStyle(L, '::before'); const bh = parseFloat(bs.height); const mid = (hit[1] + hit[3]) / 2; const hitBox = [hit[0], mid - bh / 2, hit[2], mid + bh / 2];
+      const ov = (a, b) => !(a[2] <= b[0] || b[2] <= a[0] || a[3] <= b[1] || b[3] <= a[1]);
+      return { link: hit, chip: C ? R(C) : null, card: R(card), pos: getComputedStyle(wrap).position, hitH: bh, text: L.textContent.trim(),
+        overlap: C ? ov(hit, R(C)) : false, hitOverlap: C ? ov(hitBox, R(C)) : false, inCard: hit[1] >= R(card)[1] && hit[3] <= R(card)[3], eta: !!card.querySelector('.hint.eta') }; });
+    ok(`Cut A v3 farm card ${name} at ${w}: limiter link (glyph + 44px hit) clear of "Pays back in" chip, in flow, inside card`, r.chip && !r.overlap && !r.hitOverlap && r.pos === 'static' && r.hitH >= 44 && r.inCard && r.text === 'Limited by collecting ›', JSON.stringify(r));
+    if (FCS) { mkdirSync(FCS, { recursive: true }); const [x, y, x2, y2] = r.card; await page.screenshot({ path: `${FCS}/cuta3-farmcard-${name}-${w}-${ENGINE}.png`, clip: { x: Math.max(0, x - 8), y: Math.max(0, y - 8), width: Math.min(w - Math.max(0, x - 8), x2 - x + 16), height: y2 - y + 16 } }); if (name === 'affordable') await page.screenshot({ path: `${FCS}/cuta3-full-${w}-${ENGINE}.png` }); }
+    await ctx.close();
+  }
+};
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();

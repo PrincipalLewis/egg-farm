@@ -73,8 +73,8 @@ img{user-select:none;-webkit-user-drag:none}
 @keyframes fadeout{0%{opacity:0;transform:translateY(4px)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
 .rm .ghost.walkoff,.rm .ghost.leave{animation:none}.rm .ghost.wave img{animation:none}
 .scene{position:relative;aspect-ratio:4/3;max-height:100%;margin-inline:auto;width:min(100%,560px);min-height:0;align-self:center;cursor:pointer}
-.coop{position:absolute;width:46%;left:27%;bottom:38%;transition:opacity 200ms}
-.coop.bounce{animation:bounce 400ms var(--ease-pop)}@keyframes bounce{50%{transform:scale(1.15)}}
+.scene .coop{position:absolute;width:46%;left:27%;bottom:38%;transition:opacity 200ms}
+.scene .coop.bounce{animation:bounce 400ms var(--ease-pop)}@keyframes bounce{50%{transform:scale(1.15)}}
 .scene.bump{animation:bump 300ms var(--ease-pop)}@keyframes bump{50%{transform:scale(1.05)}}
 .nest{position:absolute;width:72px;height:72px;left:calc(50% - 36px);bottom:30%}
 .nest img,.nest-icon img{position:absolute;inset:0;width:100%;height:100%}
@@ -131,7 +131,7 @@ img{user-select:none;-webkit-user-drag:none}
 .up .btn{width:100%}
 @media (min-width:600px){.up .btn{width:160px;align-self:flex-end}.up .hint{align-self:flex-end}}
 .hint{display:flex;align-items:center;gap:var(--s-1);min-height:var(--hint-h);font:700 var(--fs-hint) var(--f-body);color:var(--c-hint)}.hint img{width:14px}
-.hint.coop{color:var(--c-wood-text)}.hint.long{font-style:italic}.hint .link{border:0;background:none;padding:0;color:var(--c-wood-text);text-decoration:underline;font:inherit}
+.hint.limit{color:var(--c-wood-text)}.hint.long{font-style:italic}.hint .link{border:0;background:none;padding:0;color:var(--c-wood-text);text-decoration:underline;font:inherit}
 .btn.pulse2{animation:glow 600ms 2}
 /* modals */
 #modal-layer{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:var(--c-scrim)}#modal-layer.open{display:grid}
@@ -555,5 +555,8 @@ nav [data-nav=upgrades]{position:relative}
 .pill .rate.neg,.rate.neg{color:var(--c-danger)!important}
 .up .sum{font:700 12px var(--f-body);color:var(--c-wood-text);margin:0}
 /* UC12 Limited by collecting — visual 16px, 44px hit via padding/neg margin */
-.hint.coop .link,.hint .link{appearance:none;border:0;background:none;padding-block:14px;margin-block:-14px;padding-inline:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:44px;box-sizing:content-box}
-.hint.coop{color:var(--c-wood-text);padding-bottom:12px}
+.hint.limit .link,.hint .link{appearance:none;border:0;background:none;padding-block:14px;margin-block:-14px;padding-inline:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:44px;box-sizing:content-box}
+/* Cut A v3: limiter link stays in flow; 44px hit area lives on ::before so it can't collapse (no negative margins), with or without the ETA line */
+.hint.limit{position:static;color:var(--c-wood-text);min-height:var(--hint-h);margin-top:4px}
+.hint.limit .link{position:relative;padding:0;margin:0;min-height:var(--hint-h);box-sizing:border-box}
+.hint.limit .link::before{content:'';position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}

@@ -486,7 +486,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
     // UC12 / v1.4: Farm row "Limited by collecting ›" → Collection (44px hit via CSS padding)
     if (isF && !max && S.eggsPerTap(C, b) <= 0.5 * S.coopCapacity(F, b))
-      hint += `<div class="hint coop"><button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades."><img src="${A('icon-nest.svg')}" alt="" width="14" height="14">Limited by collecting ›</button></div>`;
+      hint += `<div class="hint limit"><button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades."><img src="${A('icon-nest.svg')}" alt="" width="14" height="14">Limited by collecting ›</button></div>`;
     const aria = !max && og && baseInc > 0 && og.gain > 0
       ? `${isF ? 'Farm level' : 'Collect per tap'}, level ${L}. Adds ${pct} percent income. ${og.gain > 0 ? `Pays back in about ${fmtTimeToAfford(og.payback).replace('~', '')}.` : ''} ${isBest ? 'Best buy.' : ''} Buy for ${fmtMoney(cost * 100)}.`
       : '';
