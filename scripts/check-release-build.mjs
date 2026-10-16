@@ -12,3 +12,6 @@ const RC0_TAG_COMMIT = process.env.RC0_TAG_COMMIT ?? '16176a3';
 const head = process.env.HEAD_COMMIT ?? (() => { try { return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim(); } catch { return ''; } })();
 const rc0 = ids.filter(i => i.startsWith('m3-rc0+'));
 if (rc0.length && !(head && (head.startsWith(RC0_TAG_COMMIT) || RC0_TAG_COMMIT.startsWith(head)))) { console.error(`check-release-build: release name m3-rc0 but HEAD is ${head.slice(0, 7) || 'unknown'}, not the m3-rc0 tag commit ${RC0_TAG_COMMIT}`); process.exit(1); }
+// CEO ruling (Oct 16): debug globals stay out of release. eggfarmUi is dev/QA-only (behind __IOS_FLAG__).
+for (const g of ['eggfarmUi']) if (js.includes(g)) { console.error(`check-release-build: debug global "${g}" found in the release bundle`); process.exit(1); }
+console.log('check-release-build: no eggfarmUi in release ok');

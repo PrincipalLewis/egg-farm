@@ -5,6 +5,7 @@ import { startAutosave } from './save/autosave';
 import { bus, guardTabs } from './save/tab-guard';
 import { readOnlyKV } from './save/save';
 import { mountApp } from './ui/app';
+import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
 
@@ -52,7 +53,8 @@ async function boot() {
   if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
-  (window as any).eggfarmUi = ui; // S2-8/S2-9: ui.rates() for the m3/rc1-ui visuals and QA
+  // CEO ruling: debug globals stay out of release. ui.rates() remains on the mountApp() return for m3/rc1-ui.
+  if (IOS_FLAG_ENABLED) (window as any).eggfarmUi = ui; // dev/QA builds only (__IOS_FLAG__), checked by check-release-build
   if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
   { const q = new URLSearchParams(location.search); if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q)); }
   // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).
