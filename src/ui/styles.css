@@ -413,4 +413,16 @@ html,body{overflow-x:hidden;max-width:100%}
 .font-credits{padding-bottom:14px} /* N1: room for the link hit box overhang so it never overlaps Reset save */
 
 /* S2-3a served dwell card (MK-16/19): static, not tappable */
-.chip.served{pointer-events:none;opacity:.95}.chip.served .tag.thanks{background:var(--c-meadow-strong);color:#fff;white-space:nowrap;font-size:var(--fs-xs)}
+.chip.served{pointer-events:none;width:64px;height:72px;background:#E3F1DC;border:3px solid #E3F1DC;gap:0;transition:opacity 200ms ease,transform 200ms ease}
+.queue.five .chip.served{width:64px;height:72px}
+.chip.served .cust-wrap{position:relative;line-height:0}.chip.served img.cust{width:30px;height:30px}
+.chip.served .smile{position:absolute;right:-6px;bottom:-2px;width:16px;height:16px}
+.chip.served .thx{font:800 12px/1.1 var(--f-body);color:#3D7F33}
+.chip.served .amt{font:600 14px/1.1 var(--f-display);color:#3E2C23;white-space:nowrap}
+.chip.served.leaving{opacity:0;transform:translateY(-8px)}
+.rm .chip.served,.reduced-motion .chip.served{transition:none}
+/* full-queue "+$X" pop (Art & UX): Yolk with outline, rises 24px over 600 ms; reduced motion = static fade */
+.qpop{position:fixed;z-index:31;pointer-events:none;translate:-50% -50%;font:700 16px var(--f-display);color:var(--c-yolk);
+  -webkit-text-stroke:1.5px #3E2C23;paint-order:stroke fill;text-shadow:0 1px 0 #3E2C23;animation:qpop 600ms ease-out forwards;white-space:nowrap}
+@keyframes qpop{from{transform:translateY(0);opacity:1}70%{opacity:1}to{transform:translateY(-24px);opacity:0}}
+.reduced-motion .qpop,.rm .qpop{animation:qpopRm 600ms linear forwards}@keyframes qpopRm{from{opacity:1}to{opacity:0}}

@@ -5,6 +5,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
+import { fmtMoneyShort } from './format';
 import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
@@ -280,12 +281,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       kids.push(el);
     }
     // S2-3a: dwelling "Thanks!" cards, in free strip room after the live customers (not tappable, aria-hidden).
-    const act = dwell.active(now(), d => { const el = dwellEls.get(d.id); dwellEls.delete(d.id); if (el?.isConnected && !rm()) ghost(el.getBoundingClientRect(), 'wave leave'); });
-    for (const id of [...dwellEls.keys()]) if (!act.some(d => d.id === id)) dwellEls.delete(id);
-    for (const d of act) {
-      if (kids.length >= stripSlots) break;
+    // Product ruling: no free strip slot -> the served customer leaves at once with only a "+$X" pop (no card, no extra slot).
+    const lay = dwell.layout(now(), split.more ? 0 : Math.max(0, stripSlots - kids.length), /* "+N waiting" shown = strip full */ d => {
+      const el = dwellEls.get(d.id); dwellEls.delete(d.id); leaveCard(el); });
+    for (const d of lay.popped) queuePop(d.cents);
+    for (const [id, el] of [...dwellEls]) if (!lay.shown.some(d => d.id === id)) { dwellEls.delete(id); el.remove(); }
+    for (const d of lay.shown) {
       let el = dwellEls.get(d.id);
-      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag thanks">Thanks! +${fmtMoney(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
+      if (!el) { el = h(`<div class="chip served" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyShort(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
       kids.push(el);
     }
     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
@@ -310,6 +313,20 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
   };
   let slotToastPending = false;
+  /** Dwell end (Art & UX): fade + slide up 8px over 200 ms at the card's spot; reduced motion = gone instantly. */
+  const leaveCard = (el: HTMLElement | undefined) => {
+    if (!el?.isConnected) return; if (rm()) { el.remove(); return; }
+    const r = el.getBoundingClientRect(); const c = el.cloneNode(true) as HTMLElement; el.remove();
+    c.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;margin:0`; spawn(c, 260);
+    requestAnimationFrame(() => c.classList.add('leaving'));
+  };
+  /** Full-queue "+$X" pop (Art & UX): from the strip's last chip, coins fly to the money pill (same path as sales); clamped to the safe area. */
+  const queuePop = (cents: number) => {
+    const from = (queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
+    const x = Math.min(Math.max(c.x, 48), innerWidth - 48), y = Math.max(c.y - 20, 40);
+    spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyShort(cents)}</div>`), 650);
+    if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
+  };
 
   // ---------- Game events ----------
   g.on((e: GameEvent) => {

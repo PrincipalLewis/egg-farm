@@ -215,6 +215,13 @@ sections.s23a = async () => {
   ok('S2-3a MK-21 a customer card visible >= 40% with Market Hand + 1,500 eggs', r.vis >= 0.4, JSON.stringify(r));
   ok('S2-3a MK-16 Thanks card shows and leaves after ~1.5 s', r.served > 0 && r.maxLife <= 1500 + 250, JSON.stringify(r));
   ok('S2-3a MK-18 dwelling card is not tappable', r.pe === 'none');
+  const full = await page.evaluate(async () => { const g = window.eggfarm;
+    g.state = { ...g.state, workers: {}, basket: 3, nextCustomerInS: 999, customers: [1, 2, 3, 4, 5, 6, 7].map(i => ({ id: 9000 + i, demand: i === 1 ? 3 : 50, filled: 0, waitedS: 0 })) };
+    await new Promise(r => setTimeout(r, 300)); g.dispatch({ type: 'sell', customerId: 9001 });
+    let served = 0, pop = '';
+    for (let i = 0; i < 15; i++) { await new Promise(r => setTimeout(r, 100)); if (document.querySelector('#queue .chip.served')) served++; const f = [...document.querySelectorAll('.qpop')].pop(); if (f) pop = f.textContent; }
+    return { served, pop, waiting: g.state.customers.length }; });
+  ok('S2-3a ruling: strip full -> no Thanks card, only a +$X pop', full.served === 0 && /^\+\$/.test(full.pop), JSON.stringify(full));
   ok('S2-3a no page errors', errors.length === 0, errors.join(' | '));
   await ctx.close();
 };

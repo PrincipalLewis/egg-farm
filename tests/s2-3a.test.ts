@@ -77,3 +77,28 @@ describe('MK-22 first customer as soon as the player returns', () => {
     expect(g.state.basket).toBe(50); expect(g.state.nextCustomerInS).toBe(2.5);
   });
 });
+
+describe('Product ruling: strip full of waiting customers', () => {
+  it('a served customer with no free slot leaves at once as a "+$X" pop: never drawn, never shown later', () => {
+    const d = new ServedDwell(b.feel.served_dwell_ms); d.sold(1, 900); d.served(1, 0);
+    const r = d.layout(0, 0); expect(r.shown).toEqual([]); expect(r.popped.map(x => [x.id, x.cents])).toEqual([[1, 900]]);
+    expect(d.layout(100, 5)).toEqual({ shown: [], popped: [] }); // a slot frees up 100 ms later: still no card
+  });
+  it('with room the card is drawn; extra served customers beyond the free slots pop; a drawn card keeps its slot', () => {
+    const d = new ServedDwell(1500); d.served(1, 0); d.served(2, 0); d.served(3, 0);
+    const r = d.layout(0, 1); expect(r.shown.map(x => x.id)).toEqual([1]); expect(r.popped.map(x => x.id)).toEqual([2, 3]);
+    expect(d.layout(500, 1).shown.map(x => x.id)).toEqual([1]); expect(d.layout(1500, 1).shown).toEqual([]);
+  });
+  it('a drawn card squeezed out by new waiting customers ends early without a second pop', () => {
+    const d = new ServedDwell(1500); d.served(7, 0); d.layout(0, 1);
+    expect(d.layout(200, 0)).toEqual({ shown: [], popped: [] }); expect(d.layout(300, 5).shown).toEqual([]);
+  });
+});
+
+import { fmtMoneyShort } from '../src/ui/format';
+describe('Art & UX compact amount on the Thanks card / pop', () => {
+  it('"$12.50" under $1K, then 1.2K style (floored, no trailing .0)', () => {
+    expect(fmtMoneyShort(1250)).toBe('$12.50'); expect(fmtMoneyShort(99_999)).toBe('$999.99');
+    expect(fmtMoneyShort(123_456)).toBe('$1.2K'); expect(fmtMoneyShort(100_000)).toBe('$1K'); expect(fmtMoneyShort(345_000_000)).toBe('$3.4M');
+  });
+});
