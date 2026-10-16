@@ -458,7 +458,9 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks .balanced .segs i.weakest{outline:2px solid var(--c-yolk-dark,#c8901a);outline-offset:1px}
 @media (prefers-reduced-motion:reduce){.tracks .balanced .segs i b{transition:none}}
 .up .lock{min-height:44px;display:flex;align-items:center;justify-content:flex-end;color:var(--c-ink,#3E2C23);font-weight:700}
-.up .lock::before{content:'🔒';margin-right:6px}
+.up .lock::before{content:'';flex:none;width:12px;height:14px;margin-right:6px;background:
+  linear-gradient(var(--c-disabled),var(--c-disabled)) 0 6px/12px 8px no-repeat,
+  radial-gradient(circle at 50% 100%,transparent 2.5px,var(--c-disabled) 2.5px 4.5px,transparent 4.5px) 1px 0/10px 6px no-repeat;border-radius:2px} /* Art&UX 01:17 #4: CSS lock glyph in Dust (#CFC6BA), not the 🔒 emoji */
 
 /* M4A-18 next-goal highlight on one Farm-tab row (static outline; no motion) */
 .tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
