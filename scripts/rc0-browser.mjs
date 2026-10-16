@@ -647,10 +647,11 @@ sections.goalLabel161 = async () => {
 // ---------- Art & UX 22:31: order card Sell vs Need at 360 — " eggs" drop from measured fit, re-checked on state change; buttons nowrap, 44px, >9 chars at 12px ----------
 sections.orderNeed = async () => {
   const { ctx, page } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
-  const meas = () => page.$$eval('#mRows .order:not([hidden])', rs => rs.map(r => { const l = r.querySelector('.l1'), b = r.querySelector('.btn'), cs = getComputedStyle(b); return { e: r.querySelector('.e').textContent, btn: b.textContent, bw: Math.round(b.getBoundingClientRect().width), bh: b.getBoundingClientRect().height, fs: cs.fontSize, ws: cs.whiteSpace, bOver: b.scrollWidth > b.clientWidth + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5 }; }));
+  const meas = () => page.$$eval('.order:not([hidden])', rs => rs.map(r => { const l = r.querySelector('.l1'), b = r.querySelector('.btn'), cs = getComputedStyle(b); return { e: r.querySelector('.e').textContent, btn: b.textContent, bw: Math.round(b.getBoundingClientRect().width), bh: b.getBoundingClientRect().height, fs: cs.fontSize, ws: cs.whiteSpace, bOver: b.scrollWidth > b.clientWidth + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5 }; }));
   const set = basket => page.evaluate(([bk]) => { const g = window.eggfarm; g.state = { ...g.state, basket: bk, customers: [{ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }, { id: 3, demand: 999, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9 }; }, [basket]);
-  await set(0); await page.locator('[data-nav=market]').click().catch(() => {}); if (!(await page.locator('#mRows .order').count())) await page.locator('#queue .chip:not(.empty)').first().click({ force: true }).catch(() => {});
-  await page.waitForSelector('#mRows .order'); await page.waitForTimeout(400);
+  await set(0); await page.waitForTimeout(400); await page.locator('#queue .chip:not(.empty)').first().click({ force: true }).catch(() => {}); await page.waitForTimeout(400);
+  if (!(await page.locator('.order .l1').count())) await page.locator('[data-nav=market]').click().catch(() => {});
+  await page.waitForSelector('.order .l1', { timeout: 5000 }); await page.waitForTimeout(400);
   const FCS = process.env.FC_SHOTS;
   for (const [name, bk] of [['need', 0], ['sell', 1e12], ['need-again', 0]]) {
     await set(bk); await page.waitForTimeout(500); const r = await meas();
