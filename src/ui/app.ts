@@ -2,6 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
+import { toastTop } from './toast-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -143,7 +144,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0; /* rc2: never over the 'New helper!' hire banner (same top at 1280 docked) */ const edge = Math.max(docked.matches ? 0 : qb, ia); const below = edge > 0; toast.style.top = below ? `${Math.round(edge + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
+  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0; /* rc2: never over the 'New helper!' hire banner */ const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
