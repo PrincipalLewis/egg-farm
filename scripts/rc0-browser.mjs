@@ -88,11 +88,12 @@ sections.b2 = async () => {
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
     await page.waitForTimeout(300); const shown = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { top: r.top, vis: getComputedStyle(e).visibility, text: e.textContent }; });
     await page.waitForTimeout(2200);
-    const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const below = w < 960;
+    const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const ia = await page.evaluate(() => document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0); const below = w < 960 || ia > 0, edge = Math.max(w < 960 ? qb : 0, ia);
     const after = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { bottom: r.bottom, vis: getComputedStyle(e).visibility, op: getComputedStyle(e).opacity }; });
     // QA precheck-2fae4c4 §1: width-aware. <960: sits 8px below the queue strip (F1) and fades in place; docked: slides off the top.
+    // rc2 item 1: a visible 'New helper!' banner (.intro-a) also pushes the toast 8px below it (any width) and it fades in place.
     ok(`B2 L5 toast shows then is fully gone (${below ? 'below strip, faded' : 'off the top'}) (${w})`, shown.vis === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
-      && (below ? Math.abs(shown.top - (qb + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, after, qb }));
+      && (below ? Math.abs(shown.top - (edge + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, after, qb, ia }));
     await ctx.close();
   }
 };
