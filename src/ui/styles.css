@@ -484,5 +484,8 @@ html,body{overflow-x:hidden;max-width:100%}
    text: 2px from the text + 8px dot = 10px right padding on the label, dot at the label's top-right, no overlap with "Workers".
    Hidden dot = display:none = no space, so the flag-off build (dot never shown) renders exactly as before. */
 .tabs .tab-pill > .new-dot{position:static;flex:none;align-self:flex-start;width:8px;height:8px;margin:8px 0 0 -4px;box-shadow:none}
+/* Workers tab tap target >= 44px at 360 (the 34px tab bar gives a ~27px button): invisible ::before extends the hit area 9px
+   above and below (27 + 18 = 45px). The tab already has position:relative. Other tabs unchanged (pre-existing ~27px). */
+.tabs [data-tab="workers"]::before{content:"";position:absolute;inset:-9px 0}
 .pulse{animation:nudge-pulse 1.6s ease-in-out infinite}@keyframes nudge-pulse{50%{transform:scale(1.06)}}
 @media (prefers-reduced-motion:reduce){.pulse{animation:none}}
