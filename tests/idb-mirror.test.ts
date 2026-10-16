@@ -100,15 +100,17 @@ describe('D2 IndexedDB mirror', () => {
     await expect(new Game(b, mem(), () => 5).clearMirror()).resolves.toBeUndefined();
   });
   it('store name is stable (save compatibility across builds)', () => { expect(IDB_STORE).toBe('save'); });
-  it('save_restore source: idb when the IndexedDB copy is restored, localStorage when it loses, none when nothing differs', () => {
+  it('save_restore fires only when the IndexedDB copy wins (QA D1): never for an older/one-behind or invalid IndexedDB copy', () => {
     const old = serialize(st({ farmLevel: 3 }), 1000), neu = serialize(st({ farmLevel: 4 }), 2000);
     expect(restoreSource(old, neu, b)).toBe('idb');
     expect(restoreSource(null, neu, b)).toBe('idb');
     expect(restoreSource('{"trunc', neu, b)).toBe('idb');
-    expect(restoreSource(neu, old, b)).toBe('localStorage');
-    expect(restoreSource(old, '{"bad', b)).toBe('localStorage');
+    expect(restoreSource(neu, old, b)).toBeNull(); // IndexedDB one save behind: normal Firefox/WebKit tab close
+    expect(restoreSource(old, '{"bad', b)).toBeNull();
     expect(restoreSource(old, old, b)).toBeNull();
     expect(restoreSource(old, null, b)).toBeNull();
     expect(restoreSource(null, null, b)).toBeNull();
+    // main.ts fires on reconcile() === 'idb'; that must agree with restoreSource for every case
+    for (const [ls, idb] of [[old, neu], [neu, old], [old, '{"bad'], [old, old]] as const) { const k = mem(); k.setItem(SAVE_KEY, ls); expect(reconcile(k, idb, b) === 'idb').toBe(restoreSource(ls, idb, b) === 'idb'); }
   });
 });

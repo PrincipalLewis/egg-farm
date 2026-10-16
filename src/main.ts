@@ -3,8 +3,7 @@ import { balance } from './config/balance';
 import { Game } from './game';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
-import { IdbMirror, reconcile, restoreSource } from './save/idb-mirror';
-import { SAVE_KEY } from './save/save';
+import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
 import { showTabGuardDialog } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
@@ -58,13 +57,13 @@ async function boot() {
   const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
   // D2: newest valid copy of localStorage / IndexedDB wins.
-  let restored: ReturnType<typeof restoreSource> = null;
-  const mirror = await IdbMirror.open(); if (mirror) { try { const idbRaw = await mirror.read(); restored = restoreSource(localStorage.getItem(SAVE_KEY), idbRaw, balance); if (reconcile(localStorage, idbRaw, balance) !== 'idb' && restored === 'idb') restored = 'localStorage'; } catch { /* localStorage blocked: Game reports it */ } }
+  let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
+  const mirror = await IdbMirror.open(); if (mirror) { try { restored = reconcile(localStorage, await mirror.read(), balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror);
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
-  if (restored) g.telemetry.track('save_restore', { source: restored });
+  if (restored) g.telemetry.track('save_restore', { source: 'idb' });
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
