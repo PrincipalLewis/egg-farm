@@ -35,7 +35,7 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
   const wait = `Need ${eggs(rem)}`;
   const button = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${preview(sellCents)}`;
   const buttonAria = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${exact(sellCents)}`;
-  const line = `${eggs(have)}/${eggs(want)} eggs · ${value}`;
+  const line = `${eggs(have)}/${eggs(want)}\u00a0eggs · ${value}`; // Art & UX: NBSP between count and eggs
   const lineAria = `${eggs(have)} of ${eggs(want)} eggs delivered, order worth ${exact(valueCents)}`;
   return { id: c.id, have, want, sell, valueCents, sellCents, state, line, lineAria, button, buttonAria };
 }
@@ -52,7 +52,7 @@ export function orderHtml(v: OrderView, avatar: string): string {
   const inner = v.state === 'wait' ? v.button : `<span class="sk">${parts[0]}</span><span class="sy">${parts[1] ?? ''}</span>`;
   const count = `${eggs(v.have)}/${eggs(v.want)}`;
   return `<div class="order ${v.state}" data-row="${v.id}"><div class="av"><img src="${avatar}" alt=""></div>
-    <div class="txt" aria-label="${v.lineAria}"><div class="l1"><span class="n">${count}</span><span class="egg"> eggs</span><span class="v"> · ${v.line.split(' · ')[1]}</span></div>
+    <div class="txt" aria-label="${v.lineAria}"><div class="l1"><span class="n">${count}\u00a0</span><span class="egg">eggs</span><span class="v"> · ${v.line.split(' · ')[1]}</span></div>
     <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${v.want}" aria-valuenow="${v.have}" aria-label="${v.lineAria}"><i style="width:${pct.toFixed(2)}%"></i></div></div>
     <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}" aria-label="${v.buttonAria}">${inner}</button></div>`;
 }
