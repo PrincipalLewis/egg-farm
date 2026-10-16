@@ -87,14 +87,17 @@ sections.b2tip = async () => {
     if (mode === 'normal') await page.locator('#iaOpen').click({ timeout: 8000 }).catch(() => {}), await page.waitForTimeout(400);
     await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' }));
     const S = []; let shotDone = false, opened = false; const t0 = Date.now();
-    while (Date.now() - t0 < 5500) { const c = await page.evaluate(SNAP); if (c) S.push(c);
+    while (Date.now() - t0 < 7000) { const c = await page.evaluate(SNAP); if (c) S.push(c);
       if (c && !shotDone && shot) { await page.waitForTimeout(120); await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}.png` }); shotDone = true; }
       // direct flow on phones: sheet stays closed for 1.5s (tip must stay hidden), then the player opens Upgrades and the deferred tip shows
-      if (!opened && Date.now() - t0 > 1500 && w < 960) { opened = true; await page.locator('[data-nav=upgrades]').click().catch(() => {}); }
+      if (!opened && Date.now() - t0 > 1500 && w < 960) { opened = true; if (!(await page.locator('#panel-layer.open').count())) await page.locator('[data-nav=upgrades]').click({ timeout: 2000 }).catch(() => {}); }
       await page.waitForTimeout(100); }
     const bad = S.filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet);
-    const info = JSON.stringify({ n: S.length, first: S[0] ?? 'deferred (not shown)', bad: bad[0] ?? null, errors });
-    ok(`B-2 tired tip ${mode} ${w}x${h}: clear of tablist + worker row, in viewport, only with the row on screen`, !bad.length && !errors.length, info);
+    // review 6a9ede1 #1: deferral is only allowed where no clean spot exists (docked short heights: the row sits right under the tabs with no room below)
+    const mayDefer = (w === 1280 && h <= 720) || (w === 1024 && h === 474);
+    const manage = await page.evaluate(() => [...document.querySelectorAll('.coach')].some(c => /Manage/.test(c.textContent) && getComputedStyle(c).visibility !== 'hidden'));
+    const info = JSON.stringify({ n: S.length, mayDefer, manage, first: S[0] ?? 'deferred (not shown)', bad: bad[0] ?? null, errors });
+    ok(`B-2 tired tip ${mode} ${w}x${h}: clear of tablist + worker row, in viewport, only with the row on screen; shows where a clean spot exists, then Manage`, !bad.length && !errors.length && (mayDefer ? (!S.length || manage) : S.length > 0 && manage), info);
     if (shot && !shotDone) await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}-deferred.png` });
     console.log(`b2tip ${mode} ${w}x${h} ${info}`);
     await ctx.close();

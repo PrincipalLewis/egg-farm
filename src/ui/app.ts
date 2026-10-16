@@ -533,13 +533,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     el.style.visibility = 'hidden'; el.style.left = '0'; el.style.top = '0'; document.body.append(el);
     const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, centred = false;
     const inVp = (r: DOMRect) => r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
-    const place = () => { if (!el.isConnected) return;
+    const place = () => { if (!el.isConnected) { close(); return; } // dropped by another tip: stop the re-check loop
       const row = rowId ? workerRow(rowId) : null; if (rowId) at = row?.querySelector('.ebar') ?? null; // tired tip: row/bar re-queried each tick (re-rendered, or not built yet while the sheet is closed)
       const r = at?.getBoundingClientRect(), rr = row?.getBoundingClientRect();
       const sheetOk = !rowId || ((docked.matches || open === 'upgrades') && tab === 'workers');
       const hw = Math.ceil((el.offsetWidth || 320) / 2) + 4, cx = r ? Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw) : innerWidth / 2;
       const tabs = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect());
-      const p = r ? safeCoachPlacement({ target: r, tip: { w: el.offsetWidth, h: el.offsetHeight }, cx, vp: { w: innerWidth, h: innerHeight }, tabs, row: rr, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
+      const p = r ? safeCoachPlacement({ target: r, tip: { w: el.offsetWidth, h: el.offsetHeight }, cx, vp: { w: innerWidth, h: innerHeight }, tabs, row: rr, clip: rowId ? uRow.parentElement?.getBoundingClientRect() : undefined, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
       // no clean spot yet but the sheet is open: bring the row to the middle of its scroller once, so there is room under it
       if (!p) { el.style.visibility = 'hidden'; if (row && sheetOk && rr?.height && !centred) { centred = true; row.scrollIntoView({ block: 'center' }); } return; }
       el.style.cssText = `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
@@ -547,7 +547,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       handImg.src = p.side === 'above' ? A('ui-pointer-hand-down.svg') : A('ui-pointer-hand.svg');
       if (!shown) { shown = true; life = window.setTimeout(close, ms); onShow?.(); } };
     const iv = window.setInterval(place, 250);
-    const close = () => { clearInterval(iv); clearTimeout(life); el.remove(); };
+    const close = () => { clearInterval(iv); clearTimeout(life); if (el.isConnected) el.remove(); };
     el.addEventListener('click', close); place(); return close;
   };
   const showGoalIntro = () => { g.telemetry.onboardingStep(5, 'next_goal_intro'); coach('Your next goal is always shown here.', goalBtn, 4000, 'toastlike'); };
@@ -584,8 +584,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       tab = 'workers'; dirty = true; render();
       coach('Workers get tired over time.', null, 3000, '', e.worker, () => window.setTimeout(() => { // B-2: Manage tip follows once the tired tip has actually shown
         const r2 = workerRow(e.worker), full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
-        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
-        introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' });
+        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000, '', null, () => { // 'done' only once the Manage tip has actually shown
+          introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); });
       }, 3100));
     }, 50);
   });

@@ -35,7 +35,7 @@ describe('B-2 amended (rc2-notes A-C): safeCoachPlacement', () => {
   it('C: sheet closed / anchor not visible -> null', () => { expect(run(scene({ w: 360, h: 740 }, [], 300, 8, 344), false)).toBeNull(); });
   it('legacy tips also never sit on a tablist or leave the viewport', () => {
     const t = box(100, 300, 100, 44), tabs = [box(0, 230, 400, 50)];
-    const p = safeCoachPlacement({ target: t, tip: TIP, cx: 150 > 142 ? 150 : 142, vp: { w: 400, h: 700 }, tabs, visible: true });
+    const p = safeCoachPlacement({ target: t, tip: TIP, cx: 150, vp: { w: 400, h: 700 }, tabs, visible: true });
     expect(p?.side).toBe('below');
     expect(safeCoachPlacement({ target: t, tip: TIP, cx: 150, vp: { w: 400, h: 420 }, tabs, visible: true })).toBeNull();
     expect(safeCoachPlacement({ target: box(100, 600, 100, 44), tip: TIP, cx: 150, vp: { w: 400, h: 700 }, tabs: [], visible: true })?.side).toBe('above');
@@ -44,5 +44,31 @@ describe('B-2 amended (rc2-notes A-C): safeCoachPlacement', () => {
     for (const [w, h] of [[1024, 474], [390, 640], [360, 740], [1280, 720], [1280, 600], [375, 812]]) for (let y = -40; y < h; y += 13) for (const ty of [0, y - 50, y + 70]) {
       const s = scene({ w, h }, [box(0, ty, w, 44)], y, 4, Math.min(w - 8, 380)); expect(clean(s, run(s))).toBe(true);
     }
+  });
+  it('margin: a tip that fits only without the 8px bottom margin is not placed there', () => {
+    // row 300..364, below = 372..440; vp 444 -> bottom 440 > 436 -> not below; above 224..292 clean
+    const s = scene({ w: 390, h: 444 }, [], 300, 8, 374); expect(run(s)).toEqual({ side: 'above', top: 300 - ROW_GAP - TIP.h });
+    const s2 = scene({ w: 390, h: 448 }, [], 300, 8, 374); expect(run(s2)?.side).toBe('below');
+  });
+  it('horizontal overflow -> null', () => {
+    const s = scene({ w: 390, h: 740 }, [], 300, 8, 374);
+    expect(safeCoachPlacement({ target: s.bar, tip: TIP, cx: 100, vp: s.vp, tabs: [], row: s.row, visible: true })).toBeNull();
+    expect(safeCoachPlacement({ target: s.bar, tip: TIP, cx: 300, vp: s.vp, tabs: [], row: s.row, visible: true })).toBeNull();
+  });
+  it('legacy side order when both sides are clean: above at top >= 120, below under 120', () => {
+    const vp = { w: 400, h: 900 };
+    expect(safeCoachPlacement({ target: box(100, 400, 100, 44), tip: TIP, cx: 150, vp, tabs: [], visible: true })).toEqual({ side: 'above', top: 400 - 12 - 68 });
+    expect(safeCoachPlacement({ target: box(100, 119, 100, 44), tip: TIP, cx: 150, vp, tabs: [], visible: true })).toEqual({ side: 'below', top: 163 + 12 });
+  });
+  it('avoid rects are honoured', () => {
+    const t = box(100, 400, 100, 44), vp = { w: 400, h: 900 };
+    expect(safeCoachPlacement({ target: t, tip: TIP, cx: 150, vp, tabs: [], avoid: [box(0, 340, 400, 10)], visible: true })?.side).toBe('below');
+    expect(safeCoachPlacement({ target: t, tip: TIP, cx: 150, vp, tabs: [], avoid: [box(0, 340, 400, 10), box(0, 470, 400, 10)], visible: true })).toBeNull();
+  });
+  it('clip: a row inside the viewport but scrolled under the sheet header / past the scroller bottom -> null', () => {
+    const s = scene({ w: 390, h: 740 }, [], 300, 8, 374), o = { target: s.bar, tip: TIP, cx: s.cx, vp: s.vp, tabs: [], row: s.row, visible: true };
+    expect(safeCoachPlacement({ ...o, clip: box(0, 320, 390, 400) })).toBeNull();
+    expect(safeCoachPlacement({ ...o, clip: box(0, 100, 390, 250) })).toBeNull();
+    expect(safeCoachPlacement({ ...o, clip: box(0, 100, 390, 600) })?.side).toBe('below');
   });
 });
