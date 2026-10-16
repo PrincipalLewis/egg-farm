@@ -73,9 +73,3 @@ export function workersHtml(s: GameState, b: Balance): string {
       <button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}">${manageIcon(s, b, 'icon-manage.svg')}<span>${cd > 0 ? `Manage 0:${String(cd).padStart(2, '0')}` : 'Manage'}</span></button></div>`;
   }).join('');
 }
-/** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */
-export function shouldShowCoopTip(s: GameState, b: Balance, shownThisSession: boolean): boolean {
-  const t = b.workers.tips;
-  return !shownThisSession && !s.workers.coop_hand && s.farmLevel >= t.coop_hand_tip_min_farm && s.coopFullS >= t.coop_hand_tip_full_s;
-}
-export const COOP_TIP_TEXT = 'Coop full! Hire a Coop Hand to collect eggs for you.';

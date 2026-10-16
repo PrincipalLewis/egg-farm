@@ -1,5 +1,6 @@
 import type { Balance } from './config/balance';
-import { GameState, initialState, coopCapacity } from './sim/state';
+import { GameState, initialState, coopCapacity, eggsPerSec } from './sim/state';
+import { mood } from './sim/workers';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
@@ -73,10 +74,35 @@ export class Game {
       else { const { type, ...rest } = e; this.telemetry.track(type, rest); }
     }
   }
+  /** B-1 v0.3: why the coop may leave full on the next check (set by the action / event that moved eggs). */
+  private exitCause: 'tap' | 'coop_hand' | 'cap_upgrade' | 'reload' | null = null;
+  /** B-1 session totals (this page load): ms spent full and eggs laid above the cap (lost). */
+  coopFullMs = 0; eggsLostWhileFull = 0;
   private checkCoopFull() {
-    const full = this.state.coop >= coopCapacity(this.state.farmLevel, this.b);
-    if (full && this.coopFullSince === null) { this.coopFullSince = this.now(); this.telemetry.track('coop_full', { phase: 'start' }); this.notify({ type: 'coop_full', phase: 'start' }); }
-    else if (!full && this.coopFullSince !== null) { this.telemetry.track('coop_full', { phase: 'end', durationMs: this.now() - this.coopFullSince }); this.coopFullSince = null; this.notify({ type: 'coop_full', phase: 'end' }); }
+    const cap = coopCapacity(this.state.farmLevel, this.b), full = this.state.coop >= cap;
+    if (full && this.coopFullSince === null) {
+      this.coopFullSince = this.now(); this.exitCause = null;
+      const ch = mood(this.state.workers.coop_hand, this.b) ?? 'none';
+      this.telemetry.track('coop_full', { phase: 'start', farm_level: this.state.farmLevel, coop_cap: cap, coop_hand_state: ch, t: this.coopFullSince });
+      this.notify({ type: 'coop_full', phase: 'start' });
+    } else if (!full && this.coopFullSince !== null) {
+      const durationMs = this.now() - this.coopFullSince; this.coopFullMs += durationMs;
+      this.telemetry.track('coop_full', { phase: 'end', durationMs, exit_reason: this.exitCause ?? 'reload',
+        coop_full_ms: this.coopFullMs, eggs_lost_while_full: Math.floor(this.eggsLostWhileFull) });
+      this.coopFullSince = null; this.exitCause = null; this.notify({ type: 'coop_full', phase: 'end' });
+    }
+  }
+  /** Eggs production would have laid above the cap during `ms` of online sim (lost, M1). */
+  private trackLost(before: GameState, ms: number) {
+    const cap = coopCapacity(before.farmLevel, this.b), laid = eggsPerSec(before.farmLevel, this.b) * ms / 1000;
+    this.eggsLostWhileFull += Math.max(0, before.coop + laid - cap);
+  }
+  private noteCause(evs: SimEvent[]) {
+    for (const e of evs) {
+      if (e.type === 'collect') this.exitCause = 'tap';
+      else if (e.type === 'worker_collect') this.exitCause = 'coop_hand';
+      else if (e.type === 'upgrade' && e.upgrade === 'farm') this.exitCause = 'cap_upgrade';
+    }
   }
   /** AC14c: set once when a save write throws (QuotaExceededError / Safari private mode); the UI warns once. */
   storageFailed = false; onStorageFail: (() => void) | null = null;
@@ -127,10 +153,10 @@ export class Game {
     this.onNewerSave?.(v);
   }
   endSession() {
-    if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end', { coop_full_ms: this.coopFullMs + (this.coopFullSince === null ? 0 : this.now() - this.coopFullSince), eggs_lost_while_full: Math.floor(this.eggsLostWhileFull) }); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
-    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();
+    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.noteCause(ev); this.emit(ev); this.checkCoopFull();
     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
   }
@@ -145,8 +171,8 @@ export class Game {
    */
   /** Debug/QA: simulate `ms` of online play immediately (same tick path as frame()). */
   debugAdvance(ms: number) {
-    const ev: SimEvent[] = []; const r = advance(this.state, ms, this.accMs, this.b, ev);
-    this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull();
+    const ev: SimEvent[] = []; this.trackLost(this.state, ms); const r = advance(this.state, ms, this.accMs, this.b, ev);
+    this.state = r.state; this.accMs = r.accMs; this.noteCause(ev); this.emit(ev); this.checkCoopFull();
   }
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
   debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.state, this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
@@ -161,8 +187,8 @@ export class Game {
     const maxMs = this.b.offline.offlineMinSeconds * 1000;
     if (gap > 0) {
       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
-      const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
-      this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+      const ev: SimEvent[] = []; this.trackLost(this.state, Math.min(gap, maxMs)); const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
+      this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.noteCause(ev); this.emit(ev);
     }
     this.checkCoopFull(); this.telemetry.poll();
   }

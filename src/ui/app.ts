@@ -6,7 +6,7 @@ import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
 import { fmtMoneyShort } from './format';
-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -24,7 +24,9 @@ import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
+import { IncomeMeter, incomePerSec, etaSeconds } from '../econ/income';
+import { COOP_FULL_COPY, WARN, isCoopFull, coopFullHint, coopFullHintVariant, rateAria } from './coop-full';
+import { workersHtml, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -52,7 +54,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   audio.enabled = flags.sfx; applyRM();
   const sfx = (n: SfxName) => audio.play(n);
   const now = () => performance.now();
-  const income = new IncomeRate(60_000);
+  const income = new IncomeMeter(); // B-1: 5 s realized-sales window
+  const net = (t = now()) => incomePerSec(income, g.state, b, t);
   const tapFx = new TapFx({ ...b.feel, flightMs: b.feel.egg_flight_ms }, now);
   const qfullCue = new Throttle(b.feel.queue_full_cue_min_gap_ms, now);
 
@@ -61,6 +64,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
     <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="num" id="coins"></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
+    <div class="pill rate" id="rate" role="img" aria-label=""><span class="num" id="rateNum"></span><span class="ratechip" id="rateChip" hidden><span aria-hidden="true">${WARN}</span> ${COOP_FULL_COPY.rateChip}</span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
     <div class="sr" aria-live="polite" id="live"></div></header>`);
@@ -69,7 +73,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <div class="queue" id="queue" role="group" aria-label="Customer queue"></div>
     <div class="scene" id="scene" aria-hidden="true">
       <img class="coop" id="coop" alt=""><span class="nest"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" id="nestEggs" src="${A('nest-eggs.svg')}" alt="" hidden></span>
-      <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" hidden></div>
+      <div class="fullbadge" id="full" aria-label="${COOP_FULL_COPY.badgeAria}" hidden><span aria-hidden="true">${WARN}</span> ${COOP_FULL_COPY.badge}</div><div class="coophint" id="coopHint" role="status" hidden><span aria-hidden="true">${WARN}</span> <span id="coopHintText"></span></div><div class="yard" id="yard"></div><div class="henpill" id="henpill" hidden></div>
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
@@ -132,12 +136,6 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (rm()) return; const c = center(at);
     for (let i = 0; i < n; i++) { const ang = (i / n) * Math.PI * 2; spawn(h(`<i class="spark" style="left:${c.x}px;top:${c.y}px;--dx:${Math.cos(ang) * 36}px;--dy:${Math.sin(ang) * 36}px"></i>`), 520); }
   };
-  // M2 placeholder Coop Hand tip: tap opens Upgrades > Workers.
-  const showTip = () => {
-    const el = h(`<button class="cooptip" role="status">${COOP_TIP_TEXT}</button>`); document.body.append(el);
-    el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
-    window.setTimeout(() => el.remove(), 8000);
-  };
   let toastTimer = 0;
   /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
@@ -147,7 +145,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
-  let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
+  let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection';
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
@@ -383,7 +381,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const t = now();
     if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
     const imm = goalNow; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
+    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, net(t)), imm); goalShown = gl;
     setText(goalLbl, gl.label); setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
@@ -432,7 +430,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     let hint = '';
     if (!max && !can) {
       if (isF) {
-        const secs = income.secondsToAfford(now(), cost * 100 - s.coinsCents);
+        const secs = etaSeconds(cost * 100 - s.coinsCents, net());
         hint = secs === null ? `<div class="hint"><img src="${A('icon-coin.svg')}" alt="">Sell eggs to earn coins</div>`
           : `<div class="hint ${secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">Ready in ${fmtTimeToAfford(secs).replace(/^~/, '~')}</div>`;
       } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
@@ -473,10 +471,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
     const hp = $('#henpill'); setHidden(hp, S.hens(F, b) <= 12); setText(hp, `×${fmtCount(S.hens(F, b))} hens`);
     // meter, nest, full badge, collect label
-    const atCap = s.coop >= cap;
+    const atCap = isCoopFull(s, b);
     meterFill.style.width = `${Math.min(100, (s.coop / cap) * 100)}%`; meter.classList.toggle('atcap', atCap);
     setText(meterText, `${fmtCount(coopWhole)} / ${fmtCount(cap)}`);
     setHidden($('#full'), !atCap);
+    // B-1: top-bar realized net rate + coop-full chip + one hint (all read the shared selector)
+    { const n = net(), el = $('#rate'), neg = n < 0 || (atCap && n <= 0);
+      setText($('#rateNum'), `${n < 0 ? '−' : '+'}${fmtMoney(Math.abs(Math.round(n)))}/s`); el.classList.toggle('neg', neg);
+      setHidden($('#rateChip'), !atCap); const ar = rateAria(n, atCap); if (el.getAttribute('aria-label') !== ar) el.setAttribute('aria-label', ar);
+      const ht = coopFullHint(s, b), he = $('#coopHint'); setHidden(he, !ht); setText($('#coopHintText'), ht);
+      const ha = ht ? COOP_FULL_COPY.hintAria[coopFullHintVariant(s, b)] : ''; if (he.getAttribute('aria-label') !== ha) he.setAttribute('aria-label', ha); }
     // Empty-nest fix (Art & UX): eggs overlay only when the coop holds >= 1 whole egg.
     const ne = $('#nestEggs'); if (ne.hidden !== (coopWhole < 1)) ne.hidden = coopWhole < 1;
     // No "+0": below one whole egg the button reads "Collect" and is aria-disabled (still tappable -> shake + "Empty").
@@ -516,7 +520,6 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     renderGoal();
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
     { const hide = goalHidden; if (goalBtn.hidden !== hide) goalBtn.hidden = hide; }
-    if (shouldShowCoopTip(s, b, coopTipShown)) { coopTipShown = true; g.telemetry.track('coop_hand_tip', { phase: 'shown', farm: F }); showTip(); }
     // aria-live throttled 1/s
     const t = now(); if (t - lastLive > 1000) { lastLive = t; setText($('#live'), `${fmtMoney(s.coinsCents)}, ${fmtCount(s.basket)} eggs`); }
     dirty = false;
@@ -637,7 +640,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
   /** S2-8/S2-9 values for the UI (Art & UX visuals on m3/rc1-ui): net rate, per-worker wage, queue-full flag. */
-  const rates = () => { const s = g.state, inc = income.centsPerSec(now());
+  const rates = () => { const s = g.state, inc = income.salesCentsPerSec(now());
     return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
