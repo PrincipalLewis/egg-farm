@@ -27,4 +27,8 @@ describe('release bundle', () => {
     const rel = await js('production'), qa = await js('qa');
     for (const m of [/eggfarmPerf/, /perf-ov/, /dbgInfo/, /get\("debug"\)/, /get\("perf"\)/]) { expect(qa).toMatch(m); expect(rel).not.toMatch(m); }
   }, 120_000);
+  it('has no window.eggfarm game handle in release (QA/dev builds keep it)', async () => {
+    const rel = await js('production'), qa = await js('qa');
+    expect(qa).toMatch(/\.eggfarm\s*=/); expect(rel).not.toMatch(/\.eggfarm\s*=/);
+  }, 120_000);
 });
