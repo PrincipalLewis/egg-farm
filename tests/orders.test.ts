@@ -46,3 +46,10 @@ describe('fitOrderEggs (m3-customer-queue-spec §2.4)', () => {
     expect(out).toBe('0/1.8M'); expect(seen).toEqual(['0/1.8M eggs']); expect(out).not.toMatch(/eg$|…/);
   });
 });
+describe('order button labels (Art & UX 22:31)', () => {
+  it('labels over 9 characters get the 12px .long class', () => {
+    const v = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 0, 4);
+    expect(v.button).toBe('Need 181.2B'); expect(orderHtml(v, 'a.svg')).toMatch(/class="btn sell  long"|class="btn sell long"/);
+    const s = orderView({ id: 2, demand: 5, filled: 0, waitedS: 0 } as any, 9, 4); expect(orderHtml(s, 'a.svg')).not.toMatch(/ long"/);
+  });
+});

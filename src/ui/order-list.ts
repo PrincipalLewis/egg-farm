@@ -29,11 +29,12 @@ export class OrderList {
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
     if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`;
-    { const l1 = E.parentElement as HTMLElement; const fe = fitOrderEggs(e, t => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; }); if (E.textContent !== fe) E.textContent = fe; } // F4: NBSP survives flex whitespace trimming
+    // fit runs after the button label/state below (Need is wider than Sell): see end of fill()
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
     if (btn.textContent !== v.button) btn.textContent = v.button;
-    const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}`; if (btn.className !== bc) btn.className = bc;
+    const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}${v.button.length > 9 ? ' long' : ''}`; if (btn.className !== bc) btn.className = bc;
+    { const l1 = E.parentElement as HTMLElement; const fe = fitOrderEggs(e, (t: string) => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; }); if (E.textContent !== fe) E.textContent = fe; } // F4: NBSP survives flex whitespace trimming
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
   }
   private make(v: OrderView) {

@@ -29,7 +29,7 @@ export function orderHtml(v: OrderView, avatar: string): string {
   return `<div class="order ${v.state}" data-row="${v.id}"><div class="av"><img src="${avatar}" alt=""></div>
     <div class="txt"><div class="l1"><span class="e">${v.line.split(' · ')[0]}</span><span class="v"> · ${v.line.split(' · ')[1]}</span></div>
     <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${v.want}" aria-valuenow="${v.have}" aria-label="Order ${v.have} of ${v.want} eggs"><i style="width:${pct.toFixed(2)}%"></i></div></div>
-    <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}">${v.button}</button></div>`;
+    <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}${v.button.length > 9 ? ' long' : ''}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}">${v.button}</button></div>`;
 }
 /** §6 Farm row preview when the next Farm level adds a customer slot (data-driven: queueMax(F+1) > queueMax(F)).
  *  v1.2 (S2-3b, Product ruling final): lead "+1 customer (max N)", N = the new queue_max; "New coop look" above it on a coop step.

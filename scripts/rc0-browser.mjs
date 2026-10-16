@@ -406,7 +406,7 @@ sections.bug9 = async () => {
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(200); res.workers = await m();
     const tabs = await page.$$eval('.tabs button', bs => bs.map(b => b.scrollWidth <= b.clientWidth + 1));
     ok(`Bug9 no sideways scroll on farm/market/upgrades/workers at ${w}x${h}`, Object.values(res).every(r => r.sw <= r.cw && r.bsw <= r.cw && r.wide === 0), JSON.stringify(res));
-    ok(`Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at ${w}`, rows.length > 0 && rows.every(r => r.inside && r.lines <= 2) && rows.every(r => /^\d[\d.K]*\/\d[\d.K]* eggs\s*·\s*\$/.test(r.text)), JSON.stringify(rows.slice(0, 2)));
+    ok(`Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at ${w}`, rows.length > 0 && rows.every(r => r.inside && r.lines <= 2) && rows.every(r => /^\d[\d.K]*\/\d[\d.K]*( eggs)?\s*·\s*\$/.test(r.text)), JSON.stringify(rows.slice(0, 2)));
     ok(`Bug9 tab labels not clipped at ${w}`, tabs.every(Boolean), JSON.stringify(tabs));
     await ctx.close();
   }
@@ -641,6 +641,22 @@ sections.goalLabel161 = async () => {
       return { track: t.textContent, gain: gn.textContent.trim(), lines, gainRects: gr, lh, w: el.clientWidth, sw: el.scrollWidth, to: cs.textOverflow, ws: cs.whiteSpace, ell: /…/.test(el.textContent), pillH: Math.round(pill.getBoundingClientRect().height), star: el.querySelector('.g-star')?.textContent === '★ ', gainBelow: gn.offsetTop > t.offsetTop + 2 }; }, [full, short, fs]);
     ok(`Goal label v1.6.1 ${name} at 360: "${want.track}", ${want.lines} line(s), gain unsplit, no ellipsis, strip 40px`, r.track === want.track && r.lines === want.lines && r.gainRects === 1 && r.gain === '· +999% income' && r.to !== 'ellipsis' && !r.ell && r.sw <= r.w + 0.5 && r.star && (want.lines === 2 ? r.gainBelow : !r.gainBelow) && (fs || (r.lh === 17 && r.pillH === 40)), JSON.stringify(r));
     const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); const bb = await page.locator('.goal').boundingBox(); await page.screenshot({ path: `${FCS}/cuta3-goal-${name}-360-${ENGINE}.png`, clip: { x: 0, y: Math.max(0, bb.y - 8), width: 360, height: bb.height + 16 } }); }
+  }
+  await ctx.close();
+};
+// ---------- Art & UX 22:31: order card Sell vs Need at 360 — " eggs" drop from measured fit, re-checked on state change; buttons nowrap, 44px, >9 chars at 12px ----------
+sections.orderNeed = async () => {
+  const { ctx, page } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+  const meas = () => page.$$eval('#mRows .order:not([hidden])', rs => rs.map(r => { const l = r.querySelector('.l1'), b = r.querySelector('.btn'), cs = getComputedStyle(b); return { e: r.querySelector('.e').textContent, btn: b.textContent, bw: Math.round(b.getBoundingClientRect().width), bh: b.getBoundingClientRect().height, fs: cs.fontSize, ws: cs.whiteSpace, bOver: b.scrollWidth > b.clientWidth + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5 }; }));
+  const set = basket => page.evaluate(([bk]) => { const g = window.eggfarm; g.state = { ...g.state, basket: bk, customers: [{ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }, { id: 3, demand: 999, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9 }; }, [basket]);
+  await set(0); await page.locator('[data-nav=market]').click().catch(() => {}); if (!(await page.locator('#mRows .order').count())) await page.locator('#queue .chip:not(.empty)').first().click({ force: true }).catch(() => {});
+  await page.waitForSelector('#mRows .order'); await page.waitForTimeout(400);
+  const FCS = process.env.FC_SHOTS;
+  for (const [name, bk] of [['need', 0], ['sell', 1e12], ['need-again', 0]]) {
+    await set(bk); await page.waitForTimeout(500); const r = await meas();
+    const good = r.length >= 3 && r.every(x => x.bh === 44 && x.ws === 'nowrap' && !x.bOver && !x.lOver && !/…/.test(x.e + x.btn) && (x.btn.length > 9 ? x.fs === '12px' : x.fs !== '12px') && (/ eggs$/.test(x.e) || /^[\d.KMBT]+\/[\d.KMBT]+$/.test(x.e)));
+    ok(`Order card ${name} at 360: " eggs" kept only if .l1 fits, buttons 44px nowrap unclipped, >9-char label 12px`, good, JSON.stringify(r));
+    if (FCS && name !== 'need-again') { mkdirSync(FCS, { recursive: true }); await page.screenshot({ path: `${FCS}/cuta3-order-${name}-360-${ENGINE}.png` }); }
   }
   await ctx.close();
 };
