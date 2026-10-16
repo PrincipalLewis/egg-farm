@@ -1,10 +1,10 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
 // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit (default chromium; CLI wins). HEADED=1.
-import { chromium, webkit } from 'playwright-core';
+import { chromium, webkit, firefox } from 'playwright-core';
 import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync } from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
-if (!['chromium', 'webkit'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
+if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
 // PORT: was a fixed 4181, which collided with parallel worktrees
 const port = +(process.env.PORT ?? 4300 + Math.floor(Math.random() * 600)); const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
@@ -12,7 +12,7 @@ const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
 for (let i = 0; i < 240; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const SHOTS = '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
-const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
+const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
 const results = []; const ok = (name, pass, info = '') => { results.push({ name, pass: !!pass, info }); if (!pass) process.exitCode = 1; };
 const URL0 = `http://127.0.0.1:${port}/`;
 const fx = f => readFileSync(new URL(`../tests/fixtures/saves/${f}`, import.meta.url), 'utf8');

@@ -1,5 +1,5 @@
 // Art & UX rc0 review shots + rotate-prompt checks (art-ux/m3-rotate-portrait-prompt.md §6.2/§6.3). Usage: node scripts/artux-shots.mjs [webkit|chromium]
-import { chromium, webkit } from 'playwright-core';
+import { chromium, webkit, firefox } from 'playwright-core';
 import { spawn } from 'node:child_process'; import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 const eng = process.argv[2] || 'chromium'; const port = 5100 + Math.floor(Math.random() * 200);
 const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
@@ -21,7 +21,7 @@ if (existsSync(OUT)) {
 } else if (process.env.OUT) die(`OUT=${OUT} does not exist; OUT= may only target an existing folder whose README names ${hash}`);
 else { mkdirSync(OUT, { recursive: true }); writeFileSync(README, `Images from commit ${hash} (build ${release}+${hash}), artux-shots, first written ${new Date().toString()}.\n`); }
 console.log(`artux-shots: build ${release}+${hash} -> ${OUT}`);
-const br = eng === 'webkit' ? await webkit.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); let bad = 0;
+const br = eng === 'webkit' ? await webkit.launch() : eng === 'firefox' ? await firefox.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); let bad = 0;
 const ok = (k, v, d) => { if (!v) bad++; console.log(k, v ? 'PASS' : 'FAIL', JSON.stringify(d ?? '')); };
 const open = async (opt, st) => { const ctx = await br.newContext(opt); const p = await ctx.newPage();
   await p.addInitScript(() => localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, seenSlots: 6 })));
