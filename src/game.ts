@@ -27,15 +27,15 @@ export class Game {
   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
   /** D2: durable mirror of every save (IndexedDB, durability 'strict'); none in tests, second tabs or without IndexedDB. */
   mirror: { write(raw: string): unknown; clear(): Promise<void> } | null;
-  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null) {
+  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null) {
     this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
-    const r = loadSafe(kv, b, now()); const f = r.file;
+    const r = loadSafe(kv, b, now(), idbRaw); const f = r.file;
     this.recovery = r.recovery; this.isNewGame = !f;
     // M4-safety: a save from a newer build is refused untouched; this Game never writes (no new game autosaves over it).
-    if (r.newer !== undefined) { this.newerSave = r.newer; this.readOnly = true; this.isNewGame = false; this.telemetry.track('save_newer_version', { version: r.newer, build }); }
+    if (r.newer !== undefined) { this.newerSave = r.newer; this.readOnly = true; this.isNewGame = false; this.mirror = null; this.telemetry.track('save_newer_version', { version: r.newer, build }); }
     if (r.recovery) {
       const { reason, had_backup, restored_from_backup, copy_failed } = r.recovery;
       this.telemetry.track('save_corrupt', { reason, had_backup, restored_from_backup, build, ...(copy_failed ? { copy_failed: true } : {}) });
@@ -43,15 +43,16 @@ export class Game {
       if (!restored_from_backup) this.bakAllowed = false;
     }
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
-    this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: f.savedAt } : null;
+    this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
       // so each load produces at most one new grant.
       if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 }; // settle only; no MK-22 arrival (no modal closed)
-      this.grantOffline(now() - f.savedAt); // one absence = last save -> this load, if >= 60 s
+      // BUG-6: no / invalid savedAt -> 0 offline; the save() below stamps now, so a reload never pays out again.
+      if (Number.isFinite(f.savedAt)) this.grantOffline(now() - f.savedAt); else this.telemetry.track('save_savedat_invalid', {}); // one absence = last save -> this load, if >= 60 s
     }
     this.lastFrameAt = now();
-    this.save(); // persist pending offline eggs + new timestamp so the grant never repeats for one absence
+    if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
   }
   private grantOffline(gapMs: number) {
     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state;

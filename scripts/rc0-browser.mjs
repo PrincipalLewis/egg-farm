@@ -24,6 +24,7 @@ async function open({ w = 390, h = 844, ls = {}, q = '', touch = false } = {}) {
   await page.waitForTimeout(150);
   return { ctx, page, errors };
 }
+const NEWER_TEXT = 'This save is from a newer version of Egg Farm. Open the newer build to keep playing.';
 const only = (process.env.ONLY ?? '').split(',').filter(Boolean), want = n => !only.length || only.includes(n);
 const sections = {};
 export { };
@@ -281,10 +282,83 @@ sections.newersave = async () => {
   const st = await page.evaluate(async () => { const keys = Object.keys(localStorage).filter(k => k.startsWith('eggfarm.save'));
     const idb = await new Promise(res => { const r = indexedDB.open('eggfarm'); r.onsuccess = () => { const db = r.result; if (!db.objectStoreNames.contains('save')) return res(null); const g = db.transaction('save').objectStore('save').get('main'); g.onsuccess = () => res(g.result ?? null); g.onerror = () => res('err'); }; r.onerror = () => res('err'); });
     return { save: localStorage.getItem('eggfarm.save'), bak: localStorage.getItem('eggfarm.save.bak'), keys, idb, collect: !!document.querySelector('#collect'), game: 'eggfarm' in window }; });
-  ok('M4 newer save: "This save is from a newer version" shown, no game started', title === 'This save is from a newer version' && !st.collect && !st.game, JSON.stringify({ title, collect: st.collect, game: st.game }));
+  ok('M4 newer save: M4A-31(b) copy shown, no game started', title === NEWER_TEXT && !st.collect && !st.game, JSON.stringify({ title, collect: st.collect, game: st.game }));
   ok('M4 newer save: localStorage save + .bak byte-identical, no corrupt copies, IndexedDB not written', st.save === m4 && st.bak === bak && st.keys.sort().join() === 'eggfarm.save,eggfarm.save.bak' && st.idb === null, JSON.stringify({ keys: st.keys, idb: st.idb, same: st.save === m4, bakSame: st.bak === bak }));
   await page.click('#nsRetry'); await page.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 }).catch(() => {});
   ok('M4 newer save: "Try again" reload still refuses and keeps the save', (await page.evaluate(() => localStorage.getItem('eggfarm.save'))) === m4 && errors.length === 0, errors.join(' | '));
+  await ctx.close();
+};
+
+// Review 8669522: spy every save-key write (localStorage + IndexedDB) and every BroadcastChannel message of a page.
+const SPY = () => { window.__w = []; window.__bc = [];
+  const ss = Storage.prototype.setItem, rm = Storage.prototype.removeItem;
+  Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('eggfarm.save') || k === 'eggfarm.lease') window.__w.push('ls:' + k); return ss.call(this, k, v); };
+  Storage.prototype.removeItem = function (k) { if (String(k).startsWith('eggfarm.save') || k === 'eggfarm.lease') window.__w.push('rm:' + k); return rm.call(this, k); };
+  const put = IDBObjectStore.prototype.put, del = IDBObjectStore.prototype.delete;
+  IDBObjectStore.prototype.put = function (...a) { window.__w.push('idb:put:' + a[1]); return put.apply(this, a); };
+  IDBObjectStore.prototype.delete = function (...a) { window.__w.push('idb:del:' + a[0]); return del.apply(this, a); };
+  if (window.BroadcastChannel) { const pm = BroadcastChannel.prototype.postMessage; BroadcastChannel.prototype.postMessage = function (m) { window.__bc.push(m?.t); return pm.call(this, m); }; } };
+const idbMain = p => p.evaluate(() => new Promise(res => { const r = indexedDB.open('eggfarm', 1); r.onupgradeneeded = () => r.result.createObjectStore('save');
+  r.onsuccess = () => { const g = r.result.transaction('save').objectStore('save').get('main'); g.onsuccess = () => { res(g.result ?? null); r.result.close(); }; g.onerror = () => res('err'); }; r.onerror = () => res('err'); }));
+const putIdbMain = (p, v) => p.evaluate(v => new Promise(res => { const r = indexedDB.open('eggfarm', 1); r.onupgradeneeded = () => r.result.createObjectStore('save');
+  r.onsuccess = () => { const t = r.result.transaction('save', 'readwrite'); t.objectStore('save').put(v, 'main'); t.oncomplete = () => { r.result.close(); res(true); }; }; }), v);
+// B1: a v7 save that exists ONLY in IndexedDB (localStorage holds an older valid save) is refused; nothing written anywhere.
+sections.newersaveidb = async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const errors = [];
+  const v7 = JSON.stringify({ version: 7, savedAt: Date.now(), state: { coinsCents: 70707, futureField: 1 } }), v5 = fx('m2-rc1-v5-12min.json');
+  const seed = await ctx.newPage(); await seed.goto(URL0, { waitUntil: 'domcontentloaded' }); await putIdbMain(seed, v7);
+  await seed.evaluate(o => { localStorage.clear(); localStorage.setItem('eggfarm.save', o); }, v5); await seed.close();
+  const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message)); await page.addInitScript(SPY);
+  await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click();
+  const shown = await page.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 }).then(() => true, () => false);
+  await page.waitForTimeout(3500); await page.evaluate(() => { window.dispatchEvent(new Event('pagehide')); document.dispatchEvent(new Event('visibilitychange')); }); await page.waitForTimeout(300);
+  const st = await page.evaluate(() => ({ w: window.__w, bc: window.__bc, save: localStorage.getItem('eggfarm.save'), ver: document.querySelector('.newer-save')?.dataset.version, collect: !!document.querySelector('#collect') }));
+  const idb = await idbMain(page);
+  ok('B1 v7 only in IndexedDB: refused (.newer-save, data-version=7), no game', shown && st.ver === '7' && !st.collect, JSON.stringify({ shown, ver: st.ver, collect: st.collect }));
+  ok('B1 v7 only in IndexedDB: no save/lease write in localStorage or IndexedDB, no lease messages; IDB main + localStorage byte-identical', st.w.length === 0 && st.bc.length === 0 && idb === v7 && st.save === v5, JSON.stringify({ w: st.w, bc: st.bc, idbSame: idb === v7, lsSame: st.save === v5 }));
+  ok('B1 no page errors', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+};
+// m2: corrupt main + newer .bak -> refuse, not a fresh start.
+sections.newerbak = async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const page = await ctx.newPage(); await page.addInitScript(SPY);
+  const v7 = JSON.stringify({ version: 7, savedAt: Date.now(), state: { coinsCents: 1 } });
+  await page.addInitScript(c => { if (sessionStorage.getItem('seeded')) return; localStorage.setItem('eggfarm.save', '{"version":6,"sav'); localStorage.setItem('eggfarm.save.bak', c); sessionStorage.setItem('seeded', '1'); window.__w = []; }, v7);
+  await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click();
+  const shown = await page.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 }).then(() => true, () => false); await page.waitForTimeout(2500);
+  const st = await page.evaluate(() => ({ w: window.__w, bak: localStorage.getItem('eggfarm.save.bak'), keys: Object.keys(localStorage).filter(k => k.startsWith('eggfarm.save')).sort() }));
+  ok('m2 corrupt main + v7 .bak: refused, no fresh start, nothing written, no corrupt copies', shown && st.w.length === 0 && st.bak === v7 && st.keys.join() === 'eggfarm.save,eggfarm.save.bak', JSON.stringify(st));
+  await ctx.close();
+};
+// m1: a non-integer version is the corrupt path, not a refusal.
+sections.newerfrac = async () => {
+  const { ctx, page } = await open({ ls: { 'eggfarm.save': JSON.stringify({ version: 7.5, savedAt: 1, state: { coinsCents: 1 } }) } });
+  const st = await page.evaluate(() => ({ newer: !!document.querySelector('.newer-save'), rec: window.eggfarm?.recovery?.reason, corrupt: Object.keys(localStorage).some(k => k.startsWith('eggfarm.save.corrupt.1')) }));
+  ok('m1 version 7.5: corrupt path (recovery reason=version, copy preserved), not .newer-save', !st.newer && st.rec === 'version' && st.corrupt, JSON.stringify(st));
+  await ctx.close();
+};
+// M1 + (f)6 second tab: a refused build opened next to a live tab; the live tab keeps playing/saving, the refused tab writes nothing.
+sections.newertwotab = async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const errors = [];
+  const a = await ctx.newPage(); a.on('pageerror', e => errors.push('A:' + e.message));
+  await a.addInitScript(() => { if (sessionStorage.getItem('seeded')) return; localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true })); sessionStorage.setItem('seeded', '1'); });
+  await a.goto(URL0, { waitUntil: 'domcontentloaded' }); await a.getByText('Tap to start').click(); await a.waitForFunction(() => window.eggfarm); await a.waitForTimeout(500);
+  const v7 = JSON.stringify({ version: 7, savedAt: Date.now(), state: { coinsCents: 1 } });
+  await a.evaluate(c => localStorage.setItem('eggfarm.save.bak', c), v7); // a newer build's copy appears (rotation never overwrites it)
+  const leaseA = await a.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.lease')).id);
+  const b = await ctx.newPage(); b.on('pageerror', e => errors.push('B:' + e.message)); await b.addInitScript(SPY);
+  await b.goto(URL0, { waitUntil: 'domcontentloaded' }); await b.getByText('Tap to start').click();
+  const shown = await b.waitForSelector('.recovery-layer.newer-save', { timeout: 8000 }).then(() => true, () => false);
+  await a.bringToFront(); await a.waitForTimeout(1000);
+  const c0 = await a.evaluate(() => window.eggfarm.state.coinsCents + window.eggfarm.state.basket + window.eggfarm.state.coop);
+  await a.evaluate(() => window.eggfarm.dispatch({ type: 'collect' })); await a.evaluate(() => window.eggfarm.save());
+  await a.waitForTimeout(2500);
+  const sa = await a.evaluate(() => ({ modal: !!document.querySelector('.recovery-layer:not(.newer-save)'), inactive: window.eggfarm.inactive, held: window.eggfarm.holdUntil > Date.now(), lease: JSON.parse(localStorage.getItem('eggfarm.lease')).id, savedAt: JSON.parse(localStorage.getItem('eggfarm.save')).savedAt }));
+  const sb = await b.evaluate(() => ({ w: window.__w, bc: window.__bc, game: 'eggfarm' in window }));
+  ok('M1 refused tab next to live tab: refused tab shows .newer-save and posts no flush/claim', shown && sb.bc.length === 0 && !sb.game, JSON.stringify({ shown, bc: sb.bc }));
+  ok('M1 live tab keeps working: no tab-guard modal, not inactive/held, still owns the lease, still saving', !sa.modal && !sa.inactive && !sa.held && sa.lease === leaseA && Date.now() - sa.savedAt < 5000, JSON.stringify({ ...sa, leaseA }));
+  ok('(f)6 refused second tab writes nothing (no save/.bak/lease key, no IndexedDB put/delete)', sb.w.length === 0, JSON.stringify(sb.w));
+  ok('M1 newer .bak survives the live tab saving', (await a.evaluate(() => localStorage.getItem('eggfarm.save.bak'))) === v7 && errors.length === 0, errors.join(' | '));
   await ctx.close();
 };
 

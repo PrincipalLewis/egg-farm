@@ -20,7 +20,14 @@ const migrations: Record<number, (d: any) => any> = {
  *  Such a save is never migrated, preserved, overwritten or cleared by this build (and neither is .bak / IndexedDB). */
 export function newerSaveVersion(raw: string | null | undefined): number | null {
   if (!raw) return null; let d: any; try { d = JSON.parse(raw); } catch { return null; }
-  return d && typeof d === 'object' && typeof d.version === 'number' && Number.isFinite(d.version) && d.version > SAVE_VERSION ? d.version : null;
+  return d && typeof d === 'object' && Number.isInteger(d.version) && d.version > SAVE_VERSION ? d.version : null; // (f)3: non-integer -> corrupt path
+}
+/** M4A-31(b) / B1: the highest newer-build version found in ANY stored copy (localStorage main, .bak, IndexedDB main), else null.
+ *  Must run before anything writes; a non-null result means refuse and write nothing anywhere. */
+export function newerStoredVersion(kv: Pick<KV, 'getItem'>, idbRaw: string | null = null): number | null {
+  let v: number | null = null;
+  for (const raw of [kv.getItem(SAVE_KEY), kv.getItem(BAK_KEY), idbRaw]) { const n = newerSaveVersion(raw); if (n !== null && (v === null || n > v)) v = n; }
+  return v;
 }
 export function migrate(d: any, b: Balance): SaveFile {
   if (!d || typeof d.version !== 'number' || d.version > SAVE_VERSION) throw new Error('bad save');
@@ -95,7 +102,8 @@ export function validate(raw: string, b: Balance): { ok: true; file: SaveFile } 
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
   if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };
   if (!Array.isArray(s.customers) || !s.workers || typeof s.workers !== 'object') return { ok: false, reason: 'invalid_state' };
-  if (typeof f.savedAt !== 'number') f.savedAt = 0;
+  // BUG-6: a missing or non-finite savedAt is NaN (was 0 = the full 2 h offline grant on every load). Game grants 0 and re-stamps.
+  if (typeof f.savedAt !== 'number' || !Number.isFinite(f.savedAt)) f.savedAt = NaN;
   return { ok: true, file: f };
 }
 export interface Recovery {
@@ -122,10 +130,11 @@ export function preserveCorrupt(kv: KV, raw: string, ts: number): boolean {
  * - main bad: preserve it; restore from a valid .bak (case R), else start fresh (F; Q when the copy failed).
  *   A bad .bak is preserved as well (QA case 1).
  */
-export function loadSafe(kv: KV, b: Balance, now = Date.now()): { file: SaveFile | null; recovery: Recovery | null; newer?: number } {
+export function loadSafe(kv: KV, b: Balance, now = Date.now(), idbRaw: string | null = null): { file: SaveFile | null; recovery: Recovery | null; newer?: number } {
+  // B1/m2: any newer copy (main, .bak or IndexedDB) refuses the load before any write, including corrupt-copy preservation.
+  const newer = newerStoredVersion(kv, idbRaw); if (newer !== null) return { file: null, recovery: null, newer };
   const raw = kv.getItem(SAVE_KEY);
   if (raw === null) return { file: null, recovery: null };
-  const newer = newerSaveVersion(raw); if (newer !== null) return { file: null, recovery: null, newer }; // refuse, touch nothing
   const v = validate(raw, b);
   if (v.ok) return { file: v.file, recovery: null };
   const copied = preserveCorrupt(kv, raw, now);

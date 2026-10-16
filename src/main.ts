@@ -1,6 +1,7 @@
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
+import { newerStoredVersion } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile } from './save/idb-mirror';
@@ -47,7 +48,21 @@ function otherTabModal() {
     setTimeout(() => location.reload(), 0); // let "Loading…" paint first
   });
 }
+/** Refused newer-build save: a read-only Game (telemetry only, mirror null, no save on load) and the session-long layer.
+ *  No lease, UI, sim, autosave or pagehide save. Nit n1: there is intentionally no Game handle or lease callback here. */
+function refuseNewer(version: number, idbRaw: string | null) {
+  try { new Game(balance, localStorage, () => Date.now(), undefined, VERSION, null, idbRaw); } catch { /* storage blocked: still refuse */ }
+  showNewerSaveDialog(a => `${import.meta.env.BASE_URL}assets/${a}`, version, () => location.reload());
+}
 async function boot() {
+  const asset = (a: string) => `${import.meta.env.BASE_URL}assets/${a}`;
+  // M4A-31(b)/(f)6 + review M1: the newer-save check runs FIRST, before the flush request, the lease claim, reconcile or
+  // any Game write. It covers localStorage main, .bak and the IndexedDB copy. A refused tab never joins the single-tab
+  // guard (so a live tab is never frozen or made to save by it) and writes no save key anywhere.
+  const mirror = await IdbMirror.open();
+  let idbRaw: string | null = null; if (mirror) idbRaw = await mirror.read();
+  let preNewer: number | null = null; try { preNewer = newerStoredVersion(localStorage, idbRaw); } catch { /* localStorage blocked: Game reports it */ }
+  if (preNewer !== null) { refuseNewer(preNewer, idbRaw); return; }
   // Single-tab guard: this (newest) tab claims the save BEFORE reading it, so an older tab's next save is blocked and
   // offline earnings are granted only by the tab that owns the save.
   let playHere = false; try { playHere = sessionStorage.getItem('eggfarm.playHere') === '1'; sessionStorage.removeItem('eggfarm.playHere'); } catch { /* ignore */ }
@@ -56,13 +71,13 @@ async function boot() {
   await lease.requestFlush(300); // the current owner saves its latest state and holds
   const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  // D2: newest valid copy of localStorage / IndexedDB wins.
+  // D2: newest valid copy of localStorage / IndexedDB wins. Re-read IndexedDB: the owner may just have flushed into it.
   let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
-  const mirror = await IdbMirror.open(); if (mirror) { try { restored = reconcile(localStorage, await mirror.read(), balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
+  if (mirror) { idbRaw = await mirror.read(); try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
-  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror);
-  if (g.newerSave !== null) { // M4-safety: refuse a newer-build save; no UI, sim, autosave or pagehide save in this tab
-    lease.release(); showNewerSaveDialog(a => `${import.meta.env.BASE_URL}assets/${a}`, g.newerSave, () => location.reload()); return;
+  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw);
+  if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
+    lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
