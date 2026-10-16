@@ -36,7 +36,7 @@ describe('M4-A track copy (art-ux/m4-tracks-copy.md)', () => {
   });
 });
 import { vi } from 'vitest';
-import { highlightRow, highlightPick, HighlightHold, milestoneHint, MILESTONE_HINT_WINDOW } from '../src/ui/tracks-ui';
+import { highlightRow, highlightPick, milestoneHint, MILESTONE_HINT_WINDOW } from '../src/ui/tracks-ui';
 import { candidates, selectGoal, GOAL_ORDER } from '../src/ui/next-goal';
 import { bestPaybackAmong, paybackOf, BUY_ORDER } from '../src/econ/best-buy';
 import { fmtAffordableIn } from '../src/ui/format';
@@ -65,16 +65,6 @@ describe('M4A-18 highlight = best payback (HoP 15:29) + next-goal', () => {
     expect(highlightRow(s, on)).toBe('farm');
     expect(highlightPick(c(30, 30, 30, 1e12), on)).toBeNull(); // all MAX
     const a = highlightPick(c(7, 6, 8, 1e12), on), z = highlightPick(c(7, 6, 8, 1e12), on); expect(a).toEqual(z);
-  });
-  it('fake clock, 1 Hz: oscillation faster than 2 ticks never flips; sustained change flips on the 2nd tick; purchase at once', () => {
-    vi.useFakeTimers(); vi.setSystemTime(0);
-    const h = new HighlightHold<string | null>(2), seen: [number, string | null][] = [];
-    const feed = (v: string | null, imm = false) => { vi.advanceTimersByTime(1000); seen.push([Date.now(), h.tick(v, imm)]); };
-    feed('hens'); for (let i = 0; i < 6; i++) feed(i % 2 ? 'hens' : 'farm');
-    expect(seen.every(([, v]) => v === 'hens')).toBe(true);
-    feed('farm'); expect(seen.at(-1)![1]).toBe('hens'); feed('farm'); expect(seen.at(-1)).toEqual([9000, 'farm']);
-    feed('eggValue', true); expect(seen.at(-1)![1]).toBe('eggValue');
-    vi.useRealTimers();
   });
   it('ETA copy when nothing is affordable (fmtAffordableIn)', () => {
     expect(fmtAffordableIn(null)).toBe('Affordable in —'); expect(fmtAffordableIn(5)).toBe('Affordable in a moment'); expect(fmtAffordableIn(75)).toBe('Affordable in ~1:15');

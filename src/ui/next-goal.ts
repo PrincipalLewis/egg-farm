@@ -46,15 +46,18 @@ export function labelFor(key: GoalKey, s: GameState, b: Balance): string {
   }
 }
 /** rate = rolling coin income in cents/s (layout-spec §4.6b), 0 = no income. */
-export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number): Goal {
+/** `shared` (M4 on): the key of the shared PickHysteresis pick (ui/pick-hysteresis.ts); the hint then shows that row so it
+ *  always matches the Farm-tab highlight (M4A-41). Omitted = stateless best-payback / cheapest rule. */
+export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shared?: GoalKey | null): Goal {
   const c = candidates(s, b);
   if (!c.length) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
   const coins = Math.round(s.coinsCents); // coins at 2 dp vs integer cost; equal = affordable
   const aff = c.filter(x => coins >= x.costCents), ready = aff.length > 0;
   // M4-A (HoP 15:29): with the flag on, the hint follows the same best-payback rule as the Farm-tab highlight. Off = main.
   const pool = ready ? aff : c, bp = m4On(b) ? bestPaybackAmong(s, b, pool.map(x => x.key)) : null;
-  const t = (bp ? pool.find(x => x.key === bp.key) : null) ?? cheapest(pool)!;
-  const state: GoalState = ready ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
+  const forced = m4On(b) && shared ? c.find(x => x.key === shared) : undefined;
+  const t = forced ?? (bp ? pool.find(x => x.key === bp.key) : null) ?? cheapest(pool)!;
+  const state: GoalState = (forced ? coins >= forced.costCents : ready) ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
   const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtTimeToAfford((t.costCents - coins) / rateCentsPerS);
   return { key: t.key, state, label: labelFor(t.key, s, b), status, costCents: t.costCents, tab: t.key === 'FARM' || t.key === 'HENS' || t.key === 'VALUE' ? 'farm' : t.key === 'COLL' ? 'collection' : 'workers' };
 }

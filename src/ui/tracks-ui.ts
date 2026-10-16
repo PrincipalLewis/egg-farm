@@ -56,19 +56,7 @@ export function highlightPick(s: GameState, b: Balance): { row: RowKey; affordab
 }
 export const highlightRow = (s: GameState, b: Balance): RowKey | null => { const p = highlightPick(s, b); return p?.affordable ? p.row : null; };
 export { ROW_KEY };
-/** M4A-18 anti-flicker: a coins-only change is shown once it held for holdTicks consecutive 1 Hz ticks (next-goal.ts
- *  holdTicks = 2); a purchase / hire / level change (immediate) applies the same tick. */
-export class HighlightHold<T = RowKey | null> {
-  shown: T | undefined = undefined; private pending: string | undefined = undefined; private n = 0;
-  constructor(private holdTicks = 2, private sig: (x: T) => string = x => JSON.stringify(x)) {}
-  tick(next: T, immediate = false): T {
-    if (this.shown === undefined || immediate || this.sig(next) === this.sig(this.shown)) { this.shown = next; this.pending = undefined; this.n = 0; return next; }
-    const k = this.sig(next);
-    if (k === this.pending) this.n++; else { this.pending = k; this.n = 1; }
-    if (this.n >= this.holdTicks) { this.shown = next; this.pending = undefined; this.n = 0; }
-    return this.shown;
-  }
-}
+/** The old HighlightHold (holdTicks = 2) is replaced by ui/pick-hysteresis.ts PickHysteresis (M4A-18 v1.4, M4A-41). */
 /** m4-tracks-copy.md v1.1: second-line milestone hint, only when the next milestone is 1..5 levels above L; hidden at a
  *  milestone level itself (the toast covers it) and at MAX. Levels and mults from balance. */
 export const MILESTONE_HINT_WINDOW = 5;
