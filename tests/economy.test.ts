@@ -11,8 +11,8 @@ import { offlineEggs } from '../src/sim/offline';
 import { parseEconomyCsv } from '../scripts/sync-economy';
 const csvText = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
 const data = parseEconomyCsv(csvText);
-/** product/sim/economy_sim.py the fixtures were generated with (Economy Oct 17; tests/fixtures/economy_sim.json f9b0a447). */
-const SIM_SHA256_PREFIX = '5ad5a3a6';
+/** product/sim/economy_sim.py the fixtures were generated with (config F1; Economy Oct 17; tests/fixtures/economy_sim.json f9b0a447). */
+const SIM_SHA256_PREFIX = 'eddf945d';
 const fx = JSON.parse(readFileSync(new URL('./fixtures/economy_sim.json', import.meta.url), 'utf8'));
 describe('AC6 every economy.csv cell reproduced from config formulas', () => {
   it.each(data)('level $level', (r) => {
@@ -48,8 +48,8 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
   });
   it.skipIf(!py)(py ? 'fixture is fresh vs the live reference sim' : 'SKIPPED (no product/ folder): fixture is fresh vs the live reference sim', () => {
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');
-    execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'current', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
-    // All 46 columns the sim's CSV writer emits (product/sim/economy_sim.py sha 5ad5a3a6 writes yawn 50 / manage 0.5, Economy Oct 17).
+    execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'f1', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
+    // All 46 columns the sim's CSV writer emits (product/sim/economy_sim.py sha eddf945d, --config f1; Economy Oct 17).
     // The m4cols-only columns (79) are not written by the sim, so compare the sim's columns rather than the whole row.
     const sim = parseEconomyCsv(readFileSync(out, 'utf8')), cols = Object.keys(sim[0]);
     expect(cols.length).toBe(46); expect(sim.length).toBe(data.length);
