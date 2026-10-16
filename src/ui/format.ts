@@ -19,6 +19,8 @@ export const fmtMoney = (cents: number) => {
   if (d < 1e6) return '$' + Math.floor(d).toLocaleString('en-US');
   return '$' + fmtCount(d);
 };
+/** Deficits ("Need $X more"): same format, rounded UP from $1,000 so earning the shown amount always affords it. */
+export const fmtMoneyCeil = (cents: number) => cents / 100 >= 1000 && cents / 100 < 1e6 ? '$' + Math.ceil(cents / 100).toLocaleString('en-US') : fmtMoney(cents);
 /** Welcome-back popup money: never abbreviated. Cents under $1,000, whole dollars (floored) from $1,000 ("$3,703,701"). */
 export const fmtMoneyFull = (cents: number) => {
   if (!Number.isFinite(cents)) return '—';
@@ -28,10 +30,12 @@ export const fmtMoneyFull = (cents: number) => {
 };
 /** Same amount spelled for screen readers: "86,400 dollars" / "812 dollars 40 cents". */
 export const moneyWords = (cents: number) => {
-  const d = cents / 100;
+  if (!Number.isFinite(cents)) return 'unknown';
+  cents = Math.round(cents); const d = cents / 100;
   if (d >= 1000) return `${Math.floor(d).toLocaleString('en-US')} dollars`;
   const w = Math.floor(d), c = Math.round(cents) % 100;
-  return `${w.toLocaleString('en-US')} ${w === 1 ? 'dollar' : 'dollars'}${c ? ` ${c} ${c === 1 ? 'cent' : 'cents'}` : ''}`;
+  const cw = `${c} ${c === 1 ? 'cent' : 'cents'}`;
+  return w === 0 && c ? cw : `${w.toLocaleString('en-US')} ${w === 1 ? 'dollar' : 'dollars'}${c ? ` ${cw}` : ''}`;
 };
 /** Full-digit egg count with separators (popup: no K/M/B). */
 export const fmtEggsFull = (n: number) => Math.floor(n).toLocaleString('en-US');

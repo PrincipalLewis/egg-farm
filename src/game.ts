@@ -106,6 +106,7 @@ export class Game {
   resumeFromHidden(hiddenMs: number): number {
     if (this.hiddenSince === null) return 0; this.hiddenSince = null;
     if (this.inactive || !(hiddenMs >= this.b.offline.offlineMinSeconds * 1000)) return 0;
+    if (this.canWrite && !this.canWrite()) { this.deactivate(); return 0; } // another tab took the save while hidden: no grant here
     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
     const eggs = this.grantOffline(hiddenMs); this.lastFrameAt = this.now(); this.accMs = 0; this.save(); return eggs;
   }
@@ -150,8 +151,9 @@ export class Game {
   /**
    * Wall-clock driven (robust to rAF/timer throttling). Hidden/background tabs use the same rule on the next frame:
    *  - gap < offlineMinSeconds (60 s): simulate the whole gap online (coop cap applies, customers arrive/leave).
-   *  - gap >= 60 s (hidden/throttled tab): simulate the FIRST 60 s online (coop cap applies, customers arrive/leave),
-   *    then freeze for the rest. No in-session offline grant.
+   *  - gap >= 60 s (throttled tab): simulate the FIRST 60 s online (coop cap applies, customers arrive/leave),
+   *    then freeze for the rest. A HIDDEN tab never gets here (offline popup v2, C-AC36): suspendForHidden freezes it and
+   *    resumeFromHidden routes a hide >= 60 s through the offline grant, exactly like close-and-reload.
    *  - negative gap: nothing.
    *  Closed/unloaded game: last save -> next load >= 60 s goes through the offline grant (AC11), in the constructor.
    * See engineering/sim-rules.md.

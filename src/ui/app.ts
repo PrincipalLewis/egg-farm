@@ -5,7 +5,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
-import { fmtCount, fmtMoney, fmtMoneyExact, fmtTimeToAfford, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtMoneyCeil, fmtMoneyExact, fmtTimeToAfford, IncomeRate } from './format';
 import { welcomeModel } from './welcome-v2';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
@@ -59,7 +59,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.innerHTML = '';
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
-    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="money-slot"><span class="num ghost" aria-hidden="true">$999,999</span><span class="num" id="coins"></span></span></div>
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="money-slot"><span class="num slot-ghost" aria-hidden="true">$999,999</span><span class="num" id="coins"></span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
@@ -232,11 +232,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     modalKind = 'welcome'; cancelAnimationFrame(countUp);
     const m = welcomeModel(eggs, g.offline.realAwayS || g.offline.awayS, g.state, b), motion = !rm();
     modal.innerHTML = `<div class="card welcome-v2" role="dialog" aria-modal="true" aria-labelledby="wbT" aria-describedby="wbAria">
-      <span class="sr-only" id="wbAria">${m.aria}</span>
+      <span class="sr" id="wbAria">${m.aria}</span>
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <div class="wb-head" aria-hidden="true"><img src="${A('icon-offline-earnings.svg')}" width="48" height="48" alt=""><h2 id="wbT">${m.title}</h2></div>
       <div class="wb-a" aria-hidden="true">${m.lineA}</div>
-      <div class="big num wb-hero${motion ? ' pop' : ''}" aria-hidden="true"><img src="${A('icon-egg.svg')}" alt=""><span id="wbN">${motion ? '+0 eggs' : m.hero}</span></div>
+      <div class="big num wb-hero${motion ? ' pop' : ''}" aria-hidden="true"><img src="${A('icon-egg.svg')}" alt=""><span class="wb-n"><span class="slot-ghost" aria-hidden="true">${m.hero}</span><span id="wbN">${m.hero}</span></span></div>
       <div class="wb-sub" aria-hidden="true">${m.sub}</div>
       <div class="wb-worth num" aria-hidden="true">${m.worth}</div>
       <div class="wb-rate num" aria-hidden="true">${m.rate}</div>
@@ -245,9 +245,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     modal.classList.add('open'); sfx('welcomeBack');
     // §3: card max 80% of the viewport; the rate line is the first to drop when it does not fit.
     const card = modal.querySelector<HTMLElement>('.card')!, rate = card.querySelector<HTMLElement>('.wb-rate')!;
-    if (card.scrollHeight > innerHeight * 0.8) rate.hidden = true;
+    // Measured on the FINAL hero text (the count-up runs inside a ghost-sized slot, so the card never grows later).
+    const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); rate.hidden = false; if (card.scrollHeight > innerHeight * 0.8) rate.hidden = true; };
+    fit(); addEventListener('resize', fit);
     if (motion) { // C-AC37: count up 0 -> N (ease-out) only when motion is allowed; the final text equals m.hero
-      const n = $('#wbN'), t0 = now(), dur = 900, unit = eggs === 1 ? 'egg' : 'eggs';
+      const n = $('#wbN'), t0 = now(), dur = 900, unit = eggs === 1 ? 'egg' : 'eggs'; n.textContent = `+0 ${unit}`;
       const step = () => { if (modalKind !== 'welcome' || !n.isConnected) return; const k = Math.min(1, (now() - t0) / dur), e = 1 - (1 - k) ** 3;
         n.textContent = k >= 1 ? m.hero : `+${Math.floor(eggs * e).toLocaleString('en-US')} ${unit}`; if (k < 1) countUp = requestAnimationFrame(step); };
       countUp = requestAnimationFrame(step);
@@ -461,7 +463,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         const secs = income.secondsToAfford(now(), cost * 100 - s.coinsCents);
         hint = secs === null ? `<div class="hint"><img src="${A('icon-coin.svg')}" alt="">Sell eggs to earn coins</div>`
           : `<div class="hint ${secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">Ready in ${fmtTimeToAfford(secs).replace(/^~/, '~')}</div>`;
-      } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
+      } else hint = `<div class="hint">Need ${fmtMoneyCeil(cost * 100 - s.coinsCents)} more</div>`;
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
     if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
@@ -665,5 +667,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const rates = () => { const s = g.state, inc = income.centsPerSec(now());
     return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
+  /** C-AC36 hidden-tab return: open the popup unless another dialog is up (pending eggs persist; the next open shows them). */
+  const showWelcomeIfFree = () => { if (recoveryOpen || (modalKind && modalKind !== 'welcome')) return false; showWelcome(); $('#wbCollect')?.focus(); return true; };
+  return { render: renderAll, showWelcome, showWelcomeIfFree, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }

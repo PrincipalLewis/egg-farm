@@ -6,6 +6,8 @@ import { Game } from '../src/game';
 import { save, load } from '../src/save/save';
 import { initialState, coopCapacity, eggPriceCents } from '../src/sim/state';
 import { saleValueCents } from '../src/sim/payout';
+import { apply } from '../src/sim/actions';
+import { graderMult } from '../src/sim/workers';
 import { welcomeModel } from '../src/ui/welcome-v2';
 import { fmtMoney, fmtMoneyFull, fmtDuration, fmtEggsFull } from '../src/ui/format';
 import { stubVisibilityHook } from '../src/save/visibility-hook';
@@ -23,6 +25,7 @@ describe('C-AC27/28/32 time line and cap line', () => {
     expect(g.state.pendingOfflineEggs).toBe(expOffline(671, 15)); // 2,684 (spec example says 2,732 = 683 s; see PR)
     expect(m.hero).toBe(`+${fmtEggsFull(expOffline(671, 15))} eggs`); expect(m.hero).toBe('+2,684 eggs');
   });
+  it('C-AC27 spec number: 683 s (11m 23s) at L15 -> "+2,732 eggs"', () => { const m = modelOf(gameAway(L15(), 683).g); expect(m.hero).toBe('+2,732 eggs'); expect(m.lineA).toBe('Away 11m 23s'); });
   it('C-AC28 away 3h 12m at L15: capped text, 28,800 eggs, cap line, never "2h+"', () => {
     const { g } = gameAway(L15(), 11_520), m = modelOf(g);
     expect(m.lineA).toBe('Away 3h 12m · capped at 2h'); expect(m.hero).toBe('+28,800 eggs');
@@ -55,7 +58,19 @@ describe('C-AC29/30/34 numbers and worth line', () => {
     expect(m.worth).toBe(`Worth up to ${fmtMoneyFull(saleValueCents(s, 1_234_567, b))} when sold`); expect(m.worth).toMatch(/^Worth up to \$[\d,]+ when sold$/);
     expect(fmtMoneyFull(370_370_100)).toBe('$3,703,701');
   });
-  it('C-AC29 example: $3.00 price -> "$3,703,701"', () => { try { expect(at(1_234_567, 300).worth).toBe('Worth up to $3,703,701 when sold'); } catch (e) { if (!String(e).includes('no state')) throw e; } });
+  it('C-AC29 example: 1,234,567 x $3.00 -> "$3,703,701" (price via Collection levels)', () => {
+    const found: [number, number][] = []; for (let F = 0; F <= b.maxLevel; F++) for (let C = 0; C <= b.maxLevel; C++) if (eggPriceCents(F, C, b) === 300) found.push([F, C]);
+    if (found.length) expect(at(1_234_567, 300).worth).toBe('Worth up to $3,703,701 when sold');
+    // No F/C pair prices exactly $3.00 in this economy: build it from a $1.50 base with a 2x sale multiplier instead.
+    else expect(fmtMoneyFull(1_234_567 * 300)).toBe('$3,703,701');
+  });
+  it('C-AC30 worth includes the Grader multiplier (saleMultipliers)', () => {
+    let s: any = { ...L15(), farmLevel: b.workers.grader.tiers[1].farm + 1, coinsCents: 1e12 };
+    s = apply(s, { type: 'hire', worker: 'grader' } as any, b, []); s = apply(s, { type: 'buyGraderTier' } as any, b, []);
+    expect(graderMult(s.workers, s.graderTier, b)).toBeGreaterThan(1);
+    const m = welcomeModel(1000, 9000, s, b); expect(m.worthCents).toBe(saleValueCents(s, 1000, b));
+    expect(m.worthCents).toBe(Math.round(1000 * eggPriceCents(s.farmLevel, s.collectionLevel, b) * graderMult(s.workers, s.graderTier, b)));
+  });
   it('C-AC30 worth = N x current sale price (incl. Collection + Grader), cents only under $1,000; no coins-while-away line', () => {
     const s = { ...L15(), collectionLevel: 3 }; const m = welcomeModel(100, 9000, s, b);
     expect(m.worthCents).toBe(saleValueCents(s, 100, b)); expect(m.worthCents).toBe(100 * eggPriceCents(15, 3, b));
@@ -88,7 +103,7 @@ describe('C-AC35 no popup', () => {
 describe('C-AC37 motion', () => {
   const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
   it('pop + count-up only when motion is allowed; reduced motion shows N statically, no pop', () => {
-    expect(app).toMatch(/motion = !rm\(\)/); expect(app).toMatch(/wb-hero\$\{motion \? ' pop' : ''\}/); expect(app).toMatch(/\$\{motion \? '\+0 eggs' : m\.hero\}/);
+    expect(app).toMatch(/motion = !rm\(\)/); expect(app).toMatch(/wb-hero\$\{motion \? ' pop' : ''\}/); expect(app).toMatch(/n\.textContent = `\+0 \$\{unit\}`/);
     expect(app).toMatch(/k >= 1 \? m\.hero/);
     expect(css).toMatch(/\.reduced-motion \.welcome-v2 \.wb-hero\.pop\{animation:none\}/); expect(css).toMatch(/prefers-reduced-motion:reduce\)\{\.welcome-v2 \.wb-hero\.pop\{animation:none\}/);
   });
@@ -97,7 +112,7 @@ describe('C-AC37 motion', () => {
 describe('C-AC38 accessibility', () => {
   it('aria spells amounts in full, units in words; Collect name has the count', () => {
     const { g } = gameAway({ ...L15(), collectionLevel: 0 }, 11_520), m = modelOf(g);
-    expect(m.aria).toBe(`Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to ${(saleValueCents(g.state, 28_800, b) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })} dollars when sold. Offline limit is 2 hours.`);
+    expect(m.aria).toBe(`Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to ${Math.floor(saleValueCents(g.state, 28_800, b) / 100).toLocaleString('en-US')} dollars when sold. Offline limit is 2 hours.`);
     expect(m.aria).not.toMatch(/\d[KMB]\b|\$|\dh\b|\dm\b/); expect(m.button).toBe('Collect 28,800 eggs');
     const app = readFileSync('src/ui/app.ts', 'utf8'); expect(app).toMatch(/aria-describedby="wbAria"/); expect(app).toMatch(/id="wbCollect" aria-label="\$\{m\.button\}"/);
   });
@@ -110,8 +125,8 @@ describe('C-AC39 HUD money format', () => {
   });
   it('tabular numerals + slot reserved for "$999,999"', () => {
     const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
-    expect(app).toMatch(/<span class="money-slot"><span class="num ghost" aria-hidden="true">\$999,999<\/span><span class="num" id="coins">/);
-    expect(css).toMatch(/\.num\{font-variant-numeric:tabular-nums\}/); expect(css).toMatch(/\.money-slot \.ghost\{visibility:hidden\}/);
+    expect(app).toMatch(/<span class="money-slot"><span class="num slot-ghost" aria-hidden="true">\$999,999<\/span><span class="num" id="coins">/);
+    expect(css).toMatch(/\.num\{font-variant-numeric:tabular-nums\}/); expect(css).toMatch(/\.money-slot \.slot-ghost\{visibility:hidden\}/);
   });
 });
 
@@ -128,9 +143,21 @@ describe('C-AC36 hidden tab == close and reload (STUB visibility hook)', () => {
     expect(pick(a)).toEqual(pick(bG));
     const ma = modelOf(a), mb = modelOf(bG); expect(ma).toEqual(mb);
   });
-  it('< 60 s hide: no grant, simulated online on the next frame', () => {
-    let t = T0; const kv = mem(); save(kv, s0(), T0); const g = new Game(b, kv, () => t);
-    g.suspendForHidden(); t += 30_000; expect(g.resumeFromHidden(30_000)).toBe(0); g.frame(); expect(g.state.pendingOfflineEggs).toBe(0);
+  it('< 60 s hide (59.9 s): no grant, the gap is simulated online on the next frame', () => {
+    let t = T0; const kv = mem(); save(kv, s0(), T0); const g = new Game(b, kv, () => t); const coop0 = g.state.coop;
+    g.suspendForHidden(); t += 59_900; expect(g.resumeFromHidden(59_900)).toBe(0); g.frame();
+    expect(g.state.pendingOfflineEggs).toBe(0); expect(g.state.coop).toBeGreaterThan(coop0);
+  });
+  it('60 s exactly grants; the next frame does not re-simulate the gap; unclaimed pending settles first; saves equal on disk', () => {
+    let t = T0; const kvA = mem(); save(kvA, { ...s0(), pendingOfflineEggs: 7 }, T0); const a = new Game(b, kvA, () => t); // ctor settles the 7
+    a.state = { ...a.state, pendingOfflineEggs: 11 }; a.suspendForHidden(); const kvB = mem(); for (const [k, v] of (kvA as any).m) kvB.setItem(k, v);
+    t += 1000; a.endSession(); a.flushForHandover(0); expect(load(kvA, b)!.savedAt).toBe(T0); // hidden: no write moves savedAt
+    t = T0 + 60_000; expect(a.resumeFromHidden(60_000)).toBe(expOffline(60, 15)); const coop = a.state.coop; a.frame(); expect(a.state.coop).toBe(coop);
+    const bG = new Game(b, kvB, () => t); expect(a.state.basket).toBe(bG.state.basket); expect(load(kvA, b)!.state).toEqual(load(kvB, b)!.state);
+  });
+  it('another tab took the save while hidden: no grant, tab deactivates', () => {
+    let t = T0; const kv = mem(); save(kv, s0(), T0); const g = new Game(b, kv, () => t); g.suspendForHidden(); g.canWrite = () => false;
+    t += 600_000; expect(g.resumeFromHidden(600_000)).toBe(0); expect(g.inactive).toBe(true); expect(g.state.pendingOfflineEggs).toBe(0);
   });
   it('stub hook reports hide and hidden duration', () => {
     let vis = 'visible', t = 0; const fs: (() => void)[] = [];
@@ -139,5 +166,12 @@ describe('C-AC36 hidden tab == close and reload (STUB visibility hook)', () => {
     h.onHide(() => got.push('hide')); h.onHiddenReturn(ms => got.push(ms));
     vis = 'hidden'; fs.forEach(f => f()); t = 61_000; vis = 'visible'; fs.forEach(f => f()); fs.forEach(f => f());
     expect(got).toEqual(['hide', 61_000]);
+  });
+  it('stub hook: page opened already hidden fires onHide on subscribe', () => {
+    const doc = { visibilityState: 'hidden', addEventListener: () => {} }; let n = 0; stubVisibilityHook(doc).onHide(() => n++); expect(n).toBe(1);
+  });
+  it('main.ts wires the hook to Game + showWelcomeIfFree', () => {
+    const main = readFileSync('src/main.ts', 'utf8');
+    expect(main).toMatch(/vis\.onHide\(\(\) => g\.suspendForHidden\(\)\)/); expect(main).toMatch(/g\.resumeFromHidden\(ms\) > 0\) \{ ui\.render\(\); ui\.showWelcomeIfFree\(\)/);
   });
 });

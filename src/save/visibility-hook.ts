@@ -6,6 +6,9 @@
  *   onHide(cb)          cb() when the tab is hidden (main.ts -> Game.suspendForHidden: save once, freeze like a closed game)
  *   onHiddenReturn(cb)  cb(hiddenMs) when it is shown again (main.ts -> Game.resumeFromHidden: >= offlineMinSeconds goes
  *                       through the offline grant + welcome popup, exactly like close-and-reload)
+ * onHide also fires at once when subscribed while the page is already hidden (opened in a background tab).
+ * Owner of the real hook: Saves (fix/hidden-tab-offline, S2, cap Sat 2026-10-17 08:00). Agree with Saves who owns the
+ * Game side (suspendForHidden/resumeFromHidden vs their frame() change) so a hide is never granted or frozen twice.
  * Both return an unsubscribe. TO SWAP: import the Saves hook in main.ts instead of stubVisibilityHook, delete this file.
  */
 export interface VisibilityHook {
@@ -22,7 +25,7 @@ export function stubVisibilityHook(doc: DocLike, now: () => number = () => Date.
     const ms = now() - hiddenAt; hiddenAt = null; ret.forEach(f => f(ms));
   });
   return {
-    onHide: cb => { hide.add(cb); return () => { hide.delete(cb); }; },
+    onHide: cb => { hide.add(cb); if (hiddenAt !== null) cb(); return () => { hide.delete(cb); }; },
     onHiddenReturn: cb => { ret.add(cb); return () => { ret.delete(cb); }; },
   };
 }

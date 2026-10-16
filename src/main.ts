@@ -121,7 +121,7 @@ async function boot() {
   // C-AC36: hidden >= 60 s == closed and reloaded (offline grant + welcome popup). STUB hook until fix/hidden-tab-offline lands.
   const vis = stubVisibilityHook(document);
   vis.onHide(() => g.suspendForHidden());
-  vis.onHiddenReturn(ms => { if (g.resumeFromHidden(ms) > 0) { ui.render(); ui.showWelcome(); } });
+  vis.onHiddenReturn(ms => { if (g.resumeFromHidden(ms) > 0) { ui.render(); ui.showWelcomeIfFree(); } });
   stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
 }
 preload().then(() => {
