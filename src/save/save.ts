@@ -86,9 +86,6 @@ export function validate(raw: string, b: Balance): { ok: true; file: SaveFile } 
   const s: any = f.state;
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
   if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };
-  // M4-A fields (filled from initialState for pre-v7 saves by migrate()).
-  for (const k of ['hensLevel', 'eggValueLevel']) if (!Number.isInteger(s[k]) || s[k] < 0 || s[k] > b.maxLevel) return { ok: false, reason: 'invalid_state' };
-  if (!Array.isArray(s.celebratedMilestones) || s.celebratedMilestones.some((x: unknown) => typeof x !== 'string')) return { ok: false, reason: 'invalid_state' };
   if (!Array.isArray(s.customers) || !s.workers || typeof s.workers !== 'object') return { ok: false, reason: 'invalid_state' };
   if (typeof f.savedAt !== 'number') f.savedAt = 0;
   return { ok: true, file: f };
