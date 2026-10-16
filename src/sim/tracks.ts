@@ -20,7 +20,7 @@ export const salePriceCents = (s: GameState, b: Balance) => m4On(b) ? trackPrice
 export const trackLevel = (s: GameState, t: Track) => t === 'hens' ? s.hensLevel : s.eggValueLevel;
 export const trackCap = (s: GameState, t: Track, b: Balance) => (t === 'hens' ? hensCap : eggValueCap)(s.farmLevel, b);
 export const trackCost = (L: number, t: Track, b: Balance) => (t === 'hens' ? hensCost : eggValueCost)(L, b);
-/** Why a track row can't be bought ('max' = level 30, 'cap' = at F+3: buy Farm first), or null. */
+/** Why a track row can't be bought ('max' = balance.maxLevel from economy.csv, 'cap' = at F+3: buy Farm first), or null. */
 export const trackLock = (s: GameState, t: Track, b: Balance): 'max' | 'cap' | null =>
   trackLevel(s, t) >= b.maxLevel ? 'max' : trackLevel(s, t) >= trackCap(s, t, b) ? 'cap' : null;
 

@@ -3,7 +3,7 @@
  * SAVE_VERSION is NOT bumped: that waits for the save-durability branch (CEO, 2026-10-16).
  *  - hensLevel = farmLevel (in-tab lay rate identical, M1).
  *  - eggValueLevel = the lowest V in 0..maxLevel whose v7 price (M4A-5: base x grade x Balanced, before the Grader,
- *    integer cents with one half-up rounding) is >= the v6 price eggPriceCents(F, C). No min(F+3, 30) cap here
+ *    integer cents with one half-up rounding) is >= the v6 price eggPriceCents(F, C). No min(F+3, maxLevel) cap here
  *    (B1, grandfathered at migration only); buying stays blocked by the purchase cap until F + cap_over_farm > V.
  *  - Collection keeps its levels; no Collection refund.
  *  - Guard (M4A-29): a level above its track max is clamped; removed levels are refunded at the CSV cost column
