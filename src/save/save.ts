@@ -163,8 +163,9 @@ function loadSafeInner(kv: KV, b: Balance, now: number, idbRaw: string | null): 
     const bakRaw = kv.getItem(BAK_KEY); if (bakRaw === null) return { file: null, recovery: null };
     const bv = validate(bakRaw, b);
     if (bv.ok) return { file: bv.file, recovery: { case: 'R', reason: 'missing', had_backup: true, restored_from_backup: true, copy_failed: false, raw: '' } };
-    preserveCorrupt(kv, bakRaw, now + 1);
-    return { file: null, recovery: null };
+    // SD4-3 / Code Reviewer N5: a bad .bak with no main is still a recovery -> 'fresh' (or 'storage' if the copy failed), never silent.
+    const bakCopied = preserveCorrupt(kv, bakRaw, now + 1);
+    return { file: null, recovery: { case: bakCopied ? 'F' : 'Q', reason: bv.reason, had_backup: true, restored_from_backup: false, copy_failed: !bakCopied, raw: bakRaw } };
   }
   const v = validate(raw, b);
   if (v.ok) return { file: v.file, recovery: null };
