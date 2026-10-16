@@ -117,7 +117,7 @@ async function boot() {
   // Tab guard: once frozen (older tab) neither the sim nor the UI advances.
   new RenderPump(() => { if (frozen) return; g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
   window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
-  stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
+  stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document, () => g.saveForUnload());
 }
 preload().then(() => {
   start.querySelector('.bar')?.remove();

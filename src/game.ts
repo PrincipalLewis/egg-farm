@@ -28,7 +28,7 @@ export class Game {
   on(fn: (e: GameEvent) => void) { this.listeners.push(fn); return () => { this.listeners = this.listeners.filter(f => f !== fn); }; }
   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
   /** D2: durable mirror of every save (IndexedDB, durability 'strict'); none in tests, second tabs or without IndexedDB. */
-  mirror: { write(raw: string): unknown; clear(): Promise<void>; newer?: number | null; onNewer?: ((v: number) => void) | null } | null;
+  mirror: { write(raw: string, opts?: { unload?: boolean }): unknown; clear(): Promise<void>; newer?: number | null; onNewer?: ((v: number) => void) | null } | null;
   constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null) {
     this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
@@ -97,15 +97,18 @@ export class Game {
   private held() { return this.now() < this.holdUntil; }
   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
-  save() {
+  /** SD5-1: the page is being hidden or unloaded (visibilitychange→hidden, pagehide, beforeunload): same guarded save, but
+   *  the IndexedDB copy is written so it commits before the document is torn down (see IdbMirror.write unload). */
+  saveForUnload() { this.save(true); }
+  save(unload = false) {
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     if (this.newerGuard()) return;
     const t = this.now();
-    try { const raw = save(this.kv, this.state, t, this.b, this.bakAllowed); this.mirror?.write(raw); }
+    try { const raw = save(this.kv, this.state, t, this.b, this.bakAllowed); this.mirror?.write(raw, { unload }); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror) try { this.mirror.write(serialize(this.state, t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror) try { this.mirror.write(serialize(this.state, t), { unload }); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
@@ -127,7 +130,7 @@ export class Game {
     this.onNewerSave?.(v);
   }
   endSession() {
-    if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(true); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();

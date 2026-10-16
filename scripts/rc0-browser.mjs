@@ -507,6 +507,22 @@ sections.recoveryCantSave = () => recoveryCase('cantsave');
 sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE, 'eggfarm.save': await getValidSave() } }); await page.waitForTimeout(300);
   ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };
 
+// SD5-1 (QA aaaa91a R1, Firefox): the save written on visibilitychange→hidden / pagehide must reach IndexedDB before the tab
+// is torn down; the IndexedDB copy then equals localStorage (no seconds of income lost when localStorage is later corrupt).
+sections.unloadmirror = async () => {
+  const { ctx, page } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, sessions: 3, workersIntroA: true, workersIntroB: true }), 'eggfarm.save': fx('m2-rc1-v5-40min.json') } });
+  const wb = page.locator('#wbCollect'); if (await wb.isVisible().catch(() => false)) await wb.click(); await page.waitForTimeout(200); // offline welcome: sim runs after Collect
+  await page.evaluate(() => { window.eggfarm.state.coinsCents = 777777777; window.eggfarm.save(); }); await page.waitForTimeout(800); await page.close();
+  const p2 = await ctx.newPage(); await p2.goto(URL0, { waitUntil: 'domcontentloaded' }); // boot waits for Tap to start: nothing new is written
+  let r; for (let i = 0; i < 60; i++) { r = await p2.evaluate(async () => { const idb = await new Promise(res => { const o = indexedDB.open('eggfarm', 1); o.onsuccess = () => { const g = o.result.transaction('save').objectStore('save').get('main'); g.onsuccess = () => { res(g.result ?? null); o.result.close(); }; }; o.onerror = () => res(null); });
+    const c = x => { try { return JSON.parse(x).state.coinsCents; } catch { return null; } }; return { ls: c(localStorage.getItem('eggfarm.save')), bak: c(localStorage.getItem('eggfarm.save.bak')), idb: c(idb) }; }); if (r.ls === r.idb) break; await p2.waitForTimeout(100); }
+  // WebKit (Playwright, before and after SD5-1) never commits an IndexedDB transaction started while the page closes; there
+  // the unload save also lands in .bak (two unload saves), which is what R1 restores from. Firefox + Chromium: IndexedDB.
+  const pass = ENGINE === 'webkit' ? r.ls > 777777777 && (r.idb === r.ls || r.bak === r.ls) : r.ls > 777777777 && r.idb === r.ls;
+  ok(`SD5-1 unload save survives the tab close: ${ENGINE === 'webkit' ? '.bak or IndexedDB' : 'IndexedDB'} copy equals localStorage (> the explicit save)`, pass, JSON.stringify(r));
+  await ctx.close();
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
