@@ -1,9 +1,9 @@
 // Single-tab guard TG-1..TG-6 + notice TG-UI-1..TG-UI-8 (product/single-tab-guard.md, art-ux/single-tab-guard/spec.md)
-// on the RELEASE build. Two pages in one browser context share localStorage/BroadcastChannel like two real tabs.
-// Usage: npm run build && node scripts/tab-guard-browser.mjs [chromium|firefox|webkit]   (FREEZE_S=30)
+// on the QA build (npm run build:qa -> dist-qa; release has no window.eggfarm since QA rc1 item 2; DIST= to override). Two pages in one browser context share localStorage/BroadcastChannel like two real tabs.
+// Usage: npm run build:qa && node scripts/tab-guard-browser.mjs [chromium|firefox|webkit]   (FREEZE_S=30)
 import pw from 'playwright-core'; import { spawn } from 'node:child_process'; import fs from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', port = +(process.env.PORT ?? 4740), FREEZE_S = +(process.env.FREEZE_S ?? 30);
-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+const srv = spawn('npx', ['vite', 'preview', '--outDir', process.env.DIST ?? 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const URL0 = `http://127.0.0.1:${port}/`, fx = fs.readFileSync(new URL('../tests/fixtures/saves/m2-rc1-v5-40min.json', import.meta.url), 'utf8');
 const br = ENGINE === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[ENGINE].launch();
