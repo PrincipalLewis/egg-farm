@@ -4,6 +4,7 @@ import { Game } from './game';
 import { startAutosave } from './save/autosave';
 import { bus, guardTabs } from './save/tab-guard';
 import { readOnlyKV } from './save/save';
+import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 
@@ -45,7 +46,10 @@ async function probeTabs(): Promise<{ second: boolean }> {
 async function boot() {
   const tabs = await probeTabs();
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  const g = new Game(balance, tabs.second ? readOnlyKV(localStorage) : localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
+  // D2: newest valid copy of localStorage / IndexedDB wins; a second tab neither reconciles nor mirrors.
+  let mirror: IdbMirror | null = null;
+  if (!tabs.second) { mirror = await IdbMirror.open(); if (mirror) { try { reconcile(localStorage, await mirror.read(), balance); } catch { /* localStorage blocked: Game reports it */ } } }
+  const g = new Game(balance, tabs.second ? readOnlyKV(localStorage) : localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror);
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
   if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
