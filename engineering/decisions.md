@@ -104,3 +104,9 @@
 - Loser goes to an empty slot, else replaces the lower-`saveSeq` slot (equal ⇒ `diverged`); equal by `sum` + state ⇒ dedupe, no write. Every slot write is read back; the loser store is overwritten only after a successful read-back; if both slot writes fail, nothing is overwritten.
 - No skip path, so a rollback build can never destroy the only copy of a loser. Residual: a third divergence without Export evicts the lower-seq slot copy (not rollback-related); notice offers Export when both slots are full.
 - `save_recovery_slot` gains `slot`. `diverged2` is on the §3b zero-writes list. Compatible with M4-24 (commit path untouched), F2-EQ, and check → slot write + read-back → overwrite.
+
+## 2026-10-16 23:58 ADR M4-25: accepted risk: third-divergence slot eviction (accepted by HoE 2026-10-16; recorded by Senior Software Architect)
+- Risk: with both recovery slots (`diverged`, `diverged2`) full, a third divergence evicts the lower-`saveSeq` slot copy, which may be the only remaining copy of that loser (m4-design §3c, ADR M4-19 rev 4).
+- Decision: **accepted for rc1**, not designed out. Mitigation: the diverged notice offers Export whenever both slots are full.
+- Rationale: it needs three divergences before any Export, and it is independent of rollback (SK-1 stays closed).
+- Follow-up post-rc1: raise `save_recovery_slot` telemetry when both slots are full; candidate refinement from Saves (see status.md).
