@@ -507,6 +507,27 @@ sections.recoveryCantSave = () => recoveryCase('cantsave');
 sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE, 'eggfarm.save': await getValidSave() } }); await page.waitForTimeout(300);
   ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };
 
+// ---------- QA TUT-1: docked desktop tutorial Sell step targets a Sell button that really sells ----------
+sections.tut1docked = async () => {
+  for (const [w, h] of [[1024, 474], [1280, 720], [1366, 768]]) {
+    const { ctx, page, errors } = await open({ w, h });
+    const onbStep = () => page.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui') ?? '{}').onbStep ?? 0);
+    for (let i = 0; i < 6; i++) { await page.locator('#collect').click(); await page.waitForTimeout(120); }
+    await page.evaluate(() => { const g = window.eggfarm; if (!g.state.customers.length) g.state = { ...g.state, nextCustomerInS: 0 }; });
+    await page.waitForFunction(() => window.eggfarm.state.customers.length > 0 && document.querySelector('#mRows button[data-id]'), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    const step0 = await onbStep();
+    const tgt = await page.evaluate(() => { const r = document.querySelector('.onb-ring'); if (!r || r.style.display === 'none') return null; const b = r.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+      const ring = r.style.pointerEvents; r.style.pointerEvents = 'none'; const el = document.elementFromPoint(x, y); r.style.pointerEvents = ring;
+      const btn = el?.closest('button'); return { x, y, sell: !!btn?.closest('#mRows') && btn.hasAttribute('data-id'), tag: btn ? btn.className : el?.className }; });
+    const before = await page.evaluate(() => ({ coins: window.eggfarm.state.coinsCents, cust: window.eggfarm.state.customers.length }));
+    if (tgt) await page.mouse.click(tgt.x, tgt.y); await page.waitForTimeout(600);
+    const after = await page.evaluate(() => ({ coins: window.eggfarm.state.coinsCents, cust: window.eggfarm.state.customers.length })); const step1 = await onbStep();
+    ok(`TUT-1 docked ${w}x${h}: Sell step targets a Sell button; clicking it sells and advances the step`, !!tgt?.sell && after.coins > before.coins && step1 > step0 && errors.length === 0, JSON.stringify({ tgt, before, after, step0, step1, errors }));
+    await ctx.close();
+  }
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();

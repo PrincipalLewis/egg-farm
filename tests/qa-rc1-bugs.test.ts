@@ -173,3 +173,14 @@ describe('S2-REL-1 / exact money wiring', () => {
     expect(app).not.toMatch(/fmtMoneyShort\(/);
   });
 });
+
+describe('QA TUT-1: docked tutorial Sell step', () => {
+  const app = readFileSync('src/ui/app.ts', 'utf8');
+  it('step 1 targets the first Sell button when docked (openPanel keeps open=null there)', () => {
+    expect(app).toMatch(/if \(st === 1\) return open === 'market' \|\| docked\.matches \? mRows\.querySelector\('button\[data-id\]'\)/);
+  });
+  it('a docked card tap highlights its order row', () => {
+    expect(app).toMatch(/if \(docked\.matches && c\) \{[^\n]*\.order\[data-row=/);
+    expect(app).toMatch(/retrigger\(row, 'goal-hl'\)/);
+  });
+});

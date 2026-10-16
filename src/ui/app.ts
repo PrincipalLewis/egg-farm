@@ -198,7 +198,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const chipBorn = new WeakMap<Element, number>(); let downChip: Element | null = null;
   const custChip = (t: EventTarget | null) => (t as HTMLElement | null)?.closest?.('.chip:not(.empty):not(.served)') ?? null;
   queueEl.addEventListener('pointerdown', e => { downChip = custChip(e.target); });
-  queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (ok) openPanel('market'); });
+  queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (!ok) return; openPanel('market');
+    // QA TUT-1: docked, the Market panel is always visible (openPanel keeps open=null), so a card tap highlights its order row.
+    if (docked.matches && c) { const id = [...chips].find(([, el]) => el === c)?.[0]; const row = (id !== undefined ? mRows.querySelector<HTMLElement>(`.order[data-row="${id}"]`) : null) ?? mRows.querySelector<HTMLElement>('.order:not([hidden])');
+      if (row) { row.scrollIntoView({ block: 'nearest', behavior: rm() ? 'auto' : 'smooth' }); retrigger(row, 'goal-hl'); setTimeout(() => row.classList.remove('goal-hl'), 1200); } } });
   let lastSellSource: Element | null = null;
   mRows.addEventListener('click', e => {
     if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
@@ -603,7 +606,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     onbUpdate = mountOnboarding(flow, (st) => {
       if (modalKind) return null;
       if (st === 0) return collectBtn;
-      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
+      if (st === 1) return open === 'market' || docked.matches ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
       if (docked.matches) { tab = 'collection'; return uRow.querySelector('.btn.buy'); }
       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
     }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'
