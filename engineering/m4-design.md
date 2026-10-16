@@ -1,4 +1,4 @@
-# M4 design and task split — Senior Software Architect · v0.2.3 (HoE-approved decisions 9.1–9.9; review m4-design-v0.2-ad10a08) · 2026-10-16
+# M4 design and task split — Senior Software Architect · v0.2.4 (HoE-approved decisions 9.1–9.9; review m4-design-v0.2-ad10a08; Saves QA guard-prep answers §3a) · 2026-10-16
 
 Base: `origin/main` @ `a01faea` (save v4 `aaaa91a` + save-recovery dialog). M4-A baseline: `m4/m4a-tracks` @ `04e2709`
 (19 commits on merge-base `4aadcbf`; `m4/m4a-tracks-v2` not pushed yet). Inputs: engineering/stack-and-architecture.md,
@@ -86,6 +86,40 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
 - backup failure: dialog once/session → toast; play continues; v7 not committed; succeeds on retry.
 - `m4-v7-*` fixtures + SHA256SUMS; 3-engine test: rc1 build × v7 fixtures → storage byte-identical.
 
+### 3a. Save facts for the M4 guard (Saves QA m4-guard-prep-notes; from code on main `a01faea` and v2 `3351d6c`)
+"CODE" = what the code does today. "DECISION" = new rule set here (Architect, ADR M4-11), to be implemented by the owner named.
+1. **Flag-off and v7:** REFUSE (ADR M4-9). No text in this doc says a flag-off build reads v7 and writes v6 any more.
+   The v0.2 down-projection text was replaced in v0.2.2.
+2. **Newer-save dialog**
+   - CODE (`src/ui/save-recovery.ts` `showNewerSaveDialog`, identical on both SHAs):
+     - layer `div.recovery-layer.newer-save[data-version="<n>"]`;
+     - card `.recovery-card[role=alertdialog][aria-modal=true][aria-labelledby=nsT]`;
+     - title `h2#nsT`, text exactly `This save is from a newer version of Egg Farm. Open the newer build to keep playing.` (`NEWER_SAVE_STRINGS.title`; body empty, no `#nsB`);
+     - one button `button#nsRetry.btn.rc-primary`, text `Try again` (reloads).
+   - **There is no export control on this layer today.** DECISION (S-2, Saves 3ba38cf3): add `button#nsExport`, label `Export save`, aria `Export save, downloads a copy of the saved farm`. It exports the raw `eggfarm.save` bytes via `exportOldSave`. Read-only, zero writes.
+   - Guard selectors: `NEWER_SEL='.recovery-layer.newer-save [role=alertdialog]'`, `NEWER_TXT` = the title above, `EXPORT_SEL='#nsExport'`. ZW-2 stays expected-FAIL until S-2.
+3. **Export format**
+   - CODE: `exportOldSave(raw, name)` exports the **raw stored string, byte for byte**, with no wrapper. It wraps it in a `Blob` (`application/json`) and delivers it by download, the iOS share sheet, or the clipboard as a fallback.
+   - The bytes are the save file `serialize()` writes: `{"version":<n>,"savedAt":<ms>,"sum":"<fnv>","state":{...}}`.
+   - The "Can't save" variant exports `live()` = a fresh `serialize()` of the current farm.
+   - DECISION: the newer-save export (item 2) uses the stored raw bytes, so ZW-2's "exact v7 bytes" is the right assertion.
+4. **`tracksV7` marker at `3351d6c` (CODE)**
+   - Shape: `state.tracksV7: 1`, the literal number `1`, optional (`tracksV7?: 1` in `GameState`). It sits **inside `state`**, next to `hensLevel`, `eggValueLevel` and `celebratedMilestones`. Top-level `version` stays `6`, and `sum` covers the state including the marker.
+   - When it is set: in `migrate()`, when M4 is on and `!state.tracksV7` (after `migrateTracksV7`), and on a new M4 farm (`game.ts:52`). Absent means a pre-M4 farm.
+   - `migrationRefundCents` is **not stored** in the state at 3351d6c (it is only returned by `migrateTracksV7`). S-4 adds it as a field.
+   - Flag-off at main/3351d6c: `migrate()` builds the state as `{...initialState(b), ...d.state}` and `serialize` JSON-stringifies the whole state. So the marker and track fields survive a flag-off write (CODE), but no test covers this yet (F-0b).
+5. **Backup naming**
+   - CODE: there is **no v6 backup in either SHA**. The only backup is the rotation copy `eggfarm.save.bak` (`BAK_KEY`), localStorage only.
+   - The IndexedDB mirror is db `eggfarm`, store `save`, key `main` (`IDB_KEY`). There are no other IDB keys.
+   - DECISION (ADR M4-11): one name everywhere: localStorage **`eggfarm.save.v6_backup`**, mirrored to IndexedDB db `eggfarm` / store `save` / key **`v6_backup`**.
+   - Write-once: never overwritten, never rotated, not in `RESET_KEYS` until M4 reaches Latest. It holds the raw v6 bytes.
+   - When it is written:
+     - interim (F-0): once, before the in-place `tracksV7` price-match (localStorage first; IDB best effort);
+     - S-4: before the first v7 write, and the v7 commit waits for the localStorage write to succeed (9.1);
+     - an IDB failure alone doesn't block, but it is reported in `save_migrated.backup_ok`.
+   - In this doc, "v6 `.bak`" means `v6_backup`. `eggfarm.save.bak` is the normal rotation copy and keeps its existing rules.
+
+
 ## 4. Feature-flag strategy
 - Set at build time in `balance.json`: `m4.enabled` gates M4-A **and the save write version** (ADR M4-4). Later: `m4.features.*`, each requiring `m4.enabled`.
 - Shipping default 0 until QA PASS. While the default is 0, TR-5 only reports (§6). QA/playtest builds turn the flag on via `build:qa` mode. The debug toggle exists in dev builds only.
@@ -141,9 +175,9 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 | A-0 | Rebase m4/m4a-tracks onto origin/main a01faea → `m4/m4a-tracks-v2` (tonight); resolve styles.css; regenerate the flag-off golden; all gates; send the v2 SHA | **HoE** | — | M |
 | U-0 | Turn /workspace/m4v2-tools/ (single.config.mjs, inline-public.mjs, smoke.mjs) into `npm run build:html` (single-file playtest HTML + smoke) | UI | A-0 | S |
 | X-1 | `scripts/gate-all.sh` + telemetry schema test skeleton | ARCH | — | S |
-| F-0 | On m4/m4a-tracks-v2: (a) interim path writes the v6 backup once before the in-place price-match (ADR M4-10); (b) test that a flag-off build saves a **marked** save without stripping `tracksV7`/`hensLevel`/`eggValueLevel`. Must land before playtest builds spread marked saves | FE (with SAV review) | A-0 | S |
+| F-0 | On m4/m4a-tracks-v2: (a) interim path writes `eggfarm.save.v6_backup` (+ IDB `save/v6_backup`) once before the in-place price-match (ADR M4-10/M4-11); (b) test that a flag-off build saves a **marked** save without stripping `tracksV7`/`hensLevel`/`eggValueLevel`. Must land before playtest builds spread marked saves | FE (with SAV review) | A-0 | S |
 | S-1 | Migration chain takes `balance`; move `migrate-v7.ts` → `save/migrations/v7.ts`; split `readMax(b)` / `writeVersion(b)` (still 6/6) | SAV | A-0 | S |
-| S-2 | Newer-save refusal = zero writes (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main**; also covers **a flag-off build opening a v7 save** (same refusal, .bak intact, export works) | SAV | — | M |
+| S-2 | Add `#nsExport` (raw bytes) to the `.newer-save` layer (§3a.2); newer-save refusal = zero writes (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main**; also covers **a flag-off build opening a v7 save** (same refusal, .bak intact, export works) | SAV | — | M |
 | S-3 | `v6_backup` write-once (LS + IDB). On failure: "Can't save" dialog once per session → toast, keep playing, don't commit v7, retry at save points; unit tests | SAV | S-1 | M |
 | S-4 | Real v6→v7 bump (replaces the interim marker). Handles unmarked v6, marked v6 (idempotent: no re-migrate, no re-refund) and v7. Wire `migrations[6]`; readMax 7 with M4 on (flag-off refuses v7, ADR M4-9); write v7 only when M4 is on; keep the v6 `.bak` until Latest; validator; flag-off v6-write, flag-off-refuses-v7 and M4-on v7-write/.bak tests | SAV | S-1, S-3, S-2 | M |
 | S-5 | Load order + first-offline-grant ×1.0 (M4A-30) tests | SAV | S-4 | S |

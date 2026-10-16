@@ -24,3 +24,7 @@
 ## 2026-10-16 20:31 ADR M4-10 Interim path writes a v6 backup first (HoE review m4-design-v0.2-ad10a08 #3; recorded by Senior Software Architect)
 - On m4/m4a-tracks-v2 (interim tracksV7 marker, ADR M4-8), the caller of migrateTracksV7 writes the raw v6 save to `v6_backup` once (write-once, LS + IDB keys as in S-3), before the in-place price-match. Owner: Features 95daf662 (F-0).
 - F-0 also adds the missing test: a flag-off build saves a marked save without stripping tracksV7/hensLevel/eggValueLevel (review #1).
+
+## 2026-10-16 21:05 ADR M4-11 Backup naming and newer-save export (Saves QA guard-prep; Senior Software Architect)
+- One backup name: localStorage `eggfarm.save.v6_backup` + IndexedDB `eggfarm`/`save`/`v6_backup`. Holds the raw v6 bytes, write-once, kept until M4 reaches Latest (not in RESET_KEYS). Written once before the interim tracksV7 change (F-0) and before the first v7 write (S-4; v7 commit waits for the LS write). `eggfarm.save.bak` stays the rotation copy.
+- The `.newer-save` layer gets `#nsExport` ("Export save"), which exports the raw stored `eggfarm.save` bytes via exportOldSave (no wrapper). Owner: S-2. Facts in m4-design §3a.
