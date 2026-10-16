@@ -86,7 +86,7 @@ describe('BUG-3: round first, then pick the suffix', () => {
   it('never 1000K/M/B across a sweep', () => {
     for (const base of [1e6, 1e9, 1e12]) for (let d = -100; d <= 100; d++) expect(fmtCount(base + d * base / 1e5)).not.toMatch(/^1000(\.\d)?[KMB]$/);
   });
-  it('money', () => { expect(fmtMoney(99_996_000)).toBe('$1M'); expect(fmtMoney(1_234_500)).toBe('$12.3K'); expect(fmtMoneyShort(1e14)).toBe('$1T'); });
+  it('money', () => { expect(fmtMoney(99_996_000)).toBe('$999,960'); expect(fmtMoney(99_999_996_000)).toBe('$1B'); expect(fmtMoney(1_234_500)).toBe('$12,345'); /* offline-popup-v2 C-AC39: full digits < $1M */ expect(fmtMoneyShort(1e14)).toBe('$1T'); });
   it('fmtMoneyExact: full dollars + thousands + 2 dp; — for non-finite', () => {
     expect(fmtMoneyExact(999_900_000)).toBe('$9,999,000.00');
     expect(fmtMoneyExact(1_234_567)).toBe('$12,345.67');
