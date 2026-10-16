@@ -67,7 +67,6 @@ img{user-select:none;-webkit-user-drag:none}
 .ghost.walkoff{animation:walkoff 900ms 500ms ease-in forwards}@keyframes walkoff{to{transform:translateX(90px);opacity:0}}
 .bubble{font:700 var(--fs-xs) var(--f-display);padding:1px 8px;border-radius:var(--r-pill);white-space:nowrap;margin-bottom:2px;border:var(--bw) solid var(--c-outline)}
 .bubble.soldout{background:var(--c-cream);color:var(--c-text)}
-.bubble.qfull{background:var(--c-yolk-dark);color:var(--c-text);animation:fadeout 1400ms ease forwards}
 @keyframes fadeout{0%{opacity:0;transform:translateY(4px)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
 .rm .ghost.walkoff,.rm .ghost.leave{animation:none}.rm .ghost.wave img{animation:none}
 .scene{position:relative;aspect-ratio:4/3;max-height:100%;margin-inline:auto;width:min(100%,560px);min-height:0;align-self:center;cursor:pointer}

@@ -366,7 +366,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       case 'customer_partial': { dwell.gone(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
       case 'customer_lost':
         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
-        else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff', { text: 'Queue full!', cls: 'qfull' }); sfx('customerLeave'); }
+        else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff') /* Art&UX 01:17 #3: no tag of its own; only the strip's .qtag says Queue full */; sfx('customerLeave'); }
         break;
       case 'upgrade': {
         sfx('upgrade'); const src = lastBuyBtn ?? uRow;
