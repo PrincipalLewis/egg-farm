@@ -20,3 +20,7 @@
 ## 2026-10-16 20:29 ADR M4-9 Flag-off builds refuse v7 saves (HoE decision 9.7; recorded by Senior Software Architect)
 - A flag-off build treats a v7 save exactly like a newer save: the existing newer-save dialog and S-2 zero-writes rules. It never writes v6 over a v7 save and never silently drops M4 progress. The v6 .bak stays as the escape hatch; export stays available. Refines M4-4 (flag-off reads v6 only).
 - Test: "flag-off refuses v7: zero writes, .bak intact, export works" (S-2/S-4). Also 9.5: QA Saves 33ec1b55 owns qa/m3-scripts/rc1-guard-save-qa-m4.mjs.
+
+## 2026-10-16 20:31 ADR M4-10 Interim path writes a v6 backup first (HoE review m4-design-v0.2-ad10a08 #3; recorded by Senior Software Architect)
+- On m4/m4a-tracks-v2 (interim tracksV7 marker, ADR M4-8), the caller of migrateTracksV7 writes the raw v6 save to `v6_backup` once (write-once, LS + IDB keys as in S-3), before the in-place price-match. Owner: Features 95daf662 (F-0).
+- F-0 also adds the missing test: a flag-off build saves a marked save without stripping tracksV7/hensLevel/eggValueLevel (review #1).

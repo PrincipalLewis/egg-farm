@@ -1,4 +1,4 @@
-# M4 design and task split — Senior Software Architect · v0.2.2 (HoE-approved decisions 9.1–9.8) · 2026-10-16
+# M4 design and task split — Senior Software Architect · v0.2.3 (HoE-approved decisions 9.1–9.9; review m4-design-v0.2-ad10a08) · 2026-10-16
 
 Base: `origin/main` @ `a01faea` (save v4 `aaaa91a` + save-recovery dialog). M4-A baseline: `m4/m4a-tracks` @ `04e2709`
 (19 commits on merge-base `4aadcbf`; `m4/m4a-tracks-v2` not pushed yet). Inputs: engineering/stack-and-architecture.md,
@@ -46,6 +46,8 @@ best buy) used by UI and bots; it may import `config/` and `sim/` types but neve
 `tracksV7` marker (v1..v6) is price-matched once through `migrateTracksV7` and gets marked `tracksV7: 1`; new M4 farms are marked at creation.
 This is allowed **only in playtest and M4-flagged builds, never as a release default**. Flag-off builds must load a marked save normally
 (ignore or keep the marker and track fields) and must **never strip them on write**. S-2 is unaffected because a marked save is still v6.
+**At `3351d6c`, M4-on saves are v6 with `tracksV7: 1`; v7 plus the kept v6 `.bak` only arrive with S-4.** The v7/.bak text below describes S-4, not v2.
+**Interim backup (9.9, ADR M4-10):** before the in-place price-match, the interim path's caller writes the raw v6 save to `v6_backup` once (write-once, same keys as S-3). Owner: Features 95daf662.
 
 **Write version follows the flag (9.2):**
 - `m4.enabled = 0` (all shipping builds until M4 reaches Latest): reads v6 and **writes v6 only**. A **v7 save is refused exactly like a newer save** (ADR M4-9, 9.7): the existing `.newer-save` dialog, S-2 zero-writes rules, never writes v6 over v7, never silently drops M4 progress. The v6 `.bak` stays as the escape hatch; export stays available.
@@ -139,6 +141,7 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 | A-0 | Rebase m4/m4a-tracks onto origin/main a01faea → `m4/m4a-tracks-v2` (tonight); resolve styles.css; regenerate the flag-off golden; all gates; send the v2 SHA | **HoE** | — | M |
 | U-0 | Turn /workspace/m4v2-tools/ (single.config.mjs, inline-public.mjs, smoke.mjs) into `npm run build:html` (single-file playtest HTML + smoke) | UI | A-0 | S |
 | X-1 | `scripts/gate-all.sh` + telemetry schema test skeleton | ARCH | — | S |
+| F-0 | On m4/m4a-tracks-v2: (a) interim path writes the v6 backup once before the in-place price-match (ADR M4-10); (b) test that a flag-off build saves a **marked** save without stripping `tracksV7`/`hensLevel`/`eggValueLevel`. Must land before playtest builds spread marked saves | FE (with SAV review) | A-0 | S |
 | S-1 | Migration chain takes `balance`; move `migrate-v7.ts` → `save/migrations/v7.ts`; split `readMax(b)` / `writeVersion(b)` (still 6/6) | SAV | A-0 | S |
 | S-2 | Newer-save refusal = zero writes (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main**; also covers **a flag-off build opening a v7 save** (same refusal, .bak intact, export works) | SAV | — | M |
 | S-3 | `v6_backup` write-once (LS + IDB). On failure: "Can't save" dialog once per session → toast, keep playing, don't commit v7, retry at save points; unit tests | SAV | S-1 | M |
@@ -168,6 +171,7 @@ F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into
 4. **v2 base → decided:** origin/main `a01faea`. HoE owns the A-0 rebase tonight; Features branches from the v2 SHA.
 5. **QA guard → decided:** QA Saves (33ec1b55) owns the M4 guard, a new file `qa/m3-scripts/rc1-guard-save-qa-m4.mjs`.
 6. **CI → decided:** no hosted minutes (spend, needs CEO). Gates run locally via `gate-all.sh`. A hosted-CI proposal with costs is optional and comes later via HoE (ADR M4-7).
-8. **Interim marker → decided (HoE, 20:28):** v2 `3351d6c` migrates inside v6 via `tracksV7`. Kept for playtest and M4-flagged builds only, never in a release default. S-4 does the real bump; F-9 removes the marker (ADR M4-8).
 7. **Flag-off opens v7 → decided: REFUSE** (ADR M4-9). Same as a newer save: newer-save dialog, zero writes, never v6 over v7, `.bak` escape hatch, export available.
+8. **Interim marker → decided (HoE, 20:28):** v2 `3351d6c` migrates inside v6 via `tracksV7`. Kept for playtest and M4-flagged builds only, never in a release default. S-4 does the real bump; F-9 removes the marker (ADR M4-8).
+9. **Interim backup → decided (HoE review, 20:31):** the interim marked path writes a v6 backup once, before the in-place change. Owner: Features 95daf662 (task F-0, ADR M4-10).
 
