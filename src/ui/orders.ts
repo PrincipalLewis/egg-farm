@@ -30,13 +30,15 @@ export function orderHtml(v: OrderView, avatar: string): string {
     <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}">${v.button}</button></div>`;
 }
 /** §6 Farm row preview when the next Farm level adds a customer slot (data-driven: queueMax(F+1) > queueMax(F)).
- *  Returns the two <li> lines (order-range line omitted when unchanged), or null. */
-export function slotPreview(qNow: number, qNext: number, dNow: [number, number], dNext: [number, number], icon: string): string | null {
+ *  v1.2 (S2-3b, Product ruling final): lead "+1 customer (max N)", N = the new queue_max; "New coop look" above it on a coop step.
+ *  Returns the <li> lines (order-range line omitted when unchanged), or null. */
+export function slotPreview(qNow: number, qNext: number, dNow: [number, number], dNext: [number, number], icon: string, coopStep = false): string | null {
   if (qNext <= qNow) return null;
   const r = (d: [number, number]) => `${eggs(d[0])}–${eggs(d[1])}`;
-  const lead = `<li class="slot" aria-label="Next level: plus 1 customer slot, ${qNow} to ${qNext}"><img src="${icon}" alt="">+${qNext - qNow} customer slot<span class="m"> (${qNow} → ${qNext})</span></li>`;
+  const coop = coopStep ? `<li class="coopnew">New coop look</li>` : '';
+  const lead = `<li class="slot" aria-label="Next level: plus ${qNext - qNow} customer, queue holds up to ${qNext}"><img src="${icon}" alt="">+${qNext - qNow} customer<span class="m"> (max ${qNext})</span></li>`;
   const same = dNow[0] === dNext[0] && dNow[1] === dNext[1];
-  return lead + (same ? '' : `<li class="orders">Orders ${r(dNow)} → ${r(dNext)} eggs</li>`);
+  return coop + lead + (same ? '' : `<li class="orders">Orders ${r(dNow)} → ${r(dNext)} eggs</li>`);
 }
 
 /** F5: one queue length shared by the farm strip "+N" and the Market "+N waiting", updated at most once per `ms`

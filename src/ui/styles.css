@@ -451,3 +451,8 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .wk-cap{font:400 12px/16px var(--f-body);color:#5A4C42;white-space:nowrap}
 .refill-wrap{position:sticky;top:0;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 6px}
 .refill-wrap .btn.manage-all{position:static;margin:0;width:calc(100% - 24px)}
+/* S2-3b: one-time "+N" chip pulse on a queue step (1 -> 1.12 -> 1 over 600ms); reduced motion: brown -> Yolk -> brown colour flash */
+.chip.more.qpulse{animation:qpulse 600ms ease-in-out 1}@keyframes qpulse{50%{transform:scale(1.12)}}
+.chip.more.qflash{animation:qflash 600ms linear 1}@keyframes qflash{50%{background:var(--c-yolk);color:var(--c-text)}}
+.rm .chip.more.qpulse{animation:qflash 600ms linear 1}
+.fx li.coopnew{font:800 14px var(--f-body);color:var(--c-wood-text)}

@@ -11,7 +11,7 @@ import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
 import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRecoveryDialog } from './save-recovery';
-import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
+import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
@@ -290,15 +290,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const full = s.customers.length >= slots;
     queueEl.classList.toggle('full', full);
     if (full && !qTagShown) { queueEl.append(h(`<span class="qtag"><span class="q-long">Queue full</span><span class="q-short">Full</span></span>`)); qTagShown = true; }
-    // Slot unlock moment (first reach of a new slot count; once, persisted)
+    // S2-3b (layout-spec §4.6b, queue spec v1.2 §6): a queue-size step pulses the "+N" chip once (1 -> 1.12 -> 1, 600ms);
+    // reduced motion = colour flash. Replaces the old L10/L20 slot grow-in (§3.3 synced to P1q). Once per step, persisted.
     if (slots > flags.seenSlots) {
       flags.seenSlots = slots; saveFlags();
-      const newSlot = empties[empties.length - 1] ?? queueEl.lastElementChild;
-      if (newSlot && !rm()) { retrigger(newSlot, 'unlock'); sparkle(newSlot, 4); }
-      slotToastPending = slotAdded(s.farmLevel, b);
+      if (moreChip.isConnected) retrigger(moreChip, rm() ? 'qflash' : 'qpulse');
     }
   };
-  let slotToastPending = false;
 
   // ---------- Game events ----------
   g.on((e: GameEvent) => {
@@ -370,7 +368,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const cost = isF ? S.farmCost(F, b) : S.collectionCost(C, b), can = s.coinsCents >= cost * 100;
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
-    const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
+    const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg'), S.coopTier(F + 1) !== S.coopTier(F)) : null;
     const fx = isF ? [
       `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
       `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
@@ -413,10 +411,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (tier > s.celebratedTier) {
       g.dispatch({ type: 'markCelebrated', tier });
       if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
-      showToast(slotToastPending ? 'Coop upgraded! +1 customer slot' : 'Coop upgraded!'); slotToastPending = false;
+      showToast('Coop upgraded!'); // §4.7: plain copy, only at the L5/L10/L20 tier steps
     }
     renderQueue();
-    if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
     // hens
     const hn = Math.min(S.hens(F, b), 12);
     if (hn !== henCount) {

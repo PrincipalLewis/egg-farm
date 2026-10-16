@@ -65,6 +65,17 @@ sections.qtag = async () => {
     await ctx.close();
   }
 };
+// ---------- S2-3b "+N" chip pulse on a queue step (reduced motion: colour flash), no slot grow-in ----------
+sections.s23b = async () => {
+  for (const reducedMotion of [false, true]) {
+    const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, seenSlots: 8, reducedMotion }) } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 14, celebratedTier: 3, coinsCents: 1e15, customers: Array.from({ length: 8 }, (_, i) => ({ id: 700 + i, demand: 5, filled: 0, waitedS: 0 })), nextCustomerInS: 1e9 }; });
+    await page.waitForTimeout(400); await page.evaluate(() => window.eggfarm.dispatch({ type: 'buyFarm' })); await page.waitForTimeout(150);
+    const r = await page.evaluate(() => { const c = document.querySelector('#queue .chip.more'); return { cls: c?.className, anim: c && getComputedStyle(c).animationName, unlock: document.querySelectorAll('.chip.unlock').length, ui: JSON.parse(localStorage.getItem('eggfarm.ui')).seenSlots }; });
+    ok(`S2-3b queue step 8->9: "+N" chip ${reducedMotion ? 'colour flash' : 'pulse'} once, no slot grow-in`, r.anim === (reducedMotion ? 'qflash' : 'qpulse') && r.unlock === 0 && r.ui === 9, JSON.stringify(r));
+    await ctx.close();
+  }
+};
 // ---------- PT1-4 / PT1-5 / PT1-6 ----------
 sections.pt1 = async () => {
   { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm

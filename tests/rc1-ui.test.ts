@@ -86,3 +86,29 @@ describe('Workers v1.3 (m2-workers-layout §4.4, m2-proposal §8 #19-20)', async
     expect(workersHtml(S([10, 90, 90], 7), b).match(/Ready in 7s/g)!.length).toBe(4); // pill + 3 workers
   });
 });
+
+describe('S2-3b + §3.3 synced to P1q (queue spec v1.2 §6)', async () => {
+  const { slotPreview, stripSplit, stripSplitAt } = await import('../src/ui/orders');
+  const { balance: b } = await import('../src/config/balance');
+  const { queueMax } = await import('../src/sim/state');
+  it('queue_max = min(10, 6 + floor(F/5))', () => { for (let F = 0; F <= 30; F++) expect(queueMax(F, b)).toBe(Math.min(10, 6 + Math.floor(F / 5))); });
+  it('"+1 customer (max N)", with "New coop look" above it only on a coop step', () => {
+    const t = (h: string | null) => h!.replace(/<[^>]+>/g, '');
+    expect(t(slotPreview(8, 9, [1, 2], [1, 2], 'i', false))).toBe('+1 customer (max 9)');
+    expect(t(slotPreview(7, 8, [1, 2], [1, 2], 'i', true))).toBe('New coop look+1 customer (max 8)');
+    expect(slotPreview(10, 10, [1, 2], [1, 2], 'i', true)).toBeNull();
+  });
+  it('phone strip: at most 5 chips; over 5 the 5th is "+N", N = queue - 4 (sizes 5, 6, 10)', () => {
+    expect(stripSplit(5)).toEqual({ shown: 5, more: 0 });
+    expect(stripSplit(6)).toEqual({ shown: 4, more: 2 });
+    expect(stripSplit(10)).toEqual({ shown: 4, more: 6 });
+    for (const n of [5, 6, 10]) { const s = stripSplitAt(n, n); expect(s.shown + (s.more ? 1 : 0)).toBeLessThanOrEqual(5); if (n > 5) expect(s.more).toBe(n - 4); }
+  });
+  it('no slot grow-in and no "+1 customer slot" toast; the "+N" chip pulses once (reduced motion: colour flash)', () => {
+    expect(app).not.toMatch(/'unlock'|customer slot|slotToastPending/);
+    expect(app).toContain("showToast('Coop upgraded!')");
+    expect(app).toMatch(/retrigger\(moreChip, rm\(\) \? 'qflash' : 'qpulse'\)/);
+    expect(css).toMatch(/\.chip\.more\.qpulse\{animation:qpulse 600ms[^}]*\}@keyframes qpulse\{50%\{transform:scale\(1\.12\)\}\}/);
+    expect(css).toMatch(/\.chip\.more\.qflash\{animation:qflash 600ms/);
+  });
+});

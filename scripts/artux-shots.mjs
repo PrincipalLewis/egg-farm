@@ -38,14 +38,14 @@ const F24 = () => { const g = window.eggfarm; g.state = { ...g.state, farmLevel:
   await p.evaluate(() => document.querySelector('nav [data-nav=market]').click()); await p.waitForTimeout(600);
   const m = await p.evaluate(() => document.querySelector('#mRows .queue-more').textContent); ok('F5 strip "+N" == Market "+N waiting" at 360', strip === m.split(' ')[0], { strip, m }); await ctx.close(); }
 // F1: toast below the strip, slot copy only on a slot level
-for (const [F, want] of [[19, 'Coop upgraded! +1 customer slot'], [24, 'Coop upgraded!']]) {
+for (const [F, want] of [[19, 'Coop upgraded!'], [24, 'Coop upgraded!']]) { // §4.7 rc1: plain copy, never a '+1 customer slot' suffix
   const { ctx, p } = await open({ viewport: { width: 360, height: 640 } }, null);
   const r = await p.evaluate(async F => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, celebratedTier: 0, coinsCents: 1e15, customers: Array.from({ length: 9 }, (_, i) => ({ id: i + 1, demand: 5, filled: 0, waitedS: 0 })), nextCustomerInS: 1e9 };
     await new Promise(r => setTimeout(r, 300)); g.dispatch({ type: 'buyFarm' }); const seen = new Set(); const end = performance.now() + 1500; let top = 0;
     while (performance.now() < end) { await new Promise(r => requestAnimationFrame(r)); const t = document.querySelector('.toast.show'); if (t) { seen.add(t.textContent); top = t.getBoundingClientRect().top; } }
     return { seen: [...seen], toastTop: Math.round(top), stripBottom: Math.round(document.querySelector('.queue').getBoundingClientRect().bottom) }; }, F);
   if (F === 19) await p.screenshot({ path: `${OUT}/toast-below-strip-360-${eng}.png` });
-  ok(`F1 toast at F${F + 1}`, r.seen.includes(want) && !r.seen.includes(F === 24 ? 'Coop upgraded! +1 customer slot' : '__') && r.toastTop >= r.stripBottom, r); await ctx.close(); }
+  ok(`F1 toast at F${F + 1}`, r.seen.includes(want) && !r.seen.some(t => /customer slot/.test(t)) && r.toastTop >= r.stripBottom, r); await ctx.close(); }
 // Rotate prompt §6.2/§6.3
 for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 640, height: 360 }, hasTouch: true, isMobile: eng !== 'webkit' || true }, true], ['1024x768 touch tablet', { viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true }, false], ['1280x720 mouse', { viewport: { width: 1280, height: 720 } }, false], ['844x390 mouse', { viewport: { width: 844, height: 390 } }, false]]) {
   const { ctx, p } = await open(opt, null);
