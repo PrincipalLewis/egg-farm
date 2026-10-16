@@ -75,7 +75,9 @@ export class Game {
     }
   }
   /** B-1 v0.3: why the coop may leave full on the next check (set by the action / event that moved eggs). */
-  private exitCause: 'tap' | 'coop_hand' | 'cap_upgrade' | 'reload' | null = null;
+  private exitCause: 'tap' | 'coop_hand' | 'cap_upgrade' | 'reload' | 'other' | null = null;
+  /** v1.0.1: mark the next coop-full exit as caused by a save load / import (in-session state replacement). */
+  noteReload() { this.exitCause = 'reload'; }
   /** B-1 session totals (this page load): ms spent full and eggs laid above the cap (lost). */
   coopFullMs = 0; eggsLostWhileFull = 0;
   private checkCoopFull() {
@@ -87,7 +89,7 @@ export class Game {
       this.notify({ type: 'coop_full', phase: 'start' });
     } else if (!full && this.coopFullSince !== null) {
       const durationMs = this.now() - this.coopFullSince; this.coopFullMs += durationMs;
-      this.telemetry.track('coop_full', { phase: 'end', durationMs, exit_reason: this.exitCause ?? 'reload',
+      this.telemetry.track('coop_full', { phase: 'end', durationMs, exit_reason: this.exitCause ?? 'other',
         coop_full_ms: this.coopFullMs, eggs_lost_while_full: Math.floor(this.eggsLostWhileFull) });
       this.coopFullSince = null; this.exitCause = null; this.notify({ type: 'coop_full', phase: 'end' });
     }

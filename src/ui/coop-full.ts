@@ -31,9 +31,12 @@ export function coopFullHint(s: GameState, b: Balance): string {
   const v = coopFullHintVariant(s, b);
   return v === 'refill' ? COOP_FULL_COPY.hintRefill : v === 'hire' ? COOP_FULL_COPY.hintHire : COOP_FULL_COPY.hintCollect;
 }
+const SUFFIX: Record<string, string> = { K: 'thousand', M: 'million', B: 'billion', T: 'trillion' };
+/** Aria money: the visible fmtMoney value with the suffix spelled out ("$12.3K" -> "$12.3 thousand"). */
+export const spokenMoney = (cents: number) => fmtMoney(cents).replace(/([KMBT])$/, (_, k) => ` ${SUFFIX[k]}`);
 /** Copy doc §5: "Net income minus $1.25 per second. Coop full." / "... zero per second." Amount = fmtMoney of |net| rounded to cents. */
 export function rateAria(netCents: number, full: boolean) {
   const c = Math.round(netCents);
-  const amt = c === 0 ? 'zero' : `${c < 0 ? 'minus' : 'plus'} ${fmtMoney(Math.abs(c))}`;
+  const amt = c === 0 ? 'zero' : `${c < 0 ? 'minus' : 'plus'} ${spokenMoney(Math.abs(c))}`;
   return `Net income ${amt} per second.${full ? ' Coop full.' : ''}`;
 }

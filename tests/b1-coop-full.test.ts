@@ -6,7 +6,7 @@ import { initialState, coopCapacity } from '../src/sim/state';
 import { unlockFarm } from '../src/sim/workers';
 import { IncomeMeter, incomePerSec, etaSeconds, INCOME_WINDOW_MS } from '../src/econ/income';
 import { totalWageCentsPerSec } from '../src/ui/rates';
-import { coopFullHint, coopFullHintVariant, isCoopFull, rateAria, COOP_FULL_COPY } from '../src/ui/coop-full';
+import { spokenMoney, coopFullHint, coopFullHintVariant, isCoopFull, rateAria, COOP_FULL_COPY } from '../src/ui/coop-full';
 import { selectGoal } from '../src/ui/next-goal';
 import { mem } from './helpers';
 const full = (over: any = {}) => { const s = { ...initialState(b, 1), ...over }; return { ...s, coop: coopCapacity(s.farmLevel, b) }; };
@@ -80,6 +80,30 @@ describe('B-1 coop full / realized net rate', () => {
     expect(coopFullHint(withHand(un, { energy: 0, cdS: 1 }), b)).toBe('Collect or refill Coop Hand');
     expect(coopFullHint(withHand(un, { energy: 50, cdS: 1, unpaid: true }), b)).toBe('Collect or refill Coop Hand');
     expect(COOP_FULL_COPY.badge).toBe('Full!'); expect(COOP_FULL_COPY.rateChip).toBe('Full!');
+  });
+  it('v1.0.1 (a): exit_reason falls back to other; reload only via noteReload', () => {
+    const c = { t: 1.8e12 }; const g = new Game(b, mem(), () => c.t, 1);
+    const cap = coopCapacity(g.state.farmLevel, b);
+    g.state = { ...g.state, coop: cap }; c.t += 100; g.frame();
+    g.state = { ...g.state, coop: 0 }; c.t += 100; g.frame(); // debug edit
+    g.state = { ...g.state, coop: cap }; c.t += 100; g.frame();
+    g.noteReload(); g.state = { ...g.state, coop: 0 }; c.t += 100; g.frame();
+    const ends = g.telemetry.events().filter(e => e.type === 'coop_full' && e.phase === 'end').map(e => e.exit_reason);
+    expect(ends).toEqual(['other', 'reload']);
+  });
+  it('v1.0.1 (b): divisor is min(5 s, elapsed since start), floored at 1 s (no /0)', () => {
+    const m = new IncomeMeter(); m.start(10_000);
+    expect(m.salesCentsPerSec(10_000)).toBe(0);
+    m.add(10_500, 200); expect(m.salesCentsPerSec(10_500)).toBe(200); // 1 s floor
+    m.add(11_500, 200); expect(m.salesCentsPerSec(12_000)).toBe(200); // 400 / 2 s
+    expect(m.salesCentsPerSec(15_000)).toBe(80); // full 5 s window: 400 / 5
+    m.start(20_000); expect(m.salesCentsPerSec(20_000)).toBe(0); // offline return restarts
+  });
+  it('aria spells out money suffixes; visible text unchanged', () => {
+    expect(rateAria(-1_230_000, true)).toBe('Net income minus $12.3 thousand per second. Coop full.');
+    expect(spokenMoney(123_000_000)).toBe('$1.23 million');
+    expect(spokenMoney(450_000_000_000)).toBe('$4.5 billion');
+    expect(spokenMoney(1234)).toBe('$12.34');
   });
   it('AC-B6: aria label text in every state', () => {
     expect(rateAria(-125, true)).toBe('Net income minus $1.25 per second. Coop full.');

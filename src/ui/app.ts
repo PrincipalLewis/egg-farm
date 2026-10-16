@@ -56,6 +56,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const now = () => performance.now();
   const income = new IncomeMeter(); // B-1: 5 s realized-sales window
   const net = (t = now()) => incomePerSec(income, g.state, b, t);
+  income.start(now());
+  { let hiddenAt = 0; document.addEventListener('visibilitychange', () => { // v1.0.1: background >= 60 s -> restart the rate window
+    if (document.hidden) hiddenAt = now(); else if (hiddenAt && now() - hiddenAt >= b.offline.offlineMinSeconds * 1000) income.start(now()); }); }
   const tapFx = new TapFx({ ...b.feel, flightMs: b.feel.egg_flight_ms }, now);
   const qfullCue = new Throttle(b.feel.queue_full_cue_min_gap_ms, now);
 
