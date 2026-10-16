@@ -3,10 +3,10 @@
 import type { Balance } from '../config/balance';
 import { type GameState } from '../sim/state';
 import type { WorkerId } from '../sim/workers';
-/** STUB (s2-money): wage in cents per second for a worker at Farm level F; 0 for workers without a wage. */
+/** @deprecated STUB (s2-money), tests only; UI uses ./rates (listedWageCentsPerSec / wageCentsPerSec). Wage in cents per second for a worker at Farm level F; 0 for workers without a wage. */
 export const wagePerSecCents = (id: WorkerId, farm: number, b: Balance) =>
   id === 'market_hand' || id === 'coop_hand' ? b.workers[id].wage_per_farm_per_min * farm / 60 * 100 : 0;
-/** STUB (s2-money): net rate = rolling sales income - wages of hired, paid, awake workers (cents/s). */
+/** @deprecated STUB (s2-money), tests only; UI uses ./rates netCentsPerSec. Net rate = rolling sales income - wages of hired, paid, awake workers (cents/s). */
 export function netRateCents(incomeCps: number, s: GameState, b: Balance) {
   let wages = 0;
   for (const id of ['market_hand', 'coop_hand'] as const) { const w = s.workers[id]; if (w && !w.unpaid && w.energy > 0) wages += wagePerSecCents(id, s.farmLevel, b); }
@@ -85,3 +85,6 @@ export class QueueDot {
     return { show, pulse };
   }
 }
+
+/** HUD header rate (Cut A FIX3, T6): negative/stopped -> '⚠ ▼ <rest>' (e.g. '⚠ ▼ $0.00/s', '⚠ ▼ −$0.03/s'); otherwise rateView's text. Pure, shared by app.ts and tests (reviewer m2). */
+export const headerRateText = (v: { text: string; sign: RateSign }) => v.sign === 'neg' ? `⚠ ▼ ${v.text.replace(/^⚠ /, '')}` : v.text;

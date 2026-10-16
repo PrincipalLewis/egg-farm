@@ -165,10 +165,11 @@ sections.s289 = async () => {
   { const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
     await page.waitForTimeout(400);
-    // P1q wages << egg income, so paint the S2-8 negative glyph path explicitly (formatter + CSS).
-    await page.evaluate(() => { const e = document.querySelector('#rate'); e.textContent = '\u25BC\u2212$0.03/s'; e.dataset.sign = 'neg'; e.className = 'rate num neg rshake'; e.setAttribute('aria-label', 'Net income minus $0.03 per second'); });
-    const r = await page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, shook: e.classList.contains('rshake') }; });
-    ok('S2-8 negative net rate: "▼−$x.xx/s" (U+2212, no hyphen, 2 decimals), 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$\d+\.\d\d\/s$/.test(r.text) && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus \$[\d.,]+[KMB]? per second$/.test(r.aria) && r.shook, JSON.stringify(r));
+    // Reviewer m2: drive the real rateView -> headerRateText path (no injected text). P1q wages << income, so the live negative case is 'production stopped' (asleep worker).
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: { ...g.state.workers, market_hand: { ...g.state.workers.market_hand, energy: 0 } } }; });
+    await page.waitForFunction(() => document.querySelector('#rate')?.dataset.sign === 'neg', null, { timeout: 4000 }).catch(() => {});
+    const r = await page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight }; });
+    ok('S2-8/FIX3 real path: asleep worker -> header "⚠ ▼ $0.00/s" (no hyphen), sign neg, 11px/700 #B83B37, aria "... production stopped"', r.text === '\u26A0 \u25BC $0.00/s' && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /production stopped$/.test(r.aria ?? ''), JSON.stringify(r));
     if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-rate-negative-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
     await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(400);
     const wl = await page.evaluate(() => [...document.querySelectorAll('#uRow .wk .wage')].map(e => e.textContent));
