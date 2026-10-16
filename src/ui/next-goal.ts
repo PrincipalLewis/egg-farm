@@ -92,24 +92,24 @@ export function paintGoalLabel(el: HTMLElement, parts: GoalLabelParts | null, pl
   const star = document.createElement('span'); star.className = 'g-star'; star.textContent = parts.star;
   const track = document.createElement('span'); track.className = 'g-track';
   track.dataset.full = parts.track; track.dataset.short = parts.shortTrack; track.textContent = parts.track;
-  const gain = document.createElement('span'); gain.className = 'g-gain'; gain.textContent = parts.gain;
-  el.append(star, track, gain);
+  const gain = document.createElement('span'); gain.className = 'g-gain'; gain.dataset.full = parts.gain; gain.textContent = parts.gain;
+  const head = document.createElement('span'); head.className = 'g-head'; head.append(star, track); el.append(head, gain);
 }
 
 /**
- * v1.4 §4 overflow (supersedes C-AC26b drop-★-only): measure once per render.
- * Order: hide ★ → short track name → CSS ellipsis on .g-track. .g-gain never shrinks.
+ * v1.6 §4 (Product C-AC26b, art-ux/rc1-upgrade-value.md v1.6): never ellipsised, ★ always kept. Measured once per render.
+ * 1. one line if it fits; 2. wrap to 2 lines, breaking only before .g-gain (.g-head = ★+track is one unbreakable unit);
+ * 3. last resort: short track name (2 lines kept) when the full name does not fit in 2 lines.
  */
 export function fitGoalLabelEl(el: HTMLElement): void {
-  const star = el.querySelector('.g-star') as HTMLElement | null;
-  const track = el.querySelector('.g-track') as HTMLElement | null;
-  if (!star || !track) return;
-  star.hidden = false;
-  track.textContent = track.dataset.full ?? track.textContent;
-  if (el.scrollWidth <= el.clientWidth + 0.5) return;
-  star.hidden = true;
-  if (el.scrollWidth <= el.clientWidth + 0.5) return;
-  track.textContent = track.dataset.short ?? track.textContent;
+  const track = el.querySelector('.g-track') as HTMLElement | null, gain = el.querySelector('.g-gain') as HTMLElement | null;
+  if (!track || !gain) return;
+  const lh = parseFloat(getComputedStyle(el).lineHeight) || 18;
+  const fits = () => el.scrollWidth <= el.clientWidth + 0.5 && el.scrollHeight <= 2 * lh + 1;
+  const trim = () => { const wrapped = gain.offsetTop > track.offsetTop + 2; const g = gain.dataset.full ?? gain.textContent ?? ''; gain.textContent = wrapped ? g.trimStart() : g; };
+  track.textContent = track.dataset.full ?? track.textContent; gain.textContent = gain.dataset.full ?? gain.textContent; trim();
+  if (fits()) return;
+  track.textContent = track.dataset.short ?? track.textContent; trim();
 }
 
 /** @deprecated kept for tests that check the old budget helper */
