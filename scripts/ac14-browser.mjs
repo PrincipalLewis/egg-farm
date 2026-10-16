@@ -36,12 +36,13 @@ for (const [cse, ls, quotaCopy, title] of [['R', { 'eggfarm.save': corrupt, 'egg
   await start(p); await p.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 50 }; g.save(); g.save(); }); await p.locator('#collect').click(); await p.waitForTimeout(300);
   const r = await p.evaluate(() => ({ notices: document.querySelectorAll('.save-warn').length, text: document.querySelector('.save-warn')?.textContent, basket: window.eggfarm.state.basket, failed: window.eggfarm.telemetry.events().filter(e => e.type === 'save_failed').length }));
   ok('AC14c quota: one "won\'t be saved" notice, game keeps running', r.notices === 1 && /won't be saved/.test(r.text) && r.basket > 0 && r.failed === 1, r); await ctx.close(); }
-// ---- AC14d two tabs
+// ---- AC14d two tabs (rc1: single-tab guard, product/single-tab-guard.md - newest tab owns the save, the older tab stops)
 { const ctx = await br.newContext({ viewport: { width: 360, height: 640 } }); const a = await ctx.newPage(); await start(a);
   await a.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: 4242 }; g.save(); });
   const b = await ctx.newPage(); await start(b); await b.waitForTimeout(300);
-  const r = await b.evaluate(() => ({ ro: window.eggfarm.readOnly, notice: document.querySelector('.save-warn')?.textContent, coins: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, C: window.eggfarm.state.collectionLevel }));
-  await b.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: 1 }; g.save(); }); await b.waitForTimeout(100);
-  const saved = await a.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.save')).state.coinsCents); const aRo = await a.evaluate(() => window.eggfarm.readOnly);
-  ok('AC14d second tab warns, is read-only, never writes', r.ro === true && /another tab/.test(r.notice ?? '') && r.coins === 4242 && saved === 4242 && aRo === false, { ...r, saved, aRo }); await ctx.close(); }
+  const r = await b.evaluate(() => ({ inactive: window.eggfarm.inactive, coins: window.eggfarm.state.coinsCents }));
+  await a.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: 1 }; g.save(); }); await a.waitForTimeout(100);
+  const saved = await b.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.save')).state.coinsCents);
+  const aState = await a.evaluate(() => ({ inactive: window.eggfarm.inactive, notice: document.querySelector('.tab-guard h2')?.textContent }));
+  ok('AC14d/tab guard: new tab loads the save and owns it; older tab shows the notice and never writes', r.inactive === false && r.coins === 4242 && saved === 4242 && aState.inactive === true && /another tab/.test(aState.notice ?? ''), { ...r, saved, aState }); await ctx.close(); }
 await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
