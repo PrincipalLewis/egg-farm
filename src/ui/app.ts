@@ -23,6 +23,7 @@ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
+import { navUpgradesTab, changedLine, fxOrNoChange } from './upgrade-card';
 import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, type Goal } from './next-goal';
 import { collectionFxLines, collectionSummary, collectionDeltas } from './collection-copy';
 import { tryDispatch } from './tap-guard';
@@ -179,7 +180,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
   let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity };
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
-  nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
+  nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n === 'upgrades' && open !== 'upgrades') { const t = navUpgradesTab(goalShown, tab); if (t !== tab) { tab = t; dirty = true; } } if (n) openPanel(n === 'farm' ? null : n as any); }); // UC24
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
   $('.tabs').addEventListener('click', e => { const t = (e.target as HTMLElement).closest('button')?.dataset.tab; if (t) { tab = t as any; dirty = true; } });
 
@@ -447,17 +448,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // C-AC26: Collection leads with price % (from balance), then eggs/tap — never +N/tap alone.
     const { pricePct: dPct, tap: tapDelta } = collectionDeltas(b);
     const collSummary = !isF && !max ? collectionSummary(b) : '';
-    const fx = isF ? [
-      `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
-      `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
-      `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
-      ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
-      `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
+    const cl = (lbl: string, a: string, z: string) => changedLine(lbl, a, z, max, arrow); // UC26: equal before→after lines are not rendered
+    const fx = fxOrNoChange(isF ? [
+      cl('Hens ', fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b))),
+      cl('Coop capacity ', fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b))),
+      cl('Egg price ', price(F, C), price(F + 1, C)),
+      ...(!max && slotLines ? [] : [cl('Customers every ', `${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`),
+      cl('Customer demand ', S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))]),
     ] : collectionFxLines(C, b).map(line => {
       const m = /^(Egg price |Eggs per tap )(.+) → (.+)$/.exec(line);
       if (!m) return line;
-      return max ? `${m[1]}${m[2]}` : `${m[1]}${m[2]} <span class="arrow">→</span> ${m[3]}`;
-    });
+      return cl(m[1], m[2], m[3]);
+    }), !!slotLines);
     const nextTier = [5, 10, 20].find(t => t > F);
     const key = isF ? 'FARM' as const : 'COLL' as const;
     const og = max ? null : optionGain(s, b, key);
