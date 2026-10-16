@@ -1,7 +1,7 @@
 /** P1q/P2 order cards + "+N waiting" chip (art-ux/m3-customer-queue-spec.md v1.0). Pure helpers, unit-tested. */
 import { queueMax, type Customer } from '../sim/state';
 import type { Balance } from '../config/balance';
-import { fmtCount, fmtMoney, fmtMoneyPreview } from './format';
+import { fmtCount, fmtMoney, fmtMoneyPreview, fmtMoneyExact } from './format';
 /** Spec §2.1: eggs >= 1,000 -> 1.2K (compact, 1 decimal). */
 const eggs = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n) : String(n);
 export type OrderState = 'wait' | 'partial' | 'ready';
@@ -24,10 +24,11 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
   const pay = (k: number) => typeof priceCents === 'function' ? priceCents(k) : k * priceCents;
   const valueCents = pay(want), sellCents = sell > 0 ? pay(sell) : 0;
-  const exact = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(cents)));
+  const cardMoney = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(cents)));
+  const exact = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoneyExact(Math.max(1, Math.round(cents)));
   const preview = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoneyPreview(Math.max(1, Math.round(cents)));
-  const value = exact(valueCents);
-  // MK-24 / HoP 15:14: visible button uses floored short money; aria keeps exact cents.
+  const value = cardMoney(valueCents);
+  // MK-24 / HoP 15:14: visible button uses floored short money; aria / popup / Thanks use fmtMoneyExact.
   const wait = `Need ${eggs(rem)}`;
   const button = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${preview(sellCents)}`;
   const buttonAria = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${exact(sellCents)}`;
