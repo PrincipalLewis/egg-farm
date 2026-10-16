@@ -1,4 +1,5 @@
 {
-  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1).",
-  "farmCostGrowthSegments": []
+  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1). farmCostLevelMultipliers: [{level,mult}], farm_cost(level) = floor(curve x mult) for that level only (F1-GAP); empty = none. Every farm_cost / w4_tier_cost row is verified.",
+  "farmCostGrowthSegments": [],
+  "farmCostLevelMultipliers": []
 }

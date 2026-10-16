@@ -5,13 +5,13 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from 'node:url';
-import { tableRow, validateCostGrowthSegments, type EconomyParams, type CostGrowthSegment } from '../src/config/formulas';
+import { tableRow, validateCostGrowthSegments, validateCostLevelMultipliers, type EconomyParams, type CostGrowthSegment, type CostLevelMultiplier } from '../src/config/formulas';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
 /** Hand-set economy shape config (F1): farm cost growth segments. Not fitted from the CSV; every farm_cost row is verified against them. */
 export const ECON_CONFIG_PATH = here('../data/economy-config.json');
-export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[] }
+export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmCostLevelMultipliers?: CostLevelMultiplier[] }
 export const readEconomyConfig = (path = ECON_CONFIG_PATH): EconomyConfig => JSON.parse(readFileSync(path, 'utf8'));
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max'];
@@ -64,7 +64,10 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   const segs = cfg.farmCostGrowthSegments;
   validateCostGrowthSegments(segs, 'economy-config.farmCostGrowthSegments');
   if (segs && segs.length) p.farm.costGrowthSegments = segs.map(s => ({ from: s.from, to: s.to, growth: s.growth }));
-  const inSeg = (L: number) => !!segs?.some(s => L >= s.from && L <= s.to);
+  const mults = cfg.farmCostLevelMultipliers;
+  validateCostLevelMultipliers(mults, 'economy-config.farmCostLevelMultipliers');
+  if (mults && mults.length) p.farm.costLevelMultipliers = mults.map(m => ({ level: m.level, mult: m.mult }));
+  const inSeg = (L: number) => !!segs?.some(s => L >= s.from && L <= s.to) || !!mults?.some(m => m.level === L || m.level === L - 1);
   const plain = R.find(r => r.level > 0 && r.level <= n && !inSeg(r.level));
   const farmGuess = segs && segs.length && plain ? R[plain.level].farm_cost / R[plain.level - 1].farm_cost : (R[n].farm_cost / R[0].farm_cost) ** (1 / n);
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
