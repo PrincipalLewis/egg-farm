@@ -62,3 +62,27 @@ describe('S2-5 nav labels (session2-ui-triage (b))', async () => {
     expect(navManageView(1, 22.9, false, a.aria, 6100).aria.text).toBe('Manage tired workers, available in 23 seconds');
   });
 });
+
+describe('Workers v1.3 (m2-workers-layout §4.4, m2-proposal §8 #19-20)', async () => {
+  const { manageAllHtml, workersHtml, farmManageAllVisible, manageCaption } = await import('../src/ui/workers-ui');
+  const { balance: b } = await import('../src/config/balance');
+  const { initialState } = await import('../src/sim/state');
+  const S = (e: number[], cd = 0): any => ({ ...initialState(b, 3), farmLevel: 10, manageCdS: cd, graderTier: 1,
+    workers: Object.fromEntries((['market_hand', 'coop_hand', 'hawker', 'grader'] as const).slice(0, e.length).map((id, i) => [id, { energy: e[i], cdS: 0 }])) });
+  it('"Refill tired (N)", N = workers at <= 40%; aria "Refill N tired workers"', () => {
+    const h = manageAllHtml(S([40, 41, 10]), b); expect(h).toContain('Refill tired (2)'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested/);
+  });
+  it('locked under 3 hired; shown at N>=1; hidden at N=0 unless cooling down (then greyed + ring + "Ready in Ns")', () => {
+    expect(manageAllHtml(S([10, 10]), b)).toBe(''); expect(farmManageAllVisible(S([10, 10]), b, false)).toBe(false);
+    expect(manageAllHtml(S([90, 90, 90]), b)).toBe('');
+    const cd = manageAllHtml(S([90, 90, 90], 12.2), b);
+    expect(cd).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true"/); expect(cd).toContain('ring-cooldown'); expect(cd).toContain('Ready in 13s');
+  });
+  it('per-worker Manage enabled only at <= 40%; greyed caption "Not tired yet" / "Ready in Ns"', () => {
+    const h = workersHtml(S([40, 41, 90]), b);
+    expect(h).toMatch(/data-w="market_hand" aria-disabled="false"/); expect(h).toMatch(/data-w="coop_hand" aria-disabled="true" aria-describedby="cap-coop_hand"/);
+    expect(h).toContain('<div class="wk-cap num" id="cap-coop_hand">Not tired yet</div>'); expect(h).not.toContain('id="cap-market_hand"');
+    expect(manageCaption({ energy: 10, cdS: 0 } as any, 7, b)).toBe('Ready in 7s');
+    expect(workersHtml(S([10, 90, 90], 7), b).match(/Ready in 7s/g)!.length).toBe(4); // pill + 3 workers
+  });
+});

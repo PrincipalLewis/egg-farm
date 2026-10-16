@@ -192,7 +192,7 @@ sections.b58 = async () => {
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
     const pill = await page.locator('#uRow .manage-all').textContent().catch(() => '');
-    ok(`B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (${w})`, vis2 === 1 && /\(1 need it\)/.test(pill), `vis=${vis2} pill=${pill}`);
+    ok(`B5 one worker <= 40% -> Farm View button visible + "Refill tired (1)" (${w})`, vis2 === 1 && /Refill tired \(1\)/.test(pill), `vis=${vis2} pill=${pill}`);
     await ctx.close();
   }
 };

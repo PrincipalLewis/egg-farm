@@ -447,3 +447,7 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
   .sheet header button.nav-manage .manage-ico{width:44px;height:40px}
   .sheet header button.nav-manage[aria-disabled=true]{background:#CFC6BA;color:#5A4C42}
 }
+/* Workers v1.3 captions (m2-workers-layout §4.4): 12px Nunito #5A4C42, one line under the button */
+.wk-cap{font:400 12px/16px var(--f-body);color:#5A4C42;white-space:nowrap}
+.refill-wrap{position:sticky;top:0;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 6px}
+.refill-wrap .btn.manage-all{position:static;margin:0;width:calc(100% - 24px)}
