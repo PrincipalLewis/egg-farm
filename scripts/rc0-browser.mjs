@@ -16,8 +16,8 @@ const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE
 const results = []; const ok = (name, pass, info = '') => { results.push({ name, pass: !!pass, info }); if (!pass) process.exitCode = 1; };
 const URL0 = `http://127.0.0.1:${port}/`;
 const fx = f => readFileSync(new URL(`../tests/fixtures/saves/${f}`, import.meta.url), 'utf8');
-async function open({ w = 390, h = 844, ls = {}, q = '', touch = false } = {}) {
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: touch, acceptDownloads: true });
+async function open({ w = 390, h = 844, ls = {}, q = '', touch = false, dsf = 1 } = {}) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: touch, acceptDownloads: true, deviceScaleFactor: dsf });
   const page = await ctx.newPage(); const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, ls);
@@ -313,6 +313,23 @@ sections.wage075 = async () => {
     ok('S2-8 360: hire card "Wage $0.75/min" not truncated, one line', !!r && r.text === 'Wage $0.75/min' && r.lines === 1 && r.h < r.lh * 1.5 && !r.clipped, JSON.stringify(r));
     await ctx.close(); }
 };
+// ---------- Art & UX 10:01: '▼−$0.01/s' double-dash check (code points, pseudo-elements, borders) + zoomed pill at 390 ----------
+sections.dash = async () => {
+  const { ctx, page } = await open({ w: 390, h: 844, dsf: 4, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 1, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { coop_hand: { energy: 90, cdS: 5 } } }; });
+  await page.waitForTimeout(1500);
+  const r = await page.evaluate(() => { const e = document.querySelector('#rate'), out = { text: e.textContent, cps: [...e.textContent].map(c => 'U+' + c.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')), html: e.innerHTML, deco: [] };
+    for (const el of [e, ...e.querySelectorAll('*'), e.parentElement]) for (const ps of [null, '::before', '::after']) { const cs = getComputedStyle(el, ps);
+      const c = cs.content; if (ps && c && c !== 'none' && c !== 'normal') out.deco.push(`${el.id || el.className}${ps} content=${c}`);
+      if (!ps && el === e) { for (const k of ['borderLeftWidth', 'borderTopWidth', 'borderBottomWidth', 'textDecorationLine', 'outlineStyle', 'boxShadow', 'backgroundImage']) out[k] = cs[k]; } }
+    return out; });
+  const between = r.cps.slice(r.cps.indexOf('U+25BC') + 1, r.cps.indexOf('U+0024'));
+  console.log(`DASH [${ENGINE}] ${JSON.stringify(r)}`);
+  ok('Art & UX 10:01: "▼−$0.01/s" — only U+2212 between ▼ and $, no hyphen/dash, no pseudo content, border, underline or outline', r.text === '\u25BC\u2212$0.01/s' && between.join() === 'U+2212' && !/[-\u2010-\u2015\uFE58\uFE63\uFF0D]/.test(r.text) && r.html === r.text && r.deco.length === 0 && r.borderLeftWidth === '0px' && r.borderTopWidth === '0px' && r.borderBottomWidth === '0px' && r.textDecorationLine === 'none' && r.outlineStyle === 'none' && r.boxShadow === 'none' && r.backgroundImage === 'none', JSON.stringify({ between, ...r }));
+  if (shot) { const bb = await page.locator('#rate').boundingBox(), p = 6; await page.screenshot({ path: `${SHOTS}/rc1-review-rate-neg-001-zoom-390.png`, clip: { x: bb.x - p, y: bb.y - p, width: bb.width + 2 * p, height: bb.height + 2 * p } });
+    const pill = page.locator('#rate').locator('xpath=..'); await pill.screenshot({ path: `${SHOTS}/rc1-review-rate-neg-001-pill-zoom-390.png` }); }
+  await ctx.close();
+};
 // ---------- B5 / B8 Manage all ----------
 sections.b58 = async () => {
   for (const [w, h] of [[390, 844], [1280, 800]]) {
@@ -330,7 +347,11 @@ sections.b58 = async () => {
     if (w > 900) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await page.waitForTimeout(400);
       const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText }; });
       ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && /^Ready in \d+s$/.test(d.text.trim()), JSON.stringify(d));
-      if (shot) await page.screenshot({ path: `${SHOTS}/rc1-review2-docked-refill-cooldown-${w}.png`, clip: { x: 560, y: 300, width: 720, height: 140 } });
+      { const bb = await page.evaluate(() => { const rs = [document.querySelector('.farm-manage-all'), ...document.querySelectorAll('.farm-manage-all *')].map(e => e.getBoundingClientRect()).filter(r => r.width);
+          const x = Math.min(...rs.map(r => r.left)), y = Math.min(...rs.map(r => r.top)); return { x, y, width: Math.max(...rs.map(r => r.right)) - x, height: Math.max(...rs.map(r => r.bottom)) - y }; }), pad = 16; // pill + overhanging icon // whole pill in frame (Art & UX 10:01)
+        ok(`Review #2b: docked Refill pill fully inside the viewport (${w}) — h=${bb && bb.height}px`, !!bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= w && bb.y + bb.height <= 900, JSON.stringify(bb));
+        console.log(`MEASURE docked Refill pill ${w}: button ${JSON.stringify(d)} painted ${JSON.stringify(bb)}`);
+        if (shot) { const x = Math.max(0, bb.x - pad), y = Math.max(0, bb.y - pad); await page.screenshot({ path: `${SHOTS}/rc1-review2-docked-refill-cooldown-${w}.png`, clip: { x, y, width: Math.min(w - x, bb.width + 2 * pad), height: bb.height + 2 * pad } }); } }
       await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, manageCdS: 0 }; }); await page.waitForTimeout(300); }
     const pill = await page.locator('#uRow .manage-all').textContent().catch(() => '');
     ok(`B5 one worker <= 40% -> Farm View button visible + "Refill tired (1)" (${w})`, vis2 === 1 && /Refill tired \(1\)/.test(pill), `vis=${vis2} pill=${pill}`);
