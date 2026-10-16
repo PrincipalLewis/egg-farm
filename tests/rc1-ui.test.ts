@@ -309,6 +309,11 @@ describe('C-AC26 Collection price-first copy (feature-spec §12)', async () => {
     expect(app).toContain('fitGoalLabelEl');
     expect(app).toContain('paintGoalLabel');
   });
+  it('FIX2: 4px after .g-star; .g-gain white-space:pre keeps space before ·', () => {
+    expect(css).toMatch(/\.goal-label \.g-star\{flex:0 0 auto;margin-right:4px\}/);
+    expect(css).toMatch(/\.goal-label \.g-gain\{flex:0 0 auto;white-space:pre\}/);
+    expect(labelFor('COLL', { ...initialState(b, 3), collectionLevel: 4 } as any, b, 8)).toBe('★ Collection L5 · +8% income');
+  });
 });
 
 describe('rc1-upgrade-value v1.4 tokens + best-buy outline', () => {
@@ -340,5 +345,23 @@ describe('build id on page (ops smoke / S2-REL-1)', () => {
     expect(main).toContain('m.content = BUILD_ID');
     expect(main).not.toMatch(/window\.__BUILD|window\.eggfarmBuild/);
     expect(app).toContain('build-tag');
+  });
+});
+
+
+describe('Art FIX1 asleep badge corner + FIX3 HUD ⚠ ▼ + FIX4 44px hits', () => {
+  it('asleep badge anchors top-right (-6,-6) on Workers tab and Upgrades nav', () => {
+    expect(css).toMatch(/\.asleep-badge\{position:absolute;top:-6px;right:-6px/);
+    expect(css).toMatch(/\.tabs \[data-tab=workers\]\{position:relative\}/);
+    expect(css).toMatch(/nav \[data-nav=upgrades\]\{position:relative\}/);
+  });
+  it('HUD neg rate keeps ⚠ and adds ▼ (asleep $0 → ⚠ ▼ $0.00/s)', () => {
+    expect(app).toMatch(/`⚠ ▼ \$\{v\.text\.replace\(\/\^⚠ \/\, ''\)\}`/);
+  });
+  it('tabs have ≥44px hit via min-height + overhang padding at all widths', () => {
+    expect(css).toMatch(/\.tabs button\{box-sizing:border-box;min-height:44px;margin-block:-4px;padding:4px 0/);
+    expect(css).toMatch(/\.icon-btn\{width:44px;height:44px/);
+    expect(css).toMatch(/--goal-hit:44px/);
+    expect(css).toMatch(/\.goal\{[^}]*min-height:var\(--goal-hit\)/);
   });
 });
