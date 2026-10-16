@@ -7,7 +7,7 @@
  * The v6->v7 migration is pure in migrate-v7.ts and NOT wired into save.ts (waits for the save-durability merge).
  */
 import type { Balance } from '../config/balance';
-import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensOfflineMult, eggsPerSec, eggPriceCents, coopCapacity, hensCap, eggValueCap, hensCost, eggValueCost, balancedTier, clampL } from '../config/formulas';
+import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensOfflineMult, eggsPerSec, eggPriceCents, coopCapacity, hensCap, eggValueCap, hensCost, eggValueCost, balancedTier, clampL, trackMaxLevel, trackExtraCost } from '../config/formulas';
 import type { GameState } from './state';
 export type Track = 'hens' | 'eggValue';
 export const prodEggsPerSec = (s: GameState, b: Balance) => m4On(b) ? trackEggsPerSec(s.hensLevel, b) : eggsPerSec(s.farmLevel, b);
@@ -17,12 +17,14 @@ export const coopCap = (s: GameState, b: Balance) => m4On(b) ? trackCoopCapacity
 export const offlineMult = (s: GameState, b: Balance) => m4On(b) ? hensOfflineMult(s.hensLevel, b) : 1;
 /** Unit price in cents BEFORE sale multipliers (Grader etc.). payout.ts (fix/rc1-qa-bugs) must take its base from here. */
 export const salePriceCents = (s: GameState, b: Balance) => m4On(b) ? trackPriceCents(s.farmLevel, s.hensLevel, s.eggValueLevel, b) : eggPriceCents(s.farmLevel, s.collectionLevel, b);
+/** Price of the next level of a track at the current Farm level: row cost + L30-17 extra-level surcharge. */
+export const trackBuyCost = (s: GameState, t: Track, b: Balance) => trackCost(trackLevel(s, t), t, b) + trackExtraCost(t, trackLevel(s, t), s.farmLevel, b);
 export const trackLevel = (s: GameState, t: Track) => t === 'hens' ? s.hensLevel : s.eggValueLevel;
 export const trackCap = (s: GameState, t: Track, b: Balance) => (t === 'hens' ? hensCap : eggValueCap)(s.farmLevel, b);
 export const trackCost = (L: number, t: Track, b: Balance) => (t === 'hens' ? hensCost : eggValueCost)(L, b);
 /** Why a track row can't be bought ('max' = balance.maxLevel from economy.csv, 'cap' = at F+3: buy Farm first), or null. */
 export const trackLock = (s: GameState, t: Track, b: Balance): 'max' | 'cap' | null =>
-  trackLevel(s, t) >= b.maxLevel ? 'max' : trackLevel(s, t) >= trackCap(s, t, b) ? 'cap' : null;
+  trackLevel(s, t) >= trackMaxLevel(t, b) ? 'max' : trackLevel(s, t) >= trackCap(s, t, b) ? 'cap' : null;
 
 /** Milestone ids reached by the current levels (level-derived, so they are re-evaluated on load).
  *  hens:<L>, grade:<L> (a minFarm grade counts only once Farm reaches it), balanced:<tier 1..5>. */

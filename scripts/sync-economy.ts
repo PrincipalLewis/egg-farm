@@ -11,7 +11,10 @@ export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
 /** Hand-set economy shape config (F1): farm cost growth segments. Not fitted from the CSV; every farm_cost row is verified against them. */
 export const ECON_CONFIG_PATH = here('../data/economy-config.json');
-export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[] }
+/** farmMaxLevel (L30+ D1): the highest buyable Farm level; CSV rows above it are a pricing base only (Farm L51-55 rows of
+ *  the L30+ table feed hv_extra_cost and the Hens/Egg value tracks). maxLevel = min(last CSV row, farmMaxLevel).
+ *  hvExtraSecondLevelMult (L30-17): surcharge multiplier for the 2nd extra Hens/Egg value level (no CSV column yet). */
+export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmMaxLevel?: number; hvExtraSecondLevelMult?: number }
 export const readEconomyConfig = (path = ECON_CONFIG_PATH): EconomyConfig => JSON.parse(readFileSync(path, 'utf8'));
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max', 'hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'];
@@ -43,7 +46,7 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   const lin = (col: string) => ({ base: R[0][col], per: r4(R[1][col] - R[0][col]) });
   const tap = lin('eggs_per_tap'), hn = lin('hens'), cap = lin('coop_capacity');
   const p: EconomyParams = {
-    maxLevel: n,
+    maxLevel: farmMaxOf(rows, cfg),
     collection: { baseCost: R[0].collection_cost, costGrowth: 0, eggsPerTapBase: tap.base, eggsPerTapPerLevel: tap.per, pricePercentPerLevel: r4(R[1].collection_price_bonus ?? 0) },
     farm: {
       baseCost: R[0].farm_cost, costGrowth: 0, hensBase: hn.base, hensPerLevel: hn.per, eggsPerHenPerSec: r4(R[1].eggs_per_sec / R[1].hens),
@@ -155,13 +158,27 @@ export const M4_COLS = ['hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'eg
 export const isM4Col = (c: string) => (M4_COLS as readonly string[]).includes(c) || /^(tc_|hens_ms\d|egg_grade\d|balanced\d|egg_value_base_step$|egg_value_level_bonus$)/.test(c);
 /** hens_cost / egg_value_cost are floor(base x growth^L) per row; caps, milestone/grade/Balanced/price-term and tc_* are constant.
  *  A CSV with no M4 columns at all produces no m4 block. Only the flag (`enabled`) is kept from balance.json. */
-export function fitM4(rows: Row[], prev: any) {
+export const farmMaxOf = (rows: Row[], cfg: EconomyConfig = {}) => Math.min(rows.length - 1, cfg.farmMaxLevel ?? Infinity);
+export function fitM4(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
+  const farmMax = farmMaxOf(rows, cfg);
   const R = rows, has = (c: string) => c in R[0];
   if (!M4_COLS.some(has)) return undefined;
   for (const c of M4_COLS) if (!has(c)) throw new Error(`sync-economy: economy.csv is missing M4 column ${c}`);
   const one = (c: string) => { if (!has(c)) throw new Error(`sync-economy: economy.csv is missing M4 column ${c}`); const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`); return v; };
   // Per-level cost tables, read verbatim (egg_value_cost carries the M3 L23-29 taper, so it is not one geometric curve).
   const geo = (c: string) => { R.forEach((r, i) => { if (!Number.isInteger(r[c]) || r[c] <= 0 || (i > 0 && r[c] <= R[i - 1][c])) throw new Error(`sync-economy: economy.csv ${c} must be positive integers, strictly rising (L${r.level})`); }); return { costs: R.map(r => r[c]) }; };
+  // L30+ D4: per-row caps. Constant column -> scalar only (unchanged output); varying -> base = L0 row + byFarm[F] up to the Farm max.
+  const caps = (c: string) => {
+    R.forEach(r => { if (!Number.isInteger(r[c]) || r[c] < 0 || r[c] < R[0][c]) throw new Error(`sync-economy: economy.csv L${r.level} ${c} must be an integer >= the L0 cap`); });
+    return R.every(r => r[c] === R[0][c]) ? { capOverFarm: R[0][c] } : { capOverFarm: R[0][c], capOverFarmByFarm: R.slice(0, farmMax + 1).map(r => r[c]) };
+  };
+  // L30-17 (D8): hv_extra_cost_farm_share per Farm row; absent column -> no block (live table unchanged).
+  const extra = () => {
+    if (!has('hv_extra_cost_farm_share')) return {};
+    const xs = R.slice(0, farmMax + 1).map(r => { const v = r.hv_extra_cost_farm_share; if (!(v >= 0 && v <= 1)) throw new Error(`sync-economy: economy.csv L${r.level} hv_extra_cost_farm_share must be in 0..1`); return v; });
+    const m = cfg.hvExtraSecondLevelMult; if (m === undefined || !(m >= 1)) throw new Error('sync-economy: economy-config.hvExtraSecondLevelMult (>= 1) is required with hv_extra_cost_farm_share');
+    return { extraCostFarmShareByFarm: xs, extraSecondLevelMult: m };
+  };
   const tc: Record<string, number> = {};
   for (const c of Object.keys(R[0]).filter(c => c.startsWith('tc_')).sort()) tc[c.slice(3)] = one(c);
   const list = (pre: string, keys: Record<string, string>) => {
@@ -170,9 +187,10 @@ export function fitM4(rows: Row[], prev: any) {
     return out;
   };
   return { enabled: prev.m4?.enabled ?? 0,
-    hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
+    hens: { ...geo('hens_cost'), ...caps('hens_cap_over_farm') },
+    ...extra(),
     offline: { eggsPerSec: R.map(r => r.offline_eggs_per_sec), maxEggs2h: R.map(r => r.offline_max_eggs_2h) }, // spec v1.14 M4A-4
-    eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm'), baseStep: one('egg_value_base_step'), levelBonus: one('egg_value_level_bonus') },
+    eggValue: { ...geo('egg_value_cost'), ...caps('egg_value_cap_over_farm'), baseStep: one('egg_value_base_step'), levelBonus: one('egg_value_level_bonus') },
     milestones: {
       hens: list('hens_ms', { level: 'level', coopMult: 'coop_mult', offlineMult: 'offline_mult' }),
       grades: list('egg_grade', { level: 'level', mult: 'mult', minFarm: 'farm_gate' }),
@@ -182,7 +200,7 @@ export function fitM4(rows: Row[], prev: any) {
 export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const p = fitParams(rows, prev, cfg);
   const workers = fitWorkers(rows, prev); verifyGraderCosts(rows, workers);
-  const m4 = fitM4(rows, prev);
+  const m4 = fitM4(rows, prev, cfg);
   prev = { ...prev, workers };
   const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, m4: _m4, ...rest } = prev;
   return { ...rest, _source: 'economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks', ...p, ...(m4 ? { m4 } : {}) };

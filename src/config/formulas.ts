@@ -28,10 +28,15 @@ export interface M4Params {
   /** Feature flag: 0 = off (pre-M4 game, Farm drives eggs/s and price), 1 = Hens/Egg value tracks live. */
   enabled: number;
   /** costs[L] = price of L -> L+1 (CSV hens_cost / egg_value_cost, verbatim). */
-  hens: { costs: number[]; capOverFarm: number };
+  /** L30+ (l30plus-spec D2/D4/D8): capOverFarmByFarm[F] = the CSV row's cap (absent = constant capOverFarm, the L0 value);
+   *  extraCostFarmShareByFarm[F] = hv_extra_cost_farm_share row (absent = 0). Track max level = costs.length - 1 (CSV rows). */
+  hens: { costs: number[]; capOverFarm: number; capOverFarmByFarm?: number[] };
+  extraCostFarmShareByFarm?: number[];
+  /** Multiplier on the 2nd extra level's surcharge (data/economy-config.json hvExtraSecondLevelMult). */
+  extraSecondLevelMult?: number;
   /** spec v1.14 M4A-4: offline grant per Hens level, verbatim from economy.csv (offline_eggs_per_sec, offline_max_eggs_2h). */
   offline?: { eggsPerSec: number[]; maxEggs2h: number[] };
-  eggValue: { costs: number[]; capOverFarm: number; baseStep: number; levelBonus: number };
+  eggValue: { costs: number[]; capOverFarm: number; capOverFarmByFarm?: number[]; baseStep: number; levelBonus: number };
   milestones: {
     /** M1 (HoP 14:45): Hens milestones raise coop capacity and offline eggs only, never the in-tab lay rate. */
     hens: { level: number; coopMult: number; offlineMult: number }[];
@@ -95,11 +100,24 @@ export const queueMax = (F: number, p: EconomyParams) =>
 export const patienceS = (_F: number, p: EconomyParams) => p.customers.customer_patience_s;
 // ---------- M4-A tracks (product/farm/m4a-spec.md v1.2) ----------
 /** M4A-1: cost in coins of Hens/Egg value level L -> L+1 (CSV column at L). */
-export const hensCost = (H: number, p: EconomyParams) => p.m4!.hens.costs[clampL(H, p)];
-export const eggValueCost = (V: number, p: EconomyParams) => p.m4!.eggValue.costs[clampL(V, p)];
+/** L30+ D1: a track's max level is read from data (its CSV cost rows), independent of the Farm max (balance.maxLevel). */
+export const trackMaxLevel = (t: 'hens' | 'eggValue', p: EconomyParams) => p.m4![t].costs.length - 1;
+const clampT = (L: number, t: 'hens' | 'eggValue', p: EconomyParams) => Math.max(0, Math.min(L, trackMaxLevel(t, p)));
+export const hensCost = (H: number, p: EconomyParams) => p.m4!.hens.costs[clampT(H, 'hens', p)];
+export const eggValueCost = (V: number, p: EconomyParams) => p.m4!.eggValue.costs[clampT(V, 'eggValue', p)];
+/** Per-row cap over Farm (hens_cap_over_farm / egg_value_cap_over_farm at row F). */
+export const capOverFarmAt = (t: 'hens' | 'eggValue', F: number, p: EconomyParams) => p.m4![t].capOverFarmByFarm?.[clampL(F, p)] ?? p.m4![t].capOverFarm;
 /** M4A-2: buy cap min(maxLevel, F + *_cap_over_farm). Enforced at purchase only (migrated levels may exceed it, M4A-27/28). */
-export const hensCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.hens.capOverFarm);
-export const eggValueCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.eggValue.capOverFarm);
+export const hensCap = (F: number, p: EconomyParams) => Math.min(trackMaxLevel('hens', p), F + capOverFarmAt('hens', F, p));
+export const eggValueCap = (F: number, p: EconomyParams) => Math.min(trackMaxLevel('eggValue', p), F + capOverFarmAt('eggValue', F, p));
+/** L30-17 (D8): surcharge for a level above the BASE cap (F + capOverFarm, the L0 row: F+3) = floor(share[F] x farmCost(F)),
+ *  x extraSecondLevelMult for the 2nd extra level. 0 when share is 0 (below L40) or the level is within the base cap. */
+export function trackExtraCost(t: 'hens' | 'eggValue', L: number, F: number, p: EconomyParams): number {
+  const k = L + 1 - (F + p.m4![t].capOverFarm); if (k <= 0) return 0;
+  const share = p.m4!.extraCostFarmShareByFarm?.[clampL(F, p)] ?? 0; if (!share) return 0;
+  const mult = k >= 2 ? (p.m4!.extraSecondLevelMult ?? 1) ** (k - 1) : 1;
+  return Math.floor(share * farmCost(F, p) * mult);
+}
 const best = <T extends { level: number }>(xs: T[], L: number, ok: (x: T) => boolean = () => true) => xs.filter(x => L >= x.level && ok(x)).pop();
 /** M4A-8: highest Hens milestone reached (null below the first). */
 export const hensMilestone = (H: number, p: EconomyParams) => best(p.m4!.milestones.hens, H) ?? null;
