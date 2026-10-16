@@ -490,3 +490,5 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 #app,#scene,#yard,.onb{-webkit-user-select:none;user-select:none;caret-color:transparent}
 #app input,#app textarea,#app select,#app [contenteditable=true]{-webkit-user-select:text;user-select:text;caret-color:auto}
 .hint.eta{color:var(--c-muted);white-space:nowrap} /* Art & UX: waiting ETA always muted grey, one line */
+.wk .btn.manage{min-height:var(--tap-min);min-width:var(--tap-min)} /* Refill: tap target >=44px in every state */
+.wk .btn.manage .manage-ico img{width:28px;height:28px;filter:none} /* nav Refill glyph, same size/colour as nav */

@@ -465,6 +465,25 @@ sections.p1toast = async () => {
   }
 };
 
+// ---------- Art & UX Oct 16: per-worker Refill (nav glyph, >=44px, muted+disabled never hidden) at 360 ----------
+sections.p1refill = async () => {
+  for (const [name, energy, cd, cap] of [['available', 30, 0, ''], ['not-tired', 90, 0, 'Not tired yet'], ['cooldown', 30, 12, 'Ready in 12s']]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 500000, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 5, customers: [], nextCustomerInS: 50, nextCustomerId: 1, rng: 5, pendingOfflineEggs: 0, celebratedTier: 1,
+      workers: { market_hand: { energy, cdS: 1 } }, graderTier: 0, manageCdS: cd, coopFullS: 0 } });
+    const { ctx, page } = await open({ w: 360, h: 800, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    const cl = page.locator('#modal-layer.open .close'); if (await cl.count()) await cl.click();
+    await page.evaluate(([e, c]) => { const st = window.eggfarm.state; window.eggfarm.state = { ...st, manageCdS: c, workers: { ...st.workers, market_hand: { ...st.workers.market_hand, energy: e } } }; }, [energy, cd]);
+    await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
+    const r = await page.evaluate(() => { const card = document.querySelector('.wk[data-w=market_hand]'); const btn = card?.querySelector('button[data-act=manage]'); if (!btn) return { missing: true };
+      const a = btn.getBoundingClientRect(), img = btn.querySelector('img'), nav = document.querySelector('.nav-manage img'), cs = getComputedStyle(btn);
+      return { text: btn.textContent.trim(), w: a.width, h: a.height, vis: cs.display !== 'none' && cs.visibility !== 'hidden' && !btn.hidden, dis: btn.getAttribute('aria-disabled'), glyph: img?.getAttribute('src') === nav?.getAttribute('src'), iw: img?.width, nw: nav?.width,
+        cap: card.querySelector('.wk-cap')?.textContent ?? '', bg: cs.backgroundColor, card: (() => { const c = card.getBoundingClientRect(); return [c.x, c.y, c.width, c.height]; })() }; });
+    const wantDis = name === 'available' ? 'false' : 'true';
+    ok(`Refill worker card ${name} at 360: shown, nav glyph, >=44px, disabled=${wantDis}, caption "${cap}"`, !r.missing && r.text === 'Refill' && r.vis && r.glyph && r.iw === r.nw && r.w >= 44 && r.h >= 44 && r.dis === wantDis && r.cap.trim() === cap, JSON.stringify(r));
+    if (shot && r.card) { await page.locator('.wk[data-w=market_hand]').scrollIntoViewIfNeeded(); const bb = await page.locator('.wk[data-w=market_hand]').boundingBox(); await page.screenshot({ path: `${SHOTS}/refill-worker-360-${name}.png`, clip: { x: Math.max(0, bb.x - 8), y: Math.max(0, bb.y - 8), width: Math.min(360, bb.width + 16), height: bb.height + 16 } }); }
+    await ctx.close();
+  }
+};
 
 
 

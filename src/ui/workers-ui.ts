@@ -17,8 +17,8 @@ export function ringHtml(s: GameState, b: Balance): string {
   return `<svg class="ring-cooldown" viewBox="0 0 48 48" aria-hidden="true" style="--ring-offset:${ringOffset(rem, b.workers.energy.manage_cooldown_s)}"><circle cx="24" cy="24" r="21" fill="none" stroke="#CFC6BA" stroke-width="3"/><circle class="ring-progress" cx="24" cy="24" r="21" fill="none" stroke="#6BBF59" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" transform="rotate(-90 24 24)"/></svg>`;
 }
 /** 44px icon area of a Manage / Manage all button; the ring wraps it while the shared cooldown runs. */
-const manageIcon = (s: GameState, b: Balance, icon: string) =>
-  `<span class="manage-ico"><img src="${ASSET(icon)}" width="22" height="22" alt="">${ringHtml(s, b)}</span>`;
+const manageIcon = (s: GameState, b: Balance, icon: string, px = 22) =>
+  `<span class="manage-ico"><img src="${ASSET(icon)}" width="${px}" height="${px}" alt="">${ringHtml(s, b)}</span>`;
 /** B5 (Product, Oct 15): a worker "needs" Manage only at energy <= manage_prompt_threshold (0.4 = Yawning). */
 export const needsPrompt = (w: Worker | undefined, b: Balance) => canManageWorker(w, b);
 /** Workers counted by "Manage all (N need it)". */
@@ -74,7 +74,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     return `<div class="wk ${m}${yawn ? ' yawn' : ''}" data-w="${id}">${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}
-      <button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>Manage</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}</div>`;
+      <button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${wageLine(wagePerSecCents(id, F, b), ASSET('icon-coin.svg'))}</div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */
