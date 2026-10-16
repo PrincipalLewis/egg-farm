@@ -16,6 +16,10 @@ const PINS: Record<string, string> = {
   'm2-rc1-v5-40min': '4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431',
   'm2-rc1-v5-40min-edge': '652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb',
 };
+// Re-pinned (HoE approved 01:49 UTC+2, Oct 17). Previous pin, kept for audit:
+//   50a87ddbf89c44751ef33a008541022e146c48c0fed8e16d5114e6d787809de0
+// Bisect: c75b6dc (just before the data switch) still gives 50a87ddb; only the approved F1 shipping-data switch
+// (data/economy.csv = m4cols 86f0e80e) moves it to f90d1678. No code changes. Storage-bytes pins (PINS) unchanged.
 const GOLDEN_MAIN_A01FAEA = 'f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544';
 const FIX = ['m1-rc2-v4-12min', 'm2-rc1-v5-12min', 'm2-rc1-v5-40min', 'm2-rc1-v5-40min-edge'];
 const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
