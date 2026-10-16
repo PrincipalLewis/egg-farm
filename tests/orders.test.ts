@@ -8,14 +8,22 @@ describe('order card (P2)', () => {
     expect(orderView(c(5), 3, 250).line).toBe('3/5 eggs · $12.50');
     expect(orderView(c(5), 0, 0.1).line).toBe('0/5 eggs · $0.01');
   });
-  it('three button states: Need N / Sell k / Sell', () => {
-    expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'Need 5', sell: 0 });
-    expect(orderView(c(5), 3, 100)).toMatchObject({ state: 'partial', button: 'Sell 3', sell: 3 });
-    expect(orderView(c(5), 9, 100)).toMatchObject({ state: 'ready', button: 'Sell', sell: 5 });
+  it('three button states: Need N / Sell k · +$X / Sell N · +$X (MK-24)', () => {
+    expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'Need 5', sell: 0, sellCents: 0, valueCents: 500 });
+    const partial = orderView(c(5), 3, 100);
+    expect(partial).toMatchObject({ state: 'partial', sell: 3, sellCents: 300, valueCents: 500 });
+    expect(partial.button).toBe('Sell 3\u00a0· +$3.00');
+    const ready = orderView(c(5), 9, 100);
+    expect(ready).toMatchObject({ state: 'ready', sell: 5, sellCents: 500, valueCents: 500 });
+    expect(ready.button).toBe('Sell 5\u00a0· +$5.00');
   });
   it('earlier partial sales count toward have (MK-8/MK-10 partial selling)', () => {
-    expect(orderView(c(10, 4), 2, 100)).toMatchObject({ have: 6, want: 10, state: 'partial', button: 'Sell 2' });
-    expect(orderView(c(10, 4), 0, 100)).toMatchObject({ have: 4, state: 'wait', button: 'Need 6' });
+    const v = orderView(c(10, 4), 2, 100);
+    expect(v).toMatchObject({ have: 6, want: 10, state: 'partial', sell: 2, sellCents: 200, valueCents: 1000 });
+    expect(v.button).toBe('Sell 2\u00a0· +$2.00');
+    // Card keeps full order ($10); Sell button shows this Sell ($2).
+    expect(v.valueCents).toBeGreaterThan(v.sellCents);
+    expect(orderView(c(10, 4), 0, 100)).toMatchObject({ have: 4, state: 'wait', button: 'Need 6', sellCents: 0 });
   });
   it('progress bar ARIA + width, disabled Need', () => {
     const h = orderHtml(orderView(c(5), 3, 100), 'a.svg');

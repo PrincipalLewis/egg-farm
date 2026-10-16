@@ -28,17 +28,46 @@ describe('BUG-1/2: every money preview equals the amount credited, to the cent',
     expect(label).toContain(fmtMoney(delta));
     expect(sells.reduce((a, e) => a + e.value, 0)).toBe(delta);      // '+$X' popups (fmtMoney(e.value)) sum to the delta
     expect(pre.eggs).toBe(sells.reduce((a, e) => a + e.k, 0));
-    for (const e of sells) {                                         // each popup == its own credit; full-order cards == their credit
-      expect(e.value).toBe(saleValueCents(s, e.k, b));
-      const c = s.customers.find(c => c.id === e.id)!, card = cards.find(v => v.id === e.id)!;
-      if (c.filled === 0 && e.k === c.demand) expect(card.valueCents).toBe(e.value);
+    for (const e of sells) expect(e.value).toBe(saleValueCents(s, e.k, b)); // each '+$X' popup == its credit
+    // Per-card Sell button == what tapping THAT card credits (own basket, not the sellAll walk).
+    for (const card of cards) {
+      const c = s.customers.find(x => x.id === card.id)!;
+      expect(card.valueCents).toBe(saleValueCents(s, c.demand, b));  // card line keeps full order value
+      if (card.sell === 0) { expect(card.sellCents).toBe(0); expect(card.button).toMatch(/^Need /); continue; }
+      expect(card.sellCents).toBe(saleValueCents(s, card.sell, b));
+      const one: GameEvent[] = []; const r1 = apply(s, { type: 'sell', customerId: card.id }, b, one);
+      const e1 = one.find(e => e.type === 'sell') as Extract<GameEvent, { type: 'sell' }>;
+      expect(e1.k).toBe(card.sell);
+      expect(e1.value).toBe(card.sellCents);
+      expect(r1.coinsCents - s.coinsCents).toBe(card.sellCents);
+      expect(card.button).toContain(`+${fmtMoney(card.sellCents)}`);
     }
   });
-  it('single-row Sell: popup == coin delta == card value with Grader (QA repro 58 eggs)', () => {
+  it('single-row Sell: popup == coin delta == Sell button with Grader (QA repro 58 eggs)', () => {
     const s = graded(1, 58, [[58, 0]]), card = orderView(s.customers[0], 58, k => saleValueCents(s, k, b));
     const ev: GameEvent[] = []; const r = apply(s, { type: 'sell', customerId: 1 }, b, ev);
     const e = ev.find(e => e.type === 'sell') as Extract<GameEvent, { type: 'sell' }>;
-    expect(e.value).toBe(r.coinsCents - s.coinsCents); expect(card.valueCents).toBe(e.value); expect(e.value).toBeGreaterThan(58 * e.price);
+    expect(e.value).toBe(r.coinsCents - s.coinsCents);
+    expect(card.sellCents).toBe(e.value);
+    expect(card.valueCents).toBe(e.value); // full order == this Sell when filled=0 and k=demand
+    expect(e.value).toBeGreaterThan(58 * e.price);
+  });
+  it('partial order: card keeps full order value; Sell button == next Sell credit (Grader 0/1/2)', () => {
+    for (const tier of [0, 1, 2]) {
+      // Partly filled (4/17), basket 3 -> this Sell is 3 eggs; full order is 17.
+      const s = graded(tier, 3, [[17, 4]]);
+      const card = orderView(s.customers[0], s.basket, k => saleValueCents(s, k, b));
+      const ev: GameEvent[] = []; const r = apply(s, { type: 'sell', customerId: 1 }, b, ev);
+      const e = ev.find(e => e.type === 'sell') as Extract<GameEvent, { type: 'sell' }>;
+      expect(e.k).toBe(3);
+      expect(card.sell).toBe(3);
+      expect(card.sellCents).toBe(e.value);
+      expect(card.sellCents).toBe(r.coinsCents - s.coinsCents);
+      expect(card.valueCents).toBe(saleValueCents(s, 17, b));
+      expect(card.valueCents).toBeGreaterThan(card.sellCents); // card shows more than next Sell; button shows the Sell amount
+      expect(card.button).toBe(`Sell 3\u00a0· +${fmtMoney(e.value)}`);
+      expect(card.line).toContain(fmtMoney(card.valueCents));
+    }
   });
   it('app.ts previews only through the payout function (no k x price money anywhere)', () => {
     const src = readFileSync('src/ui/app.ts', 'utf8');
