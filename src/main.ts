@@ -65,7 +65,7 @@ async function boot() {
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   if (restored) g.telemetry.track('save_restore', { source: 'idb' });
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
-  (window as any).eggfarm = g; // debug/QA handle
+  if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   // CEO ruling: debug globals stay out of release. ui.rates() remains on the mountApp() return for m3/rc1-ui.
