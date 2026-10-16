@@ -27,4 +27,4 @@
 
 ## 2026-10-16 21:05 ADR M4-11 Backup naming and newer-save export (Saves QA guard-prep; Senior Software Architect)
 - One backup name: localStorage `eggfarm.save.v6_backup` + IndexedDB `eggfarm`/`save`/`v6_backup`. Holds the raw v6 bytes, write-once, kept until M4 reaches Latest (not in RESET_KEYS). Written once before the interim tracksV7 change (F-0) and before the first v7 write (S-4; v7 commit waits for the LS write). `eggfarm.save.bak` stays the rotation copy.
-- The `.newer-save` layer gets `#nsExport` ("Export save"), which exports the raw stored `eggfarm.save` bytes via exportOldSave (no wrapper). Owner: S-2. Facts in m4-design §3a.
+- (HoE 21:18) The `.newer-save` dialog gets an `Export save` button `[data-testid=newer-save-export]`. It exports the raw stored save string exactly as stored: no wrapper, no migration, zero storage writes. `Try again` stays. Owner: S-2 (Saves 3ba38cf3). Facts in m4-design §3a.

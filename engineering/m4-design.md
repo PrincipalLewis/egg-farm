@@ -96,13 +96,15 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
      - card `.recovery-card[role=alertdialog][aria-modal=true][aria-labelledby=nsT]`;
      - title `h2#nsT`, text exactly `This save is from a newer version of Egg Farm. Open the newer build to keep playing.` (`NEWER_SAVE_STRINGS.title`; body empty, no `#nsB`);
      - one button `button#nsRetry.btn.rc-primary`, text `Try again` (reloads).
-   - **There is no export control on this layer today.** DECISION (S-2, Saves 3ba38cf3): add `button#nsExport`, label `Export save`, aria `Export save, downloads a copy of the saved farm`. It exports the raw `eggfarm.save` bytes via `exportOldSave`. Read-only, zero writes.
-   - Guard selectors: `NEWER_SEL='.recovery-layer.newer-save [role=alertdialog]'`, `NEWER_TXT` = the title above, `EXPORT_SEL='#nsExport'`. ZW-2 stays expected-FAIL until S-2.
-3. **Export format**
-   - CODE: `exportOldSave(raw, name)` exports the **raw stored string, byte for byte**, with no wrapper. It wraps it in a `Blob` (`application/json`) and delivers it by download, the iOS share sheet, or the clipboard as a fallback.
+   - **There is no export control on this layer today.** DECISION (HoE 21:18, S-2, Saves 3ba38cf3): the newer-save dialog gets an **`Export save`** button, **`[data-testid=newer-save-export]`**.
+     - It exports the raw stored save string (`eggfarm.save`) exactly as stored: no wrapper, no migration, **zero storage writes**.
+     - `Try again` (`#nsRetry`) stays.
+   - Guard selectors: `NEWER_SEL='.recovery-layer.newer-save [role=alertdialog]'`, `NEWER_TXT` = the title above, `EXPORT_SEL='[data-testid=newer-save-export]'`. ZW-2 stays expected-FAIL until S-2.
+3. **Export format (answer to QA question 3)**
+   - DECISION (HoE 21:18): the newer-save export is the **raw stored save string, exactly as stored**: no wrapper, no migration, zero storage writes. ZW-2's "exact v7 bytes" is the right assertion.
+   - CODE today: the existing exports (`exportOldSave`) already export raw strings as a `Blob` (`application/json`), delivered by download, the iOS share sheet, or the clipboard as a fallback.
    - The bytes are the save file `serialize()` writes: `{"version":<n>,"savedAt":<ms>,"sum":"<fnv>","state":{...}}`.
-   - The "Can't save" variant exports `live()` = a fresh `serialize()` of the current farm.
-   - DECISION: the newer-save export (item 2) uses the stored raw bytes, so ZW-2's "exact v7 bytes" is the right assertion.
+   - The "Can't save" variant exports a fresh `serialize()` of the live farm, which is a different case.
 4. **`tracksV7` marker at `3351d6c` (CODE)**
    - Shape: `state.tracksV7: 1`, the literal number `1`, optional (`tracksV7?: 1` in `GameState`). It sits **inside `state`**, next to `hensLevel`, `eggValueLevel` and `celebratedMilestones`. Top-level `version` stays `6`, and `sum` covers the state including the marker.
    - When it is set: in `migrate()`, when M4 is on and `!state.tracksV7` (after `migrateTracksV7`), and on a new M4 farm (`game.ts:52`). Absent means a pre-M4 farm.
@@ -152,7 +154,7 @@ New for M4:
 6. **release-default check**: release build has `m4.enabled` = committed default and no debug toggles.
 **Box-load rule (CEO, 2026-10-16 21:11):**
 - every browser step (Playwright, rc0, check-globals) runs under `flock /workspace/egg-farm-studio/.browser-test.lock` (`BROWSER_TEST_LOCK` overrides the path), and gate-all logs each step's lock wait;
-- vitest runs with `--maxWorkers=2` (`VITEST_WORKERS`);
+- vitest runs with 2 forks: `--poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1` (`VITEST_WORKERS`; vitest 2.1.9 rejects `--maxWorkers=2` alone);
 - QA runs take priority;
 - gate-all's `trap` cleanup kills only its own servers and browsers on exit, so nothing is left running idle.
 gate-all also does a preflight check (`run npm ci`, exit 2), fails fast (`KEEP_GOING=1` for a full report), checks for a clean tree before the release build, and supports `RETRY_FLAKY=1` (a pass on retry is FLAKY, exit 3).
@@ -183,7 +185,7 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 | X-1 | `scripts/gate-all.sh` + telemetry schema test skeleton | ARCH | — | S |
 | F-0 | On m4/m4a-tracks-v2: (a) interim path writes `eggfarm.save.v6_backup` (+ IDB `save/v6_backup`) once before the in-place price-match (ADR M4-10/M4-11); (b) test that a flag-off build saves a **marked** save without stripping `tracksV7`/`hensLevel`/`eggValueLevel`. Must land before playtest builds spread marked saves | FE (with SAV review) | A-0 | S |
 | S-1 | Migration chain takes `balance`; move `migrate-v7.ts` → `save/migrations/v7.ts`; split `readMax(b)` / `writeVersion(b)` (still 6/6) | SAV | A-0 | S |
-| S-2 | Add `#nsExport` (raw bytes) to the `.newer-save` layer (§3a.2); newer-save refusal = zero writes (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main**; also covers **a flag-off build opening a v7 save** (same refusal, .bak intact, export works) | SAV | — | M |
+| S-2 | Add `Export save` `[data-testid=newer-save-export]` to the `.newer-save` layer (raw stored string, no wrapper or migration, zero writes; `Try again` stays; §3a.2); newer-save refusal = zero writes (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main**; also covers **a flag-off build opening a v7 save** (same refusal, .bak intact, export works) | SAV | — | M |
 | S-3 | `v6_backup` write-once (LS + IDB). On failure: "Can't save" dialog once per session → toast, keep playing, don't commit v7, retry at save points; unit tests | SAV | S-1 | M |
 | S-4 | Real v6→v7 bump (replaces the interim marker). Handles unmarked v6, marked v6 (idempotent: no re-migrate, no re-refund) and v7. Wire `migrations[6]`; readMax 7 with M4 on (flag-off refuses v7, ADR M4-9); write v7 only when M4 is on; keep the v6 `.bak` until Latest; validator; flag-off v6-write, flag-off-refuses-v7 and M4-on v7-write/.bak tests | SAV | S-1, S-3, S-2 | M |
 | S-5 | Load order + first-offline-grant ×1.0 (M4A-30) tests | SAV | S-4 | S |
