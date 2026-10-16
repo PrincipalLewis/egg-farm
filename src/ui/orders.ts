@@ -1,7 +1,7 @@
 /** P1q/P2 order cards + "+N waiting" chip (art-ux/m3-customer-queue-spec.md v1.0). Pure helpers, unit-tested. */
 import { queueMax, type Customer } from '../sim/state';
 import type { Balance } from '../config/balance';
-import { fmtCount, fmtMoney } from './format';
+import { fmtCount, fmtMoney, fmtMoneyPreview } from './format';
 /** Spec §2.1: eggs >= 1,000 -> 1.2K (compact, 1 decimal). */
 const eggs = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n) : String(n);
 export type OrderState = 'wait' | 'partial' | 'ready';
@@ -11,7 +11,11 @@ export interface OrderView {
   valueCents: number;
   /** What THIS Sell pays (sell eggs) via the same payout as credit; 0 when wait. Shown on the Sell button (MK-24). */
   sellCents: number;
-  state: OrderState; line: string; button: string;
+  state: OrderState; line: string;
+  /** Visible Sell label: eggs + floored short money (HoP 15:14). */
+  button: string;
+  /** Exact amount for screen readers / aria-label (popup and Thanks stay exact too). */
+  buttonAria: string;
 }
 /** have = eggs already sold + what Sell would sell now; want = full order; valueCents = full order; sellCents = this Sell. */
 /** priceCents: per-egg price, or k -> cents (sim/payout saleValueCents) so Sell button == credit. */
@@ -20,11 +24,14 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
   const pay = (k: number) => typeof priceCents === 'function' ? priceCents(k) : k * priceCents;
   const valueCents = pay(want), sellCents = sell > 0 ? pay(sell) : 0;
-  const money = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(cents)));
-  const value = money(valueCents);
-  // MK-24 / layout-spec §4.4: Sell button shows eggs + coins of this tap ("Sell k · +$X"); card keeps full order value.
-  const button = state === 'wait' ? `Need ${eggs(rem)}` : `Sell ${eggs(sell)} · +${money(sellCents)}`;
-  return { id: c.id, have, want, sell, valueCents, sellCents, state, line: `${eggs(have)}/${eggs(want)} eggs · ${value}`, button };
+  const exact = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(cents)));
+  const preview = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoneyPreview(Math.max(1, Math.round(cents)));
+  const value = exact(valueCents);
+  // MK-24 / HoP 15:14: visible button uses floored short money; aria keeps exact cents.
+  const wait = `Need ${eggs(rem)}`;
+  const button = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${preview(sellCents)}`;
+  const buttonAria = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${exact(sellCents)}`;
+  return { id: c.id, have, want, sell, valueCents, sellCents, state, line: `${eggs(have)}/${eggs(want)} eggs · ${value}`, button, buttonAria };
 }
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
 export const visibleOrders = (viewportH: number, docked: boolean, n: number) =>
@@ -40,7 +47,7 @@ export function orderHtml(v: OrderView, avatar: string): string {
   return `<div class="order ${v.state}" data-row="${v.id}"><div class="av"><img src="${avatar}" alt=""></div>
     <div class="txt"><div class="l1"><span class="e">${v.line.split(' · ')[0]}</span><span class="v"> · ${v.line.split(' · ')[1]}</span></div>
     <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${v.want}" aria-valuenow="${v.have}" aria-label="Order ${v.have} of ${v.want} eggs"><i style="width:${pct.toFixed(2)}%"></i></div></div>
-    <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}" aria-label="${v.button}">${inner}</button></div>`;
+    <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}" aria-label="${v.buttonAria}">${inner}</button></div>`;
 }
 /** §6 Farm row preview when the next Farm level adds a customer slot (data-driven: queueMax(F+1) > queueMax(F)).
  *  Returns the two <li> lines (order-range line omitted when unchanged), or null. */
