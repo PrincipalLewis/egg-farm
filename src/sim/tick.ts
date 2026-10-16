@@ -39,7 +39,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink): GameState
     if (T?.poisson_arrivals) { // TEST-ONLY (AC-W1 casual): Exponential gap, mean = interval at current F, floored at one tick
       let r: number; [rng, r] = nextRand(rng); nextCustomerInS += Math.max(1 / b.tickHz, -Math.log(1 - r) * customerIntervalS(L, b));
     } else nextCustomerInS += customerIntervalS(L, b); // interval for farm level at timer restart (MK-2)
-    if (customers.length < queueMax(L, b)) { // F8: grows with farm level; cap stays 5 in M2 (no Hawker slot)
+    if (customers.length < queueMax(L, b)) { // F8: queue_max_base + floor(F / queue_max_step_levels), capped at queue_max_cap (6..10 from balance); the strip draws at most 5, the rest show as "+N waiting"
       const [lo, hi] = demandRange(L, b); let r: number; [rng, r] = nextRand(rng);
       const raw = lo + Math.floor(r * (hi - lo + 1));
       const c = { id: nextCustomerId++, demand: dm === 1 ? raw : Math.max(1, Math.round(raw * dm)), filled: 0, waitedS: 0 };
