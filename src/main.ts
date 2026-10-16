@@ -49,7 +49,7 @@ async function boot() {
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
   const g = new Game(balance, tabs.second ? readOnlyKV(localStorage) : localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
-  (window as any).eggfarm = g; // debug/QA handle
+  if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle; compiled out of release (S2-REL-1)
   if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });

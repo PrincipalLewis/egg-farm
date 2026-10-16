@@ -54,3 +54,8 @@ export const fmtMoneyShort = (cents: number, opts?: { round?: 'floor' | 'nearest
 };
 /** Sell-button preview only (HoP 15:14): exact under $1K; at $1K+ short form floored so the button never shows more than the credit. */
 export const fmtMoneyPreview = (cents: number) => fmtMoneyShort(cents, { round: 'floor' });
+/** Always exact (aria / popup / Thanks): full dollars, thousands separators, 2 decimals. '—' for NaN/Infinity. */
+export const fmtMoneyExact = (cents: number) => {
+  if (!Number.isFinite(cents)) return '—';
+  return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};

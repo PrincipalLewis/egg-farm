@@ -5,8 +5,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
-import { fmtMoneyShort } from './format';
-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtMoneyExact, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -101,7 +100,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
   const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
-  (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts
+  if (import.meta.env.DEV) (window as any).eggfarmOrderList = orderList; // QA §7.17; DEV-only (S2-REL-1)
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
@@ -304,7 +303,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     for (const [id, el] of [...dwellEls]) if (!lay.shown.some(d => d.id === id)) { dwellEls.delete(id); el.remove(); }
     for (const d of lay.shown) {
       let el = dwellEls.get(d.id);
-      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyShort(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
+      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyExact(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
       kids.push(el);
     }
     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
@@ -347,7 +346,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const queuePop = (cents: number, at?: HTMLElement) => {
     const from = (at?.isConnected ? at : queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
     const x = Math.min(Math.max(c.x, 48), innerWidth - 48), y = Math.max(c.y - 20, 40);
-    spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyShort(cents)}</div>`), 650);
+    spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyExact(cents)}</div>`), 650);
     if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
   };
 
@@ -360,7 +359,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         const src = lastSellSource ?? sellAllBtn;
         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
         else pulse(coinsEl.parentElement!);
-        floatText(`+${fmtMoney(e.value)}`, src, 'coin'); break;
+        floatText(`+${fmtMoneyExact(e.value)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
       case 'customer_served': dwell.served(e.id, now()); break;

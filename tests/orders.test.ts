@@ -62,10 +62,17 @@ describe('order card (P2)', () => {
     const nines = orderView(c(1), 1, 999_999);
     expect(nines.button).toBe('Sell 1\u00a0· +$9.9K');
     expect(nines.buttonAria).toBe('Sell 1\u00a0· +$9,999.99');
-    // $1.23M -> $1.2M
+    // $1.23M -> button $1.2M; aria exact $1,230,000.00
     const mil = orderView(c(1), 1, 123_000_000);
     expect(mil.button).toBe('Sell 1\u00a0· +$1.2M');
-    expect(mil.buttonAria).toBe('Sell 1\u00a0· +$1.23M');
+    expect(mil.buttonAria).toBe('Sell 1\u00a0· +$1,230,000.00');
+    // QA MK-24-1-A11Y: $9,999,000 and $12,345.67 stay exact on aria
+    const big = orderView(c(1), 1, 999_900_000);
+    expect(big.button).toBe('Sell 1\u00a0· +$9.9M');
+    expect(big.buttonAria).toBe('Sell 1\u00a0· +$9,999,000.00');
+    const mid = orderView(c(1), 1, 1_234_567);
+    expect(mid.button).toBe('Sell 1\u00a0· +$12.3K');
+    expect(mid.buttonAria).toBe('Sell 1\u00a0· +$12,345.67');
   });
 });
 describe('queue display (P1q)', () => {

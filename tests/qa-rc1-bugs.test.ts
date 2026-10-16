@@ -7,7 +7,7 @@ import { apply } from '../src/sim/actions';
 import type { SimEvent as GameEvent } from '../src/sim/events';
 import { saleValueCents, sellAllPreview, saleMultipliers } from '../src/sim/payout';
 import { orderView, sellAllLabel } from '../src/ui/orders';
-import { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview } from '../src/ui/format';
+import { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview, fmtMoneyExact } from '../src/ui/format';
 
 const graded = (tier: number, basket: number, demands: [number, number][]): GameState => ({
   ...initialState(b), farmLevel: 20, collectionLevel: 7, basket, coinsCents: 500_000,
@@ -41,7 +41,7 @@ describe('BUG-1/2: every money preview equals the amount credited, to the cent',
       expect(e1.value).toBe(card.sellCents);
       expect(r1.coinsCents - s.coinsCents).toBe(card.sellCents);
       expect(card.button).toContain(`+${fmtMoneyPreview(card.sellCents)}`);
-      expect(card.buttonAria).toContain(`+${fmtMoney(card.sellCents)}`);
+      expect(card.buttonAria).toContain(`+${fmtMoneyExact(card.sellCents)}`);
     }
   });
   it('single-row Sell: popup == coin delta == Sell button with Grader (QA repro 58 eggs)', () => {
@@ -67,14 +67,14 @@ describe('BUG-1/2: every money preview equals the amount credited, to the cent',
       expect(card.valueCents).toBe(saleValueCents(s, 17, b));
       expect(card.valueCents).toBeGreaterThan(card.sellCents); // card shows more than next Sell; button shows the Sell amount
       expect(card.button).toBe(`Sell 3\u00a0· +${fmtMoneyPreview(e.value)}`);
-      expect(card.buttonAria).toBe(`Sell 3\u00a0· +${fmtMoney(e.value)}`);
+      expect(card.buttonAria).toBe(`Sell 3\u00a0· +${fmtMoneyExact(e.value)}`);
       expect(card.line).toContain(fmtMoney(card.valueCents));
     }
   });
   it('app.ts previews only through the payout function (no k x price money anywhere)', () => {
     const src = readFileSync('src/ui/app.ts', 'utf8');
     expect(src).not.toMatch(/e\.k \* e\.price/); expect(src).not.toMatch(/cents \+= k \* price/);
-    expect(src).toMatch(/sellAllPreview\(s, b\)/); expect(src).toMatch(/fmtMoney\(e\.value\)/);
+    expect(src).toMatch(/sellAllPreview\(s, b\)/); expect(src).toMatch(/fmtMoneyExact\(e\.value\)/);
   });
 });
 
@@ -87,6 +87,14 @@ describe('BUG-3: round first, then pick the suffix', () => {
     for (const base of [1e6, 1e9, 1e12]) for (let d = -100; d <= 100; d++) expect(fmtCount(base + d * base / 1e5)).not.toMatch(/^1000(\.\d)?[KMB]$/);
   });
   it('money', () => { expect(fmtMoney(99_996_000)).toBe('$1M'); expect(fmtMoney(1_234_500)).toBe('$12.3K'); expect(fmtMoneyShort(1e14)).toBe('$1T'); });
+  it('fmtMoneyExact: full dollars + thousands + 2 dp; — for non-finite', () => {
+    expect(fmtMoneyExact(999_900_000)).toBe('$9,999,000.00');
+    expect(fmtMoneyExact(1_234_567)).toBe('$12,345.67');
+    expect(fmtMoneyExact(50)).toBe('$0.50');
+    expect(fmtMoneyExact(100_000)).toBe('$1,000.00');
+    expect(fmtMoneyExact(NaN)).toBe('—');
+    expect(fmtMoneyExact(Infinity)).toBe('—');
+  });
   it('fmtMoneyPreview floors at $1K+ and never exceeds credit', () => {
     expect(fmtMoneyPreview(99_999)).toBe('$999.99');
     expect(fmtMoneyPreview(100_000)).toBe('$1K');
@@ -147,5 +155,20 @@ describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates'
   });
   it('≤375 does not cap the Sell button at 96px', () => {
     expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell[^}]*max-width:96px/);
+  });
+});
+
+describe('S2-REL-1 / exact money wiring', () => {
+  const app = readFileSync('src/ui/app.ts', 'utf8');
+  const main = readFileSync('src/main.ts', 'utf8');
+  it('eggfarmOrderList is DEV-only; eggfarm is IOS_FLAG-only', () => {
+    expect(app).toMatch(/if \(import\.meta\.env\.DEV\) \(window as any\)\.eggfarmOrderList/);
+    expect(app).not.toMatch(/^\s*\(window as any\)\.eggfarmOrderList/m);
+    expect(main).toMatch(/if \(IOS_FLAG_ENABLED\) \(window as any\)\.eggfarm =/);
+  });
+  it('sell popup and Thanks card use fmtMoneyExact', () => {
+    expect(app).toMatch(/fmtMoneyExact\(e\.value\)/);
+    expect(app).toMatch(/fmtMoneyExact\(d\.cents\)/);
+    expect(app).not.toMatch(/fmtMoneyShort\(/);
   });
 });
