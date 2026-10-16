@@ -47,6 +47,13 @@ describe('PickHysteresis rule', () => {
     expect(p.tick(S(1000), on, t)!.key).toBe('FARM'); clock(3000);
     world.w.VALUE = { cost: 100, pb: 80, lv: 1 }; expect(p.tick(S(1000), on, t)!.key).toBe('VALUE'); expect(p.evals).toBe(2);
   });
+  it('3b (HoP 16:15). newly affordable row skips the 2 s hold but still needs 0.9x; first affordable from fallback is at once', () => {
+    const p = start({ FARM: { cost: 100, pb: 100, lv: 1 }, HENS: { cost: 500, pb: 95, lv: 1 }, VALUE: { cost: 600, pb: 80, lv: 1 } });
+    expect(p.tick(S(50), on, t)).toMatchObject({ key: 'VALUE', affordable: false }); // none affordable: best overall
+    clock(100); expect(p.tick(S(100), on, t)).toMatchObject({ key: 'FARM', affordable: true }); // fallback -> first affordable at once
+    clock(100); expect(p.tick(S(500), on, t)!.key).toBe('FARM'); // HENS newly affordable at 0.95x: no
+    clock(100); expect(p.tick(S(600), on, t)!.key).toBe('VALUE'); // VALUE newly affordable at 0.80x, 0.2 s after: at once
+  });
   it('4. buying the pick re-picks in the same tick', () => {
     const p = start({ FARM: { cost: 100, pb: 100, lv: 1 }, HENS: { cost: 100, pb: 105, lv: 1 }, VALUE: undefined });
     expect(p.tick(S(1000), on, t)!.key).toBe('FARM'); clock(100);
@@ -61,13 +68,25 @@ describe('PickHysteresis rule', () => {
     const p = start({ FARM: { cost: 500, pb: 100, lv: 1 }, HENS: { cost: 100, pb: 105, lv: 1 }, VALUE: undefined });
     expect(p.tick(S(1000), on, t)!.key).toBe('FARM'); clock(100);
     expect(p.tick(S(400), on, t)).toMatchObject({ key: 'HENS', affordable: true });
-    clock(100); expect(p.tick(S(50), on, t)).toMatchObject({ key: 'FARM', affordable: false }); // none affordable: best overall
+    clock(100); expect(p.tick(S(50), on, t)).toMatchObject({ key: 'VALUE', affordable: false }); // none affordable: best overall // none affordable: best overall
   });
   it('6. with no state change the 5 s re-check runs once', () => {
     const p = start({ FARM: { cost: 100, pb: 100, lv: 1 }, HENS: undefined, VALUE: undefined });
     p.tick(S(1000), on, t);
     for (let i = 0; i < 99; i++) { clock(100); p.tick(S(1000), on, t); } // 0.1 .. 9.9 s
     expect(p.evals).toBe(2);
+  });
+});
+
+describe('M4A-41 (HoP 16:15): rows becoming affordable', () => {
+  it('cheap rows affordable one after another within 10% give 0 changes; one at 0.85x switches at once', () => {
+    const p = start({ FARM: { cost: 100, pb: 100, lv: 1 }, HENS: { cost: 200, pb: 95, lv: 1 }, VALUE: { cost: 300, pb: 92, lv: 1 } });
+    expect(p.tick(S(100), on, t)!.key).toBe('FARM');
+    clock(300); expect(p.tick(S(200), on, t)!.key).toBe('FARM');
+    clock(300); expect(p.tick(S(300), on, t)!.key).toBe('FARM'); expect(p.changes).toBe(0);
+    const q = start({ FARM: { cost: 100, pb: 100, lv: 1 }, HENS: { cost: 200, pb: 85, lv: 1 }, VALUE: undefined });
+    expect(q.tick(S(100), on, t)!.key).toBe('FARM');
+    clock(500); expect(q.tick(S(200), on, t)!.key).toBe('HENS'); expect(t).toBeLessThan(2000); expect(q.changes).toBe(1);
   });
 });
 

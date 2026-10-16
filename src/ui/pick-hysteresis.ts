@@ -5,7 +5,8 @@
  *  - keep the current pick unless a challenger's payback <= 0.9x the current pick's (same state) AND the current pick
  *    has been shown >= 2 s.
  *  - switch at once when the current pick is bought, unaffordable, capped / MAX (no longer offered), or when an
- *    affordable row appears while the pick is the unaffordable fallback.
+ *    affordable row appears while the pick is the unaffordable fallback (first affordable row, at once).
+ *  - HoP 16:15: a row that has just become affordable skips the 2 s hold but still needs the 0.9x bar.
  *  - re-evaluate on every state change; 5 s periodic re-check as the fallback. */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
@@ -34,7 +35,7 @@ export class PickHysteresis {
   shown: SharedPick | null = null;
   /** Evaluations run (state changes + periodic re-checks); exposed for tests / telemetry. */
   evals = 0; changes = 0;
-  private shownAt = 0; private level = -1; private lastEval = -Infinity; private lastSig = '';
+  private shownAt = 0; private level = -1; private lastEval = -Infinity; private lastSig = ''; private prevAff = new Set<FarmKey>();
   constructor(private scorer: Scorer = defaultScorer, private sig: (s: GameState) => string = stateSig) {}
   /** Call on every render / state change. Evaluates only when the state changed or the 5 s re-check is due. */
   tick(s: GameState, b: Balance, nowMs: number): SharedPick | null {
@@ -49,9 +50,12 @@ export class PickHysteresis {
     if (!best) return this.set(null, nowMs);
     const cur = this.shown && rows.find(r => r.key === this.shown!.key);
     const mk = (r: RowScore): SharedPick => ({ key: r.key, affordable: aff.includes(r), costCents: r.costCents, payback: r.payback });
+    const prevAff = this.prevAff; this.prevAff = new Set(aff.map(r => r.key));
     const keepable = cur && this.shown!.affordable && aff.includes(cur) && cur.level === this.level;
-    if (!keepable) return this.set(mk(best), nowMs, best.level);
-    if (best.key !== cur.key && best.payback <= SWITCH_RATIO * cur.payback && nowMs - this.shownAt >= MIN_SHOWN_MS) return this.set(mk(best), nowMs, best.level);
+    if (!keepable) return this.set(mk(best), nowMs, best.level); // no current pick / bought / unaffordable / cap: at once
+    // HoP 16:15: a row that just became affordable skips the 2 s hold but must still clear the 0.9x bar.
+    const fresh = !prevAff.has(best.key);
+    if (best.key !== cur.key && best.payback <= SWITCH_RATIO * cur.payback && (fresh || nowMs - this.shownAt >= MIN_SHOWN_MS)) return this.set(mk(best), nowMs, best.level);
     this.shown = mk(cur); return this.shown; // refresh numbers, keep shownAt
   }
   private set(p: SharedPick | null, nowMs: number, level = -1): SharedPick | null {
