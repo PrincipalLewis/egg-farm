@@ -453,3 +453,20 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
 .reduced-motion .tab-guard .recovery-card{animation:none}
 .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
+/* offline popup v2 (offline-popup-v2-spec.md v0.3 §2-3): all lines wrap, centred, never truncated; card <= 80vh */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.welcome-v2{max-height:80vh;max-height:80dvh;overflow-y:auto;gap:var(--s-2);box-sizing:border-box}
+.welcome-v2>*{max-width:100%;overflow-wrap:anywhere}
+.welcome-v2 .wb-head{display:flex;align-items:center;justify-content:center;gap:var(--s-2);padding-inline:32px}
+.welcome-v2 .wb-a{font:700 var(--fs-md,16px) var(--f-body)}
+.welcome-v2 .wb-hero{justify-content:center;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.welcome-v2 .wb-hero.pop{animation:wbpop 420ms var(--ease-pop)}@keyframes wbpop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:none}}
+.rm .welcome-v2 .wb-hero.pop,.reduced-motion .welcome-v2 .wb-hero.pop{animation:none}
+@media (prefers-reduced-motion:reduce){.welcome-v2 .wb-hero.pop{animation:none}}
+.welcome-v2 .wb-sub{margin-top:-4px}
+.welcome-v2 .wb-worth{font:700 var(--fs-md,16px) var(--f-body)}
+.welcome-v2 .wb-rate{font-size:var(--fs-xs);color:var(--c-muted)}
+.welcome-v2 .wb-cap{font-weight:700;color:var(--c-wood-text)}
+.welcome-v2 #wbCollect{width:100%;min-height:48px;flex:none}
+/* HUD money slot: tabular numerals, width reserved for "$999,999" so it never reflows (C-AC39) */
+.money-slot{display:inline-grid;justify-items:end}.money-slot>*{grid-area:1/1}.money-slot .ghost{visibility:hidden}

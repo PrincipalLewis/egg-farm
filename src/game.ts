@@ -9,7 +9,7 @@ import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 export class Game {
-  state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
+  state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0, realAwayS: 0 };
   /** Set during "Reset save" so pagehide doesn't write the old state back. */
   resetting = false;
   /** True when no save existed at load (drives onboarding). */
@@ -60,7 +60,7 @@ export class Game {
   }
   private grantOffline(gapMs: number) {
     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state;
-    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
+    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS, realAwayS: Math.max(0, gapMs / 1000) }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
     return r.eggs;
   }
   private emit(evs: SimEvent[]) {
@@ -97,7 +97,20 @@ export class Game {
   private held() { return this.now() < this.holdUntil; }
   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
+  /** C-AC36 (offline popup v2): set while the tab is hidden; the game is frozen like a closed one. */
+  private hiddenSince: number | null = null;
+  /** Tab hidden: write the save once (savedAt = hide time), then freeze sim and saves until resumeFromHidden. */
+  suspendForHidden() { if (this.hiddenSince !== null || this.inactive) return; this.save(); this.hiddenSince = this.now(); }
+  /** Tab shown after hiddenMs. >= offlineMinSeconds: same path as close-and-reload (settle pending, one offline grant,
+   *  resume from now). Shorter: the next frame simulates the gap online, as before. Returns the eggs granted. */
+  resumeFromHidden(hiddenMs: number): number {
+    if (this.hiddenSince === null) return 0; this.hiddenSince = null;
+    if (this.inactive || !(hiddenMs >= this.b.offline.offlineMinSeconds * 1000)) return 0;
+    if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
+    const eggs = this.grantOffline(hiddenMs); this.lastFrameAt = this.now(); this.accMs = 0; this.save(); return eggs;
+  }
   save() {
+    if (this.hiddenSince !== null) return; // hidden: keep savedAt = hide time so a close while hidden grants the same
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     if (this.newerGuard()) return;
@@ -156,6 +169,7 @@ export class Game {
   private allowBackup() { this.bakAllowed = true; }
   get backupAllowed() { return this.bakAllowed; }
   frame() {
+    if (this.hiddenSince !== null) return; // hidden (C-AC36): frozen; lastFrameAt kept so a < 60 s hide simulates online
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
     const t = this.now(), gap = t - this.lastFrameAt; this.lastFrameAt = t;
     const maxMs = this.b.offline.offlineMinSeconds * 1000;
