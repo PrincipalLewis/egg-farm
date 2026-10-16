@@ -73,3 +73,12 @@
 ## 2026-10-16 22:35 ADR M4-24 amendment (HoQA review pr1-m4-design-review-cf66ce5 MUST 1–2; recorded by Senior Software Architect)
 - Pre-commit read-back: the LS-only commit (marker/v7 write) happens only after the LS v6_backup is read back and its migrationId equals state.v6BackupId; otherwise M4-12 abort (stay v6, no marker, reason readback_mismatch). Separate from the post-commit read-back (condition 3).
 - eggfarm.save.migration_attempts is a plain non-negative integer capped at N = 3 (stops incrementing, stuck_on_v6 set, never forced); never a serialized save; a parse failure or non-integer resets it to 0. eggfarm.save.headroom_probe falls under the same no-save-object rule (m4-design §3b).
+
+## 2026-10-16 22:45 ADR M4-19 amendment: divergent copies (Code Reviewer 96c4a1e N1; HoE + Saves rule; recorded by Senior Software Architect)
+- Each copy records base = {saveSeq read at boot, idbUnknownAtBoot}. Copies have diverged if one was written with idbUnknownAtBoot and its base ≤ the other's saveSeq. Not diverged ⇒ normal rank (version → committed → saveSeq → savedAt). Diverged ⇒ if exactly one copy has idbUnknownAtBoot, the other wins regardless of saveSeq; otherwise higher saveSeq, then savedAt.
+- The loser is never overwritten silently: kept in IDB eggfarm/save/diverged (one slot; if full keep the higher saveSeq, then later savedAt), save_copies_diverged emitted, offered via Export; Export of it or Reset clears the slot. Part of SQ-1 (Saves 3ba38cf3).
+- F2: saveSeq is a safe integer 0..2^53-1 (else 0) in checksummed state, preserved by older/flag-off builds. F3: at the counter cap a one-time non-blocking notice offers Export save; stuck_on_v6 is a separate LS key not reset by the garbage-to-0 rule. Accepted: IDB main goes stale while the mirror is off. Restoring v6_backup also replaces IDB main (highest saveSeq).
+- Spec m4a-spec v1.12: every failed attempt ([abort] or [deferral]) increments attempt_count, AC (h)6.
+
+## 2026-10-16 22:50 Note: M4A-27 level clamp is data-driven (Senior Software Architect)
+- The load/validate clamp and the egg-value search bound use balance.maxLevel (economy.csv → balance.json), never a hard-coded 30; L30+ content is coming. Test: raising the data max raises the clamp. Owners: S-1/S-4 (Saves), F-1 (Features).
