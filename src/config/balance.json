@@ -119,7 +119,7 @@
     "offlineMinSeconds": 60
   },
   "m4": {
-    "_note": "M4-A three tracks (product/m4-manage-proposal.md, economy.m4-candidate.csv). enabled=0 until M4-A ships (v7 save migration pending). Costs/caps regenerate from the CSV once its M4 columns land in product/economy.csv; milestones are hand-set from the proposal §4.",
+    "_note": "M4-A three tracks (product/m4-manage-proposal.md, economy.m4-candidate.csv). enabled=0 until M4-A ships (v7 save migration pending). Regenerated from the CSV once its M4 columns land in product/economy.csv; until then hand-copied from economy.m4-candidate.csv (test m4a-sync asserts equality).",
     "enabled": 0,
     "hens": {
       "baseCost": 36,
@@ -129,7 +129,9 @@
     "eggValue": {
       "baseCost": 48,
       "costGrowth": 1.33,
-      "capOverFarm": 3
+      "capOverFarm": 3,
+      "pricePerLevel": 0.05,
+      "collectionBonusPerLevel": 0.12
     },
     "milestones": {
       "hens": [
@@ -166,23 +168,23 @@
       "balanced": [
         {
           "level": 5,
-          "bonus": 0.1
+          "mult": 1.1
         },
         {
           "level": 10,
-          "bonus": 0.15
+          "mult": 1.15
         },
         {
           "level": 15,
-          "bonus": 0.2
+          "mult": 1.2
         },
         {
           "level": 20,
-          "bonus": 0.25
+          "mult": 1.25
         },
         {
           "level": 25,
-          "bonus": 0.3
+          "mult": 1.3
         }
       ]
     }

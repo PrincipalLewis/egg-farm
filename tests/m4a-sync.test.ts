@@ -13,16 +13,21 @@ describe('sync-economy M4 columns', () => {
   const nb = buildBalance(cand, balance);
   it('fits Hens 36x1.30^H and Egg value 48x1.33^V, caps F+3, from the candidate CSV', () => {
     expect(nb.m4.hens).toEqual({ baseCost: 36, costGrowth: 1.3, capOverFarm: 3 });
-    expect(nb.m4.eggValue).toEqual({ baseCost: 48, costGrowth: 1.33, capOverFarm: 3 });
+    expect(nb.m4.eggValue).toEqual({ baseCost: 48, costGrowth: 1.33, capOverFarm: 3, pricePerLevel: 0.05, collectionBonusPerLevel: 0.12 });
   });
   it('every hens_cost / egg_value_cost cell is reproduced by the formulas', () => {
     for (const r of cand) { expect(hensCost(r.level, nb)).toBe(r.hens_cost); expect(eggValueCost(r.level, nb)).toBe(r.egg_value_cost); }
   });
   it('the hand-set m4 block matches what the candidate CSV generates (costs/caps)', () => {
-    expect(balance.m4!.hens).toEqual(nb.m4.hens); expect(balance.m4!.eggValue).toEqual(nb.m4.eggValue);
+    expect(balance.m4!.hens).toEqual(nb.m4.hens); expect(balance.m4!.eggValue).toEqual(nb.m4.eggValue); expect(balance.m4!.milestones).toEqual(nb.m4.milestones);
   });
-  it('keeps the flag and milestones (not CSV columns) and carries tc_* scalars', () => {
-    expect(nb.m4.enabled).toBe(0); expect(nb.m4.milestones).toEqual(balance.m4!.milestones);
+  it('milestones/grades/Balanced come from the G1 columns; the hand-set block equals them; flag kept; tc_* carried', () => {
+    expect(nb.m4.milestones.hens).toEqual([{ level: 10, mult: 1.25 }, { level: 20, mult: 1.5 }, { level: 30, mult: 2 }]);
+    expect(nb.m4.milestones.grades[2]).toEqual({ level: 20, mult: 1.5, minFarm: 15 });
+    expect(nb.m4.milestones.balanced.map((t: any) => t.mult)).toEqual([1.1, 1.15, 1.2, 1.25, 1.3]);
+    expect(balance.m4!.milestones).toEqual(nb.m4.milestones);
+    expect(() => buildBalance(cand.map(r => r.level === 3 ? { ...r, balanced2_mult: 1.2 } : r), balance)).toThrow(/balanced2_mult must be constant/);
+    expect(nb.m4.enabled).toBe(0);
     expect(nb.m4.tc.streak_cap).toBe(0.4); expect(nb.m4.tc.frenzy_price_mult).toBe(2); expect(Object.keys(nb.m4.tc)).toHaveLength(23);
   });
   it('a pre-M4 CSV (no M4 columns) keeps the m4 block unchanged', () => {

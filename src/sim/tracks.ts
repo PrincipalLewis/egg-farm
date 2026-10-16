@@ -37,3 +37,21 @@ export function balancedStrip(s: GameState, b: Balance): { n: number; of: number
   const T = b.m4!.milestones.balanced, n = balancedTier(s.farmLevel, s.hensLevel, s.eggValueLevel, b);
   return { n, of: T.length, nextLevel: T[n]?.level ?? null };
 }
+
+// ---------- v6 -> v7 track migration (pure; NOT wired into save.ts until the save-durability merge) ----------
+/** TR-4 (amended 14:15) + m4a-spec §10 / M4A-29:
+ *  - H = F (eggs/s identical below H10).
+ *  - V = the lowest level (searched over the table, 0..cap) whose v7 unit price before the Grader is >= the v6 price
+ *    eggPriceCents(F, C). Collection keeps all its levels; only its +12% moves to Egg value. No Collection refund.
+ *  - Clamp guard: a level above min(F+3, maxLevel) is clamped and the clamped-off levels are refunded at their track
+ *    cost (cents), into coinsCents and migrationRefundCents. 0 for every real save.
+ *  - Milestones already reached are seeded into celebratedMilestones silently (no toasts). */
+export function migrateTracksV7(s: GameState, b: Balance): { state: GameState; migrationRefundCents: number; v6PriceCents: number } {
+  const F = s.farmLevel, v6PriceCents = eggPriceCents(F, s.collectionLevel, b);
+  const hCap = hensCap(F, b), vCap = eggValueCap(F, b);
+  let V = vCap; for (let v = 0; v <= vCap; v++) if (trackPriceCents(F, Math.min(F, hCap), v, b) >= v6PriceCents) { V = v; break; }
+  const wantH = F, H = Math.min(wantH, hCap);
+  let refund = 0; for (let L = H; L < wantH; L++) refund += hensCost(L, b) * 100;
+  const st: GameState = { ...s, hensLevel: H, eggValueLevel: V, coinsCents: s.coinsCents + refund };
+  return { state: { ...st, celebratedMilestones: [...new Set([...s.celebratedMilestones, ...reachedMilestones(st, b)])] }, migrationRefundCents: refund, v6PriceCents };
+}

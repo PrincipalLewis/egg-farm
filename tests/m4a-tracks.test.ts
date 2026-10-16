@@ -5,7 +5,7 @@ import { initialState, eggsPerSec, eggPriceCents, demandRange, customerIntervalS
 import { apply } from '../src/sim/actions';
 import { step } from '../src/sim/tick';
 import { applyOffline } from '../src/sim/offline';
-import { hensCost, eggValueCost, hensCap, trackPriceCents, trackEggsPerSec, gradeMult, balancedBonus } from '../src/config/formulas';
+import { hensCost, eggValueCost, hensCap, trackPriceCents, trackEggsPerSec, gradeMult, balancedMult } from '../src/config/formulas';
 import { prodEggsPerSec, salePriceCents, trackLock, reachedMilestones, pendingMilestones, balancedStrip } from '../src/sim/tracks';
 import type { SimEvent } from '../src/sim/events';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
@@ -79,7 +79,7 @@ describe('MS-1 / MS-2 milestones', () => {
     expect(gradeMult(20, 14, on)).toBe(1.25); expect(gradeMult(20, 15, on)).toBe(1.5);
   });
   it('Balanced uses min(F,H,V): +10/15/20/25/30% at 5/10/15/20/25', () => {
-    expect(balancedBonus(5, 5, 4, on)).toBe(0); expect(balancedBonus(5, 5, 5, on)).toBe(0.1); expect(balancedBonus(30, 25, 27, on)).toBe(0.3);
+    expect(balancedMult(5, 5, 4, on)).toBe(1); expect(balancedMult(5, 5, 5, on)).toBe(1.1); expect(balancedMult(30, 25, 27, on)).toBe(1.3);
     expect(balancedStrip(st({ farmLevel: 12, hensLevel: 10, eggValueLevel: 11 }), on)).toEqual({ n: 2, of: 5, nextLevel: 15 });
   });
   it('reached ids are level-derived; Jumbo counts only once Farm reaches 15', () => {
@@ -105,4 +105,43 @@ describe('big numbers', () => {
     for (const c of [hensCost(30, on), eggValueCost(30, on)]) expect(Number.isSafeInteger(c * 100)).toBe(true);
     expect(Number.isSafeInteger(trackPriceCents(30, 30, 30, on))).toBe(true);
   });
+});
+import { migrateTracksV7 } from '../src/sim/tracks';
+import { eggPriceCents as v6Price } from '../src/config/formulas';
+describe('migrateTracksV7 (TR-4 amended; pure, not yet wired into save.ts)', () => {
+  // Typical save (Economy's migration_v7 assumptions): Collection = max(0, F-3).
+  const v6 = (F: number) => ({ ...initialState(balance), farmLevel: F, collectionLevel: Math.max(0, F - 3), coinsCents: 12345 });
+  const expected: Record<number, number> = { 0: 0, 3: 1, 10: 7, 15: 10, 20: 14, 30: 20 };
+  const res = Object.fromEntries([0, 3, 10, 15, 20, 30].map(F => [F, migrateTracksV7(v6(F), on)]));
+  it('H = F, V = lowest level with v7 price >= v6 price (Economy fixtures V7/V10/V14 at F10/15/20)', () => {
+    for (const F of [0, 3, 10, 15, 20, 30]) { expect(res[F].state.hensLevel).toBe(F); expect(res[F].state.eggValueLevel).toBe(expected[F]); }
+  });
+  it('V is the lowest such level at every tested F, and price never drops', () => {
+    for (const F of [0, 3, 10, 15, 20, 30]) {
+      const { state: s, v6PriceCents } = res[F];
+      expect(salePriceCents(s, on)).toBeGreaterThanOrEqual(v6PriceCents);
+      if (s.eggValueLevel > 0) expect(trackPriceCents(F, F, s.eggValueLevel - 1, on)).toBeLessThan(v6PriceCents);
+      expect(v6PriceCents).toBe(v6Price(F, Math.max(0, F - 3), on));
+    }
+  });
+  it('eggs/s identical below H10 and never lower', () => {
+    for (const F of [0, 3]) expect(prodEggsPerSec(res[F].state, on)).toBe(eggsPerSec(F, on));
+    for (const F of [10, 15, 20, 30]) expect(prodEggsPerSec(res[F].state, on)).toBeGreaterThanOrEqual(eggsPerSec(F, on));
+  });
+  it('Collection keeps its levels; refund 0 for real saves; coins unchanged', () => {
+    for (const F of [0, 3, 10, 15, 20, 30]) { expect(res[F].state.collectionLevel).toBe(Math.max(0, F - 3)); expect(res[F].migrationRefundCents).toBe(0); expect(res[F].state.coinsCents).toBe(12345); }
+  });
+  it('reached milestones are seeded as celebrated (no toasts after migration)', () => {
+    for (const F of [10, 20, 30]) expect(pendingMilestones(res[F].state, on)).toEqual([]);
+    expect(res[20].state.celebratedMilestones).toContain('hens:20');
+  });
+  it('clamp guard (lowered-max fixture): a level above min(F+3, max) is clamped and refunded at track cost', () => {
+    const low: Balance = { ...on, maxLevel: 12 };
+    const s = { ...initialState(low), farmLevel: 15, collectionLevel: 12, coinsCents: 0 };
+    const r = migrateTracksV7(s, low);
+    const want = [12, 13, 14].reduce((a, L) => a + hensCost(L, low) * 100, 0);
+    expect(r.state.hensLevel).toBe(12); expect(r.migrationRefundCents).toBe(want); expect(r.state.coinsCents).toBe(want);
+    expect(r.state.eggValueLevel).toBeLessThanOrEqual(12);
+  });
+  it('report', () => { console.log('MIGRATION', JSON.stringify(Object.fromEntries(Object.entries(res).map(([F, r]) => [F, { H: r.state.hensLevel, V: r.state.eggValueLevel, v6: r.v6PriceCents, v7: salePriceCents(r.state, on), refund: r.migrationRefundCents }])))); });
 });

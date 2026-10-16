@@ -22,11 +22,12 @@ export interface M4Params {
   /** Feature flag: 0 = off (pre-M4 game, Farm drives eggs/s and price), 1 = Hens/Egg value tracks live. */
   enabled: number;
   hens: { baseCost: number; costGrowth: number; capOverFarm: number };
-  eggValue: { baseCost: number; costGrowth: number; capOverFarm: number };
+  eggValue: { baseCost: number; costGrowth: number; capOverFarm: number; pricePerLevel: number; collectionBonusPerLevel: number };
   milestones: {
     hens: { level: number; mult: number }[];
     grades: { level: number; mult: number; minFarm: number }[];
-    balanced: { level: number; bonus: number }[];
+    /** mult on the unit price (1.10 = +10%), CSV balancedN_mult. */
+    balanced: { level: number; mult: number }[];
   };
   /** Later-M4 scalar tunables (tc_* columns), carried through verbatim; unused by M4-A code. */
   tc?: Record<string, number>;
@@ -71,13 +72,13 @@ export const hensMilestoneMult = (H: number, p: EconomyParams) => best(p.m4!.mil
 /** Egg grade multiplier; a grade with minFarm stays locked (falls back to the previous grade) until Farm reaches it. */
 export const gradeMult = (V: number, F: number, p: EconomyParams) => best(p.m4!.milestones.grades, V, g => F >= g.minFarm)?.mult ?? 1;
 /** Balanced-farm income bonus on min(F,H,V). */
-export const balancedBonus = (F: number, H: number, V: number, p: EconomyParams) => best(p.m4!.milestones.balanced, Math.min(F, H, V))?.bonus ?? 0;
+export const balancedMult = (F: number, H: number, V: number, p: EconomyParams) => best(p.m4!.milestones.balanced, Math.min(F, H, V))?.mult ?? 1;
 export const balancedTier = (F: number, H: number, V: number, p: EconomyParams) => p.m4!.milestones.balanced.filter(t => Math.min(F, H, V) >= t.level).length;
 /** M4 eggs/s: the Hens curve (CSV hens/eggs_per_sec columns read at H) x milestone. */
 export const trackEggsPerSec = (H: number, p: EconomyParams) => roundHalfUp(eggsPerSec(H, p) * hensMilestoneMult(H, p), 4);
 /** M4 sale price in cents: round_half_up((1.00 + 0.05V)(1 + 0.12V) x grade x (1 + balanced), 2 dp). */
 export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParams) =>
-  Math.round(roundHalfUp((farmPriceCents(V, p) / 100) * (1 + p.collection.pricePercentPerLevel * clampL(V, p)) * gradeMult(V, F, p) * (1 + balancedBonus(F, H, V, p)), 2) * 100);
+  Math.round(roundHalfUp((1 + p.m4!.eggValue.pricePerLevel * clampL(V, p)) * (1 + p.m4!.eggValue.collectionBonusPerLevel * clampL(V, p)) * gradeMult(V, F, p) * balancedMult(F, H, V, p), 2) * 100);
 export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
 /** One row in economy.csv column format, for verification/parity. */
 export function tableRow(L: number, p: EconomyParams) {

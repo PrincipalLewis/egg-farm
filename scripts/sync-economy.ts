@@ -140,8 +140,21 @@ export function fitM4(rows: Row[], prev: any) {
   };
   const tc: Record<string, number> = {};
   for (const c of Object.keys(R[0]).filter(c => c.startsWith('tc_')).sort()) tc[c.slice(3)] = one(c);
-  return { ...P, hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') }, eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm') },
-    ...(Object.keys(tc).length ? { tc } : {}) };
+  // G1 milestone/price columns (numbered scalars); absent => keep the hand-set values.
+  const list = (pre: string, keys: Record<string, string>) => {
+    const out: any[] = []; for (let i = 1; has(`${pre}${i}_level`); i++) { const o: any = {}; for (const [k, suf] of Object.entries(keys)) o[k] = one(`${pre}${i}_${suf}`); out.push(o); }
+    return out.length ? out : null;
+  };
+  const ms = {
+    hens: list('hens_ms', { level: 'level', mult: 'mult' }) ?? P.milestones.hens,
+    grades: list('egg_grade', { level: 'level', mult: 'mult', minFarm: 'farm_gate' }) ?? P.milestones.grades,
+    balanced: list('balanced', { level: 'level', mult: 'mult' }) ?? P.milestones.balanced,
+  };
+  const pv = has('egg_value_price_per_level') ? one('egg_value_price_per_level') : P.eggValue.pricePerLevel;
+  const cb = has('egg_value_collection_bonus_per_level') ? one('egg_value_collection_bonus_per_level') : P.eggValue.collectionBonusPerLevel;
+  return { ...P, hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
+    eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm'), pricePerLevel: pv, collectionBonusPerLevel: cb },
+    milestones: ms, ...(Object.keys(tc).length ? { tc } : {}) };
 }
 export function buildBalance(rows: Row[], prev: any) {
   const p = fitParams(rows, prev);
