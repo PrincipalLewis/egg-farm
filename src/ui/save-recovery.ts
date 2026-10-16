@@ -75,3 +75,32 @@ export function showRecoveryDialog(r: Recovery, asset: (f: string) => string, in
     layer.remove(); res();
   }, { once: true }));
 }
+
+/** Single-tab guard notice (art-ux/single-tab-guard/spec.md v1.0): text keys tabguard.*. */
+export const TABGUARD_STRINGS = {
+  'tabguard.title': 'Game open in another tab',
+  'tabguard.body': 'Your farm is running in another tab. Play here to continue from your latest save.',
+  'tabguard.play': 'Play here',
+  'tabguard.loading': 'Loading\u2026',
+} as const;
+/** Single-action variant of the AC14b alertdialog: no close affordance; Esc, Back and scrim taps do nothing; focus stays on
+ *  "Play here". Pressing it disables the button, shows "Loading…" and calls onPlay (reload; the claim happens on load). */
+export function showTabGuardDialog(asset: (f: string) => string, inertEls: HTMLElement[], onPlay: () => void, S = TABGUARD_STRINGS): HTMLElement {
+  const existing = document.querySelector<HTMLElement>('.recovery-layer.tab-guard'); if (existing) return existing;
+  const layer = document.createElement('div'); layer.className = 'recovery-layer tab-guard';
+  layer.innerHTML = `<div class="recovery-card" role="alertdialog" aria-modal="true" aria-labelledby="tgT" aria-describedby="tgB">
+    <img src="${asset('icon-coop.svg')}" width="72" height="72" alt="">
+    <h2 id="tgT">${S['tabguard.title']}</h2><p id="tgB">${S['tabguard.body']}</p>
+    <button class="btn rc-primary" id="tgPlay" type="button">${S['tabguard.play']}</button></div>`;
+  document.body.append(layer); document.body.classList.add('tab-guard-frozen');
+  for (const el of inertEls) { el.inert = true; el.setAttribute('aria-hidden', 'true'); }
+  const go = layer.querySelector<HTMLButtonElement>('#tgPlay')!;
+  document.addEventListener('keydown', e => { if (!layer.isConnected) return; if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); e.stopImmediatePropagation(); go.focus(); } }, true);
+  try { history.pushState({ eggfarmTabGuard: 1 }, ''); } catch { /* sandboxed */ }
+  window.addEventListener('popstate', () => { try { history.pushState({ eggfarmTabGuard: 1 }, ''); } catch { /* ignore */ } });
+  for (const t of ['click', 'pointerdown', 'mousedown', 'touchstart'] as const) layer.addEventListener(t, e => { if (!(e.target as HTMLElement).closest('button')) { e.preventDefault(); e.stopPropagation(); } }, { passive: false });
+  document.addEventListener('focusin', e => { if (layer.isConnected && !layer.contains(e.target as Node)) go.focus(); }, true);
+  go.addEventListener('click', () => { if (go.disabled) return; go.disabled = true; go.textContent = S['tabguard.loading']; go.setAttribute('aria-busy', 'true'); onPlay(); });
+  go.focus();
+  return layer;
+}

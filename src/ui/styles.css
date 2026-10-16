@@ -429,3 +429,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .chip.served.squeeze{transition:opacity 120ms linear}.chip.served.squeeze.gone{opacity:0}
 /* Fast Collect taps (session 2): no double-tap-zoom/dblclick delay anywhere in the game, incl. the scene (a div) that also collects */
 #app,.scene,.queue{touch-action:manipulation}
+/* Single-tab guard notice (art-ux/single-tab-guard/spec.md): game behind frozen + dimmed */
+.tab-guard-frozen #app{filter:saturate(.6)}
+.tab-guard-frozen #app *, .tab-guard-frozen #app *::before, .tab-guard-frozen #app *::after{animation-play-state:paused!important;transition:none!important}
+.recovery-layer.tab-guard{z-index:1000}
+.tab-guard .rc-primary:disabled{opacity:1;cursor:progress}
+@media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
+.reduced-motion .tab-guard .recovery-card{animation:none}
