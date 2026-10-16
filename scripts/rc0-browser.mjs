@@ -414,6 +414,72 @@ sections.resetbak = async () => {
   await ctx.close();
 };
 
+// AC14b save-recovery dialog v2.1 (art-ux/save-recovery-dialog.md): one section per loader outcome.
+const RC = {
+  restored: { title: 'Welcome back!', body: 'We loaded your backup. You may be a few moments behind.', btn: 'Keep farming', badge: '\u2713', exp: null },
+  fresh: { title: 'A fresh start', body: "We couldn't open your farm. Your old save is kept safe.", btn: 'Start farming', badge: '\u2605', exp: 'rc-link' },
+  storage: { title: 'A fresh start', body: "We couldn't open your farm. Export it now to keep a copy.", btn: 'Start farming', badge: '!', exp: 'rc-export-q' },
+};
+const QUOTA_SPY = () => { window.__quota = 0; const set = Storage.prototype.setItem;
+  Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('eggfarm.save.corrupt')) { window.__quota++; throw new DOMException('full', 'QuotaExceededError'); } return set.call(this, k, v); }; };
+let validSave = null;
+const getValidSave = async () => { if (validSave) return validSave;
+  const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE } });
+  validSave = await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 15, coop: 0 }; g.save(); return localStorage.getItem('eggfarm.save'); });
+  await ctx.close(); return validSave; };
+async function recoveryCase(kind) {
+  const ls = kind === 'restored' ? { 'eggfarm.ui': DONE, 'eggfarm.save.bak': await getValidSave() } : { 'eggfarm.ui': DONE, 'eggfarm.save': fx('corrupt-truncated.json'), ...(kind === 'fresh' ? { 'eggfarm.save.bak': '{"version":5,"sav' } : {}) };
+  const E = RC[kind];
+  for (const [w, h] of [[360, 640], [1280, 800]]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, acceptDownloads: true }); const page = await ctx.newPage(); const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    if (kind === 'storage') await page.addInitScript(QUOTA_SPY);
+    await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, ls);
+    await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
+    await page.waitForSelector('.recovery-layer', { timeout: 5000 }); await page.waitForTimeout(350);
+    const st = await page.evaluate(() => { const L = document.querySelector('.recovery-layer'), c = L.querySelector('.recovery-card'), r = c.getBoundingClientRect(), $ = s => c.querySelector(s);
+      const ctl = [...c.querySelectorAll('button')].map(b => ({ id: b.id, cls: b.className, h: b.getBoundingClientRect().height, w: b.getBoundingClientRect().width, aria: b.getAttribute('aria-label') }));
+      return { outcome: L.dataset.outcome, gOutcome: window.eggfarm.recoveryOutcome, role: c.getAttribute('role'), modal: c.getAttribute('aria-modal'), lb: c.getAttribute('aria-labelledby'), db: c.getAttribute('aria-describedby'),
+        title: $('#rcT').textContent, body: $('#rcB').textContent, btn: $('#rcGo').textContent, badge: $('.rc-badge')?.textContent, iconHidden: $('.rc-icon')?.getAttribute('aria-hidden'), ctl, w: Math.round(r.width),
+        bodyLines: Math.round($('#rcB').getBoundingClientRect().height / (parseFloat(getComputedStyle($('#rcB')).lineHeight) || 22.4)),
+        clipped: r.left < 0 || r.right > innerWidth + 0.5 || c.scrollHeight > c.clientHeight + 1, focus: document.activeElement?.id, inert: document.getElementById('app')?.inert ?? null }; });
+    const tag = `AC14b ${kind} ${w}`;
+    ok(`${tag}: outcome '${kind}', alertdialog modal labelled/described`, st.outcome === kind && st.gOutcome === kind && st.role === 'alertdialog' && st.modal === 'true' && st.lb === 'rcT' && st.db?.startsWith('rcB'), JSON.stringify({ o: st.outcome, g: st.gOutcome, db: st.db }));
+    ok(`${tag}: exact v2.1 strings + badge, icon hidden`, st.title === E.title && st.body === E.body && st.btn === E.btn && st.badge === E.badge && st.iconHidden === 'true', JSON.stringify([st.title, st.body, st.btn, st.badge]));
+    const exp = st.ctl.find(c => c.id === 'rcExport');
+    ok(`${tag}: export control ${E.exp ?? 'absent (no raw bytes)'}`, E.exp ? exp?.cls === E.exp && exp.aria === 'Export old save, downloads a copy of your old save file' : !exp, JSON.stringify(exp ?? null));
+    ok(`${tag}: card width ${w === 360 ? 312 : 440}, body <=2 lines, nothing clipped`, st.w === (w === 360 ? 312 : 440) && st.bodyLines <= 2 && !st.clipped, JSON.stringify({ w: st.w, lines: st.bodyLines }));
+    ok(`${tag}: every control >=44 tall (primary >=48, link >=120 wide)`, st.ctl.every(c => c.h >= 44) && st.ctl.find(c => c.id === 'rcGo').h >= 48 && (!exp || exp.cls !== 'rc-link' || exp.w >= 120), JSON.stringify(st.ctl.map(c => [c.id, Math.round(c.w), c.h])));
+    ok(`${tag}: initial focus on primary`, st.focus === 'rcGo', st.focus);
+    if (shot) await page.screenshot({ path: `${SHOTS}/save-recovery-${kind}-${w}.png` });
+    if (w === 360) {
+      const seq = []; for (const k of ['Tab', 'Tab', 'Shift+Tab']) { await page.keyboard.press(k); seq.push(await page.evaluate(() => document.activeElement?.id)); }
+      ok(`${tag}: Tab/Shift+Tab wrap inside the dialog`, E.exp ? seq.join() === 'rcExport,rcGo,rcExport' : seq.every(x => x === 'rcGo'), seq.join());
+      await page.keyboard.press('Escape'); await page.mouse.click(5, 5); await page.goBack().catch(() => {}); await page.waitForTimeout(300);
+      ok(`${tag}: Esc, scrim tap and Back don't close it`, await page.locator('.recovery-layer').count() === 1);
+      if (E.exp) {
+        const dl = page.waitForEvent('download', { timeout: 4000 }).then(d => d.suggestedFilename(), () => null);
+        await page.locator('#rcExport').click(); const name = await dl; await page.waitForFunction(() => document.querySelector('#rcMsg')?.textContent, null, { timeout: 4000 }).catch(() => {});
+        const r = await page.evaluate(() => ({ msg: document.querySelector('#rcMsg')?.textContent, open: !!document.querySelector('.recovery-layer'), busy: document.querySelector('#rcExport')?.getAttribute('aria-busy') }));
+        ok(`${tag}: Export downloads eggfarm-old-save-*.json, says "Saved a copy.", stays open`, /^eggfarm-old-save-\d{8}-\d{4}\.json$/.test(name ?? '') && r.msg === 'Saved a copy.' && r.open && r.busy === null, JSON.stringify({ name, ...r }));
+      }
+      if (kind === 'storage') ok(`${tag}: at most one QuotaExceededError (no retry loop)`, (await page.evaluate(() => window.__quota)) <= 1, String(await page.evaluate(() => window.__quota)));
+      await page.locator('#rcGo').click(); await page.waitForTimeout(250);
+      const after = await page.evaluate(() => ({ open: !!document.querySelector('.recovery-layer'), focus: document.activeElement?.id, inert: document.getElementById('app')?.inert ?? null }));
+      ok(`${tag}: primary closes it and focus moves to Collect`, !after.open && after.focus === 'collect', JSON.stringify(after));
+      if (kind === 'storage') { await page.locator('#settings, [aria-label="Settings"], .settings-btn').first().click(); await page.waitForTimeout(200);
+        ok(`${tag}: Settings shows "Export old save" for the session`, await page.locator('#sOldSave').count() === 1); }
+    }
+    ok(`${tag}: no page errors`, !errors.length, errors.join(' | ').slice(0, 200));
+    await ctx.close();
+  }
+}
+sections.recoveryRestored = () => recoveryCase('restored');
+sections.recoveryFresh = () => recoveryCase('fresh');
+sections.recoveryStorage = () => recoveryCase('storage');
+sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE, 'eggfarm.save': await getValidSave() } }); await page.waitForTimeout(300);
+  ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
