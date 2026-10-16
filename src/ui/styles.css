@@ -338,14 +338,14 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (min-width:960px){.tabs button{min-width:44px}}
 /* P1q/P2 order cards + "+N waiting" (art-ux/m3-customer-queue-spec.md v1.0); visibility is set in JS (same 384px rule) */
 .order-list{display:flex;flex-direction:column;gap:var(--s-2)}
-.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md)}
+.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md);container-type:inline-size;container-name:order}
 .order[hidden]{display:none}
 .order>.txt{min-width:0}.order .av{width:40px;height:40px}.order .av img{width:100%;height:100%}
 .order .l1{display:flex;font:800 16px/1.2 var(--f-body);white-space:nowrap;font-variant-numeric:tabular-nums;color:#3E2C23;min-width:0}
 .order .l1 .e{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
 .order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
 .order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
-.order .sell{min-width:88px;max-width:45%;min-height:44px;border-radius:22px;padding:0 12px}
+.order .sell{min-width:88px;max-width:45cqw;min-height:44px;border-radius:22px;padding:0 12px}
 .order.ready{border:3px solid #3D7F33}
 .order.wait .sell{background:#fff;color:#6B5D52;border:2px solid #6B5D52;box-shadow:none}
 .queue-more{align-self:center;min-height:44px;padding:0 16px;border-radius:22px;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0;cursor:pointer}
@@ -373,7 +373,7 @@ html,body{overflow-x:hidden;max-width:100%}
 /* §5.1/§5.8 (QA 15/16): cards never flex-shrink when a leaving card is still in the list; Sell button width fixed so "Sell 3" -> "Sell" never moves the target */
 .order-list .order{flex:none;box-sizing:border-box}
 /* MK-24-1 / Art & UX: grow to fit; max 45% of row; never ellipsis the amount. Stack to 2 lines when overflow (.sell-stack) or ≤375. */
-.order .btn.sell{width:fit-content;min-width:88px;max-width:45%;min-height:44px;height:auto;padding:4px 12px;padding-inline:12px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:row;flex-wrap:nowrap;gap:0;white-space:nowrap;font-size:16px;font:700 16px var(--f-display);overflow:visible}
+.order .btn.sell{width:max-content;min-width:88px;max-width:45cqw;min-height:44px;height:auto;padding:4px 12px;padding-inline:12px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:row;flex-wrap:nowrap;gap:0;white-space:nowrap;font-size:16px;font:700 16px var(--f-display);overflow:visible}
 .order .btn.sell .sk,.order .btn.sell .sy{display:inline;flex-shrink:0;overflow:visible;text-overflow:clip;max-width:none;white-space:nowrap;text-align:center}
 .order .btn.sell .sk::after{content:'\00a0· '}
 .order .btn.sell .sy{font-weight:800}
@@ -381,7 +381,7 @@ html,body{overflow-x:hidden;max-width:100%}
 .order .btn.sell.sell-stack .sk{display:block;font:800 14px var(--f-display)}
 .order .btn.sell.sell-stack .sk::after{content:none}
 .order .btn.sell.sell-stack .sy{display:block;font:800 12px var(--f-display)}
-@media (max-width:375px){.order .btn.sell{flex-direction:column;white-space:normal;line-height:1.15;font-size:14px;min-width:72px;max-width:45%;padding:4px 12px}
+@media (max-width:375px){.order .btn.sell{flex-direction:column;white-space:normal;line-height:1.15;font-size:14px;min-width:72px;max-width:45cqw;padding:4px 12px}
 .order .btn.sell .sk{display:block;font:800 14px var(--f-display)}
 .order .btn.sell .sk::after{content:none}
 .order .btn.sell .sy{display:block;font:800 12px var(--f-display)}}
