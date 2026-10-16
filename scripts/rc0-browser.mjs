@@ -71,6 +71,20 @@ sections.pt1 = async () => {
 };
 const DONE = JSON.stringify({ onboardingDone: true });
 // ---------- B1 hire banner ----------
+// ---------- QA B-2: first-hire 'Workers get tired' tip never covers the Upgrades tablist, stays in the viewport (1280x720, 1280x600, 390x640) ----------
+sections.b2tip = async () => {
+  for (const [w, h] of [[1280, 720], [1280, 600], [390, 640]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true }) } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 5e6 }; g.dispatch({ type: 'hire', worker: 'market_hand' }); });
+    await page.waitForFunction(() => [...document.querySelectorAll('.coach')].some(c => c.textContent.includes('tired')), null, { timeout: 6000 }).catch(() => {}); await page.waitForTimeout(400);
+    const r = await page.evaluate(() => { const c = document.querySelector('.coach'); if (!c) return null; const b = c.getBoundingClientRect();
+      const hit = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect()).filter(t => t.width && t.height).some(t => Math.min(b.right, t.right) > Math.max(b.left, t.left) && Math.min(b.bottom, t.bottom) > Math.max(b.top, t.top));
+      return { text: c.textContent, top: Math.round(b.top), bottom: Math.round(b.bottom), hit, vh: innerHeight }; });
+    ok(`B-2 tired tip: no tablist overlap, inside the viewport (${w}x${h})`, !!r && /tired/.test(r.text) && !r.hit && r.top >= 0 && r.bottom <= r.vh, JSON.stringify(r));
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc2-b2-tired-tip-${w}x${h}.png` });
+    await ctx.close();
+  }
+};
 sections.b1 = async () => {
   const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE } });
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 3, coinsCents: 1e7 }; }); await page.waitForTimeout(200);

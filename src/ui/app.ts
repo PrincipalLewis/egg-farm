@@ -2,6 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
+import { coachPlacement, COACH_GAP } from './coach-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -523,15 +524,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   }
   void dirty;
   // ---------- FTUE step 4 + Workers intro (m3-ftue-spec §2 step 4, §3; M3-AC4) ----------
-  const coach = (text: string, at: Element | null, ms: number, cls = '') => {
+  const coach = (text: string, at: Element | null, ms: number, cls = '', avoidTabs = false) => {
     document.querySelectorAll('.coach').forEach(e => e.remove());
     const el = h(`<div class="coach ${cls}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     document.body.append(el);
     const handImg = el.querySelector('.coach-hand') as HTMLImageElement;
     const place = () => { if (!el.isConnected) return; const r = at?.getBoundingClientRect(); if (!r || !r.width) { el.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)'; return; }
-      const eh = el.offsetHeight, tl = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect()).filter(t => t.width); /* B-2: an 'above' tip must not cover a tab bar (1280 docked Workers tab) */
-      const above = r.top >= 120 && !tl.some(t => t.bottom > r.top - 12 - eh && t.top < r.top - 12), cx = Math.min(Math.max(r.left + r.width / 2, 156), innerWidth - 156);
-      el.style.cssText = above ? `left:${cx}px;bottom:${innerHeight - r.top + 12}px;transform:translateX(-50%)` : `left:${cx}px;top:${r.bottom + 12}px;transform:translateX(-50%)`;
+      const cx = Math.min(Math.max(r.left + r.width / 2, 156), innerWidth - 156), tabs = avoidTabs ? [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect()) : [];
+      const p = coachPlacement(r, { w: el.offsetWidth, h: el.offsetHeight }, cx, { w: innerWidth, h: innerHeight }, tabs, avoidTabs), above = p.side === 'above';
+      el.style.cssText = above ? `left:${cx}px;bottom:${innerHeight - r.top + COACH_GAP}px;transform:translateX(-50%)` : `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
       el.classList.toggle('below', !above);
       handImg.src = above ? A('ui-pointer-hand-down.svg') : A('ui-pointer-hand.svg'); };
     place(); const iv = window.setInterval(place, 250);
@@ -570,7 +571,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     document.querySelectorAll('.coach').forEach(c => c.remove());
     window.setTimeout(() => {
       tab = 'workers'; dirty = true; render(); const row = workerRow(e.worker);
-      coach('Workers get tired over time.', row?.querySelector('.ebar') ?? row ?? null, 3000);
+      coach('Workers get tired over time.', row?.querySelector('.ebar') ?? row ?? null, 3000, '', true); // B-2: only this tip avoids the tab bar
       window.setTimeout(() => {
         const r2 = workerRow(e.worker), full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
         coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
