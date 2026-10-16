@@ -6,10 +6,10 @@ import { readFileSync, mkdirSync } from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
 if (!['chromium', 'webkit'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
-const port = 4181; const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+const port = +(process.env.PORT ?? 4181); const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
 await new Promise(r => setTimeout(r, 1500));
-const SHOTS = '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
+const SHOTS = process.env.SHOTS ?? '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
 const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
 const results = []; const ok = (name, pass, info = '') => { results.push({ name, pass: !!pass, info }); if (!pass) process.exitCode = 1; };
