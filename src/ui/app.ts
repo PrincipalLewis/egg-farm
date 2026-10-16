@@ -77,7 +77,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
-      <button class="goal" id="goal" type="button" aria-live="off"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></button>
+      <button class="goal" id="goal" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
       <div class="sr" aria-live="polite" id="goalLive"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
