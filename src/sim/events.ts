@@ -6,7 +6,7 @@ export type SimEvent =
   | { type: 'customer_partial'; id: number; N: number; filled: number }
   | { type: 'customer_lost'; reason: 'timeout' | 'full_queue'; id?: number; N?: number }
   | { type: 'sell'; id: number; k: number; N: number; price: number; value: number; by: 'player' | 'market_hand' }
-  | { type: 'upgrade'; upgrade: 'collection' | 'farm' | 'hens' | 'eggValue'; newLevel: number; cost: number; coinsBefore: number }
+  | { type: 'upgrade'; upgrade: 'collection' | 'farm' | 'hens' | 'eggValue'; newLevel: number; cost: number; coinsBefore: number; track?: 'farm' | 'hens' | 'egg_value' | 'collection' }
   | { type: 'collect'; eggs: number }
   | { type: 'worker_collect'; eggs: number }
   | { type: 'worker_hire'; worker: WorkerId; cost: number; farm: number }
@@ -16,5 +16,6 @@ export type SimEvent =
   | { type: 'worker_yawn'; worker_id: WorkerId; energy_pct: number; farm_level: number } // once per entry into Yawning (<= yawn_at_pct)
   | { type: 'wage'; worker: WorkerId; cents: number }
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
-  | { type: 'milestone_reached'; id: string };
+  | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
+  | { type: 'balanced_tier'; id: string; tier: number; min_level: number };
 export type Sink = SimEvent[] | undefined;

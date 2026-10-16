@@ -25,21 +25,27 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
 function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
   const L = kind === 'collection' ? s.collectionLevel : s.farmLevel; if (L >= b.maxLevel) return s;
   const cost = (kind === 'collection' ? collectionCost : farmCost)(L, b) * 100; if (s.coinsCents < cost) return s;
-  ev?.push({ type: 'upgrade', upgrade: kind, newLevel: L + 1, cost, coinsBefore: s.coinsCents });
+  ev?.push({ type: 'upgrade', upgrade: kind, newLevel: L + 1, cost, coinsBefore: s.coinsCents, ...(m4On(b) ? { track: kind } : {}) });
   return { ...s, coinsCents: s.coinsCents - cost, ...(kind === 'collection' ? { collectionLevel: L + 1 } : { farmLevel: L + 1 }) };
 }
 /** M4-A: buy one Hens / Egg value level; refused at the cap (min(F+3, max)) or when unaffordable. Flag off => no-op. */
 function buyTrack(s: GameState, t: Track, b: Balance, ev?: Sink): GameState {
   if (!m4On(b) || trackLock(s, t, b)) return s;
   const L = trackLevel(s, t), cost = trackCost(L, t, b) * 100; if (s.coinsCents < cost) return s;
-  ev?.push({ type: 'upgrade', upgrade: t, newLevel: L + 1, cost, coinsBefore: s.coinsCents });
+  ev?.push({ type: 'upgrade', upgrade: t, newLevel: L + 1, cost, coinsBefore: s.coinsCents, track: t === 'hens' ? 'hens' : 'egg_value' });
   return { ...s, coinsCents: s.coinsCents - cost, ...(t === 'hens' ? { hensLevel: L + 1 } : { eggValueLevel: L + 1 }) };
 }
 /** Emits milestone_reached for ids newly reached by a level change (Farm can unlock Jumbo and Balanced tiers too). */
 function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Sink): GameState {
   if (after === before || !ev || !m4On(b)) return after;
   const had = new Set(reachedMilestones(before, b));
-  for (const id of reachedMilestones(after, b)) if (!had.has(id)) ev.push({ type: 'milestone_reached', id });
+  const M = b.m4!.milestones;
+  for (const id of reachedMilestones(after, b)) if (!had.has(id)) {
+    const [kind, n] = id.split(':'), k = +n; // M4A-34 payloads
+    if (kind === 'hens') ev.push({ type: 'milestone_reached', id, track: 'hens', level: k, mult: M.hens.find(m => m.level === k)!.offlineMult });
+    else if (kind === 'grade') ev.push({ type: 'milestone_reached', id, track: 'egg_value', level: k, mult: M.grades.find(g => g.level === k)!.mult });
+    else ev.push({ type: 'balanced_tier', id, tier: k, min_level: Math.min(after.farmLevel, after.hensLevel, after.eggValueLevel) });
+  }
   return after;
 }
 export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState {

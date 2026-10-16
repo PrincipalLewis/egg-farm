@@ -2,16 +2,20 @@
  * M4-A three tracks (product/m4-manage-proposal.md §2.1-2.2; decisions 2026-10-16 13:05-13:50).
  * Behind balance.m4.enabled (default 0): with the flag off every helper returns the pre-M4 value, so main's game is unchanged.
  *  - Farm: coop, queue, demand, interval, worker unlocks, and the Hens/Egg value caps (min(F+3, maxLevel)).
- *  - Hens: production (eggs/s from the Hens curve, milestones H10/20/30).
- *  - Egg value: price ((1+0.05V)(1+0.12V) x grade x Balanced); Collection no longer adds price (the +12% moved here).
- * The v6->v7 save migration (H = V = F, refund guard, celebratedMilestones seeding) is NOT here: it waits for the
- * save-durability merge. Until then old saves load with H = V = 0 when the flag is forced on (dev only).
+ *  - Hens: production (CSV eggs_per_sec at H); milestones H10/20/30 raise coop size + offline eggs only (M1).
+ *  - Egg value: price (1+step*V)(1+bonus*V) x grade x Balanced (then x Grader); Collection adds no price.
+ * The v6->v7 migration is pure in migrate-v7.ts and NOT wired into save.ts (waits for the save-durability merge).
  */
 import type { Balance } from '../config/balance';
-import { m4On, trackEggsPerSec, trackPriceCents, eggsPerSec, eggPriceCents, hensCap, eggValueCap, hensCost, eggValueCost, balancedTier } from '../config/formulas';
+import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensOfflineMult, eggsPerSec, eggPriceCents, coopCapacity, hensCap, eggValueCap, hensCost, eggValueCost, balancedTier, clampL } from '../config/formulas';
 import type { GameState } from './state';
 export type Track = 'hens' | 'eggValue';
 export const prodEggsPerSec = (s: GameState, b: Balance) => m4On(b) ? trackEggsPerSec(s.hensLevel, b) : eggsPerSec(s.farmLevel, b);
+/** M4A-4/8: coop capacity (Farm, x Hens coop milestone when on). */
+export const coopCap = (s: GameState, b: Balance) => m4On(b) ? trackCoopCapacity(s.farmLevel, s.hensLevel, b) : coopCapacity(s.farmLevel, b);
+/** M4A-4/8 offline multiplier on eggs and on the 2 h egg cap (x1.0 when off or below the first Hens milestone). */
+export const offlineMult = (s: GameState, b: Balance) => m4On(b) ? hensOfflineMult(s.hensLevel, b) : 1;
+/** Unit price in cents BEFORE sale multipliers (Grader etc.). payout.ts (fix/rc1-qa-bugs) must take its base from here. */
 export const salePriceCents = (s: GameState, b: Balance) => m4On(b) ? trackPriceCents(s.farmLevel, s.hensLevel, s.eggValueLevel, b) : eggPriceCents(s.farmLevel, s.collectionLevel, b);
 export const trackLevel = (s: GameState, t: Track) => t === 'hens' ? s.hensLevel : s.eggValueLevel;
 export const trackCap = (s: GameState, t: Track, b: Balance) => (t === 'hens' ? hensCap : eggValueCap)(s.farmLevel, b);
@@ -38,20 +42,3 @@ export function balancedStrip(s: GameState, b: Balance): { n: number; of: number
   return { n, of: T.length, nextLevel: T[n]?.level ?? null };
 }
 
-// ---------- v6 -> v7 track migration (pure; NOT wired into save.ts until the save-durability merge) ----------
-/** TR-4 (amended 14:15) + m4a-spec §10 / M4A-29:
- *  - H = F (eggs/s identical below H10).
- *  - V = the lowest level (searched over the table, 0..cap) whose v7 unit price before the Grader is >= the v6 price
- *    eggPriceCents(F, C). Collection keeps all its levels; only its +12% moves to Egg value. No Collection refund.
- *  - Clamp guard: a level above min(F+3, maxLevel) is clamped and the clamped-off levels are refunded at their track
- *    cost (cents), into coinsCents and migrationRefundCents. 0 for every real save.
- *  - Milestones already reached are seeded into celebratedMilestones silently (no toasts). */
-export function migrateTracksV7(s: GameState, b: Balance): { state: GameState; migrationRefundCents: number; v6PriceCents: number } {
-  const F = s.farmLevel, v6PriceCents = eggPriceCents(F, s.collectionLevel, b);
-  const hCap = hensCap(F, b), vCap = eggValueCap(F, b);
-  let V = vCap; for (let v = 0; v <= vCap; v++) if (trackPriceCents(F, Math.min(F, hCap), v, b) >= v6PriceCents) { V = v; break; }
-  const wantH = F, H = Math.min(wantH, hCap);
-  let refund = 0; for (let L = H; L < wantH; L++) refund += hensCost(L, b) * 100;
-  const st: GameState = { ...s, hensLevel: H, eggValueLevel: V, coinsCents: s.coinsCents + refund };
-  return { state: { ...st, celebratedMilestones: [...new Set([...s.celebratedMilestones, ...reachedMilestones(st, b)])] }, migrationRefundCents: refund, v6PriceCents };
-}

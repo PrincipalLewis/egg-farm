@@ -1,5 +1,6 @@
 import type { Balance } from './config/balance';
-import { GameState, initialState, coopCapacity } from './sim/state';
+import { GameState, initialState } from './sim/state';
+import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
@@ -61,7 +62,7 @@ export class Game {
     }
   }
   private checkCoopFull() {
-    const full = this.state.coop >= coopCapacity(this.state.farmLevel, this.b);
+    const full = this.state.coop >= coopCap(this.state, this.b);
     if (full && this.coopFullSince === null) { this.coopFullSince = this.now(); this.telemetry.track('coop_full', { phase: 'start' }); this.notify({ type: 'coop_full', phase: 'start' }); }
     else if (!full && this.coopFullSince !== null) { this.telemetry.track('coop_full', { phase: 'end', durationMs: this.now() - this.coopFullSince }); this.coopFullSince = null; this.notify({ type: 'coop_full', phase: 'end' }); }
   }

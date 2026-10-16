@@ -2,7 +2,7 @@ import type { Balance } from '../config/balance';
 import { GameState, eggsPerTap, coopCapacity, customerIntervalS, demandRange, nextRand, queueMax, patienceS } from './state';
 import type { Sink } from './events';
 import { sellTo } from './actions';
-import { prodEggsPerSec } from './tracks';
+import { prodEggsPerSec, coopCap } from './tracks';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
@@ -21,7 +21,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink): GameState
       workers[id] = w;
     }
   }
-  const cap = coopCapacity(L, b), coop = Math.min(cap, s.coop + prodEggsPerSec(s, b) * dt);
+  const cap = coopCap(s, b), coop = Math.min(cap, s.coop + prodEggsPerSec(s, b) * dt);
   const coopFullS = coop >= cap - 1e-9 ? s.coopFullS + dt : 0;
   // MK-10: every customer not fully served leaves customer_patience_s after arrival, including partly served ones
   // (timer never reset). Partly served leaver => customer_partial event, never-served => customer_lost.
