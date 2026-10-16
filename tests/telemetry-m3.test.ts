@@ -75,6 +75,7 @@ import { isDirty } from '../scripts/build-id';
 import { it as it2, expect as ex2 } from 'vitest';
 it2('PT1-9 isDirty ignores Vite timestamp files only', () => {
   ex2(isDirty('?? vite.config.ts.timestamp-1792099697515-1a2b.mjs\n')).toBe(false);
+  ex2(isDirty('?? vite.html.config.ts.timestamp-1792099697515-1a2b.mjs\n')).toBe(false); // build:html config
   ex2(isDirty(' M src/main.ts\n?? vite.config.ts.timestamp-1-2.mjs\n')).toBe(true);
   ex2(isDirty('')).toBe(false);
 });

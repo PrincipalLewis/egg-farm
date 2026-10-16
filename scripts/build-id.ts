@@ -6,7 +6,7 @@ export function formatBuildId(short: string | null, dirty: boolean, prefix = BUI
   return dirty ? `${base}+dirty` : base;
 }
 /** PT1-9: Vite's own temp config bundle (vite.config.ts.timestamp-*.mjs) never counts as a change. */
-export const IGNORED_DIRTY = /(^|\/)vite\.config\.[cm]?[jt]s\.timestamp-[^/]*$/;
+export const IGNORED_DIRTY = /(^|\/)vite(?:\.[\w-]+)?\.config\.[cm]?[jt]s\.timestamp-[^/]*$/;
 export const isDirty = (porcelain: string) => porcelain.split('\n').map(l => l.slice(3).trim().replace(/^"|"$/g, '')).filter(f => f && !IGNORED_DIRTY.test(f)).length > 0;
 export function gitBuildId(cwd?: string): string {
   try {
