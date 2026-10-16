@@ -373,7 +373,7 @@ html,body{overflow-x:hidden;max-width:100%}
 /* §5.1/§5.8 (QA 15/16): cards never flex-shrink when a leaving card is still in the list; Sell button width fixed so "Sell 3" -> "Sell" never moves the target */
 .order-list .order{flex:none;box-sizing:border-box}
 /* MK-24-1 / Art & UX: grow to fit; max 45% of row; never ellipsis the amount. Stack to 2 lines when overflow (.sell-stack) or ≤375. */
-.order .btn.sell{width:auto;min-width:88px;max-width:45%;min-height:44px;height:auto;padding:4px 12px;padding-inline:12px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:row;flex-wrap:nowrap;gap:0;white-space:nowrap;font-size:16px;font:700 16px var(--f-display);overflow:visible}
+.order .btn.sell{width:fit-content;min-width:88px;max-width:45%;min-height:44px;height:auto;padding:4px 12px;padding-inline:12px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:row;flex-wrap:nowrap;gap:0;white-space:nowrap;font-size:16px;font:700 16px var(--f-display);overflow:visible}
 .order .btn.sell .sk,.order .btn.sell .sy{display:inline;flex-shrink:0;overflow:visible;text-overflow:clip;max-width:none;white-space:nowrap;text-align:center}
 .order .btn.sell .sk::after{content:'\00a0· '}
 .order .btn.sell .sy{font-weight:800}
