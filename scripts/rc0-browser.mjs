@@ -252,12 +252,15 @@ sections.s2810 = async () => {
 sections.fastcollect = async () => {
   const { ctx, page, errors } = await open({ w: 375, h: 700, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
   for (const [target, coop] of [['#collect', 500], ['#scene', 500], ['#collect', 23]]) {
-    const exp = await page.evaluate(coop => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 0, collectionLevel: 0, coop, basket: 0, workers: {}, customers: [], nextCustomerInS: 1e9 };
+    // Freeze the sim clock for the whole tap burst. The hens lay 1.5 eggs/s at L0, so on a slow box (10 taps taking
+    // > ~0.65 s) the coop regrew a whole egg and a correct extra collect happened (flaky "-> 5, got 6"). g.frame() first
+    // flushes any pending catch-up on the real clock, so it can't land on top of the seeded coop. Taps are what we test.
+    const exp = await page.evaluate(coop => { const g = window.eggfarm; g.frame(); const t = Date.now(); window.__realNow ??= Date.now; Date.now = () => t; g.state = { ...g.state, farmLevel: 0, collectionLevel: 0, coop, basket: 0, workers: {}, customers: [], nextCustomerInS: 1e9 };
       window.__n = 0; if (!window.__fc) { window.__fc = 1; g.on(e => { if (e.type === 'collect' && e.eggs > 0) window.__n++; }); }
       const per = 5; return Math.min(10, Math.floor(coop / per) + (coop % per ? 1 : 0)); }, coop);
     const b = await page.locator(target).boundingBox(); const x = b.x + b.width / 2, y = b.y + Math.min(b.height / 2, 60);
     for (let i = 0; i < 10; i++) { await page.touchscreen.tap(x, y); await page.waitForTimeout(50); }
-    await page.waitForTimeout(300); const n = await page.evaluate(() => window.__n);
+    await page.waitForTimeout(300); const n = await page.evaluate(() => { const n = window.__n; Date.now = window.__realNow; window.eggfarm.frame(); return n; });
     ok(`Fast Collect: 10 taps on ${target} 50 ms apart (coop ${coop}) -> ${exp} collects`, n === exp, `got ${n}`);
   }
   ok('Fast Collect no page errors', errors.length === 0, errors.join(' | '));
