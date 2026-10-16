@@ -465,3 +465,5 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 .actions::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--bw);background:var(--c-outline);pointer-events:none;z-index:1}
 /* S2-4c: welcome-back "Market Hand sold N right away · +$X" line, 14px Nunito #6B5D52 */
 .card .wb-sold{font:400 14px/1.35 var(--f-body);color:#6B5D52;margin-top:-4px}
+/* particle safe area (read by app.ts clampToSafe) */
+:root{--sa-t:env(safe-area-inset-top,0px);--sa-r:env(safe-area-inset-right,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px)}

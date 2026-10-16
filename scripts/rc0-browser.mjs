@@ -130,6 +130,23 @@ sections.s24c = async () => {
     await ctx.close();
   }
 };
+// ---------- QA bd0dc66 particle fragment at the top-left (375): particles stay in the safe area and none remain ----------
+sections.fx = async () => {
+  const { ctx, page } = await open({ w: 375, h: 667, ls: { 'eggfarm.ui': DONE } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 200, coinsCents: 1e6 }; });
+  const r = await page.evaluate(async () => {
+    const g = window.eggfarm, bad = []; let maxLive = 0; const end = performance.now() + 1500;
+    for (let i = 0; i < 6; i++) document.querySelector('#collect').click();
+    g.state = { ...g.state, customers: [{ id: 1, demand: 5, filled: 0, waitedS: 0 }] }; g.dispatch({ type: 'sellAll' }); g.dispatch({ type: 'buyCollection' }); // Market closed: Sell all is hidden
+    while (performance.now() < end) { await new Promise(r => requestAnimationFrame(r)); const kids = [...document.querySelectorAll('#fx-layer > *')]; maxLive = Math.max(maxLive, kids.length);
+      for (const k of kids) { const b = k.getBoundingClientRect(); if (b.width && getComputedStyle(k).opacity !== '0' && (b.right < 8 || b.bottom < 8 || (b.left < 0 && b.top < 8))) bad.push([k.className, Math.round(b.left), Math.round(b.top)]); } }
+    await new Promise(r => setTimeout(r, 1000));
+    const coin = document.querySelector('.pill.coins img').getBoundingClientRect();
+    return { bad: bad.slice(0, 5), maxLive, left: document.querySelectorAll('#fx-layer > *').length, coin: [Math.round(coin.left + coin.width / 2), Math.round(coin.top + coin.height / 2)] };
+  });
+  ok('FX particles never in the top-left corner (375x667), none left 1 s after the animations', r.bad.length === 0 && r.maxLive > 0 && r.left === 0, JSON.stringify(r));
+  await ctx.close();
+};
 // ---------- PT1-4 / PT1-5 / PT1-6 ----------
 sections.pt1 = async () => {
   { // PT1-4: corrupt save + old "done" flags -> FTUE runs again on the fresh farm

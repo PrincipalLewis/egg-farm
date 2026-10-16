@@ -167,3 +167,17 @@ describe('S2-4c welcome-back sold line (Art & UX 08:47)', async () => {
   });
   it('card renders the line only when something sold', () => expect(app).toContain('${sale ? `<div class="wb-sold num" id="wbSold">${sale}</div>` : \'\'}'));
 });
+
+describe('FX particles (QA bd0dc66 top-left fragment)', async () => {
+  const { clampToSafe } = await import('../src/ui/fx');
+  it('clamps anchors to the viewport minus safe-area insets and 8px', () => {
+    expect(clampToSafe({ x: 0, y: 0 }, 375, 667)).toEqual({ x: 8, y: 8 });
+    expect(clampToSafe({ x: 999, y: 999 }, 375, 667, { t: 47, r: 0, b: 34, l: 0 })).toEqual({ x: 367, y: 625 });
+    expect(clampToSafe({ x: 100, y: 3 }, 375, 667, { t: 47, r: 0, b: 0, l: 0 })).toEqual({ x: 100, y: 55 });
+  });
+  it('hidden sources fall back to the scene; particles leave on animationend / finish; coins land on the pill coin', () => {
+    expect(app).toMatch(/if \(!r\.width && !r\.height\) r = scene\.getBoundingClientRect\(\)/);
+    expect(app).toContain("el.addEventListener('animationend', kill, { once: true }); setTimeout(kill, ms);");
+    expect(app).toContain("coinsEl.parentElement!.querySelector('img')!");
+  });
+});
