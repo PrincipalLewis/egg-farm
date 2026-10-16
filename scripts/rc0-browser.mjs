@@ -237,7 +237,7 @@ sections.s2810 = async () => {
   ok('S2-9 queue full: Market sheet does not open by itself; queue-full flag exposed', !q.market && q.flag === 'true' && q.rates === true, JSON.stringify(q));
   // S2-8: rates readable
   const r = await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: { market_hand: { energy: 100, cdS: 0 } } }; return window.eggfarmUi.rates(); });
-  ok('S2-8 ui.rates(): Market Hand wage 1 c/s at L3, net rate readable', r.workers.market_hand.wageCentsPerSec === 1 && typeof r.netCentsPerSec === 'number', JSON.stringify(r));
+  ok('S2-8 ui.rates(): Market Hand wage 1.25 c/s (exact) at L3, net rate readable', r.workers.market_hand.wageCentsPerSec === 1.25 && typeof r.netCentsPerSec === 'number', JSON.stringify(r));
   // S2-10: redraw right after an action, even with rAF stalled
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 5, collectionLevel: 3, coinsCents: 5e6, workers: {}, customers: [] }; });
   await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(200);

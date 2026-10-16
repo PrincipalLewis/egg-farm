@@ -14,12 +14,14 @@ export interface GameState {
   workers: Workers; graderTier: number; manageCdS: number;
   /** M2: seconds the coop has been full (Coop Hand tip); session-only, not meaningful across loads. */
   coopFullS: number;
+  /** S2-8 (Product): wage cents owed but not yet charged (fraction < 1 per worker); charged exactly at the economy.csv rate over time. v6. */
+  wageFracCents: { market_hand?: number; coop_hand?: number };
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,
   customers: [], nextCustomerInS: b.customers.first_customer_s, nextCustomerId: 1,
   rng: mixSeed(seed), pendingOfflineEggs: 0, celebratedTier: 0,
-  workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0,
+  workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0, wageFracCents: {},
 });
 /** Per-level stats: formulas in config/formulas.ts, params from balance.json (generated from economy.csv, MK-15). */
 export {

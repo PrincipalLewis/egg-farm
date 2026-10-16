@@ -2,7 +2,7 @@ import type { Balance } from '../config/balance';
 import { GameState, eggsPerSec, eggsPerTap, coopCapacity, customerIntervalS, demandRange, nextRand, queueMax, patienceS } from './state';
 import type { Sink } from './events';
 import { sellTo } from './actions';
-import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCents, resumeNeedCents } from './workers';
+import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
@@ -74,11 +74,12 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameSta
     if (cdS <= 1e-9) {
       const cfg = b.workers[id], interval = m === 'working' ? cfg.every_s : cfg.tired_every_s;
       cdS = interval;
-      const wage = wageCents(id, s.farmLevel, interval, b);
+      const { cents: wage, frac } = wageCharge(id, s.farmLevel, interval, s.wageFracCents?.[id] ?? 0, b); // S2-8: exact rate, fraction carried
       if (wage > s.coinsCents) { // §8 item 2: can't pay in full -> Unpaid, no charge, no action
         ws[id] = { ...w, cdS: 0, unpaid: true }; ev?.push({ type: 'worker_state', worker: id, state: 'unpaid' }); continue;
       }
-      if (wage > 0) { s = { ...s, coinsCents: s.coinsCents - wage }; ev?.push({ type: 'wage', worker: id, cents: wage }); }
+      s = { ...s, coinsCents: s.coinsCents - wage, wageFracCents: { ...s.wageFracCents, [id]: frac } }; // not paid -> never charged (above), frac unchanged
+      if (wage > 0) ev?.push({ type: 'wage', worker: id, cents: wage });
       if (id === 'coop_hand') {
         const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b));
         if (n > 0) { s = { ...s, coop: s.coop - n, basket: s.basket + n }; ev?.push({ type: 'worker_collect', eggs: n }); }

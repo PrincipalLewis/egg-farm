@@ -4,7 +4,7 @@ import { balance as b } from '../src/config/balance';
 import { initialState, queueMax } from '../src/sim/state';
 import { advance } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
-import { save } from '../src/save/save';
+import { save, migrate, SAVE_VERSION } from '../src/save/save';
 import { Game } from '../src/game';
 import { wageCentsPerSec, listedWageCentsPerSec, totalWageCentsPerSec, netCentsPerSec, queueFull, queueTapOpens } from '../src/ui/rates';
 import { mem } from './helpers';
@@ -12,16 +12,30 @@ import { mem } from './helpers';
 const mh = (energy = 100) => ({ market_hand: { energy, cdS: 0 } });
 
 describe('S2-8 wage from the Player log (Farm L3, Market Hand, 0 eggs)', () => {
-  it('drain = Market Hand wage: 1 cent per 1-s action at L3 ($0.01/s; listed 0.75 $/min rounds to 1 c per action)', () => {
+  it('drain = Market Hand wage at the exact economy.csv rate (0.75 $/min at L3 = 1.25 c/s; fraction carried)', () => {
     let s: any = { ...initialState(b, 1), farmLevel: 3, coinsCents: 15_257, workers: mh(), basket: 0, coop: 0, nextCustomerInS: 1e9 };
-    expect(wageCentsPerSec('market_hand', s, b)).toBe(1); expect(listedWageCentsPerSec('market_hand', s, b)).toBe(1);
-    const r = advance(s, 24_000, 0, b); expect(15_257 - r.state.coinsCents).toBe(24); // $152.57 -> $152.33 in 24 s
+    expect(wageCentsPerSec('market_hand', s, b)).toBe(1.25); expect(listedWageCentsPerSec('market_hand', s, b)).toBe(1.25);
+    const r = advance(s, 24_000, 0, b); expect(15_257 - r.state.coinsCents).toBe(30);
   });
-  it('net rate = income - wages; Tired is slower; Asleep/Unpaid/not hired cost 0', () => {
+  it('60 s of Market Hand wages at L3 = $0.75 +- 1 c (was $0.60 with per-charge rounding)', () => {
+    for (const start of [10_000, 123_457]) { const s: any = { ...initialState(b, 1), farmLevel: 3, coinsCents: start, workers: mh(), basket: 0, coop: 0, nextCustomerInS: 1e9 };
+      const spent = start - advance(s, 60_000, 0, b).state.coinsCents; expect(Math.abs(spent - 75)).toBeLessThanOrEqual(1); }
+    for (const F of [1, 7, 11, 23]) { const s: any = { ...initialState(b, 1), farmLevel: F, coinsCents: 1e9, workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 } }, basket: 0, coop: 0, nextCustomerInS: 1e9 };
+      const want = (0.25 + 0.5) * F * 100; expect(Math.abs(1e9 - advance(s, 60_000, 0, b).state.coinsCents - want), `F${F}`).toBeLessThanOrEqual(2); }
+  });
+  it('the fraction survives a save round-trip; v5 saves migrate with nothing owed', () => {
+    const kv = mem(); let t = 1_000; const g = new Game(b, kv, () => t);
+    g.state = { ...g.state, farmLevel: 3, coinsCents: 10_000, workers: mh(), customers: [], nextCustomerInS: 1e9 } as any; g.debugAdvance(3_000);
+    const frac = g.state.wageFracCents.market_hand!; expect(frac).toBeGreaterThan(0); expect(frac).toBeLessThan(1); g.save();
+    t += 10; const g2 = new Game(b, kv, () => t); expect(g2.state.wageFracCents.market_hand).toBeCloseTo(frac, 9);
+    const v5 = { version: 5, savedAt: 0, state: { ...initialState(b), wageFracCents: undefined } }; delete (v5.state as any).wageFracCents;
+    expect(migrate(v5, b).state.wageFracCents).toEqual({}); expect(migrate(v5, b).version).toBe(SAVE_VERSION);
+  });
+  it('net rate = income - wages (exact per-second rate at any pace); Asleep/Unpaid/not hired cost 0', () => {
     const s: any = { ...initialState(b), farmLevel: 10, workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 20, cdS: 0 } } };
-    const w1 = Math.round(0.25 * 10 * 1 / 60 * 100) / 1, w2 = Math.round(0.5 * 10 * 4 / 60 * 100) / 4;
-    expect(wageCentsPerSec('market_hand', s, b)).toBe(w1); expect(wageCentsPerSec('coop_hand', s, b)).toBe(w2);
-    expect(totalWageCentsPerSec(s, b)).toBe(w1 + w2); expect(netCentsPerSec(0, s, b)).toBe(-(w1 + w2));
+    const w1 = 0.25 * 10 / 60 * 100, w2 = 0.5 * 10 / 60 * 100; // exact economy.csv rates (per second, any pace)
+    expect(wageCentsPerSec('market_hand', s, b)).toBeCloseTo(w1, 9); expect(wageCentsPerSec('coop_hand', s, b)).toBeCloseTo(w2, 9);
+    expect(totalWageCentsPerSec(s, b)).toBeCloseTo(w1 + w2, 9); expect(netCentsPerSec(0, s, b)).toBeCloseTo(-(w1 + w2), 9);
     expect(wageCentsPerSec('coop_hand', { ...s, workers: { coop_hand: { energy: 0, cdS: 0 } } }, b)).toBe(0);
     expect(wageCentsPerSec('market_hand', { ...s, workers: { market_hand: { energy: 90, cdS: 0, unpaid: true } } }, b)).toBe(0);
     expect(wageCentsPerSec('market_hand', { ...s, workers: {} }, b)).toBe(0);
@@ -35,7 +49,8 @@ describe('S2-8 gate: wages draining money to $0', () => {
     for (const c of [0, 1, 3, 4, 7, 50, 1e15, Number.MAX_SAFE_INTEGER]) {
       let s = broke(c), min = Infinity;
       for (let i = 0; i < 600; i++) { s = advance(s, 1000, 0, b).state; min = Math.min(min, s.coinsCents); }
-      expect(min, `start ${c}`).toBeGreaterThanOrEqual(0); expect(Number.isFinite(s.coinsCents)).toBe(true);
+      expect(min, `start ${c}`).toBeGreaterThanOrEqual(0); expect(Number.isFinite(s.coinsCents)).toBe(true); expect(Number.isInteger(s.coinsCents)).toBe(true);
+      for (const f of Object.values(s.wageFracCents) as number[]) { expect(f).toBeGreaterThanOrEqual(0); expect(f).toBeLessThan(1); }
     }
   });
   it('workers go Unpaid when a wage cannot be paid, and resume once money covers it', () => {

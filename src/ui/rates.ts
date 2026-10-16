@@ -1,22 +1,22 @@
 /**
  * S2-8 / S2-9: values the UI can read (Art & UX owns the visuals, on m3/rc1-ui). Pure; mirrors the sim exactly.
- * Wages are charged per action (tick.ts workerActions): wageCents(id, F, interval) rounded, once every `interval`.
+ * Wages are charged per action at the exact rate; the fraction of a cent carries over (state.wageFracCents).
  */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { queueMax } from '../sim/state';
-import { mood, isOff, wageCents } from '../sim/workers';
+import { mood, isOff, wageExactCents } from '../sim/workers';
 export type WageWorker = 'market_hand' | 'coop_hand';
 export const WAGE_WORKERS: WageWorker[] = ['market_hand', 'coop_hand'];
 /** Actual wage drain of one worker right now, cents/s (0 if not hired, Asleep or Unpaid). */
 export function wageCentsPerSec(id: WageWorker, s: GameState, b: Balance): number {
   const w = s.workers[id]; const m = mood(w, b); if (!w || isOff(m)) return 0;
   const interval = m === 'working' ? b.workers[id].every_s : b.workers[id].tired_every_s;
-  return wageCents(id, s.farmLevel, interval, b) / interval;
+  return wageExactCents(id, s.farmLevel, interval, b) / interval; // S2-8: exact economy.csv rate
 }
 /** Wage the hire card / worker panel shows ("Wage $X/s"): at Working pace for the current Farm level. */
 export const listedWageCentsPerSec = (id: WageWorker, s: GameState, b: Balance) =>
-  wageCents(id, s.farmLevel, b.workers[id].every_s, b) / b.workers[id].every_s;
+  wageExactCents(id, s.farmLevel, b.workers[id].every_s, b) / b.workers[id].every_s;
 export const totalWageCentsPerSec = (s: GameState, b: Balance) => WAGE_WORKERS.reduce((a, id) => a + wageCentsPerSec(id, s, b), 0);
 /** Net money rate (income from sales minus wages), cents/s. Negative = the header shows it in red. */
 export const netCentsPerSec = (incomeCentsPerSec: number, s: GameState, b: Balance) => incomeCentsPerSec - totalWageCentsPerSec(s, b);

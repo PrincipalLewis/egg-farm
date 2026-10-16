@@ -43,3 +43,11 @@ export function hawkerDemandMult(ws: Workers, b: Balance): number {
 /** Full wage for one action interval, cents (rounded). Caller makes the worker Unpaid if coins < this. */
 export const wageCents = (id: 'market_hand' | 'coop_hand', farm: number, intervalS: number, b: Balance) =>
   Math.round(b.workers[id].wage_per_farm_per_min * farm * intervalS / 60 * 100);
+/** S2-8: exact wage for one action interval in cents (economy.csv rate, unrounded). */
+export const wageExactCents = (id: 'market_hand' | 'coop_hand', farm: number, intervalS: number, b: Balance) =>
+  b.workers[id].wage_per_farm_per_min * farm * intervalS / 60 * 100;
+/** S2-8: charge = whole cents of (carried fraction + exact wage); the rest carries to the next action. */
+export function wageCharge(id: 'market_hand' | 'coop_hand', farm: number, intervalS: number, fracCents: number, b: Balance) {
+  const due = (fracCents || 0) + wageExactCents(id, farm, intervalS, b), cents = Math.floor(due + 1e-9);
+  return { cents, frac: Math.max(0, due - cents) };
+}
