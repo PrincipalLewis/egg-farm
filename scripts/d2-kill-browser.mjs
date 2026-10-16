@@ -8,8 +8,8 @@
 import pw from 'playwright-core'; import { spawn } from 'node:child_process'; import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', port = +(process.env.PORT ?? 4720), REPS = +(process.env.REPS ?? 3);
 const DELAYS = (process.env.DELAYS ?? '0,100,500,1000,2000,3000').split(',').map(Number);
-const serve = (dir, p) => spawn('npx', ['vite', 'preview', '--outDir', dir, '--port', '' + p, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
-const srv = serve('dist-qa', port), srvRel = serve('dist', port + 1);
+import { serveOwn } from './serve-own.mjs';
+const s1 = await serveOwn('dist-qa', port), s2 = await serveOwn('dist', port + 1); const srv = { pid: 0 }, srvRel = { pid: 0 };
 for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port + 1}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const URL0 = `http://127.0.0.1:${port}/`, URLREL = `http://127.0.0.1:${port + 1}/`, fx = fs.readFileSync(new URL('../tests/fixtures/saves/m2-rc1-v5-40min.json', import.meta.url), 'utf8');
@@ -54,5 +54,5 @@ for (const D of DELAYS) for (let rep = 0; rep < REPS; rep++) {
   await ctx.close(); fs.rmSync(dir, { recursive: true, force: true }); }
 const by = {}; for (const r of rows) { by[r.D] ??= [0, 0]; by[r.D][1]++; if (r.pass) by[r.D][0]++; }
 console.log(`SUMMARY [${ENGINE}] ` + Object.entries(by).map(([d, [a, n]]) => `${d}ms ${a}/${n}`).join(', '));
-try { process.kill(-srv.pid); } catch {} try { process.kill(-srvRel.pid); } catch {}
+s1.stop(); s2.stop();
 process.exit(fails ? 1 : 0);
