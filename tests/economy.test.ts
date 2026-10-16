@@ -41,13 +41,12 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
   it.runIf(py)('fixture is fresh vs the live reference sim', () => {
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');
     execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'current', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
-    // Compare only the 17 early-game economy columns (level .. collection_price_bonus). The sim's CSV writer (sim sha 1178d8c68590)
-    // also emits 29 worker columns but still carries pre-HoP yawn_at_pct 40 / manage_prompt_threshold 0.4 (approved 50 / 0.5,
-    // decisions.md Oct 16 23:58), and it does not write the m4cols-only columns at all, so a full-row compare cannot pass.
-    const sim = parseEconomyCsv(readFileSync(out, 'utf8')), cols = Object.keys(sim[0]).slice(0, 17);
-    expect(cols[0]).toBe('level'); expect(cols[16]).toBe('collection_price_bonus');
+    // All 46 columns the sim's CSV writer emits (product/sim/economy_sim.py sha 5ad5a3a6 writes yawn 50 / manage 0.5, Economy Oct 17).
+    // The m4cols-only columns (79) are not written by the sim, so compare the sim's columns rather than the whole row.
+    const sim = parseEconomyCsv(readFileSync(out, 'utf8')), cols = Object.keys(sim[0]);
+    expect(cols.length).toBe(46); expect(sim.length).toBe(data.length);
     const pick = (rs: Record<string, number>[]) => rs.map(r => Object.fromEntries(cols.map(c => [c, r[c]])));
-    expect(pick(sim)).toEqual(pick(data)); // reference sim early-game table == economy.csv
+    expect(pick(sim)).toEqual(pick(data)); // reference sim table == economy.csv on every sim column
   });
 });
 describe('price formula', () => {
