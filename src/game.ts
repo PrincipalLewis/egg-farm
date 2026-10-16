@@ -11,7 +11,8 @@ import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
-export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
+import { hireNudgeEligible, hasWorker, type HireNudgeSource } from './ui/hire-nudge';
+export type GameEvent = SimEvent | { type: 'hire_nudge'; phase: 'shown' | 'cleared' } | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
 export const tracksOff = (b: Balance): Balance => (b.m4 ? { ...b, m4: { ...b.m4, enabled: 0 } } : b);
@@ -100,6 +101,24 @@ export class Game {
       else { const { type, ...rest } = e; this.telemetry.track(type, rest); }
     }
   }
+  /** L30-19b: hire nudge state (checked every frame/dispatch, so it shows within one frame of reaching the level). */
+  private hireNudgeShown = false;
+  /** HoP 00:04: dismissible, once per session. Session-only (never persisted): shows again next session while workers = 0. */
+  private hireNudgeDismissedThisSession = false;
+  get hireNudgeActive() { return !this.hireNudgeDismissedThisSession && hireNudgeEligible(this.state, this.b); }
+  hireNudgeDismiss(source: HireNudgeSource = 'l25') {
+    if (!this.hireNudgeActive) return; this.hireNudgeDismissedThisSession = true;
+    this.telemetry.track('hire_nudge_dismissed', { source, farm_level: this.state.farmLevel }); this.notify({ type: 'hire_nudge', phase: 'cleared' });
+  }
+  private checkHireNudge() {
+    if (this.state.hireNudgeDone) return;
+    if (hasWorker(this.state)) { this.state = { ...this.state, hireNudgeDone: 1 }; if (this.hireNudgeShown) this.notify({ type: 'hire_nudge', phase: 'cleared' }); this.hireNudgeShown = false; return; }
+    if (!this.hireNudgeShown && this.hireNudgeActive) {
+      this.hireNudgeShown = true; this.telemetry.track('hire_nudge_shown', { source: 'l25' as HireNudgeSource, farm_level: this.state.farmLevel });
+      this.notify({ type: 'hire_nudge', phase: 'shown' });
+    }
+  }
+  hireNudgeClicked(source: HireNudgeSource = 'l25') { this.telemetry.track('hire_nudge_clicked', { source, farm_level: this.state.farmLevel }); }
   private checkCoopFull() {
     const full = this.state.coop >= coopCap(this.state, this.b);
     if (full && this.coopFullSince === null) { this.coopFullSince = this.now(); this.telemetry.track('coop_full', { phase: 'start' }); this.notify({ type: 'coop_full', phase: 'start' }); }
@@ -261,7 +280,7 @@ export class Game {
     if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
-    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();
+    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull(); this.checkHireNudge();
     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
   }
@@ -277,7 +296,7 @@ export class Game {
   /** Debug/QA: simulate `ms` of online play immediately (same tick path as frame()). */
   debugAdvance(ms: number) {
     const ev: SimEvent[] = []; const r = advance(this.state, ms, this.accMs, this.b, ev);
-    this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull();
+    this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull(); this.checkHireNudge();
   }
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
   /** Dev only. Goes through the same load-time backup gate as any save (review n2): the v6 backup is written (or the
@@ -297,6 +316,6 @@ export class Game {
       const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
     }
-    this.checkCoopFull(); this.telemetry.poll();
+    this.checkCoopFull(); this.checkHireNudge(); this.telemetry.poll();
   }
 }

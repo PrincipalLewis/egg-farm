@@ -40,6 +40,7 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
   if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))
     throw new Error('balance.workers.grader.tiers: farm and mult must increase, mult > 1');
   for (const k of ['tired_bonus_share', 'asleep_bonus_share'] as const) if (W.grader[k] > 1) throw new Error(`balance.workers.grader.${k} must be <= 1`);
+  if (!Number.isInteger(W.tips.hire_nudge_farm_level) || W.tips.hire_nudge_farm_level < 0) throw new Error('balance.workers.tips.hire_nudge_farm_level must be a non-negative integer (CSV hire_nudge_farm_level or economy-config hireNudgeFarmLevel)');
   // M4-A tracks (flag + costs + caps + milestones)
   if (b.m4) {
     const m = b.m4;

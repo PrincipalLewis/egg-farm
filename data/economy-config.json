@@ -1,5 +1,5 @@
 {
-  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1). Levels the formula does not reproduce (F1-GAP L18-19, M3 taper L23-29) are read verbatim from the CSV into farm.costOverrides. farmMaxLevel (L30+ D1, HoP 23:37): highest buyable Farm level; CSV rows above it are pricing base only. hvExtraSecondLevelMult (L30-17): the 2nd extra Hens/Egg value level above F+3 costs +10% (x1.10) on the first's surcharge.",
+  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1). Levels the formula does not reproduce (F1-GAP L18-19, M3 taper L23-29) are read verbatim from the CSV into farm.costOverrides. farmMaxLevel (L30+ D1, HoP 23:37): highest buyable Farm level; CSV rows above it are pricing base only. hvExtraSecondLevelMult (L30-17): the 2nd extra Hens/Egg value level above F+3 costs +10% (x1.10) on the first's surcharge. hireNudgeFarmLevel (L30-19b): Farm level for the hire nudge when no worker is hired; fallback until economy.csv carries hire_nudge_farm_level.",
   "farmCostGrowthSegments": [
     {
       "from": 6,
@@ -13,5 +13,6 @@
     }
   ],
   "farmMaxLevel": 50,
-  "hvExtraSecondLevelMult": 1.1
+  "hvExtraSecondLevelMult": 1.1,
+  "hireNudgeFarmLevel": 25
 }

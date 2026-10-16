@@ -24,6 +24,8 @@ export interface GameState {
   v6BackupId?: string;
   /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the interim track migration). */
   celebratedMilestones: string[];
+  /** L30-19b: set once the first worker is hired; the hire nudge never shows again. Optional field in the v6 save (no SAVE_VERSION bump). */
+  hireNudgeDone?: 1;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

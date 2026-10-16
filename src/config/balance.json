@@ -86,7 +86,8 @@
     },
     "tips": {
       "coop_hand_tip_full_s": 10,
-      "coop_hand_tip_min_farm": 7
+      "coop_hand_tip_min_farm": 7,
+      "hire_nudge_farm_level": 25
     }
   },
   "maxLevel": 30,

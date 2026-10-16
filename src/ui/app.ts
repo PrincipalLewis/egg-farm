@@ -16,6 +16,7 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
+import { hireNudgeHtml, hireNudgeDismissHtml, newDotHtml, nextHire, pickHint } from './hire-nudge';
 import { m4On, trackMaxLevel, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackBuyCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
@@ -138,7 +139,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   // M2 placeholder Coop Hand tip: tap opens Upgrades > Workers.
   const showTip = () => {
-    const el = h(`<button class="cooptip" role="status">${COOP_TIP_TEXT}</button>`); document.body.append(el);
+    const el = h(`<button class="cooptip" role="status">${COOP_TIP_TEXT}</button>`); document.body.append(el); coopTipEl = el;
     el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
     window.setTimeout(() => el.remove(), 8000);
   };
@@ -381,8 +382,26 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   });
   let pendingLvPop = false;
   // ---------- M3-AC5 next-goal strip ----------
+  // L30-19b hire nudge: one hint line under the goal button + New dot/pulse on Upgrades nav and the Workers tab.
+  const nudgeEl = h(`<div class="hire-nudge-line">${hireNudgeHtml(A('icon-hire.svg'))}${hireNudgeDismissHtml()}</div>`) as HTMLElement; nudgeEl.hidden = true;
+  const navUp = nav.querySelector<HTMLElement>('[data-nav="upgrades"]')!, wTab = root.querySelector<HTMLElement>('.tabs [data-tab="workers"]');
+  const dots = [navUp, wTab].filter(Boolean).map(t => { const d = h(newDotHtml()) as HTMLElement; d.hidden = true; t!.append(d); return d; });
+  let coopTipEl: HTMLElement | null = null;
+  const renderHireNudge = () => {
+    const on = pickHint({ coop_full: !!coopTipEl?.isConnected, hire_nudge: g.hireNudgeActive }) === 'hire_nudge', active = g.hireNudgeActive;
+    if (nudgeEl.hidden !== !on) nudgeEl.hidden = !on;
+    for (const d of dots) if (d.hidden !== !active) d.hidden = !active;
+    navUp.classList.toggle('pulse', active); wTab?.classList.toggle('pulse', active);
+  };
+  nudgeEl.querySelector('.hire-nudge-x')!.addEventListener('click', () => { g.hireNudgeDismiss('l25'); renderHireNudge(); });
+  nudgeEl.querySelector('.hire-nudge')!.addEventListener('click', () => {
+    g.hireNudgeClicked('l25'); tab = 'workers'; dirty = true; openPanel('upgrades'); render();
+    const id = nextHire(g.state, b), sel = id ? `.wk[data-w="${id}"]` : '.wk', row = uRow.querySelector<HTMLElement>(sel); if (!row) return;
+    row.scrollIntoView({ block: 'center', behavior: rm() ? 'auto' : 'smooth' }); hlSel = sel; hlUntil = now() + 1200; retrigger(row, 'goal-hl');
+    row.querySelector<HTMLElement>('button.btn')?.focus({ preventScroll: true });
+  });
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
-  let hlSel = '', hlUntil = 0, goalLiveT = 0;
+  let hlSel = '', hlUntil = 0, goalLiveT = 0; goalBtn.after(nudgeEl);
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
   const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
@@ -553,6 +572,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     renderGoal();
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
     { const hide = goalHidden; if (goalBtn.hidden !== hide) goalBtn.hidden = hide; }
+    renderHireNudge();
     if (shouldShowCoopTip(s, b, coopTipShown)) { coopTipShown = true; g.telemetry.track('coop_hand_tip', { phase: 'shown', farm: F }); showTip(); }
     // aria-live throttled 1/s
     const t = now(); if (t - lastLive > 1000) { lastLive = t; setText($('#live'), `${fmtMoney(s.coinsCents)}, ${fmtCount(s.basket)} eggs`); }

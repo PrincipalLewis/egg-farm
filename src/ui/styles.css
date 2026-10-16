@@ -464,3 +464,12 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
 .tracks .up .ms-hint{font:400 13px var(--f-body,'Nunito',inherit);color:var(--c-muted,#6b5e52)}
 .tracks .up.best.pending{outline-style:dashed}
+
+/* L30-19b hire nudge (UC25 style: 12px accent text, 44px hit area, chevron) + shared New dot / pulse */
+.hire-nudge{display:flex;align-items:center;gap:var(--s-1);min-height:44px;padding:0 var(--s-2);border:0;background:none;font:700 12px var(--f-body);color:var(--c-accent,var(--c-wood-text));cursor:pointer}
+.hire-nudge[hidden]{display:none}.hire-nudge img{width:16px;height:16px}.hire-nudge .chev{margin-left:2px}
+.new-dot{position:absolute;top:4px;right:6px;width:10px;height:10px;border-radius:50%;background:#e5484d;box-shadow:0 0 0 2px #fff}.new-dot[hidden]{display:none}
+[data-nav="upgrades"],.tabs [data-tab="workers"]{position:relative}
+.pulse{animation:nudge-pulse 1.6s ease-in-out infinite}@keyframes nudge-pulse{50%{transform:scale(1.06)}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.hire-nudge-line{display:flex;align-items:center}.hire-nudge-line[hidden]{display:none}.hire-nudge-x{min-width:44px;min-height:44px;border:0;background:none;font:700 16px var(--f-body);color:var(--c-hint)}

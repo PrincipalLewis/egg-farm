@@ -14,7 +14,7 @@ export const ECON_CONFIG_PATH = here('../data/economy-config.json');
 /** farmMaxLevel (L30+ D1): the highest buyable Farm level; CSV rows above it are a pricing base only (Farm L51-55 rows of
  *  the L30+ table feed hv_extra_cost and the Hens/Egg value tracks). maxLevel = min(last CSV row, farmMaxLevel).
  *  hvExtraSecondLevelMult (L30-17): surcharge multiplier for the 2nd extra Hens/Egg value level (no CSV column yet). */
-export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmMaxLevel?: number; hvExtraSecondLevelMult?: number }
+export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmMaxLevel?: number; hvExtraSecondLevelMult?: number; hireNudgeFarmLevel?: number }
 export const readEconomyConfig = (path = ECON_CONFIG_PATH): EconomyConfig => JSON.parse(readFileSync(path, 'utf8'));
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max', 'hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'];
@@ -108,7 +108,7 @@ export function verify(rows: Row[], p: EconomyParams) {
 }
 /** M2 Workers (v1.1): scalar columns must be constant on every row; per-level columns (wages, costs, Grader tiers)
  *  are checked against the formulas the sim uses. Hand-set extras not in the CSV (e.g. tips.coop_hand_tip_min_farm) are kept. */
-export function fitWorkers(rows: Row[], prev: any) {
+export function fitWorkers(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const R = rows, has = (c: string) => c in R[0];
   const one = (c: string) => {
     if (!has(c)) throw new Error(`sync-economy: economy.csv is missing workers column ${c}`);
@@ -141,7 +141,7 @@ export function fitWorkers(rows: Row[], prev: any) {
     coop_hand: { ...W.coop_hand, unlock_farm: u2, hire_cost: hire('w2_cost', u2), wage_per_farm_per_min: perFarmWage('w2_wage_per_min', u2), every_s: one('w2_every_s'), tired_every_s: one('w2_tired_every_s') },
     hawker: { ...W.hawker, unlock_farm: u3, hire_cost: hire('w3_cost', u3), demand_mult: one('w3_demand_mult'), tired_demand_mult: one('w3_tired_demand_mult') },
     grader: { ...W.grader, tiers, tier_cost_share_of_farm_cost: one('w4_tier_cost_share'), tired_bonus_share: one('w4_tired_bonus_share'), asleep_bonus_share: one('w4_asleep_bonus_share') },
-    tips: { ...W.tips, coop_hand_tip_full_s: one('coop_full_tip_s') },
+    tips: { ...W.tips, coop_hand_tip_full_s: one('coop_full_tip_s'), hire_nudge_farm_level: has('hire_nudge_farm_level') ? one('hire_nudge_farm_level') : cfg.hireNudgeFarmLevel ?? W.tips?.hire_nudge_farm_level },
   };
 }
 /** w4_tier_cost = floor(share x farm_cost(tier farm)) of the CURRENT tier on each row. */
@@ -206,7 +206,7 @@ export function fitM4(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
 }
 export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const p = fitParams(rows, prev, cfg);
-  const workers = fitWorkers(rows, prev); verifyGraderCosts(rows, workers);
+  const workers = fitWorkers(rows, prev, cfg); verifyGraderCosts(rows, workers);
   const m4 = fitM4(rows, prev, cfg);
   prev = { ...prev, workers };
   const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, m4: _m4, ...rest } = prev;
