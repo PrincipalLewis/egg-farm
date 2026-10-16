@@ -429,3 +429,12 @@ html,body{overflow-x:hidden;max-width:100%}
 .chip.served.squeeze{transition:opacity 120ms linear}.chip.served.squeeze.gone{opacity:0}
 /* Fast Collect taps (session 2): no double-tap-zoom/dblclick delay anywhere in the game, incl. the scene (a div) that also collects */
 #app,.scene,.queue{touch-action:manipulation}
+
+/* M4-A 3-row Farm screen (Option A) */
+.tracks{display:flex;flex-direction:column;gap:var(--s-3)}
+.tracks .balanced{display:flex;flex-direction:column;gap:var(--s-1);font:700 14px var(--f-body,inherit)}
+.tracks .balanced .segs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.tracks .balanced .segs i{height:8px;border-radius:4px;background:var(--c-dust,#d9cfc4);border:2px solid var(--c-outline)}
+.tracks .balanced .segs i.on{background:var(--c-yolk,#f6c445)}
+.up .lock{min-height:44px;display:flex;align-items:center;justify-content:flex-end;color:var(--c-ink,#3E2C23);font-weight:700}
+.up .lock::before{content:'🔒';margin-right:6px}
