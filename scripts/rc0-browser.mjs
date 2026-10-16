@@ -531,17 +531,17 @@ sections.tut1docked = async () => {
 // ---------- S2 hidden tab (bug-offline-overcredit.md, C-AC36): 671 s hidden -> frozen after 60 s, paid via the offline popup ----------
 sections.hiddentab = async () => {
   const { ctx, page, errors } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
-  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 15, coop: 51 };
-    const real = Date.now; window.__off = 0; Date.now = () => real() + window.__off;
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 15, coop: 51, coinsCents: 12345 };
+    const real = Date.now; window.__real = real; window.__off = 0; window.__t0 = null; Date.now = () => (window.__t0 ?? real()) + window.__off;
     window.__vis = 'visible'; Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => window.__vis }); Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__vis === 'hidden' }); });
   await page.waitForTimeout(300);
-  const hid = await page.evaluate(() => { window.__vis = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); const g = window.eggfarm; return { coins: g.state.coinsCents, pend: g.state.pendingOfflineEggs, saved: JSON.parse(localStorage.getItem('eggfarm.save')).state.coinsCents }; });
+  const hid = await page.evaluate(() => { window.__t0 = window.__real(); /* freeze the clock at the hide: away must be exactly 671 s, no real-time leak between evaluates */ window.__vis = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); const g = window.eggfarm; return { coins: g.state.coinsCents, pend: g.state.pendingOfflineEggs, saved: JSON.parse(localStorage.getItem('eggfarm.save')).state.coinsCents }; });
   const mid = await page.evaluate(() => { const g = window.eggfarm; for (let s = 60; s <= 671; s += 60) { window.__off = Math.min(671, s) * 1000; g.frame(); } window.__off = 671_000; g.frame(); return { hidden: g.isHidden }; });
   const back = await page.evaluate(() => { window.__vis = 'visible'; document.dispatchEvent(new Event('visibilitychange')); const g = window.eggfarm; return { coins: g.state.coinsCents, pend: g.state.pendingOfflineEggs, away: g.offline.awayS, eggs: g.offline.eggs }; });
   await page.waitForTimeout(300);
   const modal = await page.locator('#wbT').count();
   ok('S2 hidden tab: hide save is the hide snapshot; 671 s hidden pays the offline grant (away 671 s), coins as at the hide, welcome popup shown',
-    mid.hidden && hid.saved === hid.coins && back.away === 671 && back.eggs > 0 && back.pend === hid.pend + back.eggs && back.coins === hid.coins && modal === 1 && errors.length === 0, JSON.stringify({ hid, back, modal, errors }));
+    mid.hidden && hid.coins > 0 && hid.saved === hid.coins && back.away === 671 && back.eggs > 0 && back.pend === hid.pend + back.eggs && back.coins === hid.coins && modal === 1 && errors.length === 0, JSON.stringify({ hid, back, modal, errors }));
   await ctx.close();
 };
 

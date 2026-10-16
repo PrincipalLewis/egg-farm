@@ -35,6 +35,15 @@ describe('S2 hidden tab: cumulative hidden budget, then offline grant (bug-offli
     c.g.onHidden(c.clock.t); c.clock.t += 671_000; c.g.frame(); c.g.onShown(c.clock.t);
     expect(view(a.g)).toEqual(view(c.g));
   });
+  it('rc0 row regression: hide save is the hide snapshot (non-zero coins); awayS is the exact ms span, sub-second included', () => {
+    const { g, kv, clock } = setup(); g.state = { ...g.state, coinsCents: 12345 };
+    g.onHidden(clock.t); g.save();
+    expect(JSON.parse(kv.getItem('eggfarm.save')!).state.coinsCents).toBe(12345);
+    const start = clock.t; clock.t = start + 671_010; g.frame(); // a real clock leaks ~10 ms between the hide and the return
+    g.onShown(clock.t);
+    expect(g.offline.awayS).toBeCloseTo(671.01, 5); // the product reports the true span; a browser row must freeze its clock to assert 671
+    expect(g.state.coinsCents).toBe(12345);
+  });
   it('budget is cumulative across frame gaps (never more than 60 s total)', () => {
     const { g, clock } = setup(); const base = setup();
     g.onHidden(clock.t); for (let i = 0; i < 40; i++) { clock.t += 5000; g.frame(); } // 200 s hidden, 5 s frames
