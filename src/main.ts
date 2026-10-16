@@ -64,7 +64,7 @@ async function boot() {
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   if (restored) g.telemetry.track('save_restore', { source: 'idb' });
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
-  (window as any).eggfarm = g; // debug/QA handle
+  if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   // D3/D4 (rc1): ?debug=1 cheat panel and ?perf=1 SM-9 sampler exist only in QA/dev builds. Same build-time flag as the
