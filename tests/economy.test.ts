@@ -41,9 +41,7 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
   it.runIf(py)('fixture is fresh vs the live reference sim', () => {
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');
     execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'current', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
-    // guard_heartbeat_s / guard_stale_s: new sim-only columns, not in economy.csv until the F1 CSV merge (Wed Oct 21).
-    const live = parseEconomyCsv(readFileSync(out, 'utf8')).map((r: any) => { const { guard_heartbeat_s, guard_stale_s, ...rest } = r; return rest; });
-    expect(live).toEqual(data); // reference sim table == economy.csv
+    expect(parseEconomyCsv(readFileSync(out, 'utf8'))).toEqual(data); // reference sim table == economy.csv
   });
 });
 describe('price formula', () => {
