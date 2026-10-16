@@ -2,8 +2,7 @@ import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
 import { startAutosave } from './save/autosave';
-import { bus, guardTabs } from './save/tab-guard';
-import { readOnlyKV } from './save/save';
+import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
@@ -37,24 +36,35 @@ function saveNotice(text: string) {
   if (document.querySelector('.save-warn')) return;
   const n = document.createElement('div'); n.className = 'save-warn'; n.setAttribute('role', 'status'); n.textContent = text; document.body.append(n);
 }
-export const TWO_TAB_TEXT = "Egg Farm is open in another tab. Progress in this tab won't be saved.";
 export const NO_STORAGE_TEXT = "Your browser isn't letting us save right now (low space or private mode), so progress won't be saved.";
-/** AC14d: ask other tabs before the Game is built, so a second tab never writes the save (even the load-time save). */
-async function probeTabs(): Promise<{ second: boolean }> {
-  const t = guardTabs(bus(), () => {});
-  await new Promise(r => setTimeout(r, 200));
-  return { second: t.second };
+export const OTHER_TAB_TEXT = 'Game open in another tab';
+/** Single-tab guard: shown in the older tab. No close button; "Play here" reloads from the latest save and claims it. */
+function otherTabModal() {
+  if (document.querySelector('.tab-guard')) return;
+  document.getElementById('app')?.setAttribute('inert', '');
+  const m = document.createElement('div'); m.className = 'tab-guard'; m.setAttribute('role', 'alertdialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'tgTitle');
+  m.style.cssText = 'position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:rgba(0,0,0,.55)';
+  m.innerHTML = `<div class="card" style="background:#fff;border-radius:16px;padding:24px;max-width:300px;text-align:center"><h2 id="tgTitle" style="margin:0 0 16px">${OTHER_TAB_TEXT}</h2><button class="btn" id="tgPlay" type="button" style="min-height:48px;min-width:160px">Play here</button></div>`;
+  document.body.append(m);
+  const b = m.querySelector('#tgPlay') as HTMLButtonElement; b.focus();
+  b.onclick = () => { try { sessionStorage.setItem('eggfarm.playHere', '1'); } catch { /* ignore */ } location.reload(); };
 }
 async function boot() {
-  const tabs = await probeTabs();
+  // Single-tab guard: this (newest) tab claims the save BEFORE reading it, so an older tab's next save is blocked and
+  // offline earnings are granted only by the tab that owns the save.
+  let playHere = false; try { playHere = sessionStorage.getItem('eggfarm.playHere') === '1'; sessionStorage.removeItem('eggfarm.playHere'); } catch { /* ignore */ }
+  let gRef: Game | null = null;
+  const lease = new TabLease(localStorage, channel(), () => gRef?.deactivate());
+  const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  // D2: newest valid copy of localStorage / IndexedDB wins; a second tab neither reconciles nor mirrors.
-  let mirror: IdbMirror | null = null;
-  if (!tabs.second) { mirror = await IdbMirror.open(); if (mirror) { try { reconcile(localStorage, await mirror.read(), balance); } catch { /* localStorage blocked: Game reports it */ } } }
-  const g = new Game(balance, tabs.second ? readOnlyKV(localStorage) : localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror);
+  // D2: newest valid copy of localStorage / IndexedDB wins.
+  const mirror = await IdbMirror.open(); if (mirror) { try { reconcile(localStorage, await mirror.read(), balance); } catch { /* localStorage blocked: Game reports it */ } }
+  if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
+  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror);
+  gRef = g; g.canWrite = () => lease.owns(); g.onInactive = otherTabModal;
+  if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
   (window as any).eggfarm = g; // debug/QA handle
-  if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   // CEO ruling: debug globals stay out of release. ui.rates() remains on the mountApp() return for m3/rc1-ui.
@@ -68,7 +78,7 @@ async function boot() {
   }
   // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).
   new RenderPump(() => { g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
-  window.addEventListener('pagehide', () => g.endSession());
+  window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
   startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
 }
 preload().then(() => {
