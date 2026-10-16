@@ -20,6 +20,7 @@ import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
+import { tryDispatch } from './tap-guard';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -160,7 +161,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
   let farmMAShown = false;
-  for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (fb.getAttribute('aria-disabled') === 'true') return cantAfford(fb); g.dispatch({ type: 'manageAll' }); sfx('upgrade'); dirty = true; });
+  for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!tryDispatch(g, { type: 'manageAll' }, b)) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
   $('.tabs').addEventListener('click', e => { const t = (e.target as HTMLElement).closest('button')?.dataset.tab; if (t) { tab = t as any; dirty = true; } });
@@ -186,21 +187,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   mRows.addEventListener('click', e => {
     if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
     const bt = (e.target as HTMLElement).closest('button[data-id]') as HTMLElement | null; if (!bt) return;
-    if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
-    lastSellSource = bt; g.dispatch({ type: 'sell', customerId: +bt.dataset.id! });
+    lastSellSource = bt; if (!tryDispatch(g, { type: 'sell', customerId: +bt.dataset.id! }, b)) return cantAfford(bt);
   });
-  sellAllBtn.addEventListener('click', () => { if (sellAllBtn.getAttribute('aria-disabled') === 'true') return cantAfford(sellAllBtn); lastSellSource = sellAllBtn; g.dispatch({ type: 'sellAll' }); });
+  sellAllBtn.addEventListener('click', () => { lastSellSource = sellAllBtn; if (!tryDispatch(g, { type: 'sellAll' }, b)) cantAfford(sellAllBtn); });
   uRow.addEventListener('click', e => {
     const t = e.target as HTMLElement;
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
-    if (bt.getAttribute('aria-disabled') === 'true') return cantAfford(bt);
+    // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const act = bt.dataset.act, wid = bt.dataset.w as any;
-    if (act) { g.dispatch(act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : act === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' }); dirty = true; return; }
-    lastBuyBtn = bt; g.dispatch({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' });
-    setDisabled(bt, true); // F5: no double buy within the same frame
+    if (act) { if (!tryDispatch(g, act === 'hire' ? { type: 'hire', worker: wid } : act === 'manage' ? { type: 'manage', worker: wid } : act === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' }, b)) return cantAfford(bt); dirty = true; return; }
+    if (buyLock) return; // F5: one buy per rendered frame (no double buy from one tap); cleared by the next render
+    lastBuyBtn = bt; if (!tryDispatch(g, { type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' }, b)) return cantAfford(bt);
+    buyLock = true; lastUp = ''; // force the sheet to re-render with the new level/price (no sticky greyed button)
   });
-  let lastBuyBtn: HTMLElement | null = null;
+  let lastBuyBtn: HTMLElement | null = null, buyLock = false;
 
   // ---------- Modals ----------
   const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null; };
@@ -463,7 +464,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
       if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
-    pendingLvPop = false;
+    pendingLvPop = false; buyLock = false;
     renderGoal();
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
     { const hide = goalHidden; if (goalBtn.hidden !== hide) goalBtn.hidden = hide; }
