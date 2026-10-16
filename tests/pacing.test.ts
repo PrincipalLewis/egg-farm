@@ -5,6 +5,8 @@ import { runM2 } from './bot-m2';
 import TARGETS from '../data/pacing-targets.json';
 // AC7 (core-loop-spec, M1-R1; HoP 23:15 standard, product/ac7-qa-threshold-changes.md): 30 seeds (P95 needs >= 30),
 // seller15 + cheapest robustness. Pacing gates: P95 + worst-seed guard; other checks stay medians.
+/** Per-test timeout for this file: the 30-seed with-workers run takes ~4-5 s alone and ~11 s under full-suite load; 120 s keeps >10x headroom. */
+const PACING_TIMEOUT_MS = 120_000;
 const SEEDS = Array.from({ length: 30 }, (_, i) => i + 1);
 /** nearest-rank quantile (q=0.95 -> the P95-high seed, q=0.05 -> the P95-low seed) */
 const quant = (xs: number[], q: number) => { const a = [...xs].sort((p, r) => p - r); return a[Math.min(a.length - 1, Math.max(0, Math.ceil(q * a.length) - 1))]; };
@@ -23,7 +25,7 @@ describe('AC7 pacing bot on the real sim', () => {
   it('Farm L10 reached within 8-12 min (P95)', () => {
     const ts = seller.map(r => (r.farmReachedS(10) ?? Infinity) / 60);
     const { min, max } = TARGETS.l10_minutes; // product/ac7-qa-threshold-changes.md:7
-    expect(quant(ts, 0.95)).toBeLessThanOrEqual(max); expect(quant(ts, 0.05)).toBeGreaterThanOrEqual(min);
+    expect(quant(ts, 0.95)).toBeLessThanOrEqual(max); expect(Math.min(...ts)).toBeGreaterThanOrEqual(min); // fastest seed (Economy Oct 17 01:14)
   });
   // Replaces the retired 'L18 in 24-36 min' (decisions.md:47); bounds from data/pacing-targets.json.
   it('AC7 (decisions.md:47): Farm level at 30:00 in the targets band, no workers (P95-low and P95-high seeds)', () => {
@@ -51,4 +53,4 @@ describe('AC7 pacing bot on the real sim', () => {
   it('cheapest-first Farm level >= 70% of seller15 at 10 and 30 min', () => {
     for (const t of [600, 1800]) expect(med(cheap, r => r.farmAt(t))).toBeGreaterThanOrEqual(0.7 * med(seller, r => r.farmAt(t)));
   });
-}, 120_000);
+}, PACING_TIMEOUT_MS);
