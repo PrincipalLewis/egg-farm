@@ -73,8 +73,8 @@ describe('Workers v1.3 (m2-workers-layout §4.4, m2-proposal §8 #19-20)', async
     const h = manageAllHtml(S([40, 41, 10]), b); expect(h).toContain('Refill 2 tired workers'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested|1 tired workers|Refill tired \(/);
     expect(manageAllHtml(S([40, 41, 90]), b)).toContain('Refill 1 tired worker');
   });
-  it('AC-R9: locked under 3 hired; shown at N>=1; hidden at N=0 (including during cooldown)', () => {
-    expect(manageAllHtml(S([10, 10]), b)).toBe(''); expect(farmManageAllVisible(S([10, 10]), b, false)).toBe(false);
+  it('AC-R9: shown at N>=1 whatever the hire count (T5, PM Workers 00:17); hidden at N=0 (including during cooldown)', () => {
+    expect(manageAllHtml(S([10, 10]), b)).toContain('Refill 2 tired workers'); expect(farmManageAllVisible(S([10, 10]), b, false)).toBe(true);
     expect(manageAllHtml(S([90, 90, 90]), b)).toBe('');
     expect(manageAllHtml(S([90, 90, 90], 12.2), b)).toBe(''); // N=0 → hidden (Addendum 2)
     const cd = manageAllHtml(S([10, 90, 90], 12.2), b);

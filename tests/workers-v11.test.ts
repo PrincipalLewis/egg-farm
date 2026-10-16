@@ -5,6 +5,7 @@ import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { mood, isYawning, showManageAll, graderMult } from '../src/sim/workers';
 import { workersHtml, manageAllHtml } from '../src/ui/workers-ui';
+import { asleepOrUnpaidCount } from '../src/econ/income';
 import type { SimEvent } from '../src/sim/events';
 const E = b.workers.energy;
 const run = (s: GameState, secs: number, ev?: SimEvent[]) => { for (let i = 0; i < Math.round(secs * b.tickHz); i++) s = step(s, 1 / b.tickHz, b, ev); return s; };
@@ -19,10 +20,10 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(html).toContain('overlay-yawn.svg'); expect(html).toContain('wk working yawn');
     expect(workersHtml(base({ workers: { hawker: wk(60) } }), b)).not.toContain('overlay-yawn');
   });
-  it('Manage all shown only with >= manage_all_min_workers hired; refills all, one shared cooldown', () => {
+  it('Manage all shown for any hired worker <= threshold (T5/AC-R9); refills all, one shared cooldown', () => {
+    const none = base({ workers: {} }); expect(showManageAll(none.workers, b)).toBe(false); expect(manageAllHtml(none, b)).toBe('');
     const two = base({ workers: { hawker: wk(20), grader: wk(50) }, graderTier: 1 });
-    expect(showManageAll(two.workers, b)).toBe(false); expect(manageAllHtml(two, b)).toBe('');
-    expect(apply(two, { type: 'manageAll' }, b)).toBe(two);
+    expect(showManageAll(two.workers, b)).toBe(true); expect(manageAllHtml(two, b)).toContain('Refill 1 tired worker');
     const three = base({ workers: { hawker: wk(20), grader: wk(50), market_hand: wk(100) }, graderTier: 1 });
     expect(manageAllHtml(three, b)).toContain('Refill 1 tired worker'); // B5: only hawker (20%) is <= 40%; grader at 50% isn't counted
     const ev: SimEvent[] = []; const m = apply(three, { type: 'manageAll' }, b, ev);
@@ -96,8 +97,9 @@ describe('M2 UI logic (§4.4, §4.6)', () => {
     expect(html.match(/is-cooldown/g)).toHaveLength(4); expect(html).not.toContain('conic');
     expect(workersHtml({ ...s, manageCdS: 0 }, b)).not.toContain('is-cooldown');
   });
-  it('Farm View Manage all: >= 3 hired and someone yawning', () => {
-    expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80) } }), b)).toBe(false);
+  it('Farm View Manage all: any hired worker yawning (T5/AC-R9, no 3-hired gate)', () => {
+    expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80) } }), b)).toBe(true);
+    expect(showFarmManageAll(base({ workers: {} }), b)).toBe(false);
     expect(showFarmManageAll(base({ workers: { hawker: wk(80), grader: wk(80), market_hand: wk(90) } }), b)).toBe(false);
     expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80), market_hand: wk(90) } }), b)).toBe(true);
   });
@@ -125,6 +127,19 @@ describe('Farm View Manage all visibility (mobile nav + desktop docked share it)
     expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false); expect(manageAllHtml(three(100, 0), b)).toBe('');
     expect(farmManageAllVisible(three(41, 0), b, true)).toBe(false);
     expect(farmManageAllVisible(three(40, 0), b, false)).toBe(true); expect(manageAllHtml(three(40, 0), b)).toMatch(/aria-disabled="false"/);
-    expect(farmManageAllVisible({ ...three(10, 25), workers: { hawker: wk(10) } }, b, true)).toBe(false); // < 3 hired: never
+    expect(farmManageAllVisible({ ...three(10, 25), workers: { hawker: wk(10) } }, b, true)).toBe(true); // T5/AC-R9: 1 hired + tired shows
+    expect(farmManageAllVisible({ ...three(10, 0), workers: {} }, b, true)).toBe(false); // none hired: never
   });
+});
+
+describe('T5/AC-R9: a single tired or asleep worker of any role shows the Refill bar and nav Refill', () => {
+  for (const id of ['market_hand', 'coop_hand', 'hawker', 'grader'] as const) for (const [state, energy] of [['tired', 20], ['asleep', 0]] as const) {
+    it(`${id} ${state} alone -> "Refill 1 tired worker" bar + nav Refill${state === 'asleep' ? ' + asleep badge 1' : ''}`, () => {
+      const s = base({ workers: { [id]: wk(energy) }, graderTier: id === 'grader' ? 1 : 0, manageCdS: 0 });
+      expect(manageAllHtml(s, b)).toContain('Refill 1 tired worker');
+      expect(farmManageAllVisible(s, b, false)).toBe(true);
+      if (state === 'asleep') expect(asleepOrUnpaidCount(s, b)).toBe(1);
+      const m = apply(s, { type: 'manageAll' }, b); expect(m.workers[id]!.energy).toBe(100);
+    });
+  }
 });
