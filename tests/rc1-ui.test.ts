@@ -305,14 +305,16 @@ describe('C-AC26 Collection price-first copy (feature-spec §12)', async () => {
     expect(p).toEqual({ star: '★ ', track: 'Collection L25', shortTrack: 'Coll. L25', gain: ' · +12% income' });
     expect(labelFor('COLL', s, b, 12)).toBe('★ Collection L25 · +12% income');
   });
-  it('v1.4 overflow CSS: g-gain no shrink, g-track ellipsis', () => {
+  it('v1.6 overflow CSS (C-AC26b): wraps before g-gain, never ellipsised', () => {
     expect(css).toMatch(/\.goal-label \.g-gain\{flex:0 0 auto/);
-    expect(css).toMatch(/\.goal-label \.g-track\{min-width:0;overflow:hidden;text-overflow:ellipsis/);
+    expect(css).toMatch(/\.goal-label\{display:flex;flex-wrap:wrap;[^}]*overflow:visible;text-overflow:clip;[^}]*white-space:normal\}/);
+    expect(css).not.toMatch(/\.goal-label[^{]*\{[^}]*text-overflow:ellipsis/);
+    expect(css).toMatch(/\.goal-label \.g-head\{flex:0 0 auto;white-space:nowrap\}/);
     expect(app).toContain('fitGoalLabelEl');
     expect(app).toContain('paintGoalLabel');
   });
   it('FIX2: 4px after .g-star; .g-gain white-space:pre keeps space before ·', () => {
-    expect(css).toMatch(/\.goal-label \.g-star\{flex:0 0 auto;margin-right:4px\}/);
+    expect(css).toMatch(/\.goal-label \.g-star\{margin-right:4px\}/);
     expect(css).toMatch(/\.goal-label \.g-gain\{flex:0 0 auto;white-space:pre\}/);
     expect(labelFor('COLL', { ...initialState(b, 3), collectionLevel: 4 } as any, b, 8)).toBe('★ Collection L5 · +8% income');
   });
