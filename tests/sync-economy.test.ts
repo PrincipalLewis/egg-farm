@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { parseEconomyCsv, buildBalance, graftM4 } from '../scripts/sync-economy';
+import { parseEconomyCsv, buildBalance, readEconomyConfig } from '../scripts/sync-economy';
 import { balance } from '../src/config/balance';
 const csv = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
-const rows = graftM4(parseEconomyCsv(csv), parseEconomyCsv(readFileSync(new URL('../data/economy.m4-candidate.csv', import.meta.url), 'utf8')));
+const rows = parseEconomyCsv(csv);
 describe('sync-economy (MK-15)', () => {
-  it('balance.json is exactly what the CSV generates', () => { expect(buildBalance(rows, balance)).toEqual(balance); });
+  it('balance.json is exactly what the CSV + economy-config generate', () => { expect(buildBalance(rows, balance, readEconomyConfig())).toEqual(balance); });
   it('a consistent CSV change (new cost curve) changes config without code changes', () => {
     const fc = (L: number) => Math.floor(200 * 1.4 ** L), tierFarm = [0, 18, 19, 21, 22, 24];
     const edited = rows.map(r => ({ ...r, farm_cost: fc(r.level), w4_tier_cost: r.w4_tier ? Math.floor(0.5 * fc(tierFarm[r.w4_tier])) : 0 }));
@@ -25,7 +25,8 @@ describe('sync-economy (MK-15)', () => {
   it('fails loudly on inconsistent worker columns', () => {
     expect(() => buildBalance(rows.map(r => r.level === 5 ? { ...r, tired_below_pct: 50 } : r), balance)).toThrow(/tired_below_pct must be constant/);
     expect(() => buildBalance(rows.map(r => r.level === 10 ? { ...r, w1_wage_per_min: 9 } : r), balance)).toThrow(/L10 w1_wage_per_min/);
-    expect(() => buildBalance(rows.map(r => r.level === 20 ? { ...r, w4_tier_cost: 1 } : r), balance)).toThrow(/L20 w4_tier_cost/);
+    expect(() => buildBalance(rows.map(r => r.level === 19 ? { ...r, w4_tier_cost: 1 } : r), balance)).toThrow(/tier 2 must be a positive integer, rising/);
+    expect(() => buildBalance(rows.map(r => r.level === 5 ? { ...r, w4_tier_cost: 7 } : r), balance)).toThrow(/L5 w4_tier_cost must be 0/);
     const { yawn_at_pct: _y, ...noYawn } = rows[0] as any;
     expect(() => buildBalance(rows.map(r => { const { yawn_at_pct: _, ...o } = r as any; return o; }), balance)).toThrow(/missing workers column yawn_at_pct/);
   });

@@ -2,6 +2,7 @@
  * Economy formulas (M1-R1). Single implementation used by the sim AND by scripts/sync-economy.ts
  * (which fits these params from product/economy.csv and verifies every row). Mirrors product/sim/economy_sim.py.
  */
+export interface CostGrowthSegment { from: number; to: number; growth: number }
 export interface EconomyParams {
   maxLevel: number;
   collection: { baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number };
@@ -12,6 +13,11 @@ export interface EconomyParams {
     demandLoFactor: number; demandHiFactor: number;
     /** P3 (PT1-11, Economy's approach): L0 eggs/s from the CSV row; hens stay formula-driven. Absent = formula. */
     eggsPerSecL0?: number;
+    /** F1 (product/f1-proposal.md): per-level-range cost growth; levels inclusive, non-overlapping, from >= 1.
+     *  Segment {from,to,growth} uses `growth` for the step INTO each level from..to; costGrowth elsewhere. Absent/empty = pure pow. */
+    costGrowthSegments?: CostGrowthSegment[];
+    /** Per-level farm_cost from the CSV where it is not formula-shaped (F1 segments, M3 taper): {level: cost}. Absent = formula everywhere. */
+    costOverrides?: Record<string, number>;
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
   offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
@@ -40,7 +46,31 @@ export const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p
 export const collectionCost = (C: number, p: EconomyParams) => Math.floor(p.collection.baseCost * p.collection.costGrowth ** clampL(C, p));
 export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerTapBase + p.collection.eggsPerTapPerLevel * clampL(C, p);
 export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
-export const farmCost = (F: number, p: EconomyParams) => Math.floor(p.farm.baseCost * p.farm.costGrowth ** clampL(F, p));
+export const farmCost = (F: number, p: EconomyParams) => {
+  const segs = p.farm.costGrowthSegments, L = clampL(F, p), ov = p.farm.costOverrides?.[L];
+  if (ov !== undefined) return ov;
+  if (!segs || segs.length === 0) return Math.floor(p.farm.baseCost * p.farm.costGrowth ** L); // pre-F1 expression, unchanged
+  // Same evaluation order as the sim (SegEco.fcost) so floors match the CSV.
+  let v = p.farm.baseCost, n = L;
+  for (const s of segs) { const k = Math.max(0, Math.min(L, s.to) - s.from + 1); v *= s.growth ** k; n -= k; }
+  return Math.floor(v * p.farm.costGrowth ** n);
+};
+/** Throws unless segments are well-formed: integers, 1 <= from <= to, growth > 0 (finite), no overlaps. */
+export function validateCostGrowthSegments(segs: unknown, where = 'farm.costGrowthSegments'): void {
+  if (segs === undefined) return;
+  if (!Array.isArray(segs)) throw new Error(`balance.${where} must be an array`);
+  const ok = (x: unknown) => typeof x === 'number' && Number.isFinite(x);
+  segs.forEach((s: any, i) => {
+    if (!s || !ok(s.from) || !ok(s.to) || !ok(s.growth)) throw new Error(`balance.${where}[${i}] needs numeric from, to, growth`);
+    if (!Number.isInteger(s.from) || !Number.isInteger(s.to)) throw new Error(`balance.${where}[${i}] from/to must be integers`);
+    if (s.from < 1) throw new Error(`balance.${where}[${i}] from must be >= 1`);
+    if (s.from > s.to) throw new Error(`balance.${where}[${i}] from must be <= to`);
+    if (!(s.growth > 0)) throw new Error(`balance.${where}[${i}] growth must be > 0`);
+  });
+  const sorted = [...segs].sort((a: any, b: any) => a.from - b.from);
+  for (let i = 1; i < sorted.length; i++) if (sorted[i].from <= sorted[i - 1].to)
+    throw new Error(`balance.${where}: segments ${sorted[i - 1].from}-${sorted[i - 1].to} and ${sorted[i].from}-${sorted[i].to} overlap`);
+}
 export const hens = (F: number, p: EconomyParams) => p.farm.hensBase + p.farm.hensPerLevel * clampL(F, p);
 export const eggsPerSec = (F: number, p: EconomyParams) =>
   clampL(F, p) === 0 && p.farm.eggsPerSecL0 !== undefined ? p.farm.eggsPerSecL0 : roundHalfUp(hens(F, p) * p.farm.eggsPerHenPerSec, 4);
