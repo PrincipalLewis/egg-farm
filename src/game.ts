@@ -14,6 +14,8 @@ export class Game {
   resetting = false;
   /** True when no save existed at load (drives onboarding). */
   isNewGame = false;
+  /** What this load read from the save (QA: TG-2 'Play here shows exactly the other tab's money'). */
+  loaded: { coinsCents: number; farmLevel: number; collectionLevel: number; savedAt: number } | null = null;
   /** rc0 AC14b: set when the stored save could not be opened (drives the recovery dialog). */
   recovery: Recovery | null = null;
   /** QA case 2: after a fresh start, `.bak` rotation waits for a valid save + progress (1 purchase or 60 s played). */
@@ -39,6 +41,7 @@ export class Game {
       if (!restored_from_backup) this.bakAllowed = false;
     }
     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
+    this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: f.savedAt } : null;
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
       // so each load produces at most one new grant.
