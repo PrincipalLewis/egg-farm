@@ -11,7 +11,8 @@
 #   TR5_BLOCKING=1    make TR-5 blocking (HoE flips this after 5 consecutive green runs, ADR M4-6)
 #   BROWSER_TEST_LOCK=path  every browser step runs under `flock <lock>` (CEO box-load rule; default
 #                     /workspace/egg-farm-studio/.browser-test.lock). The wait for the lock is logged per step.
-#   VITEST_WORKERS=2  vitest --maxWorkers (CEO box-load rule; default 2)
+#   VITEST_WORKERS=2  vitest forks pool size (CEO box-load rule; default 2). vitest 2.1.x rejects --maxWorkers=2 alone, so we pass
+#                     --poolOptions.forks.maxForks=N --poolOptions.forks.minForks=1. VITEST_POOL_ARGS overrides the flags entirely.
 #   GATE_LOG_DIR=dir  logs go here (default /tmp/gate-all.XXXX; remove with `rm -rf /tmp/gate-all.*` when done)
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -24,6 +25,7 @@ LOG="${GATE_LOG_DIR:-$(mktemp -d /tmp/gate-all.XXXX)}"; mkdir -p "$LOG"
 export SHOTS="${SHOTS:-$LOG/screenshots}"
 BROWSER_TEST_LOCK="${BROWSER_TEST_LOCK:-/workspace/egg-farm-studio/.browser-test.lock}"
 VITEST_WORKERS="${VITEST_WORKERS:-2}"
+read -r -a VPOOL <<< "${VITEST_POOL_ARGS:---poolOptions.forks.maxForks=$VITEST_WORKERS --poolOptions.forks.minForks=1}"
 declare -a RES; FAIL=0; FLAKY=0
 # Never leave dev servers / browsers behind: on any exit, kill only this script's own process tree.
 cleanup() { local kids; kids=$(pgrep -P $$ 2>/dev/null); for k in $kids; do pkill -TERM -P "$k" 2>/dev/null; kill -TERM "$k" 2>/dev/null; done
@@ -35,7 +37,7 @@ locked() { local name="$1"; shift; local w0; w0=$(date +%s.%N)
   flock "$BROWSER_TEST_LOCK" bash -c 'echo "lock-wait-s $(awk "BEGIN{printf \"%.1f\", $(date +%s.%N)-$0}")" >&2; exec "$@"' "$w0" "$@"; }
 
 summary() {
-  echo "browser lock: $BROWSER_TEST_LOCK · vitest maxWorkers=$VITEST_WORKERS"
+  echo "browser lock: $BROWSER_TEST_LOCK · vitest ${VPOOL[*]}"
   echo "== gate-all @ $(git rev-parse --short HEAD) · engines: ${SKIP_BROWSER:+(skipped) }$ENGINES · total $((SECONDS-T0))s =="
   printf '%s\n' "${RES[@]}"; echo "logs: $LOG"
   if [[ $FAIL -ne 0 ]]; then echo "RESULT: RED"; exit 1; elif [[ $FLAKY -ne 0 ]]; then echo "RESULT: FLAKY (passed only after retry; not green)"; exit 3; else echo "RESULT: GREEN"; exit 0; fi
@@ -73,7 +75,7 @@ EXCL=(); for f in $TR5_FILES; do EXCL+=(--exclude "$f"); done
 run check-economy-copy node scripts/check-economy-copy.mjs
 run sync-economy-check npx vite-node scripts/sync-economy-cli.ts -- --check
 run tsc npx tsc --noEmit
-run unit npx vitest run --maxWorkers="$VITEST_WORKERS" "${EXCL[@]}"
+run unit npx vitest run "${VPOOL[@]}" "${EXCL[@]}"
 if [[ -n "$(git status --porcelain)" ]]; then git status --porcelain >"$LOG/clean-tree.log"; RES+=("FAIL  clean-tree (uncommitted changes; check-release-build needs a clean tree)  -> $LOG/clean-tree.log"); FAIL=1; stop_if_failed
   RES+=("SKIP  release-build (dirty tree)")
 else RES+=("PASS  clean-tree"); run release-build bash -c 'npx vite build && node scripts/check-release-build.mjs dist'; fi
@@ -88,7 +90,7 @@ else
 fi
 # TR-5: report-only unless TR5_BLOCKING=1
 if [[ -z "$TR5_FILES" ]]; then RES+=("SKIP  TR-5 (looked for: $TR5_GLOB; none on this branch)")
-elif npx vitest run --maxWorkers="$VITEST_WORKERS" $TR5_FILES >"$LOG/tr5.log" 2>&1; then RES+=("PASS  TR-5 [${TR5_BLOCKING:+blocking}${TR5_BLOCKING:-report-only}] ($(echo $TR5_FILES))")
+elif npx vitest run "${VPOOL[@]}" $TR5_FILES >"$LOG/tr5.log" 2>&1; then RES+=("PASS  TR-5 [${TR5_BLOCKING:+blocking}${TR5_BLOCKING:-report-only}] ($(echo $TR5_FILES))")
 elif [[ -n "${TR5_BLOCKING:-}" ]]; then RES+=("FAIL  TR-5 [blocking] ($(echo $TR5_FILES)) -> $LOG/tr5.log"); FAIL=1
 else RES+=("WARN  TR-5 [report-only, not blocking] ($(echo $TR5_FILES)) -> $LOG/tr5.log"); fi
 summary
