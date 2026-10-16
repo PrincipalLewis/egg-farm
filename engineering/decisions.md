@@ -110,3 +110,9 @@
 - Decision: **accepted for rc1**, not designed out. Mitigation: the diverged notice offers Export whenever both slots are full.
 - Rationale: it needs three divergences before any Export, and it is independent of rollback (SK-1 stays closed).
 - Follow-up post-rc1: raise `save_recovery_slot` telemetry when both slots are full; candidate refinement from Saves (see status.md).
+
+## 2026-10-17 00:05 ADR M4-19 revision 5 (HoQA 078edfb M-1..M-3, S-2; recorded by Senior Software Architect)
+- Replace staging: a replace first copies the evicted slot copy to IDB `eggfarm/save/diverged_tmp` (read back), then writes the loser into the slot (read back), then deletes tmp; a failed slot read-back restores from tmp. Boot sweeps a stale tmp: delete only if it matches a slot or store copy by `sum` + state, else move it to an empty slot or keep it and show the notice. Pre-SQ-1 builds never touch it; it is on the §3b zero-writes list.
+- Reset deletes `diverged`, `diverged2`, `diverged_tmp` and clears `eggfarm.save.diverged_notice_shown`.
+- Diverged notice specified (trigger, copy, once-flag `eggfarm.save.diverged_notice_shown`, every-load Export offer when both slots are full); Export downloads all slot copies then clears them.
+- All one-slot/skip wording removed doc-wide; M4-25 listed as §7 risk 13.
