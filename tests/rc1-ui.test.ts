@@ -13,3 +13,20 @@ describe('D5 next-goal button (m3-next-goal-spec v1.0.1)', () => {
   });
   it('row budget: 44 hit + 4 gap = 40 pill + 8 gap', () => expect(44 + (8 - 4)).toBe(40 + 8));
 });
+
+describe('D7 rotate prompt focus trap', async () => {
+  const { trapFocus } = await import('../src/ui/rotate-prompt');
+  const fakeDoc = () => { const l: Record<string, Function> = {}; return { l, addEventListener: (t: string, f: Function) => { l[t] = f; }, removeEventListener: (t: string) => { delete l[t]; } }; };
+  it('Tab and Shift+Tab are swallowed and focus stays on the prompt', () => {
+    const d = fakeDoc(); let focus = 0; const el = { focus: () => focus++, contains: (n: any) => n === el } as any;
+    trapFocus(el, d as any); let prevented = 0;
+    for (const shiftKey of [false, true]) d.l.keydown({ key: 'Tab', shiftKey, preventDefault: () => prevented++, stopPropagation() {} });
+    d.l.keydown({ key: 'a', preventDefault: () => prevented++, stopPropagation() {} });
+    expect(prevented).toBe(2); expect(focus).toBe(2);
+  });
+  it('focus landing outside is pulled back; release removes the listeners', () => {
+    const d = fakeDoc(); let focus = 0; const el = { focus: () => focus++, contains: (n: any) => n === el } as any;
+    const release = trapFocus(el, d as any); d.l.focusin({ target: {} }); d.l.focusin({ target: el }); expect(focus).toBe(1);
+    release(); expect(d.l.keydown).toBeUndefined(); expect(d.l.focusin).toBeUndefined();
+  });
+});

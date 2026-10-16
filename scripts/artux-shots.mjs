@@ -53,6 +53,14 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   if (want) { const before = await p.evaluate(() => window.eggfarm.state.basket); await p.mouse.click(320, 300); await p.waitForTimeout(200); r.tapBlocked = (await p.evaluate(() => window.eggfarm.state.basket)) === before; r.icon = await p.evaluate(() => { const i = document.querySelector('#rotate-prompt img').getBoundingClientRect(); return [Math.round(i.width), Math.round(i.height)]; });
     await p.screenshot({ path: `${OUT}/rotate-prompt-640x360-${eng}.png` }); }
   ok(`rotate prompt ${name}`, r.shown === want && r.inert === want && (!want || (r.tapBlocked && r.icon.join() === '64,64')), r); await ctx.close(); }
+// D7: the rotate prompt traps keyboard focus while open and restores it on close
+{ const { ctx, p } = await open({ viewport: { width: 360, height: 640 }, hasTouch: true, isMobile: true }, null);
+  await p.evaluate(() => document.querySelector('#collect').focus());
+  await p.setViewportSize({ width: 640, height: 360 }); await p.waitForSelector('#rotate-prompt:not([hidden])');
+  const seen = []; for (const k of ['Tab', 'Tab', 'Shift+Tab', 'Tab']) { await p.keyboard.press(k); seen.push(await p.evaluate(() => document.activeElement?.id || document.activeElement?.tagName)); }
+  await p.setViewportSize({ width: 360, height: 640 }); await p.waitForSelector('#rotate-prompt', { state: 'hidden' });
+  const back = await p.evaluate(() => document.activeElement?.id);
+  ok('D7 rotate prompt traps Tab/Shift+Tab, restores focus to Collect on close', seen.every(x => x === 'rotate-prompt') && back === 'collect', { seen, back }); await ctx.close(); }
 // R1: FTUE bubble + Skip hidden while Settings is open, back after it closes (new save, FTUE running)
 { const ctx = await br.newContext({ viewport: { width: 360, height: 640 } }); const p = await ctx.newPage();
   await p.goto(`http://127.0.0.1:${port}/`); await p.getByText('Tap to start').click(); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(600);
