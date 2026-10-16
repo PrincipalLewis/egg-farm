@@ -2,13 +2,13 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { balance } from '../src/config/balance';
-import { loadSafe, save, SAVE_KEY, type KV } from '../src/save/save';
-import { step } from '../src/sim/tick';
-import { initialState } from '../src/sim/state';
-import { apply } from '../src/sim/actions';
-import { applyOffline } from '../src/sim/offline';
-import { runBot } from '../tests/bot';
+import { balance } from '../../src/config/balance';
+import { loadSafe, save, SAVE_KEY, type KV } from '../../src/save/save';
+import { step } from '../../src/sim/tick';
+import { initialState } from '../../src/sim/state';
+import { apply } from '../../src/sim/actions';
+import { applyOffline } from '../../src/sim/offline';
+import { runBot } from '../../tests/bot';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const PINS: Record<string, string> = {
   'm1-rc2-v4-12min': 'b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9',
@@ -23,7 +23,7 @@ describe('golden', () => {
   it('storage bytes', () => {
     const out: Record<string, string> = {};
     for (const f of FIX) {
-      const raw = readFileSync(new URL(`../tests/fixtures/saves/${f}.json`, import.meta.url), 'utf8');
+      const raw = readFileSync(new URL(`../../tests/fixtures/saves/${f}.json`, import.meta.url), 'utf8');
       const now = JSON.parse(raw).savedAt as number; const kv = mem(); kv.setItem(SAVE_KEY, raw);
       const r = loadSafe(kv, balance, now); let s = r.file!.state;
       for (let i = 0; i < 600; i++) s = step(s, 0.1, balance, []);
