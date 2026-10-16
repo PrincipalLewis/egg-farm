@@ -1,3 +1,4 @@
+import { assetUrl } from './asset-url';
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
@@ -14,7 +15,7 @@ import { RenderPump } from './ui/render-pump';
 import { BUILD_ID } from './build-id';
 const VERSION = BUILD_ID;
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
-  'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
+  'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => assetUrl(`assets/${n}.svg`));
 const root = document.getElementById('app')!;
 const audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/`);
 
@@ -46,7 +47,7 @@ export const NO_STORAGE_TEXT = "Your browser isn't letting us save right now (lo
 let frozen = false;
 function otherTabModal() {
   frozen = true; audio.mute();
-  showTabGuardDialog(f => `${import.meta.env.BASE_URL}assets/${f}`, [root], () => {
+  showTabGuardDialog(f => assetUrl(`assets/${f}`), [root], () => {
     try { sessionStorage.setItem('eggfarm.playHere', '1'); } catch { /* ignore */ }
     setTimeout(() => location.reload(), 0); // let "Loading…" paint first
   });
@@ -55,10 +56,10 @@ function otherTabModal() {
  *  No lease, UI, sim, autosave or pagehide save. Nit n1: there is intentionally no Game handle or lease callback here. */
 function refuseNewer(version: number, idbRaw: string | null) {
   try { new Game(balance, localStorage, () => Date.now(), undefined, VERSION, null, idbRaw); } catch { /* storage blocked: still refuse */ }
-  showNewerSaveDialog(a => `${import.meta.env.BASE_URL}assets/${a}`, version, () => location.reload());
+  showNewerSaveDialog(a => assetUrl(`assets/${a}`), version, () => location.reload());
 }
 async function boot() {
-  const asset = (a: string) => `${import.meta.env.BASE_URL}assets/${a}`;
+  const asset = (a: string) => assetUrl(`assets/${a}`);
   // M4A-31(b)/(f)6 + review M1: the newer-save check runs FIRST, before the flush request, the lease claim, reconcile or
   // any Game write. It covers localStorage main, .bak and the IndexedDB copy. A refused tab never joins the single-tab
   // guard (so a live tab is never frozen or made to save by it) and writes no save key anywhere.

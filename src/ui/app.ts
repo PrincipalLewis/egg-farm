@@ -1,3 +1,4 @@
+import { assetUrl } from '../asset-url';
 import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
@@ -26,7 +27,7 @@ import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
-const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
+const A = (f: string) => assetUrl(`assets/${f}`);
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
 interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
@@ -240,7 +241,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button><h2>Settings</h2>
       <label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
-      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${oldSaveForSession() ? `<button class="btn secondary" type="button" id="sOldSave">Export old save</button><div class="version" id="sOldMsg" role="status" aria-live="polite"></div>` : ''}${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
+      <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${oldSaveForSession() ? `<button class="btn secondary" type="button" id="sOldSave">Export old save</button><div class="version" id="sOldMsg" role="status" aria-live="polite"></div>` : ''}${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${assetUrl('fonts/OFL.txt')}" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
     modal.classList.add('open'); sfx('uiOpen');
   };

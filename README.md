@@ -47,6 +47,22 @@ npm run preview    # serves the built game from dist/ (the URL is printed)
 
 The [`m2-rc1-play` release](https://github.com/PrincipalLewis/egg-farm/releases/tag/m2-rc1-play) has `egg-farm-dd15dbf.html`, the whole game in one file. Download it and open it in a browser (on iPhone, open it in Safari rather than the Files preview). Progress is saved in that browser's local storage.
 
+### Building the single-file version (release step)
+
+Every Latest release attaches a single-file build. From a clean, committed checkout:
+
+```bash
+npm ci
+npm run build:html   # economy checks + tsc + vite build (vite.html.config.ts) -> dist-html/egg-farm-<tag>-<sha>.html
+npm run check:html   # opens that file from file:// in Chromium, Firefox and WebKit (headless)
+```
+
+- `<tag>` is the nearest git tag (`git describe --tags --abbrev=0`, falling back to `v<package version>`; override with `HTML_TAG=...`), `<sha>` the short HEAD.
+- JS and CSS are inlined by `vite-plugin-singlefile`; every file in `public/` (SVGs, fonts, audio, `OFL.txt`) is inlined as a `data:` URL, at runtime through `src/asset-url.ts`.
+- `build:html` fails if any non-inlined reference is left or the build id is `+dirty` (`check-release-build` on the file).
+- `check:html` fails on any network request that is not `file:`/`data:`/`blob:`, on any window global outside the allowlist in `scripts/allowed-globals.mjs` (same list as `check-globals`), or if the game does not boot (Tap to start, collect, Settings, images and fonts loaded, no page errors). Pass an engine name (e.g. `npm run check:html -- webkit`) to run one.
+- Attach the `.html` to the release and note its size.
+
 ## How to play
 
 ### The core loop: collect → sell → upgrade

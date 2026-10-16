@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '../asset-url';
 /** SFX (layout-spec §6): 11 mp3s, Web Audio, unlocked on the "Tap to start" gesture. */
 export const SFX = {
   tapStart: 'sfx-tap-start', collect: 'sfx-collect-pop', sell: 'sfx-sell-coin', upgrade: 'sfx-upgrade',
@@ -23,7 +24,7 @@ export class Audio {
     if (this.ctx.state === 'suspended') await withTimeout(this.ctx.resume().catch(() => {}), AUDIO_UNLOCK_MS);
     // Buffer loads continue in the background; missing buffers make play() a no-op.
     void Promise.all(Object.values(SFX).map(async f => {
-      try { const r = await fetch(`${this.base}${f}.mp3`); this.buffers.set(f, await this.ctx!.decodeAudioData(await r.arrayBuffer())); } catch { /* missing sfx is non-fatal */ }
+      try { const r = await fetch(resolveAssetUrl(`${this.base}${f}.mp3`)); this.buffers.set(f, await this.ctx!.decodeAudioData(await r.arrayBuffer())); } catch { /* missing sfx is non-fatal */ }
     }));
   }
   /** Single-tab guard: silence everything until reload. */

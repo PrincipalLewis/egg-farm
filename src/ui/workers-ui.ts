@@ -1,12 +1,13 @@
 /** M2 PLACEHOLDER UI (no Art & UX layout yet): Workers tab rows (hire, energy bar, state, Manage), Coop Hand tip.
  *  Final visuals come with the Art & UX M2 layout; keep logic here, swap markup later. */
+import { assetUrl } from '../asset-url';
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
-const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
+const ASSET = (f: string) => assetUrl(`assets/${f}`);
 /** §4.6 ring: --ring-offset = 100 x (1 - remaining / manage_cooldown_s); 0 = full ring, 100 = emptied. */
 export const ringOffset = (remainingS: number, cooldownS: number) =>
   cooldownS <= 0 ? 100 : Math.round(Math.min(100, Math.max(0, 100 * (1 - remainingS / cooldownS))) * 10) / 10;
