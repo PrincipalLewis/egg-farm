@@ -99,6 +99,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.append(hud, farm, nav, panelLayer); document.body.append(modal, fxLayer, toast);
   const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
+  const coinPill = $('.pill.coins'), coinIcon = $('.pill.coins > img'); // S2-8: #coins sits in .coins-col now
   const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
   const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
@@ -313,8 +314,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       case 'sell': {
         income.add(now(), e.k * e.price); sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
-        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!.querySelector('img')!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
-        else pulse(coinsEl.parentElement!);
+        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinIcon, i, 20, i === 0 ? () => pulse(coinPill) : undefined);
+        else pulse(coinPill);
         floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;

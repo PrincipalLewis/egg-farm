@@ -178,7 +178,7 @@ describe('FX particles (QA bd0dc66 top-left fragment)', async () => {
   it('hidden sources fall back to the scene; particles leave on animationend / finish; coins land on the pill coin', () => {
     expect(app).toMatch(/if \(!r\.width && !r\.height\) r = scene\.getBoundingClientRect\(\)/);
     expect(app).toContain("el.addEventListener('animationend', kill, { once: true }); setTimeout(kill, ms);");
-    expect(app).toContain("coinsEl.parentElement!.querySelector('img')!");
+    expect(app).toContain("coinIcon = $('.pill.coins > img')"); expect(app).toMatch(/fly\(A\('icon-coin\.svg'\), src, coinIcon,/);
   });
 });
 
