@@ -10,13 +10,19 @@ import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/s
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
+import { audioJuiceV1 } from './ui/feature-flags';
+import { SfxEngine, browserDeps } from './ui/sfx-v1';
 
 import { BUILD_ID } from './build-id';
 const VERSION = BUILD_ID;
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
   'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
 const root = document.getElementById('app')!;
-const audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/`);
+const JUICE = audioJuiceV1();
+const audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/`, !JUICE);
+/** Flag on: v1 engine replaces every legacy sfx; nothing is created or played before the Tap-to-start gesture. */
+const sfx1 = JUICE ? new SfxEngine(`${import.meta.env.BASE_URL}assets/`, browserDeps()) : null;
+if (sfx1) document.addEventListener('visibilitychange', () => sfx1.visibility(document.hidden));
 
 // 3.1 Loading / Tap to start (the tap is the audio-unlock gesture)
 const start = document.createElement('div'); start.className = 'start';
@@ -45,7 +51,7 @@ export const NO_STORAGE_TEXT = "Your browser isn't letting us save right now (lo
 /** Single-tab guard: this tab lost the save. Sim/saving already stopped (Game.deactivate); freeze render, mute, show notice. */
 let frozen = false;
 function otherTabModal() {
-  frozen = true; audio.mute();
+  frozen = true; audio.mute(); sfx1?.setMuted(true);
   showTabGuardDialog(f => `${import.meta.env.BASE_URL}assets/${f}`, [root], () => {
     try { sessionStorage.setItem('eggfarm.playHere', '1'); } catch { /* ignore */ }
     setTimeout(() => location.reload(), 0); // let "Loading…" paint first
@@ -96,14 +102,14 @@ async function boot() {
   // QA BUG-2: a newer build saved while this tab was live (found right before a write). Game already stopped all writes
   // and the sim; release the lease, stop autosave, freeze render and show the session-long .newer-save layer.
   let stopAutosave: (() => void) | null = null;
-  g.onNewerSave = v => { lease.release(); lease.stop(); stopAutosave?.(); frozen = true; audio.mute(); showNewerSaveDialog(asset, v, () => location.reload()); };
+  g.onNewerSave = v => { lease.release(); lease.stop(); stopAutosave?.(); frozen = true; audio.mute(); sfx1?.setMuted(true); showNewerSaveDialog(asset, v, () => location.reload()); };
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
   if (restored) g.telemetry.track('save_restore', { source: 'idb' });
   // The only release global (allowlist in check-release-build): read-only, no install_id. See Telemetry.snapshotJSON.
   (window as any).eggfarmExportTelemetry = () => g.telemetry.snapshotJSON();
   if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
-  const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
+  const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery, sfx1 });
   // CEO ruling: debug globals stay out of release. ui.rates() remains on the mountApp() return for m3/rc1-ui.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmUi = ui; // dev/QA builds only (__IOS_FLAG__), checked by check-release-build
   // D3/D4 (rc1): ?debug=1 cheat panel and ?perf=1 SM-9 sampler exist only in QA/dev builds. Same build-time flag as the
@@ -122,6 +128,6 @@ async function boot() {
 preload().then(() => {
   start.querySelector('.bar')?.remove();
   const b = document.createElement('button'); b.className = 'btn'; b.style.cssText = 'width:240px;min-height:56px'; b.textContent = 'Tap to start';
-  b.onclick = async () => { b.disabled = true; await withTimeout(audio.unlock(), AUDIO_UNLOCK_MS); audio.play('tapStart'); start.remove(); boot(); };
+  b.onclick = async () => { b.disabled = true; await withTimeout(sfx1 ? sfx1.unlock() : audio.unlock(), AUDIO_UNLOCK_MS); if (!sfx1) audio.play('tapStart'); start.remove(); boot(); };
   start.append(b);
 }, showError);

@@ -12,6 +12,9 @@ import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
 import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRecoveryDialog } from './save-recovery';
+import type { SfxEngine, SfxEvent } from './sfx-v1';
+import { tapSquash, coopBump, crumbs, cantAffordFeedback, SaleMedian, EASE_OUT, numberPop, POP_PX, type PopKind } from './juice';
+import { soundToggleHtml } from './sound-toggle';
 import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
@@ -35,7 +38,8 @@ const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textC
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
-export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null } = { newGame: false }) {
+export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null; sfx1?: SfxEngine | null } = { newGame: false }) {
+  const sfx1 = opts.sfx1 ?? null; // audio + juice v1 (flag audioJuiceV1, default off)
   let stored: any = {}; try { stored = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') ?? {}; } catch { /* bad flags: defaults */ }
   // PT1-4: a fresh-start fallback (AC14b F/Q) is a new farm: drop FTUE / Workers-tip progress flags, keep prefs.
   if (opts.recovery && !opts.recovery.restored_from_backup && opts.newGame) stored = keepPrefsOnly(stored);
@@ -49,8 +53,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const sysRM = matchMedia('(prefers-reduced-motion: reduce)');
   const rm = () => flags.reducedMotion || sysRM.matches;
   const applyRM = () => { document.documentElement.classList.toggle('reduced-motion', rm()); root.classList.toggle('rm', rm()); };
-  audio.enabled = flags.sfx; applyRM();
-  const sfx = (n: SfxName) => audio.play(n);
+  audio.enabled = flags.sfx; sfx1?.setMuted(!flags.sfx); applyRM();
+  /** Flag on: v1 hooks only (no legacy assets/audio/* at all); legacy-only cues (ui open/close, customers, coop full, yawn, welcome) are silent. */
+  const V1: Partial<Record<SfxName, SfxEvent>> = { collect: 'egg.collect', sell: 'market.sell', upgrade: 'upgrade.buy' };
+  const sfx = (n: SfxName) => { if (!sfx1) return audio.play(n); const ev = V1[n]; if (ev) sfx1.play(ev); };
+  const sales = new SaleMedian();
+  const juiceAnim = (el: Element, p: { keyframes: Keyframe[]; duration: number; easing?: string } | null) => { if (p) try { (el as HTMLElement).animate(p.keyframes, { duration: p.duration, easing: p.easing }); } catch { /* no WAAPI */ } };
   const now = () => performance.now();
   const income = new IncomeRate(60_000);
   const tapFx = new TapFx({ ...b.feel, flightMs: b.feel.egg_flight_ms }, now);
@@ -126,6 +134,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const t = now();
     if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); floater.until = t + 700; return; }
     const c = center(at), el = h(`<div class="floater ${cls}" style="left:${c.x}px;top:${c.y - 40}px;translate:-50% 0">${text}</div>`);
+    if (sfx1) { const kind: PopKind = cls === 'coin' ? 'sell' : 'tap'; el.classList.add('pop-v1'); el.setAttribute('aria-hidden', 'true'); el.style.fontSize = `${POP_PX[kind]}px`; el.style.animation = 'none'; juiceAnim(el, numberPop(rm(), kind === 'tap' ? (Math.random() * 16 - 8) : 0)); spawn(el, 820); if (!cls) floater = { el, until: t + 60 }; return; }
     spawn(el, 750); if (!cls) floater = { el, until: t + 700 };
   };
   const sparkle = (at: Element, n: number) => {
@@ -172,14 +181,17 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- Actions ----------
   /** S2-10: every player action redraws synchronously, so the screen never waits for the next frame/timer to show it. */
   const act = (a: Parameters<typeof g.dispatch>[0]): boolean => { const ok: boolean = tryDispatch(g, a, b); if (ok) { dirty = true; render(); } return ok; };
-  const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
+  const cantAfford = (el: HTMLElement) => {
+    if (sfx1) { cantAffordFeedback(el, null, () => sfx1.play('cant_afford', { key: el.id || el.dataset.id || el.dataset.kind || el.className }), rm()); return; }
+    retrigger(el, 'shake'); sfx('cantAfford');
+  };
   const collect = () => {
     const before = g.state.coop; g.dispatch({ type: 'collect' });
     const k = Math.floor(before) - Math.floor(g.state.coop) + (g.state.basket ? 0 : 0);
     const got = Math.min(Math.floor(before), S.eggsPerTap(g.state.collectionLevel, b));
-    retrigger(collectBtn, 'squash');
+    if (sfx1) { juiceAnim(collectBtn, tapSquash(rm())); sfx1.play('egg.tap'); } else retrigger(collectBtn, 'squash');
     if (got <= 0) { retrigger(collectBtn, 'shake'); floatText('Empty', collectBtn); return; }
-    void k; sfx('collect');
+    void k; if (!sfx1) sfx('collect'); else { juiceAnim($('.nest'), coopBump(rm())); if (!rm()) { const c = center(collectBtn); for (const p of crumbs(false, Math.random)) { const el = h(`<i class="crumb" aria-hidden="true" style="left:${c.x}px;top:${c.y}px"></i>`); juiceAnim(el, { duration: p.ms, keyframes: [{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${p.dx}px,${p.dy}px)`, opacity: 1, offset: .55 }, { transform: `translate(${p.dx}px,${p.dy}px)`, opacity: 0 }], easing: EASE_OUT }); spawn(el, p.ms + 20); } } }
     const d = tapFx.tap(got);
     if (!rm()) { let first = true; for (let i = 0; i < d.flyers; i++) fly(A('icon-egg.svg'), $('.nest'), basketEl.parentElement!, i, 24, () => { if (first) { first = false; pulse(basketEl.parentElement!); } }); }
     else pulse(basketEl.parentElement!);
@@ -238,7 +250,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     modalKind = 'settings';
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="Settings">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button><h2>Settings</h2>
-      <label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>
+      ${sfx1 ? soundToggleHtml(flags.sfx) : `<label class="toggle">Sound effects<input type="checkbox" id="sSfx" ${flags.sfx ? 'checked' : ''}></label>`}
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
       <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${oldSaveForSession() ? `<button class="btn secondary" type="button" id="sOldSave">Export old save</button><div class="version" id="sOldMsg" role="status" aria-live="polite"></div>` : ''}${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
@@ -248,6 +260,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const t = e.target as HTMLElement;
     if (modalKind === 'welcome') { if (t.id === 'wbCollect') grantWelcome(true); else if (t === modal || t.closest('.close')) grantWelcome(false); return; }
     if (t === modal || t.closest('.close') || t.id === 'cCancel') { closeModal(); sfx('uiClose'); return; }
+    const st = t.closest('#sSound') as HTMLElement | null;
+    if (st && sfx1) { flags.sfx = !flags.sfx; audio.enabled = flags.sfx; sfx1.setMuted(!flags.sfx); st.outerHTML = soundToggleHtml(flags.sfx); ($('#sSound') as HTMLElement).focus(); saveFlags(); return; }
     if (t.id === 'sOldSave') { const raw = oldSaveForSession(); if (raw) void exportOldSave(raw, exportName(new Date())).then(ok => { $('#sOldMsg').textContent = ok ? OK_MSG : FAIL_MSG; }); return; }
     if (t.id === 'sExport') { void exportLog(g.telemetry.exportJSON(), `eggfarm-log-${g.installId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`).then(m => { const el = $('#sExportMsg'); if (el) el.textContent = m; }); return; }
     if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
@@ -350,14 +364,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     switch (e.type) {
       case 'sell': {
         dwell.sold(e.id, e.value);
-        income.add(now(), e.k * e.price); sfx('sell');
+        income.add(now(), e.k * e.price);
+        if (sfx1) sfx1.play('market.sell', { big: sales.isBig(e.k * e.price) }); else sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
         else pulse(coinsEl.parentElement!);
         floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
-      case 'customer_served': dwell.served(e.id, now()); break;
+      case 'customer_served': dwell.served(e.id, now()); if (sfx1 && !e.partial) sfx1.play('order.complete'); break;
       case 'customer_partial': { dwell.gone(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
       case 'customer_lost':
         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
@@ -460,6 +475,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (tier > s.celebratedTier) {
       g.dispatch({ type: 'markCelebrated', tier });
       if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
+      sfx1?.play('milestone', { key: `tier${tier}` });
       showToast(slotToastPending ? 'Coop upgraded! +1 customer slot' : 'Coop upgraded!'); slotToastPending = false;
     }
     renderQueue();

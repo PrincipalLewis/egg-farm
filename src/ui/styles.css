@@ -448,3 +448,9 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
 .reduced-motion .tab-guard .recovery-card{animation:none}
 .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
+/* audio + juice v1 (flag audioJuiceV1) */
+.sound-toggle{min-height:44px;min-width:44px;padding:0 8px;border:0;background:none;font:inherit;color:inherit;cursor:pointer;border-radius:12px}
+.sound-toggle .lbl{display:inline-flex;align-items:center;gap:8px}.sound-toggle .state{font-weight:700;min-width:3ch;text-align:right}
+.sound-toggle:focus-visible{outline:3px solid var(--c-yolk-dark,#F29E1F);outline-offset:2px}
+.crumb{position:absolute;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--c-yolk);will-change:transform}
+.crumb:nth-child(2n){background:var(--c-cream,#FFF6E0)}
