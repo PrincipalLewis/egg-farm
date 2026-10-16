@@ -530,9 +530,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     document.body.append(el);
     const handImg = el.querySelector('.coach-hand') as HTMLImageElement;
     const place = () => { if (!el.isConnected) return; const r = at?.getBoundingClientRect(); if (!r || !r.width) { el.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)'; return; }
-      const cx = Math.min(Math.max(r.left + r.width / 2, 156), innerWidth - 156), tabs = avoidTabs ? [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect()) : [];
+      const hw = Math.ceil((el.offsetWidth || 320) / 2) + 4, cx = Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw), /* N4: measured tip width, not an assumed 312px */ tabs = avoidTabs ? [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect()) : [];
       const p = coachPlacement(r, { w: el.offsetWidth, h: el.offsetHeight }, cx, { w: innerWidth, h: innerHeight }, tabs, avoidTabs), above = p.side === 'above';
-      el.style.cssText = above ? `left:${cx}px;bottom:${innerHeight - r.top + COACH_GAP}px;transform:translateX(-50%)` : `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
+      el.style.cssText = above && !avoidTabs ? `left:${cx}px;bottom:${innerHeight - r.top + COACH_GAP}px;transform:translateX(-50%)` : `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
       el.classList.toggle('below', !above);
       handImg.src = above ? A('ui-pointer-hand-down.svg') : A('ui-pointer-hand.svg'); };
     place(); const iv = window.setInterval(place, 250);

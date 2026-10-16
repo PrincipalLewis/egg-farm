@@ -14,21 +14,20 @@ export function tabOverlap(left: number, right: number, top: number, h: number, 
 }
 /**
  * Legacy rule (every tip): above the target if it starts >= 120px down, else below.
- * avoidTabs (the first-hire "Workers get tired" tip only): keep 'above' only if it neither covers a tablist (vertical AND horizontal
- * overlap, so a tab bar in another column at >=960 docked is no conflict) nor leaves the viewport; else consider 'below', clamped
- * into the viewport. If neither fits cleanly, take the one with less tab overlap (ties keep the legacy side).
+ * avoidTabs (the first-hire "Workers get tired" tip only): both sides are clamped into the viewport; a side is clean when it
+ * covers neither the target nor a tablist (2-D overlap, so a tab bar in another column at >=960 docked is no conflict).
+ * Rank the two sides: not covering the target first, then less tab overlap
+ * (ties keep the legacy side). Review recheck c9d5d9c N1/N2.
  */
 export function coachPlacement(target: Box, tip: { w: number; h: number }, cx: number, vp: { w: number; h: number }, tabs: Box[], avoidTabs = false): Placement {
   const G = COACH_GAP, M = COACH_MARGIN, legacyAbove = target.top >= COACH_MIN_TOP;
-  const aboveTop = target.top - G - tip.h, belowRaw = target.bottom + G;
-  if (!avoidTabs) return legacyAbove ? { side: 'above', top: aboveTop, overlap: 0 } : { side: 'below', top: belowRaw, overlap: 0 };
-  const l = cx - tip.w / 2, r = cx + tip.w / 2;
-  const belowTop = Math.max(M, Math.min(belowRaw, vp.h - M - tip.h));
-  const aboveFits = aboveTop >= M, belowFits = belowRaw + tip.h <= vp.h - M;
-  const oA = tabOverlap(l, r, aboveTop, tip.h, tabs), oB = tabOverlap(l, r, belowTop, tip.h, tabs);
-  const A: Placement = { side: 'above', top: aboveTop, overlap: oA }, B: Placement = { side: 'below', top: belowTop, overlap: oB };
-  if (legacyAbove && aboveFits && oA === 0) return A;
-  if (belowFits && oB === 0) return B;
-  if (!legacyAbove && !aboveFits) return B;
-  return oA < oB ? A : oB < oA ? B : legacyAbove ? A : B;
+  const aboveRaw = target.top - G - tip.h, belowRaw = target.bottom + G;
+  if (!avoidTabs) return legacyAbove ? { side: 'above', top: aboveRaw, overlap: 0 } : { side: 'below', top: belowRaw, overlap: 0 };
+  const l = cx - tip.w / 2, r = cx + tip.w / 2, clamp = (t: number) => Math.max(M, Math.min(t, vp.h - M - tip.h));
+  const mk = (side: 'above' | 'below', top: number) => ({ side, top, overlap: tabOverlap(l, r, top, tip.h, tabs), covers: tabOverlap(l, r, top, tip.h, [target]) > 0 });
+  const A = mk('above', clamp(aboveRaw)), B = mk('below', clamp(belowRaw));
+  const [first, second] = legacyAbove ? [A, B] : [B, A];
+  // rank: not covering the target first, then less tab overlap; ties (incl. both clean) keep the legacy side
+  const pick = (Number(first.covers) - Number(second.covers) || first.overlap - second.overlap) > 0 ? second : first;
+  return { side: pick.side, top: pick.top, overlap: pick.overlap };
 }
