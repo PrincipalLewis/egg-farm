@@ -24,7 +24,7 @@ for (let i = 0; i < 6000; i++) {
   if (i % 50 === 0) s = apply(s, { type: 'sellAll' }, balance, ev);
   if (i % 97 === 0) s = apply(s, { type: 'buyFarm' }, balance, ev);
   if (i % 131 === 0) s = apply(s, { type: 'buyCollection' }, balance, ev);
-  if (i % 400 === 0) for (const w of ['market_hand', 'coop_hand', 'hawker', 'grader']) s = apply(s, { type: 'hire', worker: w }, balance, ev);
+  if (i % 400 === 0) for (const w of ['market_hand', 'coop_hand', 'hawker', 'grader'] as const) s = apply(s, { type: 'hire', worker: w }, balance, ev);
   if (i % 700 === 0) s = apply(s, { type: 'buyGraderTier' }, balance, ev);
 }
 const off = applyOffline(s, 5_400_000, balance);
