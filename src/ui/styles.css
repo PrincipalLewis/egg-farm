@@ -411,3 +411,6 @@ html,body{overflow-x:hidden;max-width:100%}
 /* R3: the rotate icon always renders at 64px (beat generic img sizing) */
 #rotate-prompt img{width:64px!important;height:64px!important;min-width:64px;flex:none}
 .font-credits{padding-bottom:14px} /* N1: room for the link hit box overhang so it never overlaps Reset save */
+
+/* S2-3a served dwell card (MK-16/19): static, not tappable */
+.chip.served{pointer-events:none;opacity:.95}.chip.served .tag.thanks{background:var(--c-meadow-strong);color:#fff;white-space:nowrap;font-size:var(--fs-xs)}

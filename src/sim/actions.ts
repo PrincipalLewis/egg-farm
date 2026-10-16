@@ -60,6 +60,8 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
     }
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
     // Closing the welcome-back modal without tapping Collect still grants the eggs.
-    case 'collectOffline': case 'dismissOffline': return { ...s, basket: s.basket + s.pendingOfflineEggs, pendingOfflineEggs: 0 };
+    // S2-3a / MK-22: closing the welcome-back modal brings the first customer on the next tick (deterministic: timer -> 0).
+    case 'collectOffline': case 'dismissOffline': return { ...s, basket: s.basket + s.pendingOfflineEggs, pendingOfflineEggs: 0,
+      nextCustomerInS: s.pendingOfflineEggs > 0 ? Math.min(s.nextCustomerInS, 0) : s.nextCustomerInS };
   }
 }

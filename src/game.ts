@@ -39,7 +39,7 @@ export class Game {
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
       // so each load produces at most one new grant.
-      if (this.state.pendingOfflineEggs > 0) this.state = apply(this.state, { type: 'collectOffline' }, b);
+      if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 }; // settle only; no MK-22 arrival (no modal closed)
       this.grantOffline(now() - f.savedAt); // one absence = last save -> this load, if >= 60 s
     }
     this.lastFrameAt = now();

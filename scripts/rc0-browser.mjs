@@ -200,6 +200,25 @@ sections.s2money = async () => {
   await ctx.close();
 };
 
+// ---------- S2-3a served dwell (MK-16/18/21) ----------
+sections.s23a = async () => {
+  const { ctx, page, errors } = await open({ w: 375, h: 700, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 12, collectionLevel: 9, coinsCents: 1e7, basket: 1500, coop: 0, celebratedTier: 2, customers: [], nextCustomerInS: 0.2,
+    workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 }, hawker: { energy: 100, cdS: 0 } } }; });
+  const r = await page.evaluate(async () => { let f = 0, vis = 0, served = 0, maxLife = 0; const born = new Map(); const t0 = performance.now();
+    while (performance.now() - t0 < 8000) { await new Promise(res => setTimeout(res, 100)); f++;
+      const sv = [...document.querySelectorAll('#queue .chip.served')]; if (sv.length) served++;
+      for (const el of sv) { if (!born.has(el)) born.set(el, performance.now()); maxLife = Math.max(maxLife, performance.now() - born.get(el)); }
+      if (sv.length || document.querySelector('#queue .chip:not(.empty):not(.served)')) vis++; }
+    const el = document.querySelector('#queue .chip.served'); const pe = el ? getComputedStyle(el).pointerEvents : 'none';
+    return { vis: vis / f, served: served / f, maxLife: Math.round(maxLife), pe, text: el?.textContent ?? '' }; });
+  ok('S2-3a MK-21 a customer card visible >= 40% with Market Hand + 1,500 eggs', r.vis >= 0.4, JSON.stringify(r));
+  ok('S2-3a MK-16 Thanks card shows and leaves after ~1.5 s', r.served > 0 && r.maxLife <= 1500 + 250, JSON.stringify(r));
+  ok('S2-3a MK-18 dwelling card is not tappable', r.pe === 'none');
+  ok('S2-3a no page errors', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();

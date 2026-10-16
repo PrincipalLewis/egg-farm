@@ -21,6 +21,7 @@ import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onb
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { tryDispatch } from './tap-guard';
+import { ServedDwell } from './served-dwell';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -182,7 +183,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   collectBtn.addEventListener('click', collect);
   scene.addEventListener('click', collect);
-  queueEl.addEventListener('click', e => { if ((e.target as HTMLElement).closest('.chip:not(.empty)')) openPanel('market'); }); // incl. the "+N" chip
+  queueEl.addEventListener('click', e => { if ((e.target as HTMLElement).closest('.chip:not(.empty):not(.served)')) openPanel('market'); }); // incl. the "+N" chip
   let lastSellSource: Element | null = null;
   mRows.addEventListener('click', e => {
     if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
@@ -254,6 +255,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
 
   // ---------- Queue strip ----------
   const chips = new Map<number, HTMLElement>();
+  const dwell = new ServedDwell(b.feel.served_dwell_ms), dwellEls = new Map<number, HTMLElement>();
   const moreChip = h(`<button class="chip more" type="button"></button>`);
   let qTagShown = false;
   const ghost = (at: DOMRect | null, cls: string, bubble?: { text: string; cls: string }) => {
@@ -275,6 +277,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
       setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
       setP(el, c.waitedS / patience);
+      kids.push(el);
+    }
+    // S2-3a: dwelling "Thanks!" cards, in free strip room after the live customers (not tappable, aria-hidden).
+    const act = dwell.active(now(), d => { const el = dwellEls.get(d.id); dwellEls.delete(d.id); if (el?.isConnected && !rm()) ghost(el.getBoundingClientRect(), 'wave leave'); });
+    for (const id of [...dwellEls.keys()]) if (!act.some(d => d.id === id)) dwellEls.delete(id);
+    for (const d of act) {
+      if (kids.length >= stripSlots) break;
+      let el = dwellEls.get(d.id);
+      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag thanks">Thanks! +${fmtMoney(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
       kids.push(el);
     }
     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
@@ -304,6 +315,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   g.on((e: GameEvent) => {
     switch (e.type) {
       case 'sell': {
+        dwell.sold(e.id, e.value);
         income.add(now(), e.k * e.price); sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
@@ -311,7 +323,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
-      case 'customer_partial': { const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
+      case 'customer_served': dwell.served(e.id, now()); break;
+      case 'customer_partial': { dwell.gone(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
       case 'customer_lost':
         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
         else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff', { text: 'Queue full!', cls: 'qfull' }); sfx('customerLeave'); }

@@ -8,7 +8,8 @@
     "tap_combine_window_ms": 250,
     "max_flying_eggs": 5,
     "queue_full_cue_min_gap_ms": 3000,
-    "egg_flight_ms": 500
+    "egg_flight_ms": 500,
+    "served_dwell_ms": 1500
   },
   "telemetry": {
     "ring_size": 5000,
