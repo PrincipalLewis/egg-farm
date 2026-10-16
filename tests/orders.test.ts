@@ -3,11 +3,20 @@ import { describe, it, expect } from 'vitest';
 import { orderView, orderHtml, visibleOrders, moreLabel, moreName, stripSplit } from '../src/ui/orders';
 const c = (demand: number, filled = 0) => ({ id: 1, demand, filled, waitedS: 0 });
 describe('order card (P2)', () => {
+  it('NBSP between count and eggs (Art & UX 16c2248)', () => {
+    const v = orderView(c(17, 4), 58, 552);
+    expect(v.line).toContain('\u00a0eggs');
+    expect(v.line).not.toMatch(/\d eggs/); // no regular space before eggs
+    expect(v.line.charCodeAt(v.line.indexOf('eggs') - 1)).toBe(0xa0);
+    const h = orderHtml(v, 'a.svg');
+    expect(h).toContain('4/17\u00a0</span><span class="egg">eggs</span>');
+    expect(h).not.toContain('> eggs</span>');
+  });
   it('shows full order value and delivered/demand, never $0.00 (MK-23)', () => {
-    expect(orderView(c(6), 0, 250).line).toBe('0/6 eggs · $15.00');
-    expect(orderView(c(5, 3), 99, 250).line).toBe('3/5 eggs · $12.50'); // filled=3; basket does not inflate the count
-    expect(orderView(c(5), 3, 250).line).toBe('0/5 eggs · $12.50'); // filled=0 even when Sell would take 3
-    expect(orderView(c(5), 0, 0.1).line).toBe('0/5 eggs · $0.01');
+    expect(orderView(c(6), 0, 250).line).toBe('0/6\u00a0eggs · $15.00');
+    expect(orderView(c(5, 3), 99, 250).line).toBe('3/5\u00a0eggs · $12.50'); // filled=3; basket does not inflate the count
+    expect(orderView(c(5), 3, 250).line).toBe('0/5\u00a0eggs · $12.50'); // filled=0 even when Sell would take 3
+    expect(orderView(c(5), 0, 0.1).line).toBe('0/5\u00a0eggs · $0.01');
   });
   it('three button states: Need N / Sell k · +$X / Sell N · +$X (MK-24)', () => {
     expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'Need 5', sell: 0, sellCents: 0, valueCents: 500 });
@@ -22,7 +31,7 @@ describe('order card (P2)', () => {
     // demand 17, filled 4, basket 58 -> rem 13, sell 13; card shows filled only
     const v = orderView(c(17, 4), 58, 552); // ~$5.52/egg so full ~$93.84
     expect(v).toMatchObject({ have: 4, want: 17, sell: 13, state: 'ready' });
-    expect(v.line).toBe('4/17 eggs · $93.84');
+    expect(v.line).toBe('4/17\u00a0eggs · $93.84');
     expect(v.lineAria).toBe('4 of 17 eggs delivered, order worth $93.84');
     expect(v.button).toMatch(/^Sell 13\u00a0· \+/);
     expect(v.sellCents).toBe(13 * 552);
@@ -32,7 +41,7 @@ describe('order card (P2)', () => {
   it('have is filled only; Sell does not inflate the count (MK-8/MK-10 + Product)', () => {
     const v = orderView(c(10, 4), 2, 100);
     expect(v).toMatchObject({ have: 4, want: 10, state: 'partial', sell: 2, sellCents: 200, valueCents: 1000 });
-    expect(v.line).toBe('4/10 eggs · $10.00');
+    expect(v.line).toBe('4/10\u00a0eggs · $10.00');
     expect(v.button).toBe('Sell 2\u00a0· +$2.00');
     expect(v.valueCents).toBeGreaterThan(v.sellCents);
     expect(orderView(c(10, 4), 0, 100)).toMatchObject({ have: 4, state: 'wait', button: 'Need 6', sellCents: 0 });
@@ -42,7 +51,7 @@ describe('order card (P2)', () => {
     const h = orderHtml(v, 'a.svg');
     expect(v.have).toBe(3);
     expect(h).toContain('aria-valuenow="3"'); expect(h).toContain('aria-valuemax="5"'); expect(h).toContain('width:60.00%');
-    expect(h).toContain('class="n">3/5</span><span class="egg"> eggs</span>');
+    expect(h).toContain('class="n">3/5\u00a0</span><span class="egg">eggs</span>');
     expect(h).toContain('aria-label="3 of 5 eggs delivered, order worth $5.00"');
     expect(v.lineAria).toBe('3 of 5 eggs delivered, order worth $5.00');
     expect(orderHtml(orderView(c(5), 0, 100), 'a.svg')).toContain('aria-disabled="true"');
@@ -50,8 +59,8 @@ describe('order card (P2)', () => {
     const empty = orderHtml(orderView(c(5), 3, 100), 'a.svg');
     expect(empty).toContain('aria-valuenow="0"'); expect(empty).toContain('width:0.00%');
   });
-  it('big numbers stay compact', () => { expect(orderView(c(1500, 0), 1200, 226667).line).toBe('0/1.5K eggs · $3.4M'); // delivered 0; $ = full order
-    expect(orderView(c(1500, 1200), 0, 226667).line).toBe('1.2K/1.5K eggs · $3.4M'); });
+  it('big numbers stay compact', () => { expect(orderView(c(1500, 0), 1200, 226667).line).toBe('0/1.5K\u00a0eggs · $3.4M'); // delivered 0; $ = full order
+    expect(orderView(c(1500, 1200), 0, 226667).line).toBe('1.2K/1.5K\u00a0eggs · $3.4M'); });
   it('Sell button floors short money; aria keeps exact (HoP 15:14)', () => {
     // cents = dollars * 100. Below $1K: exact on button and aria.
     expect(orderView(c(5), 3, 100).button).toBe('Sell 3\u00a0· +$3.00');

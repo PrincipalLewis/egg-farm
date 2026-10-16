@@ -96,14 +96,22 @@ for (const w of widths) {
         vEllipsis: vcs?.textOverflow,
         vTruncated: v ? v.scrollWidth > v.clientWidth + 1 : false,
         nTruncated: n ? n.scrollWidth > n.clientWidth + 1 : false,
+        nbsp: (() => { const tx = n?.textContent ?? ''; return !!tx && (tx.endsWith('\u00a0') || tx.charCodeAt(tx.length - 1) === 0xa0); })(),
       };
     });
     const sellW = getComputedStyle(document.querySelector('.order-list') || document.body).getPropertyValue('--sell-w').trim();
     // Row 2 fixture: demand 17 filled 4 basket 58 -> have 4/17 delivered, sell 13
-    const row2 = [...document.querySelectorAll('.order')].map((el) => ({
-      line: el.querySelector('.l1')?.textContent?.replace(/\s+/g, ' ').trim(),
-      btn: el.querySelector('button')?.getAttribute('aria-label'),
-    }));
+    const row2 = [...document.querySelectorAll('.order')].map((el) => {
+      const l1 = el.querySelector('.l1');
+      const n = l1?.querySelector('.n')?.textContent ?? '';
+      const egg = l1?.querySelector('.egg')?.textContent ?? '';
+      return {
+        line: `${n}${egg}${(l1?.querySelector('.v')?.textContent ?? '')}`.trim(),
+        n, egg,
+        nbsp: n.endsWith('\u00a0') || n.charCodeAt(n.length - 1) === 0xa0,
+        btn: el.querySelector('button')?.getAttribute('aria-label'),
+      };
+    });
     return { rows, sharedOk, widths, l1, sellW, row2 };
   });
   console.log(w, buildId, JSON.stringify(report, null, 0));
@@ -123,11 +131,13 @@ for (const w of widths) {
     if (line.vEllipsis === 'ellipsis') { console.error('V ELLIPSIS', w, line); ok = false; }
     if (line.nShrink !== '0') { console.error('N FLEX-SHRINK', w, line); ok = false; }
     if (line.nTruncated) { console.error('N TRUNCATED', w, line); ok = false; }
+    if (!line.nbsp) { console.error('N NO NBSP', w, line); ok = false; }
   }
-  // Product/Art & UX: row 2 is delivered 4/17, not 17/17; Sell stays 13
-  const row2 = report.row2.find(r => (r.line || '').includes('/17'));
+  // Product/Art & UX: row 2 is delivered 4/17, not 17/17; Sell stays 13; NBSP before eggs
+  const row2 = report.row2.find(r => (r.n || '').includes('/17'));
   if (row2) {
-    if (!/^4\/17 eggs/.test(row2.line || '')) { console.error('ROW2 DELIVERED', w, row2); ok = false; }
+    if (!(row2.n || '').startsWith('4/17') || row2.egg !== 'eggs') { console.error('ROW2 DELIVERED', w, row2); ok = false; }
+    if (!row2.nbsp) { console.error('ROW2 NO NBSP', w, row2); ok = false; }
     if (!(row2.btn || '').includes('Sell 13')) { console.error('ROW2 SELL', w, row2); ok = false; }
   }
   if ([360, 390, 1280].includes(w)) {
