@@ -11,6 +11,10 @@ describe('M4-A track copy (art-ux/m4-tracks-copy.md)', () => {
     expect(balancedStripText(st(12, 10, 11), on)).toBe('Balanced farm 2/5 · next +20% at all ≥ 15');
     expect(balancedStripText(st(30, 28, 25), on)).toBe('Balanced farm 5/5 · +30%');
     expect(balancedStripText(st(12, 10, 11), on, true)).toBe('Balanced farm 2 of 5. Weakest: Hens, level 10 of 15.');
+    // v1.1 top tier: no Weakest clause; y comes from the top balanced_mult (templated, not hard-coded)
+    expect(balancedStripText(st(30, 30, 30), on, true)).toBe('Balanced farm 5 of 5. Top tier, +30% income.');
+    const alt: Balance = { ...on, m4: { ...on.m4!, milestones: { ...on.m4!.milestones, balanced: on.m4!.milestones.balanced.map((t, i, a) => i === a.length - 1 ? { ...t, mult: 1.4 } : t) } } };
+    expect(balancedStripText(st(30, 30, 30), alt, true)).toBe('Balanced farm 5 of 5. Top tier, +40% income.');
   });
   it('lock and milestone toasts', () => {
     expect(trackLockText(7)).toBe('Needs Farm L8');

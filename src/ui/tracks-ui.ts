@@ -20,6 +20,8 @@ export function balancedSegments(s: GameState, b: Balance): Seg[] {
 export function balancedStripText(s: GameState, b: Balance, aria = false): string {
   const st = balancedStrip(s, b), T = b.m4!.milestones.balanced;
   if (aria) {
+    // m4-tracks-copy.md v1.1 (01:23): top tier has no Weakest clause; y from balance (top balanced_mult).
+    if (st.nextLevel === null) return `Balanced farm ${st.n} of ${st.of}. Top tier, +${pct(T[T.length - 1].mult)}% income.`;
     const w = balancedSegments(s, b).find(x => x.weakest) ?? balancedSegments(s, b).reduce((a, z) => z.level < a.level ? z : a);
     return `Balanced farm ${st.n} of ${st.of}. Weakest: ${w.track}, level ${w.level}${st.nextLevel !== null ? ` of ${st.nextLevel}` : ''}.`;
   }
