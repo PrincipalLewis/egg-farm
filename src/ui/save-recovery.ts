@@ -104,3 +104,20 @@ export function showTabGuardDialog(asset: (f: string) => string, inertEls: HTMLE
   go.focus();
   return layer;
 }
+/** M4-safety: the stored save is from a newer build. Non-destructive: nothing is loaded, written or cleared; no game starts.
+ *  Only action: "Try again" reloads (e.g. after opening the newer build). */
+export const NEWER_SAVE_STRINGS = {
+  title: 'This save is from a newer version',
+  body: 'Your progress was saved by a newer version of Egg Farm. Open that version to keep playing. This older build will not change or delete your save.',
+  retry: 'Try again',
+};
+export function showNewerSaveDialog(asset: (f: string) => string, version: number, onRetry: () => void, S = NEWER_SAVE_STRINGS): HTMLElement {
+  const layer = document.createElement('div'); layer.className = 'recovery-layer newer-save'; layer.dataset.version = String(version);
+  layer.innerHTML = `<div class="recovery-card" role="alertdialog" aria-modal="true" aria-labelledby="nsT" aria-describedby="nsB">
+    <img src="${asset('icon-coop.svg')}" width="72" height="72" alt="">
+    <h2 id="nsT">${S.title}</h2><p id="nsB">${S.body}</p>
+    <button class="btn rc-primary" id="nsRetry" type="button">${S.retry}</button></div>`;
+  document.body.append(layer);
+  const b = layer.querySelector<HTMLButtonElement>('#nsRetry')!; b.addEventListener('click', onRetry); b.focus();
+  return layer;
+}

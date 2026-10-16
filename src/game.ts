@@ -34,6 +34,8 @@ export class Game {
     this.telemetry.track('session_start', { install_id: this.installId, build });
     const r = loadSafe(kv, b, now()); const f = r.file;
     this.recovery = r.recovery; this.isNewGame = !f;
+    // M4-safety: a save from a newer build is refused untouched; this Game never writes (no new game autosaves over it).
+    if (r.newer !== undefined) { this.newerSave = r.newer; this.readOnly = true; this.isNewGame = false; this.telemetry.track('save_newer_version', { version: r.newer, build }); }
     if (r.recovery) {
       const { reason, had_backup, restored_from_backup, copy_failed } = r.recovery;
       this.telemetry.track('save_corrupt', { reason, had_backup, restored_from_backup, build, ...(copy_failed ? { copy_failed: true } : {}) });
@@ -75,6 +77,8 @@ export class Game {
   storageFailed = false; onStorageFail: (() => void) | null = null;
   /** AC14d: a second tab is read-only and never writes the save. */
   readOnly = false;
+  /** Version of a refused newer-build save (M4-safety), else null. */
+  newerSave: number | null = null;
   /** Single-tab guard: checked before EVERY save (purchase, autosave, pagehide, load-time). False -> write skipped. */
   canWrite: (() => boolean) | null = null;
   /** Single-tab guard: another tab owns the save; sim and saving stop until "Play here" reloads. */
