@@ -83,17 +83,17 @@ sections.b1 = async () => {
 
 // ---------- B2 Farm L5 toast ----------
 sections.b2 = async () => {
-  for (const w of [360, 390, 1280]) {
-    const { ctx, page } = await open({ w, h: w > 900 ? 800 : 844, ls: { 'eggfarm.ui': DONE } });
+  for (const [w, banner] of [[360, true], [390, true], [1280, true], [1280, false]]) {
+    const { ctx, page } = await open({ w, h: w > 900 ? 800 : 844, ls: { 'eggfarm.ui': banner ? DONE : JSON.stringify({ ...JSON.parse(DONE), workersIntroA: true }) } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
     await page.waitForTimeout(300); const shown = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { top: r.top, vis: getComputedStyle(e).visibility, text: e.textContent, ia: document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0 }; });
     await page.waitForTimeout(2200);
-    const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const ia = shown.ia; /* banner measured at toast show time (review ac4ec56 #2) */ const below = w < 960 || ia > 0, edge = Math.max(w < 960 ? qb : 0, ia);
+    const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const ia = shown.ia; /* banner measured at toast show time (review ac4ec56 #2) */ const below = w < 960 || ia > 0, where = ia > 0 ? '8px below the New helper! banner' : below ? 'below strip' : 'docked, no banner: slides off the top', edge = Math.max(w < 960 ? qb : 0, ia);
     const after = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { bottom: r.bottom, vis: getComputedStyle(e).visibility, op: getComputedStyle(e).opacity }; });
     // QA precheck-2fae4c4 §1: width-aware. <960: sits 8px below the queue strip (F1) and fades in place; docked: slides off the top.
     // rc2 item 1: a visible 'New helper!' banner (.intro-a) also pushes the toast 8px below it (any width) and it fades in place.
-    ok(`B2 L5 toast shows 8px below the New helper! banner, then is fully gone (${below ? 'below strip, faded' : 'off the top'}) (${w})`, shown.vis === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
-      && ia > 0 && shown.top >= ia + 7 && (below ? Math.abs(shown.top - (edge + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, after, qb, ia }));
+    ok(`B2 L5 toast shows ${where}, then is fully gone (${w})`, shown.vis === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
+      && (banner ? ia > 0 && shown.top >= ia + 7 : ia === 0) && (below ? Math.abs(shown.top - (edge + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, after, qb, ia }));
     await ctx.close();
   }
 };
