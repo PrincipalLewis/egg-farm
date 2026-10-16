@@ -1,4 +1,4 @@
-# M4 design and task split — Senior Software Architect · v0.2.7 (HoQA recheck 2e86a6e M-5, M-6, R-1, R-3, N-1, N-4, N-5; HoQA review pr1-m4-design-review-96e895b M-1..M-7, N-2, N-3; HoE-approved decisions 9.1–9.10; review m4-design-v0.2-ad10a08; Saves QA guard-prep answers §3a) · 2026-10-16
+# M4 design and task split — Senior Software Architect · v0.2.8 (Code Reviewer arch-m4-design-ab8f366: ADR M4-14..17, m1–m5, N1–N3; HoQA recheck 2e86a6e M-5, M-6, R-1, R-3, N-1, N-4, N-5; HoQA review pr1-m4-design-review-96e895b M-1..M-7, N-2, N-3; HoE-approved decisions 9.1–9.10; review m4-design-v0.2-ad10a08; Saves QA guard-prep answers §3a) · 2026-10-16
 
 Base: `origin/main` @ `a01faea` (save v4 `aaaa91a` + save-recovery dialog). M4-A baseline: `m4/m4a-tracks` @ `04e2709`
 (19 commits on merge-base `4aadcbf`; `m4/m4a-tracks-v2` not pushed yet). Inputs: engineering/stack-and-architecture.md,
@@ -10,7 +10,7 @@ sim-rules.md, decisions.md, status.md; product/farm/m4a-spec.md v1.5; product/m4
 
 ## 1. Goals and scope
 **Goal:** ship M4 "Manage" in thin, independently mergeable slices behind flags, with main always releasable and flag-off
-bit-identical to rc1 behaviour.
+**behaviour-identical** to rc1 (same sim and same save semantics; flag-off saves may carry the inert M4 default fields, §4).
 
 | Slice | Content | Spec status |
 |---|---|---|
@@ -46,38 +46,46 @@ best buy) used by UI and bots; it may import `config/` and `sim/` types but neve
 `tracksV7` marker (v1..v6) is price-matched once through `migrateTracksV7` and gets marked `tracksV7: 1`; new M4 farms are marked at creation.
 This is allowed **only in playtest and M4-flagged builds, never as a release default**. Flag-off builds must load a marked save normally
 (ignore or keep the marker and track fields) and must **never strip them on write**. S-2 is unaffected because a marked save is still v6.
-**At `3351d6c`, M4-on saves are v6 with `tracksV7: 1`; v7 plus the kept v6 `.bak` only arrive with S-4.** The v7/.bak text below describes S-4, not v2.
-**Interim backup (9.9, ADR M4-10):** before the in-place price-match, the interim path's caller writes the raw v6 save to `v6_backup` once (write-once, same keys as S-3). Owner: Features 95daf662.
+**At `3351d6c`, M4-on saves are v6 with `tracksV7: 1`; v7 plus the kept `v6_backup` only arrive with S-4.** The v7/`v6_backup` text below describes S-4, not v2.
+**Interim backup (9.9, ADR M4-10):** before the in-place price-match, the interim path's caller writes the original validated raw v6 bytes to `v6_backup` (same keys and protocol as S-3, §3c; write-once only once committed, ADR M4-15). The interim path **never refunds**: `migrateTracksV7` returns a refund (0 with current data) that F-0 must not apply; S-4 computes and records it in `migrationRefundCents` (m5). Owner: Features 95daf662.
 
 **Write version follows the flag (9.2):**
-- `m4.enabled = 0` (all shipping builds until M4 reaches Latest): reads v6 and **writes v6 only**. A **v7 save is refused exactly like a newer save** (ADR M4-9, 9.7): the existing `.newer-save` dialog, S-2 zero-writes rules, never writes v6 over v7, never silently drops M4 progress. The v6 `.bak` stays as the escape hatch; export stays available.
-- `m4.enabled = 1`: reads v6/v7, migrates v6 → v7 and **writes v7**. The v6 `.bak` / `eggfarm.save.v6_backup` is **kept, never rotated away, until M4 reaches Latest**.
+- `m4.enabled = 0` (all shipping builds until M4 reaches Latest): reads v6 and **writes v6 only**. A **v7 save is refused exactly like a newer save** (ADR M4-9, 9.7): the existing `.newer-save` dialog, S-2 zero-writes rules, never writes v6 over v7, never silently drops M4 progress. `v6_backup` stays as the escape hatch; export stays available.
+- `m4.enabled = 1`: reads v6/v7, migrates v6 → v7 and **writes v7**. `eggfarm.save.v6_backup` (once committed, ADR M4-15) is **kept until M4 reaches Latest**; it is cleared only by Settings > Reset (m2).
 - So `SAVE_VERSION` splits into `readMax(b) = writeVersion(b) = m4On(b) ? 7 : 6`. The newer-save check uses `readMax(b)`: flag-off refuses v7, M4-on reads v6/v7.
 
 **Migration function** (S-4, the real bump) `migrations[6] = (d, b) => v7`, run only when `writeVersion(b) = 7`. Three inputs:
 - **unmarked v6:** full migration (steps 1–5 below);
-- **marked v6** (`tracksV7: 1`, track fields present): just bump the version. Keep the levels, no new price-match, no second refund, no explainer or `save_migrated` replay. Idempotent;
+- **marked v6** (`tracksV7: 1`, track fields present): just bump the version. Keep the levels, no new price-match; record the refund the interim path did not apply (recompute it from the frozen price table into `migrationRefundCents` + `coinsCents`; 0 with current data), so it is never dropped; no explainer or `save_migrated` replay. Idempotent;
 - **v7:** no-op.
 Steps for the unmarked path, calling pure `migrateTracksV7(state, b, opts?)`:
 1. `hensLevel = farmLevel`.
-2. `eggValueLevel` = lowest V in 0..30 (no F+3 cap, B1) with v7 price ≥ v6 price in integer cents (one half-up rounding, M4A-5).
-3. Clamp only above `maxLevel`; refund the removed levels at the CSV cost column into `coinsCents` + `migrationRefundCents` (0 with current data).
+2. `eggValueLevel` = lowest V in 0..30 (no F+3 cap, B1) with v7 price ≥ v6 price in integer cents (one half-up rounding, M4A-5). **If no V reaches it, V = the track max level** (m5).
+3. Clamp only above `maxLevel`; refund the removed levels at the CSV cost column into `coinsCents` + `migrationRefundCents` (0 with current data). **Money rule (m5):** each level's cost is integer cents (`Math.round` once per level, as `formulas.ts` does for costs); the refund is a non-negative integer; `coinsCents + refund` is clamped to `Number.MAX_SAFE_INTEGER`; the validator rejects non-integer or negative `migrationRefundCents`.
 4. Seed `celebratedMilestones` silently.
-5. Mark "migrated this session" (explainer + first offline grant ×1.0); emit `save_migrated` once.
+5. Mark "migrated this session" (explainer + first offline grant ×1.0); emit `save_migrated` once. **Offline first grant (m4, ADR M4-14):** the ×1.0 rule is applied to the grant computed at the committing load, and the fact is carried in the save **only after commit** (S-4: `state.firstGrantDone: 1` written with the committed save). An abort leaves the save untouched, so the retry applies ×1.0 exactly once. Pending offline eggs from the v6 save are settled before migration (game.ts order kept). Float order is the code's, pinned: `Math.floor(Math.min(awayS, cap) * offlineRateMultiplier * eps * mult)` (src/sim/offline.ts:9), left to right; tests use 1.35-type multipliers.
 The chain must receive `balance` (S-1).
 
-**Load order:** read → version > readMax(b) ⇒ refuse (zero writes; flag-off + v7 included) → if M4 on and the save is an **unmarked** v6 (no `tracksV7`; interim F-0 or S-4): write `v6_backup` in both stores (a marked v6 or a v7 save writes no new backup) → migrate → validate →
-offline grant (×1.0 on the first grant after migration) → commit at the next save point in `writeVersion(b)`.
+**Load order (ADR M4-17):** read the copy that wins reconcile/recovery → version > readMax(b) ⇒ refuse (zero writes; flag-off + v7 included) → **parse → version → checksum → ranges** (pure validation, split out of `validate()` so it no longer runs `migrate()` first). Corrupt or out-of-range ⇒ the existing corrupt-recovery path; **never migrated, never backed up** → the game boots and runs this v6 **synchronously under flag-off rules** (§3c) → if M4 on and the save is an **unmarked** v6: the async backup + migration protocol of §3c (a marked v6 or a v7 save writes no new backup).
+The bytes backed up are the **original raw validated bytes of the copy actually loaded** (LS main, or the `.bak`/IDB copy that recovery chose).
 
-**Backup-write failure = ABORT the migration (ADR M4-12; spec M4A-31(a)/(f)1 governs; supersedes the 9.1 "keep playing migrated" rule and M4-10/M4-11 "IDB best effort").**
-If the v6 backup write fails in **either** store (localStorage `eggfarm.save.v6_backup` or IDB `eggfarm/save/v6_backup`):
-- discard the migrated state and keep the original v6 state in memory;
+**Backup-write failure = ABORT the migration (ADR M4-12; spec M4A-31(a)/(f)1 governs; supersedes the 9.1 "keep playing migrated" rule and M4-10/M4-11 "IDB best effort"). IDB *unavailable* is not a failure (ADR M4-16, §3c).**
+If the v6 backup write fails in localStorage, or IndexedDB opens but its write fails:
+- do not migrate; keep the v6 state in memory and keep **flag-off rules for the rest of the session** (ADR M4-14);
 - save v6 normally (main, `.bak` rotation, IDB mirror) with **no `tracksV7` marker** and no v7;
 - show the v2.2 "Can't save" notice (once per session, then the toast) **only if that normal v6 save also fails**;
 - retry the migration on the next load.
-The same rule applies to the interim marker path (F-0) and the S-4 v7 path: the backup must succeed in both stores before the migration commits.
-**Partial backup (ADR M4-13):** if one store's backup write succeeds and the other fails (LS ok + IDB fails, or the reverse), the aborted attempt **removes the backup it just wrote** (`localStorage.removeItem('eggfarm.save.v6_backup')` / IDB delete `save/v6_backup`), so after an abort neither store holds a `v6_backup` from that attempt. The retry on the next load writes a fresh backup in both stores from the unmarked v6 save. Write-once applies only to a *committed* backup (one whose migration committed).
-Emit `save_migration_aborted {store: 'ls'|'idb', reason}` (§5). Tests: an injected quota failure in each store, each time → the save stays v6 with no marker, progress (including a purchase after load) survives a page close, and the next load retries the migration.
+The same rule applies to the interim marker path (F-0) and the S-4 v7 path: the backup must be confirmed (LS required; IDB too when available) before the migration commits.
+**Partial backup (ADR M4-13, made robust by M4-15):** if one store's backup write succeeds and the other fails, the aborted attempt tries to remove **only the backup records it wrote** (matching its `migrationId`). The cleanup is best effort (removeItem can throw, the IDB delete may not finish before pagehide); correctness never depends on it, because an unreferenced backup is leftover by definition (§3c) and is deleted or overwritten on the next load.
+Emit `save_migration_aborted {store, reason, path}` (§5; the one field set used everywhere).
+
+### 3c. Backup + migration protocol (ADR M4-14..17)
+- **Aborted / pending session = flag-off rules (M4-14).** From boot until the migration commits, and for the rest of the session after an abort, the game runs the v6 state with flag-off rules: M4 formulas off, Farm-tab tracks UI, best-buy and track purchases hidden/disabled, the save stays plain v6 (no marker, no track levels written). So no track purchase can exist that the next migration would overwrite.
+- **Commit marker (M4-15).** Each attempt draws a random `migrationId` (16 hex chars). The backup record is `{"migrationId":"<id>","raw":"<original v6 bytes>"}` in LS `eggfarm.save.v6_backup` and IDB `eggfarm/save/v6_backup`. The committed migrated save stores the same id in `state.v6BackupId`. A backup is **committed** only if its id equals the live save's `v6BackupId`; anything else (no live id, other id) is **leftover**: deleted on the next load, or overwritten by that load's fresh write. Only a committed backup is write-once.
+- **IndexedDB (M4-16).** The LS backup is **required**. IDB is *unavailable* when `open` fails, the browser blocks it (private mode), or open + write transaction exceed **2000 ms (chosen here; the mirror's existing open timeout is 1.5 s)**. Then the attempt proceeds on LS alone and emits `save_backup_idb_unavailable {reason: 'open_failed'|'blocked'|'timeout', path}` (§5). If IDB opens but the write fails ⇒ abort. Product: this narrows M4A-31(f)1 ("either store fails ⇒ abort") to "a store that is present fails"; flagged to HoP for a spec note, not blocking.
+- **Async, in-session commit (M4-16, chosen as the simpler option).** Boot is unchanged and synchronous (v6, flag-off rules). After boot, `save/` writes the LS record (sync) and the IDB record (awaited, keyed success result added to `IdbMirror`; the current fire-and-forget `write` is not enough). When both are confirmed (or IDB is unavailable), at the next tick boundary the live v6 state is migrated, `v6BackupId` set, committed at once in `writeVersion(b)`, and the M4 UI unlocks in this session (explainer per M4A-33). The rejected alternative (commit on the next load) would make the backup stale against the session's v6 play. The backup is the load-time bytes, so a later rollback loses at most the few seconds of flag-off play before commit.
+- **Order (M4-17).** Validate before backup (load order above). **Restore source** for rollback/support: LS `v6_backup`, else IDB `v6_backup`, else none; only a committed record whose `raw` passes the checksum (`sum`) and range validation is restored.
+- **Reset (m2).** Settings > Reset clears `eggfarm.save.v6_backup` (added to `RESET_KEYS`) and IDB `save/v6_backup` (with `clearMirror`), so a new farm never inherits the old farm's backup.
 
 ### 3b. Zero-writes rule (HoQA ruling; QA guard ZW-3..6; applies to S-2, ZW-2, flag-off v7 refusal)
 Key names from code on main `a01faea`. During a refused load (newer save, or flag-off + v7), through autosave, `pagehide`, Export and a second tab:
@@ -89,22 +97,27 @@ Key names from code on main `a01faea`. During a refused load (newer save, or fla
 - Any other key appearing is a FAIL. S-2's own test must assert exactly this list, so S-2 cannot pass while failing QA's guard.
 
 **Rollback:** flag-off builds never produce v7, so turning M4 off (shipping a flag-off build) is a real rollback for anyone who never ran an M4-on build.
-M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still refuse v7 with zero writes (S-2).
+M4-on players keep their committed `v6_backup` until M4 is Latest. Older rc1 builds still refuse v7 with zero writes (S-2).
 
 **Tests:**
 - [S-4] chain v1..v6 → v7 (M4 on); all 21 spec fixtures + the 961-save sweep; refund via the lowered-max table.
 - [S-4/S-5] idempotent reload; offline order (19800/24750, 9900/12375).
 - [A-0, S-4] **flag-off write test: load v6 → save → stored bytes are v6** (part of the flag-off golden).
-- [S-4; PENDING-S4 before it, at 3351d6c expect v6 + `tracksV7:1`] **M4-on write test: load v6 → save → `main` is v7, and the `.bak`/`v6_backup` holds the original v6 bytes after N autosaves.**
+- [S-4; PENDING-S4 before it, at 3351d6c expect v6 + `tracksV7:1`] **M4-on write test: load v6 → save → `main` is v7 with `v6BackupId`, and the committed `v6_backup` record holds the original v6 bytes after N autosaves** (`.bak` rotates and is not asserted).
 - [S-2] **flag-off refuses v7: zero writes per §3b (the QA zero-writes rule), `.bak` intact, export works.**
 - [F-0b flag-off half; S-4 M4-on half] marked v6 (interim): M4 on → v7 with identical levels, refund 0 added, no events; flag off → loads, and the marker + track fields are preserved byte-for-byte on write.
-- **backup failure (ADR M4-12/M4-13; S-3, F-0; run once per store: `ls`, then `idb`, each with an injected quota failure in that store only):**
-  1. stored `eggfarm.save` stays `version: 6` with **no `tracksV7` marker** (and no v7 anywhere);
-  2. `save_migration_aborted {store}` fires once with the failing store;
+- **backup failure (ADR M4-12..16; S-3, F-0; run once per store: `ls`, then `idb`, each with an injected quota failure in that store only):**
+  1. stored `eggfarm.save` stays `version: 6` with **no `tracksV7` marker** and no `v6BackupId` (and no v7 anywhere);
+  2. `save_migration_aborted {store, reason, path}` fires once with the failing store;
+  2a. the tracks UI and track purchases stay hidden/disabled for the rest of the session (M4-14);
   3. **no dialog and no toast** while the normal v6 save succeeds ("Can't save" appears only if the v6 save itself also fails);
   4. a purchase made after load survives a page close (reload shows it, still v6);
-  5. no `v6_backup` is left in either store after the abort (M4-13);
-  6. the next load (failure removed) retries: backup written fresh in both stores from the unmarked v6, migration commits.
+  5. no *committed* `v6_backup` exists: any record left is unreferenced, and the next load deletes or overwrites it (M4-15; also test with the cleanup forced to throw);
+  6. the next load (failure removed) retries: backup written fresh with a new `migrationId` from the unmarked v6, migration commits, ×1.0 first grant applied once.
+- [S-3] IDB unavailable (open throws / blocked / 2000 ms timeout): migration commits on LS alone, `save_backup_idb_unavailable` fires.
+- [S-3] corrupt or out-of-range v6: corrupt-recovery path, no backup, no migration (M4-17); backup bytes = the loaded copy's bytes when recovery used `.bak`/IDB.
+- [S-3] Reset clears `v6_backup` in both stores.
+- [S-4] money: refund integer, ≥ 0, `coinsCents` clamped at `Number.MAX_SAFE_INTEGER`; no-V-reaches-price ⇒ max level; marked v6 records the interim refund.
 - [S-6] `m4-v7-*` fixtures + SHA256SUMS; 3-engine test: rc1 build × v7 fixtures → storage byte-identical.
 
 ### 3a. Save facts for the M4 guard (Saves QA m4-guard-prep-notes; from code on main `a01faea` and v2 `3351d6c`)
@@ -135,21 +148,21 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
    - CODE: there is **no v6 backup in either SHA**. The only backup is the rotation copy `eggfarm.save.bak` (`BAK_KEY`), localStorage only.
    - The IndexedDB mirror is db `eggfarm`, store `save`, key `main` (`IDB_KEY`). There are no other IDB keys.
    - DECISION (ADR M4-11): one name everywhere: localStorage **`eggfarm.save.v6_backup`**, mirrored to IndexedDB db `eggfarm` / store `save` / key **`v6_backup`**.
-   - Write-once: never overwritten, never rotated, not in `RESET_KEYS` until M4 reaches Latest. It holds the raw v6 bytes.
+   - Write-once **only once committed** (its `migrationId` = live `v6BackupId`, ADR M4-15); leftover records are deleted or overwritten. Never rotated; cleared by Reset (in `RESET_KEYS` + IDB clear). Holds `{migrationId, raw}` with the original validated v6 bytes.
    - When it is written:
      - interim (F-0): once, before the in-place `tracksV7` price-match; S-4: before the first v7 write;
-     - **both stores must succeed before the migration commits; if either fails, the migration aborts and the session stays v6 (ADR M4-12, supersedes the M4-10/M4-11 "IDB best effort" rule).**
-   - In this doc, "v6 `.bak`" means `v6_backup`. `eggfarm.save.bak` is the normal rotation copy and keeps its existing rules.
+     - **LS must succeed, and IDB too when available; a failure aborts and the session stays v6 under flag-off rules (ADR M4-12/14/16). IDB unavailable ⇒ LS alone + telemetry (M4-16).**
+   - This doc no longer uses "v6 `.bak`"; the v6 copy is always `v6_backup`. `eggfarm.save.bak` is the normal rotation copy and keeps its existing rules.
 
 
 ## 4. Feature-flag strategy
 - Set at build time in `balance.json`: `m4.enabled` gates M4-A **and the save write version** (ADR M4-4). Later: `m4.features.*`, each requiring `m4.enabled`.
-- Shipping default 0 until QA PASS. While the default is 0, TR-5 only reports (§6). QA/playtest builds turn the flag on via `build:qa` mode. The debug toggle exists in dev builds only.
-  `check-release-build` asserts the committed default.
+- Shipping default 0 until QA PASS. While the default is 0, TR-5 only reports (§6). QA/playtest builds turn the flag on via `build:qa` mode. **The QA-mode override is build-time only** (a `define` like `__IOS_FLAG__`), never a URL or storage override; M4 adds no window globals beyond `eggfarmExportTelemetry`. The debug toggle exists in dev builds only.
+  `check-release-build` asserts the committed default, and **`check-release-build` + `check-globals` also run on the U-0 `build:html` single-file artifact**.
 - Per-flag golden ("flag-off matches main", testable form): **not** a build-artifact hash (the code differs, so it cannot match). It is two checks:
   1. **Sim trace hash** (`tests/m4a-flag-off.test.ts`): sha256 hex of `JSON.stringify(out)`, where `out` = bot pacing for models `seller15` and `cheapest` × seeds 1..6 × 1800 s (farm/upgrades sampled every 60 s), plus a 10 Hz scripted trace of **6000 ticks** (dt 0.1 s, seed 7, every action type, events included) with M4 fields `hensLevel/eggValueLevel/celebratedMilestones` stripped, plus `applyOffline` over 5 400 000 ms. Economy = `tests/rc1-balance` with `m4.enabled = 0`. The golden is **re-pinned to main `a01faea`** (computed there with the same harness; the current `GOLDEN_MAIN_4AADCBF` constant is replaced in A-0 and renamed `GOLDEN_MAIN_A01FAEA`).
   2. **Storage bytes**: for each fixture in `tests/fixtures/saves` (`m1-rc2-v4-12min`, `m2-rc1-v5-12min`, `m2-rc1-v5-40min`, `m2-rc1-v5-40min-edge`, SHA256SUMS-checked; all have `savedAt: 1792087200000`), load → 600 ticks (60 s) → save, with the clock fixed at **`now = 1792087260000`** (fixture savedAt + 60 000 ms; **chosen here**, no existing test pins one). Expected: `version: 6`, `savedAt: 1792087260000`, and the state **includes the M4 defaults `hensLevel: 0, eggValueLevel: 0, celebratedMilestones: []`**. This is intended flag-off behaviour: `migrate()` spreads `initialState(b)` (src/sim/state.ts:22-33 on the M4 branch) into every loaded save, so flag-off saves carry those defaults and **no `tracksV7`**. The expected bytes are therefore pinned per fixture as golden files generated on the M4 branch (flag off) and **verified against `a01faea`** by: the a01faea bytes for the same fixture/clock equal the golden with exactly those three keys removed and `sum` recomputed. Plus "a v6 write". Flag-off also refuses v7 saves (newer-save path, ADR M4-9).
-- Removal (F-9): one release after M4 reaches Latest, delete the flag-off path, make v7 the only write version, and drop the v6 `.bak` retention rule.
+- Removal (F-9): one release after M4 reaches Latest, delete the flag-off path, make v7 the only write version, and drop the `v6_backup` retention rule.
 
 ## 5. Telemetry fields (M4A-34 + proposal §8)
 | Event | Fields | Pinned |
@@ -158,7 +171,8 @@ M4-on players keep their v6 `.bak` until M4 is Latest. Older rc1 builds still re
 | `milestone_reached` (new) | `track, level, mult` | yes |
 | `balanced_tier` (new) | `tier, min_level` | yes |
 | `save_migrated` (new) | `from:6, to:7, refund_cents, farm_level` (`backup_ok` dropped: a committed migration implies the backup succeeded, M4-12) | yes, once |
-| `save_migration_aborted` (new) | `store: 'ls'\|'idb', reason: 'quota'\|'error'`, `path: 'interim'\|'v7'` | yes, once per load |
+| `save_migration_aborted` (new) | exactly `{store: 'ls'\|'idb', reason: 'quota'\|'error', path: 'interim'\|'v7'}` (same set in §3, tests, spec note) | yes, once per load |
+| `save_backup_idb_unavailable` (new, M4-16) | `{reason: 'open_failed'\|'blocked'\|'timeout', path}` | yes, once per load |
 | `tracks_explainer` (new) | `action: shown\|dismissed` (+ `via: button\|tap\|esc\|timeout`, proposed) | yes |
 | `worker_hire`, `worker_yawn` | + `hens_level, egg_value_level` | as today |
 | `session_start/end` | + `farm_level, hens_level, egg_value_level, collection_level`, + `m4_flags` (proposed: bitmask of enabled flags so playtest data is attributable) | yes |
@@ -189,9 +203,13 @@ gate-all also does a preflight check (`run npm ci`, exit 2), fails fast (`KEEP_G
 | M4A-27 `readMax`/`writeVersion` = 7 **only with M4 on** (flag-off stays 6, v7 written only with M4 on), chain to v7 | chain v1..v6 → v7, 21 spec fixtures + 961-save sweep, validator ranges | S-4 · SAV |
 | M4A-28 price-matched start | `migrateTracksV7` unit tests, frozen price table, C ≥ F+5 fixtures; marked v6 idempotent | S-1/S-4 · SAV (F-0 interim · FE) |
 | M4A-29 cap-and-refund | lowered-max refund table; refund 0 on current data | S-4 · SAV |
-| M4A-30 order on load | 19800/24750, 9900/12375 offline order; first grant ×1.0 | S-5 · SAV |
+| M4A-30 order on load | 19800/24750, 9900/12375 offline order; first grant ×1.0 once, carried in the save only after commit, abort-then-retry case | S-5 · SAV |
 | M4A-31 downgrade/rollback | flag-off v6 write; flag-off refuses v7 (§3b); rc1 build × v7 fixtures byte-identical (3 engines) | S-2, S-4, S-6 · SAV; QA guard |
 | M4A-31(a)/(f)1, ADR M4-12/13 | backup-failure test per store (§3 Tests) | S-3 · SAV, F-0 · FE |
+| ADR M4-14 flag-off rules after abort | tracks UI/purchases disabled after abort; save stays plain v6 | S-3 · SAV, U-1 · UI |
+| ADR M4-15 commit marker | `v6BackupId` = backup `migrationId`; leftover deleted/overwritten; cleanup-throws case | S-3/S-4 · SAV |
+| ADR M4-16 IDB unavailable / async commit | LS-only commit + telemetry; in-session unlock | S-3 · SAV |
+| ADR M4-17 validate before backup | corrupt ⇒ no backup; restore order LS → IDB with checksum | S-3 · SAV |
 | M4A-32 tests/fixtures | `m4-v7-*` + marked-v6 fixtures, SHA256SUMS | S-6 · SAV |
 | M4A-33 explainer | rc0 cases: once after migration, non-blocking, reduced motion, a11y | U-3/U-4 · UI |
 | M4A-34 telemetry | schema test (§5 incl. `save_migration_aborted`) | X-1, F-2, F-3 · FE |
@@ -206,15 +224,16 @@ gate-all also does a preflight check (`run npm ci`, exit 2), fails fast (`KEEP_G
 1. **Version confusion (v4/v5/v6/v7)** across docs → wrong migration target. Mitigation: ADR M4-1, fix proposal text.
 2. **m4a-tracks is 19 commits behind main's save work** (based on `4aadcbf`, before save v4 + dialog); `merge-tree` shows a conflict in
    `src/ui/styles.css` and semantic overlap in save.ts/game.ts load path. Rebase (v2) must re-verify flag-off golden against *a01faea*, not 4aadcbf.
-3. **One-way door (reduced by 9.2):** only M4-on builds write v7, and those keep the v6 `.bak` until Latest. Remaining risks:
+3. **One-way door (reduced by 9.2):** only M4-on builds write v7, and those keep the committed `v6_backup` until Latest. Remaining risks:
    - rc1 builds opening a v7 save must write nothing (S-2 ships on main first);
    - dual write versions add code paths, each covered by a write test;
-   - **M4 progress is not reachable from a flag-off build** (refused, not lost): the v7 save stays intact, the v6 `.bak` is the escape hatch, export works.
+   - **M4 progress is not reachable from a flag-off build** (refused, not lost): the v7 save stays intact, `v6_backup` is the escape hatch, export works.
 4. **Backup storage quota:** the backup doubles the save footprint. On failure the migration aborts and the player stays on a normally saved v6, retried next load (ADR M4-12). Risk: a player near quota never migrates. Watch `save_migration_aborted` in playtest telemetry.
 5. **Migration needs balance** (price-matched search depends on economy.csv); a later CSV change silently changes migration output for not-yet-migrated players. Mitigation: freeze the v6→v7 price table as a fixture snapshot in the migration test.
 6. **payout.ts base price** must come from `salePriceCents` (comment in tracks.ts) — fix/rc1-qa-bugs branches may reintroduce direct `eggPriceCents` calls. Add a grep/unit guard.
 7. **UI churn in app.ts** (65-line diff, shared with rc2 UI work by e80556fd) → merge conflicts. Keep M4 UI in `tracks-ui.ts`, app.ts only wires.
 8. **Watch: the WebKit 375px sideways-scroll flake** (rc0 Bug9 farm tab 375×812/375×600, 195/197 once on X-1, rerun 197/197). If it recurs, treat it as a real issue, not a flake.
+10. **`?marketSeed` honoured in release builds** (src/main.ts:83 on main): out of scope for M4; owner Features 95daf662 to gate it to dev/QA builds.
 9. **TR-5 known FAIL** could block ship; gate classified reporting until Economy decision.
 
 ## 8. Task breakdown (one area per PR)
@@ -229,8 +248,8 @@ Owners: **SAV** = Saves 3ba38cf3 · **UI** = e80556fd · **FE** = Features/Econo
 | S-1 | Migration chain takes `balance`; move `migrate-v7.ts` → `save/migrations/v7.ts`; split `readMax(b)` / `writeVersion(b)` (still 6/6) | SAV | A-0 | S |
 | ZW-2 | **Separate Saves PR, before S-2:** `Export save` `[data-testid=newer-save-export]` on the `.newer-save` layer (raw stored string, no wrapper or migration, zero writes; `Try again` stays; §3a.2) | SAV | — | S |
 | S-2 | **ETA Sat 22:00.** Newer-save refusal = zero writes per §3b (autosave, pagehide, .bak, IDB mirror, 2nd tab) + 3-engine test, **on main**; also covers **a flag-off build opening a v7 save** (same refusal, .bak intact, export works) | SAV | **ZW-2** | M |
-| S-3 | `v6_backup` write-once (LS + IDB). On failure in either store: abort the migration, keep v6 in memory, save v6 normally (no marker), "Can't save" only if the v6 save also fails, retry next load (ADR M4-12); quota-injection tests per store (v6 kept, no loss across page close) | SAV | S-1 | M |
-| S-4 | Real v6→v7 bump (replaces the interim marker). Handles unmarked v6, marked v6 (idempotent: no re-migrate, no re-refund) and v7. Wire `migrations[6]`; readMax 7 with M4 on (flag-off refuses v7, ADR M4-9); write v7 only when M4 is on; keep the v6 `.bak` until Latest; validator; flag-off v6-write, flag-off-refuses-v7 and M4-on v7-write/.bak tests | SAV | S-1, S-3, S-2, **ZW-2** | M |
+| S-3 | `v6_backup` protocol §3c (LS required + IDB when available, `migrationId`/`v6BackupId` commit marker, write-once only once committed, validate before backup, async in-session commit, flag-off rules until commit, Reset clears it). On failure: abort, keep v6 under flag-off rules, save v6 normally (no marker), "Can't save" only if the v6 save also fails, retry next load (ADR M4-12..17); quota-injection tests per store (v6 kept, no loss across page close) | SAV | S-1 | M |
+| S-4 | Real v6→v7 bump (replaces the interim marker). Handles unmarked v6, marked v6 (idempotent: no re-migrate; records the unapplied interim refund in `migrationRefundCents`) and v7. Wire `migrations[6]`; readMax 7 with M4 on (flag-off refuses v7, ADR M4-9); write v7 only when M4 is on; keep the committed `v6_backup` until Latest; validator; flag-off v6-write, flag-off-refuses-v7 and M4-on v7-write/.bak tests | SAV | S-1, S-3, S-2, **ZW-2** | M |
 | S-5 | Load order + first-offline-grant ×1.0 (M4A-30) tests | SAV | S-4 | S |
 | S-6 | `m4-v7-*` fixture files + **marked-v6 (`tracksV7: 1`) fixtures** + SHA256SUMS; rc1-build × v7 rollback browser test (3 engines) | SAV | S-4 | M |
 | F-1 | Merge O1/O3 CSV columns into economy.csv (with Economy); sync-economy --check | FE | A-0 | S |
@@ -251,7 +270,7 @@ F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into
 
 ## 9. Decisions (HoE, 2026-10-16 19:29) and remaining open questions
 1. **Backup write fails → decided, then SUPERSEDED for the backup case by 9.10 / ADR M4-12** (the dialog applies only if the normal v6 save also fails): Reuse the v2.2 "Can't save" dialog once per session, then the persistent toast. Never block play; never drop in-memory state (ADR M4-5).
-2. **Flag-off writes → decided:** flag-off builds keep writing v6; v7 is written only with M4 on. The v6 `.bak` is kept until M4 reaches Latest, and the v7 reader accepts v6 (ADR M4-4, **supersedes M4-2**).
+2. **Flag-off writes → decided:** flag-off builds keep writing v6; v7 is written only with M4 on. The v6 copy (`v6_backup`) is kept until M4 reaches Latest, and the v7 reader accepts v6 (ADR M4-4, **supersedes M4-2**).
 3. **TR-5 → decided:** report-only. It becomes blocking after 5 green runs in a row with no flake; HoE flips it (ADR M4-6).
 4. **v2 base → decided:** origin/main `a01faea`. HoE owns the A-0 rebase tonight; Features branches from the v2 SHA.
 5. **QA guard → decided:** QA Saves (33ec1b55) owns the M4 guard, a new file `qa/m3-scripts/rc1-guard-save-qa-m4.mjs`.
@@ -261,4 +280,4 @@ F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into
 9. **Interim backup → decided (HoE review, 20:31):** the interim marked path writes a v6 backup once, before the in-place change. Owner: Features 95daf662 (task F-0, ADR M4-10).
 10. **Backup failure aborts → decided (HoE 21:24; review m4-m4a-tracks-v3-677317d M1):** spec M4A-31(a)/(f)1 governs; see ADR M4-12. Supersedes the "keep playing migrated" part of 9.1.
 11. **Partial backup → decided (Architect, HoQA M-4):** an aborted attempt removes any backup it wrote; the retry writes fresh from the unmarked v6 (ADR M4-13). Also adopted: QA zero-writes rule (§3b), ZW-2 before S-2 with ZW-2 PASS on its own SHA, flag-off golden pinned to a01faea (§4).
-
+12. **Abort/retry protocol → decided (Architect, Code Reviewer ab8f366 Majors 1–4):** flag-off rules after abort (M4-14); `migrationId`/`v6BackupId` commit marker (M4-15); LS required, IDB-unavailable proceeds on LS with telemetry, 2000 ms, async in-session commit (M4-16); validate before backup, restore LS → IDB with checksum (M4-17). Reset clears `v6_backup`.
