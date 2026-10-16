@@ -22,10 +22,16 @@ export async function exportOldSave(raw: string, name: string, nav: any = naviga
 }
 /** AC14b v2.1 (art-ux/save-recovery-dialog.md §1): copy keyed by the loader's single recovery outcome (Product 15:15). */
 export type DialogOutcome = Exclude<RecoveryOutcome, null>;
-export interface RecoveryCopy { outcome: DialogOutcome; icon: string; badge: '\u2713' | '\u2605' | '!'; badgeClass: 'ok' | 'new' | 'warn'; title: string; body: string; button: string; exportStyle: 'link' | 'secondary'; }
+export interface RecoveryCopy { variant?: 'cantsave'; exportLabel?: string; exportAria?: string; outcome: DialogOutcome; icon: string; badge: '\u2713' | '\u2605' | '!'; badgeClass: 'ok' | 'new' | 'warn'; title: string; body: string; button: string; exportStyle: 'link' | 'secondary'; }
+/** Fired when the AC14b dialog closes; main.ts holds the save-warning toast until then (v2.2 fix 2). */
+export const RECOVERY_CLOSED = 'eggfarm-recovery-closed';
 export const EXPORT_ARIA = 'Export old save, downloads a copy of your old save file';
-export function recoveryCopy(r: Pick<Recovery, 'case' | 'copy_failed' | 'restored_from_backup'>): RecoveryCopy | null {
+export const CANTSAVE_ARIA = 'Export save, downloads a copy of your current farm';
+export function recoveryCopy(r: Pick<Recovery, 'case' | 'copy_failed' | 'restored_from_backup'> & { cantSave?: true }): RecoveryCopy | null {
   const o = recoveryOutcome(r as Recovery);
+  // v2.2 (art-ux/save-recovery-dialog.md): storage refused but the farm loaded. The real Storage case keeps its v2.1 copy.
+  if (o === 'storage' && r.cantSave) return { variant: 'cantsave', outcome: o, icon: 'icon-coop.svg', badge: '!', badgeClass: 'warn', title: 'Saving is paused', button: 'Keep farming',
+    body: "Your farm is fine, but your browser won't let us save right now. Export a copy to keep your progress.", exportStyle: 'secondary', exportLabel: 'Export save', exportAria: CANTSAVE_ARIA };
   if (o === 'restored') return { outcome: o, icon: 'icon-coop.svg', badge: '\u2713', badgeClass: 'ok', title: 'Welcome back!', button: 'Keep farming',
     body: r.copy_failed ? 'We loaded your backup. Export the old save now to keep it.' : 'We loaded your backup. You may be a few moments behind.',
     exportStyle: r.copy_failed ? 'secondary' : 'link' };
@@ -44,15 +50,16 @@ export const exportName = (d: Date) => {
 export function showRecoveryDialog(r: Recovery | null, asset: (f: string) => string, inertEls: HTMLElement[], onExport?: () => void, doExport?: (raw: string, name: string) => Promise<boolean>): Promise<void> {
   const c = r ? recoveryCopy(r) : null;
   if (!r || !c) return Promise.resolve();
-  const layer = document.createElement('div'); layer.className = 'recovery-layer'; layer.dataset.outcome = c.outcome;
-  const exp = r.raw ? (c.exportStyle === 'secondary'
-    ? `<button class="rc-export-q" id="rcExport" type="button" aria-label="${EXPORT_ARIA}">Export old save</button>`
+  const layer = document.createElement('div'); layer.className = 'recovery-layer'; layer.dataset.outcome = c.outcome; if (c.variant) layer.dataset.variant = c.variant;
+  const canExport = !!(r.raw || r.live);
+  const exp = canExport ? (c.exportStyle === 'secondary'
+    ? `<button class="rc-export-q" id="rcExport" type="button" aria-label="${c.exportAria ?? EXPORT_ARIA}">${c.exportLabel ?? 'Export old save'}</button>`
     : `<button class="rc-link" id="rcExport" type="button" aria-label="${EXPORT_ARIA}">Export old save</button>`) : '';
-  layer.innerHTML = `<div class="recovery-card" role="alertdialog" aria-modal="true" aria-labelledby="rcT" aria-describedby="rcB${r.raw ? ' rcMsg' : ''}">
+  layer.innerHTML = `<div class="recovery-card" role="alertdialog" aria-modal="true" aria-labelledby="rcT" aria-describedby="rcB${canExport ? ' rcMsg' : ''}">
     <span class="rc-icon" aria-hidden="true"><img src="${asset(c.icon)}" width="72" height="72" alt=""><span class="rc-badge ${c.badgeClass}">${c.badge}</span></span>
     <h2 id="rcT">${c.title}</h2><p id="rcB">${c.body}</p>
     <button class="btn rc-primary" id="rcGo" type="button">${c.button}</button>
-    ${exp}${r.raw ? '<div class="rc-msg" aria-live="polite" id="rcMsg"></div>' : ''}</div>`;
+    ${exp}${canExport ? '<div class="rc-msg" aria-live="polite" id="rcMsg"></div>' : ''}</div>`;
   document.body.append(layer);
   for (const el of inertEls) el.inert = true;
   const go = layer.querySelector<HTMLButtonElement>('#rcGo')!;
@@ -81,13 +88,13 @@ export function showRecoveryDialog(r: Recovery | null, asset: (f: string) => str
     if (expBtn.getAttribute('aria-busy') === 'true') return;
     onExport?.(); if (msg) msg.textContent = ''; expBtn.setAttribute('aria-busy', 'true'); // §4: busy state, same label; the dialog stays open
     const done = (ok: boolean) => { expBtn.removeAttribute('aria-busy'); if (msg) msg.textContent = ok ? OK_MSG : FAIL_MSG; };
-    void (doExport ?? exportOldSave)(r.raw!, exportName(new Date())).then(done, () => done(false));
+    void (doExport ?? exportOldSave)(r.live ? r.live() : r.raw!, r.cantSave ? exportName(new Date()).replace('eggfarm-old-save-', 'eggfarm-save-') : exportName(new Date())).then(done, () => done(false));
   });
   go.focus();
   return new Promise(res => go.addEventListener('click', () => {
     document.removeEventListener('keydown', onKey, true); window.removeEventListener('popstate', onPop); document.removeEventListener('focusin', onFocusIn, true); layer.removeEventListener('focusout', keep);
     for (const el of inertEls) el.inert = false;
-    layer.remove(); res();
+    layer.remove(); document.dispatchEvent(new Event(RECOVERY_CLOSED)); res();
   }, { once: true }));
 }
 

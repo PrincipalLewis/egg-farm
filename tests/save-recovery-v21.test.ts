@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
 import { loadSafe, serialize, recoveryOutcome, storageBlockedRecovery, SAVE_KEY, BAK_KEY, type Recovery } from '../src/save/save';
 import { initialState } from '../src/sim/state';
-import { recoveryCopy, showRecoveryDialog, EXPORT_ARIA } from '../src/ui/save-recovery';
+import { recoveryCopy, showRecoveryDialog, EXPORT_ARIA, CANTSAVE_ARIA } from '../src/ui/save-recovery';
 const kvm = (quota = false) => { const m = new Map<string, string>(); let quotaHits = 0;
   return { m, get quotaHits() { return quotaHits; }, getItem: (k: string) => m.get(k) ?? null, removeItem: (k: string) => { m.delete(k); }, key: (i: number) => [...m.keys()][i] ?? null, get length() { return m.size; },
     setItem: (k: string, v: string) => { if (quota && k !== SAVE_KEY && k !== BAK_KEY) { quotaHits++; const e = new Error('full'); e.name = 'QuotaExceededError'; throw e; } m.set(k, v); } } as any; };
@@ -73,5 +73,27 @@ describe('v4 storageBlocked routes through the v2.1 Storage dialog', () => {
   });
   it('main.ts sets g.recovery so app.ts opens the dialog', () => {
     const src = readFileSync('src/main.ts', 'utf8'); expect(src).toMatch(/lease\.storageBlocked[\s\S]{0,200}g\.recovery = storageBlockedRecovery\(localStorage\)/);
+  });
+});
+
+describe("v2.2 'Can't save' (storage refused, farm loaded)", () => {
+  it('exact v2.2 copy; real Storage keeps v2.1', () => {
+    const c = recoveryCopy(storageBlockedRecovery(kvm()))!;
+    expect(c).toMatchObject({ variant: 'cantsave', outcome: 'storage', icon: 'icon-coop.svg', badge: '!', badgeClass: 'warn', title: 'Saving is paused', button: 'Keep farming', exportStyle: 'secondary', exportLabel: 'Export save', exportAria: CANTSAVE_ARIA });
+    expect(c.body).toBe("Your farm is fine, but your browser won't let us save right now. Export a copy to keep your progress.");
+    const q = recoveryCopy({ case: 'Q', copy_failed: true, restored_from_backup: false })!;
+    expect(q.variant).toBeUndefined(); expect(q.title).toBe('A fresh start'); expect(q.body).toBe("We couldn't open your farm. Export it now to keep a copy."); expect(q.button).toBe('Start farming'); expect(q.exportLabel).toBeUndefined();
+  });
+  it('not an old save: no session "Export old save" in Settings', () => { expect(storageBlockedRecovery(kvm()).copy_failed).toBe(false); });
+  it('card has no opacity animation (fix 1)', () => {
+    const css = readFileSync('src/ui/styles.css', 'utf8'); const kf = css.match(/@keyframes rcPop\{[^}]*\}[^}]*\}/)![0];
+    expect(kf).not.toMatch(/opacity/); expect(css).not.toMatch(/\.reduced-motion \.recovery-card\{animation:rcFade/);
+  });
+  it('main.ts holds the save-warning toast until the dialog closes (fix 2), and Export uses the live farm', () => {
+    const src = readFileSync('src/main.ts', 'utf8');
+    expect(src).toMatch(/if \(holdNotices\) \{ heldNotice \?\?= text; return; \}/);
+    expect(src).toMatch(/addEventListener\(RECOVERY_CLOSED[\s\S]{0,120}holdNotices = false/);
+    expect(src).toMatch(/g\.recovery\.live = \(\) => serialize\(g\.state/);
+    expect(readFileSync('src/ui/save-recovery.ts', 'utf8')).toMatch(/layer\.remove\(\); document\.dispatchEvent\(new Event\(RECOVERY_CLOSED\)\)/);
   });
 });

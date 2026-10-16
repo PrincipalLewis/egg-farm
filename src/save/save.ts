@@ -127,6 +127,8 @@ export interface Recovery {
   case: 'R' | 'F' | 'Q'; reason: CorruptReason; had_backup: boolean; restored_from_backup: boolean; copy_failed: boolean;
   /** Raw bytes of the bad main save, kept in memory for "Export old save" (QA case 3). */
   raw: string;
+  /** v2.2 'Can't save': storage refused but the farm loaded; Export takes the CURRENT farm from `live`. */
+  cantSave?: true; live?: () => string;
 }
 const isQuota = (e: unknown) => e instanceof Error && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || /quota/i.test(e.message));
 /** Preserve raw bytes under eggfarm.save.corrupt.<ts>, keep the last CORRUPT_KEEP. One attempt, never retried. */
@@ -151,10 +153,10 @@ export function preserveCorrupt(kv: KV, raw: string, ts: number): boolean {
 export type RecoveryOutcome = 'restored' | 'fresh' | 'storage' | null;
 export const recoveryOutcome = (r: Recovery | null): RecoveryOutcome => !r ? null : r.restored_from_backup ? 'restored' : r.case === 'Q' ? 'storage' : 'fresh';
 /** v4 f6 + AC14b v2.1: the lease write was refused (storage full) and the loader found nothing to recover. Route it
- *  through the Storage dialog ('Q' -> 'storage') with the current main bytes, if readable, for Export. */
+ *  through the dialog as outcome 'storage' with the v2.2 'Can't save' copy; Export takes the current farm. */
 export function storageBlockedRecovery(kv: KV): Recovery {
   let raw = ''; try { raw = kv.getItem(SAVE_KEY) ?? ''; } catch { /* blocked */ }
-  return { case: 'Q', reason: 'missing', had_backup: false, restored_from_backup: false, copy_failed: true, raw };
+  return { case: 'Q', reason: 'missing', had_backup: false, restored_from_backup: false, copy_failed: false, raw, cantSave: true };
 }
 export function loadSafe(kv: KV, b: Balance, now = Date.now(), idbRaw: string | null = null): { file: SaveFile | null; recovery: Recovery | null; outcome: RecoveryOutcome; newer?: number } {
   const r = loadSafeInner(kv, b, now, idbRaw); return { ...r, outcome: recoveryOutcome(r.recovery) };

@@ -267,8 +267,8 @@ img.onb-hand.down{animation:handdown 1s ease-in-out infinite}
 .rc-link{background:none;border:0;min-height:44px;padding:0 12px;font:14px var(--f-body, Nunito, sans-serif);color:#8A5528;text-decoration:underline;cursor:pointer}
 .recovery-card :focus-visible{outline:3px solid #2B79A8;outline-offset:3px}
 .rc-msg{font-size:14px;color:#6B5D52;min-height:0}
-@keyframes rcPop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
-.reduced-motion .recovery-card{animation:rcFade .15s ease-out}@keyframes rcFade{from{opacity:0}to{opacity:1}}
+@keyframes rcPop{from{transform:scale(.85)}to{transform:none}} /* v2.2 fix 1: scale only, the card is never translucent */
+.reduced-motion .recovery-card{animation:none}
 /* SM-9 perf overlay (test hook ?perf=1) */
 .perf-ov{position:fixed;left:4px;bottom:4px;z-index:60;pointer-events:none;white-space:pre;font:11px/1.3 ui-monospace,monospace;background:rgb(0 0 0/.75);color:#fff;padding:4px 6px;border-radius:6px}
 .perf-ov[data-pass=false]{background:#9b1c1c}.perf-ov[data-pass=true]{background:#1f6f2b}

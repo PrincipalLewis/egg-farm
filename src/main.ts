@@ -1,12 +1,12 @@
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
-import { newerStoredVersion, storageBlockedRecovery } from './save/save';
+import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
-import { showTabGuardDialog, showNewerSaveDialog } from './ui/save-recovery';
+import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
@@ -34,7 +34,10 @@ function showError() {
   const b = document.createElement('button'); b.className = 'btn secondary'; b.textContent = "Couldn't load — Retry"; b.onclick = () => location.reload(); start.append(b);
 }
 /** AC14c/AC14d: one persistent, polite notice (shown once). */
+let heldNotice: string | null = null, holdNotices = false; // v2.2 fix 2: no bottom toast while the recovery dialog is open
+document.addEventListener(RECOVERY_CLOSED, () => { holdNotices = false; if (heldNotice) { const t = heldNotice; heldNotice = null; saveNotice(t); } });
 function saveNotice(text: string) {
+  if (holdNotices) { heldNotice ??= text; return; }
   if (document.querySelector('.save-warn')) return;
   const n = document.createElement('div'); n.className = 'save-warn'; n.setAttribute('role', 'status'); n.textContent = text; document.body.append(n);
 }
@@ -85,9 +88,10 @@ async function boot() {
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
+  holdNotices = !!(g.recoveryOutcome && g.recovery) || !!lease.storageBlocked;
   // v4 (QA f6): localStorage refused the lease write. This lone tab still owns the save (never 'Game open in another tab');
   // report it as the storage-full outcome (art-ux/save-recovery-dialog.md v2.1 'storage') plus the no-storage notice.
-  if (lease.storageBlocked) { if (g.recoveryOutcome === null) { g.recoveryOutcome = 'storage'; g.recovery = storageBlockedRecovery(localStorage); } saveNotice(NO_STORAGE_TEXT); }
+  if (lease.storageBlocked) { if (g.recoveryOutcome === null) { g.recoveryOutcome = 'storage'; g.recovery = storageBlockedRecovery(localStorage); g.recovery.live = () => serialize(g.state, Date.now()); } saveNotice(NO_STORAGE_TEXT); }
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   // QA BUG-2: a newer build saved while this tab was live (found right before a write). Game already stopped all writes
   // and the sim; release the lease, stop autosave, freeze render and show the session-long .newer-save layer.
