@@ -97,7 +97,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
   const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
-  (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts
+  if (import.meta.env.DEV) (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts (dev only)
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
