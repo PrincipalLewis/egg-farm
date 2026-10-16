@@ -2,7 +2,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'; import { execSync } from 'node:child_process'; import { ALLOWED_GLOBALS } from './allowed-globals.mjs';
 // Accepts a build dir (dist) or a single-file HTML build (dist-html/egg-farm-*.html, everything inlined).
 const dir = process.argv[2] || 'dist'; const single = statSync(dir).isFile();
-const js = single ? readFileSync(dir, 'utf8') : readdirSync(`${dir}/assets`).filter(f => f.endsWith('.js')).map(f => readFileSync(`${dir}/assets/${f}`, 'utf8')).join('\n');
+const js = single ? [...readFileSync(dir, 'utf8').matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n') /* JS only, not inlined CSS */ : readdirSync(`${dir}/assets`).filter(f => f.endsWith('.js')).map(f => readFileSync(`${dir}/assets/${f}`, 'utf8')).join('\n');
 const ids = [...new Set(js.match(/m\d+-rc\d[a-z0-9-]*\+[0-9a-f]{7,40}(?:\+dirty)?/g) ?? [])];
 if (!ids.length) { console.error('check-release-build: no build id found in bundle'); process.exit(1); }
 const dirty = ids.filter(i => i.includes('+dirty'));
