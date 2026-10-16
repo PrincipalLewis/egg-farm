@@ -121,3 +121,9 @@
 - Boot sweep of `diverged_tmp` and the diverged notice run only after the refusal check; a refused load never sweeps, writes `eggfarm.save.diverged_notice_shown`, or touches any slot/tmp key.
 - The sweep never runs while a slot read-back is unverified; tmp is deleted only after a read-back confirms a `sum` + state duplicate in a slot or store. With both slots full the sweep keeps tmp and shows the notice; it never evicts.
 - §3b lists IDB `eggfarm/save/diverged_tmp` and allowlists `eggfarm.save.diverged_notice_shown` as a plain flag, never save data.
+
+## 2026-10-17 00:15 ADR M4-19 revision 7 (HoQA e152960 M-4, M-5, S-5, S-6; recorded by Senior Software Architect)
+- A replace never overwrites an occupied `diverged_tmp`: run the verified-duplicate delete first; if tmp remains, skip the replace (`{slot:'tmp', action:'write_failed'}`), loser store untouched, notice shown, winner keeps saving.
+- Export clears slots/tmp only after a confirmed save or share (share promise resolved, or explicit "I saved it" for plain downloads); cancel/failure/unconfirmed clears nothing.
+- Once-flag `eggfarm.save.diverged_notice_shown` = SHA-256 of the sorted `sum` set of present slot/tmp copies; re-shows when the set changes; plain value, never save data.
+- Telemetry: `save_recovery_slot.slot` adds `'tmp'`, `action` adds `'sweep'`.
