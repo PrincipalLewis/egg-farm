@@ -331,3 +331,14 @@ describe('rc1-upgrade-value v1.4 tokens + best-buy outline', () => {
   });
 });
 
+
+describe('build id on page (ops smoke / S2-REL-1)', () => {
+  const main = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8');
+  it('sets meta[name=build-id] and #app data-build-id from BUILD_ID; no window global', () => {
+    expect(main).toMatch(/meta\[name=["']build-id["']\]/);
+    expect(main).toContain('root.dataset.buildId = BUILD_ID');
+    expect(main).toContain('m.content = BUILD_ID');
+    expect(main).not.toMatch(/window\.__BUILD|window\.eggfarmBuild/);
+    expect(app).toContain('build-tag');
+  });
+});

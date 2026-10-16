@@ -359,11 +359,17 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const parts = gl.key && gl.state !== 'done' && gl.state !== 'refill' ? goalLabelParts(gl.key, g.state, gl.pct) : null;
       paintGoalLabel(goalLbl, parts, gl.label);
       // fit after layout
-      requestAnimationFrame(() => fitGoalLabelEl(goalLbl));
+      requestAnimationFrame(() => {
+        fitGoalLabelEl(goalLbl);
+        const v = `${goalLbl.textContent ?? ''} ${goalSt.textContent ?? ''}`.replace(/\s+/g, ' ').trim();
+        if (v) goalBtn.setAttribute('aria-label', `${v}. ${goalAria(gl)}`);
+      });
     }
     setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
-    goalBtn.setAttribute('aria-label', goalAria(gl));
+    // Visible name must be in the accessible name (axe label-content-name-mismatch).
+    const vis = `${goalLbl.textContent ?? ''} ${gl.status}`.replace(/\s+/g, ' ').trim();
+    goalBtn.setAttribute('aria-label', vis ? `${vis}. ${goalAria(gl)}` : goalAria(gl));
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
       if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
       setText(goalLive, goalAria(gl)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);

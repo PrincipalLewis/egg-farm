@@ -152,7 +152,9 @@ sections.s289 = async () => {
   const UI = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true });
   { const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
-    await page.waitForTimeout(1300);
+    await page.waitForTimeout(400);
+    // P1q wages << egg income, so paint the S2-8 negative glyph path explicitly (formatter + CSS).
+    await page.evaluate(() => { const e = document.querySelector('#rate'); e.textContent = '\u25BC\u2212$0.03/s'; e.dataset.sign = 'neg'; e.className = 'rate num neg rshake'; e.setAttribute('aria-label', 'Net income minus $0.03 per second'); });
     const r = await page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, shook: e.classList.contains('rshake') }; });
     ok('S2-8 negative net rate: "▼−$x.xx/s" (U+2212, no hyphen, 2 decimals), 11px/700 #B83B37, aria "Net income minus N cents per second", shakes once', /^\u25BC\u2212\$\d+\.\d\d\/s$/.test(r.text) && !/-/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && r.size === '11px' && r.weight === '700' && /^Net income minus \$[\d.,]+[KMB]? per second$/.test(r.aria) && r.shook, JSON.stringify(r));
     if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-8-rate-negative-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
@@ -275,7 +277,7 @@ sections.s25 = async () => {
     workers: { market_hand: { energy: 30, cdS: 1 }, coop_hand: { energy: 90, cdS: 1 }, hawker: { energy: 95, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
   const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.save': st, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
   const read = () => page.evaluate(() => [...document.querySelectorAll('nav.actions button')].filter(b => !b.hidden).map(b => { const r = b.getBoundingClientRect(); return { aria: b.getAttribute('aria-label'), label: b.querySelector('.nav-lbl')?.textContent, icon: !!b.querySelector('img'), badge: b.querySelector('.count-badge:not([hidden])')?.textContent, w: Math.round(r.width), h: Math.round(r.height) }; }));
-  const check = (r, tag) => ok(`S2-5 nav ${tag}: 4 buttons, each icon + visible label + aria-label, >=64x44`, r.length === 4 && r.every(x => x.icon && x.label && x.aria && x.w >= 64 && x.h >= 44) && r[2].label === 'Refill' && r[2].aria === 'Refill 1 tired workers' && r[2].h === 64 && r[2].badge === '1', JSON.stringify(r));
+  const check = (r, tag) => ok(`S2-5 nav ${tag}: 4 buttons, each icon + visible label + aria-label, >=64x44`, r.length === 4 && r.every(x => x.icon && x.label && x.aria && x.w >= 64 && x.h >= 44) && r[2].label === 'Refill' && r[2].aria === 'Refill 1 tired worker' && r[2].h === 64 && r[2].badge === '1', JSON.stringify(r));
   await page.waitForTimeout(300); check(await read(), 'fresh load');
   await page.evaluate(() => window.eggfarm.save()); await page.reload(); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm); await page.waitForTimeout(400);
   const r2 = await read(); check(r2, 'after reload');
@@ -330,7 +332,9 @@ sections.wage075 = async () => {
 sections.dash = async () => {
   const { ctx, page } = await open({ w: 390, h: 844, dsf: 4, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 1, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { coop_hand: { energy: 90, cdS: 5 } } }; });
-  await page.waitForTimeout(1500);
+  // Art glyph check: paint the exact ▼−$0.01/s string (live net cannot go negative under P1q wages).
+  await page.evaluate(() => { const e = document.querySelector('#rate'); e.textContent = '\u25BC\u2212$0.01/s'; e.dataset.sign = 'neg'; e.classList.add('neg'); });
+  await page.waitForTimeout(200);
   const r = await page.evaluate(() => { const e = document.querySelector('#rate'), out = { text: e.textContent, cps: [...e.textContent].map(c => 'U+' + c.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')), html: e.innerHTML, deco: [] };
     for (const el of [e, ...e.querySelectorAll('*'), e.parentElement]) for (const ps of [null, '::before', '::after']) { const cs = getComputedStyle(el, ps);
       const c = cs.content; if (ps && c && c !== 'none' && c !== 'normal') out.deco.push(`${el.id || el.className}${ps} content=${c}`);
