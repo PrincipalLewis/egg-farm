@@ -23,11 +23,11 @@
       "start_pct": 100,
       "drain_s_per_pct": 9,
       "tired_below_pct": 30,
-      "yawn_at_pct": 40,
+      "yawn_at_pct": 50,
       "manage_cooldown_s": 30,
       "manage_all_min_workers": 3,
       "unpaid_resume_wage_min": 1,
-      "manage_prompt_threshold": 0.4
+      "manage_prompt_threshold": 0.5
     },
     "market_hand": {
       "unlock_farm": 3,
@@ -53,23 +53,28 @@
       "tiers": [
         {
           "farm": 18,
-          "mult": 1.5
+          "mult": 1.5,
+          "cost": 5538
         },
         {
           "farm": 19,
-          "mult": 2
+          "mult": 2,
+          "cost": 9100
         },
         {
           "farm": 21,
-          "mult": 2.5
+          "mult": 2.5,
+          "cost": 20959
         },
         {
           "farm": 22,
-          "mult": 3
+          "mult": 3,
+          "cost": 28294
         },
         {
           "farm": 24,
-          "mult": 4
+          "mult": 4,
+          "cost": 51567
         }
       ],
       "tier_cost_share_of_farm_cost": 0.5,
@@ -104,7 +109,40 @@
     "customerIntervalMinS": 1.5,
     "demandLoFactor": 0.8,
     "demandHiFactor": 1.6,
-    "eggsPerSecL0": 1.5
+    "eggsPerSecL0": 1.5,
+    "costTable": [
+      100,
+      135,
+      182,
+      246,
+      332,
+      448,
+      560,
+      700,
+      875,
+      1094,
+      1368,
+      1710,
+      2138,
+      2672,
+      3340,
+      4844,
+      7024,
+      10185,
+      11076,
+      18201,
+      31050,
+      41918,
+      56589,
+      68756,
+      72194,
+      97461,
+      131573,
+      177624,
+      239792,
+      323719,
+      624316
+    ]
   },
   "customers": {
     "customer_patience_s": 30,

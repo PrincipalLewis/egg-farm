@@ -57,7 +57,7 @@ sections.pt1 = async () => {
     await ctx.close();
   }
   { // PT1-6: axe serious/critical on farm, onboarding, sheets
-    const axe = readFileSync('/tmp/axe/node_modules/axe-core/axe.min.js', 'utf8');
+    const axe = readFileSync(process.env.AXE_PATH || '/tmp/axe/node_modules/axe-core/axe.min.js', 'utf8') // AXE_PATH overrides the default manual install;
     const run = async (page, tag) => { await page.addScriptTag({ content: axe }); return (await page.evaluate(async () => (await axe.run(document, { resultTypes: ['violations'] })).violations.map(v => ({ id: v.id, impact: v.impact, t: v.nodes[0]?.target?.join(' ') })))).map(v => ({ ...v, tag })); };
     const { ctx, page } = await open(); let v = await run(page, 'onboarding');
     await page.locator('.onb-skip').click(); v = v.concat(await run(page, 'farm'));
@@ -142,13 +142,13 @@ sections.b58 = async () => {
     const n1 = await page.locator('[data-act=manageAll]').count(), vis1 = await page.locator('[data-act=manageAll]:visible').count();
     ok(`B8 exactly one Farm View Manage all button in the DOM (${w})`, (await page.locator('.farm-manage-all').count()) === 1);
     ok(`B5 workers at 81-98% -> no Manage all shown (${w})`, vis1 === 0, `dom=${n1}`);
-    await set([30, 41, 98]); await page.waitForTimeout(300);
+    await set([30, 51, 98]); await page.waitForTimeout(300);
     const vis2 = await page.locator('.farm-manage-all:visible').count();
     if (w > 900) { const bb = await page.locator('.farm-manage-all').boundingBox(); ok('B8 desktop Manage all sits in the Upgrades header, 44x44', bb && bb.width === 44 && bb.height === 44 && (await page.locator('#p-upgrades header .farm-manage-all').count()) === 1, JSON.stringify(bb)); }
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
     const pill = await page.locator('#uRow .manage-all').textContent().catch(() => '');
-    ok(`B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (${w})`, vis2 === 1 && /\(1 need it\)/.test(pill), `vis=${vis2} pill=${pill}`);
+    ok(`B5 one worker at/below threshold -> Farm View button visible + "(1 need it)" (${w})`, vis2 === 1 && /\(1 need it\)/.test(pill), `vis=${vis2} pill=${pill}`);
     await ctx.close();
   }
 };

@@ -1,5 +1,7 @@
 name: ci
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   unit:
     runs-on: ubuntu-latest
@@ -8,8 +10,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - name: economy.csv copy matches product/ (skipped when product/ is absent)
-        run: npm run check-economy-copy
       - run: npm test
   slow:
     # Slow suites (*.slow.test.ts, skipped by `npm test`): 100-seed seller-variance TS-vs-Python parity (PR #19). Always runs.
@@ -39,3 +39,20 @@ jobs:
         run: npm run build
       - name: Release globals allowlist (${{ matrix.engine }})
         run: npm run check-globals -- ${{ matrix.engine }}
+  release-html:
+    # PR #13 / Code Reviewer M1: the single-file release html must pass check-release-build (build id = HEAD,
+    # window globals = eggfarmExportTelemetry only, no external refs / sourcemaps / QA hooks).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - name: Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+        run: npm run build:html
+      - name: check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+        run: |
+          prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
+          node scripts/check-release-build.mjs dist-html/egg-farm.html --build-id "$prefix+$(git rev-parse --short HEAD)"
+      - uses: actions/upload-artifact@v4
+        with: { name: egg-farm-html, path: dist-html/egg-farm.html }

@@ -412,12 +412,14 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Recovery dialog v1.1: Q export = full-width outlined secondary button below the primary */
 /* AC14b v2.1 (art-ux/save-recovery-dialog.md §2) */
 .recovery-layer{background:var(--c-scrim)}
-.recovery-card{gap:0;border-color:var(--c-outline)}
+.recovery-card{border-color:var(--c-outline)}
+/* R1: v2.1 spacing only on the AC14b dialog; tab-guard + newer-save keep gap:12px */
+.recovery-layer[data-outcome] .recovery-card{gap:0}
 .recovery-card .rc-icon{position:relative;display:inline-block;width:72px;height:72px;flex:none}.recovery-card .rc-icon img{width:72px;height:72px;display:block}
 .rc-badge{position:absolute;right:-6px;bottom:-4px;box-sizing:border-box;width:28px;height:28px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 16px/24px var(--f-body, Nunito, sans-serif);text-align:center}
 .rc-badge.ok{background:var(--c-meadow-strong)}.rc-badge.new{background:var(--c-focus)}.rc-badge.warn{background:var(--c-wood-text)}
-.recovery-card h2{margin-top:8px;line-height:1.2;color:var(--c-text)}.recovery-card p#rcB{margin-top:8px}
-.recovery-card .rc-primary{margin-top:16px}
+.recovery-card h2{line-height:1.2;color:var(--c-text)}.recovery-layer[data-outcome] .recovery-card h2{margin-top:8px}.recovery-layer[data-outcome] .recovery-card p#rcB{margin-top:8px}
+.recovery-layer[data-outcome] .recovery-card .rc-primary{margin-top:16px}
 .recovery-card .rc-link{margin-top:8px;min-width:120px;min-height:44px}
 .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:12px;border-radius:999px;background:var(--c-white);color:var(--c-wood-text);border:2px solid var(--c-wood-text);box-shadow:none;font:700 16px var(--f-body, Nunito, sans-serif);cursor:pointer}
 .recovery-card .rc-msg{margin-top:8px}.recovery-card .rc-msg:empty{margin-top:0}

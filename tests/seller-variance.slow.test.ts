@@ -1,9 +1,9 @@
 // SLOW (~80 s): *.slow.test.ts is excluded from default `vitest run` / `npm test` (vite.config.ts test.exclude).
 // Run it with `npm run test:slow` (vitest.slow.config.ts); CI always runs it in the ci.yml `slow` job. Seeds stay at 100.
-// Seller15 variance bot (product/sim/seller-variance-proposal.md, sha256 17877b41; HoQA F-1): TS vs Python parity.
+// Seller15 variance bot (vendor/economy-sim/sim/seller-variance-proposal.md, vendored from product/sim/, sha256 17877b41; HoQA F-1): TS vs Python parity.
 // Expected values: tests/fixtures/seller_variance.json, produced by scripts/gen-seller-variance-fixtures.py running the
-// Python reference product/sim/seller_variance_sim.py (run / run_m2, policy seller15, 100 seeds, 60 min) on this repo's
-// data/economy.csv. Regenerate: SV_SIM_DIR=<product/sim> python3 scripts/gen-seller-variance-fixtures.py
+// Python reference vendor/economy-sim/sim/seller_variance_sim.py (vendored from product/sim/) (run / run_m2, policy seller15, 100 seeds, 60 min) on this repo's
+// data/economy.csv. Regenerate: python3 scripts/gen-seller-variance-fixtures.py (defaults to vendor/economy-sim/sim; SV_SIM_DIR overrides)
 //
 // What is exact and what has a tolerance (the proposal specifies neither, so it is fixed here):
 //  EXACT  - the variance stream (CPython MT19937 port): random() bit-for-bit, every p_delay / p_cheap_first roll, the call
