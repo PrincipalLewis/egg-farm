@@ -1,5 +1,5 @@
 {
- "source":"product/sim/seller_variance_sim.py run/run_m2 policy=seller15",
+ "source":"vendor/economy-sim/sim/seller_variance_sim.py (vendored from product/sim/) run/run_m2 policy=seller15",
  "sim_sha256":"560ea73b",
  "proposal_sha256":"17877b41",
  "economy_csv_sha256":"57d964d5",
