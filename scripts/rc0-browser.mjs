@@ -10,7 +10,7 @@ const port = +(process.env.PORT ?? 4181); const srv = spawn('npx', ['vite', 'pre
 const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
 await new Promise(r => setTimeout(r, 1500));
 const SHOTS = process.env.SHOTS ?? '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
-const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
+const shot = (ENGINE === 'chromium' || !!process.env.SHOTS_ALL) && headless; // screenshots from headless Chromium (SHOTS_ALL=1: every engine)
 const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
 const results = []; const ok = (name, pass, info = '') => { results.push({ name, pass: !!pass, info }); if (!pass) process.exitCode = 1; };
 const URL0 = `http://127.0.0.1:${port}/`;
