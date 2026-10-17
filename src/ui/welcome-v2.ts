@@ -25,12 +25,12 @@ export function welcomeModel(eggs: number, awayS: number, s: GameState, b: Balan
     rate: `${rateN}/min offline · ${pct}% of your farm's rate`, capLine, aria, button: `Collect ${n} ${unit}` };
 }
 import type { HiddenPeriodResult } from '../save/hidden-time';
-/** C-AC36 popup gate: show only for mode 'offline-grant', at most once per period (startAt); null / 'online' / 'none' never show. */
+/** C-AC36 popup gate: show only for mode 'offline-grant', at most once per period (periodId); null / 'online' / 'none' never show. */
 export function hiddenPopupGate() {
   const seen = new Set<number>();
   return (r: HiddenPeriodResult | null): { eggs: number; awayS: number; capped: boolean } | null => {
-    if (!r || r.mode !== 'offline-grant' || r.eggsGranted <= 0 || seen.has(r.startAt)) return null;
-    seen.add(r.startAt);
+    if (!r || r.mode !== 'offline-grant' || r.eggsGranted <= 0 || seen.has(r.periodId)) return null;
+    seen.add(r.periodId);
     // elapsedMs drives "Away {away}" (real time, spec §2); grantedMs/capped drive the cap text. coinsGranted is 0 by design (Q1).
     return { eggs: r.eggsGranted, awayS: r.elapsedMs / 1000, capped: r.capped || r.grantedMs < r.elapsedMs };
   };
