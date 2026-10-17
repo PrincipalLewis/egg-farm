@@ -144,7 +144,23 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0; /* rc2: never over the 'New helper!' hire banner */ const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); }; /* toast-v3: settle top/.below with transitions off and flush BEFORE .show, so the first toast never slides in from the off-screen base through the banner/strip */ const settle = () => { toast.style.transition = 'none'; place(); void toast.offsetHeight; toast.style.transition = ''; toast.classList.add('show'); }; /* hidden: measure next frame (a banner shown by the same action is laid out by then) */ if (toast.classList.contains('show')) { place(); requestAnimationFrame(place); } else requestAnimationFrame(settle); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
+  let settleRaf = 0;
+  const showToast = (text: string) => {
+    toast.textContent = text; clearTimeout(toastTimer);
+    /* F1: below the queue strip, never over it; rc2: never over the 'New helper!' hire banner */
+    const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0;
+      const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); };
+    /* the dismiss timer is armed only once .show is on, so a paused rAF can't leave a toast stuck (review 4902a39 #1) */
+    const arm = () => { toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
+    if (toast.classList.contains('show') || +getComputedStyle(toast).opacity > 0) {
+      /* visible or still fading out: reverse from the current value, no snap (review #2) */
+      cancelAnimationFrame(settleRaf); settleRaf = 0; place(); toast.classList.add('show'); requestAnimationFrame(place); arm(); return;
+    }
+    /* toast-v3: hidden -> settle top/.below with transitions off and flush BEFORE .show, one frame later (a banner shown by the same action is laid out by then),
+       so the first toast never slides in from the off-screen base through the banner/strip. One pending settle at a time (review nit 4). */
+    if (settleRaf) return;
+    settleRaf = requestAnimationFrame(() => { settleRaf = 0; toast.style.transition = 'none'; place(); void toast.offsetHeight; toast.style.transition = ''; toast.classList.add('show'); arm(); });
+  };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------

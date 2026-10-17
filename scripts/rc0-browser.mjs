@@ -101,7 +101,7 @@ sections.b2 = async () => {
 // ---------- toast-v3: first toast after load is at its settled top from frame 1, never over the banner/strip mid-fade ----------
 sections.toastfirst = async () => {
   const TS = process.env.TOAST_SHOTS ?? `${SHOTS}/toast-v3`; mkdirSync(TS, { recursive: true });
-  for (const [w, h, banner] of [[360, 740, true], [390, 640, false], [1280, 800, true]]) {
+  for (const [w, h, banner] of [[360, 740, true], [390, 640, false], [1280, 800, true], [1280, 800, false]]) {
     const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': banner ? DONE : JSON.stringify({ ...JSON.parse(DONE), workersIntroA: true }) } });
     const tag = `${w}x${h} ${banner ? 'banner' : 'no banner'}`;
     // sample every frame from the dispatch (same task) for ~400ms
@@ -113,9 +113,17 @@ sections.toastfirst = async () => {
     await page.waitForTimeout(400);
     const r = await page.evaluate(() => ({ f: window.__tf, ia: document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0, qb: document.querySelector('#queue').getBoundingClientRect().bottom, docked: matchMedia('(min-width:960px) and (orientation:landscape)').matches }));
     const edge = Math.max(r.docked ? 0 : r.qb, r.ia), settled = r.f[r.f.length - 1], seen = r.f.filter(x => x.show && x.vis === 'visible' && x.op > 0);
-    ok(`toast-v3 settles 8px below the ${banner ? 'banner' : 'strip'} (${tag})`, settled.op === 1 && Math.abs(settled.top - (edge + 8)) <= 1, JSON.stringify({ settled, edge }));
-    ok(`toast-v3 first visible frame already at settled top (±8px fade offset) (${tag})`, seen.length > 0 && seen[0].top >= settled.top - 8.5 && seen[0].top <= settled.top + 0.5, JSON.stringify({ first: seen[0], settled: settled.top }));
-    ok(`toast-v3 never over the ${banner ? 'banner' : 'strip'} in any frame mid-fade (${tag})`, seen.every(x => x.top >= edge - 0.5), JSON.stringify(seen.filter(x => x.top < edge - 0.5).slice(0, 3)));
+    if (edge === 0) { // 1280 docked, no banner: the intended slide-in from the top (nothing to cross)
+      ok(`toast-v3 docked no-banner slides in from above and settles on-screen (${tag})`, settled.op === 1 && settled.top >= 0 && seen.every(x => x.top <= settled.top + 0.5), JSON.stringify({ first: seen[0], settled }));
+    } else {
+      ok(`toast-v3 settles 8px below the ${banner ? 'banner' : 'strip'} (${tag})`, settled.op === 1 && Math.abs(settled.top - (edge + 8)) <= 1, JSON.stringify({ settled, edge }));
+      ok(`toast-v3 first visible frame already at settled top (±8px fade offset) (${tag})`, seen.length > 0 && seen[0].top >= settled.top - 8.5 && seen[0].top <= settled.top + 0.5, JSON.stringify({ first: seen[0], settled: settled.top }));
+      // frames at opacity 0 are invisible, so only frames with opacity > 0 count as "over" the banner/strip
+      ok(`toast-v3 never over the ${banner ? 'banner' : 'strip'} in any frame mid-fade (${tag})`, seen.every(x => x.top >= edge - 0.5), JSON.stringify(seen.filter(x => x.top < edge - 0.5).slice(0, 3)));
+    }
+    await page.waitForTimeout(1400); // timer armed after .show: 1300ms + 240ms fade
+    const gone = await page.locator('.toast').evaluate(e => ({ show: e.classList.contains('show'), op: getComputedStyle(e).opacity, vis: getComputedStyle(e).visibility }));
+    ok(`toast-v3 dismissed after ~1.3s (${tag})`, !gone.show && gone.op === '0' && gone.vis === 'hidden', JSON.stringify(gone));
     await ctx.close();
   }
 };
