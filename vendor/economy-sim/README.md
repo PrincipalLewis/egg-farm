@@ -14,7 +14,6 @@ The freshness test picks the sim `--config` from the sha256 of `data/economy.csv
 
 | data/economy.csv sha256 | --config | meaning |
 |---|---|---|
-| `57d964d5…` | `p1q` | pre-F1 (P1Q, M2_P4) |
 | `86f0e80e…` | `f1` | F1 m4cols CSV (#17/#32), main today (`current` == `f1` since sim 10f29a4a) |
 | anything else | — | hard failure: `unknown economy.csv <sha>: update vendor/economy-sim` |
 
