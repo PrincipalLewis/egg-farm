@@ -4,7 +4,7 @@ export interface PacingTargets {
   step_ratio_p95_max: number; step_ratio_worst_max: number; step_ratio_min_prev_s: number; step_ratio_from_level: number;
   gap_p95_max_s: number; gap_p95_target_s: number; gap_worst_max_s: number;
   l18_25_step_p95_max_s: number; l18_25_step_worst_max_s: number;
-  active_idle_p95_max: number; active_idle_worst_max: number; ex1_casual_workers_step_max: number; ac7_w_p5_t20_warn_s: number;
+  active_idle_p95_max: number; active_idle_worst_max: number; ex1_casual_workers_step_max: number; ac7_w_t20_p95_warn_s: number; l18_25_step_p95_max_s_variance: number;
 }
 export const loadTargets = (): PacingTargets => JSON.parse(readFileSync(new URL('../data/pacing-targets.json', import.meta.url), 'utf8'));
 export type Reach = Record<string, number> | Map<number, number>;
@@ -46,18 +46,22 @@ export function gapGuard(buysPerSeed: number[][], t: PacingTargets): GuardResult
   if (p95 > t.gap_p95_target_s) w.push(`gap P95 ${p95}s above target ${t.gap_p95_target_s}s (warn only)`);
   return { p95, worst, failures: f, warnings: w };
 }
-/** L18-25 time-on-level window guard (workers variance bot, F1). Each (seed, level) time on level L18..L25 is one step sample
- *  (QA 'L18-25 worst step' row: med(steps) -> P95(steps), HoP 23:19): P95 over all pooled samples, worst = max sample.
- *  perSeedMaxP95 (P95 of each seed's slowest level) is reported for information, not gated. */
-export function l18to25Guard(reaches: Reach[], t: PacingTargets): GuardResult & { perSeedMaxP95: number } {
-  const pooled: number[] = [], per: number[] = [];
-  for (const r of reaches) { per.push(maxTimeOnLevels(r, 18, 25)); for (let n = 18; n <= 25; n++) pooled.push(timeOnLevel(r, n)!); }
-  const p95 = quantile(pooled, 0.95), worst = Math.max(...pooled), f: string[] = [];
-  if (p95 > t.l18_25_step_p95_max_s) f.push(`L18-25 P95 ${p95}s > ${t.l18_25_step_p95_max_s}s`); if (worst > t.l18_25_step_worst_max_s) f.push(`L18-25 worst ${worst}s > ${t.l18_25_step_worst_max_s}s`);
-  return { p95, worst, failures: f, warnings: [], perSeedMaxP95: quantile(per, 0.95) };
+/** L18-25 guard, variance workers bot (HoP 02:05): per seed, the slowest level L18..L25; P95 across seeds
+ *  <= l18_25_step_p95_max_s_variance and worst seed <= l18_25_step_worst_max_s, both hard. */
+export function l18to25Guard(reaches: Reach[], t: PacingTargets): GuardResult {
+  const v = reaches.map(r => maxTimeOnLevels(r, 18, 25)), p95 = quantile(v, 0.95), worst = Math.max(...v), f: string[] = [];
+  if (p95 > t.l18_25_step_p95_max_s_variance) f.push(`L18-25 P95 ${p95.toFixed(1)}s > ${t.l18_25_step_p95_max_s_variance}s`);
+  if (worst > t.l18_25_step_worst_max_s) f.push(`L18-25 worst ${worst.toFixed(1)}s > ${t.l18_25_step_worst_max_s}s`);
+  return { p95, worst, failures: f, warnings: [] };
 }
-/** Warn-only: workers P5 time-to-L20 above ac7_w_p5_t20_warn_s. Unreached L20 counts as Infinity. */
-export function p5T20Warning(reaches: Reach[], t: PacingTargets): { p5: number; warning: string | null } {
-  const p5 = quantile(reaches.map(r => toMap(r).get(20) ?? Infinity), 0.05);
-  return { p5, warning: p5 > t.ac7_w_p5_t20_warn_s ? `workers P5 time-to-L20 ${p5}s > ${t.ac7_w_p5_t20_warn_s}s (R-AC7-W-ZERO-MARGIN, warn only)` : null };
+/** L18-25 guard, fixed (deterministic) workers bot: every seed's slowest L18..L25 level <= l18_25_step_p95_max_s. */
+export function l18to25FixedGuard(reaches: Reach[], t: PacingTargets): GuardResult {
+  const v = reaches.map(r => maxTimeOnLevels(r, 18, 25)), worst = Math.max(...v), f: string[] = [];
+  if (worst > t.l18_25_step_p95_max_s) f.push(`fixed bot L18-25 slowest ${worst.toFixed(1)}s > ${t.l18_25_step_p95_max_s}s`);
+  return { p95: quantile(v, 0.95), worst, failures: f, warnings: [] };
+}
+/** Warn-only: workers P95 time-to-L20 above ac7_w_t20_p95_warn_s. Unreached L20 counts as Infinity. */
+export function t20P95Warning(reaches: Reach[], t: PacingTargets): { p95: number; warning: string | null } {
+  const p95 = quantile(reaches.map(r => toMap(r).get(20) ?? Infinity), 0.95);
+  return { p95, warning: p95 > t.ac7_w_t20_p95_warn_s ? `workers P95 time-to-L20 ${p95}s > ${t.ac7_w_t20_p95_warn_s}s (R-AC7-W-ZERO-MARGIN, warn only)` : null };
 }

@@ -1,13 +1,13 @@
 // Unit tests for tests/pacing-guards.ts on synthetic traces. Every bound comes from data/pacing-targets.json.
 import { describe, it, expect } from 'vitest';
-import { loadTargets, timeOnLevel, maxTimeOnLevels, maxStepRatio, maxGap, stepRatioGuard, gapGuard, l18to25Guard, p5T20Warning, quantile } from './pacing-guards';
+import { l18to25FixedGuard, loadTargets, timeOnLevel, maxTimeOnLevels, maxStepRatio, maxGap, stepRatioGuard, gapGuard, l18to25Guard, t20P95Warning, quantile } from './pacing-guards';
 const t = loadTargets();
 /** Reach map from per-level durations: durs[i] = time on level start+i. Levels below start take 10 s each. */
 const reach = (start: number, durs: number[]) => { const r: Record<string, number> = {}; let x = 0; for (let n = 0; n < start; n++) { r[n] = x; x += 10; } durs.forEach((d, i) => { r[start + i] = x; x += d; }); r[start + durs.length] = x; return r; };
 const F = t.step_ratio_from_level, M = t.step_ratio_min_prev_s;
 describe('pacing-targets.json', () => {
   it('has every guard key as a finite number', () => {
-    for (const k of ['step_ratio_p95_max', 'step_ratio_worst_max', 'step_ratio_min_prev_s', 'step_ratio_from_level', 'gap_p95_max_s', 'gap_p95_target_s', 'gap_worst_max_s', 'l18_25_step_p95_max_s', 'l18_25_step_worst_max_s', 'active_idle_p95_max', 'active_idle_worst_max', 'ex1_casual_workers_step_max', 'ac7_w_p5_t20_warn_s'] as const)
+    for (const k of ['step_ratio_p95_max', 'step_ratio_worst_max', 'step_ratio_min_prev_s', 'step_ratio_from_level', 'gap_p95_max_s', 'gap_p95_target_s', 'gap_worst_max_s', 'l18_25_step_p95_max_s', 'l18_25_step_worst_max_s', 'active_idle_p95_max', 'active_idle_worst_max', 'ex1_casual_workers_step_max', 'ac7_w_t20_p95_warn_s', 'l18_25_step_p95_max_s_variance'] as const)
       expect(Number.isFinite(t[k]), k).toBe(true);
     expect(t.gap_p95_target_s).toBeLessThanOrEqual(t.gap_p95_max_s); expect(t.step_ratio_p95_max).toBeLessThanOrEqual(t.step_ratio_worst_max);
   });
@@ -49,22 +49,28 @@ describe('L18-25 window and P5 time-to-L20 warning', () => {
     expect(() => maxTimeOnLevels(reach(18, [100]), 18, 25)).toThrow(/horizon/);
   });
   it('guard fails over P95 / worst', () => {
-    const ok = Array.from({ length: 100 }, () => reach(18, Array(8).fill(t.l18_25_step_p95_max_s)));
+    const ok = Array.from({ length: 100 }, () => reach(18, Array(8).fill(t.l18_25_step_p95_max_s_variance)));
     expect(l18to25Guard(ok, t).failures).toEqual([]);
     expect(l18to25Guard([...ok.slice(1), reach(18, [...Array(7).fill(10), t.l18_25_step_worst_max_s + 1])], t).failures.join()).toMatch(/worst/);
   });
-  it('p5 warning only above the bound', () => {
+  it('P95 t20 warning only above the bound', () => {
     const at = (s: number) => Array.from({ length: 100 }, () => ({ 0: 0, 20: s }));
-    expect(p5T20Warning(at(t.ac7_w_p5_t20_warn_s), t).warning).toBeNull();
-    expect(p5T20Warning(at(t.ac7_w_p5_t20_warn_s + 1), t).warning).toMatch(/warn only/);
+    expect(t20P95Warning(at(t.ac7_w_t20_p95_warn_s), t).warning).toBeNull();
+    expect(t20P95Warning(at(t.ac7_w_t20_p95_warn_s + 1), t).warning).toMatch(/warn only/);
   });
   it('quantile', () => expect(quantile([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 0.95)).toBe(10));
 });
-describe('L18-25 pooled P95', () => {
-  it('one slow level per seed above P95 bound passes when pooled P95 is within (8 samples per seed)', () => {
-    const r = Array.from({ length: 100 }, () => reach(18, [t.l18_25_step_p95_max_s + 1, ...Array(7).fill(10)]));
-    const g = l18to25Guard(r, t); expect(g.p95).toBe(t.l18_25_step_p95_max_s + 1); // 100/800 = 12.5% > 5% -> P95 is the slow level
-    const r2 = r.map((x, i) => i < 30 ? x : reach(18, Array(8).fill(10)));        // 30/800 < 5%
-    expect(l18to25Guard(r2, t).failures).toEqual([]); expect(l18to25Guard(r2, t).perSeedMaxP95).toBe(t.l18_25_step_p95_max_s + 1);
+describe('L18-25 per-seed slowest level', () => {
+  const V = t.l18_25_step_p95_max_s_variance, slow = (x: number) => reach(18, [x, ...Array(7).fill(10)]);
+  it('variance: P95 across seeds of each seed\'s slowest level, fails just over the bound', () => {
+    const ok = Array.from({ length: 100 }, (_, i) => slow(i < 5 ? V + 1 : V));       // 5% over: P95 still within
+    expect(l18to25Guard(ok, t).failures).toEqual([]); expect(l18to25Guard(ok, t).p95).toBe(V);
+    const bad = Array.from({ length: 100 }, (_, i) => slow(i < 6 ? V + 1 : V));      // 6% over
+    expect(l18to25Guard(bad, t).failures.join()).toMatch(/P95/);
+  });
+  it('fixed bot: any seed over l18_25_step_p95_max_s fails', () => {
+    const ok = Array.from({ length: 100 }, () => slow(t.l18_25_step_p95_max_s));
+    expect(l18to25FixedGuard(ok, t).failures).toEqual([]);
+    expect(l18to25FixedGuard([...ok.slice(1), slow(t.l18_25_step_p95_max_s + 1)], t).failures.length).toBe(1);
   });
 });
