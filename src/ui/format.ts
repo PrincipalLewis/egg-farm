@@ -18,14 +18,16 @@ export const fmtAway = (s: number, capS: number) => {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
   return h ? `${h}h ${m}m` : m ? `${m}m` : `${Math.floor(s)}s`;
 };
+/** Hours + minutes from total minutes rounded once, so 59.5 min carries into the hour (never "1h 60m"; review 5d8a058 #2/#9). */
+export const hoursMins = (s: number) => { const tm = Math.round(s / 60); return { tm, h: Math.floor(tm / 60), m: tm % 60 }; };
 /** F7: <10 min "~1 min 5 s"/"~45 s"; 10-60 min nearest whole min; >=60 min "~1 h 5 min"; no income "—". */
 export const fmtTimeToAfford = (seconds: number | null) => {
   if (seconds === null || !isFinite(seconds)) return '—';
   const s = Math.max(0, Math.ceil(seconds));
   if (s < 60) return `~${s} s`;
   if (s < 600) { const m = Math.floor(s / 60), r = s % 60; return r ? `~${m} min ${r} s` : `~${m} min`; }
-  if (s < 3600) return `~${Math.round(s / 60)} min`;
-  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  const { tm, h, m } = hoursMins(s);
+  if (tm < 60) return `~${tm} min`;
   return m ? `~${h} h ${m} min` : `~${h} h`;
 };
 /** Upgrade-card ETA (Product copy, Oct 16): "Affordable in a moment" under 10 s; "Affordable in ~m:ss"; "~h:mm:ss" from 1 h; no income "Affordable in —". Same seconds as fmtTimeToAfford. */
@@ -44,7 +46,7 @@ export const fmtGoalEta = (seconds: number | null) => {
     const m = Math.floor(s / 60), r = s % 60;
     return `~${m}:${String(r).padStart(2, '0')}`;
   }
-  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  const { h, m } = hoursMins(s);
   return m ? `~${h}h ${m}m` : `~${h}h`;
 };
 /** C-AC25 (Product + Art & UX Oct 16): Welcome-back gain, N = pendingOfflineEggs (eggs actually added to the Basket).
