@@ -38,7 +38,10 @@ if (strict) { // vendored sim side: each SOURCE row <sha> <vendored path> produc
   const sumSet = new Set(sumRows.map(r => { const m = r.match(/^([0-9a-f]{64})\s+\*?(\S+)$/); return m ? key(m[1], m[2]) : `malformed:${r}`; }));
   const onlySrc = [...srcSet].filter(k => !sumSet.has(k)), onlySum = [...sumSet].filter(k => !srcSet.has(k));
   if (onlySrc.length || onlySum.length || srcSet.size !== rows.length || sumSet.size !== sumRows.length) {
-    console.warn(`check-economy-copy: ERROR SOURCE and SHA256SUMS (path, sha) sets differ: only in SOURCE [${onlySrc.join('; ')}], only in SHA256SUMS [${onlySum.join('; ')}]`); bad = true;
+    const dup = srcSet.size !== rows.length || sumSet.size !== sumRows.length;
+    if (onlySrc.length || onlySum.length) console.warn(`check-economy-copy: ERROR SOURCE and SHA256SUMS (path, sha) sets differ: only in SOURCE [${onlySrc.join('; ')}], only in SHA256SUMS [${onlySum.join('; ')}]`);
+    if (dup) console.warn(`check-economy-copy: ERROR duplicate (path, sha) row(s): SOURCE ${rows.length} rows / ${srcSet.size} unique, SHA256SUMS ${sumRows.length} rows / ${sumSet.size} unique`);
+    bad = true;
   }
   const sha = f => createHash('sha256').update(readFileSync(f)).digest('hex');
   for (const r of rows) {
@@ -48,7 +51,7 @@ if (strict) { // vendored sim side: each SOURCE row <sha> <vendored path> produc
     const rel = relative(vroot, v);
     if (!rel || rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)) { console.warn(`check-economy-copy: ERROR SOURCE path ${vend} resolves outside the vendor dir`); bad = true; continue; }
     const relP = relative(resolve(prodDir), p);
-    if (!relP || relP.startsWith('..') || isAbsolute(relP)) { console.warn(`check-economy-copy: ERROR SOURCE path ${src} resolves outside the product dir`); bad = true; continue; }
+    if (!relP || relP === '..' || relP.startsWith('..' + sep) || isAbsolute(relP)) { console.warn(`check-economy-copy: ERROR SOURCE path ${src} resolves outside the product dir`); bad = true; continue; }
     if (!existsSync(v)) { console.warn(`check-economy-copy: ERROR vendored ${vend} not found`); bad = true; continue; }
     if (!existsSync(p)) { console.warn(`check-economy-copy: ERROR ${p} not found`); bad = true; continue; }
     const hv = sha(v), hp = sha(p);

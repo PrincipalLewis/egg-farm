@@ -26,14 +26,14 @@ const t = loadTargets();
 const known = csvSha === F1_CSV || csvSha === MAIN_PRE_F1_CSV;
 describe(`AC7 worst-seed guards, workers variance bot (data/economy.csv ${csvSha})`, () => {
   it('economy CSV sha is known (else: update this suite)', () => { if (!known) throw new Error(`unknown economy CSV ${csvSha}: update AC7 worst-seed guards`); });
-  it.skipIf(csvSha !== F1_CSV)('F1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn', () => {
+  it.skipIf(csvSha !== F1_CSV)('F1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 86f0e80e only; skipped on pre-F1 57d964d5)', () => {
     const reaches = SEEDS.map(s => runM2(b, s, { model: 'seller15', T: HORIZON_S, variance: VAR_DEFAULT }).reach);
     const g = l18to25Guard(reaches, t), w = t20P95Warning(reaches, t), t20 = reaches.map(r => r.get(20) ?? Infinity);
     console.log(`variance L18-25 slowest level P95 ${g.p95.toFixed(1)}s (<= ${t.l18_25_step_p95_max_s_variance}) worst ${g.worst.toFixed(1)}s (<= ${t.l18_25_step_worst_max_s}); t20 P5/P50/P95/worst ${[.05, .5, .95].map(p => quantile(t20, p).toFixed(0)).join('/')}/${Math.max(...t20).toFixed(0)}s (warn P95 > ${t.ac7_w_t20_p95_warn_s})`);
     if (w.warning) console.warn(w.warning);
     expect(g.failures).toEqual([]);
   }, 600_000);
-  it.skipIf(csvSha !== F1_CSV)('F1 fixed bot: every seed\'s slowest L18-25 level <= l18_25_step_p95_max_s', () => {
+  it.skipIf(csvSha !== F1_CSV)('F1 fixed bot: every seed\'s slowest L18-25 level <= l18_25_step_p95_max_s (F1 86f0e80e only; skipped on pre-F1 57d964d5)', () => {
     const reaches = SEEDS.map(s => runM2(b, s, { model: 'seller15', T: HORIZON_S }).reach);
     const g = l18to25FixedGuard(reaches, t);
     console.log(`fixed L18-25 slowest level P95 ${g.p95.toFixed(1)}s worst ${g.worst.toFixed(1)}s (<= ${t.l18_25_step_p95_max_s})`);

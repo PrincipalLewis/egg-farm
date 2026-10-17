@@ -59,3 +59,9 @@
 - Done: ECONOMY_VENDOR_DIR honoured only under VITEST (override path to stderr; ignored with warning otherwise; documented in ci-gates.md); --strict requires SOURCE and SHA256SUMS (path, sha) sets to be equal exactly; SOURCE paths resolving outside the vendor (or product) dir rejected; pathToFileURL for the override. Tests: one-hash change at same count, path change, ../ escape, VITEST gating.
 - Gates: tsc OK; vitest 481/481 (maxForks=2); test:slow 11/11; sync-economy --check OK.
 - Next: CCR/QA re-check of this SHA.
+
+## 2026-10-17 04:15 Senior Software Architect — arch/m3-followups (QA/CCR nits after #23/#24; ADR M3-ECON-1)
+- Done: ADR M3-ECON-1 (product/economy.csv is the single canonical shipping file; --strict never repointed; Economy promotes f1-m4cols 86f0e80e into product/economy.csv after #17, before the next rc tag). QA nits: F1-only slow test titles say "(F1 86f0e80e only; skipped on pre-F1 57d964d5)"; `__pycache__/` in .gitignore; test:slow runs scripts/check-vendor-pins.mjs first; seller_variance fixture source label -> vendor/economy-sim/sim (regenerated, all other bytes identical). CCR nits: duplicate-only SOURCE/SHA256SUMS failure has its own message; product-side `..foo` file no longer falsely rejected (relative + '..'+sep). Tests added for both.
+- Skipped: #13 Lows/held minors and serve-own port (#13 not merged yet).
+- Gates: tsc OK; vitest 516/516 (maxForks=2); test:slow 12 + 2 F1 skips; sync-economy --check OK; build OK.
+- Next: CCR/QA on this PR; #13 Lows follow-up after #13 merges.

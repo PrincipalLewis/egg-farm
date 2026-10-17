@@ -139,3 +139,9 @@
 - Supersedes rev 8's F2-EQ refinement: equal saveSeq + different bytes is always diverged. Exactly one trusted `idbUnknownAtBoot` ⇒ the known copy wins (flag decides, never savedAt), and the unknown loser takes the full slot path with `save_copies_diverged`. One ordering; F2-EQ never preempts slotting.
 - Plain-string slot/tmp values read as `{bytes: value, exportedAt: null}`, never dropped.
 - Export-mark write changes only `exportedAt`, is read back; on failure the record stays byte-identical.
+
+## 2026-10-17 04:05 ADR M3-ECON-1: product/economy.csv is the single canonical shipping file (decided by Senior Software Architect, agreed by Head of Engineering)
+- Context: #17 (F1) ships `data/economy.csv` = `product/economy.f1-m4cols.csv` (sha256 86f0e80e), so the release gate `npm run check-economy-copy -- --product --strict` fails with "data/economy.csv differs" against `product/economy.csv`. Options were repointing the check per release (filename or manifest-recorded source) or keeping one canonical file. A manifest-recorded source (proposed 04:03) was withdrawn by Head of Engineering.
+- Decision: `product/economy.csv` is the one canonical shipping copy. `--strict` always compares `data/economy.csv` against `product/economy.csv`; there is no per-release repointing, no alternate filename and no source manifest for the CSV.
+- Consequence: Economy promotes `product/economy.f1-m4cols.csv` (86f0e80e) byte-for-byte into `product/economy.csv` within ~15 min of #17 merging, and before the next rc tag. Until then the release gate fails on F1 by design; it is a pre-release gate only and does not block merging #17/#18.
+- Variant files (`product/economy.*.csv`) stay working/staging copies and are never a release source.
