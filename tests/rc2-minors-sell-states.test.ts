@@ -25,6 +25,6 @@ describe('M-Sold-freeze', () => {
     expect(ol).toMatch(/this\.empty\.hidden = i\.customers\.length > 0 \|\| this\.nodes\.size > 0 \|\| this\.leavingN > 0/);
     expect(ol).toMatch(/if \(el\.classList\.contains\('sold'\)\) return;/);
     expect(css).toMatch(/\.order \.btn\.sell\.sold[^{]*\{background:#3D7F33;color:#fff/);
-    expect(css).toMatch(/\.reduced-motion \.order\.leaving\{animation:orderFade \.12s/);
+    expect(css).toMatch(/\.reduced-motion \.order\.leaving,\.order\.leaving\.rmfade\{animation:orderFade \.12s/); expect(ol).toMatch(/if \(i\.rm\) el\.classList\.add\('rmfade'\)/);
   });
 });

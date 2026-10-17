@@ -79,7 +79,7 @@ export class OrderList {
         const wasSold = this.soldUntil.delete(id) && !ids.has(id);
         if (wasSold || animate) { // a sold row always leaves visibly: slide/scale 240ms, or with reduced motion a 120ms fade
           const ms = i.rm ? SOLD_FADE_RM_MS : 240; if (!i.rm) this.lastLeave = t;
-          el.classList.add('leaving'); el.removeAttribute('data-row'); this.leavingN++;
+          el.classList.add('leaving'); if (i.rm) el.classList.add('rmfade'); el.removeAttribute('data-row'); this.leavingN++;
           setTimeout(() => { this.flipRemove([el], i.rm); this.leavingN--; this.kick(); }, ms);
         } else drop.push(el);
       }

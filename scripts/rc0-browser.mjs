@@ -998,7 +998,7 @@ sections.rc2minors = async () => {
     ok(`M-Sold-freeze row frozen in place ~240ms (no fade/slide yet) (${tag})`, freeze.length > 0 && freeze.every(x => x.op === 1 && (x.tf === 'none' || x.tf === 'matrix(1, 0, 0, 1, 0, 0)')) && sold[sold.length - 1].t >= 230, JSON.stringify({ n: freeze.length, last: sold[sold.length - 1]?.t }));
     ok(`M-Sold-freeze never shows the stale "Sell 8" / "0/8" after the click (${tag})`, withRow.every(x => !/Sell 8|Need/.test(x.txt ?? '') && !/^0\/8/.test(x.line ?? '')), JSON.stringify(withRow.find(x => /Sell 8/.test(x.txt ?? ''))));
     ok(`M-Sold-freeze "Next customer soon…" only after the row has left (${tag})`, lastRow > 0 && firstEmpty > lastRow && !f.some(x => x.row && x.empty), JSON.stringify({ lastRow, firstEmpty }));
-    if (rmo) ok(`M-Sold-freeze reduced motion: no slide/scale, gone by ~240+120ms (${tag})`, withRow.every(x => x.tf === 'none' || x.tf === 'matrix(1, 0, 0, 1, 0, 0)') && lastRow <= 240 + 120 + 80, JSON.stringify({ lastRow }));
+    if (rmo) ok(`M-Sold-freeze reduced motion: no slide/scale, gone by ~240+120ms (${tag})`, withRow.every(x => x.tf === "none" || x.tf === "matrix(1, 0, 0, 1, 0, 0)") && lastRow <= 240 + 120 + 80, JSON.stringify({ lastRow, tfs: [...new Set(withRow.map(x => x.tf))], ops: withRow.map(x => x.op).filter(o => o < 1).slice(0, 4) }));
     else ok(`M-Sold-freeze leaves within ~240ms after the freeze (${tag})`, lastRow >= 240 && lastRow <= 240 + 240 + 100, JSON.stringify({ lastRow }));
     ok(`rc2minors no page errors (${tag})`, errors.length === 0, errors.join(' | '));
     await ctx.close();
