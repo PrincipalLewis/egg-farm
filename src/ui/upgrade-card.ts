@@ -19,3 +19,8 @@ export const customerEveryAria = (a: number | string, z: number | string, max = 
 export const paybackChip = (t: string) => { const bare = t.replace(/^~\s*/, ''); return { short: `~${bare}`, aria: `Pays back in about ${bare}` }; };
 /** Title row level tag, e.g. "L6/30". */
 export const levelTag = (L: number, max: number) => `L${L}/${max}`;
+/** Title-row level tag: visual "L6/30" hidden from SR, SR reads "Level 6 of 30" (no aria-label on a generic span; review ec0f1b3 #4). */
+export const levelTagHtml = (L: number, max: number) => `<span class="lv"><span class="lvv" aria-hidden="true">${levelTag(L, max)}</span><span class="sr">Level ${L} of ${max}</span></span>`;
+/** The "Every a → b s" fx <li> with the customer icon; aria on the listitem (review ec0f1b3 #6: no in-band signalling). Null when unchanged. */
+export const farmEveryLi = (a: number, z: number, max: boolean, icon: string): string | null =>
+  !max && a === z ? null : `<li class="every" aria-label="${customerEveryAria(a, z, max)}"><img class="fxi" src="${icon}" alt="">${FARM_FX_LABELS.every}${max ? `${a}s` : `${a} <span class="arrow">→</span> ${z}s`}</li>`;

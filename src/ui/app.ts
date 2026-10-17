@@ -24,7 +24,7 @@ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
-import { navUpgradesTab, changedLine, fxOrNoChange, FARM_FX_LABELS, customerEveryAria, paybackChip, levelTag } from './upgrade-card';
+import { navUpgradesTab, changedLine, fxOrNoChange, FARM_FX_LABELS, farmEveryLi, paybackChip, levelTagHtml } from './upgrade-card';
 import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, goalButtonAria, type Goal } from './next-goal';
 import { collectionFxLines, collectionSummary, collectionDeltas } from './collection-copy';
 import { tryDispatch } from './tap-guard';
@@ -457,8 +457,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const fx = fxOrNoChange(isF ? [
       // B-3 compact card: short labels, order Hens, Every, Coop, Price, Demand (wrapping flex row)
       cl(FARM_FX_LABELS.hens, fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b))),
-      ...(!max && slotLines ? [] : [(() => { const ia = S.customerIntervalS(F, b), iz = S.customerIntervalS(F + 1, b), l = cl(FARM_FX_LABELS.every, `${ia}`, `${iz}s`);
-        return l == null || (!max && `${ia}` === `${iz}`) ? null : `\u0001${customerEveryAria(ia, iz, max)}\u0001<img class="fxi" src="${A('icon-customer.svg')}" alt="">${max ? `${l}s` : l}`; })()]),
+      ...(!max && slotLines ? [] : [farmEveryLi(S.customerIntervalS(F, b), S.customerIntervalS(F + 1, b), max, A('icon-customer.svg'))]),
       cl(FARM_FX_LABELS.coop, fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b))),
       cl(FARM_FX_LABELS.price, price(F, C), price(F + 1, C)),
       ...(!max && slotLines ? [] : [cl(FARM_FX_LABELS.demand, S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))]),
@@ -502,10 +501,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       : '';
     return `<div class="up${isBest ? ' best-buy' : ''}"${aria ? ` aria-label="${aria.replace(/"/g, '&quot;')}"` : ''}>
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}</div>
-      <div class="col"><div class="t"><h3>${isF ? 'Farm' : 'Collect per tap'}</h3><span class="lv" aria-label="Level ${L} of ${b.maxLevel}">${levelTag(L, b.maxLevel)}</span></div>
+      <div class="col"><div class="t"><h3>${isF ? 'Farm' : 'Collect per tap'}</h3>${levelTagHtml(L, b.maxLevel)}</div>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       ${collSummary ? `<div class="sum">${collSummary}</div>` : ''}
-      <ul class="fx">${slotLines ?? ''}${fx.map(l => { const m = /^\u0001([^\u0001]*)\u0001/.exec(l); return m ? `<li class="every" aria-label="${m[1]}">${l.slice(m[0].length)}</li>` : `<li>${l}</li>`; }).join('')}</ul>
+      <ul class="fx">${slotLines ?? ''}${fx.map(l => l.startsWith('<li') ? l : `<li>${l}</li>`).join('')}</ul>
       ${chips}
       ${hint}
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :

@@ -599,7 +599,7 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 @media (max-width:390px){.up{padding:12px}} /* B-3: 12px on phones up to 390 so 390 also lands on 260/282 */
 .up .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;min-width:0}
 .up .t h3{font:700 18px var(--f-display);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.up .t .lv{position:static;background:none;border:0;padding:0;border-radius:0;font:700 12px var(--f-body);color:var(--c-muted);white-space:nowrap;flex:none}
+.up .t .lv{position:relative;background:none;border:0;padding:0;border-radius:0;font:700 12px var(--f-body);color:var(--c-muted);white-space:nowrap;flex:none}
 .up .tier{font:700 12px var(--f-body)}
 .up .fx{display:flex;flex-wrap:wrap;column-gap:10px;row-gap:2px;font-size:13px;line-height:18px}
 .up .fx li{min-width:0;max-width:100%}
@@ -611,7 +611,7 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 .up .btn.buy:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
 .up .hint.limit{margin-top:16px} /* col gap 6 + 16 = 22 = 14px hit overhang + 8px clear of Buy */
 .up .hint.limit .link:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px;border-radius:4px}
-.up .hint.eta[hidden],.up .hint[hidden]{display:none!important}
+.up .hint.eta[hidden],.up .hint[hidden]{display:none!important} /* guard: the build renders the ETA conditionally; mock toggles [hidden] */
 /* B-3 designer Minor (rc2-notes:53): Buy stays full width at every width, incl. 1280 docked (overrides the >=600 160px pill) */
 .up .btn.buy,.up .btn.maxed{width:100%;align-self:stretch}
 .up .hint{align-self:flex-start}
