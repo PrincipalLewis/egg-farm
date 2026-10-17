@@ -1150,6 +1150,19 @@ sections.rc2minors2 = async () => {
     ok(`M-Toast-layer no page errors (${tag})`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
+  { // rc2 N3: at 360x420 the HUD, meter, goal strip and Collect are the topmost hit at their text centres (hens below, not clipped)
+    const { ctx, page, errors } = await open({ w: 360, h: 420, ls: { 'eggfarm.ui': DONE2 } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 12, coop: 30, customers: [], nextCustomerInS: 999 }; }); await page.waitForTimeout(700);
+    const hits = await page.evaluate(() => ['#coins', '#basket', '#meterText', '#goal .goal-label', '#goal', '#collect'].map(sel => { const el = document.querySelector(sel); if (!el) return { sel, missing: true };
+      const rg = document.createRange(); rg.selectNodeContents(el); const r = [...rg.getClientRects()].find(q => q.width > 0) ?? el.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const top = document.elementFromPoint(x, y); const owner = sel.split(' ')[0]; return { sel, x: Math.round(x), y: Math.round(y), ok: !!top && (el.contains(top) || !!top.closest(owner)), top: top ? `${top.tagName}.${top.className}` : null }; }));
+    const hensOverlap = await page.evaluate(() => { const g = document.querySelector('.collectbar').getBoundingClientRect(); return [...document.querySelectorAll('.hen')].some(h => { const r = h.getBoundingClientRect(); return r.bottom > g.top && r.top < g.bottom; }); });
+    const clipped = await page.evaluate(() => { const y = document.querySelector('.yard'), s = document.querySelector('.scene'); return [y, s].some(e => getComputedStyle(e).overflow !== 'visible' || getComputedStyle(e).clipPath !== 'none'); });
+    if (shot) await page.screenshot({ path: `${MS}/n3-hens-under-hud-goal-360x420.png` });
+    ok(`N3 HUD, meter, goal strip and Collect are topmost at their text centres; hens not clipped (360x420)`, hits.every(x => x.ok) && !clipped, JSON.stringify({ hits: hits.filter(x => !x.ok), hensOverlap, clipped }));
+    ok(`N3 no page errors (360x420)`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
   const caps = {};
   for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) { // M-Tut-parity (FM-AC4) + M-Tut-goal (fresh onboarding)
     const { ctx, page, errors } = await open({ w, h });
