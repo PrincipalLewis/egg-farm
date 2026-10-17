@@ -38,7 +38,10 @@ if (strict) { // vendored sim side: each SOURCE row <sha> <vendored path> produc
   const sumSet = new Set(sumRows.map(r => { const m = r.match(/^([0-9a-f]{64})\s+\*?(\S+)$/); return m ? key(m[1], m[2]) : `malformed:${r}`; }));
   const onlySrc = [...srcSet].filter(k => !sumSet.has(k)), onlySum = [...sumSet].filter(k => !srcSet.has(k));
   if (onlySrc.length || onlySum.length || srcSet.size !== rows.length || sumSet.size !== sumRows.length) {
-    console.warn(`check-economy-copy: ERROR SOURCE and SHA256SUMS (path, sha) sets differ: only in SOURCE [${onlySrc.join('; ')}], only in SHA256SUMS [${onlySum.join('; ')}]`); bad = true;
+    const dup = srcSet.size !== rows.length || sumSet.size !== sumRows.length;
+    if (onlySrc.length || onlySum.length) console.warn(`check-economy-copy: ERROR SOURCE and SHA256SUMS (path, sha) sets differ: only in SOURCE [${onlySrc.join('; ')}], only in SHA256SUMS [${onlySum.join('; ')}]`);
+    if (dup) console.warn(`check-economy-copy: ERROR duplicate (path, sha) row(s): SOURCE ${rows.length} rows / ${srcSet.size} unique, SHA256SUMS ${sumRows.length} rows / ${sumSet.size} unique`);
+    bad = true;
   }
   const sha = f => createHash('sha256').update(readFileSync(f)).digest('hex');
   for (const r of rows) {
@@ -48,7 +51,7 @@ if (strict) { // vendored sim side: each SOURCE row <sha> <vendored path> produc
     const rel = relative(vroot, v);
     if (!rel || rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)) { console.warn(`check-economy-copy: ERROR SOURCE path ${vend} resolves outside the vendor dir`); bad = true; continue; }
     const relP = relative(resolve(prodDir), p);
-    if (!relP || relP.startsWith('..') || isAbsolute(relP)) { console.warn(`check-economy-copy: ERROR SOURCE path ${src} resolves outside the product dir`); bad = true; continue; }
+    if (!relP || relP === '..' || relP.startsWith('..' + sep) || isAbsolute(relP)) { console.warn(`check-economy-copy: ERROR SOURCE path ${src} resolves outside the product dir`); bad = true; continue; }
     if (!existsSync(v)) { console.warn(`check-economy-copy: ERROR vendored ${vend} not found`); bad = true; continue; }
     if (!existsSync(p)) { console.warn(`check-economy-copy: ERROR ${p} not found`); bad = true; continue; }
     const hv = sha(v), hp = sha(p);
@@ -60,6 +63,13 @@ if (strict) { // vendored sim side: each SOURCE row <sha> <vendored path> produc
 }
 const norm = t => t.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').replace(/\n+$/, '') + '\n';
 if (!existsSync(prod)) { console.warn(`check-economy-copy: ${strict ? 'ERROR' : 'WARNING'} ${prod} not found`); process.exit(strict ? 1 : 0); }
+if (strict) { // release gate: raw bytes, no BOM/line-ending normalising (product/economy.csv must be LF, ADR M3-ECON-1)
+  const h = f => createHash('sha256').update(readFileSync(f)).digest('hex');
+  const hr = h(repo), hp = h(prod);
+  if (hr !== hp) { console.warn(`check-economy-copy: ERROR data/economy.csv sha256 ${hr.slice(0, 8)} differs from ${prod} sha256 ${hp.slice(0, 8)} (raw bytes; CRLF/BOM count as drift)`); process.exit(1); }
+  console.log(`check-economy-copy: data/economy.csv matches ${prod} byte-for-byte (sha256 ${hr.slice(0, 8)})`); process.exit(0);
+}
+// non-strict warn mode only: BOM and line endings normalised
 const a = norm(readFileSync(repo, 'utf8')).split('\n'), b = norm(readFileSync(prod, 'utf8')).split('\n');
 const diff = []; for (let i = 0; i < Math.max(a.length, b.length); i++) if (a[i] !== b[i]) diff.push(i + 1);
 if (diff.length) { console.warn(`check-economy-copy: ${strict ? 'ERROR' : 'WARNING'} data/economy.csv differs from ${prod} on line(s) ${diff.slice(0, 10).join(', ')}${diff.length > 10 ? ', ...' : ''} (Economy updates data/economy.csv via PR)`); if (strict) process.exit(1); }

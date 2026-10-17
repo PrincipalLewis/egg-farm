@@ -16,6 +16,11 @@ const VERSION = BUILD_ID;
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
   'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
 const root = document.getElementById('app')!;
+// F-META (ccd7bf9): build id via meta + data attribute only (no window global); static in built html, kept in sync at runtime.
+root.dataset.buildId = BUILD_ID;
+{ const m = document.head.querySelector('meta[name="build-id"]') as HTMLMetaElement | null
+    ?? Object.assign(document.head.appendChild(document.createElement('meta')), { name: 'build-id' }) as HTMLMetaElement;
+  m.content = BUILD_ID; }
 const audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/`);
 
 // 3.1 Loading / Tap to start (the tap is the audio-unlock gesture)
