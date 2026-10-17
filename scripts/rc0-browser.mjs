@@ -111,19 +111,19 @@ sections.toastfirst = async () => {
       g.dispatch({ type: 'buyFarm' }); snap(); const loop = () => { snap(); if (performance.now() - t0 < 400) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
     await page.waitForTimeout(100); if (shot) await page.screenshot({ path: `${TS}/toast-midfade-100ms-${w}x${h}-${banner ? 'banner' : 'nobanner'}.png` });
     await page.waitForTimeout(400);
-    const r = await page.evaluate(() => ({ f: window.__tf, ia: document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0, qb: document.querySelector('#queue').getBoundingClientRect().bottom, docked: matchMedia('(min-width:960px) and (orientation:landscape)').matches }));
+    const r = await page.evaluate(() => ({ f: window.__tf, ia: document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0, qb: document.querySelector('#queue').getBoundingClientRect().bottom, docked: matchMedia('(min-width:960px) and (orientation:landscape)').matches, below: document.querySelector('.toast').classList.contains('below') }));
     const edge = Math.max(r.docked ? 0 : r.qb, r.ia), settled = r.f[r.f.length - 1], seen = r.f.filter(x => x.show && x.vis === 'visible' && x.op > 0);
     if (edge === 0) { // 1280 docked, no banner: the intended slide-in from the top (nothing to cross)
-      ok(`toast-v3 docked no-banner slides in from above and settles on-screen (${tag})`, settled.op === 1 && settled.top >= 0 && seen.every(x => x.top <= settled.top + 0.5), JSON.stringify({ first: seen[0], settled }));
+      ok(`toast-v3 docked no-banner slides in from above and settles on-screen (${tag})`, settled.op === 1 && settled.top >= 0 && seen.length > 0 && seen[0].top < settled.top - 1 && seen.every(x => x.top <= settled.top + 0.5) && !r.below, JSON.stringify({ first: seen[0], settled, below: r.below }));
     } else {
       ok(`toast-v3 settles 8px below the ${banner ? 'banner' : 'strip'} (${tag})`, settled.op === 1 && Math.abs(settled.top - (edge + 8)) <= 1, JSON.stringify({ settled, edge }));
       ok(`toast-v3 first visible frame already at settled top (±8px fade offset) (${tag})`, seen.length > 0 && seen[0].top >= settled.top - 8.5 && seen[0].top <= settled.top + 0.5, JSON.stringify({ first: seen[0], settled: settled.top }));
       // frames at opacity 0 are invisible, so only frames with opacity > 0 count as "over" the banner/strip
       ok(`toast-v3 never over the ${banner ? 'banner' : 'strip'} in any frame mid-fade (${tag})`, seen.every(x => x.top >= edge - 0.5), JSON.stringify(seen.filter(x => x.top < edge - 0.5).slice(0, 3)));
     }
-    await page.waitForTimeout(1400); // timer armed after .show: 1300ms + 240ms fade
-    const gone = await page.locator('.toast').evaluate(e => ({ show: e.classList.contains('show'), op: getComputedStyle(e).opacity, vis: getComputedStyle(e).visibility }));
-    ok(`toast-v3 dismissed after ~1.3s (${tag})`, !gone.show && gone.op === '0' && gone.vis === 'hidden', JSON.stringify(gone));
+    // dismissal path (timer-after-show ordering is unit-tested in tests/toast-controller.test.ts): poll, don't sleep (review 148591a n4)
+    const gone = await page.waitForFunction(() => { const e = document.querySelector('.toast'), cs = getComputedStyle(e); return !e.classList.contains('show') && cs.opacity === '0' && cs.visibility === 'hidden'; }, null, { timeout: 3000 }).then(() => true, () => false);
+    ok(`toast-v3 dismissed within 3s (${tag})`, gone);
     await ctx.close();
   }
 };

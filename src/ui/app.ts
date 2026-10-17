@@ -2,7 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
-import { toastTop } from './toast-place';
+import { toastTop, toastController } from './toast-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -139,28 +139,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
     window.setTimeout(() => el.remove(), 8000);
   };
-  let toastTimer = 0;
   /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  let settleRaf = 0;
-  const showToast = (text: string) => {
-    toast.textContent = text; clearTimeout(toastTimer);
-    /* F1: below the queue strip, never over it; rc2: never over the 'New helper!' hire banner */
-    const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0;
-      const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); };
-    /* the dismiss timer is armed only once .show is on, so a paused rAF can't leave a toast stuck (review 4902a39 #1) */
-    const arm = () => { toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
-    if (toast.classList.contains('show') || +getComputedStyle(toast).opacity > 0) {
-      /* visible or still fading out: reverse from the current value, no snap (review #2) */
-      cancelAnimationFrame(settleRaf); settleRaf = 0; place(); toast.classList.add('show'); requestAnimationFrame(place); arm(); return;
-    }
-    /* toast-v3: hidden -> settle top/.below with transitions off and flush BEFORE .show, one frame later (a banner shown by the same action is laid out by then),
-       so the first toast never slides in from the off-screen base through the banner/strip. One pending settle at a time (review nit 4). */
-    if (settleRaf) return;
-    settleRaf = requestAnimationFrame(() => { settleRaf = 0; toast.style.transition = 'none'; place(); void toast.offsetHeight; toast.style.transition = ''; toast.classList.add('show'); arm(); });
-  };
+  /* toast-v3 / review 148591a: the show/settle/dismiss state machine lives in toast-place.ts (pure, unit-tested) */
+  const placeToast = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0;
+    /* F1: below the queue strip; rc2: never over the 'New helper!' hire banner */ const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); };
+  const toastShow = toastController({ shown: () => toast.classList.contains('show'), opacity: () => +getComputedStyle(toast).opacity, show: () => toast.classList.add('show'), hide: () => toast.classList.remove('show'),
+    transitions: on => { toast.style.transition = on ? '' : 'none'; }, reflow: () => { void toast.offsetHeight; }, place: placeToast },
+    { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms), clearTimeout: id => clearTimeout(id) });
+  const showToast = (text: string) => { toast.textContent = text; toastShow(); };
+
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
