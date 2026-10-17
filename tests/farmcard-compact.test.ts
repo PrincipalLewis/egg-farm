@@ -26,7 +26,7 @@ describe('B-3 compact Farm card', () => {
   it('css: compact gaps, 48px Buy, focus ring, 16px limiter offset, real display:none for hidden hints', () => {
     const css = readFileSync(new URL('../src/ui/styles.css', import.meta.url), 'utf8');
     const b3 = css.slice(css.indexOf('/* B-3 compact Farm card'));
-    for (const re of [/\.up \.col\{gap:6px\}/, /max-width:390px\)\{\.up\{padding:12px\}/, /height:48px/, /\.btn\.buy:focus-visible\{outline:3px/, /\.hint\.limit\{margin-top:16px\}/, /\[hidden\]\{display:none!important\}/, /flex-wrap:wrap;column-gap:10px/])
+    for (const re of [/\.up \.col\{gap:6px\}/, /max-width:390px\)\{\.up\{padding:12px\}/, /height:48px/, /\.btn\.buy:focus-visible\{outline:3px/, /\.hint\.limit\{margin-top:16px\}/, /\[hidden\]\{display:none!important\}/, /flex-wrap:wrap;column-gap:10px/, /\.up \.btn\.buy,\.up \.btn\.maxed\{width:100%;align-self:stretch\}/])
       expect(b3).toMatch(re);
   });
 });

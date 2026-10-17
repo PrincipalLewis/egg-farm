@@ -612,3 +612,6 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 .up .hint.limit{margin-top:16px} /* col gap 6 + 16 = 22 = 14px hit overhang + 8px clear of Buy */
 .up .hint.limit .link:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px;border-radius:4px}
 .up .hint.eta[hidden],.up .hint[hidden]{display:none!important}
+/* B-3 designer Minor (rc2-notes:53): Buy stays full width at every width, incl. 1280 docked (overrides the >=600 160px pill) */
+.up .btn.buy,.up .btn.maxed{width:100%;align-self:stretch}
+.up .hint{align-self:flex-start}
