@@ -79,7 +79,7 @@ describe('BUG-1/2: every money preview equals the amount credited, to the cent',
 });
 
 describe('BUG-3: round first, then pick the suffix', () => {
-  const cases: [number, string][] = [[9_999, '9,999'], [10_000, '10K'], [999_949, '999.9K'], [999_950, '1M'], [999_960, '1M'], [999_999, '1M'],
+  const cases: [number, string][] = [[9_999, '9,999'], [10_000, '10,000'], [999_949, '999,949'], [999_950, '999,950'], [999_960, '999,960'], [999_999, '999,999'], // v0.3.1 C-AC39: full digits < 1M
     [1_000_000, '1M'], [9_994_999, '9.99M'], [9_996_000, '10M'], [999_949_999, '999.9M'], [999_950_000, '1B'], [999_999_999, '1B'],
     [1e9, '1B'], [999_999_999_999, '1T'], [1e12, '1T'], [2.5e13, '25T']];
   for (const [n, s] of cases) it(`${n} -> ${s}`, () => expect(fmtCount(n)).toBe(s));

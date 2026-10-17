@@ -30,7 +30,7 @@ describe('queue full cue throttle', () => {
 });
 describe('formatters', () => {
   it('money (C-AC39): 2 dp under $1K, whole dollars to $999,999, short form from $1M', () => { expect(fmtMoney(1240)).toBe('$12.40'); expect(fmtMoney(123450)).toBe('$1,234'); expect(fmtMoney(1_234_500)).toBe('$12,345'); expect(fmtMoney(250_000_000)).toBe('$2.5M'); expect(fmtMoney(0)).toBe('$0.00'); });
-  it('counts', () => { expect(fmtCount(35.9)).toBe('35'); expect(fmtCount(9999)).toBe('9,999'); expect(fmtCount(12_345)).toBe('12.3K'); expect(fmtCount(2_500_000)).toBe('2.5M'); });
+  it('counts', () => { expect(fmtCount(35.9)).toBe('35'); expect(fmtCount(9999)).toBe('9,999'); expect(fmtCount(12_345)).toBe('12,345'); expect(fmtCount(2_500_000)).toBe('2.5M'); });
   it('away', () => { expect(fmtAway(4320, 7200)).toBe('1h 12m'); expect(fmtAway(7200, 7200)).toBe('2h+'); expect(fmtAway(90, 7200)).toBe('1m'); });
   it('F7 time to afford', () => {
     expect(fmtTimeToAfford(null)).toBe('—'); expect(fmtTimeToAfford(44.2)).toBe('~45 s'); expect(fmtTimeToAfford(65)).toBe('~1 min 5 s');
