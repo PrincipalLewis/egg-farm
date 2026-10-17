@@ -688,7 +688,7 @@ sections.orderFit11 = async () => {
   const FCS = process.env.FC_SHOTS;
   for (const [w, h] of [[360, 800], [375, 800], [390, 844], [1280, 800]]) {
     const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
-    const set = bk => page.evaluate(([bk]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 30, basket: bk, customers: [{ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }, { id: 3, demand: 9.99e6, filled: 1234567, waitedS: 0 }, { id: 4, demand: 1.8e6, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9 }; }, [bk]);
+    const set = bk => page.evaluate(([bk]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 30, basket: bk, customers: [{ id: 1, demand: 181.2e9, filled: 1.8e6, waitedS: 0 }, { id: 7, demand: 3976000, filled: 0, waitedS: 0 }, { id: 2, demand: 5, filled: 0, waitedS: 0 }, { id: 3, demand: 9.99e6, filled: 1234567, waitedS: 0 }, { id: 4, demand: 1.8e6, filled: 0, waitedS: 0 }], nextCustomerInS: 1e9 }; }, [bk]);
     await set(0); await page.waitForTimeout(400);
     if (!(await page.locator('.order .l1').first().isVisible().catch(() => false))) { await page.locator('#queue .chip:not(.empty)').first().click({ force: true }).catch(() => {}); await page.waitForTimeout(400); }
     if (!(await page.locator('.order .l1').first().isVisible().catch(() => false))) await page.locator('[data-nav=market]').click().catch(() => {});
@@ -696,11 +696,12 @@ sections.orderFit11 = async () => {
     for (const [name, bk] of [['need', 0], ['partial', 3], ['sell', 1e12]]) {
       await set(bk); await page.waitForTimeout(500);
       const r = await page.$$eval('.order:not([hidden])', rs => rs.filter(x => x.getBoundingClientRect().height > 0).map(x => { const l = x.querySelector('.l1'), e = l.querySelector('.e'), v = l.querySelector('.v'), b = x.querySelector('.btn'), bs = getComputedStyle(b), br = b.getBoundingClientRect(), vr = v.getBoundingClientRect(), xr = x.getBoundingClientRect();
-        return { e: e.textContent, v: v.textContent.trim(), btn: b.textContent, bh: Math.round(br.height), bOver: b.scrollWidth > b.clientWidth + 0.5, vOver: v.scrollWidth > v.clientWidth + 0.5 || vr.right > br.left + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5, fs: bs.fontSize, inCard: br.right <= xr.right + 0.5 }; }));
+        return { e: e.textContent, v: v.textContent.trim(), btn: b.textContent, bh: Math.round(br.height), bOver: b.scrollWidth > b.clientWidth + 0.5, vOver: v.scrollWidth > v.clientWidth + 0.5 || vr.right > br.left + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5, bw: Math.round(br.width), fs: bs.fontSize, inCard: br.right <= xr.right + 0.5 }; }));
       const good = r.length >= 4 && r.every(x => !x.vOver && !x.lOver && !x.bOver && x.bh === 44 && x.inCard && !/…/.test(x.e + x.v + x.btn) && /^· \$/.test(x.v)
-        && (w > 375 || !/ eggs$/.test(x.e)) && !/\d{4,}/.test(x.e) && (bk === 0 ? x.btn === 'No eggs' : true) && (bk >= 1e12 ? x.e === '✓ Ready' : !/Ready/.test(x.e)));
+        && (w > 375 || !/ eggs$/.test(x.e)) && !/\d{4,}/.test(x.e) && (bk === 0 ? x.btn === 'No eggs' : true) && !/Need|\//.test(x.btn) && x.bw === r[0].bw && (!/[KMBT]$/.test(x.v) || x.v.replace(/\D/g, '').length <= 3) && (!/\d[KMBT]/.test(x.e) || x.e.split('/').every(q => !/[KMBT]/.test(q) || q.replace(/\D/g, '').length <= 3)) && (bk >= 1e12 ? x.e === '✓ Ready' : !/Ready/.test(x.e)));
+      const v994 = r.find(x => x.v === '· $9.94M'); const need18 = r.find(x => /^1\.8M\/181B/.test(x.e) || x.e === '✓ Ready');
       const small = r.find(x => /^[03]\/5/.test(x.e));
-      ok(`Order fit v1.1 ${name} at ${w}: value never cut, " eggs" dropped first (always <=375), 3-sig counts, ${bk === 0 ? '"No eggs", ' : ''}${bk >= 1e12 ? '"✓ Ready", ' : ''}44px buttons`, good && (w <= 375 || bk >= 1e12 || !small || / eggs$/.test(small.e)), JSON.stringify(r));
+      ok(`Order fit v1.1 ${name} at ${w}: value never cut (incl. row 2 '· $9.94M'), " eggs" dropped first (always <=375), 3-sig counts (incl. 1.8M/181B row), no 'Need x/y' button, fixed equal button width, ${bk === 0 ? '"No eggs", ' : ''}${bk >= 1e12 ? '"✓ Ready", ' : ''}44px buttons`, good && !!v994 && !!need18 && (w <= 375 || bk >= 1e12 || !small || / eggs$/.test(small.e)), JSON.stringify(r));
       if (FCS && (w === 360 || w === 1280)) { mkdirSync(FCS, { recursive: true }); await page.screenshot({ path: `${FCS}/order-${name}-${w}-${ENGINE}.png` }); }
     }
     await ctx.close();

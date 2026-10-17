@@ -71,3 +71,13 @@ describe('rc2-order-sell-preview v1.1 + MK-35', () => {
     expect(fmtShortDur(41)).toBe('~0:41'); expect(fmtShortDur(7140)).toBe('~1h 59m'); expect(fmtShortDur(1e9)).toBe('—'); expect(fmtShortDur(Infinity)).toBe('—');
   });
 });
+describe('QA order clips (main repro): 1.8M/181.2B row and $9.94M value use v1.1 3-sig and never a "Need x/y" button', () => {
+  it('181.2B order with 1.8M filled, 0 eggs: "1.8M/181B eggs", button "No eggs"', () => {
+    const v = orderView({ id: 1, demand: 181.2e9, filled: 1.8e6, waitedS: 0 } as any, 0, 250);
+    expect(v.line.startsWith('1.8M/181B eggs · ')).toBe(true); expect(v.button).toBe('No eggs');
+  });
+  it('$9.94M value: 3 significant figures; no reachable "Need" label for any basket', () => {
+    expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, 0, 250).line).toBe('0/3.98M eggs · $9.94M');
+    for (const bk of [0, 0.5, 1, 3, 1e7]) expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, bk, 250).button).not.toMatch(/Need|\//);
+  });
+});
