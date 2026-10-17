@@ -105,3 +105,6 @@ export const startAbovePoint = (r: { left: number; top: number; width: number },
 export const riserTop = (btnTop: number, insetT: number): number | null => { const top = btnTop - 44; return top - 48 >= insetT + 2 ? top : null; };
 /** Empty state shows only when no customers, no keyed rows and no rows still leaving. */
 export const emptyHidden = (customers: number, nodes: number, leavingN: number) => customers > 0 || nodes > 0 || leavingN > 0;
+
+/** §9.1 render pair: value alone (no leading '· ') once the count is dropped (review 1827a27 #3). */
+export const orderLineText = (fe: string, val: string) => ({ e: fe, v: fe ? `\u00a0· ${val}` : val });

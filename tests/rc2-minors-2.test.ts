@@ -86,3 +86,12 @@ describe('§9 fitOrderText (review dbc6948 #3)', () => {
     expect(orderView(c(181e9), 0, 100).line).toBe('Wants 181B eggs · $181B'); expect(orderView(c(1e9), 0, 99996).line).toMatch(/· \$1T$/); expect(orderView(c(13), 0, 118).line).toBe('Wants 13 eggs · $15.34');
   });
 });
+
+import { orderLineText } from '../src/ui/orders';
+describe('review 1827a27 #1/#3 guards', () => {
+  it('N3: hens stay below the HUD and collect bar (stacking rules present)', () => { const css = readFileSync('src/ui/styles.css', 'utf8'); expect(css).toMatch(/\.scene\{z-index:0\}/); expect(css).toMatch(/\.hud,\.collectbar\{position:relative;z-index:1\}/); });
+  it('§9.1 render pair: value alone without the separator; with a count the NBSP separator', () => {
+    expect(orderLineText('', '$20.8M')).toEqual({ e: '', v: '$20.8M' }); expect(orderLineText('1.23M', '$20.8M')).toEqual({ e: '1.23M', v: '\u00a0· $20.8M' });
+    expect(readFileSync('src/ui/order-list.ts', 'utf8')).toMatch(/const vText = \(eggs: string\) => orderLineText\(eggs, val\)\.v;/);
+  });
+});

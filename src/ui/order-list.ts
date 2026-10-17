@@ -2,7 +2,7 @@
  *  frame, chip + live region coalesced to <= 1 / 2 s, enter slide only into a visible slot (<= 1 / 240 ms), list frozen
  *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Exception: Sold rows leave on their own hold/fade schedule even during the freeze (review ebbd02e #4 / c1b4ef5 #3). Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
-import { orderView, fitOrderText, moreLabel, moreName, soldLabel, planRemovals, emptyHidden, SOLD_HOLD_MS, type OrderView } from './orders';
+import { orderView, fitOrderText, orderLineText, moreLabel, moreName, soldLabel, planRemovals, emptyHidden, SOLD_HOLD_MS, type OrderView } from './orders';
 export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
@@ -31,7 +31,7 @@ export class OrderList {
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
-    const vText = (eggs: string) => eggs ? `\u00a0· ${val}` : val; // §9.1: value alone when the count is dropped
+    const vText = (eggs: string) => orderLineText(eggs, val).v; // §9.1: value alone when the count is dropped
     // fit runs after the button label/state below (Need is wider than Sell): see end of fill()
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have) || bar.getAttribute('aria-label') !== v.aria) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', v.aria); }

@@ -1,9 +1,8 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
 // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
-import { appendFileSync } from 'node:fs';
 import { chromium, webkit, firefox } from 'playwright-core';
 import { spawn } from 'node:child_process';
-import { readFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, mkdirSync, appendFileSync } from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
 if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
@@ -1106,8 +1105,8 @@ sections.rc2minors2 = async () => {
       const m = await page.evaluate(() => { const l1 = document.querySelector('.order[data-id="502"] .l1'); if (!l1) return null; const rg = document.createRange(); rg.selectNodeContents(l1); const rs = rg.getClientRects(), cs = getComputedStyle(l1);
         return { t: l1.textContent.replace(/\u00a0/g, ' '), w: rg.getBoundingClientRect().width, cw: l1.clientWidth, sw: l1.scrollWidth, lines: (() => { const tops = [...rs].filter(r => r.width > 0).map(r => r.top); return tops.length ? 1 + Math.floor((Math.max(...tops) - Math.min(...tops)) / (parseFloat(cs.lineHeight) || 20) + 0.4) : 0; })(), ell: /…/.test(l1.textContent) }; });
       const full = `Wants ${txt.replace(' · ', ' eggs · ')}`, valueOnly = txt.split(' · ')[1], specFits360 = d !== 3976000; // §9 table: 13/181B fit 170px at 360; 3.98M and anything at 320 may fall to the value alone (§9.1)
-      const want = m && m.t === full && w > 375 ? full : m && m.t === valueOnly && (w < 360 || (w <= 375 && !specFits360)) ? valueOnly : `Wants ${txt}`; // >375: ' eggs' kept only when it fits (181B eggs = 199px > 194)
-      ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w !== 360 || !specFits360 || m.w <= 170) && (w <= 375 || d !== 13 || m.t === full) && !/^0\//.test(m.t), JSON.stringify(m));
+      const want = m && m.t === full && w > 375 ? full : m && m.t === valueOnly && w < 360 ? valueOnly : `Wants ${txt}`; // 360/375: every fixture, incl. 3.98M (measured fits on Chromium + Firefox), must read 'Wants N · $X' exactly (review 1827a27 #2) // >375: ' eggs' kept only when it fits (181B eggs = 199px > 194)
+      ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w !== 360 || m.w <= 170) && (w <= 375 || d !== 13 || m.t === full) && !/^0\//.test(m.t), JSON.stringify(m));
       if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-wants-${txt.replace(/ · \$/, '-').replace(/ /g, '')}-${nm(w)}.png` });
     }
     { // §9.1 (designer N2): '1.23M/9.99M · $20.8M' never clipped at 360; drops '/{want}' then the count, value intact, aria full
@@ -1162,7 +1161,8 @@ sections.rc2minors2 = async () => {
     const hensOverlap = await page.evaluate(() => { const g = document.querySelector('.collectbar').getBoundingClientRect(); return [...document.querySelectorAll('.hen')].some(h => { const r = h.getBoundingClientRect(); return r.bottom > g.top && r.top < g.bottom; }); });
     const clipped = await page.evaluate(() => { const y = document.querySelector('.yard'), s = document.querySelector('.scene'); return [y, s].some(e => getComputedStyle(e).overflow !== 'visible' || getComputedStyle(e).clipPath !== 'none'); });
     if (shot) await page.screenshot({ path: `${MS}/n3-hens-under-hud-goal-360x420.png` });
-    ok(`N3 HUD, meter, goal strip and Collect are topmost at their text centres; hens not clipped (360x420)`, hits.every(x => x.ok) && !clipped, JSON.stringify({ hits: hits.filter(x => !x.ok), hensOverlap, clipped, chain }));
+    ok(`N3 fixture still has hens overlapping the collect bar (precondition) (360x420)`, hensOverlap, 'fixture no longer overlaps');
+    ok(`N3 HUD, meter, goal strip and Collect are topmost at their text centres; hens not clipped (360x420)`, hensOverlap && hits.every(x => x.ok) && !clipped, JSON.stringify({ hits: hits.filter(x => !x.ok), hensOverlap, clipped, chain }));
     ok(`N3 no page errors (360x420)`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
