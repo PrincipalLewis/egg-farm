@@ -38,3 +38,8 @@
 - done: default CI/test/build read nothing outside the repo: check-economy-copy opt-in + warn-only (--product / ECONOMY_PRODUCT_CHECK=1), removed from npm test/build and ci.yml; economy-copy.test uses temp dirs only; gen-sim-fixtures imports vendor/economy-sim; economy.test drift warning opt-in.
 - next: CCR + QA; merge after #21.
 - blocked: none.
+
+## 2026-10-17 02:53 Senior Software Architect — PR #24 CCR re-check minors
+- Done: check-economy-copy `--strict` now implies `--product` (test added); `--strict` also sha256-compares each vendored file in vendor/economy-sim/SOURCE with product/ and the pin, failing closed on drift/missing (tests added); slow-test regeneration note now points at vendor/economy-sim/sim. Fixture `source` label left unchanged (no regeneration). ci-gates.md updated.
+- Gates: tsc OK; vitest 476/476 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA; watch CI for the parallel-load flake CCR noted.

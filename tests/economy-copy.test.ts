@@ -1,7 +1,7 @@
 // check-economy-copy is an opt-in, warn-only drift report against product/ (engineering/ci-gates.md).
 // These tests never read outside the repo: the opt-in runs point ECONOMY_PRODUCT_DIR at temp dirs.
 import { it, expect } from 'vitest';
-import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, cpSync, appendFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -22,12 +22,41 @@ it('opt-in: match reported, mismatch and missing file only warn (exit 0)', () =>
   expect(run([], { ECONOMY_PRODUCT_CHECK: '1', ECONOMY_PRODUCT_DIR: bad })).toMatchObject({ code: 0, out: expect.stringMatching(/WARNING .*differs/) });
   expect(run(['--product'], { ECONOMY_PRODUCT_DIR: join(bad, 'nope') })).toMatchObject({ code: 0, out: expect.stringMatching(/WARNING .*not found/) });
 });
+// A temp product/ dir mirroring data/economy.csv plus every vendored file listed in vendor/economy-sim/SOURCE.
+const vdir = new URL('../vendor/economy-sim/', import.meta.url);
+const sourceRows = readFileSync(new URL('SOURCE', vdir), 'utf8').split('\n').map(l => l.trim())
+  .filter(l => l && !l.startsWith('#') && !l.includes(':')).map(l => l.split(/\s+/));
+const fullProduct = () => {
+  const d = mkdtempSync(join(tmpdir(), 'prod-'));
+  writeFileSync(join(d, 'economy.csv'), readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
+  for (const [, vend, src] of sourceRows) {
+    const p = join(d, src.slice('product/'.length)); mkdirSync(join(p, '..'), { recursive: true });
+    cpSync(new URL(vend, vdir).pathname, p);
+  }
+  return d;
+};
 it('--strict: exit 1 on mismatch or missing product file, exit 0 on match', () => {
-  const ok = mkdtempSync(join(tmpdir(), 'prod-'));
-  writeFileSync(join(ok, 'economy.csv'), readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
-  expect(run(['--product', '--strict'], { ECONOMY_PRODUCT_DIR: ok }).code).toBe(0);
-  const bad = mkdtempSync(join(tmpdir(), 'prod-')); writeFileSync(join(bad, 'economy.csv'), 'level\n0\n');
+  expect(sourceRows.length).toBeGreaterThanOrEqual(4);
+  const ok = fullProduct();
+  expect(run(['--product', '--strict'], { ECONOMY_PRODUCT_DIR: ok })).toMatchObject({ code: 0, out: expect.stringMatching(/vendored file\(s\) match/) });
+  const bad = fullProduct(); writeFileSync(join(bad, 'economy.csv'), 'level\n0\n');
   expect(run(['--product', '--strict'], { ECONOMY_PRODUCT_DIR: bad })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR .*differs/) });
   expect(run(['--product', '--strict'], { ECONOMY_PRODUCT_DIR: join(bad, 'nope') })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR .*not found/) });
-  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: join(bad, 'nope') }).code).toBe(0); // still opt-in: --strict alone does nothing
+});
+it('--strict implies --product: a mistyped release-gate command (no --product) does not pass green', () => {
+  const r = run(['--strict'], { ECONOMY_PRODUCT_DIR: '/nonexistent-product-dir' });
+  expect(r.code).toBe(1); expect(r.out).not.toMatch(/opt-in only/); expect(r.out).toMatch(/ERROR .*not found/);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: fullProduct() }).code).toBe(0);
+});
+it('--strict: each vendored sim file in SOURCE must match product/ by sha256 (fail closed on drift or missing)', () => {
+  for (const [, , src] of sourceRows) {
+    const drift = fullProduct(); appendFileSync(join(drift, src.slice('product/'.length)), '\n# drift\n');
+    expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: drift })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR .*differs from/) });
+    const gone = fullProduct(); writeFileSync(join(gone, 'economy.csv'), readFileSync(new URL('../data/economy.csv', import.meta.url)));
+    const missing = join(gone, src.slice('product/'.length)); rmSync(missing);
+    expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: gone })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR .*not found/) });
+  }
+  // non-strict --product stays warn-only and ignores the sim side
+  const drift = fullProduct(); appendFileSync(join(drift, sourceRows[0][2].slice('product/'.length)), 'x');
+  expect(run(['--product'], { ECONOMY_PRODUCT_DIR: drift }).code).toBe(0);
 });

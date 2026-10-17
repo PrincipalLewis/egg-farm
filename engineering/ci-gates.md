@@ -20,7 +20,7 @@ source of truth for builds; Economy changes it through a PR.
   (directory override: `ECONOMY_PRODUCT_DIR`), always exits 0, and is not part of `npm test`, `npm run build` or CI.
   Example: `npm run check-economy-copy -- --product`.
 - The drift warning in `tests/economy.test.ts` (local `product/` sim vs vendored sha) also runs only with `ECONOMY_PRODUCT_CHECK=1`.
-- `--strict` makes the opt-in check exit 1 on a mismatch or a missing product file.
+- `--strict` implies `--product` (a mistyped release-gate command cannot pass green) and makes the check exit 1 on a mismatch or a missing product file. It also compares the sha256 of every vendored file listed in `vendor/economy-sim/SOURCE` against its `product/` counterpart (and against the SOURCE pin), failing closed on drift or a missing file.
 
 ## Economy numbers: decided rule
 
