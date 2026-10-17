@@ -9,9 +9,9 @@ export const count3 = (n: number, down = false): string => {
   if (down) { const U = ['K', 'M', 'B', 'T']; let i = -1, v = n; while (v >= 1000 && i < U.length - 1) { v /= 1000; i++; } const d = v >= 100 ? 1 : v >= 10 ? 10 : 100; return `${Math.floor(v * d + 1e-9) / d}${U[i]}`; } // review 5d8a058 #11: have/sell never round up to look complete
   const U = ['K', 'M', 'B', 'T']; let i = -1, v = n; while (v >= 1000 && i < U.length - 1) { v /= 1000; i++; }
   let r = Number(v.toPrecision(3)); if (r >= 1000 && i < U.length - 1) { r = Number((r / 1000).toPrecision(3)); i++; }
-  return `${r}${U[i]}`;
+  return `${r.toLocaleString('en-US', { maximumFractionDigits: 2 })}${U[i]}`; // 1,000T at the cap (main FMT-2)
 };
-const eggsLegacy = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n) : String(n);
+const eggsLegacy = (n: number) => n < 1000 ? String(n) : n < 1e4 ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n); // band by number, not by fmtCount's comma (1,000T)
 export type OrderState = 'wait' | 'partial' | 'ready';
 export interface OrderView { id: number; have: number; want: number; sell: number; valueCents: number; state: OrderState; line: string; button: string; }
 /** have = eggs already sold to it + what Sell would sell now (min(basket, remaining)); want = full order; value = full order. */

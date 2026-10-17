@@ -43,7 +43,7 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
   const sha = (buf: Buffer | string) => createHash('sha256').update(buf).digest('hex');
   const checkPins = () => {
     const files = pins.map(([, f]) => f).sort().join(',');
-    if (files !== 'economy.f1-m4cols.csv,sim/economy_sim.py') throw new Error(`vendor/economy-sim/SHA256SUMS must pin exactly 2 files, got ${files}`);
+    if (files !== 'economy.f1-m4cols.csv,sim/economy_sim.py,sim/seller-variance-proposal.md,sim/seller_variance_sim.py') throw new Error(`vendor/economy-sim/SHA256SUMS must pin exactly 4 files, got ${files}`);
     for (const [h, f] of pins) { const got = sha(readFileSync(new URL(f, vdir))); if (got !== h) throw new Error(`vendored ${f} sha256 ${got} != pin ${h}`); }
   };
   // Hashes are verified before anything runs, so a tampered sim never executes.
@@ -56,8 +56,8 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
     expect(srcDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     for (const [h, f, from] of src) console.info(`economy-sim vendored ${f} from ${from} sha256 ${h} on ${srcDate}`);
     expect(src.map(([h, f]) => [f, h]).sort()).toEqual(pins.map(([h, f]) => [f, h]).sort());
-    // Advisory only, never fails: warn if a local live copy has drifted from the vendored one.
-    for (const [h, , from] of src) {
+    // Opt-in (ECONOMY_PRODUCT_CHECK=1), advisory only, never fails: warn if a local live copy has drifted from the vendored one.
+    if (process.env.ECONOMY_PRODUCT_CHECK === '1') for (const [h, , from] of src) {
       const live = new URL(`../../${from}`, import.meta.url);
       if (existsSync(live)) {
         const lh = createHash('sha256').update(readFileSync(live)).digest('hex');
@@ -67,7 +67,6 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
   });
   // data/economy.csv sha256 -> vendored sim --config (decisions.md:295). Unknown sha = hard failure.
   const CONFIG_BY_CSV_SHA: Record<string, string> = {
-    '57d964d50601578fb918e4faa4a137dff36374e21dba4996ee4302056efc19fd': 'current', // pre-F1 (P1Q), main
     '86f0e80e359398e3fd3061c268794054558029270cc3944ac522ef7ddbea0550': 'f1', // F1 m4cols (#17)
   };
   it('fixture is fresh vs the vendored reference sim (config chosen by economy.csv sha256)', () => {

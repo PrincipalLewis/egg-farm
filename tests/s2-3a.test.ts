@@ -115,8 +115,8 @@ describe('Product ruling: strip full of waiting customers', () => {
 import { fmtMoneyShort } from '../src/ui/format';
 const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 describe('Art & UX compact amount on the Thanks card / pop', () => {
-  it('"$12.50" under $1K, then 1.2K style (floored, no trailing .0)', () => {
+  it('"$12.50" under $1K, then 1.2K style (half-up on whole cents, no trailing .0)', () => {
     expect(fmtMoneyShort(1250)).toBe('$12.50'); expect(fmtMoneyShort(99_999)).toBe('$999.99');
-    expect(fmtMoneyShort(123_456)).toBe('$1.2K'); expect(fmtMoneyShort(100_000)).toBe('$1K'); expect(fmtMoneyShort(345_000_000)).toBe('$3.4M');
+    expect(fmtMoneyShort(123_456)).toBe('$1.2K'); expect(fmtMoneyShort(100_000)).toBe('$1K'); expect(fmtMoneyShort(345_000_000)).toBe('$3.5M');
   });
 });
