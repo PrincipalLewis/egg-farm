@@ -565,7 +565,7 @@ sections.hiddentabguard = async () => {
       playH: Math.round(document.querySelector('#tgPlay')?.getBoundingClientRect().height ?? 0) }));
     ok(`CCR m1 ${w}: hidden tab frozen by another tab -> period ended, no welcome popup, no save after show`, frz.inactive && !frz.hidden && !st.hidden && st.welcome === 0 && st.guard && st.writes === 0 && st.save === snap && before !== null && errors.length === 0, JSON.stringify({ frz, ...st, save: undefined, same: st.save === snap, errors }));
     ok(`Tab guard 'Play here' min-height 48px at ${w} (art-ux dialog.html)`, st.playH >= 48, String(st.playH));
-    await page.evaluate(() => document.getAnimations().forEach(a => a.finish()));
+    await page.evaluate(() => document.getAnimations().forEach(a => { try { a.finish(); } catch { a.cancel(); } }));
     await page.screenshot({ path: `${SHOTS}/m1-deactivate-${ENGINE}-${w}.png` });
     await ctx.close();
   }
