@@ -1,5 +1,5 @@
 {
- "source": "product/sim/economy_sim.py CURRENT",
+ "source": "vendor/economy-sim/sim/economy_sim.py CURRENT",
  "params": {
   "c_base": 10,
   "c_growth": 1.6,
