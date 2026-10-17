@@ -491,3 +491,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .queue>.qtag{z-index:2}
 .ghosts .ghost{max-width:64px}
 .ghosts .bubble{max-width:100%;box-sizing:border-box;padding:1px 4px;white-space:normal;text-align:center;line-height:13px;overflow:hidden}
+/* Art&UX 02:54 #3 / layout-spec §3.3: the "Sold out!" tag stays above its chip for 800 ms while only the customer waves and slides out
+   (the whole ghost used to slide, dragging the tag out of the strip and past x=0) */
+.ghosts .ghost.leave{animation:none}
+.ghosts .ghost.wave.leave img{animation:wave 300ms ease-in-out,leave 240ms 300ms ease-in forwards}
+.ghosts .ghost.leave:not(.wave) img{animation:leave 240ms 300ms ease-in forwards}
+.ghosts .bubble.soldout{animation:fadeout 800ms ease forwards}
+.rm .ghosts .ghost img,.rm .ghosts .ghost.leave img{animation:none}
