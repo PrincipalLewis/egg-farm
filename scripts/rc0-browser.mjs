@@ -1006,6 +1006,15 @@ sections.rc2minors = async () => {
     ok(`M-Sold-freeze "Next customer soon…" only after the row has left (${tag})`, lastRow > 0 && firstEmpty > lastRow && !f.some(x => x.row && x.empty), JSON.stringify({ lastRow, firstEmpty }));
     if (rmo) ok(`M-Sold-freeze reduced motion: no slide/scale, gone by ~240+120ms (${tag})`, withRow.every(x => x.tf === "none" || x.tf === "matrix(1, 0, 0, 1, 0, 0)") && lastRow <= 240 + 120 + 80, JSON.stringify({ lastRow, tfs: [...new Set(withRow.map(x => x.tf))], ops: withRow.map(x => x.op).filter(o => o < 1).slice(0, 4) }));
     else ok(`M-Sold-freeze leaves within ~240ms after the freeze (${tag})`, lastRow >= 240 && lastRow <= 240 + 240 + 100, JSON.stringify({ lastRow }));
+    if (!rmo) { // review ebbd02e #1: after a row sale, a Market Hand auto-sale must not fly coins from the page origin
+      await page.evaluate(() => { window.__fl = []; const g = window.eggfarm; g.state = { ...g.state, basket: 40, customers: [{ id: 778, demand: 30, filled: 0, waitedS: 0 }], workers: { market_hand: { energy: 100, cdS: 0 } } };
+        const mo = new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.classList?.contains('flyer')) requestAnimationFrame(() => { const r = n.getBoundingClientRect(); window.__fl.push({ x: r.left, y: r.top }); }); });
+        mo.observe(document.body, { childList: true, subtree: true }); });
+      await page.waitForFunction(() => window.eggfarm.state.customers.every(c => c.id !== 778 || c.filled > 0), null, { timeout: 15000 }).catch(() => {});
+      await page.waitForTimeout(300);
+      const fl = await page.evaluate(() => window.__fl);
+      ok(`M-Sold-freeze Market Hand sale after a row sale: no coin starts at the page origin (${tag})`, fl.length > 0 && fl.every(p => p.x >= 4 || p.y >= 4), JSON.stringify({ n: fl.length, worst: fl.filter(p => p.x < 4 && p.y < 4).slice(0, 3) }));
+    }
     ok(`rc2minors no page errors (${tag})`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

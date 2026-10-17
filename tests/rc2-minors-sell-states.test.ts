@@ -21,10 +21,33 @@ describe('M-Sold-freeze', () => {
   it('served -> orderList.sold with the completing sale value; held rows are not removed; empty state waits for leaving rows', () => {
     const app = readFileSync('src/ui/app.ts', 'utf8'), ol = readFileSync('src/ui/order-list.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
     expect(app).toMatch(/case 'customer_served':[^\n]*orderList\.sold\(e\.id, fmtMoneyShort\(lastSale\.get\(e\.id\)/);
-    expect(ol).toMatch(/!shownSet\.has\(id\) && !held\(id\)/);
+    expect(ol).toMatch(/planRemovals\(\{ gone, inQueue/);
     expect(ol).toMatch(/this\.empty\.hidden = i\.customers\.length > 0 \|\| this\.nodes\.size > 0 \|\| this\.leavingN > 0/);
     expect(ol).toMatch(/if \(el\.classList\.contains\('sold'\)\) return;/);
     expect(css).toMatch(/\.order \.btn\.sell\.sold[^{]*\{background:#3D7F33;color:#fff/);
     expect(css).toMatch(/\.reduced-motion \.order\.leaving,\.order\.leaving\.rmfade\{animation:orderFade \.12s/); expect(ol).toMatch(/if \(i\.rm\) el\.classList\.add\('rmfade'\)/);
+  });
+});
+import { planRemovals } from '../src/ui/orders';
+describe('M-Sold-freeze removal plan (behaviour, review ebbd02e #2/#4/#5)', () => {
+  const base = { inQueue: () => false, t: 1000, frozen: false, rm: false, lastLeave: -Infinity };
+  it('a Sold row is kept until its hold ends, then animates out', () => {
+    const held = new Map([[7, 1100]]);
+    expect(planRemovals({ ...base, gone: [7], soldUntil: held })).toEqual({ keep: [7], animate: [], drop: [], ms: 240 });
+    expect(planRemovals({ ...base, t: 1100, gone: [7], soldUntil: held })).toEqual({ keep: [], animate: [7], drop: [], ms: 240 });
+  });
+  it('reduced motion: 120ms fade', () => { expect(planRemovals({ ...base, rm: true, t: 1200, gone: [7], soldUntil: new Map([[7, 1100]]) }).ms).toBe(120); });
+  it('a Sold row leaves even under a pointer freeze; other removals wait for it (#4)', () => {
+    const p = planRemovals({ ...base, frozen: true, t: 1200, gone: [7, 8], soldUntil: new Map([[7, 1100]]) });
+    expect(p.animate).toEqual([7]); expect(p.keep).toEqual([8]); expect(p.drop).toEqual([]);
+  });
+  it('several Sold rows leave together in one batch (#5); a plain leave still obeys the 240ms anti-churn rule', () => {
+    const p = planRemovals({ ...base, t: 1200, lastLeave: 1100, gone: [1, 2, 3], soldUntil: new Map([[1, 1100], [2, 1150]]) });
+    expect(p.animate).toEqual([1, 2]); expect(p.drop).toEqual([3]);
+    expect(planRemovals({ ...base, gone: [3], soldUntil: new Map() }).animate).toEqual([3]);
+    expect(planRemovals({ ...base, lastLeave: 900, gone: [3], soldUntil: new Map() }).drop).toEqual([3]);
+  });
+  it('a row still in the queue (scrolled out of view) is never treated as sold', () => {
+    expect(planRemovals({ ...base, inQueue: () => true, t: 1200, gone: [7], soldUntil: new Map([[7, 1100]]) }).animate).toEqual([]);
   });
 });
