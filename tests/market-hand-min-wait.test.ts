@@ -1,9 +1,10 @@
 // F1 option (b) Market Hand min wait (product/f1-proposal.md §5, HoP 2026-10-16; HoE ruling 2026-10-17: missing implementation,
-// the game must match Economy's AC7 model). Reference: vendor/economy-sim/sim/economy_sim.py
-//   :309  turn fires only if any(t - arrival >= defer for x in q)   -> otherwise HELD: no wage, no action, cooldown stays expired
-//   :316  per customer: `if t - arrival < defer: continue`          -> customers still inside the min wait are skipped
-//   :409  spec_from_csv: defer = market_hand_min_wait_s, hold_until_servable = True
+// the game must match Economy's AC7 model). Reference: vendor/economy-sim/sim/economy_sim.py 0ee6433c (wage-aligned):
+//   turn fires on the every_s cadence and pays its wage whatever the queue (10f29a4a's :309 hold_until_servable gate removed)
+//   serve loop: `if t - arrival < defer: continue`  -> customers still inside the min wait are skipped
+//   spec_from_csv: defer = market_hand_min_wait_s
 // So the comparison is inclusive (>=): waited 2.0 s is servable, 1.99 s is not.
+// Wages (HoP MK-59 ruling 2026-10-17): unchanged vs main -- the turn is still taken and paid every interval; only SERVING is gated.
 import { describe, it, expect } from 'vitest';
 import { balance as b, validateBalance } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
@@ -39,16 +40,13 @@ describe('Market Hand min wait: data', () => {
 });
 
 describe('Market Hand min wait: edges (sim: t - arrival >= defer)', () => {
-  it('waited 1.99 s: turn held -> no sale, no wage, cooldown stays expired', () => {
+  it('waited 1.99 s: no sale; the turn is still taken and paid as before (HoP MK-59 ruling)', () => {
     const r = tick(st({ customers: [cust(1, MW - 0.01 - DT)] }));
     expect(r.s.customers[0].waitedS).toBeCloseTo(MW - 0.01, 9);
-    expect(r.sells.length).toBe(0); expect(r.wages.length).toBe(0); expect(r.s.coinsCents).toBe(1e9);
-    expect(r.s.workers.market_hand!.cdS).toBe(0); expect(r.s.basket).toBe(100);
+    expect(r.sells.length).toBe(0); expect(r.wages.length).toBe(1); expect(r.s.basket).toBe(100);
+    expect(r.s.workers.market_hand!.cdS).toBe(b.workers.market_hand.every_s);
   });
-  it('waited exactly 2.0 s (accumulated 0.1 s ticks): serves and charges the wage', () => {
-    let s = st({ customers: [cust(1, 0)] }); const sold: number[] = [];
-    for (let i = 1; i <= Math.round(MW * b.tickHz); i++) { const r = tick(s); s = r.s; if (r.sells.length) sold.push(i); }
-    expect(sold).toEqual([Math.round(MW * b.tickHz)]); // first sale on the tick where waited reaches 2.0, not earlier, not later
+  it('waited exactly 2.0 s on a paid turn: serves', () => {
     const r = tick(st({ customers: [cust(1, MW - DT)] }));
     expect(r.sells.length).toBe(1); expect(r.wages.length).toBe(1); expect(r.s.workers.market_hand!.cdS).toBe(b.workers.market_hand.every_s);
   });
@@ -60,19 +58,19 @@ describe('Market Hand min wait: edges (sim: t - arrival >= defer)', () => {
     const r = tick(st({ customers: [cust(1, 0.5), cust(2, MW + 1)] }));
     expect(r.sells.map((e: any) => e.id)).toEqual([2]); expect(r.s.customers.map(c => c.id)).toEqual([1]);
   });
-  it('empty queue: held, no wage (old build charged every interval)', () => {
+  it('empty queue: wage charged every interval exactly as on main (HoP MK-59 ruling; sim would hold unpaid)', () => {
     let s = st({ customers: [] }); const w: SimEvent[] = [];
     for (let i = 0; i < 100; i++) { const r = tick(s); s = r.s; w.push(...r.wages); }
-    expect(w.length).toBe(0); expect(s.coinsCents).toBe(1e9);
+    expect(w.length).toBe(10 / b.workers.market_hand.every_s); expect(s.coinsCents).toBe(1e9 - w.reduce((x, e: any) => x + e.cents, 0));
   });
   it('empty basket with a servable customer is a normal paid turn (sim: empty-basket turn unchanged)', () => {
     const r = tick(st({ basket: 0, customers: [cust(1, MW + 1)] }));
     expect(r.wages.length).toBe(1); expect(r.sells.length).toBe(0);
   });
-  it('a held turn fires on the first servable tick, then the normal interval applies', () => {
-    let s = st({ customers: [cust(1, MW - 0.5, 1e6)] }); const at: number[] = [];
-    for (let i = 1; i <= 30; i++) { const r = tick(s); s = r.s; if (r.wages.length) at.push(i); }
-    expect(at).toEqual([5, 15, 25]); // held for 0.5 s, then every_s = 1
+  it('wage cadence is independent of the min wait: paid every every_s, first sale on the first paid turn past min wait', () => {
+    let s = st({ basket: 1e6, customers: [cust(1, MW - 0.5, 1e9)] }); const paid: number[] = [], sold: number[] = [];
+    for (let i = 1; i <= 30; i++) { const r = tick(s); s = r.s; if (r.wages.length) paid.push(i); if (r.sells.length) sold.push(i); }
+    expect(paid).toEqual([1, 11, 21]); expect(sold).toEqual([11]); // tick 6 reaches 2.0 s but the next paid turn is tick 11; the whole basket sells then
   });
 });
 
@@ -85,6 +83,6 @@ describe('Market Hand min wait x MK-57 last chance (1.0 s)', () => {
     expect(r.sells.length).toBe(1); expect(r.ev.some(e => e.type === 'customer_served')).toBe(true); // time-left was 1.0 s on this tick
     const gone = tick(st({ customers: [cust(1, PAT - DT)] }));
     expect(gone.sells.length).toBe(0); expect(gone.ev.some(e => e.type === 'customer_lost')).toBe(true);
-    expect(gone.wages.length).toBe(0); // timed out before Market Hand acts -> queue empty -> held
+    expect(gone.wages.length).toBe(1); // timed out before Market Hand acts; turn still paid (HoP MK-59 ruling)
   });
 });

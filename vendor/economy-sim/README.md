@@ -18,6 +18,8 @@ The freshness test picks the sim `--config` from the sha256 of `data/economy.csv
 | anything else | — | hard failure: `unknown economy.csv <sha>: update vendor/economy-sim` |
 
 It compares the 46 columns the sim's CSV writer emits. Pins are verified in a `beforeAll` before the sim runs.
-Pinned sim sha 10f29a4a (Economy, 2026-10-17, HoE go 07:32): CURRENT = F1 and M2_CURRENT = M2_F1 (50/0.5) now that #17 is on main; pre-F1 stays available as `--config p1q`. Replaces eddf945d (decisions.md:295 revert).
-Pinned variance sim sha 68a64c59 (Economy, 2026-10-17): adds `M2_F1` (M2_P4 + yawn_at 50, manage_at 50) and sets `M2_CURRENT = M2_F1`. Replaces 560ea73b. The fixture generator reads worker values from data/economy.csv, so only the fixture's sim_sha256 label changed.
+Pinned sim sha 0ee6433c (Economy, 2026-10-17, HoP MK-59 wage ruling): Market Hand min-wait turns are no longer held unpaid; the turn advances and pays its wage on the every_s cadence, and min wait gates serving only (matches src/sim/tick.ts). Replaces 10f29a4a.
+Previous: sim sha 10f29a4a (Economy, 2026-10-17, HoE go 07:32): CURRENT = F1 and M2_CURRENT = M2_F1 (50/0.5) now that #17 is on main; pre-F1 stays available as `--config p1q`. Replaces eddf945d (decisions.md:295 revert).
+Pinned variance sim sha 20c289da (Economy, 2026-10-17): same wage-hold change as economy_sim 0ee6433c. Replaces 68a64c59.
+Previous: variance sim sha 68a64c59 (Economy, 2026-10-17): adds `M2_F1` (M2_P4 + yawn_at 50, manage_at 50) and sets `M2_CURRENT = M2_F1`. Replaces 560ea73b. The fixture generator reads worker values from data/economy.csv, so only the fixture's sim_sha256 label changed.
 Vendored economy.f1-m4cols.csv 6dca24cd (2026-10-17, HoP-approved AC7 L21 trim): only L21 changes, farm_cost 41918 -> 40660 and w4_tier_cost 20959 -> 20330 (-3%). Replaces 86f0e80e. The sims read it at import (`_F1_FC`/`_F1_W4`), so `--config f1` reproduces it.

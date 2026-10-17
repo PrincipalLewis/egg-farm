@@ -9,12 +9,12 @@ import { Game } from '../src/game';
 import { ServedDwell } from '../src/ui/served-dwell';
 import { mem } from './helpers';
 
-const busy = (seed = 7) => ({ ...initialState(b, seed), farmLevel: 12, collectionLevel: 9, coinsCents: 1e7, basket: 1500,
+const busy = (seed = 7, farmLevel = 12) => ({ ...initialState(b, seed), farmLevel, collectionLevel: 9, coinsCents: 1e7, basket: 1500,
   workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 }, hawker: { energy: 100, cdS: 0 } } });
 
-/** Fraction of 100 ms frames over `secs` with a customer card on screen (waiting, or dwelling when dwellMs > 0). */
-function visibility(dwellMs: number, secs = 60, seed = 7) {
-  let s: any = busy(seed); const d = new ServedDwell(dwellMs); let t = 0, vis = 0, frames = 0;
+/** Fraction of 100 ms samples over `secs` with a customer card on screen (waiting, or dwelling when dwellMs > 0). */
+function visibility(dwellMs: number, secs = 60, level = 12) {
+  let s: any = busy(7, level); const d = new ServedDwell(dwellMs); let t = 0, vis = 0, frames = 0;
   while (t < secs * 1000) {
     const ev: any[] = []; s = advance(s, 100, 0, b, ev).state; t += 100;
     for (const e of ev) { if (e.type === 'sell') d.sold(e.id, e.value); if (e.type === 'customer_served') d.served(e.id, t); }
@@ -51,14 +51,16 @@ describe('MK-20 the sim is untouched by the dwell (deterministic)', () => {
   });
 });
 
-describe('MK-17/21 visibility re-run (L12, 1,500 eggs, Market Hand Working)', () => {
-  it('before: ~15% visible; after: >= 40% over 60 s for several seeds', () => {
-    const before = visibility(0, 120), after = visibility(b.feel.served_dwell_ms, 120);
-    // Pre-F1 'before' was ~15% (< 0.25). F1 option (b) min wait (product/f1-proposal.md: 'a card on screen 88-99% of the time at
-    // L10-18', HoE ruling 2026-10-17) keeps each customer on screen >= min_wait_s, so the no-dwell figure now clears the bar itself.
-    expect(before).toBeGreaterThanOrEqual(0.4);
-    expect(after).toBeGreaterThanOrEqual(0.4);
-    for (const seed of [1, 2, 3, 99]) expect(visibility(b.feel.served_dwell_ms, 60, seed), `seed ${seed}`).toBeGreaterThanOrEqual(0.4);
+describe('MK-17/21 visibility (HoP-approved wording, 2026-10-17)', () => {
+  // initialState(seed 7) at Farm L10/L12/L14, Collection 9, 1,500 eggs, Market Hand + Coop Hand + Hawker at 100%, fixed arrivals;
+  // 100 ms steps from t=0; a sample is visible if the live queue is non-empty after the step, or (dwell on) a served card is within
+  // served_dwell_ms (balance.feel.served_dwell_ms). Fraction = visible samples / all samples. Pre-F1 no-dwell was ~15%; with the
+  // min wait the game gives ~57-69% (Economy's model said 88-99%; QA qa/m3-recheck/min-wait-c05c83a.md), hence the [0.40, 0.90] band.
+  it('with served_dwell_ms over 60 s: >= 0.40 at each of L10, L12, L14', () => {
+    for (const L of [10, 12, 14]) expect(visibility(b.feel.served_dwell_ms, 60, L), `L${L}`).toBeGreaterThanOrEqual(0.4);
+  });
+  it('no dwell at L12 over 120 s: within [0.40, 0.90]', () => {
+    const v = visibility(0, 120, 12); expect(v).toBeGreaterThanOrEqual(0.4); expect(v).toBeLessThanOrEqual(0.9);
   });
 });
 

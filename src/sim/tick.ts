@@ -72,11 +72,6 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameSta
     const m = mood(w, b); if (isOff(m)) continue;
     let cdS = w.cdS - dt;
     if (cdS <= 1e-9) {
-      // F1 option (b) (product/f1-proposal.md §5, HoP 2026-10-16; HoE ruling 2026-10-17): Market Hand's turn is HELD -- no wage,
-      // no action, cooldown stays expired so it fires on the first tick it can -- until some customer has waited >= min_wait_s.
-      // Matches vendor/economy-sim/sim/economy_sim.py:309 (hold_until_servable) and :316 (per-customer skip). An empty basket
-      // with a servable customer is still a normal (paid) turn. 1e-9 = same tick-float tolerance as the patience timeout.
-      if (id === 'market_hand' && !s.customers.some(c => servable(c, b))) { ws[id] = { ...w, cdS: 0 }; continue; }
       const cfg = b.workers[id], interval = m === 'working' ? cfg.every_s : cfg.tired_every_s;
       cdS = interval;
       const { cents: wage, frac } = wageCharge(id, s.farmLevel, interval, s.wageFracCents?.[id] ?? 0, b); // S2-8: exact rate, fraction carried
@@ -88,14 +83,16 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameSta
       if (id === 'coop_hand') {
         const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b));
         if (n > 0) { s = { ...s, coop: s.coop - n, basket: s.basket + n }; ev?.push({ type: 'worker_collect', eggs: n }); }
-      } else for (const c of s.customers) { if (s.basket < 1) break; if (!servable(c, b)) continue; s = sellTo(s, c.id, b, ev, 'market_hand'); }
+      } else for (const c of s.customers) { if (s.basket < 1) break; if (!servable(c, b)) continue; /* F1 (b) min wait, see servable() */ s = sellTo(s, c.id, b, ev, 'market_hand'); }
     }
     ws[id] = { ...w, cdS };
   }
   return { ...s, workers: { ...ws } };
 }
-/** F1 (b) min wait: Market Hand only serves a customer who has waited >= workers.market_hand.min_wait_s (economy.csv
- *  market_hand_min_wait_s). Inclusive, like the Python sim's `t - arrival >= defer`. */
+/** F1 (b) min wait (HoE ruling 2026-10-17): Market Hand only SERVES a customer who has waited >= workers.market_hand.min_wait_s
+ *  (economy.csv market_hand_min_wait_s); inclusive like vendor economy_sim.py (0ee6433c) `t - arrival < defer: continue`; 1e-9 =
+ *  patience tolerance. Wages unchanged (HoP MK-59 ruling 2026-10-17): Market Hand is charged every interval exactly as before, even
+ *  with an empty queue or nobody past min wait. Earlier sims (10f29a4a) held such turns unpaid; Economy's 0ee6433c pays them, as here. */
 export const servable = (c: { waitedS: number }, b: Balance) => c.waitedS >= b.workers.market_hand.min_wait_s - 1e-9;
 /** Fixed-timestep accumulator: runs whole 1/tickHz ticks, returns leftover ms. */
 export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balance, ev?: Sink) {

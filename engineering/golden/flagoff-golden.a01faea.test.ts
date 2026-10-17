@@ -25,7 +25,9 @@ const PINS: Record<string, string> = {
 //   f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544  (main acaceee and 8e6d53e, no min wait)
 // Only src/sim/tick.ts (Market Hand min wait) + balance.json workers.market_hand.min_wait_s change; the CSV is unchanged
 // (6dca24cd after #36; #36 itself left f90d1678 unchanged). Storage-bytes pins (PINS) unchanged.
-const GOLDEN_MAIN_A01FAEA = 'e7dad04063a4fdbba7d8b2edc3e18ed7de9ff46296210565de677b371d16225e';
+// Re-pinned a third time (HoP MK-59 ruling 2026-10-17): wages unchanged vs main (no unpaid hold; only serving is gated by
+// min_wait_s; = vendored sim 0ee6433c). Superseded pin, kept for audit: e7dad04063a4fdbba7d8b2edc3e18ed7de9ff46296210565de677b371d16225e (c05c83a, unpaid hold).
+const GOLDEN_MAIN_A01FAEA = '9089892aaf9c16076caeee332e0b5ef0f7f9d066c4cf731f1e2ad2b77680a258';
 const FIX = ['m1-rc2-v4-12min', 'm2-rc1-v5-12min', 'm2-rc1-v5-40min', 'm2-rc1-v5-40min-edge'];
 const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
 describe('golden', () => {

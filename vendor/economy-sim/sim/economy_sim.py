@@ -305,8 +305,7 @@ def run_m2(e, policy, seed, T=7200, dt=0.1, sell_every=SELL_EVERY, poisson=False
           last_manage = t; manages += 1
     s1 = state('w1')
     if pt: last_sell = t
-    if s1 in ('work', 'tired') and t >= w1_t and t - last_sell >= sp['w1'].get('idle_gate', 0) \
-        and not (sp['w1'].get('hold_until_servable') and not any(t - x[4] >= sp['w1']['defer'] for x in q)):  # F1 (b): hold turn, no wage, until a customer waited >= min wait (empty basket unchanged)
+    if s1 in ('work', 'tired') and t >= w1_t and t - last_sell >= sp['w1'].get('idle_gate', 0):  # F1 (b) HoP ruling 2026-10-17: held turn still advances w1_t and pays the wage; min wait gates serving only (loop skips waits < defer)
       w1_t = t + (sp['w1']['every'] if s1 == 'work' else sp['w1']['tired_every'])
       wg = sp['w1'].get('wage_per_f_min', 0) * f * (w1_t - t) / 60
       if UNP and coins < wg: unpaid.add('w1'); s1 = 'unpaid'
