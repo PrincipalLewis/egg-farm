@@ -1,0 +1,4 @@
+# Provenance of the vendored files: <sha256>  <vendored path>  <source path>
+vendored: 2026-10-17
+eddf945d572b8c19d8463569ddbf0616bf51cf1317d238c005fd8690a62646dc  sim/economy_sim.py  product/sim/economy_sim.py
+86f0e80e359398e3fd3061c268794054558029270cc3944ac522ef7ddbea0550  economy.f1-m4cols.csv  product/economy.f1-m4cols.csv
