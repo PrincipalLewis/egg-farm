@@ -3,7 +3,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
-import { incomePerSec } from '../econ/income';
+import { salesStopped } from '../econ/income';
 import { wageLine } from './s2-economy-ui';
 import { listedWageCentsPerSec, WAGE_WORKERS, type WageWorker } from './rates';
 /** Reviewer m1 (rc2): card wage = the exact economy.csv listed rate from ./rates (single source), not the s2-money stub. */
@@ -63,14 +63,30 @@ export function manageAllHtml(s: GameState, b: Balance): string {
 /** v1.3 §4.4: caption under a greyed per-worker Manage: "Ready in Ns" during the shared cooldown, else "Not tired yet" above 40%. */
 export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) =>
   !needsPrompt(w, b) ? `Rested, refill below ${Math.round(b.workers.energy.manage_prompt_threshold * 100)}%` : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
-/** PM Workers ruling (a): the banner names the role and its real effect; "stopped" only when the live net rate is <= 0 (true zero).
- *  Grader: bonus share from balance (review 5d8a058 #8). Coop Hand slows collecting; Market Hand / Hawker slow sales. Unpaid follows the same rule. */
-export function workerBannerText(id: WorkerId, m: string | null, s: GameState, b: Balance): string {
-  if (m !== 'asleep' && m !== 'unpaid') return '';
-  const pre = m === 'unpaid' ? '⚠' : '💤', state = m === 'unpaid' ? 'unpaid' : 'asleep';
-  if (id === 'grader') return `${pre} ${m === 'unpaid' ? 'Unpaid' : 'Asleep'}, bonus down to ${Math.round(b.workers.grader.asleep_bonus_share * 100)}%`;
-  if (incomePerSec(s, b) <= 0) return `${pre} ${m === 'unpaid' ? 'Unpaid' : 'Asleep'}, production stopped`;
-  return `${pre} ${WORKER_NAMES[id]} ${state}: ${id === 'coop_hand' ? 'collecting' : 'sales'} slowed`;
+/** art-ux/rc2-workers-copy.md §6 (signed off 07:19): role first, colon, effect; SVG icon (moon = asleep, warning = unpaid), no emoji.
+ *  "production stopped" only at a true zero (salesStopped, shared with the header). `short` drops the role name (360 fallback); aria always has the role. */
+export const BANNER_ROLE: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Grader' };
+export interface WorkerBanner { kind: 'asleep' | 'unpaid'; text: string; short: string; aria: string; icon: string }
+export function workerBanner(id: WorkerId, m: string | null, s: GameState, b: Balance): WorkerBanner | null {
+  if (m !== 'asleep' && m !== 'unpaid') return null;
+  const role = BANNER_ROLE[id], st = m, pct = Math.round(b.workers.grader.asleep_bonus_share * 100);
+  const [eff, effAria] = id === 'grader' ? [`bonus down to ${pct}%`, `Bonus down to ${pct} percent.`]
+    : salesStopped(s, b) ? ['production stopped', 'Production is stopped.']
+    : id === 'coop_hand' ? ['collecting slowed', 'Collecting is slowed.'] : ['sales slowed', 'Sales are slowed.'];
+  const short = `${st[0].toUpperCase()}${st.slice(1)}: ${eff}`;
+  return { kind: m, text: `${role} ${st}: ${eff}`, short, aria: `${role} is ${st}. ${effAria}`, icon: m === 'asleep' ? 'icon-moon.svg' : 'icon-warning.svg' };
+}
+/** Visible banner text (full form); kept for callers/tests. */
+export const workerBannerText = (id: WorkerId, m: string | null, s: GameState, b: Balance) => workerBanner(id, m, s, b)?.text ?? '';
+export const workerBannerHtml = (wb: WorkerBanner | null) => !wb ? '' :
+  `<div class="wk-banner ${wb.kind}" role="status"><img class="wb-ico" src="${ASSET(wb.icon)}" width="14" height="14" alt=""><span class="bt" aria-hidden="true" data-full="${wb.text}" data-short="${wb.short}">${wb.text}</span><span class="sr">${wb.aria}</span></div>`;
+/** 360 rule: if the full banner doesn't fit on one line, drop the role name (never wrap or ellipsise). Call after layout. */
+export function fitBanners(root: ParentNode) {
+  root.querySelectorAll<HTMLElement>('.wk-banner .bt').forEach(t => {
+    const full = t.dataset.full ?? '', short = t.dataset.short ?? '';
+    if (t.textContent !== full) t.textContent = full;
+    if (t.clientWidth && t.scrollWidth > t.clientWidth + 0.5) t.textContent = short;
+  });
 }
 export function workersHtml(s: GameState, b: Balance): string {
   return manageAllHtml(s, b) + WORKERS.map(id => {
@@ -84,8 +100,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const cap = manageCaption(w, cd, b);
     const off = m === 'asleep' || m === 'unpaid';
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid ⚠' : 'Asleep 💤';
-    const bt = workerBannerText(id, m, s, b);
-    const banner = bt ? `<div class="wk-banner ${m}" role="status">${bt}</div>` : '';
+    const banner = workerBannerHtml(workerBanner(id, m, s, b));
     const yawn = isYawning(w, b);
     let extra = '';
     if (id === 'grader') {

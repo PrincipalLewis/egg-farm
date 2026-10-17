@@ -2,6 +2,7 @@
  *  HUD rate + aria both come from rateView over incomePerSec (T6 / MK-39 critic: one formatter). */
 import type { Balance } from '../config/balance';
 import { type GameState } from '../sim/state';
+import { incomePerSec, salesStopped, productionStopped } from '../econ/income';
 import type { WorkerId } from '../sim/workers';
 /** @deprecated STUB (s2-money), tests only; UI uses ./rates (listedWageCentsPerSec / wageCentsPerSec). Wage in cents per second for a worker at Farm level F; 0 for workers without a wage. */
 export const wagePerSecCents = (id: WorkerId, farm: number, b: Balance) =>
@@ -40,8 +41,11 @@ export function rateMoney(absCents: number): string {
 
 /**
  * HUD net-rate view. `text` and `aria` share `rateMoney` so the spoken amount always matches the visible one.
- * AC-R2: never positive while production is stopped; ≤0 → red ⚠.
+ * PM Workers ruling (a): always the real rate. Red ⚠ (sign 'neg') only when the real rate is <= 0; a sub-cent positive rate rounds to $0.00 but stays 'zero' (not red).
+ * `stopped` (from salesStopped) adds the aria reason only at a rounded $0.00.
  */
+/** Header rate exactly as app.ts renders it (review 23a3798 #4): real incomePerSec; aria "stopped" only when sales are $0.00 and a worker is off. */
+export const headerRate = (s: GameState, b: Balance) => rateView(incomePerSec(s, b) * 100, { stopped: salesStopped(s, b) && productionStopped(s, b) });
 export function rateView(cps: number, opts: { stopped?: boolean } = {}): { text: string; sign: RateSign; aria: string; money: string } {
   // PM Workers ruling (a): always the real rate; red ⚠ only at <= 0. `stopped` only adds the aria reason at a true zero/negative.
   const c = Math.sign(cps) * Math.round(Math.abs(cps));
@@ -50,14 +54,14 @@ export function rateView(cps: number, opts: { stopped?: boolean } = {}): { text:
     const aria = opts.stopped
       ? `Net income ${money} per second, production stopped`
       : `Net income ${money} per second`;
-    return { text: `⚠ ${money}/s`, sign: 'neg', aria, money };
+    return { text: `⚠ ${money}/s`, sign: cps <= 0 ? 'neg' : 'zero', aria, money };
   }
   const money = rateMoney(c);
   if (c < 0) {
     return {
       text: `⚠ \u2212${money}/s`,
       sign: 'neg',
-      aria: `Net income minus ${money} per second${opts.stopped ? ', production stopped' : ''}`,
+      aria: `Net income minus ${money} per second${opts.stopped ? ', production stopped' : ''}`, // stopped here only if gross sales are $0.00 (rate = -wages)
       money,
     };
   }

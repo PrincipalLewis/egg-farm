@@ -15,7 +15,7 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coa
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { instantSale, saleLine, compact } from './welcome-sale';
-import { rateView, QueueDot, headerRateText } from './s2-economy-ui';
+import { headerRate, QueueDot, headerRateText } from './s2-economy-ui';
 import { incomePerSec, secondsToAffordSteady, EtaHold, asleepOrUnpaidCount, productionStopped } from '../econ/income';
 import { optionGain, bestBuy } from '../econ/best-buy';
 import { graderMult } from '../sim/workers';
@@ -29,7 +29,7 @@ import { collectionFxLines, collectionSummary, collectionDeltas } from './collec
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navRefillState, type NavAria } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navRefillState, fitBanners, type NavAria } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -545,8 +545,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     setDisabled(collectBtn, coopWhole < 1);
     // S2-8 header net rate (<= 1 update/s); first negative tick shakes the line (not under reduced motion)
     if (now() - rateAt >= 1000) { rateAt = now();
-      const cps = incomePerSec(s, b) * 100; // $/s → cents/s for rateView
-      const v = rateView(cps, { stopped: cps <= 0 && productionStopped(s, b) }); // ruling (a): real rate; 'stopped' only at a true zero
+      const v = headerRate(s, b); // ruling (a): real rate; shared 'stopped' threshold (salesStopped)
       setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
       if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
@@ -602,7 +601,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
-      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; } { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); } /* review #7: measured bar height, 0 with no bar; re-measured on resize/dock change too */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; } { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); } fitBanners(uRow); /* review #7: measured bar height, 0 with no bar; re-measured on resize/dock change too; §6 banners role-drop fit */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
     renderGoal();
