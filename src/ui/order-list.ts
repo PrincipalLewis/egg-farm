@@ -1,8 +1,8 @@
 /** Market order list renderer, anti-churn (m3-customer-queue-spec v1.1 §5): keyed nodes by order id, one rAF batch per
  *  frame, chip + live region coalesced to <= 1 / 2 s, enter slide only into a visible slot (<= 1 / 240 ms), list frozen
- *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Never innerHTMLs the list. */
+ *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Exception: Sold rows leave on their own hold/fade schedule even during the freeze (review ebbd02e #4 / c1b4ef5 #3). Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
-import { orderView, fitOrderEggs, moreLabel, moreName, soldLabel, planRemovals, SOLD_HOLD_MS, type OrderView } from './orders';
+import { orderView, fitOrderEggs, moreLabel, moreName, soldLabel, planRemovals, emptyHidden, SOLD_HOLD_MS, type OrderView } from './orders';
 export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
@@ -93,7 +93,7 @@ export class OrderList {
       this.list.insertBefore(n, this.chip);
     }
     // M-Sold-freeze: "Next customer soon…" only once the sold row has frozen and left
-    this.empty.hidden = i.customers.length > 0 || this.nodes.size > 0 || this.leavingN > 0;
+    this.empty.hidden = emptyHidden(i.customers.length, this.nodes.size, this.leavingN);
     // chip + live region: <= 1 write / 2 s (trailing, latest value); never animated
     const hidden = Math.max(0, (i.waitingLen ?? i.customers.length) - i.visible), want = hidden > 0 ? `${moreLabel(hidden, i.expanded)}|${moreName(hidden, i.expanded)}|${i.expanded}` : '';
     if (want !== this.chipShown) {
