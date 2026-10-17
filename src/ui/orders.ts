@@ -26,8 +26,11 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
 /** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
 /** rc2 M-Order-zero (rc2-order-sell-preview §9): 'Wants 13 eggs' follows the same rule as '4/17 eggs': drop " eggs" when it doesn't fit (always at <=375). */
 export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');
-/** §9 decision used by OrderList: <=375 always drops ' eggs'; wider keeps it only when it fits. The value is never cut (review dbc6948 #3). */
-export const fitOrderText = (e: string, narrow: boolean, fits: (s: string) => boolean): string => narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, fits);
+/** §9 decision used by OrderList: <=375 always drops ' eggs'; wider keeps it only when it fits; 'Wants N' that still doesn't fit becomes '0/N'. The value is never cut (review dbc6948 #3). */
+export const fitOrderText = (e: string, narrow: boolean, fits: (s: string) => boolean): string => {
+  const t = narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, fits); const w = /^Wants (\S+)$/.exec(t);
+  return w && !fits(t) ? `0/${w[1]}` : t; // last resort below the §9 170px bar (320 l1 = 124px; 'Wants 3.98M · $9.94M' at 360): compact '0/N' like '4/17', value never cut
+};
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
 export const visibleOrders = (viewportH: number, docked: boolean, n: number) =>
   docked ? n : Math.min(n, 0.75 * viewportH - 56 - 72 - 24 >= 384 ? 5 : 4);
