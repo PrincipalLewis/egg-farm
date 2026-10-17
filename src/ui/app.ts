@@ -21,7 +21,7 @@ import { optionGain, bestBuy } from '../econ/best-buy';
 import { graderMult } from '../sim/workers';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
-import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
+import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen, tutCaption } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
 import { navUpgradesTab, changedLine, fxOrNoChange } from './upgrade-card';
 import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, type Goal } from './next-goal';
@@ -697,9 +697,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)'); // P1: never spotlight an empty queue
       if (docked.matches) { tab = 'collection'; return uRow.querySelector('.btn.buy'); }
       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
-    }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'
-      : st === 1 ? (open === 'market' || docked.matches ? 'Tap <b>Sell</b> to earn coins.' : 'A customer! Tap them to sell eggs.')
-      : open === 'upgrades' || docked.matches ? 'Tap <b>Buy</b>.' : 'Spend coins to collect more eggs per tap.', A('ui-pointer-hand.svg'), A('ui-pointer-hand-down.svg'));
+    }, tutCaption /* rc2 M-Tut-parity: same copy at every width */, A('ui-pointer-hand.svg'), A('ui-pointer-hand-down.svg'));
   }
   };
   let recoveryOpen = !!(g.recoveryOutcome && opts.recovery);

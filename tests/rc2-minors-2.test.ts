@@ -14,3 +14,15 @@ describe('M-Order-zero', () => {
   it('ready keeps "✓ Ready"', () => { expect(orderView(c(5), 5, 100).line).toMatch(/^✓ Ready · /); });
   it('order-list writes the view aria to the progressbar', () => { expect(readFileSync('src/ui/order-list.ts', 'utf8')).toMatch(/bar\.setAttribute\('aria-label', v\.aria\)/); });
 });
+import { TUT_COPY, tutCaption } from '../src/ui/onboarding';
+describe('M-Tut-parity', () => {
+  it('one caption per step, the 390 strings', () => {
+    expect(TUT_COPY).toEqual(['Tap <b>Collect</b> to gather the eggs.', 'A customer! Tap them to sell eggs.', 'Spend coins to collect more eggs per tap.']);
+    expect([0, 1, 2].map(tutCaption)).toEqual([...TUT_COPY]);
+  });
+  it('app.ts passes tutCaption with no width/panel branching and no other caption strings', () => {
+    const src = readFileSync('src/ui/app.ts', 'utf8');
+    expect(src).toMatch(/\}, tutCaption \/\*/);
+    expect(src).not.toMatch(/Tap <b>Sell<\/b> to earn coins|'Tap <b>Buy<\/b>\.'/);
+  });
+});
