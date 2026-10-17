@@ -154,14 +154,17 @@ export function rankUnload(lsRaw: string | null, idbRaw: string | null, unloadRa
   if (unloadRaw === null) return 'none';
   if (unloadRaw === idbRaw) return 'promoted';
   const uv = validate(unloadRaw, b); if (!uv.ok) return 'corrupt';
-  // Ties use a fixed order LS main > IDB main > unload: a tying unload copy is 'diverged' and never promoted.
+  // Ties use a fixed order LS main > IDB main > unload: a tying unload copy is 'diverged' and never promoted (unless it
+  // is byte-identical to LS main, which ranks as LS main).
   const others: { raw: string; savedAt: unknown }[] = [];
   for (const r of [lsRaw, idbRaw]) { if (r === null || r === unloadRaw) continue; const v = validate(r, b); if (v.ok) others.push({ raw: r, savedAt: v.file.savedAt }); }
   const mode = rankMode([unloadRaw, ...others.map(o => o.raw)]);
   const u = { raw: unloadRaw, savedAt: uv.file.savedAt };
   let tie = false;
   for (const o of others) { const c = rankCompareIn(mode, u, o, now); if (c < 0) return 'older'; if (c === 0) tie = true; }
-  return tie ? 'diverged' : 'win';
+  // An unload copy byte-identical to LS main IS LS main's content, so it takes LS main's tie precedence (LS > IDB main):
+  // a tie with IDB main is a win (promote + delete), not 'diverged' (rc0 unloadmirror: unload was left behind forever).
+  return tie && unloadRaw !== lsRaw ? 'diverged' : 'win';
 }
 /** The subset of IdbMirror the boot step needs (tests pass the real mirror on fake-indexeddb). */
 export interface UnloadStore { readUnload(): Promise<string | null>; promoteUnload(raw: string): Promise<boolean>; }

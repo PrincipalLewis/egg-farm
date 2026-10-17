@@ -100,6 +100,12 @@ describe('M4-19 rev 3: transitive ranking over 3+ copies', () => {
     const perms: [string, string, string][] = [[A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]];
     for (const [ls, idb, u] of perms) expect(rankUnload(ls, idb, u, b, T + 1e6)).toBe(u === C ? 'win' : 'older');
   });
+  it('unload byte-identical to LS main ties IDB main: ranks as LS main (win), not diverged', () => {
+    const L = sv(5, T + 4000); // I2: same rank (savedAt, no seq), different bytes
+    const I2 = serialize({ ...initialState(b, 1), coinsCents: 5, basket: 1 }, T + 4000);
+    expect(rankUnload(L, I2, L, b, T + 1e6)).toBe('win');
+    expect(rankUnload(I2, L, sv(6, T + 4000), b, T + 1e6)).toBe('diverged'); // a genuine tie with distinct bytes still diverges
+  });
   it('all with a seq: seq first, then savedAt', () => {
     const X = sv(1, T + 9000, 2), Y = sv(2, T, 7);
     expect(rankMode([X, Y])).toBe('seq'); expect(rankUnload(X, null, Y, b, T + 1e6)).toBe('win'); expect(pickNewest(Y, X, b, T + 1e6)).toBe('ls');
