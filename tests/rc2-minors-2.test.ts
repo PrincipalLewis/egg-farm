@@ -40,11 +40,14 @@ describe('M-Tut-goal', () => {
   });
 });
 describe('M-Toast-layer', () => {
-  it('toasts wait while Welcome-back is open, a visible one is pulled, and the latest shows after it closes', () => {
-    const app = readFileSync('src/ui/app.ts', 'utf8');
-    expect(app).toMatch(/const showToast = \(text: string, ms = 1300\) => \{ if \(modalKind === 'welcome'\) \{ deferredToast = \[text, ms\]; return; \}/);
-    expect(app).toMatch(/if \(toast\.classList\.contains\('show'\)\) \{ deferredToast = [^\n]*toast\.classList\.remove\('show'\)[^\n]*\n\s*modalKind = 'welcome'/);
-    expect(app).toMatch(/if \(wasWelcome && deferredToast\)[^\n]*showToast\(t, ms\)/);
+  it('wiring: showToast goes through toastGate blocked by #modal-layer.open; modals pull a visible toast; closeModal releases; no z-index swap (behaviour in toast-gate.test.ts)', () => {
+    const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
+    expect(app).toMatch(/toastGate\(\(\) => modal\.classList\.contains\('open'\), rawToast/);
+    expect(app).toMatch(/const showToast = \(text: string, ms = 1300\) => toastQ\.toast\(text, ms\)/);
+    expect(app.match(/toastQ\.hold\(toast\.textContent/g)?.length).toBe(2);
+    expect(app).toMatch(/const closeModal = [^\n]*\n\s*toastQ\.released\(\)/);
+    expect(app).not.toMatch(/deferredToast/);
+    expect(css).not.toMatch(/#modal-layer\{[^}]*z-index:(3[2-9]|[4-9]\d)/);
   });
 });
 import { fitOrderEggs } from '../src/ui/orders';
