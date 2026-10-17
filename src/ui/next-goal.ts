@@ -3,6 +3,7 @@ import { WORKER_NAMES } from './workers-ui';
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { coopTier } from '../sim/state';
+import { m4On } from '../config/formulas';
 import { fmtAffordableIn, fmtGoalEta } from './format';
 import { bestBuy, bestBuyNeedsRefill, optionGain, options as buyOptions, type BuyKey, BUY_ORDER } from '../econ/best-buy';
 import { incomePerSec, secondsToAffordSteady } from '../econ/income';
@@ -42,6 +43,8 @@ function trackName(key: GoalKey): string {
   switch (key) {
     case 'FARM': return 'Farm';
     case 'COLL': return 'Collection';
+    case 'HENS': return 'Hens';
+    case 'VALUE': return 'Egg value';
     case 'W4': return 'Grader';
     default: return WNAME[WK[key]];
   }
@@ -51,6 +54,8 @@ function levelFor(key: GoalKey, s: GameState): number {
   switch (key) {
     case 'FARM': return s.farmLevel + 1;
     case 'COLL': return s.collectionLevel + 1;
+    case 'HENS': return s.hensLevel + 1;
+    case 'VALUE': return s.eggValueLevel + 1;
     case 'W4': return (s.workers.grader ? s.graderTier : 0) + 1;
     default: return 1;
   }
@@ -61,6 +66,8 @@ export type GoalLabelParts = { star: string; track: string; shortTrack: string; 
 function shortTrackName(key: GoalKey): string {
   switch (key) {
     case 'COLL': return 'Coll.';
+    case 'HENS': return 'Hens';
+    case 'VALUE': return 'Value';
     case 'FARM': return 'Farm';
     case 'W1': return 'M. Hand';
     case 'W2': return 'C. Hand';
@@ -72,7 +79,7 @@ function shortTrackName(key: GoalKey): string {
 /** Structured goal label parts (art-ux rc1-upgrade-value v1.4 §4). */
 export function goalLabelParts(key: GoalKey, s: GameState, pct: number): GoalLabelParts {
   const n = levelFor(key, s);
-  if (key === 'FARM' || key === 'COLL') {
+  if (key === 'FARM' || key === 'COLL' || key === 'HENS' || key === 'VALUE') {
     return { star: '★ ', track: `${trackName(key)} L${n}`, shortTrack: `${shortTrackName(key)} L${n}`, gain: ` · +${pct}% income` };
   }
   if (key === 'W4') {
@@ -120,7 +127,7 @@ export function fitGoalLabel(label: string, widthPx: number, budget = GOAL_LABEL
 }
 
 function tabFor(key: GoalKey): Goal['tab'] {
-  return key === 'FARM' ? 'farm' : key === 'COLL' ? 'collection' : 'workers';
+  return key === 'FARM' || key === 'HENS' || key === 'VALUE' ? 'farm' : key === 'COLL' ? 'collection' : 'workers';
 }
 
 function goalFrom(key: GoalKey, s: GameState, b: Balance, payback: number): Goal {
@@ -144,7 +151,9 @@ function goalFrom(key: GoalKey, s: GameState, b: Balance, payback: number): Goal
 }
 
 /** `_rate` ignored — steady-state incomePerSec is the only source (UC13). */
-export function selectGoal(s: GameState, b: Balance, _rate?: number): Goal {
+export function selectGoal(s: GameState, b: Balance, _rate?: number, shared?: GoalKey | null): Goal {
+  // M4-A: with the flag on, the hint follows the shared highlight pick (pick-hysteresis DualPicker). Flag off: unchanged.
+  if (shared && m4On(b) && buyOptions(s, b).some(o => o.key === shared)) return goalFrom(shared, s, b, optionGain(s, b, shared)?.bundlePayback ?? Infinity);
   // If a hired worker is asleep/unpaid and live income ≤ 0, point at Refill (Engineering decision).
   const live = incomePerSec(s, b);
   if (live <= 0) {

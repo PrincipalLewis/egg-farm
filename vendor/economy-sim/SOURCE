@@ -1,4 +1,6 @@
 # Provenance of the vendored files: <sha256>  <vendored path>  <source path>
 vendored: 2026-10-17
-eddf945d572b8c19d8463569ddbf0616bf51cf1317d238c005fd8690a62646dc  sim/economy_sim.py  product/sim/economy_sim.py
-86f0e80e359398e3fd3061c268794054558029270cc3944ac522ef7ddbea0550  economy.f1-m4cols.csv  product/economy.f1-m4cols.csv
+10f29a4a38c8b22d3b952736c2627c0b83892fb5b299e257e4db9c7adf9fa6d6  sim/economy_sim.py  product/sim/economy_sim.py
+6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455  economy.f1-m4cols.csv  product/economy.f1-m4cols.csv
+68a64c59f0db10e67d4edc3a68a9a86bc559db72bc33102d3d9e3c7b669d98f1  sim/seller_variance_sim.py  product/sim/seller_variance_sim.py
+17877b4106116951ec9d41987bd03aec43af45f0b79bfd157f81abc984e4d4e5  sim/seller-variance-proposal.md  product/sim/seller-variance-proposal.md

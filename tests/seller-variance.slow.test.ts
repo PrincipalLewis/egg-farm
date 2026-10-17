@@ -1,9 +1,9 @@
 // SLOW (~80 s): *.slow.test.ts is excluded from default `vitest run` / `npm test` (vite.config.ts test.exclude).
 // Run it with `npm run test:slow` (vitest.slow.config.ts); CI always runs it in the ci.yml `slow` job. Seeds stay at 100.
-// Seller15 variance bot (product/sim/seller-variance-proposal.md, sha256 17877b41; HoQA F-1): TS vs Python parity.
+// Seller15 variance bot (vendor/economy-sim/sim/seller-variance-proposal.md, vendored from product/sim/, sha256 17877b41; HoQA F-1): TS vs Python parity.
 // Expected values: tests/fixtures/seller_variance.json, produced by scripts/gen-seller-variance-fixtures.py running the
-// Python reference product/sim/seller_variance_sim.py (run / run_m2, policy seller15, 100 seeds, 60 min) on this repo's
-// data/economy.csv. Regenerate: SV_SIM_DIR=<product/sim> python3 scripts/gen-seller-variance-fixtures.py
+// Python reference vendor/economy-sim/sim/seller_variance_sim.py (vendored from product/sim/) (run / run_m2, policy seller15, 100 seeds, 60 min) on this repo's
+// data/economy.csv. Regenerate: python3 scripts/gen-seller-variance-fixtures.py (defaults to vendor/economy-sim/sim; SV_SIM_DIR overrides)
 //
 // What is exact and what has a tolerance (the proposal specifies neither, so it is fixed here):
 //  EXACT  - the variance stream (CPython MT19937 port): random() bit-for-bit, every p_delay / p_cheap_first roll, the call
@@ -111,12 +111,12 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, 
 
 // AC7 band on the variance bot (proposal §AC7 with variance; CCR PR #19 M1/M2). Judged at P5/P95 of level at 30:00, switched
 // on the sha256 of data/economy.csv. Every branch is a hard `it`: a thrown error always fails.
-//  86f0e80e (F1, economy.f1-m4cols, PR #17): the band holds. No workers P5 >= 18 and P95 <= 22; workers P5 >= 20 and P95 <= 24.
+//  6dca24cd (F1 economy.f1-m4cols + HoP-approved AC7 L21 trim; was 86f0e80e from PR #17): the band holds. No workers P5 >= 18 and P95 <= 22; workers P5 >= 20 and P95 <= 24.
 //  57d964d5 (main, pre-F1): the known failing values are asserted exactly (no workers L@30 P5 = 17; workers max L@30 = 18),
 //           so any drift (or a crash) fails. Needs #17 economy.f1-m4cols 86f0e80e for the real band.
 //  any other sha: fails with 'unknown economy CSV <sha>: update AC7 band test'.
 // After the CSV changes, regenerate the fixture first: scripts/gen-seller-variance-fixtures.py.
-export const F1_CSV = '86f0e80e', MAIN_PRE_F1_CSV = '57d964d5';
+export const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
 const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
 const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const;
 export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): void {

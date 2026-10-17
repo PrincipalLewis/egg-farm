@@ -70,6 +70,6 @@ describe('v4 issue 2: a lone tab with localStorage full is not locked out', () =
 describe('v4 issue 3 (Reviewer N3)', () => {
   it('a failed IndexedDB re-read keeps the first read', () => {
     const src = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8');
-    expect(src).toContain('idbRaw = (await mirror.read()) ?? idbRaw');
+    expect(src).toMatch(/r2 === undefined\) \{ idbBoot = 'unknown'.*else if \(r2 !== null\) idbRaw = r2/); // §3d: failed re-read keeps the first read and defers
   });
 });

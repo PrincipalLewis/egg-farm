@@ -2,12 +2,13 @@
  * Steady-state income (rc1-upgrade-clarity-spec.md §1 / §2(f) UC18).
  * Pure; recomputed from config + live worker moods. Not the rolling 60 s average.
  * Dollars per second; may be ≤ 0 (no clamp). Asleep Grader keeps 15% bonus via graderMult.
+ * Shared with rc1/ux-clarity (same path + API, ported from 8631e94) so the branches converge; M4-A: with the flag on,
+ * eggs/s and the unit price come from sim/tracks.ts (Hens / Egg value), otherwise identical to rc1.
  */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
-import {
-  eggsPerSec, eggsPerTap, collectionPriceBonus, demandRange, customerIntervalS,
-} from '../sim/state';
+import { eggsPerTap, demandRange, customerIntervalS } from '../sim/state';
+import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
 import { mood, isOff, graderMult, hawkerDemandMult, type Workers } from '../sim/workers';
 
 export type IncomeOpts = {
@@ -17,13 +18,12 @@ export type IncomeOpts = {
 
 /** Egg sale price in dollars (Python-compatible round to 2 dp × grader mult). */
 export function priceDollars(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
-  const F = s.farmLevel, C = s.collectionLevel;
-  const base = Math.round((1 + 0.05 * F) * (1 + collectionPriceBonus(C, b)) * 100) / 100;
+  const base = salePriceCents(s, b) / 100; // one price source (config-driven; flag off = eggPriceCents(F, C))
   const ws = opts.assumeWorking ? workingClone(s.workers) : s.workers;
   return base * graderMult(ws, s.graderTier, b);
 }
 
-/** Collect eggs/s: 1 tap/s + Coop Hand (Working = +0.5×eggs/tap, matching Economy sim). */
+/** Collect eggs/s: 1 tap/s + Coop Hand (Working = +0.5×eggs/tap, matching Economy sim). Model assumptions of the rc1 spec, not tunables. */
 export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
   const tap = eggsPerTap(s.collectionLevel, b);
   const w = s.workers.coop_hand;
@@ -60,7 +60,7 @@ export function wagesPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): nu
 
 /** Gross eggs sold/s × price − wages. Live moods unless assumeWorking. */
 export function incomePerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
-  const eggs = Math.min(eggsPerSec(s.farmLevel, b), demandPerSec(s, b, opts), collectPerSec(s, b, opts));
+  const eggs = Math.min(prodEggsPerSec(s, b), demandPerSec(s, b, opts), collectPerSec(s, b, opts));
   return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts);
 }
 
@@ -69,7 +69,7 @@ export const grossSalesPerSec = (s: GameState, b: Balance) => incomePerSec(s, b)
 /** PM Workers ruling (a), one shared threshold (review 23a3798 #3): production is "stopped" only when gross sales round to $0.00/s.
  *  A negative net rate (wages > sales) is not "stopped": production is running. Used by the header aria and the worker banners. */
 export const salesStopped = (s: GameState, b: Balance) => Math.round(grossSalesPerSec(s, b) * 100) <= 0;
-/** True when any hired worker is asleep/unpaid. Ruling (a): only used for the aria reason when the live rate is <= 0; never clamps the rate. */
+/** True when any hired worker is asleep/unpaid (Critic #3 / AC-R2). */
 export function productionStopped(s: GameState, b: Balance): boolean {
   for (const id of ['market_hand', 'coop_hand', 'hawker', 'grader'] as const) {
     const w = s.workers[id];

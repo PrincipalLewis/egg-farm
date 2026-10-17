@@ -71,23 +71,25 @@ describe('Workers v1.3 (m2-workers-layout §4.4, m2-proposal §8 #19-20)', async
   const { initialState } = await import('../src/sim/state');
   const S = (e: number[], cd = 0): any => ({ ...initialState(b, 3), farmLevel: 10, manageCdS: cd, graderTier: 1,
     workers: Object.fromEntries((['market_hand', 'coop_hand', 'hawker', 'grader'] as const).slice(0, e.length).map((id, i) => [id, { energy: e[i], cdS: 0 }])) });
-  it('AC-R9: "Refill N tired workers", N = workers at <= 40%; hidden at N=0', () => {
-    const h = manageAllHtml(S([40, 41, 10]), b); expect(h).toContain('Refill 2 tired workers'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested|1 tired workers|Refill tired \(/);
-    expect(manageAllHtml(S([40, 41, 90]), b)).toContain('Refill 1 tired worker');
+  const T = Math.round(b.workers.energy.manage_prompt_threshold * 100); // threshold from balance (main F1 retune)
+  it('AC-R9: "Refill N tired workers", N = workers at <= threshold; hidden at N=0', () => {
+    const h = manageAllHtml(S([T, T + 1, 10]), b); expect(h).toContain('Refill 2 tired workers'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested|1 tired workers|Refill tired \(/);
+    expect(manageAllHtml(S([T, T + 1, 90]), b)).toContain('Refill 1 tired worker');
   });
   it('AC-R9: shown at N>=1 whatever the hire count (T5; ruling (b): < 3 hired refills one); hidden at N=0 (including during cooldown)', () => {
-    expect(manageAllHtml(S([10, 10]), b)).toContain('Refill 1 tired worker'); // ruling (b): < 3 hired refills one expect(farmManageAllVisible(S([10, 10]), b, false)).toBe(true);
+    expect(manageAllHtml(S([10, 10]), b)).toContain('Refill 1 tired worker'); // ruling (b): < 3 hired refills one
+    expect(farmManageAllVisible(S([10, 10]), b, false)).toBe(true); // review 8a49d35 #3: was swallowed by the comment
     expect(manageAllHtml(S([90, 90, 90]), b)).toBe('');
     expect(manageAllHtml(S([90, 90, 90], 12.2), b)).toBe(''); // N=0 → hidden (Addendum 2)
     const cd = manageAllHtml(S([10, 90, 90], 12.2), b);
     expect(cd).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true"/); expect(cd).toContain('ring-cooldown'); expect(cd).toContain('Ready in 13s'); expect(cd).toContain('Refill 1 tired worker');
   });
   it('AC-R8: greyed caption "Rested, refill below 40%" / "Ready in Ns"; energy reason wins when both', () => {
-    const h = workersHtml(S([40, 41, 90]), b);
+    const h = workersHtml(S([T, T + 1, 90]), b);
     expect(h).toMatch(/data-w="market_hand" aria-disabled="false"/); expect(h).toMatch(/data-w="coop_hand" aria-disabled="true" aria-describedby="cap-coop_hand"/);
-    expect(h).toContain('<div class="wk-cap num" id="cap-coop_hand">Rested, refill below 40%</div>'); expect(h).not.toContain('id="cap-market_hand"');
+    expect(h).toContain(`<div class="wk-cap num" id="cap-coop_hand">Rested, refill below ${T}%</div>`); expect(h).not.toContain('id="cap-market_hand"');
     expect(manageCaption({ energy: 10, cdS: 0 } as any, 7, b)).toBe('Ready in 7s');
-    expect(manageCaption({ energy: 90, cdS: 0 } as any, 7, b)).toBe('Rested, refill below 40%'); // energy first
+    expect(manageCaption({ energy: 90, cdS: 0 } as any, 7, b)).toBe(`Rested, refill below ${T}%`); // energy first
     expect(workersHtml(S([10, 90, 90], 7), b).match(/Ready in 7s/g)!.length).toBe(2); // pill (N=1) + tired worker
   });
 });
@@ -144,7 +146,7 @@ describe('AC14b save-recovery dialog v1.2 (UI only)', () => {
   });
 });
 describe('S2-1 toast duration (Art & UX 08:47)', () => {
-  it('"Coop upgraded!" stays 2.5 s; other toasts keep 1.3 s', () => { expect(app).toContain('export const COOP_TOAST_MS = 2500;'); expect(app).toContain("showToast('Coop upgraded!', COOP_TOAST_MS)"); expect(app).toContain('(text: string, ms = 1300)'); });
+  it('"Coop upgraded!" stays 2.5 s; other toasts keep 1.3 s', () => { expect(app).toContain('export const COOP_TOAST_MS = 2500;'); expect(app).toContain("showToast('Coop upgraded!', COOP_TOAST_MS)"); expect(app).toMatch(/\(text: string, ms = 1300[,)]/); /* merge acdbedc: M4-A adds atHud after ms */ });
 });
 
 describe('S2-4c welcome-back sold line (Art & UX 08:47)', async () => {
