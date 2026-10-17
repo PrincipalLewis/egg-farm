@@ -72,13 +72,13 @@ describe('M-Tut-goal hint keeps the link node (review e9b9826 #5)', () => {
 });
 import { fitOrderText } from '../src/ui/orders';
 describe('§9 fitOrderText (review dbc6948 #3)', () => {
-  it('<=375 drops " eggs"; wider keeps it when it fits; a "Wants N" that still does not fit becomes "0/N"; value never cut', () => {
+  it('<=375 drops " eggs"; wider keeps it when it fits; a "Wants N" that still does not fit shows the value alone (never "0/N"); value never cut', () => {
     const fitsUpTo = (n: number) => (t: string) => t.length <= n;
     expect(fitOrderText('Wants 13 eggs', true, fitsUpTo(99))).toBe('Wants 13'); expect(fitOrderText('4/17 eggs', true, fitsUpTo(4))).toBe('4/17');
-    expect(fitOrderText('Wants 13 eggs', true, fitsUpTo(5))).toBe('0/13');
+    expect(fitOrderText('Wants 13 eggs', true, fitsUpTo(5))).toBe('');
     // §9.1 (N2): '1.23M/9.99M' -> '1.23M' -> '' (value only); value never cut
     expect(fitOrderText('1.23M/9.99M eggs', true, fitsUpTo(5))).toBe('1.23M'); expect(fitOrderText('1.23M/9.99M eggs', true, () => false)).toBe('');
-    expect(fitOrderText('1.23M/9.99M eggs', true, fitsUpTo(11))).toBe('1.23M/9.99M'); expect(fitOrderText('Wants 13 eggs', true, () => false)).toBe(''); expect(fitOrderText('Wants 3.98M eggs', false, t => t.length <= 7)).toBe('0/3.98M');
+    expect(fitOrderText('1.23M/9.99M eggs', true, fitsUpTo(11))).toBe('1.23M/9.99M'); expect(fitOrderText('Wants 13 eggs', true, () => false)).toBe(''); expect(fitOrderText('Wants 3.98M eggs', false, t => t.length <= 7)).toBe('');
     expect(fitOrderText('Wants 13 eggs', false, () => true)).toBe('Wants 13 eggs'); expect(fitOrderText('Wants 181B eggs', false, t => t !== 'Wants 181B eggs')).toBe('Wants 181B');
     expect(readFileSync('src/ui/order-list.ts', 'utf8')).toMatch(/const fe = fitOrderText\(e, narrow, fitsL1\)/);
   });

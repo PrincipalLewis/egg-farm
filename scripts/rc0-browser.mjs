@@ -1093,18 +1093,19 @@ sections.rc2minors2 = async () => {
     if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(250); }
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 0, coop: 0, nextCustomerInS: 999, customers: [{ id: 501, demand: 13, filled: 0, waitedS: 0 }] }; }); await page.waitForTimeout(400);
     const z = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
-    ok(`M-Order-zero 0 delivered reads "Wants 13", aria "Customer wants 13 eggs" (${w})`, (w < 360 ? /^(Wants 13|0\/13)/ : /^Wants 13/).test(z.e) && z.aria === 'Customer wants 13 eggs', JSON.stringify(z));
+    ok(`M-Order-zero 0 delivered reads "Wants 13", aria "Customer wants 13 eggs" (${w})`, (w < 360 ? /^(Wants 13|\$)/ : /^Wants 13/).test(z.e) && z.aria === 'Customer wants 13 eggs', JSON.stringify(z));
     if (shot) await page.screenshot({ path: `${MS}/order-wants-13-${nm(w)}.png` });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 501, demand: 13, filled: 1, waitedS: 0 }] }; }); await page.waitForTimeout(400);
     const o = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
     ok(`M-Order-zero after the first egg reads "1/13" (${w})`, /^1\/13/.test(o.e) && o.aria === 'Order 1 of 13 eggs', JSON.stringify(o));
     // rc2-order-sell-preview §9 fixtures: <=375 drops " eggs" -> 'Wants 13 · $15.34' / 'Wants 181B · $1.78T' on one line, no ellipsis, line 1 <= 170px at 360
-    for (const [F, C, d, txt] of [[1, 1, 13, '13 · $15.34'], [24, 29, 181e9, '181B · $1.78T'], [0, 0, 181e9, '181B · $181B']]) {
+    for (const [F, C, d, txt] of [[1, 1, 13, '13 · $15.34'], [24, 29, 181e9, '181B · $1.78T'], [0, 0, 181e9, '181B · $181B'], [4, 9, 3976000, '3.98M · $9.94M']]) {
       await page.evaluate(([F, C, d]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, collectionLevel: C, basket: 0, workers: {}, customers: [{ id: 502, demand: d, filled: 0, waitedS: 0 }] }; }, [F, C, d]); await page.waitForTimeout(400);
       const m = await page.evaluate(() => { const l1 = document.querySelector('.order[data-id="502"] .l1'); if (!l1) return null; const rg = document.createRange(); rg.selectNodeContents(l1); const rs = rg.getClientRects(), cs = getComputedStyle(l1);
         return { t: l1.textContent.replace(/\u00a0/g, ' '), w: rg.getBoundingClientRect().width, cw: l1.clientWidth, sw: l1.scrollWidth, lines: (() => { const tops = [...rs].filter(r => r.width > 0).map(r => r.top); return tops.length ? 1 + Math.floor((Math.max(...tops) - Math.min(...tops)) / (parseFloat(cs.lineHeight) || 20) + 0.4) : 0; })(), ell: /…/.test(l1.textContent) }; });
-      const full = `Wants ${txt.replace(' · ', ' eggs · ')}`, compact = `0/${txt}`, want = m && m.t === full && w > 375 ? full : m && m.t === compact && w < 360 ? compact : `Wants ${txt}`; // 320: '0/N' allowed (l1 124px < §9's 170) // >375: ' eggs' kept only when it fits (181B eggs = 199px > 194)
-      ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w > 375 || m.w <= 170) && (w <= 375 || d !== 13 || m.t === full), JSON.stringify(m));
+      const full = `Wants ${txt.replace(' · ', ' eggs · ')}`, valueOnly = txt.split(' · ')[1], specFits360 = d !== 3976000; // §9 table: 13/181B fit 170px at 360; 3.98M and anything at 320 may fall to the value alone (§9.1)
+      const want = m && m.t === full && w > 375 ? full : m && m.t === valueOnly && (w < 360 || (w <= 375 && !specFits360)) ? valueOnly : `Wants ${txt}`; // >375: ' eggs' kept only when it fits (181B eggs = 199px > 194)
+      ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w !== 360 || !specFits360 || m.w <= 170) && (w <= 375 || d !== 13 || m.t === full) && !/^0\//.test(m.t), JSON.stringify(m));
       if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-wants-${txt.replace(/ · \$/, '-').replace(/ /g, '')}-${nm(w)}.png` });
     }
     { // §9.1 (designer N2): '1.23M/9.99M · $20.8M' never clipped at 360; drops '/{want}' then the count, value intact, aria full

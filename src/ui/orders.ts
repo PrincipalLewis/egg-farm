@@ -26,12 +26,12 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
 /** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
 /** rc2 M-Order-zero (rc2-order-sell-preview §9): 'Wants 13 eggs' follows the same rule as '4/17 eggs': drop " eggs" when it doesn't fit (always at <=375). */
 export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');
-/** §9 decision used by OrderList: <=375 always drops ' eggs'; wider keeps it only when it fits; 'Wants N' that still doesn't fit becomes '0/N'. The value is never cut (review dbc6948 #3). */
+/** §9 decision used by OrderList: <=375 always drops ' eggs'; wider keeps it only when it fits; 'Wants N' that still doesn't fit shows the value alone (§9.1). The value is never cut (review dbc6948 #3). */
 export const fitOrderText = (e: string, narrow: boolean, fits: (s: string) => boolean): string => {
   const t = narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, fits);
   const w = /^Wants (\S+)$/.exec(t), r = /^(\S+)\/\S+$/.exec(t);
-  // §9.1 (Head of Art & UX 09:26): value never cut; drop '/{want}' ('1.23M · $20.8M'), then the count ('$20.8M'); 'Wants N' -> '0/N' -> ''. '' = value only.
-  const chain = [t, ...(w ? [`0/${w[1]}`] : r ? [r[1]] : []), ''];
+  // §9.1 (Head of Art & UX 09:26): value never cut; drop '/{want}' ('1.23M · $20.8M'), then the count ('$20.8M'); 'Wants N' -> ''. '' = value only.
+  const chain = [t, ...(!w && r ? [r[1]] : []), '']; // 'Wants N' that doesn't fit goes straight to the value alone ('0/N' was rejected for the zero line, review 6a744d6 #1)
   for (const c of chain.slice(0, -1)) if (fits(c)) return c;
   return '';
 };
