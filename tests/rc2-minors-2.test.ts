@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { orderView } from '../src/ui/orders';
 const c = (d: number, f = 0) => ({ id: 1, demand: d, filled: f, waitedS: 0 }) as any;
 describe('M-Order-zero', () => {
-  it('nothing delivered or sellable -> "Wants 13", aria "Customer wants 13 eggs"', () => {
-    const v = orderView(c(13), 0, 100); expect(v.line).toMatch(/^Wants 13 · /); expect(v.aria).toBe('Customer wants 13 eggs');
+  it('nothing delivered or sellable -> "Wants 13 eggs", aria "Customer wants 13 eggs"', () => {
+    const v = orderView(c(13), 0, 100); expect(v.line).toMatch(/^Wants 13 eggs · /); expect(v.aria).toBe('Customer wants 13 eggs');
   });
   it('after the first egg -> "1/13 eggs", aria "Order 1 of 13 eggs"', () => {
     const v = orderView(c(13, 1), 0, 100); expect(v.line).toMatch(/^1\/13 eggs · /); expect(v.aria).toBe('Order 1 of 13 eggs');
@@ -52,8 +52,9 @@ describe('M-Toast-layer', () => {
 });
 import { fitOrderEggs } from '../src/ui/orders';
 describe('M-Order-zero fit', () => {
-  it('"Wants N" kept when it fits; falls back to compact "0/N" when it does not', () => {
-    expect(fitOrderEggs('Wants 13', () => true)).toBe('Wants 13'); expect(fitOrderEggs('Wants 3.98M', () => false)).toBe('0/3.98M');
+  it('§9: "Wants N eggs" kept when it fits; drops " eggs" (never "0/N", never cut) when it does not', () => {
+    expect(fitOrderEggs('Wants 13 eggs', () => true)).toBe('Wants 13 eggs'); expect(fitOrderEggs('Wants 13 eggs', () => false)).toBe('Wants 13'); expect(fitOrderEggs('Wants 181B eggs', () => false)).toBe('Wants 181B');
+    expect(orderView(c(13), 0, 118).line).toBe('Wants 13 eggs · $15.34'); expect(orderView(c(181e9), 0, 983.4).line).toBe('Wants 181B eggs · $1.78T');
     expect(fitOrderEggs('1/13 eggs', () => false)).toBe('1/13');
   });
 });

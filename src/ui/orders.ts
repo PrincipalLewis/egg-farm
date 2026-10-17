@@ -18,14 +18,14 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
   const rem = c.demand - c.filled, sell = Math.max(0, Math.min(Math.floor(basket), rem)), have = c.filled + sell, want = c.demand;
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
   const valueCents = want * priceCents;
-  const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(valueCents)));
-  return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : have === 0 ? `Wants ${count3(want)} · ${value}` : `${count3(have)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b); rc2 M-Order-zero: 'Wants 13' until the first egg
+  const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : valueCents >= 1e14 ? `$${count3(valueCents / 100)}` /* §9 '$1.78T': fmtMoney has no T tier ('$1780B') */ : fmtMoney(Math.max(1, Math.round(valueCents)));
+  return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : have === 0 ? `Wants ${count3(want)} eggs · ${value}` : `${count3(have)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b); rc2 M-Order-zero: 'Wants 13' until the first egg
     aria: have === 0 ? `Customer wants ${want} eggs` : `Order ${have} of ${want} eggs`,
     button: state === 'wait' ? (basket < 1 ? 'No eggs' : `Need ${count3(rem)}`) : state === 'partial' ? `Sell ${count3(sell)}` : 'Sell' }; // MK-35: 0 eggs -> 'No eggs'
 }
 /** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
-/** rc2 M-Order-zero: 'Wants 3.98M' that doesn't fit falls back to the compact '0/3.98M' (never cut mid-word). */
-export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => { if (fits(e)) return e; const w = /^Wants (.+)$/.exec(e); return w ? `0/${w[1]}` : e.replace(/ eggs$/, ''); };
+/** rc2 M-Order-zero (rc2-order-sell-preview §9): 'Wants 13 eggs' follows the same rule as '4/17 eggs': drop " eggs" when it doesn't fit (always at <=375). */
+export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
 export const visibleOrders = (viewportH: number, docked: boolean, n: number) =>
   docked ? n : Math.min(n, 0.75 * viewportH - 56 - 72 - 24 >= 384 ? 5 : 4);

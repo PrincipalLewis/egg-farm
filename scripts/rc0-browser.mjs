@@ -1095,6 +1095,15 @@ sections.rc2minors2 = async () => {
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 501, demand: 13, filled: 1, waitedS: 0 }] }; }); await page.waitForTimeout(400);
     const o = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
     ok(`M-Order-zero after the first egg reads "1/13" (${w})`, /^1\/13/.test(o.e) && o.aria === 'Order 1 of 13 eggs', JSON.stringify(o));
+    // rc2-order-sell-preview §9 fixtures: <=375 drops " eggs" -> 'Wants 13 · $15.34' / 'Wants 181B · $1.78T' on one line, no ellipsis, line 1 <= 170px at 360
+    for (const [F, C, d, txt] of [[1, 1, 13, '13 · $15.34'], [24, 29, 181e9, '181B · $1.78T']]) {
+      await page.evaluate(([F, C, d]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, collectionLevel: C, basket: 0, workers: {}, customers: [{ id: 502, demand: d, filled: 0, waitedS: 0 }] }; }, [F, C, d]); await page.waitForTimeout(400);
+      const m = await page.evaluate(() => { const l1 = document.querySelector('.order[data-id="502"] .l1'); if (!l1) return null; const rg = document.createRange(); rg.selectNodeContents(l1); const rs = rg.getClientRects(), cs = getComputedStyle(l1);
+        return { t: l1.textContent, w: rg.getBoundingClientRect().width, cw: l1.clientWidth, sw: l1.scrollWidth, lines: new Set([...rs].map(r => Math.round(r.top))).size, ell: /…/.test(l1.textContent) }; });
+      const want = w <= 375 ? `Wants ${txt}` : `Wants ${txt.replace(' · ', ' eggs · ')}`;
+      ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w > 375 || m.w <= 170), JSON.stringify(m));
+      if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-wants-${d === 13 ? '13-15.34' : '181B-1.78T'}-${nm(w)}.png` });
+    }
     // M-Toast-layer: Welcome-back open, then a 'Coop upgraded!' toast fires (the reload case)
     if (w < 960) { await page.evaluate(() => (document.querySelector('#p-market .close') ?? document.querySelector('[data-nav=farm]')).click()); await page.waitForTimeout(250); }
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2685, customers: [] }; window.eggfarmQaWelcome(); }); await page.waitForTimeout(200);
