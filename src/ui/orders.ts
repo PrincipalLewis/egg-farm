@@ -21,7 +21,7 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
   const valueCents = want * priceCents;
   const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(valueCents)));
   return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : `${count3(have, true)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b)
-    button: state === 'wait' && basket < 1 ? 'No eggs' : state === 'partial' ? `Sell ${count3(sell, true)}` : 'Sell' }; // MK-35: 0 eggs -> 'No eggs'; no 'Need' label (review 5d8a058 #13/#15)
+    button: state === 'wait' && basket < 1 ? 'No eggs' : state === 'wait' ? 'Sell' : `Sell ${count3(sell, true)}` }; // full rows read 'Sell {k}' too (designer cuta3 Nit 11) // MK-35: 0 eggs -> 'No eggs'; no 'Need' label (review 5d8a058 #13/#15)
 }
 /** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
 export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');

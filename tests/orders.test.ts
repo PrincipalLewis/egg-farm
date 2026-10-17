@@ -8,10 +8,10 @@ describe('order card (P2)', () => {
     expect(orderView(c(5), 3, 250).line).toBe('3/5 eggs · $12.50');
     expect(orderView(c(5), 0, 0.1).line).toBe('0/5 eggs · $0.01');
   });
-  it('three button states: No eggs (MK-35) / Sell k / Sell', () => {
+  it('three button states: No eggs (MK-35) / Sell k / Sell k (full row)', () => {
     expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'No eggs', sell: 0 });
     expect(orderView(c(5), 3, 100)).toMatchObject({ state: 'partial', button: 'Sell 3', sell: 3 });
-    expect(orderView(c(5), 9, 100)).toMatchObject({ state: 'ready', button: 'Sell', sell: 5 });
+    expect(orderView(c(5), 9, 100)).toMatchObject({ state: 'ready', button: 'Sell 5', sell: 5 });
   });
   it('earlier partial sales count toward have (MK-8/MK-10 partial selling)', () => {
     expect(orderView(c(10, 4), 2, 100)).toMatchObject({ have: 6, want: 10, state: 'partial', button: 'Sell 2' });
