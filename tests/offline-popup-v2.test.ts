@@ -9,7 +9,7 @@ import { saleValueCents } from '../src/sim/payout';
 import { apply } from '../src/sim/actions';
 import { graderMult } from '../src/sim/workers';
 import { welcomeModel } from '../src/ui/welcome-v2';
-import { fmtCount, fmtMoney, fmtMoneyFull, fmtDuration, fmtEggsFull } from '../src/ui/format';
+import { fmtCount, fmtMoney, fmtMoneyCeil, moneyWords, fmtMoneyFull, fmtDuration, fmtEggsFull } from '../src/ui/format';
 import { accountHiddenPeriod, onHiddenPeriodAccounted, __resetHiddenTimeStub, type HiddenPeriodResult } from '../src/save/hidden-time';
 import { hiddenPopupGate } from '../src/ui/welcome-v2';
 import { mem, expOffline } from './helpers';
@@ -60,7 +60,7 @@ describe('C-AC29/30/34 numbers and worth line', () => {
   it('C-AC29 example: 1,234,567 x $3.00 -> "$3,703,701" (price via Collection levels)', () => {
     const found: [number, number][] = []; for (let F = 0; F <= b.maxLevel; F++) for (let C = 0; C <= b.maxLevel; C++) if (eggPriceCents(F, C, b) === 300) found.push([F, C]);
     if (found.length) expect(at(1_234_567, 300).worth).toBe('Worth up to $3,703,701 when sold');
-    // No F/C pair prices exactly $3.00 in this economy: build it from a $1.50 base with a 2x sale multiplier instead.
+    // No F/C pair prices exactly $3.00 in this economy: check the formatter on the spec's total instead.
     else expect(fmtMoneyFull(1_234_567 * 300)).toBe('$3,703,701');
   });
   it('C-AC30 worth includes the Grader multiplier (saleMultipliers)', () => {
@@ -82,6 +82,17 @@ describe('C-AC29/30/34 numbers and worth line', () => {
     expect(m.hero).toBe('+1 egg'); expect(m.button).toBe('Collect 1 egg'); expect(m.worth).toBe(`Worth up to ${fmtMoneyFull(eggPriceCents(15, 0, b))} when sold`);
   });
   it('rate line: 240/min at L15 (25% of the farm rate)', () => expect(welcomeModel(1, 100, L15(), b).rate).toBe("240/min offline · 25% of your farm's rate"));
+});
+
+describe('formatters (CCR Minor 7)', () => {
+  it('fmtMoneyCeil rounds deficits up from $1,000; cents below', () => {
+    expect(fmtMoneyCeil(99_950)).toBe('$999.50'); expect(fmtMoneyCeil(123_450)).toBe('$1,235'); expect(fmtMoneyCeil(100_000)).toBe('$1,000');
+    expect(fmtMoneyCeil(99_999_901)).toBe('$1,000,000'); expect(fmtMoneyCeil(100_000_000)).toBe('$1M'); expect(fmtMoneyCeil(0)).toBe('$0.00');
+  });
+  it('moneyWords', () => {
+    expect(moneyWords(0)).toBe('0 dollars'); expect(moneyWords(1)).toBe('1 cent'); expect(moneyWords(50)).toBe('50 cents'); expect(moneyWords(100)).toBe('1 dollar');
+    expect(moneyWords(81_240)).toBe('812 dollars 40 cents'); expect(moneyWords(8_640_000)).toBe('86,400 dollars'); expect(moneyWords(NaN)).toBe('unknown');
+  });
 });
 
 describe('C-AC31 basket, not coop', () => {

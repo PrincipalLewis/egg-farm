@@ -2,6 +2,7 @@
 @font-face{font-family:"Fredoka";font-weight:700;font-display:swap;src:url(/fonts/fredoka-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:"Nunito";font-weight:400;font-display:swap;src:url(/fonts/nunito-latin-400-normal.woff2) format("woff2")}
 @font-face{font-family:"Nunito";font-weight:700;font-display:swap;src:url(/fonts/nunito-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Nunito";font-weight:800;font-display:swap;src:url(/fonts/nunito-latin-800-normal.woff2) format("woff2")}
 :root{
   --c-yolk:#FFC93C;--c-yolk-dark:#F29E1F;--c-barn:#B83B37;--c-meadow:#6BBF59;--c-sky:#8FD3F4;--c-cream:#FFF6E5;--c-white:#FFFFFF;--c-wood:#A86B3C;
   --c-text:#3E2C23;--c-muted:#6B5D52;--c-meadow-strong:#3D7F33;--c-wood-text:#8A5528;--c-focus:#2B79A8;--c-slot-outline:#6B5D52;--c-floater:#3E2C23;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
