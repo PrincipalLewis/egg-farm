@@ -81,3 +81,23 @@ it('--strict: SOURCE file-row count must equal SHA256SUMS entry count (fail clos
   const extraSum = tamperedVendor((a, b) => [a, b + '0'.repeat(64) + '  extra.py\n']);
   expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: extraSum })).toMatchObject({ code: 1, out: expect.stringMatching(/SHA256SUMS has 5/) });
 });
+it('--strict: SHA256SUMS (path, sha) set must equal SOURCE exactly (same count, one hash changed -> exit 1)', () => {
+  const ok = fullProduct();
+  const oneHash = tamperedVendor((a, b) => [a, b.replace(/^eddf945d/m, '0000000d')]);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: oneHash })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR SOURCE and SHA256SUMS \(path, sha\) sets differ/) });
+  const onePath = tamperedVendor((a, b) => [a, b.replace('  sim/economy_sim.py', '  sim/other.py')]);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: onePath }).code).toBe(1);
+});
+it('--strict: SOURCE paths resolving outside the vendor dir are rejected (../)', () => {
+  const ok = fullProduct();
+  const esc = tamperedVendor((a, b) => [a.replace('  sim/economy_sim.py  ', '  ../economy-sim/sim/economy_sim.py  '), b.replace('  sim/economy_sim.py', '  ../economy-sim/sim/economy_sim.py')]);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: esc })).toMatchObject({ code: 1, out: expect.stringMatching(/resolves outside the vendor dir/) });
+});
+it('ECONOMY_VENDOR_DIR is honoured only under vitest, logged to stderr; ignored with a warning otherwise', () => {
+  const ok = fullProduct(); const broken = tamperedVendor((a, b) => [a, b.replace(/^eddf945d/m, '0000000d')]);
+  const r = spawnSync('node', [script, '--strict'], { encoding: 'utf8', env: { ...process.env, VITEST: 'true', ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: broken } });
+  expect(r.status).toBe(1); expect(r.stderr).toContain(`ECONOMY_VENDOR_DIR override ${broken}`);
+  const env: Record<string, string | undefined> = { ...process.env, ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: broken }; delete env.VITEST;
+  const n = spawnSync('node', [script, '--strict'], { encoding: 'utf8', env });
+  expect(n.status).toBe(0); expect(n.stdout + n.stderr).toMatch(/WARNING ECONOMY_VENDOR_DIR ignored/);
+});

@@ -48,3 +48,8 @@
 - Done: check-economy-copy SOURCE parsing skips only blank/#/`^vendored:` lines (colon-containing rows are now checked); --strict fails closed unless SOURCE file-row count == SHA256SUMS entry count; vendored paths resolved with path.join (a `C:` path no longer crashes URL parsing); ECONOMY_VENDOR_DIR test override; tamper tests for colon rows and count mismatch.
 - Gates: tsc OK; vitest 478/478 (maxForks=2); test:slow 11/11; sync-economy --check OK.
 - Next: CCR/QA re-check of this SHA.
+
+## 2026-10-17 03:10 Senior Software Architect — PR #24 CCR items on 1b50002
+- Done: ECONOMY_VENDOR_DIR honoured only under VITEST (override path to stderr; ignored with warning otherwise; documented in ci-gates.md); --strict requires SOURCE and SHA256SUMS (path, sha) sets to be equal exactly; SOURCE paths resolving outside the vendor (or product) dir rejected; pathToFileURL for the override. Tests: one-hash change at same count, path change, ../ escape, VITEST gating.
+- Gates: tsc OK; vitest 481/481 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA.

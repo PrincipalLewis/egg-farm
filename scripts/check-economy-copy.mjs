@@ -8,8 +8,8 @@
 // Release gate: npm run check-economy-copy -- --product --strict (engineering/ci-gates.md).
 import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve, relative, isAbsolute, sep } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 const strict = process.argv.includes('--strict');
 const on = strict || process.argv.includes('--product') || process.env.ECONOMY_PRODUCT_CHECK === '1';
 if (!on) { console.log('check-economy-copy: opt-in only (--product or ECONOMY_PRODUCT_CHECK=1) - skipped'); process.exit(0); }
@@ -17,21 +17,38 @@ const repo = new URL('../data/economy.csv', import.meta.url);
 const prodDir = process.env.ECONOMY_PRODUCT_DIR || fileURLToPath(new URL('../../product', import.meta.url));
 const prod = join(prodDir, 'economy.csv');
 if (strict) { // vendored sim side: each SOURCE row <sha> <vendored path> product/<path> must match byte-for-byte (sha256)
-  // ECONOMY_VENDOR_DIR overrides the vendor dir (tests only).
-  const vdir = process.env.ECONOMY_VENDOR_DIR ? new URL(`file://${join(process.env.ECONOMY_VENDOR_DIR, '/')}`) : new URL('../vendor/economy-sim/', import.meta.url);
-  const lines = f => existsSync(new URL(f, vdir)) ? readFileSync(new URL(f, vdir), 'utf8').split('\n').map(l => l.trim()) : null;
+  // ECONOMY_VENDOR_DIR overrides the vendor dir, honoured only under vitest (process.env.VITEST); otherwise ignored with a warning.
+  let vdir = new URL('../vendor/economy-sim/', import.meta.url);
+  if (process.env.ECONOMY_VENDOR_DIR) {
+    if (process.env.VITEST) { vdir = pathToFileURL(join(resolve(process.env.ECONOMY_VENDOR_DIR), '/')); console.error(`check-economy-copy: using ECONOMY_VENDOR_DIR override ${fileURLToPath(vdir)}`); }
+    else console.warn('check-economy-copy: WARNING ECONOMY_VENDOR_DIR ignored (test-only, honoured only under vitest)');
+  }
+  const vroot = fileURLToPath(vdir);
+  const lines = f => existsSync(join(vroot, f)) ? readFileSync(join(vroot, f), 'utf8').split('\n').map(l => l.trim()) : null;
   const src = lines('SOURCE'), sums = lines('SHA256SUMS');
   if (!src || !sums) { console.warn(`check-economy-copy: ERROR vendor SOURCE or SHA256SUMS not found`); process.exit(1); }
   // Skip only blank lines, # comments and the `vendored:` date header; every other line is a file row and is checked.
   const rows = src.filter(l => l && !l.startsWith('#') && !/^vendored:/.test(l));
-  const nsums = sums.filter(l => l && !l.startsWith('#')).length;
-  const sha = f => createHash('sha256').update(readFileSync(f)).digest('hex');
+  const sumRows = sums.filter(l => l && !l.startsWith('#'));
   let bad = rows.length === 0; if (bad) console.warn('check-economy-copy: ERROR vendor/economy-sim/SOURCE lists no files');
-  if (rows.length !== nsums) { console.warn(`check-economy-copy: ERROR SOURCE has ${rows.length} file row(s) but SHA256SUMS has ${nsums}`); bad = true; }
+  if (rows.length !== sumRows.length) { console.warn(`check-economy-copy: ERROR SOURCE has ${rows.length} file row(s) but SHA256SUMS has ${sumRows.length}`); bad = true; }
+  // (path, sha) sets of SOURCE and SHA256SUMS must be equal exactly.
+  const key = (h, f) => `${h}  ${f}`;
+  const srcSet = new Set(rows.map(r => { const [h, f] = r.split(/\s+/); return key(h, f); }));
+  const sumSet = new Set(sumRows.map(r => { const m = r.match(/^([0-9a-f]{64})\s+\*?(\S+)$/); return m ? key(m[1], m[2]) : `malformed:${r}`; }));
+  const onlySrc = [...srcSet].filter(k => !sumSet.has(k)), onlySum = [...sumSet].filter(k => !srcSet.has(k));
+  if (onlySrc.length || onlySum.length || srcSet.size !== rows.length || sumSet.size !== sumRows.length) {
+    console.warn(`check-economy-copy: ERROR SOURCE and SHA256SUMS (path, sha) sets differ: only in SOURCE [${onlySrc.join('; ')}], only in SHA256SUMS [${onlySum.join('; ')}]`); bad = true;
+  }
+  const sha = f => createHash('sha256').update(readFileSync(f)).digest('hex');
   for (const r of rows) {
     const [pin, vend, src] = r.split(/\s+/);
     if (!pin || !vend || !src || !src.startsWith('product/')) { console.warn(`check-economy-copy: ERROR malformed SOURCE row: ${r}`); bad = true; continue; }
-    const v = join(fileURLToPath(vdir), vend), p = join(prodDir, src.slice('product/'.length));
+    const v = resolve(vroot, vend), p = join(prodDir, src.slice('product/'.length));
+    const rel = relative(vroot, v);
+    if (!rel || rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)) { console.warn(`check-economy-copy: ERROR SOURCE path ${vend} resolves outside the vendor dir`); bad = true; continue; }
+    const relP = relative(resolve(prodDir), p);
+    if (!relP || relP.startsWith('..') || isAbsolute(relP)) { console.warn(`check-economy-copy: ERROR SOURCE path ${src} resolves outside the product dir`); bad = true; continue; }
     if (!existsSync(v)) { console.warn(`check-economy-copy: ERROR vendored ${vend} not found`); bad = true; continue; }
     if (!existsSync(p)) { console.warn(`check-economy-copy: ERROR ${p} not found`); bad = true; continue; }
     const hv = sha(v), hp = sha(p);
