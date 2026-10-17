@@ -76,6 +76,12 @@ describe('S2 hidden tab: cumulative hidden budget, then offline grant (bug-offli
     c.g.save(); c.clock.t += 660_000; const rc = new Game(b, c.kv, () => c.clock.t, 7);
     expect(view(ra)).toEqual(view(rc));
   });
+  it('M1: 59 s hide with no frames === 59 s visible (no lost credit)', () => {
+    const a = setup(), v = setup();
+    a.g.onHidden(a.clock.t); a.clock.t += 59_000; expect(a.g.onShown(a.clock.t)).toBe(0);
+    v.clock.t += 59_000; v.g.frame();
+    expect(view(a.g)).toEqual(view(v.g));
+  });
   it('hide < 60 s keeps the online sim (no grant), events released on return', () => {
     const a = setup(), c = setup(); const n = arrivals(a.g), m = arrivals(c.g);
     a.g.onHidden(a.clock.t); for (let i = 0; i < 45; i++) { a.clock.t += 1000; a.g.frame(); } expect(a.g.onShown(a.clock.t)).toBe(0);

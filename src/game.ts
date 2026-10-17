@@ -160,25 +160,32 @@ export class Game {
   private allowBackup() { this.bakAllowed = true; }
   get backupAllowed() { return this.bakAllowed; }
   /** S2 hidden tab: state + accMs at the hide, online ms simulated since, and the events of that provisional sim. */
-  private hidden: { at: number; state: GameState; accMs: number; simMs: number; ev: SimEvent[] } | null = null;
+  private hidden: { at: number; periodId: number; state: GameState; accMs: number; simMs: number; ev: SimEvent[] } | null = null;
+  /** Monotonic counter for hidden periods (B1: never key idempotency by startAt ms). */
+  private nextHiddenPeriodId = 1;
   get isHidden() { return this.hidden !== null; }
   /** Page hidden (platform/visibility). Frames keep coming at the throttled rate but simulate at most
    *  offline.hiddenSimMaxSeconds in TOTAL, then the sim freezes until onShown. */
   onHidden(at = this.now()) {
     if (this.hidden) return;
     this.frame(); // bring the sim up to the hide
-    this.hidden = { at, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
+    this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
   }
   /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
    *  absence through the normal offline grant, exactly as a close at the hide + reload now would (C-AC36): pending
    *  settled first, same applyOffline clamp/cap, same validSavedAt clock-tamper rule. Shorter (or clock went back):
-   *  keep the <= 60 s of online sim. Returns the eggs granted (caller shows the welcome popup). */
+   *  keep the <= 60 s of online sim (M1: also credit uncovered gap with no frames, up to the 60 s budget).
+   *  Returns the eggs granted (caller shows the welcome popup). */
   onShown(at = this.now()): number {
     const h = this.hidden; if (!h) return 0;
     return accountHiddenPeriod(this, { startAt: h.at, endAt: at })?.eggsGranted ?? 0;
   }
   /** Start of the open hidden period, or null when visible. */
   get hiddenSince(): number | null { return this.hidden?.at ?? null; }
+  /** Open hidden period token for save/hidden-time.ts (at + monotonic periodId). */
+  get openHiddenPeriod(): { at: number; periodId: number } | null {
+    return this.hidden ? { at: this.hidden.at, periodId: this.hidden.periodId } : null;
+  }
   /** @internal Only save/hidden-time.ts calls this (via accountHiddenPeriod, which guarantees once per period). */
   settleHiddenPeriod(at: number): HiddenSettlement {
     const h = this.hidden; if (!h) return { mode: 'none', simulatedMs: 0, grantedMs: 0, eggs: 0, coins: 0, capped: false };
@@ -188,8 +195,17 @@ export class Game {
       this.emit(h.ev); this.checkCoopFull(); return { mode: 'none', simulatedMs: h.simMs, grantedMs: 0, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: false };
     }
     if (gap < this.b.offline.offlineMinSeconds * 1000) {
+      // M1: credit (show - hide) - already simulated, capped so total simMs <= budget (60 s).
+      const uncover = Math.max(0, Math.min(gap, budgetMs) - h.simMs);
+      if (uncover > 0) {
+        h.simMs += uncover;
+        const r = advance(this.state, uncover, this.accMs, this.b, h.ev);
+        this.state = r.state; this.accMs = r.accMs;
+        if (!this.bakAllowed) { this.playedMs += uncover; if (this.playedMs >= 60_000) this.allowBackup(); }
+      }
       this.emit(h.ev); this.checkCoopFull();
-      return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: h.simMs >= budgetMs && gap > budgetMs };
+      // n2: capped when the 60 s budget limited credit (gap > budget); false while budget == offlineMin and gap < offlineMin.
+      return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
     }
     this.state = h.state; this.accMs = 0;
     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
@@ -206,7 +222,11 @@ export class Game {
     const h = this.hidden;
     if (h) { // S2: cumulative hidden budget, then freeze; events held until we know the sim is kept (onShown)
       const step = Math.max(0, Math.min(gap, maxMs, this.b.offline.hiddenSimMaxSeconds * 1000 - h.simMs));
-      if (step > 0) { h.simMs += step; const r = advance(this.state, step, gap >= maxMs ? 0 : this.accMs, this.b, h.ev); this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; }
+      if (step > 0) {
+        h.simMs += step; const r = advance(this.state, step, gap >= maxMs ? 0 : this.accMs, this.b, h.ev); this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs;
+        // m2: kept hidden play counts toward the .bak 60 s enable, same as visible play.
+        if (!this.bakAllowed) { this.playedMs += step; if (this.playedMs >= 60_000) this.allowBackup(); }
+      }
       this.telemetry.poll(); return;
     }
     if (gap > 0) {

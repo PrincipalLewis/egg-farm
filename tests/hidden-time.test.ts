@@ -14,11 +14,12 @@ function setup() {
 }
 const view = (g: Game) => JSON.parse(JSON.stringify(g.state));
 
-describe('accountHiddenPeriod: one entry point, exactly once per hidden period (keyed by startAt)', () => {
+describe('accountHiddenPeriod: one entry point, exactly once per hidden period (keyed by periodId)', () => {
   it('671 s: offline-grant result, listener fires once; replay is a no-op returning null', () => {
     const { g, clock, got, off } = setup(); const s = clock.t; g.onHidden(s); clock.t += 671_000; g.frame();
     const r = accountHiddenPeriod(g, { startAt: s, endAt: clock.t })!;
     expect(r).toMatchObject({ startAt: s, endAt: clock.t, elapsedMs: 671_000, mode: 'offline-grant', grantedMs: 671_000, eggsGranted: expOffline(671, 15), coinsGranted: 0, capped: false });
+    expect(typeof r.periodId).toBe('number'); expect(r.periodId).toBeGreaterThan(0);
     const after = view(g);
     expect(accountHiddenPeriod(g, { startAt: s, endAt: clock.t + 5000 })).toBeNull();
     expect(g.onShown(clock.t)).toBe(0); // double visible
@@ -53,7 +54,8 @@ describe('accountHiddenPeriod: one entry point, exactly once per hidden period (
     const { g, clock, off } = setup(); const s = clock.t; g.onHidden(s);
     for (let i = 0; i < 5; i++) { clock.t += 10_000; g.frame(); }
     const r = accountHiddenPeriod(g, { startAt: s, endAt: clock.t })!;
-    expect(r).toMatchObject({ mode: 'online', simulatedMs: 50_000, grantedMs: 50_000, eggsGranted: 0, capped: false }); off();
+    expect(r).toMatchObject({ mode: 'online', simulatedMs: 50_000, grantedMs: 50_000, eggsGranted: 0, capped: false });
+    expect(r.periodId).toBeGreaterThan(0); off();
   });
   it('offline cap: a hide longer than offlineCapSeconds is capped', () => {
     const { g, clock, got, off } = setup(); const s = clock.t; g.onHidden(s); clock.t += (b.offline.offlineCapSeconds + 600) * 1000;
@@ -62,5 +64,99 @@ describe('accountHiddenPeriod: one entry point, exactly once per hidden period (
   });
   it('unsubscribe stops the listener', () => {
     const { g, clock, got, off } = setup(); off(); g.onHidden(clock.t); clock.t += 671_000; g.onShown(clock.t); expect(got).toHaveLength(0);
+  });
+
+  // B1: periodId keying — same startAt ms must never leave the game stuck hidden
+  it('B1: hide→show→hide in the same ms: second period accounts; never stuck hidden', () => {
+    const { g, clock, got, off } = setup();
+    const s = clock.t;
+    g.onHidden(s); expect(g.isHidden).toBe(true);
+    const id1 = g.openHiddenPeriod!.periodId;
+    expect(g.onShown(s)).toBe(0); // zero-length span: online, no eggs
+    expect(g.isHidden).toBe(false); expect(got).toHaveLength(1); expect(got[0].periodId).toBe(id1);
+    g.onHidden(s); // same ms startAt as the first period
+    expect(g.isHidden).toBe(true);
+    const id2 = g.openHiddenPeriod!.periodId;
+    expect(id2).toBeGreaterThan(id1);
+    clock.t = s + 120_000;
+    expect(g.onShown(clock.t)).toBe(expOffline(120, 15));
+    expect(g.isHidden).toBe(false);
+    expect(got).toHaveLength(2); expect(got[1].periodId).toBe(id2); expect(got[1].mode).toBe('offline-grant');
+    // visible play still advances after the second show (not stuck on the hidden freeze branch)
+    const cust0 = g.state.nextCustomerId;
+    for (let i = 0; i < 30; i++) { clock.t += 1000; g.frame(); }
+    expect(g.isHidden).toBe(false);
+    expect(g.state.nextCustomerId).toBeGreaterThan(cust0);
+    off();
+  });
+  it('B1: clock goes back onto a used startAt ms: new periodId, never stuck', () => {
+    const { g, clock, got, off } = setup();
+    const s = clock.t;
+    g.onHidden(s); clock.t += 5000; g.onShown(clock.t);
+    expect(g.isHidden).toBe(false); expect(got).toHaveLength(1);
+    clock.t = s; // clock back onto the used startAt
+    g.onHidden(clock.t);
+    expect(g.isHidden).toBe(true);
+    expect(g.openHiddenPeriod!.periodId).toBeGreaterThan(got[0].periodId);
+    clock.t = s + 120_000;
+    expect(g.onShown(clock.t)).toBe(expOffline(120, 15));
+    expect(g.isHidden).toBe(false); expect(got).toHaveLength(2); off();
+  });
+
+  // M1: short hide with no frames must credit uncovered time up to 60 s
+  it('M1: 59 s hide with no frames credits full online sim (matches 59 s visible)', () => {
+    const a = setup(), v = setup(); a.off(); v.off();
+    a.g.onHidden(a.clock.t); a.clock.t += 59_000; expect(a.g.onShown(a.clock.t)).toBe(0);
+    expect(a.g.isHidden).toBe(false);
+    v.clock.t += 59_000; v.g.frame();
+    expect(view(a.g)).toEqual(view(v.g));
+  });
+  it('M1: partial frames then jump: uncover = gap - simMs up to budget', () => {
+    const { g, clock, got, off } = setup();
+    const s = clock.t; g.onHidden(s);
+    for (let i = 0; i < 20; i++) { clock.t += 1000; g.frame(); } // 20 s simulated
+    clock.t = s + 50_000; // jump to 50 s total, 30 s uncovered
+    const before = view(g);
+    const r = accountHiddenPeriod(g, { startAt: s, endAt: clock.t })!;
+    expect(r).toMatchObject({ mode: 'online', simulatedMs: 50_000, grantedMs: 50_000, capped: false, eggsGranted: 0 });
+    expect(view(g)).not.toEqual(before); // uncover advanced the sim
+    off();
+  });
+
+  // n2: online capped is false while gap < offlineMin (== budget)
+  it('n2: online mode capped is false when gap < offlineMinSeconds', () => {
+    const { g, clock, off } = setup(); const s = clock.t; g.onHidden(s); clock.t += 59_999;
+    const r = accountHiddenPeriod(g, { startAt: s, endAt: clock.t })!;
+    expect(r.mode).toBe('online'); expect(r.capped).toBe(false); expect(r.simulatedMs).toBe(59_999); off();
+  });
+});
+
+describe('m2: hidden online sim counts toward .bak playedMs', () => {
+  it('60 s of kept hidden play enables .bak after a recovery that disabled it', () => {
+    const kv = mem();
+    kv.setItem('eggfarm.save', '{not-json');
+    let t = T0; const g = new Game(b, kv, () => t, 7);
+    expect(g.backupAllowed).toBe(false);
+    g.state = { ...g.state, farmLevel: 15, coop: 51 };
+    g.onHidden(t);
+    for (let i = 0; i < 60; i++) { t += 1000; g.frame(); }
+    // m2: bak enables from hidden steps alone (before show). Exact 60 s wall then grants offline.
+    expect(g.backupAllowed).toBe(true);
+    expect(g.isHidden).toBe(true);
+    expect(g.onShown(t)).toBe(expOffline(60, 15));
+  });
+  it('M1 uncover also counts toward .bak enable', () => {
+    const kv = mem(); kv.setItem('eggfarm.save', '{not-json');
+    let t = T0; const g = new Game(b, kv, () => t, 7);
+    expect(g.backupAllowed).toBe(false);
+    g.state = { ...g.state, farmLevel: 15, coop: 51 };
+    g.onHidden(t); t += 60_000; // no frames; uncover credits 60 s on show (online, gap == offlineMin goes to grant at exactly 60)
+    // gap == 60_000 is NOT < offlineMin, so offline-grant path. Use 59_000.
+    t = T0 + 59_000; g.onShown(t);
+    expect(g.backupAllowed).toBe(false); // 59 s < 60 s threshold
+    // Fresh game: another 1 s visible should tip it... but bak threshold is 60_000 playedMs and we only got 59k.
+    // Do a second short hide of 1 s with no frames.
+    const t2 = t; g.onHidden(t2); t += 1000; g.onShown(t);
+    expect(g.backupAllowed).toBe(true);
   });
 });
