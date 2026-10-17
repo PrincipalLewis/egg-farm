@@ -380,7 +380,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         break;
       case 'upgrade': {
         sfx('upgrade'); const src = lastBuyBtn ?? uRow;
-        if (!rm()) { /* QA B4: the riser starts fully above the button and rises away, so it never covers the new price */ const c = center(src), top = src.getBoundingClientRect().top - 44; if (top >= safeInsets().t + 4) spawn(h(`<img class="riser" src="${A('icon-upgrade.svg')}" alt="" style="left:${c.x - 20}px;top:${top}px">`), 500); /* no room above: skip rather than cover the price (review ebbd02e #7) */ sparkle(src, 6); }
+        if (!rm()) { /* QA B4: the riser starts fully above the button and rises away, so it never covers the new price */ const c = center(src), top = src.getBoundingClientRect().top - 44; if (top - 48 >= safeInsets().t + 2) spawn(h(`<img class="riser" src="${A('icon-upgrade.svg')}" alt="" style="left:${c.x - 20}px;top:${top}px">`), 500); /* no room for the 48px rise above: skip rather than cover the price or leave the screen (review ebbd02e #7, rc0 FX corner) */ sparkle(src, 6); }
         if (e.upgrade === 'farm' && !rm()) retrigger(scene, 'bump');
         pendingLvPop = true; goalNow = true; break;
       }
