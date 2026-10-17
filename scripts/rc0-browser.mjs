@@ -1,5 +1,6 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
 // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
+import { appendFileSync } from 'node:fs';
 import { chromium, webkit, firefox } from 'playwright-core';
 import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync } from 'node:fs';
@@ -11,7 +12,7 @@ const port = +(process.env.PORT ?? 4300 + Math.floor(Math.random() * 600)); cons
 const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
 for (let i = 0; i < 240; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const SHOTS = process.env.SHOTS ?? '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
-const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
+const shot = (ENGINE === 'chromium' || !!process.env.SHOTS_ALL_ENGINES) && headless; // screenshots from headless Chromium (SHOTS_ALL_ENGINES=1: every engine, for manifest sets)
 const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
 const results = []; const ok = (name, pass, info = '') => { results.push({ name, pass: !!pass, info }); if (!pass) process.exitCode = 1; };
 const URL0 = `http://127.0.0.1:${port}/`;
@@ -23,6 +24,7 @@ async function open({ w = 390, h = 844, ls = {}, q = '', touch = false, dsf = 1 
   await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, ls);
   await page.goto(URL0 + q, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
   await page.waitForTimeout(150);
+  if (process.env.SHOT_LOG) { const orig = page.screenshot.bind(page); page.screenshot = async (opts = {}) => { const label = await page.evaluate(() => { const t = document.querySelector('#buildTag'); if (!t) return null; const r = t.getBoundingClientRect(), cs = getComputedStyle(t); return r.width > 0 && cs.visibility !== 'hidden' && +cs.opacity > 0 ? t.textContent : 'hidden:' + t.textContent; }).catch(() => null); const r = await orig(opts); if (opts.path) appendFileSync(process.env.SHOT_LOG, JSON.stringify({ path: opts.path, engine: ENGINE, w, h, label, ls: Object.keys(ls).length ? 'onboarding done (localStorage eggfarm.ui)' : 'fresh' }) + '\n'); return r; }; }
   return { ctx, page, errors };
 }
 const NEWER_TEXT = 'This save is from a newer version of Egg Farm. Open the newer build to keep playing.';
@@ -1088,7 +1090,7 @@ sections.b4riser = async () => {
 sections.rc2minors2 = async () => {
   const MS = process.env.MINOR2_SHOTS ?? `${SHOTS}/rc2-minors-2`; mkdirSync(MS, { recursive: true }); const nm = w => `${w}${w >= 960 ? '-docked' : ''}`;
   const DONE2 = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true });
-  for (const [w, h] of [[320, 640], [360, 740], [390, 844], [1280, 800]]) { // M-Order-zero + M-Toast-layer (320/390: §9 fit, review dbc6948 #2)
+  for (const [w, h] of [[320, 640], [360, 740], [375, 667], [390, 844], [1280, 800]]) { // M-Order-zero + M-Toast-layer (320/390: §9 fit, review dbc6948 #2)
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE2 } });
     if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(250); }
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 0, coop: 0, nextCustomerInS: 999, customers: [{ id: 501, demand: 13, filled: 0, waitedS: 0 }] }; }); await page.waitForTimeout(400);
@@ -1165,7 +1167,7 @@ sections.rc2minors2 = async () => {
     await ctx.close();
   }
   const caps = {};
-  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) { // M-Tut-parity (FM-AC4) + M-Tut-goal (fresh onboarding)
+  for (const [w, h] of [[360, 800], [375, 812], [390, 844], [1280, 800]]) { // M-Tut-parity (FM-AC4) + M-Tut-goal (fresh onboarding)
     const { ctx, page, errors } = await open({ w, h });
     const cap = () => page.evaluate(() => { const t = document.querySelector('.onb-txt'), r = t?.getBoundingClientRect(); return t ? { t: t.textContent, fit: t.scrollWidth <= t.clientWidth + 0.5 && !/…/.test(t.textContent) && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight } : null; });
     const seen = [];
@@ -1187,8 +1189,8 @@ sections.rc2minors2 = async () => {
     await ctx.close();
   }
   const FM4 = ['Tap Collect to gather eggs.', 'A customer! Tap Sell to earn coins.', 'Buy your first upgrade: more eggs per tap.'];
-  for (const w of [360, 390, 1280]) ok(`M-Tut-parity FM-AC4 step 1/2/3 captions exact, fit, in viewport (${w})`, caps[w]?.length === 3 && caps[w].every((c, i) => c && c.t === FM4[i] && c.fit), JSON.stringify(caps[w]));
-  ok('M-Tut-parity tutorial captions identical at 360, 390 and 1280', JSON.stringify(caps[360]) === JSON.stringify(caps[390]) && JSON.stringify(caps[390]) === JSON.stringify(caps[1280]), JSON.stringify(caps));
+  for (const w of [360, 375, 390, 1280]) ok(`M-Tut-parity FM-AC4 step 1/2/3 captions exact, fit, in viewport (${w})`, caps[w]?.length === 3 && caps[w].every((c, i) => c && c.t === FM4[i] && c.fit), JSON.stringify(caps[w]));
+  ok('M-Tut-parity tutorial captions identical at 360, 390 and 1280', [375, 390, 1280].every(w => JSON.stringify(caps[w]) === JSON.stringify(caps[360])), JSON.stringify(caps));
 };
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
