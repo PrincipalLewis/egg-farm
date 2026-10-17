@@ -1,0 +1,16 @@
+{
+  "_note_guards": "Worst-seed pacing guards (HoP Oct 16 23:15/23:19/23:30; product/ac7-qa-threshold-changes.md, decisions.md:242; Economy definitions). step(n) = time on level n / time on level n-1, counted when time on n-1 >= step_ratio_min_prev_s and n >= step_ratio_from_level (L30+ only; L0-29 fails by design). gap = seconds between consecutive purchases (L30+ only): P95 <= gap_p95_max_s hard, gap_p95_target_s warn-only. l18_25_step_*: time on each level L18..L25, workers variance bot, F1 only. ac7_w_p5_t20_warn_s: warn-only, workers P5 time-to-L20 (R-AC7-W-ZERO-MARGIN). active_idle_*: 10-min window (F22-24 exception P95 <= 2.15). ex1_*: EX-1 casual+workers L30+ step at P95 and worst.",
+  "step_ratio_p95_max": 2.0,
+  "step_ratio_worst_max": 2.25,
+  "step_ratio_min_prev_s": 60,
+  "step_ratio_from_level": 30,
+  "gap_p95_max_s": 240,
+  "gap_p95_target_s": 180,
+  "gap_worst_max_s": 240,
+  "l18_25_step_p95_max_s": 360,
+  "l18_25_step_worst_max_s": 480,
+  "active_idle_p95_max": 2.0,
+  "active_idle_worst_max": 2.25,
+  "ex1_casual_workers_step_max": 2.25,
+  "ac7_w_p5_t20_warn_s": 1620
+}
