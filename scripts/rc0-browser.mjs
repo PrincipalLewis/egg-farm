@@ -988,13 +988,13 @@ sections.rc2minors = async () => {
     await page.evaluate(() => { window.__sf = []; const t0 = performance.now(), list = document.querySelector('#mRows');
       const snap = () => { const row = list.querySelector('.order[data-id="777"]'), b = row?.querySelector('button'), em = list.querySelector('.empty-state'), cs = b ? getComputedStyle(b) : null;
         window.__sf.push({ t: Math.round(performance.now() - t0), row: !!row, txt: b?.textContent ?? null, line: row?.querySelector('.l1')?.textContent ?? null, dis: b ? b.disabled && b.getAttribute('aria-disabled') === 'true' : null,
-          bg: cs?.backgroundColor ?? null, fg: cs?.color ?? null, op: row ? +getComputedStyle(row).opacity : null, tf: row ? getComputedStyle(row).transform : null, empty: !!em && !em.hidden }); };
+          bg: cs?.backgroundColor ?? null, fit: b ? b.scrollWidth <= b.clientWidth + 0.5 && b.scrollHeight <= b.clientHeight + 0.5 : null, fg: cs?.color ?? null, op: row ? +getComputedStyle(row).opacity : null, tf: row ? getComputedStyle(row).transform : null, empty: !!em && !em.hidden }); };
       list.querySelector('.order[data-id="777"] button').click(); snap(); const loop = () => { snap(); if (performance.now() - t0 < 900) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
     await page.waitForTimeout(110); if (shot && !rmo) await page.screenshot({ path: `${MS}/sold-freeze-mid-110ms-${name}.png` });
     await page.waitForTimeout(900); if (shot && !rmo) await page.screenshot({ path: `${MS}/sold-after-next-customer-soon-${name}.png` });
     const f = await page.evaluate(() => window.__sf), withRow = f.filter(x => x.row), sold = withRow.filter(x => /^Sold! \+\$/.test(x.txt ?? ''));
     const freeze = sold.filter(x => x.t <= 220), lastRow = withRow.length ? withRow[withRow.length - 1].t : -1, firstEmpty = f.find(x => x.empty)?.t ?? -1;
-    ok(`M-Sold-freeze row shows a disabled green "Sold! +$X" chip from the click (${tag})`, sold.length > 0 && sold[0].t <= 40 && sold.every(x => x.dis && x.bg === 'rgb(61, 127, 51)' && x.fg === 'rgb(255, 255, 255)'), JSON.stringify(sold[0] ?? withRow[0]));
+    ok(`M-Sold-freeze row shows a disabled green "Sold! +$X" chip from the click (${tag})`, sold.length > 0 && sold[0].t <= 40 && sold.every(x => x.dis && x.fit && x.bg === 'rgb(61, 127, 51)' && x.fg === 'rgb(255, 255, 255)'), JSON.stringify(sold[0] ?? withRow[0]));
     ok(`M-Sold-freeze row frozen in place ~240ms (no fade/slide yet) (${tag})`, freeze.length > 0 && freeze.every(x => x.op === 1 && (x.tf === 'none' || x.tf === 'matrix(1, 0, 0, 1, 0, 0)')) && sold[sold.length - 1].t >= 230, JSON.stringify({ n: freeze.length, last: sold[sold.length - 1]?.t }));
     ok(`M-Sold-freeze never shows the stale "Sell 8" / "0/8" after the click (${tag})`, withRow.every(x => !/Sell 8|Need/.test(x.txt ?? '') && !/^0\/8/.test(x.line ?? '')), JSON.stringify(withRow.find(x => /Sell 8/.test(x.txt ?? ''))));
     ok(`M-Sold-freeze "Next customer soon…" only after the row has left (${tag})`, lastRow > 0 && firstEmpty > lastRow && !f.some(x => x.row && x.empty), JSON.stringify({ lastRow, firstEmpty }));
