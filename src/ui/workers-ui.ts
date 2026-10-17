@@ -23,7 +23,7 @@ export function ringHtml(s: GameState, b: Balance): string {
 /** 44px icon area of a Manage / Manage all button; the ring wraps it while the shared cooldown runs. */
 const manageIcon = (s: GameState, b: Balance, icon: string, px = 22) =>
   `<span class="manage-ico"><img src="${ASSET(icon)}" width="${px}" height="${px}" alt="">${ringHtml(s, b)}</span>`;
-/** B5 (Product, Oct 15): a worker "needs" Manage only at energy <= manage_prompt_threshold (0.4 = Yawning). */
+/** B5 (Product, Oct 15): a worker "needs" Manage only at energy <= manage_prompt_threshold (balance). */
 export const needsPrompt = (w: Worker | undefined, b: Balance) => canManageWorker(w, b);
 /** Workers counted by "Manage all (N need it)". */
 export const promptManage = (s: GameState, b: Balance) => WORKERS.filter(id => needsPrompt(s.workers[id], b));
@@ -51,7 +51,8 @@ export const refillTiredLabel = (n: number) =>
   n === 1 ? 'Refill 1 tired worker' : `Refill ${n} tired workers`;
 
 /** Ruling (b): the count every Refill control shows; < 3 hired refills only the lowest worker, so it is capped at 1 (review 56513e7 #1). */
-export function refillCount(s: GameState, b: Balance): number { const n0 = promptManage(s, b).length; return bulkManageAllowed(s.workers, b) ? n0 : Math.min(1, n0); }
+/** D-HOP-2026-10-17-05 (main wins): 0 below manage_all_min_workers hired (no bar, no nav Refill), else every hired worker <= manage_prompt_threshold. */
+export function refillCount(s: GameState, b: Balance): number { return showManageAll(s.workers, b) ? promptManage(s, b).length : 0; }
 export function manageAllHtml(s: GameState, b: Balance): string {
   if (!showManageAll(s.workers, b)) return '';
   const n = refillCount(s, b), cd = Math.ceil(s.manageCdS); // ruling (b): < 3 hired refills one
@@ -60,7 +61,7 @@ export function manageAllHtml(s: GameState, b: Balance): string {
   const label = refillTiredLabel(n);
   return `<div class="refill-wrap"><button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0}" aria-label="${label}"${cd > 0 ? ' aria-describedby="refillCap"' : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>${label}</span></button>${cd > 0 ? `<div class="wk-cap num" id="refillCap">Ready in ${cd}s</div>` : ''}</div>`;
 }
-/** v1.3 §4.4: caption under a greyed per-worker Manage: "Ready in Ns" during the shared cooldown, else "Not tired yet" above 40%. */
+/** v1.3 §4.4: caption under a greyed per-worker Manage: "Ready in Ns" during the shared cooldown, else "Rested, refill below N%" above manage_prompt_threshold. */
 export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) =>
   !needsPrompt(w, b) ? `Rested, refill below ${Math.round(b.workers.energy.manage_prompt_threshold * 100)}%` : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
 /** art-ux/rc2-workers-copy.md §6 (signed off 07:19): role first, colon, effect; SVG icon (moon = asleep, warning = unpaid), no emoji.

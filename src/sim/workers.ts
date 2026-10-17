@@ -15,10 +15,8 @@ export const isOff = (m: WorkerMood | null) => m === 'asleep' || m === 'unpaid';
 /** Yawn cue (v1.1): energy at/below yawn_at_pct and above 0, while not Unpaid/Asleep. */
 export const isYawning = (w: Worker | undefined, b: Balance) => !!w && !w.unpaid && w.energy > 0 && w.energy <= b.workers.energy.yawn_at_pct;
 export const hiredCount = (ws: Workers) => WORKERS.filter(id => ws[id]).length;
-/** rc1-asleep-state-spec T5/AC-R9 (PM Workers 00:17): the bulk Refill bar / nav Refill show for ANY single tired or asleep
- *  hired worker of any role (N>=1); hidden at N=0 is enforced by the callers. The old >= manage_all_min_workers hire gate hid
- *  them when e.g. the Market Hand was the only worker hired. _b kept for call-site compatibility. */
-export const showManageAll = (ws: Workers, _b: Balance) => hiredCount(ws) >= 1;
+/** Manage all (D-HOP-2026-10-17-05, main wins): shown only with >= manage_all_min_workers hired (balance). */
+export const showManageAll = (ws: Workers, b: Balance) => hiredCount(ws) >= b.workers.energy.manage_all_min_workers;
 /** PM Workers ruling (b), 00:4x: bulk refill (every tired/asleep worker in one tap) needs >= manage_all_min_workers hired.
  *  Below that, the same bar refills only the single lowest-energy tired/asleep worker (per-worker Manage rules + cooldown). */
 export const bulkManageAllowed = (ws: Workers, b: Balance) => hiredCount(ws) >= b.workers.energy.manage_all_min_workers;
@@ -28,7 +26,7 @@ export const lowestManageTarget = (ws: Workers, b: Balance) => {
   const low = (ids: WorkerId[]) => ids.reduce<WorkerId | null>((m, id) => m == null || ws[id]!.energy < ws[m]!.energy ? id : m, null);
   const need = needManage(ws, b); return low(need.filter(id => !ws[id]!.unpaid)) ?? low(need);
 };
-/** P4 / B5: Manage is allowed only at energy <= manage_prompt_threshold (0.4 = Yawning). */
+/** P4 / B5: Manage is allowed only at energy <= manage_prompt_threshold (balance). */
 export const canManageWorker = (w: Worker | undefined, b: Balance) => !!w && w.energy <= b.workers.energy.manage_prompt_threshold * 100;
 /** P4: workers Manage all refills / "(n need it)" counts: hired and <= threshold. 0 -> no action, no cooldown (ruling 4). */
 export const needManage = (ws: Workers, b: Balance) => WORKERS.filter(id => canManageWorker(ws[id], b));

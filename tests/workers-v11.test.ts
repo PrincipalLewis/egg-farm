@@ -22,10 +22,11 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(html).toContain('overlay-yawn.svg'); expect(html).toContain('wk working yawn');
     expect(workersHtml(base({ workers: { hawker: wk(60) } }), b)).not.toContain('overlay-yawn');
   });
-  it('Manage all shown for any hired worker <= threshold (T5/AC-R9); refills all, one shared cooldown', () => {
+  it('Manage all shown only with >= manage_all_min_workers hired (D-HOP-2026-10-17-05, main); refills all <= threshold, one shared cooldown', () => {
     const none = base({ workers: {} }); expect(showManageAll(none.workers, b)).toBe(false); expect(manageAllHtml(none, b)).toBe('');
+    expect(E.manage_all_min_workers).toBe(3); expect(E.manage_prompt_threshold).toBe(0.5);
     const two = base({ workers: { hawker: wk(20), grader: wk(T + 10) }, graderTier: 1 });
-    expect(showManageAll(two.workers, b)).toBe(true); expect(manageAllHtml(two, b)).toContain('Refill 1 tired worker');
+    expect(showManageAll(two.workers, b)).toBe(false); expect(manageAllHtml(two, b)).toBe(''); expect(apply(two, { type: 'manageAll' }, b)).toBe(two);
     const three = base({ workers: { hawker: wk(20), grader: wk(T + 10), market_hand: wk(100) }, graderTier: 1 });
     expect(manageAllHtml(three, b)).toContain('Refill 1 tired worker'); // B5: only hawker (20%) is <= threshold; grader above it isn't counted
     const ev: SimEvent[] = []; const m = apply(three, { type: 'manageAll' }, b, ev);
@@ -99,8 +100,8 @@ describe('M2 UI logic (§4.4, §4.6)', () => {
     expect(html.match(/is-cooldown/g)).toHaveLength(4); expect(html).not.toContain('conic');
     expect(workersHtml({ ...s, manageCdS: 0 }, b)).not.toContain('is-cooldown');
   });
-  it('Farm View Manage all: any hired worker yawning (T5/AC-R9, no 3-hired gate)', () => {
-    expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80) } }), b)).toBe(true);
+  it('Farm View Manage all: >= 3 hired and one at <= threshold (D-HOP-2026-10-17-05, main)', () => {
+    expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80) } }), b)).toBe(false);
     expect(showFarmManageAll(base({ workers: {} }), b)).toBe(false);
     expect(showFarmManageAll(base({ workers: { hawker: wk(80), grader: wk(80), market_hand: wk(90) } }), b)).toBe(false);
     expect(showFarmManageAll(base({ workers: { hawker: wk(39), grader: wk(80), market_hand: wk(90) } }), b)).toBe(true);
@@ -129,45 +130,28 @@ describe('Farm View Manage all visibility (mobile nav + desktop docked share it)
     expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false); expect(manageAllHtml(three(100, 0), b)).toBe('');
     expect(farmManageAllVisible(three(T + 1, 0), b, true)).toBe(false);
     expect(farmManageAllVisible(three(T, 0), b, false)).toBe(true); expect(manageAllHtml(three(T, 0), b)).toMatch(/aria-disabled="false"/);
-    expect(farmManageAllVisible({ ...three(10, 25), workers: { hawker: wk(10) } }, b, true)).toBe(true); // T5/AC-R9: 1 hired + tired shows
+    expect(farmManageAllVisible({ ...three(10, 25), workers: { hawker: wk(10) } }, b, true)).toBe(false); // main: 1 hired never shows Manage all
     expect(farmManageAllVisible({ ...three(10, 0), workers: {} }, b, true)).toBe(false); // none hired: never
   });
 });
 
-describe('T5/AC-R9: a single tired or asleep worker of any role shows the Refill bar and nav Refill', () => {
+describe('D-HOP-2026-10-17-05 (main wins): below manage_all_min_workers hired there is no Refill bar, nav Refill or bulk action', () => {
   for (const id of ['market_hand', 'coop_hand', 'hawker', 'grader'] as const) for (const [state, energy] of [['tired', 20], ['asleep', 0]] as const) {
-    it(`${id} ${state} alone -> "Refill 1 tired worker" bar + nav Refill${state === 'asleep' ? ' + asleep badge 1' : ''}`, () => {
+    it(`${id} ${state} alone -> no bar, no nav Refill, manageAll is a no-op${state === 'asleep' ? '; asleep count 1' : ''}`, () => {
       const s = base({ workers: { [id]: wk(energy) }, graderTier: id === 'grader' ? 1 : 0, manageCdS: 0 });
-      expect(manageAllHtml(s, b)).toContain('Refill 1 tired worker');
-      expect(farmManageAllVisible(s, b, false)).toBe(true);
+      expect(manageAllHtml(s, b)).toBe(''); expect(farmManageAllVisible(s, b, false)).toBe(false); expect(refillCount(s, b)).toBe(0);
       if (state === 'asleep') expect(asleepOrUnpaidCount(s, b)).toBe(1);
-      const m = apply(s, { type: 'manageAll' }, b); expect(m.workers[id]!.energy).toBe(100);
+      expect(apply(s, { type: 'manageAll' }, b)).toBe(s);
+      expect(apply(s, { type: 'manage', worker: id }, b).workers[id]!.energy).toBe(100); // the per-worker Refill still works
     });
   }
-});
-describe('PM Workers ruling (b): < 3 hired refills only the lowest worker; bulk needs >= 3', () => {
-  it('2 hired, both tired: one tap refills only the lowest-energy one; label stays "Refill 1 tired worker"; shared cooldown starts', () => {
+  it('2 hired, both tired: no bar; nav badge/aria and docked label agree with the bar (none)', () => {
     const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10) }, manageCdS: 0 });
-    expect(manageAllHtml(s, b)).toContain('Refill 1 tired worker');
-    const m = apply(s, { type: 'manageAll' }, b);
-    expect(m.workers.coop_hand!.energy).toBe(100); expect(m.workers.market_hand!.energy).toBe(30);
-    expect(m.manageCdS).toBe(E.manage_cooldown_s);
-    expect(apply(m, { type: 'manageAll' }, b)).toBe(m); // cooldown applies
-  });
-  it('2 hired, both tired: nav badge/aria and docked header label match the Workers-tab bar (review 56513e7 #1)', () => {
-    const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10) }, manageCdS: 0 });
-    expect(refillCount(s, b)).toBe(1);
+    expect(refillCount(s, b)).toBe(0); expect(manageAllHtml(s, b)).toBe(''); expect(apply(s, { type: 'manageAll' }, b)).toBe(s);
     const mob = navManageView(refillCount(s, b), 0, false, { text: '', at: 0 }, 0), dock = navManageView(refillCount(s, b), 0, true, { text: '', at: 0 }, 0);
-    expect(mob.badge).toBe('1'); expect(mob.aria.text).toBe('Refill 1 tired worker'); expect(dock.label).toBe('Refill 1 tired worker');
-    expect(manageAllHtml(s, b)).toContain(`aria-label="${dock.label}"`);
-    const s3 = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 }); expect(refillCount(s3, b)).toBe(3);
-    // the exact function app.ts renders from (review 5d8a058 #7: behaviour, not a source grep)
     expect(navRefillState(s, b, false, { text: '', at: 0 }, 0)).toEqual(mob); expect(navRefillState(s, b, true, { text: '', at: 0 }, 0)).toEqual(dock);
-  });
-  it('2 hired: Unpaid Market Hand 10% + tired Coop Hand 30%: the single tap refills the paid Coop Hand (review 5d8a058 #6)', () => {
-    const s = base({ workers: { market_hand: wk(10, true), coop_hand: wk(30) }, manageCdS: 0 });
-    const m = apply(s, { type: 'manageAll' }, b);
-    expect(m.workers.coop_hand!.energy).toBe(100); expect(m.workers.market_hand!.energy).toBe(10);
+    const s3 = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 }); expect(refillCount(s3, b)).toBe(3);
+    const d3 = navManageView(3, 0, true, { text: '', at: 0 }, 0); expect(manageAllHtml(s3, b)).toContain(`aria-label="${d3.label}"`);
   });
   it('3 hired, all tired: bulk refill still refills every tired worker', () => {
     const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 });

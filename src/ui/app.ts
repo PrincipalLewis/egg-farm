@@ -5,7 +5,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
-import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, offlineEggsParts, fmtTimeToAfford, fmtMoneyShort, fmtShortDur, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtAway, fmtAffordableIn, offlineEggsParts, fmtTimeToAfford, fmtMoneyShort, IncomeRate } from './format';
 import { TapFx, Throttle, clampToSafe } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -633,7 +633,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (s.customers.length <= vis) ordersExpanded = false;
       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
       mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
-      const ni = $('#nextIn'); if (ni) setText(ni, fmtShortDur(s.nextCustomerInS)); // designer nit: '—' / '~m:ss' without brackets
+      const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`); // D-HOP-2026-10-17-05: main (M4-A) formatting
       const { eggs, cents } = sellAllPreview(s, b); // same per-order Grader math + rounding as the sellAll action
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
     }

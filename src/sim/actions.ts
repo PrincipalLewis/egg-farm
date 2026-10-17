@@ -79,12 +79,12 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
       return { ...s, coinsCents: s.coinsCents - cost, graderTier: i + 1 }; // energy unchanged (PM Q6)
     }
     case 'manage': {
-      const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || !canManageWorker(w, b)) return s; // P4: only at <= 40%
+      const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || !canManageWorker(w, b)) return s; // P4: only at <= manage_prompt_threshold
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
       return { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
     }
     case 'manageAll': { // v1.1 + P4 + PM ruling (b): bulk needs >= manage_all_min_workers hired, else refills the single lowest tired/asleep worker; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
-      if (!bulkManageAllowed(s.workers, b)) { const t = lowestManageTarget(s.workers, b); return t ? apply(s, { type: 'manage', worker: t }, b, ev) : s; } // ruling (b): < 3 hired -> single lowest worker
+      if (!bulkManageAllowed(s.workers, b)) return s; // D-HOP-2026-10-17-05 (main wins): Manage all needs >= manage_all_min_workers hired; below that it does nothing
       const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
       const workers = { ...s.workers };
