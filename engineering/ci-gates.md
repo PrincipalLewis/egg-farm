@@ -8,3 +8,15 @@ reference sim in `vendor/economy-sim/` (pins in `vendor/economy-sim/SHA256SUMS`)
 
 Economy updates the copy through a PR, together with the CSV: replace the vendored files,
 update `SHA256SUMS` and `SOURCE` (source path, full sha256, vendoring date), and regenerate `data/economy.csv` in the same PR (`npm run sync-economy -- --check` must pass).
+
+## No reads outside the repo
+
+Default CI, `npm test` and `npm run build` read only files in the repo. `data/economy.csv` is the
+source of truth for builds; Economy changes it through a PR.
+
+- `scripts/gen-sim-fixtures.py` (`npm run gen-fixtures`) imports the vendored sim in `vendor/economy-sim/sim/`.
+- `scripts/check-economy-copy.mjs` (`npm run check-economy-copy`) is an **opt-in, warn-only** drift report
+  against the studio's `product/economy.csv`. It runs only with `--product` or `ECONOMY_PRODUCT_CHECK=1`
+  (directory override: `ECONOMY_PRODUCT_DIR`), always exits 0, and is not part of `npm test`, `npm run build` or CI.
+  Example: `npm run check-economy-copy -- --product`.
+- The drift warning in `tests/economy.test.ts` (local `product/` sim vs vendored sha) also runs only with `ECONOMY_PRODUCT_CHECK=1`.

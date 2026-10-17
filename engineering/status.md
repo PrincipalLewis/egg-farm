@@ -33,3 +33,8 @@
 - done: economy freshness test now runs a vendored, sha256-pinned sim (vendor/economy-sim, sim eddf945d + economy.f1-m4cols.csv 86f0e80e); no dependency on /workspace/product. ci-gates.md note added.
 - next: CCR + QA on the PR; Economy updates vendor/economy-sim + SHA256SUMS + data/economy.csv in one PR going forward.
 - blocked: none.
+
+## Senior Software Architect — 2026-10-17 (arch/no-product-reads, stacked on #21)
+- done: default CI/test/build read nothing outside the repo: check-economy-copy opt-in + warn-only (--product / ECONOMY_PRODUCT_CHECK=1), removed from npm test/build and ci.yml; economy-copy.test uses temp dirs only; gen-sim-fixtures imports vendor/economy-sim; economy.test drift warning opt-in.
+- next: CCR + QA; merge after #21.
+- blocked: none.

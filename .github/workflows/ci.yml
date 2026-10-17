@@ -8,8 +8,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - name: economy.csv copy matches product/ (skipped when product/ is absent)
-        run: npm run check-economy-copy
       - run: npm test
   release-globals:
     # Required (QA rc1): release window globals must be exactly eggfarmExportTelemetry, in every engine.

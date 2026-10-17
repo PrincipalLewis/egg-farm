@@ -57,8 +57,8 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
     expect(srcDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     for (const [h, f, from] of src) console.info(`economy-sim vendored ${f} from ${from} sha256 ${h} on ${srcDate}`);
     expect(src.map(([h, f]) => [f, h]).sort()).toEqual(pins.map(([h, f]) => [f, h]).sort());
-    // Advisory only, never fails: warn if a local live copy has drifted from the vendored one.
-    for (const [h, , from] of src) {
+    // Opt-in (ECONOMY_PRODUCT_CHECK=1), advisory only, never fails: warn if a local live copy has drifted from the vendored one.
+    if (process.env.ECONOMY_PRODUCT_CHECK === '1') for (const [h, , from] of src) {
       const live = new URL(`../../${from}`, import.meta.url);
       if (existsSync(live)) {
         const lh = createHash('sha256').update(readFileSync(live)).digest('hex');
