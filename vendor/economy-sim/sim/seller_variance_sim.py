@@ -399,7 +399,8 @@ M2_V11.update(w4_asleep_keep=0.15, yawn_at=40, manage_all_min_workers=3, unpaid_
               energy_start=100, coop_full_tip_s=10)
 M2_P4 = _copy.deepcopy(M2_V11); M2_P4.update(manage_at=40, manage_all_low_only=True)  # PT1-P4 (HoP approved 2026-10-15)
 M2_P4['wage_carry'] = True  # HoP 2026-10-16: exact wage via fractional-cent carry (Market Hand 60 s = $0.75)
-M2_CURRENT = M2_P4
+M2_F1 = _copy.deepcopy(M2_P4); M2_F1.update(yawn_at=50, manage_at=50)  # F1 (HoP approved): yawn_at_pct 50, manage_prompt_threshold 0.5
+M2_CURRENT = M2_F1  # main since #17 (50 / 0.5); pre-F1 was M2_P4 (40 / 0.4)
 W_CONST = [  # constant-value worker columns (same on every row), (csv column, getter)
   ('w1_unlock_farm', lambda w: w['w1']['unlock']), ('w1_every_s', lambda w: w['w1']['every']), ('w1_tired_every_s', lambda w: w['w1']['tired_every']),
   ('w2_unlock_farm', lambda w: w['w2']['unlock']), ('w2_every_s', lambda w: w['w2']['every']), ('w2_tired_every_s', lambda w: w['w2']['tired_every']),

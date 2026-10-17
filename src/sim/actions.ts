@@ -1,21 +1,24 @@
 import type { Balance } from '../config/balance';
-import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents } from './state';
+import { GameState, eggsPerTap, collectionCost, farmCost } from './state';
+import { m4On } from '../config/formulas';
+import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
 import type { Sink } from './events';
 import { saleValueCents } from './payout';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
-  | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' };
-/** Sell all preview lives in sim/payout.ts (the one payout fn, #25); re-exported here for #28 callers. */
+  | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
+  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] };
+/** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
-export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm';
+export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
 /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
 export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
   const c = s.customers.find(c => c.id === id); if (!c) return s;
   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
   // One payout function (sim/payout.ts) for credit and every UI preview.
-  const price = eggPriceCents(s.farmLevel, s.collectionLevel, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
+  const price = salePriceCents(s, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
@@ -24,8 +27,28 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
 function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
   const L = kind === 'collection' ? s.collectionLevel : s.farmLevel; if (L >= b.maxLevel) return s;
   const cost = (kind === 'collection' ? collectionCost : farmCost)(L, b) * 100; if (s.coinsCents < cost) return s;
-  ev?.push({ type: 'upgrade', upgrade: kind, newLevel: L + 1, cost, coinsBefore: s.coinsCents });
+  ev?.push({ type: 'upgrade', upgrade: kind, newLevel: L + 1, cost, coinsBefore: s.coinsCents, ...(m4On(b) ? { track: kind } : {}) });
   return { ...s, coinsCents: s.coinsCents - cost, ...(kind === 'collection' ? { collectionLevel: L + 1 } : { farmLevel: L + 1 }) };
+}
+/** M4-A: buy one Hens / Egg value level; refused at the cap (min(F+3, max)) or when unaffordable. Flag off => no-op. */
+function buyTrack(s: GameState, t: Track, b: Balance, ev?: Sink): GameState {
+  if (!m4On(b) || trackLock(s, t, b)) return s;
+  const L = trackLevel(s, t), cost = trackCost(L, t, b) * 100; if (s.coinsCents < cost) return s;
+  ev?.push({ type: 'upgrade', upgrade: t, newLevel: L + 1, cost, coinsBefore: s.coinsCents, track: t === 'hens' ? 'hens' : 'egg_value' });
+  return { ...s, coinsCents: s.coinsCents - cost, ...(t === 'hens' ? { hensLevel: L + 1 } : { eggValueLevel: L + 1 }) };
+}
+/** Emits milestone_reached for ids newly reached by a level change (Farm can unlock Jumbo and Balanced tiers too). */
+function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Sink): GameState {
+  if (after === before || !ev || !m4On(b)) return after;
+  const had = new Set(reachedMilestones(before, b));
+  const M = b.m4!.milestones;
+  for (const id of reachedMilestones(after, b)) if (!had.has(id)) {
+    const [kind, n] = id.split(':'), k = +n; // M4A-34 payloads
+    if (kind === 'hens') ev.push({ type: 'milestone_reached', id, track: 'hens', level: k, mult: M.hens.find(m => m.level === k)!.offlineMult });
+    else if (kind === 'grade') ev.push({ type: 'milestone_reached', id, track: 'egg_value', level: k, mult: M.grades.find(g => g.level === k)!.mult });
+    else ev.push({ type: 'balanced_tier', id, tier: k, min_level: Math.min(after.farmLevel, after.hensLevel, after.eggValueLevel) });
+  }
+  return after;
 }
 export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState {
   switch (a.type) {
@@ -33,7 +56,9 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
     case 'sell': return sellTo(s, a.customerId, b, ev);
     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev); } return r; }
     case 'buyCollection': return buy(s, 'collection', b, ev);
-    case 'buyFarm': return buy(s, 'farm', b, ev);
+    case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
+    case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
+    case 'markMilestones': { const add = a.ids.filter(id => !s.celebratedMilestones.includes(id)); return add.length ? { ...s, celebratedMilestones: [...s.celebratedMilestones, ...add] } : s; }
     case 'hire': {
       const id = a.worker; if (s.workers[id] || s.farmLevel < unlockFarm(id, b)) return s;
       const cost = hireCostCents(id, b); if (s.coinsCents < cost) return s;

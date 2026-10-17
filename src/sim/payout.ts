@@ -1,7 +1,8 @@
 /** The one sale-payout function (QA BUG-1/2, Product rule: every money preview == amount credited, to the cent).
  *  sellTo credits it; the Sell all label, '+$X' popup and order cards preview it. */
 import type { Balance } from '../config/balance';
-import { type GameState, eggPriceCents } from './state';
+import type { GameState } from './state';
+import { salePriceCents } from './tracks';
 import { graderMult } from './workers';
 /** Price multipliers applied to a sale, in order. M4 adds streak / frenzy entries here (one place for credit + previews). */
 export function saleMultipliers(s: GameState, b: Balance): number[] {
@@ -9,7 +10,7 @@ export function saleMultipliers(s: GameState, b: Balance): number[] {
 }
 /** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult). */
 export function saleValueCents(s: GameState, k: number, b: Balance): number {
-  const base = eggPriceCents(s.farmLevel, s.collectionLevel, b), m = saleMultipliers(s, b).reduce((a, x) => a * x, 1);
+  const base = salePriceCents(s, b), m = saleMultipliers(s, b).reduce((a, x) => a * x, 1);
   return m === 1 ? k * base : Math.round(k * base * m);
 }
 /** Preview of Sell all: same per-customer walk as the 'sellAll' action. */

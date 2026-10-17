@@ -10,7 +10,9 @@ export function installId(kv: KV, rnd: () => string = () => (globalThis.crypto?.
 /** M3-AC7 retention (proposal §4): these events are kept for the whole playtest and never evicted by the ring;
  *  only the other (high-rate: tap, customer_*, sell, worker_summary...) events are ring-trimmed to ring_size. */
 export const isPinned = (type: string) => type === 'session_start' || type === 'session_end' || type === 'upgrade' || type.startsWith('onboarding_')
-  || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset';
+  || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset'
+  || type === 'milestone_reached' || type === 'balanced_tier'
+  || type === 'save_migrated' || type === 'save_migration_aborted'; // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
 export interface TEvent { type: string; ts: number; sessionMs: number; [k: string]: unknown; }
 export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; }
 /**

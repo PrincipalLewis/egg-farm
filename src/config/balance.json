@@ -2,7 +2,10 @@
   "_source": "economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks",
   "tickHz": 10,
   "save": {
-    "autosaveIntervalS": 5
+    "autosaveIntervalS": 5,
+    "lsHeadroomFactor": 2,
+    "lsHeadroomMarginBytes": 65536,
+    "migrationAttemptsCap": 3
   },
   "feel": {
     "tap_combine_window_ms": 250,
@@ -64,7 +67,7 @@
         {
           "farm": 21,
           "mult": 2.5,
-          "cost": 20959
+          "cost": 20330
         },
         {
           "farm": 22,
@@ -132,7 +135,7 @@
       11076,
       18201,
       31050,
-      41918,
+      40660,
       56589,
       68756,
       72194,
@@ -156,5 +159,237 @@
     "offlineRateMultiplier": 0.25,
     "offlineMinSeconds": 60,
     "hiddenSimMaxSeconds": 60
+  },
+  "m4": {
+    "enabled": 0,
+    "hens": {
+      "costs": [
+        36,
+        46,
+        60,
+        79,
+        102,
+        133,
+        173,
+        225,
+        293,
+        381,
+        496,
+        645,
+        838,
+        1090,
+        1417,
+        1842,
+        2395,
+        3114,
+        4048,
+        5262,
+        6841,
+        8894,
+        11562,
+        15031,
+        19540,
+        25403,
+        33023,
+        42931,
+        55810,
+        72553,
+        94319
+      ],
+      "capOverFarm": 3
+    },
+    "offline": {
+      "eggsPerSec": [
+        0.38,
+        0.5,
+        0.75,
+        1,
+        1.25,
+        1.5,
+        1.75,
+        2,
+        2.25,
+        2.5,
+        2.75,
+        3,
+        3.25,
+        3.5,
+        3.75,
+        4,
+        4.25,
+        4.5,
+        4.75,
+        5,
+        5.25,
+        5.5,
+        5.75,
+        6,
+        6.25,
+        6.5,
+        6.75,
+        7,
+        7.25,
+        7.5,
+        7.75
+      ],
+      "maxEggs2h": [
+        2700,
+        3600,
+        5400,
+        7200,
+        9000,
+        10800,
+        12600,
+        14400,
+        16200,
+        18000,
+        19800,
+        21600,
+        23400,
+        25200,
+        27000,
+        28800,
+        30600,
+        32400,
+        34200,
+        36000,
+        37800,
+        39600,
+        41400,
+        43200,
+        45000,
+        46800,
+        48600,
+        50400,
+        52200,
+        54000,
+        55800
+      ]
+    },
+    "eggValue": {
+      "costs": [
+        48,
+        63,
+        84,
+        112,
+        150,
+        199,
+        265,
+        353,
+        469,
+        625,
+        831,
+        1105,
+        1470,
+        1955,
+        2601,
+        3459,
+        4601,
+        6119,
+        8138,
+        10824,
+        14397,
+        19148,
+        25466,
+        30484,
+        31534,
+        41940,
+        55780,
+        74187,
+        98670,
+        131231,
+        249339
+      ],
+      "capOverFarm": 3,
+      "baseStep": 0.05,
+      "levelBonus": 0.12
+    },
+    "milestones": {
+      "hens": [
+        {
+          "level": 10,
+          "coopMult": 1.25,
+          "offlineMult": 1.25
+        },
+        {
+          "level": 20,
+          "coopMult": 1.5,
+          "offlineMult": 1.5
+        },
+        {
+          "level": 30,
+          "coopMult": 2,
+          "offlineMult": 2
+        }
+      ],
+      "grades": [
+        {
+          "level": 5,
+          "mult": 1.1,
+          "minFarm": 0
+        },
+        {
+          "level": 10,
+          "mult": 1.25,
+          "minFarm": 0
+        },
+        {
+          "level": 20,
+          "mult": 1.5,
+          "minFarm": 15
+        }
+      ],
+      "balanced": [
+        {
+          "level": 5,
+          "mult": 1.1
+        },
+        {
+          "level": 10,
+          "mult": 1.15
+        },
+        {
+          "level": 15,
+          "mult": 1.2
+        },
+        {
+          "level": 20,
+          "mult": 1.25
+        },
+        {
+          "level": 25,
+          "mult": 1.3
+        }
+      ]
+    },
+    "tc": {
+      "ability_cd_s": 300,
+      "ability_s": 30,
+      "ability_w1_price_mult": 1.15,
+      "ability_w2_lay_mult": 1.15,
+      "ability_w3_price_mult": 1.15,
+      "ability_w4_tier_add": 0.5,
+      "complete_bonus_share": 0.05,
+      "egg_cash_s": 45,
+      "egg_despawn_s": 30,
+      "egg_eggs_as_cash_from_farm": 20,
+      "egg_eggs_s": 60,
+      "egg_gap_max_s": 300,
+      "egg_gap_min_s": 120,
+      "egg_unlock_farm": 8,
+      "egg_w_cash": 0.45,
+      "egg_w_eggs": 0.2,
+      "egg_w_frenzy": 0.35,
+      "focus_premium": 0.1,
+      "frenzy_all_sales": 1,
+      "frenzy_price_mult": 2,
+      "frenzy_s": 30,
+      "leave_penalty_share": 0.05,
+      "streak_cap": 0.4,
+      "streak_decay_per_s": 0.03,
+      "streak_hold_s": 3,
+      "streak_max_taps_per_s": 1,
+      "streak_per_tap": 0.01
+    }
   }
 }

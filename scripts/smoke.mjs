@@ -36,7 +36,7 @@ await page.locator('.sheet:not([hidden]) .close').click();
 await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [1, 2, 3].map(i => ({ id: 200 + i, demand: 5, filled: 0, waitedS: 0 })), nextCustomerInS: 0.05 }; });
 await page.waitForTimeout(400);
 const q = await page.evaluate(() => ({ tag: !!document.querySelector('.qtag'), bubble: !!document.querySelector('.bubble.qfull') }));
-if (!q.tag) fail('no Queue full tag'); if (!q.bubble) fail('no Queue full! walk-off bubble');
+if (!q.tag) fail('no Queue full tag'); if (q.bubble) fail('turned-away customer carries its own Queue full tag (Art&UX 01:17 #3)');
 if (await page.locator('.onb').count()) fail('onboarding not closed after collect/sell/upgrade');
 const tele = await page.evaluate(() => window.eggfarm.telemetry.events().filter(e => e.type === 'onboarding_step').map(e => e.name));
 if (!tele.join().startsWith('collect,sell,upgrade,complete')) fail('onboarding telemetry: ' + tele);
