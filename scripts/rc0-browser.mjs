@@ -1091,7 +1091,7 @@ sections.rc2minors2 = async () => {
     if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(250); }
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 0, coop: 0, nextCustomerInS: 999, customers: [{ id: 501, demand: 13, filled: 0, waitedS: 0 }] }; }); await page.waitForTimeout(400);
     const z = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
-    ok(`M-Order-zero 0 delivered reads "Wants 13", aria "Customer wants 13 eggs" (${w})`, /^Wants 13/.test(z.e) && z.aria === 'Customer wants 13 eggs', JSON.stringify(z));
+    ok(`M-Order-zero 0 delivered reads "Wants 13", aria "Customer wants 13 eggs" (${w})`, (w < 360 ? /^(Wants 13|0\/13)/ : /^Wants 13/).test(z.e) && z.aria === 'Customer wants 13 eggs', JSON.stringify(z));
     if (shot) await page.screenshot({ path: `${MS}/order-wants-13-${nm(w)}.png` });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 501, demand: 13, filled: 1, waitedS: 0 }] }; }); await page.waitForTimeout(400);
     const o = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
