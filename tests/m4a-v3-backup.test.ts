@@ -3,9 +3,9 @@
 import { describe, it, expect } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
-import { headroomNeed, saveSeqOf, validate, serialize, checksum, migrate, SAVE_KEY, BAK_KEY, V6_BACKUP_KEY, SAVE_VERSION, RESET_KEYS, resetProgress, decodeBackup, encodeBackup, newMigrationId, committedBackupRaw, MIGRATION_ATTEMPTS_KEY, HEADROOM_PROBE_KEY, rankCompare } from '../src/save/save';
+import { probeHeadroom, recoveryExport, headroomNeed, saveSeqOf, validate, serialize, checksum, migrate, SAVE_KEY, BAK_KEY, V6_BACKUP_KEY, SAVE_VERSION, RESET_KEYS, resetProgress, decodeBackup, encodeBackup, newMigrationId, committedBackupRaw, MIGRATION_ATTEMPTS_KEY, HEADROOM_PROBE_KEY, rankCompare } from '../src/save/save';
 import { IdbMirror, IDB_KEY, reconcile, pickNewest } from '../src/save/idb-mirror';
-import { Game } from '../src/game';
+import { Game, tracksOff } from '../src/game';
 import { mem } from './helpers';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
 const off: Balance = { ...balance, m4: { ...balance.m4!, enabled: 0 } };
@@ -52,7 +52,9 @@ describe('(a) flag off keeps a marked v6 save\'s track data byte-for-byte', () =
     const marked = { ...initialState(on), farmLevel: 12, collectionLevel: 9, hensLevel: 11, eggValueLevel: 14, celebratedMilestones: ['hens:10'], tracksV7: 1 as const };
     const kv = mem() as any; kv.setItem(SAVE_KEY, raw6(marked));
     const { db, data } = fakeIdb(); const m = new IdbMirror(db);
-    const g = new Game(off, kv, () => 1760000000500, undefined, 'dev', m); g.save(); await settle();
+    const writes: Promise<void>[] = []; const orig = m.write.bind(m); (m as any).write = (r: string) => { const p = orig(r); writes.push(p); return p; };
+    const g = new Game(off, kv, () => 1760000000500, undefined, 'dev', m); g.save();
+    expect(writes.length).toBeGreaterThan(0); await Promise.all(writes); // CCR 182b932: await the IDB write itself, no 5 ms timer
     expect(trackPart(kv.getItem(BAK_KEY))).toBe(trackPart(raw6(marked)));        // .bak = rotated copy of the marked save
     expect(trackPart(data.get(IDB_KEY) as string)).toBe(trackPart(raw6(marked))); // IDB mirror write
     const kv2 = mem() as any; expect(reconcile(kv2, data.get(IDB_KEY) as string, off)).toBe('idb');
@@ -62,7 +64,6 @@ describe('(a) flag off keeps a marked v6 save\'s track data byte-for-byte', () =
 
 const ids = (...xs: string[]) => { let i = 0; return () => xs[i++]; };
 const ID1 = 'a1b2c3d4e5f60718', ID2 = '0f1e2d3c4b5a6978', ID3 = '1111222233334444';
-import { probeHeadroom } from '../src/save/save';
 const ev = (g: Game, t: string) => g.telemetry.events().filter((e: any) => e.type === t) as any[];
 const kvOf = () => { const kv = mem() as any; kv.removeItem = (k: string) => kv.m.delete(k); return kv; };
 const seed = (st: any = mainState(10, 7)) => { const raw = raw6(st); const kv = kvOf(); kv.setItem(SAVE_KEY, raw); return { kv, raw }; };
@@ -305,7 +306,6 @@ describe('(b) m4-design §3c/§3d interim marker path (ADR M4-14..24, spec v1.10
 });
 
 // CCR B1 on bd487ab + HoE 02:37: an M4-off build must never lose progress to a stale saveSeq-bearing copy.
-import { tracksOff } from '../src/game';
 describe('B1 regression: M4-off saves vs a stale saveSeq copy (localStorage + IndexedDB)', () => {
   const H = 3_600_000;
   const stale = () => serialize({ ...mainState(10, 7), coinsCents: 1000_00 } as any, T0, 5, tracksOff(on)); // seq 5, 1000 coins
@@ -338,5 +338,18 @@ describe('B1 regression: M4-off saves vs a stale saveSeq copy (localStorage + In
   it('fresh flag-off save without a prior saveSeq stays main-format (no saveSeq key)', () => {
     const kv = kvOf(); kv.setItem(SAVE_KEY, raw6(mainState(10, 7))); new Game(off, kv, () => T0 + H).save();
     expect(kv.getItem(SAVE_KEY)).not.toMatch(/saveSeq/);
+  });
+  it('explicit hadSeq: serialize keeps saveSeq in the M4-off format only when the caller says the stored copy had one', () => {
+    const st = mainState(10, 7) as any;
+    expect(serialize(st, T0, 1, off, false)).not.toMatch(/saveSeq/); expect(serialize(st, T0, 7, off, false)).not.toMatch(/saveSeq/);
+    expect(saveSeqOf(serialize(st, T0, 1, off, true))).toBe(1); expect(saveSeqOf(serialize(st, T0, 7, on))).toBe(7);
+  });
+  it('main.ts:96 storage-blocked recovery export passes the balance: M4-off export is main format, M4-on keeps track fields', () => {
+    const st = { ...initialState(on), farmLevel: 10 } as any; delete st.tracksV7; delete st.v6BackupId;
+    const offOut = recoveryExport(st, off, T0), onOut = recoveryExport(st, on, T0);
+    expect(validate(offOut, off).ok).toBe(true);
+    expect(Object.keys(JSON.parse(offOut).state)).not.toContain('hensLevel'); expect(offOut).not.toMatch(/saveSeq/);
+    expect(Object.keys(JSON.parse(onOut).state)).toContain('hensLevel');
+    expect(offOut).toBe(serialize(st, T0, undefined, off)); // same bytes the M4-off save path writes
   });
 });

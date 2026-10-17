@@ -45,6 +45,9 @@ export function rankOf(raw: unknown): [number, number, number] {
 }
 /** M4-19 (HoE correction): > 0 when a outranks b by version, then committed migrationId, then saveSeq (only when both
  *  copies carry one; HoE 02:37), then savedAt. Shared by pickNewest/reconcile and IdbMirror.write's refuse check. */
+// CCR 182b932: pairwise only. With the seq-only-when-both rule this is NOT transitive across 3+ copies (e.g. A seq 7 >
+// B seq 6 by seq, B > C (no seq) by savedAt, C > A by savedAt). Callers compare exactly two copies; Saves owns the
+// 3-way (main / .bak / IDB) ordering in their unload rework.
 export function rankCompare(a: unknown, b: unknown, now = Date.now()): number {
   const [va, ca, qa] = rankOf(a), [vb, cb, qb] = rankOf(b); if (va !== vb) return va - vb; if (ca !== cb) return ca - cb; if (qa > 0 && qb > 0 && qa !== qb) return qa - qb; // CCR B1: seq only when both copies have one, else savedAt
   const t = (x: unknown) => { try { return savedAtRank(JSON.parse(x as string).savedAt, now); } catch { return -Infinity; } };
@@ -58,7 +61,7 @@ export function commitWrite(kv: KV, state: GameState, now: number, b: Balance): 
   try {
     if (newerStoredVersion(kv) !== null) return null;
     const cur = kv.getItem(SAVE_KEY); if (cur && validate(cur, b).ok) kv.setItem(BAK_KEY, cur);
-    const raw = serialize(state, now, saveSeqOf(cur) + 1, b); kv.setItem(SAVE_KEY, raw); return kv.getItem(SAVE_KEY) === raw ? raw : null;
+    const raw = serialize(state, now, saveSeqOf(cur) + 1, b, saveSeqOf(cur) > 0); kv.setItem(SAVE_KEY, raw); return kv.getItem(SAVE_KEY) === raw ? raw : null;
   } catch { return null; }
 }
 /** Telemetry `path` for the interim marker migration (vs. the S-4 v7 path later). */
@@ -140,14 +143,14 @@ export function checksum(text: string): string {
 /** Balances produced by Game's tracksOff for an M4-on build whose unmarked save awaits migration: such a session keeps
  *  the M4 build's save format (saveSeq, HoE correction); only a genuine flag-off build writes main's bytes. */
 export const M4_BUILD_SESSION_OFF = new WeakSet<Balance>();
-export function serialize(state: GameState, now: number, saveSeq?: number, b?: Balance): string {
+export function serialize(state: GameState, now: number, saveSeq?: number, b?: Balance, hadSeq = false): string {
   // Flag-off = main (HoE 02:25, save compatibility): with M4 off and an unmarked save, write main's exact bytes:
   // no saveSeq, no M4 track fields. Marked (tracksV7) saves keep their track fields byte-for-byte (M4A v3).
   const legacy = !!b && !m4On(b) && !M4_BUILD_SESSION_OFF.has(b) && (state as { tracksV7?: number }).tracksV7 !== 1;
   let out: unknown = state;
-  // HoE 02:37 / CCR B1: legacy keeps a saveSeq the stored copy already had (callers pass saveSeqOf(prev) + 1, so > 1 means
-  // prev carried one) and carries it forward; a main-origin save without one stays byte-equal to main.
-  if (legacy) { const { hensLevel: _h, eggValueLevel: _v, celebratedMilestones: _c, ...rest } = state; out = rest; if (!(saveSeq && saveSeq > 1)) saveSeq = undefined; }
+  // HoE 02:37 / CCR B1: legacy keeps a saveSeq the stored copy already had (caller passes hadSeq explicitly, Saves minor 1)
+  // and carries it forward; a main-origin save without one stays byte-equal to main.
+  if (legacy) { const { hensLevel: _h, eggValueLevel: _v, celebratedMilestones: _c, ...rest } = state; out = rest; if (!hadSeq) saveSeq = undefined; }
   const st = JSON.stringify(out);
   return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
 }
@@ -157,7 +160,7 @@ export function serialize(state: GameState, now: number, saveSeq?: number, b?: B
  */
 export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
   let prev: string | null = null; try { prev = kv.getItem(SAVE_KEY); } catch { /* blocked: the write below throws */ }
-  const raw = serialize(state, now, saveSeqOf(prev) + 1, b); // HoE correction: saveSeq on main (missing = 0)
+  const raw = serialize(state, now, saveSeqOf(prev) + 1, b, saveSeqOf(prev) > 0); // HoE correction: saveSeq on main (missing = 0)
   // BUG-2: never write over a newer-build save in main or .bak (callers check first; this is the last line of defence).
   const nv = newerStoredVersion(kv); if (nv !== null) throw new NewerSaveError(nv);
   if (rotate && b) {
@@ -240,6 +243,8 @@ export type RecoveryOutcome = 'restored' | 'fresh' | 'storage' | null;
 export const recoveryOutcome = (r: Recovery | null): RecoveryOutcome => !r ? null : r.restored_from_backup ? 'restored' : r.case === 'Q' ? 'storage' : 'fresh';
 /** v4 f6 + AC14b v2.1: the lease write was refused (storage full) and the loader found nothing to recover. Route it
  *  through the dialog as outcome 'storage' with the v2.2 'Can't save' copy; Export takes the current farm. */
+/** Storage-blocked recovery export (main.ts): the live state in this build's save format (balance passed, Saves minor 2). */
+export const recoveryExport = (state: GameState, b: Balance, now = Date.now()): string => serialize(state, now, undefined, b);
 export function storageBlockedRecovery(kv: KV): Recovery {
   let raw = ''; try { raw = kv.getItem(SAVE_KEY) ?? ''; } catch { /* blocked */ }
   return { case: 'Q', reason: 'missing', had_backup: false, restored_from_backup: false, copy_failed: false, raw, cantSave: true };

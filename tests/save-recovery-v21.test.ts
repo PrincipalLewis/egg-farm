@@ -93,7 +93,7 @@ describe("v2.2 'Can't save' (storage refused, farm loaded)", () => {
     const src = readFileSync('src/main.ts', 'utf8');
     expect(src).toMatch(/if \(holdNotices\) \{ heldNotice \?\?= text; return; \}/);
     expect(src).toMatch(/addEventListener\(RECOVERY_CLOSED[\s\S]{0,120}holdNotices = false/);
-    expect(src).toMatch(/g\.recovery\.live = \(\) => serialize\(g\.state/);
+    expect(src).toMatch(/g\.recovery\.live = \(\) => recoveryExport\(g\.state, balance\)/); // Saves minor 2: live farm, with the build's balance
     expect(readFileSync('src/ui/save-recovery.ts', 'utf8')).toMatch(/layer\.remove\(\); document\.dispatchEvent\(new Event\(RECOVERY_CLOSED\)\)/);
   });
 });

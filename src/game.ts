@@ -209,7 +209,7 @@ export class Game {
     if (lsMain !== (this.lastMainRaw ?? p.raw)) return this.deferTracks('ls', 'ls_main_changed');
     const id = (this.opts.newId ?? newMigrationId)(), rec = encodeBackup({ migrationId: id, raw: p.raw });
     const live = { ...migrateTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
-    const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1, this.b).length, rec.length, p.on.save); // spec v1.10 + HoE
+    const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1, this.b, saveSeqOf(lsMain) > 0).length, rec.length, p.on.save); // spec v1.10 + HoE
     if (!probeHeadroom(this.kv, need)) return this.deferTracks('ls', 'quota_headroom');
     try { this.kv.setItem(V6_BACKUP_KEY, rec); } catch (e) { return this.abortTracks('ls', (e as Error)?.name === 'QuotaExceededError' ? 'quota' : 'error', rec); }
     const back = decodeBackup(this.kv.getItem(V6_BACKUP_KEY));
@@ -256,7 +256,7 @@ export class Game {
     try { const raw = this.saveWithQuotaRetry(t); this.lastMainRaw = raw; this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror) try { let q = 0; try { q = saveSeqOf(this.kv.getItem(SAVE_KEY)); } catch { /* blocked */ } this.mirror.write(serialize(this.persisted(), t, q + 1, this.b)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror) try { let q = 0; try { q = saveSeqOf(this.kv.getItem(SAVE_KEY)); } catch { /* blocked */ } this.mirror.write(serialize(this.persisted(), t, q + 1, this.b, q > 0)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }

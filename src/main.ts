@@ -1,7 +1,7 @@
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
-import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
+import { newerStoredVersion, storageBlockedRecovery, recoveryExport } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile, IDB_BOOT_READ_TIMEOUT_MS } from './save/idb-mirror';
@@ -93,7 +93,7 @@ async function boot() {
   holdNotices = !!(g.recoveryOutcome && g.recovery) || !!lease.storageBlocked;
   // v4 (QA f6): localStorage refused the lease write. This lone tab still owns the save (never 'Game open in another tab');
   // report it as the storage-full outcome (art-ux/save-recovery-dialog.md v2.1 'storage') plus the no-storage notice.
-  if (lease.storageBlocked) { if (g.recoveryOutcome === null) { g.recoveryOutcome = 'storage'; g.recovery = storageBlockedRecovery(localStorage); g.recovery.live = () => serialize(g.state, Date.now(), undefined, balance); } saveNotice(NO_STORAGE_TEXT); }
+  if (lease.storageBlocked) { if (g.recoveryOutcome === null) { g.recoveryOutcome = 'storage'; g.recovery = storageBlockedRecovery(localStorage); g.recovery.live = () => recoveryExport(g.state, balance); } saveNotice(NO_STORAGE_TEXT); }
   gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
   // QA BUG-2: a newer build saved while this tab was live (found right before a write). Game already stopped all writes
   // and the sim; release the lease, stop autosave, freeze render and show the session-long .newer-save layer.
