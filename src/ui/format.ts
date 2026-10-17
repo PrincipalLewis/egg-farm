@@ -60,3 +60,11 @@ export const fmtMoneyShort = (cents: number) => {
   }
   return fmtMoney(c);
 };
+/** Upgrade-card ETA (Product copy, Oct 16; same as rc1/ux-clarity format.ts): "Affordable in a moment" under 10 s; "Affordable in ~m:ss"; "~h:mm:ss" from 1 h; no income "Affordable in —". */
+export const fmtAffordableIn = (seconds: number | null) => {
+  if (seconds === null || !isFinite(seconds)) return 'Affordable in —';
+  const s = Math.max(0, Math.ceil(seconds));
+  if (s < 10) return 'Affordable in a moment';
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60, p = (n: number) => String(n).padStart(2, '0');
+  return `Affordable in ~${h ? `${h}:${p(m)}` : m}:${p(r)}`;
+};
