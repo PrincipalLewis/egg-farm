@@ -7,26 +7,28 @@ import { mood, isYawning, showManageAll, graderMult } from '../src/sim/workers';
 import { workersHtml, manageAllHtml } from '../src/ui/workers-ui';
 import type { SimEvent } from '../src/sim/events';
 const E = b.workers.energy;
+// Thresholds from balance (HoP Oct 16 23:58: yawn_at_pct 50, manage_prompt_threshold 0.5), never hard-coded.
+const Y = E.yawn_at_pct, T = Math.round(E.manage_prompt_threshold * 100);
 const run = (s: GameState, secs: number, ev?: SimEvent[]) => { for (let i = 0; i < Math.round(secs * b.tickHz); i++) s = step(s, 1 / b.tickHz, b, ev); return s; };
 const base = (o: Partial<GameState> = {}): GameState => ({ ...initialState(b, 3), farmLevel: 10, collectionLevel: 3, nextCustomerInS: 1e9, ...o });
 const wk = (energy: number, unpaid = false) => ({ energy, cdS: 0, ...(unpaid ? { unpaid } : {}) });
 describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
-  it('yawn cue at <= yawn_at_pct (40), still Working above tired threshold; not at 0 or Unpaid', () => {
-    expect(E.yawn_at_pct).toBe(40);
-    expect(isYawning(wk(41), b)).toBe(false); expect(isYawning(wk(40), b)).toBe(true);
+  it('yawn cue at <= yawn_at_pct, still Working above tired threshold; not at 0 or Unpaid', () => {
+    expect(Y).toBeGreaterThan(E.tired_below_pct);
+    expect(isYawning(wk(Y + 1), b)).toBe(false); expect(isYawning(wk(Y), b)).toBe(true);
     expect(mood(wk(35), b)).toBe('working'); expect(isYawning(wk(0), b)).toBe(false); expect(isYawning(wk(30, true), b)).toBe(false);
     const html = workersHtml(base({ workers: { hawker: wk(39) } }), b);
     expect(html).toContain('overlay-yawn.svg'); expect(html).toContain('wk working yawn');
     expect(workersHtml(base({ workers: { hawker: wk(60) } }), b)).not.toContain('overlay-yawn');
   });
   it('Manage all shown only with >= manage_all_min_workers hired; refills all, one shared cooldown', () => {
-    const two = base({ workers: { hawker: wk(20), grader: wk(50) }, graderTier: 1 });
+    const two = base({ workers: { hawker: wk(20), grader: wk(T + 10) }, graderTier: 1 });
     expect(showManageAll(two.workers, b)).toBe(false); expect(manageAllHtml(two, b)).toBe('');
     expect(apply(two, { type: 'manageAll' }, b)).toBe(two);
-    const three = base({ workers: { hawker: wk(20), grader: wk(50), market_hand: wk(100) }, graderTier: 1 });
-    expect(manageAllHtml(three, b)).toContain('(1 need it)'); // B5: only hawker (20%) is <= 40%; grader at 50% isn't counted
+    const three = base({ workers: { hawker: wk(20), grader: wk(T + 10), market_hand: wk(100) }, graderTier: 1 });
+    expect(manageAllHtml(three, b)).toContain('(1 need it)'); // B5: only hawker (20%) is <= threshold; grader above it isn't counted
     const ev: SimEvent[] = []; const m = apply(three, { type: 'manageAll' }, b, ev);
-    expect([m.workers.hawker!.energy, m.workers.grader!.energy, m.workers.market_hand!.energy]).toEqual([100, 50, 100]); // P4: refills only <= 40%
+    expect([m.workers.hawker!.energy, m.workers.grader!.energy, m.workers.market_hand!.energy]).toEqual([100, T + 10, 100]); // P4: refills only <= threshold
     expect(m.manageCdS).toBe(E.manage_cooldown_s);
     expect(ev.filter(e => e.type === 'worker_manage_all')).toHaveLength(1); // one tap = one Manage action (AC-W5)
     const tired = { ...m, workers: { ...m.workers, hawker: wk(10) } };
@@ -40,14 +42,14 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     const full = base({ workers: { hawker: wk(100), grader: wk(100), market_hand: wk(100) }, graderTier: 1 });
     expect(apply(full, { type: 'manageAll' }, b)).toBe(full);
     expect(manageAllHtml(full, b)).toBe('');
-    expect(b.workers.energy.manage_prompt_threshold).toBe(0.4);
-    const edge = base({ workers: { hawker: wk(40), grader: wk(41), market_hand: wk(81) }, graderTier: 1 });
-    expect(manageAllHtml(edge, b)).toContain('(1 need it)'); // exactly 40% counts; 41% and 81% don't
+    expect(T).toBeLessThan(81);
+    const edge = base({ workers: { hawker: wk(T), grader: wk(T + 1), market_hand: wk(81) }, graderTier: 1 });
+    expect(manageAllHtml(edge, b)).toContain('(1 need it)'); // exactly the threshold counts; +1% and 81% don't
     const hi = base({ workers: { hawker: wk(81), grader: wk(98), market_hand: wk(90) }, graderTier: 1 });
     expect(manageAllHtml(hi, b)).toBe(''); // the playtest case: 81-98% never "need it"
   });
-  it('B5: individual Manage is enabled only at <= 40%', () => {
-    const s = base({ workers: { hawker: wk(41), grader: wk(40) }, graderTier: 1 }), h = workersHtml(s, b);
+  it('B5: individual Manage is enabled only at <= manage_prompt_threshold', () => {
+    const s = base({ workers: { hawker: wk(T + 1), grader: wk(T) }, graderTier: 1 }), h = workersHtml(s, b);
     expect(h).toMatch(/data-act="manage" data-w="hawker" aria-disabled="true"/);
     expect(h).toMatch(/data-act="manage" data-w="grader" aria-disabled="false"/);
   });
@@ -61,7 +63,7 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
     expect(workersHtml(s, b)).toContain('Unpaid');
   });
   it('ruling 2: Manage / Manage all refill an Unpaid worker; it stays Unpaid', () => {
-    const s = base({ workers: { market_hand: wk(30, true), hawker: wk(30), grader: wk(50) }, graderTier: 1 }); // P4: <= 40% to be managed
+    const s = base({ workers: { market_hand: wk(30, true), hawker: wk(30), grader: wk(50) }, graderTier: 1 }); // P4: <= threshold to be managed
     const m1 = apply(s, { type: 'manage', worker: 'market_hand' }, b);
     expect(m1.workers.market_hand).toEqual({ energy: 100, cdS: 0, unpaid: true });
     const m2 = apply(s, { type: 'manageAll' }, b); expect(m2.workers.market_hand!.unpaid).toBe(true); expect(m2.workers.market_hand!.energy).toBe(100);
@@ -114,14 +116,14 @@ describe('M2 UI logic (§4.4, §4.6)', () => {
 import { farmManageAllVisible } from '../src/ui/workers-ui';
 describe('Farm View Manage all visibility (mobile nav + desktop docked share it)', () => {
   const three = (e: number, cd = 0) => base({ workers: { hawker: wk(e), grader: wk(80), market_hand: wk(90) }, graderTier: 1, manageCdS: cd });
-  it('PT1-10 (Product final): always shown greyed during the cooldown; after it, hidden iff no worker <= 40%', () => {
-    for (const e of [100, 41, 40, 10]) {
+  it('PT1-10 (Product final): always shown greyed during the cooldown; after it, hidden iff no worker <= manage_prompt_threshold', () => {
+    for (const e of [100, T + 1, T, 10]) {
       expect(farmManageAllVisible(three(e, 25), b, false)).toBe(true); // cooldown: shown whatever the energies
       expect(manageAllHtml(three(e, 25), b)).toMatch(/is-cooldown" data-act="manageAll" aria-disabled="true">.*ring-cooldown.*Manage all 0:25/);
     }
     expect(farmManageAllVisible(three(100, 0), b, true)).toBe(false); expect(manageAllHtml(three(100, 0), b)).toBe('');
-    expect(farmManageAllVisible(three(41, 0), b, true)).toBe(false);
-    expect(farmManageAllVisible(three(40, 0), b, false)).toBe(true); expect(manageAllHtml(three(40, 0), b)).toMatch(/aria-disabled="false"/);
+    expect(farmManageAllVisible(three(T + 1, 0), b, true)).toBe(false);
+    expect(farmManageAllVisible(three(T, 0), b, false)).toBe(true); expect(manageAllHtml(three(T, 0), b)).toMatch(/aria-disabled="false"/);
     expect(farmManageAllVisible({ ...three(10, 25), workers: { hawker: wk(10) } }, b, true)).toBe(false); // < 3 hired: never
   });
 });

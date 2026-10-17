@@ -1,8 +1,74 @@
 import type { Balance } from '../config/balance';
 import { GameState, initialState, coopTier } from '../sim/state';
+import { m4On } from '../config/formulas';
+import { migrateTracksV7 } from '../sim/migrate-v7';
 export const SAVE_KEY = 'eggfarm.save';
 export const SAVE_VERSION = 6;
-export interface SaveFile { version: number; savedAt: number; state: GameState; }
+export interface SaveFile { version: number; savedAt: number; state: GameState;
+  /** Set by migrate() when the interim track migration applies to this save (M4 on, no tracksV7 marker). `state` is
+   *  then the migrated preview; Game runs `v6State` under flag-off rules until the backup commits (m4-design §3c). */
+  tracksMigrated?: true; v6State?: GameState; /** keys of the stored v6 state (what a pending session may write) */ v6Keys?: string[];
+  /** Set by validate() with tracksMigrated: the validated raw bytes of the copy loaded (M4-17), i.e. the backup payload. */
+  preTracksRaw?: string; }
+/** ADR M4-11 name; m4-design §3c record `{"migrationId","raw"}` (M4-15). Committed when its id = live state.v6BackupId. */
+export const V6_BACKUP_KEY = 'eggfarm.save.v6_backup';
+export interface V6BackupRecord { migrationId: string; raw: string }
+export const MIGRATION_ID_HEX = 16;
+export function newMigrationId(rnd: (n: number) => Uint8Array = n => crypto.getRandomValues(new Uint8Array(n))): string {
+  return Array.from(rnd(MIGRATION_ID_HEX / 2), x => x.toString(16).padStart(2, '0')).join('');
+}
+export const encodeBackup = (r: V6BackupRecord) => JSON.stringify({ migrationId: r.migrationId, raw: r.raw });
+/** Parse a stored record; anything else (old raw-string format from 677317d, junk) is null = leftover. */
+export function decodeBackup(text: unknown): V6BackupRecord | null {
+  if (typeof text !== 'string') return null; let d: any; try { d = JSON.parse(text); } catch { return null; }
+  return d && typeof d === 'object' && typeof d.migrationId === 'string' && d.migrationId.length === MIGRATION_ID_HEX && typeof d.raw === 'string' ? { migrationId: d.migrationId, raw: d.raw } : null;
+}
+/** quota_headroom (spec v1.10 + HoE): free localStorage >= max(lsHeadroomFactor x (save + backup), save + backup + lsHeadroomMarginBytes). */
+export const headroomNeed = (saveBytes: number, backupBytes: number, s: { lsHeadroomFactor: number; lsHeadroomMarginBytes: number }) => Math.max(s.lsHeadroomFactor * (saveBytes + backupBytes), saveBytes + backupBytes + s.lsHeadroomMarginBytes);
+export const HEADROOM_PROBE_KEY = 'eggfarm.save.headroom_probe';
+/** M4-16 attempt counter: deferrals only; removed on commit; cleared by Reset. attempt_count >= STUCK_ATTEMPTS => stuck_on_v6. */
+export const MIGRATION_ATTEMPTS_KEY = 'eggfarm.save.migration_attempts';
+/** @deprecated use balance.save.migrationAttemptsCap (Head of QA: config constant). */
+export const STUCK_ATTEMPTS = 3;
+/** Probe `bytes` of free localStorage under the scratch key, removed at once. true = it fits. */
+export function probeHeadroom(kv: KV, bytes: number): boolean {
+  try { kv.setItem(HEADROOM_PROBE_KEY, 'x'.repeat(Math.max(0, Math.ceil(bytes)))); return true; } catch { return false; }
+  finally { try { kv.removeItem?.(HEADROOM_PROBE_KEY); } catch { /* best effort */ } }
+}
+/** HoE correction: a main save's write sequence; missing / invalid reads as 0. */
+export const saveSeqOf = (raw: unknown): number => { if (typeof raw !== 'string') return 0; try { const n = JSON.parse(raw)?.saveSeq; return Number.isSafeInteger(n) && n > 0 ? n : 0; } catch { return 0; } };
+/** M4-19 rank of a stored copy: [version, committed (tracksV7 + v6BackupId) ? 1 : 0, saveSeq]; savedAt is the caller's tie-break. */
+export function rankOf(raw: unknown): [number, number, number] {
+  if (typeof raw !== 'string') return [-1, 0, 0]; let d: any; try { d = JSON.parse(raw); } catch { return [-1, 0, 0]; }
+  const v = Number.isInteger(d?.version) ? d.version : -1, st = d?.state;
+  return [v, st && st.tracksV7 === 1 && typeof st.v6BackupId === 'string' && st.v6BackupId !== '' ? 1 : 0, saveSeqOf(raw)];
+}
+/** M4-19 (HoE correction): > 0 when a outranks b by version, then committed migrationId, then saveSeq, then savedAt. */
+export function rankCompare(a: unknown, b: unknown, now = Date.now()): number {
+  const [va, ca, qa] = rankOf(a), [vb, cb, qb] = rankOf(b); if (va !== vb) return va - vb; if (ca !== cb) return ca - cb; if (qa !== qb) return qa - qb;
+  const t = (x: unknown) => { try { return savedAtRank(JSON.parse(x as string).savedAt, now); } catch { return -Infinity; } };
+  const ta = t(a), tb = t(b); return ta === tb ? 0 : ta > tb ? 1 : -1;
+}
+/** M4-18/M4-21: the write version for the session (m4Active). M4-A's interim marker path writes v6 either way. */
+export const writeVersion = (_m4Active: boolean) => SAVE_VERSION;
+/** M4-21 dedicated commit write (not Game.save): .bak rotation of the current valid main, then main; read back.
+ *  localStorage only (M4-24), no IndexedDB fallback. Returns the committed raw, or null on any failure. */
+export function commitWrite(kv: KV, state: GameState, now: number, b: Balance): string | null {
+  try {
+    if (newerStoredVersion(kv) !== null) return null;
+    const cur = kv.getItem(SAVE_KEY); if (cur && validate(cur, b).ok) kv.setItem(BAK_KEY, cur);
+    const raw = serialize(state, now, saveSeqOf(cur) + 1); kv.setItem(SAVE_KEY, raw); return kv.getItem(SAVE_KEY) === raw ? raw : null;
+  } catch { return null; }
+}
+/** Telemetry `path` for the interim marker migration (vs. the S-4 v7 path later). */
+export const TRACKS_MARKER_PATH = 'tracksV7_marker';
+/** M4-15: a stored record is committed only when its id equals the live save's v6BackupId. */
+export const isCommittedBackup = (text: unknown, liveId: string | undefined) => { const r = decodeBackup(text); return !!r && !!liveId && r.migrationId === liveId; };
+/** M4-17 restore source: LS record, else IDB record; only a committed record whose raw passes validation (checksum, ranges). */
+export function committedBackupRaw(lsText: unknown, idbText: unknown, liveId: string | undefined, b: Balance): string | null {
+  for (const t of [lsText, idbText]) { const r = decodeBackup(t); if (r && liveId && r.migrationId === liveId && validate(r.raw, b).ok) return r.raw; }
+  return null;
+}
 /** migrations[n] upgrades a version-n save to n+1 */
 const migrations: Record<number, (d: any) => any> = {
   // v1 stored coins as float dollars; v2 stores integer cents.
@@ -32,11 +98,16 @@ export function newerStoredVersion(kv: Pick<KV, 'getItem'>, idbRaw: string | nul
 export function migrate(d: any, b: Balance): SaveFile {
   if (!d || typeof d.version !== 'number' || d.version > SAVE_VERSION) throw new Error('bad save');
   while (d.version < SAVE_VERSION) { const m = migrations[d.version]; if (!m) throw new Error(`no migration from v${d.version}`); d = m(d); }
-  return { version: d.version, savedAt: d.savedAt, state: { ...initialState(b), ...d.state } };
+  let state: GameState = { ...initialState(b), ...d.state };
+  // M4-A (M4A-27..29): with the flag on, a pre-M4 farm (any version, no tracksV7 marker) is price-matched once:
+  // H = F, lowest V with price >= v6, milestones seeded silently. SAVE_VERSION stays 6 so main can still read the save.
+  const tracks = m4On(b) && !state.tracksV7;
+  if (!tracks) return { version: d.version, savedAt: d.savedAt, state };
+  return { version: d.version, savedAt: d.savedAt, state: { ...migrateTracksV7(state, b).state, tracksV7: 1 }, tracksMigrated: true, v6State: state, v6Keys: Object.keys(d.state ?? {}) };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
 /** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
-export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak'] as const; // QA BUG-4: .bak too, so reset progress can't come back
+export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak', 'eggfarm.save.v6_backup', 'eggfarm.save.migration_attempts', 'eggfarm.save.headroom_probe'] as const; // N3: probe key too // review m4: Reset clears the v6 backup too (V6_BACKUP_KEY) // QA BUG-4: .bak too, so reset progress can't come back
 export const UI_KEY = 'eggfarm.ui';
 /** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
 export function keepPrefsOnly(f: any): Record<string, unknown> {
@@ -65,16 +136,37 @@ export function checksum(text: string): string {
   return (h >>> 0).toString(16).padStart(8, '0');
 }
 /** Serialise a save; `sum` covers the state JSON. */
-export function serialize(state: GameState, now: number): string {
+export function serialize(state: GameState, now: number, saveSeq?: number): string {
   const st = JSON.stringify(state);
-  return `{"version":${SAVE_VERSION},"savedAt":${now},"sum":"${checksum(st)}","state":${st}}`;
+  return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
+}
+/** Balances of an M4 build whose session runs with the switch off until the migration commits (game.ts tracksOff). */
+const M4_BUILD_OFF = new WeakSet<object>();
+export const markM4BuildOff = <T extends object>(b: T): T => { M4_BUILD_OFF.add(b); return b; };
+/** ADR M4-19 saveSeq rides only on M4-build saves (flag on, an M4 build with the switch off pre-migration, or a marked tracksV7
+ *  farm); a flag-off build's pre-M4 saves keep main's bytes (HoE flag-off rule, golden f90d1678 storage pins). */
+/** CCR B1 (#12 hadSeq rule): once the previous copy carries a saveSeq, every later save carries it forward (+1) on any
+ *  build, so a flag-off save never ranks below an older M4-build-off copy (the IndexedDB mirror would refuse it and
+ *  reconcile would restore the stale copy). A previous copy without saveSeq keeps main's bytes. */
+export const m4SaveSeq = (state: GameState, b: Balance | undefined, prev: unknown): number | undefined => {
+  const hadSeq = saveSeqOf(prev) > 0;
+  return hadSeq || (b && (m4On(b) || M4_BUILD_OFF.has(b))) || (state as { tracksV7?: unknown }).tracksV7 ? saveSeqOf(prev) + 1 : undefined;
+};
+/** HoE flag-off rule: with M4 off, an unmarked (pre-M4) farm is saved in main's shape (no M4 track fields). A marked
+ *  (tracksV7) save keeps them, so a flag-off build never drops a migrated farm's tracks (downgrade). */
+export function flagOffShape(state: GameState, b: Balance): GameState {
+  if (m4On(b) || (state as { tracksV7?: unknown }).tracksV7) return state;
+  const { hensLevel, eggValueLevel, celebratedMilestones, ...v6 } = state; void hensLevel; void eggValueLevel; void celebratedMilestones;
+  return v6 as GameState;
 }
 /**
  * Write the save. With `rotate`, the current main save is first copied into `.bak`, but only if it is itself valid
  * (QA case 2: a fresh-start save never rotates until the caller allows it, and a bad main never overwrites `.bak`).
  */
 export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
-  const raw = serialize(state, now);
+  if (b) state = flagOffShape(state, b);
+  let prev: string | null = null; try { prev = kv.getItem(SAVE_KEY); } catch { /* blocked: the write below throws */ }
+  const raw = serialize(state, now, m4SaveSeq(state, b, prev)); // HoE correction: saveSeq on main (missing = 0)
   // BUG-2: never write over a newer-build save in main or .bak (callers check first; this is the last line of defence).
   const nv = newerStoredVersion(kv); if (nv !== null) throw new NewerSaveError(nv);
   if (rotate && b) {
@@ -112,6 +204,7 @@ export function validate(raw: string, b: Balance, now = 0): { ok: true; file: Sa
   if (typeof d.state !== 'object' || Array.isArray(d.state)) return { ok: false, reason: 'wrong_type' };
   if (d.sum !== undefined && d.sum !== checksum(JSON.stringify(d.state))) return { ok: false, reason: 'checksum' };
   let f: SaveFile; try { f = migrate(d, b); } catch { return { ok: false, reason: 'version' }; }
+  if (f.tracksMigrated) f.preTracksRaw = raw; // n1: only validate() knows the raw bytes; migrate() just flags it
   const s: any = f.state;
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
   if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };

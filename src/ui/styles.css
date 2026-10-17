@@ -36,7 +36,8 @@ img{user-select:none;-webkit-user-drag:none}
 @keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(61 127 51/.35)}}
 .btn.secondary{background:var(--c-white);min-height:44px}.btn.danger{background:var(--c-barn);color:#fff;min-height:44px}
 .btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
-.btn.maxed{background:var(--c-gold);pointer-events:none;box-shadow:none}
+/* MAX is a label, not a button (m4-tracks-copy.md line 10, layout-spec.md lines 110/159): yolk pill, --c-text, no shadow, no press, not focusable */
+.maxed{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:var(--r-pill);background:var(--c-yolk);color:var(--c-text);font:700 var(--fs-base) var(--f-display);box-shadow:none;pointer-events:none;user-select:none}
 .btn img{width:20px;height:20px}
 .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
 .icon-btn{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;display:grid;place-items:center;padding:0}.icon-btn img{width:28px;height:28px}
@@ -66,7 +67,6 @@ img{user-select:none;-webkit-user-drag:none}
 .ghost.walkoff{animation:walkoff 900ms 500ms ease-in forwards}@keyframes walkoff{to{transform:translateX(90px);opacity:0}}
 .bubble{font:700 var(--fs-xs) var(--f-display);padding:1px 8px;border-radius:var(--r-pill);white-space:nowrap;margin-bottom:2px;border:var(--bw) solid var(--c-outline)}
 .bubble.soldout{background:var(--c-cream);color:var(--c-text)}
-.bubble.qfull{background:var(--c-yolk-dark);color:var(--c-text);animation:fadeout 1400ms ease forwards}
 @keyframes fadeout{0%{opacity:0;transform:translateY(4px)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
 .rm .ghost.walkoff,.rm .ghost.leave{animation:none}.rm .ghost.wave img{animation:none}
 .scene{position:relative;aspect-ratio:4/3;max-height:100%;margin-inline:auto;width:min(100%,560px);min-height:0;align-self:center;cursor:pointer}
@@ -407,12 +407,14 @@ html,body{overflow-x:hidden;max-width:100%}
 /* Recovery dialog v1.1: Q export = full-width outlined secondary button below the primary */
 /* AC14b v2.1 (art-ux/save-recovery-dialog.md §2) */
 .recovery-layer{background:var(--c-scrim)}
-.recovery-card{gap:0;border-color:var(--c-outline)}
+.recovery-card{border-color:var(--c-outline)}
+/* R1: v2.1 spacing only on the AC14b dialog; tab-guard + newer-save keep gap:12px */
+.recovery-layer[data-outcome] .recovery-card{gap:0}
 .recovery-card .rc-icon{position:relative;display:inline-block;width:72px;height:72px;flex:none}.recovery-card .rc-icon img{width:72px;height:72px;display:block}
 .rc-badge{position:absolute;right:-6px;bottom:-4px;box-sizing:border-box;width:28px;height:28px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 16px/24px var(--f-body, Nunito, sans-serif);text-align:center}
 .rc-badge.ok{background:var(--c-meadow-strong)}.rc-badge.new{background:var(--c-focus)}.rc-badge.warn{background:var(--c-wood-text)}
-.recovery-card h2{margin-top:8px;line-height:1.2;color:var(--c-text)}.recovery-card p#rcB{margin-top:8px}
-.recovery-card .rc-primary{margin-top:16px}
+.recovery-card h2{line-height:1.2;color:var(--c-text)}.recovery-layer[data-outcome] .recovery-card h2{margin-top:8px}.recovery-layer[data-outcome] .recovery-card p#rcB{margin-top:8px}
+.recovery-layer[data-outcome] .recovery-card .rc-primary{margin-top:16px}
 .recovery-card .rc-link{margin-top:8px;min-width:120px;min-height:44px}
 .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:12px;border-radius:999px;background:var(--c-white);color:var(--c-wood-text);border:2px solid var(--c-wood-text);box-shadow:none;font:700 16px var(--f-body, Nunito, sans-serif);cursor:pointer}
 .recovery-card .rc-msg{margin-top:8px}.recovery-card .rc-msg:empty{margin-top:0}
@@ -448,3 +450,53 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
 .reduced-motion .tab-guard .recovery-card{animation:none}
 .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
+
+/* M4-A 3-row Farm screen (Option A) */
+.tracks{display:flex;flex-direction:column;gap:var(--s-3)}
+.tracks .balanced{display:flex;flex-direction:column;gap:var(--s-1);font:700 14px var(--f-body,inherit)}
+.tracks .balanced .segs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tracks .balanced .segs i{height:8px;border-radius:4px;background:var(--c-dust,#d9cfc4);border:2px solid var(--c-outline);overflow:hidden;display:block}
+.tracks .balanced .segs i b{display:block;height:100%;background:var(--c-yolk,#f6c445)}
+.tracks .balanced .segs i.weakest{outline:2px solid var(--c-yolk-dark,#c8901a);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){.tracks .balanced .segs i b{transition:none}}
+.up .lock{min-height:44px;display:flex;align-items:center;justify-content:flex-end;color:var(--c-ink,#3E2C23);font-weight:700}
+.up .lock::before{content:'';flex:none;width:12px;height:14px;margin-right:6px;background:
+  linear-gradient(var(--c-disabled),var(--c-disabled)) 0 6px/12px 8px no-repeat,
+  radial-gradient(circle at 50% 100%,transparent 2.5px,var(--c-disabled) 2.5px 4.5px,transparent 4.5px) 1px 0/10px 6px no-repeat;border-radius:2px} /* Art&UX 01:17 #4: CSS lock glyph in Dust (#CFC6BA), not the 🔒 emoji */
+
+/* M4A-18 next-goal highlight on one Farm-tab row (static outline; no motion) */
+.tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
+.tracks .up .ms-hint{font:400 13px var(--f-body,'Nunito',inherit);color:var(--c-muted,#6b5e52)}
+.tracks .up.best.pending{outline-style:dashed}
+/* D5 (m3-next-goal-spec v1.0.1): button.goal is a 44px hit area (2px transparent padding-block); the visible 40px pill is
+   the inner span.goal-pill. The gap below goes 8px -> 4px (margin-bottom:-4px against the 8px column gap), so the row stays 48px. */
+:root{--goal-h:40px;--goal-hit:44px}
+.goal{display:block;height:auto;min-height:var(--goal-hit);padding:2px 0;margin-bottom:-4px;background:transparent;border:0;box-shadow:none;border-radius:var(--r-pill);animation:none}
+.goal-pill{display:grid;grid-template-columns:var(--goal-icon) minmax(0,1fr) auto 16px;gap:var(--s-2);align-items:center;width:100%;height:var(--goal-h);padding:0 var(--s-3);box-sizing:border-box;
+  border-radius:var(--r-pill);background:var(--c-white);border:2px solid var(--c-outline);box-shadow:var(--shadow);text-align:left;min-width:0}
+.goal[data-state=ready]{animation:none}
+.goal[data-state=ready] .goal-pill{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
+.goal-pill>*{min-width:0}
+@media (max-width:379px){.goal-pill{grid-template-columns:var(--goal-icon) minmax(0,1fr) auto}}
+@media (min-width:960px) and (orientation:landscape){.goal{min-height:var(--goal-h-lg);padding:0;margin-bottom:0;height:auto}.goal-pill{height:var(--goal-h-lg)}}
+/* S2-6 (layout-spec §3.3, rc1): the "Queue full" tag straddles the strip's top outline, never over a chip or the "+N" tile; "Full" below 380px */
+.qtag{top:-9px;right:8px;height:18px;line-height:16px;z-index:1;pointer-events:none;white-space:nowrap;box-sizing:border-box;border:1px solid transparent}
+.qtag .q-short{display:none}
+@media (max-width:379px){.qtag .q-long{display:none}.qtag .q-short{display:inline}}
+@media (max-width:390px){.farm{padding-top:10px}} /* room for the tag's 9px overhang above the strip (farm padding is 8px here) */
+/* S2-6 (QA s2-7-bd0dc66: tag over the "+N" tile at 375/390 with 9/9): the strip reserves a 9px top band, so the tag's lower
+   half sits in it and never reaches a chip or the "+N" tile, at any chip size (64/56) or strip height. */
+.queue{padding-top:9px;min-height:81px}
+@media (max-height:699px){.queue{min-height:73px}}
+/* Art&UX 02:54 #2/#3: ghosts live in a strip-sized clip box under the Queue full tag; bubbles are chip-wide (56px max) and wrap */
+.queue>.ghosts{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;border-radius:inherit}
+.queue>.qtag{z-index:2}
+.ghosts .ghost{max-width:64px}
+.ghosts .bubble{max-width:100%;box-sizing:border-box;padding:1px 4px;white-space:normal;text-align:center;line-height:13px;overflow:hidden}
+/* Art&UX 02:54 #3 / layout-spec §3.3: the "Sold out!" tag stays above its chip for 800 ms while only the customer waves and slides out
+   (the whole ghost used to slide, dragging the tag out of the strip and past x=0) */
+.ghosts .ghost.leave{animation:none}
+.ghosts .ghost.wave.leave img{animation:wave 300ms ease-in-out,leave 240ms 300ms ease-in forwards}
+.ghosts .ghost.leave:not(.wave) img{animation:leave 240ms 300ms ease-in forwards}
+.ghosts .bubble.soldout{animation:fadeout 800ms ease forwards}
+.rm .ghosts .ghost img,.rm .ghosts .ghost.leave img{animation:none}

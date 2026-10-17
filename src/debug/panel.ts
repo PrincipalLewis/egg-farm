@@ -2,6 +2,7 @@
 import type { Game } from '../game';
 import type { Balance } from '../config/balance';
 import * as S from '../sim/state';
+import { coopCap } from '../sim/tracks';
 import { resetProgress } from '../save/save';
 export function mountDebug(g: Game, b: Balance) {
   const el = document.createElement('details'); el.className = 'dbg'; el.open = true;
@@ -21,7 +22,7 @@ export function mountDebug(g: Game, b: Balance) {
       case 'coins100': set({ coinsCents: s.coinsCents + 100_00 }); break;
       case 'coins10k': set({ coinsCents: s.coinsCents + 10_000_00 }); break;
       case 'eggs': set({ basket: s.basket + 100 }); break;
-      case 'fill': set({ coop: S.coopCapacity(s.farmLevel, b) }); break;
+      case 'fill': set({ coop: coopCap(s, b) }); break;
       case 't60': g.debugAdvance(60_000); break;
       case 't600': for (let i = 0; i < 10; i++) g.debugAdvance(60_000); break;
       case 'cust': set({ nextCustomerInS: 0.01 }); break;

@@ -7,7 +7,7 @@ import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
 import { fmtMoneyShort } from './format';
-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -17,6 +17,11 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { graderMult } from '../sim/workers';
+import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
+import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
+import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
+import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+import { sellAllPreview } from '../sim/actions';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -74,7 +79,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
-      <button class="goal" id="goal" type="button" aria-live="off"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></button>
+      <button class="goal" id="goal" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
       <div class="sr" aria-live="polite" id="goalLive"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
@@ -143,13 +148,20 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  /* toast-v3 / review 148591a: the show/settle/dismiss state machine lives in toast-place.ts (pure, unit-tested) */
-  const placeToast = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0;
+  /* toast-v3 / review 148591a: the show/settle/dismiss state machine lives in toast-place.ts (pure, unit-tested).
+     main merge: M4-A tier/milestone toasts (Art&UX 02:54 #1) sit top-centre under the HUD (HUD bottom + 8px) and queue in order. */
+  let toastAtHud = false;
+  const placeToast = () => { if (toastAtHud) { toast.style.top = `${Math.round(Math.max(0, hud.getBoundingClientRect().bottom) + 8)}px`; toast.classList.remove('below'); return; }
+    const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0;
     /* F1: below the queue strip; rc2: never over the 'New helper!' hire banner */ const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); };
-  const toastShow = toastController({ shown: () => toast.classList.contains('show'), opacity: () => +getComputedStyle(toast).opacity, show: () => toast.classList.add('show'), hide: () => toast.classList.remove('show'),
+  /** M4-A: several milestones can land in one buy; each gets its own toast, in order, never overwritten. */
+  const toastQ: string[] = [];
+  const toastShow = toastController({ shown: () => toast.classList.contains('show'), opacity: () => +getComputedStyle(toast).opacity, show: () => toast.classList.add('show'),
+    hide: () => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx, true), 250); },
     transitions: on => { toast.style.transition = on ? '' : 'none'; }, reflow: () => { void toast.offsetHeight; }, place: placeToast },
     { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms), clearTimeout: id => clearTimeout(id) });
-  const showToast = (text: string) => { toast.textContent = text; toastShow(); };
+  const showToast = (text: string, atHud = false) => { toast.textContent = text; toastAtHud = atHud; toastShow(); };
+  const queueToasts = (texts: string[]) => { if (!texts.length) return; if (toast.classList.contains('show')) toastQ.push(...texts); else { showToast(texts[0], true); toastQ.push(...texts.slice(1)); } };
 
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
@@ -215,7 +227,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
-    lastBuyBtn = bt; if (!act({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
+    lastBuyBtn = bt; const bk = bt.dataset.kind;
+    if (!act(bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
     // F5: one tap = one dispatch; act() has already redrawn the sheet with the new level/price (S2-10).
   });
   let lastBuyBtn: HTMLElement | null = null;
@@ -274,11 +287,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const dwell = new ServedDwell(b.feel.served_dwell_ms), dwellEls = new Map<number, HTMLElement>();
   const moreChip = h(`<button class="chip more" type="button"></button>`);
   let qTagShown = false;
+  /** Art&UX 02:54 #2/#3: leaving / turned-away customers draw inside the strip (clipped to it, under the .qtag), chip-wide, never past x=0. */
+  const ghostHost = h(`<div class="ghosts" aria-hidden="true"></div>`);
   const ghost = (at: DOMRect | null, cls: string, bubble?: { text: string; cls: string }) => {
-    const q = queueEl.getBoundingClientRect(); const r = at ?? new DOMRect(q.right - 64, q.top, 64, 72);
-    const el = h(`<div class="ghost ${cls}" style="left:${r.left}px;top:${r.top - 12}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
+    const q = queueEl.getBoundingClientRect(); const w = Math.round(at?.width || 56); const r = at ?? new DOMRect(q.right - w, q.top, w, 72);
+    const left = Math.max(0, Math.min(Math.round(r.left - q.left), Math.round(q.width - w))), top = Math.max(0, Math.round(r.top - q.top - 12));
+    const el = h(`<div class="ghost ${cls}" style="left:${left}px;top:${top}px;width:${w}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
     if (rm() && bubble) el.querySelector('img')!.remove(); // reduced motion: bubble fade only
-    spawn(el, 1500);
+    if (live.length >= 30) live.shift()?.remove();
+    ghostHost.append(el); live.push(el); setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, 1500);
   };
   const renderQueue = () => {
     const s = g.state, slots = S.queueMax(s.farmLevel, b), patience = S.patienceS(s.farmLevel, b);
@@ -313,7 +330,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const needEmpty = Math.max(0, stripSlots - kids.length);
     while (empties.length < needEmpty) empties.push(h(`<div class="chip empty" aria-hidden="true"></div>`));
     empties.length = needEmpty;
-    const want = [...kids, ...empties];
+    const want = [...kids, ...empties, ghostHost];
     if (want.some((el, i) => queueEl.children[i] !== el) || queueEl.children.length !== want.length + (qTagShown ? 1 : 0)) {
       for (const el of want) if (!chipBorn.has(el)) chipBorn.set(el, now());
       queueEl.replaceChildren(...want); qTagShown = false;
@@ -321,11 +338,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // Queue full cue (amber outline + tag), informational
     const full = s.customers.length >= slots;
     queueEl.classList.toggle('full', full);
-    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag">Queue full</span>`)); qTagShown = true; }
+    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag"><span class="q-long">Queue full</span><span class="q-short">Full</span></span>`)); qTagShown = true; }
     // Slot unlock moment (first reach of a new slot count; once, persisted)
     if (slots > flags.seenSlots) {
       flags.seenSlots = slots; saveFlags();
-      const newSlot = empties[empties.length - 1] ?? queueEl.lastElementChild;
+      const newSlot = empties[empties.length - 1] ?? kids[kids.length - 1];
       if (newSlot && !rm()) { retrigger(newSlot, 'unlock'); sparkle(newSlot, 4); }
       slotToastPending = slotAdded(s.farmLevel, b);
     }
@@ -368,7 +385,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       case 'customer_partial': { dwell.gone(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
       case 'customer_lost':
         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
-        else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff', { text: 'Queue full!', cls: 'qfull' }); sfx('customerLeave'); }
+        else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff') /* Art&UX 01:17 #3: no tag of its own; only the strip's .qtag says Queue full */; sfx('customerLeave'); }
         break;
       case 'upgrade': {
         sfx('upgrade'); const src = lastBuyBtn ?? uRow;
@@ -385,12 +402,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- M3-AC5 next-goal strip ----------
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
+  // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
+  const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
-    if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
-    const imm = goalNow; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
+    const M4 = m4On(b), prevKey = hintPick?.key;
+    if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
+    if (!goalNow && t - goalTickAt < 1000 && !(M4 && hintPick?.key !== prevKey)) return; // 1 Hz text tick; purchases / pick changes bypass
+    const imm = goalNow || M4; goalNow = false; goalTickAt = t;
+    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined), imm); goalShown = gl;
     setText(goalLbl, gl.label); setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     goalBtn.setAttribute('aria-label', goalAria(gl));
@@ -425,15 +446,17 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
     const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
+    const M4 = m4On(b);
     const fx = isF ? [
-      `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
-      `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
-      `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
+      ...(M4 ? [`Hens & Egg value up to L${hensCap(F, b)} ${max ? '' : `<span class="arrow">→</span> L${hensCap(F + 1, b)}`}`]
+        : [`Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`]),
+      `Coop capacity ${arrow(fmtCount(M4 ? trackCoopCapacity(F, s.hensLevel, b) : S.coopCapacity(F, b)), fmtCount(M4 ? trackCoopCapacity(F + 1, s.hensLevel, b) : S.coopCapacity(F + 1, b)))}`,
+      ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F + 1, C))}`]),
       ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
       `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
     ] : [
       `Eggs per tap ${arrow(fmtCount(S.eggsPerTap(C, b)), fmtCount(S.eggsPerTap(C + 1, b)))}`,
-      `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
+      ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F, C + 1))}`]),
     ];
     const nextTier = [5, 10, 20].find(t => t > F);
     let hint = '';
@@ -445,21 +468,45 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
-    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
+    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * coopCap(s, b))
       hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
-    return `<div class="up">
+    return `<div class="up"${max ? ` role="group" aria-label="${isF ? 'Farm level' : 'Collect per tap'}, level ${L}, max."` : ''}>
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
-      ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
+      ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div></div></div>`;
   };
+  /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
+  const trackRowHtml = (t: Track) => {
+    const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
+    const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
+    const arrow = (a: string, z: string) => lock ? a : `${a} <span class="arrow">→</span> ${z}`;
+    const fx = t === 'hens'
+      ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`]
+      : [`Egg price ${arrow(fmtMoneyShort(trackPriceCents(F, H, V, b)), fmtMoneyShort(trackPriceCents(F, H, V + 1, b)))}`];
+    const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
+      : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${F + 1}.">${trackLockText(F)}</div>`
+      : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
+    const best = rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
+    const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
+    return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : ''}>
+      <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
+      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
+      <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
+  };
+  const farmTabHtml = () => {
+    const s = g.state, st = balancedStrip(s, b);
+    const segs = balancedSegments(s, b).map(g => `<i class="${g.weakest ? 'weakest' : ''}" data-track="${g.track}"><b style="width:${Math.round(g.fill * 100)}%"></b></i>`).join('');
+    return `<div class="tracks"><div class="balanced" role="img" aria-label="${balancedStripText(s, b, true)}"><div class="segs">${segs}</div><span>${balancedStripText(s, b)}</span></div>
+      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm').replace('<div class="up"', `<div class="up${rowHl === 'farm' ? (rowPick?.affordable ? ' best' : ' best pending') : ''}" data-track="farm"`)}</div>`;
+  };
   let lastUp = '', ordersExpanded = false;
   function render() {
-    const s = g.state, F = s.farmLevel, cap = S.coopCapacity(F, b), coopWhole = Math.floor(s.coop);
+    const s = g.state, F = s.farmLevel, cap = coopCap(s, b), coopWhole = Math.floor(s.coop);
     setText(coinsEl, fmtMoney(s.coinsCents)); setText(basketEl, fmtCount(s.basket));
     // coop tier + celebration (once per first reach, persisted in save)
     const tier = S.coopTier(F);
@@ -469,6 +516,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
       showToast(slotToastPending ? 'Coop upgraded! +1 customer slot' : 'Coop upgraded!'); slotToastPending = false;
     }
+    // M4-A milestone toasts: once per save (celebratedMilestones), never for ones seeded by the v7 migration.
+    { const pend = pendingMilestones(s, b); if (pend.length) { g.dispatch({ type: 'markMilestones', ids: pend }); queueToasts(pend.map(id => milestoneToast(id, b))); } }
     renderQueue();
     if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
     // hens
@@ -504,19 +553,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
-      const unit = S.eggPriceCents(F, s.collectionLevel, b) * graderMult(s.workers, s.graderTier, b);
+      const unit = salePriceCents(s, b) * graderMult(s.workers, s.graderTier, b);
       const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
       if (s.customers.length <= vis) ordersExpanded = false;
       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
       mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
-      let left = basket, eggs = 0, cents = 0; const price = S.eggPriceCents(F, s.collectionLevel, b);
-      for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }
+      const { eggs, cents } = sellAllPreview(s, b); // same per-order Grader math + rounding as the sellAll action
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
     }
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-      const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
+      const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
       if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
