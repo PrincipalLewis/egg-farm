@@ -89,3 +89,10 @@ export function planRemovals(o: { gone: number[]; inQueue: (id: number) => boole
   for (const id of free) { if (sold(id)) animate.push(id); else if (!o.frozen) (anim1 ? animate : drop).push(id); }
   return { keep, animate, drop, ms: o.rm ? SOLD_FADE_RM_MS : 240 };
 }
+
+/** Coin-burst start just above a source rect's top edge (rc2 designer minor), clamped by the caller. */
+export const startAbovePoint = (r: { left: number; top: number; width: number }, size: number) => ({ x: r.left + r.width / 2, y: r.top - size / 2 - 2 });
+/** QA B4 riser top: 44px above the button; null when its 48px rise would leave the safe top (skip, review ebbd02e #7). */
+export const riserTop = (btnTop: number, insetT: number): number | null => { const top = btnTop - 44; return top - 48 >= insetT + 2 ? top : null; };
+/** Empty state shows only when no customers, no keyed rows and no rows still leaving. */
+export const emptyHidden = (customers: number, nodes: number, leavingN: number) => customers > 0 || nodes > 0 || leavingN > 0;

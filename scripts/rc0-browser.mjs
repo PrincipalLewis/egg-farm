@@ -1046,6 +1046,18 @@ sections.rc2minors = async () => {
       const fl = await page.evaluate(() => window.__fl);
       ok(`M-Sold-freeze Market Hand sale after a row sale: no coin starts at the page origin (${tag})`, fl.length > 0 && fl.every(p => p.x >= 4 || p.y >= 4), JSON.stringify({ n: fl.length, worst: fl.filter(p => p.x < 4 && p.y < 4).slice(0, 3) }));
     }
+    if (w < 960 && !rmo) { // review c1b4ef5 #1: a Market Hand sale with the sheet closed must not leave a stale "Sold!" row to fade on open
+      await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 0, customers: [{ id: 779, demand: 3, filled: 0, waitedS: 0 }], nextCustomerInS: 999, workers: {} }; }); await page.waitForTimeout(300);
+      await page.evaluate(() => (document.querySelector('#p-market .close') ?? document.querySelector('[data-nav=farm]')).click()); /* DOM click (the nav button animates, so Playwright's stable-wait times out); close like rc2minors2 */ await page.waitForTimeout(300);
+      const closed = await page.evaluate(() => document.querySelector('#p-market').hidden);
+      await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 10, workers: { market_hand: { energy: 100, cdS: 0 } } }; });
+      await page.waitForFunction(() => !window.eggfarm.state.customers.some(c => c.id === 779), null, { timeout: 15000 }).catch(() => {});
+      await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: {} }; }); await page.waitForTimeout(600);
+      await page.evaluate(() => { window.__st = []; const t0 = performance.now(), loop = () => { window.__st.push(!!document.querySelector('#mRows .order.sold, .order[data-id="779"]')); if (performance.now() - t0 < 400) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+      await page.evaluate(() => document.querySelector('[data-nav=market]').click()); await page.waitForTimeout(450);
+      const st = await page.evaluate(() => window.__st), served = await page.evaluate(() => !window.eggfarm.state.customers.some(c => c.id === 779));
+      ok(`M-Sold-freeze hidden-sheet Market Hand sale: no stale "Sold!" row on open (${tag})`, closed && served && st.length > 3 && st.every(x => !x), JSON.stringify({ closed, served, n: st.length, staleFrames: st.filter(Boolean).length }));
+    }
     ok(`rc2minors no page errors (${tag})`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }

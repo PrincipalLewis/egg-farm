@@ -20,15 +20,15 @@ describe('M-Sold-freeze', () => {
   it('chip text and timings', () => { expect(soldLabel('$12.40')).toBe('Sold! +$12.40'); expect(SOLD_HOLD_MS).toBe(240); expect(SOLD_FADE_RM_MS).toBe(120); });
   it('served -> orderList.sold with the completing sale value; held rows are not removed; empty state waits for leaving rows', () => {
     const app = readFileSync('src/ui/app.ts', 'utf8'), ol = readFileSync('src/ui/order-list.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
-    expect(app).toMatch(/case 'customer_served':[^\n]*orderList\.sold\(e\.id, fmtMoneyShort\(lastSale\.get\(e\.id\)/);
+    expect(app).toMatch(/case 'customer_served':[^\n]*if \(open === 'market' \|\| docked\.matches\) orderList\.sold\(e\.id, fmtMoneyShort\(lastSale\.get\(e\.id\)/);
     expect(ol).toMatch(/planRemovals\(\{ gone, inQueue/);
-    expect(ol).toMatch(/this\.empty\.hidden = i\.customers\.length > 0 \|\| this\.nodes\.size > 0 \|\| this\.leavingN > 0/);
+    expect(ol).toMatch(/this\.empty\.hidden = emptyHidden\(i\.customers\.length, this\.nodes\.size, this\.leavingN\)/);
     expect(ol).toMatch(/if \(el\.classList\.contains\('sold'\)\) return;/);
     expect(css).toMatch(/\.order \.btn\.sell\.sold[^{]*\{background:#3D7F33;color:#fff/);
     expect(css).toMatch(/\.reduced-motion \.order\.leaving,\.order\.leaving\.rmfade\{animation:orderFade \.12s/); expect(ol).toMatch(/if \(i\.rm\) el\.classList\.add\('rmfade'\)/);
   });
 });
-import { planRemovals } from '../src/ui/orders';
+import { planRemovals, startAbovePoint, riserTop, emptyHidden } from '../src/ui/orders';
 describe('M-Sold-freeze removal plan (behaviour, review ebbd02e #2/#4/#5)', () => {
   const base = { inQueue: () => false, t: 1000, frozen: false, rm: false, lastLeave: -Infinity };
   it('a Sold row is kept until its hold ends, then animates out', () => {
@@ -49,5 +49,28 @@ describe('M-Sold-freeze removal plan (behaviour, review ebbd02e #2/#4/#5)', () =
   });
   it('a row still in the queue (scrolled out of view) is never treated as sold', () => {
     expect(planRemovals({ ...base, inQueue: () => true, t: 1200, gone: [7], soldUntil: new Map([[7, 1100]]) }).animate).toEqual([]);
+  });
+});
+
+describe('review c1b4ef5 #2: extracted geometry / empty-state helpers', () => {
+  const base = { inQueue: () => false, soldUntil: new Map<number, number>(), t: 1000, frozen: false, rm: false, lastLeave: 0 };
+  it('plain removal under rm drops; in-queue sold id is dropped', () => {
+    expect(planRemovals({ ...base, rm: true, gone: [3] }).drop).toEqual([3]);
+    expect(planRemovals({ ...base, inQueue: () => true, t: 1200, gone: [7], soldUntil: new Map([[7, 1100]]) }).drop).toEqual([7]);
+  });
+  it('startAbovePoint sits above the top edge, centred', () => {
+    expect(startAbovePoint({ left: 100, top: 200, width: 40 }, 20)).toEqual({ x: 120, y: 188 });
+    expect(startAbovePoint({ left: 0, top: 0, width: 0 }, 20)).toEqual({ x: 0, y: -12 });
+  });
+  it('riserTop guard boundary', () => {
+    expect(riserTop(300, 0)).toBe(256);
+    expect(riserTop(94, 0)).toBe(50);
+    expect(riserTop(93, 0)).toBeNull();
+    expect(riserTop(130, 40)).toBeNull();
+    expect(riserTop(134, 40)).toBe(90);
+  });
+  it('emptyHidden', () => {
+    expect(emptyHidden(0, 0, 0)).toBe(false);
+    expect(emptyHidden(1, 0, 0)).toBe(true); expect(emptyHidden(0, 1, 0)).toBe(true); expect(emptyHidden(0, 0, 1)).toBe(true);
   });
 });

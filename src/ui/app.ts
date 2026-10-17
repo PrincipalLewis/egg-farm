@@ -12,7 +12,7 @@ import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
 import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRecoveryDialog } from './save-recovery';
-import { visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coalesce } from './orders';
+import { startAbovePoint, riserTop, visibleOrders, stripSplit, stripSplitAt, slotPreview, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { instantSale, saleLine, compact } from './welcome-sale';
@@ -132,7 +132,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** startAbove: start the flight just above `from`'s top edge (it then only travels up/away), e.g. so coins never cross a 'Sold!' chip. */
   const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void, startAbove = false) => {
     const srcLive = from.isConnected && from.getBoundingClientRect().width > 0; // detached / hidden sources fall back to center() (QA bd0dc66, review ebbd02e #1)
-    const a = startAbove && srcLive ? (() => { const r = from.getBoundingClientRect(); return clampToSafe({ x: r.left + r.width / 2, y: r.top - size / 2 - 2 }, innerWidth, innerHeight, safeInsets()); })() : center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
+    const a = startAbove && srcLive ? clampToSafe(startAbovePoint(from.getBoundingClientRect(), size), innerWidth, innerHeight, safeInsets()) : center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
     const dx = (Math.random() - .5) * 30;
     el.animate([{ transform: `translate(${a.x - size / 2 + dx}px,${a.y - size / 2}px) scale(.6)` }, { transform: `translate(${(a.x + z.x) / 2}px,${Math.min(a.y, z.y) - 60}px) scale(1)`, offset: .45 },
       { transform: `translate(${z.x - size / 2}px,${z.y - size / 2}px) scale(.8)` }], { duration: b.feel.egg_flight_ms, delay: i * 40, easing: 'ease-in', fill: 'both' })
@@ -385,7 +385,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         floatText(`+${fmtMoney(e.value)}`, src, 'coin'); break; // same figure as the Sold! chip (incl. Grader), review ebbd02e #6
       }
       case 'customer_arrive': sfx('customerArrive'); break;
-      case 'customer_served': dwell.served(e.id, now()); orderList.sold(e.id, fmtMoneyShort(lastSale.get(e.id) ?? 0)); lastSale.delete(e.id); break;
+      case 'customer_served': dwell.served(e.id, now()); if (open === 'market' || docked.matches) orderList.sold(e.id, fmtMoneyShort(lastSale.get(e.id) ?? 0)); /* only freeze a rendered row; a hidden one drops unseen on the next update (review c1b4ef5 #1). Chip shows the completing sale, same figure as the pop (design decision, review c1b4ef5 #4) */ lastSale.delete(e.id); break;
       case 'customer_partial': { dwell.gone(e.id); lastSale.delete(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
       case 'customer_lost': if (e.id) lastSale.delete(e.id);
         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
@@ -393,7 +393,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         break;
       case 'upgrade': {
         sfx('upgrade'); const src = lastBuyBtn ?? uRow;
-        if (!rm()) { /* QA B4: the riser starts fully above the button and rises away, so it never covers the new price */ const c = center(src), top = src.getBoundingClientRect().top - 44; if (top - 48 >= safeInsets().t + 2) spawn(h(`<img class="riser" src="${A('icon-upgrade.svg')}" alt="" style="left:${c.x - 20}px;top:${top}px">`), 500); /* no room for the 48px rise above: skip rather than cover the price or leave the screen (review ebbd02e #7, rc0 FX corner) */ sparkle(src, 6); }
+        if (!rm()) { /* QA B4: the riser starts fully above the button and rises away, so it never covers the new price */ const c = center(src), top = riserTop(src.getBoundingClientRect().top, safeInsets().t); if (top !== null) spawn(h(`<img class="riser" src="${A('icon-upgrade.svg')}" alt="" style="left:${c.x - 20}px;top:${top}px">`), 500); /* no room for the 48px rise above: skip rather than cover the price or leave the screen (review ebbd02e #7, rc0 FX corner) */ sparkle(src, 6); }
         if (e.upgrade === 'farm' && !rm()) retrigger(scene, 'bump');
         pendingLvPop = true; goalNow = true; break;
       }
