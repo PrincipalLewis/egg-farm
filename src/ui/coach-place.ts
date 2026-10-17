@@ -72,3 +72,26 @@ export function tiredTipAfter(st: { seen: boolean; skips: number }, ev: 'shown' 
 }
 /** A tip that hasn't shown within MAX_DEFER_MS is dropped (never pops up minutes later). */
 export const deferExpired = (born: number, now: number, shown: boolean) => !shown && now - born > MAX_DEFER_MS;
+
+/** Rule D per-tick decision for a hidden tip (pure; review 4d3cc77 #1). Tired tip: one guarded auto-scroll on settled geometry, then skip. */
+export interface StepIn { autoScroll: boolean; reveal: boolean; shown: boolean; sheetOk: boolean; rowLaidOut: boolean; hasClip: boolean;
+  settled: boolean; scrolledAt: number; now: number; guardOk: boolean; delta: number | null; rowCut: boolean; revealed: boolean }
+export type Step = { act: 'wait' } | { act: 'skip' } | { act: 'scroll'; d: number } | { act: 'reveal' };
+export const SCROLL_SETTLE_MS = 800;
+export function coachStep(i: StepIn): Step {
+  const ready = i.sheetOk && i.rowLaidOut && i.hasClip && !i.shown;
+  if (i.autoScroll && ready) {
+    if (i.scrolledAt) return i.now - i.scrolledAt > SCROLL_SETTLE_MS ? { act: 'skip' } : { act: 'wait' };
+    if (!i.settled) return { act: 'wait' }; // the phone sheet may still be sliding in
+    if (!i.guardOk || i.delta === null) return { act: 'skip' };
+    return { act: 'scroll', d: i.delta };
+  }
+  if (i.reveal && ready && i.rowCut && !i.revealed && i.guardOk) return { act: 'reveal' };
+  return { act: 'wait' };
+}
+/** Re-arm the Manage tip on a later Workers visit until it has actually shown (review ddace62 #3). */
+export const manageRearm = (f: { tiredSeen?: boolean; manageSeen?: boolean; tiredWorker?: string }, tiredPending: boolean) => !!f.tiredSeen && !!f.tiredWorker && !f.manageSeen && !tiredPending;
+/** Rule D guard: keys that scroll the panel (not Enter/Space on a button, i.e. the Hire tap). */
+export const isUserScrollKey = (key: string, onButton: boolean) => !onButton && /^(Page(Up|Down)|Arrow(Up|Down)|Home|End| )$/.test(key);
+/** Rule D guard: only these panel events count as the player scrolling/touching (not pointerdown/touchstart: the Hire tap). */
+export const GUARD_EVENTS = ['wheel', 'touchmove'] as const;

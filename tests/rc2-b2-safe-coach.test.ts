@@ -77,10 +77,11 @@ describe('B-2 amended (rc2-notes A-C): safeCoachPlacement', () => {
     expect(runM(scene({ w: 390, h: 220 }, [], 80, 8, 374))).toBeNull();
     expect(runM(scene({ w: 390, h: 220 }, [], 84, 8, 374))).toEqual({ side: 'above', top: 8 });
   });
-  it('touching edges do not count as overlap (tip bottom == tab top; tip top == tab bottom)', () => {
+  it('touching edges (both edges) do not count as overlap (tip bottom == tab top; tip top == tab bottom)', () => {
     const s = scene({ w: 390, h: 740 }, [box(0, 440, 390, 44)], 300, 8, 374); // below band 372..440
     expect(run(s)?.side).toBe('below');
-    const s2 = scene({ w: 390, h: 740 }, [box(0, 441 - 1 - 1, 390, 44)], 300, 8, 374); expect(run(s2)?.side).not.toBe('below');
+    const s2 = scene({ w: 390, h: 740 }, [box(0, 439, 390, 44)], 300, 8, 374); expect(run(s2)).toBeNull(); // 1px into the band
+    const s3 = scene({ w: 390, h: 740 }, [box(0, 220, 390, 80)], 300, 8, 374); expect(runM(s3)?.side).toBe('below'); // tab bottom == row top: touching, fine
   });
   it('COACH_MIN_TOP boundary: target.top = 120 prefers above', () => {
     expect(safeCoachPlacement({ target: box(100, 120 + 80, 100, 44), tip: TIP, cx: 150, vp: { w: 400, h: 900 }, tabs: [], visible: true })?.side).toBe('above');

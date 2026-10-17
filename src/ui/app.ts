@@ -2,7 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
-import { safeCoachPlacement, autoScrollDelta, guardAllows, tiredTipAfter, deferExpired } from './coach-place';
+import { safeCoachPlacement, autoScrollDelta, guardAllows, tiredTipAfter, deferExpired, coachStep, manageRearm, isUserScrollKey, GUARD_EVENTS, COACH_MARGIN } from './coach-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -544,7 +544,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const row = rowId ? workerRow(rowId) : (at?.closest('.wk') ?? null); if (rowId && !at) at = row?.querySelector('.ebar') ?? null;
       const r = at?.getBoundingClientRect(), rr = rowId ? row?.getBoundingClientRect() : undefined;
       const sheetOk = !rowId || ((docked.matches || open === 'upgrades') && tab === 'workers');
-      const hw = Math.ceil((el.offsetWidth || 320) / 2) + 4, cx = r ? Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw) : innerWidth / 2;
+      const hw = Math.ceil((el.offsetWidth || 320) / 2) + COACH_MARGIN, /* 8px side margin (ddace62 #9) */ cx = r ? Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw) : innerWidth / 2;
       const tabs = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect());
       // legacy tips inside a worker row (hire): also keep off that row's name / Energy label / bar (902f924 #3)
       const avoid = !rowId && row ? [...row.querySelectorAll('h3, .meta, .ebar')].filter(x => !x.contains(at!) && !at!.contains(x)).map(x => x.getBoundingClientRect()) : [];
@@ -554,16 +554,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         // rule D: tired tip, sheet open, row laid out, but no clean spot -> one guarded auto-scroll, then skip this visit
         // decide only on settled geometry: two ticks in a row with the same row/panel rects (the phone sheet slides in, review ddace62 #2)
         const geo = rr && clip ? `${Math.round(rr.top)},${Math.round(clip.top)},${Math.round(clip.bottom)}` : ''; const settled = geo !== '' && geo === lastGeo; lastGeo = geo;
-        if (o.autoScroll && sheetOk && rr?.height && clip && !shown && (settled || scrolledAt)) {
-          const now = Date.now();
-          if (!scrolledAt) { const d = guardAllows(now, lastPanelUser) ? autoScrollDelta(rr, clip, tip.h, innerHeight) : null;
-            if (d === null) { skip(); return; }
-            scrolledAt = now; if (d) { autoScrollingUntil = now + 900; uRow.closest('.body')?.scrollBy({ top: d, behavior: rm() ? 'instant' : 'smooth' }); } }
-          else if (now - scrolledAt > 800) skip(); // still no fit after the scroll settled (e.g. 1024x474)
-        }
-        // Manage tip (reveal): if its row is cut off by the panel edge, bring it fully into view once (same guard)
-        if (o.reveal && !shown && sheetOk && rr?.height && clip && !revealed && (rr.top < clip.top || rr.bottom > clip.bottom) && guardAllows(Date.now(), lastPanelUser)) {
-          revealed = true; autoScrollingUntil = Date.now() + 900; row?.scrollIntoView({ block: 'nearest', behavior: rm() ? 'instant' : 'smooth' }); }
+        const now = Date.now(), cut = !!(rr && clip && (rr.top < clip.top || rr.bottom > clip.bottom)), guardOk = guardAllows(now, lastPanelUser);
+        const st = coachStep({ autoScroll: !!o.autoScroll, reveal: !!o.reveal, shown, sheetOk, rowLaidOut: !!rr?.height, hasClip: !!clip, settled, scrolledAt, now, guardOk,
+          delta: o.autoScroll && rr && clip && !scrolledAt && settled && guardOk ? autoScrollDelta(rr, clip, tip.h, innerHeight) : null, rowCut: cut, revealed });
+        if (st.act === 'skip') { skip(); return; }
+        if (st.act === 'scroll') { scrolledAt = now; if (st.d) { autoScrollingUntil = now + 900; uRow.closest('.body')?.scrollBy({ top: st.d, behavior: rm() ? 'instant' : 'smooth' }); } }
+        if (st.act === 'reveal') { revealed = true; autoScrollingUntil = now + 900; row?.scrollIntoView({ block: 'nearest', behavior: rm() ? 'instant' : 'smooth' }); }
         return; }
       el.style.cssText = `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
       el.classList.toggle('below', p.side === 'below');
@@ -577,10 +573,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let lastPanelUser = -Infinity, autoScrollingUntil = 0;
   { const body = uRow.closest('.body'); const mark = () => { lastPanelUser = Date.now(); };
     // only scroll gestures count (review ddace62 #1): the tap/Enter on Hire must not block the auto-scroll it causes
-    if (body) { for (const ev of ['wheel', 'touchmove']) body.addEventListener(ev, mark, { passive: true });
-      body.addEventListener('keydown', e => { const k = (e as KeyboardEvent).key; if (/^(Page(Up|Down)|Arrow(Up|Down)|Home|End| )$/.test(k) && !(e.target as HTMLElement).closest('button')) mark(); });
+    if (body) { for (const ev of GUARD_EVENTS) body.addEventListener(ev, mark, { passive: true });
+      body.addEventListener('keydown', e => { if (isUserScrollKey((e as KeyboardEvent).key, !!(e.target as HTMLElement).closest('button'))) mark(); });
       body.addEventListener('scroll', () => { if (Date.now() > autoScrollingUntil) mark(); }, { passive: true }); } }
-  const showGoalIntro = () => { g.telemetry.onboardingStep(5, 'next_goal_intro'); coach('Your next goal is always shown here.', goalBtn, 4000, { cls: 'toastlike' }); };
+  const showGoalIntro = () => { coach('Your next goal is always shown here.', goalBtn, 4000, { cls: 'toastlike', onShow: () => g.telemetry.onboardingStep(5, 'next_goal_intro') }); }; // step 5 logged only once it actually showed (ddace62 #7)
   let introA: HTMLElement | null = null, introBStage = 0;
   const workerRow = (id: string) => uRow.querySelector(`[data-w=${id}]`);
   const renderWorkersIntro = () => {
@@ -628,7 +624,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const visitIv = window.setInterval(() => { if (flags.tiredSeen && flags.manageSeen) { clearInterval(visitIv); return; } // nothing left to teach (review ddace62 #8)
     const v = (docked.matches || open === 'upgrades') && tab === 'workers'; if (!v) visitActive = false; else if (!visitActive) { startTiredVisit();
     // Manage tip re-armed on later visits until it has actually shown (e.g. it was dropped after the tired tip showed)
-    if (flags.tiredSeen && flags.tiredWorker && !flags.manageSeen && !tiredPending) { visitActive = true; showManage(flags.tiredWorker, 300); } } }, 250);
+    if (manageRearm(flags, tiredPending)) { visitActive = true; showManage(flags.tiredWorker!, 300); } } }, 250);
   g.on(e => {
     if (e.type !== 'worker_hire' || flags.workersIntroB) return;
     flags.workersIntroB = true; flags.tiredWorker = e.worker; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
