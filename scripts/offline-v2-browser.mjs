@@ -25,7 +25,7 @@ const popup = async (page, eggs, awayS) => {
 const measure = page => page.evaluate(() => {
   const card = document.querySelector('.welcome-v2'), r = e => e && e.getBoundingClientRect(), btn = document.querySelector('#wbCollect'), cs = getComputedStyle(card);
   const contentW = card.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const lines = [...card.children].filter(e => !e.classList.contains('sr') && !e.classList.contains('close'));
+  const lines = [...card.children, ...(card.querySelector('.wb-body')?.children ?? [])].filter(e => !e.classList.contains('wb-body')).filter(e => !e.classList.contains('sr') && !e.classList.contains('close'));
   const trunc = lines.some(e => e.scrollWidth > e.clientWidth + 1 || getComputedStyle(e).textOverflow === 'ellipsis');
   return { contentW, card: r(card).toJSON(), cardSH: card.scrollHeight, cardCH: card.clientHeight, btn: r(btn).toJSON(), a: r(card.querySelector('.wb-a')).toJSON(), hero: r(card.querySelector('.wb-hero')).toJSON(),
     heroText: card.querySelector('#wbN').textContent, rateHidden: card.querySelector('.wb-rate').hidden, text: card.innerText, trunc, vh: innerHeight,
@@ -50,7 +50,7 @@ for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 8
 { // short height: the rate line drops first
   const { ctx, page } = await open(360, 420); await popup(page, 1_234_567, 11_520); const m = await measure(page);
   if (ENGINE === 'chromium') await page.screenshot({ path: `${SHOTS}/offline-v2-capped-short-360x420.png` });
-  ok('C-AC33 short height: rate line dropped first, cap line kept, Collect visible', m.rateHidden && m.text.includes('Offline limit') && m.btn.bottom <= m.vh, JSON.stringify({ r: m.rateHidden, btn: m.btn, vh: m.vh })); await ctx.close();
+  ok('C-AC33 short height: card <= 80vh, rate line dropped first, Collect pinned at the card bottom and visible', m.rateHidden && m.card.height <= m.vh * 0.8 + 1 && m.btn.bottom <= m.card.bottom && m.card.bottom - m.btn.bottom <= 40 && m.btn.bottom <= m.vh, JSON.stringify({ r: m.rateHidden, btn: m.btn, vh: m.vh })); await ctx.close();
 }
 { // not capped, reduced motion: static number, no pop
   const { ctx, page } = await open(390, 844, true);
