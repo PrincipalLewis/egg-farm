@@ -130,8 +130,9 @@ describe('S2-1 coop tiers + toast (session2-ui-triage (c), layout-spec §4.7)', 
 describe('AC14b save-recovery dialog v1.2 (UI only)', () => {
   const src = readFileSync(new URL('../src/ui/save-recovery.ts', import.meta.url), 'utf8');
   it('alertdialog; buttons are type=button; Export old save is a <button> with a 44px tap area', () => {
-    expect(src).toContain('role="alertdialog" aria-modal="true"'); expect(src).toContain('id="rcGo" type="button"');
-    expect(src).toMatch(/<button class="\$\{r\.copy_failed \? 'btn rc-export-q' : 'rc-link'\}" id="rcExport" type="button">Export old save<\/button>/);
+    // after merging main: save-recovery.ts is main's v2.x dialog (its own tests in save-recovery-v21.test.ts); keep the AC14b invariants only
+    expect(src).toContain('role="alertdialog" aria-modal="true"'); expect(src).toMatch(/id="rcGo" type="button"/);
+    expect(src).toMatch(/<button class="rc-export-q" id="rcExport" type="button"/); expect(src).toMatch(/<button class="rc-link" id="rcExport" type="button"/);
     expect(css).toMatch(/#rcExport\{min-height:44px;min-width:44px\}/);
   });
   it('Esc / Back / outside taps are swallowed; storage-full keeps the old save in memory only (no storage write in the dialog)', () => {
