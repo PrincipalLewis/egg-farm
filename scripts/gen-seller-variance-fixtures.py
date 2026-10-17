@@ -59,7 +59,7 @@ for s in range(4):
   for _ in range(10): d += [V.check(15), V.tap(), float(V.r.random()), V.r.lognormvariate(0, 0.35)]
   draws[str(s)] = dict(skill=V.skill, seq=d)
 sha = lambda p: hashlib.sha256(open(p, 'rb').read()).hexdigest()[:8]
-out = dict(source='product/sim/seller_variance_sim.py run/run_m2 policy=seller15', sim_sha256=sha(os.path.join(SIM, 'seller_variance_sim.py')),
+out = dict(source='vendor/economy-sim/sim/seller_variance_sim.py (vendored from product/sim/) run/run_m2 policy=seller15', sim_sha256=sha(os.path.join(SIM, 'seller_variance_sim.py')),
            proposal_sha256=sha(os.path.join(SIM, 'seller-variance-proposal.md')), economy_csv_sha256=sha(CSV), config=PRESET + ' + spec_from_csv(data/economy.csv)',
            python=sys.version.split()[0], T=T, seeds=SEEDS, var=S.VAR_DEFAULT, draws=draws, traces=traces, runs=runs)
 path = os.path.join(ROOT, 'tests', 'fixtures', 'seller_variance.json')

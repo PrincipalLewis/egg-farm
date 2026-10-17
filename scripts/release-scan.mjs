@@ -26,6 +26,9 @@ function close(s, i) {
   for (let j = i; j < s.length && j < i + MAX_KEY; j++) {
     const c = s[j];
     if (c === '"' || c === "'" || c === '`') { const q = c; for (j++; j < s.length && s[j] !== q; j++) if (s[j] === '\\') j++; continue; }
+    // L-3 (QA): a comment inside the key (`window[k // ]\n]=1`, `window[k /* ] */]=1`) must not end the bracket early.
+    if (c === '/' && s[j + 1] === '/') { const e = s.indexOf('\n', j); if (e < 0) return -1; j = e; continue; }
+    if (c === '/' && s[j + 1] === '*') { const e = s.indexOf('*/', j + 2); if (e < 0) return -1; j = e + 1; continue; }
     if (c === open) d++; else if (c === shut && --d === 0) return j + 1;
   }
   return -1;
@@ -155,11 +158,17 @@ export function findUnresolvedRefs(html, scripts = []) {
   return out;
 }
 
-/** Single-file only: <meta name="build-id" content> and data-build-id values (F-META). */
+/** Single-file only: <meta name="build-id" content> and data-build-id values (F-META). HTML comments are ignored (L-2);
+ *  `attrs` = every data-build-id, `appAttrs` = those on the element with id="app" (the only place it may be). */
 export function findBuildIdMarkup(html) {
-  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '<script></script>');
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '<script></script>').replace(/<!--[\s\S]*?(?:-->|$)/g, '');
   const metas = [...markup.matchAll(/<meta\b[^>]*>/gi)].map(m => m[0]).filter(t => /\bname\s*=\s*["']?build-id["'\s>/]/i.test(t))
     .map(t => (/\bcontent\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(t) ?? []).slice(1).find(x => x !== undefined) ?? null);
-  const attrs = [...markup.matchAll(/\sdata-build-id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)].map(m => m[1] ?? m[2] ?? m[3]);
-  return { metas, attrs };
+  const ATTR = /\sdata-build-id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+  const attrs = [], appAttrs = [];
+  for (const [tag] of markup.matchAll(/<[a-z][^>]*>/gi)) {
+    const isApp = /\sid\s*=\s*(?:"app"|'app'|app(?=[\s>/]))/i.test(tag);
+    for (const m of tag.matchAll(ATTR)) { const v = m[1] ?? m[2] ?? m[3]; attrs.push(v); if (isApp) appAttrs.push(v); }
+  }
+  return { metas, attrs, appAttrs };
 }

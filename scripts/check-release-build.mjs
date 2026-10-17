@@ -12,6 +12,7 @@ for (let i = 0; i < args.length; i++) {
   else if (a.startsWith('--')) fail(`unknown option ${a}`);
   else rest.push(a);
 }
+if (rest.length > 1) fail(`expected one path, got ${rest.length}: ${rest.join(' ')} (scan one build per run)`);
 const target = rest[0] || 'dist';
 if (!existsSync(target)) fail(`${target} does not exist`);
 const single = statSync(target).isFile();
@@ -45,9 +46,10 @@ if (single || expectId) {
 }
 // F-META: single file carries exactly one <meta name="build-id"> and one data-build-id, both = the script id (and --build-id).
 if (single) {
-  const { metas, attrs } = findBuildIdMarkup(html);
+  const { metas, attrs, appAttrs } = findBuildIdMarkup(html);
   if (metas.length !== 1) fail(`expected exactly one <meta name="build-id">, found ${metas.length}`);
   if (attrs.length !== 1) fail(`expected exactly one data-build-id attribute, found ${attrs.length}`);
+  if (appAttrs.length !== 1) fail('data-build-id must be on the #app element (id="app"), not another element');
   if (metas[0] !== ids[0]) fail(`<meta name="build-id"> content "${metas[0]}" != script build id ${ids[0]}`);
   if (attrs[0] !== ids[0]) fail(`data-build-id "${attrs[0]}" != script build id ${ids[0]}`);
   console.log(`check-release-build: build-id meta + data-build-id = ${ids[0]} ok`);

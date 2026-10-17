@@ -10,14 +10,16 @@ releases/tags are cut outside CI. Run the same commands locally before merging o
 | ci / `slow` | `npm run test:slow` | 100-seed seller-variance TS-vs-Python parity, AC7 band |
 | ci / `release-globals (chromium)`, `release-globals (webkit)`, `release-globals (firefox)` | `npm run build` (ends in `check-release-build dist`), `npm run check-globals -- <engine>` | dist release build + **runtime** window-globals allowlist |
 | ci / `release-html` | `npm run build:html`, then `check-release-build dist-html/egg-farm.html --build-id <BUILD_PREFIX>+<commit>`; uploads `egg-farm-html` artifact | single-file release html |
-| release-asset / `check-uploaded-html` | on release published/edited (or manual): `gh release download <tag> --pattern '*.html'`, `check-release-build <file> --build-id <BUILD_PREFIX>+<tag commit>` | the html actually attached to the release |
+| release-asset / `check-uploaded-html` | on release published/edited (or manual): `gh release download <tag> --pattern '*.html'`, `check-release-build <file> --build-id <BUILD_PREFIX>+<tag commit>` | the html actually attached to the release. A **post-publish detector**: it runs after the release is published, so a failure means the bad file was already public; pull/fix the asset. It does not block publishing. |
 
 ### Recommendation (repo setting, not changed by this PR)
 Protect `main` and make `unit`, `release-globals (chromium|webkit|firefox)` and `release-html` required status checks; build the
 release asset with `npm run build:html` and attach that exact file, so `check-uploaded-html` re-verifies what players download.
 
 ## check-release-build (`scripts/check-release-build.mjs`, scans in `scripts/release-scan.mjs`)
-`node scripts/check-release-build.mjs <dist-dir | file.html> [--build-id <id> | --build-id=<id>]`
+`node scripts/check-release-build.mjs <dist-dir | file.html> [--build-id <id> | --build-id=<id>]` (exactly one path; extra paths exit 1).
+Single file: HTML comments are ignored by the meta/attribute checks, and the one `data-build-id` must be on `#app`.
+`npm run check-globals` serves on a free port (printed) unless `PORT` is set.
 The tool is **fail-fast**: it exits 1 at the first failing check and reports only that category; fix and rerun to see the next.
 - Build id: present, not `+dirty`/`+unknown`; single-file (or `--build-id`): exactly one id, equal to `--build-id`/`EXPECT_BUILD_ID`, else `<BUILD_PREFIX>+<HEAD>`.
 - No `eggfarmUi`, QA hooks (`eggfarmPerf`, `eggfarmOnb`, `eggfarmQaRecovery`, `?debug`/`?perf`/`?ios`), sampler/panel chunks.
@@ -57,6 +59,10 @@ source of truth for builds; Economy changes it through a PR.
   Example: `npm run check-economy-copy -- --product`.
 - The drift warning in `tests/economy.test.ts` (local `product/` sim vs vendored sha) also runs only with `ECONOMY_PRODUCT_CHECK=1`.
 - `--strict` implies `--product` (a mistyped release-gate command cannot pass green) and makes the check exit 1 on a mismatch or a missing product file. It also compares the sha256 of every vendored file listed in `vendor/economy-sim/SOURCE` against its `product/` counterpart (and against the SOURCE pin), failing closed on drift or a missing file.
+- `product/economy.csv` is the single canonical shipping file (ADR M3-ECON-1, decisions.md): `--strict` always compares `data/economy.csv` with it, never with a variant such as `product/economy.f1-m4cols.csv`. Economy promotes the shipping variant byte-for-byte into `product/economy.csv` before an rc tag.
+- Under `--strict` the CSV comparison is raw sha256 (CRLF/BOM count as drift); only the non-strict warn mode normalises line endings. `.gitattributes` keeps repo CSVs LF and marks `vendor/economy-sim/**` `-text` (no EOL conversion, so sha pins survive `core.autocrlf=true` checkouts).
+- Stale checkouts: a `core.autocrlf=true` checkout made before the `-text` rule (c6c4458) keeps CRLF vendored files after switching to a newer commit, so all four pins fail (fail-closed). Fix: `rm -rf vendor && git checkout -- vendor`, then rerun `node scripts/check-vendor-pins.mjs`. Fresh clones are unaffected.
+- `npm run test:slow` first runs `scripts/check-vendor-pins.mjs` (every `vendor/economy-sim/SHA256SUMS` pin, missing SHA256SUMS and unlisted files fail), so the slow suites alone never run a tampered vendored sim; the default suite checks the same pins in `tests/economy.test.ts`.
 - `ECONOMY_VENDOR_DIR` (test-only) overrides the vendor dir read by `--strict`. It is honoured only when `process.env.VITEST` is set (the path is printed to stderr); outside vitest it is ignored with a warning, so a release-gate run always checks the in-repo `vendor/economy-sim`. Under `--strict` the (path, sha) sets of SOURCE and SHA256SUMS must be identical, and SOURCE paths resolving outside the vendor dir are rejected.
 
 ## Economy numbers: decided rule
@@ -67,4 +73,5 @@ source of truth for builds; Economy changes it through a PR.
     `npm run check-economy-copy -- --product` before each handoff, and hands the sha(s) to
     **Features (Senior Engineer, Features & Economy Wiring), who opens the repo PR.**
 (b) The pre-release checklist runs `npm run check-economy-copy -- --product --strict` on a studio machine and
-    **blocks the release on drift** between the repo and `product/`. **Owner: the release owner.**
+    **blocks the release on drift** between the repo and `product/`. **Owner: the release owner.** This is a manual
+    pre-release step by design: no CI job runs `--strict` (CI has no `product/`).

@@ -91,3 +91,21 @@ it('N1/N2: unbalanced, over-long or regex-literal keys fail closed', () => {
   expect(keys(`window["${'x'.repeat(5000)}"]=1`)).toEqual(['[unparsed key]']);
   expect(keys('window[a/2].y=1;x=window[a/b];c[0]=1')).toEqual([]);
 });
+// L-1..L-3 (QA pr13-release-check-8475bc4): extra path args, comment-blind F-META / data-build-id not on #app, // in a bracket key.
+it('L-1: a second/extra path argument exits 1', () => {
+  const r = exec(fx('pass'), fx('pass')); expect(r.status).toBe(1); expect(r.stderr).toMatch(/expected one path, got 2/);
+  expect(exec(fx('pass'), 'bogus.html', 'x.html').stderr).toMatch(/got 3/);
+});
+it.each([
+  ['fail-meta-in-comment', /exactly one <meta name="build-id">, found 0/],
+  ['fail-data-attr-in-comment', /exactly one data-build-id attribute, found 0/],
+  ['fail-data-attr-not-app', /must be on the #app element/],
+  ['fail-line-comment-in-key', /computed k \/\/ \]/],
+])('L-2/L-3: %s fails', (n, msg) => { const r = run(n); expect(r.status).toBe(1); expect(r.stderr).toMatch(msg); });
+it('L-2: build-id markup inside an HTML comment is ignored (pass)', () => { const r = run('pass-commented-build-id'); expect(r.stderr).toBe(''); expect(r.status).toBe(0); });
+it('L-3: comments inside a bracket key do not end it early', () => {
+  expect(keys('window[k // ]\n]=1')).toEqual(['[computed k // ]]']);
+  expect(keys('window[k /* ] */]=1')).toEqual(['[computed k /* ] */]']);
+  expect(keys('window["eggfarmExportTelemetry" // c ]\n]=1')).toHaveLength(1); // commented const key: flagged (fail closed)
+  expect(keys('window[k // ]')).toEqual(['[unparsed key]']);
+});
