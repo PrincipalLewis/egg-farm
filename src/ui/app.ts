@@ -149,19 +149,20 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
   /* toast-v3 / review 148591a: the show/settle/dismiss state machine lives in toast-place.ts (pure, unit-tested).
-     main merge: M4-A tier/milestone toasts (Art&UX 02:54 #1) sit top-centre under the HUD (HUD bottom + 8px) and queue in order. */
-  let toastAtHud = false;
+     M4-A tier/milestone toasts (Art&UX 02:54 #1) sit top-centre under the HUD (HUD bottom + 8px) and queue in order.
+     toastBusy is set synchronously: the controller adds .show on the next frame, so .show cannot tell a same-frame caller a toast is pending. */
+  let toastAtHud = false, toastBusy = false;
   const placeToast = () => { if (toastAtHud) { toast.style.top = `${Math.round(Math.max(0, hud.getBoundingClientRect().bottom) + 8)}px`; toast.classList.remove('below'); return; }
     const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0;
     /* F1: below the queue strip; rc2: never over the 'New helper!' hire banner */ const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); };
   /** M4-A: several milestones can land in one buy; each gets its own toast, in order, never overwritten. */
   const toastQ: string[] = [];
   const toastShow = toastController({ shown: () => toast.classList.contains('show'), opacity: () => +getComputedStyle(toast).opacity, show: () => toast.classList.add('show'),
-    hide: () => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx, true), 250); },
+    hide: () => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx, true), 250); else toastBusy = false; },
     transitions: on => { toast.style.transition = on ? '' : 'none'; }, reflow: () => { void toast.offsetHeight; }, place: placeToast },
     { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms), clearTimeout: id => clearTimeout(id) });
-  const showToast = (text: string, atHud = false) => { toast.textContent = text; toastAtHud = atHud; toastShow(); };
-  const queueToasts = (texts: string[]) => { if (!texts.length) return; if (toast.classList.contains('show')) toastQ.push(...texts); else { showToast(texts[0], true); toastQ.push(...texts.slice(1)); } };
+  const showToast = (text: string, atHud = false) => { toast.textContent = text; toastAtHud = atHud; toastBusy = true; toastShow(); };
+  const queueToasts = (texts: string[]) => { if (!texts.length) return; if (toastBusy) toastQ.push(...texts); else { showToast(texts[0], true); toastQ.push(...texts.slice(1)); } };
 
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
