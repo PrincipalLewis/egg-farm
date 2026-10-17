@@ -3,6 +3,22 @@ import { GameState, initialState, coopTier } from '../sim/state';
 export const SAVE_KEY = 'eggfarm.save';
 export const SAVE_VERSION = 6;
 export interface SaveFile { version: number; savedAt: number; state: GameState; }
+const carryFrac = (f: unknown): Record<string, number> => {
+  const o: Record<string, number> = {}; if (!f || typeof f !== 'object' || Array.isArray(f)) return o;
+  for (const [k, v] of Object.entries(f)) if (typeof v === 'number' && Number.isFinite(v) && v >= 0 && v < 1) o[k] = v;
+  return o;
+};
+/** SD6-2 / BUG-6: a top-level savedAt written as a bare NaN / Infinity token (not JSON) is read as null, so the save takes the
+ *  missing-savedAt path (progress kept, savedAt re-stamped now, 0 offline, no recovery dialog, no corrupt copy). Only the
+ *  header before "state" is touched; the state bytes (and so the checksum) are unchanged. */
+export function parseSave(raw: string): any {
+  try { return JSON.parse(raw); } catch (e) {
+    const i = raw.indexOf('"state":'); if (i < 0) throw e;
+    const head = raw.slice(0, i).replace(/("savedAt"\s*:\s*)[-+]?(?:NaN|Infinity)(\s*,)/, '$1null$2');
+    if (head === raw.slice(0, i)) throw e;
+    return JSON.parse(head + raw.slice(i));
+  }
+}
 /** migrations[n] upgrades a version-n save to n+1 */
 const migrations: Record<number, (d: any) => any> = {
   // v1 stored coins as float dollars; v2 stores integer cents.
@@ -14,7 +30,8 @@ const migrations: Record<number, (d: any) => any> = {
   // v5 (M2): no workers hired, no Grader tier, Manage ready.
   4: (d) => ({ ...d, version: 5, state: { ...d.state, workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0 } }),
   // v6 (S2-8): exact wages carry the leftover fraction of a cent; older saves start with nothing owed.
-  5: (d) => ({ ...d, version: 6, state: { ...d.state, wageFracCents: {} } }),
+  // SD6-3: carry a fraction a v5 save already holds (valid numbers in [0, 1) only); none -> {}.
+  5: (d) => ({ ...d, version: 6, state: { ...d.state, wageFracCents: carryFrac(d.state?.wageFracCents) } }),
 };
 /** M4-safety: the save version when a stored save is from a NEWER build (version > SAVE_VERSION), else null.
  *  Such a save is never migrated, preserved, overwritten or cleared by this build (and neither is .bak / IndexedDB). */
@@ -119,7 +136,7 @@ const NUM_FIELDS = ['coinsCents', 'coop', 'basket', 'collectionLevel', 'farmLeve
 /** Parse + checksum (when present; pre-rc0 saves have none) + state validation + migration. */
 export function validate(raw: string, b: Balance, now = 0): { ok: true; file: SaveFile } | { ok: false; reason: CorruptReason } {
   if (!raw.trim()) return { ok: false, reason: 'empty' };
-  let d: any; try { d = JSON.parse(raw); } catch { return { ok: false, reason: 'parse' }; }
+  let d: any; try { d = parseSave(raw); } catch { return { ok: false, reason: 'parse' }; }
   if (!d || typeof d !== 'object' || Array.isArray(d) || typeof d.version !== 'number' || (d.savedAt !== undefined && d.savedAt !== null && typeof d.savedAt !== 'number')) return { ok: false, reason: 'wrong_type' };
   if (d.version > SAVE_VERSION || d.version < 1 || !Number.isInteger(d.version)) return { ok: false, reason: 'version' };
   if (d.state === undefined || d.state === null) return { ok: false, reason: 'missing_state' };

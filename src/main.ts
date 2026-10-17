@@ -37,7 +37,9 @@ function showError() {
 let heldNotice: string | null = null, holdNotices = false; // v2.2 fix 2: no bottom toast while the recovery dialog is open
 document.addEventListener(RECOVERY_CLOSED, () => { holdNotices = false; if (heldNotice) { const t = heldNotice; heldNotice = null; saveNotice(t); } });
 function saveNotice(text: string) {
-  if (holdNotices) { heldNotice ??= text; return; }
+  // SD6-1 (HoE): the no-storage notice is a persistent status, never held behind the recovery dialog (the player must
+  // know progress isn't being saved even if the dialog is dismissed late or never mounts). Other notices still wait.
+  if (holdNotices && text !== NO_STORAGE_TEXT) { heldNotice ??= text; return; }
   if (document.querySelector('.save-warn')) return;
   const n = document.createElement('div'); n.className = 'save-warn'; n.setAttribute('role', 'status'); n.textContent = text; document.body.append(n);
 }

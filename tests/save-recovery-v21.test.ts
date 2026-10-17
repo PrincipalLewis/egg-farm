@@ -91,7 +91,7 @@ describe("v2.2 'Can't save' (storage refused, farm loaded)", () => {
   });
   it('main.ts holds the save-warning toast until the dialog closes (fix 2), and Export uses the live farm', () => {
     const src = readFileSync('src/main.ts', 'utf8');
-    expect(src).toMatch(/if \(holdNotices\) \{ heldNotice \?\?= text; return; \}/);
+    expect(src).toMatch(/if \(holdNotices && text !== NO_STORAGE_TEXT\) \{ heldNotice \?\?= text; return; \}/);
     expect(src).toMatch(/addEventListener\(RECOVERY_CLOSED[\s\S]{0,120}holdNotices = false/);
     expect(src).toMatch(/g\.recovery\.live = \(\) => serialize\(g\.state/);
     expect(readFileSync('src/ui/save-recovery.ts', 'utf8')).toMatch(/layer\.remove\(\); document\.dispatchEvent\(new Event\(RECOVERY_CLOSED\)\)/);
