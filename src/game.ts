@@ -92,7 +92,9 @@ export class Game {
   /** Called once when the guard first blocks a write. */
   onInactive: (() => void) | null = null;
   /** Stop sim + saving (another tab took the save). */
-  deactivate() { if (this.inactive) return; this.inactive = true; this.onInactive?.(); }
+  deactivate() { if (this.inactive) return; this.inactive = true; this.endHiddenOnFreeze(); this.onInactive?.(); }
+  /** CCR m1: a tab frozen (tab guard / newer save) while hidden ends its hidden period now (mode 'none'), so it can never stay open. */
+  private endHiddenOnFreeze() { if (this.hidden) this.onShown(this.now()); }
   /** Hand-over hold (another tab asked us to flush): no sim, no saves until the claim arrives or the hold expires. */
   holdUntil = 0;
   private held() { return this.now() < this.holdUntil; }
@@ -125,7 +127,7 @@ export class Game {
   /** Stop all writes for good (sim too), drop the mirror and hand control to main.ts (release lease, .newer-save layer). */
   private refuseNewer(v: number) {
     if (this.newerSave !== null && this.readOnly) return;
-    this.newerSave = v; this.readOnly = true; this.inactive = true; this.mirror = null;
+    this.newerSave = v; this.readOnly = true; this.inactive = true; this.mirror = null; this.endHiddenOnFreeze();
     this.telemetry.track('save_newer_version', { version: v, build: this.build, live: true });
     this.onNewerSave?.(v);
   }

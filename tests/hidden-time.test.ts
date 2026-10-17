@@ -160,3 +160,24 @@ describe('m2: hidden online sim counts toward .bak playedMs', () => {
     expect(g.backupAllowed).toBe(true);
   });
 });
+
+describe('CCR m1/n1/n2 follow-ups', () => {
+  it('m1: tab guard freeze while hidden ends the hidden period (one none-mode result, never left open)', () => {
+    const { g, clock, got, off } = setup(); g.onHidden(clock.t); clock.t += 5_000;
+    g.deactivate();
+    expect(g.isHidden).toBe(false); expect(got.length).toBe(1); expect(got[0].mode).toBe('none');
+    clock.t += 1_000; expect(g.onShown(clock.t)).toBe(0); expect(got.length).toBe(1); off();
+  });
+  it('n1: 1000 periods stay exactly-once (accounted state bounded to the last id)', () => {
+    const { g, clock, got, off } = setup();
+    for (let i = 0; i < 1000; i++) {
+      const s = clock.t; g.onHidden(s); clock.t += 10; accountHiddenPeriod(g, { startAt: s, endAt: clock.t });
+      expect(accountHiddenPeriod(g, { startAt: s, endAt: clock.t })).toBeNull();
+    }
+    expect(got.length).toBe(1000); expect(new Set(got.map(r => r.periodId)).size).toBe(1000); off();
+  });
+  it('n2: offline-grant capped only beyond offlineCapSeconds', () => {
+    const { g, clock, got, off } = setup(); g.onHidden(clock.t); clock.t += 600_000; g.onShown(clock.t);
+    expect(got[0].mode).toBe('offline-grant'); expect(got[0].capped).toBe(false); off();
+  });
+});
