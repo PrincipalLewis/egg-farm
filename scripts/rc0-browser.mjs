@@ -83,13 +83,15 @@ sections.b2tip = async () => {
     return { t: Math.round(b.top), b: Math.round(b.bottom), l: Math.round(b.left), r: Math.round(b.right), tabOv: Math.round(tabs.reduce((s, t) => s + ar(b, t), 0)), rowOv: parts.filter(x => ar(b, R(x)) > 0).map(x => x.className || x.tagName).slice(0, 4), inVp: b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth, rowVis: !!row && R(row).height > 0 && R(row).top < innerHeight && R(row).bottom > 0, sheet }; };
   // rule D (02:15): the tired tip must show at every size (auto-scroll at docked 1280x720/600) except 1024x474, where it is skipped
   // and the Manage tip shows alone; 'guard' = the player scrolled the panel just before the hire -> no auto-scroll, skipped visit, Manage alone
-  const cases = [...['direct', 'normal'].flatMap(m => sizes.map(sz => [m, ...sz])), ...(process.env.B2_SIZES ? [] : [['guard', 1280, 720]])];
+  const cases = [...['direct', 'normal'].flatMap(m => sizes.map(sz => [m, ...sz])), ...(process.env.B2_SIZES ? [] : [['guard', 1280, 720], ['click', 1280, 720], ['click', 1280, 600]])];
   for (const [mode, w, h] of cases) {
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify(mode !== 'normal' ? { onboardingDone: true, workersIntroA: true } : { onboardingDone: true }) } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 5e6 }; }); await page.waitForTimeout(400);
     if (mode === 'normal') await page.locator('#iaOpen').click({ timeout: 8000 }).catch(() => {}), await page.waitForTimeout(400);
     if (mode === 'guard') { await page.locator('[data-nav=upgrades]').click({ timeout: 2000 }).catch(() => {}); await page.evaluate(() => { const b = document.querySelector('#uRow').closest('.body'); b.dispatchEvent(new WheelEvent('wheel', { deltaY: 10, bubbles: true })); }); }
-    await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' }));
+    // 'click' = a real tap on Hire (review ddace62 #1: the tap must not trip the scroll guard)
+    if (mode === 'click') { await page.locator('[data-nav=upgrades]').click({ timeout: 2000 }).catch(() => {}); await page.evaluate(() => { const ws = [...document.querySelectorAll('[role=tab]')].find(t => /Workers/.test(t.textContent)); ws?.click(); }); await page.waitForTimeout(300); await page.locator('#uRow [data-w=market_hand] button.btn').first().click({ timeout: 4000 }); }
+    else await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' }));
     const S = []; let shotDone = false, opened = false, M = null, afterRerender = null; const t0 = Date.now(), skipExpected = mode === 'guard' || (w === 1024 && h === 474), MB = [];
     while (Date.now() - t0 < 8000) { const c = await page.evaluate(SNAP); if (c) S.push(c);
       if (c && !shotDone && shot) { await page.waitForTimeout(120); await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}.png` }); shotDone = true; }
@@ -102,6 +104,7 @@ sections.b2tip = async () => {
       await page.waitForTimeout(100); }
     const bad = [...S, ...MB].filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet);
     if (M && !afterRerender) bad.push({ manageGoneAfterRerender: true });
+    if (w < 960 && mode === 'direct') { const st = await page.evaluate(() => document.querySelector('#uRow').closest('.body').scrollTop); if (st !== 0) bad.push({ phoneScrolled: st }); } // review ddace62 #2: no nudge on phones where it fits
     const flags = await page.evaluate(() => { const f = JSON.parse(localStorage.getItem('eggfarm.ui') || '{}'); return { seen: f.tiredSeen, skips: f.tiredSkips }; });
     const info = JSON.stringify({ n: S.length, skipExpected, manage: M, flags, first: S[0] ?? 'not shown', bad: bad[0] ?? null, errors });
     const pass = !bad.length && !errors.length && !!M && (skipExpected ? !S.length && flags.skips === 1 && !flags.seen : S.length > 0 && flags.seen === true);

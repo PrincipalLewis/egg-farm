@@ -30,7 +30,7 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; tiredWorker?: string; tiredSeen?: boolean; tiredSkips?: number; sessions?: number; iosHomeShown?: boolean }
+interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; tiredWorker?: string; tiredSeen?: boolean; tiredSkips?: number; manageSeen?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
@@ -534,7 +534,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     document.querySelectorAll('.coach').forEach(e => e.remove());
     const el = h(`<div class="coach ${o.cls ?? ''}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     el.style.visibility = 'hidden'; el.style.left = '0'; el.style.top = '0'; document.body.append(el);
-    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, scrolledAt = 0, done = false, revealed = false;
+    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, scrolledAt = 0, done = false, revealed = false, lastGeo = '';
     const inVp = (r: DOMRect) => r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
     const born = Date.now(), rowId = o.rowId;
     const skip = () => { if (done) return; done = true; close(); o.onSkip?.(); };
@@ -552,7 +552,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const p = r ? safeCoachPlacement({ target: r, tip, cx, vp: { w: innerWidth, h: innerHeight }, tabs, avoid, row: rr, rowAbove: o.rowAbove, clip, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
       if (!p) { el.style.visibility = 'hidden';
         // rule D: tired tip, sheet open, row laid out, but no clean spot -> one guarded auto-scroll, then skip this visit
-        if (o.autoScroll && sheetOk && rr?.height && clip && !shown) {
+        // decide only on settled geometry: two ticks in a row with the same row/panel rects (the phone sheet slides in, review ddace62 #2)
+        const geo = rr && clip ? `${Math.round(rr.top)},${Math.round(clip.top)},${Math.round(clip.bottom)}` : ''; const settled = geo !== '' && geo === lastGeo; lastGeo = geo;
+        if (o.autoScroll && sheetOk && rr?.height && clip && !shown && (settled || scrolledAt)) {
           const now = Date.now();
           if (!scrolledAt) { const d = guardAllows(now, lastPanelUser) ? autoScrollDelta(rr, clip, tip.h, innerHeight) : null;
             if (d === null) { skip(); return; }
@@ -560,22 +562,23 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
           else if (now - scrolledAt > 800) skip(); // still no fit after the scroll settled (e.g. 1024x474)
         }
         // Manage tip (reveal): if its row is cut off by the panel edge, bring it fully into view once (same guard)
-        if (o.reveal && sheetOk && rr?.height && clip && !revealed && (rr.top < clip.top || rr.bottom > clip.bottom) && guardAllows(Date.now(), lastPanelUser)) {
+        if (o.reveal && !shown && sheetOk && rr?.height && clip && !revealed && (rr.top < clip.top || rr.bottom > clip.bottom) && guardAllows(Date.now(), lastPanelUser)) {
           revealed = true; autoScrollingUntil = Date.now() + 900; row?.scrollIntoView({ block: 'nearest', behavior: rm() ? 'instant' : 'smooth' }); }
         return; }
       el.style.cssText = `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
       el.classList.toggle('below', p.side === 'below');
       handImg.src = p.side === 'above' ? A('ui-pointer-hand-down.svg') : A('ui-pointer-hand.svg');
       if (!shown) { shown = true; life = window.setTimeout(close, ms); o.onShow?.(); } };
-    const iv = window.setInterval(place, 250);
+    let closed = false; const iv = window.setInterval(place, 250);
     const close = () => { clearInterval(iv); clearTimeout(life); if (el.isConnected) el.remove(); if (!closed) { closed = true; o.onClose?.(); } };
-    let closed = false;
     el.addEventListener('click', close); place(); return close;
   };
   // rule D guard: the player's own scroll / touch on the Upgrades panel (programmatic auto-scroll excluded)
   let lastPanelUser = -Infinity, autoScrollingUntil = 0;
   { const body = uRow.closest('.body'); const mark = () => { lastPanelUser = Date.now(); };
-    if (body) { for (const ev of ['wheel', 'touchstart', 'pointerdown', 'keydown']) body.addEventListener(ev, mark, { passive: true });
+    // only scroll gestures count (review ddace62 #1): the tap/Enter on Hire must not block the auto-scroll it causes
+    if (body) { for (const ev of ['wheel', 'touchmove']) body.addEventListener(ev, mark, { passive: true });
+      body.addEventListener('keydown', e => { const k = (e as KeyboardEvent).key; if (/^(Page(Up|Down)|Arrow(Up|Down)|Home|End| )$/.test(k) && !(e.target as HTMLElement).closest('button')) mark(); });
       body.addEventListener('scroll', () => { if (Date.now() > autoScrollingUntil) mark(); }, { passive: true }); } }
   const showGoalIntro = () => { g.telemetry.onboardingStep(5, 'next_goal_intro'); coach('Your next goal is always shown here.', goalBtn, 4000, { cls: 'toastlike' }); };
   let introA: HTMLElement | null = null, introBStage = 0;
@@ -605,10 +608,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // Part B: first hire (any worker) -> energy bar tip, then Manage. Rule D: the tired tip is retried on each Workers visit until
   // shown or skipped 3 times (flags.tiredSeen / tiredSkips); the Manage tip follows a shown tip, or shows on its own after a skip.
   let tiredPending = false, manageShown = false;
-  const showManage = (w: string, delay: number) => window.setTimeout(() => { if (manageShown) return; manageShown = true;
+  const showManage = (w: string, delay: number) => window.setTimeout(() => { if (manageShown || flags.manageSeen) return; manageShown = true;
     const full = (g.state.workers[w as keyof typeof g.state.workers]?.energy ?? 0) >= 100;
     coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', () => workerRow(w)?.querySelector('[data-act=manage]') ?? null, 6000,
-      { rowId: w, rowAbove: true, reveal: true, onShow: () => { introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); }, onClose: () => { if (introBStage < 2) manageShown = false; } }); // 'done' only once it actually showed
+      { rowId: w, rowAbove: true, reveal: true, onShow: () => { introBStage = 2; flags.manageSeen = true; saveFlags(); g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); }, onClose: () => { if (!flags.manageSeen) manageShown = false; } }); // persisted: shown once ever (review ddace62 #3/#4) // 'done' only once it actually showed
   }, delay);
   const tiredMark = (ev: 'shown' | 'skipped') => { const n = tiredTipAfter({ seen: !!flags.tiredSeen, skips: flags.tiredSkips ?? 0 }, ev); flags.tiredSeen = n.seen; flags.tiredSkips = n.skips; saveFlags(); };
   const startTiredVisit = () => {
@@ -622,7 +625,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // a "visit" = the Workers list becoming visible (sheet opened on Workers, or the Workers tab picked while docked)
   // one attempt per visit: visitActive is set when an attempt starts and cleared only when the Workers list stops being visible
   let visitActive = false;
-  window.setInterval(() => { const v = (docked.matches || open === 'upgrades') && tab === 'workers'; if (!v) visitActive = false; else if (!visitActive) startTiredVisit(); }, 250);
+  const visitIv = window.setInterval(() => { if (flags.tiredSeen && flags.manageSeen) { clearInterval(visitIv); return; } // nothing left to teach (review ddace62 #8)
+    const v = (docked.matches || open === 'upgrades') && tab === 'workers'; if (!v) visitActive = false; else if (!visitActive) { startTiredVisit();
+    // Manage tip re-armed on later visits until it has actually shown (e.g. it was dropped after the tired tip showed)
+    if (flags.tiredSeen && flags.tiredWorker && !flags.manageSeen && !tiredPending) { visitActive = true; showManage(flags.tiredWorker, 300); } } }, 250);
   g.on(e => {
     if (e.type !== 'worker_hire' || flags.workersIntroB) return;
     flags.workersIntroB = true; flags.tiredWorker = e.worker; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
