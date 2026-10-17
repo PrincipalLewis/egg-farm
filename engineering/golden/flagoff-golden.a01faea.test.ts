@@ -2,13 +2,13 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { balance } from '../src/config/balance';
-import { loadSafe, save, SAVE_KEY, type KV } from '../src/save/save';
-import { step } from '../src/sim/tick';
-import { initialState } from '../src/sim/state';
-import { apply } from '../src/sim/actions';
-import { applyOffline } from '../src/sim/offline';
-import { runBot } from '../tests/bot';
+import { balance } from '../../src/config/balance';
+import { loadSafe, save, SAVE_KEY, type KV } from '../../src/save/save';
+import { step } from '../../src/sim/tick';
+import { initialState } from '../../src/sim/state';
+import { apply } from '../../src/sim/actions';
+import { applyOffline } from '../../src/sim/offline';
+import { runBot } from '../../tests/bot';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const PINS: Record<string, string> = {
   'm1-rc2-v4-12min': 'b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9',
@@ -16,14 +16,18 @@ const PINS: Record<string, string> = {
   'm2-rc1-v5-40min': '4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431',
   'm2-rc1-v5-40min-edge': '652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb',
 };
-const GOLDEN_MAIN_A01FAEA = '50a87ddbf89c44751ef33a008541022e146c48c0fed8e16d5114e6d787809de0';
+// Re-pinned (HoE approved 01:49 UTC+2, Oct 17). Previous pin, kept for audit:
+//   50a87ddbf89c44751ef33a008541022e146c48c0fed8e16d5114e6d787809de0
+// Bisect: c75b6dc (just before the data switch) still gives 50a87ddb; only the approved F1 shipping-data switch
+// (data/economy.csv = m4cols 86f0e80e) moves it to f90d1678. No code changes. Storage-bytes pins (PINS) unchanged.
+const GOLDEN_MAIN_A01FAEA = 'f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544';
 const FIX = ['m1-rc2-v4-12min', 'm2-rc1-v5-12min', 'm2-rc1-v5-40min', 'm2-rc1-v5-40min-edge'];
 const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
 describe('golden', () => {
   it('storage bytes', () => {
     const out: Record<string, string> = {};
     for (const f of FIX) {
-      const raw = readFileSync(new URL(`../tests/fixtures/saves/${f}.json`, import.meta.url), 'utf8');
+      const raw = readFileSync(new URL(`../../tests/fixtures/saves/${f}.json`, import.meta.url), 'utf8');
       const now = JSON.parse(raw).savedAt as number; const kv = mem(); kv.setItem(SAVE_KEY, raw);
       const r = loadSafe(kv, balance, now); let s = r.file!.state;
       for (let i = 0; i < 600; i++) s = step(s, 0.1, balance, []);

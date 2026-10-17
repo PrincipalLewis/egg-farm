@@ -1,4 +1,5 @@
 {
-  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1).",
-  "farmCostGrowthSegments": []
+  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1). farmCostFromCsv: true = farm_cost and w4_tier_cost are per-level data copied from the CSV (F1, HoE Oct 17); no formula fit.",
+  "farmCostGrowthSegments": [],
+  "farmCostFromCsv": true
 }

@@ -28,3 +28,46 @@
 - 2026-10-17 00:15 Senior Software Architect — **done:** m4-design v0.3.12 per HoQA e152960: M-4 occupied-tmp guard on replace (+row, §7 #13), M-5 Export clears only on confirmed save/share, 'I saved it' rule for downloads (+rows), S-5 copy-identity hash once-flag (+row), S-6 telemetry slot 'tmp'/action 'sweep'; ADR M4-19 rev 7. Golden 2/2. **next:** HoQA recheck; Saves SQ-1 to v0.3.12. **blocked:** none.
 - 2026-10-17 00:20 Senior Software Architect — **done:** m4-design v0.3.13 per Code Reviewer 3342918 (a) Export marks exportedAt, never deletes, exported evicted first; (b) FNV-1a once-flag, no crypto.subtle; (c) F2-EQ respects exactly-one trusted unknown flag (+row); (d) rev-2 skip bullet SUPERSEDED; HoQA S-7 once per load, S-8 prompt only if download didn't throw, S-9 clipboard marks only on I saved it; ADR M4-19 rev 8. Golden 2/2. **next:** HoQA + Code Reviewer recheck; Saves SQ-1 delta. **blocked:** none.
 - 2026-10-17 00:25 Senior Software Architect — **done:** m4-design v0.3.14 (data-loss only) per HoQA 8a2150c: M-6 equal-seq one-unknown ⇒ diverged, known wins, loser slotted (+rows), S-10 legacy string slot values, S-11 export-mark write; ADR M4-19 rev 9. Golden 2/2. **next:** HoQA recheck; Saves SQ-1 delta. Post-rc1 follow-ups: (1) save_recovery_slot telemetry when both slots are full (M4-25); (2) S-12 pin the once-flag format (`fnv1a:` + 8 lowercase hex, 32-bit FNV-1a offset/prime, UTF-8, `,` join). **blocked:** none.
+
+## Senior Software Architect — 2026-10-17 02:05 (UTC+2): AC7 worst-seed guards (branch arch/ac7-worst-seed-guards, stacks on #19)
+- done: data/pacing-targets.json guard keys (gap_p95_max_s 240 hard + gap_p95_target_s 180 warn, per Economy correction); tests/pacing-guards.ts pure helpers + 12 synthetic unit tests; tests/ac7-worst-seed.slow.test.ts: L18-25 time-on-level (workers variance bot, F1 hard, pre-F1 skipped, unknown sha fails) + warn-only workers P5 time-to-L20. Scratch merge with #17 (86f0e80e): L18-25 pooled P95 301.6 s / worst 471.6 s PASS; t20 P5 1564 s (no warn).
+- next: Economy to confirm L18-25 P95 = pooled over (seed, level) samples (per-seed-max P95 is 372.2 s and would FAIL 360); wire step-ratio/gap/EX-1 guards into an L30+ suite once one exists.
+- blocked: no L30+ bot / late_curve suite in repo, so step/gap guards are helper + unit tests only. data/pacing-targets.json is also created by #17 (add/add conflict, trivial key union).
+- 2026-10-17 02:20 Senior Software Architect — **done:** PR #23 per HoP 02:05: L18-25 = per-seed slowest level; variance bot P95 <= l18_25_step_p95_max_s_variance 390 (F1: 372.2 s) and worst <= 480 (471.6 s), fixed bot every seed <= 360 (270.0 s), all hard; ac7_w_p5_t20_warn_s -> ac7_w_t20_p95_warn_s 1740 on P95 t20 (1670 s, no warn); L30+ helpers unwired (official gate: QA late_curve.py ab928dc96d1c on b59c4e0d). **next:** CCR review; #17 add/add on data/pacing-targets.json (key union). **blocked:** none.
+- 2026-10-17 02:35 Senior Software Architect — **done:** PR #23 CCR minors (1326ba6 review): m1 guards fail closed (non-finite -> explicit failure, !(x <= bound)) + NaN/Infinity unit tests; m2 seeds = fx.seeds 1..100 (F1 values unchanged: variance P95 372.2 / worst 471.6 s, fixed 270.0 s, t20 P95 1670 s); m3 'note' defines slowest L18-25 level as max n=18..25 of reach(n+1)-reach(n), cites decisions.md:297. **next:** QA (edb6ef85); Economy confirms the definition. **blocked:** none.
+## Senior Software Architect — 2026-10-17 (arch/vendor-economy-sim)
+- done: economy freshness test now runs a vendored, sha256-pinned sim (vendor/economy-sim, sim eddf945d + economy.f1-m4cols.csv 86f0e80e); no dependency on /workspace/product. ci-gates.md note added.
+- next: CCR + QA on the PR; Economy updates vendor/economy-sim + SHA256SUMS + data/economy.csv in one PR going forward.
+- blocked: none.
+
+## Senior Software Architect — 2026-10-17 (arch/no-product-reads, stacked on #21)
+- done: default CI/test/build read nothing outside the repo: check-economy-copy opt-in + warn-only (--product / ECONOMY_PRODUCT_CHECK=1), removed from npm test/build and ci.yml; economy-copy.test uses temp dirs only; gen-sim-fixtures imports vendor/economy-sim; economy.test drift warning opt-in.
+- next: CCR + QA; merge after #21.
+- blocked: none.
+
+## 2026-10-17 02:53 Senior Software Architect — PR #24 CCR re-check minors
+- Done: check-economy-copy `--strict` now implies `--product` (test added); `--strict` also sha256-compares each vendored file in vendor/economy-sim/SOURCE with product/ and the pin, failing closed on drift/missing (tests added); slow-test regeneration note now points at vendor/economy-sim/sim. Fixture `source` label left unchanged (no regeneration). ci-gates.md updated.
+- Gates: tsc OK; vitest 476/476 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA; watch CI for the parallel-load flake CCR noted.
+
+## 2026-10-17 03:00 Senior Software Architect — PR #24 CCR minor on a8f8611
+- Done: check-economy-copy SOURCE parsing skips only blank/#/`^vendored:` lines (colon-containing rows are now checked); --strict fails closed unless SOURCE file-row count == SHA256SUMS entry count; vendored paths resolved with path.join (a `C:` path no longer crashes URL parsing); ECONOMY_VENDOR_DIR test override; tamper tests for colon rows and count mismatch.
+- Gates: tsc OK; vitest 478/478 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA.
+
+## 2026-10-17 03:10 Senior Software Architect — PR #24 CCR items on 1b50002
+- Done: ECONOMY_VENDOR_DIR honoured only under VITEST (override path to stderr; ignored with warning otherwise; documented in ci-gates.md); --strict requires SOURCE and SHA256SUMS (path, sha) sets to be equal exactly; SOURCE paths resolving outside the vendor (or product) dir rejected; pathToFileURL for the override. Tests: one-hash change at same count, path change, ../ escape, VITEST gating.
+- Gates: tsc OK; vitest 481/481 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA.
+
+## arch/release-check-lows (Senior Software Architect, Oct 17)
+- Done: QA #13 Lows L-1 (extra path arg exits 1), L-2 (F-META ignores HTML comments; data-build-id required on #app), L-3 (// and /* */ comments inside a bracket key no longer end it early); CCR #13 nits: check-globals serves on a free port (printed; PORT overrides), ci-gates.md: release-asset is a post-publish detector, --strict drift check is a manual pre-release step owned by the release owner; ci.yml top-level `permissions: contents: read`. Tests: tests/release-html.test.ts (L-1..L-3), tests/serve-own.test.ts.
+## 2026-10-17 04:15 Senior Software Architect — arch/m3-followups (QA/CCR nits after #23/#24; ADR M3-ECON-1)
+- Done: ADR M3-ECON-1 (product/economy.csv is the single canonical shipping file; --strict never repointed; Economy promotes f1-m4cols 86f0e80e into product/economy.csv after #17, before the next rc tag). QA nits: F1-only slow test titles say "(F1 86f0e80e only; skipped on pre-F1 57d964d5)"; `__pycache__/` in .gitignore; test:slow runs scripts/check-vendor-pins.mjs first; seller_variance fixture source label -> vendor/economy-sim/sim (regenerated, all other bytes identical). CCR nits: duplicate-only SOURCE/SHA256SUMS failure has its own message; product-side `..foo` file no longer falsely rejected (relative + '..'+sep). Tests added for both.
+- Skipped: #13 Lows/held minors and serve-own port (#13 not merged yet).
+- Gates: tsc OK; vitest 516/516 (maxForks=2); test:slow 12 + 2 F1 skips; sync-economy --check OK; build OK.
+- Next: CCR/QA on this PR; #13 Lows follow-up after #13 merges.
+- 2026-10-17 04:15 Senior Software Architect — **done:** ADR M3-ECON-1 records Economy's 04:11 fix (product/economy.csv b294762e was a CRLF-only copy -> now 57d964d5, LF, no number changes) and the LF rule; `check-economy-copy -- --product --strict` exits 0 on main's data. **next:** CCR/QA on #26. **blocked:** none.
+- 2026-10-17 04:30 Senior Software Architect — **done:** merged origin/main 4608a4f (#13; .gitignore conflict resolved as union); CCR #26 m1: --strict CSV compare is raw sha256 (CRLF/BOM fail), non-strict still normalises; `.gitattributes` `*.csv text eol=lf` (renormalise no-op); check-vendor-pins: missing SHA256SUMS -> ERROR exit 1, unlisted vendor files fail; tests. Real product/ --strict exit 0 (57d964d5; #17 not on main yet). **next:** CCR/QA re-check; #13 Lows follow-up now unblocked. **blocked:** none.
+- 2026-10-17 04:50 Senior Software Architect — **done:** QA #26: .gitattributes adds `vendor/economy-sim/** -text` after `*.csv text eol=lf` (vendor wins); renormalise no-op; check-vendor-pins passes in a core.autocrlf=true clone. **next:** QA/CCR re-check. **blocked:** none.
+- 2026-10-17 04:57 Senior Software Architect: done: ci-gates.md stale-autocrlf caveat (#26). next: QA verdicts #26/#27.
