@@ -159,7 +159,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  const showToast = (text: string, ms = 1300) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), ms); };
+  /** rc2 M-Toast-layer: Welcome-back always wins. A toast raised while it is open waits and shows once it closes (latest only). */
+  let deferredToast: [string, number] | null = null;
+  const showToast = (text: string, ms = 1300) => { if (modalKind === 'welcome') { deferredToast = [text, ms]; return; } toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), ms); };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
@@ -230,10 +232,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let lastBuyBtn: HTMLElement | null = null;
 
   // ---------- Modals ----------
-  const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null; };
+  const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; const wasWelcome = modalKind === 'welcome'; modalKind = null;
+    if (wasWelcome && deferredToast) { const [t, ms] = deferredToast; deferredToast = null; requestAnimationFrame(() => showToast(t, ms)); } };
   let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
+    if (toast.classList.contains('show')) { deferredToast = [toast.textContent ?? '', 1300]; toast.classList.remove('show'); clearTimeout(toastTimer); } // M-Toast-layer: never over Welcome-back
     modalKind = 'welcome'; const sale = saleLine(instantSale(g.state, b), compact, fmtMoney); // S2-4c
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>

@@ -39,3 +39,11 @@ describe('M-Tut-goal', () => {
     expect(css).toMatch(/\.onb \.tut-link\{pointer-events:auto/);
   });
 });
+describe('M-Toast-layer', () => {
+  it('toasts wait while Welcome-back is open, a visible one is pulled, and the latest shows after it closes', () => {
+    const app = readFileSync('src/ui/app.ts', 'utf8');
+    expect(app).toMatch(/const showToast = \(text: string, ms = 1300\) => \{ if \(modalKind === 'welcome'\) \{ deferredToast = \[text, ms\]; return; \}/);
+    expect(app).toMatch(/if \(toast\.classList\.contains\('show'\)\) \{ deferredToast = [^\n]*toast\.classList\.remove\('show'\)[^\n]*\n\s*modalKind = 'welcome'/);
+    expect(app).toMatch(/if \(wasWelcome && deferredToast\)[^\n]*showToast\(t, ms\)/);
+  });
+});

@@ -1029,6 +1029,58 @@ sections.b4riser = async () => {
     await ctx.close();
   }
 };
+// ---------- rc2 Minors 2: M-Order-zero, M-Tut-parity, M-Tut-goal, M-Toast-layer ----------
+sections.rc2minors2 = async () => {
+  const MS = process.env.MINOR2_SHOTS ?? `${SHOTS}/rc2-minors-2`; mkdirSync(MS, { recursive: true }); const nm = w => `${w}${w >= 960 ? '-docked' : ''}`;
+  const DONE2 = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true });
+  for (const [w, h] of [[360, 740], [1280, 800]]) { // M-Order-zero + M-Toast-layer
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE2 } });
+    if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(250); }
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 0, coop: 0, nextCustomerInS: 999, customers: [{ id: 501, demand: 13, filled: 0, waitedS: 0 }] }; }); await page.waitForTimeout(400);
+    const z = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
+    ok(`M-Order-zero 0 delivered reads "Wants 13", aria "Customer wants 13 eggs" (${w})`, /^Wants 13/.test(z.e) && z.aria === 'Customer wants 13 eggs', JSON.stringify(z));
+    if (shot) await page.screenshot({ path: `${MS}/order-wants-13-${nm(w)}.png` });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 501, demand: 13, filled: 1, waitedS: 0 }] }; }); await page.waitForTimeout(400);
+    const o = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
+    ok(`M-Order-zero after the first egg reads "1/13" (${w})`, /^1\/13/.test(o.e) && o.aria === 'Order 1 of 13 eggs', JSON.stringify(o));
+    // M-Toast-layer: Welcome-back open, then a 'Coop upgraded!' toast fires (the reload case)
+    if (w < 960) { await page.locator('#p-market .close, [data-nav=farm]').first().click(); await page.waitForTimeout(250); }
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2685, customers: [] }; window.eggfarmQaWelcome(); }); await page.waitForTimeout(200);
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
+    await page.waitForTimeout(350);
+    const t = await page.evaluate(() => { const e = document.querySelector('.toast'), m = document.querySelector('#modal-layer'); return { wb: m.classList.contains('open') && !!m.querySelector('#wbT'), vis: getComputedStyle(e).visibility, op: +getComputedStyle(e).opacity }; });
+    if (shot) await page.screenshot({ path: `${MS}/welcome-over-toast-${nm(w)}.png` });
+    ok(`M-Toast-layer no toast over Welcome-back (${w})`, t.wb && (t.vis === 'hidden' || t.op === 0), JSON.stringify(t));
+    await page.locator('#wbCollect').click(); await page.waitForTimeout(450);
+    const a = await page.evaluate(() => { const e = document.querySelector('.toast'); return { text: e.textContent, vis: getComputedStyle(e).visibility, modal: document.querySelector('#modal-layer').classList.contains('open') }; });
+    ok(`M-Toast-layer the toast shows after Welcome-back closes (${w})`, !a.modal && a.vis === 'visible' && /Coop upgraded/.test(a.text), JSON.stringify(a));
+    ok(`rc2minors2 no page errors (${w})`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  const caps = {};
+  for (const [w, h] of [[390, 844], [1280, 800]]) { // M-Tut-parity + M-Tut-goal (fresh onboarding)
+    const { ctx, page, errors } = await open({ w, h });
+    const cap = () => page.evaluate(() => document.querySelector('.onb-txt')?.innerHTML ?? '');
+    const seen = [];
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 40 }; }); await page.waitForTimeout(400); seen.push(await cap());
+    await page.evaluate(() => window.eggfarm.dispatch({ type: 'collect' })); await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 601, demand: 3, filled: 0, waitedS: 0 }], basket: 5 }; }); await page.waitForTimeout(400); seen.push(await cap());
+    await page.evaluate(() => window.eggfarm.dispatch({ type: 'sell', customerId: 601 })); await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: 1e6 }; }); await page.waitForTimeout(400); seen.push(await cap());
+    caps[w] = seen;
+    if (shot) await page.screenshot({ path: `${MS}/tutorial-step3-${nm(w)}.png` });
+    // M-Tut-goal: $2 short -> hint bubble with the link
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: 800 }; }); await page.waitForTimeout(500);
+    const hint = await page.evaluate(() => { const t = document.querySelector('.onb-txt'); return { text: t?.textContent ?? '', html: t?.innerHTML ?? '' }; });
+    if (shot) await page.screenshot({ path: `${MS}/tutorial-goal-bubble-${nm(w)}.png` });
+    ok(`M-Tut-goal bubble reads "$2 to go · Upgrades ›" with NBSPs (${w})`, hint.text === '$2\u00a0to\u00a0go\u00a0·\u00a0Upgrades\u00a0›', JSON.stringify(hint.text));
+    await page.locator('.tut-link').click(); await page.waitForTimeout(450);
+    const after = await page.evaluate(() => { const b = document.querySelector('#uRow .btn.buy'), r = b?.getBoundingClientRect(); return { upOpen: !document.querySelector('#p-upgrades').hidden || matchMedia('(min-width:960px) and (orientation:landscape)').matches, pulse: !!b?.classList.contains('pulse'), inView: !!r && r.top >= 0 && r.bottom <= innerHeight }; });
+    if (shot) await page.screenshot({ path: `${MS}/tutorial-goal-link-tapped-${nm(w)}.png` });
+    ok(`M-Tut-goal link opens Upgrades, target Buy in view and pulsing (${w})`, after.upOpen && after.pulse && after.inView, JSON.stringify(after));
+    ok(`rc2minors2 tutorial no page errors (${w})`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+  ok('M-Tut-parity tutorial captions identical at 390 and 1280', JSON.stringify(caps[390]) === JSON.stringify(caps[1280]) && caps[390].every(Boolean), JSON.stringify(caps));
+};
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);
