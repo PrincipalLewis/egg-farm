@@ -75,3 +75,7 @@
 ## 2026-10-17 07:05 (UTC+2) Senior Engineer, Features & Economy Wiring: PR #31 CCR B1/m1/n1
 - done: 459c1de on m4/m4a-tracks-v4: m4SaveSeq carries saveSeq forward (+1) whenever the previous copy had one (hadSeq), so a flag-off save after an M4-build-off save outranks the stale IDB copy; regression test tests/m4a-saveseq-carry.test.ts (fails on 7621153, passes now); doc comments reattached (n1); PR body cites full art-ux/ and qa/m3-recheck/ paths (m1). Gates: tsc OK, vitest 745/745, slow 14/14, sync --check OK, golden f90d1678 + pins, check-globals chromium PASS.
 - next: HoE to push SHA; CCR re-review; m2 stays with #17.
+
+## 2026-10-17 07:47 (UTC+2) Senior Engineer, Features & Economy Wiring: PR #31 merge-forward
+- done: merged origin/econ/f1-cost-overrides 8fcd177 (a39801d: .gitattributes data/economy.f1.csv -text, rc0 B5 fixture), CCR m3 accepted edge documented at idb-mirror.ts write() (1dcd0bf), merged main 3f2ac38 (316439d) and main 97a57c1 (3897372), both no-op trees. Gates @ 3897372: tsc OK, vitest 745/745, slow 14/14, sync --check OK, golden f90d1678 + pins, build + release check OK, git status clean after tests, Chromium check-globals PASS, Chromium rc0 209/209.
+- next: HoE to push; mark #31 ready; CCR re-review.
