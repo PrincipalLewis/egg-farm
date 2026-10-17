@@ -529,6 +529,18 @@ sections.sellallgrader = async () => {
   ok('SellAll grader no page errors', errors.length === 0, errors.join(' | '));
   await ctx.close();
 };
+sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1280 (docked) too, QA-scale Grader 2 label
+  for (const [w, h] of [[390, 844], [1280, 800]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+    if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(200); }
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 23, collectionLevel: 17, basket: 181.2e9, coop: 0, nextCustomerInS: 999,
+      customers: [{ id: 901, demand: 2e11, filled: 0, waitedS: 0 }], workers: { grader: { energy: 100, cdS: 0 } }, graderTier: 2 }; });
+    await page.waitForTimeout(350);
+    const m = await page.evaluate(() => { const b = document.querySelector('#sellAll'), r = b.getBoundingClientRect(); return { t: b.textContent, sw: b.scrollWidth, cw: b.clientWidth, l: r.left, r: r.right, vw: innerWidth }; });
+    ok(`SellAll Grader 2 label fits at ${w}`, /\$[\d.]+T/.test(m.t) && m.sw <= m.cw + 1 && m.l >= 0 && m.r <= m.vw + 0.5, JSON.stringify(m));
+    await ctx.close();
+  }
+};
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);
