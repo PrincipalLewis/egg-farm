@@ -201,8 +201,8 @@ sections.s2money = async () => {
   // greyed tap: freeze the economy for the tap (no workers), compare state + save before/after
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: {}, customers: [], nextCustomerInS: 999, coinsCents: 100 }; g.save(); });
   await page.waitForTimeout(100);
-  const pre = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, dis: document.querySelector('#uRow .btn.buy').getAttribute('aria-disabled'), sv: localStorage.getItem('eggfarm.save') }));
-  await page.locator('#uRow .btn.buy').click({ force: true, timeout: 5000 }); await page.waitForTimeout(300);
+  const pre = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, dis: document.querySelector('#uRow .btn.buy[data-kind=farm]').getAttribute('aria-disabled'), sv: localStorage.getItem('eggfarm.save') }));
+  await page.locator('#uRow .btn.buy[data-kind=farm]').click({ force: true, timeout: 5000 }); await page.waitForTimeout(300);
   const post = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, hdr: document.querySelector('#coins').textContent, sv: localStorage.getItem('eggfarm.save') }));
   ok('S2-4a greyed Farm L12 tap: money, level, header and save unchanged', pre.dis === 'true' && post.c === pre.c && post.F === 11 && post.hdr === '$1.00' && JSON.parse(post.sv).state.coinsCents === JSON.parse(pre.sv).state.coinsCents, JSON.stringify({ pre: { c: pre.c, dis: pre.dis }, post: { c: post.c, F: post.F, hdr: post.hdr } }));
   // live sheet with rAF stalled (occluded / throttled window)
@@ -259,7 +259,7 @@ sections.s2810 = async () => {
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 5, collectionLevel: 3, coinsCents: 5e6, workers: {}, customers: [] }; });
   await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(200);
   const z = await page.evaluate(() => { window.requestAnimationFrame = () => 0; const g = window.eggfarm, out = [];
-    for (let i = 0; i < 3; i++) { document.querySelector('#uRow .btn.buy').click(); out.push([g.state.farmLevel, document.querySelector('#uRow .lv').textContent]); } return out; });
+    for (let i = 0; i < 3; i++) { document.querySelector('#uRow .btn.buy[data-kind=farm]').click(); out.push([g.state.farmLevel, document.querySelector('#uRow [data-track=farm] .lv').textContent]); } return out; });
   ok('S2-10 sheet shows each purchase synchronously (no one-action lag, rAF stalled)', z.every(([F, lv], i) => lv === `L${F}` && F === 6 + i), JSON.stringify(z));
   ok('S2-8/9/10 no page errors', errors.length === 0, errors.join(' | '));
   await ctx.close();
@@ -643,7 +643,7 @@ sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1
       customers: [{ id: 901, demand: 2e11, filled: 0, waitedS: 0 }], workers: { grader: { energy: 100, cdS: 0 } }, graderTier: 2 }; });
     await page.waitForTimeout(350);
     const m = await page.evaluate(() => { const b = document.querySelector('#sellAll'), r = b.getBoundingClientRect(); return { t: b.textContent, sw: b.scrollWidth, cw: b.clientWidth, l: r.left, r: r.right, vw: innerWidth }; });
-    ok(`SellAll Grader 2 label fits at ${w}`, /\$[\d.]+T/.test(m.t) && m.sw <= m.cw + 1 && m.l >= 0 && m.r <= m.vw + 0.5, JSON.stringify(m));
+    ok(`SellAll Grader 2 label fits at ${w}`, /\$[\d.]+[BT]/.test(m.t) && m.sw <= m.cw + 1 && m.l >= 0 && m.r <= m.vw + 0.5, JSON.stringify(m));
     await ctx.close();
   }
 };
