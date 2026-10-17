@@ -2,7 +2,7 @@
  *  frame, chip + live region coalesced to <= 1 / 2 s, enter slide only into a visible slot (<= 1 / 240 ms), list frozen
  *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Exception: Sold rows leave on their own hold/fade schedule even during the freeze (review ebbd02e #4 / c1b4ef5 #3). Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
-import { orderView, fitOrderEggs, moreLabel, moreName, soldLabel, planRemovals, emptyHidden, SOLD_HOLD_MS, type OrderView } from './orders';
+import { orderView, fitOrderText, moreLabel, moreName, soldLabel, planRemovals, emptyHidden, SOLD_HOLD_MS, type OrderView } from './orders';
 export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
@@ -41,7 +41,7 @@ export class OrderList {
       const l1 = E.parentElement as HTMLElement, narrow = typeof matchMedia === 'function' && matchMedia('(max-width:375px)').matches, key = `${e}|${val}|${v.button}|${l1.clientWidth}|${narrow}`; // v1.1: always drop at <=375
       if (el.dataset.fitKey !== key || el.dataset.fitE == null) {
         const fitsL1 = (t: string) => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; };
-        const fe = narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, fitsL1); // §9: 'Wants 13 · $15.34' at <=375
+        const fe = fitOrderText(e, narrow, fitsL1); // §9: 'Wants 13 · $15.34' at <=375
         el.dataset.fitKey = key; el.dataset.fitE = fe;
       }
       if (E.textContent !== el.dataset.fitE) E.textContent = el.dataset.fitE!;

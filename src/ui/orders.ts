@@ -18,7 +18,7 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
   const rem = c.demand - c.filled, sell = Math.max(0, Math.min(Math.floor(basket), rem)), have = c.filled + sell, want = c.demand;
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
   const valueCents = want * priceCents;
-  const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : valueCents >= 1e14 ? `$${count3(valueCents / 100)}` /* §9 '$1.78T': fmtMoney has no T tier ('$1780B') */ : fmtMoney(Math.max(1, Math.round(valueCents)));
+  const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : valueCents >= 1e11 ? `$${count3(valueCents / 100)}` /* §9: 3 sig figs from $1B ('$181B', '$1.78T'); the v3 base fmtMoney has no T tier and gives '$181.2B'/'$1000B' (review dbc6948 nit 5) */ : fmtMoney(Math.max(1, Math.round(valueCents)));
   return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : have === 0 ? `Wants ${count3(want)} eggs · ${value}` : `${count3(have)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b); rc2 M-Order-zero: 'Wants 13' until the first egg
     aria: have === 0 ? `Customer wants ${want} eggs` : `Order ${have} of ${want} eggs`,
     button: state === 'wait' ? (basket < 1 ? 'No eggs' : `Need ${count3(rem)}`) : state === 'partial' ? `Sell ${count3(sell)}` : 'Sell' }; // MK-35: 0 eggs -> 'No eggs'
@@ -26,6 +26,8 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
 /** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
 /** rc2 M-Order-zero (rc2-order-sell-preview §9): 'Wants 13 eggs' follows the same rule as '4/17 eggs': drop " eggs" when it doesn't fit (always at <=375). */
 export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');
+/** §9 decision used by OrderList: <=375 always drops ' eggs'; wider keeps it only when it fits. The value is never cut (review dbc6948 #3). */
+export const fitOrderText = (e: string, narrow: boolean, fits: (s: string) => boolean): string => narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, fits);
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
 export const visibleOrders = (viewportH: number, docked: boolean, n: number) =>
   docked ? n : Math.min(n, 0.75 * viewportH - 56 - 72 - 24 >= 384 ? 5 : 4);

@@ -30,3 +30,13 @@ describe('toastGate (rc2 M-Toast-layer: hold while #modal-layer.open)', () => {
   });
   it('release with nothing held does nothing', () => { const r = rig(); r.g.released(); expect(r.frames).toEqual([]); });
 });
+
+import { pullToast } from '../src/ui/toast-place';
+describe('pullToast (review dbc6948 #3)', () => {
+  const mk = (shown: boolean, op: number) => { const log: string[] = [], held: string[] = [];
+    const d = { shown: () => shown, opacity: () => op, text: () => 'Coop upgraded!', transitions: (on: boolean) => log.push(on ? 'on' : 'off'), hide: () => log.push('hide'), reflow: () => log.push('reflow') };
+    pullToast(d, t => held.push(t)); return { log, held }; };
+  it('visible toast: held and hidden instantly (transitions off around the hide)', () => { const r = mk(true, 1); expect(r.held).toEqual(['Coop upgraded!']); expect(r.log).toEqual(['off', 'hide', 'reflow', 'on']); });
+  it('fading out (no .show, opacity > 0): hidden instantly, not re-held', () => { const r = mk(false, 0.4); expect(r.held).toEqual([]); expect(r.log).toEqual(['off', 'hide', 'reflow', 'on']); });
+  it('fully hidden: nothing', () => { const r = mk(false, 0); expect(r.held).toEqual([]); expect(r.log).toEqual([]); });
+});

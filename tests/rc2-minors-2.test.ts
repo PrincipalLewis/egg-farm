@@ -44,7 +44,7 @@ describe('M-Toast-layer', () => {
     const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
     expect(app).toMatch(/toastGate\(\(\) => modal\.classList\.contains\('open'\), rawToast/); expect(app).toMatch(/\{ blocked: \(\) => modal\.classList\.contains\('open'\), hold: ms => toastQ\.hold\(/);
     expect(app).toMatch(/const showToast = \(text: string, ms = TOAST_MS\) => toastQ\.toast\(text, ms\)/);
-    expect(app.match(/pullToast\(\); /g)?.length).toBe(2); expect(app).toMatch(/const pullToast = [^\n]*toastQ\.hold\(toast\.textContent[^\n]*\n\s*toast\.style\.transition = 'none'; toast\.classList\.remove\('show'\)/);
+    expect(app.match(/pullToast\(\); /g)?.length).toBe(2); expect(app).toMatch(/const pullToast = \(\) => pullToastFrom\(/);
     expect(app).toMatch(/const closeModal = [^\n]*\n\s*toastQ\.released\(\)/);
     expect(app).not.toMatch(/deferredToast/);
     expect(css).not.toMatch(/#modal-layer\{[^}]*z-index:(3[2-9]|[4-9]\d)/);
@@ -70,6 +70,15 @@ describe('M-Tut-goal hint keeps the link node (review e9b9826 #5)', () => {
     setHint(el, 'Collect some eggs to sell.'); expect(el.writes).toBe(2);
   });
 });
-describe('§9 narrow branch', () => {
-  it('<=375 strips " eggs" from both forms (same rule as 4/17)', () => { for (const [a, b] of [['Wants 13 eggs', 'Wants 13'], ['4/17 eggs', '4/17']]) expect(a.replace(/ eggs$/, '')).toBe(b); expect(readFileSync('src/ui/order-list.ts', 'utf8')).toMatch(/const fe = narrow \? e\.replace\(\/ eggs\$\/, ''\) : fitOrderEggs\(e, fitsL1\)/); });
+import { fitOrderText } from '../src/ui/orders';
+describe('§9 fitOrderText (review dbc6948 #3)', () => {
+  it('<=375 drops " eggs" without measuring; wider keeps it when it fits, drops it when not; value never cut', () => {
+    const never = () => { throw new Error('measured'); };
+    expect(fitOrderText('Wants 13 eggs', true, never)).toBe('Wants 13'); expect(fitOrderText('4/17 eggs', true, never)).toBe('4/17');
+    expect(fitOrderText('Wants 13 eggs', false, () => true)).toBe('Wants 13 eggs'); expect(fitOrderText('Wants 181B eggs', false, () => false)).toBe('Wants 181B');
+    expect(readFileSync('src/ui/order-list.ts', 'utf8')).toMatch(/const fe = fitOrderText\(e, narrow, fitsL1\)/);
+  });
+  it('3 sig figs from $1B, no "$1000B" glitch', () => {
+    expect(orderView(c(181e9), 0, 100).line).toBe('Wants 181B eggs · $181B'); expect(orderView(c(1e9), 0, 99996).line).toMatch(/· \$1T$/); expect(orderView(c(13), 0, 118).line).toBe('Wants 13 eggs · $15.34');
+  });
 });

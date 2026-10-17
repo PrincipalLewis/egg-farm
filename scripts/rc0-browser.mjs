@@ -1086,7 +1086,7 @@ sections.b4riser = async () => {
 sections.rc2minors2 = async () => {
   const MS = process.env.MINOR2_SHOTS ?? `${SHOTS}/rc2-minors-2`; mkdirSync(MS, { recursive: true }); const nm = w => `${w}${w >= 960 ? '-docked' : ''}`;
   const DONE2 = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true });
-  for (const [w, h] of [[360, 740], [1280, 800]]) { // M-Order-zero + M-Toast-layer
+  for (const [w, h] of [[320, 640], [360, 740], [390, 844], [1280, 800]]) { // M-Order-zero + M-Toast-layer (320/390: §9 fit, review dbc6948 #2)
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE2 } });
     if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(250); }
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 0, coop: 0, nextCustomerInS: 999, customers: [{ id: 501, demand: 13, filled: 0, waitedS: 0 }] }; }); await page.waitForTimeout(400);
@@ -1097,13 +1097,13 @@ sections.rc2minors2 = async () => {
     const o = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
     ok(`M-Order-zero after the first egg reads "1/13" (${w})`, /^1\/13/.test(o.e) && o.aria === 'Order 1 of 13 eggs', JSON.stringify(o));
     // rc2-order-sell-preview §9 fixtures: <=375 drops " eggs" -> 'Wants 13 · $15.34' / 'Wants 181B · $1.78T' on one line, no ellipsis, line 1 <= 170px at 360
-    for (const [F, C, d, txt] of [[1, 1, 13, '13 · $15.34'], [24, 29, 181e9, '181B · $1.78T']]) {
+    for (const [F, C, d, txt] of [[1, 1, 13, '13 · $15.34'], [24, 29, 181e9, '181B · $1.78T'], [0, 0, 181e9, '181B · $181B']]) {
       await page.evaluate(([F, C, d]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, collectionLevel: C, basket: 0, workers: {}, customers: [{ id: 502, demand: d, filled: 0, waitedS: 0 }] }; }, [F, C, d]); await page.waitForTimeout(400);
       const m = await page.evaluate(() => { const l1 = document.querySelector('.order[data-id="502"] .l1'); if (!l1) return null; const rg = document.createRange(); rg.selectNodeContents(l1); const rs = rg.getClientRects(), cs = getComputedStyle(l1);
         return { t: l1.textContent.replace(/\u00a0/g, ' '), w: rg.getBoundingClientRect().width, cw: l1.clientWidth, sw: l1.scrollWidth, lines: (() => { const tops = [...rs].filter(r => r.width > 0).map(r => r.top); return tops.length ? 1 + Math.floor((Math.max(...tops) - Math.min(...tops)) / (parseFloat(cs.lineHeight) || 20) + 0.4) : 0; })(), ell: /…/.test(l1.textContent) }; });
       const full = `Wants ${txt.replace(' · ', ' eggs · ')}`, want = w <= 375 ? `Wants ${txt}` : (m && m.t === full ? full : `Wants ${txt}`); // >375: ' eggs' kept only when it fits (181B eggs = 199px > 194)
       ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w > 375 || m.w <= 170) && (w <= 375 || d !== 13 || m.t === full), JSON.stringify(m));
-      if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-wants-${d === 13 ? '13-15.34' : '181B-1.78T'}-${nm(w)}.png` });
+      if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-wants-${txt.replace(/ · \$/, '-').replace(/ /g, '')}-${nm(w)}.png` });
     }
     // M-Toast-layer: Welcome-back open, then a 'Coop upgraded!' toast fires (the reload case)
     if (w < 960) { await page.evaluate(() => (document.querySelector('#p-market .close') ?? document.querySelector('[data-nav=farm]')).click()); await page.waitForTimeout(250); }
@@ -1121,7 +1121,7 @@ sections.rc2minors2 = async () => {
   }
   // M-Toast-layer (designer spec, art-ux screenshot-check-2026-10-17-0722): at 320x568 / 360x420 no toast is visible in ANY frame
   // while #modal-layer.open; held toasts appear after it closes. Two paths: toast raised while open, and toast already up when it opens.
-  for (const [w, h] of [[320, 568], [360, 420]]) for (const path of ['during', 'before', 'same']) { // 'same': buy + Welcome-back in one task, toast still pending its settle frame (review e9b9826 #1)
+  for (const [w, h] of [[320, 568], [360, 420]]) for (const path of ['during', 'before', 'same']) { // 'same': buy + Welcome-back in one task (the modal is open before the next render; the pending-settle case is unit-tested in toast-controller.test.ts, review dbc6948 #1)
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE2 } }); const tag = `${w}x${h} ${path}`;
     await page.evaluate(() => { window.__tl = []; const t0 = performance.now(), e = document.querySelector('.toast'), m = document.querySelector('#modal-layer');
       const loop = () => { const cs = getComputedStyle(e); window.__tl.push({ t: Math.round(performance.now() - t0), modal: m.classList.contains('open'), op: +cs.opacity, vis: cs.visibility, text: e.textContent }); if (performance.now() - t0 < 5000) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });

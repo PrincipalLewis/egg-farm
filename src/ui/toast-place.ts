@@ -42,3 +42,12 @@ export function toastGate(blocked: () => boolean, show: (text: string, ms: numbe
     held: () => held.map(h => h[0]),
   };
 }
+
+/** a modal is opening (rc2 M-Toast-layer): take a visible or still-fading toast off instantly (no fade over the modal);
+ *  only one still marked .show is held for after the modal. Pure over a small DOM facade (review dbc6948 #3). */
+export interface PullDom { shown(): boolean; opacity(): number; text(): string; transitions(on: boolean): void; hide(): void; reflow(): void }
+export function pullToast(d: PullDom, hold: (text: string) => void): void {
+  const shown = d.shown(); if (!shown && d.opacity() === 0) return;
+  if (shown) hold(d.text());
+  d.transitions(false); d.hide(); d.reflow(); d.transitions(true);
+}

@@ -2,7 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
-import { toastTop, toastController, toastGate, TOAST_MS } from './toast-place';
+import { toastTop, toastController, toastGate, TOAST_MS, pullToast as pullToastFrom } from './toast-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -172,8 +172,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const toastQ = toastGate(() => modal.classList.contains('open'), rawToast, { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms) });
   const showToast = (text: string, ms = TOAST_MS) => toastQ.toast(text, ms);
   /** a modal is opening: take a visible toast off instantly (no fade-out over the modal) and hold it for after the modal */
-  const pullToast = () => { if (!toast.classList.contains('show') && +getComputedStyle(toast).opacity === 0) return; if (toast.classList.contains('show')) toastQ.hold(toast.textContent ?? '', toastMs);
-    toast.style.transition = 'none'; toast.classList.remove('show'); void toast.offsetHeight; toast.style.transition = ''; };
+  const pullToast = () => pullToastFrom({ shown: () => toast.classList.contains('show'), opacity: () => +getComputedStyle(toast).opacity, text: () => toast.textContent ?? '',
+    transitions: on => { toast.style.transition = on ? '' : 'none'; }, hide: () => toast.classList.remove('show'), reflow: () => { void toast.offsetHeight; } }, t => toastQ.hold(t, toastMs));
 
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
