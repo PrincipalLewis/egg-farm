@@ -10,7 +10,7 @@ describe('D5 next-goal button (m3-next-goal-spec v1.0.1)', () => {
   it('button.goal is a 44px hit area with 2px vertical padding; the 40px pill is an inner span', () => {
     expect(app).toMatch(/<button class="goal" id="goal"[^>]*><span class="goal-pill">/);
     expect(css).toMatch(/\.goal\{[^}]*min-height:var\(--goal-hit\);padding:2px 0;margin-bottom:-4px/);
-    expect(css).toMatch(/\.goal-pill\{[^}]*height:var\(--goal-h\)/);
+    // review 5d8a058 #7: the effective pill height (min 40px, grows for wrapped text) is measured in rc0 goalLabel161, not regex-pinned here
   });
   it('row budget: 44 hit + 4 gap = 40 pill + 8 gap', () => expect(44 + (8 - 4)).toBe(40 + 8));
 });

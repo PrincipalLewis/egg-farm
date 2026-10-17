@@ -131,7 +131,7 @@ img{user-select:none;-webkit-user-drag:none}
 .up .btn{width:100%}
 @media (min-width:600px){.up .btn{width:160px;align-self:flex-end}.up .hint{align-self:flex-end}}
 .hint{display:flex;align-items:center;gap:var(--s-1);min-height:var(--hint-h);font:700 var(--fs-hint) var(--f-body);color:var(--c-hint)}.hint img{width:14px}
-.hint.limit{color:var(--c-wood-text)}.hint.long{font-style:italic}.hint .link{border:0;background:none;padding:0;color:var(--c-wood-text);text-decoration:underline;font:inherit}
+.hint.limit{color:var(--c-wood-text)}.hint.long{font-style:italic}.hint .link{text-decoration:underline} /* box/hit-area props live in the .hint.limit .link rule below */
 .btn.pulse2{animation:glow 600ms 2}
 /* modals */
 #modal-layer{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:var(--c-scrim)}#modal-layer.open{display:grid}
@@ -332,7 +332,6 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (max-width:390px){
   .farm{padding:var(--s-2);gap:var(--s-2)}
   .manage-all{font-size:var(--fs-base);white-space:nowrap}
-  .manage-all small,.manage-all .count{display:none} /* keep "Manage all"; count moves to the badge */
 }
 /* Bug 9 root cause (Engineering, measured in a headed 375x600 Chromium window): #app min-height:640px forces a
    vertical scrollbar, which takes 15px, so the usable width drops to 360 and the #app min-width:360px plus
@@ -583,7 +582,7 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 .order .l1 .v{overflow:visible;text-overflow:clip;flex:none} /* v1.1 (c): order value never cut; count shortens instead */
 .goal-pill{height:auto;min-height:var(--goal-h);align-items:center} .goal-label{white-space:normal;overflow:visible} /* cuta3 #2 (v1.6.1 §4): grows only when 2 lines exceed 40px (large text) */
 #uRow>.refill-wrap{padding-bottom:10px} /* cuta3 nit: +2px so no banner tick shows under the strip */
-#p-upgrades:has(#uRow > .refill-wrap) header .farm-manage-all{display:none} /* cuta3 nit: no duplicate header Refill pill while the sticky Refill shows */
+#p-upgrades:has(#uRow > .refill-wrap) header .farm-manage-all{display:none} /* cuta3 nit: no duplicate header Refill pill while the sticky Refill shows. :has() needs Safari/iOS 15.4+; older engines just keep both pills */
 /* Single-tab guard notice (art-ux/single-tab-guard/spec.md): game behind frozen + dimmed */
 .tab-guard-frozen #app{filter:saturate(.6)}
 .tab-guard-frozen #app *, .tab-guard-frozen #app *::before, .tab-guard-frozen #app *::after{animation-play-state:paused!important;transition:none!important}
