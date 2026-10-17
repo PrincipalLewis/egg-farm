@@ -966,6 +966,44 @@ sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { '
   ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };
 
 // SECTIONS
+// ---------- rc2 Minors: M-SellAll-empty + M-Sold-freeze ----------
+sections.rc2minors = async () => {
+  const MS = process.env.MINOR_SHOTS ?? `${SHOTS}/rc2-minors`; mkdirSync(MS, { recursive: true });
+  for (const [w, h, rmo] of [[360, 740, false], [1280, 800, false], [360, 740, true]]) {
+    const { ctx, page, errors } = await open({ w, h, touch: w < 960, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    if (rmo) await page.emulateMedia({ reducedMotion: 'reduce' });
+    const tag = `${w}x${h}${rmo ? ' reduced-motion' : ''}`, name = `${w}${w >= 960 ? '-docked' : ''}${rmo ? '-rm' : ''}`;
+    if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(250); }
+    // M-SellAll-empty: eggs but no customers
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 12, coop: 0, customers: [], nextCustomerInS: 999, workers: {} }; });
+    await page.waitForTimeout(300);
+    const e1 = await page.locator('#sellAll').evaluate(b => ({ t: b.textContent, name: b.getAttribute('aria-label') ?? b.textContent, dis: b.getAttribute('aria-disabled') ?? String(b.disabled) }));
+    ok(`M-SellAll-empty eggs + no customers reads "Waiting for customers" (${tag})`, e1.t === 'Waiting for customers' && e1.name === e1.t && e1.dis === 'true', JSON.stringify(e1));
+    if (shot && !rmo) await page.screenshot({ path: `${MS}/sellall-waiting-${name}.png` });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 0 }; }); await page.waitForTimeout(300);
+    ok(`M-SellAll-empty empty basket keeps "No eggs to sell" (${tag})`, (await page.locator('#sellAll').textContent()) === 'No eggs to sell');
+    // M-Sold-freeze: one order of 8, basket 8, sell it and sample every frame
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 8, customers: [{ id: 777, demand: 8, filled: 0, waitedS: 0 }] }; });
+    await page.waitForTimeout(400);
+    await page.evaluate(() => { window.__sf = []; const t0 = performance.now(), list = document.querySelector('#mRows');
+      const snap = () => { const row = list.querySelector('.order[data-id="777"]'), b = row?.querySelector('button'), em = list.querySelector('.empty-state'), cs = b ? getComputedStyle(b) : null;
+        window.__sf.push({ t: Math.round(performance.now() - t0), row: !!row, txt: b?.textContent ?? null, line: row?.querySelector('.l1')?.textContent ?? null, dis: b ? b.disabled && b.getAttribute('aria-disabled') === 'true' : null,
+          bg: cs?.backgroundColor ?? null, fg: cs?.color ?? null, op: row ? +getComputedStyle(row).opacity : null, tf: row ? getComputedStyle(row).transform : null, empty: !!em && !em.hidden }); };
+      list.querySelector('.order[data-id="777"] button').click(); snap(); const loop = () => { snap(); if (performance.now() - t0 < 900) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+    await page.waitForTimeout(110); if (shot && !rmo) await page.screenshot({ path: `${MS}/sold-freeze-mid-110ms-${name}.png` });
+    await page.waitForTimeout(900); if (shot && !rmo) await page.screenshot({ path: `${MS}/sold-after-next-customer-soon-${name}.png` });
+    const f = await page.evaluate(() => window.__sf), withRow = f.filter(x => x.row), sold = withRow.filter(x => /^Sold! \+\$/.test(x.txt ?? ''));
+    const freeze = sold.filter(x => x.t <= 220), lastRow = withRow.length ? withRow[withRow.length - 1].t : -1, firstEmpty = f.find(x => x.empty)?.t ?? -1;
+    ok(`M-Sold-freeze row shows a disabled green "Sold! +$X" chip from the click (${tag})`, sold.length > 0 && sold[0].t <= 40 && sold.every(x => x.dis && x.bg === 'rgb(61, 127, 51)' && x.fg === 'rgb(255, 255, 255)'), JSON.stringify(sold[0] ?? withRow[0]));
+    ok(`M-Sold-freeze row frozen in place ~240ms (no fade/slide yet) (${tag})`, freeze.length > 0 && freeze.every(x => x.op === 1 && (x.tf === 'none' || x.tf === 'matrix(1, 0, 0, 1, 0, 0)')) && sold[sold.length - 1].t >= 230, JSON.stringify({ n: freeze.length, last: sold[sold.length - 1]?.t }));
+    ok(`M-Sold-freeze never shows the stale "Sell 8" / "0/8" after the click (${tag})`, withRow.every(x => !/Sell 8|Need/.test(x.txt ?? '') && !/^0\/8/.test(x.line ?? '')), JSON.stringify(withRow.find(x => /Sell 8/.test(x.txt ?? ''))));
+    ok(`M-Sold-freeze "Next customer soon…" only after the row has left (${tag})`, lastRow > 0 && firstEmpty > lastRow && !f.some(x => x.row && x.empty), JSON.stringify({ lastRow, firstEmpty }));
+    if (rmo) ok(`M-Sold-freeze reduced motion: no slide/scale, gone by ~240+120ms (${tag})`, withRow.every(x => x.tf === 'none' || x.tf === 'matrix(1, 0, 0, 1, 0, 0)') && lastRow <= 240 + 120 + 80, JSON.stringify({ lastRow }));
+    else ok(`M-Sold-freeze leaves within ~240ms after the freeze (${tag})`, lastRow >= 240 && lastRow <= 240 + 240 + 100, JSON.stringify({ lastRow }));
+    ok(`rc2minors no page errors (${tag})`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+};
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);

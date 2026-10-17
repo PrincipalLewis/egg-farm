@@ -357,10 +357,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
 
   // ---------- Game events ----------
+  const lastSale = new Map<number, number>(); // rc2 M-Sold-freeze: value of each order's latest sale (the one that completes it)
   g.on((e: GameEvent) => {
     switch (e.type) {
       case 'sell': {
-        dwell.sold(e.id, e.value);
+        dwell.sold(e.id, e.value); lastSale.set(e.id, e.value);
         sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinIcon, i, 20, i === 0 ? () => pulse(coinPill) : undefined);
@@ -368,7 +369,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
-      case 'customer_served': dwell.served(e.id, now()); break;
+      case 'customer_served': dwell.served(e.id, now()); orderList.sold(e.id, fmtMoneyShort(lastSale.get(e.id) ?? 0)); lastSale.delete(e.id); break;
       case 'customer_partial': { dwell.gone(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
       case 'customer_lost':
         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
@@ -597,7 +598,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const ni = $('#nextIn'); if (ni) setText(ni, `(${fmtShortDur(s.nextCustomerInS)})`);
       let left = basket, eggs = 0, cents = 0; const price = S.eggPriceCents(F, s.collectionLevel, b);
       for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }
-      setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
+      setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney, basket, s.customers.length)); setDisabled(sellAllBtn, eggs === 0);
     }
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));

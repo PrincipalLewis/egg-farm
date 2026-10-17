@@ -2,11 +2,13 @@
  *  frame, chip + live region coalesced to <= 1 / 2 s, enter slide only into a visible slot (<= 1 / 240 ms), list frozen
  *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
-import { orderView, fitOrderEggs, moreLabel, moreName, type OrderView } from './orders';
+import { orderView, fitOrderEggs, moreLabel, moreName, soldLabel, SOLD_HOLD_MS, SOLD_FADE_RM_MS, type OrderView } from './orders';
 export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
   private lastSlide = -Infinity; private lastLeave = -Infinity; private frozenUntil = 0; private pointer = false;
+  /** rc2 M-Sold-freeze: served rows held in their Sold state until the time here; rows still on screen while leaving */
+  private soldUntil = new Map<number, number>(); private leavingN = 0;
   private chipAt = -Infinity; private chipTimer = 0; private chipShown = ''; private liveShown = -1;
   readonly chip: HTMLButtonElement; private empty: HTMLElement;
   /** Stats for tests/QA (§7.17): nodes created / removed. */
@@ -25,6 +27,7 @@ export class OrderList {
   update(i: ListInput) { this.pending = i; this.kick(); }
   private kick() { if (!this.raf) this.raf = this.schedule(() => { this.raf = 0; if (this.pending) this.apply(this.pending); }) || 1; }
   private fill(el: HTMLElement, v: OrderView) {
+    if (el.classList.contains('sold')) return; // frozen Sold! row: never redraw the stale '0/8 · Sell 8'
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
@@ -67,12 +70,18 @@ export class OrderList {
     const shownSet = new Set(shownIds);
     // removals (serve/leave, or no longer in a visible slot) - deferred while frozen
     if (!frozen) {
-      const gone = [...this.nodes.keys()].filter(id => !shownSet.has(id));
+      const held = (id: number) => (this.soldUntil.get(id) ?? 0) > t; // still frozen in its Sold state
+      const gone = [...this.nodes.keys()].filter(id => !shownSet.has(id) && !held(id));
       const animate = !i.rm && gone.length === 1 && ids.has(gone[0]) === false && t - this.lastLeave >= 240;
       const drop: HTMLElement[] = [];
       for (const id of gone) {
         const el = this.nodes.get(id)!; this.nodes.delete(id); this.stats.removed++;
-        if (animate) { this.lastLeave = t; el.classList.add('leaving'); el.removeAttribute('data-row'); setTimeout(() => this.flipRemove([el], i.rm), 240); } else drop.push(el);
+        const wasSold = this.soldUntil.delete(id) && !ids.has(id);
+        if (wasSold || animate) { // a sold row always leaves visibly: slide/scale 240ms, or with reduced motion a 120ms fade
+          const ms = i.rm ? SOLD_FADE_RM_MS : 240; if (!i.rm) this.lastLeave = t;
+          el.classList.add('leaving'); el.removeAttribute('data-row'); this.leavingN++;
+          setTimeout(() => { this.flipRemove([el], i.rm); this.leavingN--; this.kick(); }, ms);
+        } else drop.push(el);
       }
       if (drop.length) this.flipRemove(drop, i.rm);
     }
@@ -85,7 +94,8 @@ export class OrderList {
       if (!i.rm && t - this.lastSlide >= 240) { this.lastSlide = t; n.classList.add('enter'); setTimeout(() => n.classList.remove('enter'), 240); }
       this.list.insertBefore(n, this.chip);
     }
-    this.empty.hidden = i.customers.length > 0;
+    // M-Sold-freeze: "Next customer soon…" only once the sold row has frozen and left
+    this.empty.hidden = i.customers.length > 0 || this.nodes.size > 0 || this.leavingN > 0;
     // chip + live region: <= 1 write / 2 s (trailing, latest value); never animated
     const hidden = Math.max(0, (i.waitingLen ?? i.customers.length) - i.visible), want = hidden > 0 ? `${moreLabel(hidden, i.expanded)}|${moreName(hidden, i.expanded)}|${i.expanded}` : '';
     if (want !== this.chipShown) {
@@ -100,6 +110,16 @@ export class OrderList {
       else if (!this.chipTimer) this.chipTimer = window.setTimeout(write, 2000 - (t - this.chipAt));
     }
     if (frozen) setTimeout(() => this.kick(), 320);
+  }
+  /** rc2 M-Sold-freeze: the order was fully served: freeze the row as "Sold! +$X" (disabled, full bar) for SOLD_HOLD_MS, then it leaves. */
+  sold(id: number, money: string) {
+    const el = this.nodes.get(id); if (!el) return;
+    this.soldUntil.set(id, this.now() + SOLD_HOLD_MS);
+    el.className = 'order sold'; const btn = el.querySelector('button')!, bar = el.querySelector('.bar') as HTMLElement;
+    btn.textContent = soldLabel(money); btn.className = 'btn sell sold'; btn.setAttribute('aria-disabled', 'true'); btn.disabled = true;
+    (bar.firstElementChild as HTMLElement).style.width = '100%';
+    const want = bar.getAttribute('aria-valuemax'); if (want) { bar.setAttribute('aria-valuenow', want); bar.setAttribute('aria-label', `Order ${want} of ${want} eggs`); }
+    setTimeout(() => this.kick(), SOLD_HOLD_MS + 5);
   }
   node(id: number) { return this.nodes.get(id); }
 }

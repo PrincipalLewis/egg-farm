@@ -66,5 +66,9 @@ export const stripSplitAt = (live: number, coalesced: number) => { const s = str
 /** F1: the "+1 customer slot" toast only on a level that really adds a slot (queue_max(F) > queue_max(F-1)). */
 export const slotAdded = (F: number, b: Balance) => F > 0 && queueMax(F, b) > queueMax(F - 1, b);
 /** F2: never "$0.00": a greyed Sell all reads "No eggs to sell". */
-export const sellAllLabel = (eggs: number, cents: number, fc: (n: number) => string, fm: (c: number) => string) =>
-  eggs > 0 ? `Sell all (${fc(eggs)} eggs\u00a0· ${fm(cents)})` : 'No eggs to sell';
+/** rc2 M-SellAll-empty: eggs in the basket but no customers -> "Waiting for customers"; an empty basket keeps "No eggs to sell". */
+export const sellAllLabel = (eggs: number, cents: number, fc: (n: number) => string, fm: (c: number) => string, basket = 0, customers = 0) =>
+  eggs > 0 ? `Sell all (${fc(eggs)} eggs\u00a0· ${fm(cents)})` : basket >= 1 && customers === 0 ? 'Waiting for customers' : 'No eggs to sell';
+/** rc2 M-Sold-freeze: the disabled chip a served row shows for SOLD_HOLD_MS before it leaves. */
+export const soldLabel = (money: string) => `Sold! +${money}`;
+export const SOLD_HOLD_MS = 240, SOLD_FADE_RM_MS = 120;

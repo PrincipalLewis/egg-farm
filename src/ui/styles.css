@@ -369,7 +369,10 @@ html,body{overflow-x:hidden;max-width:100%}
 #sellAll{min-width:min(100%,280px);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .order.enter{animation:orderIn .24s ease-out}@keyframes orderIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .order.leaving{animation:orderOut .24s ease-out forwards;pointer-events:none}@keyframes orderOut{to{opacity:0;transform:scale(.96)}}
-.reduced-motion .order.enter,.reduced-motion .order.leaving{animation:none}
+.reduced-motion .order.enter{animation:none}
+/* rc2 M-Sold-freeze: frozen Sold! chip; reduced motion leaves with a 120ms fade, no slide/scale */
+.order .btn.sell.sold,.order .btn.sell.sold[aria-disabled=true]{background:#3D7F33;color:#fff;opacity:1;filter:none;cursor:default;box-shadow:none}
+.reduced-motion .order.leaving{animation:orderFade .12s linear forwards}@keyframes orderFade{to{opacity:0}}
 /* §6 farm row: +1 customer slot */
 .fx li.slot{font:800 14px var(--f-body);color:#3E2C23;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fx li.slot img{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
 .fx li.slot .m{color:#6B5D52;font-weight:700}.fx li.orders{font:700 12px var(--f-body);color:#6B5D52;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
