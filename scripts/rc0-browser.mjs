@@ -1120,13 +1120,14 @@ sections.rc2minors2 = async () => {
   }
   // M-Toast-layer (designer spec, art-ux screenshot-check-2026-10-17-0722): at 320x568 / 360x420 no toast is visible in ANY frame
   // while #modal-layer.open; held toasts appear after it closes. Two paths: toast raised while open, and toast already up when it opens.
-  for (const [w, h] of [[320, 568], [360, 420]]) for (const path of ['during', 'before']) {
+  for (const [w, h] of [[320, 568], [360, 420]]) for (const path of ['during', 'before', 'same']) { // 'same': buy + Welcome-back in one task, toast still pending its settle frame (review e9b9826 #1)
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE2 } }); const tag = `${w}x${h} ${path}`;
     await page.evaluate(() => { window.__tl = []; const t0 = performance.now(), e = document.querySelector('.toast'), m = document.querySelector('#modal-layer');
       const loop = () => { const cs = getComputedStyle(e); window.__tl.push({ t: Math.round(performance.now() - t0), modal: m.classList.contains('open'), op: +cs.opacity, vis: cs.visibility, text: e.textContent }); if (performance.now() - t0 < 5000) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
     const buy = () => page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
     const wb = () => page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2685, customers: [] }; window.eggfarmQaWelcome(); });
-    if (path === 'during') { await wb(); await page.waitForTimeout(150); await buy(); } else { await buy(); await page.waitForTimeout(400); await wb(); }
+    if (path === 'same') await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); g.state = { ...g.state, pendingOfflineEggs: 2685, customers: [] }; window.eggfarmQaWelcome(); });
+    else if (path === 'during') { await wb(); await page.waitForTimeout(150); await buy(); } else { await buy(); await page.waitForTimeout(400); await wb(); }
     await page.waitForTimeout(500); if (shot) await page.screenshot({ path: `${MS}/toast-layer-welcome-open-${w}x${h}-${path}.png` });
     const opened = await page.evaluate(() => document.querySelector('#modal-layer').classList.contains('open'));
     await page.evaluate(() => document.querySelector('#wbCollect').click()); await page.waitForTimeout(600);
@@ -1138,9 +1139,9 @@ sections.rc2minors2 = async () => {
     await ctx.close();
   }
   const caps = {};
-  for (const [w, h] of [[390, 844], [1280, 800]]) { // M-Tut-parity + M-Tut-goal (fresh onboarding)
+  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) { // M-Tut-parity (FM-AC4) + M-Tut-goal (fresh onboarding)
     const { ctx, page, errors } = await open({ w, h });
-    const cap = () => page.evaluate(() => document.querySelector('.onb-txt')?.innerHTML ?? '');
+    const cap = () => page.evaluate(() => { const t = document.querySelector('.onb-txt'), r = t?.getBoundingClientRect(); return t ? { t: t.textContent, fit: t.scrollWidth <= t.clientWidth + 0.5 && !/…/.test(t.textContent) && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight } : null; });
     const seen = [];
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coop: 40 }; }); await page.waitForTimeout(400); seen.push(await cap());
     await page.evaluate(() => window.eggfarm.dispatch({ type: 'collect' })); await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 601, demand: 3, filled: 0, waitedS: 0 }], basket: 5 }; }); await page.waitForTimeout(400); seen.push(await cap());
@@ -1159,7 +1160,9 @@ sections.rc2minors2 = async () => {
     ok(`rc2minors2 tutorial no page errors (${w})`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
-  ok('M-Tut-parity tutorial captions identical at 390 and 1280', JSON.stringify(caps[390]) === JSON.stringify(caps[1280]) && caps[390].every(Boolean), JSON.stringify(caps));
+  const FM4 = ['Tap Collect to gather eggs.', 'A customer! Tap Sell to earn coins.', 'Buy your first upgrade: more eggs per tap.'];
+  for (const w of [360, 390, 1280]) ok(`M-Tut-parity FM-AC4 step 1/2/3 captions exact, fit, in viewport (${w})`, caps[w]?.length === 3 && caps[w].every((c, i) => c && c.t === FM4[i] && c.fit), JSON.stringify(caps[w]));
+  ok('M-Tut-parity tutorial captions identical at 360, 390 and 1280', JSON.stringify(caps[360]) === JSON.stringify(caps[390]) && JSON.stringify(caps[390]) === JSON.stringify(caps[1280]), JSON.stringify(caps));
 };
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();

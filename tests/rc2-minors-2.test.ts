@@ -16,14 +16,14 @@ describe('M-Order-zero', () => {
 });
 import { TUT_COPY, tutCaption } from '../src/ui/onboarding';
 describe('M-Tut-parity', () => {
-  it('one caption per step, the 390 strings', () => {
-    expect(TUT_COPY).toEqual(['Tap <b>Collect</b> to gather the eggs.', 'A customer! Tap them to sell eggs.', 'Spend coins to collect more eggs per tap.']);
+  it('one caption per step, FM-AC4 strings', () => {
+    expect(TUT_COPY).toEqual(['Tap <b>Collect</b> to gather eggs.', 'A customer! Tap <b>Sell</b> to earn coins.', 'Buy your first upgrade: more eggs per tap.']);
     expect([0, 1, 2].map(tutCaption)).toEqual([...TUT_COPY]);
   });
   it('app.ts passes tutCaption with no width/panel branching and no other caption strings', () => {
     const src = readFileSync('src/ui/app.ts', 'utf8');
     expect(src).toMatch(/\}, tutCaption \/\*/);
-    expect(src).not.toMatch(/Tap <b>Sell<\/b> to earn coins|'Tap <b>Buy<\/b>\.'/);
+    expect(src).not.toMatch(/Tap <b>Sell<\/b> to earn coins|'Tap <b>Buy<\/b>\.'|gather the eggs/);
   });
 });
 import { ftueGate, TUT_GOAL_LINK } from '../src/ui/onboarding';
@@ -42,8 +42,8 @@ describe('M-Tut-goal', () => {
 describe('M-Toast-layer', () => {
   it('wiring: showToast goes through toastGate blocked by #modal-layer.open; modals pull a visible toast; closeModal releases; no z-index swap (behaviour in toast-gate.test.ts)', () => {
     const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
-    expect(app).toMatch(/toastGate\(\(\) => modal\.classList\.contains\('open'\), rawToast/);
-    expect(app).toMatch(/const showToast = \(text: string, ms = 1300\) => toastQ\.toast\(text, ms\)/);
+    expect(app).toMatch(/toastGate\(\(\) => modal\.classList\.contains\('open'\), rawToast/); expect(app).toMatch(/\{ blocked: \(\) => modal\.classList\.contains\('open'\), hold: ms => toastQ\.hold\(/);
+    expect(app).toMatch(/const showToast = \(text: string, ms = TOAST_MS\) => toastQ\.toast\(text, ms\)/);
     expect(app.match(/pullToast\(\); /g)?.length).toBe(2); expect(app).toMatch(/const pullToast = [^\n]*toastQ\.hold\(toast\.textContent[^\n]*\n\s*toast\.style\.transition = 'none'; toast\.classList\.remove\('show'\)/);
     expect(app).toMatch(/const closeModal = [^\n]*\n\s*toastQ\.released\(\)/);
     expect(app).not.toMatch(/deferredToast/);
@@ -57,4 +57,19 @@ describe('M-Order-zero fit', () => {
     expect(orderView(c(13), 0, 118).line).toBe('Wants 13 eggs · $15.34'); expect(orderView(c(181e9), 0, 983.4).line).toBe('Wants 181B eggs · $1.78T');
     expect(fitOrderEggs('1/13 eggs', () => false)).toBe('1/13');
   });
+});
+
+import { setHint, TUT_GOAL_LINK } from '../src/ui/onboarding';
+describe('M-Tut-goal hint keeps the link node (review e9b9826 #5)', () => {
+  const fake = () => { const link = { classList: { contains: (c: string) => c === 'tut-link' } }; const t = { nodeType: 3, nodeValue: '' as string | null };
+    const el: any = { _html: '', set innerHTML(v: string) { this._html = v; this.writes++; const k = v.endsWith(TUT_GOAL_LINK) ? v.length - TUT_GOAL_LINK.length : -1; if (k > 0) { t.nodeValue = v.slice(0, k); this.firstChild = t; this.lastElementChild = link; this.childNodes = { length: 2 }; } else { this.firstChild = null; this.lastElementChild = null; this.childNodes = { length: 1 }; } }, get innerHTML() { return this._html; }, writes: 0, firstChild: null, lastElementChild: null, childNodes: { length: 0 } };
+    return { el, t, link }; };
+  it('amount change rewrites only the text node; other captions replace the content', () => {
+    const { el, t } = fake(); setHint(el, `$3\u00a0to\u00a0go\u00a0·\u00a0${TUT_GOAL_LINK}`); expect(el.writes).toBe(1); const node = el.lastElementChild;
+    setHint(el, `$2\u00a0to\u00a0go\u00a0·\u00a0${TUT_GOAL_LINK}`); expect(el.writes).toBe(1); expect(t.nodeValue).toBe('$2\u00a0to\u00a0go\u00a0·\u00a0'); expect(el.lastElementChild).toBe(node);
+    setHint(el, 'Collect some eggs to sell.'); expect(el.writes).toBe(2);
+  });
+});
+describe('§9 narrow branch', () => {
+  it('<=375 strips " eggs" from both forms (same rule as 4/17)', () => { for (const [a, b] of [['Wants 13 eggs', 'Wants 13'], ['4/17 eggs', '4/17']]) expect(a.replace(/ eggs$/, '')).toBe(b); expect(readFileSync('src/ui/order-list.ts', 'utf8')).toMatch(/const fe = narrow \? e\.replace\(\/ eggs\$\/, ''\) : fitOrderEggs\(e, fitsL1\)/); });
 });

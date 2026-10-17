@@ -42,3 +42,16 @@ describe('toastController per-toast duration', () => {
   it('honours the given ms (COOP_TOAST_MS 2500), default stays TOAST_MS', () => { const r = rig(); r.show(2500); r.frame(); r.advance(2499); expect(r.shown).toBe(true); r.advance(1); expect(r.shown).toBe(false);
     const q = rig(); q.show(); q.frame(); q.advance(TOAST_MS - 1); expect(q.shown).toBe(true); q.advance(1); expect(q.shown).toBe(false); });
 });
+
+import { toastController as tc2, TOAST_MS as TM } from '../src/ui/toast-place';
+describe('toastController gate hook (review e9b9826 #1: pending toast when a modal opens)', () => {
+  const mk = () => { let shown = false, blocked = false; const frames: (() => void)[] = [], held: number[] = [];
+    const show = tc2({ shown: () => shown, opacity: () => (shown ? 1 : 0), show: () => { shown = true; }, hide: () => { shown = false; }, transitions: () => {}, reflow: () => {}, place: () => {} },
+      { raf: f => { frames.push(f); return 1; }, setTimeout: () => 1, clearTimeout: () => {} }, { blocked: () => blocked, hold: ms => held.push(ms) });
+    return { show, frames, held, block: (v: boolean) => { blocked = v; }, get shown() { return shown; } }; };
+  it('show() then the modal opens before the settle frame: nothing is drawn, the toast is held with its duration', () => {
+    const r = mk(); r.show(2500); r.block(true); r.frames.splice(0).forEach(f => f()); expect(r.shown).toBe(false); expect(r.held).toEqual([2500]);
+  });
+  it('show() while blocked holds at once, no frame queued', () => { const r = mk(); r.block(true); r.show(); expect(r.frames.length).toBe(0); expect(r.held).toEqual([TM]); });
+  it('unblocked path still shows', () => { const r = mk(); r.show(); r.frames.splice(0).forEach(f => f()); expect(r.shown).toBe(true); expect(r.held).toEqual([]); });
+});

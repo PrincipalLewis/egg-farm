@@ -15,8 +15,10 @@ describe('toastGate (rc2 M-Toast-layer: hold while #modal-layer.open)', () => {
     const r = rig(); r.set(true); r.g.toast('A', 2500); r.g.toast('A', 2500); r.g.toast('B'); r.set(false); r.g.released(); r.frame();
     expect(r.shown).toEqual([['A', 2500]]); expect(r.timers.map(t => t[1])).toEqual([2500 + TOAST_GAP_MS]);
     r.g.toast('C'); expect(r.shown.length).toBe(1); // queued behind the drain, not shown over A
-    r.tick(); expect(r.shown.map(s => s[0])).toEqual(['A', 'B']); r.tick(); expect(r.shown.map(s => s[0])).toEqual(['A', 'B', 'C']); expect(r.timers).toEqual([]);
-    r.g.toast('D'); expect(r.shown.at(-1)).toEqual(['D', TOAST_MS]); // drain over: pass-through again
+    r.tick(); expect(r.shown.map(s => s[0])).toEqual(['A', 'B']); r.tick(); expect(r.shown.map(s => s[0])).toEqual(['A', 'B', 'C']);
+    r.g.toast('D'); expect(r.shown.length).toBe(3); // C still has its own time: D waits (review e9b9826 #2)
+    expect(r.timers.map(t => t[1])).toEqual([TOAST_MS + TOAST_GAP_MS]); r.tick(); expect(r.shown.at(-1)).toEqual(['D', TOAST_MS]); r.tick(); expect(r.timers).toEqual([]);
+    r.g.toast('E'); expect(r.shown.at(-1)).toEqual(['E', TOAST_MS]); // drain over: pass-through again
   });
   it('a toast pulled off screen by hold() re-shows first after the modal', () => {
     const r = rig(); r.set(true); r.g.toast('B'); r.g.hold('A', 2500); r.g.hold('A'); expect(r.g.held()).toEqual(['A', 'B']);

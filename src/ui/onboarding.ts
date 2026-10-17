@@ -10,7 +10,8 @@ export const STEPS = [
   { name: 'upgrade', caption: 'Spend your coins: open Upgrades and buy your first one.' },
 ] as const;
 /** rc2 M-Tut-parity: the coach-mark caption per step, identical at every width and panel state (source: the 390 strings). */
-export const TUT_COPY = ['Tap <b>Collect</b> to gather the eggs.', 'A customer! Tap them to sell eggs.', 'Spend coins to collect more eggs per tap.'] as const;
+/** first-minute FM-AC4 (Head of Art & UX approved; product/collection/first-minute-proposal.md): one caption per step at every width. */
+export const TUT_COPY = ['Tap <b>Collect</b> to gather eggs.', 'A customer! Tap <b>Sell</b> to earn coins.', 'Buy your first upgrade: more eggs per tap.'] as const;
 /** rc2 M-Tut-goal: the bubble's link; app.ts opens/scrolls to the target upgrade and pulses its Buy button. */
 export const TUT_GOAL_LINK = '<button type="button" class="tut-link" data-tut="upgrades">Upgrades\u00a0›</button>';
 export const tutCaption = (st: number) => TUT_COPY[Math.min(Math.max(st, 0), TUT_COPY.length - 1)];
@@ -183,7 +184,7 @@ export function mountOnboarding(
     const paused = dialogOpen(); if (layer.hidden !== paused) layer.hidden = paused; if (paused) return true; // R1: resume when the dialog closes
     const mode = flow.mode; layer.classList.toggle('hint', mode !== 'mark'); cap.hidden = mode === 'none';
     const el = mode === 'mark' ? target(flow.step) : null;
-    const text = mode === 'mark' ? caption(flow.step) : flow.hint; if (text !== last) { txt.innerHTML = text; dotEl.textContent = dots(flow.step); last = text; }
+    const text = mode === 'mark' ? caption(flow.step) : flow.hint; if (text !== last) { setHint(txt, text); dotEl.textContent = dots(flow.step); last = text; }
     if (!el) { ring.style.display = hand.style.display = 'none'; cap.style.cssText = mode === 'mark' ? 'left:50%;top:40%;transform:translateX(-50%)' : 'left:50%;top:96px;transform:translateX(-50%)'; return true; }
     const r = el.getBoundingClientRect(), pad = 6;
     ring.style.display = hand.style.display = '';
@@ -210,3 +211,11 @@ export function mountOnboarding(
 /** m3-ftue-spec v1.1 §2.2: the label always shows the real per-tap value; with less in the coop the capped amount is secondary. */
 export const collectLabel = (coopWhole: number, perTap: number, fmt: (n: number) => string = String) =>
   coopWhole >= perTap ? `Collect +${fmt(perTap)}` : `Collect +${fmt(perTap)} · ${fmt(Math.max(0, coopWhole))} ready`;
+
+/** rc2 M-Tut-goal (review e9b9826 #5): when only the '$N to go · ' amount changes, rewrite just that text node so a focused
+ *  'Upgrades ›' button keeps focus (and is not re-created); any other change replaces the caption. */
+export function setHint(el: { innerHTML: string; firstChild: { nodeType: number; nodeValue: string | null } | null; lastElementChild: { classList: { contains(c: string): boolean } } | null; childNodes: { length: number } }, text: string) {
+  const k = text.endsWith(TUT_GOAL_LINK) ? text.length - TUT_GOAL_LINK.length : -1;
+  if (k > 0 && el.childNodes.length === 2 && el.firstChild?.nodeType === 3 && el.lastElementChild?.classList.contains('tut-link')) { const pre = text.slice(0, k); if (el.firstChild.nodeValue !== pre) el.firstChild.nodeValue = pre; return; }
+  el.innerHTML = text;
+}

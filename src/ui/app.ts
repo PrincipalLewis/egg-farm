@@ -2,7 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
-import { toastTop, toastController, toastGate } from './toast-place';
+import { toastTop, toastController, toastGate, TOAST_MS } from './toast-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -165,11 +165,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     /* F1: below the queue strip; rc2: never over the 'New helper!' hire banner */ const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); };
   const toastShow = toastController({ shown: () => toast.classList.contains('show'), opacity: () => +getComputedStyle(toast).opacity, show: () => toast.classList.add('show'), hide: () => toast.classList.remove('show'),
     transitions: on => { toast.style.transition = on ? '' : 'none'; }, reflow: () => { void toast.offsetHeight; }, place: placeToast },
-    { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms), clearTimeout: id => clearTimeout(id) });
-  let toastMs = 1300; const rawToast = (text: string, ms: number) => { toast.textContent = text; toastMs = ms; toastShow(ms); };
-  /* rc2 M-Toast-layer: toasts wait while #modal-layer.open and show after it closes (.toast z 31 stays above #modal-layer 20 on purpose) */
+    { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms), clearTimeout: id => clearTimeout(id) },
+    { blocked: () => modal.classList.contains('open'), hold: ms => toastQ.hold(toast.textContent ?? '', ms) });
+  let toastMs = TOAST_MS; const rawToast = (text: string, ms: number) => { toast.textContent = text; toastMs = ms; toastShow(ms); };
+  /* rc2 M-Toast-layer: toasts wait while #modal-layer.open and show after it closes (.toast z 35 by cascade stays above #modal-layer 20 on purpose; only #modal-layer gates, not .recovery-layer 40 or the rotate prompt) */
   const toastQ = toastGate(() => modal.classList.contains('open'), rawToast, { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms) });
-  const showToast = (text: string, ms = 1300) => toastQ.toast(text, ms);
+  const showToast = (text: string, ms = TOAST_MS) => toastQ.toast(text, ms);
   /** a modal is opening: take a visible toast off instantly (no fade-out over the modal) and hold it for after the modal */
   const pullToast = () => { if (!toast.classList.contains('show') && +getComputedStyle(toast).opacity === 0) return; if (toast.classList.contains('show')) toastQ.hold(toast.textContent ?? '', toastMs);
     toast.style.transition = 'none'; toast.classList.remove('show'); void toast.offsetHeight; toast.style.transition = ''; };
