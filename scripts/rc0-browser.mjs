@@ -1030,6 +1030,28 @@ sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1
     await ctx.close();
   }
 };
+// ---------- B-3 compact Farm card (rc2-notes §B-3 mock v2): 260px (282 with ETA) ±2 at 360/390; Buy fully visible + 48px; no clipping; 1280 docked fits ----------
+sections.farmCompact = async () => {
+  const SH = process.env.B3_SHOTS;
+  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) for (const [name, coins] of [['affordable', 5e6], ['eta', 995]]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: coins, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 6, customers: [],
+      nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2, workers: {}, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); if (await page.locator('[data-tab=farm]').isVisible()) await page.locator('[data-tab=farm]').click();
+    await page.waitForSelector('#uRow .up .btn.buy[data-kind=farm]', { timeout: 5000 }); await page.waitForTimeout(300);
+    await page.evaluate(() => document.querySelector('#uRow .btn.buy[data-kind=farm]').closest('.up').scrollIntoView({ block: 'center' })); await page.waitForTimeout(250);
+    const r = await page.evaluate(() => { const B = document.querySelector('#uRow .btn.buy[data-kind=farm]'), card = B.closest('.up'), cr = card.getBoundingClientRect(), br = B.getBoundingClientRect();
+      const cx = (br.left + br.right) / 2, cy = (br.top + br.bottom) / 2, top = document.elementFromPoint(cx, cy);
+      const clipped = [...card.querySelectorAll('h3,.lv,.tier,.fx li,.vchip,.hint,.btn')].filter(e => e.getClientRects().length && (e.scrollWidth > e.clientWidth + 0.5 || e.getBoundingClientRect().right > cr.right + 0.5 || e.getBoundingClientRect().left < cr.left - 0.5)).map(e => e.className + ':' + e.textContent.trim());
+      const eta = card.querySelector('.hint.eta'), meta = card.querySelector('.meta'), lv = card.querySelector('.t .lv'), ev = card.querySelector('.fx li.every');
+      return { h: Math.round(cr.height * 10) / 10, eta: !!(eta && eta.getClientRects().length), meta: !!meta, lv: lv?.textContent, every: ev?.getAttribute('aria-label') ?? null, bh: Math.round(br.height), buyVis: br.top >= 0 && br.bottom <= innerHeight && br.left >= 0 && br.right <= innerWidth && (top === B || B.contains(top)), clipped, w: innerWidth }; });
+    const target = r.eta ? 282 : 260, phone = w < 600;
+    ok(`B-3 compact farm card ${name} at ${w}: ${phone ? `height ${target}±2, ` : ''}title L6/30, no .meta line, Buy 48px fully visible + on top, no clipped text`, (!phone || Math.abs(r.h - target) <= 2) && r.eta === (name === 'eta') && !r.meta && r.lv === 'L6/30' && r.bh === 48 && r.buyVis && !r.clipped.length && (r.every == null || /^Customers arrive every [\d.]+ s, next [\d.]+ s$/.test(r.every)), JSON.stringify(r));
+    if (SH) { mkdirSync(SH, { recursive: true }); await page.evaluate(() => { const d = document.createElement('div'); d.id = 'b3-build'; d.textContent = `build ${document.querySelector("[data-build-id]")?.dataset.buildId}`; d.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:99999;background:#000c;color:#fff;font:700 12px monospace;padding:2px 6px;border-radius:4px;pointer-events:none'; document.body.appendChild(d); });
+      await page.screenshot({ path: `${SH}/b3-farmcard-${name}-${w}${w >= 960 ? '-docked' : ''}-${ENGINE}.png` }); }
+    await ctx.close();
+  }
+};
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);

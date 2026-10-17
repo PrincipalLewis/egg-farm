@@ -24,7 +24,7 @@ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
-import { navUpgradesTab, changedLine, fxOrNoChange } from './upgrade-card';
+import { navUpgradesTab, changedLine, fxOrNoChange, FARM_FX_LABELS, customerEveryAria, paybackChip, levelTag } from './upgrade-card';
 import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, goalButtonAria, type Goal } from './next-goal';
 import { collectionFxLines, collectionSummary, collectionDeltas } from './collection-copy';
 import { tryDispatch } from './tap-guard';
@@ -455,11 +455,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const collSummary = !isF && !max ? collectionSummary(b) : '';
     const cl = (lbl: string, a: string, z: string) => changedLine(lbl, a, z, max, arrow); // UC26: equal before→after lines are not rendered
     const fx = fxOrNoChange(isF ? [
-      cl('Hens ', fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b))),
-      cl('Coop capacity ', fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b))),
-      cl('Egg price ', price(F, C), price(F + 1, C)),
-      ...(!max && slotLines ? [] : [cl('Customers every ', `${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`),
-      cl('Customer demand ', S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))]),
+      // B-3 compact card: short labels, order Hens, Every, Coop, Price, Demand (wrapping flex row)
+      cl(FARM_FX_LABELS.hens, fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b))),
+      ...(!max && slotLines ? [] : [(() => { const ia = S.customerIntervalS(F, b), iz = S.customerIntervalS(F + 1, b), l = cl(FARM_FX_LABELS.every, `${ia}`, `${iz}s`);
+        return l == null || (!max && `${ia}` === `${iz}`) ? null : `\u0001${customerEveryAria(ia, iz, max)}\u0001<img class="fxi" src="${A('icon-customer.svg')}" alt="">${max ? `${l}s` : l}`; })()]),
+      cl(FARM_FX_LABELS.coop, fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b))),
+      cl(FARM_FX_LABELS.price, price(F, C), price(F + 1, C)),
+      ...(!max && slotLines ? [] : [cl(FARM_FX_LABELS.demand, S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))]),
     ] : collectionFxLines(C, b).map(line => {
       const m = /^(Egg price |Eggs per tap )(.+) → (.+)$/.exec(line);
       if (!m) return line;
@@ -477,7 +479,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const effect = baseInc > 0 && og.gain > 0 ? `<span class="vchip eff">+${pct}% income</span>`
         : `<span class="vchip eff">${isF ? `+${fmtCount(S.eggsPerSec(F + 1, b) - S.eggsPerSec(F, b))} eggs/s` : collectionSummary(b)}</span>`;
       let pb = '';
-      if (og.gain > 0) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">Pays back in ${fmtTimeToAfford(og.payback)}</span>`;
+      if (og.gain > 0) { const p = paybackChip(fmtTimeToAfford(og.payback)); pb = `<span class="vchip pb" role="img" aria-label="${p.aria}"><img src="${A('icon-offline-earnings.svg')}" alt="">${p.short}</span>`; }
       else if (og.bundlePayback != null) pb = `<span class="vchip pb"><img src="${A('icon-offline-earnings.svg')}" alt="">With next buys: ${fmtTimeToAfford(og.bundlePayback)}</span>`;
       else if (isF) pb = `<span class="vchip pb"><img src="${A('icon-customer.svg')}" alt="">Unlocks more customers</span>`;
       const best = isBest ? `<span class="vchip bb">★ Best buy</span>` : '';
@@ -490,24 +492,25 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const hold = isF ? farmEta : collEta;
       const secs = hold.tick(raw, incomePerSec(s, b), s.coinsCents);
       hint = `<div class="hint eta ${secs != null && secs >= 3600 ? 'long' : ''}"><img src="${A('icon-offline-earnings.svg')}" alt="">${fmtAffordableIn(secs)}</div>`;
-    } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
+    }
+    let limit = '';
     // UC12 / v1.4: Farm row "Limited by collecting ›" → Collection (44px hit via CSS padding)
     if (isF && !max && S.eggsPerTap(C, b) <= 0.5 * S.coopCapacity(F, b))
-      hint += `<div class="hint limit"><button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades."><img src="${A('icon-nest.svg')}" alt="" width="14" height="14">Limited by collecting ›</button></div>`;
+      limit = `<div class="hint limit"><button class="link" data-goto="collection" aria-label="Limited by collecting. Go to Collection upgrades."><img src="${A('icon-nest.svg')}" alt="" width="14" height="14">Limited by collecting ›</button></div>`;
     const aria = !max && og && baseInc > 0 && og.gain > 0
       ? `${isF ? 'Farm level' : 'Collect per tap'}, level ${L}. Adds ${pct} percent income. ${og.gain > 0 ? `Pays back in about ${fmtTimeToAfford(og.payback).replace('~', '')}.` : ''} ${isBest ? 'Best buy.' : ''} Buy for ${fmtMoney(cost * 100)}.`
       : '';
     return `<div class="up${isBest ? ' best-buy' : ''}"${aria ? ` aria-label="${aria.replace(/"/g, '&quot;')}"` : ''}>
-      <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
-      <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
+      <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}</div>
+      <div class="col"><div class="t"><h3>${isF ? 'Farm' : 'Collect per tap'}</h3><span class="lv" aria-label="Level ${L} of ${b.maxLevel}">${levelTag(L, b.maxLevel)}</span></div>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       ${collSummary ? `<div class="sum">${collSummary}</div>` : ''}
-      <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      <ul class="fx">${slotLines ?? ''}${fx.map(l => { const m = /^\u0001([^\u0001]*)\u0001/.exec(l); return m ? `<li class="every" aria-label="${m[1]}">${l.slice(m[0].length)}</li>` : `<li>${l}</li>`; }).join('')}</ul>
       ${chips}
-      <div class="meta">Level ${L} / ${b.maxLevel}</div>
+      ${hint}
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
-      <div>${hint}</div></div></div>`;
+      ${limit}</div></div>`;
   };
   let lastUp = '', ordersExpanded = false;
   let refillDirty = false; { const mark = () => { refillDirty = true; }; addEventListener('resize', mark); docked.addEventListener?.('change', mark); } // review 56513e7 #3: --refill-bar-h follows wraps from resize/rotation/dock
