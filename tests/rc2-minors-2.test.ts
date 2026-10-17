@@ -47,3 +47,10 @@ describe('M-Toast-layer', () => {
     expect(app).toMatch(/if \(wasWelcome && deferredToast\)[^\n]*showToast\(t, ms\)/);
   });
 });
+import { fitOrderEggs } from '../src/ui/orders';
+describe('M-Order-zero fit', () => {
+  it('"Wants N" kept when it fits; falls back to compact "0/N" when it does not', () => {
+    expect(fitOrderEggs('Wants 13', () => true)).toBe('Wants 13'); expect(fitOrderEggs('Wants 3.98M', () => false)).toBe('0/3.98M');
+    expect(fitOrderEggs('1/13 eggs', () => false)).toBe('1/13');
+  });
+});
