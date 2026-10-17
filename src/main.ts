@@ -1,3 +1,4 @@
+import { watchVisibility } from './platform/visibility';
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
@@ -125,6 +126,8 @@ async function boot() {
   }
   // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).
   // Tab guard: once frozen (older tab) neither the sim nor the UI advances.
+  // S2 hidden-tab fix: one visibility hook (reused by telemetry v0.6.1 later). Before autosave, so the hide save is the snapshot.
+  watchVisibility(document, () => Date.now(), { onHidden: at => g.onHidden(at), onShown: s => { const eggs = g.onShown(s.endAt); if (!frozen && eggs > 0) ui.showWelcome(); } });
   new RenderPump(() => { if (frozen) return; g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
   window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
   // §3c interim path: backup (LS + IndexedDB) then in-session commit; after the lease claim and newer checks (m1).

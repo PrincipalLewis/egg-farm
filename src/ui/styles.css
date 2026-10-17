@@ -345,25 +345,26 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (min-width:960px){.tabs button{min-width:44px}}
 /* P1q/P2 order cards + "+N waiting" (art-ux/m3-customer-queue-spec.md v1.0); visibility is set in JS (same 384px rule) */
 .order-list{display:flex;flex-direction:column;gap:var(--s-2)}
-.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md)}
+.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md);container-type:inline-size;container-name:order}
 .order[hidden]{display:none}
 .order>.txt{min-width:0}.order .av{width:40px;height:40px}.order .av img{width:100%;height:100%}
 .order .l1{display:flex;font:800 16px/1.2 var(--f-body);white-space:nowrap;font-variant-numeric:tabular-nums;color:#3E2C23;min-width:0}
-.order .l1 .e{flex:none}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.order .l1 .n{flex:0 0 auto;flex-shrink:0}.order .l1 .egg{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:visible;text-overflow:clip;flex:0 0 auto;flex-shrink:0}
 .order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
 .order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
-.order .sell{min-width:88px;max-width:42%;min-height:44px;border-radius:22px;padding:0 var(--s-3)}
+.order .sell{min-height:44px;border-radius:22px}
+.order[data-hl]{outline:3px solid var(--c-focus);outline-offset:2px;animation:hlpulse 600ms 2}
 .order.ready{border:3px solid #3D7F33}
 .order.wait .sell{background:#fff;color:#6B5D52;border:2px solid #6B5D52;box-shadow:none}
 .queue-more{align-self:center;min-height:44px;padding:0 16px;border-radius:22px;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0;cursor:pointer}
 .queue-more:focus-visible{outline:2px solid #2B79A8;outline-offset:2px}
-@media (min-width:960px) and (orientation:landscape){#p-market .body{overflow:auto}.order .sell{min-width:112px}}
+@media (min-width:960px) and (orientation:landscape){#p-market .body{overflow:auto}}
 .reduced-motion .order .bar>i{transition:none}
 /* farm strip "+N" chip (5th slot) */
 .chip.more{display:grid;place-items:center;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0}
 /* v1.1 §5 anti-churn: fixed heights/widths, transform/opacity-only animations */
 .order{height:60px;min-height:0;contain:layout paint;overflow:hidden}
-.order .sell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.order .sell{overflow:visible}
 .order-list{overflow-anchor:auto}
 .queue-more{min-width:9ch;font-variant-numeric:tabular-nums;transition:none;flex:none}
 #sellAll{min-width:min(100%,280px);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -379,8 +380,12 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (max-height:699px){.queue{min-height:64px}}
 /* §5.1/§5.8 (QA 15/16): cards never flex-shrink when a leaving card is still in the list; Sell button width fixed so "Sell 3" -> "Sell" never moves the target */
 .order-list .order{flex:none;box-sizing:border-box}
-.order .btn.sell{width:88px;min-width:88px;padding-inline:0;justify-content:center;font-variant-numeric:tabular-nums}
-.order .btn.sell{max-width:none}
+/* MK-24-1 v3 / Art & UX: always two-line Sell ('Sell k' 14px over '+$X' 12px); shared width via --sell-w on .order-list (min 88, max 45cqw); never ellipsis the button. */
+.order .btn.sell{width:var(--sell-w,88px);min-width:88px;max-width:45cqw;min-height:44px;height:auto;padding:4px 10px;padding-inline:10px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:column;flex-wrap:nowrap;gap:0;white-space:normal;line-height:1.15;font-size:14px;font:800 14px var(--f-display);overflow:visible}
+.order .btn.sell .sk,.order .btn.sell .sy{display:block;flex-shrink:0;overflow:visible;text-overflow:clip;max-width:none;white-space:nowrap;text-align:center}
+.order .btn.sell .sk{font:800 14px var(--f-display)}
+.order .btn.sell .sk::after{content:none}
+.order .btn.sell .sy{font:800 12px var(--f-display)}
 .order.ready{border-width:2px;box-shadow:inset 0 0 0 1px #3D7F33;border-color:#3D7F33}
 /* PT1-13 (WebKit 375/SE overflow; layout-spec §9, bug9-375.css): single mobile column can never grow past the viewport */
 #app{width:100%;max-width:100vw;box-sizing:border-box}
@@ -389,7 +394,7 @@ html,body{overflow-x:hidden;max-width:100%}
 #app>*,.farm,.collectbar,.collectbar>*,.goal,.goal>*,.hud>*,.queue,.row>*,.order>*{min-width:0}
 .goal-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .collectbar{box-sizing:border-box}
-@media (max-width:375px){#collect,.collectbar .btn,.order .sell,.order .btn.sell,.row .btn{min-width:0;max-width:96px}.order .btn.sell{width:80px}#collect{max-width:none}}
+@media (max-width:375px){#collect,.collectbar .btn,.row .btn{min-width:0;max-width:96px}#collect{max-width:none}}
 /* PT1-14: greyed Manage all = #5A4C42 on #CFC6BA (4.88:1); focus ring unchanged */
 .btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{color:#5A4C42;background:#CFC6BA}
 /* Rotate-to-portrait prompt (art-ux/m3-rotate-portrait-prompt.md §5); shown/hidden in JS from the same media query */
@@ -595,6 +600,7 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
 .reduced-motion .tab-guard .recovery-card{animation:none}
 .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
+.tab-guard #tgPlay{min-height:48px} /* art-ux/single-tab-guard/dialog.html .btn (was 44px via .rc-primary) */
 
 /* M4-A 3-row Farm screen (Option A) */
 .tracks{display:flex;flex-direction:column;gap:var(--s-3)}

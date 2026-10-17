@@ -3,26 +3,97 @@ import { describe, it, expect } from 'vitest';
 import { orderView, orderHtml, visibleOrders, moreLabel, moreName, stripSplit } from '../src/ui/orders';
 const c = (demand: number, filled = 0) => ({ id: 1, demand, filled, waitedS: 0 });
 describe('order card (P2)', () => {
-  it('shows full order value and have/want, never $0.00', () => {
-    expect(orderView(c(6), 0, 250).line).toBe('0/6 eggs · $15.00');
-    expect(orderView(c(5), 3, 250).line).toBe('3/5 eggs · $12.50');
-    expect(orderView(c(5), 0, 0.1).line).toBe('0/5 eggs · $0.01');
+  it('NBSP between count and eggs (Art & UX 16c2248)', () => {
+    const v = orderView(c(17, 4), 58, 552);
+    expect(v.line).toContain('\u00a0eggs');
+    expect(v.line).not.toMatch(/\d eggs/); // no regular space before eggs
+    expect(v.line.charCodeAt(v.line.indexOf('eggs') - 1)).toBe(0xa0);
+    const h = orderHtml(v, 'a.svg');
+    expect(h).toContain('4/17\u00a0</span><span class="egg">eggs</span>');
+    expect(h).not.toContain('> eggs</span>');
   });
-  it('three button states: No eggs (MK-35) / Sell k / Sell', () => {
-    expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'No eggs', sell: 0 });
-    expect(orderView(c(5), 3, 100)).toMatchObject({ state: 'partial', button: 'Sell 3', sell: 3 });
-    expect(orderView(c(5), 9, 100)).toMatchObject({ state: 'ready', button: 'Sell', sell: 5 });
+  it('shows full order value and delivered/demand, never $0.00 (MK-23)', () => {
+    expect(orderView(c(6), 0, 250).line).toBe('0/6\u00a0eggs · $15.00');
+    expect(orderView(c(5, 3), 99, 250).line).toBe('3/5\u00a0eggs · $12.50'); // filled=3; basket does not inflate the count
+    expect(orderView(c(5), 3, 250).line).toBe('0/5\u00a0eggs · $12.50'); // filled=0 even when Sell would take 3
+    expect(orderView(c(5), 0, 0.1).line).toBe('0/5\u00a0eggs · $0.01');
   });
-  it('earlier partial sales count toward have (MK-8/MK-10 partial selling)', () => {
-    expect(orderView(c(10, 4), 2, 100)).toMatchObject({ have: 6, want: 10, state: 'partial', button: 'Sell 2' });
-    expect(orderView(c(10, 4), 0, 100)).toMatchObject({ have: 4, state: 'wait', button: 'No eggs' });
+  it('three button states: Need N / Sell k · +$X / Sell N · +$X (MK-24)', () => {
+    expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'Need 5', sell: 0, sellCents: 0, valueCents: 500 });
+    const partial = orderView(c(5), 3, 100);
+    expect(partial).toMatchObject({ state: 'partial', sell: 3, sellCents: 300, valueCents: 500 });
+    expect(partial.button).toBe('Sell 3\u00a0· +$3.00');
+    const ready = orderView(c(5), 9, 100);
+    expect(ready).toMatchObject({ state: 'ready', sell: 5, sellCents: 500, valueCents: 500 });
+    expect(ready.button).toBe('Sell 5\u00a0· +$5.00');
   });
-  it('progress bar ARIA + width, disabled Need', () => {
-    const h = orderHtml(orderView(c(5), 3, 100), 'a.svg');
+  it('row 2 fixture: 4/17 delivered with Sell 13 (Product delivered-eggs + Art & UX)', () => {
+    // demand 17, filled 4, basket 58 -> rem 13, sell 13; card shows filled only
+    const v = orderView(c(17, 4), 58, 552); // ~$5.52/egg so full ~$93.84
+    expect(v).toMatchObject({ have: 4, want: 17, sell: 13, state: 'ready' });
+    expect(v.line).toBe('4/17\u00a0eggs · $93.84');
+    expect(v.lineAria).toBe('4 of 17 eggs delivered, order worth $93.84');
+    expect(v.button).toMatch(/^Sell 13\u00a0· \+/);
+    expect(v.sellCents).toBe(13 * 552);
+    expect(v.valueCents).toBe(17 * 552);
+    expect(v.valueCents).toBeGreaterThan(v.sellCents); // card $ = full order; button = this Sell
+  });
+  it('have is filled only; Sell does not inflate the count (MK-8/MK-10 + Product)', () => {
+    const v = orderView(c(10, 4), 2, 100);
+    expect(v).toMatchObject({ have: 4, want: 10, state: 'partial', sell: 2, sellCents: 200, valueCents: 1000 });
+    expect(v.line).toBe('4/10\u00a0eggs · $10.00');
+    expect(v.button).toBe('Sell 2\u00a0· +$2.00');
+    expect(v.valueCents).toBeGreaterThan(v.sellCents);
+    expect(orderView(c(10, 4), 0, 100)).toMatchObject({ have: 4, state: 'wait', button: 'Need 6', sellCents: 0 });
+  });
+  it('progress bar + row aria use delivered eggs; $ is full order (Art & UX)', () => {
+    const v = orderView(c(5, 3), 9, 100);
+    const h = orderHtml(v, 'a.svg');
+    expect(v.have).toBe(3);
     expect(h).toContain('aria-valuenow="3"'); expect(h).toContain('aria-valuemax="5"'); expect(h).toContain('width:60.00%');
+    expect(h).toContain('class="n">3/5\u00a0</span><span class="egg">eggs</span>');
+    expect(h).toContain('aria-label="3 of 5 eggs delivered, order worth $5.00"');
+    expect(v.lineAria).toBe('3 of 5 eggs delivered, order worth $5.00');
     expect(orderHtml(orderView(c(5), 0, 100), 'a.svg')).toContain('aria-disabled="true"');
+    // basket alone does not move the bar
+    const empty = orderHtml(orderView(c(5), 3, 100), 'a.svg');
+    expect(empty).toContain('aria-valuenow="0"'); expect(empty).toContain('width:0.00%');
   });
-  it('big numbers stay compact', () => { expect(orderView(c(1500, 0), 1200, 226667).line).toBe('1.2K/1.5K eggs · $3.4M'); });
+  it('big numbers stay compact', () => { expect(orderView(c(1500, 0), 1200, 226667).line).toBe('0/1.5K\u00a0eggs · $3.4M'); // delivered 0; $ = full order
+    expect(orderView(c(1500, 1200), 0, 226667).line).toBe('1.2K/1.5K\u00a0eggs · $3.4M'); });
+  it('Sell button floors short money; aria keeps exact (HoP 15:14)', () => {
+    // cents = dollars * 100. Below $1K: exact on button and aria.
+    expect(orderView(c(5), 3, 100).button).toBe('Sell 3\u00a0· +$3.00');
+    expect(orderView(c(5), 3, 100).buttonAria).toBe('Sell 3\u00a0· +$3.00');
+    // $999.99 exact
+    const under = orderView(c(1), 1, 99999);
+    expect(under.button).toBe('Sell 1\u00a0· +$999.99');
+    expect(under.buttonAria).toBe('Sell 1\u00a0· +$999.99');
+    // $1,000 -> $1K (floor)
+    const k = orderView(c(1), 1, 100_000);
+    expect(k.button).toBe('Sell 1\u00a0· +$1K');
+    expect(k.buttonAria).toBe('Sell 1\u00a0· +$1,000.00');
+    // $1,299.99 -> $1.2K not $1.3K; aria exact
+    const floor = orderView(c(1), 1, 129_999);
+    expect(floor.button).toBe('Sell 1\u00a0· +$1.2K');
+    expect(floor.buttonAria).toBe('Sell 1\u00a0· +$1,299.99');
+    expect(floor.sellCents).toBe(129_999);
+    // $9,999.99 -> $9.9K
+    const nines = orderView(c(1), 1, 999_999);
+    expect(nines.button).toBe('Sell 1\u00a0· +$9.9K');
+    expect(nines.buttonAria).toBe('Sell 1\u00a0· +$9,999.99');
+    // $1.23M -> button $1.2M; aria exact $1,230,000.00
+    const mil = orderView(c(1), 1, 123_000_000);
+    expect(mil.button).toBe('Sell 1\u00a0· +$1.2M');
+    expect(mil.buttonAria).toBe('Sell 1\u00a0· +$1,230,000.00');
+    // QA MK-24-1-A11Y: $9,999,000 and $12,345.67 stay exact on aria
+    const big = orderView(c(1), 1, 999_900_000);
+    expect(big.button).toBe('Sell 1\u00a0· +$9.9M');
+    expect(big.buttonAria).toBe('Sell 1\u00a0· +$9,999,000.00');
+    const mid = orderView(c(1), 1, 1_234_567);
+    expect(mid.button).toBe('Sell 1\u00a0· +$12.3K');
+    expect(mid.buttonAria).toBe('Sell 1\u00a0· +$12,345.67');
+  });
 });
 describe('queue display (P1q)', () => {
   it('4 cards at 360x640/375x667, 5 at 390x844, all on desktop', () => {
@@ -46,51 +117,8 @@ describe('fitOrderEggs (m3-customer-queue-spec §2.4)', () => {
     expect(out).toBe('0/1.8M'); expect(seen).toEqual(['0/1.8M eggs']); expect(out).not.toMatch(/eg$|…/);
   });
 });
-describe('order button labels (MK-35 supersedes 22:31 12px)', () => {
-  it('0 eggs -> "No eggs" (no .long shrink); 3-sig counts keep labels <= 10 chars; only >9-char Sell labels get .long', () => {
-    const v = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 0, 4);
-    expect(v.button).toBe('No eggs'); expect(orderHtml(v, 'a.svg')).not.toMatch(/ long"/);
-    const p = orderView({ id: 2, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 99.94e9, 4); expect(p.button).toBe('Sell 99.9B'); expect(orderHtml(p, 'a.svg')).toMatch(/ long"/);
-  });
-});
+// merge af5e3ab (D-HOP-2026-10-17-05, main formatting wins): rc1 block superseded by main's MK-24 order card tests above: order button labels (MK-35
 import { count3 } from '../src/ui/orders';
 import { fmtShortDur } from '../src/ui/format';
-describe('rc2-order-sell-preview v1.1 + MK-35', () => {
-  it('(b) counts >= 1,000 use 3 significant figures, below exact, roll over', () => {
-    expect(count3(999)).toBe('999'); expect(count3(1000)).toBe('1K'); expect(count3(1234)).toBe('1.23K'); expect(count3(1.8e6)).toBe('1.8M');
-    expect(count3(181.2e9)).toBe('181B'); expect(count3(999.6e9)).toBe('1T'); expect(count3(12345)).toBe('12.3K');
-  });
-  it('(a) complete order reads "✓ Ready · $X"', () => {
-    const v = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 1e12, 4); expect(v.state).toBe('ready'); expect(v.line).toMatch(/^✓ Ready · \$/);
-  });
-  it('(b) partial / waiting lines use 3-sig counts; 0 eggs -> "No eggs" button', () => {
-    const w = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 0, 4); expect(w.line).toMatch(/^0\/181B eggs · /); expect(w.button).toBe('No eggs');
-    const n = orderView({ id: 2, demand: 5, filled: 2, waitedS: 0 } as any, 0, 4); expect(n.button).toBe('No eggs');
-  });
-  it('#6 short duration: ~m:ss, ~1h 59m, — when never', () => {
-    expect(fmtShortDur(41)).toBe('~0:41'); expect(fmtShortDur(7140)).toBe('~1h 59m'); expect(fmtShortDur(1e9)).toBe('—'); expect(fmtShortDur(Infinity)).toBe('—');
-  });
-});
-describe('QA order clips (main repro): 1.8M/181.2B row and $9.94M value use v1.1 3-sig and never a "Need x/y" button', () => {
-  it('181.2B order with 1.8M filled, 0 eggs: "1.8M/181B eggs", button "No eggs"', () => {
-    const v = orderView({ id: 1, demand: 181.2e9, filled: 1.8e6, waitedS: 0 } as any, 0, 250);
-    expect(v.line.startsWith('1.8M/181B eggs · ')).toBe(true); expect(v.button).toBe('No eggs');
-  });
-  it('$9.94M value: 3 significant figures (pin on fmtMoney/count3)', () => {
-    expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, 0, 250).line).toBe('0/3.98M eggs · $9.94M');
-  });
-  it('review 5d8a058 #13/#15: a wait order with eggs in hand (rem <= 0) never shows a "Need" label', () => {
-    const v = orderView({ id: 3, demand: 5, filled: 5, waitedS: 0 } as any, 3, 250); expect(v.state).toBe('wait'); expect(v.button).toBe('Sell');
-  });
-  it('review 5d8a058 #11: have / Sell count round down, so a partial order never reads complete', () => {
-    const v = orderView({ id: 4, demand: 1e6, filled: 0, waitedS: 0 } as any, 999600, 250);
-    expect(v.state).toBe('partial'); expect(v.line.startsWith('999K/1M eggs')).toBe(true); expect(v.button).toBe('Sell 999K');
-    expect(count3(999.5e9)).toBe('1T'); // want side keeps the v1.1 rollover
-  });
-  it('fitOrderEggs: drops " eggs" only when the full text does not fit, never mid-word', () => {
-    expect(fitOrderEggs('3/5 eggs', () => true)).toBe('3/5 eggs');
-    expect(fitOrderEggs('3/5 eggs', t => t.length <= 3)).toBe('3/5');
-    expect(fitOrderEggs('1.23M/9.99M eggs', () => false)).toBe('1.23M/9.99M');
-    const seen: string[] = []; fitOrderEggs('3/5 eggs', t => { seen.push(t); return false; }); expect(seen).toEqual(['3/5 eggs']);
-  });
-});
+// merge af5e3ab (D-HOP-2026-10-17-05, main formatting wins): rc1 block superseded by main's MK-24 order card tests above: rc2-order-sell-preview v1.1 + MK-35
+// merge af5e3ab (D-HOP-2026-10-17-05, main formatting wins): rc1 block superseded by main's MK-24 order card tests above: QA order clips (main repro)

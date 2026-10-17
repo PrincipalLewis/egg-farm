@@ -401,13 +401,13 @@ sections.bug9 = async () => {
     const m = () => page.evaluate(() => { const d = document.documentElement; const wide = [...document.querySelectorAll('#app *, #panel-layer *')].filter(e => { const r = e.getBoundingClientRect(); return r.width && r.right > d.clientWidth + 0.5 && getComputedStyle(e).visibility !== 'hidden'; }).length; return { sw: d.scrollWidth, cw: d.clientWidth, bsw: document.body.scrollWidth, wide }; });
     const res = { farm: await m() };
     await page.locator('[data-nav=market]').click(); await page.waitForTimeout(300); res.market = await m();
-    const rows = await page.$$eval('#mRows .order:not([hidden])', rs => rs.map(r => { const a = r.getBoundingClientRect(), b = r.querySelector('.btn').getBoundingClientRect(), t = r.querySelector('.l1').getBoundingClientRect(); return { inside: b.right <= a.right - 8 + 0.5 && b.left >= a.left, lines: Math.round(t.height / 19), text: r.querySelector('.l1').innerText }; }));
+    const rows = await page.$$eval('#mRows .order:not([hidden])', rs => rs.map(r => { const a = r.getBoundingClientRect(), b = r.querySelector('.btn').getBoundingClientRect(), t = r.querySelector('.l1').getBoundingClientRect(); return { inside: b.right <= a.right - 8 + 0.5 && b.left >= a.left, lines: Math.round(t.height / 19), text: r.querySelector('.l1').innerText.replace(/[ \t\r\n]+/g, ' ').trim() }; }));
     if (shot && w === 375 && h === 812) await page.screenshot({ path: `${SHOTS}/m3-rc0-bug9-375-market.png` });
     await page.locator('.sheet:not([hidden]) .close').click(); await page.locator('[data-nav=upgrades]').click(); await page.waitForTimeout(200); res.upgrades = await m();
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(200); res.workers = await m();
     const tabs = await page.$$eval('.tabs button', bs => bs.map(b => b.scrollWidth <= b.clientWidth + 1));
     ok(`Bug9 no sideways scroll on farm/market/upgrades/workers at ${w}x${h}`, Object.values(res).every(r => r.sw <= r.cw && r.bsw <= r.cw && r.wide === 0), JSON.stringify(res));
-    ok(`Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at ${w}`, rows.length > 0 && rows.every(r => r.inside && r.lines <= 2) && rows.every(r => /^(\d[\d.KMBT]*\/\d[\d.KMBT]*( eggs)?|✓ Ready)\s*·\s*\$/.test(r.text)), JSON.stringify(rows.slice(0, 2)));
+    ok(`Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at ${w}`, rows.length > 0 && rows.every(r => r.inside && r.lines <= 2) && rows.every(r => /^\d[\d.K]*\/\d[\d.K]*[ \u00a0]*\u00a0[ \u00a0]*eggs\s*·\s*\$/.test(r.text)), JSON.stringify(rows.slice(0, 2)));
     ok(`Bug9 tab labels not clipped at ${w}`, tabs.every(Boolean), JSON.stringify(tabs));
     await ctx.close();
   }
@@ -1016,6 +1016,72 @@ sections.recoveryStorage = () => recoveryCase('storage');
 sections.recoveryCantSave = () => recoveryCase('cantsave');
 sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE, 'eggfarm.save': await getValidSave() } }); await page.waitForTimeout(300);
   ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };
+
+// ---------- QA TUT-1: docked desktop tutorial Sell step targets a Sell button that really sells ----------
+sections.tut1docked = async () => {
+  for (const [w, h] of [[1024, 474], [1280, 720], [1366, 768]]) {
+    const { ctx, page, errors } = await open({ w, h });
+    const onbStep = () => page.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui') ?? '{}').onbStep ?? 0);
+    for (let i = 0; i < 6; i++) { await page.locator('#collect').click(); await page.waitForTimeout(120); }
+    await page.evaluate(() => { const g = window.eggfarm; if (!g.state.customers.length) g.state = { ...g.state, nextCustomerInS: 0 }; });
+    await page.waitForFunction(() => window.eggfarm.state.customers.length > 0 && document.querySelector('#mRows button[data-id]'), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    const step0 = await onbStep();
+    const tgt = await page.evaluate(() => { const r = document.querySelector('.onb-ring'); if (!r || r.style.display === 'none') return null; const b = r.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+      const ring = r.style.pointerEvents; r.style.pointerEvents = 'none'; const el = document.elementFromPoint(x, y); r.style.pointerEvents = ring;
+      const btn = el?.closest('button'); return { x, y, sell: !!btn?.closest('#mRows') && btn.hasAttribute('data-id'), tag: btn ? btn.className : el?.className }; });
+    const before = await page.evaluate(() => ({ coins: window.eggfarm.state.coinsCents, cust: window.eggfarm.state.customers.length }));
+    if (tgt) await page.mouse.click(tgt.x, tgt.y); await page.waitForTimeout(600);
+    const after = await page.evaluate(() => ({ coins: window.eggfarm.state.coinsCents, cust: window.eggfarm.state.customers.length })); const step1 = await onbStep();
+    ok(`TUT-1 docked ${w}x${h}: Sell step targets a Sell button; clicking it sells and advances the step`, !!tgt?.sell && after.coins > before.coins && step1 > step0 && errors.length === 0, JSON.stringify({ tgt, before, after, step0, step1, errors }));
+    await ctx.close();
+  }
+};
+
+// ---------- S2 hidden tab (bug-offline-overcredit.md, C-AC36): 671 s hidden -> frozen after 60 s, paid via the offline popup ----------
+sections.hiddentab = async () => {
+  const { ctx, page, errors } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 15, coop: 51, coinsCents: 12345 };
+    const real = Date.now; window.__real = real; window.__off = 0; window.__t0 = null; Date.now = () => (window.__t0 ?? real()) + window.__off;
+    window.__vis = 'visible'; Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => window.__vis }); Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__vis === 'hidden' }); });
+  await page.waitForTimeout(300);
+  const hid = await page.evaluate(() => { window.__t0 = window.__real(); /* freeze the clock at the hide: away must be exactly 671 s, no real-time leak between evaluates */ window.__vis = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); const g = window.eggfarm; return { coins: g.state.coinsCents, pend: g.state.pendingOfflineEggs, saved: JSON.parse(localStorage.getItem('eggfarm.save')).state.coinsCents }; });
+  const mid = await page.evaluate(() => { const g = window.eggfarm; for (let s = 60; s <= 671; s += 60) { window.__off = Math.min(671, s) * 1000; g.frame(); } window.__off = 671_000; g.frame(); return { hidden: g.isHidden }; });
+  const back = await page.evaluate(() => { window.__vis = 'visible'; document.dispatchEvent(new Event('visibilitychange')); const g = window.eggfarm; return { coins: g.state.coinsCents, pend: g.state.pendingOfflineEggs, away: g.offline.awayS, eggs: g.offline.eggs }; });
+  await page.waitForTimeout(300);
+  const modal = await page.locator('#wbT').count();
+  ok('S2 hidden tab: hide save is the hide snapshot; 671 s hidden pays the offline grant (away 671 s), coins as at the hide, welcome popup shown',
+    mid.hidden && hid.coins > 0 && hid.saved === hid.coins && back.away === 671 && back.eggs > 0 && back.pend === hid.pend + back.eggs && back.coins === hid.coins && modal === 1 && errors.length === 0, JSON.stringify({ hid, back, modal, errors }));
+  await ctx.close();
+};
+
+// CCR 59cce62 n1 / m1: hidden tab loses the save to another tab -> its hidden period ends with the freeze; on show no
+// welcome popup and no save from the frozen tab. Shots m1-deactivate at 360, 390 and 1280 on every engine (art-ux re-shoot).
+sections.hiddentabguard = async () => {
+  for (const w of [360, 390, 1280]) {
+    const { ctx, page, errors } = await open({ w, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 15, coop: 51, coinsCents: 12345 };
+      window.__vis = 'visible'; Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => window.__vis }); Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__vis === 'hidden' });
+      window.__vis = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); });
+    const p2 = await ctx.newPage(); await p2.goto(URL0, { waitUntil: 'domcontentloaded' }); await p2.getByText('Tap to start').click(); await p2.waitForFunction(() => window.eggfarm); await p2.waitForTimeout(400);
+    const frz = await page.evaluate(() => { const g = window.eggfarm; g.save(); return { inactive: g.inactive, hidden: g.isHidden }; });
+    const before = await page.evaluate(() => localStorage.getItem('eggfarm.save'));
+    await p2.close(); // B's pagehide save lands before A shows; snapshot again so only A's writes count
+    // WebKit propagates B's pagehide localStorage write to A asynchronously: wait until A sees a stable value
+    let snap = await page.evaluate(() => localStorage.getItem('eggfarm.save'));
+    for (let i = 0; i < 20; i++) { await page.waitForTimeout(150); const v = await page.evaluate(() => localStorage.getItem('eggfarm.save')); if (v === snap && i >= 3) break; snap = v; }
+    await page.evaluate(() => { window.__w = 0; const ss = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('eggfarm.save')) window.__w++; return ss.call(this, k, v); };
+      window.__vis = 'visible'; document.dispatchEvent(new Event('visibilitychange')); window.eggfarm.save(); });
+    await page.waitForTimeout(400);
+    const st = await page.evaluate(() => ({ hidden: window.eggfarm.isHidden, welcome: document.querySelectorAll('#wbT').length, guard: !!document.querySelector('.recovery-layer.tab-guard'), writes: window.__w, save: localStorage.getItem('eggfarm.save'),
+      playH: Math.round(document.querySelector('#tgPlay')?.getBoundingClientRect().height ?? 0) }));
+    ok(`CCR m1 ${w}: hidden tab frozen by another tab -> period ended, no welcome popup, no save after show`, frz.inactive && !frz.hidden && !st.hidden && st.welcome === 0 && st.guard && st.writes === 0 && st.save === snap && before !== null && errors.length === 0, JSON.stringify({ frz, ...st, save: undefined, same: st.save === snap, errors }));
+    ok(`Tab guard 'Play here' min-height 48px at ${w} (art-ux dialog.html)`, st.playH >= 48, String(st.playH));
+    await page.evaluate(() => document.getAnimations().forEach(a => { try { a.finish(); } catch { a.cancel(); } }));
+    await page.screenshot({ path: `${SHOTS}/m1-deactivate-${ENGINE}-${w}.png` });
+    await ctx.close();
+  }
+};
 
 // SECTIONS
 // ---------- QA bug-sellall-label-grader: label = payout at Grader 0/1/2, fits at 360 ----------

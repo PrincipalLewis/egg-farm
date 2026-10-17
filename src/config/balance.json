@@ -157,7 +157,8 @@
   "offline": {
     "offlineCapSeconds": 7200,
     "offlineRateMultiplier": 0.25,
-    "offlineMinSeconds": 60
+    "offlineMinSeconds": 60,
+    "hiddenSimMaxSeconds": 60
   },
   "m4": {
     "enabled": 0,
