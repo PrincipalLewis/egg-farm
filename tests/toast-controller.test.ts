@@ -38,3 +38,7 @@ describe('toastController', () => {
   });
   it('visible branch places next frame only, not synchronously', () => { const r = rig(); r.show(); r.frame(); r.log.length = 0; r.show(); expect(r.log).not.toContain('place'); r.frame(); expect(r.log).toContain('place'); });
 });
+describe('toastController per-toast duration', () => {
+  it('honours the given ms (COOP_TOAST_MS 2500), default stays TOAST_MS', () => { const r = rig(); r.show(2500); r.frame(); r.advance(2499); expect(r.shown).toBe(true); r.advance(1); expect(r.shown).toBe(false);
+    const q = rig(); q.show(); q.frame(); q.advance(TOAST_MS - 1); expect(q.shown).toBe(true); q.advance(1); expect(q.shown).toBe(false); });
+});

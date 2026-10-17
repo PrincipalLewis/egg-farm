@@ -1097,6 +1097,25 @@ sections.rc2minors2 = async () => {
     ok(`rc2minors2 no page errors (${w})`, errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
+  // M-Toast-layer (designer spec, art-ux screenshot-check-2026-10-17-0722): at 320x568 / 360x420 no toast is visible in ANY frame
+  // while #modal-layer.open; held toasts appear after it closes. Two paths: toast raised while open, and toast already up when it opens.
+  for (const [w, h] of [[320, 568], [360, 420]]) for (const path of ['during', 'before']) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE2 } }); const tag = `${w}x${h} ${path}`;
+    await page.evaluate(() => { window.__tl = []; const t0 = performance.now(), e = document.querySelector('.toast'), m = document.querySelector('#modal-layer');
+      const loop = () => { const cs = getComputedStyle(e); window.__tl.push({ t: Math.round(performance.now() - t0), modal: m.classList.contains('open'), op: +cs.opacity, vis: cs.visibility, text: e.textContent }); if (performance.now() - t0 < 5000) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+    const buy = () => page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
+    const wb = () => page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2685, customers: [] }; window.eggfarmQaWelcome(); });
+    if (path === 'during') { await wb(); await page.waitForTimeout(150); await buy(); } else { await buy(); await page.waitForTimeout(400); await wb(); }
+    await page.waitForTimeout(500); if (shot) await page.screenshot({ path: `${MS}/toast-layer-welcome-open-${w}x${h}-${path}.png` });
+    const opened = await page.evaluate(() => document.querySelector('#modal-layer').classList.contains('open'));
+    await page.evaluate(() => document.querySelector('#wbCollect').click()); await page.waitForTimeout(600);
+    if (shot) await page.screenshot({ path: `${MS}/toast-layer-after-close-${w}x${h}-${path}.png` });
+    const f = await page.evaluate(() => window.__tl), over = f.filter(x => x.modal && x.vis === 'visible' && x.op > 0.01), after = f.filter(x => !x.modal && f.some(y => y.modal && y.t < x.t));
+    ok(`M-Toast-layer no toast visible in any frame while the modal is open (${tag})`, opened && f.some(x => x.modal) && over.length === 0, JSON.stringify({ opened, over: over.slice(0, 3) }));
+    ok(`M-Toast-layer held 'Coop upgraded!' appears after the modal closes (${tag})`, after.some(x => x.op > 0.9 && /Coop upgraded/.test(x.text)), JSON.stringify(after.slice(-1)));
+    ok(`M-Toast-layer no page errors (${tag})`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
   const caps = {};
   for (const [w, h] of [[390, 844], [1280, 800]]) { // M-Tut-parity + M-Tut-goal (fresh onboarding)
     const { ctx, page, errors } = await open({ w, h });
