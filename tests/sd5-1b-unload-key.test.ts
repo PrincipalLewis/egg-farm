@@ -6,7 +6,7 @@ import { IDBFactory } from 'fake-indexeddb';
 import { balance as b } from '../src/config/balance';
 import { SAVE_KEY, SAVE_VERSION, serialize, rankMode, rankCompareIn, validate } from '../src/save/save';
 import { initialState } from '../src/sim/state';
-import { IdbMirror, IDB_NAME, IDB_STORE, IDB_KEY, UNLOAD_KEY, rankUnload, bootUnload, pickNewest } from '../src/save/idb-mirror';
+import { IdbMirror, IDB_NAME, IDB_STORE, IDB_KEY, UNLOAD_KEY, rankUnload, bootUnload, pickNewest, reconcile } from '../src/save/idb-mirror';
 import { startAutosave } from '../src/save/autosave';
 import { Game } from '../src/game';
 import { mem } from './helpers';
@@ -99,5 +99,13 @@ describe('M4-19 rev 3: transitive ranking over 3+ copies', () => {
   it('all with a seq: seq first, then savedAt', () => {
     const X = sv(1, T + 9000, 2), Y = sv(2, T, 7);
     expect(rankMode([X, Y])).toBe('seq'); expect(rankUnload(X, null, Y, b, T + 1e6)).toBe('win'); expect(pickNewest(Y, X, b, T + 1e6)).toBe('ls');
+  });
+  it('Architect m2: reconcile reuses bootUnload\'s whole-set mode (IDB main without saveSeq -> savedAt mode end to end)', async () => {
+    const LS = sv(1, T + 1000, 5), IDBM = sv(2, T + 2000), U = sv(3, T + 3000, 3); // pairwise LS vs U would be seq mode: LS wins
+    const f = new IDBFactory(); await put(f, IDB_KEY, IDBM); await put(f, UNLOAD_KEY, U); const kv = mem(); kv.setItem(SAVE_KEY, LS);
+    const r = await boot(f, kv); expect(r.mode).toBe('savedAt'); expect(r.verdict).toBe('win'); expect(r.promoted).toBe(true);
+    expect(pickNewest(LS, U, b, T + 1e6)).toBe('ls'); // the stale pairwise mode would keep LS
+    expect(reconcile(kv, r.idbRaw, b, T + 1e6, r.mode)).toBe('idb'); expect(kv.getItem(SAVE_KEY)).toBe(U);
+    expect(await get(f, IDB_KEY)).toBe(U); expect(await get(f, UNLOAD_KEY)).toBeUndefined();
   });
 });

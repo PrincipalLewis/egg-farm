@@ -9,7 +9,7 @@
  * localStorage only, as in rc0.
  */
 import type { Balance } from '../config/balance';
-import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, rankMode, rankCompareIn, type KV } from './save';
+import { SAVE_KEY, validate, preserveCorrupt, newerStoredVersion, newerSaveVersion, rankMode, rankCompareIn, type KV, type RankMode } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** SD5-1 option (b): the close-time save's own key (eggfarm/save/unload). Outside the M4 two-slot recovery. */
 export const UNLOAD_KEY = 'unload';
@@ -105,23 +105,25 @@ export class IdbMirror {
 }
 export type Pick_ = 'ls' | 'idb';
 /** Newest valid copy. Ties and an invalid/missing IndexedDB copy keep localStorage. */
-export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balance, now = Date.now()): Pick_ {
+export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balance, now = Date.now(), setMode?: RankMode): Pick_ {
   if (idbRaw === null || idbRaw === lsRaw) return 'ls';
   const iv = validate(idbRaw, b); if (!iv.ok) return 'ls';
   if (lsRaw === null) return 'idb';
   const lv = validate(lsRaw, b); if (!lv.ok) return 'idb';
   // v4 (QA e3, Reviewer N2): a savedAt invalid for offline earnings (missing, null, <= 0, pre-2020, or in the future beyond
   // SAVED_AT_SKEW_MS) is the OLDEST copy and never beats a valid one; both invalid -> tie -> localStorage.
-  // M4-19 rev 3: one rank mode for the set (seq only when both carry a saveSeq).
-  const mode = rankMode([idbRaw, lsRaw]);
+  // M4-19 rev 3: ONE rank mode for the whole candidate set. At boot the caller passes bootUnload's mode (computed over
+  // all valid copies: LS main, IDB main, unload) so this LS-vs-winner step keeps the same order; without it the mode
+  // is computed over these two copies (seq only when both carry a saveSeq).
+  const mode = setMode ?? rankMode([idbRaw, lsRaw]);
   return rankCompareIn(mode, { raw: idbRaw, savedAt: iv.file.savedAt }, { raw: lsRaw, savedAt: lv.file.savedAt }, now) > 0 ? 'idb' : 'ls';
 }
 /** Boot step, before `new Game`: write the IndexedDB copy back into localStorage when it is the newest valid one.
  *  A corrupt localStorage save it replaces is preserved first (eggfarm.save.corrupt.<ts>, AC14b). Returns which won. */
-export function reconcile(kv: KV, idbRaw: string | null, b: Balance, now = Date.now()): Pick_ {
+export function reconcile(kv: KV, idbRaw: string | null, b: Balance, now = Date.now(), setMode?: RankMode): Pick_ {
   const lsRaw = kv.getItem(SAVE_KEY);
   if (newerStoredVersion(kv, idbRaw) !== null) return 'ls'; // M4 save in main, .bak or IndexedDB: never write any copy
-  const w = pickNewest(lsRaw, idbRaw, b, now);
+  const w = pickNewest(lsRaw, idbRaw, b, now, setMode);
   if (w === 'idb') {
     if (lsRaw !== null && !validate(lsRaw, b).ok) preserveCorrupt(kv, lsRaw, now);
     try { kv.setItem(SAVE_KEY, idbRaw!); } catch { /* quota: Game falls back to localStorage as-is */ return 'ls'; }
@@ -144,10 +146,15 @@ export function restoreSource(lsRaw: string | null, idbRaw: string | null, b: Ba
  *  - 'older' / 'corrupt': never overwrites main; left in unload untouched (the next close replaces it).
  *  Equal bytes to localStorage only (IndexedDB main differs) counts as 'win' (promoting identical content is safe). */
 export type UnloadVerdict = 'none' | 'promoted' | 'win' | 'diverged' | 'older' | 'corrupt';
+/** M4-19 rev 3: the rank mode over ALL valid copies (LS main, IDB main, unload); reused by reconcile at boot. */
+export function setRankMode(raws: (string | null)[], b: Balance): RankMode {
+  return rankMode([...new Set(raws.filter((r): r is string => r !== null && validate(r, b).ok))]);
+}
 export function rankUnload(lsRaw: string | null, idbRaw: string | null, unloadRaw: string | null, b: Balance, now = Date.now()): UnloadVerdict {
   if (unloadRaw === null) return 'none';
   if (unloadRaw === idbRaw) return 'promoted';
   const uv = validate(unloadRaw, b); if (!uv.ok) return 'corrupt';
+  // Ties use a fixed order LS main > IDB main > unload: a tying unload copy is 'diverged' and never promoted.
   const others: { raw: string; savedAt: unknown }[] = [];
   for (const r of [lsRaw, idbRaw]) { if (r === null || r === unloadRaw) continue; const v = validate(r, b); if (v.ok) others.push({ raw: r, savedAt: v.file.savedAt }); }
   const mode = rankMode([unloadRaw, ...others.map(o => o.raw)]);
@@ -162,11 +169,12 @@ export interface UnloadStore { readUnload(): Promise<string | null>; promoteUnlo
  *  use (the unload copy when it won, even if the promote failed: unload is kept and retried next boot) and the verdict.
  *  Callers have already refused a newer-build copy in any key (newerStoredVersion with the unload raw), so nothing here
  *  runs on the §3b refusal path. */
-export async function bootUnload(store: UnloadStore, kv: Pick<KV, 'getItem'>, idbRaw: string | null, unloadRaw: string | null, b: Balance, now = Date.now()): Promise<{ idbRaw: string | null; verdict: UnloadVerdict; promoted: boolean }> {
+export async function bootUnload(store: UnloadStore, kv: Pick<KV, 'getItem'>, idbRaw: string | null, unloadRaw: string | null, b: Balance, now = Date.now()): Promise<{ idbRaw: string | null; verdict: UnloadVerdict; promoted: boolean; mode: RankMode }> {
   let lsRaw: string | null = null; try { lsRaw = kv.getItem(SAVE_KEY); } catch { /* blocked */ }
+  const mode = setRankMode([lsRaw, idbRaw, unloadRaw], b); // pass to reconcile: same order for the LS-vs-winner step
   const verdict = rankUnload(lsRaw, idbRaw, unloadRaw, b, now);
-  if (verdict === 'promoted') return { idbRaw, verdict, promoted: await store.promoteUnload(unloadRaw!) };
-  if (verdict !== 'win') return { idbRaw, verdict, promoted: false };
+  if (verdict === 'promoted') return { idbRaw, verdict, promoted: await store.promoteUnload(unloadRaw!), mode };
+  if (verdict !== 'win') return { idbRaw, verdict, promoted: false, mode };
   const promoted = await store.promoteUnload(unloadRaw!);
-  return { idbRaw: unloadRaw, verdict, promoted };
+  return { idbRaw: unloadRaw, verdict, promoted, mode };
 }

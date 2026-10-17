@@ -1,7 +1,7 @@
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
-import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
+import { newerStoredVersion, storageBlockedRecovery, serialize, type RankMode } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile, bootUnload } from './save/idb-mirror';
@@ -86,9 +86,9 @@ async function boot() {
   let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
   // SD5-1 (b): the close-time copy (eggfarm/save/unload) is ranked like any other copy; when it wins it is promoted to
   // IndexedDB main (write + read-back, then unload deleted) and fed to reconcile. Older / corrupt / F2-EQ: main untouched.
-  let unloadWon = false;
-  if (mirror && unloadRaw !== null) { const u = await bootUnload(mirror, localStorage, idbRaw, unloadRaw, balance); idbRaw = u.idbRaw; unloadWon = u.verdict === 'win'; }
-  if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
+  let unloadWon = false, setMode: RankMode | undefined; // M4-19 rev 3 (Architect m2): reconcile reuses the whole-set rank mode
+  if (mirror && unloadRaw !== null) { const u = await bootUnload(mirror, localStorage, idbRaw, unloadRaw, balance); idbRaw = u.idbRaw; unloadWon = u.verdict === 'win'; setMode = u.mode; }
+  if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance, Date.now(), setMode) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw);
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
