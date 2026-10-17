@@ -53,15 +53,15 @@ describe('S2-5 nav labels (session2-ui-triage (b))', async () => {
     for (const b of btns) { expect(b).toMatch(/aria-label="[^"]+"/); expect(b).toMatch(/<img /); expect(b).toMatch(/class="nav-lbl[^"]*">[^<]+</); }
   });
   it('ready: "Refill" + N badge; aria "Refill N tired workers"', () => {
-    expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Refill', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
+    expect(navManageView(2, 0, false, P, 0)).toEqual({ hideLabel: false, label: 'Refill', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
     expect(navManageView(2, 0, true, P, 0).label).toBe('Refill 2 tired workers');
   });
-  it('cooldown: "0:28", no badge; aria text changes at most every 5 s', () => {
-    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe('');
-    expect(a.aria.text).toBe('Refill 0:28, available in 28 seconds'); expect(a.aria.text).toContain(a.label); // review 5d8a058 #5 label in name
-    expect(navManageView(1, 25.1, false, a.aria, 3000).aria).toBe(a.aria);
-    expect(navManageView(1, 22.9, false, a.aria, 6100).aria.text).toBe('Refill 0:23, available in 23 seconds');
-    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Ready in 28s'); expect(d.aria.text.toLowerCase()).toContain(d.label.toLowerCase());
+  it('cooldown: "0:28" visual-only (aria-hidden), stable name for the whole cooldown (review 23a3798 #1)', () => {
+    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe(''); expect(a.hideLabel).toBe(true);
+    expect(a.aria.text).toBe('Refill, cooling down');
+    for (const [cd, t] of [[25.1, 3000], [22.9, 6100], [1.2, 27000]]) { const v = navManageView(1, cd, false, a.aria, t); expect(v.aria).toBe(a.aria); expect(v.hideLabel).toBe(true); }
+    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Ready in 28s'); expect(d.hideLabel).toBe(true); expect(d.aria.text).toBe('Refill, cooling down');
+    expect(navManageView(2, 0, false, a.aria, 30000)).toMatchObject({ hideLabel: false, aria: { text: 'Refill 2 tired workers' } });
   });
 });
 

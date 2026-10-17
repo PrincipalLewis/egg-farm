@@ -124,18 +124,17 @@ export function shouldShowCoopTip(s: GameState, b: Balance, shownThisSession: bo
 }
 export const COOP_TIP_TEXT = 'Coop full! Hire a Coop Hand to collect eggs for you.';
 /** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav (Art & UX 08:47, v1.3 copy): "Refill" / "0:28" + N badge; docked header: "Refill tired (N)" /
- *  "Ready in Ns". aria-label "Refill N tired workers" / "Refill 0:NN, available in N seconds" / docked "Refill, ready in Ns"; the cooldown aria text changes at most every 5 s. */
+ *  "Ready in Ns". aria-label "Refill N tired workers" / "Refill, cooling down" during the cooldown (countdown label aria-hidden, review 23a3798 #1); the cooldown aria text changes at most every 5 s. */
 export interface NavAria { text: string; at: number }
 /** Pure nav/docked Refill state from the game state (what app.ts renders); uses the ruling (b) capped count. */
 export const navRefillState = (s: GameState, b: Balance, docked: boolean, prev: NavAria, nowMs: number) => navManageView(refillCount(s, b), s.manageCdS, docked, prev, nowMs);
-export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; badge: string; aria: NavAria } {
+export const REFILL_COOLDOWN_ARIA = 'Refill, cooling down';
+export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; badge: string; aria: NavAria; hideLabel: boolean } {
   const cd = Math.ceil(cdS - 1e-9);
   if (cd > 0) {
     const label = docked ? `Ready in ${cd}s` : `0:${String(cd).padStart(2, '0')}`;
-    // review 5d8a058 #5: the visible label is in the accessible name (WCAG 2.5.3); text still updates at most every 5 s
-    const head = docked ? 'Refill, ready in' : 'Refill';
-    const fresh = prev.text.startsWith(docked ? 'Refill, ready in' : 'Refill 0:') && nowMs - prev.at < 5000;
-    return { label, badge: '', aria: fresh ? prev : { text: docked ? `${head} ${cd}s` : `${head} ${label}, available in ${cd} seconds`, at: nowMs } };
+    // review 23a3798 #1: the countdown is a visual-only, aria-hidden label; the name is stable for the whole cooldown, so it never goes stale
+    return { label, badge: '', hideLabel: true, aria: prev.text === REFILL_COOLDOWN_ARIA ? prev : { text: REFILL_COOLDOWN_ARIA, at: nowMs } };
   }
-  return { label: docked ? refillTiredLabel(n) : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
+  return { hideLabel: false, label: docked ? refillTiredLabel(n) : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
 }
