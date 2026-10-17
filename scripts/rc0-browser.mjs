@@ -546,6 +546,39 @@ sections.hiddentab = async () => {
 };
 
 // SECTIONS
+// ---------- QA bug-sellall-label-grader: label = payout at Grader 0/1/2, fits at 360 ----------
+sections.sellallgrader = async () => {
+  const { ctx, page, errors } = await open({ w: 360, h: 640, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+  await page.locator('[data-nav=market]').click(); await page.waitForTimeout(200);
+  const money = t => { const m = /\$([\d,.]+)([KMBT]?)/.exec(t); return m ? +m[1].replace(/,/g, '') * ({ '': 1, K: 1e3, M: 1e6, B: 1e9, T: 1e12 })[m[2]] : NaN; };
+  for (const tier of [0, 1, 2]) for (const [eggs, tag] of [[181.2e9, 'QA 181.2B'], [37, '37']]) {
+    await page.evaluate(([tier, eggs]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 23, collectionLevel: 17, basket: eggs, coop: 0, coinsCents: 0, nextCustomerInS: 999,
+      customers: [{ id: 901, demand: Math.ceil(eggs * 0.6), filled: 0, waitedS: 0 }, { id: 902, demand: Math.ceil(eggs * 0.5), filled: 0, waitedS: 0 }],
+      workers: tier ? { grader: { energy: 100, cdS: 0 } } : {}, graderTier: tier }; }, [tier, eggs]);
+    await page.waitForTimeout(350);
+    const m = await page.evaluate(() => { const b = document.querySelector('#sellAll'), r = b.getBoundingClientRect(); return { t: b.textContent, sw: b.scrollWidth, cw: b.clientWidth, l: r.left, r: r.right, vw: innerWidth, c0: window.eggfarm.state.coinsCents }; });
+    if (shot && tier === 1 && eggs > 1e9) await page.screenshot({ path: `${SHOTS}/sellall-grader-t1-360.png` });
+    ok(`SellAll label fits at 360 (Grader ${tier}, ${tag})`, m.sw <= m.cw + 1 && m.l >= 0 && m.r <= m.vw + 0.5, JSON.stringify(m));
+    await page.locator('#sellAll').click(); await page.waitForTimeout(250);
+    const delta = (await page.evaluate(() => window.eggfarm.state.coinsCents)) - m.c0, lab = money(m.t), got = delta / 100;
+    // displayed precision: 2 dp under $10K, else 3 significant digits (fmtMoney) -> 0.5% covers it; the old bug was x1.5 / x2
+    ok(`SellAll label = money gained (Grader ${tier}, ${tag})`, got > 0 && Math.abs(lab - got) <= Math.max(0.005, got * 0.005), JSON.stringify({ label: m.t, gained: got }));
+  }
+  ok('SellAll grader no page errors', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+};
+sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1280 (docked) too, QA-scale Grader 2 label
+  for (const [w, h] of [[390, 844], [1280, 800]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+    if (w < 960) { await page.locator('[data-nav=market]').click(); await page.waitForTimeout(200); }
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 23, collectionLevel: 17, basket: 181.2e9, coop: 0, nextCustomerInS: 999,
+      customers: [{ id: 901, demand: 2e11, filled: 0, waitedS: 0 }], workers: { grader: { energy: 100, cdS: 0 } }, graderTier: 2 }; });
+    await page.waitForTimeout(350);
+    const m = await page.evaluate(() => { const b = document.querySelector('#sellAll'), r = b.getBoundingClientRect(); return { t: b.textContent, sw: b.scrollWidth, cw: b.clientWidth, l: r.left, r: r.right, vw: innerWidth }; });
+    ok(`SellAll Grader 2 label fits at ${w}`, /\$[\d.]+T/.test(m.t) && m.sw <= m.cw + 1 && m.l >= 0 && m.r <= m.vw + 0.5, JSON.stringify(m));
+    await ctx.close();
+  }
+};
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);
