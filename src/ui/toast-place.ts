@@ -9,9 +9,9 @@ export interface ToastClock { raf(f: () => void): number; setTimeout(f: () => vo
 export const TOAST_MS = 1300;
 /** toast-v3 state machine: a small stateful controller with injected DOM + clock (no globals), unit-tested.
  *  (This module now holds toast placement AND show/dismiss timing.)
- *  - visible or still fading out (opacity > 0): re-show at once from the current value (no snap); place next frame only (review 148591a n3);
- *  - hidden: one pending settle (n4): next frame, transitions off -> place -> reflow -> on -> show;
- *  - the dismiss timer is armed only after .show is on (m1), and re-armed for every new toast. */
+ *  - visible or still fading out (opacity > 0): re-show at once from the current value (no snap); place next frame only;
+ *  - hidden: one pending settle per frame: next frame, transitions off -> place -> reflow -> on -> show;
+ *  - the dismiss timer is armed only after .show is on, and re-armed for every new toast. */
 export function toastController(d: ToastDom, c: ToastClock) {
   let timer = 0, pending = false;
   const arm = () => { timer = c.setTimeout(() => d.hide(), TOAST_MS); };

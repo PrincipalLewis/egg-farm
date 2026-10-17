@@ -17,23 +17,24 @@ describe('toastController', () => {
     expect(r.log).toEqual(['tr-off', 'place', 'reflow', 'tr-on', 'show']);
   });
   it('dismiss path: hides TOAST_MS after .show, not after the call', () => {
-    const r = rig(); r.show(); r.advance(TOAST_MS + 500); expect(r.shown).toBe(false); expect(r.timers.size).toBe(0); // rAF paused: no timer yet 
+    const r = rig(); r.show(); r.advance(TOAST_MS + 500); expect(r.shown).toBe(false); expect(r.timers.size).toBe(0); // rAF paused: no timer yet
     r.frame(); expect(r.shown).toBe(true); r.advance(TOAST_MS - 1); expect(r.shown).toBe(true); r.advance(1); expect(r.log.at(-1)).toBe('hide');
   });
   it('second toast while visible: shown at once (no snap/settle), timer re-armed from the second call', () => {
     const r = rig(); r.show(); r.frame(); r.advance(1000); r.log.length = 0; r.show();
     expect(r.log).toEqual(['show']); expect(r.log).not.toContain('tr-off'); r.advance(TOAST_MS - 1); expect(r.shown).toBe(true); r.advance(1); expect(r.shown).toBe(false);
   });
-  it('second toast during the exit fade (opacity > 0, .show gone): reverse at once, no transitions-off snap ', () => {
+  it('second toast during the exit fade (opacity > 0, .show gone): reverse at once, no transitions-off snap', () => {
     const r = rig(); r.show(); r.frame(); r.advance(TOAST_MS); expect(r.shown).toBe(false); r.op = 0.6; r.log.length = 0; r.show();
     expect(r.log).toEqual(['show']); r.frame(); expect(r.log).toEqual(['show', 'place']);
   });
-  it('two calls before the first frame: one settle, one show ', () => {
+  it('two calls before the first frame: one settle, one show', () => {
     const r = rig(); r.show(); r.show(); expect(r.frames.length).toBe(1); r.frame(); expect(r.log.filter(x => x === 'show').length).toBe(1); expect(r.timers.size).toBe(1);
   });
   it('a later toast after the first has fully gone settles again (transitions-off path), not the instant re-show', () => {
     const r = rig(); r.show(); r.frame(); r.advance(TOAST_MS); r.op = 0; r.log.length = 0; r.show();
     expect(r.frames.length).toBe(1); r.frame(); expect(r.log).toEqual(['tr-off', 'place', 'reflow', 'tr-on', 'show']); expect(r.shown).toBe(true);
+    expect(r.timers.size).toBe(1); r.advance(TOAST_MS); expect(r.shown).toBe(false);
   });
-  it('visible branch places next frame only, not synchronously ', () => { const r = rig(); r.show(); r.frame(); r.log.length = 0; r.show(); expect(r.log).not.toContain('place'); r.frame(); expect(r.log).toContain('place'); });
+  it('visible branch places next frame only, not synchronously', () => { const r = rig(); r.show(); r.frame(); r.log.length = 0; r.show(); expect(r.log).not.toContain('place'); r.frame(); expect(r.log).toContain('place'); });
 });
