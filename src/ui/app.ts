@@ -254,7 +254,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const body = card.querySelector<HTMLElement>('.wb-body')!;
     const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); const head = card.querySelector<HTMLElement>('.wb-head')!, h2 = head.querySelector('h2')!; head.classList.remove('no-icon');
       if (head.scrollWidth > head.clientWidth + 1 || h2.scrollWidth > h2.clientWidth + 1) head.classList.add('no-icon'); // title never wraps: drop the icon, not the size
-      rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; };
+      rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; edge(); };
+    const edge = () => { const sc = body.scrollHeight > body.clientHeight + 1; body.classList.toggle('scrolls', sc); body.classList.toggle('at-end', !sc || body.scrollTop + body.clientHeight >= body.scrollHeight - 1); };
+    body.addEventListener('scroll', edge, { passive: true });
     fit(); addEventListener('resize', fit); document.fonts?.ready.then(fit); document.fonts?.addEventListener?.('loadingdone', fit); // CCR Minor 2: re-measure when web fonts land
     if (motion) { // C-AC37: count up 0 -> N (ease-out) only when motion is allowed; the final text equals m.hero
       const n = $('#wbN'), t0 = now(), dur = 900, unit = eggs === 1 ? 'egg' : 'eggs'; n.textContent = `+0 ${unit}`;

@@ -542,6 +542,23 @@ sections.welcomeTitle = async () => {
   }
 };
 
+// Art & UX 07:22 (C-AC33): short screens, no line truncated; the cap line is reachable inside the scrolling body.
+sections.welcomeShort = async () => {
+  for (const [w, h] of [[360, 420], [320, 568]]) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 1234567 }; g.offline = { eggs: 1234567, awayS: 7200, realAwayS: 11520 }; window.eggfarmUi.showWelcome(); });
+    await page.waitForTimeout(1300);
+    const t = await page.evaluate(async () => { const card = document.querySelector('.welcome-v2'), body = card.querySelector('.wb-body'), cap = card.querySelector('.wb-cap'), btn = card.querySelector('#wbCollect');
+      const lines = [...card.querySelectorAll('.wb-head h2,.wb-a,.wb-hero,.wb-sub,.wb-worth,.wb-cap,#wbCollect')];
+      const trunc = lines.filter(e => e.scrollWidth > e.clientWidth + 1).map(e => e.className || e.id);
+      body.scrollTop = body.scrollHeight; await new Promise(r => setTimeout(r, 100));
+      const c = cap.getBoundingClientRect(), b = body.getBoundingClientRect(), k = card.getBoundingClientRect(), bt = btn.getBoundingClientRect();
+      return { trunc, capIn: c.top >= b.top - 1 && c.bottom <= b.bottom + 1, cardFits: k.top >= 0 && k.bottom <= innerHeight, btnIn: bt.bottom <= k.bottom && bt.height >= 48, atEnd: body.classList.contains('at-end') }; });
+    ok(`Art&UX 07:22 welcome ${w}x${h}: no truncation, cap line reachable, card on screen, Collect pinned >= 48px`, !t.trunc.length && t.capIn && t.cardFits && t.btnIn && t.atEnd && errors.length === 0, JSON.stringify(t));
+    await ctx.close();
+  }
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
