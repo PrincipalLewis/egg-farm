@@ -1,6 +1,6 @@
 // Unit tests for tests/pacing-guards.ts on synthetic traces. Every bound comes from data/pacing-targets.json.
 import { describe, it, expect } from 'vitest';
-import { l18to25FixedGuard, loadTargets, timeOnLevel, maxTimeOnLevels, maxStepRatio, maxGap, stepRatioGuard, gapGuard, l18to25Guard, t20P95Warning, quantile } from './pacing-guards';
+import { l18to25FixedGuard, over, loadTargets, timeOnLevel, maxTimeOnLevels, maxStepRatio, maxGap, stepRatioGuard, gapGuard, l18to25Guard, t20P95Warning, quantile } from './pacing-guards';
 const t = loadTargets();
 /** Reach map from per-level durations: durs[i] = time on level start+i. Levels below start take 10 s each. */
 const reach = (start: number, durs: number[]) => { const r: Record<string, number> = {}; let x = 0; for (let n = 0; n < start; n++) { r[n] = x; x += 10; } durs.forEach((d, i) => { r[start + i] = x; x += d; }); r[start + durs.length] = x; return r; };
@@ -73,4 +73,20 @@ describe('L18-25 per-seed slowest level', () => {
     expect(l18to25FixedGuard(ok, t).failures).toEqual([]);
     expect(l18to25FixedGuard([...ok.slice(1), slow(t.l18_25_step_p95_max_s + 1)], t).failures.length).toBe(1);
   });
+});
+describe('fail closed on non-finite values (CCR m1)', () => {
+  const ok = () => Array.from({ length: 100 }, () => reach(18, Array(8).fill(10)));
+  for (const [name, bad] of [['NaN', NaN], ['Infinity', Infinity]] as const) {
+    it(`${name} fails every guard`, () => {
+      const r = ok(); r[0] = { ...r[0], 20: bad };                                    // poisons time on L19 and L20
+      expect(l18to25Guard(r, t).failures.join()).toMatch(/non-finite/);
+      expect(l18to25FixedGuard(r, t).failures.join()).toMatch(/non-finite/);
+      const st = Array.from({ length: 100 }, () => reach(F - 1, [M, M])); st[0] = reach(F - 1, [M, bad]);
+      expect(stepRatioGuard(st, t).failures.join()).toMatch(/non-finite/);
+      expect(gapGuard([[0, bad], ...Array.from({ length: 99 }, () => [0, 10])], t).failures.join()).toMatch(/non-finite/);
+      expect(t20P95Warning(Array.from({ length: 100 }, () => ({ 0: 0, 20: bad })), t).warning).toMatch(/warn only/);
+      expect(over(bad, 1e9)).toBe(true);
+    });
+  }
+  it('finite values at the bound pass (inclusive)', () => expect(over(t.l18_25_step_worst_max_s, t.l18_25_step_worst_max_s)).toBe(false));
 });

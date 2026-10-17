@@ -18,7 +18,9 @@ import { runM2 } from './bot-m2';
 import { VAR_DEFAULT } from './seller-variance';
 import { loadTargets, l18to25Guard, l18to25FixedGuard, t20P95Warning, quantile } from './pacing-guards';
 const F1_CSV = '86f0e80e', MAIN_PRE_F1_CSV = '57d964d5';
-const SEEDS = Array.from({ length: 100 }, (_, i) => i), HORIZON_S = 2 * 3600;
+// Same seeds as the AC7 band suite (tests/fixtures/seller_variance.json, 1..100; CCR m2).
+const fx = JSON.parse(readFileSync(new URL('./fixtures/seller_variance.json', import.meta.url), 'utf8')) as { seeds: number[] };
+const SEEDS = fx.seeds, HORIZON_S = 2 * 3600;
 const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
 const t = loadTargets();
 const known = csvSha === F1_CSV || csvSha === MAIN_PRE_F1_CSV;
