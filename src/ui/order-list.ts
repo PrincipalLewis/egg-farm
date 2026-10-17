@@ -35,9 +35,9 @@ export class OrderList {
     if (btn.textContent !== v.button) btn.textContent = v.button;
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}${v.button.length > 9 ? ' long' : ''}`; if (btn.className !== bc) btn.className = bc;
     { // §2.4 eggs fit, cached per (text, button label, width): at most one measure pass per change, no per-frame rewrites (review #3)
-      const l1 = E.parentElement as HTMLElement, key = `${e}|${v.button}|${l1.clientWidth}`;
+      const l1 = E.parentElement as HTMLElement, narrow = typeof matchMedia === 'function' && matchMedia('(max-width:375px)').matches, key = `${e}|${v.button}|${l1.clientWidth}|${narrow}`; // v1.1: always drop at <=375
       if (el.dataset.fitKey !== key || el.dataset.fitE == null) {
-        const fe = fitOrderEggs(e, (t: string) => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; });
+        const fe = narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, (t: string) => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; });
         el.dataset.fitKey = key; el.dataset.fitE = fe;
       }
       if (E.textContent !== el.dataset.fitE) E.textContent = el.dataset.fitE!;

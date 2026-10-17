@@ -8,14 +8,14 @@ describe('order card (P2)', () => {
     expect(orderView(c(5), 3, 250).line).toBe('3/5 eggs · $12.50');
     expect(orderView(c(5), 0, 0.1).line).toBe('0/5 eggs · $0.01');
   });
-  it('three button states: Need N / Sell k / Sell', () => {
-    expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'Need 5', sell: 0 });
+  it('three button states: No eggs (MK-35) / Sell k / Sell', () => {
+    expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'No eggs', sell: 0 });
     expect(orderView(c(5), 3, 100)).toMatchObject({ state: 'partial', button: 'Sell 3', sell: 3 });
     expect(orderView(c(5), 9, 100)).toMatchObject({ state: 'ready', button: 'Sell', sell: 5 });
   });
   it('earlier partial sales count toward have (MK-8/MK-10 partial selling)', () => {
     expect(orderView(c(10, 4), 2, 100)).toMatchObject({ have: 6, want: 10, state: 'partial', button: 'Sell 2' });
-    expect(orderView(c(10, 4), 0, 100)).toMatchObject({ have: 4, state: 'wait', button: 'Need 6' });
+    expect(orderView(c(10, 4), 0, 100)).toMatchObject({ have: 4, state: 'wait', button: 'No eggs' });
   });
   it('progress bar ARIA + width, disabled Need', () => {
     const h = orderHtml(orderView(c(5), 3, 100), 'a.svg');
@@ -46,10 +46,28 @@ describe('fitOrderEggs (m3-customer-queue-spec §2.4)', () => {
     expect(out).toBe('0/1.8M'); expect(seen).toEqual(['0/1.8M eggs']); expect(out).not.toMatch(/eg$|…/);
   });
 });
-describe('order button labels (Art & UX 22:31)', () => {
-  it('labels over 9 characters get the 12px .long class', () => {
+describe('order button labels (MK-35 supersedes 22:31 12px)', () => {
+  it('0 eggs -> "No eggs" (no .long shrink); 3-sig counts keep labels <= 10 chars; only >9-char Sell labels get .long', () => {
     const v = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 0, 4);
-    expect(v.button).toBe('Need 181.2B'); expect(orderHtml(v, 'a.svg')).toMatch(/class="btn sell  long"|class="btn sell long"/);
-    const s = orderView({ id: 2, demand: 5, filled: 0, waitedS: 0 } as any, 9, 4); expect(orderHtml(s, 'a.svg')).not.toMatch(/ long"/);
+    expect(v.button).toBe('No eggs'); expect(orderHtml(v, 'a.svg')).not.toMatch(/ long"/);
+    const p = orderView({ id: 2, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 99.94e9, 4); expect(p.button).toBe('Sell 99.9B'); expect(orderHtml(p, 'a.svg')).toMatch(/ long"/);
+  });
+});
+import { count3 } from '../src/ui/orders';
+import { fmtShortDur } from '../src/ui/format';
+describe('rc2-order-sell-preview v1.1 + MK-35', () => {
+  it('(b) counts >= 1,000 use 3 significant figures, below exact, roll over', () => {
+    expect(count3(999)).toBe('999'); expect(count3(1000)).toBe('1K'); expect(count3(1234)).toBe('1.23K'); expect(count3(1.8e6)).toBe('1.8M');
+    expect(count3(181.2e9)).toBe('181B'); expect(count3(999.6e9)).toBe('1T'); expect(count3(12345)).toBe('12.3K');
+  });
+  it('(a) complete order reads "✓ Ready · $X"', () => {
+    const v = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 1e12, 4); expect(v.state).toBe('ready'); expect(v.line).toMatch(/^✓ Ready · \$/);
+  });
+  it('(b) partial / waiting lines use 3-sig counts; 0 eggs -> "No eggs" button', () => {
+    const w = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 0, 4); expect(w.line).toMatch(/^0\/181B eggs · /); expect(w.button).toBe('No eggs');
+    const n = orderView({ id: 2, demand: 5, filled: 2, waitedS: 0 } as any, 0, 4); expect(n.button).toBe('No eggs');
+  });
+  it('#6 short duration: ~m:ss, ~1h 59m, — when never', () => {
+    expect(fmtShortDur(41)).toBe('~0:41'); expect(fmtShortDur(7140)).toBe('~1h 59m'); expect(fmtShortDur(1e9)).toBe('—'); expect(fmtShortDur(Infinity)).toBe('—');
   });
 });

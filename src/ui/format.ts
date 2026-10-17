@@ -68,3 +68,10 @@ export class IncomeRate {
 /** Art & UX compact money for pops/cards: "$12.50" under $1,000, then "$1.2K" / "$3.4M". */
 export const fmtMoneyShort = (cents: number) => { const d = cents / 100; if (d < 1000) return fmtMoney(cents);
   const [v, u] = d >= 1e9 ? [d / 1e9, 'B'] : d >= 1e6 ? [d / 1e6, 'M'] : [d / 1e3, 'K']; return '$' + (Math.floor(v * 10) / 10).toFixed(1).replace(/\.0$/, '') + u; };
+/** Short duration (cuta3 #6): "~0:41", "~12:05", "~1h 59m"; '—' when not finite or effectively never (> 24 h). */
+export const fmtShortDur = (seconds: number | null) => {
+  if (seconds === null || !isFinite(seconds) || seconds > 86400) return '—';
+  const s = Math.max(0, Math.ceil(seconds));
+  if (s < 3600) return `~${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return `~${h}h ${m}m`;
+};

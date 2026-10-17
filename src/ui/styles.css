@@ -569,3 +569,7 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 #uRow>.refill-wrap{background:var(--c-cream);padding-block:8px;margin-inline:0;align-self:stretch;width:100%;box-sizing:border-box}
 #uRow .wk{scroll-margin-top:var(--refill-bar-h,0px)} /* set from the measured sticky bar (+8px), 0 when no bar */
 .goal-label{column-gap:4px} /* review #4: space before '· +X% income' on line 1 only (flex column-gap), no text trim */
+.order .l1 .v{overflow:visible;text-overflow:clip;flex:none} /* v1.1 (c): order value never cut; count shortens instead */
+.goal-pill{height:auto;min-height:var(--goal-h);align-items:center} .goal-label{white-space:normal;overflow:visible} /* cuta3 #2 (v1.6.1 §4): grows only when 2 lines exceed 40px (large text) */
+#uRow>.refill-wrap{padding-bottom:10px} /* cuta3 nit: +2px so no banner tick shows under the strip */
+#p-upgrades:has(#uRow > .refill-wrap) header .farm-manage-all{display:none} /* cuta3 nit: no duplicate header Refill pill while the sticky Refill shows */
