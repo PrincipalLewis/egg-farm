@@ -6,7 +6,7 @@ import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
-import { stubVisibilityHook } from './save/visibility-hook'; // STUB (C-AC36): swap for the Saves hook from fix/hidden-tab-offline
+import { onHiddenPeriodAccounted } from './save/hidden-time'; // STUB until Saves' fix/hidden-tab-offline lands (same path/names)
 import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
@@ -119,9 +119,9 @@ async function boot() {
   new RenderPump(() => { if (frozen) return; g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
   window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
   // C-AC36: hidden >= 60 s == closed and reloaded (offline grant + welcome popup). STUB hook until fix/hidden-tab-offline lands.
-  const vis = stubVisibilityHook(document);
-  vis.onHide(() => g.suspendForHidden());
-  vis.onHiddenReturn(ms => { if (g.resumeFromHidden(ms) > 0) { ui.render(); ui.showWelcomeIfFree(); } });
+  if (document.visibilityState === 'hidden') g.suspendForHidden();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') g.suspendForHidden(); else g.endHidden(); });
+  onHiddenPeriodAccounted(r => { if (ui.welcomeFromHidden(r)) ui.render(); });
   stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
 }
 preload().then(() => {

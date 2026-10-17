@@ -6,6 +6,7 @@ import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
 import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery } from './save/save';
 import { Telemetry, installId } from './telemetry/telemetry';
+import { accountHiddenPeriod, type HiddenPeriodResult } from './save/hidden-time';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 export class Game {
@@ -103,6 +104,10 @@ export class Game {
   suspendForHidden() { if (this.hiddenSince !== null || this.inactive) return; this.save(); this.hiddenSince = this.now(); }
   /** Tab shown after hiddenMs. >= offlineMinSeconds: same path as close-and-reload (settle pending, one offline grant,
    *  resume from now). Shorter: the next frame simulates the gap online, as before. Returns the eggs granted. */
+  /** Tab shown again: Game accounts the hidden period itself via the Saves module (fires on show only). */
+  endHidden(): HiddenPeriodResult | null { const startAt = this.hiddenSince; if (startAt === null) return null; return accountHiddenPeriod(this, { startAt, endAt: this.now() }); }
+  get balance() { return this.b; }
+  /** Used by the hidden-time accounting (stub today). Prefer endHidden(). */
   resumeFromHidden(hiddenMs: number): number {
     if (this.hiddenSince === null) return 0; this.hiddenSince = null;
     if (this.inactive || !(hiddenMs >= this.b.offline.offlineMinSeconds * 1000)) return 0;

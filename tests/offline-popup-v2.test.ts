@@ -10,7 +10,8 @@ import { apply } from '../src/sim/actions';
 import { graderMult } from '../src/sim/workers';
 import { welcomeModel } from '../src/ui/welcome-v2';
 import { fmtCount, fmtMoney, fmtMoneyFull, fmtDuration, fmtEggsFull } from '../src/ui/format';
-import { stubVisibilityHook } from '../src/save/visibility-hook';
+import { accountHiddenPeriod, onHiddenPeriodAccounted, __resetHiddenTimeStub, type HiddenPeriodResult } from '../src/save/hidden-time';
+import { hiddenPopupGate } from '../src/ui/welcome-v2';
 import { mem, expOffline } from './helpers';
 const T0 = 1.8e12;
 const L15 = () => ({ ...initialState(b, 7), farmLevel: 15 });
@@ -168,19 +169,33 @@ describe('C-AC36 hidden tab == close and reload (STUB visibility hook)', () => {
     let t = T0; const kv = mem(); save(kv, s0(), T0); const g = new Game(b, kv, () => t); g.suspendForHidden(); g.canWrite = () => false;
     t += 600_000; expect(g.resumeFromHidden(600_000)).toBe(0); expect(g.inactive).toBe(true); expect(g.state.pendingOfflineEggs).toBe(0);
   });
-  it('stub hook reports hide and hidden duration', () => {
-    let vis = 'visible', t = 0; const fs: (() => void)[] = [];
-    const doc = { get visibilityState() { return vis; }, addEventListener: (_: string, f: () => void) => fs.push(f) };
-    const h = stubVisibilityHook(doc, () => t); const got: (string | number)[] = [];
-    h.onHide(() => got.push('hide')); h.onHiddenReturn(ms => got.push(ms));
-    vis = 'hidden'; fs.forEach(f => f()); t = 61_000; vis = 'visible'; fs.forEach(f => f()); fs.forEach(f => f());
-    expect(got).toEqual(['hide', 61_000]);
+  const R = (o: Partial<HiddenPeriodResult>): HiddenPeriodResult => ({ startAt: 1, endAt: 2, elapsedMs: 11_520_000, simulatedMs: 0, grantedMs: 7_200_000, eggsGranted: 28_800, coinsGranted: 0, capped: true, mode: 'offline-grant', ...o });
+  it('popup gate: offline-grant shows once with eggsGranted / elapsed / capped', () => {
+    const gate = hiddenPopupGate(); expect(gate(R({}))).toEqual({ eggs: 28_800, awayS: 11_520, capped: true });
+    expect(gate(R({}))).toBeNull(); // duplicate startAt: no second popup
+    expect(gate(R({ startAt: 5, elapsedMs: 683_000, grantedMs: 683_000, eggsGranted: 2732, capped: false }))).toEqual({ eggs: 2732, awayS: 683, capped: false });
   });
-  it('stub hook: page opened already hidden fires onHide on subscribe', () => {
-    const doc = { visibilityState: 'hidden', addEventListener: () => {} }; let n = 0; stubVisibilityHook(doc).onHide(() => n++); expect(n).toBe(1);
+  it("popup gate: null, 'none' and 'online' never show", () => {
+    const gate = hiddenPopupGate(); expect(gate(null)).toBeNull();
+    expect(gate(R({ mode: 'none', eggsGranted: 0 }))).toBeNull(); expect(gate(R({ startAt: 9, mode: 'online', simulatedMs: 30_000, eggsGranted: 0 }))).toBeNull();
   });
-  it('main.ts wires the hook to Game + showWelcomeIfFree', () => {
-    const main = readFileSync('src/main.ts', 'utf8');
-    expect(main).toMatch(/vis\.onHide\(\(\) => g\.suspendForHidden\(\)\)/); expect(main).toMatch(/g\.resumeFromHidden\(ms\) > 0\) \{ ui\.render\(\); ui\.showWelcomeIfFree\(\)/);
+  it('hidden-time stub: Game.endHidden accounts once (idempotent by startAt), modes online / offline-grant / none', () => {
+    __resetHiddenTimeStub(); const got: HiddenPeriodResult[] = []; const off = onHiddenPeriodAccounted(r => got.push(r));
+    let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t);
+    g.suspendForHidden(); t += 30_000; expect(g.endHidden()!.mode).toBe('online');
+    g.suspendForHidden(); const s1 = t; t += 683_000; const r = g.endHidden()!;
+    expect(r).toMatchObject({ mode: 'offline-grant', startAt: s1, elapsedMs: 683_000, grantedMs: 683_000, eggsGranted: 2732, coinsGranted: 0, capped: false });
+    expect(accountHiddenPeriod(g, { startAt: s1, endAt: t })).toBeNull(); expect(g.endHidden()).toBeNull();
+    g.suspendForHidden(); g.canWrite = () => false; t += 600_000; expect(g.endHidden()!.mode).toBe('none');
+    expect(got.map(x => x.mode)).toEqual(['online', 'offline-grant', 'none']); off(); __resetHiddenTimeStub();
+  });
+  it('hidden-time stub: capped period', () => {
+    __resetHiddenTimeStub(); let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t);
+    g.suspendForHidden(); t += 11_520_000; expect(g.endHidden()).toMatchObject({ mode: 'offline-grant', grantedMs: 7_200_000, eggsGranted: 28_800, capped: true }); __resetHiddenTimeStub();
+  });
+  it('main.ts: the popup subscribes only via onHiddenPeriodAccounted; Game accounts on show', () => {
+    const main = readFileSync('src/main.ts', 'utf8'), app = readFileSync('src/ui/app.ts', 'utf8');
+    expect(main).toMatch(/onHiddenPeriodAccounted\(r => \{ if \(ui\.welcomeFromHidden\(r\)\)/); expect(main).toMatch(/g\.suspendForHidden\(\); else g\.endHidden\(\)/);
+    expect(main).not.toMatch(/resumeFromHidden|accountHiddenPeriod/); expect(app).not.toMatch(/resumeFromHidden|accountHiddenPeriod|grantOffline/);
   });
 });

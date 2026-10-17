@@ -6,7 +6,8 @@ import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
 import { fmtCount, fmtMoney, fmtMoneyCeil, fmtMoneyExact, fmtTimeToAfford, IncomeRate } from './format';
-import { welcomeModel } from './welcome-v2';
+import { welcomeModel, hiddenPopupGate } from './welcome-v2';
+import type { HiddenPeriodResult } from '../save/hidden-time';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -227,26 +228,29 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
   // Offline popup v2 (product/collection/offline-popup-v2-spec.md v0.3): real away time, full digits, worth line, cap line.
   let countUp = 0;
+  let fromHidden: { eggs: number; awayS: number; capped: boolean } | null = null;
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
     modalKind = 'welcome'; cancelAnimationFrame(countUp);
-    const m = welcomeModel(eggs, g.offline.realAwayS || g.offline.awayS, g.state, b), motion = !rm();
+    const h = fromHidden; fromHidden = null;
+    const m = h ? welcomeModel(h.eggs, h.awayS, g.state, b, h.capped) : welcomeModel(eggs, g.offline.realAwayS || g.offline.awayS, g.state, b), motion = !rm();
     modal.innerHTML = `<div class="card welcome-v2" role="dialog" aria-modal="true" aria-labelledby="wbT" aria-describedby="wbAria">
       <span class="sr" id="wbAria">${m.aria}</span>
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <div class="wb-head" aria-hidden="true"><img src="${A('icon-offline-earnings.svg')}" width="48" height="48" alt=""><h2 id="wbT">${m.title}</h2></div>
-      <div class="wb-a" aria-hidden="true">${m.lineA}</div>
+      <div class="wb-body"><div class="wb-a" aria-hidden="true">${m.lineA}</div>
       <div class="big num wb-hero${motion ? ' pop' : ''}" aria-hidden="true"><img src="${A('icon-egg.svg')}" alt=""><span class="wb-n"><span class="slot-ghost" aria-hidden="true">${m.hero}</span><span id="wbN">${m.hero}</span></span></div>
       <div class="wb-sub" aria-hidden="true">${m.sub}</div>
       <div class="wb-worth num" aria-hidden="true">${m.worth}</div>
       <div class="wb-rate num" aria-hidden="true">${m.rate}</div>
-      ${m.capLine ? `<div class="wb-cap" aria-hidden="true"><svg class="wb-clock" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="5.8"/><path d="M8 6v3l2 1.5M6.5 1.5h3"/></svg> ${m.capLine}</div>` : ''}
-      <button class="btn" id="wbCollect" aria-label="${m.button}">Collect</button></div>`;
+      ${m.capLine ? `<div class="wb-cap" aria-hidden="true"><svg class="wb-clock" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="5.8"/><path d="M8 6v3l2 1.5M6.5 1.5h3"/></svg>${m.capLine}</div>` : ''}
+      </div><button class="btn" id="wbCollect" aria-label="${m.button}">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
     // §3: card max 80% of the viewport; the rate line is the first to drop when it does not fit.
     const card = modal.querySelector<HTMLElement>('.card')!, rate = card.querySelector<HTMLElement>('.wb-rate')!;
     // Measured on the FINAL hero text (the count-up runs inside a ghost-sized slot, so the card never grows later).
-    const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); rate.hidden = false; if (card.scrollHeight > innerHeight * 0.8) rate.hidden = true; };
+    const body = card.querySelector<HTMLElement>('.wb-body')!;
+    const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; };
     fit(); addEventListener('resize', fit);
     if (motion) { // C-AC37: count up 0 -> N (ease-out) only when motion is allowed; the final text equals m.hero
       const n = $('#wbN'), t0 = now(), dur = 900, unit = eggs === 1 ? 'egg' : 'eggs'; n.textContent = `+0 ${unit}`;
@@ -668,6 +672,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   /** C-AC36 hidden-tab return: open the popup unless another dialog is up (pending eggs persist; the next open shows them). */
-  const showWelcomeIfFree = () => { if (recoveryOpen || (modalKind && modalKind !== 'welcome')) return false; showWelcome(); $('#wbCollect')?.focus(); return true; };
-  return { render: renderAll, showWelcome, showWelcomeIfFree, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
+  const gate = hiddenPopupGate();
+  /** C-AC36: the only hidden-tab entry point (subscribed via onHiddenPeriodAccounted in main.ts); no accounting here. */
+  const welcomeFromHidden = (r: HiddenPeriodResult | null) => { const h = gate(r); if (!h) return false; dirty = true;
+    if (recoveryOpen || (modalKind && modalKind !== 'welcome')) return true; // another dialog is up: the pending eggs show on the next open
+    fromHidden = h; showWelcome(); $('#wbCollect')?.focus(); return true; };
+  return { render: renderAll, showWelcome, welcomeFromHidden, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }
