@@ -524,6 +524,30 @@ sections.recoveryNone = async () => { const { ctx, page } = await open({ ls: { '
   ok('AC14b null outcome: no dialog', (await page.locator('.recovery-layer').count()) === 0 && (await page.evaluate(() => window.eggfarm.recoveryOutcome)) === null); await ctx.close(); };
 
 // SECTIONS
+// ---------- Major P3: Collection card 'Limited by coop' must not overlap 'Need $X more' (320/360/375/390, still shown at 1280) ----------
+sections.p3card = async () => {
+  for (const [w, h] of [[320, 568], [360, 640], [375, 667], [390, 844], [1280, 800]]) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+    if (w < 900) { await page.locator('[data-nav=upgrades]').click(); await page.waitForTimeout(200); }
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 0, collectionLevel: 17, coinsCents: 0, coop: 0, basket: 0, customers: [], nextCustomerInS: 1e9 }; });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => {
+      const hs = [...document.querySelectorAll('.up .hint')];
+      const need = hs.find(e => /^Need \$\S+ more$/.test(e.textContent.trim())), lim = hs.find(e => /Limited by coop/.test(e.textContent));
+      const box = e => { if (!e) return null; const a = e.getBoundingClientRect(); return { l: a.left, r: a.right, t: a.top, b: a.bottom, w: a.width, h: a.height, vis: getComputedStyle(e).visibility !== 'hidden' && a.width > 0 && a.height > 0 }; };
+      const a = box(need), z = box(lim), same = !!(need && lim && need.closest('.up') === lim.closest('.up'));
+      const overlap = a && z ? !(a.r <= z.l || z.r <= a.l || a.b <= z.t || z.b <= a.t) : null;
+      const card = (need ?? lim)?.closest('.up'), cb = card?.getBoundingClientRect();
+      const inCard = !!(cb && z && a && z.t >= cb.top - 0.5 && z.b <= cb.bottom + 0.5 && a.t >= cb.top - 0.5 && a.b <= cb.bottom + 0.5);
+      return { need: a, lim: z, same, overlap, inCard, pos: lim ? getComputedStyle(lim).position : null };
+    });
+    ok(`P3 Collection card: 'Need $X more' and 'Limited by coop' both shown, same card (${w}x${h})`, r.need?.vis && r.lim?.vis && r.same && r.inCard, JSON.stringify(r));
+    ok(`P3 Collection card: 'Limited by coop' does not overlap 'Need $X more' (${w}x${h})`, r.overlap === false && r.pos !== 'absolute', JSON.stringify(r));
+    if (shot && w === 375) { const card = page.locator('.up', { has: page.locator('.hint', { hasText: 'Limited by coop' }) }).first(); await card.scrollIntoViewIfNeeded(); await card.screenshot({ path: `${SHOTS}/p3-collection-card-375.png` }); }
+    ok(`P3 card no page errors (${w})`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+};
 // ---------- QA bug-sellall-label-grader: label = payout at Grader 0/1/2, fits at 360 ----------
 sections.sellallgrader = async () => {
   const { ctx, page, errors } = await open({ w: 360, h: 640, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
