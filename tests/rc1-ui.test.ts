@@ -58,9 +58,10 @@ describe('S2-5 nav labels (session2-ui-triage (b))', async () => {
   });
   it('cooldown: "0:28", no badge; aria text changes at most every 5 s', () => {
     const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe('');
-    expect(a.aria.text).toBe('Refill available in 28 seconds');
+    expect(a.aria.text).toBe('Refill 0:28, available in 28 seconds'); expect(a.aria.text).toContain(a.label); // review 5d8a058 #5 label in name
     expect(navManageView(1, 25.1, false, a.aria, 3000).aria).toBe(a.aria);
-    expect(navManageView(1, 22.9, false, a.aria, 6100).aria.text).toBe('Refill available in 23 seconds');
+    expect(navManageView(1, 22.9, false, a.aria, 6100).aria.text).toBe('Refill 0:23, available in 23 seconds');
+    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Ready in 28s'); expect(d.aria.text.toLowerCase()).toContain(d.label.toLowerCase());
   });
 });
 

@@ -4,8 +4,7 @@ import { initialState, GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { mood, isYawning, showManageAll, graderMult } from '../src/sim/workers';
-import { workersHtml, manageAllHtml, refillCount, navManageView } from '../src/ui/workers-ui';
-import { readFileSync } from 'node:fs';
+import { workersHtml, manageAllHtml, refillCount, navManageView, navRefillState } from '../src/ui/workers-ui';
 import { asleepOrUnpaidCount } from '../src/econ/income';
 import type { SimEvent } from '../src/sim/events';
 const E = b.workers.energy;
@@ -160,9 +159,8 @@ describe('PM Workers ruling (b): < 3 hired refills only the lowest worker; bulk 
     expect(mob.badge).toBe('1'); expect(mob.aria.text).toBe('Refill 1 tired worker'); expect(dock.label).toBe('Refill 1 tired worker');
     expect(manageAllHtml(s, b)).toContain(`aria-label="${dock.label}"`);
     const s3 = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 }); expect(refillCount(s3, b)).toBe(3);
-    // app.ts must feed the capped count to the nav (not promptManage().length)
-    const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
-    expect(src).toMatch(/navManageView\(refillCount\(s, b\)/); expect(src).not.toMatch(/navManageView\(promptManage/);
+    // the exact function app.ts renders from (review 5d8a058 #7: behaviour, not a source grep)
+    expect(navRefillState(s, b, false, { text: '', at: 0 }, 0)).toEqual(mob); expect(navRefillState(s, b, true, { text: '', at: 0 }, 0)).toEqual(dock);
   });
   it('2 hired: Unpaid Market Hand 10% + tired Coop Hand 30%: the single tap refills the paid Coop Hand (review 5d8a058 #6)', () => {
     const s = base({ workers: { market_hand: wk(10, true), coop_hand: wk(30) }, manageCdS: 0 });

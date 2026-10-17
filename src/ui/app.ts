@@ -29,7 +29,7 @@ import { collectionFxLines, collectionSummary, collectionDeltas } from './collec
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navManageView, refillCount, type NavAria } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, promptManage, navRefillState, type NavAria } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -581,7 +581,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     for (const fb of farmMAs) {
       setHidden(fb, !farmMAShown);
       if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
-        const v = navManageView(refillCount(s, b), s.manageCdS, docked.matches, maAria, now());
+        const v = navRefillState(s, b, docked.matches, maAria, now());
         setText(fb.querySelector('.nav-lbl')!, v.label); const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
