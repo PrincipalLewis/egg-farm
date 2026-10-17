@@ -11,6 +11,8 @@ export const STEPS = [
 ] as const;
 /** rc2 M-Tut-parity: the coach-mark caption per step, identical at every width and panel state (source: the 390 strings). */
 export const TUT_COPY = ['Tap <b>Collect</b> to gather the eggs.', 'A customer! Tap them to sell eggs.', 'Spend coins to collect more eggs per tap.'] as const;
+/** rc2 M-Tut-goal: the bubble's link; app.ts opens/scrolls to the target upgrade and pulses its Buy button. */
+export const TUT_GOAL_LINK = '<button type="button" class="tut-link" data-tut="upgrades">Upgrades\u00a0›</button>';
 export const tutCaption = (st: number) => TUT_COPY[Math.min(Math.max(st, 0), TUT_COPY.length - 1)];
 export interface OnboardingHooks { step(n: number, name: string): void; skip(atStep: number): void; done(): void; timeout?(n: number, name: string): void }
 /** m3-ftue-spec v1.1 §2.1: what the current step's gate sees. */
@@ -25,7 +27,7 @@ export function ftueGate(name: string, c: GateCtx): Gate {
     if (c.customers < 1) return { open: false, hint: 'A customer is on the way…' + (c.nextCustomerInS <= 10 ? ` ${Math.max(1, Math.ceil(c.nextCustomerInS))} s` : '') };
     return { open: c.basket >= 1, hint: 'Collect some eggs to sell.' };
   }
-  return { open: c.coinsCents >= c.costCents, hint: `Sell a few more eggs to afford it\u00a0·\u00a0${usd(c.costCents - c.coinsCents)}\u00a0to\u00a0go` }; // Art & UX 23:25: '· $2 to go' never breaks
+  return { open: c.coinsCents >= c.costCents, hint: `${usd(c.costCents - c.coinsCents)}\u00a0to\u00a0go\u00a0·\u00a0${TUT_GOAL_LINK}` }; // rc2 M-Tut-goal: '$2 to go · Upgrades ›', NBSPs so it never breaks
 }
 export type GateMode = 'mark' | 'hint' | 'none';
 export class OnboardingFlow {

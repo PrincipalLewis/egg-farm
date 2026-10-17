@@ -1,6 +1,6 @@
 // art-ux/m3-ftue-spec.md v1.1 §2.1 event gating + §2.2 Collect label.
 import { describe, it, expect } from 'vitest';
-import { OnboardingFlow, ftueGate, collectLabel, GATE_TIMEOUT_S, HINT_HIDE_S, type GateCtx } from '../src/ui/onboarding';
+import { OnboardingFlow, ftueGate, collectLabel, GATE_TIMEOUT_S, HINT_HIDE_S, type GateCtx } from '../src/ui/onboarding'; import { TUT_GOAL_LINK } from '../src/ui/onboarding';
 const C = (o: Partial<GateCtx> = {}): GateCtx => ({ coop: 0, eggsPerTap: 5, customers: 0, basket: 0, coinsCents: 0, costCents: 1000, nextCustomerInS: 10, ...o });
 const mk = () => { const log: any[] = []; const f = new OnboardingFlow({ step: (n, nm) => log.push(['step', n, nm]), skip: n => log.push(['skip', n]), done: () => log.push(['done']), timeout: (n, nm) => log.push(['timeout', n, nm]) }); f.start(); return { f, log }; };
 describe('FTUE v1.1 §2.1 gates', () => {
@@ -12,7 +12,7 @@ describe('FTUE v1.1 §2.1 gates', () => {
     expect(ftueGate('sell', C({ customers: 1, basket: 1 })).open).toBe(true);
   });
   it('Buy needs coins >= cost (PT1: "Tap Buy" while $2 short)', () => {
-    expect(ftueGate('upgrade', C({ coinsCents: 800 }))).toEqual({ open: false, hint: 'Sell a few more eggs to afford it\u00a0·\u00a0$2\u00a0to\u00a0go' });
+    expect(ftueGate('upgrade', C({ coinsCents: 800 }))).toEqual({ open: false, hint: '$2\u00a0to\u00a0go\u00a0·\u00a0' + TUT_GOAL_LINK });
     expect(ftueGate('upgrade', C({ coinsCents: 1000 })).open).toBe(true);
   });
   it('each step waits for its own event; pointer hides if the gate closes while shown', () => {

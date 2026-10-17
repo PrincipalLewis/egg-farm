@@ -700,6 +700,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }, tutCaption /* rc2 M-Tut-parity: same copy at every width */, A('ui-pointer-hand.svg'), A('ui-pointer-hand-down.svg'));
   }
   };
+  // rc2 M-Tut-goal: 'Upgrades ›' in the tutorial bubble opens Upgrades (Collection), scrolls the target upgrade into view and pulses its Buy button
+  document.addEventListener('click', ev => {
+    if (!(ev.target as Element).closest?.('.tut-link')) return;
+    tab = 'collection'; if (!docked.matches) openPanel('upgrades'); dirty = true; render();
+    requestAnimationFrame(() => { const buy = uRow.querySelector<HTMLElement>('.btn.buy'); if (!buy) return; buy.scrollIntoView({ block: 'nearest', behavior: rm() ? 'auto' : 'smooth' }); retrigger(buy, 'pulse'); });
+  });
   let recoveryOpen = !!(g.recoveryOutcome && opts.recovery);
   const rotate = mountRotatePrompt($('#app') as HTMLElement, A('icon-rotate-phone.svg'), () => recoveryOpen, () => queueMicrotask(() => renderIosTip()));
   // ---------- AC14g iOS Home Screen tip ----------

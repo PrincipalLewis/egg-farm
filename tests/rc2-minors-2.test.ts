@@ -26,3 +26,16 @@ describe('M-Tut-parity', () => {
     expect(src).not.toMatch(/Tap <b>Sell<\/b> to earn coins|'Tap <b>Buy<\/b>\.'/);
   });
 });
+import { ftueGate, TUT_GOAL_LINK } from '../src/ui/onboarding';
+describe('M-Tut-goal', () => {
+  it('bubble reads "$2 to go · Upgrades ›" with NBSPs (never breaks)', () => {
+    const h = ftueGate('upgrade', { coop: 0, eggsPerTap: 5, customers: 0, basket: 0, coinsCents: 800, costCents: 1000, nextCustomerInS: 10 }).hint;
+    expect(h).toBe('$2\u00a0to\u00a0go\u00a0·\u00a0' + TUT_GOAL_LINK);
+    expect(h.replace(/<[^>]+>/g, '')).toBe('$2\u00a0to\u00a0go\u00a0·\u00a0Upgrades\u00a0›'); expect(h.replace(/<[^>]+>/g, '')).not.toMatch(/ /);
+  });
+  it('link opens Upgrades, scrolls to and pulses the target Buy button; tappable through the overlay', () => {
+    const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
+    expect(app).toMatch(/closest\?\.\('\.tut-link'\)[\s\S]{0,200}openPanel\('upgrades'\)[\s\S]{0,300}scrollIntoView[\s\S]{0,120}retrigger\(buy, 'pulse'\)/);
+    expect(css).toMatch(/\.onb \.tut-link\{pointer-events:auto/);
+  });
+});
