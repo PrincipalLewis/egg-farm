@@ -120,14 +120,14 @@ sections.b2rearm = async () => {
   const { ctx, page, errors } = await open({ w: 390, h: 640, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true }) } });
   const vis = re => page.evaluate(r => [...document.querySelectorAll('.coach')].some(c => new RegExp(r).test(c.textContent) && getComputedStyle(c).visibility !== 'hidden'), re);
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 5e6 }; g.dispatch({ type: 'hire', worker: 'market_hand' }); });
-  await page.waitForTimeout(400); await page.locator('[data-nav=upgrades]').click();
+  await page.waitForTimeout(400); await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click());
   await page.waitForFunction(() => [...document.querySelectorAll('.coach')].some(c => /tired/.test(c.textContent) && getComputedStyle(c).visibility !== 'hidden'), null, { timeout: 6000 }).catch(() => {});
-  await page.locator('[data-nav=farm]').click(); // close before the Manage tip (+3.1s)
+  await page.evaluate(() => document.querySelector('[data-nav=farm]').click()); // close before the Manage tip (+3.1s)
   await page.waitForTimeout(19500); const goneWhileClosed = !(await vis('Manage'));
-  await page.locator('[data-nav=upgrades]').click(); let shownAgain = false;
+  await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click()); let shownAgain = false;
   for (let i = 0; i < 30 && !shownAgain; i++) { await page.waitForTimeout(200); shownAgain = await vis('Manage'); }
   const f1 = await page.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui')));
-  await page.reload(); await page.getByText('Tap to start').click(); await page.waitForTimeout(500); await page.locator('[data-nav=upgrades]').click(); await page.waitForTimeout(2500);
+  await page.reload(); await page.getByText('Tap to start').click(); await page.waitForTimeout(500); await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click()); await page.waitForTimeout(2500);
   const repeat = await vis('Manage') || await vis('tired');
   ok('B-2 rule D re-arm: Manage dropped while the sheet was closed shows on the next Workers visit; manageSeen persists; no repeat after reload',
     goneWhileClosed && shownAgain && f1.manageSeen === true && f1.tiredSeen === true && !repeat && !errors.length, JSON.stringify({ goneWhileClosed, shownAgain, f1: { tiredSeen: f1.tiredSeen, manageSeen: f1.manageSeen }, repeat, errors }));
