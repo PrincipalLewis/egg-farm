@@ -3,6 +3,7 @@ import { GameState, initialState, coopCapacity } from './sim/state';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
+import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import type { SimEvent } from './sim/events';
 import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery } from './save/save';
 import { Telemetry, installId } from './telemetry/telemetry';
@@ -174,16 +175,29 @@ export class Game {
    *  keep the <= 60 s of online sim. Returns the eggs granted (caller shows the welcome popup). */
   onShown(at = this.now()): number {
     const h = this.hidden; if (!h) return 0;
+    return accountHiddenPeriod(this, { startAt: h.at, endAt: at })?.eggsGranted ?? 0;
+  }
+  /** Start of the open hidden period, or null when visible. */
+  get hiddenSince(): number | null { return this.hidden?.at ?? null; }
+  /** @internal Only save/hidden-time.ts calls this (via accountHiddenPeriod, which guarantees once per period). */
+  settleHiddenPeriod(at: number): HiddenSettlement {
+    const h = this.hidden; if (!h) return { mode: 'none', simulatedMs: 0, grantedMs: 0, eggs: 0, coins: 0, capped: false };
     this.hidden = null; this.lastFrameAt = at;
-    const gap = at - h.at;
-    if (this.inactive || this.readOnly || gap < this.b.offline.offlineMinSeconds * 1000 || !validSavedAt(h.at, at)) {
-      this.emit(h.ev); this.checkCoopFull(); return 0;
+    const gap = at - h.at, budgetMs = this.b.offline.hiddenSimMaxSeconds * 1000;
+    if (this.inactive || this.readOnly || !validSavedAt(h.at, at)) {
+      this.emit(h.ev); this.checkCoopFull(); return { mode: 'none', simulatedMs: h.simMs, grantedMs: 0, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: false };
+    }
+    if (gap < this.b.offline.offlineMinSeconds * 1000) {
+      this.emit(h.ev); this.checkCoopFull();
+      return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: h.simMs >= budgetMs && gap > budgetMs };
     }
     this.state = h.state; this.accMs = 0;
     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
     const eggs = this.grantOffline(gap);
     if (eggs > 0) this.notify({ type: 'offline_grant', eggs, awayS: this.offline.awayS });
-    this.checkCoopFull(); this.save(); return eggs;
+    this.checkCoopFull(); this.save();
+    const capS = this.b.offline.offlineCapSeconds;
+    return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
   }
   frame() {
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
