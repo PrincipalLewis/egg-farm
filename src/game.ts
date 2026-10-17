@@ -6,7 +6,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf, M4_BUILD_SESSION_OFF } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateTracksV7 } from './sim/migrate-v7';
@@ -15,7 +15,7 @@ import { hireNudgeEligible, hasWorker, type HireNudgeSource } from './ui/hire-nu
 export type GameEvent = SimEvent | { type: 'hire_nudge'; phase: 'shown' | 'cleared' } | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
-export const tracksOff = (b: Balance): Balance => (b.m4 ? { ...b, m4: { ...b.m4, enabled: 0 } } : b);
+export const tracksOff = (b: Balance): Balance => { if (!b.m4) return b; const o: Balance = { ...b, m4: { ...b.m4, enabled: 0 } }; M4_BUILD_SESSION_OFF.add(o); return o; };
 export interface GameOpts {
   /** M4-20: outcome of boot's IndexedDB open + read ('unknown' defers the migration; default 'absent' = no IndexedDB). */
   idbBoot?: IdbBoot; idbAbsentReason?: string;
@@ -209,7 +209,7 @@ export class Game {
     if (lsMain !== (this.lastMainRaw ?? p.raw)) return this.deferTracks('ls', 'ls_main_changed');
     const id = (this.opts.newId ?? newMigrationId)(), rec = encodeBackup({ migrationId: id, raw: p.raw });
     const live = { ...migrateTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
-    const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1).length, rec.length, p.on.save); // spec v1.10 + HoE
+    const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1, this.b).length, rec.length, p.on.save); // spec v1.10 + HoE
     if (!probeHeadroom(this.kv, need)) return this.deferTracks('ls', 'quota_headroom');
     try { this.kv.setItem(V6_BACKUP_KEY, rec); } catch (e) { return this.abortTracks('ls', (e as Error)?.name === 'QuotaExceededError' ? 'quota' : 'error', rec); }
     const back = decodeBackup(this.kv.getItem(V6_BACKUP_KEY));
@@ -256,7 +256,7 @@ export class Game {
     try { const raw = this.saveWithQuotaRetry(t); this.lastMainRaw = raw; this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror) try { let q = 0; try { q = saveSeqOf(this.kv.getItem(SAVE_KEY)); } catch { /* blocked */ } this.mirror.write(serialize(this.persisted(), t, q + 1)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror) try { let q = 0; try { q = saveSeqOf(this.kv.getItem(SAVE_KEY)); } catch { /* blocked */ } this.mirror.write(serialize(this.persisted(), t, q + 1, this.b)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
