@@ -234,17 +234,48 @@ sections.b1 = async () => {
 
 // ---------- B2 Farm L5 toast ----------
 sections.b2 = async () => {
-  for (const w of [390, 1280]) {
-    const { ctx, page } = await open({ w, h: w > 900 ? 800 : 844, ls: { 'eggfarm.ui': DONE } });
+  for (const [w, banner] of [[360, true], [390, true], [1280, true], [1280, false]]) {
+    const { ctx, page } = await open({ w, h: w > 900 ? 800 : 844, ls: { 'eggfarm.ui': banner ? DONE : JSON.stringify({ ...JSON.parse(DONE), workersIntroA: true }) } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
-    await page.waitForTimeout(300); const shown = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { top: r.top, vis: getComputedStyle(e).visibility, text: e.textContent }; });
-    await page.waitForTimeout(1900); const mid = await page.locator('.toast').evaluate(e => getComputedStyle(e).visibility); // 2.2 s: still up (2.5 s)
+    await page.waitForTimeout(300); const shown = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { top: r.top, vis: getComputedStyle(e).visibility, text: e.textContent, ia: document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0 }; });
+    await page.waitForTimeout(1900); const mid = await page.locator('.toast').evaluate(e => getComputedStyle(e).visibility); // 2.2 s: still up (COOP_TOAST_MS 2.5 s)
     await page.waitForTimeout(800);
-    const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const below = w < 960;
+    const qb = await page.locator('#queue').evaluate(e => e.getBoundingClientRect().bottom); const ia = shown.ia; /* banner measured at toast show time (review ac4ec56 #2) */ const below = w < 960 || ia > 0, where = ia > 0 ? '8px below the New helper! banner' : below ? 'below strip' : 'docked, no banner: slides off the top', edge = Math.max(w < 960 ? qb : 0, ia);
     const after = await page.locator('.toast').evaluate(e => { const r = e.getBoundingClientRect(); return { bottom: r.bottom, vis: getComputedStyle(e).visibility, op: getComputedStyle(e).opacity }; });
     // QA precheck-2fae4c4 §1: width-aware. <960: sits 8px below the queue strip (F1) and fades in place; docked: slides off the top.
-    ok(`B2 L5 toast shows then is fully gone (${below ? 'below strip, faded' : 'off the top'}) (${w})`, shown.vis === 'visible' && mid === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
-      && (below ? Math.abs(shown.top - (qb + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, mid, after, qb }));
+    // rc2 item 1: a visible 'New helper!' banner (.intro-a) also pushes the toast 8px below it (any width) and it fades in place.
+    ok(`B2 L5 toast shows ${where}, then is fully gone (${w})`, shown.vis === 'visible' && mid === 'visible' && /Coop upgraded/.test(shown.text) && after.vis === 'hidden' && after.op === '0'
+      && (banner ? ia > 0 && shown.top >= ia + 7 : ia === 0) && (below ? Math.abs(shown.top - (edge + 8)) <= 1 : (shown.top >= 0 && after.bottom <= 0)), JSON.stringify({ shown, mid, after, qb, ia }));
+    await ctx.close();
+  }
+};
+
+// ---------- toast-v3: first toast after load is at its settled top from frame 1, never over the banner/strip mid-fade ----------
+sections.toastfirst = async () => {
+  const TS = process.env.TOAST_SHOTS ?? `${SHOTS}/toast-v3`; mkdirSync(TS, { recursive: true });
+  for (const [w, h, banner] of [[360, 740, true], [390, 640, false], [1280, 800, true], [1280, 800, false]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': banner ? DONE : JSON.stringify({ ...JSON.parse(DONE), workersIntroA: true }) } });
+    const tag = `${w}x${h} ${banner ? 'banner' : 'no banner'}`;
+    // sample every frame from the dispatch (same task) for ~400ms
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; window.__tf = [];
+      const t0 = performance.now(), el = document.querySelector('.toast');
+      const snap = () => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); window.__tf.push({ t: Math.round(performance.now() - t0), top: r.top, bottom: r.bottom, op: +cs.opacity, vis: cs.visibility, show: el.classList.contains('show') }); };
+      g.dispatch({ type: 'buyFarm' }); snap(); const loop = () => { snap(); if (performance.now() - t0 < 400) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+    await page.waitForTimeout(100); if (shot) await page.screenshot({ path: `${TS}/toast-midfade-100ms-${w}x${h}-${banner ? 'banner' : 'nobanner'}.png` });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => ({ f: window.__tf, ia: document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0, qb: document.querySelector('#queue').getBoundingClientRect().bottom, docked: matchMedia('(min-width:960px) and (orientation:landscape)').matches, below: document.querySelector('.toast').classList.contains('below') }));
+    const edge = Math.max(r.docked ? 0 : r.qb, r.ia), settled = r.f[r.f.length - 1], seen = r.f.filter(x => x.show && x.vis === 'visible' && x.op > 0);
+    if (edge === 0) { // 1280 docked, no banner: the intended slide-in from the top (nothing to cross)
+      ok(`toast-v3 docked no-banner slides in from above and settles on-screen (${tag})`, settled.op === 1 && settled.top >= 0 && seen.length > 0 && seen[0].top < settled.top - 1 && seen.every(x => x.top <= settled.top + 0.5) && !r.below, JSON.stringify({ first: seen[0], settled, below: r.below }));
+    } else {
+      ok(`toast-v3 settles 8px below the ${banner ? 'banner' : 'strip'} (${tag})`, settled.op === 1 && Math.abs(settled.top - (edge + 8)) <= 1, JSON.stringify({ settled, edge }));
+      ok(`toast-v3 first visible frame already at settled top (±8px fade offset) (${tag})`, seen.length > 0 && seen[0].top >= settled.top - 8.5 && seen[0].top <= settled.top + 0.5, JSON.stringify({ first: seen[0], settled: settled.top }));
+      // frames at opacity 0 are invisible, so only frames with opacity > 0 count as "over" the banner/strip
+      ok(`toast-v3 never over the ${banner ? 'banner' : 'strip'} in any frame mid-fade (${tag})`, seen.every(x => x.top >= edge - 0.5), JSON.stringify(seen.filter(x => x.top < edge - 0.5).slice(0, 3)));
+    }
+    // dismissal path (timer-after-show ordering is unit-tested in tests/toast-controller.test.ts): poll, don't sleep (review 148591a n4)
+    const gone = await page.waitForFunction(() => { const e = document.querySelector('.toast'), cs = getComputedStyle(e); return !e.classList.contains('show') && cs.opacity === '0' && cs.visibility === 'hidden'; }, null, { timeout: 4000 }).then(() => true, () => false);
+    ok(`toast-v3 dismissed within 4s (COOP_TOAST_MS 2.5 s) (${tag})`, gone);
     await ctx.close();
   }
 };

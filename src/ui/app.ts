@@ -2,6 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
+import { toastTop, toastController, toastGate } from './toast-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -155,14 +156,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
     window.setTimeout(() => el.remove(), 8000);
   };
-  let toastTimer = 0;
   /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  /** rc2 M-Toast-layer: Welcome-back always wins. A toast raised while it is open waits and shows once it closes (latest only). */
-  let deferredToast: [string, number] | null = null;
-  const showToast = (text: string, ms = 1300) => { if (modalKind === 'welcome') { deferredToast = [text, ms]; return; } toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), ms); };
+  /* toast-v3 / review 148591a: the show/settle/dismiss state machine lives in toast-place.ts (pure, unit-tested) */
+  const placeToast = () => { const qb = queueEl.getBoundingClientRect().bottom; const ia = document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0;
+    /* F1: below the queue strip; rc2: never over the 'New helper!' hire banner */ const top = toastTop(qb, ia, docked.matches), below = top !== null; toast.style.top = below ? `${top}px` : ''; toast.classList.toggle('below', below); };
+  const toastShow = toastController({ shown: () => toast.classList.contains('show'), opacity: () => +getComputedStyle(toast).opacity, show: () => toast.classList.add('show'), hide: () => toast.classList.remove('show'),
+    transitions: on => { toast.style.transition = on ? '' : 'none'; }, reflow: () => { void toast.offsetHeight; }, place: placeToast },
+    { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms), clearTimeout: id => clearTimeout(id) });
+  let toastMs = 1300; const rawToast = (text: string, ms: number) => { toast.textContent = text; toastMs = ms; toastShow(ms); };
+  /* rc2 M-Toast-layer: toasts wait while #modal-layer.open and show after it closes (.toast z 31 stays above #modal-layer 20 on purpose) */
+  const toastQ = toastGate(() => modal.classList.contains('open'), rawToast, { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms) });
+  const showToast = (text: string, ms = 1300) => toastQ.toast(text, ms);
+
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
@@ -233,12 +241,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let lastBuyBtn: HTMLElement | null = null;
 
   // ---------- Modals ----------
-  const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; const wasWelcome = modalKind === 'welcome'; modalKind = null;
-    if (wasWelcome && deferredToast) { const [t, ms] = deferredToast; deferredToast = null; requestAnimationFrame(() => showToast(t, ms)); } };
+  const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null;
+    toastQ.released(); };
   let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
-    if (toast.classList.contains('show')) { deferredToast = [toast.textContent ?? '', 1300]; toast.classList.remove('show'); clearTimeout(toastTimer); } // M-Toast-layer: never over Welcome-back
+    if (toast.classList.contains('show')) { toastQ.hold(toast.textContent ?? '', toastMs); toast.classList.remove('show'); } // M-Toast-layer: never over Welcome-back
     modalKind = 'welcome'; const sale = saleLine(instantSale(g.state, b), compact, fmtMoney); // S2-4c
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
@@ -263,6 +271,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
       <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${oldSaveForSession() ? `<button class="btn secondary" type="button" id="sOldSave">Export old save</button><div class="version" id="sOldMsg" role="status" aria-live="polite"></div>` : ''}${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
+    if (toast.classList.contains('show')) { toastQ.hold(toast.textContent ?? '', toastMs); toast.classList.remove('show'); } // no toast over any modal
     modal.classList.add('open'); sfx('uiOpen');
   };
   modal.addEventListener('click', e => {
