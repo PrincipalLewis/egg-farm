@@ -5,6 +5,7 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
+import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import type { SimEvent } from './sim/events';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
@@ -118,7 +119,9 @@ export class Game {
   /** Called once when the guard first blocks a write. */
   onInactive: (() => void) | null = null;
   /** Stop sim + saving (another tab took the save). */
-  deactivate() { if (this.inactive) return; this.inactive = true; this.onInactive?.(); }
+  deactivate() { if (this.inactive) return; this.inactive = true; this.endHiddenOnFreeze(); this.onInactive?.(); }
+  /** CCR m1: a tab frozen (tab guard / newer save) while hidden ends its hidden period now (mode 'none'), so it can never stay open. */
+  private endHiddenOnFreeze() { if (this.hidden) this.onShown(this.now()); }
   /** Hand-over hold (another tab asked us to flush): no sim, no saves until the claim arrives or the hold expires. */
   holdUntil = 0;
   private held() { return this.now() < this.holdUntil; }
@@ -134,12 +137,12 @@ export class Game {
   /** The balance this session runs on right now (flag off until the migration commits); the UI reads it live. */
   get balance(): Balance { return this.b; }
   get tracksMigrationPending() { return this.tracksPending !== null; }
-  private persisted(): GameState {
+  private persisted(st: GameState = this.state): GameState {
     const p = this.tracksPending;
     if (!p) {
-      return flagOffShape(this.state, this.b); // HoE flag-off rule (save.ts)
+      return flagOffShape(st, this.b); // HoE flag-off rule (save.ts)
     }
-    const o: any = {}; for (const k of p.v6Keys) if (k in this.state) o[k] = (this.state as any)[k]; return o;
+    const o: any = {}; for (const k of p.v6Keys) if (k in st) o[k] = (st as any)[k]; return o;
   }
   private pausedMirror: Game['mirror'] = null;
   /** migrationId of this session's aborted attempt (N2 quota cleanup scope). */
@@ -219,27 +222,28 @@ export class Game {
   }
   /** M4-23: after an abort, a normal save that hits quota first removes the leftover (uncommitted) LS backup record, then
    *  retries once. A committed record is never removed. */
-  private saveWithQuotaRetry(t: number): string {
-    try { return save(this.kv, this.persisted(), t, this.b, this.bakAllowed); }
+  private saveWithQuotaRetry(t: number, st: GameState = this.state): string {
+    try { return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed); }
     catch (e) {
       if (e instanceof NewerSaveError || (e as Error)?.name !== 'QuotaExceededError') throw e;
       // N2 (doc v0.3.2): remove ONLY the record of this session's aborted migrationId, never the one main's v6BackupId points to.
       const rec = this.kv.getItem(V6_BACKUP_KEY), id = rec === null ? undefined : decodeBackup(rec)?.migrationId;
       // N2 (HoE): never the only pre-M4 backup: only while main itself is still the unmigrated v6 (else fail visibly below).
       if (!id || id !== this.abortedMigrationId || this.state.tracksV7 === 1 || id === this.state.v6BackupId || isCommittedBackup(rec!, this.state.v6BackupId)) throw e;
-      this.kv.removeItem?.(V6_BACKUP_KEY); return save(this.kv, this.persisted(), t, this.b, this.bakAllowed);
+      this.kv.removeItem?.(V6_BACKUP_KEY); return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed);
     }
   }
   save() {
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     if (this.newerGuard()) return;
-    const t = this.now();
+    // S2 (#25): while hidden, persist the state as of the hide, stamped at the hide (C-AC36); the provisional hidden sim is never saved.
+    const t = this.hidden ? this.hidden.at : this.now(), base = this.hidden ? this.hidden.state : this.state;
     if (this.mirrorResumeOnSave) { this.mirrorResumeOnSave = false; this.mirror = this.pausedMirror; this.pausedMirror = null; } // N6
-    try { const raw = this.saveWithQuotaRetry(t); this.lastMainRaw = raw; this.mirror?.write(raw); }
+    try { const raw = this.saveWithQuotaRetry(t, base); this.lastMainRaw = raw; this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
@@ -256,7 +260,7 @@ export class Game {
   /** Stop all writes for good (sim too), drop the mirror and hand control to main.ts (release lease, .newer-save layer). */
   private refuseNewer(v: number) {
     if (this.newerSave !== null && this.readOnly) return;
-    this.newerSave = v; this.readOnly = true; this.inactive = true; this.mirror = null;
+    this.newerSave = v; this.readOnly = true; this.inactive = true; this.mirror = null; this.endHiddenOnFreeze();
     this.telemetry.track('save_newer_version', { version: v, build: this.build, live: true });
     this.onNewerSave?.(v);
   }
@@ -272,7 +276,8 @@ export class Game {
    * Wall-clock driven (robust to rAF/timer throttling). Hidden/background tabs use the same rule on the next frame:
    *  - gap < offlineMinSeconds (60 s): simulate the whole gap online (coop cap applies, customers arrive/leave).
    *  - gap >= 60 s (hidden/throttled tab): simulate the FIRST 60 s online (coop cap applies, customers arrive/leave),
-   *    then freeze for the rest. No in-session offline grant.
+   *    then freeze for the rest (visible but throttled). A HIDDEN page (onHidden/onShown) instead gets a cumulative
+   *    budget of offline.hiddenSimMaxSeconds, and a hide >= offlineMinSeconds is paid on return via the offline grant.
    *  - negative gap: nothing.
    *  Closed/unloaded game: last save -> next load >= 60 s goes through the offline grant (AC11), in the constructor.
    * See engineering/sim-rules.md.
@@ -291,10 +296,76 @@ export class Game {
   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */
   private allowBackup() { this.bakAllowed = true; }
   get backupAllowed() { return this.bakAllowed; }
+  /** S2 hidden tab: state + accMs at the hide, online ms simulated since, and the events of that provisional sim. */
+  private hidden: { at: number; periodId: number; state: GameState; accMs: number; simMs: number; ev: SimEvent[] } | null = null;
+  /** Monotonic counter for hidden periods (B1: never key idempotency by startAt ms). */
+  private nextHiddenPeriodId = 1;
+  get isHidden() { return this.hidden !== null; }
+  /** Page hidden (platform/visibility). Frames keep coming at the throttled rate but simulate at most
+   *  offline.hiddenSimMaxSeconds in TOTAL, then the sim freezes until onShown. */
+  onHidden(at = this.now()) {
+    if (this.hidden) return;
+    this.frame(); // bring the sim up to the hide
+    this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
+  }
+  /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
+   *  absence through the normal offline grant, exactly as a close at the hide + reload now would (C-AC36): pending
+   *  settled first, same applyOffline clamp/cap, same validSavedAt clock-tamper rule. Shorter (or clock went back):
+   *  keep the <= 60 s of online sim (M1: also credit uncovered gap with no frames, up to the 60 s budget).
+   *  Returns the eggs granted (caller shows the welcome popup). */
+  onShown(at = this.now()): number {
+    const h = this.hidden; if (!h) return 0;
+    return accountHiddenPeriod(this, { startAt: h.at, endAt: at })?.eggsGranted ?? 0;
+  }
+  /** Start of the open hidden period, or null when visible. */
+  get hiddenSince(): number | null { return this.hidden?.at ?? null; }
+  /** Open hidden period token for save/hidden-time.ts (at + monotonic periodId). */
+  get openHiddenPeriod(): { at: number; periodId: number } | null {
+    return this.hidden ? { at: this.hidden.at, periodId: this.hidden.periodId } : null;
+  }
+  /** @internal Only save/hidden-time.ts calls this (via accountHiddenPeriod, which guarantees once per period). */
+  settleHiddenPeriod(at: number): HiddenSettlement {
+    const h = this.hidden; if (!h) return { mode: 'none', simulatedMs: 0, grantedMs: 0, eggs: 0, coins: 0, capped: false };
+    this.hidden = null; this.lastFrameAt = at;
+    const gap = at - h.at, budgetMs = this.b.offline.hiddenSimMaxSeconds * 1000;
+    if (this.inactive || this.readOnly || !validSavedAt(h.at, at)) {
+      this.emit(h.ev); this.checkCoopFull(); return { mode: 'none', simulatedMs: h.simMs, grantedMs: 0, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: false };
+    }
+    if (gap < this.b.offline.offlineMinSeconds * 1000) {
+      // M1: credit (show - hide) - already simulated, capped so total simMs <= budget (60 s).
+      const uncover = Math.max(0, Math.min(gap, budgetMs) - h.simMs);
+      if (uncover > 0) {
+        h.simMs += uncover;
+        const r = advance(this.state, uncover, this.accMs, this.b, h.ev);
+        this.state = r.state; this.accMs = r.accMs;
+        if (!this.bakAllowed) { this.playedMs += uncover; if (this.playedMs >= 60_000) this.allowBackup(); }
+      }
+      this.emit(h.ev); this.checkCoopFull();
+      // n2: capped when the 60 s budget limited credit (gap > budget); false while budget == offlineMin and gap < offlineMin.
+      return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
+    }
+    this.state = h.state; this.accMs = 0;
+    if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
+    const eggs = this.grantOffline(gap);
+    if (eggs > 0) this.notify({ type: 'offline_grant', eggs, awayS: this.offline.awayS });
+    this.checkCoopFull(); this.save();
+    const capS = this.b.offline.offlineCapSeconds;
+    return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
+  }
   frame() {
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
-    const t = this.now(), gap = t - this.lastFrameAt; this.lastFrameAt = t;
+    const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
     const maxMs = this.b.offline.offlineMinSeconds * 1000;
+    const h = this.hidden;
+    if (h) { // S2: cumulative hidden budget, then freeze; events held until we know the sim is kept (onShown)
+      const step = Math.max(0, Math.min(gap, maxMs, this.b.offline.hiddenSimMaxSeconds * 1000 - h.simMs));
+      if (step > 0) {
+        h.simMs += step; const r = advance(this.state, step, gap >= maxMs ? 0 : this.accMs, this.b, h.ev); this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs;
+        // m2: kept hidden play counts toward the .bak 60 s enable, same as visible play.
+        if (!this.bakAllowed) { this.playedMs += step; if (this.playedMs >= 60_000) this.allowBackup(); }
+      }
+      this.telemetry.poll(); return;
+    }
     if (gap > 0) {
       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
       const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);

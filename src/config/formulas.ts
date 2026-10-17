@@ -22,7 +22,7 @@ export interface EconomyParams {
     costTable?: number[];
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
-  offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
+  offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number; hiddenSimMaxSeconds: number };
   /** M4-A three tracks (product/m4-manage-proposal.md §2.1-2.2). Optional so pre-M4 params stay valid. */
   m4?: M4Params;
 }

@@ -43,9 +43,9 @@ describe('rc2 FMT-1/FMT-2 money + count formatting', () => {
   it('fmtMoneyShort: — for NaN/±Infinity', () => { for (const x of [NaN, Infinity, -Infinity]) expect(fmtMoneyShort(x)).toBe('—'); });
   it('order card eggs labels at 1,000T and in the K band', () => {
     const c = (d: number, f = 0) => ({ id: 1, demand: d, filled: f, waitedS: 0 });
-    expect(orderView(c(1e15), 0, 1).line).toMatch(/^0\/1,000T eggs · /);
+    expect(orderView(c(1e15), 0, 1).line).toMatch(/^0\/1,000T\u00a0eggs · /);
     expect(orderView(c(1e15), 0, 1).button).toBe('Need 1,000T');
-    expect(orderView(c(9_999), 1_250, 1).line).toMatch(/^1\.2K\/9\.9K eggs/);
-    expect(orderView(c(12_350), 0, 1).line).toMatch(/^0\/12\.4K eggs/);
+    expect(orderView(c(9_999, 1_250), 0, 1).line).toMatch(/^1\.2K\/9\.9K\u00a0eggs/); // Product (#25): line shows delivered (filled) eggs
+    expect(orderView(c(12_350), 0, 1).line).toMatch(/^0\/12\.4K\u00a0eggs/);
   });
 });
