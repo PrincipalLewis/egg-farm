@@ -455,3 +455,4 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
 .reduced-motion .tab-guard .recovery-card{animation:none}
 .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
+.tab-guard #tgPlay{min-height:48px} /* art-ux/single-tab-guard/dialog.html .btn (was 44px via .rc-primary) */

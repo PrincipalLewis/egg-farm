@@ -545,6 +545,32 @@ sections.hiddentab = async () => {
   await ctx.close();
 };
 
+// CCR 59cce62 n1 / m1: hidden tab loses the save to another tab -> its hidden period ends with the freeze; on show no
+// welcome popup and no save from the frozen tab. Shots m1-deactivate at 360, 390 and 1280 on every engine (art-ux re-shoot).
+sections.hiddentabguard = async () => {
+  for (const w of [360, 390, 1280]) {
+    const { ctx, page, errors } = await open({ w, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true }) } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 15, coop: 51, coinsCents: 12345 };
+      window.__vis = 'visible'; Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => window.__vis }); Object.defineProperty(document, 'hidden', { configurable: true, get: () => window.__vis === 'hidden' });
+      window.__vis = 'hidden'; document.dispatchEvent(new Event('visibilitychange')); });
+    const p2 = await ctx.newPage(); await p2.goto(URL0, { waitUntil: 'domcontentloaded' }); await p2.getByText('Tap to start').click(); await p2.waitForFunction(() => window.eggfarm); await p2.waitForTimeout(400);
+    const frz = await page.evaluate(() => { const g = window.eggfarm; g.save(); return { inactive: g.inactive, hidden: g.isHidden }; });
+    const before = await page.evaluate(() => localStorage.getItem('eggfarm.save'));
+    await p2.close(); // B's pagehide save lands before A shows; snapshot again so only A's writes count
+    const snap = await page.evaluate(() => localStorage.getItem('eggfarm.save'));
+    await page.evaluate(() => { window.__w = 0; const ss = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('eggfarm.save')) window.__w++; return ss.call(this, k, v); };
+      window.__vis = 'visible'; document.dispatchEvent(new Event('visibilitychange')); window.eggfarm.save(); });
+    await page.waitForTimeout(400);
+    const st = await page.evaluate(() => ({ hidden: window.eggfarm.isHidden, welcome: document.querySelectorAll('#wbT').length, guard: !!document.querySelector('.recovery-layer.tab-guard'), writes: window.__w, save: localStorage.getItem('eggfarm.save'),
+      playH: Math.round(document.querySelector('#tgPlay')?.getBoundingClientRect().height ?? 0) }));
+    ok(`CCR m1 ${w}: hidden tab frozen by another tab -> period ended, no welcome popup, no save after show`, frz.inactive && !frz.hidden && !st.hidden && st.welcome === 0 && st.guard && st.writes === 0 && st.save === snap && before !== null && errors.length === 0, JSON.stringify({ frz, ...st, save: undefined, same: st.save === snap, errors }));
+    ok(`Tab guard 'Play here' min-height 48px at ${w} (art-ux dialog.html)`, st.playH >= 48, String(st.playH));
+    await page.evaluate(() => document.getAnimations().forEach(a => { try { a.finish(); } catch { a.cancel(); } }));
+    await page.screenshot({ path: `${SHOTS}/m1-deactivate-${ENGINE}-${w}.png` });
+    await ctx.close();
+  }
+};
+
 // SECTIONS
 // ---------- QA bug-sellall-label-grader: label = payout at Grader 0/1/2, fits at 360 ----------
 sections.sellallgrader = async () => {
