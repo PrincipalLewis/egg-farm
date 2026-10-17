@@ -8,27 +8,33 @@ import { apply } from '../src/sim/actions';
 import type { SimEvent } from '../src/sim/events';
 import { WorkerId, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../src/sim/workers';
 import type { Model } from './bot';
+import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
 export interface M2Opts {
   model: Model; T?: number; sellEvery?: number;
   /** player taps n times (1/s) at the start of every period_s window; undefined = 1 tap/s */
   taps?: [number, number];
   use?: WorkerId[]; manage?: 'managed' | 'unmanaged';
+  /** seller-variance-proposal.md; undefined = old deterministic bot */
+  variance?: SellerVarianceParams;
 }
 export interface M2Result { reach: Map<number, number>; manages: number; hired: WorkerId[]; tiers: number; incomeAt: (L: number) => number | null; maxStep: (from: number, to: number) => number | null; }
 export const SLOW = { sellEvery: 30, taps: [30, 5] as [number, number] }; // economy_sim.py SLOW
 export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
   const T = o.T ?? 7200, sellEvery = o.sellEvery ?? 15, use = new Set(o.use ?? ['market_hand', 'coop_hand', 'hawker', 'grader']), managed = (o.manage ?? 'managed') === 'managed';
+  const V = o.variance ? new SellerVariance(o.variance, seed) : null;
+  if (V) V.trace = TRACE.fn;
+  if (V && o.variance!.poisson) b = { ...b, sim_test: { ...b.sim_test, poisson_arrivals: true } };
   let s: GameState = initialState(b, seed); const dt = 1 / b.tickHz, n = Math.round(T * b.tickHz);
   const reach = new Map<number, number>([[0, 0]]), income: { t: number; f: number; v: number }[] = [];
-  let tapT = 1, sellT = sellEvery, manages = 0;
+  let tapT = 1, sellT = V ? V.checkInterval(sellEvery) : sellEvery, manages = 0;
   const ev: SimEvent[] = [];
   const drain = (t: number, f: number) => { for (const e of ev) if (e.type === 'sell') income.push({ t, f, v: e.value }); ev.length = 0; };
   for (let i = 1; i <= n; i++) {
     const t = Math.round(i * dt * 10) / 10, f = s.farmLevel;
     s = step(s, dt, b, ev); drain(t, f);
-    if (t >= tapT) { tapT += 1; if (!o.taps || ((tapT - 2) % o.taps[0]) < o.taps[1]) s = apply(s, { type: 'collect' }, b); }
+    if (t >= tapT) { tapT += V ? V.tapInterval() : 1; if (!o.taps || ((tapT - 2) % o.taps[0]) < o.taps[1]) s = apply(s, { type: 'collect' }, b); }
     if (t < sellT) continue;
-    sellT += sellEvery;
+    sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery;
     s = apply(s, { type: 'sellAll' }, b, ev); drain(t, s.farmLevel);
     if (managed && s.manageCdS <= 1e-9) {
       // P4 (pt1_resim.py manage_at = 40, manage_all_low_only): Manage only at <= manage_prompt_threshold; Manage all when
@@ -36,6 +42,8 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
       const low = (Object.entries(s.workers) as [WorkerId, { energy: number }][]).filter(([, w]) => w.energy <= b.workers.energy.manage_prompt_threshold * 100).sort((a, c) => a[1].energy - c[1].energy);
       if (low.length) { s = apply(s, showManageAll(s.workers, b) && low.length >= b.workers.energy.manage_all_min_workers ? { type: 'manageAll' } : { type: 'manage', worker: low[0][0] }, b); manages++; }
     }
+    if (V?.delay()) continue; // variance p_delay: this check-in skips buying
+    let chf = V ? V.cheapFirst() : false;
     for (let guard = 0; guard < 200; guard++) {
       let bought = false;
       for (const w of ['market_hand', 'coop_hand', 'hawker'] as const)
@@ -44,7 +52,8 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
       if (use.has('grader') && s.graderTier < tiers.length && s.farmLevel >= tiers[s.graderTier].farm && s.coinsCents >= graderTierCostCents(s.graderTier, b)) { s = apply(s, { type: 'buyGraderTier' }, b); bought = true; }
       const fc = s.farmLevel < b.maxLevel ? farmCost(s.farmLevel, b) * 100 : Infinity, cc = s.collectionLevel < b.maxLevel ? collectionCost(s.collectionLevel, b) * 100 : Infinity;
       let kind: 'c' | 'f' | null;
-      if (o.model === 'seller15') kind = s.coinsCents >= fc ? 'f' : s.coinsCents >= cc && cc <= 0.5 * fc ? 'c' : null;
+      if (o.model === 'seller15' && chf && s.collectionLevel < b.maxLevel && s.coinsCents >= cc) { kind = 'c'; chf = false; } // variance p_cheap_first
+      else if (o.model === 'seller15') kind = s.coinsCents >= fc ? 'f' : s.coinsCents >= cc && cc <= 0.5 * fc ? 'c' : null;
       else kind = s.coinsCents >= Math.min(cc, fc) ? (cc <= fc ? 'c' : 'f') : null;
       if (kind === 'f') { s = apply(s, { type: 'buyFarm' }, b); reach.set(s.farmLevel, t); }
       else if (kind === 'c') s = apply(s, { type: 'buyCollection' }, b);

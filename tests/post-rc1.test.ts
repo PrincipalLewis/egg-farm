@@ -23,13 +23,13 @@ describe('post-rc1 m-2: worker_yawn telemetry', () => {
   });
   it('no event when already Yawning at start; fires again after Manage refills and it drops back', () => {
     const ev: SimEvent[] = [];
-    let s = run(base({ workers: { hawker: wk(35) } }), 30, ev); expect(yawns(ev)).toHaveLength(0);
+    let s = run(base({ workers: { hawker: wk(E.yawn_at_pct - 5) } }), 30, ev); expect(yawns(ev)).toHaveLength(0);
     s = apply(s, { type: 'manage', worker: 'hawker' }, b);
     s = run(s, (100 - E.yawn_at_pct + 1) * E.drain_s_per_pct, ev); expect(yawns(ev)).toHaveLength(1);
   });
   it('one event per worker', () => {
     const ev: SimEvent[] = [];
-    run(base({ workers: { hawker: wk(40.5), grader: wk(40.3) }, graderTier: 1 }), 30, ev);
+    run(base({ workers: { hawker: wk(E.yawn_at_pct + 0.5), grader: wk(E.yawn_at_pct + 0.3) }, graderTier: 1 }), 30, ev);
     expect(yawns(ev).map(e => e.worker_id).sort()).toEqual(['grader', 'hawker']);
   });
 });

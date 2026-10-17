@@ -3,7 +3,7 @@ import { queueMax, type Customer } from '../sim/state';
 import type { Balance } from '../config/balance';
 import { fmtCount, fmtMoney } from './format';
 /** Spec §2.1: eggs >= 1,000 -> 1.2K (compact, 1 decimal). */
-const eggs = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n) : String(n);
+const eggs = (n: number) => n < 1000 ? String(n) : n < 1e4 ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n); // band by number, not by fmtCount's comma (1,000T)
 export type OrderState = 'wait' | 'partial' | 'ready';
 export interface OrderView { id: number; have: number; want: number; sell: number; valueCents: number; state: OrderState; line: string; button: string; }
 /** have = eggs already sold to it + what Sell would sell now (min(basket, remaining)); want = full order; value = full order. */

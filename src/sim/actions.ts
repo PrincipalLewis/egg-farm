@@ -6,14 +6,22 @@ export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' };
+/** Grader: sale value = round(k x price x mult) cents (exact k x price when no Grader). Shared by sellTo and the Sell all label. */
+export const saleValueCents = (k: number, base: number, gm: number) => gm === 1 ? k * base : Math.round(k * base * gm);
+/** What a 'sellAll' would sell and pay right now: walks customers like the action (basket floored, per-order rounding). Pure. */
+export function sellAllPreview(s: GameState, b: Balance): { eggs: number; cents: number } {
+  const base = eggPriceCents(s.farmLevel, s.collectionLevel, b), gm = graderMult(s.workers, s.graderTier, b);
+  let left = Math.floor(s.basket), eggs = 0, cents = 0;
+  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(k, base, gm); }
+  return { eggs, cents };
+}
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm';
 /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
 export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
   const c = s.customers.find(c => c.id === id); if (!c) return s;
   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
   const base = eggPriceCents(s.farmLevel, s.collectionLevel, b), gm = graderMult(s.workers, s.graderTier, b);
-  // Grader: sale value = round(k x price x mult) cents (exact k x price when no Grader).
-  const price = base, value = gm === 1 ? k * base : Math.round(k * base * gm), filled = c.filled + k, done = filled >= c.demand;
+  const price = base, value = saleValueCents(k, base, gm), filled = c.filled + k, done = filled >= c.demand;
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);

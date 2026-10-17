@@ -1,11 +1,11 @@
 import raw from './balance.json';
-import type { EconomyParams } from './formulas';
+import { validateCostGrowthSegments, validateCostTable, type EconomyParams } from './formulas';
 /** TEST-ONLY scenario hooks (m2-proposal §8 item 17, AC-W1 casual). Never in balance.json; rejected in production builds. */
 export interface SimTestHooks { poisson_arrivals?: boolean; demand_scale?: number; }
 export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
 function check(o: any, path: string) {
   for (const [k, v] of Object.entries(o)) {
-    if (k.startsWith('_') || (path === '' && k === 'sim_test')) continue;
+    if (k.startsWith('_') || (path === '' && k === 'sim_test') || (path === '.farm' && (k === 'costGrowthSegments' || k === 'costTable'))) continue;
     if (v && typeof v === 'object') check(v, `${path}.${k}`);
     else if (v === undefined || typeof v !== 'number' || !isFinite(v) || v < 0) throw new Error(`balance${path}.${k} invalid`);
   }
@@ -22,6 +22,9 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
   if (b.save.autosaveIntervalS > 5) throw new Error('balance.save.autosaveIntervalS must be <= 5 (AC8)');
   for (const p of ['collection.baseCost', 'farm.baseCost', 'farm.eggsPerHenPerSec', 'farm.customerIntervalMinS', 'farm.customerIntervalBaseS', 'customers.customer_patience_s']) pos(b, p);
   for (const p of ['customers.queue_max_base', 'customers.queue_max_cap', 'customers.queue_max_step_levels']) int(b, p);
+  validateCostGrowthSegments((b.farm as any).costGrowthSegments);
+  validateCostTable((b.farm as any).costTable, b.maxLevel);
+  for (const [i, t] of b.workers.grader.tiers.entries()) if ((t as any).cost !== undefined && !(Number.isSafeInteger((t as any).cost) && (t as any).cost > 0)) throw new Error(`balance.workers.grader.tiers[${i}].cost must be a positive integer`);
   if (b.collection.costGrowth < 1 || b.farm.costGrowth < 1) throw new Error('balance cost growth must be >= 1');
   if (!(b.farm.customerIntervalDecay > 0 && b.farm.customerIntervalDecay <= 1)) throw new Error('balance.farm.customerIntervalDecay must be in (0,1]');
   if (!(b.farm.demandLoFactor > 0 && b.farm.demandHiFactor >= b.farm.demandLoFactor)) throw new Error('balance.farm demand factors: 0 < lo <= hi');
