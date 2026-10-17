@@ -29,7 +29,7 @@ export class OrderList {
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
     if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`;
-    // fit runs after the button label/state below (Need is wider than Sell): see end of fill()
+    // fit runs after the button label/state below (the label width changes with state): see end of fill()
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
     if (btn.textContent !== v.button) btn.textContent = v.button;

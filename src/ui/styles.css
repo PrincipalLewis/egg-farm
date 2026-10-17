@@ -574,7 +574,7 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 .hint.limit{position:static;color:var(--c-wood-text);min-height:var(--hint-h);margin-top:8px} /* Art & UX: below Buy, >=8px clear */
 .hint.limit .link{position:relative;padding:0;margin:0;min-height:var(--hint-h);box-sizing:border-box}
 .hint.limit .link::before{content:'';position:absolute;inset:-14px 0} /* 16px line + 2x14 = 44px hit, no negative margin */
-/* Art & UX 22:31: order buttons never wrap or ellipsise; labels > 9 chars (e.g. 'Need 181.2B') at 12px; exactly 44px tall */
+/* Art & UX 22:31: order buttons never wrap or ellipsise; labels > 9 chars (e.g. 'Sell 1.23M') at 12px; exactly 44px tall */
 .order .btn.sell{white-space:nowrap;text-overflow:clip;height:44px;min-height:44px;max-height:44px;box-sizing:border-box}.order .btn.sell.long{font-size:12px}
 /* Art & UX 23:25: sticky refill bar is opaque, full-width cream with 8px vertical padding (Unpaid strip never shows through); cards scroll clear of it */
 #uRow>.refill-wrap{background:var(--c-cream);padding-block:8px;margin-inline:0;align-self:stretch;width:100%;box-sizing:border-box}

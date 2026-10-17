@@ -76,8 +76,21 @@ describe('QA order clips (main repro): 1.8M/181.2B row and $9.94M value use v1.1
     const v = orderView({ id: 1, demand: 181.2e9, filled: 1.8e6, waitedS: 0 } as any, 0, 250);
     expect(v.line.startsWith('1.8M/181B eggs · ')).toBe(true); expect(v.button).toBe('No eggs');
   });
-  it('$9.94M value: 3 significant figures; no reachable "Need" label for any basket', () => {
+  it('$9.94M value: 3 significant figures (pin on fmtMoney/count3)', () => {
     expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, 0, 250).line).toBe('0/3.98M eggs · $9.94M');
-    for (const bk of [0, 0.5, 1, 3, 1e7]) expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, bk, 250).button).not.toMatch(/Need|\//);
+  });
+  it('review 5d8a058 #13/#15: a wait order with eggs in hand (rem <= 0) never shows a "Need" label', () => {
+    const v = orderView({ id: 3, demand: 5, filled: 5, waitedS: 0 } as any, 3, 250); expect(v.state).toBe('wait'); expect(v.button).toBe('Sell');
+  });
+  it('review 5d8a058 #11: have / Sell count round down, so a partial order never reads complete', () => {
+    const v = orderView({ id: 4, demand: 1e6, filled: 0, waitedS: 0 } as any, 999600, 250);
+    expect(v.state).toBe('partial'); expect(v.line.startsWith('999K/1M eggs')).toBe(true); expect(v.button).toBe('Sell 999K');
+    expect(count3(999.5e9)).toBe('1T'); // want side keeps the v1.1 rollover
+  });
+  it('fitOrderEggs: drops " eggs" only when the full text does not fit, never mid-word', () => {
+    expect(fitOrderEggs('3/5 eggs', () => true)).toBe('3/5 eggs');
+    expect(fitOrderEggs('3/5 eggs', t => t.length <= 3)).toBe('3/5');
+    expect(fitOrderEggs('1.23M/9.99M eggs', () => false)).toBe('1.23M/9.99M');
+    const seen: string[] = []; fitOrderEggs('3/5 eggs', t => { seen.push(t); return false; }); expect(seen).toEqual(['3/5 eggs']);
   });
 });

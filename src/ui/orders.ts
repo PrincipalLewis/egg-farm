@@ -4,8 +4,9 @@ import type { Balance } from '../config/balance';
 import { fmtCount, fmtMoney } from './format';
 /** Spec §2.1: eggs >= 1,000 -> 1.2K (compact, 1 decimal). */
 /** rc2-order-sell-preview v1.1 (b): counts >= 1,000 use 3 significant figures with K/M/B/T (rolls over: 999.5B -> 1T); below 1,000 exact. */
-export const count3 = (n: number): string => {
+export const count3 = (n: number, down = false): string => {
   if (!isFinite(n)) return '—'; if (n < 1000) return String(Math.floor(n));
+  if (down) { const U = ['K', 'M', 'B', 'T']; let i = -1, v = n; while (v >= 1000 && i < U.length - 1) { v /= 1000; i++; } const d = v >= 100 ? 1 : v >= 10 ? 10 : 100; return `${Math.floor(v * d + 1e-9) / d}${U[i]}`; } // review 5d8a058 #11: have/sell never round up to look complete
   const U = ['K', 'M', 'B', 'T']; let i = -1, v = n; while (v >= 1000 && i < U.length - 1) { v /= 1000; i++; }
   let r = Number(v.toPrecision(3)); if (r >= 1000 && i < U.length - 1) { r = Number((r / 1000).toPrecision(3)); i++; }
   return `${r}${U[i]}`;
@@ -19,8 +20,8 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
   const valueCents = want * priceCents;
   const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(valueCents)));
-  return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : `${count3(have)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b)
-    button: state === 'wait' ? (basket < 1 ? 'No eggs' : `Need ${count3(rem)}`) : state === 'partial' ? `Sell ${count3(sell)}` : 'Sell' }; // MK-35: 0 eggs -> 'No eggs'
+  return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : `${count3(have, true)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b)
+    button: state === 'wait' && basket < 1 ? 'No eggs' : state === 'partial' ? `Sell ${count3(sell, true)}` : 'Sell' }; // MK-35: 0 eggs -> 'No eggs'; no 'Need' label (review 5d8a058 #13/#15)
 }
 /** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
 export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');
