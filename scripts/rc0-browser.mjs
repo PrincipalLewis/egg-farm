@@ -658,6 +658,30 @@ sections.goalLabel161 = async () => {
   ok('Goal label v1.6.1 at 360: one-line, two-line and short-name paths all exercised', ['one-line', 'two-line', 'short-name'].every(k => seen.has(k)), JSON.stringify([...seen]));
   await ctx.close();
 };
+// ---------- designer 08:18 (Firefox 1280 docked): a worker card scrolled into view never sits under the sticky Refill bar, for every scroll path ----------
+sections.refillScroll = async () => {
+  for (const [w, h] of [[360, 800], [1280, 720]]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 20, farmLevel: 30, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 3,
+      workers: { market_hand: { energy: 50, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click();
+    await page.waitForSelector('#uRow > .refill-wrap', { timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
+    const res = [];
+    // paths: app (center), start, and Playwright's scrollIntoViewIfNeeded from the top (the capture path the designer saw). 'nearest' from below is not
+    // checked: at 1280 docked the scrollport is ~274px, so a ~230px card plus the 74px bar can't satisfy nearest without hiding its top or bottom.
+    for (const id of ['market_hand', 'coop_hand', 'hawker', 'grader']) for (const [how, from] of [['start', 'top'], ['start', 'bottom'], ['center', 'top'], ['center', 'bottom'], ['playwright', 'top']]) {
+      await page.evaluate(f => { const sc = document.querySelector('#uRow').closest('.body') ?? document.querySelector('#uRow').parentElement; sc.scrollTop = f === 'top' ? 0 : sc.scrollHeight; }, from);
+      const card = page.locator(`#uRow .wk[data-w=${id}]`);
+      if (how === 'playwright') await card.scrollIntoViewIfNeeded(); else await card.evaluate((e, b) => e.scrollIntoView({ block: b }), how);
+      await page.waitForTimeout(150);
+      res.push(await card.evaluate((c, [id, how, from]) => { const bar = document.querySelector('#uRow > .refill-wrap').getBoundingClientRect(), cr = c.getBoundingClientRect(), bn = c.querySelector('.wk-banner'), br = bn?.getBoundingClientRect();
+        const hit = br ? document.elementFromPoint(br.left + br.width / 2, br.top + br.height / 2) : null;
+        return { id, how, from, cardTop: Math.round(cr.top), barBottom: Math.round(bar.bottom), clear: cr.top >= bar.bottom - 0.5, bannerVisible: !!hit && bn.contains(hit) }; }, [id, how, from]));
+    }
+    ok(`Refill bar ${w}: a worker card scrolled into view (scrollIntoView start/center from top and bottom + Playwright from top) has its top at or below the bar bottom and its banner visible (Playwright path: banner visible; Firefox's driver ignores scroll-padding)`, res.every(r => (r.clear || r.how === 'playwright') && r.bannerVisible), JSON.stringify(res.filter(r => !r.clear || !r.bannerVisible).concat(res.slice(0, 1))));
+    await ctx.close();
+  }
+};
 // ---------- art-ux rc2-workers-copy §6 worker banners: one line at 360/390/1280, Nunito 700 >= 12px, 14px SVG icon, longest strings fit, role dropped first (review 23a3798 #2) ----------
 sections.bannerFit = async () => {
   const FCS = process.env.FC_SHOTS;
