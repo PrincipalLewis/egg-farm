@@ -250,7 +250,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const card = modal.querySelector<HTMLElement>('.card')!, rate = card.querySelector<HTMLElement>('.wb-rate')!;
     // Measured on the FINAL hero text (the count-up runs inside a ghost-sized slot, so the card never grows later).
     const body = card.querySelector<HTMLElement>('.wb-body')!;
-    const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; };
+    const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); const head = card.querySelector<HTMLElement>('.wb-head')!, h2 = head.querySelector('h2')!; head.classList.remove('no-icon');
+      if (head.scrollWidth > head.clientWidth + 1 || h2.scrollWidth > h2.clientWidth + 1) head.classList.add('no-icon'); // title never wraps: drop the icon, not the size
+      rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; };
     fit(); addEventListener('resize', fit);
     if (motion) { // C-AC37: count up 0 -> N (ease-out) only when motion is allowed; the final text equals m.hero
       const n = $('#wbN'), t0 = now(), dur = 900, unit = eggs === 1 ? 'egg' : 'eggs'; n.textContent = `+0 ${unit}`;

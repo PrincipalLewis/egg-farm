@@ -528,6 +528,20 @@ sections.tut1docked = async () => {
   }
 };
 
+// Offline popup v2 (PR #16): 'Welcome back!' title on one line, no overflow, at 360/375/390/1280.
+sections.welcomeTitle = async () => {
+  for (const [w, h] of [[360, 640], [375, 700], [390, 844], [1280, 800]]) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE } });
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 1234567 }; g.offline = { eggs: 1234567, awayS: 7200, realAwayS: 11520 }; window.eggfarmUi.showWelcome(); });
+    await page.waitForTimeout(300);
+    const t = await page.evaluate(() => { const h2 = document.querySelector('.welcome-v2 .wb-head h2'), head = h2.parentElement, r = h2.getBoundingClientRect(), card = head.closest('.card').getBoundingClientRect();
+      const lh = parseFloat(getComputedStyle(h2).lineHeight) || parseFloat(getComputedStyle(h2).fontSize) * 1.3;
+      return { text: h2.textContent, h: r.height, lh, sw: h2.scrollWidth, cw: h2.clientWidth, hsw: head.scrollWidth, hcw: head.clientWidth, inCard: r.left >= card.left && r.right <= card.right, icon: getComputedStyle(head.querySelector('img')).display }; });
+    ok(`PR16 welcome title one line, no overflow at ${w}x${h}`, t.text === 'Welcome back!' && t.h < t.lh * 1.5 && t.sw <= t.cw + 1 && t.hsw <= t.hcw + 1 && t.inCard && errors.length === 0, JSON.stringify(t));
+    await ctx.close();
+  }
+};
+
 // SECTIONS
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
