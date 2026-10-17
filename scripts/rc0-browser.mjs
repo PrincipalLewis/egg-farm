@@ -635,7 +635,7 @@ sections.goalLabel161 = async () => {
   await page.waitForSelector('.goal-label'); await page.waitForTimeout(300);
   const seen = new Set();
   for (const [name, full, short, gain, fs] of [['farm', 'Farm L30', 'Farm L30', '· +999% income', 0], ['collection', 'Collection L30', 'Coll. L30', '· +999% income', 0],
-    ['stress-wrap', 'Hire Market Hand', 'Hire M. Hand', '· +99999% income', 0], ['short-name', 'Collection L30', 'Coll. L30', '· +999% income', 25]]) {
+    ['stress-wrap', 'Hire Market Hand', 'Hire M. Hand', '· +99999% income', 0], ['short-name', 'Collection L30', 'Coll. L30', '· +999% income', 30]]) {
     const r = await page.evaluate(async ([full, short, gain, fs]) => { const el = document.querySelector('.goal-label'); el.style.fontSize = fs ? fs + 'px' : ''; el.style.lineHeight = fs ? Math.round(fs * 17 / 14) + 'px' : '';
       const mk = t => `<span class="g-head"><span class="g-star">★ </span><span class="g-track" data-full="${full}" data-short="${short}">${t}</span></span><span class="g-gain">${gain}</span>`;
       // measure natural widths in a probe that inherits the label's font, outside the flex box
@@ -677,8 +677,8 @@ sections.refillBar = async () => {
       const hit = document.elementFromPoint(a2.left + 4, a2.top + 3); const onBar = !!hit && (hit === b || b.contains(hit));
       return { bg: cs.backgroundColor, pt: cs.paddingTop, pb: cs.paddingBottom, barW: Math.round(a.width), sheetW: Math.round(sr.width), barL: Math.round(a.left - sr.left), varH, barH: Math.round(a.height), sm, cardTop: Math.round(c2.top), barBottom: Math.round(a2.bottom), onBar }; });
     const opaque = /^rgb\(/.test(r.bg) || /, 1\)$/.test(r.bg);
-    ok(`Refill bar ${w}: opaque cream, 8px vertical padding; --refill-bar-h = measured bar + 8; scrolled card clears the bar`,
-      opaque && r.pt === '8px' && r.pb === '8px' && Math.abs(r.varH - (r.barH + 8)) <= 1 && r.sm === r.varH && r.cardTop >= r.barBottom - 0.5 && r.onBar, JSON.stringify(r));
+    ok(`Refill bar ${w}: opaque cream, 8px top / 10px bottom padding (cuta3 designer); --refill-bar-h = measured bar + 8; scrolled card clears the bar`,
+      opaque && r.pt === '8px' && r.pb === '10px' && Math.abs(r.varH - (r.barH + 8)) <= 1 && r.sm === r.varH && r.cardTop >= r.barBottom - 0.5 && r.onBar, JSON.stringify(r));
     const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); await page.evaluate(() => { const row = document.querySelector('#uRow'); const sc = row.closest('.body') ?? row.parentElement; sc.scrollTop = 120; }); await page.waitForTimeout(200); await page.screenshot({ path: `${FCS}/cuta3-refillbar-${w}-${ENGINE}.png` }); }
     await ctx.close();
   }
