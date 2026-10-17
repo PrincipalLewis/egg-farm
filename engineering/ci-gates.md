@@ -10,14 +10,16 @@ releases/tags are cut outside CI. Run the same commands locally before merging o
 | ci / `slow` | `npm run test:slow` | 100-seed seller-variance TS-vs-Python parity, AC7 band |
 | ci / `release-globals (chromium)`, `release-globals (webkit)`, `release-globals (firefox)` | `npm run build` (ends in `check-release-build dist`), `npm run check-globals -- <engine>` | dist release build + **runtime** window-globals allowlist |
 | ci / `release-html` | `npm run build:html`, then `check-release-build dist-html/egg-farm.html --build-id <BUILD_PREFIX>+<commit>`; uploads `egg-farm-html` artifact | single-file release html |
-| release-asset / `check-uploaded-html` | on release published/edited (or manual): `gh release download <tag> --pattern '*.html'`, `check-release-build <file> --build-id <BUILD_PREFIX>+<tag commit>` | the html actually attached to the release |
+| release-asset / `check-uploaded-html` | on release published/edited (or manual): `gh release download <tag> --pattern '*.html'`, `check-release-build <file> --build-id <BUILD_PREFIX>+<tag commit>` | the html actually attached to the release. A **post-publish detector**: it runs after the release is published, so a failure means the bad file was already public; pull/fix the asset. It does not block publishing. |
 
 ### Recommendation (repo setting, not changed by this PR)
 Protect `main` and make `unit`, `release-globals (chromium|webkit|firefox)` and `release-html` required status checks; build the
 release asset with `npm run build:html` and attach that exact file, so `check-uploaded-html` re-verifies what players download.
 
 ## check-release-build (`scripts/check-release-build.mjs`, scans in `scripts/release-scan.mjs`)
-`node scripts/check-release-build.mjs <dist-dir | file.html> [--build-id <id> | --build-id=<id>]`
+`node scripts/check-release-build.mjs <dist-dir | file.html> [--build-id <id> | --build-id=<id>]` (exactly one path; extra paths exit 1).
+Single file: HTML comments are ignored by the meta/attribute checks, and the one `data-build-id` must be on `#app`.
+`npm run check-globals` serves on a free port (printed) unless `PORT` is set.
 The tool is **fail-fast**: it exits 1 at the first failing check and reports only that category; fix and rerun to see the next.
 - Build id: present, not `+dirty`/`+unknown`; single-file (or `--build-id`): exactly one id, equal to `--build-id`/`EXPECT_BUILD_ID`, else `<BUILD_PREFIX>+<HEAD>`.
 - No `eggfarmUi`, QA hooks (`eggfarmPerf`, `eggfarmOnb`, `eggfarmQaRecovery`, `?debug`/`?perf`/`?ios`), sampler/panel chunks.
@@ -71,4 +73,5 @@ source of truth for builds; Economy changes it through a PR.
     `npm run check-economy-copy -- --product` before each handoff, and hands the sha(s) to
     **Features (Senior Engineer, Features & Economy Wiring), who opens the repo PR.**
 (b) The pre-release checklist runs `npm run check-economy-copy -- --product --strict` on a studio machine and
-    **blocks the release on drift** between the repo and `product/`. **Owner: the release owner.**
+    **blocks the release on drift** between the repo and `product/`. **Owner: the release owner.** This is a manual
+    pre-release step by design: no CI job runs `--strict` (CI has no `product/`).

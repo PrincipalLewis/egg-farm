@@ -60,6 +60,8 @@
 - Gates: tsc OK; vitest 481/481 (maxForks=2); test:slow 11/11; sync-economy --check OK.
 - Next: CCR/QA re-check of this SHA.
 
+## arch/release-check-lows (Senior Software Architect, Oct 17)
+- Done: QA #13 Lows L-1 (extra path arg exits 1), L-2 (F-META ignores HTML comments; data-build-id required on #app), L-3 (// and /* */ comments inside a bracket key no longer end it early); CCR #13 nits: check-globals serves on a free port (printed; PORT overrides), ci-gates.md: release-asset is a post-publish detector, --strict drift check is a manual pre-release step owned by the release owner; ci.yml top-level `permissions: contents: read`. Tests: tests/release-html.test.ts (L-1..L-3), tests/serve-own.test.ts.
 ## 2026-10-17 04:15 Senior Software Architect — arch/m3-followups (QA/CCR nits after #23/#24; ADR M3-ECON-1)
 - Done: ADR M3-ECON-1 (product/economy.csv is the single canonical shipping file; --strict never repointed; Economy promotes f1-m4cols 86f0e80e into product/economy.csv after #17, before the next rc tag). QA nits: F1-only slow test titles say "(F1 86f0e80e only; skipped on pre-F1 57d964d5)"; `__pycache__/` in .gitignore; test:slow runs scripts/check-vendor-pins.mjs first; seller_variance fixture source label -> vendor/economy-sim/sim (regenerated, all other bytes identical). CCR nits: duplicate-only SOURCE/SHA256SUMS failure has its own message; product-side `..foo` file no longer falsely rejected (relative + '..'+sep). Tests added for both.
 - Skipped: #13 Lows/held minors and serve-own port (#13 not merged yet).
