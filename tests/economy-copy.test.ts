@@ -115,3 +115,11 @@ it('--strict: a product/ file named ..foo is inside product/ (not a false reject
   const esc = tamperedVendor((a, b) => [a.replace('  product/sim/economy_sim.py', '  product/../economy_sim.py'), b]);
   expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: esc })).toMatchObject({ code: 1, out: expect.stringMatching(/outside the product dir/) });
 });
+it('--strict compares raw sha256: a CRLF (or BOM) product/economy.csv fails --strict, only matches/warns without it', () => {
+  const crlf = fullProduct(); writeFileSync(join(crlf, 'economy.csv'), readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8').replace(/\n/g, '\r\n'));
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: crlf })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR data\/economy.csv sha256 \w+ differs .*raw bytes/) });
+  expect(run(['--product'], { ECONOMY_PRODUCT_DIR: crlf })).toMatchObject({ code: 0, out: expect.stringMatching(/matches .*line endings normalised/) });
+  const bom = fullProduct(); writeFileSync(join(bom, 'economy.csv'), '\uFEFF' + readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: bom }).code).toBe(1);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: fullProduct() })).toMatchObject({ code: 0, out: expect.stringMatching(/byte-for-byte/) });
+});
