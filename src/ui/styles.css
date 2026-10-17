@@ -615,3 +615,4 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 /* B-3 designer Minor (rc2-notes:53): Buy stays full width at every width, incl. 1280 docked (overrides the >=600 160px pill) */
 .up .btn.buy,.up .btn.maxed{width:100%;align-self:stretch}
 .up .hint{align-self:flex-start}
+.up .t .lv .sr{left:0;top:0} /* B-3: SR text stays inside the tag box (no scroll overflow) */
