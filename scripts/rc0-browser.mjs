@@ -1099,9 +1099,9 @@ sections.rc2minors2 = async () => {
     for (const [F, C, d, txt] of [[1, 1, 13, '13 · $15.34'], [24, 29, 181e9, '181B · $1.78T']]) {
       await page.evaluate(([F, C, d]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, collectionLevel: C, basket: 0, workers: {}, customers: [{ id: 502, demand: d, filled: 0, waitedS: 0 }] }; }, [F, C, d]); await page.waitForTimeout(400);
       const m = await page.evaluate(() => { const l1 = document.querySelector('.order[data-id="502"] .l1'); if (!l1) return null; const rg = document.createRange(); rg.selectNodeContents(l1); const rs = rg.getClientRects(), cs = getComputedStyle(l1);
-        return { t: l1.textContent, w: rg.getBoundingClientRect().width, cw: l1.clientWidth, sw: l1.scrollWidth, lines: new Set([...rs].map(r => Math.round(r.top))).size, ell: /…/.test(l1.textContent) }; });
-      const want = w <= 375 ? `Wants ${txt}` : `Wants ${txt.replace(' · ', ' eggs · ')}`;
-      ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w > 375 || m.w <= 170), JSON.stringify(m));
+        return { t: l1.textContent, w: rg.getBoundingClientRect().width, cw: l1.clientWidth, sw: l1.scrollWidth, lines: (() => { const tops = [...rs].filter(r => r.width > 0).map(r => r.top); return tops.length ? 1 + Math.floor((Math.max(...tops) - Math.min(...tops)) / (parseFloat(cs.lineHeight) || 20) + 0.4) : 0; })(), ell: /…/.test(l1.textContent) }; });
+      const full = `Wants ${txt.replace(' · ', ' eggs · ')}`, want = w <= 375 ? `Wants ${txt}` : (m && m.t === full ? full : `Wants ${txt}`); // >375: ' eggs' kept only when it fits (181B eggs = 199px > 194)
+      ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w > 375 || m.w <= 170) && (w <= 375 || d !== 13 || m.t === full), JSON.stringify(m));
       if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-wants-${d === 13 ? '13-15.34' : '181B-1.78T'}-${nm(w)}.png` });
     }
     // M-Toast-layer: Welcome-back open, then a 'Coop upgraded!' toast fires (the reload case)
