@@ -6,7 +6,7 @@ import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
 import { fmtMoneyShort } from './format';
-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
+import { fmtCount, fmtMoney, fmtMoneyExact, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -15,12 +15,12 @@ import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRec
 import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
+import { saleValueCents, sellAllPreview } from '../sim/payout';
 import { graderMult } from '../sim/workers';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
-import { sellAllPreview } from '../sim/actions';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -114,9 +114,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const spawn = (el: HTMLElement, ms: number) => {
     if (live.length >= 30) live.shift()?.remove();
     fxLayer.append(el); live.push(el);
-    setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms);
+    expire(el, ms);
     return el;
   };
+  // BUG-5: one removal timer per element; re-arming it (merged '+N' floater) cancels the old one so it can finish its rise.
+  const timers = new WeakMap<HTMLElement, number>();
+  function expire(el: HTMLElement, ms: number) {
+    clearTimeout(timers.get(el));
+    timers.set(el, window.setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms));
+  }
   const center = (el: Element) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
   const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void) => {
     const a = center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
@@ -129,7 +135,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let floater: { el: HTMLElement; until: number } | null = null;
   const floatText = (text: string, at: Element, cls = '', merge = false) => {
     const t = now();
-    if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); floater.until = t + 700; return; }
+    if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); expire(floater.el, 750); floater.until = t + 700; return; }
     const c = center(at), el = h(`<div class="floater ${cls}" style="left:${c.x}px;top:${c.y - 40}px;translate:-50% 0">${text}</div>`);
     spawn(el, 750); if (!cls) floater = { el, until: t + 700 };
   };
@@ -201,7 +207,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const chipBorn = new WeakMap<Element, number>(); let downChip: Element | null = null;
   const custChip = (t: EventTarget | null) => (t as HTMLElement | null)?.closest?.('.chip:not(.empty):not(.served)') ?? null;
   queueEl.addEventListener('pointerdown', e => { downChip = custChip(e.target); });
-  queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (ok) openPanel('market'); });
+  queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (!ok) return; openPanel('market');
+    // QA TUT-1: docked, the Market panel is always visible (openPanel keeps open=null), so a card tap highlights its order row.
+    if (docked.matches && c) { const id = [...chips].find(([, el]) => el === c)?.[0]; const row = (id !== undefined ? mRows.querySelector<HTMLElement>(`.order[data-row="${id}"]`) : null) ?? mRows.querySelector<HTMLElement>('.order:not([hidden])');
+      if (row) { row.scrollIntoView({ block: 'nearest', behavior: rm() ? 'auto' : 'smooth' }); delete row.dataset.hl; void row.offsetWidth; row.dataset.hl = '1'; clearTimeout(Number(row.dataset.hlT)); row.dataset.hlT = String(setTimeout(() => { delete row.dataset.hl; }, 1200)); } } });
   let lastSellSource: Element | null = null;
   mRows.addEventListener('click', e => {
     if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
@@ -311,7 +320,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     for (const [id, el] of [...dwellEls]) if (!lay.shown.some(d => d.id === id)) { dwellEls.delete(id); el.remove(); }
     for (const d of lay.shown) {
       let el = dwellEls.get(d.id);
-      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyShort(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
+      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyExact(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
       kids.push(el);
     }
     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
@@ -354,7 +363,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const queuePop = (cents: number, at?: HTMLElement) => {
     const from = (at?.isConnected ? at : queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
     const x = Math.min(Math.max(c.x, 48), innerWidth - 48), y = Math.max(c.y - 20, 40);
-    spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyShort(cents)}</div>`), 650);
+    spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyExact(cents)}</div>`), 650);
     if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
   };
 
@@ -363,11 +372,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     switch (e.type) {
       case 'sell': {
         dwell.sold(e.id, e.value);
-        income.add(now(), e.k * e.price); sfx('sell');
+        income.add(now(), e.value); sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
         else pulse(coinsEl.parentElement!);
-        floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
+        floatText(`+${fmtMoneyExact(e.value)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
       case 'customer_served': dwell.served(e.id, now()); break;
@@ -542,7 +551,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
-      const unit = salePriceCents(s, b) * graderMult(s.workers, s.graderTier, b);
+      const unit = (k: number) => saleValueCents(s, k, b);
       const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
       if (s.customers.length <= vis) ordersExpanded = false;
       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
@@ -643,7 +652,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     onbUpdate = mountOnboarding(flow, (st) => {
       if (modalKind) return null;
       if (st === 0) return collectBtn;
-      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
+      if (st === 1) return open === 'market' || docked.matches ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
       if (docked.matches) { tab = 'collection'; return uRow.querySelector('.btn.buy'); }
       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
     }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'

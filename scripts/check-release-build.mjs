@@ -78,3 +78,10 @@ if (maps.length) fail(`source maps in release: ${maps.join(', ')}`);
 const ext = findExternalRefs(single ? html : [js, css, html].join('\n'));
 if (ext.length) fail(`external references: ${[...new Set(ext.map(e => `${e.kind} ${e.url}`))].join(', ')}`);
 console.log('check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok');
+// QA B-4: aliased writes (const w = window; w.eggfarmPerf = ...) slip past the assignment regex above. Any eggfarm*
+// identifier in the release bundle must be on this list. eggfarmRecovery/eggfarmTabGuard are history.state keys only.
+const ALLOWED_IDENTS = [...ALLOWED_GLOBALS, 'eggfarmRecovery', 'eggfarmTabGuard'];
+const idents = [...new Set(js.match(/\beggfarm[A-Za-z_$][\w$]*/g) ?? [])];
+const badIdents = idents.filter(k => !ALLOWED_IDENTS.includes(k));
+if (badIdents.length) { console.error(`check-release-build: non-allowlisted eggfarm* identifiers in release bundle: ${badIdents.join(', ')} (allowed: ${ALLOWED_IDENTS.join(', ')})`); process.exit(1); }
+console.log(`check-release-build: eggfarm* identifiers ${idents.join(', ') || '(none)'} ok`);

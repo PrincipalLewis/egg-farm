@@ -3,7 +3,7 @@
  *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
 import { orderView, moreLabel, moreName, type OrderView } from './orders';
-export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
+export interface ListInput { customers: Customer[]; basket: number; unit: number | ((k: number) => number); visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
   private lastSlide = -Infinity; private lastLeave = -Infinity; private frozenUntil = 0; private pointer = false;
@@ -26,18 +26,52 @@ export class OrderList {
   private kick() { if (!this.raf) this.raf = this.schedule(() => { this.raf = 0; if (this.pending) this.apply(this.pending); }) || 1; }
   private fill(el: HTMLElement, v: OrderView) {
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
-    const [e, val] = v.line.split(' · ');
-    const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
-    if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`; // F4: NBSP survives flex whitespace trimming
+    const [countPart, val] = v.line.split(' · '); // "4/17\u00a0eggs" · "$93.84"
+    const count = countPart.replace(/[\u00a0 ]eggs$/, '');
+    const N = el.querySelector('.n')!, Egg = el.querySelector('.egg')!, V = el.querySelector('.v')!, txt = el.querySelector('.txt') as HTMLElement;
+    const bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
+    const countNbsp = count + '\u00a0'; // Art & UX: NBSP in the count span so flex won't collapse to '4/17eggs'
+    if (N.textContent !== countNbsp) N.textContent = countNbsp;
+    if (Egg.textContent !== 'eggs') Egg.textContent = 'eggs';
+    if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`; // F4: NBSP survives flex whitespace trimming
+    if (txt.getAttribute('aria-label') !== v.lineAria) txt.setAttribute('aria-label', v.lineAria);
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
-    if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
-    if (btn.textContent !== v.button) btn.textContent = v.button;
+    if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); }
+    if (bar.getAttribute('aria-label') !== v.lineAria) bar.setAttribute('aria-label', v.lineAria);
+    if (btn.getAttribute('aria-label') !== v.buttonAria || (v.state !== 'wait' && !btn.querySelector('.sk'))) {
+      // MK-24-1 v3: always two-line "Sell k" / "+$X"; wait stays a single label.
+      if (v.state === 'wait') btn.textContent = v.button;
+      else {
+        const parts = v.button.split('\u00a0· ');
+        btn.replaceChildren(
+          Object.assign(document.createElement('span'), { className: 'sk', textContent: parts[0] }),
+          Object.assign(document.createElement('span'), { className: 'sy', textContent: parts[1] ?? '' }),
+        );
+      }
+      btn.setAttribute('aria-label', v.buttonAria);
+    }
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}`; if (btn.className !== bc) btn.className = bc;
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
   }
+  /** Art & UX MK-24-1 v3: one shared Sell button width = max(88, widest content), capped by 45% of the row. */
+  private syncSellWidth() {
+    const btns = [...this.list.querySelectorAll<HTMLButtonElement>('.order .btn.sell')];
+    if (!btns.length) { this.list.style.removeProperty('--sell-w'); return; }
+    let max = 88;
+    for (const b of btns) {
+      const prev = b.style.width;
+      b.style.width = 'max-content';
+      max = Math.max(max, b.scrollWidth);
+      b.style.width = prev;
+    }
+    const order = this.list.querySelector('.order') as HTMLElement | null;
+    const cap = order && order.clientWidth > 0 ? order.clientWidth * 0.45 : max;
+    const w = Math.min(Math.max(88, max), Math.max(88, cap));
+    this.list.style.setProperty('--sell-w', `${Math.ceil(w)}px`);
+  }
   private make(v: OrderView) {
     const el = document.createElement('div'); el.dataset.row = String(v.id); el.dataset.id = String(v.id);
-    el.innerHTML = `<div class="av"><img src="${this.avatar}" alt=""></div><div class="txt"><div class="l1"><span class="e"></span><span class="v"></span></div><div class="bar" role="progressbar" aria-valuemin="0"><i></i></div></div><button data-id="${v.id}"></button>`;
+    el.innerHTML = `<div class="av"><img src="${this.avatar}" alt=""></div><div class="txt"><div class="l1"><span class="n"></span><span class="egg"></span><span class="v"></span></div><div class="bar" role="progressbar" aria-valuemin="0"><i></i></div></div><button data-id="${v.id}"></button>`;
     this.fill(el, v); this.stats.created++; return el;
   }
   /** §5.7 (QA 15): removal = one layout step, but the cards below glide up with a compensating transform (FLIP),
@@ -90,6 +124,7 @@ export class OrderList {
       if (firstOrToggle || t - this.chipAt >= 2000) { clearTimeout(this.chipTimer); write(); }
       else if (!this.chipTimer) this.chipTimer = window.setTimeout(write, 2000 - (t - this.chipAt));
     }
+    this.syncSellWidth();
     if (frozen) setTimeout(() => this.kick(), 320);
   }
   node(id: number) { return this.nodes.get(id); }

@@ -1,3 +1,4 @@
+import { IOS_FLAG_ENABLED } from '../ui/ios-tip';
 /** SM-9 rAF frame sampler (engineering/m3-smoke-plan.md). Test-hook only: loaded with ?perf=1 (separate chunk). */
 export interface FrameStats { frames: number; p50: number; p95: number; max: number; over20Pct: number; over100: number; durationMs: number; pass: boolean; }
 /** Pure stats over frame deltas (ms). Pass: p95 <= 20, <= 5% of frames > 20 ms, no frame > 100 ms. */
@@ -29,6 +30,7 @@ export class FrameSampler {
 }
 /** On-screen overlay for real devices; result also on window.eggfarmPerf. */
 export function mountPerfOverlay(params: URLSearchParams) {
+  if (!IOS_FLAG_ENABLED) return; // QA B-4: never in release (compile-time __IOS_FLAG__); main.ts also gates the import
   const el = document.createElement('div'); el.className = 'perf-ov'; el.setAttribute('aria-hidden', 'true');
   document.body.append(el);
   const sec = Number(params.get('perfS') ?? 60), warm = Number(params.get('perfWarmS') ?? 10);
