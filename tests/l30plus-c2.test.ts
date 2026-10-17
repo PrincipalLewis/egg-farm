@@ -14,7 +14,7 @@ import { serialize, load, SAVE_KEY } from '../src/save/save';
 import { mem } from './helpers';
 const csvBuf = readFileSync(new URL('../data/economy.csv', import.meta.url));
 const R = parseEconomyCsv(csvBuf.toString('utf8'));
-const C2 = '1536be4999844b1aeec550027a8c71612fba08c692c85213c7e18cbd290962d4';
+const C2 = 'a957b07218591e1d50fde55a1842c73d66151b5bbbedae6225a2b8f60036252b';
 const top = R[R.length - 1].level;
 
 describe('L30+ C2 data', () => {

@@ -8,13 +8,13 @@ const rows = parseEconomyCsv(text);
 // MK-33a dependency: 0.20 is the value in 70009738d2d1 (was 0.15 in 053b2ba5ad71). If MK-33a is reverted, change ONLY this constant.
 // Data only: MK-33a logic (leave penalty gated by leave_attended_window_s / awake Market Hand) is NOT implemented here.
 // Source: yawn_at_pct=50 and manage_prompt_threshold=0.5 approved by HoP Oct 16 23:58 (decisions.md; product/economy.md PT1-P4): yawn, Manage prompt and refill all at 50%.
-const EXPECTED_SHA256 = '1536be4999844b1aeec550027a8c71612fba08c692c85213c7e18cbd290962d4'; // L30+ fix C2 (was 6dca24cd; L0-29 cells unchanged)
+const EXPECTED_SHA256 = 'a957b07218591e1d50fde55a1842c73d66151b5bbbedae6225a2b8f60036252b'; // C2 1536be49 + start_coop_eggs column (#37); was 6dca24cd; L0-29 cells unchanged
 const W2_ASLEEP_COLLECT_SHARE = 0.20;
 const one = (c: string) => { expect(c in rows[0], `missing ${c}`).toBe(true); const v = rows[0][c]; for (const r of rows) expect(r[c], `${c} L${r.level}`).toBe(v); return v; };
 describe('staging economy.f1-m4cols.csv (rc2 Workers columns)', () => {
-  it('shape: 132 columns, 56 rows (L0-55), LF only', () => {
+  it('shape: 133 columns, 56 rows (L0-55), LF only', () => {
     expect(text.includes('\r')).toBe(false);
-    expect(text.split('\n')[0].split(',').length).toBe(132);
+    expect(text.split('\n')[0].split(',').length).toBe(133);
     expect(rows.length).toBe(56);
   });
   it('rc2 worker scalars are constant and match the spec', () => {
@@ -22,6 +22,10 @@ describe('staging economy.f1-m4cols.csv (rc2 Workers columns)', () => {
       focus_premium: 0.05, rest_recovery_mult: 0.25, start_charges: 2, nudge_rearm_farm: 5, nudge_max_dismissals: 2, yawn_at_pct: 50, manage_prompt_threshold: 0.5,
       nudge_coopfull_share: 0.5, nudge_coopfull_window_s: 300, nudge_coopfull_min_farm: 7, leave_attended_window_s: 30 };
     for (const [c, v] of Object.entries(want)) expect(one(c), c).toBe(v);
+  });
+  it('start_coop_eggs is the last column and constant 10 (data only, no consumer yet; #37)', () => {
+    expect(text.split('\n')[0].split(',').at(-1)).toBe('start_coop_eggs');
+    expect(one('start_coop_eggs')).toBe(10);
   });
   it('w2_asleep_collect_share is read from the file and matches W2_ASLEEP_COLLECT_SHARE (MK-33a)', () => {
     const raw = text.split('\n')[0].split(',').indexOf('w2_asleep_collect_share');

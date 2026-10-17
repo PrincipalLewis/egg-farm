@@ -9,7 +9,7 @@ const rows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.
 /** sha256 of product/economy.f1.csv (Economy's F1 + F1-GAP table), vendored as data/economy.f1.csv. */
 const F1_CSV_SHA256 = '4ad1349ad27ca4c1657c94afd0fbfabd081aa658faa3ff5882a8bc6121e4737f'; // Economy row-20 fix (w4 9100), CRLF
 /** sha256 of product/economy.f1-m4cols.csv rev 6dca24cd (F1 + HoP-approved AC7 L21 trim; was 86f0e80e), copied to data/economy.csv. */
-const M4COLS_SHA256 = '1536be4999844b1aeec550027a8c71612fba08c692c85213c7e18cbd290962d4'; // L30+ fix C2 (HoP 09:02; QA qa/m3-recheck/l30fix-C2-1536be49.md): L0-29 = 6dca24cd, new L30 costs, L31-55 rows
+const M4COLS_SHA256 = 'a957b07218591e1d50fde55a1842c73d66151b5bbbedae6225a2b8f60036252b'; // L30+ fix C2 + start_coop_eggs=10 (a957b072 = C2 1536be49 + #37 column; HoP 09:02; QA qa/m3-recheck/l30fix-C2-1536be49.md): L0-29 = 6dca24cd, new L30 costs, L31-55 rows
 const F1 = [{ from: 6, to: 14, growth: 1.25 }, { from: 15, to: 20, growth: 1.45 }];
 /** Curve params (pre-F1 L0 base 100, growth 1.35) with no costTable, so these tests exercise the formula path. */
 const curve: any = { ...balance, farm: { ...balance.farm, costTable: undefined, baseCost: 100, costGrowth: 1.35 } };
