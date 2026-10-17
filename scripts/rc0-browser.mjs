@@ -74,7 +74,7 @@ const DONE = JSON.stringify({ onboardingDone: true });
 // ---------- B-2 amended (rc2-notes §B-2 A-C, 00:49 FAIL on 572864a): in both flows the tired tip never intersects the tablist or the
 // worker row (name, energy bar, Energy label, Refill/Manage), stays in the viewport, and never shows with the Workers sheet closed ----------
 sections.b2tip = async () => {
-  const sizes = (process.env.B2_SIZES ?? '1280x720,1280x600,1280x800,1024x474,390x640,360x740').split(',').map(x => x.split('x').map(Number));
+  const sizes = (process.env.B2_SIZES || '1280x720,1280x600,1280x800,1024x474,390x640,360x740').split(',').map(x => x.split('x').map(Number));
   const SNAP = (re = 'tired') => { const R = e => e.getBoundingClientRect(), ar = (a, c) => Math.max(0, Math.min(a.right, c.right) - Math.max(a.left, c.left)) * Math.max(0, Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top));
     const c = [...document.querySelectorAll('.coach')].find(x => new RegExp(re).test(x.textContent) && getComputedStyle(x).visibility !== 'hidden' && R(x).width); if (!c) return null; const b = R(c);
     const tabs = [...document.querySelectorAll('[role=tablist]')].map(R).filter(t => t.width && t.height), row = document.querySelector('#uRow [data-w=market_hand]');

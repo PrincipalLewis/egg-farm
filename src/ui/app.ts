@@ -528,13 +528,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // stays hidden and is re-checked every 250ms (dropped after MAX_DEFER_MS); its `ms` life starts on first show.
   // rowId = row mode (tired + Manage tips): anchored 8px under the whole worker row, Workers sheet open only.
   // autoScroll (tired tip, rule D): if it can't fit, scroll the panel so the row sits just under the tablist (guarded), else onSkip().
-  interface CoachOpts { cls?: string; rowId?: string; rowAbove?: boolean; autoScroll?: boolean; onShow?: () => void; onSkip?: () => void; onClose?: () => void }
+  interface CoachOpts { cls?: string; rowId?: string; rowAbove?: boolean; autoScroll?: boolean; reveal?: boolean; onShow?: () => void; onSkip?: () => void; onClose?: () => void }
   const coachClip = () => uRow.closest('.body')?.getBoundingClientRect();
   const coach = (text: string, anchor: Element | null | (() => Element | null), ms: number, o: CoachOpts = {}) => {
     document.querySelectorAll('.coach').forEach(e => e.remove());
     const el = h(`<div class="coach ${o.cls ?? ''}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     el.style.visibility = 'hidden'; el.style.left = '0'; el.style.top = '0'; document.body.append(el);
-    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, scrolledAt = 0, done = false;
+    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, scrolledAt = 0, done = false, revealed = false;
     const inVp = (r: DOMRect) => r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
     const born = Date.now(), rowId = o.rowId;
     const skip = () => { if (done) return; done = true; close(); o.onSkip?.(); };
@@ -559,6 +559,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
             scrolledAt = now; if (d) { autoScrollingUntil = now + 900; uRow.closest('.body')?.scrollBy({ top: d, behavior: rm() ? 'instant' : 'smooth' }); } }
           else if (now - scrolledAt > 800) skip(); // still no fit after the scroll settled (e.g. 1024x474)
         }
+        // Manage tip (reveal): if its row is cut off by the panel edge, bring it fully into view once (same guard)
+        if (o.reveal && sheetOk && rr?.height && clip && !revealed && (rr.top < clip.top || rr.bottom > clip.bottom) && guardAllows(Date.now(), lastPanelUser)) {
+          revealed = true; autoScrollingUntil = Date.now() + 900; row?.scrollIntoView({ block: 'nearest', behavior: rm() ? 'instant' : 'smooth' }); }
         return; }
       el.style.cssText = `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
       el.classList.toggle('below', p.side === 'below');
@@ -605,7 +608,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const showManage = (w: string, delay: number) => window.setTimeout(() => { if (manageShown) return; manageShown = true;
     const full = (g.state.workers[w as keyof typeof g.state.workers]?.energy ?? 0) >= 100;
     coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', () => workerRow(w)?.querySelector('[data-act=manage]') ?? null, 6000,
-      { rowId: w, rowAbove: true, onShow: () => { introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); }, onClose: () => { if (introBStage < 2) manageShown = false; } }); // 'done' only once it actually showed
+      { rowId: w, rowAbove: true, reveal: true, onShow: () => { introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); }, onClose: () => { if (introBStage < 2) manageShown = false; } }); // 'done' only once it actually showed
   }, delay);
   const tiredMark = (ev: 'shown' | 'skipped') => { const n = tiredTipAfter({ seen: !!flags.tiredSeen, skips: flags.tiredSkips ?? 0 }, ev); flags.tiredSeen = n.seen; flags.tiredSkips = n.skips; saveFlags(); };
   const startTiredVisit = () => {
