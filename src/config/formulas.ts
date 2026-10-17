@@ -48,8 +48,12 @@ export const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p
 export const collectionCost = (C: number, p: EconomyParams) => Math.floor(p.collection.baseCost * p.collection.costGrowth ** clampL(C, p));
 export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerTapBase + p.collection.eggsPerTapPerLevel * clampL(C, p);
 export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
-export const farmCost = (F: number, p: EconomyParams) => {
-  const segs = p.farm.costGrowthSegments, L = clampL(F, p), ov = p.farm.costOverrides?.[L];
+/** HoE flag-off rule: the F1 curve (segments + per-level overrides from economy.csv) ships with the M4 economy only;
+ *  flag off = main's pure pow. economy.csv rows (tableRow, sync-economy) are always the F1 curve. */
+export const farmCost = (F: number, p: EconomyParams) => m4On(p) ? farmCostF1(F, p) : Math.floor(p.farm.baseCost * p.farm.costGrowth ** clampL(F, p));
+export const farmCostF1 = (F: number, p: EconomyParams) => {
+  const segs = p.farm.costGrowthSegments, L = clampL(F, p);
+  const ov = p.farm.costOverrides?.[L];
   if (ov !== undefined) return ov;
   if (!segs || segs.length === 0) return Math.floor(p.farm.baseCost * p.farm.costGrowth ** L); // pre-F1 expression, unchanged
   // Same evaluation order as the sim (SegEco.fcost) so floors match the CSV.
@@ -125,7 +129,7 @@ export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
 export function tableRow(L: number, p: EconomyParams) {
   const [demand_min, demand_max] = demandRange(L, p);
   return {
-    level: L, collection_cost: collectionCost(L, p), eggs_per_tap: eggsPerTap(L, p), farm_cost: farmCost(L, p), hens: hens(L, p),
+    level: L, collection_cost: collectionCost(L, p), eggs_per_tap: eggsPerTap(L, p), farm_cost: farmCostF1(L, p), hens: hens(L, p),
     eggs_per_sec: eggsPerSec(L, p), coop_capacity: coopCapacity(L, p), egg_price: farmPriceCents(L, p) / 100,
     customer_interval_s: customerIntervalS(L, p), demand_min, demand_max,
     offline_eggs_per_sec: roundHalfUp(eggsPerSec(L, p) * p.offline.offlineRateMultiplier, 2),

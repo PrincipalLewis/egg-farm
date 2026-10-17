@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parseEconomyCsv, buildBalance } from '../scripts/sync-economy';
 import { balance } from '../src/config/balance';
-import { hensCost, eggValueCost } from '../src/config/formulas';
+import { hensCost, eggValueCost, farmCostF1 } from '../src/config/formulas';
 import * as S from '../src/sim/state';
 import { isM4Col } from '../scripts/sync-economy';
 // M4-A columns come from data/economy.m4-candidate.csv (vendored copy of product/economy.m4-candidate.csv) until
@@ -15,8 +15,8 @@ describe('sync-economy M4 columns', () => {
     expect(balance.m4).toEqual(nb.m4); expect(nb.m4.enabled).toBe(0);
   });
   it('farm_cost is reproduced per level from the CSV (formula + costOverrides for F1 segments / M3 taper)', () => {
-    for (const r of live) expect(S.farmCost(r.level, balance)).toBe(r.farm_cost);
-    expect(S.farmCost(23, balance)).toBe(68756); expect(S.farmCost(24, balance)).toBe(72194);
+    for (const r of live) expect(farmCostF1(r.level, balance)).toBe(r.farm_cost);
+    expect(farmCostF1(23, balance)).toBe(68756); expect(farmCostF1(24, balance)).toBe(72194);
   });
   it('Grader tier costs are the CSV value of each tier\'s first row (T5 51,567, not re-linked)', () => {
     expect(balance.workers.grader.tiers.map((t: any) => t.cost)).toEqual([5538, 9100, 20959, 28294, 51567]);

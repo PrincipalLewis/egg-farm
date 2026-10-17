@@ -135,7 +135,13 @@ export class Game {
   get balance(): Balance { return this.b; }
   get tracksMigrationPending() { return this.tracksPending !== null; }
   private persisted(): GameState {
-    const p = this.tracksPending; if (!p) return this.state;
+    const p = this.tracksPending;
+    if (!p) {
+      // HoE flag-off rule: a pre-M4 farm saved by a flag-off session writes main's save shape (no M4 track fields).
+      // A marked (tracksV7) save keeps them, so a flag-off build never drops a migrated farm's tracks (downgrade).
+      if (m4On(this.b) || this.state.tracksV7) return this.state;
+      const { hensLevel, eggValueLevel, celebratedMilestones, ...v6 } = this.state; void hensLevel; void eggValueLevel; void celebratedMilestones; return v6 as GameState;
+    }
     const o: any = {}; for (const k of p.v6Keys) if (k in this.state) o[k] = (this.state as any)[k]; return o;
   }
   private pausedMirror: Game['mirror'] = null;

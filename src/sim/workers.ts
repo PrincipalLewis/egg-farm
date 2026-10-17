@@ -1,5 +1,5 @@
 import type { Balance } from '../config/balance';
-import { farmCost } from '../config/formulas';
+import { farmCost, m4On } from '../config/formulas';
 /** M2 Workers (m2-proposal v1.0). All tunables in balance.workers. Pure helpers used by tick/actions. */
 export type WorkerId = 'market_hand' | 'coop_hand' | 'hawker' | 'grader';
 export const WORKERS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
@@ -32,7 +32,8 @@ export const unlockFarm = (id: WorkerId, b: Balance) => id === 'grader' ? b.work
  *  floor(share x farmCost(tier farm level)). */
 export const graderTierCostCents = (i: number, b: Balance) => {
   const t = b.workers.grader.tiers[i] as { farm: number; cost?: number };
-  return (t.cost ?? Math.floor(b.workers.grader.tier_cost_share_of_farm_cost * farmCost(t.farm, b))) * 100;
+  // HoE flag-off rule: the CSV w4_tier_cost (F1) applies with the M4 economy only; flag off = main's share x farmCost.
+  return ((m4On(b) ? t.cost : undefined) ?? Math.floor(b.workers.grader.tier_cost_share_of_farm_cost * farmCost(t.farm, b))) * 100;
 };
 /** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share. */
 export function graderMult(ws: Workers, tier: number, b: Balance): number {
