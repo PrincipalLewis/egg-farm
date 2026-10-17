@@ -20,6 +20,7 @@ import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hen
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+import { sellAllPreview } from '../sim/actions';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -547,8 +548,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
       mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
-      let left = basket, eggs = 0, cents = 0; const price = salePriceCents(s, b);
-      for (const c of s.customers) { const k = Math.min(left, c.demand - c.filled); left -= k; eggs += k; cents += k * price; }
+      const { eggs, cents } = sellAllPreview(s, b); // same per-order Grader math + rounding as the sellAll action
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
     }
     if (open === 'upgrades' || docked.matches) {
