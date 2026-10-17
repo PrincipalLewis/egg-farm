@@ -142,8 +142,9 @@ describe('AC14b save-recovery dialog v1.2 (UI only)', () => {
     expect(src).not.toMatch(/localStorage|setItem|indexedDB/);
   });
 });
+import { TOAST_MS } from '../src/ui/toast-place';
 describe('S2-1 toast duration (Art & UX 08:47)', () => {
-  it('"Coop upgraded!" stays 2.5 s; other toasts keep 1.3 s', () => { expect(app).toContain('export const COOP_TOAST_MS = 2500;'); expect(app).toContain("showToast('Coop upgraded!', COOP_TOAST_MS)"); expect(app).toContain('(text: string, ms = 1300)'); });
+  it('"Coop upgraded!" stays 2.5 s; other toasts keep 1.3 s', () => { expect(app).toContain('export const COOP_TOAST_MS = 2500;'); expect(app).toContain("showToast('Coop upgraded!', COOP_TOAST_MS)"); expect(app).toContain('(text: string, ms = TOAST_MS)'); expect(TOAST_MS).toBe(1300); });
 });
 
 describe('S2-4c welcome-back sold line (Art & UX 08:47)', async () => {
