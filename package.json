@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist",
     "test": "vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
+    "test:slow": "vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1",
     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",
     "screenshot": "node scripts/screenshot.mjs",
