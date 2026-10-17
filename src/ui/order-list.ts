@@ -2,7 +2,7 @@
  *  frame, chip + live region coalesced to <= 1 / 2 s, enter slide only into a visible slot (<= 1 / 240 ms), list frozen
  *  (no adds/removes/moves) while a pointer is down and for 300 ms after release. Never innerHTMLs the list. */
 import type { Customer } from '../sim/state';
-import { orderView, fitOrderEggs, moreLabel, moreName, soldLabel, SOLD_HOLD_MS, SOLD_FADE_RM_MS, type OrderView } from './orders';
+import { orderView, fitOrderEggs, moreLabel, moreName, soldLabel, planRemovals, SOLD_HOLD_MS, type OrderView } from './orders';
 export interface ListInput { customers: Customer[]; basket: number; unit: number; visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
@@ -68,22 +68,20 @@ export class OrderList {
     const ids = new Set(i.customers.map(c => c.id));
     const shownIds = i.customers.filter((_, k) => i.expanded || k < i.visible).map(c => c.id);
     const shownSet = new Set(shownIds);
-    // removals (serve/leave, or no longer in a visible slot) - deferred while frozen
-    if (!frozen) {
-      const held = (id: number) => (this.soldUntil.get(id) ?? 0) > t; // still frozen in its Sold state
-      const gone = [...this.nodes.keys()].filter(id => !shownSet.has(id) && !held(id));
-      const animate = !i.rm && gone.length === 1 && ids.has(gone[0]) === false && t - this.lastLeave >= 240;
-      const drop: HTMLElement[] = [];
-      for (const id of gone) {
-        const el = this.nodes.get(id)!; this.nodes.delete(id); this.stats.removed++;
-        const wasSold = this.soldUntil.delete(id) && !ids.has(id);
-        if (wasSold || animate) { // a sold row always leaves visibly: slide/scale 240ms, or with reduced motion a 120ms fade
-          const ms = i.rm ? SOLD_FADE_RM_MS : 240; if (!i.rm) this.lastLeave = t;
-          el.classList.add('leaving'); if (i.rm) el.classList.add('rmfade'); el.removeAttribute('data-row'); this.leavingN++;
-          setTimeout(() => { this.flipRemove([el], i.rm); this.leavingN--; this.kick(); }, ms);
-        } else drop.push(el);
+    // removals (serve/leave, or no longer in a visible slot): non-sold ones deferred while frozen; Sold rows held SOLD_HOLD_MS then always leave
+    {
+      const gone = [...this.nodes.keys()].filter(id => !shownSet.has(id));
+      const p = planRemovals({ gone, inQueue: id => ids.has(id), soldUntil: this.soldUntil, t, frozen, rm: i.rm, lastLeave: this.lastLeave });
+      const take = (id: number) => { const el = this.nodes.get(id)!; this.nodes.delete(id); this.soldUntil.delete(id); this.stats.removed++; return el; };
+      const leaving = p.animate.map(take), drop = p.drop.map(take);
+      if (leaving.length) { // one batch: one timer, one FLIP (review ebbd02e #5)
+        if (!i.rm) this.lastLeave = t;
+        for (const el of leaving) { el.classList.add('leaving'); if (i.rm) el.classList.add('rmfade'); el.removeAttribute('data-row'); }
+        this.leavingN += leaving.length;
+        setTimeout(() => { this.flipRemove(leaving, i.rm); this.leavingN -= leaving.length; this.kick(); }, p.ms);
       }
       if (drop.length) this.flipRemove(drop, i.rm);
+      if (p.keep.some(id => this.soldUntil.has(id))) setTimeout(() => this.kick(), Math.max(0, Math.min(...p.keep.map(id => this.soldUntil.get(id) ?? Infinity)) - t) + 5);
     }
     // updates + additions in FIFO order (new visible orders only ever append at the end)
     for (const c of i.customers) {

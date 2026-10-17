@@ -73,3 +73,18 @@ export const sellAllLabel = (eggs: number, cents: number, fc: (n: number) => str
 /** rc2 M-Sold-freeze: the disabled chip a served row shows for SOLD_HOLD_MS before it leaves. */
 export const soldLabel = (money: string) => `Sold! +${money}`;
 export const SOLD_HOLD_MS = 240, SOLD_FADE_RM_MS = 120;
+/** M-Sold-freeze removal plan for one OrderList.apply (pure, unit-tested; review ebbd02e #2/#4/#5).
+ *  gone = nodes no longer shown; soldUntil = held Sold rows. Held rows stay (even under a pointer freeze they only leave once
+ *  the hold ends, and they always leave, freeze or not: they never move under the finger). Everything that animates out
+ *  leaves together in ONE batch (one timer, one FLIP); `ms` = 240, or 120 with reduced motion. */
+export function planRemovals(o: { gone: number[]; inQueue: (id: number) => boolean; soldUntil: ReadonlyMap<number, number>; t: number; frozen: boolean; rm: boolean; lastLeave: number }) {
+  const keep: number[] = [], animate: number[] = [], drop: number[] = [];
+  const sold = (id: number) => o.soldUntil.has(id) && !o.inQueue(id);
+  const free = o.gone.filter(id => !((o.soldUntil.get(id) ?? 0) > o.t));
+  for (const id of o.gone) if (!free.includes(id)) keep.push(id);
+  const others = free.filter(id => !sold(id));
+  if (o.frozen) keep.push(...others); // non-sold removals still wait for the pointer freeze
+  const anim1 = !o.frozen && !o.rm && others.length === 1 && !o.inQueue(others[0]) && o.t - o.lastLeave >= 240;
+  for (const id of free) { if (sold(id)) animate.push(id); else if (!o.frozen) (anim1 ? animate : drop).push(id); }
+  return { keep, animate, drop, ms: o.rm ? SOLD_FADE_RM_MS : 240 };
+}
