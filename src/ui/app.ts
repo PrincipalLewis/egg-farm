@@ -549,7 +549,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       // legacy tips inside a worker row (hire): also keep off that row's name / Energy label / bar (902f924 #3)
       const avoid = !rowId && row ? [...row.querySelectorAll('h3, .meta, .ebar')].filter(x => !x.contains(at!) && !at!.contains(x)).map(x => x.getBoundingClientRect()) : [];
       const clip = rowId || row ? coachClip() : undefined, tip = { w: el.offsetWidth, h: el.offsetHeight };
-      const panel = o.manage ? uRow.closest('.sheet')?.getBoundingClientRect() : undefined;
+      const sh = o.manage ? uRow.closest('.sheet')?.getBoundingClientRect() : undefined, bd = o.manage ? coachClip() : undefined;
+      // bounds = the Upgrades scroller's visible box (never over the sheet header), clipped to the sheet (CCR 4adec84 #1)
+      const panel = sh && bd ? { left: Math.max(sh.left, bd.left), right: Math.min(sh.right, bd.right), top: Math.max(sh.top, bd.top), bottom: Math.min(sh.bottom, bd.bottom) } : undefined;
       // Manage tip: on its button, inside the Upgrades panel under the tablist (never on Market), else defer
       if (o.manage && panel) cx = Math.min(Math.max(cx, panel.left + tip.w / 2 + COACH_MARGIN), panel.right - tip.w / 2 - COACH_MARGIN);
       const p = o.manage ? (r && panel && sheetOk && inVp(r) ? managePlacement(r, tip, cx, { w: innerWidth, h: innerHeight }, panel, tabs) : null)
