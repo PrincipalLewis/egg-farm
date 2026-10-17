@@ -81,6 +81,16 @@ sections.b2tip = async () => {
     const parts = row ? [row, ...row.querySelectorAll('*')].filter(x => R(x).width && R(x).height) : [];
     const sheet = matchMedia('(min-width:960px) and (orientation:landscape)').matches || !!document.querySelector('#panel-layer.open');
     return { t: Math.round(b.top), b: Math.round(b.bottom), l: Math.round(b.left), r: Math.round(b.right), tabOv: Math.round(tabs.reduce((s, t) => s + ar(b, t), 0)), rowOv: parts.filter(x => ar(b, R(x)) > 0).map(x => x.className || x.tagName).slice(0, 4), inVp: b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth, rowVis: !!row && R(row).height > 0 && R(row).top < innerHeight && R(row).bottom > 0, sheet }; };
+  // Manage tip (Art & UX Minor on 192f273): points at the Manage button (8px above, hand down / 8px below, hand up), inside the
+  // Upgrades panel, off the Market panel and the tablist
+  const MSNAP = () => { const R = e => e.getBoundingClientRect(), ov = (a, c) => Math.min(a.right, c.right) > Math.max(a.left, c.left) && Math.min(a.bottom, c.bottom) > Math.max(a.top, c.top);
+    const c = [...document.querySelectorAll('.coach')].find(x => /Manage/.test(x.textContent) && getComputedStyle(x).visibility !== 'hidden' && R(x).width); if (!c) return null;
+    const b = R(c), btn = document.querySelector('#uRow [data-w=market_hand] [data-act=manage]'), bb = btn && R(btn), up = R(document.querySelector('#p-upgrades')), mk = document.querySelector('#p-market'), mr = mk && R(mk).width ? R(mk) : null;
+    const tabs = [...document.querySelectorAll('[role=tablist]')].map(R).filter(t => t.width && t.height), down = /hand-down/.test(c.querySelector('.coach-hand').src);
+    const points = !!bb && ((down && Math.abs(b.bottom - (bb.top - 8)) <= 1.5) || (!down && c.classList.contains('below') && Math.abs(b.top - (bb.bottom + 8)) <= 1.5));
+    const inUp = b.left >= up.left - 0.5 && b.right <= up.right + 0.5 && b.top >= up.top - 0.5 && b.bottom <= up.bottom + 0.5;
+    return { t: Math.round(b.top), b: Math.round(b.bottom), l: Math.round(b.left), r: Math.round(b.right), btn: bb && [Math.round(bb.top), Math.round(bb.bottom)], side: down ? 'above' : 'below', points, inUp, onMarket: !!mr && ov(b, mr), onTabs: tabs.some(t => ov(b, t)), onBtn: !!bb && ov(b, bb), inVp: b.top >= 0 && b.bottom <= innerHeight }; };
+  const manageBad = m => !m.points || !m.inUp || m.onMarket || m.onTabs || m.onBtn || !m.inVp;
   // rule D (02:15): the tired tip must show at every size (auto-scroll at docked 1280x720/600) except 1024x474, where it is skipped
   // and the Manage tip shows alone; 'guard' = the player scrolled the panel just before the hire -> no auto-scroll, skipped visit, Manage alone
   const cases = [...['direct', 'normal'].flatMap(m => sizes.map(sz => [m, ...sz])), ...(process.env.B2_SIZES ? [] : [['guard', 1280, 720], ['click', 1280, 720], ['click', 1280, 600]])];
@@ -95,14 +105,14 @@ sections.b2tip = async () => {
     const S = []; let shotDone = false, opened = false, M = null, afterRerender = null; const t0 = Date.now(), skipExpected = mode === 'guard' || (w === 1024 && h === 474), MB = [];
     while (Date.now() - t0 < 8000) { const c = await page.evaluate(SNAP); if (c) S.push(c);
       if (c && !shotDone && shot) { await page.waitForTimeout(120); await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}.png` }); shotDone = true; }
-      const m = await page.evaluate(SNAP, 'Manage'); if (m) MB.push(m);
+      const m = await page.evaluate(MSNAP); if (m) MB.push(m);
       if (m && !M) { M = m; if (shot && skipExpected) await page.screenshot({ path: `${SHOTS}/b2-${mode === 'guard' ? 'guard-skip' : 'skip-manage'}-${w}x${h}.png` });
         // force a Workers list rebuild: the Manage tip must survive it (review 5877e0f #2)
-        await page.evaluate(() => { const u = document.querySelector('#uRow'); u.innerHTML = u.innerHTML + ''; }); await page.waitForTimeout(400); afterRerender = !!(await page.evaluate(SNAP, 'Manage')); }
+        await page.evaluate(() => { const u = document.querySelector('#uRow'); u.innerHTML = u.innerHTML + ''; }); await page.waitForTimeout(400); afterRerender = !!(await page.evaluate(MSNAP)); }
       // direct flow on phones: sheet stays closed for 1.5s (tip must stay hidden), then the player opens Upgrades and the deferred tip shows
       if (!opened && Date.now() - t0 > 1500 + (w * 7 + h) % 3 * 120 && w < 960) { opened = true; if (!(await page.locator('#panel-layer.open').count())) await page.locator('[data-nav=upgrades]').click({ timeout: 2000 }).catch(() => {}); }
       await page.waitForTimeout(100); }
-    const bad = [...S, ...MB].filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet);
+    const bad = [...S.filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet), ...MB.filter(manageBad).map(m => ({ manageTip: m }))];
     if (M && !afterRerender) bad.push({ manageGoneAfterRerender: true });
     if (w < 960 && mode === 'direct') { const st = await page.evaluate(() => document.querySelector('#uRow').closest('.body').scrollTop); if (st !== 0) bad.push({ phoneScrolled: st }); } // review ddace62 #2: no nudge on phones where it fits
     const flags = await page.evaluate(() => { const f = JSON.parse(localStorage.getItem('eggfarm.ui') || '{}'); return { seen: f.tiredSeen, skips: f.tiredSkips }; });
@@ -129,8 +139,13 @@ sections.b2rearm = async () => {
   const f1 = await page.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui')));
   await page.reload(); await page.getByText('Tap to start').click(); await page.waitForFunction(() => document.querySelector('[data-nav=upgrades]'), null, { timeout: 15000 }); await page.waitForTimeout(500); await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click()); await page.waitForTimeout(2500);
   const repeat = await vis('Manage') || await vis('tired');
+  // positive control (CCR 47526b3 #1): with manageSeen cleared the same reload+visit must show Manage, so `repeat` can fail
+  await page.evaluate(() => { const f = JSON.parse(localStorage.getItem('eggfarm.ui')); f.manageSeen = false; localStorage.setItem('eggfarm.ui', JSON.stringify(f)); });
+  await page.reload(); await page.getByText('Tap to start').click(); await page.waitForFunction(() => document.querySelector('[data-nav=upgrades]'), null, { timeout: 15000 }); await page.waitForTimeout(500);
+  await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click()); let control = false;
+  for (let i = 0; i < 25 && !control; i++) { await page.waitForTimeout(200); control = await vis('Manage'); }
   ok('B-2 rule D re-arm: Manage dropped while the sheet was closed shows on the next Workers visit; manageSeen persists; no repeat after reload',
-    goneWhileClosed && shownAgain && f1.manageSeen === true && f1.tiredSeen === true && !repeat && !errors.length, JSON.stringify({ goneWhileClosed, shownAgain, f1: { tiredSeen: f1.tiredSeen, manageSeen: f1.manageSeen }, repeat, errors }));
+    goneWhileClosed && shownAgain && f1.manageSeen === true && f1.tiredSeen === true && !repeat && control && !errors.length, JSON.stringify({ goneWhileClosed, shownAgain, control, f1: { tiredSeen: f1.tiredSeen, manageSeen: f1.manageSeen }, repeat, errors }));
   await ctx.close();
 };
 sections.b1 = async () => {
