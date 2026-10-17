@@ -2,7 +2,7 @@
  *  All costs/effects read from config; nothing hard-coded. */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
-import { farmCost, collectionCost, eggsPerTap, coopTier } from '../sim/state';
+import { farmCost, collectionCost, eggsPerTap, coopTier, farmMaxLevel } from '../sim/state';
 import { hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 import { fmtTimeToAfford } from './format';
 export type GoalKey = 'FARM' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
@@ -15,8 +15,8 @@ export interface Candidate { key: GoalKey; costCents: number; }
 export interface Goal { key: GoalKey | null; state: GoalState; label: string; status: string; costCents: number; tab: 'farm' | 'collection' | 'workers'; }
 export function candidates(s: GameState, b: Balance): Candidate[] {
   const out: Candidate[] = [], F = s.farmLevel;
-  if (F < b.maxLevel) out.push({ key: 'FARM', costCents: farmCost(F, b) * 100 });
-  if (s.collectionLevel < b.maxLevel) out.push({ key: 'COLL', costCents: collectionCost(s.collectionLevel, b) * 100 });
+  if (F < farmMaxLevel(b)) out.push({ key: 'FARM', costCents: farmCost(F, b) * 100 });
+  if (s.collectionLevel < farmMaxLevel(b)) out.push({ key: 'COLL', costCents: collectionCost(s.collectionLevel, b) * 100 });
   for (const k of ['W1', 'W2', 'W3'] as const) { const id = WK[k]; if (!s.workers[id] && F >= unlockFarm(id, b)) out.push({ key: k, costCents: hireCostCents(id, b) }); }
   const tiers = b.workers.grader.tiers, i = s.workers.grader ? s.graderTier : 0; // not hired -> tier 1 = the hire
   if (i < tiers.length && F >= tiers[i].farm) out.push({ key: 'W4', costCents: graderTierCostCents(i, b) });

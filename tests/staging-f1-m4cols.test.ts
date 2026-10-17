@@ -8,14 +8,14 @@ const rows = parseEconomyCsv(text);
 // MK-33a dependency: 0.20 is the value in 70009738d2d1 (was 0.15 in 053b2ba5ad71). If MK-33a is reverted, change ONLY this constant.
 // Data only: MK-33a logic (leave penalty gated by leave_attended_window_s / awake Market Hand) is NOT implemented here.
 // Source: yawn_at_pct=50 and manage_prompt_threshold=0.5 approved by HoP Oct 16 23:58 (decisions.md; product/economy.md PT1-P4): yawn, Manage prompt and refill all at 50%.
-const EXPECTED_SHA256 = '6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455';
+const EXPECTED_SHA256 = '1536be4999844b1aeec550027a8c71612fba08c692c85213c7e18cbd290962d4'; // L30+ fix C2 (was 6dca24cd; L0-29 cells unchanged)
 const W2_ASLEEP_COLLECT_SHARE = 0.20;
 const one = (c: string) => { expect(c in rows[0], `missing ${c}`).toBe(true); const v = rows[0][c]; for (const r of rows) expect(r[c], `${c} L${r.level}`).toBe(v); return v; };
 describe('staging economy.f1-m4cols.csv (rc2 Workers columns)', () => {
-  it('shape: 125 columns, 31 rows, LF only', () => {
+  it('shape: 132 columns, 56 rows (L0-55), LF only', () => {
     expect(text.includes('\r')).toBe(false);
-    expect(text.split('\n')[0].split(',').length).toBe(125);
-    expect(rows.length).toBe(31);
+    expect(text.split('\n')[0].split(',').length).toBe(132);
+    expect(rows.length).toBe(56);
   });
   it('rc2 worker scalars are constant and match the spec', () => {
     const want: Record<string, number> = { charge_regen_s: 150, charge_cap: 2, refill_threshold_pct: 50, combo_window_s: 10, combo_boost_s: 45,

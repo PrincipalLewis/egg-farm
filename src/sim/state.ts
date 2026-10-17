@@ -26,7 +26,7 @@ export const initialState = (b: Balance, seed = 1): GameState => ({
 /** Per-level stats: formulas in config/formulas.ts, params from balance.json (generated from economy.csv, MK-15). */
 export {
   collectionCost, eggsPerTap, farmCost, hens, eggsPerSec, coopCapacity, eggPriceCents, customerIntervalS,
-  demandRange, queueMax, patienceS, collectionPriceBonus, farmPriceCents,
+  demandRange, queueMax, patienceS, collectionPriceBonus, farmPriceCents, farmMaxLevel, hvLevelCost,
 } from '../config/formulas';
 /** Scramble a user/time seed into xorshift32 state (murmur3 fmix32). Without this, small seeds (1, 2, 3...) give
  *  first draws near 0, e.g. seed 1 -> r = 0.0000025, so the first customer always wanted demand_min. */

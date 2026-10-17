@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
-import { initialState, farmCost, collectionCost } from '../src/sim/state';
+import { initialState, farmCost, collectionCost, farmMaxLevel } from '../src/sim/state';
 import { hireCostCents, graderTierCostCents } from '../src/sim/workers';
 import { selectGoal, candidates, GoalHold, farmLabel } from '../src/ui/next-goal';
 const st = (o: any = {}) => ({ ...initialState(b, 1), ...o });
@@ -44,7 +44,7 @@ describe('next-goal selection (AC5)', () => {
   });
   it('Done when nothing is left', () => {
     const ws = Object.fromEntries(['market_hand', 'coop_hand', 'hawker', 'grader'].map(k => [k, { energy: 100, cdS: 0 }]));
-    expect(selectGoal(st({ farmLevel: 30, collectionLevel: 30, workers: ws, graderTier: b.workers.grader.tiers.length }), b, 0)).toMatchObject({ state: 'done', label: 'All upgrades done!', key: null });
+    expect(selectGoal(st({ farmLevel: farmMaxLevel(b), collectionLevel: farmMaxLevel(b), workers: ws, graderTier: b.workers.grader.tiers.length }), b, 0)).toMatchObject({ state: 'done', label: 'All upgrades done!', key: null });
   });
 });
 describe('next-goal anti-flicker hold', () => {

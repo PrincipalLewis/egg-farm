@@ -68,7 +68,7 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
   });
   // data/economy.csv sha256 -> vendored sim --config (decisions.md:295). Unknown sha = hard failure.
   const CONFIG_BY_CSV_SHA: Record<string, string> = {
-    '6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455': 'f1', // F1 m4cols + AC7 L21 trim (was 86f0e80e, #17)
+    '1536be4999844b1aeec550027a8c71612fba08c692c85213c7e18cbd290962d4': 'f1', // L30+ fix C2 (L0-29 = 6dca24cd F1 m4cols + AC7 L21 trim); the sim reads its farm_cost table from the vendored copy
   };
   it('fixture is fresh vs the vendored reference sim (config chosen by economy.csv sha256)', () => {
     checkPins();
@@ -78,9 +78,10 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
     execFileSync('python3', [new URL('sim/economy_sim.py', vdir).pathname, '--config', config, '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
     // Compare every column the sim's CSV writer emits (46); m4cols-only CSV columns are not written by the sim.
     const sim = parseEconomyCsv(readFileSync(out, 'utf8')), cols = Object.keys(sim[0]);
-    expect(cols.length).toBe(46); expect(sim.length).toBe(data.length);
+    // The reference sim's table stops at its own max level (L30); L31-55 are the L30+ pack, gated by late_curve (l30plus tests).
+    expect(cols.length).toBe(46); expect(sim.length).toBe(Math.min(data.length, 31));
     const pick = (rs: Record<string, number>[]) => rs.map(r => Object.fromEntries(cols.map(c => [c, r[c]])));
-    expect(pick(sim)).toEqual(pick(data)); // vendored sim table == economy.csv on every sim column
+    expect(pick(sim)).toEqual(pick(data.slice(0, sim.length))); // vendored sim table == economy.csv on every sim column
   });
 });
 describe('price formula', () => {

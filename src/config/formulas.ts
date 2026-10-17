@@ -4,7 +4,13 @@
  */
 export interface CostGrowthSegment { from: number; to: number; growth: number }
 export interface EconomyParams {
+  /** Last CSV row = load clamp and Collection / Hens / Egg value track max (L30+ C2: 55). */
   maxLevel: number;
+  /** L30+ (HoP): Farm can be bought up to this level (CSV farm_max_level, constant); rows above it only price the other tracks. Absent = maxLevel. */
+  farmMaxLevel?: number;
+  /** L30+ extra-level price rule (HoP 00:28, late_curve v9), all from the CSV: at Farm F, a Hens/Egg value level L >= F + baseCapOverFarm
+   *  costs max(row cost, floor(shareByFarm[F] x farmCost(F) x (1 + markup x (L - F - baseCapOverFarm)))). share 0 = rule off at that Farm level. */
+  hvExtra?: { shareByFarm: number[]; markup: number; baseCapOverFarm: number };
   collection: { baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number };
   farm: {
     baseCost: number; costGrowth: number; hensBase: number; hensPerLevel: number; eggsPerHenPerSec: number;
@@ -20,6 +26,11 @@ export interface EconomyParams {
      *  When present it is THE farm cost (covers the F1-GAP cuts and any later per-level edits); no formula fallback.
      *  Absent = baseCost/costGrowth/segments curve (pre-F1 behaviour). */
     costTable?: number[];
+    /** L30+ second coop wing: coop_capacity x mult from fromLevel on (fitted from the CSV step; absent = linear). */
+    coopWing?: { fromLevel: number; mult: number };
+    /** L30+: demand_min/max follow the eggs/s x interval formula up to this level and extend linearly by that level's step above it
+     *  (Economy's late_curve: "linear columns continue their L29->30 step"). Absent = formula on every level. */
+    demandFormulaMaxLevel?: number;
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
   offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
@@ -70,7 +81,10 @@ export function validateCostTable(t: unknown, maxLevel: number, where = 'farm.co
 export const hens = (F: number, p: EconomyParams) => p.farm.hensBase + p.farm.hensPerLevel * clampL(F, p);
 export const eggsPerSec = (F: number, p: EconomyParams) =>
   clampL(F, p) === 0 && p.farm.eggsPerSecL0 !== undefined ? p.farm.eggsPerSecL0 : roundHalfUp(hens(F, p) * p.farm.eggsPerHenPerSec, 4);
-export const coopCapacity = (F: number, p: EconomyParams) => p.farm.coopCapacityBase + p.farm.coopCapacityPerLevel * clampL(F, p);
+export const coopCapacity = (F: number, p: EconomyParams) => {
+  const L = clampL(F, p), lin = p.farm.coopCapacityBase + p.farm.coopCapacityPerLevel * L, w = p.farm.coopWing;
+  return w && L >= w.fromLevel ? Math.round(lin * w.mult) : lin;
+};
 /** Farm part of the egg price in cents (CSV egg_price x 100). */
 export const farmPriceCents = (F: number, p: EconomyParams) => p.farm.eggPriceCentsBase + p.farm.eggPriceCentsPerLevel * clampL(F, p);
 /** Sale price in cents: round_half_up((1.00 + 0.05F) x (1 + 0.12C), 2 dp), coefficients from config. */
@@ -80,10 +94,24 @@ export const customerIntervalS = (F: number, p: EconomyParams) =>
   Math.max(p.farm.customerIntervalMinS, roundHalfUp(p.farm.customerIntervalBaseS * p.farm.customerIntervalDecay ** clampL(F, p), 2));
 /** Demand = uniform int [ceil(lo*k), ceil(hi*k)], k = eggs/s x interval (min 1; max >= min). */
 export const demandRange = (F: number, p: EconomyParams): readonly [number, number] => {
+  const K = p.farm.demandFormulaMaxLevel, L = clampL(F, p);
+  if (K !== undefined && K >= 1 && L > K) {
+    const [a, b] = demandRange(K, p), [a0, b0] = demandRange(K - 1, p);
+    return [a + (L - K) * (a - a0), b + (L - K) * (b - b0)] as const;
+  }
   const k = eggsPerSec(F, p) * customerIntervalS(F, p);
   const lo = Math.max(1, Math.ceil(p.farm.demandLoFactor * k));
   return [lo, Math.max(lo, Math.ceil(p.farm.demandHiFactor * k))] as const;
 };
+/** Highest Farm level that can be bought (L30+: CSV farm_max_level; pre-L30+: maxLevel). */
+export const farmMaxLevel = (p: EconomyParams) => Math.min(p.maxLevel, p.farmMaxLevel ?? p.maxLevel);
+/** L30+ extra-level price for a Hens / Egg value level L bought at Farm F (see EconomyParams.hvExtra). rowCost = that track's CSV cost at L. */
+export function hvLevelCost(rowCost: number, L: number, F: number, p: EconomyParams): number {
+  const x = p.hvExtra; if (!x) return rowCost;
+  const f = clampL(F, p), share = x.shareByFarm[f] ?? 0, over = L - f - x.baseCapOverFarm;
+  if (!(share > 0) || over < 0) return rowCost;
+  return Math.max(rowCost, Math.floor(share * farmCost(f, p) * (1 + x.markup * over)));
+}
 export const queueMax = (F: number, p: EconomyParams) =>
   Math.min(p.customers.queue_max_cap, p.customers.queue_max_base + Math.floor(clampL(F, p) / p.customers.queue_max_step_levels));
 export const patienceS = (_F: number, p: EconomyParams) => p.customers.customer_patience_s;

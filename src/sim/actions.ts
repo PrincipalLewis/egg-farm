@@ -1,5 +1,5 @@
 import type { Balance } from '../config/balance';
-import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents } from './state';
+import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents, farmMaxLevel } from './state';
 import type { Sink } from './events';
 import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
@@ -28,7 +28,7 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
   return { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
 }
 function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
-  const L = kind === 'collection' ? s.collectionLevel : s.farmLevel; if (L >= b.maxLevel) return s;
+  const L = kind === 'collection' ? s.collectionLevel : s.farmLevel; if (L >= farmMaxLevel(b)) return s; // L30+: Farm & Collection stop at farm_max_level (late_curve MAXL); rows above only price Hens/Egg value
   const cost = (kind === 'collection' ? collectionCost : farmCost)(L, b) * 100; if (s.coinsCents < cost) return s;
   ev?.push({ type: 'upgrade', upgrade: kind, newLevel: L + 1, cost, coinsBefore: s.coinsCents });
   return { ...s, coinsCents: s.coinsCents - cost, ...(kind === 'collection' ? { collectionLevel: L + 1 } : { farmLevel: L + 1 }) };

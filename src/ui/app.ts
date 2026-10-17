@@ -414,7 +414,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
   coopImg.src = A(COOP_SPRITES[lastTier]);
   const upRowHtml = (kind: 'collection' | 'farm') => {
-    const s = g.state, C = s.collectionLevel, F = s.farmLevel, isF = kind === 'farm', L = isF ? F : C, max = L >= b.maxLevel;
+    const s = g.state, C = s.collectionLevel, F = s.farmLevel, isF = kind === 'farm', L = isF ? F : C, max = L >= S.farmMaxLevel(b);
     const cost = isF ? S.farmCost(F, b) : S.collectionCost(C, b), can = s.coinsCents >= cost * 100;
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
@@ -446,7 +446,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
-      <div class="meta">Level ${L} / ${b.maxLevel}</div>
+      <div class="meta">Level ${L} / ${S.farmMaxLevel(b)}</div>
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div></div></div>`;
@@ -484,7 +484,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     setText(collectBtn, collectLabel(coopWhole, S.eggsPerTap(s.collectionLevel, b), fmtCount));
     setDisabled(collectBtn, coopWhole < 1);
     // nav badges
-    const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
+    const canUp = (s.collectionLevel < S.farmMaxLevel(b) && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < S.farmMaxLevel(b) && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
     { const mk = nav.querySelector('[data-nav=market]') as HTMLElement, qf = queueFull(s, b) ? 'true' : 'false'; if (mk.dataset.queueFull !== qf) mk.dataset.queueFull = qf; } // S2-9 badge hook (Art & UX styles it)
     setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);

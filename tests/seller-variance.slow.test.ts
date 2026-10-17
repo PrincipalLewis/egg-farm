@@ -116,7 +116,7 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, 
 //           so any drift (or a crash) fails. Needs #17 economy.f1-m4cols 86f0e80e for the real band.
 //  any other sha: fails with 'unknown economy CSV <sha>: update AC7 band test'.
 // After the CSV changes, regenerate the fixture first: scripts/gen-seller-variance-fixtures.py.
-export const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
+export const F1_CSV = '1536be49' /* L30+ C2; was 6dca24cd (L0-29 identical) */, MAIN_PRE_F1_CSV = '57d964d5';
 const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
 const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const;
 export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): void {

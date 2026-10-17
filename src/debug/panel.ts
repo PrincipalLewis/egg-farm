@@ -14,7 +14,7 @@ export function mountDebug(g: Game, b: Balance) {
   document.body.append(el);
   const info = el.querySelector('#dbgInfo')!;
   const set = (patch: Partial<S.GameState>) => { g.state = { ...g.state, ...patch }; g.save(); };
-  const clampL = (L: number) => Math.max(0, Math.min(b.maxLevel, L));
+  const clampL = (L: number) => Math.max(0, Math.min(S.farmMaxLevel(b), L));
   el.addEventListener('click', e => {
     const a = (e.target as HTMLElement).dataset?.a; if (!a) return; const s = g.state;
     switch (a) {

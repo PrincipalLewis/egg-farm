@@ -17,7 +17,7 @@ import { balance as b } from '../src/config/balance';
 import { runM2 } from './bot-m2';
 import { VAR_DEFAULT } from './seller-variance';
 import { loadTargets, l18to25Guard, l18to25FixedGuard, t20P95Warning, quantile } from './pacing-guards';
-const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
+const F1_CSV = '1536be49' /* L30+ C2; was 6dca24cd (L0-29 identical) */, MAIN_PRE_F1_CSV = '57d964d5';
 // Same seeds as the AC7 band suite (tests/fixtures/seller_variance.json, 1..100; CCR m2).
 const fx = JSON.parse(readFileSync(new URL('./fixtures/seller_variance.json', import.meta.url), 'utf8')) as { seeds: number[] };
 const SEEDS = fx.seeds, HORIZON_S = 2 * 3600;

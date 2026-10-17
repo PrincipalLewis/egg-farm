@@ -65,6 +65,22 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   };
   // P3: an L0 eggs/s off the eggs/s = rate x hens line becomes the eggsPerSecL0 param (verified with every other cell).
   if (Math.abs(R[0].eggs_per_sec - r4(R[0].hens * p.farm.eggsPerHenPerSec)) > 1e-9) p.farm.eggsPerSecL0 = R[0].eggs_per_sec;
+  // L30+ second coop wing: first level off the linear coop line sets {fromLevel, mult}; verify() checks every later row.
+  const offLine = R.find(r => r.coop_capacity !== cap.base + cap.per * r.level);
+  if (offLine) p.farm.coopWing = { fromLevel: offLine.level, mult: r4(offLine.coop_capacity / (cap.base + cap.per * offLine.level)) };
+  // L30+: Farm max (CSV farm_max_level, constant) and the extra-level price rule (hv_extra_cost_farm_share per Farm row,
+  // hv_extra_second_markup constant, base cap = the L0 hens_cap_over_farm). Older CSVs without the columns keep the old shape.
+  const constCol = (c: string) => { const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`); return v; };
+  if ('farm_max_level' in R[0]) {
+    const fm = constCol('farm_max_level');
+    if (!Number.isInteger(fm) || fm < 1 || fm > n) throw new Error(`sync-economy: economy.csv farm_max_level=${fm} must be an integer in 1..${n}`);
+    p.farmMaxLevel = fm;
+  }
+  if ('hv_extra_cost_farm_share' in R[0]) {
+    if (!('hv_extra_second_markup' in R[0]) || !('hens_cap_over_farm' in R[0]) || R[0].hens_cap_over_farm !== R[0].egg_value_cap_over_farm)
+      throw new Error('sync-economy: hv_extra_cost_farm_share needs hv_extra_second_markup and equal L0 hens/egg_value_cap_over_farm');
+    p.hvExtra = { shareByFarm: R.map(r => r.hv_extra_cost_farm_share), markup: constCol('hv_extra_second_markup'), baseCapOverFarm: R[0].hens_cap_over_farm };
+  }
   const segs = cfg.farmCostGrowthSegments;
   validateCostGrowthSegments(segs, 'economy-config.farmCostGrowthSegments');
   if (segs && segs.length) p.farm.costGrowthSegments = segs.map(s => ({ from: s.from, to: s.to, growth: s.growth }));
@@ -81,11 +97,29 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
     p.farm.costGrowth = prev.farm?.costGrowth ?? 1;
   } else p.farm.costGrowth = fit('farm costGrowth', farmGuess, 0.0001, 0.05, v => col('farm_cost')({ ...p, farm: { ...p.farm, costGrowth: v } }));
   p.farm.customerIntervalDecay = fit('customerIntervalDecay', R[1].customer_interval_s / R[0].customer_interval_s, 0.0001, 0.02, v => col('customer_interval_s')({ ...p, farm: { ...p.farm, customerIntervalDecay: v } }));
-  const k0 = R[0].eggs_per_sec * R[0].customer_interval_s;
-  p.farm.demandLoFactor = fit('demandLoFactor', R[0].demand_min / k0, 0.01, 1, v => col('demand_min')({ ...p, farm: { ...p.farm, demandLoFactor: v, demandHiFactor: 99 } }));
-  p.farm.demandHiFactor = fit('demandHiFactor', R[0].demand_max / k0, 0.01, 2, v => col('demand_max')({ ...p, farm: { ...p.farm, demandHiFactor: v } }));
+  fitDemand(R, p);
   verify(rows, p);
   return p;
+}
+/** demand_min/max: fit lo/hi factors on the longest prefix L0..K that the eggs/s x interval formula reproduces; rows above K must
+ *  continue K's linear step (Economy's late_curve extrapolation). K = last row on pre-L30+ CSVs (no new param, unchanged output).
+ *  Rows above K are checked by verify(); nothing here is a hand-set level. */
+function fitDemand(R: Row[], p: EconomyParams) {
+  const n = R.length - 1, k0 = R[0].eggs_per_sec * R[0].customer_interval_s;
+  const ok = (c: 'demand_min' | 'demand_max', K: number, q: EconomyParams) => R.every(r => r.level > K || (tableRow(r.level, q) as any)[c] === r[c]);
+  let err: unknown;
+  for (let K = n; K >= 2; K--) {
+    try {
+      const lo = fit('demandLoFactor', R[0].demand_min / k0, 0.01, 1, v => ok('demand_min', K, { ...p, farm: { ...p.farm, demandLoFactor: v, demandHiFactor: 99 } }));
+      const hi = fit('demandHiFactor', R[0].demand_max / k0, 0.01, 2, v => ok('demand_max', K, { ...p, farm: { ...p.farm, demandLoFactor: lo, demandHiFactor: v } }));
+      const q: EconomyParams = { ...p, farm: { ...p.farm, demandLoFactor: lo, demandHiFactor: hi, ...(K < n ? { demandFormulaMaxLevel: K } : {}) } };
+      if (!R.every(r => { const t = tableRow(r.level, q); return t.demand_min === r.demand_min && t.demand_max === r.demand_max; })) {
+        throw new Error(`sync-economy: economy.csv demand above L${K} is not a linear continuation of the formula rows`);
+      }
+      p.farm = q.farm; return;
+    } catch (e) { err ??= e; if (K === n) err = e; }
+  }
+  throw err;
 }
 /** Every CSV cell must equal the formula output (floats to 1e-9). */
 export function verify(rows: Row[], p: EconomyParams) {
@@ -149,6 +183,6 @@ export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const p = fitParams(rows, prev, cfg);
   const workers = fitWorkers(rows, prev, !!cfg.farmCostFromCsv); verifyGraderCosts(rows, workers);
   prev = { ...prev, workers };
-  const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, ...rest } = prev;
+  const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, farmMaxLevel: _fm, hvExtra: _hx, ...rest } = prev;
   return { ...rest, _source: 'economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks', ...p };
 }
