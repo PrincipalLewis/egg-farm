@@ -1004,6 +1004,25 @@ sections.rc2minors = async () => {
     await ctx.close();
   }
 };
+// ---------- QA B4: the green ↑ purchase riser never covers the new upgrade price ----------
+sections.b4riser = async () => {
+  const MS = process.env.MINOR_SHOTS ?? `${SHOTS}/rc2-minors`; mkdirSync(MS, { recursive: true });
+  for (const [w, h] of [[360, 740], [1280, 800]]) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+    if (w < 960) { await page.locator('[data-nav=upgrades]').click(); await page.waitForTimeout(250); }
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: 1e7, customers: [], nextCustomerInS: 999 }; }); await page.waitForTimeout(300);
+    const btn = page.locator('#uRow .btn.buy').first();
+    await page.evaluate(() => { window.__rs = []; const t0 = performance.now(), loop = () => { const b = document.querySelector('#uRow .btn.buy'), r = document.querySelector('.riser');
+      if (b && r) { const a = b.getBoundingClientRect(), q = r.getBoundingClientRect(); window.__rs.push({ t: Math.round(performance.now() - t0), op: +getComputedStyle(r).opacity, hit: q.bottom > a.top + 0.5 && q.top < a.bottom && q.right > a.left && q.left < a.right }); }
+      if (performance.now() - t0 < 700) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+    await btn.click(); await page.waitForTimeout(100); if (shot) await page.screenshot({ path: `${MS}/b4-riser-after-buy-100ms-${w}${w >= 960 ? '-docked' : ''}.png` });
+    await page.waitForTimeout(700);
+    const f = await page.evaluate(() => window.__rs);
+    ok(`B4 purchase riser seen and never over the buy button / price (${w})`, f.length > 3 && f.every(x => !x.hit || x.op < 0.05), JSON.stringify({ n: f.length, hit: f.filter(x => x.hit).slice(0, 3) }));
+    ok(`B4 no page errors (${w})`, errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+};
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);
