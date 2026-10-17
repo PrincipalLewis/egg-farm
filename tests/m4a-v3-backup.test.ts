@@ -312,8 +312,9 @@ describe('B1 regression: M4-off saves vs a stale saveSeq copy (localStorage + In
   it('seq 5 / 1000 coins in LS + IDB, M4-off build saves 999,999 coins, reload keeps 999,999 (IDB mirror path)', async () => {
     const kv = kvOf(); const s5 = stale(); kv.setItem(SAVE_KEY, s5); const { db, data } = fakeIdb(); data.set(IDB_KEY, s5);
     expect(saveSeqOf(s5)).toBe(5);
-    const g = new Game(off, kv, () => T0 + H, undefined, 'dev', new IdbMirror(db)); await settle();
-    g.state = { ...g.state, coinsCents: 999_999_00 }; g.save(); await settle();
+    const m = new IdbMirror(db), writes: Promise<void>[] = []; const orig = m.write.bind(m); (m as any).write = (r: string) => { const p = orig(r); writes.push(p); return p; };
+    const g = new Game(off, kv, () => T0 + H, undefined, 'dev', m); await Promise.all(writes);
+    g.state = { ...g.state, coinsCents: 999_999_00 }; g.save(); await Promise.all(writes); // await the IDB writes, no timer (flaked under load)
     const ls = kv.getItem(SAVE_KEY)!, idb = data.get(IDB_KEY) as string;
     expect(saveSeqOf(ls)).toBeGreaterThan(5); expect(JSON.parse(ls).state.coinsCents).toBe(999_999_00); // seq carried forward
     expect(idb).toBe(ls); // the mirror put was not refused

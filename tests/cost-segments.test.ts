@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { farmCost, validateCostGrowthSegments, validateCostTable, type EconomyParams } from '../src/config/formulas';
 import { graderTierCostCents } from '../src/sim/workers';
@@ -10,6 +10,8 @@ const rows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.
 const F1_CSV_SHA256 = '4ad1349ad27ca4c1657c94afd0fbfabd081aa658faa3ff5882a8bc6121e4737f'; // Economy row-20 fix (w4 9100), CRLF
 /** sha256 of product/economy.f1-m4cols.csv rev 86f0e80e (HoE-approved shipping F1 table), copied to data/economy.csv. */
 const M4COLS_SHA256 = '86f0e80e359398e3fd3061c268794054558029270cc3944ac522ef7ddbea0550';
+/** HoE 03:51: the approved L30+ table (product/economy.l30plus-polish.csv rev b59c4e0d), copied to data/staging/economy.l30plus.csv. */
+const L30_APPROVED_SHA256 = 'b59c4e0db7e7ddd53ba37b6fa27c815a7f3d308a795df56828c611bdbfd31658';
 const F1 = [{ from: 6, to: 14, growth: 1.25 }, { from: 15, to: 20, growth: 1.45 }];
 /** Curve params (pre-F1 L0 base 100, growth 1.35) with no costTable, so these tests exercise the formula path. */
 const curve: any = { ...balance, farm: { ...balance.farm, costTable: undefined, baseCost: 100, costGrowth: 1.35 } };
@@ -46,10 +48,10 @@ describe('F1 farm cost growth segments', () => {
   });
   it("Economy's economy.f1.csv (vendored, sha-pinned): per-level fit, F1-GAP L18/L19 exact", () => {
     // Vendored copy of Economy's product/economy.f1.csv, pinned by sha256 (verified against the product file when the studio workspace is present).
-    const vendored = new URL('../data/economy.f1.csv', import.meta.url), prod = new URL('../../product/economy.f1.csv', import.meta.url);
+    // HoE 03:51: never read Product's working drafts (product/economy.f1.csv changes under us); repo copies only, sha-pinned.
+    const vendored = new URL('../data/economy.f1.csv', import.meta.url);
     const sha = (u: URL) => createHash('sha256').update(readFileSync(u)).digest('hex');
     expect(sha(vendored)).toBe(F1_CSV_SHA256);
-    if (existsSync(prod)) expect(sha(prod), 'data/economy.f1.csv must equal product/economy.f1.csv').toBe(sha(vendored));
     const src = vendored;
     const f1 = parseEconomyCsv(readFileSync(src, 'utf8'));
     expect(f1.length).toBe(31);
@@ -115,5 +117,15 @@ describe('F1 farm cost growth segments', () => {
     const L = 300, want = Math.floor(100 * 1.25 ** 9 * 1.45 ** 6 * 1.35 ** (L - 15));
     expect(farmCost(L, p) / want).toBeCloseTo(1, 12);
     expect(farmCost(600, p)).toBe(farmCost(500, p)); // clamped to maxLevel
+  });
+  it('approved L30+ table b59c4e0d (pinned, not a draft): F1 L0-29 farm/w4 costs = shipped CSV, Farm cost rising to L50', () => {
+    const u = new URL('../data/staging/economy.l30plus.csv', import.meta.url);
+    expect(createHash('sha256').update(readFileSync(u)).digest('hex')).toBe(L30_APPROVED_SHA256);
+    const t = parseEconomyCsv(readFileSync(u, 'utf8')), cfg = readEconomyConfig();
+    for (const r of rows.filter(r => r.level < 30)) { expect(t[r.level].farm_cost, `L${r.level} farm_cost`).toBe(r.farm_cost); expect(t[r.level].w4_tier_cost, `L${r.level} w4`).toBe(r.w4_tier_cost); }
+    expect([t[18].farm_cost, t[19].farm_cost]).toEqual([11076, 18201]); // F1-GAP rows
+    // Full param fit of the L30+ table waits for Economy's merge (D5); tests/l30plus.test.ts builds that balance. Here: data only.
+    expect(t.length - 1).toBeGreaterThanOrEqual(cfg.farmMaxLevel!); expect(cfg.farmMaxLevel).toBe(50);
+    for (let L = 1; L <= cfg.farmMaxLevel!; L++) expect(t[L].farm_cost, `L${L} strictly increasing`).toBeGreaterThan(t[L - 1].farm_cost);
   });
 });
