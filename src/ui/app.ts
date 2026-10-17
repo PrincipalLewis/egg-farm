@@ -24,7 +24,7 @@ import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
 import { navUpgradesTab, changedLine, fxOrNoChange } from './upgrade-card';
-import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, type Goal } from './next-goal';
+import { selectGoal, GoalHysteresis, goalAria, goalLabelParts, paintGoalLabel, fitGoalLabelEl, goalButtonAria, type Goal } from './next-goal';
 import { collectionFxLines, collectionSummary, collectionDeltas } from './collection-copy';
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
@@ -406,14 +406,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       requestAnimationFrame(() => {
         fitGoalLabelEl(goalLbl);
         const v = `${goalLbl.textContent ?? ''} ${goalSt.textContent ?? ''}`.replace(/\s+/g, ' ').trim();
-        if (v) goalBtn.setAttribute('aria-label', `${v}. ${goalAria(gl)}`);
+        if (v) goalBtn.setAttribute('aria-label', goalButtonAria(v, gl));
       });
     }
     setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
     // Visible name must be in the accessible name (axe label-content-name-mismatch).
     const vis = `${goalLbl.textContent ?? ''} ${gl.status}`.replace(/\s+/g, ' ').trim();
-    goalBtn.setAttribute('aria-label', vis ? `${vis}. ${goalAria(gl)}` : goalAria(gl));
+    goalBtn.setAttribute('aria-label', goalButtonAria(vis, gl));
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
       if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
       setText(goalLive, goalAria(gl)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
@@ -425,7 +425,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let refitRaf = 0; const refitGoal = () => { if (!refitRaf) refitRaf = requestAnimationFrame(() => { refitRaf = 0; fitGoalLabelEl(goalLbl); }); };
   if (typeof ResizeObserver !== 'undefined') { let lastW = -1; new ResizeObserver(es => { const w = Math.round(es[0].contentRect.width); if (w !== lastW) { lastW = w; refitGoal(); } }).observe(goalLbl.parentElement ?? goalLbl); }
   docked.addEventListener?.('change', refitGoal);
-  void document.fonts.ready.then(() => { goalNow = true; renderGoal(); refitGoal(); });
+  void document.fonts?.ready?.then(() => { goalNow = true; renderGoal(); refitGoal(); });
   /** Tap never buys: open the target's tab, scroll the row into view, highlight it, focus its Buy (spec §4). */
   const openGoal = () => {
     const gl = goalShown; if (!gl) return;
