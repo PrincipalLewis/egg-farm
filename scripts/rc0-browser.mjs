@@ -690,6 +690,27 @@ sections.bannerFit = async () => {
   }
 };
 // ---------- Art & UX 23:25: sticky refill bar opaque + full width + 8px padding; cards scroll-margin (360, 1280 docked) ----------
+// ---------- Major P3 (#3 fix kept after the main merge): at 375 the Collection card's hint lines ("Limited by …", "Affordable in …" / "Need $X more") never overlap ----------
+sections.p3coll375 = async () => {
+  const { ctx, page } = await open({ w: 375, h: 667, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+  for (const [F, C] of [[3, 5], [10, 12], [20, 24]]) {
+    await page.evaluate(([F, C]) => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: F, collectionLevel: C, coinsCents: 1, customers: [], nextCustomerInS: 1e9 }; }, [F, C]);
+    if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click().catch(() => {});
+    await page.locator('[data-tab=collection]').click(); await page.waitForTimeout(400);
+    const r = await page.evaluate(() => {
+      const card = document.querySelector('#uRow .up'); if (!card) return { missing: true };
+      const els = [...card.querySelectorAll('.hint, .hint *')].filter(e => e.getClientRects().length && e.textContent.trim() && (e.classList.contains('hint') || e.matches('button, span'))).filter(e => e.classList.contains('hint'));
+      const rs = els.map(e => { const b = e.getBoundingClientRect(); return { t: e.textContent.trim().slice(0, 40), x: b.left, y: b.top, r: b.right, b: b.bottom }; });
+      const ov = []; for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) { const a = rs[i], c = rs[j]; if (a.x < c.r - 0.5 && c.x < a.r - 0.5 && a.y < c.b - 0.5 && c.y < a.b - 0.5) ov.push([a.t, c.t]); }
+      const cb = card.getBoundingClientRect(); const out = rs.filter(h => h.r > cb.right + 0.5 || h.x < cb.left - 0.5);
+      return { n: rs.length, hints: rs.map(h => h.t), ov, out, need: /Need \$[\d.,]+[KMBT]? more/.test(card.textContent), card: [cb.left, cb.top, cb.width, cb.height] };
+    });
+    ok(`Major P3 375 F${F}/C${C}: Collection card hint boxes (Limited by … / Affordable in … / Need $X more) do not overlap and stay inside the card`, !r.missing && r.n >= 1 && r.ov.length === 0 && r.out.length === 0, JSON.stringify(r));
+    if (shot) await page.screenshot({ path: `${SHOTS}/rc1-p3-collection-375-F${F}.png` });
+    { const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); await page.locator('#uRow .up').first().screenshot({ path: `${FCS}/p3-collection-card-375-F${F}-${ENGINE}.png` }); } }
+  }
+  await ctx.close();
+};
 sections.refillBar = async () => {
   for (const [w, h] of [[360, 800], [1280, 800]]) {
     const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 10, farmLevel: 12, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2,
