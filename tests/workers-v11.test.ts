@@ -4,7 +4,8 @@ import { initialState, GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { mood, isYawning, showManageAll, graderMult } from '../src/sim/workers';
-import { workersHtml, manageAllHtml } from '../src/ui/workers-ui';
+import { workersHtml, manageAllHtml, refillCount, navManageView } from '../src/ui/workers-ui';
+import { readFileSync } from 'node:fs';
 import { asleepOrUnpaidCount } from '../src/econ/income';
 import type { SimEvent } from '../src/sim/events';
 const E = b.workers.energy;
@@ -151,6 +152,17 @@ describe('PM Workers ruling (b): < 3 hired refills only the lowest worker; bulk 
     expect(m.workers.coop_hand!.energy).toBe(100); expect(m.workers.market_hand!.energy).toBe(30);
     expect(m.manageCdS).toBe(E.manage_cooldown_s);
     expect(apply(m, { type: 'manageAll' }, b)).toBe(m); // cooldown applies
+  });
+  it('2 hired, both tired: nav badge/aria and docked header label match the Workers-tab bar (review 56513e7 #1)', () => {
+    const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10) }, manageCdS: 0 });
+    expect(refillCount(s, b)).toBe(1);
+    const mob = navManageView(refillCount(s, b), 0, false, { text: '', at: 0 }, 0), dock = navManageView(refillCount(s, b), 0, true, { text: '', at: 0 }, 0);
+    expect(mob.badge).toBe('1'); expect(mob.aria.text).toBe('Refill 1 tired worker'); expect(dock.label).toBe('Refill 1 tired worker');
+    expect(manageAllHtml(s, b)).toContain(`aria-label="${dock.label}"`);
+    const s3 = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 }); expect(refillCount(s3, b)).toBe(3);
+    // app.ts must feed the capped count to the nav (not promptManage().length)
+    const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+    expect(src).toMatch(/navManageView\(refillCount\(s, b\)/); expect(src).not.toMatch(/navManageView\(promptManage/);
   });
   it('3 hired, all tired: bulk refill still refills every tired worker', () => {
     const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 });

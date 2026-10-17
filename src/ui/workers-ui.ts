@@ -49,9 +49,11 @@ export class YawnSfx {
 export const refillTiredLabel = (n: number) =>
   n === 1 ? 'Refill 1 tired worker' : `Refill ${n} tired workers`;
 
+/** Ruling (b): the count every Refill control shows; < 3 hired refills only the lowest worker, so it is capped at 1 (review 56513e7 #1). */
+export function refillCount(s: GameState, b: Balance): number { const n0 = promptManage(s, b).length; return bulkManageAllowed(s.workers, b) ? n0 : Math.min(1, n0); }
 export function manageAllHtml(s: GameState, b: Balance): string {
   if (!showManageAll(s.workers, b)) return '';
-  const n0 = promptManage(s, b).length, n = bulkManageAllowed(s.workers, b) ? n0 : Math.min(1, n0), cd = Math.ceil(s.manageCdS); // ruling (b): < 3 hired refills one
+  const n = refillCount(s, b), cd = Math.ceil(s.manageCdS); // ruling (b): < 3 hired refills one
   if (n === 0) return ''; // AC-R9: hidden when N=0
   const glow = WORKERS.some(id => isYawning(s.workers[id], b));
   const label = refillTiredLabel(n);
