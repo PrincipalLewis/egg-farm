@@ -23,6 +23,11 @@ export function candidates(s: GameState, b: Balance): Candidate[] {
   return out;
 }
 const cheapest = (c: Candidate[]) => c.reduce<Candidate | null>((a, x) => !a || x.costCents < a.costCents || (x.costCents === a.costCents && GOAL_ORDER.indexOf(x.key) < GOAL_ORDER.indexOf(a.key)) ? x : a, null);
+/** Upgrade card state (Farm / Collection): level, displayed max (CSV farm_max_level) and MAX = buy disabled. */
+export function upgradeCard(kind: 'collection' | 'farm', s: GameState, b: Balance): { level: number; maxLevel: number; max: boolean; meta: string } {
+  const level = kind === 'farm' ? s.farmLevel : s.collectionLevel, maxLevel = farmMaxLevel(b);
+  return { level, maxLevel, max: level >= maxLevel, meta: `Level ${level} / ${maxLevel}` };
+}
 export function farmLabel(F: number, b: Balance): string {
   const n = F + 1, w = (['market_hand', 'coop_hand', 'hawker'] as const).find(id => b.workers[id].unlock_farm === n);
   const k = b.workers.grader.tiers.findIndex(t => t.farm === n);

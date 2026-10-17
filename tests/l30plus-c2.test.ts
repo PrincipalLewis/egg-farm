@@ -92,3 +92,46 @@ describe('saves across the cap lift', () => {
     expect(roundTrip(saveAt(top))).not.toBeNull(); expect(roundTrip(saveAt(top + 1))).toBeNull();
   });
 });
+
+// HoP 09:29 (50/55 split confirmed): Farm and Collection MAX at CSV farm_max_level; load clamp = last row (55).
+import { candidates, selectGoal, upgradeCard } from '../src/ui/next-goal';
+describe('HoP 50/55 split: Farm and Collection MAX at farm_max_level', () => {
+  const M = R[0].farm_max_level;
+  const at = (F: number, C: number) => ({ ...initialState(b, 7), farmLevel: F, collectionLevel: C, coinsCents: 1e15 });
+  it('farm_max_level is 50 and the track clamp is 55 (from the CSV)', () => { expect(farmMaxLevel(b)).toBe(M); expect(b.maxLevel).toBe(top); expect([M, top]).toEqual([50, 55]); });
+  for (const kind of ['farm', 'collection'] as const) {
+    it(`${kind}: card shows MAX and "Level ${M} / ${M}" at ${M}; buyable with "/ ${M}" at ${M - 1}`, () => {
+      const s = kind === 'farm' ? at(M, 0) : at(0, M);
+      expect(upgradeCard(kind, s, b)).toEqual({ level: M, maxLevel: M, max: true, meta: `Level ${M} / ${M}` });
+      const s1 = kind === 'farm' ? at(M - 1, 0) : at(0, M - 1);
+      expect(upgradeCard(kind, s1, b)).toMatchObject({ max: false, meta: `Level ${M - 1} / ${M}` });
+    });
+    it(`${kind}: buying L${M + 1} is impossible even with unlimited coins (state unchanged)`, () => {
+      const s = at(M, M), t = apply(s, { type: kind === 'farm' ? 'buyFarm' : 'buyCollection' } as any, b);
+      expect(t).toBe(s); expect(t.farmLevel).toBe(M); expect(t.collectionLevel).toBe(M);
+    });
+  }
+  it(`next-goal never offers FARM or COLL at ${M} (offers them at ${M - 1})`, () => {
+    const keys = (F: number, C: number) => candidates(at(F, C), b).map(c => c.key);
+    expect(keys(M, M)).not.toContain('FARM'); expect(keys(M, M)).not.toContain('COLL');
+    expect(keys(M - 1, M - 1)).toEqual(expect.arrayContaining(['FARM', 'COLL']));
+    const g = selectGoal(at(M, M), b, 0); expect(['FARM', 'COLL']).not.toContain(g.key);
+  });
+  it(`saves at ${M + 1}..${top} (above Farm max, within the clamp) load cleanly with levels kept; ${top + 1} is rejected`, () => {
+    const rt = (s: any) => { const kv = mem(); kv.setItem(SAVE_KEY, serialize(s, Date.now())); return load(kv, b); };
+    for (const L of [M + 1, top]) {
+      const s = at(L, L), f = rt(s); expect(f, `L${L}`).not.toBeNull(); expect(f!.state).toEqual(JSON.parse(JSON.stringify(s)));
+      expect(upgradeCard('farm', f!.state, b).max).toBe(true);
+    }
+    expect(rt(at(top + 1, 0))).toBeNull(); expect(rt(at(0, top + 1))).toBeNull();
+  });
+});
+
+// TODO(#12 integration after #31 merges): main has no Hens / Egg value tracks or save fields; enable these on the M4-A base.
+describe.skip('Hens / Egg value tracks to 55 (needs M4-A #31)', () => {
+  it.todo('Hens and Egg value buyable L51..55 at Farm 50, charged hvLevelCost(row, L, F) (max(row, share x farmCost(F) x (1 + markup x extra)))');
+  it.todo('H/V cap = F + hens_cap_over_farm (3) below L40, F + 5 from L40; capped at track max 55; L56 impossible');
+  it.todo('best-buy / next-goal / track card use hvLevelCost and show "Level L / 55", MAX at 55');
+  it.todo('save with hensLevel / eggValueLevel 55 loads unchanged; 56 rejected (migrate-v7 default track max = 55)');
+  it.todo('100-seed TS L30+ bot matches the pinned Python late_curve gate (no test-built balance)');
+});

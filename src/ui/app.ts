@@ -21,7 +21,7 @@ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
-import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
+import { selectGoal, GoalHold, goalAria, upgradeCard, type Goal } from './next-goal';
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
@@ -414,7 +414,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
   coopImg.src = A(COOP_SPRITES[lastTier]);
   const upRowHtml = (kind: 'collection' | 'farm') => {
-    const s = g.state, C = s.collectionLevel, F = s.farmLevel, isF = kind === 'farm', L = isF ? F : C, max = L >= S.farmMaxLevel(b);
+    const s = g.state, C = s.collectionLevel, F = s.farmLevel, isF = kind === 'farm', card = upgradeCard(kind, s, b), L = card.level, max = card.max;
     const cost = isF ? S.farmCost(F, b) : S.collectionCost(C, b), can = s.coinsCents >= cost * 100;
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
@@ -446,7 +446,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
-      <div class="meta">Level ${L} / ${S.farmMaxLevel(b)}</div>
+      <div class="meta">${card.meta}</div>
       ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div></div></div>`;
