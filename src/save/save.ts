@@ -43,9 +43,10 @@ export function rankOf(raw: unknown): [number, number, number] {
   const v = Number.isInteger(d?.version) ? d.version : -1, st = d?.state;
   return [v, st && st.tracksV7 === 1 && typeof st.v6BackupId === 'string' && st.v6BackupId !== '' ? 1 : 0, saveSeqOf(raw)];
 }
-/** M4-19 (HoE correction): > 0 when a outranks b by version, then committed migrationId, then saveSeq, then savedAt. */
+/** M4-19 (HoE correction): > 0 when a outranks b by version, then committed migrationId, then saveSeq (only when both
+ *  copies carry one; HoE 02:37), then savedAt. Shared by pickNewest/reconcile and IdbMirror.write's refuse check. */
 export function rankCompare(a: unknown, b: unknown, now = Date.now()): number {
-  const [va, ca, qa] = rankOf(a), [vb, cb, qb] = rankOf(b); if (va !== vb) return va - vb; if (ca !== cb) return ca - cb; if (qa !== qb) return qa - qb;
+  const [va, ca, qa] = rankOf(a), [vb, cb, qb] = rankOf(b); if (va !== vb) return va - vb; if (ca !== cb) return ca - cb; if (qa > 0 && qb > 0 && qa !== qb) return qa - qb; // CCR B1: seq only when both copies have one, else savedAt
   const t = (x: unknown) => { try { return savedAtRank(JSON.parse(x as string).savedAt, now); } catch { return -Infinity; } };
   const ta = t(a), tb = t(b); return ta === tb ? 0 : ta > tb ? 1 : -1;
 }
@@ -144,7 +145,9 @@ export function serialize(state: GameState, now: number, saveSeq?: number, b?: B
   // no saveSeq, no M4 track fields. Marked (tracksV7) saves keep their track fields byte-for-byte (M4A v3).
   const legacy = !!b && !m4On(b) && !M4_BUILD_SESSION_OFF.has(b) && (state as { tracksV7?: number }).tracksV7 !== 1;
   let out: unknown = state;
-  if (legacy) { const { hensLevel: _h, eggValueLevel: _v, celebratedMilestones: _c, ...rest } = state; out = rest; saveSeq = undefined; }
+  // HoE 02:37 / CCR B1: legacy keeps a saveSeq the stored copy already had (callers pass saveSeqOf(prev) + 1, so > 1 means
+  // prev carried one) and carries it forward; a main-origin save without one stays byte-equal to main.
+  if (legacy) { const { hensLevel: _h, eggValueLevel: _v, celebratedMilestones: _c, ...rest } = state; out = rest; if (!(saveSeq && saveSeq > 1)) saveSeq = undefined; }
   const st = JSON.stringify(out);
   return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
 }

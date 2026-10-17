@@ -252,7 +252,7 @@ describe('(b) m4-design §3c/§3d interim marker path (ADR M4-14..24, spec v1.10
   it('HoE ranking: version, then committed migrationId, then saveSeq, then savedAt; saves write saveSeq on main (missing = 0)', () => {
     const mk = (o: any) => JSON.stringify({ version: 6, savedAt: T0, state: mainState(1, 1), ...o });
     expect(rankCompare(mk({ saveSeq: 5, savedAt: T0 - 9000 }), mk({ saveSeq: 4 }), T0 + 1)).toBeGreaterThan(0); // seq beats savedAt
-    expect(rankCompare(mk({}), mk({ saveSeq: 1 }), T0 + 1)).toBeLessThan(0); // missing = 0
+    expect(rankCompare(mk({}), mk({ saveSeq: 1 }), T0 + 1)).toBe(0); expect(rankCompare(mk({ savedAt: T0 + 1 }), mk({ saveSeq: 9 }), T0 + 2)).toBeGreaterThan(0); // HoE 02:37: one side without seq -> savedAt
     expect(rankCompare(mk({ saveSeq: 3, savedAt: T0 - 5 }), mk({ saveSeq: 3 }), T0 + 1)).toBeLessThan(0); // tie -> savedAt
     expect(rankCompare(raw6({ ...initialState(on), tracksV7: 1, v6BackupId: ID1 }), mk({ saveSeq: 99 }), T0 + 1)).toBeGreaterThan(0); // committed beats seq
     expect(rankCompare(mk({ version: 5, saveSeq: 99 }), mk({}), T0 + 1)).toBeLessThan(0); // version first
@@ -301,5 +301,42 @@ describe('(b) m4-design §3c/§3d interim marker path (ADR M4-14..24, spec v1.10
   });
   it('n1: migrate() alone never yields a backup payload', () => {
     const f = migrate(JSON.parse(raw6(mainState(10, 7))), on); expect(f.tracksMigrated).toBe(true); expect(f.preTracksRaw).toBeUndefined();
+  });
+});
+
+// CCR B1 on bd487ab + HoE 02:37: an M4-off build must never lose progress to a stale saveSeq-bearing copy.
+import { tracksOff } from '../src/game';
+describe('B1 regression: M4-off saves vs a stale saveSeq copy (localStorage + IndexedDB)', () => {
+  const H = 3_600_000;
+  const stale = () => serialize({ ...mainState(10, 7), coinsCents: 1000_00 } as any, T0, 5, tracksOff(on)); // seq 5, 1000 coins
+  it('seq 5 / 1000 coins in LS + IDB, M4-off build saves 999,999 coins, reload keeps 999,999 (IDB mirror path)', async () => {
+    const kv = kvOf(); const s5 = stale(); kv.setItem(SAVE_KEY, s5); const { db, data } = fakeIdb(); data.set(IDB_KEY, s5);
+    expect(saveSeqOf(s5)).toBe(5);
+    const g = new Game(off, kv, () => T0 + H, undefined, 'dev', new IdbMirror(db)); await settle();
+    g.state = { ...g.state, coinsCents: 999_999_00 }; g.save(); await settle();
+    const ls = kv.getItem(SAVE_KEY)!, idb = data.get(IDB_KEY) as string;
+    expect(saveSeqOf(ls)).toBeGreaterThan(5); expect(JSON.parse(ls).state.coinsCents).toBe(999_999_00); // seq carried forward
+    expect(idb).toBe(ls); // the mirror put was not refused
+    // reboot: reconcile the IndexedDB copy into localStorage, then load
+    reconcile(kv, idb, off, T0 + 2 * H); expect(new Game(off, kv, () => T0 + 2 * H).state.coinsCents).toBe(999_999_00);
+    // and even with the stale seq-5 copy still in IndexedDB, the newer LS copy wins
+    expect(reconcile(kv, s5, off, T0 + 2 * H)).toBe('ls'); expect(new Game(off, kv, () => T0 + 2 * H).state.coinsCents).toBe(999_999_00);
+  });
+  it('localStorage path: a newer main-format copy without saveSeq beats an older seq-5 copy (savedAt fallback), and IDB.write does not refuse it', async () => {
+    const s5 = stale(); const lsNoSeq = serialize({ ...mainState(10, 7), coinsCents: 999_999_00 } as any, T0 + H, undefined, off);
+    expect(saveSeqOf(lsNoSeq)).toBe(0);
+    expect(pickNewest(lsNoSeq, s5, off, T0 + 2 * H)).toBe('ls');
+    const kv = kvOf(); kv.setItem(SAVE_KEY, lsNoSeq); expect(reconcile(kv, s5, off, T0 + 2 * H)).toBe('ls');
+    expect(new Game(off, kv, () => T0 + 2 * H).state.coinsCents).toBe(999_999_00);
+    const { db, data } = fakeIdb(); data.set(IDB_KEY, s5); await new IdbMirror(db).write(lsNoSeq); expect(data.get(IDB_KEY)).toBe(lsNoSeq);
+  });
+  it('both copies carry saveSeq: the higher seq still wins over a newer savedAt', async () => {
+    const hi = serialize({ ...mainState(10, 7), coinsCents: 5_00 } as any, T0, 7, on), lo = serialize({ ...mainState(10, 7), coinsCents: 6_00 } as any, T0 + H, 6, on);
+    expect(pickNewest(lo, hi, off, T0 + 2 * H)).toBe('idb'); expect(pickNewest(hi, lo, off, T0 + 2 * H)).toBe('ls');
+    const { db, data } = fakeIdb(); data.set(IDB_KEY, hi); await new IdbMirror(db).write(lo); expect(data.get(IDB_KEY)).toBe(hi); // refused
+  });
+  it('fresh flag-off save without a prior saveSeq stays main-format (no saveSeq key)', () => {
+    const kv = kvOf(); kv.setItem(SAVE_KEY, raw6(mainState(10, 7))); new Game(off, kv, () => T0 + H).save();
+    expect(kv.getItem(SAVE_KEY)).not.toMatch(/saveSeq/);
   });
 });
