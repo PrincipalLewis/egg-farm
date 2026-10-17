@@ -5,7 +5,7 @@ reads at import (`product/economy.f1-m4cols.csv`, opened via `../economy.f1-m4co
 Files are byte-identical to the source; the layout keeps the sim's relative path working.
 
 `tests/economy.test.ts` runs ONLY this copy and asserts the sha256 values in `SHA256SUMS`.
-To change it, Economy opens a PR that updates these files, `SHA256SUMS`, `SOURCE` (provenance: source path, full sha256, vendoring date), and `data/economy.csv`
+To change it, Features opens a PR (from the sha Economy hands over) that updates these files, `SHA256SUMS`, `SOURCE` (provenance: source path, full sha256, vendoring date), and `data/economy.csv`
 together (see engineering/ci-gates.md).
 
 ## Config mapping (decisions.md:295)

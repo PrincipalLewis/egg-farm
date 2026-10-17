@@ -22,3 +22,12 @@ it('opt-in: match reported, mismatch and missing file only warn (exit 0)', () =>
   expect(run([], { ECONOMY_PRODUCT_CHECK: '1', ECONOMY_PRODUCT_DIR: bad })).toMatchObject({ code: 0, out: expect.stringMatching(/WARNING .*differs/) });
   expect(run(['--product'], { ECONOMY_PRODUCT_DIR: join(bad, 'nope') })).toMatchObject({ code: 0, out: expect.stringMatching(/WARNING .*not found/) });
 });
+it('--strict: exit 1 on mismatch or missing product file, exit 0 on match', () => {
+  const ok = mkdtempSync(join(tmpdir(), 'prod-'));
+  writeFileSync(join(ok, 'economy.csv'), readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
+  expect(run(['--product', '--strict'], { ECONOMY_PRODUCT_DIR: ok }).code).toBe(0);
+  const bad = mkdtempSync(join(tmpdir(), 'prod-')); writeFileSync(join(bad, 'economy.csv'), 'level\n0\n');
+  expect(run(['--product', '--strict'], { ECONOMY_PRODUCT_DIR: bad })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR .*differs/) });
+  expect(run(['--product', '--strict'], { ECONOMY_PRODUCT_DIR: join(bad, 'nope') })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR .*not found/) });
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: join(bad, 'nope') }).code).toBe(0); // still opt-in: --strict alone does nothing
+});
