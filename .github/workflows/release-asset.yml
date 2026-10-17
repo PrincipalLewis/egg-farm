@@ -1,0 +1,30 @@
+name: release-asset
+# QA F2: releases/tags are made outside CI, so gate the asset that is actually uploaded: download every .html attached to the
+# release and run check-release-build on it with --build-id = BUILD_PREFIX + the tag's commit.
+# Also runnable by hand: Actions > release-asset > Run workflow > tag.
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      tag: { description: 'Release tag to check', required: true }
+permissions:
+  contents: read
+jobs:
+  check-uploaded-html:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Download release .html assets
+        run: mkdir -p rel && gh release download "$TAG" --pattern '*.html' --dir rel && ls -la rel
+      - name: check-release-build --build-id on each uploaded html
+        run: |
+          prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
+          sha=$(git rev-parse --short "$TAG^{commit}")
+          for f in rel/*.html; do HEAD_COMMIT=$(git rev-parse "$TAG^{commit}") node scripts/check-release-build.mjs "$f" --build-id "$prefix+$sha"; done
