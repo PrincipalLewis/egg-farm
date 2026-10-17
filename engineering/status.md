@@ -71,3 +71,7 @@
 - 2026-10-17 04:30 Senior Software Architect — **done:** merged origin/main 4608a4f (#13; .gitignore conflict resolved as union); CCR #26 m1: --strict CSV compare is raw sha256 (CRLF/BOM fail), non-strict still normalises; `.gitattributes` `*.csv text eol=lf` (renormalise no-op); check-vendor-pins: missing SHA256SUMS -> ERROR exit 1, unlisted vendor files fail; tests. Real product/ --strict exit 0 (57d964d5; #17 not on main yet). **next:** CCR/QA re-check; #13 Lows follow-up now unblocked. **blocked:** none.
 - 2026-10-17 04:50 Senior Software Architect — **done:** QA #26: .gitattributes adds `vendor/economy-sim/** -text` after `*.csv text eol=lf` (vendor wins); renormalise no-op; check-vendor-pins passes in a core.autocrlf=true clone. **next:** QA/CCR re-check. **blocked:** none.
 - 2026-10-17 04:57 Senior Software Architect: done: ci-gates.md stale-autocrlf caveat (#26). next: QA verdicts #26/#27.
+
+## 2026-10-17 07:05 (UTC+2) Senior Engineer, Features & Economy Wiring: PR #31 CCR B1/m1/n1
+- done: 459c1de on m4/m4a-tracks-v4: m4SaveSeq carries saveSeq forward (+1) whenever the previous copy had one (hadSeq), so a flag-off save after an M4-build-off save outranks the stale IDB copy; regression test tests/m4a-saveseq-carry.test.ts (fails on 7621153, passes now); doc comments reattached (n1); PR body cites full art-ux/ and qa/m3-recheck/ paths (m1). Gates: tsc OK, vitest 745/745, slow 14/14, sync --check OK, golden f90d1678 + pins, check-globals chromium PASS.
+- next: HoE to push SHA; CCR re-review; m2 stays with #17.
