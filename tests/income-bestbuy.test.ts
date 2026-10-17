@@ -172,10 +172,8 @@ describe('T6 HUD text === aria money (MK-39)', () => {
       // visible text embeds the same money token (after optional ⚠ / + / −)
       expect(v.text.replace('⚠ ', '').replace('\u2212', '').replace('+', '')).toBe(`${v.money}/s`);
     }
-    // stopped never positive
-    const stopped = rateView(13461, { stopped: true });
-    expect(stopped.sign).not.toBe('pos');
-    expect(stopped.money).toBe('$0.00');
-    expect(stopped.aria).toContain('$0.00');
+    // PM Workers ruling (a): the real rate is never clamped; 'stopped' only adds the aria reason at <= 0
+    const pos = rateView(13461, { stopped: true }); expect(pos.sign).toBe('pos'); expect(pos.money).toBe('$134.61');
+    const z = rateView(0, { stopped: true }); expect(z.sign).toBe('neg'); expect(z.aria).toContain('production stopped');
   });
 });

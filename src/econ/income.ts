@@ -64,7 +64,7 @@ export function incomePerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): n
   return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts);
 }
 
-/** True when any hired worker is asleep/unpaid (Critic #3 / AC-R2). */
+/** True when any hired worker is asleep/unpaid. Ruling (a): only used for the aria reason when the live rate is <= 0; never clamps the rate. */
 export function productionStopped(s: GameState, b: Balance): boolean {
   for (const id of ['market_hand', 'coop_hand', 'hawker', 'grader'] as const) {
     const w = s.workers[id];

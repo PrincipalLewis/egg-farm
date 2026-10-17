@@ -196,7 +196,7 @@ describe('S2-8 net rate + wages, S2-9 queue-full dot (stubbed data seam)', async
   it('rate text / sign / aria', () => {
     expect(E.rateView(120)).toMatchObject({ text: '+$1.20/s', sign: 'pos', money: '$1.20', aria: 'Net income plus $1.20 per second' });
     expect(E.rateView(-3).text).toBe('⚠ \u2212$0.03/s'); expect(E.rateView(-3).aria).toBe('Net income minus $0.03 per second'); expect(E.rateView(-3).money).toBe('$0.03');
-    expect(E.rateView(0.3).text).toBe('⚠ $0.00/s'); expect(E.rateView(-7.5).text).toBe('⚠ \u2212$0.08/s'); expect(E.rateView(99999).text).toBe('+$999.99/s'); expect(E.rateView(0).sign).toBe('zero');
+    expect(E.rateView(0.3).text).toBe('⚠ $0.00/s'); expect(E.rateView(-7.5).text).toBe('⚠ \u2212$0.08/s'); expect(E.rateView(99999).text).toBe('+$999.99/s'); expect(E.rateView(0).sign).toBe('neg'); // ruling (a): red ⚠ at <= 0
   });
   it('wage per second = wage_per_farm_per_min x F / 60; unwaged workers have no line', () => {
     expect(E.wagePerSecCents('market_hand', 1, b)).toBeCloseTo(b.workers.market_hand.wage_per_farm_per_min / 60 * 100);

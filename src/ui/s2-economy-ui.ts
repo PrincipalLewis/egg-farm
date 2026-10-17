@@ -43,21 +43,21 @@ export function rateMoney(absCents: number): string {
  * AC-R2: never positive while production is stopped; ≤0 → red ⚠.
  */
 export function rateView(cps: number, opts: { stopped?: boolean } = {}): { text: string; sign: RateSign; aria: string; money: string } {
-  let c = Math.sign(cps) * Math.round(Math.abs(cps));
-  if (opts.stopped && c > 0) c = 0;
+  // PM Workers ruling (a): always the real rate; red ⚠ only at <= 0. `stopped` only adds the aria reason at a true zero/negative.
+  const c = Math.sign(cps) * Math.round(Math.abs(cps));
   if (c === 0) {
     const money = rateMoney(0);
     const aria = opts.stopped
       ? `Net income ${money} per second, production stopped`
       : `Net income ${money} per second`;
-    return { text: `⚠ ${money}/s`, sign: opts.stopped ? 'neg' : 'zero', aria, money };
+    return { text: `⚠ ${money}/s`, sign: 'neg', aria, money };
   }
   const money = rateMoney(c);
   if (c < 0) {
     return {
       text: `⚠ \u2212${money}/s`,
       sign: 'neg',
-      aria: `Net income minus ${money} per second`,
+      aria: `Net income minus ${money} per second${opts.stopped ? ', production stopped' : ''}`,
       money,
     };
   }

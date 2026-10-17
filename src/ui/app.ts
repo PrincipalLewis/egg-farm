@@ -546,7 +546,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-8 header net rate (<= 1 update/s); first negative tick shakes the line (not under reduced motion)
     if (now() - rateAt >= 1000) { rateAt = now();
       const cps = incomePerSec(s, b) * 100; // $/s → cents/s for rateView
-      const v = rateView(cps, { stopped: productionStopped(s, b) });
+      const v = rateView(cps, { stopped: cps <= 0 && productionStopped(s, b) }); // ruling (a): real rate; 'stopped' only at a true zero
       setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
       if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }

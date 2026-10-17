@@ -3,6 +3,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
+import { incomePerSec } from '../econ/income';
 import { wageLine } from './s2-economy-ui';
 import { listedWageCentsPerSec, WAGE_WORKERS, type WageWorker } from './rates';
 /** Reviewer m1 (rc2): card wage = the exact economy.csv listed rate from ./rates (single source), not the s2-money stub. */
@@ -61,7 +62,16 @@ export function manageAllHtml(s: GameState, b: Balance): string {
 }
 /** v1.3 §4.4: caption under a greyed per-worker Manage: "Ready in Ns" during the shared cooldown, else "Not tired yet" above 40%. */
 export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) =>
-  !needsPrompt(w, b) ? 'Rested, refill below 40%' : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
+  !needsPrompt(w, b) ? `Rested, refill below ${Math.round(b.workers.energy.manage_prompt_threshold * 100)}%` : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
+/** PM Workers ruling (a): the banner names the role and its real effect; "stopped" only when the live net rate is <= 0 (true zero).
+ *  Grader: bonus share from balance (review 5d8a058 #8). Coop Hand slows collecting; Market Hand / Hawker slow sales. Unpaid follows the same rule. */
+export function workerBannerText(id: WorkerId, m: string | null, s: GameState, b: Balance): string {
+  if (m !== 'asleep' && m !== 'unpaid') return '';
+  const pre = m === 'unpaid' ? '⚠' : '💤', state = m === 'unpaid' ? 'unpaid' : 'asleep';
+  if (id === 'grader') return `${pre} ${m === 'unpaid' ? 'Unpaid' : 'Asleep'}, bonus down to ${Math.round(b.workers.grader.asleep_bonus_share * 100)}%`;
+  if (incomePerSec(s, b) <= 0) return `${pre} ${m === 'unpaid' ? 'Unpaid' : 'Asleep'}, production stopped`;
+  return `${pre} ${WORKER_NAMES[id]} ${state}: ${id === 'coop_hand' ? 'collecting' : 'sales'} slowed`;
+}
 export function workersHtml(s: GameState, b: Balance): string {
   return manageAllHtml(s, b) + WORKERS.map(id => {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
@@ -74,11 +84,8 @@ export function workersHtml(s: GameState, b: Balance): string {
     const cap = manageCaption(w, cd, b);
     const off = m === 'asleep' || m === 'unpaid';
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid ⚠' : 'Asleep 💤';
-    const banner = m === 'unpaid' ? `<div class="wk-banner unpaid" role="status">⚠ Unpaid, production stopped</div>`
-      : m === 'asleep' ? (id === 'grader'
-        ? `<div class="wk-banner asleep" role="status">💤 Asleep, bonus down to 15%</div>`
-        : `<div class="wk-banner asleep" role="status">💤 Asleep, production stopped</div>`)
-      : '';
+    const bt = workerBannerText(id, m, s, b);
+    const banner = bt ? `<div class="wk-banner ${m}" role="status">${bt}</div>` : '';
     const yawn = isYawning(w, b);
     let extra = '';
     if (id === 'grader') {
