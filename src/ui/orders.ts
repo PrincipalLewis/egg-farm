@@ -12,14 +12,15 @@ export const count3 = (n: number): string => {
 };
 const eggsLegacy = (n: number) => n >= 1000 ? fmtCount(n).includes(',') ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n) : String(n);
 export type OrderState = 'wait' | 'partial' | 'ready';
-export interface OrderView { id: number; have: number; want: number; sell: number; valueCents: number; state: OrderState; line: string; button: string; }
+export interface OrderView { id: number; have: number; want: number; sell: number; valueCents: number; state: OrderState; line: string; button: string; /** progressbar name */ aria: string; }
 /** have = eggs already sold to it + what Sell would sell now (min(basket, remaining)); want = full order; value = full order. */
 export function orderView(c: Customer, basket: number, priceCents: number): OrderView {
   const rem = c.demand - c.filled, sell = Math.max(0, Math.min(Math.floor(basket), rem)), have = c.filled + sell, want = c.demand;
   const state: OrderState = sell === 0 ? 'wait' : sell < rem ? 'partial' : 'ready';
   const valueCents = want * priceCents;
   const value = !Number.isFinite(valueCents) ? '—' : valueCents > 0 && valueCents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(valueCents)));
-  return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : `${count3(have)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b)
+  return { id: c.id, have, want, sell, valueCents, state, line: state === 'ready' ? `✓ Ready · ${value}` : have === 0 ? `Wants ${count3(want)} · ${value}` : `${count3(have)}/${count3(want)} eggs · ${value}`, // v1.1 (a)/(b); rc2 M-Order-zero: 'Wants 13' until the first egg
+    aria: have === 0 ? `Customer wants ${want} eggs` : `Order ${have} of ${want} eggs`,
     button: state === 'wait' ? (basket < 1 ? 'No eggs' : `Need ${count3(rem)}`) : state === 'partial' ? `Sell ${count3(sell)}` : 'Sell' }; // MK-35: 0 eggs -> 'No eggs'
 }
 /** m3-customer-queue-spec §2.4 (:62): when line 1 doesn't fit, drop the whole word " eggs" ("0/1.8M · $9.94M"); never cut mid-word. */
@@ -35,7 +36,7 @@ export function orderHtml(v: OrderView, avatar: string): string {
   const pct = v.want ? (v.have / v.want) * 100 : 0;
   return `<div class="order ${v.state}" data-row="${v.id}"><div class="av"><img src="${avatar}" alt=""></div>
     <div class="txt"><div class="l1"><span class="e">${v.line.split(' · ')[0]}</span><span class="v"> · ${v.line.split(' · ')[1]}</span></div>
-    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${v.want}" aria-valuenow="${v.have}" aria-label="Order ${v.have} of ${v.want} eggs"><i style="width:${pct.toFixed(2)}%"></i></div></div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${v.want}" aria-valuenow="${v.have}" aria-label="${v.aria}"><i style="width:${pct.toFixed(2)}%"></i></div></div>
     <button class="btn sell ${v.state === 'wait' ? '' : 'buy affordable'}${v.button.length > 9 ? ' long' : ''}" data-id="${v.id}" aria-disabled="${v.state === 'wait'}">${v.button}</button></div>`;
 }
 /** §6 Farm row preview when the next Farm level adds a customer slot (data-driven: queueMax(F+1) > queueMax(F)).

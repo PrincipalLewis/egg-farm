@@ -4,9 +4,9 @@ import { orderView, orderHtml, visibleOrders, moreLabel, moreName, stripSplit } 
 const c = (demand: number, filled = 0) => ({ id: 1, demand, filled, waitedS: 0 });
 describe('order card (P2)', () => {
   it('shows full order value and have/want, never $0.00', () => {
-    expect(orderView(c(6), 0, 250).line).toBe('0/6 eggs · $15.00');
+    expect(orderView(c(6), 0, 250).line).toBe('Wants 6 · $15.00');
     expect(orderView(c(5), 3, 250).line).toBe('3/5 eggs · $12.50');
-    expect(orderView(c(5), 0, 0.1).line).toBe('0/5 eggs · $0.01');
+    expect(orderView(c(5), 0, 0.1).line).toBe('Wants 5 · $0.01');
   });
   it('three button states: No eggs (MK-35) / Sell k / Sell', () => {
     expect(orderView(c(5), 0, 100)).toMatchObject({ state: 'wait', button: 'No eggs', sell: 0 });
@@ -64,7 +64,7 @@ describe('rc2-order-sell-preview v1.1 + MK-35', () => {
     const v = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 1e12, 4); expect(v.state).toBe('ready'); expect(v.line).toMatch(/^✓ Ready · \$/);
   });
   it('(b) partial / waiting lines use 3-sig counts; 0 eggs -> "No eggs" button', () => {
-    const w = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 0, 4); expect(w.line).toMatch(/^0\/181B eggs · /); expect(w.button).toBe('No eggs');
+    const w = orderView({ id: 1, demand: 181.2e9, filled: 0, waitedS: 0 } as any, 0, 4); expect(w.line).toMatch(/^Wants 181B · /); expect(w.button).toBe('No eggs');
     const n = orderView({ id: 2, demand: 5, filled: 2, waitedS: 0 } as any, 0, 4); expect(n.button).toBe('No eggs');
   });
   it('#6 short duration: ~m:ss, ~1h 59m, — when never', () => {
@@ -77,7 +77,7 @@ describe('QA order clips (main repro): 1.8M/181.2B row and $9.94M value use v1.1
     expect(v.line.startsWith('1.8M/181B eggs · ')).toBe(true); expect(v.button).toBe('No eggs');
   });
   it('$9.94M value: 3 significant figures; no reachable "Need" label for any basket', () => {
-    expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, 0, 250).line).toBe('0/3.98M eggs · $9.94M');
+    expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, 0, 250).line).toBe('Wants 3.98M · $9.94M');
     for (const bk of [0, 0.5, 1, 3, 1e7]) expect(orderView({ id: 2, demand: 3976000, filled: 0, waitedS: 0 } as any, bk, 250).button).not.toMatch(/Need|\//);
   });
 });

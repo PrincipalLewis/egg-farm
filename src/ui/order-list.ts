@@ -34,7 +34,7 @@ export class OrderList {
     if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`;
     // fit runs after the button label/state below (Need is wider than Sell): see end of fill()
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
-    if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
+    if (bar.getAttribute('aria-valuenow') !== String(v.have) || bar.getAttribute('aria-label') !== v.aria) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', v.aria); }
     if (btn.textContent !== v.button) btn.textContent = v.button;
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}${v.button.length > 9 ? ' long' : ''}`; if (btn.className !== bc) btn.className = bc;
     { // §2.4 eggs fit, cached per (eggs text, value text, button label, width): at most one measure pass per change, no per-frame rewrites (review #3)
