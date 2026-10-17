@@ -42,7 +42,7 @@ def _f1_tables(path=F1_CSV):
   return ({int(r['level']): int(float(r['farm_cost'])) for r in R}, {int(r['level']): int(float(r['w4_tier_cost'])) for r in R})
 _F1_FC, _F1_W4 = _f1_tables()
 F1 = dict(P1Q, name='F1 (economy.f1-m4cols.csv 86f0e80e)', farm_cost_table=_F1_FC, w4_cost_table=_F1_W4)
-CURRENT = P1Q  # main's data/economy.csv (pre-F1). F1 branches use --config f1 / m.F1; flip to F1 when #17 merges
+CURRENT = F1  # main's data/economy.csv since #17/#32 (86f0e80e). Pre-F1: --config p1q / m.P1Q
 CONFIGS = {'baseline': BASELINE, 'proposal': PROPOSAL, 'p1q': P1Q, 'f1': F1, 'current': CURRENT}
 COLL_SHARE = 0.5; SELL_EVERY = 15
 
@@ -368,7 +368,7 @@ M2_V11.update(w4_asleep_keep=0.15, yawn_at=40, manage_all_min_workers=3, unpaid_
 M2_P4 = _copy.deepcopy(M2_V11); M2_P4.update(manage_at=40, manage_all_low_only=True)  # PT1-P4 (HoP approved 2026-10-15)
 M2_P4['wage_carry'] = True  # HoP 2026-10-16: exact wage via fractional-cent carry (Market Hand 60 s = $0.75)
 M2_F1 = _copy.deepcopy(M2_P4); M2_F1.update(yawn_at=50, manage_at=50)  # F1 (HoP approved): yawn_at_pct 50, manage_prompt_threshold 0.5
-M2_CURRENT = M2_P4  # main (40 / 0.4); F1 uses M2_F1 (50 / 0.5)
+M2_CURRENT = M2_F1  # main since #17 (50 / 0.5); pre-F1 was M2_P4 (40 / 0.4)
 W_CONST = [  # constant-value worker columns (same on every row), (csv column, getter)
   ('w1_unlock_farm', lambda w: w['w1']['unlock']), ('w1_every_s', lambda w: w['w1']['every']), ('w1_tired_every_s', lambda w: w['w1']['tired_every']),
   ('w2_unlock_farm', lambda w: w['w2']['unlock']), ('w2_every_s', lambda w: w['w2']['every']), ('w2_tired_every_s', lambda w: w['w2']['tired_every']),
