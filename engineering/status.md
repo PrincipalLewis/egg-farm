@@ -71,3 +71,8 @@
 - 2026-10-17 04:30 Senior Software Architect — **done:** merged origin/main 4608a4f (#13; .gitignore conflict resolved as union); CCR #26 m1: --strict CSV compare is raw sha256 (CRLF/BOM fail), non-strict still normalises; `.gitattributes` `*.csv text eol=lf` (renormalise no-op); check-vendor-pins: missing SHA256SUMS -> ERROR exit 1, unlisted vendor files fail; tests. Real product/ --strict exit 0 (57d964d5; #17 not on main yet). **next:** CCR/QA re-check; #13 Lows follow-up now unblocked. **blocked:** none.
 - 2026-10-17 04:50 Senior Software Architect — **done:** QA #26: .gitattributes adds `vendor/economy-sim/** -text` after `*.csv text eol=lf` (vendor wins); renormalise no-op; check-vendor-pins passes in a core.autocrlf=true clone. **next:** QA/CCR re-check. **blocked:** none.
 - 2026-10-17 04:57 Senior Software Architect: done: ci-gates.md stale-autocrlf caveat (#26). next: QA verdicts #26/#27.
+
+## 2026-10-17 09:05 Senior Engineer, Saves & Persistence (PR #25)
+- done: merged origin/main 97a57c1 (e0c65c8) and 68950c0 (7519fb1) into fix/hidden-tab-offline; gates green on 7519fb1. Tab-guard Play here min-height 48px + rc0 hiddentabguard row (2340d61, b3e17fa WebKit settle fix); shots art-ux/reviews/pr25-2340d61-m1-deactivate/.
+- next: HoE push; CCR + QA on merge and tip; UI/Visual Designer re-check shots.
+- blocked: none. origin/main now 8e6d53e (#33/#34/#36), merges cleanly, not merged in.
