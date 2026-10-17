@@ -717,6 +717,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
+  if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow); // QA-only (§6 banner rc0)
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitGoal = () => fitGoalLabelEl(goalLbl); // QA-only (v1.6.1 goal-label rc0), compiled out of release
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaWelcome = () => showWelcome(); // QA-only (C-AC25 copy checks), compiled out of release
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);

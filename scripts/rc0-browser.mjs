@@ -658,6 +658,37 @@ sections.goalLabel161 = async () => {
   ok('Goal label v1.6.1 at 360: one-line, two-line and short-name paths all exercised', ['one-line', 'two-line', 'short-name'].every(k => seen.has(k)), JSON.stringify([...seen]));
   await ctx.close();
 };
+// ---------- art-ux rc2-workers-copy §6 worker banners: one line at 360/390/1280, Nunito 700 >= 12px, 14px SVG icon, longest strings fit, role dropped first (review 23a3798 #2) ----------
+sections.bannerFit = async () => {
+  const FCS = process.env.FC_SHOTS;
+  const LONG = [['Market Hand asleep: production stopped', 'Asleep: production stopped'], ['Market Hand unpaid: production stopped', 'Unpaid: production stopped'], ['Coop Hand unpaid: collecting slowed', 'Unpaid: collecting slowed']];
+  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 20, farmLevel: 30, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 3,
+      workers: { market_hand: { energy: 50, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click();
+    await page.waitForSelector('.wk-banner', { timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
+    const r = await page.evaluate(async (LONG) => {
+      const meas = () => [...document.querySelectorAll('.wk-banner')].map(bn => { const t = bn.querySelector('.bt'), ic = bn.querySelector('img'), cs = getComputedStyle(t), br = bn.getBoundingClientRect(), tr = t.getBoundingClientRect(), card = bn.closest('.wk').getBoundingClientRect();
+        return { text: t.textContent, full: t.dataset.full, aria: bn.querySelector('.sr')?.textContent, fs: parseFloat(cs.fontSize), fw: cs.fontWeight, ff: cs.fontFamily.split(',')[0], ic: ic ? [Math.round(ic.getBoundingClientRect().width), ic.getAttribute('src').split('/').pop()] : null,
+          fits: t.scrollWidth <= t.clientWidth + 0.5, oneLine: tr.height <= parseFloat(cs.lineHeight) * 1.2 + 0.5, h: Math.round(br.height), inCard: br.left >= card.left - 0.5 && br.right <= card.right + 0.5, emoji: /[\u{1F300}-\u{1FAFF}\u26A0]/u.test(bn.textContent) }; });
+      const live = meas();
+      // longest approved strings on the real banner element, through the app's own fit (eggfarmQaFitBanners)
+      const bt = document.querySelector('.wk-banner .bt'), keep = [bt.dataset.full, bt.dataset.short], longest = [];
+      for (const [f, sh] of LONG) { bt.dataset.full = f; bt.dataset.short = sh; window.eggfarmQaFitBanners(); await new Promise(r => requestAnimationFrame(r)); const m = meas()[0]; longest.push({ want: f, got: m.text, fits: m.fits, oneLine: m.oneLine, dropped: m.text === sh }); }
+      // forced role-drop fallback: a narrow banner must show the short form, still one line, no clipping
+      const bn = bt.closest('.wk-banner'); bn.style.maxWidth = '230px'; bn.style.width = '230px'; bt.dataset.full = LONG[0][0]; bt.dataset.short = LONG[0][1]; window.eggfarmQaFitBanners(); await new Promise(r => requestAnimationFrame(r));
+      const fb = meas()[0]; bn.style.maxWidth = ''; bn.style.width = ''; bt.dataset.full = keep[0]; bt.dataset.short = keep[1]; window.eggfarmQaFitBanners();
+      return { live, longest, fallback: { text: fb.text, fits: fb.fits, oneLine: fb.oneLine } };
+    }, LONG);
+    const liveOk = r.live.length >= 4 && r.live.every(x => x.fits && x.oneLine && x.fs >= 12 && x.fw === '700' && /Nunito/i.test(x.ff) && x.ic && x.ic[0] === 14 && /icon-(moon|warning)\.svg/.test(x.ic[1]) && x.inCard && !x.emoji && x.aria && /^(Market Hand|Coop Hand|Hawker|Grader) is (asleep|unpaid)\./.test(x.aria) && (x.text === x.full || x.text === x.full.replace(/^(Market Hand|Coop Hand|Hawker|Grader) (\w)/, (_, __, c) => c.toUpperCase())));
+    ok(`§6 banners ${w}: live states (Coop Hand asleep, Market Hand unpaid, Hawker + Grader asleep) one line, Nunito 700 >= 12px, 14px moon/warning SVG, no emoji, aria with role`, liveOk, JSON.stringify(r.live));
+    ok(`§6 banners ${w}: longest strings fit on one line (full, or role dropped first only when needed)`, r.longest.every(x => x.fits && x.oneLine && (x.got === x.want || x.dropped)), JSON.stringify(r.longest));
+    ok(`§6 banners ${w}: forced narrow banner drops the role name ("Asleep: production stopped"), one line, not clipped`, r.fallback.text === LONG[0][1] && r.fallback.fits && r.fallback.oneLine, JSON.stringify(r.fallback));
+    if (FCS && (w === 360 || w === 1280)) { mkdirSync(FCS, { recursive: true }); await page.locator('.wk-banner').first().scrollIntoViewIfNeeded(); await page.screenshot({ path: `${FCS}/banners-${w}-${ENGINE}.png` }); }
+    await ctx.close();
+  }
+};
 // ---------- Art & UX 23:25: sticky refill bar opaque + full width + 8px padding; cards scroll-margin (360, 1280 docked) ----------
 sections.refillBar = async () => {
   for (const [w, h] of [[360, 800], [1280, 800]]) {
@@ -696,12 +727,12 @@ sections.orderFit11 = async () => {
     for (const [name, bk] of [['need', 0], ['partial', 3], ['sell', 1e12]]) {
       await set(bk); await page.waitForTimeout(500);
       const r = await page.$$eval('.order:not([hidden])', rs => rs.filter(x => x.getBoundingClientRect().height > 0).map(x => { const l = x.querySelector('.l1'), e = l.querySelector('.e'), v = l.querySelector('.v'), b = x.querySelector('.btn'), bs = getComputedStyle(b), br = b.getBoundingClientRect(), vr = v.getBoundingClientRect(), xr = x.getBoundingClientRect();
-        return { e: e.textContent, v: v.textContent.trim(), btn: b.textContent, bh: Math.round(br.height), bOver: b.scrollWidth > b.clientWidth + 0.5, vOver: v.scrollWidth > v.clientWidth + 0.5 || vr.right > br.left + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5, bw: Math.round(br.width), fs: bs.fontSize, inCard: br.right <= xr.right + 0.5 }; }));
+        return { id: b.dataset.id, e: e.textContent, v: v.textContent.trim(), btn: b.textContent, bh: Math.round(br.height), bOver: b.scrollWidth > b.clientWidth + 0.5, vOver: v.scrollWidth > v.clientWidth + 0.5 || vr.right > br.left + 0.5, lOver: l.scrollWidth > l.clientWidth + 0.5, bw: Math.round(br.width), fs: bs.fontSize, inCard: br.right <= xr.right + 0.5 }; }));
       const good = r.length >= 4 && r.every(x => !x.vOver && !x.lOver && !x.bOver && x.bh === 44 && x.inCard && !/…/.test(x.e + x.v + x.btn) && /^· \$/.test(x.v)
         && (w > 375 || !/ eggs$/.test(x.e)) && !/\d{4,}/.test(x.e) && (bk === 0 ? x.btn === 'No eggs' : true) && !/Need|\//.test(x.btn) && x.bw === r[0].bw && (!/[KMBT]$/.test(x.v) || x.v.replace(/\D/g, '').length <= 3) && (!/\d[KMBT]/.test(x.e) || x.e.split('/').every(q => !/[KMBT]/.test(q) || q.replace(/\D/g, '').length <= 3)) && (bk >= 1e12 ? x.e === '✓ Ready' : !/Ready/.test(x.e)));
-      const v994 = r.find(x => x.v === '· $9.94M'); const need18 = bk >= 1e12 ? r.length >= 5 : r.find(x => /^1\.8M\/181B/.test(x.e)); // review 5d8a058 #12: the sell pass checks the row count, not '✓ Ready' text
+      const v994 = r.find(x => x.v === '· $9.94M'); const row1 = r.find(x => x.id === '1'), need18 = !!row1 && row1.v === '· $453B' && (bk >= 1e12 ? row1.e === '✓ Ready' && row1.btn === 'Sell' : /^1\.8M\/181B/.test(row1.e)); // review 23a3798 #8: the 181.2B order looked up by id in every pass
       const small = r.find(x => /^[03]\/5/.test(x.e));
-      ok(`Order fit v1.1 ${name} at ${w}: value never cut (incl. row 2 '· $9.94M'), " eggs" dropped first (always <=375), 3-sig counts (1.8M/181B row in need/partial), no 'Need x/y' button, fixed equal button width, ${bk === 0 ? '"No eggs", ' : ''}${bk >= 1e12 ? '"✓ Ready", ' : ''}44px buttons`, good && !!v994 && !!need18 && (w <= 375 || bk >= 1e12 || !small || / eggs$/.test(small.e)), JSON.stringify(r));
+      ok(`Order fit v1.1 ${name} at ${w}: value never cut (incl. row 2 '· $9.94M'), " eggs" dropped first (always <=375), 3-sig counts (181.2B order by id in every pass), no 'Need x/y' button, fixed equal button width, ${bk === 0 ? '"No eggs", ' : ''}${bk >= 1e12 ? '"✓ Ready", ' : ''}44px buttons`, good && !!v994 && !!need18 && (w <= 375 || bk >= 1e12 || !small || / eggs$/.test(small.e)), JSON.stringify(r));
       if (FCS && (w === 360 || w === 1280)) { mkdirSync(FCS, { recursive: true }); await page.screenshot({ path: `${FCS}/order-${name}-${w}-${ENGINE}.png` }); }
     }
     await ctx.close();
