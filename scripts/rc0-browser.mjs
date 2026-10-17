@@ -537,7 +537,7 @@ sections.welcomeTitle = async () => {
     const t = await page.evaluate(() => { const h2 = document.querySelector('.welcome-v2 .wb-head h2'), head = h2.parentElement, r = h2.getBoundingClientRect(), card = head.closest('.card').getBoundingClientRect();
       const lh = parseFloat(getComputedStyle(h2).lineHeight) || parseFloat(getComputedStyle(h2).fontSize) * 1.3;
       return { text: h2.textContent, h: r.height, lh, sw: h2.scrollWidth, cw: h2.clientWidth, hsw: head.scrollWidth, hcw: head.clientWidth, inCard: r.left >= card.left && r.right <= card.right, icon: getComputedStyle(head.querySelector('img')).display }; });
-    ok(`PR16 welcome title one line, no overflow at ${w}x${h}`, t.text === 'Welcome back!' && t.h < t.lh * 1.5 && t.sw <= t.cw + 1 && t.hsw <= t.hcw + 1 && t.inCard && errors.length === 0, JSON.stringify(t));
+    ok(`PR16 welcome title one line, no overflow, icon shown at ${w}x${h}`, t.icon !== 'none' && t.text === 'Welcome back!' && t.h < t.lh * 1.5 && t.sw <= t.cw + 1 && t.hsw <= t.hcw + 1 && t.inCard && errors.length === 0, JSON.stringify(t));
     await ctx.close();
   }
 };
@@ -551,10 +551,14 @@ sections.welcomeShort = async () => {
     const t = await page.evaluate(async () => { const card = document.querySelector('.welcome-v2'), body = card.querySelector('.wb-body'), cap = card.querySelector('.wb-cap'), btn = card.querySelector('#wbCollect');
       const lines = [...card.querySelectorAll('.wb-head h2,.wb-a,.wb-hero,.wb-sub,.wb-worth,.wb-cap,#wbCollect')];
       const trunc = lines.filter(e => e.scrollWidth > e.clientWidth + 1).map(e => e.className || e.id);
-      body.scrollTop = body.scrollHeight; await new Promise(r => setTimeout(r, 100));
+      const mask0 = getComputedStyle(body).maskImage || getComputedStyle(body).webkitMaskImage, scrolls = body.scrollHeight > body.clientHeight + 1, cls0 = body.className;
+      body.scrollTop = body.scrollHeight; await new Promise(r => setTimeout(r, 150));
+      const mask1 = getComputedStyle(body).maskImage || getComputedStyle(body).webkitMaskImage, vh = innerHeight, ch = card.getBoundingClientRect().height;
       const c = cap.getBoundingClientRect(), b = body.getBoundingClientRect(), k = card.getBoundingClientRect(), bt = btn.getBoundingClientRect();
-      return { trunc, capIn: c.top >= b.top - 1 && c.bottom <= b.bottom + 1, cardFits: k.top >= 0 && k.bottom <= innerHeight, btnIn: bt.bottom <= k.bottom && bt.height >= 48, atEnd: body.classList.contains('at-end') }; });
+      return { trunc, capIn: c.top >= b.top - 1 && c.bottom <= b.bottom + 1, cardFits: k.top >= 0 && k.bottom <= innerHeight, btnIn: bt.bottom <= k.bottom && bt.height >= 48, atEnd: body.classList.contains('at-end'), scrolls, cls0, mask0, mask1, ch, vh }; });
     ok(`Art&UX 07:22 welcome ${w}x${h}: no truncation, cap line reachable, card on screen, Collect pinned >= 48px`, !t.trunc.length && t.capIn && t.cardFits && t.btnIn && t.atEnd && errors.length === 0, JSON.stringify(t));
+    if (h < 480) ok(`Art&UX 07:22 ${w}x${h}: short-screen rule active (card taller than 80vh, up to vh - 24) and the body scrolls`, t.ch > t.vh * 0.8 + 1 && t.ch <= t.vh - 24 + 1 && t.scrolls, JSON.stringify(t));
+    if (t.scrolls) ok(`Art&UX 07:22 ${w}x${h}: bottom fade while scrollable, none at the end`, /scrolls/.test(t.cls0) && !/at-end/.test(t.cls0) && t.mask0 && t.mask0 !== 'none' && (!t.mask1 || t.mask1 === 'none'), JSON.stringify(t));
     await ctx.close();
   }
 };

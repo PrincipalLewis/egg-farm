@@ -87,7 +87,7 @@ describe('C-AC29/30/34 numbers and worth line', () => {
 describe('formatters (CCR Minor 7)', () => {
   it('fmtMoneyCeil rounds deficits up from $1,000; cents below', () => {
     expect(fmtMoneyCeil(99_950)).toBe('$999.50'); expect(fmtMoneyCeil(123_450)).toBe('$1,235'); expect(fmtMoneyCeil(100_000)).toBe('$1,000');
-    expect(fmtMoneyCeil(99_999_901)).toBe('$1,000,000'); expect(fmtMoneyCeil(100_000_000)).toBe('$1M'); expect(fmtMoneyCeil(0)).toBe('$0.00');
+    expect(fmtMoneyCeil(99_999_901)).toBe('$1M'); expect(fmtMoneyCeil(100_000_000)).toBe('$1M'); expect(fmtMoneyCeil(0)).toBe('$0.00');
   });
   it('moneyWords', () => {
     expect(moneyWords(0)).toBe('0 dollars'); expect(moneyWords(1)).toBe('1 cent'); expect(moneyWords(50)).toBe('50 cents'); expect(moneyWords(100)).toBe('1 dollar');
@@ -203,13 +203,24 @@ describe('C-AC36 hidden tab == close and reload (STUB visibility hook)', () => {
   });
   it('Major (CCR 0470045): the freeze is released even when accounting returns null (already accounted)', () => {
     __resetHiddenTimeStub(); let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t);
-    g.suspendForHidden(); const s1 = t; accountHiddenPeriod({ resumeFromHidden: () => 0, balance: b, inactive: false } as any, { startAt: s1, endAt: s1 }); // other game: no effect
+    g.suspendForHidden(); const s1 = t;
     t += 600_000; accountHiddenPeriod(g, { startAt: s1, endAt: t }); // accounted once (also unfreezes via resumeFromHidden)
     const s2 = t + 120_000; accountHiddenPeriod(g, { startAt: s2, endAt: s2 }); // pre-record s2 so endHidden gets null
     g.state = { ...g.state, coop: 0 }; // would only change via a frame
     t = s2; g.suspendForHidden(); t += 120_000; expect(g.endHidden()).toBeNull();
     t += 5_000; g.frame(); expect(g.state.coop).toBeGreaterThan(0); // unfrozen
     const before = load(kv, b)!.savedAt; t += 1_000; g.save(); expect(load(kv, b)!.savedAt).toBeGreaterThan(before); // saving again
+  });
+  it('CCR e3daa15 Minor 2: a throwing subscriber neither breaks accounting nor leaves the game frozen; others still run', () => {
+    __resetHiddenTimeStub(); let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t); const seen: string[] = [];
+    const o1 = onHiddenPeriodAccounted(() => { throw new Error('boom'); }), o2 = onHiddenPeriodAccounted(r => seen.push(r.mode));
+    g.suspendForHidden(); t += 600_000; expect(g.endHidden()!.mode).toBe('offline-grant'); expect(seen).toEqual(['offline-grant']);
+    const coop = g.state.coop; t += 5_000; g.frame(); expect(g.state.coop).toBeGreaterThan(coop);
+    const before = load(kv, b)!.savedAt; t += 1_000; g.save(); expect(load(kv, b)!.savedAt).toBeGreaterThan(before); o1(); o2();
+  });
+  it('per-game dedupe: the same startAt on another Game is accounted', () => {
+    let t = T0; const mk = () => { const kv = mem(); save(kv, L15(), T0); return new Game(b, kv, () => t); }; const g1 = mk(), g2 = mk();
+    g1.suspendForHidden(); g2.suspendForHidden(); t += 120_000; expect(g1.endHidden()).not.toBeNull(); expect(g2.endHidden()).not.toBeNull();
   });
   it('Minor 4 (CCR): a read-only game (refused newer save) never freezes or grants on hide', () => {
     let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t); g.readOnly = true;

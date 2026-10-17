@@ -21,7 +21,8 @@ export function accountHiddenPeriod(game: Game, p: { startAt: number; endAt: num
   const mode: HiddenPeriodResult['mode'] = eggs > 0 ? 'offline-grant' : online && !game.inactive ? 'online' : 'none';
   const r: HiddenPeriodResult = { periodId: nextPeriodId++, startAt: p.startAt, endAt: p.endAt, elapsedMs, simulatedMs: mode === 'online' ? elapsedMs : 0,
     grantedMs: mode === 'offline-grant' ? Math.min(elapsedMs, capMs) : 0, eggsGranted: eggs, coinsGranted: 0, capped: mode === 'offline-grant' && elapsedMs >= capMs, mode };
-  subs.forEach(f => f(r)); return r;
+  for (const f of [...subs]) { try { f(r); } catch { /* a subscriber never breaks accounting or starves the others */ } }
+  return r;
 }
-/** Test-only: forget accounted periods and subscribers. */
+/** Test-only: drop subscribers (accounted periods are per Game, so a new Game starts clean). */
 export function __resetHiddenTimeStub() { subs.clear(); }

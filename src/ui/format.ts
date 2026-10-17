@@ -20,7 +20,7 @@ export const fmtMoney = (cents: number) => {
   return '$' + fmtCount(d);
 };
 /** Deficits ("Need $X more"): same format, rounded UP from $1,000 so earning the shown amount always affords it. */
-export const fmtMoneyCeil = (cents: number) => cents / 100 >= 1000 && cents / 100 < 1e6 ? '$' + Math.ceil(cents / 100).toLocaleString('en-US') : fmtMoney(cents);
+export const fmtMoneyCeil = (cents: number) => cents / 100 >= 1000 ? fmtMoney(Math.ceil(cents / 100) * 100) : fmtMoney(cents); // ceil first, then format ($999,999.01 -> $1M)
 /** Welcome-back popup money: never abbreviated. Cents under $1,000, whole dollars (floored) from $1,000 ("$3,703,701"). */
 export const fmtMoneyFull = (cents: number) => {
   if (!Number.isFinite(cents)) return '—';

@@ -257,7 +257,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; edge(); };
     const edge = () => { const sc = body.scrollHeight > body.clientHeight + 1; body.classList.toggle('scrolls', sc); body.classList.toggle('at-end', !sc || body.scrollTop + body.clientHeight >= body.scrollHeight - 1); };
     body.addEventListener('scroll', edge, { passive: true });
-    fit(); addEventListener('resize', fit); document.fonts?.ready.then(fit); document.fonts?.addEventListener?.('loadingdone', fit); // CCR Minor 2: re-measure when web fonts land
+    fit(); addEventListener('resize', fit); document.fonts?.ready.then(fit); document.fonts?.addEventListener?.('loadingdone', fit, { once: true }); // CCR Minor 2: re-measure when web fonts land
     if (motion) { // C-AC37: count up 0 -> N (ease-out) only when motion is allowed; the final text equals m.hero
       const n = $('#wbN'), t0 = now(), dur = 900, unit = eggs === 1 ? 'egg' : 'eggs'; n.textContent = `+0 ${unit}`;
       const step = () => { if (modalKind !== 'welcome' || !n.isConnected) return; const k = Math.min(1, (now() - t0) / dur), e = 1 - (1 - k) ** 3;
@@ -670,7 +670,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case })).then(() => {
-      recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(heldHidden ?? undefined); heldHidden = null; if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
+      recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(heldHidden ?? undefined); heldHidden = null; if (!modalKind) collectBtn.focus(); else ((modalKind === 'welcome' ? $('#wbCollect') : null) ?? modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
   /** S2-8/S2-9 values for the UI (Art & UX visuals on m3/rc1-ui): net rate, per-worker wage, queue-full flag. */
@@ -680,8 +680,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** C-AC36 hidden-tab return: open the popup unless another dialog is up (pending eggs persist; the next open shows them). */
   const gate = hiddenPopupGate();
   /** C-AC36: the only hidden-tab entry point (subscribed via onHiddenPeriodAccounted in main.ts); no accounting here. */
-  const welcomeFromHidden = (r: HiddenPeriodResult | null) => { const h = gate(r); if (!h) return false; dirty = true;
-    if (recoveryOpen || (modalKind && modalKind !== 'welcome')) { heldHidden = h; return true; } // shown when that dialog closes
-    showWelcome(h); $('#wbCollect')?.focus(); return true; };
+  const welcomeFromHidden = (r: HiddenPeriodResult | null) => { const hg = gate(r); if (!hg) return false; dirty = true;
+    if (recoveryOpen || (modalKind && modalKind !== 'welcome')) { heldHidden = hg; return true; } // shown when that dialog closes
+    heldHidden = null; showWelcome(hg); $('#wbCollect')?.focus(); return true; };
   return { render: renderAll, showWelcome, welcomeFromHidden, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }

@@ -476,5 +476,5 @@ html,body{overflow-x:hidden;max-width:100%}
 .money-slot{display:inline-grid;justify-items:end;font-family:var(--f-body);font-weight:800}.money-slot>*{grid-area:1/1}.money-slot .slot-ghost{visibility:hidden}
 .welcome-v2 .wb-clock{display:inline-block;vertical-align:-3px;width:16px;height:16px;margin-right:4px;color:#8A5528}
 /* Art & UX 2026-10-17 07:22: short screens (C-AC33) */
-@media (max-height:479px){.welcome-v2{max-height:calc(100dvh - 24px)}.welcome-v2 .wb-body{gap:4px}}
+@media (max-height:479px){.welcome-v2{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}.welcome-v2 .wb-body{gap:4px}.welcome-v2 .wb-sub{margin-top:0}}
 .welcome-v2 .wb-body.scrolls:not(.at-end){-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 16px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 16px),transparent)}
