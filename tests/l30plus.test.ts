@@ -19,7 +19,7 @@ const cfg = readEconomyConfig();
 const farmMax = farmMaxOf(R, cfg);
 // Live params + the L30+ M4 block and Farm prices from the table (full L30+ param fit waits for Economy's merge, D5).
 const b: Balance = validateBalance({ ...live, maxLevel: farmMax, m4: { ...fitM4(R, live, cfg)!, enabled: 1 },
-  farm: { ...live.farm, costOverrides: Object.fromEntries(R.slice(0, farmMax + 1).map(r => [r.level, r.farm_cost])) } } as Balance);
+  farm: { ...live.farm, costTable: R.slice(0, farmMax + 1).map(r => r.farm_cost) } } as unknown as Balance); // #17 costTable
 const st = (F: number, H: number, V = 0, coins = 1e15) => ({ ...initialState(b, 1), farmLevel: F, hensLevel: H, eggValueLevel: V, coinsCents: coins, tracksV7: 1 } as any);
 const fc = (F: number) => R[F].farm_cost, share = (F: number) => R[F].hv_extra_cost_farm_share;
 const xp = (F: number, L: number, col: string) => Math.max(R[L][col], Math.floor(share(F) * fc(F) * (1 + R[0].hv_extra_second_markup * (L - F - 3))));
@@ -120,7 +120,7 @@ describe(`${file}: prices equal the shipping CSV exactly (pricing frozen; test o
   it('Farm cost L0-50 = CSV row on every level (verbatim, no growth formula)', () => {
     expect(b.maxLevel).toBe(50);
     for (let L = 0; L <= 50; L++) expect(farmCost(L, b), `Farm L${L}`).toBe(R[L].farm_cost);
-    expect(Object.keys(b.farm.costOverrides!).length).toBe(51); // every level read from the row
+    expect(b.farm.costTable!.length).toBe(51); // every level read from the row
   });
   it('Hens / Egg value row cost L0-55 = CSV row', () => {
     for (let L = 0; L <= trackMaxLevel('hens', b); L++) expect(hensCost(L, b), `Hens L${L}`).toBe(R[L].hens_cost);
@@ -134,7 +134,7 @@ describe(`${file}: integer-safe floor (PR #12)`, () => {
   it('exact-integer product never loses a coin (0.29 x 100 = 29, not 28)', () => {
     expect(Math.floor(0.29 * 100)).toBe(28); expect(floorSafe(0.29 * 100)).toBe(29); expect(floorSafe(28.9)).toBe(28);
     const RR = R.map(r => r.level === 40 ? { ...r, hv_extra_cost_farm_share: 0.29 } : r);
-    const bb = { ...b, m4: { ...b.m4!, ...fitM4(RR, live, cfg)!, enabled: 1 }, farm: { ...b.farm, costOverrides: { ...b.farm.costOverrides, 40: 100 } } } as unknown as Balance;
+    const bb = { ...b, m4: { ...b.m4!, ...fitM4(RR, live, cfg)!, enabled: 1 }, farm: { ...b.farm, costTable: b.farm.costTable!.map((c, L) => L === 40 ? 100 : c) } } as unknown as Balance;
     expect(trackExtraCost('hens', 43, 40, bb)).toBe(29);
   });
 });

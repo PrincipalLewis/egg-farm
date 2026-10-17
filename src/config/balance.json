@@ -26,11 +26,11 @@
       "start_pct": 100,
       "drain_s_per_pct": 9,
       "tired_below_pct": 30,
-      "yawn_at_pct": 40,
+      "yawn_at_pct": 50,
       "manage_cooldown_s": 30,
       "manage_all_min_workers": 3,
       "unpaid_resume_wage_min": 1,
-      "manage_prompt_threshold": 0.4
+      "manage_prompt_threshold": 0.5
     },
     "market_hand": {
       "unlock_farm": 3,
@@ -114,29 +114,39 @@
     "demandLoFactor": 0.8,
     "demandHiFactor": 1.6,
     "eggsPerSecL0": 1.5,
-    "costGrowthSegments": [
-      {
-        "from": 6,
-        "to": 14,
-        "growth": 1.25
-      },
-      {
-        "from": 15,
-        "to": 20,
-        "growth": 1.45
-      }
-    ],
-    "costOverrides": {
-      "18": 11076,
-      "19": 18201,
-      "23": 68756,
-      "24": 72194,
-      "25": 97461,
-      "26": 131573,
-      "27": 177624,
-      "28": 239792,
-      "29": 323719
-    }
+    "costTable": [
+      100,
+      135,
+      182,
+      246,
+      332,
+      448,
+      560,
+      700,
+      875,
+      1094,
+      1368,
+      1710,
+      2138,
+      2672,
+      3340,
+      4844,
+      7024,
+      10185,
+      11076,
+      18201,
+      31050,
+      41918,
+      56589,
+      68756,
+      72194,
+      97461,
+      131573,
+      177624,
+      239792,
+      323719,
+      624316
+    ]
   },
   "customers": {
     "customer_patience_s": 30,

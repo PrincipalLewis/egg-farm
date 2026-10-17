@@ -16,8 +16,10 @@ export interface EconomyParams {
     /** F1 (product/f1-proposal.md): per-level-range cost growth; levels inclusive, non-overlapping, from >= 1.
      *  Segment {from,to,growth} uses `growth` for the step INTO each level from..to; costGrowth elsewhere. Absent/empty = pure pow. */
     costGrowthSegments?: CostGrowthSegment[];
-    /** Per-level farm_cost from the CSV where it is not formula-shaped (F1 segments, M3 taper): {level: cost}. Absent = formula everywhere. */
-    costOverrides?: Record<string, number>;
+    /** F1 (HoE, Oct 17): farm_cost per level, copied verbatim from the CSV by sync-economy (index = level, 0..maxLevel).
+     *  When present it is THE farm cost (covers the F1-GAP cuts and any later per-level edits); no formula fallback.
+     *  Absent = baseCost/costGrowth/segments curve (pre-F1 behaviour). */
+    costTable?: number[];
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
   offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
@@ -54,8 +56,13 @@ export const collectionCost = (C: number, p: EconomyParams) => Math.floor(p.coll
 export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerTapBase + p.collection.eggsPerTapPerLevel * clampL(C, p);
 export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
 export const farmCost = (F: number, p: EconomyParams) => {
-  const segs = p.farm.costGrowthSegments, L = clampL(F, p), ov = p.farm.costOverrides?.[L];
-  if (ov !== undefined) return ov;
+  const t = p.farm.costTable, L = clampL(F, p);
+  if (t) { const v = t[L]; if (!Number.isInteger(v)) throw new Error(`balance.farm.costTable has no integer cost for level ${L}`); return v; }
+  return farmCurveCost(L, p);
+};
+/** Farm cost from baseCost/costGrowth/segments (used when there is no costTable). */
+export const farmCurveCost = (F: number, p: EconomyParams) => {
+  const segs = p.farm.costGrowthSegments, L = clampL(F, p);
   if (!segs || segs.length === 0) return Math.floor(p.farm.baseCost * p.farm.costGrowth ** L); // pre-F1 expression, unchanged
   // Same evaluation order as the sim (SegEco.fcost) so floors match the CSV.
   let v = p.farm.baseCost, n = L;
@@ -77,6 +84,13 @@ export function validateCostGrowthSegments(segs: unknown, where = 'farm.costGrow
   const sorted = [...segs].sort((a: any, b: any) => a.from - b.from);
   for (let i = 1; i < sorted.length; i++) if (sorted[i].from <= sorted[i - 1].to)
     throw new Error(`balance.${where}: segments ${sorted[i - 1].from}-${sorted[i - 1].to} and ${sorted[i].from}-${sorted[i].to} overlap`);
+}
+/** Throws unless the table is maxLevel+1 positive integers (strict increase is NOT required here; sync-economy copies the CSV verbatim). */
+export function validateCostTable(t: unknown, maxLevel: number, where = 'farm.costTable'): void {
+  if (t === undefined) return;
+  if (!Array.isArray(t)) throw new Error(`balance.${where} must be an array`);
+  if (t.length !== maxLevel + 1) throw new Error(`balance.${where} must have maxLevel+1 = ${maxLevel + 1} entries, got ${t.length}`);
+  t.forEach((v, i) => { if (!Number.isSafeInteger(v) || v <= 0) throw new Error(`balance.${where}[${i}] must be a positive integer`); });
 }
 export const hens = (F: number, p: EconomyParams) => p.farm.hensBase + p.farm.hensPerLevel * clampL(F, p);
 export const eggsPerSec = (F: number, p: EconomyParams) =>

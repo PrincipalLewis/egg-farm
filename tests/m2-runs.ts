@@ -1,4 +1,4 @@
-import { rc1Balance as b } from './rc1-balance'; // M2/P4 gates are on the rc1 economy (main)
+import { balance as b } from '../src/config/balance';
 import { runM2, SLOW, M2Opts, M2Result } from './bot-m2';
 import { median } from './bot';
 /** 20 seeds, medians (Economy validated on 100; the medians match economy_sim.py run_m2 to <= 0.1 min). */

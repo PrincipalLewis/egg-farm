@@ -35,19 +35,19 @@ export function probeHeadroom(kv: KV, bytes: number): boolean {
   try { kv.setItem(HEADROOM_PROBE_KEY, 'x'.repeat(Math.max(0, Math.ceil(bytes)))); return true; } catch { return false; }
   finally { try { kv.removeItem?.(HEADROOM_PROBE_KEY); } catch { /* best effort */ } }
 }
-/** M4-19 rank of a stored copy: [version, committed (tracksV7 + v6BackupId) ? 1 : 0]; savedAt is the caller's tie-break. */
 /** HoE correction: a main save's write sequence; missing / invalid reads as 0. */
 export const saveSeqOf = (raw: unknown): number => { if (typeof raw !== 'string') return 0; try { const n = JSON.parse(raw)?.saveSeq; return Number.isSafeInteger(n) && n > 0 ? n : 0; } catch { return 0; } };
+/** M4-19 rank of a stored copy: [version, committed (tracksV7 + v6BackupId) ? 1 : 0, saveSeq]; savedAt is the caller's tie-break. */
 export function rankOf(raw: unknown): [number, number, number] {
   if (typeof raw !== 'string') return [-1, 0, 0]; let d: any; try { d = JSON.parse(raw); } catch { return [-1, 0, 0]; }
   const v = Number.isInteger(d?.version) ? d.version : -1, st = d?.state;
   return [v, st && st.tracksV7 === 1 && typeof st.v6BackupId === 'string' && st.v6BackupId !== '' ? 1 : 0, saveSeqOf(raw)];
 }
 /** M4-19 (HoE correction): > 0 when a outranks b by version, then committed migrationId, then saveSeq (only when both
- *  copies carry one; HoE 02:37), then savedAt. Shared by pickNewest/reconcile and IdbMirror.write's refuse check. */
-// CCR 182b932: pairwise only. With the seq-only-when-both rule this is NOT transitive across 3+ copies (e.g. A seq 7 >
-// B seq 6 by seq, B > C (no seq) by savedAt, C > A by savedAt). Callers compare exactly two copies; Saves owns the
-// 3-way (main / .bak / IDB) ordering in their unload rework.
+ *  copies carry one; HoE 02:37), then savedAt. Shared by pickNewest/reconcile and IdbMirror.write's refuse check.
+ *  CCR 182b932: pairwise only. With the seq-only-when-both rule this is NOT transitive across 3+ copies (e.g. A seq 7 >
+ *  B seq 6 by seq, B > C (no seq) by savedAt, C > A by savedAt). Callers compare exactly two copies; Saves owns the
+ *  3-way (main / .bak / IDB) ordering in their unload rework. */
 export function rankCompare(a: unknown, b: unknown, now = Date.now()): number {
   const [va, ca, qa] = rankOf(a), [vb, cb, qb] = rankOf(b); if (va !== vb) return va - vb; if (ca !== cb) return ca - cb; if (qa > 0 && qb > 0 && qa !== qb) return qa - qb; // CCR B1: seq only when both copies have one, else savedAt
   const t = (x: unknown) => { try { return savedAtRank(JSON.parse(x as string).savedAt, now); } catch { return -Infinity; } };
@@ -241,10 +241,10 @@ export function preserveCorrupt(kv: KV, raw: string, ts: number): boolean {
 /** Product 15:15: the single recovery outcome the AC14b dialog (art-ux/save-recovery-dialog.md v2.1) attaches to. */
 export type RecoveryOutcome = 'restored' | 'fresh' | 'storage' | null;
 export const recoveryOutcome = (r: Recovery | null): RecoveryOutcome => !r ? null : r.restored_from_backup ? 'restored' : r.case === 'Q' ? 'storage' : 'fresh';
-/** v4 f6 + AC14b v2.1: the lease write was refused (storage full) and the loader found nothing to recover. Route it
- *  through the dialog as outcome 'storage' with the v2.2 'Can't save' copy; Export takes the current farm. */
 /** Storage-blocked recovery export (main.ts): the live state in this build's save format (balance passed, Saves minor 2). */
 export const recoveryExport = (state: GameState, b: Balance, now = Date.now()): string => serialize(state, now, undefined, b);
+/** v4 f6 + AC14b v2.1: the lease write was refused (storage full) and the loader found nothing to recover. Route it
+ *  through the dialog as outcome 'storage' with the v2.2 'Can't save' copy; Export takes the current farm. */
 export function storageBlockedRecovery(kv: KV): Recovery {
   let raw = ''; try { raw = kv.getItem(SAVE_KEY) ?? ''; } catch { /* blocked */ }
   return { case: 'Q', reason: 'missing', had_backup: false, restored_from_backup: false, copy_failed: false, raw, cantSave: true };

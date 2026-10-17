@@ -2,9 +2,8 @@
 import { it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-// Branch m4/m4a-tracks: Product's copy is product/economy.m4branch.csv (HoP 15:29); main's product/economy.csv is untouched.
-const prod = new URL('../../product/economy.m4branch.csv', import.meta.url);
-it.runIf(existsSync(prod))('data/economy.csv == product/economy.m4branch.csv (normalised line endings)', () => {
+const prod = new URL('../../product/economy.f1-m4cols.csv', import.meta.url);
+it.runIf(existsSync(prod))('data/economy.csv == product/economy.f1-m4cols.csv (HoE-approved F1 shipping table) (normalised line endings)', () => {
   const norm = (t: string) => t.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').replace(/\n+$/, '');
   expect(norm(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'))).toBe(norm(readFileSync(prod, 'utf8')));
 });

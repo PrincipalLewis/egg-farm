@@ -14,7 +14,9 @@ export const ECON_CONFIG_PATH = here('../data/economy-config.json');
 /** farmMaxLevel (L30+ D1): the highest buyable Farm level; CSV rows above it are a pricing base only (Farm L51-55 rows of
  *  the L30+ table feed hv_extra_cost and the Hens/Egg value tracks). maxLevel = min(last CSV row, farmMaxLevel).
  *  hvExtraSecondLevelMult (L30-17): surcharge multiplier for the 2nd extra Hens/Egg value level (no CSV column yet). */
-export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmMaxLevel?: number; hvExtraSecondLevelMult?: number; hireNudgeFarmLevel?: number }
+/** farmCostFromCsv (F1): farm.costTable = the CSV farm_cost column and grader tiers carry the CSV w4_tier_cost (verified on every row).
+ *  (Merged with #12's L30+ keys.) */
+export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmCostFromCsv?: boolean; farmMaxLevel?: number; hvExtraSecondLevelMult?: number; hireNudgeFarmLevel?: number }
 export const readEconomyConfig = (path = ECON_CONFIG_PATH): EconomyConfig => JSON.parse(readFileSync(path, 'utf8'));
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max', 'hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'];
@@ -43,6 +45,9 @@ function fit(name: string, guess: number, step: number, span: number, ok: (v: nu
 }
 export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): EconomyParams {
   const R = rows, n = R.length - 1, all = (f: (r: Row) => boolean) => R.every(f);
+  // PR #17 review: every Farm level must cost strictly more than the one before (L0..maxLevel), in both curve and per-level mode.
+  for (let i = 1; i < R.length; i++) if (!(R[i].farm_cost > R[i - 1].farm_cost))
+    throw new Error(`sync-economy: economy.csv farm_cost must be strictly increasing: L${R[i].level}=${R[i].farm_cost} <= L${R[i - 1].level}=${R[i - 1].farm_cost}`);
   const lin = (col: string) => ({ base: R[0][col], per: r4(R[1][col] - R[0][col]) });
   const tap = lin('eggs_per_tap'), hn = lin('hens'), cap = lin('coop_capacity');
   const p: EconomyParams = {
@@ -72,23 +77,13 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   const farmGuess = segs && segs.length && plain ? R[plain.level].farm_cost / R[plain.level - 1].farm_cost : (R[n].farm_cost / R[0].farm_cost) ** (1 / n);
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
   p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
-  // The CSV's per-level farm_cost is the source of truth. A formula is fitted only when the column is formula-shaped
-  // (pow, or pow + configured segments). Otherwise (F1 segments + M3 L23-29 taper) the growth is fitted on the longest
-  // formula-shaped prefix (>= L0..L2) and every level the formula misses goes into farm.costOverrides {level: cost}, read verbatim.
-  try { p.farm.costGrowth = fit('farm costGrowth', farmGuess, 0.0001, 0.05, v => col('farm_cost')({ ...p, farm: { ...p.farm, costGrowth: v } })); }
-  catch (e) {
-    const pre = (k: number) => R.slice(0, k + 1);
-    let k = n, g: number | null = null;
-    for (; k >= 2 && g === null; k--) { try { const rows = pre(k); g = fit('farm costGrowth', (rows[k].farm_cost / rows[0].farm_cost) ** (1 / k), 0.0001, 0.05, v => rows.every(r => tableRow(r.level, { ...p, farm: { ...p.farm, costGrowth: v } }).farm_cost === r.farm_cost)); } catch { /* shorter prefix */ } }
-    if (g === null) throw e;
-    p.farm.costGrowth = g;
-    const ov: Record<string, number> = {};
-    for (const r of R) if (tableRow(r.level, p).farm_cost !== r.farm_cost) ov[r.level] = r.farm_cost;
-    p.farm.costOverrides = ov;
-    // A configured segment that explains none of its levels contradicts the CSV: fail loudly instead of overriding it all.
-    for (const sg of segs ?? []) { let ok = 0; for (let L = sg.from; L <= sg.to; L++) if (!(L in ov)) ok++; if (!ok) throw new Error(`sync-economy: farm cost segment ${sg.from}-${sg.to} x${sg.growth} matches no farm_cost row (economy-config.json vs economy.csv)`); }
-    if (!all(r => tableRow(r.level, p).farm_cost === r.farm_cost)) throw new Error('sync-economy: farm_cost overrides do not reproduce the CSV');
-  }
+  if (cfg.farmCostFromCsv) {
+    // F1 (HoE, Oct 17): farm_cost is per-level data, copied verbatim; no formula fit and no fallback. costGrowth/segments are
+    // not used for costs and are kept only as the pre-F1 shape (costGrowth = baseline growth, informational).
+    if (segs && segs.length) throw new Error('sync-economy: economy-config farmCostFromCsv and farmCostGrowthSegments are mutually exclusive');
+    p.farm.costTable = R.slice(0, p.maxLevel + 1).map(r => r.farm_cost); // L30+: rows above farmMaxLevel are pricing base only
+    p.farm.costGrowth = prev.farm?.costGrowth ?? 1;
+  } else p.farm.costGrowth = fit('farm costGrowth', farmGuess, 0.0001, 0.05, v => col('farm_cost')({ ...p, farm: { ...p.farm, costGrowth: v } }));
   p.farm.customerIntervalDecay = fit('customerIntervalDecay', R[1].customer_interval_s / R[0].customer_interval_s, 0.0001, 0.02, v => col('customer_interval_s')({ ...p, farm: { ...p.farm, customerIntervalDecay: v } }));
   const k0 = R[0].eggs_per_sec * R[0].customer_interval_s;
   p.farm.demandLoFactor = fit('demandLoFactor', R[0].demand_min / k0, 0.01, 1, v => col('demand_min')({ ...p, farm: { ...p.farm, demandLoFactor: v, demandHiFactor: 99 } }));
@@ -148,10 +143,12 @@ export function fitWorkers(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
 /** Grader tier costs are read verbatim from the CSV (Economy's convention, product/sim/m4/m4_workers_prog.py: tier t costs
  *  w4_tier_cost of the FIRST row with w4_tier = t). HoP 14:58: T5 = 51,567 is no longer linked to 0.5 x farm_cost.
  *  Later rows of the same tier are informational and not used. */
-function verifyGraderCosts(rows: Row[], w: any) {
+function verifyGraderCosts(rows: Row[], w: any, perRow = false) {
   const T = w.grader.tiers as { cost: number }[];
   T.forEach((t, i) => { if (!Number.isInteger(t.cost) || t.cost <= 0 || (i > 0 && t.cost <= T[i - 1].cost)) throw new Error(`sync-economy: w4_tier_cost for tier ${i + 1} must be a positive integer, rising (got ${t.cost})`); });
   for (const r of rows) if (!r.w4_tier && r.w4_tier_cost !== 0) throw new Error(`sync-economy: economy.csv L${r.level} w4_tier_cost must be 0 below the first Grader tier`);
+  // #17 (F1, farmCostFromCsv): every row repeats its current tier's CSV cost, so a stray cell fails loudly.
+  if (perRow) for (const r of rows) if (r.w4_tier && r.w4_tier_cost !== T[r.w4_tier - 1].cost) throw new Error(`sync-economy: economy.csv L${r.level} w4_tier_cost=${r.w4_tier_cost}, expected ${T[r.w4_tier - 1].cost}`);
 }
 /** M4-A columns live in economy.csv (Economy's f1-m4cols merge, this branch only). */
 export const M4_COLS = ['hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'] as const;
@@ -206,7 +203,7 @@ export function fitM4(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
 }
 export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const p = fitParams(rows, prev, cfg);
-  const workers = fitWorkers(rows, prev, cfg); verifyGraderCosts(rows, workers);
+  const workers = fitWorkers(rows, prev, cfg); verifyGraderCosts(rows, workers, !!cfg.farmCostFromCsv);
   const m4 = fitM4(rows, prev, cfg);
   prev = { ...prev, workers };
   const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, m4: _m4, ...rest } = prev;

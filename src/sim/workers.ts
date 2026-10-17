@@ -28,10 +28,10 @@ export function hireCostCents(id: WorkerId, b: Balance): number {
   return id === 'grader' ? graderTierCostCents(0, b) : b.workers[id].hire_cost * 100;
 }
 export const unlockFarm = (id: WorkerId, b: Balance) => id === 'grader' ? b.workers.grader.tiers[0].farm : b.workers[id].unlock_farm;
-/** Tier i cost in cents: the CSV w4_tier_cost of the tier's first row (tiers[i].cost); legacy configs without it use
- *  floor(share x farmCost(tier farm level)). */
+/** Tier i cost in cents: the CSV's w4_tier_cost for that tier when sync-economy carried it (tiers[i].cost, dollars),
+ *  else floor(share x farmCost(tier farm level)) dollars (pre-F1 balance files). */
 export const graderTierCostCents = (i: number, b: Balance) => {
-  const t = b.workers.grader.tiers[i] as { farm: number; cost?: number };
+  const t = b.workers.grader.tiers[i] as { farm: number; mult: number; cost?: number };
   return (t.cost ?? Math.floor(b.workers.grader.tier_cost_share_of_farm_cost * farmCost(t.farm, b))) * 100;
 };
 /** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share. */
