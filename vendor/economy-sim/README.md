@@ -14,9 +14,9 @@ The freshness test picks the sim `--config` from the sha256 of `data/economy.csv
 
 | data/economy.csv sha256 | --config | meaning |
 |---|---|---|
-| `57d964d5…` | `current` | pre-F1 (P1Q, M2_P4), main today |
-| `86f0e80e…` | `f1` | F1 m4cols CSV (#17) |
+| `57d964d5…` | `p1q` | pre-F1 (P1Q, M2_P4) |
+| `86f0e80e…` | `f1` | F1 m4cols CSV (#17/#32), main today (`current` == `f1` since sim 10f29a4a) |
 | anything else | — | hard failure: `unknown economy.csv <sha>: update vendor/economy-sim` |
 
 It compares the 46 columns the sim's CSV writer emits. Pins are verified in a `beforeAll` before the sim runs.
-Pinned sim sha eddf945d implements the ruling at decisions.md:295 (Oct 17 01:32): CURRENT reverted to pre-F1, F1 is `--config f1`.
+Pinned sim sha 10f29a4a (Economy, 2026-10-17, HoE go 07:32): CURRENT = F1 and M2_CURRENT = M2_F1 (50/0.5) now that #17 is on main; pre-F1 stays available as `--config p1q`. Replaces eddf945d (decisions.md:295 revert).
