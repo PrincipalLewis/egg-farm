@@ -3,7 +3,7 @@
 // Seller15 variance bot (product/sim/seller-variance-proposal.md, sha256 17877b41; HoQA F-1): TS vs Python parity.
 // Expected values: tests/fixtures/seller_variance.json, produced by scripts/gen-seller-variance-fixtures.py running the
 // Python reference product/sim/seller_variance_sim.py (run / run_m2, policy seller15, 100 seeds, 60 min) on this repo's
-// data/economy.csv. Regenerate: SV_SIM_DIR=<product/sim> python3 scripts/gen-seller-variance-fixtures.py
+// data/economy.csv. Regenerate: python3 scripts/gen-seller-variance-fixtures.py (defaults to vendor/economy-sim/sim; SV_SIM_DIR overrides)
 //
 // What is exact and what has a tolerance (the proposal specifies neither, so it is fixed here):
 //  EXACT  - the variance stream (CPython MT19937 port): random() bit-for-bit, every p_delay / p_cheap_first roll, the call
