@@ -18,6 +18,13 @@ async function open(w, h, rm = false) {
   await page.waitForFunction(() => window.eggfarm && window.eggfarmUi); await page.waitForTimeout(200);
   return { ctx, page, errors };
 }
+// Screenshot-only overlay: burns the running build id (Game.build = BUILD_ID) into the top-left corner; checked visible.
+const label = async page => { const t = await page.evaluate(() => { let d = document.getElementById('qa-build-label'); if (!d) { d = document.createElement('div'); d.id = 'qa-build-label';
+  d.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:2147483647;background:#000c;color:#fff;font:600 11px/1.2 monospace;padding:2px 5px;border-radius:4px;pointer-events:none'; document.body.append(d); }
+  d.textContent = 'build ' + window.eggfarm.build; const r = d.getBoundingClientRect(); const cs = getComputedStyle(d);
+  return { text: d.textContent, visible: r.width > 0 && r.left >= 0 && r.bottom <= innerHeight && cs.visibility === 'visible' && cs.zIndex === '2147483647' }; });
+  ok(`build label visible (${t.text})`, t.visible && /\+[0-9a-f]{7}$/.test(t.text), JSON.stringify(t)); return t.text; };
+const snap = async (page, path) => { await label(page); await page.screenshot({ path }); };
 const popup = async (page, eggs, awayS) => {
   await page.evaluate(([e, a]) => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: e }; g.offline = { eggs: e, awayS: Math.min(a, 7200), realAwayS: a }; window.eggfarmUi.showWelcome(); }, [eggs, awayS]);
   await page.waitForTimeout(1200);
@@ -35,7 +42,7 @@ const measure = page => page.evaluate(() => {
 for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 844, '390x844'], [1280, 800, '1280-docked']]) {
   const { ctx, page, errors } = await open(w, h);
   await popup(page, 1_234_567, 11_520); const m = await measure(page);
-  if (ENGINE === 'chromium') await page.screenshot({ path: `${SHOTS}/offline-v2-capped-1234567-${tag}.png` });
+  if (ENGINE === 'chromium') await snap(page, `${SHOTS}/offline-v2-capped-1234567-${tag}.png`);
   ok(`C-AC33 ${tag}: line A and hero on separate lines`, m.hero.top >= m.a.bottom - 1, JSON.stringify([m.a, m.hero]));
   ok(`C-AC33 ${tag}: no truncation / ellipsis`, !m.trunc);
   ok(`C-AC33 ${tag}: Collect full width, >= 48px, visible without scrolling`, m.btn.height >= 48 && m.btn.width >= m.contentW - 1 && m.btn.bottom <= m.card.bottom && m.btn.bottom <= m.vh && m.cardSH <= m.cardCH + 1, JSON.stringify([m.btn, m.card, m.cardSH, m.cardCH]));
@@ -49,14 +56,17 @@ for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 8
 }
 { // short height: the rate line drops first
   const { ctx, page } = await open(360, 420); await popup(page, 1_234_567, 11_520); const m = await measure(page);
-  if (ENGINE === 'chromium') await page.screenshot({ path: `${SHOTS}/offline-v2-capped-short-360x420.png` });
+  if (ENGINE === 'chromium') await snap(page, `${SHOTS}/offline-v2-capped-short-360x420.png`);
+  if (ENGINE === 'chromium') { await page.evaluate(() => { const b = document.querySelector('.wb-body'); b.scrollTop = b.scrollHeight; }); await page.waitForTimeout(100);
+    const capVis = await page.evaluate(() => { const c = document.querySelector('.wb-cap').getBoundingClientRect(), b = document.querySelector('.wb-body').getBoundingClientRect(); return c.top >= b.top - 1 && c.bottom <= b.bottom + 1; });
+    ok('C-AC33 short height: cap line reachable by scrolling the body', capVis); await snap(page, `${SHOTS}/offline-v2-capped-short-360x420-scrolled-cap.png`); }
   ok('C-AC33 short height: card <= 80vh, rate line dropped first, Collect pinned at the card bottom and visible', m.rateHidden && m.card.height <= m.vh * 0.8 + 1 && m.btn.bottom <= m.card.bottom && m.card.bottom - m.btn.bottom <= 40 && m.btn.bottom <= m.vh, JSON.stringify({ r: m.rateHidden, btn: m.btn, vh: m.vh })); await ctx.close();
 }
 { // not capped, reduced motion: static number, no pop
   const { ctx, page } = await open(390, 844, true);
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2732 }; g.offline = { eggs: 2732, awayS: 683, realAwayS: 683 }; window.eggfarmUi.showWelcome(); });
   const t0 = await page.evaluate(() => document.querySelector('#wbN').textContent); const m = await measure(page);
-  if (ENGINE === 'chromium') await page.screenshot({ path: `${SHOTS}/offline-v2-uncapped-rm-390x844.png` });
+  if (ENGINE === 'chromium') await snap(page, `${SHOTS}/offline-v2-uncapped-rm-390x844.png`);
   ok('C-AC37 reduced motion: static N immediately, no pop animation', t0 === '+2,732 eggs' && m.heroAnim === 'none', `${t0} ${m.heroAnim}`);
   ok('C-AC27 uncapped: "Away 11m 23s", no cap text/line', m.text.includes('Away 11m 23s') && !m.text.includes('capped') && !m.text.includes('Offline limit'), m.text);
   const before = await page.evaluate(() => window.eggfarm.state.basket); await page.click('#wbCollect'); await page.waitForTimeout(100);
@@ -67,7 +77,7 @@ for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 8
   const { ctx, page } = await open(360, 640); const vals = [81_240, 100_000, 1_041_237, 99_999_999, 123_456_700, 11_111_100, 80_000_800]; const out = [];
   for (const c of vals) { await page.evaluate(c => { window.eggfarm.state = { ...window.eggfarm.state, coinsCents: c }; window.eggfarmUi.render(); }, c); await page.waitForTimeout(80);
     out.push(await page.evaluate(() => { const e = document.querySelector('#coins'); return { t: e.textContent, w: e.parentElement.getBoundingClientRect().width, tw: e.getBoundingClientRect().width, gw: e.previousElementSibling.getBoundingClientRect().width, pill: e.closest('.pill').getBoundingClientRect().width, tab: getComputedStyle(e).fontVariantNumeric }; }));
-    if (ENGINE === 'chromium' && c === 99_999_999) { await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, basket: 99_999 }; window.eggfarmUi.render(); }); await page.waitForTimeout(80); await page.screenshot({ path: `${SHOTS}/offline-v2-hud-999999-360x640.png` }); } }
+    if (ENGINE === 'chromium' && c === 99_999_999) { await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, basket: 99_999 }; window.eggfarmUi.render(); }); await page.waitForTimeout(80); await snap(page, `${SHOTS}/offline-v2-hud-999999-360x640.png`); } }
   { const bv = [999, 12_345, 999_999, 1_234_567], bo = [];
     for (const n of bv) { await page.evaluate(n => { window.eggfarm.state = { ...window.eggfarm.state, basket: n }; window.eggfarmUi.render(); }, n); await page.waitForTimeout(80);
       bo.push(await page.evaluate(() => { const e = document.querySelector('#basket'); return { t: e.textContent, tw: e.getBoundingClientRect().width, gw: e.previousElementSibling.getBoundingClientRect().width, pill: e.closest('.pill').getBoundingClientRect().width, tab: getComputedStyle(e).fontVariantNumeric }; })); }
