@@ -81,27 +81,32 @@ sections.b2tip = async () => {
     const parts = row ? [row, ...row.querySelectorAll('*')].filter(x => R(x).width && R(x).height) : [];
     const sheet = matchMedia('(min-width:960px) and (orientation:landscape)').matches || !!document.querySelector('#panel-layer.open');
     return { t: Math.round(b.top), b: Math.round(b.bottom), l: Math.round(b.left), r: Math.round(b.right), tabOv: Math.round(tabs.reduce((s, t) => s + ar(b, t), 0)), rowOv: parts.filter(x => ar(b, R(x)) > 0).map(x => x.className || x.tagName).slice(0, 4), inVp: b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth, rowVis: !!row && R(row).height > 0 && R(row).top < innerHeight && R(row).bottom > 0, sheet }; };
-  for (const mode of ['direct', 'normal']) for (const [w, h] of sizes) {
-    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify(mode === 'direct' ? { onboardingDone: true, workersIntroA: true } : { onboardingDone: true }) } });
+  // rule D (02:15): the tired tip must show at every size (auto-scroll at docked 1280x720/600) except 1024x474, where it is skipped
+  // and the Manage tip shows alone; 'guard' = the player scrolled the panel just before the hire -> no auto-scroll, skipped visit, Manage alone
+  const cases = [...['direct', 'normal'].flatMap(m => sizes.map(sz => [m, ...sz])), ...(process.env.B2_SIZES ? [] : [['guard', 1280, 720]])];
+  for (const [mode, w, h] of cases) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': JSON.stringify(mode !== 'normal' ? { onboardingDone: true, workersIntroA: true } : { onboardingDone: true }) } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 5e6 }; }); await page.waitForTimeout(400);
     if (mode === 'normal') await page.locator('#iaOpen').click({ timeout: 8000 }).catch(() => {}), await page.waitForTimeout(400);
+    if (mode === 'guard') { await page.locator('[data-nav=upgrades]').click({ timeout: 2000 }).catch(() => {}); await page.evaluate(() => { const b = document.querySelector('#uRow').closest('.body'); b.dispatchEvent(new WheelEvent('wheel', { deltaY: 10, bubbles: true })); }); }
     await page.evaluate(() => window.eggfarm.dispatch({ type: 'hire', worker: 'market_hand' }));
-    const S = []; let shotDone = false, opened = false; const t0 = Date.now();
-    while (Date.now() - t0 < 7000) { const c = await page.evaluate(SNAP); if (c) S.push(c);
+    const S = []; let shotDone = false, opened = false, M = null, afterRerender = null; const t0 = Date.now(), skipExpected = mode === 'guard' || (w === 1024 && h === 474), MB = [];
+    while (Date.now() - t0 < 8000) { const c = await page.evaluate(SNAP); if (c) S.push(c);
       if (c && !shotDone && shot) { await page.waitForTimeout(120); await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}.png` }); shotDone = true; }
+      const m = await page.evaluate(SNAP, 'Manage'); if (m) MB.push(m);
+      if (m && !M) { M = m; if (shot && skipExpected) await page.screenshot({ path: `${SHOTS}/b2-${mode === 'guard' ? 'guard-skip' : 'skip-manage'}-${w}x${h}.png` });
+        // force a Workers list rebuild: the Manage tip must survive it (review 5877e0f #2)
+        await page.evaluate(() => { const u = document.querySelector('#uRow'); u.innerHTML = u.innerHTML + ''; }); await page.waitForTimeout(400); afterRerender = !!(await page.evaluate(SNAP, 'Manage')); }
       // direct flow on phones: sheet stays closed for 1.5s (tip must stay hidden), then the player opens Upgrades and the deferred tip shows
       if (!opened && Date.now() - t0 > 1500 && w < 960) { opened = true; if (!(await page.locator('#panel-layer.open').count())) await page.locator('[data-nav=upgrades]').click({ timeout: 2000 }).catch(() => {}); }
       await page.waitForTimeout(100); }
-    const bad = S.filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet);
-    // review 6a9ede1 #1: deferral is only allowed where no clean spot exists (docked short heights: the row sits right under the tabs with no room below)
-    const mayDefer = (w === 1280 && h <= 720) || (w === 1024 && h === 474); // measured: row 521..645 under tabs 459..503 at 1280x720 -> no 8px-clear spot (see `why`)
-    const M = await page.evaluate(SNAP, 'Manage'), manage = !!M; if (M && (M.tabOv > 0 || !M.inVp)) bad.push({ manageTip: M });
-    // rerender: force a Workers list rebuild and check the Manage tip survives (review 5877e0f #2)
-    let afterRerender = null; if (M) { await page.evaluate(() => { const u = document.querySelector('#uRow'); u.innerHTML = u.innerHTML + ''; }); await page.waitForTimeout(600); afterRerender = !!(await page.evaluate(SNAP, 'Manage')); if (!afterRerender) bad.push({ manageGoneAfterRerender: true }); }
-    const why = S.length ? null : await page.evaluate(() => { const R = e => { const b = e.getBoundingClientRect(); return [b.top, b.bottom].map(Math.round); }; const row = document.querySelector('#uRow [data-w=market_hand]'); return { vh: innerHeight, row: row && R(row), body: row && R(row.closest('.body')), tabs: [...document.querySelectorAll('[role=tablist]')].map(R) }; });
-    const info = JSON.stringify({ n: S.length, mayDefer, manage, why, first: S[0] ?? 'deferred (not shown)', bad: bad[0] ?? null, errors });
-    ok(`B-2 tired tip ${mode} ${w}x${h}: clear of tablist + worker row, in viewport, only with the row on screen; shows where a clean spot exists, then Manage`, !bad.length && !errors.length && (mayDefer ? (!S.length || manage) : S.length > 0 && manage), info);
-    if (shot && !shotDone) await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}-deferred.png` });
+    const bad = [...S, ...MB].filter(c => c.tabOv > 0 || c.rowOv.length || !c.inVp || !c.rowVis || !c.sheet);
+    if (M && !afterRerender) bad.push({ manageGoneAfterRerender: true });
+    const flags = await page.evaluate(() => { const f = JSON.parse(localStorage.getItem('eggfarm.ui') || '{}'); return { seen: f.tiredSeen, skips: f.tiredSkips }; });
+    const info = JSON.stringify({ n: S.length, skipExpected, manage: M, flags, first: S[0] ?? 'not shown', bad: bad[0] ?? null, errors });
+    const pass = !bad.length && !errors.length && !!M && (skipExpected ? !S.length && flags.skips === 1 && !flags.seen : S.length > 0 && flags.seen === true);
+    ok(`B-2 rule A-D ${mode} ${w}x${h}: ${skipExpected ? 'tired tip skipped (1 skip), Manage alone' : 'tired tip shown (seen), then Manage'}; no tip touches tablist / worker row / viewport edge or shows with the sheet closed`, pass, info);
+    if (shot && !shotDone && !skipExpected) await page.screenshot({ path: `${SHOTS}/b2-tired-${mode}-${w}x${h}-MISSING.png` });
     console.log(`b2tip ${mode} ${w}x${h} ${info}`);
     await ctx.close();
   }

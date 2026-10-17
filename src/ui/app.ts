@@ -589,7 +589,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       introA.addEventListener('click', e => {
         const t = (e.target as HTMLElement).closest('button'); if (!t) return;
         if (t.id === 'iaOpen') { g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'open' }); tab = 'workers'; dirty = true; openPanel('upgrades'); render();
-          const row = workerRow('market_hand'); row?.scrollIntoView({ block: 'center' }); coach(`Hire them for ${fmtMoney(hireCostMH)}. They work while you play.`, () => workerRow('market_hand')?.querySelector('button.btn') ?? null, 8000); }
+          const row = workerRow('market_hand'); autoScrollingUntil = Date.now() + 900; row?.scrollIntoView({ block: 'center' }); /* ours, not the player's (rule D guard) */ coach(`Hire them for ${fmtMoney(hireCostMH)}. They work while you play.`, () => workerRow('market_hand')?.querySelector('button.btn') ?? null, 8000); }
         else g.telemetry.onboardingStep(6, 'workers_hire_tip', { action: 'dismiss' });
         introA?.remove(); introA = null;
       });
@@ -610,15 +610,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const tiredMark = (ev: 'shown' | 'skipped') => { const n = tiredTipAfter({ seen: !!flags.tiredSeen, skips: flags.tiredSkips ?? 0 }, ev); flags.tiredSeen = n.seen; flags.tiredSkips = n.skips; saveFlags(); };
   const startTiredVisit = () => {
     const w = flags.tiredWorker; if (!w || flags.tiredSeen || tiredPending) return;
-    tiredPending = true;
+    tiredPending = true; visitActive = true;
     coach('Workers get tired over time.', null, 3000, { rowId: w, autoScroll: true,
       onShow: () => { tiredMark('shown'); showManage(w, 3100); },
       onSkip: () => { tiredMark('skipped'); showManage(w, 300); },
       onClose: () => { tiredPending = false; } });
   };
   // a "visit" = the Workers list becoming visible (sheet opened on Workers, or the Workers tab picked while docked)
-  let workersVisible = false;
-  window.setInterval(() => { const v = (docked.matches || open === 'upgrades') && tab === 'workers'; if (v && !workersVisible) startTiredVisit(); workersVisible = v; }, 250);
+  // one attempt per visit: visitActive is set when an attempt starts and cleared only when the Workers list stops being visible
+  let visitActive = false;
+  window.setInterval(() => { const v = (docked.matches || open === 'upgrades') && tab === 'workers'; if (!v) visitActive = false; else if (!visitActive) startTiredVisit(); }, 250);
   g.on(e => {
     if (e.type !== 'worker_hire' || flags.workersIntroB) return;
     flags.workersIntroB = true; flags.tiredWorker = e.worker; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
