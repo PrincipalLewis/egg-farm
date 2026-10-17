@@ -10,7 +10,7 @@ export interface Worker { energy: number; cdS: number; unpaid?: boolean; }
 export type Workers = Partial<Record<WorkerId, Worker>>;
 export const mood = (w: Worker | undefined, b: Balance): WorkerMood | null =>
   !w ? null : w.unpaid ? 'unpaid' : w.energy >= b.workers.energy.tired_below_pct ? 'working' : w.energy > 0 ? 'tired' : 'asleep';
-/** Off = produces nothing (Asleep or Unpaid). */
+/** Off = Asleep or Unpaid: the worker does not do its job (Market Hand/Coop Hand/Hawker effect lost, Grader keeps asleep_bonus_share). Farm output continues; see salesStopped for a true zero. */
 export const isOff = (m: WorkerMood | null) => m === 'asleep' || m === 'unpaid';
 /** Yawn cue (v1.1): energy at/below yawn_at_pct and above 0, while not Unpaid/Asleep. */
 export const isYawning = (w: Worker | undefined, b: Balance) => !!w && !w.unpaid && w.energy > 0 && w.energy <= b.workers.energy.yawn_at_pct;
@@ -22,8 +22,8 @@ export const showManageAll = (ws: Workers, _b: Balance) => hiredCount(ws) >= 1;
 /** PM Workers ruling (b), 00:4x: bulk refill (every tired/asleep worker in one tap) needs >= manage_all_min_workers hired.
  *  Below that, the same bar refills only the single lowest-energy tired/asleep worker (per-worker Manage rules + cooldown). */
 export const bulkManageAllowed = (ws: Workers, b: Balance) => hiredCount(ws) >= b.workers.energy.manage_all_min_workers;
-/** Target of a below-threshold Refill tap: the lowest-energy hired worker <= manage_prompt_threshold (card order breaks ties). */
-/** review 5d8a058 #6: Unpaid workers stay stopped after a refill, so a paid tired worker is preferred; Unpaid ones are picked only when no paid worker needs it. */
+/** Target of a below-threshold Refill tap: the lowest-energy hired worker <= manage_prompt_threshold (card order breaks ties).
+ *  review 5d8a058 #6: Unpaid workers stay stopped after a refill, so a paid tired worker is preferred; Unpaid ones are picked only when no paid worker needs it. */
 export const lowestManageTarget = (ws: Workers, b: Balance) => {
   const low = (ids: WorkerId[]) => ids.reduce<WorkerId | null>((m, id) => m == null || ws[id]!.energy < ws[m]!.energy ? id : m, null);
   const need = needManage(ws, b); return low(need.filter(id => !ws[id]!.unpaid)) ?? low(need);

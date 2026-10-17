@@ -30,6 +30,10 @@ describe('review 5d8a058 #3/#16: goal aria', () => {
     const name = g.label.replace(/^★\s*/, '').split(/[·:,]/)[0].trim(); expect(a.split(name).length - 1).toBe(1);
   });
 });
+describe('review 23a3798 #6: goal aria polish', () => {
+  it('"done" is said once, no "!."', () => { const g = { ...refillGoal(null), key: null, state: 'done', label: 'All upgrades done!' } as any; expect(goalButtonAria('All upgrades done!', g)).toBe('All upgrades done.'); });
+  it('W4 refill uses the card name', () => expect(goalAria(refillGoal('W4'))).toBe('Next goal: refill the Egg Grader.'));
+});
 describe('review 5d8a058 #4: shown Refill never re-derives as "All upgrades done!"', () => {
   it('due tick with a different pick replaces the refill goal', () => {
     const h = new GoalHysteresis(5000); const s = st({ coinsCents: 1e6, workers: { market_hand: { energy: 100, cdS: 0 } } });

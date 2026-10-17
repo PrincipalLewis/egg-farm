@@ -1,4 +1,5 @@
 /** M3-AC5 next-goal hint — rc1 clarity: target = bestBuy; 5 s / 10% hysteresis (replaces GoalHold). */
+import { WORKER_NAMES } from './workers-ui';
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { coopTier } from '../sim/state';
@@ -210,14 +211,18 @@ const UNIT: Record<string, string> = { s: 'second', min: 'minute', h: 'hour' };
 export const spokenDuration = (status: string) =>
   status.replace('~', '').replace(/(\d+)\s*(min|s|h)\b/g, (_, n: string, u: string) => `${n} ${UNIT[u]}${n === '1' ? '' : 's'}`).trim();
 
-const REFILL_NAME: Record<string, string> = { W1: 'the Market Hand', W2: 'the Coop Hand', W3: 'the Hawker', W4: 'the Grader' };
+const REFILL_NAME: Record<string, string> = { W1: `the ${WORKER_NAMES.market_hand}`, W2: `the ${WORKER_NAMES.coop_hand}`, W3: `the ${WORKER_NAMES.hawker}`, W4: `the ${WORKER_NAMES.grader}` }; // review 23a3798 #6: same names as the cards
 /** review 5d8a058 #3: spoken worker name, never the internal W1..W4 key. */
 export const refillGoalName = (key?: string | null) => (key && REFILL_NAME[key]) || 'a tired worker';
 /** Spoken goal state without the goal name (review #16: the button's aria-label already starts with the visible label). */
 export const goalAriaDetail = (g: Goal) => g.state === 'done' ? 'All upgrades done.' : g.state === 'refill' ? `Refill ${refillGoalName(g.key)}.` :
   g.state === 'ready' ? 'Ready now.' : g.state === 'noincome' ? 'Sell eggs to earn coins.' : g.status.startsWith('Affordable') ? `${g.status}.` : `Affordable in about ${spokenDuration(g.status)}.`;
 /** Goal button aria-label: visible text first (label in name), then the state once. */
-export const goalButtonAria = (visible: string, g: Goal) => visible ? `${visible}. ${goalAriaDetail(g)}` : goalAria(g);
+export const goalButtonAria = (visible: string, g: Goal) => {
+  if (!visible) return goalAria(g);
+  const d = goalAriaDetail(g), v = visible.replace(/[.!]+$/, '');
+  return d.replace(/[.!]+$/, '').toLowerCase() === v.toLowerCase() ? `${v}.` : `${v}. ${d}`; // review 23a3798 #6: no 'done!. done.'
+};
 export const goalAria = (g: Goal) => g.state === 'done' ? 'Next goal: all upgrades done.' :
   g.state === 'refill' ? `Next goal: refill ${refillGoalName(g.key)}.` :
   `Next goal: ${g.label.replace(':', ',')}. ${g.state === 'ready' ? 'Ready now.' : g.state === 'noincome' ? 'Sell eggs to earn coins.' : g.status.startsWith('Affordable') ? `${g.status}.` : `Affordable in about ${spokenDuration(g.status)}.`}`;
