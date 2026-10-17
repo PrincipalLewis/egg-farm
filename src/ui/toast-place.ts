@@ -7,7 +7,8 @@ export const toastTop = (queueBottom: number, bannerBottom: number, docked: bool
 export interface ToastDom { shown(): boolean; opacity(): number; show(): void; hide(): void; transitions(on: boolean): void; reflow(): void; place(): void; }
 export interface ToastClock { raf(f: () => void): number; setTimeout(f: () => void, ms: number): number; clearTimeout(id: number): void; }
 export const TOAST_MS = 1300;
-/** toast-v3 state machine (pure, injected DOM + clock; unit-tested):
+/** toast-v3 state machine: a small stateful controller with injected DOM + clock (no globals), unit-tested.
+ *  (This module now holds toast placement AND show/dismiss timing.)
  *  - visible or still fading out (opacity > 0): re-show at once from the current value (no snap); place next frame only (review 148591a n3);
  *  - hidden: one pending settle (n4): next frame, transitions off -> place -> reflow -> on -> show;
  *  - the dismiss timer is armed only after .show is on (m1), and re-armed for every new toast. */
