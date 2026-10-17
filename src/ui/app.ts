@@ -467,7 +467,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
     if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * coopCap(s, b))
-      hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
+      hint += `<div class="hint limit"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
     return `<div class="up"${max ? ` role="group" aria-label="${isF ? 'Farm level' : 'Collect per tap'}, level ${L}, max."` : ''}>
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
