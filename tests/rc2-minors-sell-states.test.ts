@@ -24,7 +24,7 @@ describe('M-Sold-freeze', () => {
     expect(ol).toMatch(/planRemovals\(\{ gone, inQueue/);
     expect(ol).toMatch(/this\.empty\.hidden = emptyHidden\(i\.customers\.length, this\.nodes\.size, this\.leavingN\)/);
     expect(ol).toMatch(/if \(el\.classList\.contains\('sold'\)\) return;/);
-    expect(css).toMatch(/\.order \.btn\.sell\.sold[^{]*\{background:#3D7F33;color:#fff/);
+    expect(css).toMatch(/\.order \.btn\.sell\.sold[^{]*\{background:#3D7F33;color:#fff/); expect(css).toMatch(/\.order \.btn\.sell\.sold\[aria-disabled\]\{[^}]*font-family:var\(--f-body\);font-weight:700;font-size:12px/); // designer minimum: Nunito 700 12px
     expect(css).toMatch(/\.reduced-motion \.order\.leaving,\.order\.leaving\.rmfade\{animation:orderFade \.12s/); expect(ol).toMatch(/if \(i\.rm\) el\.classList\.add\('rmfade'\)/);
   });
 });

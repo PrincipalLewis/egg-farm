@@ -372,7 +372,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         floatText(`+${fmtMoney(e.value)}`, src, 'coin'); break; // same figure as the Sold! chip (incl. Grader), review ebbd02e #6
       }
       case 'customer_arrive': sfx('customerArrive'); break;
-      case 'customer_served': dwell.served(e.id, now()); if (open === 'market' || docked.matches) orderList.sold(e.id, fmtMoneyShort(lastSale.get(e.id) ?? 0)); /* only freeze a rendered row; a hidden one drops unseen on the next update (review c1b4ef5 #1). Chip shows the completing sale, same figure as the pop (design decision, review c1b4ef5 #4) */ lastSale.delete(e.id); break;
+      case 'customer_served': dwell.served(e.id, now()); if (open === 'market' || docked.matches) orderList.sold(e.id, fmtMoneyShort(lastSale.get(e.id) ?? 0)); /* only freeze a rendered row; a hidden one takes the normal removal path on the next update (review c1b4ef5 #1). Chip shows the completing sale, same figure as the pop (design decision, review c1b4ef5 #4) */ lastSale.delete(e.id); break;
       case 'customer_partial': { dwell.gone(e.id); lastSale.delete(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
       case 'customer_lost': if (e.id) lastSale.delete(e.id);
         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
