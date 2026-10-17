@@ -9,7 +9,7 @@ import { saleValueCents } from '../src/sim/payout';
 import { apply } from '../src/sim/actions';
 import { graderMult } from '../src/sim/workers';
 import { welcomeModel } from '../src/ui/welcome-v2';
-import { fmtMoney, fmtMoneyFull, fmtDuration, fmtEggsFull } from '../src/ui/format';
+import { fmtCount, fmtMoney, fmtMoneyFull, fmtDuration, fmtEggsFull } from '../src/ui/format';
 import { stubVisibilityHook } from '../src/save/visibility-hook';
 import { mem, expOffline } from './helpers';
 const T0 = 1.8e12;
@@ -19,19 +19,17 @@ const gameAway = (s: ReturnType<typeof L15>, awayS: number) => { const kv = mem(
 const modelOf = (g: Game) => welcomeModel(g.state.pendingOfflineEggs, g.offline.realAwayS, g.state, b);
 
 describe('C-AC27/28/32 time line and cap line', () => {
-  it('C-AC27 away 11m 11s at L15: no cap text, full-digit hero, no cap line', () => {
-    const { g } = gameAway(L15(), 671), m = modelOf(g);
-    expect(m.lineA).toBe('Away 11m 11s'); expect(m.capped).toBe(false); expect(m.capLine).toBeNull();
-    expect(g.state.pendingOfflineEggs).toBe(expOffline(671, 15)); // 2,684 (spec example says 2,732 = 683 s; see PR)
-    expect(m.hero).toBe(`+${fmtEggsFull(expOffline(671, 15))} eggs`); expect(m.hero).toBe('+2,684 eggs');
+  it('C-AC27 (v0.3.1) away 11m 23s at L15: no cap text, "+2,732 eggs", no cap line', () => {
+    const { g } = gameAway(L15(), 683), m = modelOf(g);
+    expect(m.lineA).toBe('Away 11m 23s'); expect(m.capped).toBe(false); expect(m.capLine).toBeNull();
+    expect(g.state.pendingOfflineEggs).toBe(expOffline(683, 15)); expect(m.hero).toBe('+2,732 eggs');
   });
-  it('C-AC27 spec number: 683 s (11m 23s) at L15 -> "+2,732 eggs"', () => { const m = modelOf(gameAway(L15(), 683).g); expect(m.hero).toBe('+2,732 eggs'); expect(m.lineA).toBe('Away 11m 23s'); });
   it('C-AC28 away 3h 12m at L15: capped text, 28,800 eggs, cap line, never "2h+"', () => {
     const { g } = gameAway(L15(), 11_520), m = modelOf(g);
     expect(m.lineA).toBe('Away 3h 12m · capped at 2h'); expect(m.hero).toBe('+28,800 eggs');
     expect(m.capLine).toBe('Offline limit is 2h. Check in sooner to earn more.');
     expect(popupText(m)).not.toContain('2h+');
-    const app = readFileSync('src/ui/app.ts', 'utf8'); expect(app).toMatch(/wb-clock">⏱/); expect(app).not.toMatch(/fmtAway\(/);
+    const app = readFileSync('src/ui/app.ts', 'utf8'); expect(app).toMatch(/<svg class="wb-clock"[^>]*aria-hidden="true"[^>]*stroke="currentColor"/); expect(app).not.toContain('⏱'); expect(app).not.toMatch(/fmtAway\(/);
     expect(readFileSync('src/ui/styles.css', 'utf8')).toMatch(/\.wb-cap\{[^}]*color:var\(--c-wood-text\)/);
   });
   it('≥ 24h reads days', () => { const { g } = gameAway(L15(), 2 * 86400 + 4 * 3600 + 59), m = modelOf(g); expect(m.lineA).toBe('Away 2d 4h · capped at 2h'); });
@@ -127,6 +125,17 @@ describe('C-AC39 HUD money format', () => {
     const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
     expect(app).toMatch(/<span class="money-slot"><span class="num slot-ghost" aria-hidden="true">\$999,999<\/span><span class="num" id="coins">/);
     expect(css).toMatch(/\.num\{font-variant-numeric:tabular-nums\}/); expect(css).toMatch(/\.money-slot \.slot-ghost\{visibility:hidden\}/);
+  });
+});
+
+describe('C-AC39 (v0.3.1) egg counts', () => {
+  it('full digits with separators under 1,000,000, K/M/B from 1M', () => {
+    expect(fmtCount(999_999)).toBe('999,999'); expect(fmtCount(28_800)).toBe('28,800'); expect(fmtCount(12_345)).toBe('12,345'); expect(fmtCount(999.9)).toBe('999');
+    expect(fmtCount(1_000_000)).toBe('1M'); expect(fmtCount(1_234_567)).toBe('1.23M'); expect(fmtCount(2.5e9)).toBe('2.5B'); expect(fmtCount(999_999_999)).toBe('1B');
+  });
+  it('Basket HUD: tabular slot reserved for "999,999"', () => {
+    const app = readFileSync('src/ui/app.ts', 'utf8');
+    expect(app).toMatch(/<span class="money-slot count-slot"><span class="num slot-ghost" aria-hidden="true">999,999<\/span><span class="num" id="basket">/);
   });
 });
 

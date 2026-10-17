@@ -60,7 +60,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
     <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="money-slot"><span class="num slot-ghost" aria-hidden="true">$999,999</span><span class="num" id="coins"></span></span></div>
-    <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
+    <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="money-slot count-slot"><span class="num slot-ghost" aria-hidden="true">999,999</span><span class="num" id="basket"></span></span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
     <div class="sr" aria-live="polite" id="live"></div></header>`);
@@ -240,7 +240,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="wb-sub" aria-hidden="true">${m.sub}</div>
       <div class="wb-worth num" aria-hidden="true">${m.worth}</div>
       <div class="wb-rate num" aria-hidden="true">${m.rate}</div>
-      ${m.capLine ? `<div class="wb-cap" aria-hidden="true"><span class="wb-clock">⏱</span> ${m.capLine}</div>` : ''}
+      ${m.capLine ? `<div class="wb-cap" aria-hidden="true"><svg class="wb-clock" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="5.8"/><path d="M8 6v3l2 1.5M6.5 1.5h3"/></svg> ${m.capLine}</div>` : ''}
       <button class="btn" id="wbCollect" aria-label="${m.button}">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
     // §3: card max 80% of the viewport; the rate line is the first to drop when it does not fit.

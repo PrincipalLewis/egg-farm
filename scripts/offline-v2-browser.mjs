@@ -30,7 +30,7 @@ const measure = page => page.evaluate(() => {
   return { contentW, card: r(card).toJSON(), cardSH: card.scrollHeight, cardCH: card.clientHeight, btn: r(btn).toJSON(), a: r(card.querySelector('.wb-a')).toJSON(), hero: r(card.querySelector('.wb-hero')).toJSON(),
     heroText: card.querySelector('#wbN').textContent, rateHidden: card.querySelector('.wb-rate').hidden, text: card.innerText, trunc, vh: innerHeight,
     aria: card.getAttribute('aria-describedby') && document.getElementById(card.getAttribute('aria-describedby')).textContent, btnName: btn.getAttribute('aria-label'),
-    cap: card.querySelector('.wb-cap') && getComputedStyle(card.querySelector('.wb-cap')).color, heroAnim: getComputedStyle(card.querySelector('.wb-hero')).animationName };
+    cap: card.querySelector('.wb-cap') && getComputedStyle(card.querySelector('.wb-cap')).color, clock: (c => c && { stroke: getComputedStyle(c).stroke, hidden: c.getAttribute('aria-hidden') })(card.querySelector('.wb-cap svg.wb-clock')), heroAnim: getComputedStyle(card.querySelector('.wb-hero')).animationName };
 });
 for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 844, '390x844'], [1280, 800, '1280-docked']]) {
   const { ctx, page, errors } = await open(w, h);
@@ -41,7 +41,7 @@ for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 8
   ok(`C-AC33 ${tag}: Collect full width, >= 48px, visible without scrolling`, m.btn.height >= 48 && m.btn.width >= m.contentW - 1 && m.btn.bottom <= m.card.bottom && m.btn.bottom <= m.vh && m.cardSH <= m.cardCH + 1, JSON.stringify([m.btn, m.card, m.cardSH, m.cardCH]));
   ok(`C-AC33 ${tag}: card <= 80% viewport`, m.card.height <= m.vh * 0.8 + 1, `${m.card.height}/${m.vh}`);
   ok(`C-AC29 ${tag}: full digits, no K/M/B, no "no limit"`, m.text.includes('+1,234,567 eggs') && !/\d[KMB]\b/.test(m.text) && !/no limit/i.test(m.text), m.text);
-  ok(`C-AC28 ${tag}: cap line + "capped at 2h", never "2h+"`, m.text.includes('Away 3h 12m · capped at 2h') && m.text.includes('⏱ Offline limit is 2h. Check in sooner to earn more.') && !m.text.includes('2h+') && m.cap === 'rgb(138, 85, 40)', m.cap);
+  ok(`C-AC28 ${tag}: cap line + "capped at 2h", never "2h+"`, m.text.includes('Away 3h 12m · capped at 2h') && m.text.includes('Offline limit is 2h. Check in sooner to earn more.') && !m.text.includes('⏱') && m.clock && m.clock.stroke === m.cap && m.clock.hidden === 'true' && !m.text.includes('2h+') && m.cap === 'rgb(138, 85, 40)', m.cap);
   ok(`C-AC37 ${tag}: motion on -> pop + count-up reaches N`, m.heroAnim === 'wbpop' && m.heroText === '+1,234,567 eggs', m.heroAnim + ' ' + m.heroText);
   ok(`C-AC38 ${tag}: accessible text + Collect name`, /Plus 1,234,567 eggs added to your basket\. Worth up to [\d,]+ dollars when sold\. Offline limit is 2 hours\./.test(m.aria) && m.btnName === 'Collect 1,234,567 eggs', m.aria);
   ok(`no page errors ${tag}`, errors.length === 0, errors.join('; '));
@@ -54,20 +54,25 @@ for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 8
 }
 { // not capped, reduced motion: static number, no pop
   const { ctx, page } = await open(390, 844, true);
-  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2684 }; g.offline = { eggs: 2684, awayS: 671, realAwayS: 671 }; window.eggfarmUi.showWelcome(); });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2732 }; g.offline = { eggs: 2732, awayS: 683, realAwayS: 683 }; window.eggfarmUi.showWelcome(); });
   const t0 = await page.evaluate(() => document.querySelector('#wbN').textContent); const m = await measure(page);
   if (ENGINE === 'chromium') await page.screenshot({ path: `${SHOTS}/offline-v2-uncapped-rm-390x844.png` });
-  ok('C-AC37 reduced motion: static N immediately, no pop animation', t0 === '+2,684 eggs' && m.heroAnim === 'none', `${t0} ${m.heroAnim}`);
-  ok('C-AC27 uncapped: "Away 11m 11s", no cap text/line', m.text.includes('Away 11m 11s') && !m.text.includes('capped') && !m.text.includes('Offline limit'), m.text);
+  ok('C-AC37 reduced motion: static N immediately, no pop animation', t0 === '+2,732 eggs' && m.heroAnim === 'none', `${t0} ${m.heroAnim}`);
+  ok('C-AC27 uncapped: "Away 11m 23s", no cap text/line', m.text.includes('Away 11m 23s') && !m.text.includes('capped') && !m.text.includes('Offline limit'), m.text);
   const before = await page.evaluate(() => window.eggfarm.state.basket); await page.click('#wbCollect'); await page.waitForTimeout(100);
   const after = await page.evaluate(() => window.eggfarm.state.basket);
-  ok('C-AC31 Collect adds exactly N to the Basket', after - before === 2684, `${before} -> ${after}`); await ctx.close();
+  ok('C-AC31 Collect adds exactly N to the Basket', after - before === 2732, `${before} -> ${after}`); await ctx.close();
 }
 { // C-AC39 HUD
   const { ctx, page } = await open(360, 640); const vals = [81_240, 100_000, 1_041_237, 99_999_999, 123_456_700, 11_111_100, 80_000_800]; const out = [];
   for (const c of vals) { await page.evaluate(c => { window.eggfarm.state = { ...window.eggfarm.state, coinsCents: c }; window.eggfarmUi.render(); }, c); await page.waitForTimeout(80);
     out.push(await page.evaluate(() => { const e = document.querySelector('#coins'); return { t: e.textContent, w: e.parentElement.getBoundingClientRect().width, tw: e.getBoundingClientRect().width, gw: e.previousElementSibling.getBoundingClientRect().width, pill: e.closest('.pill').getBoundingClientRect().width, tab: getComputedStyle(e).fontVariantNumeric }; }));
     if (ENGINE === 'chromium' && c === 99_999_999) { await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, basket: 99_999 }; window.eggfarmUi.render(); }); await page.waitForTimeout(80); await page.screenshot({ path: `${SHOTS}/offline-v2-hud-999999-360x640.png` }); } }
+  { const bv = [999, 12_345, 999_999, 1_234_567], bo = [];
+    for (const n of bv) { await page.evaluate(n => { window.eggfarm.state = { ...window.eggfarm.state, basket: n }; window.eggfarmUi.render(); }, n); await page.waitForTimeout(80);
+      bo.push(await page.evaluate(() => { const e = document.querySelector('#basket'); return { t: e.textContent, tw: e.getBoundingClientRect().width, gw: e.previousElementSibling.getBoundingClientRect().width, pill: e.closest('.pill').getBoundingClientRect().width, tab: getComputedStyle(e).fontVariantNumeric }; })); }
+    ok('C-AC39 Basket full digits < 1M, short from 1M', bo.map(o => o.t).join('|') === '999|12,345|999,999|1.23M', bo.map(o => o.t).join('|'));
+    ok('C-AC39 Basket tabular + slot reserved for 999,999', bo.every(o => o.tab.includes('tabular-nums') && o.tw <= o.gw + 0.5) && bo.slice(0, 3).every(o => Math.abs(o.pill - bo[2].pill) < 0.5), JSON.stringify(bo)); }
   ok('C-AC39 HUD text', out.map(o => o.t).join('|') === '$812.40|$1,000|$10,412|$999,999|$1.23M|$111,111|$800,008', out.map(o => o.t).join('|'));
   ok('C-AC39 equal digit advance (tabular): $111,111 == $800,008 == $999,999 text width', Math.abs(out[5].tw - out[3].tw) < 0.5 && Math.abs(out[6].tw - out[3].tw) < 0.5, [out[5].tw, out[6].tw, out[3].tw].join(','));
   ok('C-AC39 pill width constant $1,000..$999,999 and no value exceeds the $999,999 ghost', [1, 2, 3, 5, 6].every(i => Math.abs(out[i].pill - out[3].pill) < 0.5 && out[i].tw <= out[i].gw + 0.5), out.map(o => `${o.pill}/${o.tw}/${o.gw}`).join(','));

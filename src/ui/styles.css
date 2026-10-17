@@ -470,3 +470,4 @@ html,body{overflow-x:hidden;max-width:100%}
 .welcome-v2 #wbCollect{width:100%;min-height:48px;flex:none}
 /* HUD money slot: Fredoka has no tnum (proportional digits), so the slot uses Nunito, whose digits are equal width; tabular numerals, width reserved for "$999,999" so it never reflows (C-AC39) */
 .money-slot{display:inline-grid;justify-items:end;font-family:var(--f-body);font-weight:800}.money-slot>*{grid-area:1/1}.money-slot .slot-ghost{visibility:hidden}
+.welcome-v2 .wb-clock{display:inline-block;vertical-align:-2px;width:1em;height:1em}

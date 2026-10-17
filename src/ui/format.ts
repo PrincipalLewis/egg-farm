@@ -3,7 +3,7 @@ const TIERS: [number, string][] = [[1e3, 'K'], [1e6, 'M'], [1e9, 'B'], [1e12, 'T
 /** BUG-3: round first, then pick the suffix (999,960 -> "1M", never "1000K"). K: 1 decimal; M+: 2 under 10, else 1. */
 export const fmtCount = (n: number) => {
   n = Math.floor(n);
-  if (n < 1e4) return n.toLocaleString('en-US');
+  if (n < 1e6) return n.toLocaleString('en-US'); // spec v0.3.1 C-AC39: full digits under 1,000,000
   let i = TIERS.length - 1; while (i > 0 && n < TIERS[i][0]) i--;
   for (;; i++) {
     const [d, u] = TIERS[i], v = n / d, dp = i === 0 || v >= 10 ? 1 : 2, r = v.toFixed(dp);
