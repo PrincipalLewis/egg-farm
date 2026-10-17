@@ -3,4 +3,5 @@ dist
 dist-qa
 vite.config.ts.timestamp-*
 qa-out/
+__pycache__/
 dist-html
