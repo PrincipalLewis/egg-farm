@@ -100,17 +100,21 @@ export class Game {
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
   /** C-AC36 (offline popup v2): set while the tab is hidden; the game is frozen like a closed one. */
   private hiddenSince: number | null = null;
-  /** Tab hidden: write the save once (savedAt = hide time), then freeze sim and saves until resumeFromHidden. */
-  suspendForHidden() { if (this.hiddenSince !== null || this.inactive) return; this.save(); this.hiddenSince = this.now(); }
-  /** Tab shown after hiddenMs. >= offlineMinSeconds: same path as close-and-reload (settle pending, one offline grant,
-   *  resume from now). Shorter: the next frame simulates the gap online, as before. Returns the eggs granted. */
-  /** Tab shown again: Game accounts the hidden period itself via the Saves module (fires on show only). */
-  endHidden(): HiddenPeriodResult | null { const startAt = this.hiddenSince; if (startAt === null) return null; return accountHiddenPeriod(this, { startAt, endAt: this.now() }); }
+  /** Tab hidden: write the save once (savedAt = hide time), then freeze sim and saves until the tab is shown. */
+  suspendForHidden() { if (this.hiddenSince !== null || this.inactive || this.readOnly) return; this.save(); this.hiddenSince = this.now(); }
+  /** Tab shown again: Game accounts the hidden period itself via the Saves module (fires on show only). The freeze is
+   *  released in `finally`, whatever the module does (returns null, throws, or never calls back into Game). */
+  endHidden(): HiddenPeriodResult | null {
+    const startAt = this.hiddenSince; if (startAt === null) return null;
+    try { return accountHiddenPeriod(this, { startAt, endAt: this.now() }); } finally { this.hiddenSince = null; }
+  }
   get balance() { return this.b; }
-  /** Used by the hidden-time accounting (stub today). Prefer endHidden(). */
+  /** Called by the hidden-time accounting (stub today) to settle a hidden period of hiddenMs. >= offlineMinSeconds: same
+   *  path as close-and-reload (settle pending, one offline grant, resume from now); shorter: the next frame simulates the
+   *  gap online. Returns the eggs granted. Prefer endHidden(). */
   resumeFromHidden(hiddenMs: number): number {
     if (this.hiddenSince === null) return 0; this.hiddenSince = null;
-    if (this.inactive || !(hiddenMs >= this.b.offline.offlineMinSeconds * 1000)) return 0;
+    if (this.inactive || this.readOnly || !(hiddenMs >= this.b.offline.offlineMinSeconds * 1000)) return 0;
     if (this.canWrite && !this.canWrite()) { this.deactivate(); return 0; } // another tab took the save while hidden: no grant here
     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
     const eggs = this.grantOffline(hiddenMs); this.lastFrameAt = this.now(); this.accMs = 0; this.save(); return eggs;

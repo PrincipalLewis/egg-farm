@@ -190,6 +190,20 @@ describe('C-AC36 hidden tab == close and reload (STUB visibility hook)', () => {
     g.suspendForHidden(); g.canWrite = () => false; t += 600_000; expect(g.endHidden()!.mode).toBe('none');
     expect(got.map(x => x.mode)).toEqual(['online', 'offline-grant', 'none']); expect(got[1].periodId).toBeGreaterThan(got[0].periodId); expect(got[2].periodId).toBeGreaterThan(got[1].periodId); off(); __resetHiddenTimeStub();
   });
+  it('Major (CCR 0470045): the freeze is released even when accounting returns null (already accounted)', () => {
+    __resetHiddenTimeStub(); let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t);
+    g.suspendForHidden(); const s1 = t; accountHiddenPeriod({ resumeFromHidden: () => 0, balance: b, inactive: false } as any, { startAt: s1, endAt: s1 }); // other game: no effect
+    t += 600_000; accountHiddenPeriod(g, { startAt: s1, endAt: t }); // accounted once (also unfreezes via resumeFromHidden)
+    const s2 = t + 120_000; accountHiddenPeriod(g, { startAt: s2, endAt: s2 }); // pre-record s2 so endHidden gets null
+    g.state = { ...g.state, coop: 0 }; // would only change via a frame
+    t = s2; g.suspendForHidden(); t += 120_000; expect(g.endHidden()).toBeNull();
+    t += 5_000; g.frame(); expect(g.state.coop).toBeGreaterThan(0); // unfrozen
+    const before = load(kv, b)!.savedAt; t += 1_000; g.save(); expect(load(kv, b)!.savedAt).toBeGreaterThan(before); // saving again
+  });
+  it('Minor 4 (CCR): a read-only game (refused newer save) never freezes or grants on hide', () => {
+    let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t); g.readOnly = true;
+    g.suspendForHidden(); t += 600_000; expect(g.endHidden()).toBeNull(); expect(g.state.pendingOfflineEggs).toBe(0);
+  });
   it('hidden-time stub: capped period', () => {
     __resetHiddenTimeStub(); let t = T0; const kv = mem(); save(kv, L15(), T0); const g = new Game(b, kv, () => t);
     g.suspendForHidden(); t += 11_520_000; expect(g.endHidden()).toMatchObject({ mode: 'offline-grant', grantedMs: 7_200_000, eggsGranted: 28_800, capped: true }); __resetHiddenTimeStub();
