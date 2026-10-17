@@ -1,5 +1,5 @@
 import type { Balance } from '../config/balance';
-import { farmCost, m4On } from '../config/formulas';
+import { farmCost } from '../config/formulas';
 /** M2 Workers (m2-proposal v1.0). All tunables in balance.workers. Pure helpers used by tick/actions. */
 export type WorkerId = 'market_hand' | 'coop_hand' | 'hawker' | 'grader';
 export const WORKERS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
@@ -28,12 +28,11 @@ export function hireCostCents(id: WorkerId, b: Balance): number {
   return id === 'grader' ? graderTierCostCents(0, b) : b.workers[id].hire_cost * 100;
 }
 export const unlockFarm = (id: WorkerId, b: Balance) => id === 'grader' ? b.workers.grader.tiers[0].farm : b.workers[id].unlock_farm;
-/** Tier i cost in cents: the CSV w4_tier_cost of the tier's first row (tiers[i].cost); legacy configs without it use
- *  floor(share x farmCost(tier farm level)). */
+/** Tier i cost in cents: the CSV's w4_tier_cost for that tier when sync-economy carried it (tiers[i].cost, dollars),
+ *  else floor(share x farmCost(tier farm level)) dollars (pre-F1 balance files). */
 export const graderTierCostCents = (i: number, b: Balance) => {
-  const t = b.workers.grader.tiers[i] as { farm: number; cost?: number };
-  // HoE flag-off rule: the CSV w4_tier_cost (F1) applies with the M4 economy only; flag off = main's share x farmCost.
-  return ((m4On(b) ? t.cost : undefined) ?? Math.floor(b.workers.grader.tier_cost_share_of_farm_cost * farmCost(t.farm, b))) * 100;
+  const t = b.workers.grader.tiers[i] as { farm: number; mult: number; cost?: number };
+  return (t.cost ?? Math.floor(b.workers.grader.tier_cost_share_of_farm_cost * farmCost(t.farm, b))) * 100;
 };
 /** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share. */
 export function graderMult(ws: Workers, tier: number, b: Balance): number {

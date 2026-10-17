@@ -6,7 +6,7 @@ import { median } from './bot';
 // AC-W1 (m2-proposal §8 item 17): casual model = test-only Poisson arrivals + demand x0.75, sell every 20 s, tap 1/s,
 // seller15 buy rule, managed, v1.1 values, 2 h runs, seeds 0-99 (one RNG stream per run, seeded by the integer seed).
 // Reference: product/sim/economy_sim.py run_m2(seller15, spec=M2_CURRENT, **CASUAL), seeds 0-99.
-const PY = { pass10: 98, medF10: 12.33, medF18: 30.67 };
+const PY = { pass10: 100, medF10: 10.33, medF18: 21.33 }; // F1 m4cols Python re-sim (Economy ruling, decisions.md); was 98 / 12.33 / 30.67
 const casual: Balance = { ...balance, sim_test: { poisson_arrivals: true, demand_scale: 0.75 } };
 describe('AC-W1 casual (100 seeds, slow)', () => {
   it('hooks are off by default and rejected in production', () => {

@@ -14,7 +14,7 @@ describe('sync-economy M4 columns', () => {
   it('balance.json m4 block is exactly what the CSVs generate (flag kept off)', () => {
     expect(balance.m4).toEqual(nb.m4); expect(nb.m4.enabled).toBe(0);
   });
-  it('farm_cost is reproduced per level from the CSV (formula + costOverrides for F1 segments / M3 taper)', () => {
+  it('farm_cost is reproduced per level from the CSV (#17 costTable, verbatim)', () => {
     for (const r of live) expect(S.farmCost(r.level, balance)).toBe(r.farm_cost);
     expect(S.farmCost(23, balance)).toBe(68756); expect(S.farmCost(24, balance)).toBe(72194);
   });

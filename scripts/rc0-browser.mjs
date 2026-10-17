@@ -73,7 +73,7 @@ sections.pt1 = async () => {
     await ctx.close();
   }
   { // PT1-6: axe serious/critical on farm, onboarding, sheets
-    const axe = readFileSync('/tmp/axe/node_modules/axe-core/axe.min.js', 'utf8');
+    const axe = readFileSync(process.env.AXE_PATH || '/tmp/axe/node_modules/axe-core/axe.min.js', 'utf8') // AXE_PATH overrides the default manual install;
     const run = async (page, tag) => { await page.addScriptTag({ content: axe }); return (await page.evaluate(async () => (await axe.run(document, { resultTypes: ['violations'] })).violations.map(v => ({ id: v.id, impact: v.impact, t: v.nodes[0]?.target?.join(' ') })))).map(v => ({ ...v, tag })); };
     const { ctx, page } = await open(); let v = await run(page, 'onboarding');
     await page.locator('.onb-skip').click(); v = v.concat(await run(page, 'farm'));
