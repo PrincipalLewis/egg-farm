@@ -128,7 +128,7 @@ img{user-select:none;-webkit-user-drag:none}
 .up .btn{width:100%}
 @media (min-width:600px){.up .btn{width:160px;align-self:flex-end}.up .hint{align-self:flex-end}}
 .hint{display:flex;align-items:center;gap:var(--s-1);min-height:var(--hint-h);font:700 var(--fs-hint) var(--f-body);color:var(--c-hint)}.hint img{width:14px}
-.hint.limit{position:static;color:var(--c-wood-text);margin-top:8px} /* P3: was .hint.coop, which inherited the scene sprite's position:absolute and overlapped 'Need $X more' at 375 */.hint.long{font-style:italic}.hint .link{border:0;background:none;padding:0;color:var(--c-wood-text);text-decoration:underline;font:inherit}
+.hint.limit{position:static;color:var(--c-wood-text);margin-top:8px} /* P3: was the 'coop' hint class, which inherited the scene sprite's position:absolute and overlapped 'Need $X more' at 375 */.hint.long{font-style:italic}.hint .link{border:0;background:none;padding:0;color:var(--c-wood-text);text-decoration:underline;font:inherit}
 .btn.pulse2{animation:glow 600ms 2}
 /* modals */
 #modal-layer{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:var(--c-scrim)}#modal-layer.open{display:grid}
