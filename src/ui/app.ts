@@ -534,7 +534,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     document.querySelectorAll('.coach').forEach(e => e.remove());
     const el = h(`<div class="coach ${o.cls ?? ''}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     el.style.visibility = 'hidden'; el.style.left = '0'; el.style.top = '0'; document.body.append(el);
-    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, scrolledAt = 0, done = false, revealed = false, lastGeo = '';
+    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, scrolledAt = 0, done = false, revealed = false, lastGeo = '', lastBtnTop = NaN;
     const inVp = (r: DOMRect) => r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
     const born = Date.now(), rowId = o.rowId;
     const skip = () => { if (done) return; done = true; close(); o.onSkip?.(); };
@@ -554,7 +554,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const panel = sh && bd ? scrollerPanel(sh, bd) : undefined;
       // Manage tip: on its button, inside the Upgrades panel under the tablist (never on Market), else defer
       if (o.manage && panel) cx = Math.min(Math.max(cx, panel.left + tip.w / 2 + COACH_MARGIN), panel.right - tip.w / 2 - COACH_MARGIN);
-      const p = o.manage ? (r && panel && sheetOk && inVp(r) ? managePlacement(r, tip, cx, { w: innerWidth, h: innerHeight }, panel, tabs) : null)
+      // Manage tip: first show only once its button is still (reveal scroll finished), so the 8px gap is exact (Firefox 1024x474)
+      const btnTop = r ? Math.round(r.top) : NaN, still = btnTop === lastBtnTop; lastBtnTop = btnTop;
+      const p = o.manage ? (r && panel && sheetOk && inVp(r) && (shown || still) ? managePlacement(r, tip, cx, { w: innerWidth, h: innerHeight }, panel, tabs) : null)
         : r ? safeCoachPlacement({ target: r, tip, cx, vp: { w: innerWidth, h: innerHeight }, tabs, avoid, row: rr, rowAbove: o.rowAbove, clip, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
       if (!p) { el.style.visibility = 'hidden';
         // rule D: tired tip, sheet open, row laid out, but no clean spot -> one guarded auto-scroll, then skip this visit
