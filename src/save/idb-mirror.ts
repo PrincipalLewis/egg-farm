@@ -96,6 +96,11 @@ export class IdbMirror {
       return true;
     } catch { return false; }
   }
+  /** Delete `unload` only if it still holds `raw` (a redundant close copy whose farm equals a kept copy). Never throws. */
+  async dropUnload(raw: string, ms = 1500): Promise<void> {
+    try { await timeout(new Promise<void>(res => { const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE);
+      const g = os.get(UNLOAD_KEY); g.onsuccess = () => { if (g.result === raw) os.delete(UNLOAD_KEY); }; t.oncomplete = t.onerror = t.onabort = () => res(); }), ms); } catch { /* keep */ }
+  }
   /** Reset save: remove the mirror copy (resolves once committed or failed). */
   clear(): Promise<void> {
     this.lastUnloadRaw = null;
@@ -145,7 +150,7 @@ export function restoreSource(lsRaw: string | null, idbRaw: string | null, b: Ba
  *    slots): it stays in unload, main is not overwritten. With the M4/SQ-1 flag on it takes the diverged-slot path.
  *  - 'older' / 'corrupt': never overwrites main; left in unload untouched (the next close replaces it).
  *  Equal bytes to localStorage only (IndexedDB main differs) counts as 'win' (promoting identical content is safe). */
-export type UnloadVerdict = 'none' | 'promoted' | 'win' | 'diverged' | 'older' | 'corrupt';
+export type UnloadVerdict = 'none' | 'promoted' | 'win' | 'diverged' | 'older' | 'corrupt' | 'redundant';
 /** M4-19 rev 3: the rank mode over ALL valid copies (LS main, IDB main, unload); reused by reconcile at boot. */
 export function setRankMode(raws: (string | null)[], b: Balance): RankMode {
   return rankMode([...new Set(raws.filter((r): r is string => r !== null && validate(r, b).ok))]);
@@ -161,13 +166,21 @@ export function rankUnload(lsRaw: string | null, idbRaw: string | null, unloadRa
   const mode = rankMode([unloadRaw, ...others.map(o => o.raw)]);
   const u = { raw: unloadRaw, savedAt: uv.file.savedAt };
   let tie = false;
-  for (const o of others) { const c = rankCompareIn(mode, u, o, now); if (c < 0) return 'older'; if (c === 0) tie = true; }
+  let lose = false;
+  for (const o of others) { const c = rankCompareIn(mode, u, o, now); if (c < 0) lose = true; if (c === 0) tie = true; }
+  // 'redundant': the unload copy loses or ties, but its game state is identical to a kept copy (e.g. Firefox fires
+  // visibilitychange->hidden AFTER pagehide, so main is re-saved later with the same farm). It carries nothing; delete it.
+  if ((lose || (tie && unloadRaw !== lsRaw)) && others.some(o => sameState(o.raw, uv.file, b))) return 'redundant';
+  if (lose) return 'older';
   // An unload copy byte-identical to LS main IS LS main's content, so it takes LS main's tie precedence (LS > IDB main):
   // a tie with IDB main is a win (promote + delete), not 'diverged' (rc0 unloadmirror: unload was left behind forever).
   return tie && unloadRaw !== lsRaw ? 'diverged' : 'win';
 }
+function sameState(raw: string, f: { state: unknown }, b: Balance): boolean {
+  const v = validate(raw, b); return v.ok && JSON.stringify(v.file.state) === JSON.stringify(f.state);
+}
 /** The subset of IdbMirror the boot step needs (tests pass the real mirror on fake-indexeddb). */
-export interface UnloadStore { readUnload(): Promise<string | null>; promoteUnload(raw: string): Promise<boolean>; }
+export interface UnloadStore { readUnload(): Promise<string | null>; promoteUnload(raw: string): Promise<boolean>; dropUnload(raw: string): Promise<void>; }
 /** SD5-1 (b) boot step, BEFORE reconcile: resolve the close-time copy. Returns the IndexedDB raw that reconcile should
  *  use (the unload copy when it won, even if the promote failed: unload is kept and retried next boot) and the verdict.
  *  Callers have already refused a newer-build copy in any key (newerStoredVersion with the unload raw), so nothing here
@@ -177,6 +190,7 @@ export async function bootUnload(store: UnloadStore, kv: Pick<KV, 'getItem'>, id
   const mode = setRankMode([lsRaw, idbRaw, unloadRaw], b); // pass to reconcile: same order for the LS-vs-winner step
   const verdict = rankUnload(lsRaw, idbRaw, unloadRaw, b, now);
   if (verdict === 'promoted') return { idbRaw, verdict, promoted: await store.promoteUnload(unloadRaw!), mode };
+  if (verdict === 'redundant') { await store.dropUnload(unloadRaw!); return { idbRaw, verdict, promoted: false, mode }; }
   if (verdict !== 'win') return { idbRaw, verdict, promoted: false, mode };
   const promoted = await store.promoteUnload(unloadRaw!);
   return { idbRaw: unloadRaw, verdict, promoted, mode };

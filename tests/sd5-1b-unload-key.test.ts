@@ -106,6 +106,14 @@ describe('M4-19 rev 3: transitive ranking over 3+ copies', () => {
     expect(rankUnload(L, I2, L, b, T + 1e6)).toBe('win');
     expect(rankUnload(I2, L, sv(6, T + 4000), b, T + 1e6)).toBe('diverged'); // a genuine tie with distinct bytes still diverges
   });
+  it('redundant: an older unload whose farm equals the kept main (Firefox: hidden save after pagehide) is dropped, never promoted', async () => {
+    const U = sv(778, T + 4000), H = sv(778, T + 4001); // same farm, main re-saved 1 ms later
+    expect(rankUnload(H, H, U, b, T + 1e6)).toBe('redundant');
+    expect(rankUnload(H, H, sv(779, T + 3000), b, T + 1e6)).toBe('older'); // different farm: still kept (ADR)
+    const f = new IDBFactory(); await put(f, IDB_KEY, H); await put(f, UNLOAD_KEY, U); const kv = mem(); kv.setItem(SAVE_KEY, H);
+    const r = await boot(f, kv); expect(r.verdict).toBe('redundant'); expect(r.promoted).toBe(false);
+    expect(await get(f, IDB_KEY)).toBe(H); expect(await get(f, UNLOAD_KEY)).toBeUndefined(); expect(kv.getItem(SAVE_KEY)).toBe(H);
+  });
   it('all with a seq: seq first, then savedAt', () => {
     const X = sv(1, T + 9000, 2), Y = sv(2, T, 7);
     expect(rankMode([X, Y])).toBe('seq'); expect(rankUnload(X, null, Y, b, T + 1e6)).toBe('win'); expect(pickNewest(Y, X, b, T + 1e6)).toBe('ls');
