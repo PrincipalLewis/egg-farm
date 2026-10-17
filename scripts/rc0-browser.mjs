@@ -88,7 +88,8 @@ sections.b2tip = async () => {
     const b = R(c), btn = document.querySelector('#uRow [data-w=market_hand] [data-act=manage]'), bb = btn && R(btn), up = R(document.querySelector('#p-upgrades')), mk = document.querySelector('#p-market'), mr = mk && R(mk).width ? R(mk) : null;
     const tabs = [...document.querySelectorAll('[role=tablist]')].map(R).filter(t => t.width && t.height), down = /hand-down/.test(c.querySelector('.coach-hand').src);
     const points = !!bb && ((down && Math.abs(b.bottom - (bb.top - 8)) <= 1.5) || (!down && c.classList.contains('below') && Math.abs(b.top - (bb.bottom + 8)) <= 1.5));
-    const inUp = b.left >= up.left - 0.5 && b.right <= up.right + 0.5 && b.top >= up.top - 0.5 && b.bottom <= up.bottom + 0.5;
+    const body = R(document.querySelector('#uRow').closest('.body')), hd = R(document.querySelector('#p-upgrades header'));
+    const inUp = b.left >= up.left - 0.5 && b.right <= up.right + 0.5 && b.top >= Math.max(up.top, body.top) - 0.5 && b.bottom <= Math.min(up.bottom, body.bottom) + 0.5 && !(hd.height && ov(b, hd)); // inside the scroller, never the header (CCR fdc8f7a #1)
     return { t: Math.round(b.top), b: Math.round(b.bottom), l: Math.round(b.left), r: Math.round(b.right), btn: bb && [Math.round(bb.top), Math.round(bb.bottom)], side: down ? 'above' : 'below', points, inUp, onMarket: !!mr && ov(b, mr), onTabs: tabs.some(t => ov(b, t)), onBtn: !!bb && ov(b, bb), inVp: b.top >= 0 && b.bottom <= innerHeight }; };
   const manageBad = m => !m.points || !m.inUp || m.onMarket || m.onTabs || m.onBtn || !m.inVp;
   // rule D (02:15): the tired tip must show at every size (auto-scroll at docked 1280x720/600) except 1024x474, where it is skipped

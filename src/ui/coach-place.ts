@@ -112,3 +112,5 @@ export function managePlacement(btn: Box, tip: { w: number; h: number }, cx: num
   }
   return null;
 }
+/** Manage tip bounds: the Upgrades scroller's visible box (.body) clipped to the sheet, so never the sheet header (CCR 4adec84 #1, fdc8f7a #1). */
+export const scrollerPanel = (sheet: Box, body: Box): Box => ({ left: Math.max(sheet.left, body.left), right: Math.min(sheet.right, body.right), top: Math.max(sheet.top, body.top), bottom: Math.min(sheet.bottom, body.bottom) });

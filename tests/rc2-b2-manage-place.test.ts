@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { managePlacement, ROW_GAP, type Box } from '../src/ui/coach-place';
+import { managePlacement, scrollerPanel, ROW_GAP, type Box } from '../src/ui/coach-place';
 const box = (left: number, top: number, w: number, h: number): Box => ({ left, top, right: left + w, bottom: top + h });
 const hit = (a: Box, b: Box) => Math.min(a.right, b.right) > Math.max(a.left, b.left) && Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
 const TIP = { w: 286, h: 68 };
@@ -34,5 +34,22 @@ describe('Manage tip placement (Art & UX 04:00 Minor on 192f273)', () => {
     const pp = box(0, 160, 390, 480), b = box(16, 40 + 120, 358, 44); // button right under the panel top: above blocked by the panel
     expect(managePlacement(b, TIP, 195, { w: 390, h: 640 }, pp, [])).toEqual({ side: 'below', top: 212 });
     expect(managePlacement(box(16, 556, 358, 44), TIP, 195, { w: 390, h: 640 }, pp, [box(0, 470, 390, 30)])).toBeNull(); // below 608+68 > 632, above under tabs 500
+  });
+});
+describe('Manage tip never in the sheet header (CCR fdc8f7a #1/#2)', () => {
+  // real docked 1024x474 layout: sheet 237..474 with a 56px header (237..293), scroller .body 295..474, tabs inside the body
+  const sheet = box(620, 237, 404, 237), header = box(620, 237, 404, 56), body = box(622, 295, 400, 179), tb = [box(630, 303, 384, 44)];
+  it('scrollerPanel = body clipped to the sheet', () => { expect(scrollerPanel(sheet, body)).toEqual(box(622, 295, 400, 179)); expect(scrollerPanel(box(0, 300, 500, 100), box(-10, 250, 520, 400))).toEqual(box(0, 300, 500, 100)); });
+  it('a button just under the header: never placed in the header band (below or null)', () => {
+    for (let y = 295; y < 420; y += 7) { const p = managePlacement(box(630, y, 384, 44), TIP, 822, { w: 1024, h: 474 }, scrollerPanel(sheet, body), []);
+      if (p) expect(hit(tipBox(822, p.top), header)).toBe(false); }
+    expect(managePlacement(box(630, 300, 384, 44), TIP, 822, { w: 1024, h: 474 }, scrollerPanel(sheet, body), [])).toEqual({ side: 'below', top: 352 });
+    // the whole-sheet box would have allowed the header band: shows why the clip matters
+    expect(managePlacement(box(630, 340, 384, 44), TIP, 822, { w: 1024, h: 474 }, sheet, [])?.top).toBe(264);
+    expect(managePlacement(box(630, 340, 384, 44), TIP, 822, { w: 1024, h: 474 }, scrollerPanel(sheet, body), [])?.side).toBe('below');
+  });
+  it('tabs scrolled into view inside the body still floor the tip', () => {
+    const p = managePlacement(box(630, 425, 384, 44), TIP, 822, { w: 1024, h: 474 }, scrollerPanel(sheet, body), tb);
+    expect(p).toEqual({ side: 'above', top: 425 - ROW_GAP - 68 }); expect(p!.top).toBeGreaterThanOrEqual(347);
   });
 });
