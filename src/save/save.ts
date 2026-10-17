@@ -144,9 +144,24 @@ export function serialize(state: GameState, now: number, saveSeq?: number): stri
  * Write the save. With `rotate`, the current main save is first copied into `.bak`, but only if it is itself valid
  * (QA case 2: a fresh-start save never rotates until the caller allows it, and a bad main never overwrites `.bak`).
  */
+/** HoE flag-off rule: with M4 off, an unmarked (pre-M4) farm is saved in main's shape (no M4 track fields). A marked
+ *  (tracksV7) save keeps them, so a flag-off build never drops a migrated farm's tracks (downgrade). */
+/** Balances of an M4 build whose session runs with the switch off until the migration commits (game.ts tracksOff). */
+const M4_BUILD_OFF = new WeakSet<object>();
+export const markM4BuildOff = <T extends object>(b: T): T => { M4_BUILD_OFF.add(b); return b; };
+/** ADR M4-19 saveSeq rides only on M4-build saves (flag on, an M4 build with the switch off pre-migration, or a marked tracksV7
+ *  farm); a flag-off build's pre-M4 saves keep main's bytes (HoE flag-off rule, golden f90d1678 storage pins). */
+export const m4SaveSeq = (state: GameState, b: Balance | undefined, prev: unknown): number | undefined =>
+  (b && (m4On(b) || M4_BUILD_OFF.has(b))) || (state as { tracksV7?: unknown }).tracksV7 ? saveSeqOf(prev) + 1 : undefined;
+export function flagOffShape(state: GameState, b: Balance): GameState {
+  if (m4On(b) || (state as { tracksV7?: unknown }).tracksV7) return state;
+  const { hensLevel, eggValueLevel, celebratedMilestones, ...v6 } = state; void hensLevel; void eggValueLevel; void celebratedMilestones;
+  return v6 as GameState;
+}
 export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
+  if (b) state = flagOffShape(state, b);
   let prev: string | null = null; try { prev = kv.getItem(SAVE_KEY); } catch { /* blocked: the write below throws */ }
-  const raw = serialize(state, now, saveSeqOf(prev) + 1); // HoE correction: saveSeq on main (missing = 0)
+  const raw = serialize(state, now, m4SaveSeq(state, b, prev)); // HoE correction: saveSeq on main (missing = 0)
   // BUG-2: never write over a newer-build save in main or .bak (callers check first; this is the last line of defence).
   const nv = newerStoredVersion(kv); if (nv !== null) throw new NewerSaveError(nv);
   if (rotate && b) {

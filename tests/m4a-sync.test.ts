@@ -4,13 +4,13 @@ import { parseEconomyCsv, buildBalance } from '../scripts/sync-economy';
 import { balance } from '../src/config/balance';
 import { hensCost, eggValueCost } from '../src/config/formulas';
 import * as S from '../src/sim/state';
-import { isM4Col } from '../scripts/sync-economy';
+import { isM4Col, readEconomyConfig } from '../scripts/sync-economy';
 // M4-A columns come from data/economy.m4-candidate.csv (vendored copy of product/economy.m4-candidate.csv) until
 // Economy merges them into product/economy.csv (spec O1); only M4 columns are grafted, other columns stay economy.csv's.
 const live = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
 const m4 = live, cand = live; // M4 columns now in economy.csv (Economy's f1-m4cols merge, this branch)
 describe('sync-economy M4 columns', () => {
-  const nb = buildBalance(cand, balance);
+  const nb = buildBalance(cand, balance, readEconomyConfig()); // #17: farmCostFromCsv (costTable)
   it('balance.json m4 block is exactly what the CSVs generate (flag kept off)', () => {
     expect(balance.m4).toEqual(nb.m4); expect(nb.m4.enabled).toBe(0);
   });
@@ -31,10 +31,10 @@ describe('sync-economy M4 columns', () => {
     expect(nb.m4.milestones.balanced).toHaveLength(5);
     expect(nb.m4.eggValue.baseStep).toBe(m4[0].egg_value_base_step); expect(nb.m4.eggValue.levelBonus).toBe(m4[0].egg_value_level_bonus);
   });
-  it('a CSV with no M4 columns produces no m4 block', () => { const pre = live.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => !isM4Col(k)))); expect(buildBalance(pre, balance).m4).toBeUndefined(); });
+  it('a CSV with no M4 columns produces no m4 block', () => { const pre = live.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => !isM4Col(k)))); expect(buildBalance(pre, balance, readEconomyConfig()).m4).toBeUndefined(); });
   it('fails loudly on non-rising costs, a missing column, or a non-constant scalar', () => {
-    expect(() => buildBalance(cand.map(r => r.level === 12 ? { ...r, hens_cost: 1 } : r), balance)).toThrow(/hens_cost/);
-    expect(() => buildBalance(cand.map(r => { const { egg_value_level_bonus: _, ...o } = r as any; return o; }), balance)).toThrow(/egg_value_level_bonus/);
-    expect(() => buildBalance(cand.map(r => r.level === 3 ? { ...r, balanced2_mult: 9 } : r), balance)).toThrow(/balanced2_mult must be constant/);
+    expect(() => buildBalance(cand.map(r => r.level === 12 ? { ...r, hens_cost: 1 } : r), balance, readEconomyConfig())).toThrow(/hens_cost/);
+    expect(() => buildBalance(cand.map(r => { const { egg_value_level_bonus: _, ...o } = r as any; return o; }), balance, readEconomyConfig())).toThrow(/egg_value_level_bonus/);
+    expect(() => buildBalance(cand.map(r => r.level === 3 ? { ...r, balanced2_mult: 9 } : r), balance, readEconomyConfig())).toThrow(/balanced2_mult must be constant/);
   });
 });

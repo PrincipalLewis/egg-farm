@@ -6,7 +6,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import type { SimEvent } from './sim/events';
-import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateTracksV7 } from './sim/migrate-v7';
@@ -14,7 +14,7 @@ import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
-export const tracksOff = (b: Balance): Balance => (b.m4 ? { ...b, m4: { ...b.m4, enabled: 0 } } : b);
+export const tracksOff = (b: Balance): Balance => (b.m4 ? markM4BuildOff({ ...b, m4: { ...b.m4, enabled: 0 } }) : b);
 export interface GameOpts {
   /** M4-20: outcome of boot's IndexedDB open + read ('unknown' defers the migration; default 'absent' = no IndexedDB). */
   idbBoot?: IdbBoot; idbAbsentReason?: string;
@@ -137,10 +137,7 @@ export class Game {
   private persisted(): GameState {
     const p = this.tracksPending;
     if (!p) {
-      // HoE flag-off rule: a pre-M4 farm saved by a flag-off session writes main's save shape (no M4 track fields).
-      // A marked (tracksV7) save keeps them, so a flag-off build never drops a migrated farm's tracks (downgrade).
-      if (m4On(this.b) || this.state.tracksV7) return this.state;
-      const { hensLevel, eggValueLevel, celebratedMilestones, ...v6 } = this.state; void hensLevel; void eggValueLevel; void celebratedMilestones; return v6 as GameState;
+      return flagOffShape(this.state, this.b); // HoE flag-off rule (save.ts)
     }
     const o: any = {}; for (const k of p.v6Keys) if (k in this.state) o[k] = (this.state as any)[k]; return o;
   }
@@ -242,7 +239,7 @@ export class Game {
     try { const raw = this.saveWithQuotaRetry(t); this.lastMainRaw = raw; this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror) try { let q = 0; try { q = saveSeqOf(this.kv.getItem(SAVE_KEY)); } catch { /* blocked */ } this.mirror.write(serialize(this.persisted(), t, q + 1)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }

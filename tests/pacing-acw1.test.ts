@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateBalance, Balance } from '../src/config/balance';
-import { rc1Balance as balance } from './rc1-balance'; // rc1 economy gate (main)
+import { balance, validateBalance, Balance } from '../src/config/balance';
 import { runM2 } from './bot-m2';
 import { median } from './bot';
 // AC-W1 (m2-proposal §8 item 17): casual model = test-only Poisson arrivals + demand x0.75, sell every 20 s, tap 1/s,

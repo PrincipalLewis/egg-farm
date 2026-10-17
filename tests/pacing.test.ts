@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rc1Balance as b } from './rc1-balance'; // rc1 economy (main); this branch's CSV is f1-m4cols
+import { balance as b } from '../src/config/balance';
 import { runBot, median } from './bot';
 import TARGETS from '../data/pacing-targets.json';
 // AC7 (core-loop-spec, M1-R1): 20 seeds, medians, seller15 + cheapest robustness, ±20% on times.

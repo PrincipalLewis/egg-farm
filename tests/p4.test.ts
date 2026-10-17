@@ -1,7 +1,7 @@
 // P4 (product/playtest1-resim.md): Manage only at <= 40%, Manage all refills only those; Economy expects W4 4.5, W4b 5.25 (F1 m4cols re-sim, Economy ruling logged in decisions.md; was 5.5 / 7.5), 6.88 Manage / 15 min
 // (Economy ruling Oct 17, product/sim/economy_sim.py sha 5ad5a3a6: F1 sim 6.875 = 5.62 + 1.125 from yawn 50 / manage 0.5 + 0.125 from F1 costs; was 5.62).
 import { describe, it, expect } from 'vitest';
-import { rc1Balance as b } from './rc1-balance'; // rc1 economy (main); this branch's CSV is f1-m4cols
+import { balance as b } from '../src/config/balance';
 import { runs, med } from './m2-runs';
 import { initialState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
