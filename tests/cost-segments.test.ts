@@ -8,8 +8,8 @@ import { parseEconomyCsv, buildBalance, readEconomyConfig } from '../scripts/syn
 const rows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
 /** sha256 of product/economy.f1.csv (Economy's F1 + F1-GAP table), vendored as data/economy.f1.csv. */
 const F1_CSV_SHA256 = '4ad1349ad27ca4c1657c94afd0fbfabd081aa658faa3ff5882a8bc6121e4737f'; // Economy row-20 fix (w4 9100), CRLF
-/** sha256 of product/economy.f1-m4cols.csv rev 86f0e80e (HoE-approved shipping F1 table), copied to data/economy.csv. */
-const M4COLS_SHA256 = '86f0e80e359398e3fd3061c268794054558029270cc3944ac522ef7ddbea0550';
+/** sha256 of product/economy.f1-m4cols.csv rev 6dca24cd (F1 + HoP-approved AC7 L21 trim; was 86f0e80e), copied to data/economy.csv. */
+const M4COLS_SHA256 = '6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455';
 const F1 = [{ from: 6, to: 14, growth: 1.25 }, { from: 15, to: 20, growth: 1.45 }];
 /** Curve params (pre-F1 L0 base 100, growth 1.35) with no costTable, so these tests exercise the formula path. */
 const curve: any = { ...balance, farm: { ...balance.farm, costTable: undefined, baseCost: 100, costGrowth: 1.35 } };
@@ -17,7 +17,7 @@ const withSegs = (segs: any, p: any = curve): EconomyParams => ({ ...p, farm: { 
 const clone = () => JSON.parse(JSON.stringify(balance));
 
 describe('F1 farm cost growth segments', () => {
-  it('shipping balance (F1 m4cols 86f0e80e): farm_cost and every w* cost equal the CSV on every level L0..last row', async () => {
+  it('shipping balance (F1 m4cols 6dca24cd): farm_cost and every w* cost equal the CSV on every level L0..last row', async () => {
     const csv = new URL('../data/economy.csv', import.meta.url);
     expect(createHash('sha256').update(readFileSync(csv)).digest('hex')).toBe(M4COLS_SHA256);
     expect(balance.farm.costGrowthSegments).toBeUndefined();
