@@ -253,7 +253,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // Measured on the FINAL hero text (the count-up runs inside a ghost-sized slot, so the card never grows later).
     const body = card.querySelector<HTMLElement>('.wb-body')!;
     const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); const head = card.querySelector<HTMLElement>('.wb-head')!, h2 = head.querySelector('h2')!; head.classList.remove('no-icon');
-      if (head.scrollWidth > head.clientWidth + 1 || h2.scrollWidth > h2.clientWidth + 1) head.classList.add('no-icon'); // title never wraps: drop the icon, not the size
+      const cs = getComputedStyle(head), avail = head.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), img = head.querySelector('img');
+      // Sum the children instead of head.scrollWidth: Firefox counts flex padding/overflow differently and hid the icon even at 1280.
+      const need = h2.scrollWidth + (img ? img.getBoundingClientRect().width + (parseFloat(cs.columnGap) || 0) : 0);
+      if (need > avail + 1 || h2.scrollWidth > h2.clientWidth + 1) head.classList.add('no-icon'); // title never wraps: drop the icon, not the size
       rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; edge(); };
     const edge = () => { const sc = body.scrollHeight > body.clientHeight + 1; body.classList.toggle('scrolls', sc); body.classList.toggle('at-end', !sc || body.scrollTop + body.clientHeight >= body.scrollHeight - 1); };
     body.addEventListener('scroll', edge, { passive: true });
