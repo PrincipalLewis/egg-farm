@@ -59,3 +59,6 @@
 - Done: ECONOMY_VENDOR_DIR honoured only under VITEST (override path to stderr; ignored with warning otherwise; documented in ci-gates.md); --strict requires SOURCE and SHA256SUMS (path, sha) sets to be equal exactly; SOURCE paths resolving outside the vendor (or product) dir rejected; pathToFileURL for the override. Tests: one-hash change at same count, path change, ../ escape, VITEST gating.
 - Gates: tsc OK; vitest 481/481 (maxForks=2); test:slow 11/11; sync-economy --check OK.
 - Next: CCR/QA re-check of this SHA.
+
+## arch/release-check-lows (Senior Software Architect, Oct 17)
+- Done: QA #13 Lows L-1 (extra path arg exits 1), L-2 (F-META ignores HTML comments; data-build-id required on #app), L-3 (// and /* */ comments inside a bracket key no longer end it early); CCR #13 nits: check-globals serves on a free port (printed; PORT overrides), ci-gates.md: release-asset is a post-publish detector, --strict drift check is a manual pre-release step owned by the release owner; ci.yml top-level `permissions: contents: read`. Tests: tests/release-html.test.ts (L-1..L-3), tests/serve-own.test.ts.
