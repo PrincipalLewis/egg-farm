@@ -224,16 +224,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let lastBuyBtn: HTMLElement | null = null;
 
   // ---------- Modals ----------
-  const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null; };
+  // CCR Minor 1: a welcome grant that arrived while another dialog was open shows as soon as that dialog closes.
+  const closeModal = () => { const was = modalKind; modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null;
+    if (was !== 'welcome' && !recoveryOpen && g.state.pendingOfflineEggs > 0) { showWelcome(heldHidden ?? undefined); heldHidden = null; $('#wbCollect')?.focus(); } };
   let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
   // Offline popup v2 (product/collection/offline-popup-v2-spec.md v0.3): real away time, full digits, worth line, cap line.
   let countUp = 0;
-  let fromHidden: { eggs: number; awayS: number; capped: boolean } | null = null;
-  const showWelcome = () => {
+  type HiddenGrant = { eggs: number; awayS: number; capped: boolean };
+  let heldHidden: HiddenGrant | null = null; // a hidden-tab grant waiting for another dialog to close
+  const showWelcome = (hg?: HiddenGrant) => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
     modalKind = 'welcome'; cancelAnimationFrame(countUp);
-    const h = fromHidden; fromHidden = null;
-    const m = h ? welcomeModel(h.eggs, h.awayS, g.state, b, h.capped) : welcomeModel(eggs, g.offline.realAwayS || g.offline.awayS, g.state, b), motion = !rm();
+    const m = hg ? welcomeModel(hg.eggs, hg.awayS, g.state, b, hg.capped) : welcomeModel(eggs, g.offline.realAwayS || g.offline.awayS, g.state, b), motion = !rm();
     modal.innerHTML = `<div class="card welcome-v2" role="dialog" aria-modal="true" aria-labelledby="wbT" aria-describedby="wbAria">
       <span class="sr" id="wbAria">${m.aria}</span>
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
@@ -253,7 +255,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const fit = () => { if (modalKind !== 'welcome' || !card.isConnected) return removeEventListener('resize', fit); const head = card.querySelector<HTMLElement>('.wb-head')!, h2 = head.querySelector('h2')!; head.classList.remove('no-icon');
       if (head.scrollWidth > head.clientWidth + 1 || h2.scrollWidth > h2.clientWidth + 1) head.classList.add('no-icon'); // title never wraps: drop the icon, not the size
       rate.hidden = false; if (body.scrollHeight > body.clientHeight + 1) rate.hidden = true; };
-    fit(); addEventListener('resize', fit);
+    fit(); addEventListener('resize', fit); document.fonts?.ready.then(fit); document.fonts?.addEventListener?.('loadingdone', fit); // CCR Minor 2: re-measure when web fonts land
     if (motion) { // C-AC37: count up 0 -> N (ease-out) only when motion is allowed; the final text equals m.hero
       const n = $('#wbN'), t0 = now(), dur = 900, unit = eggs === 1 ? 'egg' : 'eggs'; n.textContent = `+0 ${unit}`;
       const step = () => { if (modalKind !== 'welcome' || !n.isConnected) return; const k = Math.min(1, (now() - t0) / dur), e = 1 - (1 - k) ** 3;
@@ -666,7 +668,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case })).then(() => {
-      recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
+      recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(heldHidden ?? undefined); heldHidden = null; if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }
   /** S2-8/S2-9 values for the UI (Art & UX visuals on m3/rc1-ui): net rate, per-worker wage, queue-full flag. */
@@ -677,7 +679,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const gate = hiddenPopupGate();
   /** C-AC36: the only hidden-tab entry point (subscribed via onHiddenPeriodAccounted in main.ts); no accounting here. */
   const welcomeFromHidden = (r: HiddenPeriodResult | null) => { const h = gate(r); if (!h) return false; dirty = true;
-    if (recoveryOpen || (modalKind && modalKind !== 'welcome')) return true; // another dialog is up: the pending eggs show on the next open
-    fromHidden = h; showWelcome(); $('#wbCollect')?.focus(); return true; };
+    if (recoveryOpen || (modalKind && modalKind !== 'welcome')) { heldHidden = h; return true; } // shown when that dialog closes
+    showWelcome(h); $('#wbCollect')?.focus(); return true; };
   return { render: renderAll, showWelcome, welcomeFromHidden, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }

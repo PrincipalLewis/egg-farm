@@ -73,6 +73,17 @@ for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 8
   const after = await page.evaluate(() => window.eggfarm.state.basket);
   ok('C-AC31 Collect adds exactly N to the Basket', after - before === 2732, `${before} -> ${after}`); await ctx.close();
 }
+{ // CCR Minor 1 + real hidden path: grant arriving while Settings is open shows when Settings closes, focused
+  const { ctx, page } = await open(390, 844); await page.click('#settings'); await page.waitForTimeout(150);
+  const r1 = await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2732 };
+    return window.eggfarmUi.welcomeFromHidden({ periodId: 991, startAt: 1, endAt: 2, elapsedMs: 683000, simulatedMs: 0, grantedMs: 683000, eggsGranted: 2732, coinsGranted: 0, capped: false, mode: 'offline-grant' }); });
+  const during = await page.evaluate(() => !!document.querySelector('.welcome-v2'));
+  await page.keyboard.press('Escape'); await page.waitForTimeout(200);
+  const after = await page.evaluate(() => ({ shown: !!document.querySelector('.welcome-v2'), focus: document.activeElement?.id, text: document.querySelector('.welcome-v2')?.innerText ?? '' }));
+  ok('CCR Minor 1: hidden grant held while Settings is open, shown + focused when it closes', r1 && !during && after.shown && after.focus === 'wbCollect' && after.text.includes('Away 11m 23s') && after.text.includes('+2,732 eggs'), JSON.stringify({ r1, during, after }));
+  const dup = await page.evaluate(() => window.eggfarmUi.welcomeFromHidden({ periodId: 991, startAt: 1, endAt: 2, elapsedMs: 683000, simulatedMs: 0, grantedMs: 683000, eggsGranted: 2732, coinsGranted: 0, capped: false, mode: 'offline-grant' }));
+  ok('same periodId again: no second popup', dup === false); await ctx.close();
+}
 { // C-AC39 HUD
   const { ctx, page } = await open(360, 640); const vals = [81_240, 100_000, 1_041_237, 99_999_999, 123_456_700, 11_111_100, 80_000_800]; const out = [];
   for (const c of vals) { await page.evaluate(c => { window.eggfarm.state = { ...window.eggfarm.state, coinsCents: c }; window.eggfarmUi.render(); }, c); await page.waitForTimeout(80);
