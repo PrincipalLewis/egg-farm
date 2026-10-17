@@ -544,7 +544,7 @@ sections.welcomeTitle = async () => {
 
 // Art & UX 07:22 (C-AC33): short screens, no line truncated; the cap line is reachable inside the scrolling body.
 sections.welcomeShort = async () => {
-  for (const [w, h] of [[360, 420], [320, 568]]) {
+  for (const [w, h] of [[360, 420], [320, 568], [320, 400]]) {
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.ui': DONE } });
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 1234567 }; g.offline = { eggs: 1234567, awayS: 7200, realAwayS: 11520 }; window.eggfarmUi.showWelcome(); });
     await page.waitForTimeout(1300);
@@ -558,6 +558,7 @@ sections.welcomeShort = async () => {
       return { trunc, capIn: c.top >= b.top - 1 && c.bottom <= b.bottom + 1, cardFits: k.top >= 0 && k.bottom <= innerHeight, btnIn: bt.bottom <= k.bottom && bt.height >= 48, atEnd: body.classList.contains('at-end'), scrolls, cls0, mask0, mask1, ch, vh }; });
     ok(`Art&UX 07:22 welcome ${w}x${h}: no truncation, cap line reachable, card on screen, Collect pinned >= 48px`, !t.trunc.length && t.capIn && t.cardFits && t.btnIn && t.atEnd && errors.length === 0, JSON.stringify(t));
     if (h < 480) ok(`Art&UX 07:22 ${w}x${h}: short-screen rule active (card taller than 80vh, up to vh - 24)`, t.ch > t.vh * 0.8 + 1 && t.ch <= t.vh - 24 + 1, JSON.stringify(t));
+    if (w === 320 && h === 400) ok('Art&UX 07:22 320x400 is a must-scroll viewport (mask check below runs)', t.scrolls, JSON.stringify(t));
     if (t.scrolls) ok(`Art&UX 07:22 ${w}x${h}: bottom fade while scrollable, none at the end`, /scrolls/.test(t.cls0) && !/at-end/.test(t.cls0) && t.mask0 && t.mask0 !== 'none' && (!t.mask1 || t.mask1 === 'none'), JSON.stringify(t));
     await ctx.close();
   }
