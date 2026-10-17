@@ -1,6 +1,7 @@
 // rc1 Art & UX handoff (art-ux/*.md, 2026-10-16): CSS / markup / logic checks per item.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { headerRateText as headerRateText6, rateView as rateView6 } from '../src/ui/s2-economy-ui';
 const css = readFileSync(new URL('../src/ui/styles.css', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
 
@@ -360,7 +361,7 @@ describe('Art FIX1 asleep badge corner + FIX3 HUD ⚠ ▼ + FIX4 44px hits', () 
     expect(css).toMatch(/nav \[data-nav=upgrades\]\{position:relative\}/);
   });
   it('HUD neg rate keeps ⚠ and adds ▼ (asleep $0 → ⚠ ▼ $0.00/s)', () => {
-    expect(app).toContain('setText(rateEl, headerRateText(v))'); // reviewer m2: logic moved to s2-economy-ui headerRateText (tested in rc2-cuta-followups)
+    expect(headerRateText6(rateView6(0, { stopped: true }))).toBe('⚠ ▼ $0.00/s'); expect(headerRateText6(rateView6(-3))).toBe('⚠ ▼ \u2212$0.03/s'); // review #6: behaviour, not source text
   });
   it('tabs have ≥44px hit via min-height + overhang padding at all widths', () => {
     expect(css).toMatch(/\.tabs button\{box-sizing:border-box;min-height:44px;margin-block:-4px;padding:4px 0/);

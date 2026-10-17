@@ -92,7 +92,7 @@ export function paintGoalLabel(el: HTMLElement, parts: GoalLabelParts | null, pl
   const star = document.createElement('span'); star.className = 'g-star'; star.textContent = parts.star;
   const track = document.createElement('span'); track.className = 'g-track';
   track.dataset.full = parts.track; track.dataset.short = parts.shortTrack; track.textContent = parts.track;
-  const gain = document.createElement('span'); gain.className = 'g-gain'; gain.dataset.full = parts.gain; gain.textContent = parts.gain;
+  const gain = document.createElement('span'); gain.className = 'g-gain'; gain.textContent = parts.gain.trimStart(); // review #4: separator space is CSS column-gap, never a text char
   const head = document.createElement('span'); head.className = 'g-head'; head.append(star, track); el.append(head, gain);
 }
 
@@ -106,10 +106,9 @@ export function fitGoalLabelEl(el: HTMLElement): void {
   if (!track || !gain) return;
   const lh = parseFloat(getComputedStyle(el).lineHeight) || 17;
   const fits = () => el.scrollWidth <= el.clientWidth + 0.5 && el.scrollHeight <= 2 * lh + 1;
-  const trim = () => { const wrapped = gain.offsetTop > track.offsetTop + 2; const g = gain.dataset.full ?? gain.textContent ?? ''; gain.textContent = wrapped ? g.trimStart() : g; };
-  track.textContent = track.dataset.full ?? track.textContent; gain.textContent = gain.dataset.full ?? gain.textContent; trim();
+  track.textContent = track.dataset.full ?? track.textContent;
   if (fits()) return;
-  track.textContent = track.dataset.short ?? track.textContent; trim();
+  track.textContent = track.dataset.short ?? track.textContent;
 }
 
 /** @deprecated kept for tests that check the old budget helper */

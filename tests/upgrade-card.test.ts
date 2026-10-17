@@ -5,6 +5,8 @@ import * as S from '../src/sim/state';
 const arrow = (a: string, z: string) => `${a} → ${z}`;
 describe('UC24 nav Upgrades tab', () => {
   it('opens the hinted tab when a hint is shown', () => { expect(navUpgradesTab({ key: 'COLL', state: 'saving', tab: 'collection' }, 'workers')).toBe('collection'); expect(navUpgradesTab({ key: 'W2', state: 'ready', tab: 'workers' }, 'farm')).toBe('workers'); });
+  it('Refill hint opens its tab (workers)', () => { expect(navUpgradesTab({ key: 'W1', state: 'refill', tab: 'workers' }, 'farm')).toBe('workers'); });
+  it('a hint hidden during the FTUE is ignored', () => { expect(navUpgradesTab({ key: 'COLL', state: 'saving', tab: 'collection' }, 'farm', false)).toBe('farm'); });
   it('falls back to the last-used tab with no hint', () => { expect(navUpgradesTab(null, 'farm')).toBe('farm'); expect(navUpgradesTab({ key: null, state: 'done', tab: 'workers' }, 'collection')).toBe('collection'); });
 });
 describe('UC26 unchanged before→after lines', () => {

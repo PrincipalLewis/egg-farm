@@ -50,7 +50,7 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
       return { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
     }
-    case 'manageAll': { // v1.1 + P4: 3+ hired; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+    case 'manageAll': { // v1.1 + P4: bulk needs >= manage_all_min_workers hired (sim rule, pending PM/Economy); refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
       const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
       const workers = { ...s.workers };

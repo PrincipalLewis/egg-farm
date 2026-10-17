@@ -15,12 +15,18 @@ describe('reviewer m2: header rate text comes from the real rateView path', () =
     expect(headerRateText(rateView(0, { stopped: true }))).toBe('⚠ ▼ $0.00/s');
     expect(headerRateText(rateView(-3))).toBe('⚠ ▼ \u2212$0.03/s');
     expect(headerRateText(rateView(125))).toBe(rateView(125).text);
-    expect(app).toContain('setText(rateEl, headerRateText(v))');
+    expect(headerRateText(rateView(-125))).toMatch(/^⚠ ▼ /); expect(headerRateText(rateView(-125))).not.toMatch(/⚠ ▼ ⚠/);
   });
 });
-describe('reviewer m1: workers-ui wage comes from ./rates, not the stub', () => {
-  it('no wagePerSecCents import in workers-ui', () => {
-    const w = readFileSync(new URL('../src/ui/workers-ui.ts', import.meta.url), 'utf8');
-    expect(w).not.toMatch(/wagePerSecCents/); expect(w).toContain('listedWageCentsPerSec');
+import { workersHtml } from '../src/ui/workers-ui';
+import { listedWageCentsPerSec } from '../src/ui/rates';
+import { fmtExactRate } from '../src/ui/s2-economy-ui';
+import { balance as b } from '../src/config/balance';
+import { initialState } from '../src/sim/state';
+describe('reviewer m1: worker card wage is the exact listed rate (./rates)', () => {
+  for (const [id, F] of [['market_hand', 3], ['market_hand', 12], ['coop_hand', 30]] as const) it(`${id} at Farm L${F}: card shows the exact listed wage`, () => {
+    const s = { ...initialState(b, 3), farmLevel: F, workers: { [id]: { energy: 100, cdS: 0 } } } as any;
+    const want = `Wage ${fmtExactRate(listedWageCentsPerSec(id, s, b))}`;
+    expect(workersHtml(s, b)).toContain(want);
   });
 });

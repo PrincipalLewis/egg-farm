@@ -28,13 +28,20 @@ export class OrderList {
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
-    if (E.textContent !== e) E.textContent = e; if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`;
+    if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`;
     // fit runs after the button label/state below (Need is wider than Sell): see end of fill()
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have)) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', `Order ${v.have} of ${v.want} eggs`); }
     if (btn.textContent !== v.button) btn.textContent = v.button;
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}${v.button.length > 9 ? ' long' : ''}`; if (btn.className !== bc) btn.className = bc;
-    { const l1 = E.parentElement as HTMLElement; const fe = fitOrderEggs(e, (t: string) => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; }); if (E.textContent !== fe) E.textContent = fe; } // F4: NBSP survives flex whitespace trimming
+    { // §2.4 eggs fit, cached per (text, button label, width): at most one measure pass per change, no per-frame rewrites (review #3)
+      const l1 = E.parentElement as HTMLElement, key = `${e}|${v.button}|${l1.clientWidth}`;
+      if (el.dataset.fitKey !== key || el.dataset.fitE == null) {
+        const fe = fitOrderEggs(e, (t: string) => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; });
+        el.dataset.fitKey = key; el.dataset.fitE = fe;
+      }
+      if (E.textContent !== el.dataset.fitE) E.textContent = el.dataset.fitE!;
+    }
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
   }
   private make(v: OrderView) {

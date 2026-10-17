@@ -567,4 +567,5 @@ nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 .order .btn.sell{white-space:nowrap;text-overflow:clip;height:44px;min-height:44px;max-height:44px;box-sizing:border-box}.order .btn.sell.long{font-size:12px}
 /* Art & UX 23:25: sticky refill bar is opaque, full-width cream with 8px vertical padding (Unpaid strip never shows through); cards scroll clear of it */
 #uRow>.refill-wrap{background:var(--c-cream);padding-block:8px;margin-inline:0;align-self:stretch;width:100%;box-sizing:border-box}
-#uRow .wk{scroll-margin-top:var(--refill-bar-h,88px)}
+#uRow .wk{scroll-margin-top:var(--refill-bar-h,0px)} /* set from the measured sticky bar (+8px), 0 when no bar */
+.goal-label{column-gap:4px} /* review #4: space before '· +X% income' on line 1 only (flex column-gap), no text trim */

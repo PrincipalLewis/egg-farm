@@ -180,7 +180,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
   let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity };
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
-  nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n === 'upgrades' && open !== 'upgrades') { const t = navUpgradesTab(goalShown, tab); if (t !== tab) { tab = t; dirty = true; } } if (n) openPanel(n === 'farm' ? null : n as any); }); // UC24
+  nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n === 'upgrades' && open !== 'upgrades') { const t = navUpgradesTab(goalShown, tab, !goalHidden); if (t !== tab) { tab = t; dirty = true; } } if (n) openPanel(n === 'farm' ? null : n as any); }); // UC24
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
   $('.tabs').addEventListener('click', e => { const t = (e.target as HTMLElement).closest('button')?.dataset.tab; if (t) { tab = t as any; dirty = true; } });
 
@@ -421,7 +421,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
     }
   };
-  void document.fonts.ready.then(() => { goalNow = true; renderGoal(); });
+  // review #4: re-fit (full name wins whenever it fits) on width changes, dock/undock and font load, not only on content change
+  let refitRaf = 0; const refitGoal = () => { if (!refitRaf) refitRaf = requestAnimationFrame(() => { refitRaf = 0; fitGoalLabelEl(goalLbl); }); };
+  if (typeof ResizeObserver !== 'undefined') { let lastW = -1; new ResizeObserver(es => { const w = Math.round(es[0].contentRect.width); if (w !== lastW) { lastW = w; refitGoal(); } }).observe(goalLbl.parentElement ?? goalLbl); }
+  docked.addEventListener?.('change', refitGoal);
+  void document.fonts.ready.then(() => { goalNow = true; renderGoal(); refitGoal(); });
   /** Tap never buys: open the target's tab, scroll the row into view, highlight it, focus its Buy (spec §4). */
   const openGoal = () => {
     const gl = goalShown; if (!gl) return;
@@ -597,7 +601,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
-      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); } /* review #7: measured bar height, 0 with no bar */ if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
     renderGoal();

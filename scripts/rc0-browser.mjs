@@ -628,20 +628,33 @@ sections.p1build = async () => {
     await ctx.close();
   }
 };
-// ---------- v1.6.1 §4 goal label at 360: 1 line if it fits, else 2 lines breaking only before the gain, else short name; never ellipsis; strip 40px ----------
+// ---------- v1.6.1 §4 goal label at 360 (review #6: expectations from the MEASURED live label box, no forced width) ----------
 sections.goalLabel161 = async () => {
   const { ctx, page } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
   await page.waitForSelector('.goal-label'); await page.waitForTimeout(300);
-  for (const [name, full, short, fs, want] of [['one-line', 'Farm L30', 'Farm L30', 0, { lines: 1, track: 'Farm L30' }], ['two-line', 'Collection L30', 'Coll. L30', 0, { lines: 2, track: 'Collection L30' }], ['short-name', 'Collection L30', 'Coll. L30', 25, { lines: 2, track: 'Coll. L30' }]]) {
-    const r = await page.evaluate(async ([full, short, fs]) => { const el = document.querySelector('.goal-label'); el.style.width = el.style.maxWidth = '188px'; /* live 360 label box with a status chip = 188px (v1.6.1) */ el.style.fontSize = fs ? fs + 'px' : ''; el.style.lineHeight = fs ? Math.round(fs * 17 / 14) + 'px' : '';
-      el.innerHTML = `<span class="g-head"><span class="g-star">★ </span><span class="g-track" data-full="${full}" data-short="${short}">${full}</span></span><span class="g-gain" data-full=" · +999% income"> · +999% income</span>`;
-      window.eggfarmQaFitGoal(); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const seen = new Set();
+  for (const [name, full, short, gain, fs] of [['farm', 'Farm L30', 'Farm L30', '· +999% income', 0], ['collection', 'Collection L30', 'Coll. L30', '· +999% income', 0],
+    ['stress-wrap', 'Hire Market Hand', 'Hire M. Hand', '· +99999% income', 0], ['short-name', 'Collection L30', 'Coll. L30', '· +999% income', 25]]) {
+    const r = await page.evaluate(async ([full, short, gain, fs]) => { const el = document.querySelector('.goal-label'); el.style.fontSize = fs ? fs + 'px' : ''; el.style.lineHeight = fs ? Math.round(fs * 17 / 14) + 'px' : '';
+      const mk = t => `<span class="g-head"><span class="g-star">★ </span><span class="g-track" data-full="${full}" data-short="${short}">${t}</span></span><span class="g-gain">${gain}</span>`;
+      // measure natural widths in a probe that inherits the label's font, outside the flex box
+      const probe = document.createElement('span'); probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;left:-9999px'; el.append(probe);
+      const W = html => { probe.innerHTML = html; return probe.getBoundingClientRect().width; };
+      const cs0 = getComputedStyle(el); const gap = parseFloat(cs0.columnGap) || 0;
+      probe.innerHTML = mk(full); const headF = probe.querySelector('.g-head').getBoundingClientRect().width, gainW = probe.querySelector('.g-gain').getBoundingClientRect().width;
+      probe.innerHTML = mk(short); const headS = probe.querySelector('.g-head').getBoundingClientRect().width; probe.remove();
+      el.innerHTML = mk(full); window.eggfarmQaFitGoal(); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const box = el.clientWidth;
+      const want = headF + gap + gainW <= box + 0.5 ? { lines: 1, track: full } : headF <= box + 0.5 && gainW <= box + 0.5 ? { lines: 2, track: full } : { lines: 2, track: short };
       const cs = getComputedStyle(el), lh = parseFloat(cs.lineHeight), t = el.querySelector('.g-track'), gn = el.querySelector('.g-gain'), pill = el.closest('.goal-pill') ?? el.closest('.goal');
-      const gr = gn.getClientRects().length; const lines = Math.round(el.getBoundingClientRect().height / lh);
-      return { track: t.textContent, gain: gn.textContent.trim(), lines, gainRects: gr, lh, w: el.clientWidth, sw: el.scrollWidth, to: cs.textOverflow, ws: cs.whiteSpace, ell: /…/.test(el.textContent), pillH: Math.round(pill.getBoundingClientRect().height), star: el.querySelector('.g-star')?.textContent === '★ ', gainBelow: gn.offsetTop > t.offsetTop + 2 }; }, [full, short, fs]);
-    ok(`Goal label v1.6.1 ${name} at 360: "${want.track}", ${want.lines} line(s), gain unsplit, no ellipsis, strip 40px`, r.track === want.track && r.lines === want.lines && r.gainRects === 1 && r.gain === '· +999% income' && r.to !== 'ellipsis' && !r.ell && r.sw <= r.w + 0.5 && r.star && (want.lines === 2 ? r.gainBelow : !r.gainBelow) && (fs || (r.lh === 17 && r.pillH === 40)), JSON.stringify(r));
+      const lines = Math.round(el.getBoundingClientRect().height / lh);
+      return { want, box, headF: Math.round(headF), headS: Math.round(headS), gainW: Math.round(gainW), track: t.textContent, gain: gn.textContent, lines, gainRects: gn.getClientRects().length, lh, sw: el.scrollWidth, to: cs.textOverflow, ell: /…/.test(el.textContent), pillH: Math.round(pill.getBoundingClientRect().height), gainBelow: gn.offsetTop > t.offsetTop + 2, gainX: Math.round(gn.getBoundingClientRect().left - t.getBoundingClientRect().right) }; }, [full, short, gain, fs]);
+    seen.add(r.want.lines === 1 ? 'one-line' : r.want.track === full ? 'two-line' : 'short-name');
+    ok(`Goal label v1.6.1 ${name} at 360 (measured box ${r.box}px): expect ${r.want.lines} line(s) "${r.want.track}", gain unsplit, no ellipsis, strip 40px`,
+      r.track === r.want.track && r.lines === r.want.lines && r.gainRects === 1 && r.gain === gain && r.to !== 'ellipsis' && !r.ell && r.sw <= r.box + 0.5 && (r.want.lines === 2 ? r.gainBelow : !r.gainBelow && r.gainX >= 3) && (fs || (r.lh === 17 && r.pillH === 40)), JSON.stringify(r));
     const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); const bb = await page.locator('.goal').boundingBox(); await page.screenshot({ path: `${FCS}/cuta3-goal-${name}-360-${ENGINE}.png`, clip: { x: 0, y: Math.max(0, bb.y - 8), width: 360, height: bb.height + 16 } }); }
   }
+  ok('Goal label v1.6.1 at 360: one-line, two-line and short-name paths all exercised', ['one-line', 'two-line', 'short-name'].every(k => seen.has(k)), JSON.stringify([...seen]));
   await ctx.close();
 };
 // ---------- Art & UX 22:31: order card Sell vs Need at 360 — " eggs" drop from measured fit, re-checked on state change; buttons nowrap, 44px, >9 chars at 12px ----------
@@ -670,10 +683,18 @@ sections.refillBar = async () => {
     if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click();
     const has = await page.waitForSelector('#uRow > .refill-wrap', { timeout: 5000 }).then(() => true, () => false);
     if (!has) { ok(`Refill bar ${w}: sticky bar present`, false, 'no #uRow > .refill-wrap in this state'); await ctx.close(); continue; }
-    const r = await page.evaluate(() => { const b = document.querySelector('#uRow > .refill-wrap'), row = document.querySelector('#uRow'), cs = getComputedStyle(b), a = b.getBoundingClientRect(), rr = row.getBoundingClientRect();
-      const card = document.querySelector('#uRow .wk'); return { bg: cs.backgroundColor, pt: cs.paddingTop, pb: cs.paddingBottom, full: a.width >= row.clientWidth - 1, sm: card ? parseFloat(getComputedStyle(card).scrollMarginTop) : null, barH: a.height }; });
+    const r = await page.evaluate(async () => { const b = document.querySelector('#uRow > .refill-wrap'), row = document.querySelector('#uRow'), cs = getComputedStyle(b), a = b.getBoundingClientRect();
+      const sheet = row.closest('.sheet, .panel, [id^=p-]') ?? row.parentElement; const sr = sheet.getBoundingClientRect();
+      const cards = [...row.querySelectorAll('.wk')]; const last = cards[cards.length - 1];
+      const varH = parseFloat(getComputedStyle(row).getPropertyValue('--refill-bar-h')); const sm = parseFloat(getComputedStyle(last).scrollMarginTop);
+      last.scrollIntoView({ block: 'start' }); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const a2 = b.getBoundingClientRect(), c2 = last.getBoundingClientRect();
+      // opacity: sample the element under a point inside the bar's padding; it must be the bar (or its child), not a card behind
+      const hit = document.elementFromPoint(a2.left + 4, a2.top + 3); const onBar = !!hit && (hit === b || b.contains(hit));
+      return { bg: cs.backgroundColor, pt: cs.paddingTop, pb: cs.paddingBottom, barW: Math.round(a.width), sheetW: Math.round(sr.width), barL: Math.round(a.left - sr.left), varH, barH: Math.round(a.height), sm, cardTop: Math.round(c2.top), barBottom: Math.round(a2.bottom), onBar }; });
     const opaque = /^rgb\(/.test(r.bg) || /, 1\)$/.test(r.bg);
-    ok(`Refill bar ${w}: opaque cream, full width, 8px vertical padding; cards scroll-margin >= bar height`, opaque && r.pt === '8px' && r.pb === '8px' && r.full && r.sm >= r.barH, JSON.stringify(r));
+    ok(`Refill bar ${w}: opaque cream, 8px vertical padding; --refill-bar-h = measured bar + 8; scrolled card clears the bar`,
+      opaque && r.pt === '8px' && r.pb === '8px' && Math.abs(r.varH - (r.barH + 8)) <= 1 && r.sm === r.varH && r.cardTop >= r.barBottom - 0.5 && r.onBar, JSON.stringify(r));
     const FCS = process.env.FC_SHOTS; if (FCS) { mkdirSync(FCS, { recursive: true }); await page.evaluate(() => { const row = document.querySelector('#uRow'); const sc = row.closest('.body') ?? row.parentElement; sc.scrollTop = 120; }); await page.waitForTimeout(200); await page.screenshot({ path: `${FCS}/cuta3-refillbar-${w}-${ENGINE}.png` }); }
     await ctx.close();
   }

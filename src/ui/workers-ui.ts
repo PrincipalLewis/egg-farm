@@ -26,7 +26,7 @@ const manageIcon = (s: GameState, b: Balance, icon: string, px = 22) =>
 export const needsPrompt = (w: Worker | undefined, b: Balance) => canManageWorker(w, b);
 /** Workers counted by "Manage all (N need it)". */
 export const promptManage = (s: GameState, b: Balance) => WORKERS.filter(id => needsPrompt(s.workers[id], b));
-/** Farm View Manage-all button (§4.4): >= manage_all_min_workers hired and N > 0 (hidden when N is 0, B5). */
+/** Farm View Manage-all button (§4.4, T5/AC-R9): >= 1 hired and N > 0 (hidden when N is 0, B5). */
 export const showFarmManageAll = (s: GameState, b: Balance) => showManageAll(s.workers, b) && promptManage(s, b).length > 0;
 /** Visibility of the Farm View button: B5 hides it whenever N is 0 (including the cooldown right after Manage all). */
 /** PT1-10 (Product final): during the shared cooldown it always shows (greyed, M2 ring), whatever the energies; after it,
@@ -45,7 +45,7 @@ export class YawnSfx {
     return id;
   }
 }
-/** Manage all pill (layout §4.4): hidden < manage_all_min_workers, and hidden when N (workers <= threshold) is 0 (B5). */
+/** Manage all pill (layout §4.4, T5/AC-R9): shown with >= 1 hired and N (workers <= threshold) >= 1; hidden at N=0 (B5). */
 export const refillTiredLabel = (n: number) =>
   n === 1 ? 'Refill 1 tired worker' : `Refill ${n} tired workers`;
 
