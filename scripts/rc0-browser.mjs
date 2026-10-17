@@ -578,7 +578,7 @@ sections.p1toast = async () => {
 
 // ---------- Art & UX Oct 16: per-worker Refill (nav glyph, >=44px, muted+disabled never hidden) at 360 ----------
 sections.p1refill = async () => {
-  for (const [name, energy, cd, cap] of [['available', 30, 0, ''], ['not-tired', 90, 0, 'Rested, refill below 40%'], ['cooldown', 30, 12, 'Ready in 12s']]) {
+  for (const [name, energy, cd, cap] of [['available', 30, 0, ''], ['not-tired', 90, 0, 'Rested, refill below 50%'], ['cooldown', 30, 12, 'Ready in 12s']]) {
     const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 500000, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 5, customers: [], nextCustomerInS: 50, nextCustomerId: 1, rng: 5, pendingOfflineEggs: 0, celebratedTier: 1,
       workers: { market_hand: { energy, cdS: 1 } }, graderTier: 0, manageCdS: cd, coopFullS: 0 } });
     const { ctx, page } = await open({ w: 360, h: 800, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
