@@ -44,7 +44,7 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
   const sha = (buf: Buffer | string) => createHash('sha256').update(buf).digest('hex');
   const checkPins = () => {
     const files = pins.map(([, f]) => f).sort().join(',');
-    if (files !== 'economy.f1-m4cols.csv,sim/economy_sim.py') throw new Error(`vendor/economy-sim/SHA256SUMS must pin exactly 2 files, got ${files}`);
+    if (files !== 'economy.f1-m4cols.csv,sim/economy_sim.py,sim/seller-variance-proposal.md,sim/seller_variance_sim.py') throw new Error(`vendor/economy-sim/SHA256SUMS must pin exactly 4 files, got ${files}`);
     for (const [h, f] of pins) { const got = sha(readFileSync(new URL(f, vdir))); if (got !== h) throw new Error(`vendored ${f} sha256 ${got} != pin ${h}`); }
   };
   // Hashes are verified before anything runs, so a tampered sim never executes.
