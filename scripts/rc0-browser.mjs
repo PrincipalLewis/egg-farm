@@ -127,7 +127,7 @@ sections.b2rearm = async () => {
   await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click()); let shownAgain = false;
   for (let i = 0; i < 30 && !shownAgain; i++) { await page.waitForTimeout(200); shownAgain = await vis('Manage'); }
   const f1 = await page.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.ui')));
-  await page.reload(); await page.getByText('Tap to start').click(); await page.waitForTimeout(500); await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click()); await page.waitForTimeout(2500);
+  await page.reload(); await page.getByText('Tap to start').click(); await page.waitForFunction(() => document.querySelector('[data-nav=upgrades]'), null, { timeout: 15000 }); await page.waitForTimeout(500); await page.evaluate(() => document.querySelector('[data-nav=upgrades]').click()); await page.waitForTimeout(2500);
   const repeat = await vis('Manage') || await vis('tired');
   ok('B-2 rule D re-arm: Manage dropped while the sheet was closed shows on the next Workers visit; manageSeen persists; no repeat after reload',
     goneWhileClosed && shownAgain && f1.manageSeen === true && f1.tiredSeen === true && !repeat && !errors.length, JSON.stringify({ goneWhileClosed, shownAgain, f1: { tiredSeen: f1.tiredSeen, manageSeen: f1.manageSeen }, repeat, errors }));
