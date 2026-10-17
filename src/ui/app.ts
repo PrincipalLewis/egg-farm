@@ -2,7 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
-import { safeCoachPlacement, autoScrollDelta, guardAllows, tiredTipAfter, deferExpired, coachStep, manageRearm, isUserScrollKey, GUARD_EVENTS, COACH_MARGIN } from './coach-place';
+import { safeCoachPlacement, managePlacement, autoScrollDelta, guardAllows, tiredTipAfter, deferExpired, coachStep, manageRearm, isUserScrollKey, GUARD_EVENTS, COACH_MARGIN } from './coach-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -528,7 +528,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // stays hidden and is re-checked every 250ms (dropped after MAX_DEFER_MS); its `ms` life starts on first show.
   // rowId = row mode (tired + Manage tips): anchored 8px under the whole worker row, Workers sheet open only.
   // autoScroll (tired tip, rule D): if it can't fit, scroll the panel so the row sits just under the tablist (guarded), else onSkip().
-  interface CoachOpts { cls?: string; rowId?: string; rowAbove?: boolean; autoScroll?: boolean; reveal?: boolean; onShow?: () => void; onSkip?: () => void; onClose?: () => void }
+  interface CoachOpts { cls?: string; rowId?: string; rowAbove?: boolean; autoScroll?: boolean; reveal?: boolean; manage?: boolean; onShow?: () => void; onSkip?: () => void; onClose?: () => void }
   const coachClip = () => uRow.closest('.body')?.getBoundingClientRect();
   const coach = (text: string, anchor: Element | null | (() => Element | null), ms: number, o: CoachOpts = {}) => {
     document.querySelectorAll('.coach').forEach(e => e.remove());
@@ -544,12 +544,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const row = rowId ? workerRow(rowId) : (at?.closest('.wk') ?? null); if (rowId && !at) at = row?.querySelector('.ebar') ?? null;
       const r = at?.getBoundingClientRect(), rr = rowId ? row?.getBoundingClientRect() : undefined;
       const sheetOk = !rowId || ((docked.matches || open === 'upgrades') && tab === 'workers');
-      const hw = Math.ceil((el.offsetWidth || 320) / 2) + COACH_MARGIN, /* 8px side margin (ddace62 #9) */ cx = r ? Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw) : innerWidth / 2;
+      const hw = Math.ceil((el.offsetWidth || 320) / 2) + COACH_MARGIN; /* 8px side margin (ddace62 #9) */ let cx = r ? Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw) : innerWidth / 2;
       const tabs = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect());
       // legacy tips inside a worker row (hire): also keep off that row's name / Energy label / bar (902f924 #3)
       const avoid = !rowId && row ? [...row.querySelectorAll('h3, .meta, .ebar')].filter(x => !x.contains(at!) && !at!.contains(x)).map(x => x.getBoundingClientRect()) : [];
       const clip = rowId || row ? coachClip() : undefined, tip = { w: el.offsetWidth, h: el.offsetHeight };
-      const p = r ? safeCoachPlacement({ target: r, tip, cx, vp: { w: innerWidth, h: innerHeight }, tabs, avoid, row: rr, rowAbove: o.rowAbove, clip, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
+      const panel = o.manage ? uRow.closest('.sheet')?.getBoundingClientRect() : undefined;
+      // Manage tip: on its button, inside the Upgrades panel under the tablist (never on Market), else defer
+      if (o.manage && panel) cx = Math.min(Math.max(cx, panel.left + tip.w / 2 + COACH_MARGIN), panel.right - tip.w / 2 - COACH_MARGIN);
+      const p = o.manage ? (r && panel && sheetOk && inVp(r) ? managePlacement(r, tip, cx, { w: innerWidth, h: innerHeight }, panel, tabs) : null)
+        : r ? safeCoachPlacement({ target: r, tip, cx, vp: { w: innerWidth, h: innerHeight }, tabs, avoid, row: rr, rowAbove: o.rowAbove, clip, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
       if (!p) { el.style.visibility = 'hidden';
         // rule D: tired tip, sheet open, row laid out, but no clean spot -> one guarded auto-scroll, then skip this visit
         // decide only on settled geometry: two ticks in a row with the same row/panel rects (the phone sheet slides in, review ddace62 #2)
@@ -607,7 +611,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const showManage = (w: string, delay: number) => window.setTimeout(() => { if (manageShown || flags.manageSeen) return; manageShown = true;
     const full = (g.state.workers[w as keyof typeof g.state.workers]?.energy ?? 0) >= 100;
     coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', () => workerRow(w)?.querySelector('[data-act=manage]') ?? null, 6000,
-      { rowId: w, rowAbove: true, reveal: true, onShow: () => { introBStage = 2; flags.manageSeen = true; saveFlags(); g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); }, onClose: () => { if (!flags.manageSeen) manageShown = false; } }); // persisted: shown once ever (review ddace62 #3/#4) // 'done' only once it actually showed
+      { rowId: w, manage: true, reveal: true, onShow: () => { introBStage = 2; flags.manageSeen = true; saveFlags(); g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); }, onClose: () => { if (!flags.manageSeen) manageShown = false; } }); // persisted: shown once ever (review ddace62 #3/#4) // 'done' only once it actually showed
   }, delay);
   const tiredMark = (ev: 'shown' | 'skipped') => { const n = tiredTipAfter({ seen: !!flags.tiredSeen, skips: flags.tiredSkips ?? 0 }, ev); flags.tiredSeen = n.seen; flags.tiredSkips = n.skips; saveFlags(); };
   const startTiredVisit = () => {

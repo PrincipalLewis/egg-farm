@@ -95,3 +95,20 @@ export const manageRearm = (f: { tiredSeen?: boolean; manageSeen?: boolean; tire
 export const isUserScrollKey = (key: string, onButton: boolean) => !onButton && /^(Page(Up|Down)|Arrow(Up|Down)|Home|End| )$/.test(key);
 /** Rule D guard: only these panel events count as the player scrolling/touching (not pointerdown/touchstart: the Hire tap). */
 export const GUARD_EVENTS = ['wheel', 'touchmove'] as const;
+/**
+ * Manage tip (Art & UX 04:00 Minor on 192f273): anchored to the Manage button, 8px above it (hand down) or else 8px below.
+ * The tip box must sit inside the Upgrades panel, below every tablist above the button, inside the viewport (8px), and touch
+ * neither a tablist nor the button. Null = defer. Never lands on the Market panel (it lies outside the Upgrades panel box).
+ */
+export function managePlacement(btn: Box, tip: { w: number; h: number }, cx: number, vp: { w: number; h: number }, panel: Box, tabs: Box[]): { side: 'above' | 'below'; top: number } | null {
+  const M = COACH_MARGIN, l = cx - tip.w / 2, r = cx + tip.w / 2;
+  if (btn.bottom - btn.top <= 0 || btn.top < panel.top || btn.bottom > panel.bottom) return null;
+  const floor = Math.max(panel.top, ...tabs.filter(t => t.bottom <= btn.top && t.right > panel.left && t.left < panel.right).map(t => t.bottom));
+  for (const c of [{ side: 'above' as const, top: btn.top - ROW_GAP - tip.h }, { side: 'below' as const, top: btn.bottom + ROW_GAP }]) {
+    const b: Box = { left: l, right: r, top: c.top, bottom: c.top + tip.h };
+    if (b.left < Math.max(0, panel.left) || b.right > Math.min(vp.w, panel.right) || b.top < Math.max(M, floor) || b.bottom > Math.min(vp.h - M, panel.bottom)) continue;
+    if ([btn, ...tabs].some(x => hit(b, x))) continue;
+    return c;
+  }
+  return null;
+}
