@@ -693,7 +693,7 @@ sections.bannerFit = async () => {
 sections.refillBar = async () => {
   for (const [w, h] of [[360, 800], [1280, 800]]) {
     const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 10, farmLevel: 12, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2,
-      workers: { market_hand: { energy: 0, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+      workers: { market_hand: { energy: 0, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
     const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
     if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click();
     const has = await page.waitForSelector('#uRow > .refill-wrap', { timeout: 5000 }).then(() => true, () => false);
