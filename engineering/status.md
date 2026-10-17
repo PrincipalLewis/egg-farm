@@ -65,3 +65,4 @@
 - Skipped: #13 Lows/held minors and serve-own port (#13 not merged yet).
 - Gates: tsc OK; vitest 516/516 (maxForks=2); test:slow 12 + 2 F1 skips; sync-economy --check OK; build OK.
 - Next: CCR/QA on this PR; #13 Lows follow-up after #13 merges.
+- 2026-10-17 04:15 Senior Software Architect — **done:** ADR M3-ECON-1 records Economy's 04:11 fix (product/economy.csv b294762e was a CRLF-only copy -> now 57d964d5, LF, no number changes) and the LF rule; `check-economy-copy -- --product --strict` exits 0 on main's data. **next:** CCR/QA on #26. **blocked:** none.
