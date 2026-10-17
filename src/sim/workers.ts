@@ -23,7 +23,11 @@ export const showManageAll = (ws: Workers, _b: Balance) => hiredCount(ws) >= 1;
  *  Below that, the same bar refills only the single lowest-energy tired/asleep worker (per-worker Manage rules + cooldown). */
 export const bulkManageAllowed = (ws: Workers, b: Balance) => hiredCount(ws) >= b.workers.energy.manage_all_min_workers;
 /** Target of a below-threshold Refill tap: the lowest-energy hired worker <= manage_prompt_threshold (card order breaks ties). */
-export const lowestManageTarget = (ws: Workers, b: Balance) => needManage(ws, b).reduce<WorkerId | null>((m, id) => m == null || ws[id]!.energy < ws[m]!.energy ? id : m, null);
+/** review 5d8a058 #6: Unpaid workers stay stopped after a refill, so a paid tired worker is preferred; Unpaid ones are picked only when no paid worker needs it. */
+export const lowestManageTarget = (ws: Workers, b: Balance) => {
+  const low = (ids: WorkerId[]) => ids.reduce<WorkerId | null>((m, id) => m == null || ws[id]!.energy < ws[m]!.energy ? id : m, null);
+  const need = needManage(ws, b); return low(need.filter(id => !ws[id]!.unpaid)) ?? low(need);
+};
 /** P4 / B5: Manage is allowed only at energy <= manage_prompt_threshold (0.4 = Yawning). */
 export const canManageWorker = (w: Worker | undefined, b: Balance) => !!w && w.energy <= b.workers.energy.manage_prompt_threshold * 100;
 /** P4: workers Manage all refills / "(n need it)" counts: hired and <= threshold. 0 -> no action, no cooldown (ruling 4). */

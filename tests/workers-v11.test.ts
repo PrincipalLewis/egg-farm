@@ -164,6 +164,11 @@ describe('PM Workers ruling (b): < 3 hired refills only the lowest worker; bulk 
     const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
     expect(src).toMatch(/navManageView\(refillCount\(s, b\)/); expect(src).not.toMatch(/navManageView\(promptManage/);
   });
+  it('2 hired: Unpaid Market Hand 10% + tired Coop Hand 30%: the single tap refills the paid Coop Hand (review 5d8a058 #6)', () => {
+    const s = base({ workers: { market_hand: wk(10, true), coop_hand: wk(30) }, manageCdS: 0 });
+    const m = apply(s, { type: 'manageAll' }, b);
+    expect(m.workers.coop_hand!.energy).toBe(100); expect(m.workers.market_hand!.energy).toBe(10);
+  });
   it('3 hired, all tired: bulk refill still refills every tired worker', () => {
     const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 });
     expect(manageAllHtml(s, b)).toContain('Refill 3 tired workers');
