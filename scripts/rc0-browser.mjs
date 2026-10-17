@@ -98,6 +98,28 @@ sections.b2 = async () => {
   }
 };
 
+// ---------- toast-v3: first toast after load is at its settled top from frame 1, never over the banner/strip mid-fade ----------
+sections.toastfirst = async () => {
+  const TS = process.env.TOAST_SHOTS ?? `${SHOTS}/toast-v3`; mkdirSync(TS, { recursive: true });
+  for (const [w, h, banner] of [[360, 740, true], [390, 640, false], [1280, 800, true]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': banner ? DONE : JSON.stringify({ ...JSON.parse(DONE), workersIntroA: true }) } });
+    const tag = `${w}x${h} ${banner ? 'banner' : 'no banner'}`;
+    // sample every frame from the dispatch (same task) for ~400ms
+    await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; window.__tf = [];
+      const t0 = performance.now(), el = document.querySelector('.toast');
+      const snap = () => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); window.__tf.push({ t: Math.round(performance.now() - t0), top: r.top, bottom: r.bottom, op: +cs.opacity, vis: cs.visibility, show: el.classList.contains('show') }); };
+      g.dispatch({ type: 'buyFarm' }); snap(); const loop = () => { snap(); if (performance.now() - t0 < 400) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+    await page.waitForTimeout(100); if (shot) await page.screenshot({ path: `${TS}/toast-midfade-100ms-${w}x${h}-${banner ? 'banner' : 'nobanner'}.png` });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => ({ f: window.__tf, ia: document.querySelector('.intro-a:not([hidden])')?.getBoundingClientRect().bottom ?? 0, qb: document.querySelector('#queue').getBoundingClientRect().bottom, docked: matchMedia('(min-width:960px) and (orientation:landscape)').matches }));
+    const edge = Math.max(r.docked ? 0 : r.qb, r.ia), settled = r.f[r.f.length - 1], seen = r.f.filter(x => x.show && x.vis === 'visible' && x.op > 0);
+    ok(`toast-v3 settles 8px below the ${banner ? 'banner' : 'strip'} (${tag})`, settled.op === 1 && Math.abs(settled.top - (edge + 8)) <= 1, JSON.stringify({ settled, edge }));
+    ok(`toast-v3 first visible frame already at settled top (±8px fade offset) (${tag})`, seen.length > 0 && seen[0].top >= settled.top - 8.5 && seen[0].top <= settled.top + 0.5, JSON.stringify({ first: seen[0], settled: settled.top }));
+    ok(`toast-v3 never over the ${banner ? 'banner' : 'strip'} in any frame mid-fade (${tag})`, seen.every(x => x.top >= edge - 0.5), JSON.stringify(seen.filter(x => x.top < edge - 0.5).slice(0, 3)));
+    await ctx.close();
+  }
+};
+
 // ---------- B3 goal chip SR text ----------
 sections.b3 = async () => {
   const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE } });
