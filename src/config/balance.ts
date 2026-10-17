@@ -35,6 +35,8 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
     'workers.energy.yawn_at_pct', 'workers.energy.manage_all_min_workers', 'workers.energy.unpaid_resume_wage_min',
     'workers.market_hand.hire_cost', 'workers.coop_hand.hire_cost', 'workers.hawker.hire_cost', 'workers.grader.tier_cost_share_of_farm_cost', 'workers.tips.coop_hand_tip_full_s']) pos(b, p);
   const W = b.workers;
+  const mw = (W.market_hand as any).min_wait_s; // F1 (b): required, finite, >= 0 (0 = no min wait)
+  if (!(typeof mw === 'number' && isFinite(mw) && mw >= 0)) throw new Error('balance.workers.market_hand.min_wait_s must be a number >= 0');
   if (W.energy.tired_below_pct > 100 || W.energy.start_pct > 100) throw new Error('balance.workers.energy pct must be <= 100');
   if (W.hawker.demand_mult < W.hawker.tired_demand_mult || W.hawker.tired_demand_mult < 1) throw new Error('balance.workers.hawker: 1 <= tired_demand_mult <= demand_mult');
   if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))

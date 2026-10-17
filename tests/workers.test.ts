@@ -37,7 +37,9 @@ describe('M2 workers (m2-proposal v1.1)', () => {
   });
   it('Market Hand serves the queue every 1 s (3 s Tired), charges wage per interval, stops Asleep', () => {
     let s = apply({ ...rich(), coinsCents: 100_000, basket: 1000 }, { type: 'hire', worker: 'market_hand' }, b);
-    s = { ...s, customers: [{ id: 99, demand: 2, filled: 0, waitedS: 0 }] };
+    // F1 (b) min wait: the customer has already waited min_wait_s, so the first turn serves; a huge order keeps the queue servable.
+    const MW = b.workers.market_hand.min_wait_s;
+    s = { ...s, customers: [{ id: 99, demand: 2, filled: 0, waitedS: MW }, { id: 100, demand: 1e9, filled: 0, waitedS: MW }] };
     const ev: SimEvent[] = []; s = run(s, 0.1, ev);
     const sale = ev.find(e => e.type === 'sell') as any; expect(sale.by).toBe('market_hand'); expect(sale.k).toBe(2);
     const wage = ev.find(e => e.type === 'wage') as any; expect(wage.cents).toBe(Math.round(0.25 * 24 * 1 / 60 * 100));

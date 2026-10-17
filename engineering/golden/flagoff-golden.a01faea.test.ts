@@ -20,7 +20,12 @@ const PINS: Record<string, string> = {
 //   50a87ddbf89c44751ef33a008541022e146c48c0fed8e16d5114e6d787809de0
 // Bisect: c75b6dc (just before the data switch) still gives 50a87ddb; only the approved F1 shipping-data switch
 // (data/economy.csv = m4cols 86f0e80e) moves it to f90d1678. No code changes. Storage-bytes pins (PINS) unchanged.
-const GOLDEN_MAIN_A01FAEA = 'f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544';
+// Re-pinned again (feat/market-hand-min-wait, off main 8e6d53e): HoE ruling 2026-10-17 -- market_hand_min_wait_s = 2 is a
+// missing implementation that must match Economy's AC7 model (economy_sim.py:309/:316, hold_until_servable). Previous pin:
+//   f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544  (main acaceee and 8e6d53e, no min wait)
+// Only src/sim/tick.ts (Market Hand min wait) + balance.json workers.market_hand.min_wait_s change; the CSV is unchanged
+// (6dca24cd after #36; #36 itself left f90d1678 unchanged). Storage-bytes pins (PINS) unchanged.
+const GOLDEN_MAIN_A01FAEA = 'e7dad04063a4fdbba7d8b2edc3e18ed7de9ff46296210565de677b371d16225e';
 const FIX = ['m1-rc2-v4-12min', 'm2-rc1-v5-12min', 'm2-rc1-v5-40min', 'm2-rc1-v5-40min-edge'];
 const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
 describe('golden', () => {

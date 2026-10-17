@@ -107,6 +107,8 @@ export function fitWorkers(rows: Row[], prev: any, perLevel = false) {
     return v;
   };
   const W = prev.workers ?? {};
+  // CSV-owned keys never survive from the previous balance.json (a CSV without the column must not keep a stale value)
+  const omit = (o: any, k: string) => { const { [k]: _drop, ...rest } = o ?? {}; return rest; };
   const perFarmWage = (col: string, unlock: number) => {
     const r = R.find(x => x.level === unlock)!; const v = r4(r[col] / unlock);
     for (const x of R) { const want = x.level >= unlock ? r4(v * x.level) : 0; if (Math.abs(x[col] - want) > 1e-9) throw new Error(`sync-economy: economy.csv L${x.level} ${col}=${x[col]}, expected ${want}`); }
@@ -128,7 +130,9 @@ export function fitWorkers(rows: Row[], prev: any, perLevel = false) {
       unpaid_resume_wage_min: one('unpaid_resume_wage_min'),
       // B5 (Product, Oct 15; 0.4 = Yawning): Manage / 'Manage all (N need it)' count a worker only at energy <= this share.
       ...(has('manage_prompt_threshold') ? { manage_prompt_threshold: one('manage_prompt_threshold') } : {}) },
-    market_hand: { ...W.market_hand, unlock_farm: u1, hire_cost: hire('w1_cost', u1), wage_per_farm_per_min: perFarmWage('w1_wage_per_min', u1), every_s: one('w1_every_s'), tired_every_s: one('w1_tired_every_s') },
+    market_hand: { ...omit(W.market_hand, 'min_wait_s'), unlock_farm: u1, hire_cost: hire('w1_cost', u1), wage_per_farm_per_min: perFarmWage('w1_wage_per_min', u1), every_s: one('w1_every_s'), tired_every_s: one('w1_tired_every_s'),
+      // F1 option (b) (HoP 2026-10-16; HoE ruling 2026-10-17: missing implementation): Market Hand turn held until a customer waited >= this.
+      ...(has('market_hand_min_wait_s') ? { min_wait_s: one('market_hand_min_wait_s') } : {}) },
     coop_hand: { ...W.coop_hand, unlock_farm: u2, hire_cost: hire('w2_cost', u2), wage_per_farm_per_min: perFarmWage('w2_wage_per_min', u2), every_s: one('w2_every_s'), tired_every_s: one('w2_tired_every_s') },
     hawker: { ...W.hawker, unlock_farm: u3, hire_cost: hire('w3_cost', u3), demand_mult: one('w3_demand_mult'), tired_demand_mult: one('w3_tired_demand_mult') },
     grader: { ...W.grader, tiers, tier_cost_share_of_farm_cost: one('w4_tier_cost_share'), tired_bonus_share: one('w4_tired_bonus_share'), asleep_bonus_share: one('w4_asleep_bonus_share') },

@@ -11,24 +11,32 @@ import { mem } from './helpers';
 const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 
 const mh = (energy = 100) => ({ market_hand: { energy, cdS: 0 } });
+// F1 (b) min wait (HoE ruling 2026-10-17): Market Hand's turn is held, with no wage, unless some customer has waited >= min_wait_s.
+// The wage tests below need a paid turn every interval, so they run with one never-filled customer who has already waited
+// min_wait_s, on a balance whose patience is long enough that the customer never times out. Wage rates are unchanged.
+const bp: any = { ...b, customers: { ...b.customers, customer_patience_s: 1e9 } };
+const waiting = () => [{ id: 1, demand: 1e12, filled: 0, waitedS: b.workers.market_hand.min_wait_s }];
 
 describe('S2-8 wage from the Player log (Farm L3, Market Hand, 0 eggs)', () => {
   it('drain = Market Hand wage at the exact economy.csv rate (0.75 $/min at L3 = 1.25 c/s; fraction carried)', () => {
-    let s: any = { ...initialState(b, 1), farmLevel: 3, coinsCents: 15_257, workers: mh(), basket: 0, coop: 0, nextCustomerInS: 1e9 };
+    let s: any = { ...initialState(b, 1), farmLevel: 3, coinsCents: 15_257, workers: mh(), basket: 0, coop: 0, nextCustomerInS: 1e9, customers: waiting() };
     expect(wageCentsPerSec('market_hand', s, b)).toBe(1.25); expect(listedWageCentsPerSec('market_hand', s, b)).toBe(1.25);
-    const r = advance(s, 24_000, 0, b); expect(15_257 - r.state.coinsCents).toBe(30);
+    const r = advance(s, 24_000, 0, bp); expect(15_257 - r.state.coinsCents).toBe(30);
+    // held turns: no customer -> no wage at all (f1-proposal.md §5 AC: no wage is charged on a held turn)
+    expect(advance({ ...s, customers: [] }, 24_000, 0, bp).state.coinsCents).toBe(15_257);
   });
   it('60 s of Market Hand wages at L3 = $0.75 +- 1 c (was $0.60 with per-charge rounding)', () => {
-    for (const start of [10_000, 123_457]) { const s: any = { ...initialState(b, 1), farmLevel: 3, coinsCents: start, workers: mh(), basket: 0, coop: 0, nextCustomerInS: 1e9 };
-      const spent = start - advance(s, 60_000, 0, b).state.coinsCents; expect(Math.abs(spent - 75)).toBeLessThanOrEqual(1); }
-    for (const F of [1, 7, 11, 23]) { const s: any = { ...initialState(b, 1), farmLevel: F, coinsCents: 1e9, workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 } }, basket: 0, coop: 0, nextCustomerInS: 1e9 };
-      const want = (0.25 + 0.5) * F * 100; expect(Math.abs(1e9 - advance(s, 60_000, 0, b).state.coinsCents - want), `F${F}`).toBeLessThanOrEqual(2); }
+    for (const start of [10_000, 123_457]) { const s: any = { ...initialState(b, 1), farmLevel: 3, coinsCents: start, workers: mh(), basket: 0, coop: 0, nextCustomerInS: 1e9, customers: waiting() };
+      const spent = start - advance(s, 60_000, 0, bp).state.coinsCents; expect(Math.abs(spent - 75)).toBeLessThanOrEqual(1); }
+    for (const F of [1, 7, 11, 23]) { const s: any = { ...initialState(b, 1), farmLevel: F, coinsCents: 1e9, workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 } }, basket: 0, coop: 0, nextCustomerInS: 1e9, customers: waiting() };
+      const want = (0.25 + 0.5) * F * 100, ev: any[] = []; advance(s, 60_000, 0, bp, ev); // wage events only: Coop Hand eggs now sell to the waiting customer
+      expect(Math.abs(ev.filter(e => e.type === 'wage').reduce((x, e) => x + e.cents, 0) - want), `F${F}`).toBeLessThanOrEqual(2); }
   });
   it('the fraction survives a save round-trip; v5 saves migrate with nothing owed', () => {
-    const kv = mem(); let t = 1_000; const g = new Game(b, kv, () => t);
-    g.state = { ...g.state, farmLevel: 3, coinsCents: 10_000, workers: mh(), customers: [], nextCustomerInS: 1e9 } as any; g.debugAdvance(3_000);
+    const kv = mem(); let t = 1_000; const g = new Game(bp, kv, () => t);
+    g.state = { ...g.state, farmLevel: 3, coinsCents: 10_000, workers: mh(), customers: waiting(), nextCustomerInS: 1e9 } as any; g.debugAdvance(3_000);
     const frac = g.state.wageFracCents.market_hand!; expect(frac).toBeGreaterThan(0); expect(frac).toBeLessThan(1); g.save();
-    t += 10; const g2 = new Game(b, kv, () => t); expect(g2.state.wageFracCents.market_hand).toBeCloseTo(frac, 9);
+    t += 10; const g2 = new Game(bp, kv, () => t); expect(g2.state.wageFracCents.market_hand).toBeCloseTo(frac, 9);
     const v5 = { version: 5, savedAt: 0, state: { ...initialState(b), wageFracCents: undefined } }; delete (v5.state as any).wageFracCents;
     expect(migrate(v5, b).state.wageFracCents).toEqual({}); expect(migrate(v5, b).version).toBe(SAVE_VERSION);
   });
@@ -55,10 +63,10 @@ describe('S2-8 gate: wages draining money to $0', () => {
     }
   });
   it('workers go Unpaid when a wage cannot be paid, and resume once money covers it', () => {
-    let s = broke(10); for (let i = 0; i < 30; i++) s = advance(s, 1000, 0, b).state;
+    let s = { ...broke(10), customers: waiting() }; for (let i = 0; i < 30; i++) s = advance(s, 1000, 0, bp).state; // F1 (b): a servable customer, so Market Hand's turns are paid
     expect(s.workers.market_hand!.unpaid).toBe(true); expect(s.workers.coop_hand!.unpaid).toBe(true);
-    const c0 = s.coinsCents; s = advance(s, 10_000, 0, b).state; expect(s.coinsCents).toBe(c0); // paused: no further charge
-    s = { ...s, coinsCents: 100_000 }; s = advance(s, 2000, 0, b).state;
+    const c0 = s.coinsCents; s = advance(s, 10_000, 0, bp).state; expect(s.coinsCents).toBe(c0); // paused: no further charge
+    s = { ...s, coinsCents: 100_000 }; s = advance(s, 2000, 0, bp).state;
     expect(s.workers.market_hand!.unpaid).toBeFalsy(); expect(s.workers.coop_hand!.unpaid).toBeFalsy();
   });
   it('no soft-lock at $0: Collect and manual Sell still work and earn money', () => {

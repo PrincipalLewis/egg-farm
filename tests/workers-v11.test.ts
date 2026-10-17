@@ -55,7 +55,7 @@ describe('M2 Workers v1.1 (m2-proposal §8 items 15-16, §10)', () => {
   });
   it('wage short -> Unpaid: no charge, no action, acts as Asleep, no drain (ruling 1)', () => {
     const ev: SimEvent[] = [];
-    let s = run(base({ coinsCents: 1, basket: 100, customers: [{ id: 1, demand: 5, filled: 0, waitedS: 0 }], workers: { market_hand: wk(80) } }), 0.1, ev);
+    let s = run(base({ coinsCents: 1, basket: 100, customers: [{ id: 1, demand: 5, filled: 0, waitedS: b.workers.market_hand.min_wait_s }], workers: { market_hand: wk(80) } }), 0.1, ev); // F1 (b): servable
     expect(s.workers.market_hand!.unpaid).toBe(true); expect(mood(s.workers.market_hand, b)).toBe('unpaid');
     expect(s.coinsCents).toBe(1); expect(ev.some(e => e.type === 'sell')).toBe(false);
     const e0 = s.workers.market_hand!.energy; s = run(s, 60); expect(s.workers.market_hand!.energy).toBe(e0); expect(s.basket).toBe(100);

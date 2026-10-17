@@ -34,7 +34,8 @@
       "hire_cost": 40,
       "wage_per_farm_per_min": 0.25,
       "every_s": 1,
-      "tired_every_s": 3
+      "tired_every_s": 3,
+      "min_wait_s": 2
     },
     "coop_hand": {
       "unlock_farm": 7,
