@@ -2,7 +2,7 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
-import { safeCoachPlacement } from './coach-place';
+import { safeCoachPlacement, autoScrollDelta, guardAllows, tiredTipAfter, deferExpired } from './coach-place';
 import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
@@ -30,7 +30,7 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
+interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; tiredWorker?: string; tiredSeen?: boolean; tiredSkips?: number; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
@@ -524,36 +524,57 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   }
   void dirty;
   // ---------- FTUE step 4 + Workers intro (m3-ftue-spec §2 step 4, §3; M3-AC4) ----------
-  // rc2-notes §B-2 amendment A-C (00:55): every tip runs the tablist + viewport check via the pure safeCoachPlacement();
-  // when no clean spot exists (or the anchor isn't laid out/in view) the tip stays hidden and is re-checked every 250ms;
-  // its `ms` life starts on first show. `row` = tired-tip mode: anchored 8px under the whole worker row, Workers sheet open only.
-  const coach = (text: string, anchor: Element | null | (() => Element | null), ms: number, cls = '', rowId: string | null = null, onShow?: () => void) => {
+  // rc2-notes §B-2 A-D: every tip runs the tablist + viewport check via the pure safeCoachPlacement(); with no clean spot the tip
+  // stays hidden and is re-checked every 250ms (dropped after MAX_DEFER_MS); its `ms` life starts on first show.
+  // rowId = row mode (tired + Manage tips): anchored 8px under the whole worker row, Workers sheet open only.
+  // autoScroll (tired tip, rule D): if it can't fit, scroll the panel so the row sits just under the tablist (guarded), else onSkip().
+  interface CoachOpts { cls?: string; rowId?: string; rowAbove?: boolean; autoScroll?: boolean; onShow?: () => void; onSkip?: () => void; onClose?: () => void }
+  const coachClip = () => uRow.closest('.body')?.getBoundingClientRect();
+  const coach = (text: string, anchor: Element | null | (() => Element | null), ms: number, o: CoachOpts = {}) => {
     document.querySelectorAll('.coach').forEach(e => e.remove());
-    const el = h(`<div class="coach ${cls}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
+    const el = h(`<div class="coach ${o.cls ?? ''}" role="dialog" aria-label="Tip" aria-live="polite"><img class="coach-hand" src="${A('ui-pointer-hand-down.svg')}" width="40" height="40" alt="" aria-hidden="true"><span>${text}</span></div>`);
     el.style.visibility = 'hidden'; el.style.left = '0'; el.style.top = '0'; document.body.append(el);
-    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, centred = false;
+    const handImg = el.querySelector('.coach-hand') as HTMLImageElement; let shown = false, life = 0, scrolledAt = 0, done = false;
     const inVp = (r: DOMRect) => r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth;
-    let at: Element | null = null; const born = Date.now();
+    const born = Date.now(), rowId = o.rowId;
+    const skip = () => { if (done) return; done = true; close(); o.onSkip?.(); };
     const place = () => { if (!el.isConnected) { close(); return; } // dropped by another tip: stop the re-check loop
-      if (!shown && Date.now() - born > 15000) { close(); return; } // max defer 15s: never pop up minutes later out of context
-      at = typeof anchor === 'function' ? anchor() : anchor; // getters re-resolve each tick (the list re-renders ~every 9s)
-      const row = rowId ? workerRow(rowId) : null; if (rowId) at = row?.querySelector('.ebar') ?? null; // tired tip: row/bar re-queried each tick (re-rendered, or not built yet while the sheet is closed)
-      const r = at?.getBoundingClientRect(), rr = row?.getBoundingClientRect();
+      if (deferExpired(born, Date.now(), shown)) { close(); return; }
+      let at = typeof anchor === 'function' ? anchor() : anchor; // getters re-resolve each tick (the list re-renders ~every 9s)
+      const row = rowId ? workerRow(rowId) : (at?.closest('.wk') ?? null); if (rowId && !at) at = row?.querySelector('.ebar') ?? null;
+      const r = at?.getBoundingClientRect(), rr = rowId ? row?.getBoundingClientRect() : undefined;
       const sheetOk = !rowId || ((docked.matches || open === 'upgrades') && tab === 'workers');
       const hw = Math.ceil((el.offsetWidth || 320) / 2) + 4, cx = r ? Math.min(Math.max(r.left + r.width / 2, hw), innerWidth - hw) : innerWidth / 2;
       const tabs = [...document.querySelectorAll('[role=tablist]')].map(t => t.getBoundingClientRect());
-      const p = r ? safeCoachPlacement({ target: r, tip: { w: el.offsetWidth, h: el.offsetHeight }, cx, vp: { w: innerWidth, h: innerHeight }, tabs, row: rr, clip: rowId ? uRow.closest('.body')?.getBoundingClientRect() : undefined, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
-      // no clean spot yet but the sheet is open: bring the row to the middle of its scroller once, so there is room under it
-      if (!p) { el.style.visibility = 'hidden'; if (row && sheetOk && rr?.height && !centred) { centred = true; row.scrollIntoView({ block: 'center' }); } return; }
+      // legacy tips inside a worker row (hire): also keep off that row's name / Energy label / bar (902f924 #3)
+      const avoid = !rowId && row ? [...row.querySelectorAll('h3, .meta, .ebar')].filter(x => !x.contains(at!) && !at!.contains(x)).map(x => x.getBoundingClientRect()) : [];
+      const clip = rowId || row ? coachClip() : undefined, tip = { w: el.offsetWidth, h: el.offsetHeight };
+      const p = r ? safeCoachPlacement({ target: r, tip, cx, vp: { w: innerWidth, h: innerHeight }, tabs, avoid, row: rr, rowAbove: o.rowAbove, clip, visible: sheetOk && inVp(r) && (!rowId || !!rr?.height) }) : null;
+      if (!p) { el.style.visibility = 'hidden';
+        // rule D: tired tip, sheet open, row laid out, but no clean spot -> one guarded auto-scroll, then skip this visit
+        if (o.autoScroll && sheetOk && rr?.height && clip && !shown) {
+          const now = Date.now();
+          if (!scrolledAt) { const d = guardAllows(now, lastPanelUser) ? autoScrollDelta(rr, clip, tip.h, innerHeight) : null;
+            if (d === null) { skip(); return; }
+            scrolledAt = now; if (d) { autoScrollingUntil = now + 900; uRow.closest('.body')?.scrollBy({ top: d, behavior: rm() ? 'instant' : 'smooth' }); } }
+          else if (now - scrolledAt > 800) skip(); // still no fit after the scroll settled (e.g. 1024x474)
+        }
+        return; }
       el.style.cssText = `left:${cx}px;top:${Math.round(p.top)}px;transform:translateX(-50%)`;
       el.classList.toggle('below', p.side === 'below');
       handImg.src = p.side === 'above' ? A('ui-pointer-hand-down.svg') : A('ui-pointer-hand.svg');
-      if (!shown) { shown = true; life = window.setTimeout(close, ms); onShow?.(); } };
+      if (!shown) { shown = true; life = window.setTimeout(close, ms); o.onShow?.(); } };
     const iv = window.setInterval(place, 250);
-    const close = () => { clearInterval(iv); clearTimeout(life); if (el.isConnected) el.remove(); };
+    const close = () => { clearInterval(iv); clearTimeout(life); if (el.isConnected) el.remove(); if (!closed) { closed = true; o.onClose?.(); } };
+    let closed = false;
     el.addEventListener('click', close); place(); return close;
   };
-  const showGoalIntro = () => { g.telemetry.onboardingStep(5, 'next_goal_intro'); coach('Your next goal is always shown here.', goalBtn, 4000, 'toastlike'); };
+  // rule D guard: the player's own scroll / touch on the Upgrades panel (programmatic auto-scroll excluded)
+  let lastPanelUser = -Infinity, autoScrollingUntil = 0;
+  { const body = uRow.closest('.body'); const mark = () => { lastPanelUser = Date.now(); };
+    if (body) { for (const ev of ['wheel', 'touchstart', 'pointerdown', 'keydown']) body.addEventListener(ev, mark, { passive: true });
+      body.addEventListener('scroll', () => { if (Date.now() > autoScrollingUntil) mark(); }, { passive: true }); } }
+  const showGoalIntro = () => { g.telemetry.onboardingStep(5, 'next_goal_intro'); coach('Your next goal is always shown here.', goalBtn, 4000, { cls: 'toastlike' }); };
   let introA: HTMLElement | null = null, introBStage = 0;
   const workerRow = (id: string) => uRow.querySelector(`[data-w=${id}]`);
   const renderWorkersIntro = () => {
@@ -578,19 +599,31 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (introA) { const hide = modalKind === 'welcome' || !!open; if (introA.hidden !== hide) introA.hidden = hide; }
   };
   const unlockFarmMH = b.workers.market_hand.unlock_farm, hireCostMH = b.workers.market_hand.hire_cost * 100;
-  // Part B: first hire (any worker) -> energy bar, then Manage. Once per save.
+  // Part B: first hire (any worker) -> energy bar tip, then Manage. Rule D: the tired tip is retried on each Workers visit until
+  // shown or skipped 3 times (flags.tiredSeen / tiredSkips); the Manage tip follows a shown tip, or shows on its own after a skip.
+  let tiredPending = false, manageShown = false;
+  const showManage = (w: string, delay: number) => window.setTimeout(() => { if (manageShown) return; manageShown = true;
+    const full = (g.state.workers[w as keyof typeof g.state.workers]?.energy ?? 0) >= 100;
+    coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', () => workerRow(w)?.querySelector('[data-act=manage]') ?? null, 6000,
+      { rowId: w, rowAbove: true, onShow: () => { introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); }, onClose: () => { if (introBStage < 2) manageShown = false; } }); // 'done' only once it actually showed
+  }, delay);
+  const tiredMark = (ev: 'shown' | 'skipped') => { const n = tiredTipAfter({ seen: !!flags.tiredSeen, skips: flags.tiredSkips ?? 0 }, ev); flags.tiredSeen = n.seen; flags.tiredSkips = n.skips; saveFlags(); };
+  const startTiredVisit = () => {
+    const w = flags.tiredWorker; if (!w || flags.tiredSeen || tiredPending) return;
+    tiredPending = true;
+    coach('Workers get tired over time.', null, 3000, { rowId: w, autoScroll: true,
+      onShow: () => { tiredMark('shown'); showManage(w, 3100); },
+      onSkip: () => { tiredMark('skipped'); showManage(w, 300); },
+      onClose: () => { tiredPending = false; } });
+  };
+  // a "visit" = the Workers list becoming visible (sheet opened on Workers, or the Workers tab picked while docked)
+  let workersVisible = false;
+  window.setInterval(() => { const v = (docked.matches || open === 'upgrades') && tab === 'workers'; if (v && !workersVisible) startTiredVisit(); workersVisible = v; }, 250);
   g.on(e => {
     if (e.type !== 'worker_hire' || flags.workersIntroB) return;
-    flags.workersIntroB = true; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
+    flags.workersIntroB = true; flags.tiredWorker = e.worker; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
     document.querySelectorAll('.coach').forEach(c => c.remove());
-    window.setTimeout(() => {
-      tab = 'workers'; dirty = true; render();
-      coach('Workers get tired over time.', null, 3000, '', e.worker, () => window.setTimeout(() => { // B-2: Manage tip follows once the tired tip has actually shown
-        const full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
-        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', () => workerRow(e.worker)?.querySelector('[data-act=manage]') ?? null, 6000, '', null, () => { // 'done' only once the Manage tip has actually shown
-          introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' }); });
-      }, 3100));
-    }, 50);
+    window.setTimeout(() => { tab = 'workers'; dirty = true; render(); startTiredVisit(); }, 50);
   });
   void introBStage;
   // ---------- Onboarding (new games only, once, skippable) ----------
