@@ -147,10 +147,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx), 250); }, 1300); };
+  const showToast = (text: string, atHud = false) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render). M4-A tier/milestone toasts (Art&UX 02:54 #1): top-centre under the HUD (HUD bottom + 8px), same host/z-index above sheets. */ const place = () => { if (atHud) { toast.style.top = `${Math.round(Math.max(0, hud.getBoundingClientRect().bottom) + 8)}px`; toast.classList.remove('below'); return; } const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx, true), 250); }, 1300); };
   /** M4-A: several milestones can land in one buy (e.g. Hens L20 + Balanced 4/5); each gets its own toast, in order, never overwritten. */
   const toastQ: string[] = [];
-  const queueToasts = (texts: string[]) => { if (!texts.length) return; if (toast.classList.contains('show')) toastQ.push(...texts); else { showToast(texts[0]); toastQ.push(...texts.slice(1)); } };
+  const queueToasts = (texts: string[]) => { if (!texts.length) return; if (toast.classList.contains('show')) toastQ.push(...texts); else { showToast(texts[0], true); toastQ.push(...texts.slice(1)); } };
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
   // ---------- Panels ----------
@@ -275,11 +275,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const dwell = new ServedDwell(b.feel.served_dwell_ms), dwellEls = new Map<number, HTMLElement>();
   const moreChip = h(`<button class="chip more" type="button"></button>`);
   let qTagShown = false;
+  /** Art&UX 02:54 #2/#3: leaving / turned-away customers draw inside the strip (clipped to it, under the .qtag), chip-wide, never past x=0. */
+  const ghostHost = h(`<div class="ghosts" aria-hidden="true"></div>`);
   const ghost = (at: DOMRect | null, cls: string, bubble?: { text: string; cls: string }) => {
-    const q = queueEl.getBoundingClientRect(); const r = at ?? new DOMRect(q.right - 64, q.top, 64, 72);
-    const el = h(`<div class="ghost ${cls}" style="left:${r.left}px;top:${r.top - 12}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
+    const q = queueEl.getBoundingClientRect(); const w = Math.round(at?.width || 56); const r = at ?? new DOMRect(q.right - w, q.top, w, 72);
+    const left = Math.max(0, Math.min(Math.round(r.left - q.left), Math.round(q.width - w))), top = Math.max(0, Math.round(r.top - q.top - 12));
+    const el = h(`<div class="ghost ${cls}" style="left:${left}px;top:${top}px;width:${w}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
     if (rm() && bubble) el.querySelector('img')!.remove(); // reduced motion: bubble fade only
-    spawn(el, 1500);
+    if (live.length >= 30) live.shift()?.remove();
+    ghostHost.append(el); live.push(el); setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, 1500);
   };
   const renderQueue = () => {
     const s = g.state, slots = S.queueMax(s.farmLevel, b), patience = S.patienceS(s.farmLevel, b);
@@ -314,7 +318,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const needEmpty = Math.max(0, stripSlots - kids.length);
     while (empties.length < needEmpty) empties.push(h(`<div class="chip empty" aria-hidden="true"></div>`));
     empties.length = needEmpty;
-    const want = [...kids, ...empties];
+    const want = [...kids, ...empties, ghostHost];
     if (want.some((el, i) => queueEl.children[i] !== el) || queueEl.children.length !== want.length + (qTagShown ? 1 : 0)) {
       for (const el of want) if (!chipBorn.has(el)) chipBorn.set(el, now());
       queueEl.replaceChildren(...want); qTagShown = false;
@@ -326,7 +330,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // Slot unlock moment (first reach of a new slot count; once, persisted)
     if (slots > flags.seenSlots) {
       flags.seenSlots = slots; saveFlags();
-      const newSlot = empties[empties.length - 1] ?? queueEl.lastElementChild;
+      const newSlot = empties[empties.length - 1] ?? kids[kids.length - 1];
       if (newSlot && !rm()) { retrigger(newSlot, 'unlock'); sparkle(newSlot, 4); }
       slotToastPending = slotAdded(s.farmLevel, b);
     }

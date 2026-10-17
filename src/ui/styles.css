@@ -486,3 +486,8 @@ html,body{overflow-x:hidden;max-width:100%}
    half sits in it and never reaches a chip or the "+N" tile, at any chip size (64/56) or strip height. */
 .queue{padding-top:9px;min-height:81px}
 @media (max-height:699px){.queue{min-height:73px}}
+/* Art&UX 02:54 #2/#3: ghosts live in a strip-sized clip box under the Queue full tag; bubbles are chip-wide (56px max) and wrap */
+.queue>.ghosts{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;border-radius:inherit}
+.queue>.qtag{z-index:2}
+.ghosts .ghost{max-width:64px}
+.ghosts .bubble{max-width:100%;box-sizing:border-box;padding:1px 4px;white-space:normal;text-align:center;line-height:13px;overflow:hidden}
