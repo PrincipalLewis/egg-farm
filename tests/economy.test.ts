@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync, mkdtempSync } from 'node:fs';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { readFileSync, mkdtempSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -17,7 +18,7 @@ describe('AC6 every economy.csv cell reproduced from config formulas', () => {
     for (const [c, v] of Object.entries(r)) if (c in t) expect([c, t[c]]).toEqual([c, expect.closeTo(v, 9)]);
   });
 });
-describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)', () => {
+describe('parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures)', () => {
   it.each(fx.rows as Record<string, number>[])('level $level stats', (r) => {
     const t = tableRow(r.level, b) as Record<string, number>;
     for (const [c, v] of Object.entries(r)) expect([c, t[c]]).toEqual([c, expect.closeTo(v, 9)]);
@@ -37,16 +38,50 @@ describe('parity with product/sim/economy_sim.py (fixture: npm run gen-fixtures)
     expect([b.farm.demandLoFactor, b.farm.demandHiFactor, b.customers.queue_max_base, b.customers.queue_max_step_levels, b.customers.queue_max_cap]).toEqual([p.d_lo, p.d_hi, p.q_base, p.q_step, p.q_cap]);
     expect([b.offline.offlineRateMultiplier, b.offline.offlineCapSeconds]).toEqual([p.offline_rate, p.offline_cap_s]);
   });
-  const py = existsSync(new URL('../../product/sim/economy_sim.py', import.meta.url).pathname);
-  it.runIf(py)('fixture is fresh vs the live reference sim', () => {
+  // Vendored, sha-pinned reference sim (vendor/economy-sim). Never reads anything outside the repo.
+  const vdir = new URL('../vendor/economy-sim/', import.meta.url);
+  const pins = readFileSync(new URL('SHA256SUMS', vdir), 'utf8').trim().split('\n').map(l => l.split(/\s+/));
+  const sha = (buf: Buffer | string) => createHash('sha256').update(buf).digest('hex');
+  const checkPins = () => {
+    const files = pins.map(([, f]) => f).sort().join(',');
+    if (files !== 'economy.f1-m4cols.csv,sim/economy_sim.py') throw new Error(`vendor/economy-sim/SHA256SUMS must pin exactly 2 files, got ${files}`);
+    for (const [h, f] of pins) { const got = sha(readFileSync(new URL(f, vdir))); if (got !== h) throw new Error(`vendored ${f} sha256 ${got} != pin ${h}`); }
+  };
+  // Hashes are verified before anything runs, so a tampered sim never executes.
+  beforeAll(checkPins);
+  it('vendored reference sim matches its sha256 pins', () => { expect(checkPins).not.toThrow(); });
+  const srcLines = readFileSync(new URL('SOURCE', vdir), 'utf8').split('\n').filter(l => l.trim() && !l.startsWith('#'));
+  const srcDate = srcLines.find(l => l.startsWith('vendored:'))?.slice(9).trim();
+  const src = srcLines.filter(l => !l.startsWith('vendored:')).map(l => l.trim().split(/\s+/));
+  it('vendored SOURCE provenance equals the SHA256SUMS pins (unmodified copies)', () => {
+    expect(srcDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    for (const [h, f, from] of src) console.info(`economy-sim vendored ${f} from ${from} sha256 ${h} on ${srcDate}`);
+    expect(src.map(([h, f]) => [f, h]).sort()).toEqual(pins.map(([h, f]) => [f, h]).sort());
+    // Advisory only, never fails: warn if a local live copy has drifted from the vendored one.
+    for (const [h, , from] of src) {
+      const live = new URL(`../../${from}`, import.meta.url);
+      if (existsSync(live)) {
+        const lh = createHash('sha256').update(readFileSync(live)).digest('hex');
+        if (lh !== h) console.warn(`economy-sim: local ${from} sha256 ${lh} differs from vendored ${h} (advisory; Economy updates vendor/economy-sim via PR)`);
+      }
+    }
+  });
+  // data/economy.csv sha256 -> vendored sim --config (decisions.md:295). Unknown sha = hard failure.
+  const CONFIG_BY_CSV_SHA: Record<string, string> = {
+    '57d964d50601578fb918e4faa4a137dff36374e21dba4996ee4302056efc19fd': 'current', // pre-F1 (P1Q), main
+    '86f0e80e359398e3fd3061c268794054558029270cc3944ac522ef7ddbea0550': 'f1', // F1 m4cols (#17)
+  };
+  it('fixture is fresh vs the vendored reference sim (config chosen by economy.csv sha256)', () => {
+    checkPins();
+    const csvSha = sha(csvText), config = CONFIG_BY_CSV_SHA[csvSha];
+    if (!config) throw new Error(`unknown economy.csv ${csvSha}: update vendor/economy-sim`);
     const out = join(mkdtempSync(join(tmpdir(), 'eco-')), 't.csv');
-    execFileSync('python3', [new URL('../../product/sim/economy_sim.py', import.meta.url).pathname, '--config', 'current', '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
-    // All 46 columns the sim's CSV writer emits (product/sim/economy_sim.py sha 5ad5a3a6 writes yawn 50 / manage 0.5, Economy Oct 17).
-    // The m4cols-only columns (79) are not written by the sim, so compare the sim's columns rather than the whole row.
+    execFileSync('python3', [new URL('sim/economy_sim.py', vdir).pathname, '--config', config, '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
+    // Compare every column the sim's CSV writer emits (46); m4cols-only CSV columns are not written by the sim.
     const sim = parseEconomyCsv(readFileSync(out, 'utf8')), cols = Object.keys(sim[0]);
     expect(cols.length).toBe(46); expect(sim.length).toBe(data.length);
     const pick = (rs: Record<string, number>[]) => rs.map(r => Object.fromEntries(cols.map(c => [c, r[c]])));
-    expect(pick(sim)).toEqual(pick(data)); // reference sim table == economy.csv on every sim column
+    expect(pick(sim)).toEqual(pick(data)); // vendored sim table == economy.csv on every sim column
   });
 });
 describe('price formula', () => {
