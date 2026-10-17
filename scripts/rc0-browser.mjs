@@ -557,7 +557,9 @@ sections.hiddentabguard = async () => {
     const frz = await page.evaluate(() => { const g = window.eggfarm; g.save(); return { inactive: g.inactive, hidden: g.isHidden }; });
     const before = await page.evaluate(() => localStorage.getItem('eggfarm.save'));
     await p2.close(); // B's pagehide save lands before A shows; snapshot again so only A's writes count
-    const snap = await page.evaluate(() => localStorage.getItem('eggfarm.save'));
+    // WebKit propagates B's pagehide localStorage write to A asynchronously: wait until A sees a stable value
+    let snap = await page.evaluate(() => localStorage.getItem('eggfarm.save'));
+    for (let i = 0; i < 20; i++) { await page.waitForTimeout(150); const v = await page.evaluate(() => localStorage.getItem('eggfarm.save')); if (v === snap && i >= 3) break; snap = v; }
     await page.evaluate(() => { window.__w = 0; const ss = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (String(k).startsWith('eggfarm.save')) window.__w++; return ss.call(this, k, v); };
       window.__vis = 'visible'; document.dispatchEvent(new Event('visibilitychange')); window.eggfarm.save(); });
     await page.waitForTimeout(400);
