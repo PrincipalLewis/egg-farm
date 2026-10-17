@@ -17,14 +17,21 @@ const repo = new URL('../data/economy.csv', import.meta.url);
 const prodDir = process.env.ECONOMY_PRODUCT_DIR || fileURLToPath(new URL('../../product', import.meta.url));
 const prod = join(prodDir, 'economy.csv');
 if (strict) { // vendored sim side: each SOURCE row <sha> <vendored path> product/<path> must match byte-for-byte (sha256)
-  const vdir = new URL('../vendor/economy-sim/', import.meta.url);
-  const rows = readFileSync(new URL('SOURCE', vdir), 'utf8').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && !l.includes(':'));
+  // ECONOMY_VENDOR_DIR overrides the vendor dir (tests only).
+  const vdir = process.env.ECONOMY_VENDOR_DIR ? new URL(`file://${join(process.env.ECONOMY_VENDOR_DIR, '/')}`) : new URL('../vendor/economy-sim/', import.meta.url);
+  const lines = f => existsSync(new URL(f, vdir)) ? readFileSync(new URL(f, vdir), 'utf8').split('\n').map(l => l.trim()) : null;
+  const src = lines('SOURCE'), sums = lines('SHA256SUMS');
+  if (!src || !sums) { console.warn(`check-economy-copy: ERROR vendor SOURCE or SHA256SUMS not found`); process.exit(1); }
+  // Skip only blank lines, # comments and the `vendored:` date header; every other line is a file row and is checked.
+  const rows = src.filter(l => l && !l.startsWith('#') && !/^vendored:/.test(l));
+  const nsums = sums.filter(l => l && !l.startsWith('#')).length;
   const sha = f => createHash('sha256').update(readFileSync(f)).digest('hex');
   let bad = rows.length === 0; if (bad) console.warn('check-economy-copy: ERROR vendor/economy-sim/SOURCE lists no files');
+  if (rows.length !== nsums) { console.warn(`check-economy-copy: ERROR SOURCE has ${rows.length} file row(s) but SHA256SUMS has ${nsums}`); bad = true; }
   for (const r of rows) {
     const [pin, vend, src] = r.split(/\s+/);
     if (!pin || !vend || !src || !src.startsWith('product/')) { console.warn(`check-economy-copy: ERROR malformed SOURCE row: ${r}`); bad = true; continue; }
-    const v = fileURLToPath(new URL(vend, vdir)), p = join(prodDir, src.slice('product/'.length));
+    const v = join(fileURLToPath(vdir), vend), p = join(prodDir, src.slice('product/'.length));
     if (!existsSync(v)) { console.warn(`check-economy-copy: ERROR vendored ${vend} not found`); bad = true; continue; }
     if (!existsSync(p)) { console.warn(`check-economy-copy: ERROR ${p} not found`); bad = true; continue; }
     const hv = sha(v), hp = sha(p);

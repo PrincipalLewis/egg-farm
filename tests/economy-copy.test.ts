@@ -25,7 +25,7 @@ it('opt-in: match reported, mismatch and missing file only warn (exit 0)', () =>
 // A temp product/ dir mirroring data/economy.csv plus every vendored file listed in vendor/economy-sim/SOURCE.
 const vdir = new URL('../vendor/economy-sim/', import.meta.url);
 const sourceRows = readFileSync(new URL('SOURCE', vdir), 'utf8').split('\n').map(l => l.trim())
-  .filter(l => l && !l.startsWith('#') && !l.includes(':')).map(l => l.split(/\s+/));
+  .filter(l => l && !l.startsWith('#') && !/^vendored:/.test(l)).map(l => l.split(/\s+/));
 const fullProduct = () => {
   const d = mkdtempSync(join(tmpdir(), 'prod-'));
   writeFileSync(join(d, 'economy.csv'), readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
@@ -59,4 +59,25 @@ it('--strict: each vendored sim file in SOURCE must match product/ by sha256 (fa
   // non-strict --product stays warn-only and ignores the sim side
   const drift = fullProduct(); appendFileSync(join(drift, sourceRows[0][2].slice('product/'.length)), 'x');
   expect(run(['--product'], { ECONOMY_PRODUCT_DIR: drift }).code).toBe(0);
+});
+const tamperedVendor = (edit: (source: string, sums: string) => [string, string]) => {
+  const d = mkdtempSync(join(tmpdir(), 'vend-')); cpSync(vdir.pathname, d, { recursive: true });
+  const [a, b] = edit(readFileSync(join(d, 'SOURCE'), 'utf8'), readFileSync(join(d, 'SHA256SUMS'), 'utf8'));
+  writeFileSync(join(d, 'SOURCE'), a); writeFileSync(join(d, 'SHA256SUMS'), b); return d;
+};
+it('--strict: SOURCE rows containing a colon are still checked (only ^vendored: is a header)', () => {
+  const ok = fullProduct();
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: tamperedVendor((a, b) => [a, b]) }).code).toBe(0);
+  // a C:-prefixed row used to be dropped by the header filter and --strict exited 0
+  const colon = tamperedVendor((a, b) => [a.replace(/^(eddf945d\S+)/m, 'C:$1'), b]);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: colon })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR/) });
+  const colonPath = tamperedVendor((a, b) => [a.replace('  sim/economy_sim.py  ', '  C:sim/economy_sim.py  '), b]);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: colonPath })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR .*not found/) });
+});
+it('--strict: SOURCE file-row count must equal SHA256SUMS entry count (fail closed)', () => {
+  const ok = fullProduct();
+  const dropped = tamperedVendor((a, b) => [a.split('\n').filter(l => !l.includes('seller_variance_sim.py')).join('\n'), b]);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: dropped })).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR SOURCE has 3 .*SHA256SUMS has 4/) });
+  const extraSum = tamperedVendor((a, b) => [a, b + '0'.repeat(64) + '  extra.py\n']);
+  expect(run(['--strict'], { ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: extraSum })).toMatchObject({ code: 1, out: expect.stringMatching(/SHA256SUMS has 5/) });
 });

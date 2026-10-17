@@ -43,3 +43,8 @@
 - Done: check-economy-copy `--strict` now implies `--product` (test added); `--strict` also sha256-compares each vendored file in vendor/economy-sim/SOURCE with product/ and the pin, failing closed on drift/missing (tests added); slow-test regeneration note now points at vendor/economy-sim/sim. Fixture `source` label left unchanged (no regeneration). ci-gates.md updated.
 - Gates: tsc OK; vitest 476/476 (maxForks=2); test:slow 11/11; sync-economy --check OK.
 - Next: CCR/QA re-check of this SHA; watch CI for the parallel-load flake CCR noted.
+
+## 2026-10-17 03:00 Senior Software Architect — PR #24 CCR minor on a8f8611
+- Done: check-economy-copy SOURCE parsing skips only blank/#/`^vendored:` lines (colon-containing rows are now checked); --strict fails closed unless SOURCE file-row count == SHA256SUMS entry count; vendored paths resolved with path.join (a `C:` path no longer crashes URL parsing); ECONOMY_VENDOR_DIR test override; tamper tests for colon rows and count mismatch.
+- Gates: tsc OK; vitest 478/478 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA.
