@@ -35,9 +35,9 @@ export function probeHeadroom(kv: KV, bytes: number): boolean {
   try { kv.setItem(HEADROOM_PROBE_KEY, 'x'.repeat(Math.max(0, Math.ceil(bytes)))); return true; } catch { return false; }
   finally { try { kv.removeItem?.(HEADROOM_PROBE_KEY); } catch { /* best effort */ } }
 }
-/** M4-19 rank of a stored copy: [version, committed (tracksV7 + v6BackupId) ? 1 : 0]; savedAt is the caller's tie-break. */
 /** HoE correction: a main save's write sequence; missing / invalid reads as 0. */
 export const saveSeqOf = (raw: unknown): number => { if (typeof raw !== 'string') return 0; try { const n = JSON.parse(raw)?.saveSeq; return Number.isSafeInteger(n) && n > 0 ? n : 0; } catch { return 0; } };
+/** M4-19 rank of a stored copy: [version, committed (tracksV7 + v6BackupId) ? 1 : 0, saveSeq]; savedAt is the caller's tie-break. */
 export function rankOf(raw: unknown): [number, number, number] {
   if (typeof raw !== 'string') return [-1, 0, 0]; let d: any; try { d = JSON.parse(raw); } catch { return [-1, 0, 0]; }
   const v = Number.isInteger(d?.version) ? d.version : -1, st = d?.state;
@@ -140,24 +140,29 @@ export function serialize(state: GameState, now: number, saveSeq?: number): stri
   const st = JSON.stringify(state);
   return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
 }
-/**
- * Write the save. With `rotate`, the current main save is first copied into `.bak`, but only if it is itself valid
- * (QA case 2: a fresh-start save never rotates until the caller allows it, and a bad main never overwrites `.bak`).
- */
-/** HoE flag-off rule: with M4 off, an unmarked (pre-M4) farm is saved in main's shape (no M4 track fields). A marked
- *  (tracksV7) save keeps them, so a flag-off build never drops a migrated farm's tracks (downgrade). */
 /** Balances of an M4 build whose session runs with the switch off until the migration commits (game.ts tracksOff). */
 const M4_BUILD_OFF = new WeakSet<object>();
 export const markM4BuildOff = <T extends object>(b: T): T => { M4_BUILD_OFF.add(b); return b; };
 /** ADR M4-19 saveSeq rides only on M4-build saves (flag on, an M4 build with the switch off pre-migration, or a marked tracksV7
  *  farm); a flag-off build's pre-M4 saves keep main's bytes (HoE flag-off rule, golden f90d1678 storage pins). */
-export const m4SaveSeq = (state: GameState, b: Balance | undefined, prev: unknown): number | undefined =>
-  (b && (m4On(b) || M4_BUILD_OFF.has(b))) || (state as { tracksV7?: unknown }).tracksV7 ? saveSeqOf(prev) + 1 : undefined;
+/** CCR B1 (#12 hadSeq rule): once the previous copy carries a saveSeq, every later save carries it forward (+1) on any
+ *  build, so a flag-off save never ranks below an older M4-build-off copy (the IndexedDB mirror would refuse it and
+ *  reconcile would restore the stale copy). A previous copy without saveSeq keeps main's bytes. */
+export const m4SaveSeq = (state: GameState, b: Balance | undefined, prev: unknown): number | undefined => {
+  const hadSeq = saveSeqOf(prev) > 0;
+  return hadSeq || (b && (m4On(b) || M4_BUILD_OFF.has(b))) || (state as { tracksV7?: unknown }).tracksV7 ? saveSeqOf(prev) + 1 : undefined;
+};
+/** HoE flag-off rule: with M4 off, an unmarked (pre-M4) farm is saved in main's shape (no M4 track fields). A marked
+ *  (tracksV7) save keeps them, so a flag-off build never drops a migrated farm's tracks (downgrade). */
 export function flagOffShape(state: GameState, b: Balance): GameState {
   if (m4On(b) || (state as { tracksV7?: unknown }).tracksV7) return state;
   const { hensLevel, eggValueLevel, celebratedMilestones, ...v6 } = state; void hensLevel; void eggValueLevel; void celebratedMilestones;
   return v6 as GameState;
 }
+/**
+ * Write the save. With `rotate`, the current main save is first copied into `.bak`, but only if it is itself valid
+ * (QA case 2: a fresh-start save never rotates until the caller allows it, and a bad main never overwrites `.bak`).
+ */
 export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
   if (b) state = flagOffShape(state, b);
   let prev: string | null = null; try { prev = kv.getItem(SAVE_KEY); } catch { /* blocked: the write below throws */ }
