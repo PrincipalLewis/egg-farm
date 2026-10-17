@@ -1022,7 +1022,7 @@ sections.rc2minors = async () => {
       await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 10, workers: { market_hand: { energy: 100, cdS: 0 } } }; });
       await page.waitForFunction(() => !window.eggfarm.state.customers.some(c => c.id === 779), null, { timeout: 15000 }).catch(() => {});
       await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: {} }; }); await page.waitForTimeout(600);
-      await page.evaluate(() => { window.__st = []; const t0 = performance.now(), loop = () => { window.__st.push(!!document.querySelector('#mRows .order.sold, .order[data-id="779"]')); if (performance.now() - t0 < 400) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+      await page.evaluate(() => { window.__st = []; const t0 = performance.now(), loop = () => { window.__st.push(!!document.querySelector('.order.sold, .order .btn.sell.sold, .order[data-id="779"] .btn.sell[aria-disabled]')); /* a plain leave fade of 779 is the old drop path; only a stale Sold state is the bug */ if (performance.now() - t0 < 400) requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
       await page.evaluate(() => document.querySelector('[data-nav=market]').click()); await page.waitForTimeout(450);
       const st = await page.evaluate(() => window.__st), served = await page.evaluate(() => !window.eggfarm.state.customers.some(c => c.id === 779));
       ok(`M-Sold-freeze hidden-sheet Market Hand sale: no stale "Sold!" row on open (${tag})`, closed && served && st.length > 3 && st.every(x => !x), JSON.stringify({ closed, served, n: st.length, staleFrames: st.filter(Boolean).length }));
