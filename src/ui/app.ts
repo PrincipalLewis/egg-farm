@@ -128,8 +128,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
    *  so nothing ever flies from the page origin (QA bd0dc66: coin flyers from the closed Market's Sell all started at 0,0). */
   const safeInsets = () => { const cs = getComputedStyle(document.documentElement); const n = (v: string) => parseFloat(cs.getPropertyValue(v)) || 0; return { t: n('--sa-t'), r: n('--sa-r'), b: n('--sa-b'), l: n('--sa-l') }; };
   const center = (el: Element) => { let r = el.getBoundingClientRect(); if (!r.width && !r.height) r = scene.getBoundingClientRect(); return clampToSafe({ x: r.left + r.width / 2, y: r.top + r.height / 2 }, innerWidth, innerHeight, safeInsets()); };
-  const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void) => {
-    const a = center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
+  /** startAbove: start the flight just above `from`'s top edge (it then only travels up/away), e.g. so coins never cross a 'Sold!' chip. */
+  const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void, startAbove = false) => {
+    const a = startAbove ? (() => { const r = from.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top - size / 2 - 2 }; })() : center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
     const dx = (Math.random() - .5) * 30;
     el.animate([{ transform: `translate(${a.x - size / 2 + dx}px,${a.y - size / 2}px) scale(.6)` }, { transform: `translate(${(a.x + z.x) / 2}px,${Math.min(a.y, z.y) - 60}px) scale(1)`, offset: .45 },
       { transform: `translate(${z.x - size / 2}px,${z.y - size / 2}px) scale(.8)` }], { duration: b.feel.egg_flight_ms, delay: i * 40, easing: 'ease-in', fill: 'both' })
@@ -364,7 +365,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         dwell.sold(e.id, e.value); lastSale.set(e.id, e.value);
         sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
-        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinIcon, i, 20, i === 0 ? () => pulse(coinPill) : undefined);
+        const onRow = !!(src as HTMLElement).closest?.('.order'); /* rc2 designer minor: from an order row the burst starts at the chip's top edge and travels up, never across 'Sold! +$X' */
+        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinIcon, i, 20, i === 0 ? () => pulse(coinPill) : undefined, onRow);
         else pulse(coinPill);
         floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
       }
