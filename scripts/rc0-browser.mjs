@@ -1044,7 +1044,7 @@ sections.rc2minors2 = async () => {
     const o = await page.evaluate(() => { const r = document.querySelector('.order[data-id="501"]'); return { e: r?.querySelector('.l1')?.textContent ?? '', aria: r?.querySelector('.bar')?.getAttribute('aria-label') }; });
     ok(`M-Order-zero after the first egg reads "1/13" (${w})`, /^1\/13/.test(o.e) && o.aria === 'Order 1 of 13 eggs', JSON.stringify(o));
     // M-Toast-layer: Welcome-back open, then a 'Coop upgraded!' toast fires (the reload case)
-    if (w < 960) { await page.locator('#p-market .close, [data-nav=farm]').first().click(); await page.waitForTimeout(250); }
+    if (w < 960) { await page.evaluate(() => (document.querySelector('#p-market .close') ?? document.querySelector('[data-nav=farm]')).click()); await page.waitForTimeout(250); }
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2685, customers: [] }; window.eggfarmQaWelcome(); }); await page.waitForTimeout(200);
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 4, coinsCents: 1e9 }; g.dispatch({ type: 'buyFarm' }); });
     await page.waitForTimeout(350);
