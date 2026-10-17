@@ -72,7 +72,10 @@ export class IdbMirror {
   onNewer: ((v: number) => void) | null = null;
   private seeNewer(raw: unknown) { const v = typeof raw === 'string' ? newerSaveVersion(raw) : null; if (v !== null && this.newer === null) { this.newer = v; this.onNewer?.(v); } return v; }
   /** Fire-and-forget durable write; transactions on one store commit in order, so the last save wins. Never throws.
-   *  BUG-2: get + check + put run in ONE readwrite transaction, so a newer-build copy is never overwritten (no put). */
+   *  BUG-2: get + check + put run in ONE readwrite transaction, so a newer-build copy is never overwritten (no put).
+   *  CCR m3 (ADR M4-19, accepted): if a main (pre-saveSeq) session's every mirror write fails, IndexedDB keeps this build's
+   *  older copy with seq N while localStorage holds main's newer unsequenced save; this build's next boot then prefers the
+   *  stale IDB copy. Needs a total IDB write failure across a whole session plus a downgrade/upgrade; unlikely, accepted. */
   write(raw: string): Promise<void> {
     if (this.newer !== null) return Promise.resolve();
     try {
