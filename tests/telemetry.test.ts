@@ -5,6 +5,7 @@ import { Game } from '../src/game';
 import { save, SAVE_KEY } from '../src/save/save';
 import { initialState, eggPriceCents } from '../src/sim/state';
 import { mem, expOffline } from './helpers';
+const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 const clock = () => { const c = { t: 1_000_000 }; return { c, now: () => c.t }; };
 describe('telemetry', () => {
   it('events carry ts + sessionMs', () => {
@@ -32,8 +33,8 @@ describe('telemetry', () => {
     const j = JSON.parse(t.exportJSON()); expect(j.events.map((e: any) => e.type)).toEqual(['onboarding_step', 'onboarding_skip']);
   });
   it('game emits session, sell, customer, upgrade, offline_grant, coop_full events', () => {
-    const kv = mem(); save(kv, { ...initialState(b, 3), coinsCents: 1000 }, 0);
-    const { c, now } = clock(); c.t = 120_000; const g = new Game(b, kv, now);
+    const kv = mem(); save(kv, { ...initialState(b, 3), coinsCents: 1000 }, T0);
+    const { c, now } = clock(); c.t = T0 + 120_000; const g = new Game(b, kv, now);
     g.dispatch({ type: 'dismissOffline' }); g.state = { ...g.state, basket: Math.max(g.state.basket, 60) };
     g.dispatch({ type: 'buyCollection' });
     c.t += 10_000; g.frame(); // first customer

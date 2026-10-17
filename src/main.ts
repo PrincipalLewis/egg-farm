@@ -1,10 +1,12 @@
 import './ui/styles.css';
 import { balance } from './config/balance';
 import { Game } from './game';
+import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
 import { startAutosave } from './save/autosave';
-import { bus, guardTabs } from './save/tab-guard';
-import { readOnlyKV } from './save/save';
+import { TabLease, channel } from './save/tab-lease';
+import { IdbMirror, reconcile } from './save/idb-mirror';
 import { mountApp } from './ui/app';
+import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
@@ -37,35 +39,90 @@ function showError() {
   const b = document.createElement('button'); b.className = 'btn secondary'; b.textContent = "Couldn't load — Retry"; b.onclick = () => location.reload(); start.append(b);
 }
 /** AC14c/AC14d: one persistent, polite notice (shown once). */
+let heldNotice: string | null = null, holdNotices = false; // v2.2 fix 2: no bottom toast while the recovery dialog is open
+document.addEventListener(RECOVERY_CLOSED, () => { holdNotices = false; if (heldNotice) { const t = heldNotice; heldNotice = null; saveNotice(t); } });
 function saveNotice(text: string) {
+  if (holdNotices) { heldNotice ??= text; return; }
   if (document.querySelector('.save-warn')) return;
   const n = document.createElement('div'); n.className = 'save-warn'; n.setAttribute('role', 'status'); n.textContent = text; document.body.append(n);
 }
-export const TWO_TAB_TEXT = "Egg Farm is open in another tab. Progress in this tab won't be saved.";
 export const NO_STORAGE_TEXT = "Your browser isn't letting us save right now (low space or private mode), so progress won't be saved.";
-/** AC14d: ask other tabs before the Game is built, so a second tab never writes the save (even the load-time save). */
-async function probeTabs(): Promise<{ second: boolean }> {
-  const t = guardTabs(bus(), () => {});
-  await new Promise(r => setTimeout(r, 200));
-  return { second: t.second };
+/** Single-tab guard: this tab lost the save. Sim/saving already stopped (Game.deactivate); freeze render, mute, show notice. */
+let frozen = false;
+function otherTabModal() {
+  frozen = true; audio.mute();
+  showTabGuardDialog(f => `${import.meta.env.BASE_URL}assets/${f}`, [root], () => {
+    try { sessionStorage.setItem('eggfarm.playHere', '1'); } catch { /* ignore */ }
+    setTimeout(() => location.reload(), 0); // let "Loading…" paint first
+  });
+}
+/** Refused newer-build save: a read-only Game (telemetry only, mirror null, no save on load) and the session-long layer.
+ *  No lease, UI, sim, autosave or pagehide save. Nit n1: there is intentionally no Game handle or lease callback here. */
+function refuseNewer(version: number, idbRaw: string | null) {
+  try { new Game(balance, localStorage, () => Date.now(), undefined, VERSION, null, idbRaw); } catch { /* storage blocked: still refuse */ }
+  showNewerSaveDialog(a => `${import.meta.env.BASE_URL}assets/${a}`, version, () => location.reload());
 }
 async function boot() {
-  const tabs = await probeTabs();
+  const asset = (a: string) => `${import.meta.env.BASE_URL}assets/${a}`;
+  // M4A-31(b)/(f)6 + review M1: the newer-save check runs FIRST, before the flush request, the lease claim, reconcile or
+  // any Game write. It covers localStorage main, .bak and the IndexedDB copy. A refused tab never joins the single-tab
+  // guard (so a live tab is never frozen or made to save by it) and writes no save key anywhere.
+  const mirror = await IdbMirror.open();
+  let idbRaw: string | null = null; if (mirror) idbRaw = await mirror.read();
+  let preNewer: number | null = null; try { preNewer = newerStoredVersion(localStorage, idbRaw); } catch { /* localStorage blocked: Game reports it */ }
+  if (preNewer !== null) { refuseNewer(preNewer, idbRaw); return; }
+  // Single-tab guard: this (newest) tab claims the save BEFORE reading it, so an older tab's next save is blocked and
+  // offline earnings are granted only by the tab that owns the save.
+  let playHere = false; try { playHere = sessionStorage.getItem('eggfarm.playHere') === '1'; sessionStorage.removeItem('eggfarm.playHere'); } catch { /* ignore */ }
+  let gRef: Game | null = null;
+  const lease = new TabLease(localStorage, channel(), () => gRef?.deactivate());
+  await lease.requestFlush(300); // the current owner saves its latest state and holds
+  // D2: re-read IndexedDB BEFORE the claim (the owner may just have flushed into it; its write transaction was created
+  // before this read, so the read sees it). Review minor main.ts:79-80: re-check for a newer save here too, so a newer
+  // build that saved during the flush is refused BEFORE we claim, and the live tab never flashes 'Game open in another tab'.
+  // From here to `new Game` there is no await, so nothing else can save in between.
+  if (mirror) idbRaw = (await mirror.read()) ?? idbRaw; // Reviewer N3: a failed/timed-out re-read keeps the first read
+  let preNewer2: number | null = null; try { preNewer2 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
+  if (preNewer2 !== null) { lease.stop(); refuseNewer(preNewer2, idbRaw); return; }
+  const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  const g = new Game(balance, tabs.second ? readOnlyKV(localStorage) : localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION);
-  (window as any).eggfarmExportTelemetry = () => g.telemetry.exportJSON();
-  if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (QA-RC1UI-2)
-  if (tabs.second) { g.readOnly = true; saveNotice(TWO_TAB_TEXT); }
+  let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
+  if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
+  if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
+  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw);
+  if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
+    lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
+  }
+  holdNotices = !!(g.recoveryOutcome && g.recovery) || !!lease.storageBlocked;
+  // v4 (QA f6): localStorage refused the lease write. This lone tab still owns the save (never 'Game open in another tab');
+  // report it as the storage-full outcome (art-ux/save-recovery-dialog.md v2.1 'storage') plus the no-storage notice.
+  if (lease.storageBlocked) { if (g.recoveryOutcome === null) { g.recoveryOutcome = 'storage'; g.recovery = storageBlockedRecovery(localStorage); g.recovery.live = () => serialize(g.state, Date.now()); } saveNotice(NO_STORAGE_TEXT); }
+  gRef = g; g.canWrite = () => lease.owns(); lease.onFlush = () => g.flushForHandover(); g.onInactive = otherTabModal;
+  // QA BUG-2: a newer build saved while this tab was live (found right before a write). Game already stopped all writes
+  // and the sim; release the lease, stop autosave, freeze render and show the session-long .newer-save layer.
+  let stopAutosave: (() => void) | null = null;
+  g.onNewerSave = v => { lease.release(); lease.stop(); stopAutosave?.(); frozen = true; audio.mute(); showNewerSaveDialog(asset, v, () => location.reload()); };
+  if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
+  if (restored) g.telemetry.track('save_restore', { source: 'idb' });
+  // The only release global (allowlist in check-release-build): read-only, no install_id. See Telemetry.snapshotJSON.
+  (window as any).eggfarmExportTelemetry = () => g.telemetry.snapshotJSON();
+  if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)
   g.onStorageFail = () => saveNotice(NO_STORAGE_TEXT); if (g.storageFailed) saveNotice(NO_STORAGE_TEXT);
   const ui = mountApp(root, g, balance, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
   // CEO ruling: debug globals stay out of release. ui.rates() remains on the mountApp() return for m3/rc1-ui.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmUi = ui; // dev/QA builds only (__IOS_FLAG__), checked by check-release-build
-  if (new URLSearchParams(location.search).get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
-  { const q = new URLSearchParams(location.search); if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q)); }
+  // D3/D4 (rc1): ?debug=1 cheat panel and ?perf=1 SM-9 sampler exist only in QA/dev builds. Same build-time flag as the
+  // eggfarmOnb/eggfarmQaRecovery hooks (__IOS_FLAG__ = mode !== 'production'): release dead-code-eliminates both chunks.
+  if (IOS_FLAG_ENABLED) {
+    const q = new URLSearchParams(location.search);
+    if (q.get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, balance));
+    if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q));
+  }
   // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).
-  new RenderPump(() => { g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
-  window.addEventListener('pagehide', () => g.endSession());
-  startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
+  // Tab guard: once frozen (older tab) neither the sim nor the UI advances.
+  new RenderPump(() => { if (frozen) return; g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
+  window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
+  stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
 }
 preload().then(() => {
   start.querySelector('.bar')?.remove();

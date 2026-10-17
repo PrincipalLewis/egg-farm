@@ -30,8 +30,8 @@ describe('validate', () => {
   });
 });
 describe('loadSafe', () => {
-  it('no save -> new game, no recovery', () => { expect(loadSafe(kvm(), b)).toEqual({ file: null, recovery: null }); });
-  for (const f of Object.keys(reasons)) it(`${f}: no backup -> case F, raw preserved`, () => {
+  it('no save -> new game, no recovery', () => { expect(loadSafe(kvm(), b)).toEqual({ file: null, recovery: null, outcome: null }); });
+  for (const f of Object.keys(reasons).filter(f => f !== 'corrupt-version-99.json' /* M4-safety: newer saves are refused untouched, see newer-save.test.ts */)) it(`${f}: no backup -> case F, raw preserved`, () => {
     const k = kvm(); k.setItem(SAVE_KEY, fx(f)); k.setItem('eggfarm.install_id', 'iid');
     const r = loadSafe(k, b, 5000);
     expect(r.file).toBeNull(); expect(r.recovery).toMatchObject({ case: 'F', reason: reasons[f], had_backup: false, restored_from_backup: false, copy_failed: false });
@@ -95,12 +95,12 @@ describe('Game + rotation', () => {
   it('save() writes a checksummed save that validates', () => { const k = kvm(); save(k, initialState(b), 3); expect(JSON.parse(k.getItem(SAVE_KEY)!).sum).toMatch(/^[0-9a-f]{8}$/); });
 });
 describe('recovery dialog copy', () => {
-  it('three cases, no jargon', () => {
-    const all = [recoveryCopy({ case: 'R', copy_failed: false }), recoveryCopy({ case: 'F', copy_failed: false }), recoveryCopy({ case: 'Q', copy_failed: true }), recoveryCopy({ case: 'R', copy_failed: true })];
+  it('three cases, no jargon (v2.1 strings)', () => {
+    const all = [recoveryCopy({ case: 'R', copy_failed: false, restored_from_backup: true }), recoveryCopy({ case: 'F', copy_failed: false, restored_from_backup: false }), recoveryCopy({ case: 'Q', copy_failed: true, restored_from_backup: false }), recoveryCopy({ case: 'R', copy_failed: true, restored_from_backup: true })].map(c => c!);
     expect(all.map(c => c.title)).toEqual(['Welcome back!', 'A fresh start', 'A fresh start', 'Welcome back!']);
     expect(all.map(c => c.button)).toEqual(['Keep farming', 'Start farming', 'Start farming', 'Keep farming']);
-    for (const c of all) expect(`${c.title} ${c.body} ${c.note}`).not.toMatch(/corrupt|checksum|parse|quota/i);
-    expect(all[2].note).toBe("Export it now if you'd like to keep it.");
+    for (const c of all) expect(`${c.title} ${c.body}`).not.toMatch(/corrupt|error|checksum|parse|quota/i);
+    expect(all[2].body).toBe("We couldn't open your farm. Export it now to keep a copy.");
   });
   it('export file name', () => { expect(exportName(new Date(2026, 9, 15, 9, 5))).toBe('eggfarm-old-save-20261015-0905.json'); });
 });

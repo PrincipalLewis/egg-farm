@@ -11,3 +11,31 @@ jobs:
       - name: economy.csv copy matches product/ (skipped when product/ is absent)
         run: npm run check-economy-copy
       - run: npm test
+  slow:
+    # Slow suites (*.slow.test.ts, skipped by `npm test`): 100-seed seller-variance TS-vs-Python parity (PR #19). Always runs.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run test:slow
+  release-globals:
+    # Required (QA rc1): release window globals must be exactly eggfarmExportTelemetry, in every engine.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - name: Install browser (${{ matrix.engine }})
+        run: |
+          if [ "${{ matrix.engine }}" = chromium ]; then test -x /usr/bin/google-chrome; else npx playwright-core install --with-deps ${{ matrix.engine }}; fi
+      - name: Release build (includes check-release-build)
+        run: npm run build
+      - name: Release globals allowlist (${{ matrix.engine }})
+        run: npm run check-globals -- ${{ matrix.engine }}

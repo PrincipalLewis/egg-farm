@@ -45,7 +45,7 @@ const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void
 export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null } = { newGame: false }) {
   let stored: any = {}; try { stored = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') ?? {}; } catch { /* bad flags: defaults */ }
   // PT1-4: a fresh-start fallback (AC14b F/Q) is a new farm: drop FTUE / Workers-tip progress flags, keep prefs.
-  if (opts.recovery && !opts.recovery.restored_from_backup) stored = keepPrefsOnly(stored);
+  if (opts.recovery && !opts.recovery.restored_from_backup && opts.newGame) stored = keepPrefsOnly(stored);
   const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...stored };
   const saveFlags = () => { try { localStorage.setItem(UI_KEY, JSON.stringify(flags)); } catch { /* full */ } };
   flags.sessions = (flags.sessions ?? 0) + 1; // AC14g session_count (one per page load / Tap to start)
@@ -266,7 +266,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (t.id === 'sOldSave') { const raw = oldSaveForSession(); if (raw) void exportOldSave(raw, exportName(new Date())).then(ok => { $('#sOldMsg').textContent = ok ? OK_MSG : FAIL_MSG; }); return; }
     if (t.id === 'sExport') { void exportLog(g.telemetry.exportJSON(), `eggfarm-log-${g.installId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`).then(m => { const el = $('#sExportMsg'); if (el) el.textContent = m; }); return; }
     if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
-    if (t.id === 'cReset') { g.resetting = true; g.telemetry.track('save_reset'); g.telemetry.flush(true); resetProgress(localStorage); location.reload(); }
+    if (t.id === 'cReset') { g.resetting = true; g.telemetry.track('save_reset'); g.telemetry.flush(true); resetProgress(localStorage); void g.clearMirror().then(() => location.reload()); }
   });
   modal.addEventListener('change', e => {
     const t = e.target as HTMLInputElement;
@@ -698,7 +698,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       : open === 'upgrades' || docked.matches ? 'Tap <b>Buy</b>.' : 'Spend coins to collect more eggs per tap.', A('ui-pointer-hand.svg'), A('ui-pointer-hand-down.svg'));
   }
   };
-  let recoveryOpen = !!opts.recovery;
+  let recoveryOpen = !!(g.recoveryOutcome && opts.recovery);
   const rotate = mountRotatePrompt($('#app') as HTMLElement, A('icon-rotate-phone.svg'), () => recoveryOpen, () => queueMicrotask(() => renderIosTip()));
   // ---------- AC14g iOS Home Screen tip ----------
   let iosTip: HTMLElement | null = null, iosTipLive = false; // live = shown this session and not dismissed
@@ -722,7 +722,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
-  if (opts.recovery) {
+  if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case })).then(() => {

@@ -5,6 +5,7 @@ import { startAutosave } from '../src/save/autosave';
 import { initialState, collectionCost, farmCost } from '../src/sim/state';
 import { Game } from '../src/game';
 import { mem, expOffline } from './helpers';
+const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 describe('save/load + migrations', () => {
   it('AC8 round-trips coins, coop, basket, levels', () => {
     const kv = mem(); const s = { ...initialState(b), coinsCents: 4250, coop: 17.3, basket: 9, collectionLevel: 2, farmLevel: 4 };
@@ -50,10 +51,10 @@ describe('autosave', () => {
     g.dispatch({ type: 'buyFarm' }); expect(saves()).toBe(2); expect(load(kv, b)!.state.farmLevel).toBe(1);
   });
   it('offline modal not granted twice for one absence', () => {
-    const kv = mem(); save(kv, initialState(b), 0);
-    const g1 = new Game(b, kv, () => 600_000); expect(g1.state.pendingOfflineEggs).toBe(expOffline(600));
+    const kv = mem(); save(kv, initialState(b), T0);
+    const g1 = new Game(b, kv, () => T0 + 600_000); expect(g1.state.pendingOfflineEggs).toBe(expOffline(600));
     g1.dispatch({ type: 'collectOffline' });
-    const g2 = new Game(b, kv, () => 600_010); expect(g2.state.pendingOfflineEggs).toBe(0); expect(g2.state.basket).toBe(expOffline(600));
+    const g2 = new Game(b, kv, () => T0 + 600_010); expect(g2.state.pendingOfflineEggs).toBe(0); expect(g2.state.basket).toBe(expOffline(600));
   });
 });
 describe('v4 celebratedTier', () => {
