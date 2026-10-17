@@ -1107,6 +1107,14 @@ sections.rc2minors2 = async () => {
       ok(`§9 order fit '${want}' one line, no ellipsis, not clipped${w <= 375 ? ', <= 170px' : ''} (${w})`, !!m && m.t === want && m.lines === 1 && !m.ell && m.sw <= m.cw + 0.5 && (w > 375 || m.w <= 170) && (w <= 375 || d !== 13 || m.t === full), JSON.stringify(m));
       if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-wants-${txt.replace(/ · \$/, '-').replace(/ /g, '')}-${nm(w)}.png` });
     }
+    { // §9.1 (designer N2): '1.23M/9.99M · $20.8M' never clipped at 360; drops '/{want}' then the count, value intact, aria full
+      await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 0, collectionLevel: 9, basket: 0, workers: {}, customers: [{ id: 503, demand: 9.99e6, filled: 1.23e6, waitedS: 0 }] }; }); await page.waitForTimeout(400);
+      const m = await page.evaluate(() => { const r = document.querySelector('.order[data-id="503"]'), l1 = r?.querySelector('.l1'), v = r?.querySelector('.v'); if (!l1) return null;
+        return { t: l1.textContent.replace(/\u00a0/g, ' '), v: v.textContent.replace(/\u00a0/g, ' '), cw: l1.clientWidth, sw: l1.scrollWidth, vsw: v.scrollWidth, vcw: v.clientWidth, aria: r.querySelector('.bar')?.getAttribute('aria-label') }; });
+      const okT = m && ['1.23M/9.99M eggs · $20.8M', '1.23M/9.99M · $20.8M', '1.23M · $20.8M', '$20.8M'].includes(m.t);
+      ok(`§9.1 order fit '1.23M/9.99M · $20.8M' not clipped, value intact, fallback order, aria full (${w})`, !!okT && m.sw <= m.cw + 0.5 && m.vsw <= m.vcw + 0.5 && /\$20\.8M$/.test(m.v) && m.aria === 'Order 1230000 of 9990000 eggs' && (w > 375 || !/eggs/.test(m.t)), JSON.stringify(m));
+      if (shot && w <= 375) await page.screenshot({ path: `${MS}/order-fit-1.23M-9.99M-20.8M-${nm(w)}.png` });
+    }
     // M-Toast-layer: Welcome-back open, then a 'Coop upgraded!' toast fires (the reload case)
     if (w < 960) { await page.evaluate(() => (document.querySelector('#p-market .close') ?? document.querySelector('[data-nav=farm]')).click()); await page.waitForTimeout(250); }
     await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2685, customers: [] }; window.eggfarmQaWelcome(); }); await page.waitForTimeout(200);

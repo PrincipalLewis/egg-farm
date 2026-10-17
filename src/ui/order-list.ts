@@ -31,7 +31,7 @@ export class OrderList {
     const cls = `order ${v.state}`; if (el.className.replace(/ (enter|leaving)/g, '') !== cls) el.className = cls + (el.classList.contains('enter') ? ' enter' : '');
     const [e, val] = v.line.split(' · ');
     const E = el.querySelector('.e')!, V = el.querySelector('.v')!, bar = el.querySelector('.bar') as HTMLElement, fillI = bar.firstElementChild as HTMLElement, btn = el.querySelector('button')!;
-    if (V.textContent !== `\u00a0· ${val}`) V.textContent = `\u00a0· ${val}`;
+    const vText = (eggs: string) => eggs ? `\u00a0· ${val}` : val; // §9.1: value alone when the count is dropped
     // fit runs after the button label/state below (Need is wider than Sell): see end of fill()
     const w = `${(v.want ? (v.have / v.want) * 100 : 0).toFixed(2)}%`; if (fillI.style.width !== w) fillI.style.width = w;
     if (bar.getAttribute('aria-valuenow') !== String(v.have) || bar.getAttribute('aria-label') !== v.aria) { bar.setAttribute('aria-valuenow', String(v.have)); bar.setAttribute('aria-valuemax', String(v.want)); bar.setAttribute('aria-label', v.aria); }
@@ -40,11 +40,11 @@ export class OrderList {
     { // §2.4 eggs fit, cached per (eggs text, value text, button label, width): at most one measure pass per change, no per-frame rewrites (review #3)
       const l1 = E.parentElement as HTMLElement, narrow = typeof matchMedia === 'function' && matchMedia('(max-width:375px)').matches, key = `${e}|${val}|${v.button}|${l1.clientWidth}|${narrow}`; // v1.1: always drop at <=375
       if (el.dataset.fitKey !== key || el.dataset.fitE == null) {
-        const fitsL1 = (t: string) => { if (E.textContent !== t) E.textContent = t; return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; };
+        const fitsL1 = (t: string) => { if (E.textContent !== t) E.textContent = t; if (V.textContent !== vText(t)) V.textContent = vText(t); return !l1.clientWidth || l1.scrollWidth <= l1.clientWidth + 0.5 && (V as HTMLElement).scrollWidth <= (V as HTMLElement).clientWidth + 0.5; };
         const fe = fitOrderText(e, narrow, fitsL1); // §9: 'Wants 13 · $15.34' at <=375
         el.dataset.fitKey = key; el.dataset.fitE = fe;
       }
-      if (E.textContent !== el.dataset.fitE) E.textContent = el.dataset.fitE!;
+      if (E.textContent !== el.dataset.fitE) E.textContent = el.dataset.fitE!; if (V.textContent !== vText(el.dataset.fitE!)) V.textContent = vText(el.dataset.fitE!);
     }
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
   }

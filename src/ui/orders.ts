@@ -28,8 +28,12 @@ export function orderView(c: Customer, basket: number, priceCents: number): Orde
 export const fitOrderEggs = (e: string, fits: (s: string) => boolean): string => fits(e) ? e : e.replace(/ eggs$/, '');
 /** §9 decision used by OrderList: <=375 always drops ' eggs'; wider keeps it only when it fits; 'Wants N' that still doesn't fit becomes '0/N'. The value is never cut (review dbc6948 #3). */
 export const fitOrderText = (e: string, narrow: boolean, fits: (s: string) => boolean): string => {
-  const t = narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, fits); const w = /^Wants (\S+)$/.exec(t);
-  return w && !fits(t) ? `0/${w[1]}` : t; // last resort below the §9 170px bar (320 l1 = 124px; 'Wants 3.98M · $9.94M' at 360): compact '0/N' like '4/17', value never cut
+  const t = narrow ? e.replace(/ eggs$/, '') : fitOrderEggs(e, fits);
+  const w = /^Wants (\S+)$/.exec(t), r = /^(\S+)\/\S+$/.exec(t);
+  // §9.1 (Head of Art & UX 09:26): value never cut; drop '/{want}' ('1.23M · $20.8M'), then the count ('$20.8M'); 'Wants N' -> '0/N' -> ''. '' = value only.
+  const chain = [t, ...(w ? [`0/${w[1]}`] : r ? [r[1]] : []), ''];
+  for (const c of chain.slice(0, -1)) if (fits(c)) return c;
+  return '';
 };
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
 export const visibleOrders = (viewportH: number, docked: boolean, n: number) =>
