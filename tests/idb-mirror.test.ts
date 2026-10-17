@@ -1,5 +1,5 @@
 // D2 (rc1): IndexedDB mirror of the save, durability 'strict', newest valid copy wins on boot.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
 import { SAVE_KEY, serialize, CORRUPT_INDEX_KEY, load } from '../src/save/save';
@@ -97,8 +97,10 @@ describe('D2 IndexedDB mirror', () => {
     full = true; g.save(); expect(writes).toHaveLength(2); expect(JSON.parse(writes[1]).savedAt).toBe(5); expect(g.storageFailed).toBe(true);
   });
   it('Reset save clears the mirror (awaited) so a reload does not restore the old save', async () => {
-    const f = fakeIdb(); const m = (await IdbMirror.open(f.factory))!; const g = new Game(b, mem(), () => 5, 1, 'dev', m); await flush();
-    expect(f.data.size).toBe(1); await g.clearMirror(); expect(f.data.size).toBe(0); expect(await m.read()).toBeNull();
+    const f = fakeIdb(); const m = (await IdbMirror.open(f.factory))!; const g = new Game(b, mem(), () => 5, 1, 'dev', m);
+    // Flake root cause: the boot write is get-hop then put-hop (2 chained setTimeout(0)); a fixed 5 ms flush() can expire
+    // before the put hop is even scheduled on a loaded event loop. Wait for the put itself, not for wall time.
+    await vi.waitFor(() => expect(f.data.size).toBe(1), { timeout: 5000, interval: 1 }); await g.clearMirror(); expect(f.data.size).toBe(0); expect(await m.read()).toBeNull();
     await expect(new Game(b, mem(), () => 5).clearMirror()).resolves.toBeUndefined();
   });
   it('store name is stable (save compatibility across builds)', () => { expect(IDB_STORE).toBe('save'); });
