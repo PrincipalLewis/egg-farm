@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { farmCost, validateCostGrowthSegments, validateCostTable, type EconomyParams } from '../src/config/formulas';
 import { graderTierCostCents } from '../src/sim/workers';
 import { balance, validateBalance } from '../src/config/balance';
@@ -49,6 +50,9 @@ describe('F1 farm cost growth segments', () => {
     const vendored = new URL('../data/economy.f1.csv', import.meta.url), prod = new URL('../../product/economy.f1.csv', import.meta.url);
     const sha = (u: URL) => createHash('sha256').update(readFileSync(u)).digest('hex');
     expect(sha(vendored)).toBe(F1_CSV_SHA256);
+    // Byte-exact CRLF vendored copy: .gitattributes must exempt it from `*.csv eol=lf`, else the tree reads dirty (release check fails).
+    try { expect(execFileSync('git', ['check-attr', 'text', 'data/economy.f1.csv'], { cwd: new URL('..', import.meta.url), encoding: 'utf8' }).trim()).toBe('data/economy.f1.csv: text: unset'); }
+    catch (e: any) { if (e?.code !== 'ENOENT' && !/not a git repository/.test(String(e?.stderr))) throw e; }
     if (existsSync(prod)) expect(sha(prod), 'data/economy.f1.csv must equal product/economy.f1.csv').toBe(sha(vendored));
     const src = vendored;
     const f1 = parseEconomyCsv(readFileSync(src, 'utf8'));

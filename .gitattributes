@@ -1,3 +1,6 @@
 *.csv text eol=lf
 # vendored files are byte-exact (sha256-pinned): no EOL conversion; listed after *.csv so it wins for vendor CSVs
 vendor/economy-sim/** -text
+# data/economy.f1.csv is Economy's product/economy.f1.csv vendored byte-exact (CRLF, sha256 4ad1349a pinned in tests/cost-segments.test.ts): no EOL conversion,
+# else `*.csv eol=lf` flags the CRLF blob as modified and check-release-build sees a dirty tree
+data/economy.f1.csv -text
