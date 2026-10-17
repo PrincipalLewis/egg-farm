@@ -78,7 +78,7 @@ for (const [w, h, tag] of [[360, 640, '360x640'], [375, 700, '375x700'], [390, 8
   const r1 = await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, pendingOfflineEggs: 2732 };
     return window.eggfarmUi.welcomeFromHidden({ periodId: 991, startAt: 1, endAt: 2, elapsedMs: 683000, simulatedMs: 0, grantedMs: 683000, eggsGranted: 2732, coinsGranted: 0, capped: false, mode: 'offline-grant' }); });
   const during = await page.evaluate(() => !!document.querySelector('.welcome-v2'));
-  await page.keyboard.press('Escape'); await page.waitForTimeout(200);
+  await page.keyboard.press('Escape'); await page.waitForTimeout(1300); // count-up done
   const after = await page.evaluate(() => ({ shown: !!document.querySelector('.welcome-v2'), focus: document.activeElement?.id, text: document.querySelector('.welcome-v2')?.innerText ?? '' }));
   ok('CCR Minor 1: hidden grant held while Settings is open, shown + focused when it closes', r1 && !during && after.shown && after.focus === 'wbCollect' && after.text.includes('Away 11m 23s') && after.text.includes('+2,732 eggs'), JSON.stringify({ r1, during, after }));
   const dup = await page.evaluate(() => window.eggfarmUi.welcomeFromHidden({ periodId: 991, startAt: 1, endAt: 2, elapsedMs: 683000, simulatedMs: 0, grantedMs: 683000, eggsGranted: 2732, coinsGranted: 0, capped: false, mode: 'offline-grant' }));
