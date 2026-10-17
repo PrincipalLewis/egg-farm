@@ -170,6 +170,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /* rc2 M-Toast-layer: toasts wait while #modal-layer.open and show after it closes (.toast z 31 stays above #modal-layer 20 on purpose) */
   const toastQ = toastGate(() => modal.classList.contains('open'), rawToast, { raf: f => requestAnimationFrame(f), setTimeout: (f, ms) => window.setTimeout(f, ms) });
   const showToast = (text: string, ms = 1300) => toastQ.toast(text, ms);
+  /** a modal is opening: take a visible toast off instantly (no fade-out over the modal) and hold it for after the modal */
+  const pullToast = () => { if (!toast.classList.contains('show') && +getComputedStyle(toast).opacity === 0) return; if (toast.classList.contains('show')) toastQ.hold(toast.textContent ?? '', toastMs);
+    toast.style.transition = 'none'; toast.classList.remove('show'); void toast.offsetHeight; toast.style.transition = ''; };
 
   const pulse = (el: Element) => retrigger(el, 'pulse');
 
@@ -246,7 +249,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let modalKind: 'welcome' | 'settings' | 'confirm' | null = null;
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
-    if (toast.classList.contains('show')) { toastQ.hold(toast.textContent ?? '', toastMs); toast.classList.remove('show'); } // M-Toast-layer: never over Welcome-back
+    pullToast(); // M-Toast-layer: never over Welcome-back
     modalKind = 'welcome'; const sale = saleLine(instantSale(g.state, b), compact, fmtMoney); // S2-4c
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
@@ -271,7 +274,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <label class="toggle">Reduced motion<input type="checkbox" id="sRm" ${flags.reducedMotion ? 'checked' : ''}></label>
       <button class="btn secondary" id="sExport">Export log</button><div class="version" id="sExportMsg" role="status"></div>${oldSaveForSession() ? `<button class="btn secondary" type="button" id="sOldSave">Export old save</button><div class="version" id="sOldMsg" role="status" aria-live="polite"></div>` : ''}${settingsIosLine()}<p class="font-credits">Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. <a href="${import.meta.env.BASE_URL}fonts/OFL.txt" target="_blank" rel="noopener">SIL Open Font License 1.1</a>.</p>
       <button class="btn danger" id="sReset">Reset save</button><div class="version">Egg Farm ${version}</div></div>`;
-    if (toast.classList.contains('show')) { toastQ.hold(toast.textContent ?? '', toastMs); toast.classList.remove('show'); } // no toast over any modal
+    pullToast(); // no toast over any modal
     modal.classList.add('open'); sfx('uiOpen');
   };
   modal.addEventListener('click', e => {

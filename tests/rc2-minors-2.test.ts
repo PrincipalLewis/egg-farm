@@ -44,7 +44,7 @@ describe('M-Toast-layer', () => {
     const app = readFileSync('src/ui/app.ts', 'utf8'), css = readFileSync('src/ui/styles.css', 'utf8');
     expect(app).toMatch(/toastGate\(\(\) => modal\.classList\.contains\('open'\), rawToast/);
     expect(app).toMatch(/const showToast = \(text: string, ms = 1300\) => toastQ\.toast\(text, ms\)/);
-    expect(app.match(/toastQ\.hold\(toast\.textContent/g)?.length).toBe(2);
+    expect(app.match(/pullToast\(\); /g)?.length).toBe(2); expect(app).toMatch(/const pullToast = [^\n]*toastQ\.hold\(toast\.textContent[^\n]*\n\s*toast\.style\.transition = 'none'; toast\.classList\.remove\('show'\)/);
     expect(app).toMatch(/const closeModal = [^\n]*\n\s*toastQ\.released\(\)/);
     expect(app).not.toMatch(/deferredToast/);
     expect(css).not.toMatch(/#modal-layer\{[^}]*z-index:(3[2-9]|[4-9]\d)/);
