@@ -59,7 +59,7 @@ describe('M-Order-zero fit', () => {
   });
 });
 
-import { setHint, TUT_GOAL_LINK } from '../src/ui/onboarding';
+import { setHint } from '../src/ui/onboarding';
 describe('M-Tut-goal hint keeps the link node (review e9b9826 #5)', () => {
   const fake = () => { const link = { classList: { contains: (c: string) => c === 'tut-link' } }; const t = { nodeType: 3, nodeValue: '' as string | null };
     const el: any = { _html: '', set innerHTML(v: string) { this._html = v; this.writes++; const k = v.endsWith(TUT_GOAL_LINK) ? v.length - TUT_GOAL_LINK.length : -1; if (k > 0) { t.nodeValue = v.slice(0, k); this.firstChild = t; this.lastElementChild = link; this.childNodes = { length: 2 }; } else { this.firstChild = null; this.lastElementChild = null; this.childNodes = { length: 1 }; } }, get innerHTML() { return this._html; }, writes: 0, firstChild: null, lastElementChild: null, childNodes: { length: 0 } };
