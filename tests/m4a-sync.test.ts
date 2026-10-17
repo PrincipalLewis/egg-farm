@@ -19,7 +19,7 @@ describe('sync-economy M4 columns', () => {
     expect(S.farmCost(23, balance)).toBe(68756); expect(S.farmCost(24, balance)).toBe(72194);
   });
   it('Grader tier costs are the CSV value of each tier\'s first row (T5 51,567, not re-linked)', () => {
-    expect(balance.workers.grader.tiers.map((t: any) => t.cost)).toEqual([5538, 9100, 20959, 28294, 51567]);
+    expect(balance.workers.grader.tiers.map((t: any) => t.cost)).toEqual([5538, 9100, 20330, 28294, 51567]);
   });
   it('every hens_cost / egg_value_cost cell is reproduced (incl. the M3 L23-29 taper)', () => {
     for (const r of m4) { expect(hensCost(r.level, nb)).toBe(r.hens_cost); expect(eggValueCost(r.level, nb)).toBe(r.egg_value_cost); }
