@@ -6,7 +6,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'; import { tmpdir
 // @ts-expect-error plain .mjs helper without types
 import { inlineAssetRefs } from '../scripts/build-html.mjs';
 // @ts-expect-error plain .mjs helper without types
-import { findGlobalWrites, findExternalRefs, constKey, extractScripts, findUnresolvedRefs } from '../scripts/release-scan.mjs';
+import { findGlobalWrites, findExternalRefs, constKey, extractScripts, findUnresolvedRefs, findBuildIdMarkup } from '../scripts/release-scan.mjs';
 const script = new URL('../scripts/check-release-build.mjs', import.meta.url).pathname;
 const fx = (n: string) => new URL(`./fixtures/release-html/${n}.html`, import.meta.url).pathname;
 const exec = (...a: string[]) => spawnSync('node', [script, ...a], { env: { ...process.env, HEAD_COMMIT: 'abc1234deadbeef' }, encoding: 'utf8' });
@@ -108,4 +108,33 @@ it('L-3: comments inside a bracket key do not end it early', () => {
   expect(keys('window[k /* ] */]=1')).toEqual(['[computed k /* ] */]']);
   expect(keys('window["eggfarmExportTelemetry" // c ]\n]=1')).toHaveLength(1); // commented const key: flagged (fail closed)
   expect(keys('window[k // ]')).toEqual(['[unparsed key]']);
+});
+it('CCR #27 n4: a bare \\r (or U+2028) ends a line comment inside a key', () => {
+  expect(keys('window[k //c\r]=1')).toEqual(['[computed k //c]']);
+  expect(keys('window[k //c\u2028]=1')).toHaveLength(1);
+  expect(keys('window[k //c\r')).toEqual(['[unparsed key]']);
+});
+it('QA #27 Low 1: a root passed as a function argument makes the parameter an alias', () => {
+  expect(keys('(function(h){h["eggfarm"+"Dbg"]=1})(window)')).toEqual(['eggfarmDbg']);
+  expect(keys('!function(a,h){h.eggfarmX=1}(0,self)')).toEqual(['eggfarmX']);
+  expect(keys('((h)=>{h["eggfarmY"]=1})(globalThis)')).toEqual(['eggfarmY']);
+  expect(keys('(function(h){h.eggfarmZ=1}).call(this,window)')).toEqual(['eggfarmZ']);
+  expect(keys('(function(a,h){h.eggfarmZ=1}).apply(null,[1,window])')).toEqual(['eggfarmZ']);
+  expect(keys('(function(h){Object.defineProperty(h,"eggfarmD",{})})(window)')).toEqual(['eggfarmD']);
+  expect(keys('(function(h){h.eggfarmExportTelemetry=1;h.x=1})(window)')).toEqual([]); // allowed key; non-egg via alias = accepted gap
+  expect(keys('(function(h){h.eggfarmQ=1})(other)')).toEqual([]);
+  // fail closed: root passed to something we can't map -> any identifier counts as an alias for eggfarm* keys
+  expect(keys('init(window);q.eggfarmQ=1')).toEqual(['eggfarmQ']);
+  expect(keys('((h)=>h.eggfarmW=1)(window)')).toEqual(['eggfarmW']);
+  expect(keys('if(typeof window==="undefined"){};q.eggfarmQ=1')).toEqual([]);
+  expect(keys('(0,window).eggfarmA=1')).toEqual(['eggfarmA']); // (0,root) member shape still normalised
+});
+it('CCR #27 m1/n1: build-id markup attributes are parsed with quoted values', () => {
+  const b = (h: string) => findBuildIdMarkup(h);
+  expect(b('<div title=" id=app " data-build-id="x"></div>').appAttrs).toEqual([]);
+  expect(b(`<div data-x='a id=app b' data-build-id=x>`).appAttrs).toEqual([]);
+  expect(b('<div id="app" title="a>b" data-build-id="z">')).toMatchObject({ attrs: ['z'], appAttrs: ['z'] });
+  expect(b('<div title="a>b data-build-id=q" id=app>')).toMatchObject({ attrs: [], appAttrs: [] });
+  expect(b('<meta content="m>1" name="build-id"><meta name=other content=n>').metas).toEqual(['m>1']);
+  expect(b('<div id=app data-build-id=y>').appAttrs).toEqual(['y']);
 });

@@ -6,7 +6,10 @@
 // defineProperties/assign, and aliases (`h=window`, `h=typeof window<"u"?window:globalThis`, `h=Function("return this")()`).
 // ACCEPTED GAP (minifiers reuse short names, so `t` may be window here and a DOM node there): through an ALIAS only
 // eggfarm* keys are flagged (`h.eggfarmX=`, `h['eggfarm'+'X']=`, h[`eggfarm${x}`]=, defineProperty(h,'eggfarmX')).
-// `h.dbg=1`, `h[k]=` with a variable key, and window passed in as a function parameter are NOT caught statically.
+// A root passed as an argument (`(function(h){h["eggfarm"+"Dbg"]=1})(window)`, `!function(a,h){..}(0,self)`, `((h)=>{..})(window)`,
+// `f.call(this,window)`) makes the matching parameter an alias. FAIL CLOSED: if any root is passed as an argument we can't map
+// to a parameter (named function, arrow without braces, destructuring...), every identifier is treated as an alias for
+// eggfarm* keys. `h.dbg=1` and `h[k]=` with a variable key through an alias are NOT caught statically.
 // The runtime gate `npm run check-globals <engine>` (own-property diff of window) stays authoritative.
 export const ALLOWED_GLOBALS = ['eggfarmExportTelemetry'];
 const ID = '[A-Za-z_$][\\w$]*';
@@ -21,13 +24,14 @@ export function constKey(expr) {
 }
 /** Index just past the bracket/brace/paren matching s[i]; -1 if unbalanced. Skips simple string literals. */
 export const MAX_KEY = 4000;
-function close(s, i) {
+function close(s, i, max = MAX_KEY) {
   const open = s[i], shut = { '[': ']', '{': '}', '(': ')' }[open]; let d = 0;
-  for (let j = i; j < s.length && j < i + MAX_KEY; j++) {
+  for (let j = i; j < s.length && j < i + max; j++) {
     const c = s[j];
     if (c === '"' || c === "'" || c === '`') { const q = c; for (j++; j < s.length && s[j] !== q; j++) if (s[j] === '\\') j++; continue; }
     // L-3 (QA): a comment inside the key (`window[k // ]\n]=1`, `window[k /* ] */]=1`) must not end the bracket early.
-    if (c === '/' && s[j + 1] === '/') { const e = s.indexOf('\n', j); if (e < 0) return -1; j = e; continue; }
+    // A line comment ends at any JS line terminator (\n, bare \r, U+2028, U+2029), not only \n (CCR #27 n4).
+    if (c === '/' && s[j + 1] === '/') { const e = s.slice(j).search(/[\n\r\u2028\u2029]/); if (e < 0) return -1; j += e; continue; }
     if (c === '/' && s[j + 1] === '*') { const e = s.indexOf('*/', j + 2); if (e < 0) return -1; j = e + 1; continue; }
     if (c === open) d++; else if (c === shut && --d === 0) return j + 1;
   }
@@ -46,12 +50,51 @@ function objKeys(lit) {
   return keys;
 }
 
+/** Top-level comma-separated parts of s (strings and nested brackets skipped), with their start offsets. */
+function splitTop(s) {
+  const out = []; let d = 0, start = 0;
+  for (let j = 0; j < s.length; j++) { const c = s[j];
+    if (c === '"' || c === "'" || c === '`') { const q = c; for (j++; j < s.length && s[j] !== q; j++) if (s[j] === '\\') j++; continue; }
+    if ('[{('.includes(c)) d++; else if (']})'.includes(c)) d--; else if (c === ',' && d === 0) { out.push([s.slice(start, j), start]); start = j + 1; } }
+  out.push([s.slice(start), start]); return out;
+}
+/** Parameters bound to a root by an immediate call/.call/.apply of a function expression or braced arrow (QA #27 Low 1).
+ *  unresolved = some root is passed as an argument that is not mapped to a parameter (caller fails closed). */
+export function paramAliases(js, roots) {
+  const R = roots.join('|'), names = new Set(), covered = new Set();
+  const heads = /\bfunction\b\s*\*?\s*[\w$]*\s*\(|\((?=[^()]*\)\s*=>\s*\{)/g;
+  for (const m of js.matchAll(heads)) {
+    const po = m.index + m[0].length - 1, pc = close(js, po); if (pc < 0) continue;
+    const params = splitTop(js.slice(po + 1, pc - 1)).map(([p]) => (new RegExp(`^\\s*(${ID})\\s*(?:=[\\s\\S]*)?$`).exec(p) ?? [])[1] ?? null);
+    const bo = js.slice(pc).search(/\S/) + pc; let k = bo; if (js.slice(k, k + 2) === '=>') k = js.slice(k + 2).search(/\S/) + k + 2;
+    if (js[k] !== '{') continue; const be = close(js, k, Infinity); if (be < 0) continue;
+    let a = be + js.slice(be).search(/\S|$/); if (js[a] === ')') a = a + 1 + js.slice(a + 1).search(/\S|$/);
+    let skip = 0;
+    const cm = /^\.\s*(call|apply)\s*(?=\()/.exec(js.slice(a)); if (cm) { a += cm[0].length; skip = 1; }
+    if (js[a] !== '(') continue; const ae = close(js, a, Infinity); if (ae < 0) continue;
+    let args = splitTop(js.slice(a + 1, ae - 1)).map(([t, o]) => [t, o + a + 1]);
+    if (cm && cm[1] === 'apply') { const arr = args[1]; if (!arr) continue; const t = arr[0].trim(); if (t[0] !== '[' || !t.endsWith(']')) continue;
+      const o = arr[1] + arr[0].indexOf('['); args = [args[0], ...splitTop(t.slice(1, -1)).map(([x, oo]) => [x, oo + o + 1])]; }
+    args.slice(skip).forEach(([t, o], i) => { const r = new RegExp(`^\\s*(?:${R})\\s*$`).test(t); if (!r) return;
+      covered.add(o + t.search(/\S/)); if (params[i]) names.add(params[i]); });
+  }
+  let unresolved = false;
+  for (const m of js.matchAll(new RegExp(`[(,]\\s*((?:${R}))(?=\\s*[,)])`, 'g'))) {
+    const at = m.index + m[0].length - m[1].length;
+    if (covered.has(at)) continue;
+    // not an argument: `(window)` grouping / `if(x,window)` is still treated as unresolved (fail closed), except plain comparisons/typeof
+    if (/(?:typeof|===?|!==?|instanceof|\bin)\s*$/.test(js.slice(Math.max(0, at - 12), at))) continue;
+    unresolved = true; break;
+  }
+  return { names, unresolved };
+}
+
 /** Normalize shapes that are equivalent to a bare root. */
 export function normalize(js) {
   return js
     .replace(/(?<=[\w$\])])\s*\.(?!\.)\s*(?=[A-Za-z_$])/g, '.')
     .replace(/\bFunction\s*\(\s*(['"`])return this\1\s*\)\s*\(\s*\)/g, 'globalThis')
-    .replace(/\(\s*0\s*,\s*(window|globalThis|self|top|parent|frames)\s*\)/g, '$1')
+    .replace(/(?<![\w$)\]}]\s*)\(\s*0\s*,\s*(window|globalThis|self|top|parent|frames)\s*\)/g, '$1') // not in call position: f(0,self) stays an argument list
     .replace(/\b(?:window|globalThis|self|top|parent|frames)\.(?:window|globalThis|self)\b(?![\w$])/g, 'window')
     .replace(/typeof\s+(?:window|globalThis|self)\s*(?:[!=]==?|[<>]=?)\s*(['"])[a-z]+\1\s*\?\s*(window|globalThis|self)\s*:\s*(?:window|globalThis|self|this|\{\}|void 0|null|undefined)(?![\w$.\[(])/g, '$2');
 }
@@ -63,7 +106,8 @@ export function findGlobalWrites(src, allowed = ALLOWED_GLOBALS) {
   const roots = ['window', 'globalThis', 'top', 'parent', 'frames', ...(localSelf ? [] : ['self'])];
   const R = roots.join('|');
   const aliases = new Set([...js.matchAll(new RegExp(`(?:^|[^\\w$.])(${ID})\\s*=\\s*(?:${R})(?![\\w$.\\[(])`, 'g'))].map(m => m[1]).filter(a => !roots.includes(a)));
-  const A = [...aliases].map(esc).join('|') || '(?!)';
+  const pa = paramAliases(js, roots); for (const n of pa.names) if (!roots.includes(n)) aliases.add(n);
+  const A = pa.unresolved ? `(?!(?:${R})(?![\\w$]))${ID}` : ([...aliases].map(esc).join('|') || '(?!)');
   const hits = []; const hit = (key, src) => { if (!allowed.includes(key)) hits.push({ key, src }); };
   const isEgg = k => /^eggfarm/.test(k);
   // dotted writes
@@ -158,17 +202,39 @@ export function findUnresolvedRefs(html, scripts = []) {
   return out;
 }
 
+/** Start tags of markup with properly parsed attributes: quoted values may hold '>' or ' id=app ' (CCR #27 m1/n1).
+ *  [{ name, attrs: [[lowercased name, value|null]...] }]; an unterminated quote runs to the end (fails closed downstream). */
+export function parseTags(markup) {
+  const tags = []; const n = markup.length;
+  for (let i = markup.indexOf('<'); i >= 0 && i < n; i = markup.indexOf('<', i)) {
+    const t = /^<([a-z][^\s/>]*)/i.exec(markup.slice(i, i + 64)); if (!t) { i++; continue; }
+    let j = i + t[0].length; const attrs = [];
+    for (;;) {
+      while (j < n && /[\s/]/.test(markup[j])) j++;
+      if (j >= n || markup[j] === '>') { j++; break; }
+      let k = j; while (k < n && !/[\s/>=]/.test(markup[k])) k++; if (k === j) k++; // a stray '=' becomes part of a name
+      const name = markup.slice(j, k).toLowerCase(); j = k; while (j < n && /\s/.test(markup[j])) j++;
+      let v = null;
+      if (markup[j] === '=') { j++; while (j < n && /\s/.test(markup[j])) j++;
+        if (markup[j] === '"' || markup[j] === "'") { const q = markup[j], e = markup.indexOf(q, j + 1); v = markup.slice(j + 1, e < 0 ? n : e); j = e < 0 ? n : e + 1; }
+        else { k = j; while (k < n && !/[\s>]/.test(markup[k])) k++; v = markup.slice(j, k); j = k; } }
+      attrs.push([name, v]);
+    }
+    tags.push({ name: t[1].toLowerCase(), attrs }); i = j;
+  }
+  return tags;
+}
+
 /** Single-file only: <meta name="build-id" content> and data-build-id values (F-META). HTML comments are ignored (L-2);
  *  `attrs` = every data-build-id, `appAttrs` = those on the element with id="app" (the only place it may be). */
 export function findBuildIdMarkup(html) {
   const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '<script></script>').replace(/<!--[\s\S]*?(?:-->|$)/g, '');
-  const metas = [...markup.matchAll(/<meta\b[^>]*>/gi)].map(m => m[0]).filter(t => /\bname\s*=\s*["']?build-id["'\s>/]/i.test(t))
-    .map(t => (/\bcontent\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(t) ?? []).slice(1).find(x => x !== undefined) ?? null);
-  const ATTR = /\sdata-build-id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+  const tags = parseTags(markup), first = (t, k) => (t.attrs.find(([a]) => a === k) ?? [])[1];
+  const metas = tags.filter(t => t.name === 'meta' && (first(t, 'name') ?? '').toLowerCase() === 'build-id').map(t => first(t, 'content') ?? null);
   const attrs = [], appAttrs = [];
-  for (const [tag] of markup.matchAll(/<[a-z][^>]*>/gi)) {
-    const isApp = /\sid\s*=\s*(?:"app"|'app'|app(?=[\s>/]))/i.test(tag);
-    for (const m of tag.matchAll(ATTR)) { const v = m[1] ?? m[2] ?? m[3]; attrs.push(v); if (isApp) appAttrs.push(v); }
+  for (const t of tags) {
+    const isApp = first(t, 'id') === 'app'; // the first id attribute wins (HTML); ' id=app ' inside another value is just text
+    for (const [a, v] of t.attrs) if (a === 'data-build-id') { attrs.push(v ?? ''); if (isApp) appAttrs.push(v ?? ''); }
   }
   return { metas, attrs, appAttrs };
 }

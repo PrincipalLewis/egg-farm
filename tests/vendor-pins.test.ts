@@ -1,6 +1,6 @@
 // scripts/check-vendor-pins.mjs (runs first in npm run test:slow). Tamper cases run on temp copies via ECONOMY_VENDOR_DIR (VITEST-only).
 import { it, expect } from 'vitest';
-import { mkdtempSync, cpSync, rmSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
+import { mkdtempSync, cpSync, rmSync, writeFileSync, mkdirSync, appendFileSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -26,4 +26,16 @@ it('tampered pinned file fails; override ignored outside vitest', () => {
   const t = copy(); appendFileSync(join(t, 'sim', 'economy_sim.py'), '#x\n');
   expect(run(t)).toMatchObject({ code: 1, out: expect.stringMatching(/sim\/economy_sim.py sha256 .* != pin/) });
   expect(run(t, false)).toMatchObject({ code: 0, out: expect.stringMatching(/WARNING ECONOMY_VENDOR_DIR ignored/) });
+});
+it('unlisted symlink fails (CCR #26 m1), even to a regular file outside the vendor dir', () => {
+  const d = copy(); symlinkSync('/etc/hostname', join(d, 'sim', 'link.py'));
+  expect(run(d)).toMatchObject({ code: 1, out: expect.stringMatching(/ERROR unlisted file vendor\/economy-sim\/sim\/link.py/) });
+  const dang = copy(); symlinkSync(join(dang, 'nope'), join(dang, 'sim', 'dangling.py'));
+  expect(run(dang).code).toBe(1);
+});
+it('__pycache__: only *.pyc ignored (CCR #26 n1)', () => {
+  const d = copy(); mkdirSync(join(d, 'sim', '__pycache__'), { recursive: true }); writeFileSync(join(d, 'sim', '__pycache__', 'evil.py'), 'x');
+  expect(run(d)).toMatchObject({ code: 1, out: expect.stringMatching(/unlisted file vendor\/economy-sim\/sim\/__pycache__\/evil.py/) });
+  const l = copy(); mkdirSync(join(l, 'sim', '__pycache__'), { recursive: true }); symlinkSync('/etc/hostname', join(l, 'sim', '__pycache__', 'x.pyc'));
+  expect(run(l).code).toBe(1);
 });
