@@ -20,3 +20,4 @@ The freshness test picks the sim `--config` from the sha256 of `data/economy.csv
 
 It compares the 46 columns the sim's CSV writer emits. Pins are verified in a `beforeAll` before the sim runs.
 Pinned sim sha 10f29a4a (Economy, 2026-10-17, HoE go 07:32): CURRENT = F1 and M2_CURRENT = M2_F1 (50/0.5) now that #17 is on main; pre-F1 stays available as `--config p1q`. Replaces eddf945d (decisions.md:295 revert).
+Pinned variance sim sha 68a64c59 (Economy, 2026-10-17): adds `M2_F1` (M2_P4 + yawn_at 50, manage_at 50) and sets `M2_CURRENT = M2_F1`. Replaces 560ea73b. The fixture generator reads worker values from data/economy.csv, so only the fixture's sim_sha256 label changed.
