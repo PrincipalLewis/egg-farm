@@ -38,10 +38,10 @@ describe('SD6-3: v5 -> v6 migration', () => {
     const kv = mem(); kv.setItem(SAVE_KEY, JSON.stringify(v5)); expect(loadSafe(kv, b, T).file!.state.wageFracCents).toEqual({ market_hand: 0.9166 });
   });
 });
-describe('SD6-1: no-storage notice is never held behind the recovery dialog', () => {
-  it('main.ts shows NO_STORAGE_TEXT at once; other notices still wait for RECOVERY_CLOSED', () => {
+describe('SD6-1 + AC14b ruling (a): no-storage notice is always raised, deferred only while the recovery dialog is open', () => {
+  it('main.ts raises NO_STORAGE_TEXT on refusal; the notice queue shows it when the dialog closes', () => {
     const src = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8');
-    expect(src).toMatch(/if \(holdNotices && text !== NO_STORAGE_TEXT\) \{ heldNotice \?\?= text; return; \}/);
+    expect(src).toMatch(/addEventListener\(RECOVERY_CLOSED, \(\) => notices\.dialogClosed\(\)\)/);
     expect(src).toMatch(/lease\.storageBlocked\)[\s\S]{0,300}saveNotice\(NO_STORAGE_TEXT\)/);
     expect(src).toMatch(/if \(g\.storageFailed\) saveNotice\(NO_STORAGE_TEXT\)/);
   });

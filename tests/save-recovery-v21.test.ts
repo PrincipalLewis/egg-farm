@@ -91,8 +91,10 @@ describe("v2.2 'Can't save' (storage refused, farm loaded)", () => {
   });
   it('main.ts holds the save-warning toast until the dialog closes (fix 2), and Export uses the live farm', () => {
     const src = readFileSync('src/main.ts', 'utf8');
-    expect(src).toMatch(/if \(holdNotices && text !== NO_STORAGE_TEXT\) \{ heldNotice \?\?= text; return; \}/);
-    expect(src).toMatch(/addEventListener\(RECOVERY_CLOSED[\s\S]{0,120}holdNotices = false/);
+    // HoE AC14b ruling (a): every notice (incl. no-storage) waits for RECOVERY_CLOSED; behaviour in tests/notice-queue.test.ts
+    expect(src).toMatch(/function saveNotice\(text: string\) \{ notices\.notify\(text\); \}/);
+    expect(src).toMatch(/addEventListener\(RECOVERY_CLOSED, \(\) => notices\.dialogClosed\(\)\)/);
+    expect(src).toMatch(/lease\.storageBlocked\) notices\.dialogOpened\(\)/);
     expect(src).toMatch(/g\.recovery\.live = \(\) => serialize\(g\.state/);
     expect(readFileSync('src/ui/save-recovery.ts', 'utf8')).toMatch(/layer\.remove\(\); document\.dispatchEvent\(new Event\(RECOVERY_CLOSED\)\)/);
   });

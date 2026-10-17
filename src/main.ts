@@ -7,6 +7,7 @@ import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, reconcile, bootUnload } from './save/idb-mirror';
 import { mountApp } from './ui/app';
 import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
+import { noticeQueue } from './ui/notice-queue';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
@@ -34,15 +35,14 @@ function showError() {
   const b = document.createElement('button'); b.className = 'btn secondary'; b.textContent = "Couldn't load — Retry"; b.onclick = () => location.reload(); start.append(b);
 }
 /** AC14c/AC14d: one persistent, polite notice (shown once). */
-let heldNotice: string | null = null, holdNotices = false; // v2.2 fix 2: no bottom toast while the recovery dialog is open
-document.addEventListener(RECOVERY_CLOSED, () => { holdNotices = false; if (heldNotice) { const t = heldNotice; heldNotice = null; saveNotice(t); } });
-function saveNotice(text: string) {
-  // SD6-1 (HoE): the no-storage notice is a persistent status, never held behind the recovery dialog (the player must
-  // know progress isn't being saved even if the dialog is dismissed late or never mounts). Other notices still wait.
-  if (holdNotices && text !== NO_STORAGE_TEXT) { heldNotice ??= text; return; }
+// v2.2 fix 2 + HoE AC14b ruling (a): no bottom toast while the recovery dialog is open; every notice, including the
+// SD6-1 no-storage notice, is deferred and shown when the dialog closes (src/ui/notice-queue.ts, both orders tested).
+const notices = noticeQueue(text => {
   if (document.querySelector('.save-warn')) return;
   const n = document.createElement('div'); n.className = 'save-warn'; n.setAttribute('role', 'status'); n.textContent = text; document.body.append(n);
-}
+}, () => document.querySelector('.save-warn')?.remove());
+document.addEventListener(RECOVERY_CLOSED, () => notices.dialogClosed());
+function saveNotice(text: string) { notices.notify(text); }
 export const NO_STORAGE_TEXT = "Your browser isn't letting us save right now (low space or private mode), so progress won't be saved.";
 /** Single-tab guard: this tab lost the save. Sim/saving already stopped (Game.deactivate); freeze render, mute, show notice. */
 let frozen = false;
@@ -94,7 +94,7 @@ async function boot() {
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
-  holdNotices = !!(g.recoveryOutcome && g.recovery) || !!lease.storageBlocked;
+  if ((g.recoveryOutcome && g.recovery) || lease.storageBlocked) notices.dialogOpened(); // the recovery dialog mounts below (mountApp)
   // v4 (QA f6): localStorage refused the lease write. This lone tab still owns the save (never 'Game open in another tab');
   // report it as the storage-full outcome (art-ux/save-recovery-dialog.md v2.1 'storage') plus the no-storage notice.
   if (lease.storageBlocked) { if (g.recoveryOutcome === null) { g.recoveryOutcome = 'storage'; g.recovery = storageBlockedRecovery(localStorage); g.recovery.live = () => serialize(g.state, Date.now()); } saveNotice(NO_STORAGE_TEXT); }
