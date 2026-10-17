@@ -33,3 +33,23 @@
 - done: economy freshness test now runs a vendored, sha256-pinned sim (vendor/economy-sim, sim eddf945d + economy.f1-m4cols.csv 86f0e80e); no dependency on /workspace/product. ci-gates.md note added.
 - next: CCR + QA on the PR; Economy updates vendor/economy-sim + SHA256SUMS + data/economy.csv in one PR going forward.
 - blocked: none.
+
+## Senior Software Architect — 2026-10-17 (arch/no-product-reads, stacked on #21)
+- done: default CI/test/build read nothing outside the repo: check-economy-copy opt-in + warn-only (--product / ECONOMY_PRODUCT_CHECK=1), removed from npm test/build and ci.yml; economy-copy.test uses temp dirs only; gen-sim-fixtures imports vendor/economy-sim; economy.test drift warning opt-in.
+- next: CCR + QA; merge after #21.
+- blocked: none.
+
+## 2026-10-17 02:53 Senior Software Architect — PR #24 CCR re-check minors
+- Done: check-economy-copy `--strict` now implies `--product` (test added); `--strict` also sha256-compares each vendored file in vendor/economy-sim/SOURCE with product/ and the pin, failing closed on drift/missing (tests added); slow-test regeneration note now points at vendor/economy-sim/sim. Fixture `source` label left unchanged (no regeneration). ci-gates.md updated.
+- Gates: tsc OK; vitest 476/476 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA; watch CI for the parallel-load flake CCR noted.
+
+## 2026-10-17 03:00 Senior Software Architect — PR #24 CCR minor on a8f8611
+- Done: check-economy-copy SOURCE parsing skips only blank/#/`^vendored:` lines (colon-containing rows are now checked); --strict fails closed unless SOURCE file-row count == SHA256SUMS entry count; vendored paths resolved with path.join (a `C:` path no longer crashes URL parsing); ECONOMY_VENDOR_DIR test override; tamper tests for colon rows and count mismatch.
+- Gates: tsc OK; vitest 478/478 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA.
+
+## 2026-10-17 03:10 Senior Software Architect — PR #24 CCR items on 1b50002
+- Done: ECONOMY_VENDOR_DIR honoured only under VITEST (override path to stderr; ignored with warning otherwise; documented in ci-gates.md); --strict requires SOURCE and SHA256SUMS (path, sha) sets to be equal exactly; SOURCE paths resolving outside the vendor (or product) dir rejected; pathToFileURL for the override. Tests: one-hash change at same count, path change, ../ escape, VITEST gating.
+- Gates: tsc OK; vitest 481/481 (maxForks=2); test:slow 11/11; sync-economy --check OK.
+- Next: CCR/QA re-check of this SHA.
