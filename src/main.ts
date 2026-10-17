@@ -4,7 +4,7 @@ import { Game } from './game';
 import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
-import { IdbMirror, reconcile } from './save/idb-mirror';
+import { IdbMirror, reconcile, bootUnload } from './save/idb-mirror';
 import { mountApp } from './ui/app';
 import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
@@ -63,8 +63,8 @@ async function boot() {
   // any Game write. It covers localStorage main, .bak and the IndexedDB copy. A refused tab never joins the single-tab
   // guard (so a live tab is never frozen or made to save by it) and writes no save key anywhere.
   const mirror = await IdbMirror.open();
-  let idbRaw: string | null = null; if (mirror) idbRaw = await mirror.read();
-  let preNewer: number | null = null; try { preNewer = newerStoredVersion(localStorage, idbRaw); } catch { /* localStorage blocked: Game reports it */ }
+  let idbRaw: string | null = null, unloadRaw: string | null = null; if (mirror) { idbRaw = await mirror.read(); unloadRaw = await mirror.readUnload(); }
+  let preNewer: number | null = null; try { preNewer = newerStoredVersion(localStorage, idbRaw, unloadRaw); } catch { /* localStorage blocked: Game reports it */ }
   if (preNewer !== null) { refuseNewer(preNewer, idbRaw); return; }
   // Single-tab guard: this (newest) tab claims the save BEFORE reading it, so an older tab's next save is blocked and
   // offline earnings are granted only by the tab that owns the save.
@@ -76,12 +76,16 @@ async function boot() {
   // before this read, so the read sees it). Review minor main.ts:79-80: re-check for a newer save here too, so a newer
   // build that saved during the flush is refused BEFORE we claim, and the live tab never flashes 'Game open in another tab'.
   // From here to `new Game` there is no await, so nothing else can save in between.
-  if (mirror) idbRaw = (await mirror.read()) ?? idbRaw; // Reviewer N3: a failed/timed-out re-read keeps the first read
-  let preNewer2: number | null = null; try { preNewer2 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
+  if (mirror) { idbRaw = (await mirror.read()) ?? idbRaw; unloadRaw = (await mirror.readUnload()) ?? unloadRaw; } // Reviewer N3: a failed/timed-out re-read keeps the first read
+  let preNewer2: number | null = null; try { preNewer2 = newerStoredVersion(localStorage, idbRaw, unloadRaw); } catch { /* blocked */ }
   if (preNewer2 !== null) { lease.stop(); refuseNewer(preNewer2, idbRaw); return; }
   const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
   let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
+  // SD5-1 (b): the close-time copy (eggfarm/save/unload) is ranked like any other copy; when it wins it is promoted to
+  // IndexedDB main (write + read-back, then unload deleted) and fed to reconcile. Older / corrupt / F2-EQ: main untouched.
+  let unloadWon = false;
+  if (mirror && unloadRaw !== null) { const u = await bootUnload(mirror, localStorage, idbRaw, unloadRaw, balance); idbRaw = u.idbRaw; unloadWon = u.verdict === 'win'; }
   if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
   const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw);
@@ -98,7 +102,7 @@ async function boot() {
   let stopAutosave: (() => void) | null = null;
   g.onNewerSave = v => { lease.release(); lease.stop(); stopAutosave?.(); frozen = true; audio.mute(); showNewerSaveDialog(asset, v, () => location.reload()); };
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
-  if (restored) g.telemetry.track('save_restore', { source: 'idb' });
+  if (restored) g.telemetry.track('save_restore', { source: unloadWon ? 'unload' : 'idb' });
   // The only release global (allowlist in check-release-build): read-only, no install_id. See Telemetry.snapshotJSON.
   (window as any).eggfarmExportTelemetry = () => g.telemetry.snapshotJSON();
   if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)

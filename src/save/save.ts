@@ -24,9 +24,9 @@ export function newerSaveVersion(raw: string | null | undefined): number | null 
 }
 /** M4A-31(b) / B1: the highest newer-build version found in ANY stored copy (localStorage main, .bak, IndexedDB main), else null.
  *  Must run before anything writes; a non-null result means refuse and write nothing anywhere. */
-export function newerStoredVersion(kv: Pick<KV, 'getItem'>, idbRaw: string | null = null): number | null {
-  let v: number | null = null;
-  for (const raw of [kv.getItem(SAVE_KEY), kv.getItem(BAK_KEY), idbRaw]) { const n = newerSaveVersion(raw); if (n !== null && (v === null || n > v)) v = n; }
+export function newerStoredVersion(kv: Pick<KV, 'getItem'>, idbRaw: string | null = null, ...more: (string | null)[]): number | null {
+  let v: number | null = null; // SD5-1 (b): callers pass the IndexedDB unload copy in `more`
+  for (const raw of [kv.getItem(SAVE_KEY), kv.getItem(BAK_KEY), idbRaw, ...more]) { const n = newerSaveVersion(raw); if (n !== null && (v === null || n > v)) v = n; }
   return v;
 }
 export function migrate(d: any, b: Balance): SaveFile {
@@ -96,6 +96,20 @@ export const SAVED_AT_SKEW_MS = 2 * 60_000;
 /** Rank of a copy's savedAt for newest-copy picks: any savedAt invalid for offline earnings (missing, null, <= 0, pre-2020
  *  when the clock is past 2020, or more than SAVED_AT_SKEW_MS in the future) is the OLDEST (-Infinity). */
 export const savedAtRank = (t: unknown, now = Date.now()): number => validSavedAt(t, now + SAVED_AT_SKEW_MS) ? t : -Infinity;
+/** saveSeq of a raw copy (M4-19); missing / invalid = 0 (no seq). */
+export const saveSeqOf = (raw: unknown): number => { if (typeof raw !== 'string') return 0; try { const n = JSON.parse(raw)?.saveSeq; return Number.isSafeInteger(n) && n > 0 ? n : 0; } catch { return 0; } };
+export type RankMode = 'seq' | 'savedAt';
+/** M4-19 rev 3: ONE ranking mode for a whole candidate set, so the order is transitive across 3+ copies (main, IndexedDB,
+ *  unload). Pairwise "seq only when both have it" cycles in mixed sets (A seq5@t1, B no-seq@t2, C seq3@t3: A>C by seq,
+ *  C>B and B>A by savedAt). Rule: if ANY copy lacks a saveSeq, rank all by savedAt; otherwise by saveSeq, then savedAt. */
+export const rankMode = (raws: readonly string[]): RankMode => raws.length > 0 && raws.every(r => saveSeqOf(r) > 0) ? 'seq' : 'savedAt';
+const cmpNum = (x: number, y: number) => x === y ? 0 : x > y ? 1 : -1; // -Infinity == -Infinity -> 0 (no NaN)
+/** > 0 when copy a outranks copy b under `mode` (raw strings; savedAt from the validated files). 0 = tie (F2-EQ when the
+ *  bytes differ). */
+export function rankCompareIn(mode: RankMode, a: { raw: string; savedAt: unknown }, b: { raw: string; savedAt: unknown }, now = Date.now()): number {
+  if (mode === 'seq') { const c = cmpNum(saveSeqOf(a.raw), saveSeqOf(b.raw)); if (c !== 0) return c; }
+  return cmpNum(savedAtRank(a.savedAt, now), savedAtRank(b.savedAt, now));
+}
 export function load(kv: KV, b: Balance): SaveFile | null {
   const raw = kv.getItem(SAVE_KEY); if (!raw) return null;
   const v = validate(raw, b); return v.ok ? v.file : null;

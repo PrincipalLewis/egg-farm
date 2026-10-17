@@ -2,7 +2,7 @@
 // the transaction was still waiting for its get when the page was torn down. Unload writes put at once, 'relaxed', commit().
 import { describe, it, expect, vi } from 'vitest';
 import { balance as b } from '../src/config/balance';
-import { IdbMirror, IDB_KEY } from '../src/save/idb-mirror';
+import { IdbMirror, IDB_KEY, UNLOAD_KEY } from '../src/save/idb-mirror';
 import { startAutosave } from '../src/save/autosave';
 import { Game } from '../src/game';
 import { mem } from './helpers';
@@ -38,13 +38,13 @@ describe('SD5-1 unload-safe IndexedDB write', () => {
     const p = m.write('new'); f.teardown(); await p;
     expect(f.data.get(IDB_KEY)).toBe('old'); expect(m.failed).toBe(true); expect(m.pending).toBe(0);
   });
-  it('unload write: get + put queued synchronously, durability relaxed, no commit() (abort must stay possible), lands despite teardown; promise resolves on complete', async () => {
+  it('SD5-1 (b) unload write: unconditional put to eggfarm/save/unload + commit(), durability relaxed, never touches main, lands despite teardown', async () => {
     const f = teardownIdb(); const m = (await IdbMirror.open(f.factory))!;
     await m.write('old');
     let done = false; const p = m.write('new', { unload: true }).then(() => { done = true; });
-    const t = f.txs.at(-1); expect(t.put).toBe(true); expect(t.committed).toBe(false); expect(t.durability).toBe('relaxed');
+    const t = f.txs.at(-1); expect(t.put).toBe(true); expect(t.committed).toBe(true); expect(t.durability).toBe('relaxed');
     f.teardown(); expect(done).toBe(false); await p; expect(done).toBe(true);
-    expect(f.data.get(IDB_KEY)).toBe('new'); expect(m.failed).toBe(false);
+    expect(f.data.get(UNLOAD_KEY)).toBe('new'); expect(f.data.get(IDB_KEY)).toBe('old'); expect(m.failed).toBe(false);
     expect(f.txs.slice(0, -1).every(x => x.durability === 'strict')).toBe(true); // only the unload write is relaxed
   });
   it('dedupe: identical raw is not written twice (hidden + pagehide + beforeunload of the same state); an aborted write is retried', async () => {

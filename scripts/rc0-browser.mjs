@@ -514,12 +514,18 @@ sections.unloadmirror = async () => {
   const wb = page.locator('#wbCollect'); if (await wb.isVisible().catch(() => false)) await wb.click(); await page.waitForTimeout(200); // offline welcome: sim runs after Collect
   await page.evaluate(() => { window.eggfarm.state.coinsCents = 777777777; window.eggfarm.save(); }); await page.waitForTimeout(800); await page.close();
   const p2 = await ctx.newPage(); await p2.goto(URL0, { waitUntil: 'domcontentloaded' }); // boot waits for Tap to start: nothing new is written
-  let r; for (let i = 0; i < 60; i++) { r = await p2.evaluate(async () => { const idb = await new Promise(res => { const o = indexedDB.open('eggfarm', 1); o.onsuccess = () => { const g = o.result.transaction('save').objectStore('save').get('main'); g.onsuccess = () => { res(g.result ?? null); o.result.close(); }; }; o.onerror = () => res(null); });
-    const c = x => { try { return JSON.parse(x).state.coinsCents; } catch { return null; } }; return { ls: c(localStorage.getItem('eggfarm.save')), bak: c(localStorage.getItem('eggfarm.save.bak')), idb: c(idb) }; }); if (r.ls === r.idb) break; await p2.waitForTimeout(100); }
+  // SD5-1 (b): the close save lands in its own key eggfarm/save/unload; main is the last normal (checked) write.
+  const peek = () => p2.evaluate(async () => { const rd = k => new Promise(res => { const o = indexedDB.open('eggfarm', 1); o.onsuccess = () => { try { const g = o.result.transaction('save').objectStore('save').get(k); g.onsuccess = () => { res(g.result ?? null); o.result.close(); }; } catch { res(null); } }; o.onerror = () => res(null); });
+    const c = x => { try { return JSON.parse(x).state.coinsCents; } catch { return null; } }; const idb = await rd('main'), un = await rd('unload'); return { ls: c(localStorage.getItem('eggfarm.save')), bak: c(localStorage.getItem('eggfarm.save.bak')), idb: c(idb), unload: c(un), unloadRaw: un !== null }; });
+  let r; for (let i = 0; i < 60; i++) { r = await peek(); if (r.ls === r.unload || r.ls === r.idb) break; await p2.waitForTimeout(100); }
   // WebKit (Playwright, before and after SD5-1) never commits an IndexedDB transaction started while the page closes; there
-  // the unload save also lands in .bak (two unload saves), which is what R1 restores from. Firefox + Chromium: IndexedDB.
-  const pass = ENGINE === 'webkit' ? r.ls > 777777777 && (r.idb === r.ls || r.bak === r.ls) : r.ls > 777777777 && r.idb === r.ls;
-  ok(`SD5-1 unload save survives the tab close: ${ENGINE === 'webkit' ? '.bak or IndexedDB' : 'IndexedDB'} copy equals localStorage (> the explicit save)`, pass, JSON.stringify(r));
+  // the unload save also lands in .bak (two unload saves), which is what R1 restores from. Firefox + Chromium: IndexedDB unload key.
+  const pass = ENGINE === 'webkit' ? r.ls > 777777777 && (r.unload === r.ls || r.idb === r.ls || r.bak === r.ls) : r.ls > 777777777 && r.unload === r.ls;
+  ok(`SD5-1 unload save survives the tab close: ${ENGINE === 'webkit' ? '.bak or IndexedDB' : 'IndexedDB unload key'} copy equals localStorage (> the explicit save)`, pass, JSON.stringify(r));
+  if (r.unloadRaw) { // boot: the winning unload copy is promoted to main (read-back) and unload is deleted
+    await p2.getByText('Tap to start').click().catch(() => {}); let q; for (let i = 0; i < 40; i++) { await p2.waitForTimeout(100); q = await peek(); if (!q.unloadRaw) break; }
+    ok('SD5-1 (b) boot promotes the unload copy into IndexedDB main and deletes unload', !q.unloadRaw && q.idb >= r.unload, JSON.stringify(q));
+  }
   await ctx.close();
 };
 
