@@ -7,7 +7,7 @@ import { wageLine } from './s2-economy-ui';
 import { listedWageCentsPerSec, WAGE_WORKERS, type WageWorker } from './rates';
 /** Reviewer m1 (rc2): card wage = the exact economy.csv listed rate from ./rates (single source), not the s2-money stub. */
 const cardWage = (id: WorkerId, s: GameState, b: Balance) => (WAGE_WORKERS as string[]).includes(id) ? listedWageCentsPerSec(id as WageWorker, s, b) : 0;
-import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
+import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, bulkManageAllowed, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -51,7 +51,7 @@ export const refillTiredLabel = (n: number) =>
 
 export function manageAllHtml(s: GameState, b: Balance): string {
   if (!showManageAll(s.workers, b)) return '';
-  const n = promptManage(s, b).length, cd = Math.ceil(s.manageCdS);
+  const n0 = promptManage(s, b).length, n = bulkManageAllowed(s.workers, b) ? n0 : Math.min(1, n0), cd = Math.ceil(s.manageCdS); // ruling (b): < 3 hired refills one
   if (n === 0) return ''; // AC-R9: hidden when N=0
   const glow = WORKERS.some(id => isYawning(s.workers[id], b));
   const label = refillTiredLabel(n);

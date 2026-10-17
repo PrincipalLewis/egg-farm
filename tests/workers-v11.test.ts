@@ -143,3 +143,19 @@ describe('T5/AC-R9: a single tired or asleep worker of any role shows the Refill
     });
   }
 });
+describe('PM Workers ruling (b): < 3 hired refills only the lowest worker; bulk needs >= 3', () => {
+  it('2 hired, both tired: one tap refills only the lowest-energy one; label stays "Refill 1 tired worker"; shared cooldown starts', () => {
+    const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10) }, manageCdS: 0 });
+    expect(manageAllHtml(s, b)).toContain('Refill 1 tired worker');
+    const m = apply(s, { type: 'manageAll' }, b);
+    expect(m.workers.coop_hand!.energy).toBe(100); expect(m.workers.market_hand!.energy).toBe(30);
+    expect(m.manageCdS).toBe(E.manage_cooldown_s);
+    expect(apply(m, { type: 'manageAll' }, b)).toBe(m); // cooldown applies
+  });
+  it('3 hired, all tired: bulk refill still refills every tired worker', () => {
+    const s = base({ workers: { market_hand: wk(30), coop_hand: wk(10), hawker: wk(0) }, manageCdS: 0 });
+    expect(manageAllHtml(s, b)).toContain('Refill 3 tired workers');
+    const m = apply(s, { type: 'manageAll' }, b);
+    expect([m.workers.market_hand!.energy, m.workers.coop_hand!.energy, m.workers.hawker!.energy]).toEqual([100, 100, 100]);
+  });
+});

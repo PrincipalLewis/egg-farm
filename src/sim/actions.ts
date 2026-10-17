@@ -1,7 +1,7 @@
 import type { Balance } from '../config/balance';
 import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents } from './state';
 import type { Sink } from './events';
-import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, bulkManageAllowed, lowestManageTarget, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
@@ -50,7 +50,8 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
       return { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
     }
-    case 'manageAll': { // v1.1 + P4: bulk needs >= manage_all_min_workers hired (sim rule, pending PM/Economy); refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+    case 'manageAll': { // v1.1 + P4 + PM ruling (b): bulk needs >= manage_all_min_workers hired, else refills the single lowest tired/asleep worker; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+      if (!bulkManageAllowed(s.workers, b)) { const t = lowestManageTarget(s.workers, b); return t ? apply(s, { type: 'manage', worker: t }, b, ev) : s; } // ruling (b): < 3 hired -> single lowest worker
       const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
       const workers = { ...s.workers };

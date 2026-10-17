@@ -19,6 +19,11 @@ export const hiredCount = (ws: Workers) => WORKERS.filter(id => ws[id]).length;
  *  hired worker of any role (N>=1); hidden at N=0 is enforced by the callers. The old >= manage_all_min_workers hire gate hid
  *  them when e.g. the Market Hand was the only worker hired. _b kept for call-site compatibility. */
 export const showManageAll = (ws: Workers, _b: Balance) => hiredCount(ws) >= 1;
+/** PM Workers ruling (b), 00:4x: bulk refill (every tired/asleep worker in one tap) needs >= manage_all_min_workers hired.
+ *  Below that, the same bar refills only the single lowest-energy tired/asleep worker (per-worker Manage rules + cooldown). */
+export const bulkManageAllowed = (ws: Workers, b: Balance) => hiredCount(ws) >= b.workers.energy.manage_all_min_workers;
+/** Target of a below-threshold Refill tap: the lowest-energy hired worker <= manage_prompt_threshold (card order breaks ties). */
+export const lowestManageTarget = (ws: Workers, b: Balance) => needManage(ws, b).reduce<WorkerId | null>((m, id) => m == null || ws[id]!.energy < ws[m]!.energy ? id : m, null);
 /** P4 / B5: Manage is allowed only at energy <= manage_prompt_threshold (0.4 = Yawning). */
 export const canManageWorker = (w: Worker | undefined, b: Balance) => !!w && w.energy <= b.workers.energy.manage_prompt_threshold * 100;
 /** P4: workers Manage all refills / "(n need it)" counts: hired and <= threshold. 0 -> no action, no cooldown (ruling 4). */
