@@ -9,7 +9,8 @@ import type { SimEvent } from '../src/sim/events';
 import { WorkerId, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../src/sim/workers';
 import type { Model } from './bot';
 import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
-import { pickBuy, pickAction } from './bot-m4';
+import { pickBuy, pickAction, M1_KEYS } from './bot-m4';
+import { m4On } from '../src/config/formulas';
 export interface M2Opts {
   model: Model; T?: number; sellEvery?: number;
   /** player taps n times (1/s) at the start of every period_s window; undefined = 1 tap/s */
@@ -47,13 +48,14 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
     let chf = V ? V.cheapFirst() : false;
     for (let guard = 0; guard < 200; guard++) {
       let bought = false;
-      for (const w of ['market_hand', 'coop_hand', 'hawker'] as const)
+      const allPick = o.model === 'seller15' && m4On(b); // D-HOP-02: workers are bought through the same pick (pickBuy keys), not first
+      for (const w of ['market_hand', 'coop_hand', 'hawker'] as const) if (!allPick)
         if (use.has(w) && !s.workers[w] && s.farmLevel >= unlockFarm(w, b) && s.coinsCents >= hireCostCents(w, b)) { s = apply(s, { type: 'hire', worker: w }, b); bought = true; }
       const tiers = b.workers.grader.tiers;
-      if (use.has('grader') && s.graderTier < tiers.length && s.farmLevel >= tiers[s.graderTier].farm && s.coinsCents >= graderTierCostCents(s.graderTier, b)) { s = apply(s, { type: 'buyGraderTier' }, b); bought = true; }
-      // D-HOP-2026-10-19-01: tests/bot-m4.ts pickBuy (+ HENS/VALUE with M4 on; flag off = the old Farm/Collection rule).
-      let kind = pickBuy(s, b, o.model, chf);
-      if (kind === 'c' && chf) chf = false; // variance p_cheap_first
+      if (!allPick && use.has('grader') && s.graderTier < tiers.length && s.farmLevel >= tiers[s.graderTier].farm && s.coinsCents >= graderTierCostCents(s.graderTier, b)) { s = apply(s, { type: 'buyGraderTier' }, b); bought = true; }
+      // D-HOP-2026-10-19-02: tests/bot-m4.ts pickBuy (M4 on, seller15: game pick over every purchasable incl. workers, wait rule; flag off = old rule).
+      let kind = pickBuy(s, b, o.model, chf, [...M1_KEYS, ...(['W1', 'W2', 'W3', 'W4'] as const).filter(k => use.has(({ W1: 'market_hand', W2: 'coop_hand', W3: 'hawker', W4: 'grader' } as const)[k]))]);
+      if (kind === 'c' && chf && !allPick) chf = false; // variance p_cheap_first
       if (kind) { const next = apply(s, pickAction(kind), b); if (next === s) kind = null; else { s = next; if (kind === 'f') reach.set(s.farmLevel, t); } }
       if (!kind && !bought) break;
     }
