@@ -15,7 +15,7 @@ describe('welcome-back modal & one grant per load', () => {
     const kv = mem(); save(kv, initialState(b), T0);
     new Game(b, kv, () => T0 + 600_000);
     const g2 = new Game(b, kv, () => T0 + 720_000);
-    expect(g2.state.basket).toBe(expOfflineV6(600)); expect(g2.state.pendingOfflineEggs).toBe(expOffline(120));
+    expect(g2.state.basket).toBe(expOfflineV6(600)); expect(g2.state.pendingOfflineEggs).toBe(expOfflineV6(120)); // still an unmarked v6 load (flag-off grant; CCR n1)
   });
   it('gap < 60s between save and load: no grant', () => {
     const kv = mem(); save(kv, initialState(b), T0); expect(new Game(b, kv, () => T0 + 59_999).state.pendingOfflineEggs).toBe(0);
