@@ -76,7 +76,7 @@ describe('D2 IndexedDB mirror', () => {
     const g = new Game(b, kv, () => 2e12); expect(g.isNewGame).toBe(false); expect(g.state.workers).toEqual({});
   });
   it('Game mirrors every save (load-time save and immediate purchase save) with the exact localStorage bytes', () => {
-    const writes: string[] = []; const kv = mem(); kv.setItem(SAVE_KEY, serialize(st({ coinsCents: 1e9 }), 1));
+    const writes: string[] = []; const kv = mem(); kv.setItem(SAVE_KEY, serialize(st({ coinsCents: 1e9, tracksV7: 1 as const, v6BackupId: '0123456789abcdef' }), 1));
     let t = 10; const g = new Game(b, kv, () => t, 1, 'dev', { write: r => writes.push(r), clear: async () => {} });
     expect(writes).toHaveLength(1); expect(writes[0]).toBe(kv.getItem(SAVE_KEY));
     t = 20; g.dispatch({ type: 'buyFarm' });
@@ -84,7 +84,7 @@ describe('D2 IndexedDB mirror', () => {
   });
   it('purchase lost from localStorage (kill before flush) is recovered from the IndexedDB copy on the next boot', async () => {
     const f = fakeIdb(); const m = (await IdbMirror.open(f.factory))!; const kv = mem();
-    kv.setItem(SAVE_KEY, serialize(st({ coinsCents: 1e9 }), 1));
+    kv.setItem(SAVE_KEY, serialize(st({ coinsCents: 1e9, tracksV7: 1 as const, v6BackupId: '0123456789abcdef' }), 1));
     let t = 10; const g = new Game(b, kv, () => t, 1, 'dev', m); const before = kv.getItem(SAVE_KEY)!;
     t = 20; g.dispatch({ type: 'buyFarm' }); await flush();
     kv.setItem(SAVE_KEY, before); // simulate localStorage's lazy flush losing the purchase
