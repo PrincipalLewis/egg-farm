@@ -6,6 +6,7 @@ import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
 import { fmtMoneyShort } from './format';
+import { keyGuard } from './key-guard';
 import { fmtCount, fmtMoney, fmtMoneyExact, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
@@ -278,7 +279,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     saveFlags();
   });
   $('#settings').addEventListener('click', showSettings);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else openPanel(null); } });
+  document.addEventListener('keydown', e => keyGuard(e, () => { if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else openPanel(null); }));
 
   // ---------- Queue strip ----------
   const chips = new Map<number, HTMLElement>();
