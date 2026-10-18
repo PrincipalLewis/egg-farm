@@ -9,6 +9,8 @@ import { eggsPerSec } from '../src/sim/state';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
+/** Explicit forced-flag-off build (M4 ships ON since D-CEO-20261019-01 / rc 90a9c84). */
+const off: Balance = { ...balance, m4: { ...balance.m4!, enabled: 0 } };
 /** A main (pre-M4) v6 state: no hensLevel / eggValueLevel / celebratedMilestones / tracksV7. */
 const mainState = (F: number, C: number) => { const { hensLevel, eggValueLevel, celebratedMilestones, tracksV7, ...r } = { ...initialState(balance), farmLevel: F, collectionLevel: C, coinsCents: 987654, coop: 7, basket: 3 } as any; void hensLevel; void eggValueLevel; void celebratedMilestones; void tracksV7; return r; };
 const v6raw = (F: number, C: number) => { const st = JSON.stringify(mainState(F, C)); return `{"version":6,"savedAt":1760000000000,"sum":"${checksum(st)}","state":${st}}`; };
@@ -39,7 +41,7 @@ describe('M4 on: old saves migrate without loss', () => {
     const r = validate(serialize(s, 1760000000000), on); expect(r.ok && [r.file.state.hensLevel, r.file.state.eggValueLevel]).toEqual([2, 1]);
   });
   it('flag off: v6 loads unchanged (no tracks, no marker)', () => {
-    const r = validate(v6raw(10, 7), balance); expect(r.ok && r.file.state.tracksV7).toBeUndefined();
+    const r = validate(v6raw(10, 7), off); expect(r.ok && r.file.state.tracksV7).toBeUndefined();
     expect(r.ok && r.file.state.hensLevel).toBe(0);
   });
 });

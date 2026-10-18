@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { balance as b } from '../src/config/balance';
+import { balance } from '../src/config/balance';
+/** AC5 cheapest-first rules are the flag-off next-goal. M4 ships ON (D-CEO-20261019-01): with the flag on the pick is
+ *  best payback incl. HENS/VALUE (M4A-18), covered in m4a-tracks-ui.test.ts. This file pins the AC5 path as an explicit forced-flag-off test. */
+const b = { ...balance, m4: { ...balance.m4!, enabled: 0 } };
 import { initialState, farmCost, collectionCost } from '../src/sim/state';
 import { hireCostCents, graderTierCostCents } from '../src/sim/workers';
 import { selectGoal, candidates, GoalHold, farmLabel } from '../src/ui/next-goal';

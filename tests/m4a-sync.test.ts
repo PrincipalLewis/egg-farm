@@ -11,8 +11,8 @@ const live = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.
 const m4 = live, cand = live; // M4 columns now in economy.csv (Economy's f1-m4cols merge, this branch)
 describe('sync-economy M4 columns', () => {
   const nb = buildBalance(cand, balance, readEconomyConfig()); // #17: farmCostFromCsv (costTable)
-  it('balance.json m4 block is exactly what the CSVs generate (flag kept off)', () => {
-    expect(balance.m4).toEqual(nb.m4); expect(nb.m4.enabled).toBe(0);
+  it('balance.json m4 block is exactly what the CSVs generate (flag kept as shipped: on, D-CEO-20261019-01)', () => {
+    expect(balance.m4).toEqual(nb.m4); expect(nb.m4.enabled).toBe(1);
   });
   it('farm_cost is reproduced per level from the CSV (#17 costTable, verbatim)', () => {
     for (const r of live) expect(S.farmCost(r.level, balance)).toBe(r.farm_cost);

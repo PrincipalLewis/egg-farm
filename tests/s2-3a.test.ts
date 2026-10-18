@@ -9,14 +9,14 @@ import { Game } from '../src/game';
 import { ServedDwell } from '../src/ui/served-dwell';
 import { mem } from './helpers';
 
-const busy = (seed = 7) => ({ ...initialState(b, seed), farmLevel: 12, collectionLevel: 9, coinsCents: 1e7, basket: 1500,
+const busy = (seed = 7, bb = b) => ({ ...initialState(bb, seed), farmLevel: 12, collectionLevel: 9, coinsCents: 1e7, basket: 1500,
   workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 100, cdS: 0 }, hawker: { energy: 100, cdS: 0 } } });
 
 /** Fraction of 100 ms frames over `secs` with a customer card on screen (waiting, or dwelling when dwellMs > 0). */
-function visibility(dwellMs: number, secs = 60, seed = 7) {
-  let s: any = busy(seed); const d = new ServedDwell(dwellMs); let t = 0, vis = 0, frames = 0;
+function visibility(dwellMs: number, secs = 60, seed = 7, bb = b) {
+  let s: any = busy(seed, bb); const d = new ServedDwell(dwellMs); let t = 0, vis = 0, frames = 0;
   while (t < secs * 1000) {
-    const ev: any[] = []; s = advance(s, 100, 0, b, ev).state; t += 100;
+    const ev: any[] = []; s = advance(s, 100, 0, bb, ev).state; t += 100;
     for (const e of ev) { if (e.type === 'sell') d.sold(e.id, e.value); if (e.type === 'customer_served') d.served(e.id, t); }
     frames++; if (s.customers.length > 0 || (dwellMs > 0 && d.active(t).length > 0)) vis++;
   }
@@ -53,8 +53,13 @@ describe('MK-20 the sim is untouched by the dwell (deterministic)', () => {
 
 describe('MK-17/21 visibility re-run (L12, 1,500 eggs, Market Hand Working)', () => {
   it('before: ~15% visible; after: >= 40% over 60 s for several seeds', () => {
+    // The ~15% 'before' is the pre-M4 repro (decisions 2026-10-16 02:21): kept on an explicit forced-flag-off build.
+    // M4 ships ON (D-CEO-20261019-01): at F12/H0 production is lower, so more cards wait and no-dwell visibility is ~37%;
+    // the MK-17/21 goal (after >= 40%, and dwell never lowers visibility) is asserted on the shipped balance.
+    const off = { ...b, m4: { ...b.m4!, enabled: 0 } };
+    expect(visibility(0, 120, 7, off)).toBeLessThan(0.25);
     const before = visibility(0, 120), after = visibility(b.feel.served_dwell_ms, 120);
-    expect(before).toBeLessThan(0.25);
+    expect(after).toBeGreaterThanOrEqual(before);
     expect(after).toBeGreaterThanOrEqual(0.4);
     for (const seed of [1, 2, 3, 99]) expect(visibility(b.feel.served_dwell_ms, 60, seed), `seed ${seed}`).toBeGreaterThanOrEqual(0.4);
   });

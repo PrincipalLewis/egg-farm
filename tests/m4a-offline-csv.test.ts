@@ -4,6 +4,8 @@ import { balance, type Balance } from '../src/config/balance';
 import { applyOffline, m4OfflineEggs, offlineEggs } from '../src/sim/offline';
 import { initialState } from '../src/sim/state';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
+/** Explicit forced-flag-off build (M4 ships ON since D-CEO-20261019-01 / rc 90a9c84). */
+const off: Balance = { ...balance, m4: { ...balance.m4!, enabled: 0 } };
 const st = (H: number, F = 0) => ({ ...initialState(on), farmLevel: F, hensLevel: H, collectionLevel: 0 });
 describe('M4A-4 offline grant from data', () => {
   it('table mirrors economy.csv L0 (0.38 eggs/s, 2700 max)', () => { expect(on.m4!.offline!.eggsPerSec[0]).toBe(0.38); expect(on.m4!.offline!.maxEggs2h[0]).toBe(2700); });
@@ -15,7 +17,7 @@ describe('M4A-4 offline grant from data', () => {
   });
   it('< offlineMinSeconds => 0; flag off unchanged (AC11 formula)', () => {
     expect(applyOffline(st(0), 59_000, on).eggs).toBe(0);
-    expect(applyOffline({ ...st(0), farmLevel: 0 }, 3600_000, balance).eggs).toBe(offlineEggs(3600, 0, balance));
+    expect(applyOffline({ ...st(0), farmLevel: 0 }, 3600_000, off).eggs).toBe(offlineEggs(3600, 0, off));
   });
   it('the row read is the Hens level (H1 => CSV L1 0.5/s, 3600 cap)', () => { expect(m4OfflineEggs(3600, 1, on)).toBe(1800); expect(m4OfflineEggs(7200, 1, on)).toBe(3600); });
 });

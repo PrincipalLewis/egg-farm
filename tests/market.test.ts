@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { balance as b, validateBalance } from '../src/config/balance';
+import { salePriceCents } from '../src/sim/tracks';
 import { initialState, customerIntervalS, GameState, eggPriceCents, demandRange, farmCost, queueMax } from '../src/sim/state';
 import { step, advance } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
@@ -80,7 +81,8 @@ describe('market spec MK-*', () => {
   it('MK-12 / Q3 price at sale time after farm upgrade; queued N unchanged', () => {
     let s = { ...s0(), coinsCents: farmCost(0, b) * 100, basket: 5, customers: [cust(1, 5)] };
     s = apply(s, { type: 'buyFarm' }, b); expect(s.customers[0].demand).toBe(5);
-    s = apply(s, { type: 'sell', customerId: 1 }, b); expect(s.coinsCents).toBe(5 * eggPriceCents(1, 0, b));
+    const p = salePriceCents(s, b); expect(p).toBe(salePriceCents({ ...s, farmLevel: 1 }, b)); // M4 on: price from the tracks at sale time (M4A-5)
+    s = apply(s, { type: 'sell', customerId: 1 }, b); expect(s.coinsCents).toBe(5 * p);
   });
   it('MK-9 sell all front-to-back stops at empty basket', () => {
     const s = apply({ ...s0(), basket: 9, customers: [cust(1, 4), cust(2, 4), cust(3, 4)] }, { type: 'sellAll' }, b);

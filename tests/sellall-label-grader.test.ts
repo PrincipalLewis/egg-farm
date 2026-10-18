@@ -1,6 +1,7 @@
 // QA bug-sellall-label-grader: the Sell all label must equal what the sellAll action pays (Grader mult + per-order rounding).
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
+import { salePriceCents } from '../src/sim/tracks';
 import { initialState, eggPriceCents } from '../src/sim/state';
 import { apply, sellAllPreview } from '../src/sim/actions';
 import { graderMult } from '../src/sim/workers';
@@ -31,10 +32,15 @@ describe('Sell all label = actual sellAll money delta', () => {
       expect(eggPriceCents(3, 1, b)).toBe(129); expect(Number.isInteger(p.cents)).toBe(true); expect(p.cents).toBe(after.coinsCents - s.coinsCents); }
   });
   it('absolute payout pinned: per-order round(k x 129 x 1.5), not round of the total', () => {
+    // 129 = flag-off price at F3/C1. M4 ships ON (D-CEO-20261019-01); the per-order rounding rule is price-agnostic, so this
+    // absolute pin runs on an explicit forced-flag-off build, and the same rule is then checked on the shipped (M4-on) price.
+    const off = { ...b, m4: { ...b.m4!, enabled: 0 } };
     const s = { ...st(1, 100, 21.7), farmLevel: 3, collectionLevel: 1 }; // basket 21 -> orders take 5, 13, 3
     const want = [5, 13, 3].reduce((a, k) => a + Math.round(k * 129 * 1.5), 0);
     expect(want).toBe(968 + 2516 + 581); expect(want).not.toBe(Math.round(21 * 129 * 1.5));
-    expect(sellAllPreview(s, b)).toEqual({ eggs: 21, cents: want }); expect(apply(s, { type: 'sellAll' }, b).coinsCents - s.coinsCents).toBe(want);
+    expect(sellAllPreview(s, off)).toEqual({ eggs: 21, cents: want }); expect(apply(s, { type: 'sellAll' }, off).coinsCents - s.coinsCents).toBe(want);
+    const p = salePriceCents(s, b), wantOn = [5, 13, 3].reduce((a, k) => a + Math.round(k * p * 1.5), 0);
+    expect(sellAllPreview(s, b)).toEqual({ eggs: 21, cents: wantOn }); expect(apply(s, { type: 'sellAll' }, b).coinsCents - s.coinsCents).toBe(wantOn);
   });
   it('app.ts builds the #sellAll label from sellAllPreview (no second copy of the price math)', () => {
     const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
