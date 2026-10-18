@@ -90,3 +90,7 @@
 - done: merged origin/main 97a57c1 (e0c65c8) and 68950c0 (7519fb1) into fix/hidden-tab-offline; gates green on 7519fb1. Tab-guard Play here min-height 48px + rc0 hiddentabguard row (2340d61, b3e17fa WebKit settle fix); shots art-ux/reviews/pr25-2340d61-m1-deactivate/.
 - next: HoE push; CCR + QA on merge and tip; UI/Visual Designer re-check shots.
 - blocked: none. origin/main now 8e6d53e (#33/#34/#36), merges cleanly, not merged in.
+## 2026-10-19 00:40 Senior Software Architect (rc/m4-on-tests-2, stacked on #41)
+- done: M4-on test triage final (engineering/reviews/m4-on-test-triage.md). Unit 55->9 failed (854), slow 7 failed; all remaining = AC7/pacing bot vs balance (HoP/CEO-Product). 5 save suspects = test artifacts (Saves c3811f7). M4-on golden 403ca889 (2 runs identical); flag-off golden kept forced-off. rc0 chromium 249/249. No src/data changes.
+- next: PR against rc/m4-default-on; HoP retune / AC7 bot decision for the 16 balance tests.
+- blocked: none.
