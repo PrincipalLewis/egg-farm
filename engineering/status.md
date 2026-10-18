@@ -94,3 +94,7 @@
 - done: M4-on test triage final (engineering/reviews/m4-on-test-triage.md). Unit 55->9 failed (854), slow 7 failed; all remaining = AC7/pacing bot vs balance (HoP/CEO-Product). 5 save suspects = test artifacts (Saves c3811f7). M4-on golden 403ca889 (2 runs identical); flag-off golden kept forced-off. rc0 chromium 249/249. No src/data changes.
 - next: PR against rc/m4-default-on; HoP retune / AC7 bot decision for the 16 balance tests.
 - blocked: none.
+## 2026-10-19 01:20 Senior Software Architect (#42, D-HOP-2026-10-19-01)
+- done: HENS/VALUE in AC7/pacing bots (tests/bot-m4.ts, payback pick). Unit 850/854 (4 fail: pacing L10 12.5 min, cheapest>=70% NEW, acw1, p4); slow 10/14 (4 seller-variance Python parity/quantiles). 10 of 16 fixed. M4-on golden trace re-pinned 9173492e (2 runs); flag-off unchanged. AC7 L10 P95 15.33/15.09 min (gate 12: FAIL), matches Economy within 0.1 %. Hint check: M4 next-goal is best payback (next-goal.ts:57/59), not cheapest; HoP condition not met.
+- next: HoP 03:30 retune; Art & UX hint check; Python fixture regen decision.
+- blocked: none.

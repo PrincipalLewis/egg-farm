@@ -91,6 +91,55 @@ Diff vs base 90a9c84 at 06171c7. No src/ or data/ changes.
 | tests/tick.test.ts | AC4 expects the M4 track price (salePriceCents) |
 | tests/workers.test.ts | Grader sale expects track price x tier (salePriceCents) |
 
+## D-HOP-2026-10-19-01 bot change
+
+Change (separate commit): tests/bot-m4.ts `pickBuy`, used by tests/bot.ts (runBot) and tests/bot-m2.ts (runM2). With M4 on, seller15 picks Farm/Hens/Egg value by the game's own payback rule (src/ui/tracks-ui.ts:53 highlightPick -> src/econ/best-buy.ts bestPaybackAmong, the Farm-tab highlight); Collection keeps the 50 % rule against the picked row's cost. The cheapest model takes the cheapest affordable of C/F/H/V. Flag off = the old rule, byte for byte. Pure function of state: deterministic. No thresholds, assertions, src/ or data/ touched.
+
+Goldens: flag-off golden unchanged (f90d1678 + storage pins pass). M4-on golden sim trace 403ca889… -> **9173492e41ac06cbe3c077bcbadc464ad5ce681646eb4b9619b640ff40a31f6b** (runBot is part of the trace), regenerated twice, identical. M4-on storage pins unchanged.
+
+### The 16 tests, before / after
+| file | test | before (06171c7) | after | status |
+|---|---|---|---|---|
+| tests/pacing.test.ts | >= 9 upgrades by 5 min | FAIL: median 7 | PASS: 13 | PASS |
+| tests/pacing.test.ts | Farm L10 within 8-12 min | FAIL: never (Infinity) | FAIL: 12.5 min (gate <= 12) | balance, goes into HoP's 03:30 retune |
+| tests/pacing.test.ts | AC7 Farm level at 30:00 in band | FAIL: F7 (band >= 18) | PASS: F20 | PASS |
+| tests/pacing-acw1.test.ts | >= 95% reach F10 in 15 min; F18 median <= 40; Python parity ±20% | FAIL: pass10 0% | FAIL: pass10 1%, medF10 17.33 min (Python 10.33), medF18 28.33 (Python 21.33) | balance, goes into HoP's 03:30 retune (the Python reference also has no M4 tracks) |
+| tests/pacing-m2.test.ts | AC-W2 managed <= +1 min vs M1 | FAIL: +14.5 min | PASS | PASS |
+| tests/pacing-m2.test.ts | AC-W4 F18->F25 <= 6 min, F25 <= 70 | FAIL: Infinity | PASS | PASS |
+| tests/pacing-m2b.test.ts | AC-W3 unmanaged F25 faster | FAIL: Infinity | PASS | PASS |
+| tests/pacing-m2b.test.ts | AC-W6 Coop Hand >= 4 min | FAIL: NaN | PASS | PASS |
+| tests/p4.test.ts | W4 ~4.5 / W4b ~5.25 / Manage ~6.88 (±0.3 min / ±10%) | FAIL: Infinity | FAIL: W4 2.75, W4b 3.25 (off by 1.75 min), Manage 6.75/15 min | balance, goes into HoP's 03:30 retune (Economy P4 re-sim targets are pre-M4) |
+| tests/ac7-worst-seed.slow.test.ts | F1 variance bot L18-25 P95 <= 390 / worst <= 480 | FAIL: L18 not completed | PASS: P95 229.1 s, worst 246.2 s; t20 P95 1736 s (warn > 1740, 4 s margin) | PASS |
+| tests/ac7-worst-seed.slow.test.ts | F1 fixed bot <= 360 | FAIL: L18 not completed | PASS: 180 s | PASS |
+| tests/seller-variance.slow.test.ts | m1 per-seed reach exact vs Python, 100 seeds | FAIL: seed 1 L1 135 s vs 105 | FAIL: seed 1 differs (Python fixtures have no tracks) | balance, goes into HoP's 03:30 retune / needs Python fixture regeneration with the M4 bot (fixture owner) |
+| tests/seller-variance.slow.test.ts | m2 per-seed L@30 equal vs Python | FAIL | FAIL: same cause | balance, goes into HoP's 03:30 retune / Python fixtures |
+| tests/seller-variance.slow.test.ts | m1 AC7 quantiles match Python | FAIL: L@30 P5 6 vs 20 | FAIL: L@30 P5 18 vs 20 | balance, goes into HoP's 03:30 retune |
+| tests/seller-variance.slow.test.ts | m2 AC7 quantiles match Python | FAIL: L@30 P5 6 vs 20 | FAIL: t18 P5 off by 8.5% vs Python (limit 2%) | balance, goes into HoP's 03:30 retune |
+| tests/seller-variance.slow.test.ts | AC7 band 6dca24cd (hard band) | FAIL: m1 P5 6 vs >= 18 | PASS | PASS |
+
+**Result: 10 of 16 now pass; 6 still fail (unit: pacing L10, acw1, p4; slow: seller-variance m1/m2 parity, m1/m2 quantiles): balance, goes into HoP's 03:30 retune.**
+
+**New failure caused by the bot change (was passing):** tests/pacing.test.ts 'cheapest-first Farm level >= 70% of seller15 at 10 and 30 min': cheapest F4 vs seller15 F6 at 10 min (needs >= 4.2). Assertion untouched. Under M4 the cheapest bot spreads coins over C/H/V, so its Farm level lags. Listed for HoP with the retune (balance, goes into HoP's 03:30 retune); alternatively HoP defines the cheapest model's M4 rule.
+
+### AC7 L10 / L30+ (100 seeds, VAR_DEFAULT, Economy's horizons and metric definitions, computed with this branch's bots)
+| metric | no workers (60 min) | workers (2 h) | Economy scratch/m4-ac7-bot | agreement |
+|---|---|---|---|---|
+| L10 P95 (gate <= 12 min) | **15.33 min: FAIL** | **15.09 min: FAIL** | 15.31 / 15.09 | +0.1 % / 0.0 % (HoQA ±20 %: PASS) |
+| L10 fastest (>= 8) | 11.17 | 11.51 | 11.17 / 11.51 | identical |
+| Farm L@30 P5/P50/P95 (band nw 18-22, w 20-24) | 18/19/19 (P5 on floor) | 20/20/21 (P5 on floor) | 18/19/19, 20/20/21 | identical |
+| t18 P50 (L18 sanity 19.8 ±10 %, non-gating) | 25.89 min | 23.94 min | 25.89 / 23.94 | identical |
+| L18-25 var P95 / worst; fixed | n/a | 229.1 / 246.2 s; 180 s | 229.1 / 246.2; 180 | identical |
+| L30 (max level) reached | 0/100 in 60 min (median max level F24) | 100/100; t30 P50 50.18 / P95 51.93 min | n/a | |
+
+The two bots use the same rule, so they agree to within 0.1 %. L10 P95 is not a repo test (Economy's gates.py from data/pacing-targets.json); it fails by ~3.1-3.3 min: balance, goes into HoP's 03:30 retune.
+
+## Handoff for Art & UX: new-save hint with M4 on
+With M4 on, a new save's next-goal hint points to **Hens** (payback 120 s) instead of Collection (150.6 s). HoP provisionally accepted it *if it follows the cheapest next-goal rule*. **It does not.** With M4 on the pick is best payback, not cheapest:
+- src/ui/next-goal.ts:57: `bp = m4On(b) ? bestPaybackAmong(s, b, pool...)`; :59 the cheapest rule (`cheapest`, defined :31) is only the fallback when payback gives nothing (flag off).
+- The hint is the DualPicker `hint` (src/ui/pick-hysteresis.ts:32 allScorer, best payback over every option); src/ui/pick-hysteresis.ts:88 replaces the hint with the highlight whenever the hint's pick is a Farm-tab row, so on a new save hint = highlight = HENS.
+- Under the cheapest rule a new save would show Collection ($10 vs Hens $36).
+Art & UX: please check the hint against the Farm-tab highlight (they are designed to match). HoP must re-decide, because the acceptance condition is not met.
+
 ## Golden hashes (sha256)
 | golden | old (flag-off, a01faea; still pinned in the forced-off test) | M4-on (new, engineering/golden/m4on-golden.90a9c84.test.ts) |
 |---|---|---|
