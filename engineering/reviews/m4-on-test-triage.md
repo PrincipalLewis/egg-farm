@@ -58,6 +58,39 @@ Decision: D-CEO-20261019-01 (M4 ships ON). Branch = 90a9c84 + 94e373f (rc0 scrip
 | tests/seller-variance.slow.test.ts | m2 AC7 quantiles | AC7/pacing bot never buys Hens/Value (tests/bot.ts has no buyTrack); with M4 on production follows Hens L0, so the bot stalls around F6-7 (got: L@30 P5 6 vs 20) | b | HoP retune / CEO-Product AC7 bot decision; untouched |
 | tests/seller-variance.slow.test.ts | AC7 band 6dca24cd | AC7/pacing bot never buys Hens/Value (tests/bot.ts has no buyTrack); with M4 on production follows Hens L0, so the bot stalls around F6-7 (got: m1 P5 6 vs >= 18) | b | HoP retune / CEO-Product AC7 bot decision; untouched |
 
+## Changed tests and goldens in #42 (D-CEO-20261019-03)
+Diff vs base 90a9c84 at 06171c7. No src/ or data/ changes.
+
+| file | reason |
+|---|---|
+| engineering/golden/flagoff-golden.a01faea.test.ts | now forces m4.enabled=0 explicitly; old pins unchanged and passing |
+| engineering/golden/m4on-golden.90a9c84.test.ts | NEW M4-on golden on the shipped balance (trace 403ca889 + 4 storage pins), generated twice, identical |
+| scripts/rc0-browser.mjs | 94e373f: Farm-row selectors (data-kind/data-track=farm) + `$…[BT]` regex for the M4 price |
+| tests/helpers.ts | expOffline reads the M4 CSV offline table at the Hens level (M4A-4); new expOfflineV6 for unmarked v6 seeds (flag-off grant, ADR M4-14..17) |
+| tests/hidden-save-paths.test.ts | Saves c3811f7: N2 quota-retry case runs on tracksOff(b) (fresh M4 farm is marked at creation, game.ts:75) |
+| tests/hidden-tab.test.ts | view() drops the per-farm random v6BackupId (M4-22); offline numbers via the M4-aware helper |
+| tests/hidden-time.test.ts | same as hidden-tab |
+| tests/idb-mirror.test.ts | Saves c3811f7: seeds a marked save (mirror paused for an unmarked v6 until the commit) |
+| tests/m4a-flag-off.test.ts | asserts the flag ships 1; flag-off parity stays forced-off |
+| tests/m4a-offline-csv.test.ts | flag-off case uses an explicit forced-off balance |
+| tests/m4a-pick-hysteresis.test.ts | fresh-save case kept forced-off (55.6/111.9 pins) + new M4-on structural case (no numbers pinned) |
+| tests/m4a-save-migrate.test.ts | flag-off case uses an explicit forced-off balance |
+| tests/m4a-saveseq-carry.test.ts | Saves c3811f7: flag-off cases use the shipped balance with enabled 0 |
+| tests/m4a-sync.test.ts | the sync-generated m4 block keeps enabled 1 (D-CEO-20261019-01) |
+| tests/m4a-tracks-ui.test.ts | the 'HENS hidden when flag off' check uses a forced-off balance |
+| tests/m4a-tracks.test.ts | asserts the flag ships 1; flag-off cases (eggs/s, price, buyTrack no-op, M4A-8 base) use `off` |
+| tests/market.test.ts | MK-12 expects the M4 track price at sale time (salePriceCents, M4A-5) |
+| tests/next-goal.test.ts | AC5 cheapest-first picker pinned to forced flag off; M4-on pick is covered by m4a-tracks-ui (M4A-18) |
+| tests/offline-modal.test.ts | unmarked v6 seed: expects the flag-off grant (expOfflineV6) |
+| tests/onboarding.test.ts | debugBackdateSave grant via the M4-aware expOffline |
+| tests/s2-3a.test.ts | 'before ~15%' repro on forced-off; M4: after >= 40% and after >= before (threshold unchanged) |
+| tests/save-majors-2959ba0.test.ts | Saves c3811f7: seeds a marked save; BUG-2 assertions unchanged |
+| tests/save.test.ts | Saves c3811f7: AC8 adds the marker when m4On; 'not granted twice' uses expOfflineV6 |
+| tests/sellall-label-grader.test.ts | 129 c absolute pin on forced-off + same rounding rule on the M4 price |
+| tests/tab-guard-tg.test.ts | TG-5: unmarked v6 seed, flag-off grant (expOfflineV6) |
+| tests/tick.test.ts | AC4 expects the M4 track price (salePriceCents) |
+| tests/workers.test.ts | Grader sale expects track price x tier (salePriceCents) |
+
 ## Golden hashes (sha256)
 | golden | old (flag-off, a01faea; still pinned in the forced-off test) | M4-on (new, engineering/golden/m4on-golden.90a9c84.test.ts) |
 |---|---|---|
