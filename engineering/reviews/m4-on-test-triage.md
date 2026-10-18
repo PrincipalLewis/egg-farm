@@ -140,6 +140,56 @@ With M4 on, a new save's next-goal hint points to **Hens** (payback 120 s) inste
 - Under the cheapest rule a new save would show Collection ($10 vs Hens $36).
 Art & UX: please check the hint against the Farm-tab highlight (they are designed to match). HoP must re-decide, because the acceptance condition is not met.
 
+## D-HOP-2026-10-19-02 bot change (replaces -01) + HoE follow-ups
+
+**c163fb9 (-01) vs D-HOP-02:** Farm/Hens/Egg value via highlightPick: yes. Collection through the pick: **no** (kept the 50 % rule). Workers through the pick: **no** (runM2 hired workers first by QA order). Wait rule: **no** (an unaffordable pick could still buy Collection; the variance cheap-first roll also bought Collection outside the pick). Cadence/seeds unchanged: yes. Cheapest bot (D-HOP-03): yes. Economy's scratch/m4-ac7-bot follows the -01 shape too, so per HoE it was NOT ported.
+
+**Change (8308417):** tests/bot-m4.ts `pickM4All`: with M4 on, seller15 buys only the game's pick, `bestPaybackAmong` (src/econ/best-buy.ts:151) over every offered purchasable it can buy (runBot: Farm, Hens, Egg value, Collection; runM2 adds the workers in use, W1-W4), with the highlightPick call shape (src/ui/tracks-ui.ts:53: affordable keys first, else all). Wait rule: if the pick is unaffordable, nothing is bought that check-in; the variance cheap-first roll is not applied with M4 on. Flag off = old rule. Cheapest bot unchanged (D-HOP-03). M4-on golden sim trace 9173492e… -> **723b91ab311be9bf403e7bd5a8f7363bc85234287354c4dedf94a45613faa817** (2 runs identical); flag-off golden unchanged.
+
+**seller-variance Python parity forced flag-off (32ebe43, own commit, revertable):** traces, per-seed and quantile cases run with m4.enabled 0 (the fixtures model the pre-M4 bot); the AC7 band case runs on the shipped M4-on balance. Fixtures untouched (Economy).
+
+**First purchase (969d7a9, tests/ac7-first-purchase.test.ts):** new save, seeds 1-200, M4 on: deterministic bot max **15 s** (gating, <= 30 s: PASS). Variance bot reported only: 40/200 seeds over 30 s (max 57.8 s), **identical with M4 forced off**, so it measures the bot's random check-in cadence, not the game.
+
+### The 16 tests (before = 06171c7, -01 = c163fb9, now = -02 + follow-ups)
+| test | before | -01 | now |
+|---|---|---|---|
+| pacing >= 9 upgrades by 5 min | FAIL 7 | PASS 13 | PASS 13 |
+| pacing Farm L10 8-12 min | FAIL never | FAIL 12.5 | **FAIL 13.0 min**: balance, goes into HoP's 03:30 retune |
+| pacing Farm level at 30:00 in band | FAIL F7 | PASS F20 | PASS F19 |
+| pacing-acw1 | FAIL 0 % | FAIL 1 % | **FAIL 1 %, medF10 18.0 (Py 10.33), medF18 29.67 (Py 21.33)**: balance, goes into HoP's 03:30 retune |
+| pacing-m2 AC-W2 | FAIL +14.5 | PASS | PASS |
+| pacing-m2 AC-W4 | FAIL Inf | PASS | PASS |
+| pacing-m2b AC-W3 | FAIL Inf | PASS | PASS |
+| pacing-m2b AC-W6 | FAIL NaN | PASS | PASS |
+| p4 W4/W4b/Manage | FAIL Inf | FAIL 2.75/3.25/6.75 | **FAIL 3.0/3.25/6.63 (targets 4.5/5.25/6.88)**: balance, goes into HoP's 03:30 retune |
+| ac7-worst-seed variance | FAIL L18 n/c | PASS 229.1/246.2 s | PASS 239.2/268.1 s (t20 P95 1763 s > 1740 warn, non-gating) |
+| ac7-worst-seed fixed | FAIL | PASS 180 s | PASS 180 s |
+| seller-variance m1 per-seed (Python) | FAIL | FAIL | PASS (flag-off parity) |
+| seller-variance m2 per-seed (Python) | FAIL | FAIL | PASS (flag-off parity) |
+| seller-variance m1 quantiles | FAIL P5 6 | FAIL P5 18 | PASS (flag-off parity) |
+| seller-variance m2 quantiles | FAIL P5 6 | FAIL t18 8.5 % | PASS (flag-off parity) |
+| seller-variance AC7 band (M4 on) | FAIL P5 6 | PASS | PASS |
+Also: pacing 'cheapest >= 70 % of seller15' (newly failing under -01) PASSES again (seller15 F5 at 10 min, cheapest F4).
+
+### AC7, seeds 1-200, VAR_DEFAULT (60 min no workers / 2 h workers)
+| metric | no workers | workers | Economy (100 seeds, -01-shape bot) |
+|---|---|---|---|
+| L10 P95 (gate <= 12) | **15.65 min FAIL** (seeds 1-100: 15.40) | **15.38 min FAIL** (1-100: 15.38) | 15.31 / 15.09 |
+| agreement with Economy (HoQA ±20 %) | +2.2 % | +1.9 % | PASS |
+| L10 fastest (>= 8) | 11.45 | 11.23 | 11.17 / 11.51 |
+| Farm L@30 P5/P50/P95 | 18/19/19 | 20/20/21 | same |
+| t18 P50 | 26.19 | 24.04 | 25.89 / 23.94 |
+| L30 reached | 0/200 in 60 min (median max F24) | 200/200; t30 P50 52.91 / P95 54.31 min | n/a |
+
+### CCR Minors (06171c7 review)
+- m1 (1a24902): literal 100 c in tick/workers/sellall M4-on expectations.
+- m2 (427573a): MK-12 now sells before and after a Farm upgrade at H5/V5: 220 c -> 242 c (Balanced tier 1).
+- m3 (5889947): M4-on N2 refusal case; verified by removing `this.state.tracksV7 === 1` from src/game.ts:232 locally (test failed), then restored (no src diff).
+- n1 (beb7a8a): offline-modal g2 uses expOfflineV6(120). n2, n3 not done (n2 acceptable per CCR; n3 pre-existing rc0 flake).
+
+### Gates now
+tsc clean; unit **855/858** (3 fail: pacing L10, pacing-acw1, p4 = balance, goes into HoP's 03:30 retune); slow **14/14**; goldens 4/4.
+
 ## Golden hashes (sha256)
 | golden | old (flag-off, a01faea; still pinned in the forced-off test) | M4-on (new, engineering/golden/m4on-golden.90a9c84.test.ts) |
 |---|---|---|

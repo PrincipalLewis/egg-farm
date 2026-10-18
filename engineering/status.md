@@ -98,3 +98,7 @@
 - done: HENS/VALUE in AC7/pacing bots (tests/bot-m4.ts, payback pick). Unit 850/854 (4 fail: pacing L10 12.5 min, cheapest>=70% NEW, acw1, p4); slow 10/14 (4 seller-variance Python parity/quantiles). 10 of 16 fixed. M4-on golden trace re-pinned 9173492e (2 runs); flag-off unchanged. AC7 L10 P95 15.33/15.09 min (gate 12: FAIL), matches Economy within 0.1 %. Hint check: M4 next-goal is best payback (next-goal.ts:57/59), not cheapest; HoP condition not met.
 - next: HoP 03:30 retune; Art & UX hint check; Python fixture regen decision.
 - blocked: none.
+## 2026-10-19 01:35 Senior Software Architect (#42, D-HOP-02 + HoE follow-ups)
+- done: seller15 M4 bot = game pick over all purchasables + wait rule; seller-variance parity forced flag-off (own commit); first-purchase <= 30 s test (seeds 1-200); CCR m1-m3 + n1. Unit 855/858 (pacing L10 13.0, acw1, p4 = balance), slow 14/14. AC7 L10 P95 (1-200) 15.65/15.38 min (gate 12 FAIL), +2 % vs Economy. M4-on golden trace 723b91ab.
+- next: HoP 03:30 retune.
+- blocked: none.
