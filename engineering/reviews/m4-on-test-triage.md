@@ -1,4 +1,6 @@
-# M4-on test triage, rc/m4-on-tests from 90a9c84: WIP (STOPPED, release parked)
+# M4-on test triage, rc/m4-on-tests-2 from 90a9c84 (PR #41 base): IN PROGRESS
+
+> Revived 2026-10-19 (D-CEO-20261019-01). Branch rc/m4-on-tests-2 = 90a9c84 + cherry-pick 94e373f + cherry-pick c3811f7 (Saves). Baseline with c3811f7: unit 55 failed / 851, slow 7 failed / 14. The 5 save suspects are **test artifacts, fixed by Saves (c3811f7)**; see the Saves section. Historical WIP notes below are kept for reference; the final table supersedes them.
 
 Status: **WIP, stopped at 14:53 CEST on instruction (release parked).** No test changes made yet; only the rc0 script fixes are done. No BUG confirmed so far (none triaged far enough to confirm or rule out).
 
@@ -94,3 +96,22 @@ Baseline at 90a9c84 (M4 on), vitest 2 forks: unit **62 failed / 851**, slow **7 
 ## Not done
 - Golden regeneration, all test edits, final gates.
 - Commit identity: no written Head-of-Engineering rule found in engineering/*.md or CONTRIBUTING (only the rc commit author), so used Senior Software Architect.
+
+## Saves: c3811f7 test changes (M4-on artifacts)
+
+Commit c3811f750bfb53a565c9b547966abead074ff4dc on local branch test/m4on-saves-artifacts (off rc/m4-on-tests @94e373f, not pushed). It rewrites 7 test cases and unskips none. Lines are in the test file at c3811f7. Src refs were re-read at 94e373f with `git show 94e373f:<file>`.
+
+| status | test file:line | test name | reason (one line) | backing src (94e373f) |
+|---|---|---|---|---|
+| test artifact, fixed in c3811f7 | tests/hidden-save-paths.test.ts:29 | saveWithQuotaRetry, N2 quota retry (own aborted v6 record removed, then retried): retry writes the snapshot | With M4 on, a fresh Game gets the marker at creation, so N2 correctly refuses to remove the backup. The fix runs on `tracksOff(b)`, the aborted-session balance. | src/game.ts:75 (M4-22 fresh-farm commit); src/game.ts:232 (N2 refuses when `tracksV7 === 1`) |
+| test artifact, fixed in c3811f7 | tests/idb-mirror.test.ts:78 | Game mirrors every save (load-time save and immediate purchase save) with the exact localStorage bytes | An unmarked v6 seed loads as a pending tracks migration, and the mirror is paused until the commit. The fix seeds a marked save (`tracksV7: 1`, `v6BackupId`). | src/game.ts:60, :64 (mirror paused); src/game.ts:218 (resumes only after the commit) |
+| test artifact, fixed in c3811f7 | tests/idb-mirror.test.ts:85 | purchase lost from localStorage (kill before flush) is recovered from the IndexedDB copy on the next boot | Same cause: no IndexedDB write before the commit, so there is no copy to recover. The fix seeds a marked save. | src/game.ts:60, :64; src/game.ts:218 |
+| test artifact, fixed in c3811f7 | tests/save-majors-2959ba0.test.ts:50 | newer copy only in IndexedDB: the mirror write checks in its transaction, never puts, and stops the Game | The "normal mirror write" precheck was `undefined` because the mirror is paused for an unmarked v6. The fix seeds a marked save. The BUG-2 assertions are unchanged. | src/game.ts:60, :64; src/game.ts:218 |
+| test artifact, fixed in c3811f7 | tests/save.test.ts:11 | AC8 round-trips coins, coop, basket, levels | Under M4 on, load() of an unmarked v6 returns the pending-migration descriptor (tracksMigrated, v6State, v6Keys, preTracksRaw). The fix adds the marker only when `m4On(b)`. | src/save/save.ts:106; src/save/save.ts:207 |
+| test artifact, fixed in c3811f7 | tests/m4a-saveseq-carry.test.ts:15 | M4-build-off save seq 5 -> flag-off save -> reload: the newest copy wins | A flag-off-only test asserts `m4On(b) === false` against the shipped balance (now enabled 1). The fix uses the shipped balance with `m4.enabled: 0`, not markM4BuildOff. | src/config/formulas.ts:137 (`m4On`); src/config/balance.json:164 (`enabled: 1`). No game.ts/save.ts defect. |
+| test artifact, fixed in c3811f7 | tests/m4a-saveseq-carry.test.ts:33 | flag-off save with no prior saveSeq keeps main bytes (no saveSeq) | Same: with M4 on, save() writes saveSeq, which is expected. The fix runs on the flag-off build. | src/config/formulas.ts:137; src/config/balance.json:164 |
+
+Verification: the 5 files pass 47/47 and tsc is clean at c3811f7. No real save bug was found, so no fix branch off main was made. Correction to the earlier status note: the fresh-farm commit is at src/game.ts:75, not :76.
+
+### Design note (IDB mirror pause)
+While the IDB mirror is paused pre-commit (pending tracks migration, src/game.ts:60/:64 until :218), the newer-in-IDB check at src/game.ts:256 is skipped. The localStorage newer-copy checks still run, and there are no IDB writes in that window, so nothing can overwrite a newer IDB copy; the check resumes with the mirror after the commit.
