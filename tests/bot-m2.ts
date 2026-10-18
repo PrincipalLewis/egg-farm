@@ -9,6 +9,7 @@ import type { SimEvent } from '../src/sim/events';
 import { WorkerId, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../src/sim/workers';
 import type { Model } from './bot';
 import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
+import { pickBuy, pickAction } from './bot-m4';
 export interface M2Opts {
   model: Model; T?: number; sellEvery?: number;
   /** player taps n times (1/s) at the start of every period_s window; undefined = 1 tap/s */
@@ -50,13 +51,10 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
         if (use.has(w) && !s.workers[w] && s.farmLevel >= unlockFarm(w, b) && s.coinsCents >= hireCostCents(w, b)) { s = apply(s, { type: 'hire', worker: w }, b); bought = true; }
       const tiers = b.workers.grader.tiers;
       if (use.has('grader') && s.graderTier < tiers.length && s.farmLevel >= tiers[s.graderTier].farm && s.coinsCents >= graderTierCostCents(s.graderTier, b)) { s = apply(s, { type: 'buyGraderTier' }, b); bought = true; }
-      const fc = s.farmLevel < b.maxLevel ? farmCost(s.farmLevel, b) * 100 : Infinity, cc = s.collectionLevel < b.maxLevel ? collectionCost(s.collectionLevel, b) * 100 : Infinity;
-      let kind: 'c' | 'f' | null;
-      if (o.model === 'seller15' && chf && s.collectionLevel < b.maxLevel && s.coinsCents >= cc) { kind = 'c'; chf = false; } // variance p_cheap_first
-      else if (o.model === 'seller15') kind = s.coinsCents >= fc ? 'f' : s.coinsCents >= cc && cc <= 0.5 * fc ? 'c' : null;
-      else kind = s.coinsCents >= Math.min(cc, fc) ? (cc <= fc ? 'c' : 'f') : null;
-      if (kind === 'f') { s = apply(s, { type: 'buyFarm' }, b); reach.set(s.farmLevel, t); }
-      else if (kind === 'c') s = apply(s, { type: 'buyCollection' }, b);
+      // D-HOP-2026-10-19-01: tests/bot-m4.ts pickBuy (+ HENS/VALUE with M4 on; flag off = the old Farm/Collection rule).
+      let kind = pickBuy(s, b, o.model, chf);
+      if (kind === 'c' && chf) chf = false; // variance p_cheap_first
+      if (kind) { const next = apply(s, pickAction(kind), b); if (next === s) kind = null; else { s = next; if (kind === 'f') reach.set(s.farmLevel, t); } }
       if (!kind && !bought) break;
     }
   }

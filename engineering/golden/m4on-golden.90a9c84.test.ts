@@ -20,8 +20,8 @@ const PINS: Record<string, string> = {
   'm2-rc1-v5-40min': '48b1fa43497a912c700461ddd4a2cf0abe59ba685977e7841c012ce8f7e6f1ef',
   'm2-rc1-v5-40min-edge': '78b97634d0bbc3b4a174751917ad573889ec57bc22cc3163deb4c6fec0e4a4bc',
 };
-// Generated 2026-10-19 on 90a9c84 + this branch, two runs, identical. A retune (HoP) or any M4 sim change moves these: re-pin with HoE OK.
-const GOLDEN_M4ON = '403ca889bb02121e764c402cb2c408b0aebf0bed43ca14d187ea62bbeafa7974';
+// Generated 2026-10-19 on 90a9c84 + this branch, two runs, identical. Re-pinned for the D-HOP-2026-10-19-01 bot (HENS/VALUE in runBot): previous 403ca889bb02121e764c402cb2c408b0aebf0bed43ca14d187ea62bbeafa7974. Storage pins unchanged (no bot). A retune or any M4 sim change moves these: re-pin with HoE OK.
+const GOLDEN_M4ON = '9173492e41ac06cbe3c077bcbadc464ad5ce681646eb4b9619b640ff40a31f6b';
 const FIX = ['m1-rc2-v4-12min', 'm2-rc1-v5-12min', 'm2-rc1-v5-40min', 'm2-rc1-v5-40min-edge'];
 const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
 describe('golden', () => {
