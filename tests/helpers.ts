@@ -11,3 +11,6 @@ export const expOffline = (awayS: number, L = 0, b = balance, H = 0) => {
   if (t) { const mult = hensOfflineMult(H, b); return Math.floor(Math.min(Math.min(awayS, b.offline.offlineCapSeconds) * t.eggsPerSec[H], t.maxEggs2h[H]) * mult); }
   return Math.floor(Math.min(awayS, b.offline.offlineCapSeconds) * b.offline.offlineRateMultiplier * eggsPerSec(L, b));
 };
+/** Offline grant for an UNMARKED v6 save (e.g. `save(kv, initialState(b), T0)`, no tracksV7) loaded on an M4 build: per ADR M4-14..17
+ *  (src/game.ts:57-64) it boots as plain v6 under flag-off rules until the tracks commit, so the grant is AC11 (flag off). */
+export const expOfflineV6 = (awayS: number, L = 0, b = balance) => expOffline(awayS, L, { ...b, m4: b.m4 ? { ...b.m4, enabled: 0 } : b.m4 } as typeof b);

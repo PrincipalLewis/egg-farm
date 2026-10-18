@@ -5,7 +5,7 @@ import { save, load, SAVE_KEY, SAVE_VERSION } from '../src/save/save';
 import { startAutosave } from '../src/save/autosave';
 import { initialState, collectionCost, farmCost } from '../src/sim/state';
 import { Game } from '../src/game';
-import { mem, expOffline } from './helpers';
+import { mem, expOffline, expOfflineV6 } from './helpers';
 const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 describe('save/load + migrations', () => {
   it('AC8 round-trips coins, coop, basket, levels', () => {
@@ -53,9 +53,9 @@ describe('autosave', () => {
   });
   it('offline modal not granted twice for one absence', () => {
     const kv = mem(); save(kv, initialState(b), T0);
-    const g1 = new Game(b, kv, () => T0 + 600_000); expect(g1.state.pendingOfflineEggs).toBe(expOffline(600));
+    const g1 = new Game(b, kv, () => T0 + 600_000); expect(g1.state.pendingOfflineEggs).toBe(expOfflineV6(600)); // unmarked v6 seed: flag-off grant (ADR M4-14..17)
     g1.dispatch({ type: 'collectOffline' });
-    const g2 = new Game(b, kv, () => T0 + 600_010); expect(g2.state.pendingOfflineEggs).toBe(0); expect(g2.state.basket).toBe(expOffline(600));
+    const g2 = new Game(b, kv, () => T0 + 600_010); expect(g2.state.pendingOfflineEggs).toBe(0); expect(g2.state.basket).toBe(expOfflineV6(600));
   });
 });
 describe('v4 celebratedTier', () => {
