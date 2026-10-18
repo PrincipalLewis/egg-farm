@@ -7,7 +7,8 @@ Decision: D-CEO-20261019-01 (M4 ships ON). Branch = 90a9c84 + 94e373f (rc0 scrip
 |---|---|---|
 | 90a9c84 (QA) | 62 failed / 851 | 7 failed |
 | + c3811f7 (Saves) | 55 failed / 851 | 7 failed |
-| this branch | **9 failed / 854** (all balance/AC7 bot) | **7 failed** (all balance/AC7 bot) |
+| 06171c7 | 9 failed / 854 (all balance/AC7 bot) | 7 failed (all balance/AC7 bot) |
+| **this branch (528f1a7+)** | **3 failed / 858** (pacing L10, pacing-acw1, p4: balance, HoP 03:30 retune) | **14/14 passed** |
 
 851 -> 854 tests: +1 M4-on fresh-save picker case, +2 M4-on golden cases.
 
@@ -117,7 +118,7 @@ Goldens: flag-off golden unchanged (f90d1678 + storage pins pass). M4-on golden 
 | tests/seller-variance.slow.test.ts | m2 AC7 quantiles match Python | FAIL: L@30 P5 6 vs 20 | FAIL: t18 P5 off by 8.5% vs Python (limit 2%) | balance, goes into HoP's 03:30 retune |
 | tests/seller-variance.slow.test.ts | AC7 band 6dca24cd (hard band) | FAIL: m1 P5 6 vs >= 18 | PASS | PASS |
 
-**Result: 10 of 16 now pass; 6 still fail (unit: pacing L10, acw1, p4; slow: seller-variance m1/m2 parity, m1/m2 quantiles): balance, goes into HoP's 03:30 retune.**
+**Result at c163fb9 (-01, superseded): 10 of 16 passed; 6 failed (unit: pacing L10, acw1, p4; slow: seller-variance m1/m2 parity, m1/m2 quantiles): balance, goes into HoP's 03:30 retune.**
 
 **New failure caused by the bot change (was passing):** tests/pacing.test.ts 'cheapest-first Farm level >= 70% of seller15 at 10 and 30 min': cheapest F4 vs seller15 F6 at 10 min (needs >= 4.2). Assertion untouched. Under M4 the cheapest bot spreads coins over C/H/V, so its Farm level lags. Listed for HoP with the retune (balance, goes into HoP's 03:30 retune); alternatively HoP defines the cheapest model's M4 rule.
 
@@ -209,8 +210,8 @@ None. All 5 save suspects are test artifacts, fixed by Saves in c3811f7 (verifie
 
 ## Gates (vitest --poolOptions.forks.minForks=1 --poolOptions.forks.maxForks=2)
 - tsc --noEmit: clean
-- unit: 845 passed / 9 failed / 854 (the 9 = balance list)
-- test:slow: vendor pins OK; 7 passed / 7 failed (the 7 = balance list)
+- unit: 845 passed / 9 failed / 854 at 06171c7; **now 855/858, 3 left (pacing L10, pacing-acw1, p4)**
+- test:slow: 7/14 at 06171c7; **now 14/14**
 - golden: 4/4
 - build:qa OK; rc0-browser chromium (flock .browser-test-2.lock, load ~8.9): **249/249 passed**, incl. the 4 rows fixed in 94e373f
 

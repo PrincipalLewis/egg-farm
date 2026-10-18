@@ -12,9 +12,9 @@ describe('AC7 new save: first purchase within 30 s (seeds 1-200, M4 on)', () => 
     console.log(`first purchase deterministic: max ${Math.max(...t)} s`);
     for (const [i, x] of t.entries()) expect(x, `seed ${i + 1}`).toBeLessThanOrEqual(30);
   });
-  // Report only: the variance bot's first check-in is itself random (VAR_DEFAULT check interval / p_delay). 40/200 seeds buy
+  // REPORT-ONLY (non-gating; random-timing bot): the variance bot's first check-in is itself random (VAR_DEFAULT check interval / p_delay). 40/200 seeds buy
   // after 30 s (P95 42 s, max 57.8 s), identical with M4 forced off, so it measures the bot's cadence, not the game.
-  it('variance bot (report, non-gating)', () => {
+  it('variance bot (random timing): REPORT-ONLY, non-gating, first-purchase time logged', () => {
     const t = SEEDS.map(s => runBot(b, s, 'seller15', 120, 15, VAR_DEFAULT).firstUpgradeS ?? Infinity);
     console.log(`first purchase variance: ${t.filter(x => x > 30).length}/200 over 30 s, max ${Math.max(...t)} s`);
     expect(t.every(Number.isFinite)).toBe(true);
