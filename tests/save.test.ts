@@ -1,3 +1,4 @@
+import { m4On } from '../src/config/formulas';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { save, load, SAVE_KEY, SAVE_VERSION } from '../src/save/save';
@@ -8,7 +9,7 @@ import { mem, expOffline } from './helpers';
 const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 describe('save/load + migrations', () => {
   it('AC8 round-trips coins, coop, basket, levels', () => {
-    const kv = mem(); const s = { ...initialState(b), coinsCents: 4250, coop: 17.3, basket: 9, collectionLevel: 2, farmLevel: 4 };
+    const kv = mem(); const s = { ...initialState(b), coinsCents: 4250, coop: 17.3, basket: 9, collectionLevel: 2, farmLevel: 4, ...(m4On(b) ? { tracksV7: 1 as const, v6BackupId: '0123456789abcdef' } : {}) }; // M4 on: an unmarked v6 loads as a pending tracks migration
     save(kv, s, 123); expect(load(kv, b)).toEqual({ version: SAVE_VERSION, savedAt: 123, state: s });
   });
   it('null on empty, corrupt, or newer-version save', () => {
