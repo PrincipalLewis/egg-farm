@@ -34,11 +34,16 @@ const lvlAt = (r: Record<string, number>, t: number) => Math.max(0, ...Object.en
 const REL_EPS = 1e-12;
 const near = (a: number, e: number) => a === e || Math.abs(a - e) <= REL_EPS * Math.max(Math.abs(a), Math.abs(e));
 const t18 = (r: Record<string, number>) => (r['18'] ?? Infinity) / 60;
-const LVL30: Partial<Record<'m1' | 'm2', number[]>> = {};
-const RUN = {
-  m1: (s: number, v?: typeof VAR_DEFAULT) => reachOf(runBot(b, s, 'seller15', fx.T, 15, v).reach),
-  m2: (s: number, v?: typeof VAR_DEFAULT) => reachOf(runM2(b, s, { model: 'seller15', T: fx.T, variance: v }).reach),
-};
+/** Python-parity runs (traces, per-seed, quantiles) compare FLAG-OFF parity: the Python fixtures model the pre-M4 bot.
+ *  M4 forced off here (HoE, 2026-10-19; own commit, revertable). Fixture regeneration with M4 is Economy's. */
+const bOff = { ...b, m4: { ...b.m4!, enabled: 0 } };
+const runs = (bb: typeof b) => ({
+  m1: (s: number, v?: typeof VAR_DEFAULT) => reachOf(runBot(bb, s, 'seller15', fx.T, 15, v).reach),
+  m2: (s: number, v?: typeof VAR_DEFAULT) => reachOf(runM2(bb, s, { model: 'seller15', T: fx.T, variance: v }).reach),
+});
+const RUN = runs(bOff);
+/** AC7 band stays on the shipped balance (M4 on). */
+const RUN_ON = runs(b);
 
 describe('variance stream = CPython random.Random (exact)', () => {
   it('params object = Python VAR_DEFAULT', () => expect(fx.var).toEqual({ ...VAR_DEFAULT }));
@@ -104,7 +109,6 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, 
     expect(spread(tP)).toBeGreaterThanOrEqual(3); expect(spread(tP)).toBeLessThanOrEqual(15);
     expect(new Set(tT.slice(0, 30)).size).toBeGreaterThanOrEqual(15);                                   // target 1, '15 of 30 seeds' variant
     expect(new Set(tP.slice(0, 30)).size).toBeGreaterThanOrEqual(15);
-    LVL30[wk] = ts.map(r => lvlAt(r, 1800));
     console.log(`${wk} variance t18 P5/P50/P95 TS ${[.05, .5, .95].map(p => q(tT, p).toFixed(2)).join('/')} PY ${[.05, .5, .95].map(p => q(tP, p).toFixed(2)).join('/')}; spread TS ${spread(tT).toFixed(1)}% PY ${spread(tP).toFixed(1)}%; L@30 P5/P95 ${q(ts.map(r => lvlAt(r, 1800)), .05)}/${q(ts.map(r => lvlAt(r, 1800)), .95)}`);
   }, 300_000);
 });
@@ -126,7 +130,7 @@ export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): 
     expect(q(l30.m1, 0.05), 'm1 L@30 P5 (pre-F1)').toBe(17); expect(Math.max(...l30.m2), 'm2 max L@30 (pre-F1)').toBe(18);
   } else throw new Error(`unknown economy CSV ${sha}: update AC7 band test`);
 }
-const l30 = (wk: 'm1' | 'm2') => LVL30[wk] ?? fx.seeds.map(s => lvlAt(RUN[wk](s, VAR_DEFAULT), 1800));
+const l30 = (wk: 'm1' | 'm2') => fx.seeds.map(s => lvlAt(RUN_ON[wk](s, VAR_DEFAULT), 1800)); // shipped M4-on, not the flag-off parity cache
 describe(`AC7 band, variance bot (data/economy.csv ${csvSha})`, () => {
   it(`band per CSV sha ${csvSha}${csvSha === F1_CSV ? ' (F1: hard band)' : csvSha === MAIN_PRE_F1_CSV ? ' (pre-F1: known values, needs #17)' : ' (UNKNOWN)'}`, () => {
     ac7BandCheck(csvSha, { m1: l30('m1'), m2: l30('m2') });
