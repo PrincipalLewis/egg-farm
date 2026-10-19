@@ -42,9 +42,9 @@ All 200 seeds reach F50. Time on each level, median/P95 in seconds:
 | 9 | 41/65 | 19 | 98/137 | 29 | 182/283 | 39 | 222/349 | 49 | 759/778 |
 
 **Dead zones (P95 time on level > 3 min):**
-- Pre-existing on main's own data: F0, F17, F18, F20-22, F26-28. Main measured the same way flags F0, F17, F18, F20, F21, F22,
-  F26, F27, F28, so these are not new.
-- New or changed with (b): F29, plus **every level F30-F49**. The worst are F45 (9.4/9.7 min), F49 (12.7/13.0 min), F42-43
+- Pre-existing on main's own data: main measured the same way flags F0, F17, F18, F20, F21, F22, F26, F27 and F29 (main's F29
+  is the time to its cap), so these are not new.
+- New with (b): F28 (217/244 s, up from main's 155/175 because of the L30 row), plus **every level F30-F49**. The worst are F45 (9.4/9.7 min), F49 (12.7/13.0 min), F42-43
   (~7.5 min), F38 (5.8/6.2 min) and F34 (4.6/5.1 min).
 - Late-game levels at > 3 min are by design (late-game-curve-model). The 3-min flag applies mainly to the early/mid game.
   The F34/F38/F45/F49 spikes are what drive the top-step-share failure below.
