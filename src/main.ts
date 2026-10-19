@@ -5,9 +5,9 @@ import { Game } from './game';
 import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
-import { IdbMirror, reconcile, IDB_BOOT_READ_TIMEOUT_MS } from './save/idb-mirror';
+import { IdbMirror, bootPreserveIdb, IDB_BOOT_READ_TIMEOUT_MS } from './save/idb-mirror';
 import { mountApp } from './ui/app';
-import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
+import { showTabGuardDialog, showNewerSaveDialog, showRecoveryDialog, recoveryNotice, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
@@ -70,7 +70,7 @@ async function boot() {
   // guard (so a live tab is never frozen or made to save by it) and writes no save key anywhere.
   // M4-20: the boot read's outcome (ok / absent / unknown) is carried into the migration decision.
   const bootIdb = await IdbMirror.openForBoot();
-  const mirror = bootIdb.mirror; let idbRaw: string | null = bootIdb.raw;
+  const mirror = bootIdb.mirror; let idbRaw: string | null = bootIdb.raw, idbValue: unknown = bootIdb.value; // IDB1-2: the raw value (non-string = corrupt)
   let idbBoot = bootIdb.status, idbReason = bootIdb.reason;
   let preNewer: number | null = null; try { preNewer = newerStoredVersion(localStorage, idbRaw); } catch { /* localStorage blocked: Game reports it */ }
   if (preNewer !== null) { refuseNewer(preNewer, idbRaw); return; }
@@ -84,17 +84,31 @@ async function boot() {
   // before this read, so the read sees it). Review minor main.ts:79-80: re-check for a newer save here too, so a newer
   // build that saved during the flush is refused BEFORE we claim, and the live tab never flashes 'Game open in another tab'.
   // From here to `new Game` there is no await, so nothing else can save in between.
-  if (mirror) { const r2 = await mirror.readStrict(IDB_BOOT_READ_TIMEOUT_MS); if (r2 === undefined) { idbBoot = 'unknown'; idbReason = 'idb_read_error'; } else if (r2 !== null) idbRaw = r2; } // Reviewer N3: a failed/timed-out re-read keeps the first read (and defers the migration, M4-20)
+  if (mirror) { const r2 = await mirror.readValue(IDB_BOOT_READ_TIMEOUT_MS); if (r2 === undefined) { idbBoot = 'unknown'; idbReason = 'idb_read_error'; } else if (r2.kind !== 'none') { idbValue = r2.value; idbRaw = r2.kind === 'string' ? r2.value as string : null; } } // Reviewer N3: a failed/timed-out re-read keeps the first read (and defers the migration, M4-20)
   let preNewer2: number | null = null; try { preNewer2 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
   if (preNewer2 !== null) { lease.stop(); refuseNewer(preNewer2, idbRaw); return; }
   const takeover = lease.claim(playHere);
   const seedParam = new URLSearchParams(location.search).get('marketSeed'); // debug: fixed market RNG (MK-5)
-  let restored = false; // save_restore fires only when the IndexedDB copy actually replaced localStorage (QA D1)
-  if (mirror) { try { restored = reconcile(localStorage, idbRaw, balance) === 'idb'; } catch { /* localStorage blocked: Game reports it */ } }
+  // M41-7 (spec v0.3.3 OQ-7 / CSR-8): no reconcile here any more: loadSafe (inside new Game, after owns()) owns the stale-LS
+  // restore (save_restore) and every recovery write. CSR-AC-IDB1 IDB1-5: an invalid IndexedDB main is copied into corrupt.* and
+  // the transaction AWAITED before Game, so the new farm's first save can't destroy it; a failed copy => Game gets no mirror.
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
-  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, mirror, idbRaw, { idbBoot, idbAbsentReason: idbReason });
+  const idbIn = { status: idbBoot, raw: idbValue, reason: idbReason };
+  const idbCopy = await bootPreserveIdb(mirror, idbIn, balance, Date.now());
+  if (idbCopy !== 'none') {
+    if (!lease.owns()) { otherTabModal(); return; } // the copy awaited: re-check the claim and newer builds before any LS write
+    let preNewer3: number | null = null; try { preNewer3 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
+    if (preNewer3 !== null) { lease.release(); lease.stop(); refuseNewer(preNewer3, idbRaw); return; }
+  }
+  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, idbCopy === 'failed' ? null : mirror, idbValue, { idbBoot, idbAbsentReason: idbReason, idbCopy });
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
+  }
+  if (g.recoveryOutcome === 'deferred' && g.recovery) { // CSR-13 defer (M4): read-only Game, no save write; "Try again" reloads.
+    lease.release(); lease.stop();
+    g.telemetry.track('save_recovery_notice_shown', { notice: 'M4', source: 'deferred' }); g.telemetry.flush(true);
+    void showRecoveryDialog(g.recovery, asset, [root]).then(() => { g.telemetry.track('save_recovery_notice_dismissed', { notice: 'M4', source: 'deferred' }); g.telemetry.flush(true); location.reload(); });
+    return;
   }
   holdNotices = !!(g.recoveryOutcome && g.recovery) || !!lease.storageBlocked;
   // v4 (QA f6): localStorage refused the lease write. This lone tab still owns the save (never 'Game open in another tab');
@@ -106,7 +120,6 @@ async function boot() {
   let stopAutosave: (() => void) | null = null;
   g.onNewerSave = v => { lease.release(); lease.stop(); stopAutosave?.(); frozen = true; audio.mute(); showNewerSaveDialog(asset, v, () => location.reload()); };
   if (takeover) g.telemetry.track('tab_guard_takeover', { reason: takeover });
-  if (restored) g.telemetry.track('save_restore', { source: 'idb' });
   // The only release global (allowlist in check-release-build): read-only, no install_id. See Telemetry.snapshotJSON.
   (window as any).eggfarmExportTelemetry = () => g.telemetry.snapshotJSON();
   if (IOS_FLAG_ENABLED) (window as any).eggfarm = g; // debug/QA handle, compiled out of release (__IOS_FLAG__, QA rc1 item 2)
