@@ -668,6 +668,7 @@ sections.g5 = async () => {
     ok(`G5 EXP1 buy works after/through the card at ${w}`, (await page.evaluate(() => window.eggfarm.state.farmLevel)) === pre + 1);
     const tabs = await page.$$eval('[data-tab]', bs => bs.map(x => ({ h: x.getBoundingClientRect().height, p: x.querySelector('.tab-pill').getBoundingClientRect().height })));
     ok(`G5 F2 Upgrades tabs pill >=36 and hit >=44 at ${w}`, tabs.length === 3 && tabs.every(t => t.p >= 36 && t.h >= 44), JSON.stringify(tabs));
+    await page.evaluate(() => document.querySelector('[data-tab=farm]').scrollIntoView({ block: 'nearest' })); await page.waitForTimeout(150);
     if (G5) { const f = `${ENGINE}-upgrades-tabs-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state: 'migrated-v5', screen: 'upgrades-farm', asserted_tab: 'farm', checks: tabs }); }
     await page.evaluate(() => window.eggfarm.save()); await page.reload({ waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click().catch(() => {}); await page.waitForTimeout(1200);
     ok(`G5 EXP1 not shown again after reload at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
