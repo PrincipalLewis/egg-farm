@@ -219,7 +219,7 @@ export class Game {
     const raw = commitWrite(this.kv, migrated, this.now(), p.on);
     const confirmed = raw !== null && this.kv.getItem(SAVE_KEY) === raw && decodeBackup(this.kv.getItem(V6_BACKUP_KEY))?.migrationId === id;
     if (!confirmed) return this.abortTracks('ls', 'commit_write_failed', rec);
-    this.migrationRefundCents = migrateTracksV7(this.state, p.on).migrationRefundCents; // M4A-33 refund line (0 for current data)
+    this.migrationRefundCents = migrateStoredTracksV7(this.state, p.on).migrationRefundCents; // M4A-33 refund line (0 for current data)
     this.state = migrated; this.b = p.on; this.tracksPending = null; this.lastMainRaw = raw;
     try { this.kv.removeItem?.(MIGRATION_ATTEMPTS_KEY); } catch { /* best effort */ }
     this.mirror = this.pausedMirror; this.pausedMirror = null; this.mirror?.write(raw); // M4-24 (3): only after the read-back
