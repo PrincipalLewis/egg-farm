@@ -648,29 +648,66 @@ sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1
   }
 };
 // ---------- M4 gate5: tracks explainer (EXP1) + F2 Upgrades tabs; G5SHOTS=<dir> writes shots + entries ----------
+// G5MODE=swallow (variant B: a dismissing outside tap only closes) | nonmodal (variant C: outside taps register, card stays)
 sections.g5 = async () => {
-  const G5 = process.env.G5SHOTS; if (G5) mkdirSync(G5, { recursive: true }); const entries = [];
+  const G5 = process.env.G5SHOTS, MODE = process.env.G5MODE ?? 'swallow'; if (G5) mkdirSync(G5, { recursive: true }); const entries = [];
   const DONE = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
+  const rect = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; }, sel);
+  const hit = (a, b) => !!a && !!b && a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+  const shotIt = async (page, name, w, h, state, extra = {}) => { if (!G5) return; const f = `${ENGINE}-${name}-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state, ...extra }); };
   for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } });
-    await page.waitForSelector('.tracks-exp', { timeout: 5000 }).catch(() => {});
-    const c = await page.evaluate(() => { const e = document.querySelector('.tracks-exp'); if (!e) return null; const r = e.getBoundingClientRect(), b = { height: e.querySelector('button').offsetHeight };
-      return { t: e.querySelector('h2').textContent, p: e.querySelector('p').textContent, btns: e.querySelectorAll('button').length, bh: b.height, l: r.left, r: r.right, seen: window.eggfarm.state.seenTracksExplainer, m4: !!window.eggfarm.balance.m4?.enabled }; });
-    ok(`G5 EXP1 explainer shown once on the migrated save at ${w}`, c && c.t === 'Upgrades got an upgrade!' && c.p === 'Hens and Egg value are now separate. Top them up!' && c.btns === 1 && c.bh >= 48 && c.l >= 0 && c.r <= w && c.seen === true, JSON.stringify(c));
-    if (G5) { const f = `${ENGINE}-explainer-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state: 'migrated-v5', screen: 'farm', asserted: 'explainer card visible' }); }
-    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 3000 }).catch(() => {}); await page.waitForTimeout(300); // Welcome back (tap also dismisses the card, passing through)
-    ok(`G5 EXP1 a tap elsewhere dismisses the card at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    await page.waitForTimeout(1500);
+    const both = await page.evaluate(() => ({ modal: !!document.querySelector('#modal-layer.open'), card: !!document.querySelector('.tracks-exp') }));
+    ok(`G5 A explainer waits behind Welcome back (never two dialogs) at ${w}`, both.modal && !both.card, JSON.stringify(both));
+    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 3000 }).catch(() => {});
+    await page.waitForSelector('.tracks-exp', { timeout: 4000 }).catch(() => {});
+    // fire a toast while the card is open (coop tier celebration): it must be held, not overlap
+    await page.evaluate(() => { window.eggfarm.state.celebratedTier = -1; }); await page.waitForTimeout(400);
+    const c = await page.evaluate(() => { const e = document.querySelector('.tracks-exp'); if (!e) return null;
+      return { t: e.querySelector('h2').textContent, p: e.querySelector('p').textContent, btns: e.querySelectorAll('button').length, bh: e.querySelector('button').offsetHeight, focus: document.activeElement === e.querySelector('button'), seen: window.eggfarm.state.seenTracksExplainer, modal: !!document.querySelector('#modal-layer.open') }; });
+    ok(`G5 EXP1 card shown after Collect, focus on Got it, alone at ${w}`, c && c.t === 'Upgrades got an upgrade!' && c.p === 'Hens and Egg value are now separate. Top them up!' && c.btns === 1 && c.bh >= 48 && c.focus && c.seen === true && !c.modal, JSON.stringify(c));
+    const toastShown = await page.evaluate(() => { const t = document.querySelector('.toast'); return !!t && t.classList.contains('show') && getComputedStyle(t).visibility !== 'hidden' && t.getBoundingClientRect().height > 0; });
+    const tr = await rect(page, '.toast'), cr = await rect(page, '.tracks-exp');
+    ok(`G5 A toast held while the card is open (no overlap) at ${w}`, !toastShown || !hit(tr, cr), JSON.stringify({ toastShown, tr, cr }));
+    await shotIt(page, 'explainer', w, h, 'offline return collected, coop toast fired + held, card open', { asserted: 'card visible, no toast overlap, no modal' });
+    if (MODE === 'nonmodal') {
+      const col = await rect(page, '.collect, #collect, button.collect'); ok(`G5 C card does not cover Collect at ${w}`, !hit(cr, col), JSON.stringify({ cr, col }));
+    }
+    // close with Got it, focus returns (to the active Upgrades tab when the panel is open; else back to the page)
+    await page.locator('.tracks-exp-ok').click(); await page.waitForTimeout(500);
+    ok(`G5 Got it closes the card at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    const toastAfter = await page.evaluate(() => (document.querySelector('.toast')?.textContent ?? ''));
+    ok(`G5 A held toast plays after close at ${w}`, /Coop upgraded/.test(toastAfter), toastAfter);
+    // Upgrades + B/C tap semantics on a re-shown card (debug hook: clear the flag, re-trigger via the commit hook)
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); } await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(250);
-    const pre = await page.evaluate(() => window.eggfarm.state.farmLevel);
-    // the card may already be dismissed by the nav tap (taps pass through); re-check a buy registers while it is up on a fresh show
-    await page.evaluate(() => { window.eggfarm.state.coinsCents = 1e12; });
+    await page.evaluate(() => document.querySelector('[data-tab=farm]').scrollIntoView({ block: 'nearest' }));
+    await page.evaluate(() => { const g = window.eggfarm; g.state.coinsCents = 1e12; g.state = { ...g.state, seenTracksExplainer: false }; g.onTracksCommitted(); });
+    await page.waitForSelector('.tracks-exp', { timeout: 3000 }).catch(() => {});
+    const F0 = await page.evaluate(() => window.eggfarm.state.farmLevel);
+    const buyR = await rect(page, '#uRow .btn.buy[data-kind=farm]'), cr2 = await rect(page, '.tracks-exp');
+    if (MODE === 'nonmodal') ok(`G5 C card does not cover Buy at ${w}`, !hit(cr2, buyR), JSON.stringify({ cr2, buyR }));
     await page.locator('#uRow .btn.buy[data-kind=farm]').click({ timeout: 5000 }); await page.waitForTimeout(250);
-    ok(`G5 EXP1 buy works after/through the card at ${w}`, (await page.evaluate(() => window.eggfarm.state.farmLevel)) === pre + 1);
+    const F1 = await page.evaluate(() => window.eggfarm.state.farmLevel), open1 = (await page.locator('.tracks-exp').count()) === 1;
+    if (MODE === 'nonmodal') ok(`G5 C outside tap on Buy buys 1 and the card stays at ${w}`, F1 === F0 + 1 && open1, JSON.stringify({ F0, F1, open1 }));
+    else ok(`G5 B dismissing tap on Buy: 0 buys, card closed at ${w}`, F1 === F0 && !open1, JSON.stringify({ F0, F1, open1 }));
+    if (MODE !== 'nonmodal') { await page.locator('#uRow .btn.buy[data-kind=farm]').click({ timeout: 5000 }); await page.waitForTimeout(250);
+      ok(`G5 B next tap on Buy buys exactly 1 at ${w}`, (await page.evaluate(() => window.eggfarm.state.farmLevel)) === F0 + 1); }
     const tabs = await page.$$eval('[data-tab]', bs => bs.map(x => ({ h: x.getBoundingClientRect().height, p: x.querySelector('.tab-pill').getBoundingClientRect().height })));
     ok(`G5 F2 Upgrades tabs pill >=36 and hit >=44 at ${w}`, tabs.length === 3 && tabs.every(t => t.p >= 36 && t.h >= 44), JSON.stringify(tabs));
-    await page.evaluate(() => document.querySelector('[data-tab=farm]').scrollIntoView({ block: 'nearest' })); await page.waitForTimeout(150);
-    if (G5) { const f = `${ENGINE}-upgrades-tabs-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state: 'migrated-v5', screen: 'upgrades-farm', asserted_tab: 'farm', checks: tabs }); }
+    // Esc / Enter / (C: card tap) close paths, focus back to the active Upgrades tab
+    for (const how of MODE === 'nonmodal' ? ['Escape', 'Enter', 'card'] : ['Escape', 'Enter']) {
+      await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
+      await page.waitForSelector('.tracks-exp', { timeout: 3000 }).catch(() => {});
+      if (how === 'card') await page.locator('.tracks-exp h2').click(); else await page.keyboard.press(how);
+      await page.waitForTimeout(250);
+      const st = await page.evaluate(() => ({ open: !!document.querySelector('.tracks-exp'), focus: document.activeElement?.getAttribute('data-tab') ?? document.activeElement?.tagName }));
+      ok(`G5 close via ${how} + focus on the active Upgrades tab at ${w}`, !st.open && st.focus === 'farm', JSON.stringify(st));
+      if (w === 360) await shotIt(page, `focus-after-${how.toLowerCase()}`, w, h, `card closed via ${how}, focus ring on the Farm tab`);
+    }
+    await shotIt(page, 'upgrades-tabs', w, h, 'Upgrades > Farm tab, tabs 36px pill / 44px hit', { asserted_tab: 'farm', checks: tabs });
     await page.evaluate(() => window.eggfarm.save()); await page.reload({ waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click().catch(() => {}); await page.waitForTimeout(1200);
+    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 2000 }).catch(() => {}); await page.waitForTimeout(1300);
     ok(`G5 EXP1 not shown again after reload at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
     ok(`G5 no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
     await ctx.close();

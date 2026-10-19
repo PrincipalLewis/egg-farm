@@ -27,15 +27,16 @@ export function showTracksExplainer(g: G, doc: Document = document): HTMLElement
   el.innerHTML = `<h2 id="tracks-exp-t">${EXP_TITLE}</h2><p>${EXP_BODY}</p>${(g.migrationRefundCents ?? 0) > 0 ? `<p class="tracks-exp-refund"><img src="${import.meta.env.BASE_URL}assets/icon-coin.svg" alt="" width="16" height="16"> ${refundLine(g.migrationRefundCents!)}</p>` : ''}<button type="button" class="btn tracks-exp-ok">Got it</button>`;
   const prev = doc.activeElement as HTMLElement | null; // P46-M1: focus fallback
   doc.body.append(el);
-  const close = () => { if (!el.isConnected) return; clearTimeout(t); doc.removeEventListener('pointerdown', onAny, true); doc.removeEventListener('keydown', onKey, true); el.remove();
+  const off = () => { clearTimeout(t); doc.removeEventListener('click', onAny, true); doc.removeEventListener('keydown', onKey, true); };
+  const close = () => { if (!el.isConnected) return off(); off(); el.remove();
     // P46-M1: focus back to the active Upgrades tab, else where it was
     const tab = doc.querySelector<HTMLElement>('[data-tab].active'); (tab ?? (prev && prev.isConnected ? prev : null))?.focus({ preventScroll: true });
     doc.dispatchEvent(new Event(EXP_CLOSED)); };
-  // Any tap dismisses and passes through (never preventDefault/stopPropagation), so a Buy/Collect tap still registers.
-  const onAny = (e: Event) => { if (!el.contains(e.target as Node)) close(); };
-  const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' || (e.key === 'Enter' && e.target === ok)) { e.preventDefault(); close(); } };
+  // CEO D-07 amendment (swallow): a tap outside the card ONLY closes it; that click never reaches Buy/Collect.
+  const onAny = (e: Event) => { if (!el.isConnected) { off(); return; } if (!el.contains(e.target as Node)) { e.preventDefault(); e.stopPropagation(); close(); } };
+  const onKey = (e: KeyboardEvent) => { if (!el.isConnected) return off(); if (e.key === 'Escape' || (e.key === 'Enter' && e.target === ok)) { e.preventDefault(); e.stopPropagation(); close(); } }; // Esc closes only the card, not the sheet behind it
   const ok = el.querySelector('button') as HTMLButtonElement;
-  doc.addEventListener('pointerdown', onAny, true); doc.addEventListener('keydown', onKey, true);
+  doc.addEventListener('click', onAny, true); doc.addEventListener('keydown', onKey, true);
   el.querySelector('button')!.addEventListener('click', close);
   const t = setTimeout(close, EXP_MS); // starts when the card actually appears
   (el.querySelector('button') as HTMLButtonElement).focus({ preventScroll: true });
