@@ -19,6 +19,8 @@ export const tracksOff = (b: Balance): Balance => (b.m4 ? markM4BuildOff({ ...b,
 export interface GameOpts {
   /** M4-20: outcome of boot's IndexedDB open + read ('unknown' defers the migration; default 'absent' = no IndexedDB). */
   idbBoot?: IdbBoot; idbAbsentReason?: string;
+  /** M41-7 CSR-AC-IDB1 (IDB1-3/5): result of main.ts's bootPreserveIdb before this Game ('failed' => main.ts passes no mirror). */
+  idbCopy?: 'none' | 'copied' | 'failed';
   /** N7: migrationId source (save/newMigrationId), injectable for goldens. */
   newId?: () => string;
 }
@@ -43,17 +45,24 @@ export class Game {
   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
   /** D2: durable mirror of every save (IndexedDB, durability 'strict'); none in tests, second tabs or without IndexedDB. */
   mirror: { write(raw: string): unknown; clear(): Promise<void>; newer?: number | null; onNewer?: ((v: number) => void) | null } | null;
-  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null, private opts: GameOpts = {}) {
+  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: unknown = null, private opts: GameOpts = {}) {
     this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
-    const r = loadSafe(kv, b, now(), idbRaw); const f = r.file;
+    // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
+    // tier (CSR-2/3/13, CSR-AC-IDB1) and the stale-LS reconcile runs inside it; without it (tests, refused-newer) the legacy
+    // raw is only used for the newer-build check.
+    const idbIn = opts.idbBoot ? { status: opts.idbBoot, raw: idbRaw, reason: opts.idbAbsentReason } : (typeof idbRaw === 'string' ? idbRaw : null);
+    const r = loadSafe(kv, b, now(), idbIn, opts.idbCopy === 'failed'); const f = r.file;
     if (f && !validSavedAt(f.savedAt, now())) f.savedAt = NaN; // QA BUG-1: <= 0 / pre-2020 savedAt -> 0 offline, re-stamped below
     this.recovery = r.recovery; this.recoveryOutcome = r.outcome; this.isNewGame = !f;
     // M4-safety: a save from a newer build is refused untouched; this Game never writes (no new game autosaves over it).
     if (r.newer !== undefined) { this.newerSave = r.newer; this.readOnly = true; this.isNewGame = false; this.mirror = null; this.telemetry.track('save_newer_version', { version: r.newer, build }); }
+    else if (r.recovery?.case === 'D') { this.readOnly = true; this.isNewGame = false; this.mirror = null; } // CSR-13 defer: no save write of any kind
     else if (this.mirror) this.mirror.onNewer = v => this.refuseNewer(v);
+    if (r.mirrorOff) this.mirror = null; // CSR-13: .bak restored while IndexedDB unknown: the session never writes the mirror
+    if (r.staleRestore) this.telemetry.track('save_restore', { source: 'idb' }); // G7 / D-HOP-35 / IDB1-7: name unchanged (main.ts:109 before M41-7)
     // m4-design §3c (ADR M4-14..17): an unmarked v6 farm with M4 on boots as plain v6 under flag-off rules. The
     // backup + in-session commit run later in startTracksMigration(); nothing about backups is touched on load (N2).
     // Accepted risk (review m3): a farm that loses its marker is migrated again with a fresh backup (overwrites).
@@ -64,8 +73,11 @@ export class Game {
       this.pausedMirror = this.mirror; this.mirror = null;
     }
     if (r.recovery) {
-      const { reason, had_backup, restored_from_backup, copy_failed } = r.recovery;
-      this.telemetry.track('save_corrupt', { reason, had_backup, restored_from_backup, build, ...(copy_failed ? { copy_failed: true } : {}) });
+      const { reason, had_backup, restored_from_backup, copy_failed, source, store, tried, restored_version, migrated } = r.recovery;
+      // CSR-10 + IDB1-6: recovered_from, required store, tried; restored_version / migrated on restores only.
+      this.telemetry.track('save_corrupt', { reason, had_backup, restored_from_backup, build, ...(copy_failed ? { copy_failed: true } : {}),
+        recovered_from: source ?? (restored_from_backup ? 'bak' : 'none'), store: store ?? 'ls', tried: tried ?? [],
+        ...(restored_version !== undefined ? { restored_version } : {}), migrated: !!migrated });
       this.telemetry.flush(true);
       if (!restored_from_backup) this.bakAllowed = false;
     }

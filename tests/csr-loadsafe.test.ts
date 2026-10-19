@@ -229,7 +229,7 @@ describe('CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, I
     const k = kvm(); k.setItem('eggfarm.ui', '{"onboardingDone":true}');
     const g = new Game(b, k, () => NOW, 1, 'test', null, value, { idbBoot: 'ok', idbCopy: 'copied' });
     expect(g.recoveryOutcome).toBe('fresh'); expect(g.state.coinsCents).toBe(initialState(b).coinsCents);
-    const e = ev(g, 'save_corrupt'); expect(e).toHaveLength(1); expect(e[0]).toMatchObject({ store: 'idb', reason, recovered_from: 'none', copy_failed: undefined });
+    const e = ev(g, 'save_corrupt'); expect(e).toHaveLength(1); expect(e[0]).toMatchObject({ store: 'idb', reason, recovered_from: 'none' }); expect(e[0].copy_failed).toBeUndefined();
     expect(e[0].tried[1]).toMatchObject({ source: 'idb', result: 'invalid', reason });
     expect(ev(g, 'save_repaired')).toEqual([]); expect(corrupt(k)).toEqual([]); // the copy lives in IDB, not LS
   });
