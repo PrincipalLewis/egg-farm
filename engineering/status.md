@@ -112,3 +112,10 @@
 - AC7 seeds 1-200: L10 P95 12.02 nw / 12.08 w (gate <= 12: FAIL by 0.02/0.08), fastest 7.87 (>= 8: FAIL, ruling pending), L@30 19/19/20 and 21/22/22, L30 200/200 workers t30 P50 49.64 / P95 50.77 min. Matches Economy's README.
 - still red: cost-segments (data sha pin 6dca24cd), m4a-tracks TR-1 (hard-coded $48/$36 costs), pacing-acw1 (91% vs 95%), p4. Not edited (assertions).
 - next: HoE decisions (pins, vendor copy, gate ruling); PR.
+
+### 2026-10-19 03:20 (UTC+2) — PR #44 HoE rulings (Senior Software Architect)
+- cost-segments allowlists 6dca24cd + T3 b48be8a4; m4a-tracks TR-1 reads prices from config.
+- D-CEO-20261019-04 encoded in tests/ac7-dceo-04.slow.test.ts (decisions.md:51). 1-200: L10 P95 nw 12.02 / w 12.08, fastest 7.87 / 8.32 (pass). 201-300 strict: L10 P95 11.81/11.81, fastest 8.13/8.76, L@30 nw 19/20 w 21/22 (P5/P95), t18 spread 8.9%/5.7%, distinct 97/93, L18-25 variance P95 241 s / worst 261 s, fixed 180 s (pass).
+- L30+ step ratio NOT evaluable: T3 maxLevel 30, stepRatioGuard has no L30+ steps (test skipIf maxLevel<=30 until the L30+ pack a957b072 lands).
+- REAL MISSES, not changed: pacing-acw1 M4-on 91% / medF10 13.67 / medF18 25.00 (M4 off on T3: 100 / 10.33 / 21.33 = Python ref exactly); p4 M4-on W4 3.00 / W4b 3.25 / Manage 6.75 (M4 off: 4.50 / 5.25 / 6.88 = Economy ref exactly).
+- rc0 Chromium 249/249 (axe-core 4.14.0 at /tmp/axe). Unit 861/863 (the 2 above), slow 16+1 skip, goldens 4/4, tsc, sync --check, vendor pins, economy-copy strict OK.
