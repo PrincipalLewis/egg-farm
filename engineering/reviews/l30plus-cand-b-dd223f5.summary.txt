@@ -1,0 +1,15 @@
+L30+ harness scripts/measure-l30plus.ts blob 8aa74ce14a21 | code 729565e95435
+csv /workspace/egg-farm-studio/scratch/m4-retune/handoff-T3h/cand/b.csv sha256 84bd0b70bf40b8dfa8be223a0356f2cddbf025c532fe4da3ab5adf11d9088faa | seeds 1-200 | workers T 14400s
+L0-30 vs repo data/economy.csv: FAIL (3 cell diffs; L0-11 PASS)
+  L30 farm_cost 624316 -> 330194
+  L30 hens_cost 94319 -> 74005
+  L30 egg_value_cost 249339 -> 133856
+  added columns (8): farm_ms_price_mult, feed_mill_price_mult, auto_collect_every_s, contracts_manual_bonus, hv_extra_cost_farm_share, farm_max_level, hv_extra_second_markup, start_coop_eggs
+build OK: Farm max 50, Hens max 55, Egg value max 55, coop table true, m4.enabled 1
+L0-11 balance (tableRow + m4 costs) vs repo balance.json: identical
+workers path: Farm level at T P5/median/P95 50/50/50
+time on level (median/P95 s): F0 168/235 F1 64/124 F2 53/89 F3 48/91 F4 39/82 F5 44/82 F6 41/77 F7 45/81 F8 58/97 F9 41/65 F10 42/71 F11 48/87 F12 53/98 F13 57/110 F14 57/109 F15 107/166 F16 81/135 F17 158/227 F18 134/193 F19 98/137 F20 151/214 F21 137/228 F22 154/208 F23 113/177 F24 127/173 F25 115/148 F26 145/195 F27 180/204 F28 217/244 F29 182/283 F30 168/260 F31 186/266 F32 170/238 F33 175/197 F34 278/307 F35 197/300 F36 196/220 F37 203/231 F38 345/369 F39 222/349 F40 329/346 F41 297/470 F42 458/483 F43 433/458 F44 333/356 F45 562/584 F46 381/583 F47 412/436 F48 445/464 F49 759/778
+dead zones (P95 time on level > 180s): F0 F17 F18 F20 F21 F22 F26 F27 F28 F29 F30 F31 F32 F33 F34 F35 F36 F37 F38 F39 F40 F41 F42 F43 F44 F45 F46 F47 F48 F49
+L10 P95 workers 12.08 min (margin 0.022 to 12.1; fastest 8.32) | no-workers 12.02 (margin 0.083; fastest 7.87)
+step gate D-CEO-20261019-04 (P95 <= 2, worst <= 2.25): PASS | P95 1.974 | worst 2.171 (seed 188) | 200 seeds counted
+top-step share per level (D-HOP-22 rule <= 25%): FAIL | F38 27.5%, F45 20.0%, F49 19.5%, F34 10.5%, F35 6.0%, F42 5.0%
