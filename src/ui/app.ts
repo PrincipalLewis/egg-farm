@@ -12,7 +12,7 @@ import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
 import { exportLog } from './export-log';
-import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRecoveryDialog } from './save-recovery';
+import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRecoveryDialog, recoveryNotice } from './save-recovery';
 import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
@@ -692,7 +692,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
+    // M41-7 copy interface §3: notice telemetry (ids from recoveryNotice; the UI engineer owns the strings).
+    const nt = recoveryNotice(opts.recovery, { storageBlocked: !!opts.storageBlocked?.(), now: Date.now() });
+    const ntData = { notice: nt.id, source: nt.source, ...(nt.variant ? { variant: nt.variant } : {}) };
+    g.telemetry.track('save_recovery_notice_shown', ntData);
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case })).then(() => {
+      g.telemetry.track('save_recovery_notice_dismissed', ntData);
       recoveryOpen = false; rotate.sync(); startOnboarding(); renderAll(); showWelcome(); if (!modalKind) collectBtn.focus(); else (modal.querySelector('button.btn, button') as HTMLElement | null)?.focus();
     });
   } else { startOnboarding(); renderAll(); showWelcome(); }

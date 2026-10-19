@@ -32,6 +32,9 @@ export function recoveryCopy(r: Pick<Recovery, 'case' | 'copy_failed' | 'restore
   // v2.2 (art-ux/save-recovery-dialog.md): storage refused but the farm loaded. The real Storage case keeps its v2.1 copy.
   if (o === 'storage' && r.cantSave) return { variant: 'cantsave', outcome: o, icon: 'icon-coop.svg', badge: '!', badgeClass: 'warn', title: 'Saving is paused', button: 'Keep farming',
     body: "Your farm is fine, but your browser won't let us save right now. Export a copy to keep your progress.", exportStyle: 'secondary', exportLabel: 'Export save', exportAria: CANTSAVE_ARIA };
+  // M41-7 M4 (CSR-13 defer): no legacy copy, so the final Art & UX strings (art-ux/copy/csr9-recovery-copy.md M4) ship now.
+  if (o === 'deferred') return { outcome: o, icon: 'icon-coop.svg', badge: '!', badgeClass: 'warn', title: "Couldn't load your farm", button: 'Try again',
+    body: "Your save is safe. Let's try that again.", exportStyle: 'secondary', exportLabel: 'Export save file', exportAria: EXPORT_ARIA };
   if (o === 'restored') return { outcome: o, icon: 'icon-coop.svg', badge: '\u2713', badgeClass: 'ok', title: 'Welcome back!', button: 'Keep farming',
     body: r.copy_failed ? 'We loaded your backup. Export the old save now to keep it.' : 'We loaded your backup. You may be a few moments behind.',
     exportStyle: r.copy_failed ? 'secondary' : 'link' };
@@ -40,6 +43,21 @@ export function recoveryCopy(r: Pick<Recovery, 'case' | 'copy_failed' | 'restore
   if (o === 'fresh') return { outcome: o, icon: 'char-chicken.svg', badge: '\u2605', badgeClass: 'new', title: 'A fresh start', button: 'Start farming',
     body: "We couldn't open your farm. Your old save is kept safe.", exportStyle: 'link' };
   return null;
+}
+/** M41-7 copy interface (engineering/reviews/m41-7-copy-interface.md §2): which notice a loader outcome maps to. Pure; the UI
+ *  engineer renders the CSR-9 copy from it. `storageBlocked` = lease.storageBlocked || g.storageFailed at dialog time. */
+export type NoticeId = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'storage' | 'cantsave';
+export interface Notice { id: NoticeId | null; source: Recovery['source'] | null; variant?: 'level' | 'age' | 'fallback'; level?: number; ageMs?: number }
+export function recoveryNotice(r: Recovery | null, o: { storageBlocked: boolean; now: number }): Notice {
+  if (!r) return { id: o.storageBlocked ? 'cantsave' : null, source: null };
+  const source = r.source ?? null;
+  if (r.case === 'D') return { id: 'M4', source };
+  if (r.cantSave) return { id: 'cantsave', source };
+  if (r.case === 'Q') return { id: 'storage', source };
+  if (r.case !== 'R') return { id: 'M3', source };
+  const m2 = source === 'v6_backup' ? (r.prevLevel !== undefined && r.restoredLevel !== undefined && r.restoredLevel !== r.prevLevel ? { variant: 'level' as const, level: r.restoredLevel }
+    : r.restoredSavedAt !== undefined ? { variant: 'age' as const, ageMs: o.now - r.restoredSavedAt } : { variant: 'fallback' as const }) : null;
+  return { id: o.storageBlocked ? 'M5' : m2 ? 'M2' : 'M1', source, ...(m2 ?? {}) };
 }
 export const exportName = (d: Date) => {
   const p = (n: number) => String(n).padStart(2, '0');
