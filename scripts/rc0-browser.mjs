@@ -648,9 +648,9 @@ sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1
   }
 };
 // ---------- M4 gate5: tracks explainer (EXP1) + F2 Upgrades tabs; G5SHOTS=<dir> writes shots + entries ----------
-// G5MODE=swallow (variant B: a dismissing outside tap only closes) | nonmodal (variant C: outside taps register, card stays)
+// v1.15 (m4a-spec, CEO): non-modal card; outside taps register and do not close it
 sections.g5 = async () => {
-  const G5 = process.env.G5SHOTS, MODE = process.env.G5MODE ?? 'swallow'; if (G5) mkdirSync(G5, { recursive: true }); const entries = [];
+  const G5 = process.env.G5SHOTS, MODE = 'nonmodal'; if (G5) mkdirSync(G5, { recursive: true }); const entries = [];
   const DONE = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
   const rect = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; }, sel);
   const hit = (a, b) => !!a && !!b && a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
@@ -688,17 +688,15 @@ sections.g5 = async () => {
     await page.waitForSelector('.tracks-exp', { timeout: 3000 }).catch(() => {});
     const F0 = await page.evaluate(() => window.eggfarm.state.farmLevel);
     const buyR = await rect(page, '#uRow .btn.buy[data-kind=farm]'), cr2 = await rect(page, '.tracks-exp');
-    if (MODE === 'nonmodal') ok(`G5 C card does not cover Buy at ${w}`, !hit(cr2, buyR), JSON.stringify({ cr2, buyR }));
+    ok(`G5 C card does not cover Buy at ${w}`, !hit(cr2, buyR), JSON.stringify({ cr2, buyR }));
+    { const colR = await rect(page, '#collect'); ok(`G5 C card does not cover Collect at ${w}`, !colR || !hit(cr2, colR), JSON.stringify({ cr2, colR })); }
     await page.locator('#uRow .btn.buy[data-kind=farm]').click({ timeout: 5000 }); await page.waitForTimeout(250);
     const F1 = await page.evaluate(() => window.eggfarm.state.farmLevel), open1 = (await page.locator('.tracks-exp').count()) === 1;
-    if (MODE === 'nonmodal') ok(`G5 C outside tap on Buy buys 1 and the card stays at ${w}`, F1 === F0 + 1 && open1, JSON.stringify({ F0, F1, open1 }));
-    else ok(`G5 B dismissing tap on Buy: 0 buys, card closed at ${w}`, F1 === F0 && !open1, JSON.stringify({ F0, F1, open1 }));
-    if (MODE !== 'nonmodal') { await page.locator('#uRow .btn.buy[data-kind=farm]').click({ timeout: 5000 }); await page.waitForTimeout(250);
-      ok(`G5 B next tap on Buy buys exactly 1 at ${w}`, (await page.evaluate(() => window.eggfarm.state.farmLevel)) === F0 + 1); }
+    ok(`G5 C outside tap on Buy buys 1 and the card stays at ${w}`, F1 === F0 + 1 && open1, JSON.stringify({ F0, F1, open1 }));
     const tabs = await page.$$eval('[data-tab]', bs => bs.map(x => ({ h: x.getBoundingClientRect().height, p: x.querySelector('.tab-pill').getBoundingClientRect().height })));
     ok(`G5 F2 Upgrades tabs pill >=36 and hit >=44 at ${w}`, tabs.length === 3 && tabs.every(t => t.p >= 36 && t.h >= 44), JSON.stringify(tabs));
     // Esc / Enter / (C: card tap) close paths, focus back to the active Upgrades tab
-    for (const how of MODE === 'nonmodal' ? ['Escape', 'Enter', 'card'] : ['Escape', 'Enter']) {
+    for (const how of ['Escape', 'Enter', 'card']) {
       await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
       await page.waitForSelector('.tracks-exp', { timeout: 3000 }).catch(() => {});
       if (how === 'card') await page.locator('.tracks-exp h2').click(); else await page.keyboard.press(how);
