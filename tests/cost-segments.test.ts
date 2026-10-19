@@ -11,7 +11,8 @@ const F1_CSV_SHA256 = '4ad1349ad27ca4c1657c94afd0fbfabd081aa658faa3ff5882a8bc612
 /** sha256 of product/economy.f1-m4cols.csv rev 6dca24cd (F1 + HoP-approved AC7 L21 trim; was 86f0e80e), copied to data/economy.csv. */
 const M4COLS_SHA256 = '6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455';
 /** Allowed shipping CSVs: F1 6dca24cd (flag-off/f1) and the M4-on retune T3 b48be8a4 (D-CEO-20261019-04: only hens/egg_value cost L0-L11, farm_cost and w* unchanged). */
-const SHIPPING_SHA256 = [M4COLS_SHA256, 'b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857'];
+const SHIPPING_SHA256 = [M4COLS_SHA256, 'b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857',
+  'c7bb783fe890928f747c142411503261f0711388e73fe1cdadbfd76cc8d68b44']; // M41-5 (D-HOP-25): T3 b48be8a4 minus the 2 dead guard_* columns, every kept cell identical
 const F1 = [{ from: 6, to: 14, growth: 1.25 }, { from: 15, to: 20, growth: 1.45 }];
 /** Curve params (pre-F1 L0 base 100, growth 1.35) with no costTable, so these tests exercise the formula path. */
 const curve: any = { ...balance, farm: { ...balance.farm, costTable: undefined, baseCost: 100, costGrowth: 1.35 } };
