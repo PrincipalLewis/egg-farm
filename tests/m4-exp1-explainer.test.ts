@@ -177,19 +177,22 @@ describe('P46-M1 focus: to Got it on open, back to the active Upgrades tab on cl
     expect(document.querySelector('.tracks-exp')).toBeNull();
     expect(document.activeElement).toBe(document.querySelector('[data-tab=farm]'));
   });
-  it('falls back to the previously focused element when no Upgrades tab exists', () => {
-    document.body.innerHTML = '<button id="other">x</button>'; (document.getElementById('other') as HTMLElement).focus();
+  it('no Upgrades tab: bottom-nav Upgrades button', () => {
+    document.body.innerHTML = '<button data-nav="upgrades">U</button><button id="collect">c</button>';
     const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} };
-    showTracksExplainer(g)!.querySelector('button')!.click(); expect(document.activeElement!.id).toBe('other');
+    showTracksExplainer(g)!.querySelector('button')!.click(); expect(document.activeElement!.getAttribute('data-nav')).toBe('upgrades');
   });
 });
 
 describe('P46-M1 CCR major: focus return only when it was on the card, never to a hidden tab', () => {
   const g = () => ({ state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} }) as any;
-  it('hidden Upgrades sheet: falls back to the previously focused element', () => {
-    document.body.innerHTML = '<div hidden><button data-tab="farm" class="active">F</button></div><button id="other">x</button>';
-    (document.getElementById('other') as HTMLElement).focus();
-    showTracksExplainer(g())!.querySelector('button')!.click(); expect(document.activeElement!.id).toBe('other');
+  it('B-M1: sheet closed -> bottom-nav Upgrades button (not the hidden tab, not #collect)', () => {
+    document.body.innerHTML = '<div id="p-upgrades" hidden><button data-tab="farm" class="active">F</button></div><nav><button data-nav="upgrades">U</button></nav><button id="collect">c</button>';
+    showTracksExplainer(g())!.querySelector('button')!.click(); expect(document.activeElement!.getAttribute('data-nav')).toBe('upgrades');
+  });
+  it('B-M1: no tab or nav rendered -> #collect last resort', () => {
+    document.body.innerHTML = '<div hidden><button data-tab="farm" class="active">F</button><button data-nav="upgrades">U</button></div><button id="collect">c</button>';
+    showTracksExplainer(g())!.querySelector('button')!.click(); expect(document.activeElement!.id).toBe('collect');
   });
   it('timer close while the user focuses another control: focus is left alone', () => {
     vi.useFakeTimers();
