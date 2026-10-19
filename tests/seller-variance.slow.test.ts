@@ -121,10 +121,12 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, 
 //  any other sha: fails with 'unknown economy CSV <sha>: update AC7 band test'.
 // After the CSV changes, regenerate the fixture first: scripts/gen-seller-variance-fixtures.py.
 export const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
+/** Hard-band CSVs: F1 6dca24cd and the M4-on retune T3 b48be8a4 (D-CEO-20261019-04: hens/egg_value cost L0-L11 only). */
+export const T3_CSV = 'b48be8a4', HARD_BAND_CSV: readonly string[] = [F1_CSV, T3_CSV];
 const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
 const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const;
 export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): void {
-  if (sha === F1_CSV) for (const wk of ['m1', 'm2'] as const) {
+  if (HARD_BAND_CSV.includes(sha)) for (const wk of ['m1', 'm2'] as const) {
     expect(q(l30[wk], 0.05), `${wk} L@30 P5`).toBeGreaterThanOrEqual(BAND[wk].lo); expect(q(l30[wk], 0.95), `${wk} L@30 P95`).toBeLessThanOrEqual(BAND[wk].hi);
   } else if (sha === MAIN_PRE_F1_CSV) { // known failing values on pre-F1 main (needs #17 economy.f1-m4cols 86f0e80e)
     expect(q(l30.m1, 0.05), 'm1 L@30 P5 (pre-F1)').toBe(17); expect(Math.max(...l30.m2), 'm2 max L@30 (pre-F1)').toBe(18);
@@ -132,7 +134,7 @@ export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): 
 }
 const l30 = (wk: 'm1' | 'm2') => fx.seeds.map(s => lvlAt(RUN_ON[wk](s, VAR_DEFAULT), 1800)); // shipped M4-on, not the flag-off parity cache
 describe(`AC7 band, variance bot (data/economy.csv ${csvSha})`, () => {
-  it(`band per CSV sha ${csvSha}${csvSha === F1_CSV ? ' (F1: hard band)' : csvSha === MAIN_PRE_F1_CSV ? ' (pre-F1: known values, needs #17)' : ' (UNKNOWN)'}`, () => {
+  it(`band per CSV sha ${csvSha}${HARD_BAND_CSV.includes(csvSha) ? ` (${csvSha === T3_CSV ? 'T3' : 'F1'}: hard band)` : csvSha === MAIN_PRE_F1_CSV ? ' (pre-F1: known values, needs #17)' : ' (UNKNOWN)'}`, () => {
     ac7BandCheck(csvSha, { m1: l30('m1'), m2: l30('m2') });
   }, 300_000);
   it('meta: unknown sha (appended newline, 168b74da) and a thrown error both fail', () => {
