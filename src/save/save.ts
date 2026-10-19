@@ -1,7 +1,7 @@
 import type { Balance } from '../config/balance';
 import { GameState, initialState, coopTier } from '../sim/state';
 import { m4On } from '../config/formulas';
-import { migrateTracksV7 } from '../sim/migrate-v7';
+import { migrateStoredTracksV7 } from '../sim/migrate-v7';
 export const SAVE_KEY = 'eggfarm.save';
 export const SAVE_VERSION = 6;
 export interface SaveFile { version: number; savedAt: number; state: GameState;
@@ -103,7 +103,9 @@ export function migrate(d: any, b: Balance): SaveFile {
   // H = F, lowest V with price >= v6, milestones seeded silently. SAVE_VERSION stays 6 so main can still read the save.
   const tracks = m4On(b) && !state.tracksV7;
   if (!tracks) return { version: d.version, savedAt: d.savedAt, state };
-  return { version: d.version, savedAt: d.savedAt, state: { ...migrateTracksV7(state, b).state, tracksV7: 1 }, tracksMigrated: true, v6State: state, v6Keys: Object.keys(d.state ?? {}) };
+  // l30plus-saves M2: a Farm level above this build's max is price-matched at the effective (capped) level; the stored
+  // level is kept as saved so a rollback + forward never loses it (migrateTracksV7 itself is unchanged).
+  return { version: d.version, savedAt: d.savedAt, state: { ...migrateStoredTracksV7(state, b).state, tracksV7: 1 }, tracksMigrated: true, v6State: state, v6Keys: Object.keys(d.state ?? {}) };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
 /** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
@@ -193,7 +195,13 @@ export function load(kv: KV, b: Balance): SaveFile | null {
   const v = validate(raw, b); return v.ok ? v.file : null;
 }
 export type CorruptReason = 'missing' | 'empty' | 'parse' | 'wrong_type' | 'version' | 'missing_state' | 'checksum' | 'invalid_state';
-const NUM_FIELDS = ['coinsCents', 'coop', 'basket', 'collectionLevel', 'farmLevel'] as const;
+const NUM_FIELDS = ['coinsCents', 'coop', 'basket'] as const;
+/** l30plus-saves m1: level fields are finite non-negative integers. Non-integers floor; strings, null, NaN, negatives and
+ *  Infinity become 0 (the minimum level). A level ABOVE this build's maxLevel is valid and kept as stored (M2): every sim
+ *  and pricing use site clamps it (formulas clampL / the track cost clamp), so it is never reset and survives re-saves. */
+export const LEVEL_FIELDS = ['farmLevel', 'collectionLevel', 'hensLevel', 'eggValueLevel'] as const;
+export const sanitizeLevel = (v: unknown): number => typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0;
+const sanitizeLevels = (st: any) => { for (const k of LEVEL_FIELDS) if (k in st) st[k] = sanitizeLevel(st[k]); return st; };
 /** Parse + checksum (when present; pre-rc0 saves have none) + state validation + migration. */
 export function validate(raw: string, b: Balance, now = 0): { ok: true; file: SaveFile } | { ok: false; reason: CorruptReason } {
   if (!raw.trim()) return { ok: false, reason: 'empty' };
@@ -203,11 +211,12 @@ export function validate(raw: string, b: Balance, now = 0): { ok: true; file: Sa
   if (d.state === undefined || d.state === null) return { ok: false, reason: 'missing_state' };
   if (typeof d.state !== 'object' || Array.isArray(d.state)) return { ok: false, reason: 'wrong_type' };
   if (d.sum !== undefined && d.sum !== checksum(JSON.stringify(d.state))) return { ok: false, reason: 'checksum' };
+  d = { ...d, state: sanitizeLevels({ ...d.state }) };
   let f: SaveFile; try { f = migrate(d, b); } catch { return { ok: false, reason: 'version' }; }
   if (f.tracksMigrated) f.preTracksRaw = raw; // n1: only validate() knows the raw bytes; migrate() just flags it
   const s: any = f.state;
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
-  if (!Number.isInteger(s.farmLevel) || !Number.isInteger(s.collectionLevel) || s.farmLevel > b.maxLevel || s.collectionLevel > b.maxLevel) return { ok: false, reason: 'invalid_state' };
+  sanitizeLevels(s); if (f.v6State) sanitizeLevels(f.v6State);
   if (!Array.isArray(s.customers) || !s.workers || typeof s.workers !== 'object') return { ok: false, reason: 'invalid_state' };
   // BUG-6 / QA BUG-1+5: a missing, null, non-finite or <= 0 savedAt becomes NaN (Game grants 0 offline and re-stamps now).
   // The pre-2020 floor and the future check need a clock: they apply only when the caller passes `now` (pickNewest passes

@@ -11,4 +11,4 @@ Baseline on bf1962a `migrate()`: 4 corrupt files throw (load → null → fresh 
 Engineering: copy into `game/tests/fixtures/saves/` (AC14a). Before any real-browser play saves are captured, they are additionally needed from V2 devices.
 
 ## M4 migrate-v7 sample (Architect, 2026-10-19, rc/m4-t3-l30plus)
-| m4-pre-v7-F30-C30.json | save() on this branch, live balance (flag off) | v6, F30, C30, $1,234,567.89, H0/V0 (pre-M4): the shipping-max farm that migrateTracksV7 price-matches. Generator: inline (initialState + save, savedAt 2026-10-19 01:00 UTC). |
+| m4-pre-v7-F30-C30.json | save() on this branch, live balance (flag off) | v6, F30, C30, $1,234,567.89, H0/V0 (pre-M4): the shipping-max farm that migrateTracksV7 price-matches. Generator: inline (initialState + save, savedAt 2026-10-19 01:00 UTC). Used by tests/v7-marker-run-once.test.ts. |
