@@ -137,6 +137,8 @@ export class Game {
   /** The balance this session runs on right now (flag off until the migration commits); the UI reads it live. */
   get balance(): Balance { return this.b; }
   get tracksMigrationPending() { return this.tracksPending !== null; }
+  /** D-HOP-2026-10-19-13: a committed migration (marker + a v6_backup whose migrationId is state.v6BackupId); fresh farms have no backup. */
+  get tracksMigratedWithBackup() { let r: string | null = null; try { r = this.kv.getItem(V6_BACKUP_KEY); } catch { /* none */ } return this.state.tracksV7 === 1 && isCommittedBackup(r, this.state.v6BackupId); }
   private persisted(st: GameState = this.state): GameState {
     const p = this.tracksPending;
     if (!p) {

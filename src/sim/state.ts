@@ -22,6 +22,8 @@ export interface GameState {
   tracksV7?: 1;
   /** m4-design §3c / ADR M4-15: migrationId of the committed v6_backup record (set with tracksV7 at commit). */
   v6BackupId?: string;
+  /** M4-AC-EXP1: the one-time tracks explainer was shown. Optional v6 field (absent = false); SAVE_VERSION stays 6. */
+  seenTracksExplainer?: boolean;
   /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the interim track migration). */
   celebratedMilestones: string[];
 }
