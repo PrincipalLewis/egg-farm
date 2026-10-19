@@ -201,8 +201,8 @@ sections.s2money = async () => {
   // greyed tap: freeze the economy for the tap (no workers), compare state + save before/after
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: {}, customers: [], nextCustomerInS: 999, coinsCents: 100 }; g.save(); });
   await page.waitForTimeout(100);
-  const pre = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, dis: document.querySelector('#uRow .btn.buy').getAttribute('aria-disabled'), sv: localStorage.getItem('eggfarm.save') }));
-  await page.locator('#uRow .btn.buy').click({ force: true, timeout: 5000 }); await page.waitForTimeout(300);
+  const pre = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, dis: document.querySelector('#uRow .btn.buy[data-kind=farm]').getAttribute('aria-disabled'), sv: localStorage.getItem('eggfarm.save') }));
+  await page.locator('#uRow .btn.buy[data-kind=farm]').click({ force: true, timeout: 5000 }); await page.waitForTimeout(300);
   const post = await page.evaluate(() => ({ c: window.eggfarm.state.coinsCents, F: window.eggfarm.state.farmLevel, hdr: document.querySelector('#coins').textContent, sv: localStorage.getItem('eggfarm.save') }));
   ok('S2-4a greyed Farm L12 tap: money, level, header and save unchanged', pre.dis === 'true' && post.c === pre.c && post.F === 11 && post.hdr === '$1.00' && JSON.parse(post.sv).state.coinsCents === JSON.parse(pre.sv).state.coinsCents, JSON.stringify({ pre: { c: pre.c, dis: pre.dis }, post: { c: post.c, F: post.F, hdr: post.hdr } }));
   // live sheet with rAF stalled (occluded / throttled window)
@@ -259,7 +259,7 @@ sections.s2810 = async () => {
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 5, collectionLevel: 3, coinsCents: 5e6, workers: {}, customers: [] }; });
   await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(200);
   const z = await page.evaluate(() => { window.requestAnimationFrame = () => 0; const g = window.eggfarm, out = [];
-    for (let i = 0; i < 3; i++) { document.querySelector('#uRow .btn.buy').click(); out.push([g.state.farmLevel, document.querySelector('#uRow .lv').textContent]); } return out; });
+    for (let i = 0; i < 3; i++) { document.querySelector('#uRow .btn.buy[data-kind=farm]').click(); out.push([g.state.farmLevel, document.querySelector('#uRow [data-track=farm] .lv').textContent]); } return out; });
   ok('S2-10 sheet shows each purchase synchronously (no one-action lag, rAF stalled)', z.every(([F, lv], i) => lv === `L${F}` && F === 6 + i), JSON.stringify(z));
   ok('S2-8/9/10 no page errors', errors.length === 0, errors.join(' | '));
   await ctx.close();
@@ -643,9 +643,151 @@ sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1
       customers: [{ id: 901, demand: 2e11, filled: 0, waitedS: 0 }], workers: { grader: { energy: 100, cdS: 0 } }, graderTier: 2 }; });
     await page.waitForTimeout(350);
     const m = await page.evaluate(() => { const b = document.querySelector('#sellAll'), r = b.getBoundingClientRect(); return { t: b.textContent, sw: b.scrollWidth, cw: b.clientWidth, l: r.left, r: r.right, vw: innerWidth }; });
-    ok(`SellAll Grader 2 label fits at ${w}`, /\$[\d.]+T/.test(m.t) && m.sw <= m.cw + 1 && m.l >= 0 && m.r <= m.vw + 0.5, JSON.stringify(m));
+    ok(`SellAll Grader 2 label fits at ${w}`, /\$[\d.]+[BT]/.test(m.t) && m.sw <= m.cw + 1 && m.l >= 0 && m.r <= m.vw + 0.5, JSON.stringify(m));
     await ctx.close();
   }
+};
+// ---------- M4 gate5: tracks explainer (EXP1) + F2 Upgrades tabs; G5SHOTS=<dir> writes shots + entries ----------
+// v1.15 (m4a-spec, CEO): non-modal card; outside taps register and do not close it
+sections.g5 = async () => {
+  const EXP_WAIT_MS = 2500;
+  const G5 = process.env.G5SHOTS, MODE = 'nonmodal'; if (G5) mkdirSync(G5, { recursive: true }); const entries = [];
+  const DONE = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
+  const rect = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; }, sel);
+  const hit = (a, b) => !!a && !!b && a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+  const cardUp = async (page, what, w) => { const up = await page.waitForFunction(() => { const c = document.querySelector('.tracks-exp'); return !!c && getComputedStyle(c).opacity === '1'; }, null, { timeout: 3000 }).then(() => true, () => false); ok(`G5 card fully up (opacity 1) for ${what} shot at ${w}`, up); return up; };
+  const shotIt = async (page, name, w, h, state, extra = {}) => { if (!G5) return; const f = `${ENGINE}-${name}-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); const activeElement = await page.evaluate(() => { const a = document.activeElement; return a ? a.tagName + (a.id ? '#' + a.id : '') + (a.dataset.tab ? `[data-tab=${a.dataset.tab}]` : '') + (a.dataset.nav ? `[data-nav=${a.dataset.nav}]` : '') + (a.className ? '.' + String(a.className).trim().split(/\s+/).join('.') : '') : null; }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state, activeElement, ...extra }); };
+  for (const [w, h] of [[360, 800], [375, 812], [390, 844], [1280, 800]]) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } });
+    await page.waitForTimeout(1500);
+    const both = await page.evaluate(() => ({ modal: !!document.querySelector('#modal-layer.open'), card: !!document.querySelector('.tracks-exp') }));
+    ok(`G5 A explainer waits behind Welcome back (never two dialogs) at ${w}`, both.modal && !both.card, JSON.stringify(both));
+    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 3000 }).catch(() => {});
+    await page.waitForSelector('.tracks-exp', { timeout: 4000 }).catch(() => {});
+    // fire a toast while the card is open (coop tier celebration): it must be held, not overlap
+    await page.evaluate(() => { window.eggfarm.state.celebratedTier = -1; }); await page.waitForTimeout(400);
+    const c = await page.evaluate(() => { const e = document.querySelector('.tracks-exp'); if (!e) return null;
+      return { t: e.querySelector('h2').textContent, p: e.querySelector('p').textContent, btns: e.querySelectorAll('button').length, bh: e.querySelector('button').offsetHeight, focus: document.activeElement === e.querySelector('button'), seen: window.eggfarm.state.seenTracksExplainer, modal: !!document.querySelector('#modal-layer.open') }; });
+    ok(`G5 EXP1 card shown after Collect, focus on Got it, alone at ${w}`, c && c.t === 'Upgrades got an upgrade!' && c.p === 'Hens and Egg value are now separate. Top them up!' && c.btns === 1 && c.bh >= 48 && c.focus && c.seen === true && !c.modal, JSON.stringify(c));
+    const toastShown = await page.evaluate(() => { const t = document.querySelector('.toast'); return !!t && t.classList.contains('show') && getComputedStyle(t).visibility !== 'hidden' && t.getBoundingClientRect().height > 0; });
+    const tr = await rect(page, '.toast'), cr = await rect(page, '.tracks-exp');
+    ok(`G5 A toast held while the card is open (no overlap) at ${w}`, !toastShown || !hit(tr, cr), JSON.stringify({ toastShown, tr, cr }));
+    const behind = await page.evaluate(() => { const r = document.querySelector('.tracks-exp')?.getBoundingClientRect(); if (!r) return null; const out = []; for (const [x, y] of [[r.left + 6, r.top + 10], [r.right - 6, r.top + 10], [r.left + 6, r.top + 40]]) { const els = document.elementsFromPoint(x, y).slice(0, 6).map(e => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).join('.') : '')); out.push(els); } return out; });
+    ok(`G5 probe: elements behind the card corners at ${w}`, true, JSON.stringify(behind));
+    ok(`G5 no toast DOM shown while the card is open at ${w}`, await page.evaluate(() => !document.querySelector('.toast.show') && ![...document.querySelectorAll('.toast,[role=status].toast')].some(t => t.classList.contains('show'))));
+    await cardUp(page, 'explainer', w);
+    await shotIt(page, 'explainer', w, h, 'offline return collected, coop toast fired + held, card open', { asserted: 'card visible, no toast overlap, no modal' });
+    if (MODE === 'nonmodal') {
+      const col = await rect(page, '.collect, #collect, button.collect'); ok(`G5 C card does not cover Collect at ${w}`, !hit(cr, col), JSON.stringify({ cr, col }));
+    }
+    // close with Got it, focus returns (to the active Upgrades tab when the panel is open; else back to the page)
+    await page.locator('.tracks-exp-ok').click(); await page.waitForTimeout(500);
+    ok(`G5 Got it closes the card at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    const fo = await page.evaluate(() => document.activeElement?.id || document.activeElement?.getAttribute('data-tab') || document.activeElement?.tagName);
+    ok(`G5 focus not lost after Got it (sheet closed) at ${w}`, fo !== 'BODY', fo);
+    await shotIt(page, 'focus-after-gotit', w, h, 'card closed via Got it (sheet closed), focus target visible', { focus: fo });
+    const toastAfter = await page.evaluate(() => (document.querySelector('.toast')?.textContent ?? ''));
+    ok(`G5 A held toast plays after close at ${w}`, /Coop upgraded/.test(toastAfter), toastAfter);
+    // Upgrades + B/C tap semantics on a re-shown card (debug hook: clear the flag, re-trigger via the commit hook)
+    if (w < 900) { await page.locator('[data-nav=upgrades]').click(); } await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(250);
+    await page.evaluate(() => document.querySelector('[data-tab=farm]').scrollIntoView({ block: 'nearest' }));
+    await page.evaluate(() => { const g = window.eggfarm; g.state.coinsCents = 1e12; g.state = { ...g.state, seenTracksExplainer: false }; g.onTracksCommitted(); });
+    await page.waitForSelector('.tracks-exp', { timeout: 3000 }).catch(() => {});
+    const F0 = await page.evaluate(() => window.eggfarm.state.farmLevel);
+    const buyR = await rect(page, '#uRow .btn.buy[data-kind=farm]'), cr2 = await rect(page, '.tracks-exp');
+    ok(`G5 C card does not cover Buy at ${w}`, !hit(cr2, buyR), JSON.stringify({ cr2, buyR }));
+    { const colR = await rect(page, '#collect'); ok(`G5 C card does not cover Collect at ${w}`, !colR || !hit(cr2, colR), JSON.stringify({ cr2, colR })); }
+    await page.locator('#uRow .btn.buy[data-kind=farm]').click({ timeout: 5000 }); await page.waitForTimeout(250);
+    const F1 = await page.evaluate(() => window.eggfarm.state.farmLevel), open1 = (await page.locator('.tracks-exp').count()) === 1;
+    ok(`G5 C outside tap on Buy buys 1 and the card stays at ${w}`, F1 === F0 + 1 && open1, JSON.stringify({ F0, F1, open1 }));
+    await cardUp(page, 'buy-tap-card-stays', w);
+    await shotIt(page, 'buy-tap-card-stays', w, h, 'Buy tapped while card up: bought 1, card stays; card rect clear of Buy and Collect', { F0, F1, cardRect: cr2, buyRect: buyR });
+    const tabs = await page.$$eval('[data-tab]', bs => bs.map(x => ({ h: x.getBoundingClientRect().height, p: x.querySelector('.tab-pill').getBoundingClientRect().height })));
+    ok(`G5 F2 Upgrades tabs pill >=36 and hit >=44 at ${w}`, tabs.length === 3 && tabs.every(t => t.p >= 36 && t.h >= 44), JSON.stringify(tabs));
+    // Esc / Enter / (C: card tap) close paths, focus back to the active Upgrades tab
+    for (const how of ['Escape', 'Enter', 'card']) {
+      await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
+      await page.waitForSelector('.tracks-exp', { timeout: 3000 }).catch(() => {});
+      if (how === 'card') await page.locator('.tracks-exp h2').click(); else await page.keyboard.press(how);
+      await page.waitForTimeout(250);
+      const st = await page.evaluate(() => ({ open: !!document.querySelector('.tracks-exp'), focus: document.activeElement?.getAttribute('data-tab') ?? document.activeElement?.tagName }));
+      ok(`G5 close via ${how} + focus on the active Upgrades tab at ${w}`, !st.open && st.focus === 'farm', JSON.stringify(st));
+      if (w === 360) await shotIt(page, `focus-after-${how.toLowerCase()}`, w, h, `card closed via ${how}, focus ring on the Farm tab`);
+    }
+    {
+      await page.evaluate(() => { const g = window.eggfarm; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
+      await page.waitForSelector('.tracks-exp-refund', { timeout: 3000 }).catch(() => {});
+      const rl = await page.evaluate(() => document.querySelector('.tracks-exp-refund')?.textContent.trim() ?? null);
+      ok(`G5 refund line shown when migrationRefundCents > 0 at ${w}`, rl === 'We refunded +$1,234.56 for your old upgrades.', rl);
+      await cardUp(page, 'refund-line', w);
+      await shotIt(page, 'refund-line', w, h, 'card with refund line (migrationRefundCents=123456, debug-set)');
+      await page.locator('.tracks-exp-ok').click(); await page.evaluate(() => { window.eggfarm.migrationRefundCents = 0; });
+    }
+    await shotIt(page, 'upgrades-tabs', w, h, 'Upgrades > Farm tab, tabs 36px pill / 44px hit', { asserted_tab: 'farm', checks: tabs });
+    await page.evaluate(() => window.eggfarm.save()); await page.reload({ waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click().catch(() => {}); await page.waitForTimeout(1200);
+    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 2000 }).catch(() => {}); await page.waitForTimeout(1300);
+    ok(`G5 EXP1 not shown again after reload at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    await shotIt(page, 'after-reload', w, h, 'reloaded after the card was seen: no re-show');
+    ok(`G5 no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
+    await ctx.close();
+  }
+  for (const [w, h] of [[360, 800], [375, 812], [390, 844], [1280, 800]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': DONE } });
+    await page.waitForTimeout(2500);
+    const st = await page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), m: window.eggfarm.state.tracksV7, seen: window.eggfarm.state.seenTracksExplainer ?? null }));
+    ok(`G5 new save never shows the explainer at ${w}`, !st.card && st.m === 1, JSON.stringify(st));
+    await shotIt(page, 'new-save', w, h, 'fresh M4 farm: no explainer');
+    await ctx.close();
+  }
+  // HoE Major #49: storage really blocked (localStorage.setItem throws, via an init script after seeding). The migrated save
+  // must never show the card (the flag could not persist, so it would re-show on every load), and a reload changes nothing.
+  for (const [w, h] of [[360, 800]]) {
+    // Phase 0 (storage working): load the v5 save so the tracksV7 migration commits with its v6 backup, but stop while the
+    // card is still queued behind Welcome back (flag unset). Snapshot localStorage: a committed migration, not yet explained.
+    let snap; { const o = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } }); await o.page.waitForTimeout(1500);
+      snap = await o.page.evaluate(() => ({ ls: Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)])), migrated: window.eggfarm.tracksMigratedWithBackup, seen: window.eggfarm.state.seenTracksExplainer ?? null, card: !!document.querySelector('.tracks-exp') }));
+      await o.ctx.close(); }
+    ok(`G5 storage blocked: precondition, migrated with backup and not yet explained at ${w}`, snap.migrated === true && !snap.seen && !snap.card, JSON.stringify({ migrated: snap.migrated, seen: snap.seen, card: snap.card }));
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } }); const page = await ctx.newPage(); const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, snap.ls);
+    await page.addInitScript(() => { window.__setItemThrows = 0; Storage.prototype.setItem = function () { window.__setItemThrows++; throw new DOMException('blocked', 'QuotaExceededError'); }; });
+    const look = async () => { await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
+      for (let i = 0; i < 3; i++) { await page.waitForTimeout(600); for (const n of ['Collect', 'Continue', 'OK', 'Got it', 'Close']) await page.getByRole('button', { name: n, exact: true }).first().click({ timeout: 300 }).catch(() => {}); }
+      await page.waitForTimeout(EXP_WAIT_MS);
+      return page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), seen: window.eggfarm.state.seenTracksExplainer ?? null, m: window.eggfarm.state.tracksV7, migrated: window.eggfarm.tracksMigratedWithBackup, throws: window.__setItemThrows })); };
+    const s1 = await look();
+    ok(`G5 storage blocked: setItem throws and no card at ${w}`, s1.throws > 0 && s1.migrated === true && !s1.card && !s1.seen, JSON.stringify(s1));
+    await shotIt(page, 'storage-blocked', w, h, 'localStorage.setItem throws (init script): migrated save, no explainer', s1);
+    const s2 = await look();
+    ok(`G5 storage blocked: still no card after reload at ${w}`, s2.throws > 0 && s2.migrated === true && !s2.card && !s2.seen, JSON.stringify(s2));
+    await shotIt(page, 'storage-blocked-after-reload', w, h, 'storage still blocked, reloaded: no explainer', s2);
+    ok(`G5 storage blocked: no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
+    await ctx.close();
+  }
+  // HoE #49b: a real QuotaExceededError AFTER load (lease fine, so lease.storageBlocked stays false): the flag write fails
+  // (Game sets storageFailed), so the card must not appear.
+  for (const [w, h] of [[360, 800]]) {
+    let snap; { const o = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } }); await o.page.waitForTimeout(1500);
+      snap = await o.page.evaluate(() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))); await o.ctx.close(); }
+    // localStorage accepts everything (lease, boot saves) until the save carrying seenTracksExplainer=true: that write gets a real
+    // QuotaExceededError, as when the disk fills right then. Installed by an init script after seeding; Game.save sets storageFailed.
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } }); const page = await ctx.newPage(); const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, snap);
+    await page.addInitScript(() => { window.__quota = 0; const orig = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (this === localStorage && String(v).includes('"seenTracksExplainer":true')) { window.__quota++; throw new DOMException('quota', 'QuotaExceededError'); } return orig.call(this, k, v); }; });
+    await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
+    const pre = await page.evaluate(() => ({ migrated: window.eggfarm.tracksMigratedWithBackup, quotaAtBoot: window.__quota }));
+    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 2000 }).catch(() => {});
+    await page.waitForTimeout(EXP_WAIT_MS);
+    const st = await page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), failed: window.eggfarm.storageFailed, quota: window.__quota }));
+    ok(`G5 quota after load: precondition (migrated with backup, explainer due) at ${w}`, pre.migrated === true, JSON.stringify(pre));
+    ok(`G5 quota after load: QuotaExceededError on the flag write, no card at ${w}`, st.quota > 0 && st.failed === true && !st.card, JSON.stringify(st));
+    await shotIt(page, 'quota-after-load', w, h, 'QuotaExceededError after load (flag write failed): no explainer', st);
+    ok(`G5 quota after load: no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
+    await ctx.close();
+  }
+  if (G5) { const { writeFileSync } = await import('node:fs'); writeFileSync(`${G5}/entries-${ENGINE}.json`, JSON.stringify(entries, null, 1)); }
 };
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();

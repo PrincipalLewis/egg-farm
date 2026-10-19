@@ -53,7 +53,7 @@ describe('BUG-2: a live tab re-checks for a newer save before every write', () =
       get: (key: string) => { const r: any = {}; later(() => { r.result = data.get(key); r.onsuccess?.(); later(() => t.oncomplete?.()); }); return r; },
       put: (v: unknown, key: string) => { data.set(key, v); return {}; }, delete: (key: string) => { data.delete(key); return {}; } }); return t; } };
     const m = (await IdbMirror.open({ open: () => { const r: any = {}; later(() => { r.result = db; r.onsuccess?.(); }); return r; } } as any))!;
-    const k = kvm(); k.m.set(SAVE_KEY, serialize(st(), NOW)); const g = new Game(b, k, () => NOW, undefined, 'dev', m, null);
+    const k = kvm(); k.m.set(SAVE_KEY, serialize(st({ tracksV7: 1 as const, v6BackupId: '0123456789abcdef' }), NOW)); const g = new Game(b, k, () => NOW, undefined, 'dev', m, null); // marked: an unmarked v6 pauses the mirror until the commit (M4-24)
     await new Promise(r => setTimeout(r, 10)); expect(typeof data.get('main')).toBe('string'); // normal mirror write
     const seen: number[] = []; g.onNewerSave = v => seen.push(v);
     data.set('main', v7); g.save(); await new Promise(r => setTimeout(r, 10));

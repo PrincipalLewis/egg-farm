@@ -2,7 +2,10 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { balance } from '../../src/config/balance';
+import { balance as shipped } from '../../src/config/balance';
+// M4 ships ON (D-CEO-20261019-01, rc 90a9c84). This harness is the explicit forced-flag-off golden: pins below are unchanged
+// and hold on the shipped data with m4.enabled forced to 0. The M4-on golden is m4on-golden.90a9c84.test.ts.
+const balance = { ...shipped, m4: { ...shipped.m4!, enabled: 0 } };
 import { loadSafe, save, SAVE_KEY, type KV } from '../../src/save/save';
 import { step } from '../../src/sim/tick';
 import { initialState } from '../../src/sim/state';

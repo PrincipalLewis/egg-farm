@@ -5,7 +5,7 @@ import { SAVE_KEY, load, save } from '../src/save/save';
 import { initialState } from '../src/sim/state';
 import { Game } from '../src/game';
 import { TabLease, LEASE_KEY, readLease, type LeaseChannel } from '../src/save/tab-lease';
-import { mem, expOffline } from './helpers';
+import { mem, expOffline, expOfflineV6 } from './helpers';
 const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 afterEach(() => vi.useRealTimers());
 const hub = () => { const chs: LeaseChannel[] = []; return () => { const c: LeaseChannel = { onmessage: null, postMessage: m => chs.filter(x => x !== c).forEach(x => x.onmessage?.({ data: m })), close() {} }; chs.push(c); return c; }; };
@@ -60,11 +60,11 @@ describe('single-tab guard', () => {
   it('TG-5: returning with two tabs pays offline earnings only once', () => {
     vi.useFakeTimers(); const kv = mem(), h = hub(); save(kv, initialState(b), T0);
     let t = T0 + 600_000; const now = () => t;
-    const A = tab(kv, h(), now); expect(A.g.state.pendingOfflineEggs).toBe(expOffline(600));
-    t += 50; const B = tab(kv, h(), now); expect(B.g.state.basket + B.g.state.pendingOfflineEggs).toBe(expOffline(600)); // A's grant settled, no second grant
+    const A = tab(kv, h(), now); expect(A.g.state.pendingOfflineEggs).toBe(expOfflineV6(600));
+    t += 50; const B = tab(kv, h(), now); expect(B.g.state.basket + B.g.state.pendingOfflineEggs).toBe(expOfflineV6(600)); // A's grant settled, no second grant
     B.g.dispatch({ type: 'collectOffline' }); A.g.dispatch({ type: 'collectOffline' });
-    expect(load(kv, b)!.state.basket).toBe(expOffline(600));
-    const C = tab(kv, h(), now, true); expect(C.g.state.basket + C.g.state.pendingOfflineEggs).toBe(expOffline(600));
+    expect(load(kv, b)!.state.basket).toBe(expOfflineV6(600));
+    const C = tab(kv, h(), now, true); expect(C.g.state.basket + C.g.state.pendingOfflineEggs).toBe(expOfflineV6(600));
   });
   it('TG-6: a single tab behaves as before - no notice, every save written, heartbeat keeps the lease fresh', () => {
     vi.useFakeTimers(); const kv = mem(), h = hub(); let t = 1_000; const now = () => t; save(kv, rich(), t);

@@ -12,7 +12,8 @@ function setup() {
   const got: HiddenPeriodResult[] = []; const off = onHiddenPeriodAccounted(r => got.push(r));
   return { kv, g, clock, got, off };
 }
-const view = (g: Game) => JSON.parse(JSON.stringify(g.state));
+/** M4-22 (src/game.ts:75): every fresh farm on an M4 build gets its own random v6BackupId (a per-farm backup identity, not game state), so two independent setup() farms never share it. Compare gameplay state without it. */
+const view = (g: Game) => { const v = JSON.parse(JSON.stringify(g.state)); delete v.v6BackupId; return v; };
 
 describe('accountHiddenPeriod: one entry point, exactly once per hidden period (keyed by periodId)', () => {
   it('671 s: offline-grant result, listener fires once; replay is a no-op returning null', () => {

@@ -17,23 +17,25 @@ import { balance as b } from '../src/config/balance';
 import { runM2 } from './bot-m2';
 import { VAR_DEFAULT } from './seller-variance';
 import { loadTargets, l18to25Guard, l18to25FixedGuard, t20P95Warning, quantile } from './pacing-guards';
-const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
+const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5', T3_CSV = 'b48be8a4'; // T3: M4-on retune D-CEO-20261019-04, same guards as F1
+const GUARDED = csvSha_() === F1_CSV || csvSha_() === T3_CSV;
+function csvSha_() { return createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8); }
 // Same seeds as the AC7 band suite (tests/fixtures/seller_variance.json, 1..100; CCR m2).
 const fx = JSON.parse(readFileSync(new URL('./fixtures/seller_variance.json', import.meta.url), 'utf8')) as { seeds: number[] };
 const SEEDS = fx.seeds, HORIZON_S = 2 * 3600;
 const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
 const t = loadTargets();
-const known = csvSha === F1_CSV || csvSha === MAIN_PRE_F1_CSV;
+const known = GUARDED || csvSha === MAIN_PRE_F1_CSV;
 describe(`AC7 worst-seed guards, workers variance bot (data/economy.csv ${csvSha})`, () => {
   it('economy CSV sha is known (else: update this suite)', () => { if (!known) throw new Error(`unknown economy CSV ${csvSha}: update AC7 worst-seed guards`); });
-  it.skipIf(csvSha !== F1_CSV)('F1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd only; skipped on pre-F1 57d964d5)', () => {
+  it.skipIf(!GUARDED)('F1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)', () => {
     const reaches = SEEDS.map(s => runM2(b, s, { model: 'seller15', T: HORIZON_S, variance: VAR_DEFAULT }).reach);
     const g = l18to25Guard(reaches, t), w = t20P95Warning(reaches, t), t20 = reaches.map(r => r.get(20) ?? Infinity);
     console.log(`variance L18-25 slowest level P95 ${g.p95.toFixed(1)}s (<= ${t.l18_25_step_p95_max_s_variance}) worst ${g.worst.toFixed(1)}s (<= ${t.l18_25_step_worst_max_s}); t20 P5/P50/P95/worst ${[.05, .5, .95].map(p => quantile(t20, p).toFixed(0)).join('/')}/${Math.max(...t20).toFixed(0)}s (warn P95 > ${t.ac7_w_t20_p95_warn_s})`);
     if (w.warning) console.warn(w.warning);
     expect(g.failures).toEqual([]);
   }, 600_000);
-  it.skipIf(csvSha !== F1_CSV)('F1 fixed bot: every seed\'s slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd only; skipped on pre-F1 57d964d5)', () => {
+  it.skipIf(!GUARDED)('F1 fixed bot: every seed\'s slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)', () => {
     const reaches = SEEDS.map(s => runM2(b, s, { model: 'seller15', T: HORIZON_S }).reach);
     const g = l18to25FixedGuard(reaches, t);
     console.log(`fixed L18-25 slowest level P95 ${g.p95.toFixed(1)}s worst ${g.worst.toFixed(1)}s (<= ${t.l18_25_step_p95_max_s})`);

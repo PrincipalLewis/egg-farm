@@ -30,7 +30,7 @@ describe('actions', () => {
   });
   it('AC4 sale credits sold x price, partial fill', () => {
     const s = { ...s0(), basket: 4, farmLevel: 1, customers: [{ id: 7, demand: 6, filled: 0, waitedS: 0 }] };
-    expect(apply(s, { type: 'sell', customerId: 7 }, b)).toMatchObject({ basket: 0, coinsCents: 4 * eggPriceCents(1, 0, b), customers: [{ id: 7, demand: 6, filled: 4 }] });
+    expect(apply(s, { type: 'sell', customerId: 7 }, b)).toMatchObject({ basket: 0, coinsCents: 4 * 100, /* M4 on, V0: track price = 100 c literal (M4A-5; CCR m1: not from the src price fn) */ customers: [{ id: 7, demand: 6, filled: 4 }] });
   });
   it('AC5 upgrade deducts exact cost only when affordable', () => {
     expect(apply(s0(), { type: 'buyFarm' }, b).farmLevel).toBe(0);

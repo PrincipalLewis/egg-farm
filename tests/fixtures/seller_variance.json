@@ -2,7 +2,7 @@
  "source":"vendor/economy-sim/sim/seller_variance_sim.py (vendored from product/sim/) run/run_m2 policy=seller15",
  "sim_sha256":"68a64c59",
  "proposal_sha256":"17877b41",
- "economy_csv_sha256":"6dca24cd",
+ "economy_csv_sha256":"b48be8a4",
  "config":"F1 (P1Q + farm_cost/w4_tier_cost tables from data/economy.csv) + spec_from_csv(data/economy.csv)",
  "python":"3.13.5",
  "T":3600,
