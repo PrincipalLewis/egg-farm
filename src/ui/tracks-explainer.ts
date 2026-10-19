@@ -17,10 +17,13 @@ export const explainerOpen = (doc: Document = document) => !!doc.querySelector('
 const modalOpen = (doc: Document) => !!doc.querySelector('#modal-layer.open');
 export const shouldShowTracksExplainer = (g: G) => m4On(g.balance) && !g.state.seenTracksExplainer;
 /** Call ONLY from Game.onTracksCommitted (existing save upgraded this session; fresh M4 farms never fire it). Shows the card once; persists seenTracksExplainer=true as soon as it is shown. Returns the card, or null if not shown. */
-export function showTracksExplainer(g: G, doc: Document = document): HTMLElement | null {
+export function showTracksExplainer(g: G, doc: Document = document, storageBlocked: () => boolean = () => false): HTMLElement | null {
   if (!shouldShowTracksExplainer(g)) return null;
+  // HoE Major #49: localStorage refuses writes (TabLease.storageBlocked, the NO_STORAGE_TEXT signal in main.ts). The flag
+  // could never persist, so the card would re-show on every load: don't show it this session; a later load with working storage does.
+  if (storageBlocked()) return null;
   // Saves m1: only when the flag can actually be saved and the tab is visible; else retry (the on-load rule covers a reload).
-  if (g.canPersist === false || doc.visibilityState === 'hidden' || modalOpen(doc)) { setTimeout(() => showTracksExplainer(g, doc), EXP_RETRY_MS); return null; }
+  if (g.canPersist === false || doc.visibilityState === 'hidden' || modalOpen(doc)) { setTimeout(() => showTracksExplainer(g, doc, storageBlocked), EXP_RETRY_MS); return null; }
   g.state = { ...g.state, seenTracksExplainer: true }; g.save();
   const el = doc.createElement('div');
   el.className = 'tracks-exp'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'tracks-exp-t');

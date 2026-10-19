@@ -41,7 +41,7 @@ const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textC
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
-export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null } = { newGame: false }) {
+export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null; storageBlocked?: () => boolean } = { newGame: false }) {
   let stored: any = {}; try { stored = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') ?? {}; } catch { /* bad flags: defaults */ }
   // PT1-4: a fresh-start fallback (AC14b F/Q) is a new farm: drop FTUE / Workers-tip progress flags, keep prefs.
   if (opts.recovery && !opts.recovery.restored_from_backup && opts.newGame) stored = keepPrefsOnly(stored);
@@ -700,7 +700,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const rates = () => { const s = g.state, inc = income.centsPerSec(now());
     return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
-  g.onTracksCommitted = () => { showTracksExplainer(g); }; // M4-AC-EXP1: shown once, at the in-session commit
-  if (g.tracksMigratedWithBackup) showTracksExplainer(g); // D-HOP-2026-10-19-13: reload after commit, before it showed
+  g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
+  if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
   return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }

@@ -201,3 +201,28 @@ describe('P46-M1 CCR major: focus return only when it was on the card, never to 
     vi.advanceTimersByTime(EXP_MS); expect(document.querySelector('.tracks-exp')).toBeNull(); expect(document.activeElement!.id).toBe('buy');
   });
 });
+
+describe('HoE Major #49: storage blocked (localStorage.setItem throws)', () => {
+  it('no card, no flag, no save, no retry; a reload changes nothing', async () => {
+    const { TabLease } = await import('../src/save/tab-lease');
+    vi.useFakeTimers();
+    const kv = { getItem: () => null, setItem: () => { throw new DOMException('quota', 'QuotaExceededError'); } };
+    let saves = 0; const state = { ...initialState(on), tracksV7: 1 };
+    for (let load = 0; load < 2; load++) { // first load, then a reload with the same (unsaved) state
+      const lease = new TabLease(kv, null, () => {}); lease.claim(); expect(lease.storageBlocked).toBe(true);
+      expect(lease.owns()).toBe(true); // canWrite() stays true while blocked: the gate must not rely on it
+      const g: any = { state: { ...state }, balance: on, canPersist: true, migrationRefundCents: 0, save() { saves++; } };
+      expect(showTracksExplainer(g, document, () => lease.storageBlocked)).toBeNull();
+      vi.advanceTimersByTime(EXP_RETRY_MS * 5);
+      expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(g.state.seenTracksExplainer).toBeUndefined();
+      lease.stop();
+    }
+    expect(saves).toBe(0); vi.useRealTimers();
+  });
+  it('control: same fake with storage writable shows the card once', () => {
+    const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} };
+    expect(showTracksExplainer(g, document, () => false)).not.toBeNull(); expect(document.querySelectorAll('.tracks-exp').length).toBe(1);
+    expect(g.state.seenTracksExplainer).toBe(true); expect(showTracksExplainer(g, document, () => false)).toBeNull();
+    document.querySelector('.tracks-exp')?.remove();
+  });
+});

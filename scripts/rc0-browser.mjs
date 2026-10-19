@@ -650,6 +650,7 @@ sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1
 // ---------- M4 gate5: tracks explainer (EXP1) + F2 Upgrades tabs; G5SHOTS=<dir> writes shots + entries ----------
 // v1.15 (m4a-spec, CEO): non-modal card; outside taps register and do not close it
 sections.g5 = async () => {
+  const EXP_WAIT_MS = 2500;
   const G5 = process.env.G5SHOTS, MODE = 'nonmodal'; if (G5) mkdirSync(G5, { recursive: true }); const entries = [];
   const DONE = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
   const rect = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; }, sel);
@@ -736,6 +737,32 @@ sections.g5 = async () => {
     const st = await page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), m: window.eggfarm.state.tracksV7, seen: window.eggfarm.state.seenTracksExplainer ?? null }));
     ok(`G5 new save never shows the explainer at ${w}`, !st.card && st.m === 1, JSON.stringify(st));
     await shotIt(page, 'new-save', w, h, 'fresh M4 farm: no explainer');
+    await ctx.close();
+  }
+  // HoE Major #49: storage really blocked (localStorage.setItem throws, via an init script after seeding). The migrated save
+  // must never show the card (the flag could not persist, so it would re-show on every load), and a reload changes nothing.
+  for (const [w, h] of [[360, 800]]) {
+    // Phase 0 (storage working): load the v5 save so the tracksV7 migration commits with its v6 backup, but stop while the
+    // card is still queued behind Welcome back (flag unset). Snapshot localStorage: a committed migration, not yet explained.
+    let snap; { const o = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } }); await o.page.waitForTimeout(1500);
+      snap = await o.page.evaluate(() => ({ ls: Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)])), migrated: window.eggfarm.tracksMigratedWithBackup, seen: window.eggfarm.state.seenTracksExplainer ?? null, card: !!document.querySelector('.tracks-exp') }));
+      await o.ctx.close(); }
+    ok(`G5 storage blocked: precondition, migrated with backup and not yet explained at ${w}`, snap.migrated === true && !snap.seen && !snap.card, JSON.stringify({ migrated: snap.migrated, seen: snap.seen, card: snap.card }));
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } }); const page = await ctx.newPage(); const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, snap.ls);
+    await page.addInitScript(() => { window.__setItemThrows = 0; Storage.prototype.setItem = function () { window.__setItemThrows++; throw new DOMException('blocked', 'QuotaExceededError'); }; });
+    const look = async () => { await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
+      for (let i = 0; i < 3; i++) { await page.waitForTimeout(600); for (const n of ['Collect', 'Continue', 'OK', 'Got it', 'Close']) await page.getByRole('button', { name: n, exact: true }).first().click({ timeout: 300 }).catch(() => {}); }
+      await page.waitForTimeout(EXP_WAIT_MS);
+      return page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), seen: window.eggfarm.state.seenTracksExplainer ?? null, m: window.eggfarm.state.tracksV7, migrated: window.eggfarm.tracksMigratedWithBackup, throws: window.__setItemThrows })); };
+    const s1 = await look();
+    ok(`G5 storage blocked: setItem throws and no card at ${w}`, s1.throws > 0 && s1.migrated === true && !s1.card && !s1.seen, JSON.stringify(s1));
+    await shotIt(page, 'storage-blocked', w, h, 'localStorage.setItem throws (init script): migrated save, no explainer', s1);
+    const s2 = await look();
+    ok(`G5 storage blocked: still no card after reload at ${w}`, s2.throws > 0 && s2.migrated === true && !s2.card && !s2.seen, JSON.stringify(s2));
+    await shotIt(page, 'storage-blocked-after-reload', w, h, 'storage still blocked, reloaded: no explainer', s2);
+    ok(`G5 storage blocked: no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
     await ctx.close();
   }
   if (G5) { const { writeFileSync } = await import('node:fs'); writeFileSync(`${G5}/entries-${ENGINE}.json`, JSON.stringify(entries, null, 1)); }
