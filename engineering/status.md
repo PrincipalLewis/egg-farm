@@ -126,3 +126,8 @@
 - 900 s run-cap check: no cap. runM2 T=7200 s (tests/bot-m2.ts:25). Buys only at 20 s sell check-ins, so reach times are on a 20 s grid; 900 s = check-in #45. Seeds at exactly 900 s: 16 (1-200), 7 (201-299).
 - CCR M1: tests/zz-t3.test.ts deleted. m2: stale "F1 6dca24cd only" titles fixed. n1: headers cite product/decisions.md:232/241.
 - tsc OK; vitest 862/864 (only the 2 acw1 gate tests fail); sync-economy --check OK.
+
+## 2026-10-19 09:55 (UTC+2) Senior Software Architect — M41-5 (D-HOP-25), branch arch/m41-5-dead-cols off main dd223f5
+- done: data/economy.csv drops guard_heartbeat_s/guard_stale_s (the only 2 of the 8 D-HOP-25 columns on main; farm_ms_price_mult, feed_mill_price_mult, auto_collect_every_s, contracts_manual_bonus, farm_max_level, hv_extra_second_markup are b.csv-only). New CSV sha256 c7bb783fe890928f747c142411503261f0711388e73fe1cdadbfd76cc8d68b44 (123 cols, 31 rows, LF) = product/economy.csv. balance.json byte-identical (2e7f0f3e). economy_sim.json fixture byte-identical (7b3ed73b); seller_variance.json differs only in its economy_csv_sha256 provenance field. Goldens unchanged (2 runs). CSV-sha switches pin c7bb783f next to T3 b48be8a4 (no threshold change).
+- done: G10 unread-column gate in sync-economy (scripts/csv-columns.ts, Proxy read tracking; allowlist parsed from product/economy/csv-column-allowlist.md, prefix tc_*, owner + expiry, expired = warn / fail under --strict-allowlist). 16 unread on main, all allowlisted. Tests tests/csv-columns.test.ts.
+- next: HoP confirms Product's csv-column-allowlist.md matches the repo copy (per-row expiry added); Economy rebases the L30+ reshape CSV on c7bb783f; #45 branch picks this up. DO NOT MERGE until CI is back (local gates only).
