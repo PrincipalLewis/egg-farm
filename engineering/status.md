@@ -106,3 +106,9 @@
 - done: merged rc/m4-default-on 7fdb273 (clean); bot Farm-level log fix + regression test (HoQA). Unit 860/863 (3 balance reds), slow 14/14, goldens 4/4 unchanged. AC7 1-200 L10 P95 15.35 / 15.38 min (matches HoQA).
 - next: HoP 03:30 retune.
 - blocked: none.
+## 2026-10-19 02:45 Senior Software Architect (rc/m4-retune-t3, D-CEO-20261019-04)
+- done: T3 data (economy.csv b48be8a4; balance.json via sync-economy, only m4 hens/eggValue costs L0-L11), seller_variance.json fixture 4ea66e5c, T3 sha allowlisted (AC7 band, worst-seed, economy-sim parity), M4-on golden trace re-pinned a54c9cf9. L30+ pack a957b072 not landed (econ/l30plus-v2 only), so economy.T3.csv used.
+- gates: tsc ok; sync --check ok; unit 858/863; slow 14/14; goldens 4/4; check-economy-copy --product --strict FAILS (vendor/economy-sim/economy.f1-m4cols.csv still 6dca24cd vs product b48be8a4). rc0 chromium 246/247 (pt1: /tmp/axe axe-core missing, env).
+- AC7 seeds 1-200: L10 P95 12.02 nw / 12.08 w (gate <= 12: FAIL by 0.02/0.08), fastest 7.87 (>= 8: FAIL, ruling pending), L@30 19/19/20 and 21/22/22, L30 200/200 workers t30 P50 49.64 / P95 50.77 min. Matches Economy's README.
+- still red: cost-segments (data sha pin 6dca24cd), m4a-tracks TR-1 (hard-coded $48/$36 costs), pacing-acw1 (91% vs 95%), p4. Not edited (assertions).
+- next: HoE decisions (pins, vendor copy, gate ruling); PR.
