@@ -95,23 +95,30 @@ export const fmtMoneyShort = (cents: number, opts?: { round?: 'nearest' | 'floor
 };
 /** Sell-button preview only (HoP 15:14): exact under $1K; at $1K+ short form floored so the button never shows more than the credit. */
 export const fmtMoneyPreview = (cents: number) => fmtMoneyShort(cents, { round: 'floor' });
-/** M41-9 aria / spoken text (B-1 rule, number-format-big §5): spell the suffix of a short form out from the SUFFIXES table
- *  ("$12.3K" -> "$12.3 thousand", "1.2Qa" -> "1.2 quadrillion"); scientific reads "1.23 times 10 to the 36". */
+/** M41-9 aria / live-region text only (number-format-big §5, Art ruling on #56): spell out Qa and above from the SUFFIXES
+ *  table ("1.2Qa" -> "1.2 quadrillion"); scientific reads "1.23 times 10 to the 36". K–T stay as on main ("$1M", "13K"). */
+const SPELL_FROM = 1e15;
 export const spellShort = (short: string): string => {
   const sci = /^(\$?)(\d+(?:\.\d+)?)e(\d+)$/.exec(short); if (sci) return `${sci[1]}${sci[2]} times 10 to the ${sci[3]}`;
-  const m = /^(\$?[\d.,]+)([A-Za-z]+)$/.exec(short); const t = m && SUFFIXES.find(x => x.sym === m[2]);
+  const m = /^(\$?[\d.,]+)([A-Za-z]+)$/.exec(short); const t = m && SUFFIXES.find(x => x.sym === m[2] && x.base >= SPELL_FROM);
   return t ? `${m![1]} ${t.name}` : short;
 };
 /** Spoken egg count: fmtCount with the suffix spelled out (under 1e4 it is the plain number). */
 export const fmtCountAria = (n: number) => spellShort(fmtCount(n));
-/** Always exact (aria / popup / Thanks): full dollars, thousands separators, 2 decimals. '—' for NaN/Infinity.
- *  M41-9: from $1 quadrillion (1e15 dollars) the spelled short form instead of a digit string ("$1.25 quadrillion",
- *  "$1.23 times 10 to the 36"); below that byte-identical. */
+/** VISIBLE exact money (coin pops, +$ floaters): full dollars, thousands separators, 2 decimals; '—' for NaN/Infinity.
+ *  M41-9: from $1 quadrillion (1e15 dollars) the compact suffix form, never a digit string or a spelled word ("$1.2Qa",
+ *  "$1.23e36"); below that byte-identical to main. */
 export const fmtMoneyExact = (cents: number) => {
   if (!Number.isFinite(cents)) return '—';
-  if (cents / 100 >= 1e15) return spellShort(fmtMoney(cents));
+  if (cents / 100 >= SPELL_FROM) return fmtMoneyShort(cents);
   return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
+/** ARIA exact money (order row / Sell aria): equals fmtMoneyExact below $1e15 (byte-identical to main); from $1e15 the
+ *  spelled short form ("$1.25 quadrillion", "$1.23 times 10 to the 36"), never a full digit string. */
+export const fmtMoneyAria = (cents: number) =>
+  Number.isFinite(cents) && cents / 100 >= SPELL_FROM ? spellShort(fmtMoney(cents)) : fmtMoneyExact(cents);
+/** #live region text (once a second): "$12.3K, 13K eggs" exactly as on main for K–T; Qa+ spelled out. */
+export const liveText = (coinsCents: number, basket: number) => `${spellShort(fmtMoney(coinsCents))}, ${fmtCountAria(basket)} eggs`;
 /** Upgrade-card ETA (Product copy, Oct 16; same as rc1/ux-clarity format.ts): "Affordable in a moment" under 10 s; "Affordable in ~m:ss"; "~h:mm:ss" from 1 h; no income "Affordable in —". */
 export const fmtAffordableIn = (seconds: number | null) => {
   if (seconds === null || !isFinite(seconds)) return 'Affordable in —';

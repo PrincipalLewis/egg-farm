@@ -7,7 +7,7 @@ import type { Balance } from '../config/balance';
 import type { Game, GameEvent } from '../game';
 import * as S from '../sim/state';
 import { fmtMoneyShort } from './format';
-import { fmtCount, fmtCountFloor, fmtCountAria, fmtMoney, fmtMoneyFloor, spellShort, fmtMoneyExact, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
+import { fmtCount, fmtCountFloor, fmtMoney, fmtMoneyFloor, liveText, fmtMoneyExact, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
 import { TapFx, Throttle } from './fx';
 import type { Audio, SfxName } from './audio';
 import { resetProgress, keepPrefsOnly } from '../save/save';
@@ -578,7 +578,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     { const hide = goalHidden; if (goalBtn.hidden !== hide) goalBtn.hidden = hide; }
     if (shouldShowCoopTip(s, b, coopTipShown)) { coopTipShown = true; g.telemetry.track('coop_hand_tip', { phase: 'shown', farm: F }); showTip(); }
     // aria-live throttled 1/s
-    const t = now(); if (t - lastLive > 1000) { lastLive = t; setText($('#live'), `${spellShort(fmtMoney(s.coinsCents))}, ${fmtCountAria(s.basket)} eggs`); }
+    const t = now(); if (t - lastLive > 1000) { lastLive = t; setText($('#live'), liveText(s.coinsCents, s.basket)); }
     dirty = false;
   }
   void dirty;
