@@ -3,7 +3,7 @@ import { balance, validateBalance, Balance } from '../src/config/balance';
 import { runM2 } from './bot-m2';
 import { median } from './bot';
 // AC-W1 (m2-proposal §8 item 17): casual model = test-only Poisson arrivals + demand x0.75, sell every 20 s, tap 1/s,
-// seller15 buy rule, managed, v1.1 values, 2 h runs, seeds 0-99 (one RNG stream per run, seeded by the integer seed).
+// seller15 buy rule, managed, v1.1 values, 2 h runs, seeds 1-200 and 201-299 (one RNG stream per run, seeded by the integer seed).
 // Refs: D-HOP-2026-10-19-09 (product/decisions.md:241), D-CEO-20261019-06 (decisions.md:57, IN FORCE per its 04:04 entry: >= 95% reach F10 within 16 min, inclusive, on seeds 1-200 and 201-299; median F18 <= 40 min), product/decisions.md:232.
 // Old reference: product/sim/economy_sim.py run_m2(seller15, spec=M2_CURRENT, **CASUAL), seeds 0-99 (M2_CURRENT = M2_F1, 50 / 0.5, since sim 10f29a4a).
 // M4-on reference (Economy round 4, D-HOP-08; scratch/m4-retune/REPORT.md Round 4 §C/§D): REGRESSION BASELINE ONLY; Python has no M4 model.
