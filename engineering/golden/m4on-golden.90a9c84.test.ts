@@ -20,8 +20,8 @@ const PINS: Record<string, string> = {
   'm2-rc1-v5-40min': '48b1fa43497a912c700461ddd4a2cf0abe59ba685977e7841c012ce8f7e6f1ef',
   'm2-rc1-v5-40min-edge': '78b97634d0bbc3b4a174751917ad573889ec57bc22cc3163deb4c6fec0e4a4bc',
 };
-// Generated 2026-10-19 on 90a9c84 + this branch, two runs, identical. Re-pinned for the D-HOP-2026-10-19-02 bot (game pick over all purchasables): history 403ca889bb02121e764c402cb2c408b0aebf0bed43ca14d187ea62bbeafa7974 (no bot change) -> 9173492e41ac06cbe3c077bcbadc464ad5ce681646eb4b9619b640ff40a31f6b (-01 bot). Storage pins unchanged (no bot). A retune or any M4 sim change moves these: re-pin with HoE OK.
-const GOLDEN_M4ON = '723b91ab311be9bf403e7bd5a8f7363bc85234287354c4dedf94a45613faa817';
+// Generated 2026-10-19 on 90a9c84 + this branch, two runs, identical. Re-pinned for the D-HOP-2026-10-19-02 bot (game pick over all purchasables): history 403ca889bb02121e764c402cb2c408b0aebf0bed43ca14d187ea62bbeafa7974 (no bot change) -> 9173492e41ac06cbe3c077bcbadc464ad5ce681646eb4b9619b640ff40a31f6b (-01 bot) -> 723b91ab311be9bf403e7bd5a8f7363bc85234287354c4dedf94a45613faa817 (-02 bot) -> a54c9cf9 (T3 data b48be8a4, D-CEO-20261019-04). Storage pins unchanged (no bot). A retune or any M4 sim change moves these: re-pin with HoE OK.
+const GOLDEN_M4ON = 'a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5';
 const FIX = ['m1-rc2-v4-12min', 'm2-rc1-v5-12min', 'm2-rc1-v5-40min', 'm2-rc1-v5-40min-edge'];
 const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
 describe('golden', () => {
