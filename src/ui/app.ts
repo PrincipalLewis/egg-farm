@@ -278,7 +278,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     saveFlags();
   });
   $('#settings').addEventListener('click', showSettings);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else openPanel(null); } });
+  // PL-1: Escape only closes the modal/panel, never activates; a held Enter or Space can't auto-repeat buys (one press = one level).
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else openPanel(null); }
+    else if ((e.key === 'Enter' || e.key === ' ') && e.repeat && (e.target as Element | null)?.closest?.('button')) e.preventDefault();
+  });
 
   // ---------- Queue strip ----------
   const chips = new Map<number, HTMLElement>();
