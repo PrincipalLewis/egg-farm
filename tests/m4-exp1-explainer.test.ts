@@ -240,3 +240,28 @@ describe('HoE #49b: QuotaExceededError on the flag write (g.storageFailed)', () 
     vi.useRealTimers();
   });
 });
+
+describe('Saves/HoQA Major: a failed flag save leaves seen=false (memory, IDB mirror, next autosave)', () => {
+  it('flag write hits QuotaExceededError: no card, seen=false in g.state; later saves never carry seen=true', () => {
+    vi.useFakeTimers();
+    const m = mem(); const kv = { getItem: m.getItem, setItem: (k: string, v: string) => { if (v.includes('"seenTracksExplainer":true')) throw new DOMException('quota', 'QuotaExceededError'); m.setItem(k, v); } };
+    const writes: string[] = []; const mirror = { write: (raw: string) => { writes.push(raw); return Promise.resolve(); } } as any;
+    const g = new Game(on, kv, () => 1760000000500 + n++ * 1000, undefined, 'dev', mirror, null, { idbBoot: 'absent', newId: id });
+    g.state = { ...g.state, tracksV7: 1 }; g.save(); expect(g.storageFailed).toBe(false);
+    const flagWrite = writes.length;
+    expect(showTracksExplainer(g as any, document, () => g.storageFailed)).toBeNull();
+    expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
+    expect(g.storageFailed).toBe(true);
+    expect(g.state.seenTracksExplainer).toBe(false); // in memory
+    // The catch path inside Game.save (save code, not touched here) mirrors the state it was asked to save, i.e. the one
+    // write that carried seen=true. Record it honestly; the fix guarantees every LATER write is clean.
+    const atFail = writes.slice(flagWrite).map(r => r.includes('"seenTracksExplainer":true'));
+    const afterFail = writes.length;
+    g.save(); vi.advanceTimersByTime(60_000); g.save(); // next autosaves
+    const later = writes.slice(afterFail);
+    expect(later.length).toBeGreaterThan(0);
+    expect(later.some(r => r.includes('"seenTracksExplainer":true'))).toBe(false); // IDB mirror: no seen=true after the revert
+    expect(m.getItem(SAVE_KEY) ?? '').not.toContain('"seenTracksExplainer":true'); // localStorage never got it
+    expect(atFail).toEqual([true]); // documents the residual: that single fallback mirror write (inside Game.save) still has seen=true until the next save overwrites it
+  });
+});
