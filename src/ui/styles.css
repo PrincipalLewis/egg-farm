@@ -117,6 +117,8 @@ img{user-select:none;-webkit-user-drag:none}
 .tabs{display:flex;background:var(--c-white);border-radius:var(--r-pill);border:var(--bw) solid var(--c-outline);padding:2px;height:44px}
 .tabs button{flex:1;border:0;border-radius:var(--r-pill);background:transparent;display:flex;gap:6px;align-items:center;justify-content:center;font:700 var(--fs-base) var(--f-display)}
 .tabs button img{width:24px}.tabs .active{background:var(--c-yolk)}
+/* gate5 F2: the tabs row never flex-shrinks (was 34px -> 26px buttons on phones); 36px pill visual, 44px hit area (PT1-8 pattern) */
+.tabs{flex:none;overflow:visible}.tabs button{box-sizing:border-box;min-height:44px;margin-block:-4px;padding:4px 0;align-self:stretch}
 .up{display:grid;grid-template-columns:56px minmax(0,1fr);gap:var(--s-3);align-items:start;padding:var(--s-4);background:var(--c-white);border:var(--bw) solid var(--c-outline);border-radius:var(--r-md)}
 .up .ic{position:relative;width:56px;height:56px}.up .ic > img{width:56px;height:56px}
 .up .col{display:flex;flex-direction:column;gap:var(--s-2);min-width:0}
