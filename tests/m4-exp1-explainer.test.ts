@@ -124,3 +124,19 @@ describe('Saves m1: explainer only when the flag can be persisted', () => {
     vis.mockRestore();
   });
 });
+
+describe('§11 refund line and reduced motion', () => {
+  const g = (refund: number) => ({ state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, migrationRefundCents: refund, save() {} }) as any;
+  it('refund > 0: line with the money formatter; refund 0: omitted', async () => {
+    const { fmtMoney } = await import('../src/ui/format');
+    showTracksExplainer(g(123456)); const r = document.querySelector('.tracks-exp-refund');
+    expect(r!.textContent!.trim()).toBe(`We refunded +${fmtMoney(123456)} for your old upgrades.`); expect(r!.querySelector('img')).toBeTruthy();
+    document.body.innerHTML = ''; showTracksExplainer(g(0));
+    expect(document.querySelector('.tracks-exp')).toBeTruthy(); expect(document.querySelector('.tracks-exp-refund')).toBeNull();
+  });
+  it('reduced motion: 150 ms opacity fade only (no scale)', async () => {
+    const css = (await import('node:fs')).readFileSync(process.cwd() + '/src/ui/styles.css', 'utf8');
+    const m = css.match(/@media \(prefers-reduced-motion:reduce\)\{\.tracks-exp\{animation:(\w+) \.15s[^}]*\}\}/); expect(m).toBeTruthy();
+    const kf = css.match(new RegExp(`@keyframes ${m![1]}\\{([^@]*?)\\}\\}`))![1]; expect(kf).toContain('opacity'); expect(kf).not.toContain('scale');
+  });
+});
