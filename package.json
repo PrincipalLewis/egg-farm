@@ -10,6 +10,7 @@
     "test": "vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
     "test:slow": "node scripts/check-vendor-pins.mjs && vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1",
     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
+    "economy:allowlist-triage": "vite-node scripts/sync-economy-cli.ts -- --check --strict-allowlist",
     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",
     "screenshot": "node scripts/screenshot.mjs",
     "smoke": "node scripts/smoke.mjs",

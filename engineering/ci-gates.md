@@ -56,7 +56,12 @@ the in-repo `product/economy/csv-column-allowlist.md` (Head of Product owns it).
   is fetched. `in` checks and `Object.keys` do not count.
 - The allowlist is the first markdown table with `column | feature | owner | expires` headers, parsed at runtime (no other copy).
   `name*` is a prefix entry (`tc_*`). `owner` and `expires` (YYYY-MM-DD) are required; a malformed row fails the sync.
-- Expired entries (today, UTC, after `expires`) print a WARNING; with `--strict-allowlist` or `ECONOMY_ALLOWLIST_STRICT=1` they fail.
+- Expired entries (today, UTC, after `expires`) only print a WARNING in every build/CI/release path (`npm test`, `npm run build`,
+  `build:html`, `build:qa`, `.github/workflows/*`), so a build never depends on the date. They fail only in the explicit triage
+  script `npm run economy:allowlist-triage` (`--check --strict-allowlist`), run at the Oct 22 M4.2 triage. There is no
+  environment switch: `ECONOMY_ALLOWLIST_STRICT` is ignored (it prints a warning), so a stray CI variable can't turn strict on.
+  `tests/csv-columns.test.ts` asserts that no npm script except the triage one and no workflow passes `--strict-allowlist`.
+- Allowlist entries that match no economy.csv column (e.g. `start_coop_eggs` before PR #37) print a WARNING, never fail.
 - Tests: `tests/csv-columns.test.ts`.
 
 ## No reads outside the repo

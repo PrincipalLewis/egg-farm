@@ -40,18 +40,26 @@ export function trackReads(rows: Row[], prev: unknown, cfg: EconomyConfig = {}):
   buildBalance(rows.map(wrap), structuredClone(prev), cfg);
   return read;
 }
-export interface ColumnReport { unread: string[]; allowed: { col: string; entry: AllowEntry }[]; violations: string[]; expired: AllowEntry[]; unusedEntries: AllowEntry[]; errors: string[]; warnings: string[] }
-/** today: YYYY-MM-DD. An entry is expired when today > expires. strict: expired entries that still cover a column are errors. */
+export interface ColumnReport { unread: string[]; allowed: { col: string; entry: AllowEntry }[]; violations: string[]; expired: AllowEntry[]; unusedEntries: AllowEntry[]; noMatchEntries: AllowEntry[]; errors: string[]; warnings: string[] }
+/** today: YYYY-MM-DD. An entry is expired when today > expires. strict: expired entries that still cover a column are errors.
+ *  strict is ONLY for the Oct 22 triage script (npm run economy:allowlist-triage); build/CI/release paths never pass it, so
+ *  expiry can only warn there and a build never depends on the date. Entries matching no CSV column at all warn (never fail). */
 export function checkColumns(rows: Row[], prev: unknown, cfg: EconomyConfig, allow: AllowEntry[], today: string, strict = false): ColumnReport {
   const header = Object.keys(rows[0] ?? {}), read = trackReads(rows, prev, cfg);
   const unread = header.filter(c => !read.has(c)), allowed: ColumnReport['allowed'] = [], violations: string[] = [];
   for (const col of unread) { const entry = allow.find(e => allowMatch(e, col)); if (entry) allowed.push({ col, entry }); else violations.push(col); }
   const expired = allow.filter(e => today > e.expires && allowed.some(a => a.entry === e));
   const unusedEntries = allow.filter(e => !allowed.some(a => a.entry === e));
+  const noMatchEntries = allow.filter(e => !header.some(c => allowMatch(e, c)));
   const errors = violations.map(c => `economy.csv column ${c} is not read by scripts/sync-economy.ts and is not in product/economy/csv-column-allowlist.md (wire it, drop it, or allowlist it with owner + expiry)`);
   const warnings: string[] = [];
   for (const e of expired) (strict ? errors : warnings).push(`csv-column-allowlist entry ${e.name}${e.prefix ? '*' : ''} (owner ${e.owner}) expired ${e.expires}: slot it into a milestone or drop the column`);
-  return { unread, allowed, violations, expired, unusedEntries, errors, warnings };
+  for (const e of noMatchEntries) warnings.push(`csv-column-allowlist entry ${e.name}${e.prefix ? '*' : ''} (owner ${e.owner}, line ${e.line}) matches no economy.csv column: remove it or add the column`);
+  return { unread, allowed, violations, expired, unusedEntries, noMatchEntries, errors, warnings };
 }
 export const todayUtc = () => new Date().toISOString().slice(0, 10);
 export const readAllowlist = (path = ALLOWLIST_PATH) => parseAllowlist(readFileSync(path, 'utf8'));
+/** Strict expiry only via the explicit --strict-allowlist flag (economy:allowlist-triage). There is deliberately no
+ *  environment switch: a stray env var on a CI runner must never make a build depend on the date. */
+export const STRICT_FLAG = '--strict-allowlist';
+export const isStrict = (argv: readonly string[]) => argv.includes(STRICT_FLAG);

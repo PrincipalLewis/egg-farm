@@ -1,9 +1,10 @@
 // M41-5 (D-HOP-25, gates.md G10): unread economy.csv columns fail sync-economy --check unless allowlisted
 // in product/economy/csv-column-allowlist.md (parsed at runtime). Reads are tracked through a Proxy, not grepped.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parseEconomyCsv, readEconomyConfig } from '../scripts/sync-economy';
-import { parseAllowlist, readAllowlist, checkColumns, trackReads, allowMatch } from '../scripts/csv-columns';
+import { parseAllowlist, readAllowlist, checkColumns, trackReads, allowMatch, isStrict, todayUtc } from '../scripts/csv-columns';
+import { readdirSync } from 'node:fs';
 const csvText = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
 const prev = JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8'));
 const cfg = readEconomyConfig(), allow = readAllowlist(), TODAY = '2026-10-19';
@@ -39,7 +40,7 @@ describe('csv-column allowlist (product/economy/csv-column-allowlist.md)', () =>
   it('expired entries warn by default and fail under strict', () => {
     const r = checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-23');
     expect(r.errors).toEqual([]); expect(r.warnings.length).toBeGreaterThan(0); expect(r.warnings[0]).toMatch(/expired 2026-10-22/);
-    expect(checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-22').warnings).toEqual([]); // valid through the triage day
+    expect(checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-22').warnings.filter(w => /expired/.test(w))).toEqual([]); // valid through the triage day
     expect(checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-23', true).errors.join('\n')).toMatch(/expired/);
   });
   it('the allowlist is parsed from the markdown file: owner and expiry required, malformed rows fail', () => {
@@ -52,5 +53,33 @@ describe('csv-column allowlist (product/economy/csv-column-allowlist.md)', () =>
   it('read tracking counts value reads only (presence checks and key listing do not)', () => {
     const read = trackReads(withCols({ zz_new_knob: 1 }), prev, cfg);
     expect(read.has('farm_cost')).toBe(true); expect(read.has('tc_focus_premium')).toBe(true); expect(read.has('zz_new_knob')).toBe(false);
+  });
+  // M41-5 follow-up (HoE): builds never depend on the date; strict expiry only in npm run economy:allowlist-triage.
+  afterEach(() => { vi.useRealTimers(); });
+  it('clock past expiry (2026-10-23): the build path (--check, no strict flag) passes with warnings only', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date('2026-10-23T09:00:00Z'));
+    expect(todayUtc()).toBe('2026-10-23');
+    const build = checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, todayUtc(), isStrict(['--check']));
+    expect(build.errors).toEqual([]); expect(build.expired.length).toBeGreaterThan(0);
+    expect(build.warnings.filter(w => /expired 2026-10-22/.test(w))).toHaveLength(build.expired.length);
+    const triage = checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, todayUtc(), isStrict(['--check', '--strict-allowlist']));
+    expect(triage.errors.length).toBe(build.expired.length); expect(triage.errors.join('\n')).toMatch(/expired/);
+  });
+  it('strict is only the explicit flag: no npm script but economy:allowlist-triage and no workflow passes it; no env switch', () => {
+    const scripts: Record<string, string> = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).scripts;
+    expect(Object.keys(scripts).filter(k => scripts[k].includes('--strict-allowlist'))).toEqual(['economy:allowlist-triage']);
+    expect(scripts['economy:allowlist-triage']).toMatch(/sync-economy-cli\.ts -- --check --strict-allowlist$/);
+    const wf = new URL('../.github/workflows/', import.meta.url);
+    for (const f of readdirSync(wf)) expect(readFileSync(new URL(f, wf), 'utf8'), f).not.toMatch(/strict-allowlist|ALLOWLIST_STRICT|allowlist-triage/);
+    const prevEnv = process.env.ECONOMY_ALLOWLIST_STRICT; process.env.ECONOMY_ALLOWLIST_STRICT = '1';
+    try { expect(isStrict(['--check'])).toBe(false); } finally { if (prevEnv === undefined) delete process.env.ECONOMY_ALLOWLIST_STRICT; else process.env.ECONOMY_ALLOWLIST_STRICT = prevEnv; }
+  });
+  it('entries matching no CSV column warn, never fail (start_coop_eggs on main; a prefix with no match)', () => {
+    const a = [...allow, ...parseAllowlist(md('| zz_none_* | test | QA | 2026-10-22 |'))];
+    const r = checkColumns(parseEconomyCsv(csvText), prev, cfg, a, TODAY);
+    expect(r.errors).toEqual([]);
+    expect(r.noMatchEntries.map(e => e.name + (e.prefix ? '*' : ''))).toEqual(['start_coop_eggs', 'zz_none_*']);
+    expect(r.warnings.filter(w => /matches no economy\.csv column/.test(w))).toHaveLength(2);
+    expect(r.noMatchEntries.some(e => e.name === 'tc_')).toBe(false); // tc_* matches (read) columns: no warning
   });
 });

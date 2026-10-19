@@ -7,9 +7,10 @@ with an explicit per-row `expires` date. Source: scratch/unread-cols/classificat
 Rules:
 - One row per feature. `column` holds one or more column names separated by commas; a trailing `*` is a prefix entry
   (`tc_*` matches every column starting with `tc_`).
-- `owner` and `expires` (YYYY-MM-DD) are required. An entry is expired once the date has passed; expired entries warn on
-  every sync and fail under `--strict-allowlist` (or `ECONOMY_ALLOWLIST_STRICT=1`). On expiry, an entry not slotted into a
+- `owner` and `expires` (YYYY-MM-DD) are required. An entry is expired once the date has passed; expired entries only warn
+  in builds/CI and fail only in the triage script `npm run economy:allowlist-triage`. On expiry, an entry not slotted into a
   milestone is DROPPED (column removed from the CSV).
+- An entry that matches no CSV column (e.g. `start_coop_eggs` until PR #37 adds it) warns, never fails.
 - Columns the sync already reads never need an entry.
 
 ## Documentation-only allowlist (expires at the M4.2 triage, Oct 22)
