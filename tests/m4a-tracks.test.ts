@@ -30,10 +30,13 @@ describe('TR-1 costs from config', () => {
   });
   it('buying charges the cost in cents and raises the level', () => {
     const ev: SimEvent[] = [];
+    // Prices from config (economy.csv egg_value_cost / hens_cost L0, $ -> cents), not hard-coded: survive retunes (HoE, #44).
+    const ev0 = on.m4!.eggValue.costs[0] * 100, h0 = on.m4!.hens.costs[0] * 100;
     const s = apply(st({ coinsCents: 10_000 }), { type: 'buyTrack', track: 'eggValue' }, on, ev);
-    expect(s.eggValueLevel).toBe(1); expect(s.coinsCents).toBe(10_000 - 4800);
-    expect(ev[0]).toMatchObject({ type: 'upgrade', upgrade: 'eggValue', newLevel: 1, cost: 4800 });
-    expect(apply(st({ coinsCents: 3599 }), { type: 'buyTrack', track: 'hens' }, on).hensLevel).toBe(0);
+    expect(s.eggValueLevel).toBe(1); expect(s.coinsCents).toBe(10_000 - ev0);
+    expect(ev[0]).toMatchObject({ type: 'upgrade', upgrade: 'eggValue', newLevel: 1, cost: ev0 });
+    expect(apply(st({ coinsCents: h0 - 1 }), { type: 'buyTrack', track: 'hens' }, on).hensLevel).toBe(0);
+    expect(apply(st({ coinsCents: h0 }), { type: 'buyTrack', track: 'hens' }, on).hensLevel).toBe(1);
   });
 });
 describe('TR-2 cap min(F+3, 30)', () => {
