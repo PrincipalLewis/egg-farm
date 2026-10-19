@@ -1,6 +1,7 @@
 // L30+ (product/farm/l30plus-spec.md v0.2 + HoP 23:37): data-driven clamps (Farm 50, Hens/Egg value 55), per-row caps
 // (F+3 below L40, F+5 from L40), L30-17 extra-level surcharge, L30-18 no near-zero increase. All expected values are read
-// from data/staging/economy.l30plus.csv (= product/economy.l30plus-candidate.csv, sha256 77a68a6131895ba1...).
+// from tests/fixtures/l30plus-cand-b.csv (HoP candidate (b), sha256 84bd0b70bf40b8df..., D-HOP-2026-10-19-22; test fixture only,
+// the shipping data/economy.csv stays main's 31-row table).
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parseEconomyCsv, fitM4, farmMaxOf, readEconomyConfig } from '../scripts/sync-economy';
@@ -11,12 +12,12 @@ import { initialState } from '../src/sim/state';
 import { apply } from '../src/sim/actions';
 import { fxArrow } from '../src/ui/tracks-ui';
 import { fmtMoneyShort, fmtCount } from '../src/ui/format';
-const R = parseEconomyCsv(readFileSync(new URL('../data/staging/economy.l30plus.csv', import.meta.url), 'utf8'));
+const R = parseEconomyCsv(readFileSync(new URL('./fixtures/l30plus-cand-b.csv', import.meta.url), 'utf8'));
 const cfg = readEconomyConfig();
 const farmMax = farmMaxOf(R, cfg);
 // Live params + the L30+ M4 block and Farm prices from the table (full L30+ param fit waits for Economy's merge, D5).
 const b: Balance = validateBalance({ ...live, maxLevel: farmMax, m4: { ...fitM4(R, live, cfg)!, enabled: 1 },
-  farm: { ...live.farm, costOverrides: Object.fromEntries(R.slice(0, farmMax + 1).map(r => [r.level, r.farm_cost])) } } as Balance);
+  farm: { ...live.farm, costTable: R.slice(0, farmMax + 1).map(r => r.farm_cost) } } as unknown as Balance);
 const st = (F: number, H: number, V = 0, coins = 1e15) => ({ ...initialState(b, 1), farmLevel: F, hensLevel: H, eggValueLevel: V, coinsCents: coins, tracksV7: 1 } as any);
 const fc = (F: number) => R[F].farm_cost, share = (F: number) => R[F].hv_extra_cost_farm_share;
 describe('L30+ D1 clamps from data', () => {
@@ -42,23 +43,26 @@ describe('L30-13/17 buy gate', () => {
     expect(trackLock(st(39, 42), 'hens', b)).toBe('cap');
     expect(trackBuyCost(st(39, 41), 'hens', b)).toBe(R[41].hens_cost);
   });
-  it('L40: cap F+5; first extra level = row cost + floor(share x current Farm cost)', () => {
-    expect(R[40].hens_cap_over_farm).toBe(5); expect(share(40)).toBe(0.15);
-    expect(trackBuyCost(st(40, 42), 'hens', b)).toBe(R[42].hens_cost); // within F+3: no surcharge
-    expect(trackLock(st(40, 43), 'hens', b)).toBeNull();
-    expect(trackBuyCost(st(40, 43), 'hens', b)).toBe(R[43].hens_cost + Math.floor(share(40) * fc(40)));
-    expect(trackBuyCost(st(40, 0, 43), 'eggValue', b)).toBe(R[43].egg_value_cost + Math.floor(share(40) * fc(40)));
+  // Levels derived from the data (S2 caps: F+4 at L40-42, F+5 from L43 in cand (b)), not hard-coded.
+  const FS = R.find(r => share(r.level) > 0)!.level, F5 = R.find(r => r.level >= FS && r.hens_cap_over_farm === 5)!.level;
+  it('first surcharge row: cap from the row; first extra level = row cost + floor(share x current Farm cost)', () => {
+    expect(R[FS].hens_cap_over_farm).toBeGreaterThan(3); expect(share(FS)).toBeGreaterThan(0);
+    expect(trackBuyCost(st(FS, FS + 2), 'hens', b)).toBe(R[FS + 2].hens_cost); // within F+3: no surcharge
+    expect(trackLock(st(FS, FS + 3), 'hens', b)).toBeNull();
+    expect(trackBuyCost(st(FS, FS + 3), 'hens', b)).toBe(R[FS + 3].hens_cost + Math.floor(share(FS) * fc(FS)));
+    expect(trackBuyCost(st(FS, 0, FS + 3), 'eggValue', b)).toBe(R[FS + 3].egg_value_cost + Math.floor(share(FS) * fc(FS)));
+    expect(trackLock(st(FS, FS + R[FS].hens_cap_over_farm), 'hens', b)).toBe('cap');
   });
-  it('+2 level costs 10% more surcharge; F+5 locks', () => {
-    expect(trackBuyCost(st(40, 44), 'hens', b)).toBe(R[44].hens_cost + Math.floor(share(40) * fc(40) * cfg.hvExtraSecondLevelMult!));
-    expect(trackLock(st(40, 45), 'hens', b)).toBe('cap');
+  it('+2 level costs 10% more surcharge (first F+5 row); F+5 locks', () => {
+    expect(trackBuyCost(st(F5, F5 + 4), 'hens', b)).toBe(R[F5 + 4].hens_cost + Math.floor(share(F5) * fc(F5) * cfg.hvExtraSecondLevelMult!));
+    expect(trackLock(st(F5, F5 + 5), 'hens', b)).toBe('cap');
   });
   it('surcharge follows the CURRENT Farm level', () => {
     expect(trackBuyCost(st(45, 48), 'hens', b)).toBe(R[48].hens_cost + Math.floor(share(45) * fc(45)));
     expect(trackBuyCost(st(46, 48), 'hens', b)).toBe(R[48].hens_cost); // F+3 = 49 now
   });
   it('buying charges the surcharged price', () => {
-    const s = st(40, 43, 0, 1e13), after = apply(s, { type: 'buyTrack', track: 'hens' } as any, b, []);
+    const s = st(FS, FS + 3, 0, 1e13), after = apply(s, { type: 'buyTrack', track: 'hens' } as any, b, []);
     expect(s.coinsCents - after.coinsCents).toBe(trackBuyCost(s, 'hens', b) * 100);
   });
 });
