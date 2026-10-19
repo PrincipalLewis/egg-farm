@@ -126,7 +126,15 @@ export class Game {
   holdUntil = 0;
   private held() { return this.now() < this.holdUntil; }
   /** Saves m1: save() would persist right now (not read-only/resetting/inactive/held, lease owned). */
-  get canPersist() { return !this.resetting && !this.readOnly && !this.inactive && !this.held() && !this.newerSave && (!this.canWrite || this.canWrite()); }
+  /** M41-6: the same guards as save(), in the same order, side-effect free: newer-save check without refuseNewer() (a throw
+   *  from blocked storage counts as "no newer", as in newerGuard), and visible only: while hidden save() persists the hide
+   *  snapshot, so a change made to this.state now would not reach storage. */
+  get canPersist() {
+    if (this.resetting || this.readOnly || this.inactive || this.held() || this.newerSave !== null || this.hidden) return false;
+    if (this.canWrite && !this.canWrite()) return false;
+    let v: number | null = null; try { v = newerStoredVersion(this.kv); } catch { /* blocked: save() would still try */ }
+    return v === null && this.mirror?.newer == null;
+  }
   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
   /** Pending interim migration (unmarked v6, M4 on): the validated raw bytes loaded (M4-17), the flag-on balance, and the
@@ -240,7 +248,9 @@ export class Game {
       this.kv.removeItem?.(V6_BACKUP_KEY); return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed);
     }
   }
-  save() {
+  /** M41-6: mirrorOnFail=false skips the IndexedDB fallback write when the localStorage write throws (default true: the mirror
+   *  is the fallback when localStorage is full, SD design). For one-off writes whose failure the caller reverts (explainer flag). */
+  save({ mirrorOnFail = true }: { mirrorOnFail?: boolean } = {}) {
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     if (this.newerGuard()) return;
@@ -250,7 +260,7 @@ export class Game {
     try { const raw = this.saveWithQuotaRetry(t, base); this.lastMainRaw = raw; this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror && mirrorOnFail) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }

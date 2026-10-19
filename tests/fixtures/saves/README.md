@@ -12,3 +12,6 @@ Engineering: copy into `game/tests/fixtures/saves/` (AC14a). Before any real-bro
 
 ## M4 migrate-v7 sample (Architect, 2026-10-19, rc/m4-t3-l30plus; copied from 732e70e)
 | m4-pre-v7-F30-C30.json | save() on rc/m4-t3-l30plus, live balance (flag off) | v6, F30, C30, $1,234,567.89, H0/V0 (pre-M4). Used by tests/v7-marker-run-once.test.ts. |
+
+## M41-6 explainer storage fixture (Saves, 2026-10-19; copied from qa/m3-recheck/gate4-fixtures/EXP1-committed-unseen-4ccb9fd.json)
+| m4-exp1-committed-unseen.json | HoQA, real 4ccb9fd flow (ls + idb + notes) | v6 committed tracksV7 + v6BackupId, seenTracksExplainer unset, F30/C30 H30/V20. Used by tests/m41-6-*.test.ts. |

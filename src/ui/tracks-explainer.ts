@@ -6,7 +6,7 @@ import { fmtMoney } from './format';
 export const EXP_TITLE = 'Upgrades got an upgrade!';
 export const EXP_BODY = 'Hens and Egg value are now separate. Top them up!';
 export const EXP_MS = 8000;
-type G = Pick<Game, 'state' | 'balance' | 'save'> & { canPersist?: boolean; migrationRefundCents?: number };
+type G = Pick<Game, 'state' | 'balance'> & { save(o?: { mirrorOnFail?: boolean }): void } & { canPersist?: boolean; migrationRefundCents?: number };
 /** §11 refund line, only when migrationRefundCents > 0. */
 export const refundLine = (cents: number) => cents > 0 ? `We refunded +${fmtMoney(cents)} for your old upgrades.` : '';
 export const EXP_RETRY_MS = 1000;
@@ -24,9 +24,15 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
   if (storageBlocked()) return null;
   // Saves m1: only when the flag can actually be saved and the tab is visible; else retry (the on-load rule covers a reload).
   if (g.canPersist === false || doc.visibilityState === 'hidden' || modalOpen(doc)) { setTimeout(() => showTracksExplainer(g, doc, storageBlocked), EXP_RETRY_MS); return null; }
-  g.state = { ...g.state, seenTracksExplainer: true }; g.save();
+  // M41-6 (QE-LATE-e): if the localStorage write throws, the flag save skips the IndexedDB fallback, so seen=true never reaches the mirror.
+  g.state = { ...g.state, seenTracksExplainer: true }; g.save({ mirrorOnFail: false });
   // HoE #49: the flag write itself can fail (QuotaExceededError sets g.storageFailed): it didn't persist, so no card.
-  if (storageBlocked()) { g.state = { ...g.state, seenTracksExplainer: false }; g.save(); return null; } // the 2nd save's catch rewrites the IDB mirror with seen=false (Saves Q2: reconcile) // Saves: never leave seen=true behind for the mirror/next autosave
+  // g.storageFailed is sticky for the session (CCR #49 n1, intended): after any earlier failure the card waits for the next load.
+  if (storageBlocked()) {
+    // Never leave seen=true behind for the next autosave. This normal save's catch refreshes the IDB mirror with seen=false
+    // (Saves Q2: a stale mirror copy must not out-rank localStorage in reconcile).
+    g.state = { ...g.state, seenTracksExplainer: false }; g.save(); return null;
+  }
   const el = doc.createElement('div');
   el.className = 'tracks-exp'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'tracks-exp-t');
   el.innerHTML = `<h2 id="tracks-exp-t">${EXP_TITLE}</h2><p>${EXP_BODY}</p>${(g.migrationRefundCents ?? 0) > 0 ? `<p class="tracks-exp-refund"><img src="${import.meta.env.BASE_URL}assets/icon-coin.svg" alt="" width="16" height="16"> ${refundLine(g.migrationRefundCents!)}</p>` : ''}<button type="button" class="btn tracks-exp-ok">Got it</button>`;
