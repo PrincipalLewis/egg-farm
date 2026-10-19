@@ -1,5 +1,5 @@
 import { IOS_FLAG_ENABLED } from './ios-tip';
-import { showTracksExplainer } from './tracks-explainer';
+import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
@@ -155,7 +155,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
-  const showToast = (text: string, atHud = false) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render). M4-A tier/milestone toasts (Art&UX 02:54 #1): top-centre under the HUD (HUD bottom + 8px), same host/z-index above sheets. */ const place = () => { if (atHud) { toast.style.top = `${Math.round(Math.max(0, hud.getBoundingClientRect().bottom) + 8)}px`; toast.classList.remove('below'); return; } const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx, true), 250); }, 1300); };
+  const heldToasts: [string, boolean][] = []; // gate5: toasts wait while the tracks explainer is open, then play in order
+  document.addEventListener(EXP_CLOSED, () => { const q = heldToasts.splice(0); if (q.length) { showToast(q[0][0], q[0][1]); toastQ.push(...q.slice(1).map(x => x[0])); } });
+  const showToast = (text: string, atHud = false) => { if (explainerOpen()) { heldToasts.push([text, atHud]); return; } toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render). M4-A tier/milestone toasts (Art&UX 02:54 #1): top-centre under the HUD (HUD bottom + 8px), same host/z-index above sheets. */ const place = () => { if (atHud) { toast.style.top = `${Math.round(Math.max(0, hud.getBoundingClientRect().bottom) + 8)}px`; toast.classList.remove('below'); return; } const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx, true), 250); }, 1300); };
   /** M4-A: several milestones can land in one buy (e.g. Hens L20 + Balanced 4/5); each gets its own toast, in order, never overwritten. */
   const toastQ: string[] = [];
   const queueToasts = (texts: string[]) => { if (!texts.length) return; if (toast.classList.contains('show')) toastQ.push(...texts); else { showToast(texts[0], true); toastQ.push(...texts.slice(1)); } };
