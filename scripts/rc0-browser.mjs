@@ -677,6 +677,8 @@ sections.g5 = async () => {
     // close with Got it, focus returns (to the active Upgrades tab when the panel is open; else back to the page)
     await page.locator('.tracks-exp-ok').click(); await page.waitForTimeout(500);
     ok(`G5 Got it closes the card at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    const fo = await page.evaluate(() => document.activeElement?.id || document.activeElement?.getAttribute('data-tab') || document.activeElement?.tagName);
+    ok(`G5 focus not lost after Got it (sheet closed) at ${w}`, fo !== 'BODY', fo);
     const toastAfter = await page.evaluate(() => (document.querySelector('.toast')?.textContent ?? ''));
     ok(`G5 A held toast plays after close at ${w}`, /Coop upgraded/.test(toastAfter), toastAfter);
     // Upgrades + B/C tap semantics on a re-shown card (debug hook: clear the flag, re-trigger via the commit hook)
