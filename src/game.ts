@@ -125,6 +125,8 @@ export class Game {
   /** Hand-over hold (another tab asked us to flush): no sim, no saves until the claim arrives or the hold expires. */
   holdUntil = 0;
   private held() { return this.now() < this.holdUntil; }
+  /** Saves m1: save() would persist right now (not read-only/resetting/inactive/held, lease owned). */
+  get canPersist() { return !this.resetting && !this.readOnly && !this.inactive && !this.held() && !this.newerSave && (!this.canWrite || this.canWrite()); }
   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
   /** Pending interim migration (unmarked v6, M4 on): the validated raw bytes loaded (M4-17), the flag-on balance, and the
