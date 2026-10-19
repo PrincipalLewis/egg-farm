@@ -10,13 +10,13 @@ export interface BotResult { firstUpgradeS: number | null; upgradesAt: (s: numbe
   /** Farm level -> first time reached (s); 0 -> 0. */ reach: Map<number, number> }
 /** Buy step: tests/bot-m4.ts pickBuy (D-HOP-2026-10-19-01: + HENS/VALUE with M4 on; flag off = the old Farm/Collection rule).
  *  Track buys log as 't' (they count as upgrades, never as Farm levels). */
-function buy(s: GameState, model: Model, b: Balance, log: (kind: 'c' | 'f' | 't') => void, cheapFirst = false): GameState {
+export function buy(s: GameState, model: Model, b: Balance, log: (kind: 'c' | 'f' | 't', next: GameState) => void, cheapFirst = false): GameState {
   for (let guard = 0; guard < 100; guard++) {
     const pick = pickBuy(s, b, model, cheapFirst);
     if (pick === 'c' && cheapFirst) cheapFirst = false; // variance p_cheap_first: one affordable Collection, ignoring the 50 % rule
     if (!pick) return s;
     const next = apply(s, pickAction(pick), b); if (next === s) return s; // refused buy: stop (no spin)
-    s = next; log(pick === 'f' ? 'f' : pick === 'c' ? 'c' : 't');
+    s = next; log(pick === 'f' ? 'f' : pick === 'c' ? 'c' : 't', next);
   }
   return s;
 }
@@ -37,7 +37,8 @@ export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEve
       sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery; s = apply(s, { type: 'sellAll' }, b);
       if (V?.delay()) continue; // variance p_delay: this check-in skips buying
       const chf = V ? V.cheapFirst() : false;
-      s = buy(s, model, b, k => { const farm = s.farmLevel + (k === 'f' ? 1 : 0); buys.push({ t, kind: k, farm }); if (k === 'f') reach.set(farm, t); }, chf);
+      // HoQA ac7-twobot-528f1a7: record the level AFTER the buy (the outer `s` is stale inside buy(), so two Farm buys in one check-in were logged as the same level).
+      s = buy(s, model, b, (k, next) => { const farm = next.farmLevel; buys.push({ t, kind: k, farm }); if (k === 'f') reach.set(farm, t); }, chf);
     }
   }
   return {
