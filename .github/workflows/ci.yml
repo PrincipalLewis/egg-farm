@@ -11,6 +11,8 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npm test
+      - name: Flag-off byte-identical to rc/m4-default-on 7fdb273 (D-CEO-20261019-05)
+        run: npm run test:flagoff
   slow:
     # Slow suites (*.slow.test.ts, skipped by `npm test`): 100-seed seller-variance TS-vs-Python parity (PR #19). Always runs.
     runs-on: ubuntu-latest

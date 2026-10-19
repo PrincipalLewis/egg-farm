@@ -8,6 +8,7 @@
     "build": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist",
     "build:html": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && node scripts/build-html.mjs dist-html && node scripts/check-release-build.mjs dist-html/egg-farm.html",
     "test": "vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
+    "test:flagoff": "vitest run tests/flagoff-identical.test.ts engineering/golden/flagoff-golden.a01faea.test.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1",
     "test:slow": "node scripts/check-vendor-pins.mjs && vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1",
     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",

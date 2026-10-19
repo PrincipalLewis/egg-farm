@@ -419,3 +419,9 @@ F-1/F-2/F-5/U-1 in parallel after A-0; U-3 after S-4; Q-1 last. Merge order into
 14. **BLOCKER e845cf3 → decided (Architect + HoE, 22:08):** rank by version → committed → savedAt (M4-19); boot input carried, deferral disables the IDB mirror, IDB re-read before commit (M4-20); dedicated commit write, guards on `m4Active`/`readMax` (M4-21); fresh M4 farm committed at creation (M4-22); quota drops the leftover backup first (M4-23); `blocked` is a deferral (spec v1.9). §3d LS-only commit **adopted by HoE 22:11 (ADR M4-24)**.
 15. **M4-A commit is localStorage-only → decided (HoE 22:11, ADR M4-24):** §3d adopted with conditions (LS headroom check ⇒ `quota_headroom` deferral; IDB boot read required; mirror resumes after a read-back-confirmed commit; S-4 restores the IDB backup copy). §3c IDB variant kept as the recorded alternative.
 16. **Code Reviewer cf66ce5 follow-ups → decided (Architect, 22:15):** headroom per spec v1.10 (j); 1500 ms covers the open only; N1 fixed via `saveSeq` (SQ-1 on main), N4 accepted; M4-23 cleanup scoped to this session's aborted id; mirror resumes after non-IDB aborts; probe key deleted at boot + in RESET_KEYS; risk 11 widened.
+
+## Flag-off byte-identical check (D-CEO-20261019-05, rc/m4-t3-l30plus)
+`npm run test:flagoff` (CI job `test`, after `npm test`) proves flag-off is unchanged vs rc/m4-default-on 7fdb273:
+golden f90d1678 (engineering/golden/flagoff-golden.a01faea.test.ts), plus tests/flagoff-identical.test.ts pins measured on 7fdb273:
+balance.json without `m4`/`_source` = a3bc9f45af2de50b365c1f218a88b60c090801a948e36d90d6467012f656c562, flag-off bot trace
+(seller15 + cheapest, seeds 1-3, 30 min) = fefad60f4fca9ba0ebdce9ec7fb16956885023e4624826e9198e7785e978ae19. Re-pin only with HoE OK.
