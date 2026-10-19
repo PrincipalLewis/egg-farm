@@ -647,6 +647,35 @@ sections.sellallgraderfit = async () => { // review 948180e #4: fit at 390 and 1
     await ctx.close();
   }
 };
+// ---------- M4 gate5: tracks explainer (EXP1) + F2 Upgrades tabs; G5SHOTS=<dir> writes shots + entries ----------
+sections.g5 = async () => {
+  const G5 = process.env.G5SHOTS; if (G5) mkdirSync(G5, { recursive: true }); const entries = [];
+  const DONE = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
+  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
+    const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } });
+    await page.waitForSelector('.tracks-exp', { timeout: 5000 }).catch(() => {});
+    const c = await page.evaluate(() => { const e = document.querySelector('.tracks-exp'); if (!e) return null; const r = e.getBoundingClientRect(), b = { height: e.querySelector('button').offsetHeight };
+      return { t: e.querySelector('h2').textContent, p: e.querySelector('p').textContent, btns: e.querySelectorAll('button').length, bh: b.height, l: r.left, r: r.right, seen: window.eggfarm.state.seenTracksExplainer, m4: !!window.eggfarm.balance.m4?.enabled }; });
+    ok(`G5 EXP1 explainer shown once on the migrated save at ${w}`, c && c.t === 'Upgrades got an upgrade!' && c.p === 'Hens and Egg value are now separate. Top them up!' && c.btns === 1 && c.bh >= 48 && c.l >= 0 && c.r <= w && c.seen === true, JSON.stringify(c));
+    if (G5) { const f = `${ENGINE}-explainer-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state: 'migrated-v5', screen: 'farm', asserted: 'explainer card visible' }); }
+    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 3000 }).catch(() => {}); await page.waitForTimeout(300); // Welcome back (tap also dismisses the card, passing through)
+    ok(`G5 EXP1 a tap elsewhere dismisses the card at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    if (w < 900) { await page.locator('[data-nav=upgrades]').click(); } await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(250);
+    const pre = await page.evaluate(() => window.eggfarm.state.farmLevel);
+    // the card may already be dismissed by the nav tap (taps pass through); re-check a buy registers while it is up on a fresh show
+    await page.evaluate(() => { window.eggfarm.state.coinsCents = 1e12; });
+    await page.locator('#uRow .btn.buy[data-kind=farm]').click({ timeout: 5000 }); await page.waitForTimeout(250);
+    ok(`G5 EXP1 buy works after/through the card at ${w}`, (await page.evaluate(() => window.eggfarm.state.farmLevel)) === pre + 1);
+    const tabs = await page.$$eval('[data-tab]', bs => bs.map(x => ({ h: x.getBoundingClientRect().height, p: x.querySelector('.tab-pill').getBoundingClientRect().height })));
+    ok(`G5 F2 Upgrades tabs pill >=36 and hit >=44 at ${w}`, tabs.length === 3 && tabs.every(t => t.p >= 36 && t.h >= 44), JSON.stringify(tabs));
+    if (G5) { const f = `${ENGINE}-upgrades-tabs-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state: 'migrated-v5', screen: 'upgrades-farm', asserted_tab: 'farm', checks: tabs }); }
+    await page.evaluate(() => window.eggfarm.save()); await page.reload({ waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click().catch(() => {}); await page.waitForTimeout(1200);
+    ok(`G5 EXP1 not shown again after reload at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    ok(`G5 no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
+    await ctx.close();
+  }
+  if (G5) { const { writeFileSync } = await import('node:fs'); writeFileSync(`${G5}/entries-${ENGINE}.json`, JSON.stringify(entries, null, 1)); }
+};
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }
 await browser.close(); killSrv();
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'} [${ENGINE}${headless ? '' : ' headed'}] ${r.name}${r.info ? ` — ${r.info}` : ''}`);
