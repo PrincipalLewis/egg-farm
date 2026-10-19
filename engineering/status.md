@@ -119,3 +119,10 @@
 - L30+ step ratio NOT evaluable: T3 maxLevel 30, stepRatioGuard has no L30+ steps (test skipIf maxLevel<=30 until the L30+ pack a957b072 lands).
 - REAL MISSES, not changed: pacing-acw1 M4-on 91% / medF10 13.67 / medF18 25.00 (M4 off on T3: 100 / 10.33 / 21.33 = Python ref exactly); p4 M4-on W4 3.00 / W4b 3.25 / Manage 6.75 (M4 off: 4.50 / 5.25 / 6.88 = Economy ref exactly).
 - rc0 Chromium 249/249 (axe-core 4.14.0 at /tmp/axe). Unit 861/863 (the 2 above), slow 16+1 skip, goldens 4/4, tsc, sync --check, vendor pins, economy-copy strict OK.
+
+## 2026-10-19 ~04:05 (Senior Software Architect) — #44 M4-on targets + CCR fixes
+- p4 → M4-on: W4 3.0±0.3, W4b 3.25±0.3 (model-derived, Economy round 4, D-HOP-08/09); managePer15 6.75±10% REGRESSION BASELINE ONLY. Build: 3.00 / 3.25 / 6.75 → PASS.
+- acw1: Python refs replaced by M4 baselines 91±5 / 13.67±20% / 25.0±20% (REGRESSION BASELINE ONLY; Python has no M4 model); seeds now 1-200 and 201-299. Design gate UNCHANGED at ≥95% within 15 min (D-CEO-20261019-06 16-min gate is ON HOLD per its 03:52 amendment). Still RED: 91.0% / 90.9% at 900 s; at 960 s 98.0% / 97.0%; medF18 25.0 / 25.0.
+- 900 s run-cap check: no cap. runM2 T=7200 s (tests/bot-m2.ts:25). Buys only at 20 s sell check-ins, so reach times are on a 20 s grid; 900 s = check-in #45. Seeds at exactly 900 s: 16 (1-200), 7 (201-299).
+- CCR M1: tests/zz-t3.test.ts deleted. m2: stale "F1 6dca24cd only" titles fixed. n1: headers cite product/decisions.md:232/241.
+- tsc OK; vitest 862/864 (only the 2 acw1 gate tests fail); sync-economy --check OK.

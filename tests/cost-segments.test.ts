@@ -19,7 +19,7 @@ const withSegs = (segs: any, p: any = curve): EconomyParams => ({ ...p, farm: { 
 const clone = () => JSON.parse(JSON.stringify(balance));
 
 describe('F1 farm cost growth segments', () => {
-  it('shipping balance (F1 m4cols 6dca24cd): farm_cost and every w* cost equal the CSV on every level L0..last row', async () => {
+  it('shipping balance (F1 m4cols 6dca24cd or T3 b48be8a4): farm_cost and every w* cost equal the CSV on every level L0..last row', async () => {
     const csv = new URL('../data/economy.csv', import.meta.url);
     expect(SHIPPING_SHA256).toContain(createHash('sha256').update(readFileSync(csv)).digest('hex'));
     expect(balance.farm.costGrowthSegments).toBeUndefined();
