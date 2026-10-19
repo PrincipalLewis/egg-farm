@@ -6,7 +6,8 @@ import { balance, type Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
 import { migrateTracksV7 } from '../src/sim/migrate-v7';
 import { trackLock } from '../src/sim/tracks';
-import { trackUnlockFarm, trackLockText } from '../src/ui/tracks-ui';
+import { trackUnlockFarm, trackLockText, unlockFarmMax } from '../src/ui/tracks-ui';
+import { hensCap, eggValueCap } from '../src/config/formulas';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
@@ -59,3 +60,62 @@ describe('M41-11 real unlock level for capped tracks', () => {
     expect(need).not.toBe(F + 1); // these combos are the M4B-1 cases where F+1 was wrong
   });
 });
+
+// D-HOP-32 (m4a-spec §19 / OQ-B1-1): the search runs to the FARM max level from balance and falls back to farmMax, never F+1.
+const capOf = (t: 'hens' | 'eggValue') => t === 'hens' ? hensCap : eggValueCap;
+const at = (b: Balance, F: number, t: 'hens' | 'eggValue', L: number) =>
+  ({ ...initialState(b), farmLevel: F, hensLevel: t === 'hens' ? L : 0, eggValueLevel: t === 'eggValue' ? L : 0 });
+describe('M41-11 / D-HOP-32: unlock search bounded by the farm max level, fallback farmMax', () => {
+  // L30+ shape: farm max 50 (balance.farmMaxLevel, CSV farm_max_level) differs from the track max 55 (balance.maxLevel).
+  const l30 = { ...on, maxLevel: 55, farmMaxLevel: 50 } as Balance;
+  it('current config (30): farm max = maxLevel = 30 when balance has no farmMaxLevel', () => {
+    expect((on as { farmMaxLevel?: number }).farmMaxLevel).toBeUndefined();
+    expect(unlockFarmMax(on)).toBe(on.maxLevel);
+    expect(on.maxLevel).toBe(30);
+  });
+  it('L30+ config: farm max is read from balance (50), not the track max (55)', () => {
+    expect(unlockFarmMax(l30)).toBe(50);
+    expect(l30.maxLevel).toBe(55);
+  });
+  it.each(['hens', 'eggValue'] as const)('current config (30), %s: B1-1 F10 at cap -> L11; B1-4 F26 at L29 -> L27; L30 = MAX', t => {
+    const c = on.m4![t].capOverFarm;
+    expect(trackLock(at(on, 10, t, 10 + c), t, on)).toBe('cap');
+    expect(trackUnlockFarm(at(on, 10, t, 10 + c), t, on)).toBe(11);
+    expect(trackLock(at(on, 26, t, 29), t, on)).toBe('cap');
+    expect(trackUnlockFarm(at(on, 26, t, 29), t, on)).toBe(27);
+    expect(trackLock(at(on, 29, t, on.maxLevel), t, on)).toBe('max');
+  });
+  it.each(['hens', 'eggValue'] as const)('B1-6 current config (30), %s: a qualifying Farm level always exists (fallback never reached)', t => {
+    const farmMax = unlockFarmMax(on);
+    for (let F = 0; F < on.maxLevel; F++) for (let L = capOf(t)(F, on); L < on.maxLevel; L++) {
+      const s = at(on, F, t, L); expect(trackLock(s, t, on)).toBe('cap');
+      const need = trackUnlockFarm(s, t, on);
+      expect(need, `F${F}/L${L}`).toBeGreaterThan(F);
+      expect(need, `F${F}/L${L}`).toBeLessThanOrEqual(farmMax);
+      expect(capOf(t)(need, on), `F${F}/L${L} cap at F${need}`).toBeGreaterThan(L);
+    }
+  });
+  it.each(['hens', 'eggValue'] as const)('L30+ (farm max 50, track max 55), %s: in-range unlocks are still the first lifting level', t => {
+    const c = l30.m4![t].capOverFarm;
+    expect(trackUnlockFarm(at(l30, 10, t, 10 + c), t, l30)).toBe(11);
+    expect(trackUnlockFarm(at(l30, 46, t, 46 + c), t, l30)).toBe(47);
+    // the last Farm level that can lift the lock is farm max itself: cap(50) = 50 + c > 50 + c - 1
+    expect(trackUnlockFarm(at(l30, 40, t, 50 + c - 1), t, l30)).toBe(50);
+  });
+  it.each(['hens', 'eggValue'] as const)('L30+, %s: a track above cap(farmMax-1) that no Farm level <= 50 can unlock shows L{farmMax} (not F+1, not 51..55)', t => {
+    const c = l30.m4![t].capOverFarm, farmMax = unlockFarmMax(l30);
+    for (let L = Math.max(capOf(t)(farmMax, l30), capOf(t)(farmMax - 1, l30) + 1); L < l30.maxLevel; L++) for (const F of [40, farmMax - 1]) {
+      const s = at(l30, F, t, L);
+      expect(trackLock(s, t, l30), `F${F}/L${L}`).toBe('cap');
+      expect(capOf(t)(farmMax, l30), 'no Farm level within range lifts it').toBeLessThanOrEqual(L);
+      expect(trackUnlockFarm(s, t, l30), `F${F}/L${L}`).toBe(farmMax);
+      expect(trackLockText(trackUnlockFarm(s, t, l30))).toBe(`Needs Farm L${farmMax}`);
+    }
+    expect(c).toBeGreaterThan(0);
+  });
+  it.each(['hens', 'eggValue'] as const)('L30+, %s: a track at its max (55) is MAX, never a lock label', t => {
+    expect(trackLock(at(l30, 50, t, l30.maxLevel), t, l30)).toBe('max');
+    expect(trackLock(at(l30, 40, t, l30.maxLevel), t, l30)).toBe('max');
+  });
+});
+

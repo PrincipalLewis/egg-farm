@@ -9,14 +9,18 @@ const pct = (mult: number) => Math.round((mult - 1) * 100);
 export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
 /** Lock line for a capped track row; `need` = the Farm level that unlocks the next buy (trackUnlockFarm). */
 export const trackLockText = (need: number) => `Needs Farm L${need}`;
-/** M41-11 (M4B-1): the Farm level at which a capped track can be bought again = the first Farm level F' > F whose purchase
- *  cap (hensCap / eggValueCap, i.e. min(maxLevel, F' + balance.m4 capOverFarm)) exceeds the track's level. Not F+1: a
- *  migrated save can sit above its cap (migrate-v7 grandfathers eggValueLevel), e.g. F5 with Egg value L9 unlocks at F7.
- *  null when no Farm level unlocks it (only possible at maxLevel, which is the MAX state). */
-export function trackUnlockFarm(s: GameState, t: 'hens' | 'eggValue', b: Balance): number | null {
-  const L = trackLevel(s, t);
-  for (let f = s.farmLevel + 1; f <= b.maxLevel; f++) if (trackCap({ ...s, farmLevel: f }, t, b) > L) return f;
-  return null;
+/** Highest Farm level the player can buy, read from balance: `farmMaxLevel` (L30+, CSV farm_max_level) when present, else
+ *  maxLevel (pre-L30+ data, where farm max == track max == 30). Clamped to maxLevel, same rule as L30+'s formulas.farmMaxLevel. */
+export const unlockFarmMax = (b: Balance) => Math.min(b.maxLevel, (b as { farmMaxLevel?: number }).farmMaxLevel ?? b.maxLevel);
+/** M41-11 (M4B-1, D-HOP-28/32; m4a-spec §19): the Farm level at which a capped track can be bought again = the first Farm
+ *  level F' > F, searched only up to the farm max level (unlockFarmMax, NOT the track maxLevel: under L30+ farm max 50 and
+ *  track max 55 differ), whose purchase cap (hensCap / eggValueCap, i.e. min(maxLevel, F' + balance.m4 capOverFarm)) exceeds
+ *  the track's level. Not F+1: a migrated save can sit above its cap (migrate-v7 grandfathers eggValueLevel), e.g. F5 with
+ *  Egg value L9 unlocks at F7. If no Farm level qualifies, falls back to farmMax (never F+1). */
+export function trackUnlockFarm(s: GameState, t: 'hens' | 'eggValue', b: Balance): number {
+  const L = trackLevel(s, t), farmMax = unlockFarmMax(b);
+  for (let f = s.farmLevel + 1; f <= farmMax; f++) if (trackCap({ ...s, farmLevel: f }, t, b) > L) return f;
+  return farmMax;
 }
 type Seg = { track: 'Hens' | 'Egg value' | 'Farm'; level: number; fill: number; weakest: boolean };
 /** M4A-19: one segment per track (order Hens, Egg value, Farm), fill = min(level, N)/N, N = next Balanced threshold
