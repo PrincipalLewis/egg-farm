@@ -1,5 +1,7 @@
 {
-  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1). farmCostFromCsv: true = farm_cost and w4_tier_cost are per-level data copied from the CSV (F1, HoE Oct 17); no formula fit.",
+  "_note": "Hand-set economy shape config read by scripts/sync-economy.ts. farmCostGrowthSegments: [{from,to,growth}], levels inclusive, from>=1, non-overlapping; empty = pure costGrowth pow (pre-F1). farmCostFromCsv: true = farm_cost and w4_tier_cost are per-level data copied from the CSV (F1, HoE Oct 17); no formula fit. farmMaxLevel (L30+ D1, HoP 23:37): highest buyable Farm level; CSV rows above it are pricing base only. hvExtraSecondLevelMult (L30-17): the 2nd extra Hens/Egg value level above F+3 costs +10% (x1.10) on the first's surcharge.",
   "farmCostGrowthSegments": [],
-  "farmCostFromCsv": true
+  "farmCostFromCsv": true,
+  "farmMaxLevel": 50,
+  "hvExtraSecondLevelMult": 1.1
 }
