@@ -193,8 +193,11 @@ export function fitM4(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
     }, tc };
 }
 export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
-  const p = fitParams(rows, prev, cfg);
-  const workers = fitWorkers(rows, prev, !!cfg.farmCostFromCsv); verifyGraderCosts(rows, workers);
+  // L30+ D1 (HoE): Farm/Collection/workers/customers are fitted and verified on rows 0..farmMaxLevel only (the buyable levels);
+  // rows above it (L51-55) are pricing base for the Hens/Egg value cost tables, which fitM4 keeps in full.
+  const farmRows = rows.slice(0, farmMaxOf(rows, cfg) + 1);
+  const p = fitParams(farmRows, prev, cfg);
+  const workers = fitWorkers(farmRows, prev, !!cfg.farmCostFromCsv); verifyGraderCosts(farmRows, workers);
   const m4 = fitM4(rows, prev, cfg);
   prev = { ...prev, workers };
   const { levels: _drop, collection: _c, farm: _f, customers: _cu, offline: _o, maxLevel: _m, m4: _m4, ...rest } = prev;
