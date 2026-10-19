@@ -5,7 +5,7 @@ import { balance, type Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
 import { validate, serialize, checksum, SAVE_KEY, SAVE_VERSION } from '../src/save/save';
 import { Game } from '../src/game';
-import { showTracksExplainer, EXP_TITLE, EXP_BODY, EXP_MS } from '../src/ui/tracks-explainer';
+import { showTracksExplainer, EXP_TITLE, EXP_BODY, EXP_MS, EXP_RETRY_MS } from '../src/ui/tracks-explainer';
 import { mem } from './helpers';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
 const off: Balance = { ...balance, m4: { ...balance.m4!, enabled: 0 } };
@@ -138,5 +138,48 @@ describe('§11 refund line and reduced motion', () => {
     const css = (await import('node:fs')).readFileSync(process.cwd() + '/src/ui/styles.css', 'utf8');
     const m = css.match(/@media \(prefers-reduced-motion:reduce\)\{\.tracks-exp\{animation:(\w+) \.15s[^}]*\}\}/); expect(m).toBeTruthy();
     const kf = css.match(new RegExp(`@keyframes ${m![1]}\\{([^@]*?)\\}\\}`))![1]; expect(kf).toContain('opacity'); expect(kf).not.toContain('scale');
+  });
+});
+
+describe('gate5 A: toasts held while the card is open; card waits for a modal; 8 s timer starts on appear', () => {
+  it('a Coop upgraded! toast fired while the card is open is held, then plays after it closes', async () => {
+    const kv = kvOf(); kv.setItem(SAVE_KEY, raw6(mainState()));
+    const g = boot(kv); const { ui, cards } = await mount(g, on);
+    document.getElementById('modal-layer')?.classList.remove('open'); // no Welcome back in the way for this case
+    await g.startTracksMigration(); expect(cards()).toBe(1);
+    const toast = () => document.querySelector('.toast') as HTMLElement;
+    toast().textContent = ''; toast().classList.remove('show');
+    g.state = { ...g.state, celebratedTier: -1 } as any; ui.render();
+    expect(toast().textContent).not.toMatch(/Coop upgraded!/); expect(toast().classList.contains('show')).toBe(false);
+    (document.querySelector('.tracks-exp-ok') as HTMLButtonElement).click(); expect(cards()).toBe(0);
+    expect(toast().textContent).toMatch(/^Coop upgraded!/);
+  });
+  it('waits while a modal (Welcome back!) is open, shows after it closes; the 8 s timer starts when it appears', () => {
+    vi.useFakeTimers();
+    const layer = document.createElement('div'); layer.id = 'modal-layer'; layer.className = 'open'; document.body.append(layer);
+    const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} };
+    expect(showTracksExplainer(g)).toBeNull(); expect(g.state.seenTracksExplainer).toBeUndefined();
+    vi.advanceTimersByTime(20_000); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); // never together with the dialog
+    layer.classList.remove('open'); vi.advanceTimersByTime(EXP_RETRY_MS); expect(document.querySelectorAll('.tracks-exp').length).toBe(1);
+    vi.advanceTimersByTime(EXP_MS - 1); expect(document.querySelectorAll('.tracks-exp').length).toBe(1); // full 8 s from appear
+    vi.advanceTimersByTime(1); expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
+  });
+});
+
+describe('P46-M1 focus: to Got it on open, back to the active Upgrades tab on close', () => {
+  for (const how of ['gotit', 'esc', 'enter'] as const) it(`close via ${how}`, () => {
+    document.body.innerHTML = '<div class="tabs"><button data-tab="collection">C</button><button data-tab="farm" class="active">F</button></div><button id="other">x</button>';
+    (document.getElementById('other') as HTMLElement).focus();
+    const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} };
+    const el = showTracksExplainer(g)!; const ok = el.querySelector('button')!; expect(document.activeElement).toBe(ok);
+    if (how === 'gotit') ok.click();
+    else ok.dispatchEvent(new KeyboardEvent('keydown', { key: how === 'esc' ? 'Escape' : 'Enter', bubbles: true, cancelable: true }));
+    expect(document.querySelector('.tracks-exp')).toBeNull();
+    expect(document.activeElement).toBe(document.querySelector('[data-tab=farm]'));
+  });
+  it('falls back to the previously focused element when no Upgrades tab exists', () => {
+    document.body.innerHTML = '<button id="other">x</button>'; (document.getElementById('other') as HTMLElement).focus();
+    const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} };
+    showTracksExplainer(g)!.querySelector('button')!.click(); expect(document.activeElement!.id).toBe('other');
   });
 });
