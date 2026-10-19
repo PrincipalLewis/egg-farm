@@ -4,8 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import * as NEW from '../src/ui/format';
 import * as OLD from './fixtures/format-dd223f5';
+import * as OLDO from './fixtures/orders-dd223f5';
 import { orderView, sellAllLabel, slotPreview } from '../src/ui/orders';
-const { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview, fmtMoneyExact, fmtCountFloor, fmtMoneyFloor, fmtCountAria, spellShort, SUFFIXES } = NEW;
+const { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview, fmtMoneyExact, fmtCountFloor, fmtMoneyFloor, fmtCountAria, fmtMoneyAria, liveText, spellShort, SUFFIXES } = NEW;
 const NB = '\u00a0';
 const cust = (demand: number, filled = 0) => ({ id: 1, demand, filled }) as any;
 
@@ -43,7 +44,7 @@ describe('suffix table (data-driven, case exact)', () => {
   it('K..Dc in order; one entry drives symbol and spoken name', () => {
     expect(SUFFIXES.map(s => s.sym)).toEqual(['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc']);
     expect(SUFFIXES.slice(4).map(s => s.name)).toEqual(['quadrillion', 'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion', 'decillion']);
-    SUFFIXES.forEach((s, i) => { expect(s.base).toBe(10 ** (3 * (i + 1))); if (i) expect(fmtCount(s.base)).toBe('1' + s.sym); expect(spellShort('1.2' + s.sym)).toBe('1.2 ' + s.name); });
+    SUFFIXES.forEach((s, i) => { expect(s.base).toBe(10 ** (3 * (i + 1))); if (i) expect(fmtCount(s.base)).toBe('1' + s.sym); expect(spellShort('1.2' + s.sym)).toBe(s.base >= 1e15 ? '1.2 ' + s.name : '1.2' + s.sym); });
   });
 });
 
@@ -99,7 +100,7 @@ describe('QA4-2: one rounding rule on a Sell (never more eggs than are sold)', (
   it('basket 12,960, demand 20,000 (QA repro): card and Sell all both read 12.9K / $12.9K', () => {
     const v = orderView(cust(20_000), 12_960, 100);
     expect(v.button).toBe(`Sell 12.9K${NB}· +$12.9K`);
-    expect(v.buttonAria).toBe(`Sell 12.9 thousand${NB}· +$12,960.00`);
+    expect(v.buttonAria).toBe(`Sell 13K${NB}· +$12,960.00`); // aria count as on main (Art ruling on #56)
     expect(sellAllLabel(12_960, 1_296_000, fmtCountFloor, fmtMoneyFloor)).toBe(`Sell all (12.9K${NB}eggs${NB}· $12.9K)`);
   });
   it('floored count never exceeds the real count', () => {
@@ -126,18 +127,37 @@ describe('NBSP (U+00A0) before unit words', () => {
 
 describe('aria / spoken: suffix spelled out, never a full digit string above 1e15', () => {
   it('spellShort / fmtCountAria / fmtMoneyExact', () => {
-    expect(spellShort('$12.3K')).toBe('$12.3 thousand'); expect(spellShort('1.2Qa')).toBe('1.2 quadrillion'); expect(spellShort('$999.9Dc')).toBe('$999.9 decillion');
+    expect(spellShort('$12.3K')).toBe('$12.3K'); expect(spellShort('999.9T')).toBe('999.9T'); expect(spellShort('1.2Qa')).toBe('1.2 quadrillion'); expect(spellShort('$999.9Dc')).toBe('$999.9 decillion');
     expect(spellShort('$1.23e36')).toBe('$1.23 times 10 to the 36'); expect(spellShort('1,234')).toBe('1,234'); expect(spellShort('—')).toBe('—');
     expect(fmtCountAria(1.2e18)).toBe('1.2 quintillion'); expect(fmtCountAria(1.234e36)).toBe('1.23 times 10 to the 36');
-    expect(fmtMoneyExact(1.25e17)).toBe('$1.25 quadrillion'); expect(fmtMoneyExact(4.56e25)).toBe('$456 sextillion');
-    expect(fmtMoneyExact(9.999e31)).toBe('$999.9 octillion'); expect(fmtMoneyExact(9.999e34)).toBe('$999.9 nonillion'); expect(fmtMoneyExact(1.234e38)).toBe('$1.23 times 10 to the 36');
-    expect(fmtMoneyExact(123_456_789_012_345)).toBe('$1,234,567,890,123.45'); // < 1e15 dollars: exact digit string kept
-    expect(fmtMoneyExact(1e17)).toBe('$1 quadrillion');
+    expect(fmtMoneyAria(1.25e17)).toBe('$1.25 quadrillion'); expect(fmtMoneyAria(4.56e25)).toBe('$456 sextillion');
+    expect(fmtMoneyAria(9.999e31)).toBe('$999.9 octillion'); expect(fmtMoneyAria(9.999e34)).toBe('$999.9 nonillion'); expect(fmtMoneyAria(1.234e38)).toBe('$1.23 times 10 to the 36');
+    expect(fmtMoneyAria(123_456_789_012_345)).toBe('$1,234,567,890,123.45'); // < 1e15 dollars: exact digit string kept
+    expect(fmtMoneyAria(1e17)).toBe('$1 quadrillion'); expect(liveText(1.2e17, 1.2e18)).toBe('$1.2 quadrillion, 1.2 quintillion eggs');
   });
   it('order aria at Qa+ spells the suffix, no 16+ digit run', () => {
     const v = orderView(cust(3e21, 1e21), 2e21, 1e3);
     expect(v.lineAria).toBe('1 sextillion of 3 sextillion eggs delivered, order worth $30 sextillion');
     expect(v.buttonAria).toBe(`Sell 2 sextillion${NB}· +$20 sextillion`);
     expect(v.lineAria + v.buttonAria).not.toMatch(/\d{16}/);
+  });
+});
+
+describe('Art ruling on #56: spelled words only in aria/live; visible pops stay compact', () => {
+  it('visible coin pop / +$ floater formatter at 1.2e15 dollars is $1.2Qa, never a spelled word', () => {
+    expect(fmtMoneyExact(1.2e17)).toBe('$1.2Qa'); expect(fmtMoneyExact(9.999e37)).toBe('$999.9Dc'); expect(fmtMoneyExact(1e38)).toBe('$1.00e36');
+    for (let e = 15; e < 40; e += 0.05) expect(fmtMoneyExact(10 ** e * 100)).not.toMatch(/illion|times/);
+    const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+    expect(src).toContain('<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyExact(cents)}</div>');
+    expect(src).toContain("floatText(`+${fmtMoneyExact(e.value)}`, src, 'coin')");
+    expect(src).toContain("setText($('#live'), liveText(s.coinsCents, s.basket));");
+  });
+  it('K–T aria and live text equal the frozen dd223f5 output', () => {
+    const xs = [0, 1, 7, 999, 1000, 1299, 9999, 10_000, 12_960, 20_000, 99_950, 999_949, 999_950, 1_234_567, 9_995_000, 12_345_678_901, 999_949_999_999_999];
+    for (const n of xs) for (const c of [n, n * 100 + 37]) if (c < 1e17) expect(liveText(c, n)).toBe(`${OLD.fmtMoney(c)}, ${OLD.fmtCount(n)} eggs`);
+    for (const want of xs.filter(x => x > 0 && x < 999.95e12)) for (const [filled, basket] of [[0, 0], [0, Math.floor(want / 3)], [Math.floor(want / 2), want], [0, want]]) for (const price of [1, 37, 100]) {
+      const c = cust(want, filled), a = orderView(c, basket, price), o = OLDO.orderView(c, basket, price);
+      expect(a.lineAria).toBe(o.lineAria); expect(a.buttonAria).toBe(o.buttonAria);
+    }
   });
 });

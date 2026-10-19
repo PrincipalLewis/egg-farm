@@ -1,13 +1,13 @@
 /** P1q/P2 order cards + "+N waiting" chip (art-ux/m3-customer-queue-spec.md v1.0). Pure helpers, unit-tested. */
 import { queueMax, type Customer } from '../sim/state';
 import type { Balance } from '../config/balance';
-import { fmtCount, fmtCountFloor, fmtMoney, fmtMoneyPreview, fmtMoneyExact, spellShort } from './format';
+import { fmtCount, fmtCountFloor, fmtMoney, fmtMoneyPreview, fmtMoneyAria, spellShort } from './format';
 /** Spec §2.1: eggs >= 1,000 -> 1.2K (compact, 1 decimal). */
 const eggs = (n: number) => n < 1000 ? String(n) : n < 1e4 ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n); // band by number, not by fmtCount's comma (1,000T)
 /** QA4-2: what a Sell moves is floored like its money (never more eggs shown than are sold): 12,960 -> 12.9K, not 13K. */
 const eggsFloor = (n: number) => n < 1e4 ? eggs(n) : fmtCountFloor(n);
-/** M41-9 aria (B-1 rule): suffix spelled out from the SUFFIXES table (1.2K -> 1.2 thousand, 1.2Qa -> 1.2 quadrillion). */
-const eggsAria = (n: number) => spellShort(eggs(n)), eggsFloorAria = (n: number) => spellShort(eggsFloor(n));
+/** M41-9 aria: K–T exactly as on main; Qa and above spelled out from the SUFFIXES table (1.2Qa -> 1.2 quadrillion). */
+const eggsAria = (n: number) => spellShort(eggs(n));
 export type OrderState = 'wait' | 'partial' | 'ready';
 export interface OrderView {
   id: number; have: number; want: number; sell: number;
@@ -32,13 +32,13 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
   const pay = (k: number) => typeof priceCents === 'function' ? priceCents(k) : k * priceCents;
   const valueCents = pay(want), sellCents = sell > 0 ? pay(sell) : 0;
   const cardMoney = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoney(Math.max(1, Math.round(cents)));
-  const exact = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoneyExact(Math.max(1, Math.round(cents)));
+  const exact = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoneyAria(Math.max(1, Math.round(cents))); // aria only
   const preview = (cents: number) => !Number.isFinite(cents) ? '—' : cents > 0 && cents < 1 ? '$0.01' : fmtMoneyPreview(Math.max(1, Math.round(cents)));
   const value = cardMoney(valueCents);
-  // MK-24 / HoP 15:14: visible button uses floored short money; aria / popup / Thanks use fmtMoneyExact.
+  // MK-24 / HoP 15:14: visible button uses floored short money; aria uses fmtMoneyAria (= fmtMoneyExact below $1e15).
   const wait = `Need ${eggs(rem)}`;
   const button = state === 'wait' ? wait : `Sell ${eggsFloor(sell)} · +${preview(sellCents)}`;
-  const buttonAria = state === 'wait' ? wait : `Sell ${eggsFloorAria(sell)} · +${exact(sellCents)}`;
+  const buttonAria = state === 'wait' ? wait : `Sell ${eggsAria(sell)} · +${exact(sellCents)}`;
   const line = `${eggs(have)}/${eggs(want)}\u00a0eggs · ${value}`; // Art & UX: NBSP between count and eggs
   const lineAria = `${eggsAria(have)} of ${eggsAria(want)} eggs delivered, order worth ${exact(valueCents)}`;
   return { id: c.id, have, want, sell, valueCents, sellCents, state, line, lineAria, button, buttonAria };
