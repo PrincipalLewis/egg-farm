@@ -18,10 +18,10 @@ const waiting = new Coalesce(2000); // F5: one coalesced queue length for the st
 import { OrderList } from './order-list';
 import { saleValueCents, sellAllPreview } from '../sim/payout';
 import { graderMult } from '../sim/workers';
-import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
-import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
+import { m4On, trackMaxLevel, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
+import { salePriceCents, coopCap, trackLevel, trackBuyCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
-import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect, fxArrow } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -448,12 +448,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const upRowHtml = (kind: 'collection' | 'farm') => {
     const s = g.state, C = s.collectionLevel, F = s.farmLevel, isF = kind === 'farm', L = isF ? F : C, max = L >= b.maxLevel;
     const cost = isF ? S.farmCost(F, b) : S.collectionCost(C, b), can = s.coinsCents >= cost * 100;
-    const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
+    const arrow = (a: string, z: string) => max ? `${a}` : fxArrow(a, z);
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
     const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
     const M4 = m4On(b);
     const fx = isF ? [
-      ...(M4 ? [`Hens & Egg value up to L${hensCap(F, b)} ${max ? '' : `<span class="arrow">→</span> L${hensCap(F + 1, b)}`}`]
+      ...(M4 ? [`Hens & Egg value up to ${max ? `L${hensCap(F, b)}` : fxArrow(`L${hensCap(F, b)}`, `L${hensCap(F + 1, b)}`)}`]
         : [`Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`]),
       `Coop capacity ${arrow(fmtCount(M4 ? trackCoopCapacity(F, s.hensLevel, b) : S.coopCapacity(F, b)), fmtCount(M4 ? trackCoopCapacity(F + 1, s.hensLevel, b) : S.coopCapacity(F + 1, b)))}`,
       ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F + 1, C))}`]),
@@ -488,8 +488,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
   const trackRowHtml = (t: Track) => {
     const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
-    const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
-    const arrow = (a: string, z: string) => lock ? a : `${a} <span class="arrow">→</span> ${z}`;
+    const cost = trackBuyCost(s, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
+    const arrow = (a: string, z: string) => lock ? a : fxArrow(a, z); // L30-18: no near-zero (rounded-away) increase
     const fx = t === 'hens'
       ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`]
       : [`Egg price ${arrow(fmtMoneyShort(trackPriceCents(F, H, V, b)), fmtMoneyShort(trackPriceCents(F, H, V + 1, b)))}`];
@@ -501,7 +501,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : ''}>
       <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
       <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
-      <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
+      <div class="meta">Level ${L} / ${trackMaxLevel(t, b)}</div>${right}</div></div>`;
   };
   const farmTabHtml = () => {
     const s = g.state, st = balancedStrip(s, b);

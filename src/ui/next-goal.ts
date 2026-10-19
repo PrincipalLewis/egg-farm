@@ -6,7 +6,7 @@ import { farmCost, collectionCost, eggsPerTap, coopTier } from '../sim/state';
 import { hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 import { fmtTimeToAfford } from './format';
 import { m4On } from '../config/formulas';
-import { trackLock, trackCost, trackLevel } from '../sim/tracks';
+import { trackLock, trackBuyCost } from '../sim/tracks';
 import { trackGoalLabel } from './tracks-ui';
 import { bestPaybackAmong } from '../econ/best-buy';
 export type GoalKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
@@ -21,7 +21,7 @@ export function candidates(s: GameState, b: Balance): Candidate[] {
   const out: Candidate[] = [], F = s.farmLevel;
   if (F < b.maxLevel) out.push({ key: 'FARM', costCents: farmCost(F, b) * 100 });
   // M4A-22/23: a capped or MAX track is never a candidate.
-  if (m4On(b)) for (const [key, t] of [['HENS', 'hens'], ['VALUE', 'eggValue']] as const) if (!trackLock(s, t, b)) out.push({ key, costCents: trackCost(trackLevel(s, t), t, b) * 100 });
+  if (m4On(b)) for (const [key, t] of [['HENS', 'hens'], ['VALUE', 'eggValue']] as const) if (!trackLock(s, t, b)) out.push({ key, costCents: trackBuyCost(s, t, b) * 100 });
   if (s.collectionLevel < b.maxLevel) out.push({ key: 'COLL', costCents: collectionCost(s.collectionLevel, b) * 100 });
   for (const k of ['W1', 'W2', 'W3'] as const) { const id = WK[k]; if (!s.workers[id] && F >= unlockFarm(id, b)) out.push({ key: k, costCents: hireCostCents(id, b) }); }
   const tiers = b.workers.grader.tiers, i = s.workers.grader ? s.graderTier : 0; // not hired -> tier 1 = the hire

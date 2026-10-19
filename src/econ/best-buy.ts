@@ -11,7 +11,7 @@ import { farmCost, collectionCost } from '../sim/state';
 import { hireCostCents, unlockFarm, graderTierCostCents, mood, isOff, type WorkerId } from '../sim/workers';
 import { incomePerSec } from './income';
 import { m4On } from '../config/formulas';
-import { trackLock, trackCost } from '../sim/tracks';
+import { trackLock, trackBuyCost } from '../sim/tracks';
 
 export type BuyKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
 export const BUY_ORDER: BuyKey[] = ['FARM', 'HENS', 'VALUE', 'COLL', 'W1', 'W2', 'W3', 'W4'];
@@ -46,8 +46,8 @@ export function options(s: GameState, b: Balance): BuyOpt[] {
   const F = s.farmLevel, C = s.collectionLevel;
   if (F < b.maxLevel) out.push({ key: 'FARM', cost: farmCost(F, b), after: { ...s, farmLevel: F + 1 } });
   if (m4On(b)) {
-    if (!trackLock(s, 'hens', b)) out.push({ key: 'HENS', cost: trackCost(s.hensLevel, 'hens', b), after: { ...s, hensLevel: s.hensLevel + 1 } });
-    if (!trackLock(s, 'eggValue', b)) out.push({ key: 'VALUE', cost: trackCost(s.eggValueLevel, 'eggValue', b), after: { ...s, eggValueLevel: s.eggValueLevel + 1 } });
+    if (!trackLock(s, 'hens', b)) out.push({ key: 'HENS', cost: trackBuyCost(s, 'hens', b), after: { ...s, hensLevel: s.hensLevel + 1 } });
+    if (!trackLock(s, 'eggValue', b)) out.push({ key: 'VALUE', cost: trackBuyCost(s, 'eggValue', b), after: { ...s, eggValueLevel: s.eggValueLevel + 1 } });
   }
   if (C < b.maxLevel) out.push({ key: 'COLL', cost: collectionCost(C, b), after: { ...s, collectionLevel: C + 1 } });
   for (const k of ['W1', 'W2', 'W3'] as const) {

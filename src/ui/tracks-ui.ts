@@ -7,6 +7,9 @@ import { options, bestPaybackAmong } from '../econ/best-buy';
 import { gradeMult } from '../config/formulas';
 const pct = (mult: number) => Math.round((mult - 1) * 100);
 export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
+/** L30-18 (HoP 23:37): never show a near-zero increase. If the next value FORMATS the same as the current one (rounding at
+ *  high levels, e.g. "$1.2M -> $1.2M"), the arrow and next value are hidden and only the current value shows. */
+export const fxArrow = (cur: string, next: string) => cur === next ? cur : `${cur} <span class="arrow">→</span> ${next}`;
 export const trackLockText = (F: number) => `Needs Farm L${F + 1}`;
 type Seg = { track: 'Hens' | 'Egg value' | 'Farm'; level: number; fill: number; weakest: boolean };
 /** M4A-19: one segment per track (order Hens, Egg value, Farm), fill = min(level, N)/N, N = next Balanced threshold
