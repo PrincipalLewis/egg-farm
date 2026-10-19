@@ -25,13 +25,14 @@ export function showTracksExplainer(g: G, doc: Document = document): HTMLElement
   const el = doc.createElement('div');
   el.className = 'tracks-exp'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'tracks-exp-t');
   el.innerHTML = `<h2 id="tracks-exp-t">${EXP_TITLE}</h2><p>${EXP_BODY}</p>${(g.migrationRefundCents ?? 0) > 0 ? `<p class="tracks-exp-refund"><img src="${import.meta.env.BASE_URL}assets/icon-coin.svg" alt="" width="16" height="16"> ${refundLine(g.migrationRefundCents!)}</p>` : ''}<button type="button" class="btn tracks-exp-ok">Got it</button>`;
-  const prev = doc.activeElement as HTMLElement | null; // P46-M1: focus fallback
   doc.body.append(el);
   const off = () => { clearTimeout(t); doc.removeEventListener('click', onAny, true); doc.removeEventListener('keydown', onKey, true); };
   const close = () => { if (!el.isConnected) return off(); const ae = doc.activeElement, mine = !ae || ae === doc.body || el.contains(ae); off(); el.remove();
     // P46-M1 (CCR major): only when focus was on the card; the active Upgrades tab if rendered, else where it was
-    const tab = doc.querySelector<HTMLElement>('[data-tab].active'), vis = tab && (tab.getClientRects().length > 0 || !tab.closest('[hidden]')) ? tab : null; // docked layout overrides [hidden]
-    if (mine) (vis ?? (prev && prev.isConnected && prev !== doc.body ? prev : null) ?? doc.getElementById('collect'))?.focus({ preventScroll: true });
+    // Art & UX B-M1 order: sheet open -> active Upgrades tab; sheet closed -> bottom-nav Upgrades; last resort #collect.
+    const shown = (e: HTMLElement | null) => !!e && (e.getClientRects().length > 0 || !e.closest('[hidden]')) ? e : null; // docked overrides [hidden]
+    const target = shown(doc.querySelector<HTMLElement>('[data-tab].active')) ?? shown(doc.querySelector<HTMLElement>('[data-nav=upgrades]')) ?? doc.getElementById('collect');
+    if (mine) target?.focus({ preventScroll: true });
     doc.dispatchEvent(new Event(EXP_CLOSED)); };
   // m4a-spec v1.15 (variant C): non-modal; taps outside register normally and never close it. A tap on the card
   // closes it and does nothing else.
