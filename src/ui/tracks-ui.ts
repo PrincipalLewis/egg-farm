@@ -2,12 +2,22 @@
  *  Multipliers and thresholds come from balance.m4 (economy CSV), never from this file. */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
-import { balancedStrip, trackLock, trackCost, trackLevel } from '../sim/tracks';
+import { balancedStrip, trackLock, trackCost, trackLevel, trackCap } from '../sim/tracks';
 import { options, bestPaybackAmong } from '../econ/best-buy';
 import { gradeMult } from '../config/formulas';
 const pct = (mult: number) => Math.round((mult - 1) * 100);
 export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
-export const trackLockText = (F: number) => `Needs Farm L${F + 1}`;
+/** Lock line for a capped track row; `need` = the Farm level that unlocks the next buy (trackUnlockFarm). */
+export const trackLockText = (need: number) => `Needs Farm L${need}`;
+/** M41-11 (M4B-1): the Farm level at which a capped track can be bought again = the first Farm level F' > F whose purchase
+ *  cap (hensCap / eggValueCap, i.e. min(maxLevel, F' + balance.m4 capOverFarm)) exceeds the track's level. Not F+1: a
+ *  migrated save can sit above its cap (migrate-v7 grandfathers eggValueLevel), e.g. F5 with Egg value L9 unlocks at F7.
+ *  null when no Farm level unlocks it (only possible at maxLevel, which is the MAX state). */
+export function trackUnlockFarm(s: GameState, t: 'hens' | 'eggValue', b: Balance): number | null {
+  const L = trackLevel(s, t);
+  for (let f = s.farmLevel + 1; f <= b.maxLevel; f++) if (trackCap({ ...s, farmLevel: f }, t, b) > L) return f;
+  return null;
+}
 type Seg = { track: 'Hens' | 'Egg value' | 'Farm'; level: number; fill: number; weakest: boolean };
 /** M4A-19: one segment per track (order Hens, Egg value, Farm), fill = min(level, N)/N, N = next Balanced threshold
  *  (full at the top tier); weakest = lowest fill, ties mark all tied. */

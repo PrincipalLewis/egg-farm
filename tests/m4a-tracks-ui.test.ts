@@ -17,7 +17,7 @@ describe('M4-A track copy (art-ux/m4-tracks-copy.md)', () => {
     expect(balancedStripText(st(30, 30, 30), alt, true)).toBe('Balanced farm 5 of 5. Top tier, +40% income.');
   });
   it('lock and milestone toasts', () => {
-    expect(trackLockText(7)).toBe('Needs Farm L8');
+    expect(trackLockText(8)).toBe('Needs Farm L8');
     expect(milestoneToast('hens:10', on)).toBe('Hens L10: bigger coop · offline ×1.25');
     expect(milestoneToast('grade:20', on)).toBe('Egg value L20: Jumbo ×1.5');
     expect(milestoneToast('balanced:2', on)).toBe('Balanced farm 2/5: +15% income');
