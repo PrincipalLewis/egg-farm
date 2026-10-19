@@ -1,5 +1,7 @@
 import { execSync } from 'node:child_process';
-export const BUILD_PREFIX = 'm3-rc1-pre';
+/** M41-10: the ONE release-prefix constant. The build id is `<BUILD_PREFIX>+<short hash>[+dirty]`; vite.config.ts injects it
+ *  (__BUILD__, __BUILD_PREFIX__), check-release-build asserts it, and CI/release-asset read it from this line. Bump per release. */
+export const BUILD_PREFIX = 'm4.1';
 /** `<prefix>+<short hash>`, plus `+dirty` when the working tree has uncommitted (incl. untracked, non-ignored) changes. */
 export function formatBuildId(short: string | null, dirty: boolean, prefix = BUILD_PREFIX): string {
   const base = short && /^[0-9a-f]{7,}$/.test(short) ? `${prefix}+${short}` : `${prefix}+unknown`;
