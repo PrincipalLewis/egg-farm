@@ -1,6 +1,6 @@
 // Unit tests for the L30+ harness play-equivalence hash/compare and first-buy logic (scripts/l30plus-trace.ts).
 import { describe, it, expect } from 'vitest';
-import { eventKey, traceHash, compareSeed, summarize, firstBuys, firstTickAt, prefix, snap, type TraceEvent } from '../scripts/l30plus-trace';
+import { eventKey, traceHash, compareSeed, summarize, firstBuys, dceo15Verdicts, firstTickAt, prefix, snap, type TraceEvent } from '../scripts/l30plus-trace';
 import { initialState } from '../src/sim/state';
 import { balance } from '../src/config/balance';
 const ev = (i: number, kind: string, F: number, o: Partial<TraceEvent> = {}): TraceEvent => ({ i, t: i / 10, kind, row: 0, coins: 100 * i, F, C: 0, H: 0, V: 0, workers: '', grader: 0, coop: 0, basket: 0, ...o });
@@ -61,5 +61,29 @@ describe('l30plus-trace first-buy report', () => {
   });
   it('uses each seed\'s FIRST buy of the row only', () => {
     expect(firstBuys([[ev(1, 'c', 32, { row: 22 }), ev(2, 'c', 20, { row: 22 })]], [22])[0]).toMatchObject({ earliestFarm: 32, seedsBuyingBeforeF31: 0 });
+  });
+});
+describe('D-CEO-15 per-row verdicts', () => {
+  const fb = (row: number, before: number) => ({ row, earliestFarm: 33, earliestSeedIdx: 0, seedsBuyingBeforeF31: before, seeds: 3 });
+  it('PASS needs play-equivalence PASS and zero seeds buying before F31', () => {
+    const v = dceo15Verdicts('PASS', [fb(22, 0), fb(23, 1)]);
+    expect(v.map(r => [r.row, r.buysToLevel, r.verdict])).toEqual([[22, 23, 'PASS'], [23, 24, 'FROZEN']]);
+  });
+  it('play-equivalence FAIL freezes every row', () => {
+    expect(dceo15Verdicts('FAIL', [fb(22, 0), fb(27, 0)]).every(r => r.verdict === 'FROZEN' && /play-equivalence FAIL/.test(r.reason))).toBe(true);
+  });
+  it('row 28 is never eligible (info only, always FROZEN)', () => {
+    expect(dceo15Verdicts('PASS', [fb(28, 0)])[0]).toMatchObject({ row: 28, buysToLevel: 29, eligible: false, verdict: 'FROZEN' });
+  });
+});
+describe('row convention matches the game (row C = collectionCost(C) = price of C -> C+1)', () => {
+  it('buyCollection at C charges collection.costTable[C] and the trace row is C', async () => {
+    const { apply } = await import('../src/sim/actions');
+    const t = Array.from({ length: balance.maxLevel + 1 }, (_, i) => 1000 + i);
+    const b = { ...balance, collection: { ...balance.collection, costTable: t } } as any;
+    const s0 = { ...initialState(b, 1), collectionLevel: 22, farmLevel: 25, coinsCents: 10_000_000 };
+    const s1 = apply(s0, { type: 'buyCollection' }, b);
+    expect(s0.coinsCents - s1.coinsCents).toBe(t[22] * 100);
+    expect(snap(1, 0.1, 'c', s1).row).toBe(22);
   });
 });

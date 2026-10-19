@@ -39,3 +39,13 @@ export function firstBuys(traces: TraceEvent[][], rowsWanted: number[], L = 31) 
     return { row, earliestFarm: Number.isFinite(earliestF) ? earliestF : null, earliestSeedIdx, seedsBuyingBeforeF31: beforeL, seeds: traces.length };
   });
 }
+/** D-CEO-15 (HoE 2026-10-19): row C is 0-based (collectionCost(C), the price of C -> C+1). Gate rows 22-27 (buys to L23-L28).
+ *  PASS (may be eased) only if play-equivalence PASSes for every seed AND no seed buys the row before F31; else FROZEN.
+ *  Rows outside 22-27 (e.g. 28) are information only and always FROZEN. */
+export const DCEO15_ROWS = [22, 23, 24, 25, 26, 27];
+export function dceo15Verdicts(eqVerdict: 'PASS' | 'FAIL', fb: ReturnType<typeof firstBuys>) {
+  return fb.map(r => { const eligible = DCEO15_ROWS.includes(r.row), ok = eqVerdict === 'PASS' && r.seedsBuyingBeforeF31 === 0;
+    return { row: r.row, buysToLevel: r.row + 1, eligible, seedsBuyingBeforeF31: r.seedsBuyingBeforeF31, verdict: (eligible && ok ? 'PASS' : 'FROZEN') as 'PASS' | 'FROZEN',
+      reason: !eligible ? 'not eligible under D-CEO-15 (gate is rows 22-27)' : ok ? 'trace-identical through F31 and never bought before F31'
+        : [eqVerdict !== 'PASS' ? `play-equivalence ${eqVerdict}` : '', r.seedsBuyingBeforeF31 ? `${r.seedsBuyingBeforeF31} seeds buy it before F31` : ''].filter(Boolean).join('; ') }; });
+}

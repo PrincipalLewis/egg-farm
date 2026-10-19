@@ -9,7 +9,7 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseEconomyCsv, buildBalance, readEconomyConfig } from './sync-economy';
 import * as syncEconomy from './sync-economy';
-import { snap, compareSeed, summarize, firstBuys, type TraceEvent } from './l30plus-trace';
+import { snap, compareSeed, summarize, firstBuys, dceo15Verdicts, type TraceEvent } from './l30plus-trace';
 import { existsSync } from 'node:fs';
 import { validateBalance, balance as repoBalance, type Balance } from '../src/config/balance';
 import { tableRow } from '../src/config/formulas';
@@ -44,23 +44,26 @@ say(`collectionCostFromCsv ${out.collectionTable.state} (source: ${out.collectio
 if (flagOn && !flagSupported) { out.build = { ok: false, error: 'collectionCostFromCsv on but this code has no D-HOP-23 sync support' }; say(`BUILD FAILS: ${out.build.error}`); finish(1); }
 const cfg = { ...cfg0, collectionCostFromCsv: flagOn || undefined };
 if (!flagOn) delete (cfg as any).collectionCostFromCsv;
-// main's data/economy.csv (origin/main; repo file if git has no origin/main) for the L30-row byte check and the play-equivalence baseline
-const mainRef = sh('git rev-parse origin/main'), mainTxt = (mainRef && sh('git show origin/main:data/economy.csv')) || readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
-const mainSha = createHash('sha256').update(mainTxt.endsWith('\n') ? mainTxt : mainTxt + '\n').digest('hex');
-out.mainCsv = { source: mainRef ? `origin/main ${mainRef.slice(0, 12)}:data/economy.csv` : 'repo data/economy.csv', sha256: mainSha };
-say(`main csv ${out.mainCsv.source} sha256 ${mainSha}`);
+// Baseline CSV (HoE 09:36): the post-D-HOP-25 economy.csv (123 kept columns), sha256 BASELINE_SHA. Used for the L0-30 / L30-row
+// cell checks AND as the play-equivalence baseline run. --baseline <csv> overrides; its path + sha256 are always printed.
+const BASELINE_SHA = 'c7bb783fe890928f747c142411503261f0711388e73fe1cdadbfd76cc8d68b44', BASELINE_DEFAULT = '/workspace/egg-farm-studio/scratch/m41-5-drop/economy.dropped8.csv';
+const basePath = opt('--baseline', BASELINE_DEFAULT), baseRaw = readFileSync(basePath), mainTxt = baseRaw.toString('utf8'), mainSha = createHash('sha256').update(baseRaw).digest('hex');
+out.baselineCsv = { path: basePath, sha256: mainSha, expectedSha256: BASELINE_SHA, pinned: mainSha === BASELINE_SHA, columns: mainTxt.split(/\r?\n/)[0].split(',').length, overridden: basePath !== BASELINE_DEFAULT };
+say(`baseline csv ${basePath} sha256 ${mainSha} (${out.baselineCsv.columns} columns; ${out.baselineCsv.pinned ? 'matches the post-D-HOP-25 pin' : `DOES NOT match the post-D-HOP-25 pin ${BASELINE_SHA.slice(0, 12)}`})`);
 // L0-30 diff vs the repo's data/economy.csv (shared columns; added columns listed separately)
-const rows = parseEconomyCsv(raw.toString('utf8')), repoRows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
-const cells: string[] = []; for (let L = 0; L <= Math.min(30, repoRows.length - 1); L++) for (const k of Object.keys(repoRows[L])) if (repoRows[L][k] !== rows[L]?.[k]) cells.push(`L${L} ${k} ${repoRows[L][k]} -> ${rows[L]?.[k]}`);
-const added = Object.keys(rows[0]).filter(k => !(k in repoRows[0])), removed = Object.keys(repoRows[0]).filter(k => !(k in rows[0]));
+const rows = parseEconomyCsv(raw.toString('utf8'));
+const rawTable = (txt: string) => { const ls = txt.trim().split(/\r?\n/), h = ls[0].split(',').map(x => x.trim()); return { h, rows: ls.slice(1).map(l => Object.fromEntries(l.split(',').map((v, k) => [h[k], v.trim()]))) }; };
+const BT = rawTable(mainTxt), CT = rawTable(raw.toString('utf8'));
+const cells: string[] = []; for (let L = 0; L <= Math.min(30, BT.rows.length - 1); L++) for (const k of BT.h) if (BT.rows[L][k] !== CT.rows[L]?.[k]) cells.push(`L${L} ${k} ${BT.rows[L][k]} -> ${CT.rows[L]?.[k] ?? '(missing)'}`);
+const added = CT.h.filter(k => !BT.h.includes(k)), removed = BT.h.filter(k => !CT.h.includes(k));
 const l011 = cells.filter(c => +c.slice(1, c.indexOf(' ')) <= 11);
-out.l0_30 = { verdict: cells.length ? 'FAIL' : 'PASS', l0_11: l011.length ? 'FAIL' : 'PASS', cellDiffs: cells, addedColumns: added, removedColumns: removed };
-say(`L0-30 vs repo data/economy.csv: ${out.l0_30.verdict} (${cells.length} cell diffs; L0-11 ${out.l0_30.l0_11})${cells.slice(0, 6).map(c => '\n  ' + c).join('')}${added.length ? `\n  added columns (${added.length}): ${added.join(', ')}` : ''}`);
-// L30-row byte check vs main (raw CSV text cells, shared columns): FAIL if any L30 cell differs
+out.l0_30 = { vs: `${basePath} ${mainSha}`, columnsCompared: BT.h.length, verdict: cells.length ? 'FAIL' : 'PASS', l0_11: l011.length ? 'FAIL' : 'PASS', cellDiffs: cells, addedColumns: added, removedColumns: removed };
+say(`L0-30 byte check vs baseline (${BT.h.length} baseline columns, raw cells): ${out.l0_30.verdict} (${cells.length} cell diffs; L0-11 ${out.l0_30.l0_11})${cells.slice(0, 6).map(c => '\n  ' + c).join('')}${added.length ? `\n  extra columns not in baseline (${added.length}): ${added.join(', ')}` : ''}${removed.length ? `\n  baseline columns missing (${removed.length}): ${removed.join(', ')}` : ''}`);
+// L30-row byte check vs baseline (raw CSV text cells, shared columns): FAIL if any L30 cell differs
 { const cellsOf = (txt: string) => { const ls = txt.trim().split(/\r?\n/), h = ls[0].split(','), r = ls.find(l => l.split(',')[h.indexOf('level')] === '30'); return r ? Object.fromEntries(r.split(',').map((v, k) => [h[k], v])) : null; };
   const a = cellsOf(mainTxt), c = cellsOf(raw.toString('utf8')), d = a && c ? Object.keys(a).filter(k => a[k] !== c[k]).map(k => `${k} ${a[k]} -> ${c[k] ?? '(missing)'}`) : ['L30 row missing'];
-  out.l30Row = { verdict: d.length ? 'FAIL' : 'PASS', vs: out.mainCsv.source, diffs: d };
-  say(`L30 row byte check vs main: ${out.l30Row.verdict}${d.length ? ` (${d.length} cells: ${d.slice(0, 6).join('; ')})` : ' (every cell identical)'}`); }
+  out.l30Row = { verdict: d.length ? 'FAIL' : 'PASS', vs: `${basePath} ${mainSha}`, diffs: d };
+  say(`L30 row byte check vs baseline: ${out.l30Row.verdict}${d.length ? ` (${d.length} cells: ${d.slice(0, 6).join('; ')})` : ' (every cell identical)'}`); }
 // build
 let b: Balance;
 try { b = validateBalance(buildBalance(rows, JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8')), cfg) as Balance, false); }
@@ -101,14 +104,21 @@ say(`L10 P95 workers ${q(lw, .95).toFixed(2)} min (margin ${out.l10.workers.marg
   let base: TraceEvent[][] | null = null, cached = false;
   if (useCache && existsSync(f)) { base = JSON.parse(readFileSync(f, 'utf8')).traces; cached = true; }
   if (!base) { base = S.map(s => { const tr: TraceEvent[] = []; runM2(mainBal(), s, { model: 'seller15', T, variance: VAR_DEFAULT, onBuy: e => tr.push(snap(e.i, e.t, e.kind, e.s)) }); return tr; });
-    if (useCache) { mkdirSync(dir, { recursive: true }); writeFileSync(f, JSON.stringify({ key, code: head, mainCsvSha256: mainSha, collectionCostFromCsv: flagOn, T, seeds: [s0, s1], traces: base })); } }
+    if (useCache) { mkdirSync(dir, { recursive: true }); writeFileSync(f, JSON.stringify({ key, code: head, baselineCsv: basePath, baselineCsvSha256: mainSha, collectionCostFromCsv: flagOn, T, seeds: [s0, s1], traces: base })); } }
   const rs = S.map((s, k) => compareSeed(s, TR[k], base![k], 31)), eq = summarize(rs);
   out.playEquivalence = { ...eq, upTo: 'first tick at Farm L31 (exclusive)', baseline: { key, cached, file: useCache ? f : null, dirtyNoCache: dirty }, seedsNeverF31: rs.filter(r => r.until < 0).length, perSeed: rs.map(r => ({ seed: r.seed, until: r.until, events: r.events, hash: r.hash.slice(0, 16), match: r.match })) };
   const ff = eq.firstFail;
-  say(`play-equivalence vs main csv (trace to first F31 tick, same code + collectionCostFromCsv ${flagOn ? 'on' : 'off'}; baseline ${cached ? 'cached' : 'computed'} ${key}): ${eq.verdict} | ${eq.seeds - eq.mismatches}/${eq.seeds} seeds match${ff ? ` | first FAIL seed ${ff.seed} tick ${ff.firstDiff!.tick} event #${ff.firstDiff!.index}\n  cand ${ff.firstDiff!.cand}\n  main ${ff.firstDiff!.main}` : ''}`);
+  say(`play-equivalence vs baseline csv ${mainSha.slice(0, 12)} (trace to first F31 tick, same code + collectionCostFromCsv ${flagOn ? 'on' : 'off'}; baseline ${cached ? 'cached' : 'computed'} ${key}): ${eq.verdict} | ${eq.seeds - eq.mismatches}/${eq.seeds} seeds match${ff ? ` | first FAIL seed ${ff.seed} tick ${ff.firstDiff!.tick} event #${ff.firstDiff!.index}\n  cand ${ff.firstDiff!.cand}\n  main ${ff.firstDiff!.main}` : ''}`);
   // first-buy report, Collection rows 22-27 (row = collection level before the buy)
   const fb = firstBuys(TR, [22, 23, 24, 25, 26, 27], 31).map(r => ({ ...r, earliestSeed: r.earliestSeedIdx >= 0 ? S[r.earliestSeedIdx] : null, earliestSeedIdx: undefined }));
   out.collectionFirstBuy = fb;
+  // D-CEO-15 (HoE 09:36): row C = 0-based costTable/economy.csv row = collectionCost(C) = price of C -> C+1 (actions.ts buy()).
+  // Gate rows 22-27 (buys to L23-L28): PASS (may be eased) only if play-equivalence PASSes for every seed AND no seed buys the row
+  // before F31; else FROZEN. Row 28 is printed for information and is always FROZEN (not eligible under D-CEO-15).
+  const fb28 = firstBuys(TR, [22, 23, 24, 25, 26, 27, 28], 31);
+  const dceo = dceo15Verdicts(eq.verdict, fb28);
+  out.dceo15 = { gate: 'rows 22-27 (buys to L23-L28)', rowConvention: '0-based: row C = economy.csv level C = collection.costTable[C] = collectionCost(C) = price of C -> C+1', playEquivalence: eq.verdict, rows: dceo };
+  say(`D-CEO-15 gate rows 22-27 (buys to L23-L28) | row convention: 0-based, row C = collectionCost(C) = price of C -> C+1\n${dceo.map(r => `  row ${r.row} (buy to L${r.buysToLevel}): ${r.verdict}${r.eligible ? '' : ' [not eligible: info only]'} - ${r.reason}`).join('\n')}`);
   say(`Collection first buy (rows 22-27; earliest Farm level across seeds, seeds buying before F31): ${fb.map(r => `C${r.row} ${r.earliestFarm == null ? 'never' : `F${r.earliestFarm} (seed ${r.earliestSeed})`} ${r.seedsBuyingBeforeF31}/${r.seeds}`).join(' | ')}`); }
 // step gate
 const t = loadTargets(), per = S.map((s, i) => [s, maxStepRatio(W[i], t.step_ratio_from_level, t.step_ratio_min_prev_s)] as const).filter(x => x[1] != null) as [number, number][];
