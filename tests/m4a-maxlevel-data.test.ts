@@ -11,9 +11,12 @@ const raw = (F: number) => serialize({ ...initialState(balance), farmLevel: F, c
 describe('M4A-27 max level from data', () => {
   it('balance.maxLevel comes from the data (current economy.csv rows)', () => { expect(Number.isInteger(balance.maxLevel)).toBe(true); expect(balance.maxLevel).toBeGreaterThan(0); });
   it('a non-30 max (40): F35 loads and migrates with H clamped to 40, not 30', () => {
-    const b = withMax(40); expect(validate(raw(35), b).ok).toBe(true); expect(validate(raw(41), b).ok).toBe(false);
+    const b = withMax(40); expect(validate(raw(35), b).ok).toBe(true); const hi = validate(raw(41), b); expect(hi.ok && hi.file.state.farmLevel).toBe(41); // l30plus-saves M2: above max loads as stored
     const r = migrateTracksV7({ ...initialState(b), farmLevel: 35 }, b); expect(r.state.hensLevel).toBe(35);
     expect(migrateTracksV7({ ...initialState(b), farmLevel: 35 }, b, {}).state.hensLevel).toBeLessThanOrEqual(b.maxLevel);
   });
-  it('a smaller max (20): F25 is rejected at load', () => { expect(validate(raw(25), withMax(20)).ok).toBe(false); expect(validate(raw(20), withMax(20)).ok).toBe(true); });
+  it('a smaller max (20): F25 loads as stored (l30plus-saves M2), migrated tracks stay within the max', () => {
+    const r = validate(raw(25), withMax(20)); expect(r.ok).toBe(true); if (!r.ok) return;
+    expect(r.file.state.farmLevel).toBe(25); expect(r.file.state.hensLevel).toBe(20); expect(validate(raw(20), withMax(20)).ok).toBe(true);
+  });
 });

@@ -290,9 +290,15 @@ describe('(b) m4-design §3c/§3d interim marker path (ADR M4-14..24, spec v1.10
     const mk = (q: number, t: number) => JSON.stringify({ version: 6, savedAt: t, saveSeq: q, state: mainState(1, 1) });
     expect(rankCompare(mk(7, T0), mk(5, T0 + 100), T0 + 200)).toBeGreaterThan(0); expect(rankCompare(mk(5, T0), mk(5, T0 + 100), T0 + 200)).toBeLessThan(0);
   });
-  it('M4-17: a corrupt / out-of-range v6 is never backed up or migrated', async () => {
-    const kv = kvOf(); kv.setItem(SAVE_KEY, raw6({ ...mainState(10, 7), farmLevel: 99 }));
+  it('M4-17: a corrupt v6 is never backed up or migrated', async () => {
+    const kv = kvOf(); kv.setItem(SAVE_KEY, raw6(mainState(10, 7)).replace(/"sum":"[^"]*"/, '"sum":"00000000"')); // checksum mismatch
     const g = boot(kv); expect(g.tracksMigrationPending).toBe(false); expect(await g.startTracksMigration()).toBe('none'); expect(kv.getItem(V6_BACKUP_KEY)).toBeNull();
+  });
+  it('l30plus-saves M2: an above-max v6 (F99) is valid, migrates at the capped level, backup holds the original bytes, F99 kept', async () => {
+    const kv = kvOf(), r = raw6({ ...mainState(10, 7), farmLevel: 99 }); kv.setItem(SAVE_KEY, r);
+    const g = boot(kv); expect(g.tracksMigrationPending).toBe(true); expect(await g.startTracksMigration()).toBe('committed');
+    expect(decodeBackup(kv.getItem(V6_BACKUP_KEY))!.raw).toBe(r); expect(g.state.farmLevel).toBe(99); expect(g.state.hensLevel).toBeLessThanOrEqual(on.maxLevel);
+    expect(JSON.parse(kv.getItem(SAVE_KEY)!).state.farmLevel).toBe(99); expect(Number.isFinite(g.state.coinsCents)).toBe(true);
   });
   it('Reset: v6_backup + migration_attempts in RESET_KEYS; IDB clear removes main only (§3d: no IDB backup in M4-A)', async () => {
     expect(RESET_KEYS).toEqual(expect.arrayContaining([V6_BACKUP_KEY, MIGRATION_ATTEMPTS_KEY]));
