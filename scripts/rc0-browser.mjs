@@ -654,8 +654,9 @@ sections.g5 = async () => {
   const DONE = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
   const rect = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; }, sel);
   const hit = (a, b) => !!a && !!b && a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
-  const shotIt = async (page, name, w, h, state, extra = {}) => { if (!G5) return; const f = `${ENGINE}-${name}-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state, ...extra }); };
-  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
+  const cardUp = async (page, what, w) => { const up = await page.waitForFunction(() => { const c = document.querySelector('.tracks-exp'); return !!c && getComputedStyle(c).opacity === '1'; }, null, { timeout: 3000 }).then(() => true, () => false); ok(`G5 card fully up (opacity 1) for ${what} shot at ${w}`, up); return up; };
+  const shotIt = async (page, name, w, h, state, extra = {}) => { if (!G5) return; const f = `${ENGINE}-${name}-${w}x${h}.png`; await page.screenshot({ path: `${G5}/${f}` }); const activeElement = await page.evaluate(() => { const a = document.activeElement; return a ? a.tagName + (a.id ? '#' + a.id : '') + (a.dataset.tab ? `[data-tab=${a.dataset.tab}]` : '') + (a.dataset.nav ? `[data-nav=${a.dataset.nav}]` : '') + (a.className ? '.' + String(a.className).trim().split(/\s+/).join('.') : '') : null; }); entries.push({ file: f, engine: ENGINE, viewport: `${w}x${h}`, state, activeElement, ...extra }); };
+  for (const [w, h] of [[360, 800], [375, 812], [390, 844], [1280, 800]]) {
     const { ctx, page, errors } = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } });
     await page.waitForTimeout(1500);
     const both = await page.evaluate(() => ({ modal: !!document.querySelector('#modal-layer.open'), card: !!document.querySelector('.tracks-exp') }));
@@ -670,6 +671,10 @@ sections.g5 = async () => {
     const toastShown = await page.evaluate(() => { const t = document.querySelector('.toast'); return !!t && t.classList.contains('show') && getComputedStyle(t).visibility !== 'hidden' && t.getBoundingClientRect().height > 0; });
     const tr = await rect(page, '.toast'), cr = await rect(page, '.tracks-exp');
     ok(`G5 A toast held while the card is open (no overlap) at ${w}`, !toastShown || !hit(tr, cr), JSON.stringify({ toastShown, tr, cr }));
+    const behind = await page.evaluate(() => { const r = document.querySelector('.tracks-exp')?.getBoundingClientRect(); if (!r) return null; const out = []; for (const [x, y] of [[r.left + 6, r.top + 10], [r.right - 6, r.top + 10], [r.left + 6, r.top + 40]]) { const els = document.elementsFromPoint(x, y).slice(0, 6).map(e => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).join('.') : '')); out.push(els); } return out; });
+    ok(`G5 probe: elements behind the card corners at ${w}`, true, JSON.stringify(behind));
+    ok(`G5 no toast DOM shown while the card is open at ${w}`, await page.evaluate(() => !document.querySelector('.toast.show') && ![...document.querySelectorAll('.toast,[role=status].toast')].some(t => t.classList.contains('show'))));
+    await cardUp(page, 'explainer', w);
     await shotIt(page, 'explainer', w, h, 'offline return collected, coop toast fired + held, card open', { asserted: 'card visible, no toast overlap, no modal' });
     if (MODE === 'nonmodal') {
       const col = await rect(page, '.collect, #collect, button.collect'); ok(`G5 C card does not cover Collect at ${w}`, !hit(cr, col), JSON.stringify({ cr, col }));
@@ -679,6 +684,7 @@ sections.g5 = async () => {
     ok(`G5 Got it closes the card at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
     const fo = await page.evaluate(() => document.activeElement?.id || document.activeElement?.getAttribute('data-tab') || document.activeElement?.tagName);
     ok(`G5 focus not lost after Got it (sheet closed) at ${w}`, fo !== 'BODY', fo);
+    await shotIt(page, 'focus-after-gotit', w, h, 'card closed via Got it (sheet closed), focus target visible', { focus: fo });
     const toastAfter = await page.evaluate(() => (document.querySelector('.toast')?.textContent ?? ''));
     ok(`G5 A held toast plays after close at ${w}`, /Coop upgraded/.test(toastAfter), toastAfter);
     // Upgrades + B/C tap semantics on a re-shown card (debug hook: clear the flag, re-trigger via the commit hook)
@@ -693,6 +699,8 @@ sections.g5 = async () => {
     await page.locator('#uRow .btn.buy[data-kind=farm]').click({ timeout: 5000 }); await page.waitForTimeout(250);
     const F1 = await page.evaluate(() => window.eggfarm.state.farmLevel), open1 = (await page.locator('.tracks-exp').count()) === 1;
     ok(`G5 C outside tap on Buy buys 1 and the card stays at ${w}`, F1 === F0 + 1 && open1, JSON.stringify({ F0, F1, open1 }));
+    await cardUp(page, 'buy-tap-card-stays', w);
+    await shotIt(page, 'buy-tap-card-stays', w, h, 'Buy tapped while card up: bought 1, card stays; card rect clear of Buy and Collect', { F0, F1, cardRect: cr2, buyRect: buyR });
     const tabs = await page.$$eval('[data-tab]', bs => bs.map(x => ({ h: x.getBoundingClientRect().height, p: x.querySelector('.tab-pill').getBoundingClientRect().height })));
     ok(`G5 F2 Upgrades tabs pill >=36 and hit >=44 at ${w}`, tabs.length === 3 && tabs.every(t => t.p >= 36 && t.h >= 44), JSON.stringify(tabs));
     // Esc / Enter / (C: card tap) close paths, focus back to the active Upgrades tab
@@ -705,11 +713,29 @@ sections.g5 = async () => {
       ok(`G5 close via ${how} + focus on the active Upgrades tab at ${w}`, !st.open && st.focus === 'farm', JSON.stringify(st));
       if (w === 360) await shotIt(page, `focus-after-${how.toLowerCase()}`, w, h, `card closed via ${how}, focus ring on the Farm tab`);
     }
+    {
+      await page.evaluate(() => { const g = window.eggfarm; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
+      await page.waitForSelector('.tracks-exp-refund', { timeout: 3000 }).catch(() => {});
+      const rl = await page.evaluate(() => document.querySelector('.tracks-exp-refund')?.textContent.trim() ?? null);
+      ok(`G5 refund line shown when migrationRefundCents > 0 at ${w}`, rl === 'We refunded +$1,234.56 for your old upgrades.', rl);
+      await cardUp(page, 'refund-line', w);
+      await shotIt(page, 'refund-line', w, h, 'card with refund line (migrationRefundCents=123456, debug-set)');
+      await page.locator('.tracks-exp-ok').click(); await page.evaluate(() => { window.eggfarm.migrationRefundCents = 0; });
+    }
     await shotIt(page, 'upgrades-tabs', w, h, 'Upgrades > Farm tab, tabs 36px pill / 44px hit', { asserted_tab: 'farm', checks: tabs });
     await page.evaluate(() => window.eggfarm.save()); await page.reload({ waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click().catch(() => {}); await page.waitForTimeout(1200);
     await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 2000 }).catch(() => {}); await page.waitForTimeout(1300);
     ok(`G5 EXP1 not shown again after reload at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
+    await shotIt(page, 'after-reload', w, h, 'reloaded after the card was seen: no re-show');
     ok(`G5 no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
+    await ctx.close();
+  }
+  for (const [w, h] of [[360, 800], [375, 812], [390, 844], [1280, 800]]) {
+    const { ctx, page } = await open({ w, h, ls: { 'eggfarm.ui': DONE } });
+    await page.waitForTimeout(2500);
+    const st = await page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), m: window.eggfarm.state.tracksV7, seen: window.eggfarm.state.seenTracksExplainer ?? null }));
+    ok(`G5 new save never shows the explainer at ${w}`, !st.card && st.m === 1, JSON.stringify(st));
+    await shotIt(page, 'new-save', w, h, 'fresh M4 farm: no explainer');
     await ctx.close();
   }
   if (G5) { const { writeFileSync } = await import('node:fs'); writeFileSync(`${G5}/entries-${ENGINE}.json`, JSON.stringify(entries, null, 1)); }
