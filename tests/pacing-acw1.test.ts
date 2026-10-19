@@ -4,7 +4,7 @@ import { runM2 } from './bot-m2';
 import { median } from './bot';
 // AC-W1 (m2-proposal §8 item 17): casual model = test-only Poisson arrivals + demand x0.75, sell every 20 s, tap 1/s,
 // seller15 buy rule, managed, v1.1 values, 2 h runs, seeds 0-99 (one RNG stream per run, seeded by the integer seed).
-// Refs: D-HOP-2026-10-19-09 (product/decisions.md:241), D-CEO-20261019-06 (decisions.md:57, ON HOLD per its 03:52 amendment), product/decisions.md:232.
+// Refs: D-HOP-2026-10-19-09 (product/decisions.md:241), D-CEO-20261019-06 (decisions.md:57, IN FORCE per its 04:04 entry: >= 95% reach F10 within 16 min, inclusive, on seeds 1-200 and 201-299; median F18 <= 40 min), product/decisions.md:232.
 // Old reference: product/sim/economy_sim.py run_m2(seller15, spec=M2_CURRENT, **CASUAL), seeds 0-99 (M2_CURRENT = M2_F1, 50 / 0.5, since sim 10f29a4a).
 // M4-on reference (Economy round 4, D-HOP-08; scratch/m4-retune/REPORT.md Round 4 §C/§D): REGRESSION BASELINE ONLY; Python has no M4 model.
 // Same code as the build, so this is not an independent check. pass10 here = count reaching F10 within 15 min (900 s).
@@ -17,11 +17,11 @@ describe('AC-W1 casual (seeds 1-200, 201-299, slow)', () => {
     expect(() => validateBalance(casual, true)).toThrow(/test-only/);
     expect(() => validateBalance(casual, false)).not.toThrow();
   });
-  // Design gate (UNCHANGED, D-HOP-2026-10-19-09): >= 95 % of seeds reach F10 within 15 min (900 s), median F18 <= 40 min,
+  // Design gate (D-CEO-20261019-06, in force): >= 95 % of seeds reach F10 within 16 min (960 s), median F18 <= 40 min,
   // on seeds 1-200 and 201-299. Comparison inclusive (t <= limit), the same as the bot's reach times.
   // Run cap: runM2 runs T = 7200 s (tests/bot-m2.ts:25); there is no 900 s cut-off. Buys happen only at sell check-ins
   // (sellEvery 20 s), so reach times sit on a 20 s grid and 900 s = 45 x 20 s is a real check-in time, not a cap.
-  const GATE_S = 900, GATE_PCT = 95, F18_MAX_MIN = 40;
+  const GATE_S = 960, GATE_PCT = 95, F18_MAX_MIN = 40;
   const measure = (seeds: number[]) => {
     const R = seeds.map(seed => runM2(casual, seed, { model: 'seller15', sellEvery: 20 }));
     const t10 = R.map(r => r.reach.get(10) ?? Infinity), t18 = R.map(r => r.reach.get(18) ?? Infinity);
