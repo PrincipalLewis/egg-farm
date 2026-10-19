@@ -1,9 +1,13 @@
 /** P1q/P2 order cards + "+N waiting" chip (art-ux/m3-customer-queue-spec.md v1.0). Pure helpers, unit-tested. */
 import { queueMax, type Customer } from '../sim/state';
 import type { Balance } from '../config/balance';
-import { fmtCount, fmtMoney, fmtMoneyPreview, fmtMoneyExact } from './format';
+import { fmtCount, fmtCountFloor, fmtMoney, fmtMoneyPreview, fmtMoneyExact, spellShort } from './format';
 /** Spec §2.1: eggs >= 1,000 -> 1.2K (compact, 1 decimal). */
 const eggs = (n: number) => n < 1000 ? String(n) : n < 1e4 ? `${(Math.floor(n / 100) / 10).toFixed(1)}K` : fmtCount(n); // band by number, not by fmtCount's comma (1,000T)
+/** QA4-2: what a Sell moves is floored like its money (never more eggs shown than are sold): 12,960 -> 12.9K, not 13K. */
+const eggsFloor = (n: number) => n < 1e4 ? eggs(n) : fmtCountFloor(n);
+/** M41-9 aria (B-1 rule): suffix spelled out from the SUFFIXES table (1.2K -> 1.2 thousand, 1.2Qa -> 1.2 quadrillion). */
+const eggsAria = (n: number) => spellShort(eggs(n)), eggsFloorAria = (n: number) => spellShort(eggsFloor(n));
 export type OrderState = 'wait' | 'partial' | 'ready';
 export interface OrderView {
   id: number; have: number; want: number; sell: number;
@@ -33,10 +37,10 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
   const value = cardMoney(valueCents);
   // MK-24 / HoP 15:14: visible button uses floored short money; aria / popup / Thanks use fmtMoneyExact.
   const wait = `Need ${eggs(rem)}`;
-  const button = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${preview(sellCents)}`;
-  const buttonAria = state === 'wait' ? wait : `Sell ${eggs(sell)} · +${exact(sellCents)}`;
+  const button = state === 'wait' ? wait : `Sell ${eggsFloor(sell)} · +${preview(sellCents)}`;
+  const buttonAria = state === 'wait' ? wait : `Sell ${eggsFloorAria(sell)} · +${exact(sellCents)}`;
   const line = `${eggs(have)}/${eggs(want)}\u00a0eggs · ${value}`; // Art & UX: NBSP between count and eggs
-  const lineAria = `${eggs(have)} of ${eggs(want)} eggs delivered, order worth ${exact(valueCents)}`;
+  const lineAria = `${eggsAria(have)} of ${eggsAria(want)} eggs delivered, order worth ${exact(valueCents)}`;
   return { id: c.id, have, want, sell, valueCents, sellCents, state, line, lineAria, button, buttonAria };
 }
 /** Sheet body height rule (§1.1): 5 cards when the body has >= 384px, else 4. Desktop docked shows all. */
@@ -63,7 +67,7 @@ export function slotPreview(qNow: number, qNext: number, dNow: [number, number],
   const r = (d: [number, number]) => `${eggs(d[0])}–${eggs(d[1])}`;
   const lead = `<li class="slot" aria-label="Next level: plus 1 customer slot, ${qNow} to ${qNext}"><img src="${icon}" alt="">+${qNext - qNow} customer slot<span class="m"> (${qNow} → ${qNext})</span></li>`;
   const same = dNow[0] === dNext[0] && dNow[1] === dNext[1];
-  return lead + (same ? '' : `<li class="orders">Orders ${r(dNow)} → ${r(dNext)} eggs</li>`);
+  return lead + (same ? '' : `<li class="orders">Orders ${r(dNow)} → ${r(dNext)}\u00a0eggs</li>`);
 }
 
 /** F5: one queue length shared by the farm strip "+N" and the Market "+N waiting", updated at most once per `ms`
@@ -83,4 +87,4 @@ export const stripSplitAt = (live: number, coalesced: number) => { const s = str
 export const slotAdded = (F: number, b: Balance) => F > 0 && queueMax(F, b) > queueMax(F - 1, b);
 /** F2: never "$0.00": a greyed Sell all reads "No eggs to sell". */
 export const sellAllLabel = (eggs: number, cents: number, fc: (n: number) => string, fm: (c: number) => string) =>
-  eggs > 0 ? `Sell all (${fc(eggs)} eggs\u00a0· ${fm(cents)})` : 'No eggs to sell';
+  eggs > 0 ? `Sell all (${fc(eggs)}\u00a0eggs\u00a0· ${fm(cents)})` : 'No eggs to sell';
