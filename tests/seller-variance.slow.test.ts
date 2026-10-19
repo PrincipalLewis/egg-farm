@@ -134,7 +134,7 @@ export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): 
 }
 const l30 = (wk: 'm1' | 'm2') => fx.seeds.map(s => lvlAt(RUN_ON[wk](s, VAR_DEFAULT), 1800)); // shipped M4-on, not the flag-off parity cache
 describe(`AC7 band, variance bot (data/economy.csv ${csvSha})`, () => {
-  it(`band per CSV sha ${csvSha}${HARD_BAND_CSV.includes(csvSha) ? ` (${csvSha === T3_CSV ? 'T3' : 'F1'}: hard band)` : csvSha === MAIN_PRE_F1_CSV ? ' (pre-F1: known values, needs #17)' : ' (UNKNOWN)'}`, () => {
+  it(`band per CSV sha ${csvSha}${HARD_BAND_CSV.includes(csvSha) ? ` (${csvSha === T3_CSV ? 'T3' : csvSha === M41_5_CSV ? 'T3 minus guard_* (M41-5)' : 'F1'}: hard band)` : csvSha === MAIN_PRE_F1_CSV ? ' (pre-F1: known values, needs #17)' : ' (UNKNOWN)'}`, () => {
     ac7BandCheck(csvSha, { m1: l30('m1'), m2: l30('m2') });
   }, 300_000);
   it('meta: unknown sha (appended newline, 168b74da) and a thrown error both fail', () => {
