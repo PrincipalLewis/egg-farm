@@ -12,7 +12,7 @@ await new Promise(r => setTimeout(r, 2500));
 const html = readFileSync('dist/index.html', 'utf8');
 const jsName = (html.match(/assets\/(index-[^"]+\.js)/) || [])[1];
 const js = jsName ? readFileSync(`dist/assets/${jsName}`, 'utf8') : '';
-const buildId = (js.match(/m3-rc1-pre\+[0-9a-f]{7,}(?:\+dirty)?/) || ['m3-rc1-pre+unknown'])[0];
+const buildId = (js.match(/(?:m\d+-rc\d[a-z0-9-]*|m\d+(?:\.\d+)+)\+[0-9a-f]{7,}(?:\+dirty)?/) || ['unknown'])[0]; // any release prefix (M41-10)
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const save = {
   version: 6, savedAt: Date.now(),
