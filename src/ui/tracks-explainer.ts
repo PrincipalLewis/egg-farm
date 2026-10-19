@@ -28,9 +28,10 @@ export function showTracksExplainer(g: G, doc: Document = document): HTMLElement
   const prev = doc.activeElement as HTMLElement | null; // P46-M1: focus fallback
   doc.body.append(el);
   const off = () => { clearTimeout(t); doc.removeEventListener('click', onAny, true); doc.removeEventListener('keydown', onKey, true); };
-  const close = () => { if (!el.isConnected) return off(); off(); el.remove();
-    // P46-M1: focus back to the active Upgrades tab, else where it was
-    const tab = doc.querySelector<HTMLElement>('[data-tab].active'); (tab ?? (prev && prev.isConnected ? prev : null))?.focus({ preventScroll: true });
+  const close = () => { if (!el.isConnected) return off(); const ae = doc.activeElement, mine = !ae || ae === doc.body || el.contains(ae); off(); el.remove();
+    // P46-M1 (CCR major): only when focus was on the card; the active Upgrades tab if rendered, else where it was
+    const tab = doc.querySelector<HTMLElement>('[data-tab].active'), vis = tab && !tab.closest('[hidden]') ? tab : null;
+    if (mine) (vis ?? (prev && prev.isConnected && prev !== doc.body ? prev : null) ?? doc.getElementById('collect'))?.focus({ preventScroll: true });
     doc.dispatchEvent(new Event(EXP_CLOSED)); };
   // CEO D-07 amendment (swallow): a tap outside the card ONLY closes it; that click never reaches Buy/Collect.
   const onAny = (e: Event) => { if (!el.isConnected) { off(); return; } if (!el.contains(e.target as Node)) { e.preventDefault(); e.stopPropagation(); close(); } };

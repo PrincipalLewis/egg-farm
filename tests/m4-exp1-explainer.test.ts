@@ -183,3 +183,18 @@ describe('P46-M1 focus: to Got it on open, back to the active Upgrades tab on cl
     showTracksExplainer(g)!.querySelector('button')!.click(); expect(document.activeElement!.id).toBe('other');
   });
 });
+
+describe('P46-M1 CCR major: focus return only when it was on the card, never to a hidden tab', () => {
+  const g = () => ({ state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} }) as any;
+  it('hidden Upgrades sheet: falls back to the previously focused element', () => {
+    document.body.innerHTML = '<div hidden><button data-tab="farm" class="active">F</button></div><button id="other">x</button>';
+    (document.getElementById('other') as HTMLElement).focus();
+    showTracksExplainer(g())!.querySelector('button')!.click(); expect(document.activeElement!.id).toBe('other');
+  });
+  it('timer close while the user focuses another control: focus is left alone', () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<div class="tabs"><button data-tab="farm" class="active">F</button></div><button id="buy">b</button>';
+    showTracksExplainer(g()); (document.getElementById('buy') as HTMLElement).focus();
+    vi.advanceTimersByTime(EXP_MS); expect(document.querySelector('.tracks-exp')).toBeNull(); expect(document.activeElement!.id).toBe('buy');
+  });
+});
