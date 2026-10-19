@@ -4,7 +4,7 @@ import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { balancedStrip, trackLock, trackCost, trackLevel } from '../sim/tracks';
 import { options, bestPaybackAmong } from '../econ/best-buy';
-import { gradeMult } from '../config/formulas';
+import { gradeMult, trackMaxLevel } from '../config/formulas';
 const pct = (mult: number) => Math.round((mult - 1) * 100);
 export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
 /** L30-18 (HoP 23:37): never show a near-zero increase. If the next value FORMATS the same as the current one (rounding at
@@ -66,7 +66,7 @@ export { ROW_KEY };
  *  milestone level itself (the toast covers it) and at MAX. Levels and mults from balance. */
 export const MILESTONE_HINT_WINDOW = 5;
 export function milestoneHint(t: 'hens' | 'eggValue', L: number, F: number, b: Balance): string | null {
-  if (L >= b.maxLevel) return null;
+  if (L >= trackMaxLevel(t, b)) return null; // M41-2: the track's own max (55 on L30+), not the Farm max
   const M = b.m4!.milestones;
   if (t === 'hens') {
     if (M.hens.some(m => m.level === L)) return null;
