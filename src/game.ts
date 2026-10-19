@@ -136,6 +136,8 @@ export class Game {
   tracksMigrationAborted: string | null = null;
   /** UI hook: the migration committed in-session; M4 rules/UI are live from now on. */
   onTracksCommitted: (() => void) | null = null;
+  /** M4A-29/33: refund of this session's committed migration (cents); 0 unless a level was clamped. */
+  migrationRefundCents = 0;
   /** The balance this session runs on right now (flag off until the migration commits); the UI reads it live. */
   get balance(): Balance { return this.b; }
   get tracksMigrationPending() { return this.tracksPending !== null; }
@@ -217,6 +219,7 @@ export class Game {
     const raw = commitWrite(this.kv, migrated, this.now(), p.on);
     const confirmed = raw !== null && this.kv.getItem(SAVE_KEY) === raw && decodeBackup(this.kv.getItem(V6_BACKUP_KEY))?.migrationId === id;
     if (!confirmed) return this.abortTracks('ls', 'commit_write_failed', rec);
+    this.migrationRefundCents = migrateTracksV7(this.state, p.on).migrationRefundCents; // M4A-33 refund line (0 for current data)
     this.state = migrated; this.b = p.on; this.tracksPending = null; this.lastMainRaw = raw;
     try { this.kv.removeItem?.(MIGRATION_ATTEMPTS_KEY); } catch { /* best effort */ }
     this.mirror = this.pausedMirror; this.pausedMirror = null; this.mirror?.write(raw); // M4-24 (3): only after the read-back
