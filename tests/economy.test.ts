@@ -69,6 +69,7 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
   // data/economy.csv sha256 -> vendored sim --config (decisions.md:295). Unknown sha = hard failure.
   const CONFIG_BY_CSV_SHA: Record<string, string> = {
     '6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455': 'f1', // F1 m4cols + AC7 L21 trim (was 86f0e80e, #17)
+    'c7bb783fe890928f747c142411503261f0711388e73fe1cdadbfd76cc8d68b44': 'f1', // M41-5 (D-HOP-25): T3 b48be8a4 minus the dead guard_heartbeat_s/guard_stale_s columns (neither is among the 46 columns the sim emits)
     'b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857': 'f1', // M4-on retune T3 (D-CEO-20261019-04): only hens/egg_value cost L0-L11 (m4 columns, not emitted by the sim)
   };
   it('fixture is fresh vs the vendored reference sim (config chosen by economy.csv sha256)', () => {
