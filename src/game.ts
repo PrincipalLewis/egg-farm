@@ -10,7 +10,7 @@ import type { SimEvent } from './sim/events';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
-import { migrateTracksV7 } from './sim/migrate-v7';
+import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
@@ -194,7 +194,7 @@ export class Game {
     const lsMain = this.kv.getItem(SAVE_KEY);
     if (lsMain !== (this.lastMainRaw ?? p.raw)) return this.deferTracks('ls', 'ls_main_changed');
     const id = (this.opts.newId ?? newMigrationId)(), rec = encodeBackup({ migrationId: id, raw: p.raw });
-    const live = { ...migrateTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
+    const live = { ...migrateStoredTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
     const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1).length, rec.length, p.on.save); // spec v1.10 + HoE
     if (!probeHeadroom(this.kv, need)) return this.deferTracks('ls', 'quota_headroom');
     try { this.kv.setItem(V6_BACKUP_KEY, rec); } catch (e) { return this.abortTracks('ls', (e as Error)?.name === 'QuotaExceededError' ? 'quota' : 'error', rec); }
@@ -206,7 +206,7 @@ export class Game {
       if ((now !== null && rankCompare(now, p.raw) > 0 && now !== this.kv.getItem(SAVE_KEY))) return this.abortTracks('idb', 'idb_main_changed', rec);
     }
     if (this.tracksPending !== p || !this.canCommit() || this.kv.getItem(SAVE_KEY) !== lsMain) return this.abortTracks('ls', 'commit_write_failed', rec);
-    const migrated = { ...migrateTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
+    const migrated = { ...migrateStoredTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
     // Head of QA (1): read v6_backup back right before the marker/v7 write; its migrationId must be state.v6BackupId.
     let pre: string | undefined; try { pre = decodeBackup(this.kv.getItem(V6_BACKUP_KEY))?.migrationId; } catch { pre = undefined; }
     if (pre !== migrated.v6BackupId) return this.abortTracks('ls', 'readback_mismatch', rec);

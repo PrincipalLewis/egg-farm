@@ -36,3 +36,12 @@ export function migrateTracksV7(s: GameState, b: Balance, o: MigrateV7Opts = {})
     migrationRefundCents: refund, v6PriceCents, v7PriceCents: trackPriceCents(F, H, V, b),
   };
 }
+/** l30plus-saves M2: the migration for a STORED state whose Farm level may exceed this build's maxLevel (saved by a
+ *  higher-cap build). migrateTracksV7 runs unchanged at the effective level min(F, maxLevel), so H/V and the refund
+ *  stay inside the cost tables (no NaN); the stored Farm level is kept as saved so a rollback + forward never loses it. */
+export function migrateStoredTracksV7(s: GameState, b: Balance): MigrateV7Result {
+  const F = s.farmLevel, Fe = Math.min(F, b.maxLevel);
+  if (Fe === F) return migrateTracksV7(s, b);
+  const r = migrateTracksV7({ ...s, farmLevel: Fe }, b);
+  return { ...r, state: { ...r.state, farmLevel: F } };
+}
