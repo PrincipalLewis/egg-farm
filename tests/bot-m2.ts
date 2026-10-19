@@ -18,6 +18,8 @@ export interface M2Opts {
   use?: WorkerId[]; manage?: 'managed' | 'unmanaged';
   /** seller-variance-proposal.md; undefined = old deterministic bot */
   variance?: SellerVarianceParams;
+  /** Observer only (L30+ harness play-equivalence trace): called after every purchase with the tick, kind and new state. No effect on play. */
+  onBuy?: (e: { i: number; t: number; kind: string; s: GameState }) => void;
 }
 export interface M2Result { reach: Map<number, number>; manages: number; hired: WorkerId[]; tiers: number; incomeAt: (L: number) => number | null; maxStep: (from: number, to: number) => number | null; }
 export const SLOW = { sellEvery: 30, taps: [30, 5] as [number, number] }; // economy_sim.py SLOW
@@ -50,13 +52,13 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
       let bought = false;
       const allPick = o.model === 'seller15' && m4On(b); // D-HOP-02: workers are bought through the same pick (pickBuy keys), not first
       for (const w of ['market_hand', 'coop_hand', 'hawker'] as const) if (!allPick)
-        if (use.has(w) && !s.workers[w] && s.farmLevel >= unlockFarm(w, b) && s.coinsCents >= hireCostCents(w, b)) { s = apply(s, { type: 'hire', worker: w }, b); bought = true; }
+        if (use.has(w) && !s.workers[w] && s.farmLevel >= unlockFarm(w, b) && s.coinsCents >= hireCostCents(w, b)) { s = apply(s, { type: 'hire', worker: w }, b); bought = true; o.onBuy?.({ i, t, kind: 'hire:' + w, s }); }
       const tiers = b.workers.grader.tiers;
-      if (!allPick && use.has('grader') && s.graderTier < tiers.length && s.farmLevel >= tiers[s.graderTier].farm && s.coinsCents >= graderTierCostCents(s.graderTier, b)) { s = apply(s, { type: 'buyGraderTier' }, b); bought = true; }
+      if (!allPick && use.has('grader') && s.graderTier < tiers.length && s.farmLevel >= tiers[s.graderTier].farm && s.coinsCents >= graderTierCostCents(s.graderTier, b)) { s = apply(s, { type: 'buyGraderTier' }, b); bought = true; o.onBuy?.({ i, t, kind: 'grader', s }); }
       // D-HOP-2026-10-19-02: tests/bot-m4.ts pickBuy (M4 on, seller15: game pick over every purchasable incl. workers, wait rule; flag off = old rule).
       let kind = pickBuy(s, b, o.model, chf, [...M1_KEYS, ...(['W1', 'W2', 'W3', 'W4'] as const).filter(k => use.has(({ W1: 'market_hand', W2: 'coop_hand', W3: 'hawker', W4: 'grader' } as const)[k]))]);
       if (kind === 'c' && chf && !allPick) chf = false; // variance p_cheap_first
-      if (kind) { const next = apply(s, pickAction(kind), b); if (next === s) kind = null; else { s = next; if (kind === 'f') reach.set(s.farmLevel, t); } }
+      if (kind) { const next = apply(s, pickAction(kind), b); if (next === s) kind = null; else { s = next; if (kind === 'f') reach.set(s.farmLevel, t); o.onBuy?.({ i, t, kind: String(kind), s }); } }
       if (!kind && !bought) break;
     }
   }

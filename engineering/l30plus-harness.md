@@ -54,6 +54,21 @@ npm run measure:l30plus -- <path/to/economy.csv> [--seeds 1-200] [--T 14400] [--
 
 ## Output
 `result.json` (machine-readable; keys: harness{path,blob,committedBlob}, code{head,dirty}, csv{path,sha256}, seeds, T, gate,
-l0_30, build, l0_11_balance, levels[], deadZones[], farmLevelAtT, l10, stepGate{verdict,p95,worst,worstSeed,top5Seeds,
+collectionTable{flag,state,source,codeSupportsFlag}, mainCsv{source,sha256}, l0_30, l30Row{verdict,vs,diffs}, build, l0_11_balance, levels[], deadZones[], farmLevelAtT, l10, playEquivalence{verdict,seeds,mismatches,firstFail,baseline,perSeed[]}, collectionFirstBuy[], stepGate{verdict,p95,worst,worstSeed,top5Seeds,
 topStepShare[],topStepRuleVerdict}) and `summary.txt` (the same, as the lines printed to stdout). Exit 0 when the measurement
 completed (read the verdicts inside). Exit 1 when the CSV doesn't build or the step gate can't be evaluated.
+
+## Added 2026-10-19 (HoE, M4.1)
+- **collectionCostFromCsv (D-HOP-23):** taken from `data/economy-config.json`; `--collection-table on|off` overrides it. The state
+  and its source are printed and stored in `collectionTable`. `on` fails the build if this code has no D-HOP-23 sync support.
+- **L30-row byte check:** each raw CSV cell of row L30 is compared with `origin/main:data/economy.csv`. FAIL if any cell differs.
+- **Play-equivalence:** for each seed, the Workers bot's purchase trace is hashed up to (excluding) the first tick it reaches
+  Farm L31. Each event holds tick, time, kind, row paid, coins, F/C/H/V levels, workers, grader tier, coop and basket. The hash
+  is compared with the same seed run on main's CSV (same code, same flag state). PASS only if every seed matches. A FAIL shows
+  the first failing seed, its tick and both event keys. A seed that never reaches F31 compares its whole run. The main-CSV
+  baseline is cached in `/workspace/.cache/l30plus-baseline/<code sha>-<main csv sha256>-coll<on|off>-T<T>-s<seeds>.json`
+  (`--baseline-dir`; `--no-baseline-cache` turns it off). A dirty tree is never cached. Logic: `scripts/l30plus-trace.ts`,
+  tests: `tests/l30plus-trace.test.ts`.
+- **Collection first buy (rows 22-27):** row = collection level before the buy. For each row it reports the lowest Farm level
+  at which any seed first buys it (and which seed), plus how many seeds buy it before F31.
+- Workers L10 P95 and its margin to 12.1 min are still in every run (`l10`).
