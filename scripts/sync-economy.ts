@@ -74,6 +74,12 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   const inSeg = (L: number) => !!segs?.some(s => L >= s.from && L <= s.to);
   const plain = R.find(r => r.level > 0 && r.level <= n && !inSeg(r.level));
   const farmGuess = segs && segs.length && plain ? R[plain.level].farm_cost / R[plain.level - 1].farm_cost : (R[n].farm_cost / R[0].farm_cost) ** (1 / n);
+  // D-HOP-10 (HoE): coop_capacity is per-row data, not fitted. A linear column keeps the base/per shape (no table, so a linear
+  // CSV produces byte-identical output); any other column is copied verbatim into farm.coopCapacityTable (rows 0..farmMaxLevel).
+  if (R.some(r => r.coop_capacity !== cap.base + cap.per * r.level)) {
+    R.forEach(r => { if (!Number.isInteger(r.coop_capacity) || r.coop_capacity <= 0) throw new Error(`sync-economy: economy.csv L${r.level} coop_capacity must be a positive integer`); });
+    p.farm.coopCapacityTable = R.map(r => r.coop_capacity);
+  }
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
   // L30+ (Economy 03:50): the demand formula does not reproduce the L31-50 demand rows, so demand_min/demand_max are fitted
   // and verified on rows 0..30 only (the pre-L30+ table); L31-50 demand comes from the fitted formula, not the CSV.
