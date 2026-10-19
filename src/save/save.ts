@@ -196,12 +196,16 @@ export function load(kv: KV, b: Balance): SaveFile | null {
 }
 export type CorruptReason = 'missing' | 'empty' | 'parse' | 'wrong_type' | 'version' | 'missing_state' | 'checksum' | 'invalid_state';
 const NUM_FIELDS = ['coinsCents', 'coop', 'basket'] as const;
-/** l30plus-saves m1: level fields are finite non-negative integers. Non-integers floor; strings, null, NaN, negatives and
- *  Infinity become 0 (the minimum level). A level ABOVE this build's maxLevel is valid and kept as stored (M2): every sim
+/** l30plus-saves m1 (+ CCR #47 m1): a level is a finite non-negative number (floored) or a whole-number string ('12' -> 12;
+ *  '2.5', '-1', '' and other strings are rejected). null, negatives, NaN, Infinity, booleans, arrays and objects are
+ *  rejected (null): validate() returns invalid_state, so the load takes the corrupt path and recovers from .bak/IDB instead
+ *  of loading 0 and saving it over main. A level ABOVE this build's maxLevel is valid and kept as stored (M2): every sim
  *  and pricing use site clamps it (formulas clampL / the track cost clamp), so it is never reset and survives re-saves. */
 export const LEVEL_FIELDS = ['farmLevel', 'collectionLevel', 'hensLevel', 'eggValueLevel'] as const;
-export const sanitizeLevel = (v: unknown): number => typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0;
-const sanitizeLevels = (st: any) => { for (const k of LEVEL_FIELDS) if (k in st) st[k] = sanitizeLevel(st[k]); return st; };
+export const sanitizeLevel = (v: unknown): number | null =>
+  typeof v === 'number' ? (Number.isFinite(v) && v >= 0 ? Math.floor(v) : null) : typeof v === 'string' && /^\d+$/.test(v) ? Number(v) : null;
+/** Sanitizes the level fields present in `st` in place; false if any is invalid (caller rejects the save). */
+const sanitizeLevels = (st: any): boolean => { for (const k of LEVEL_FIELDS) if (k in st) { const n = sanitizeLevel(st[k]); if (n === null) return false; st[k] = n; } return true; };
 /** Parse + checksum (when present; pre-rc0 saves have none) + state validation + migration. */
 export function validate(raw: string, b: Balance, now = 0): { ok: true; file: SaveFile } | { ok: false; reason: CorruptReason } {
   if (!raw.trim()) return { ok: false, reason: 'empty' };
@@ -211,12 +215,12 @@ export function validate(raw: string, b: Balance, now = 0): { ok: true; file: Sa
   if (d.state === undefined || d.state === null) return { ok: false, reason: 'missing_state' };
   if (typeof d.state !== 'object' || Array.isArray(d.state)) return { ok: false, reason: 'wrong_type' };
   if (d.sum !== undefined && d.sum !== checksum(JSON.stringify(d.state))) return { ok: false, reason: 'checksum' };
-  d = { ...d, state: sanitizeLevels({ ...d.state }) };
+  { const st = { ...d.state }; if (!sanitizeLevels(st)) return { ok: false, reason: 'invalid_state' }; d = { ...d, state: st }; }
   let f: SaveFile; try { f = migrate(d, b); } catch { return { ok: false, reason: 'version' }; }
   if (f.tracksMigrated) f.preTracksRaw = raw; // n1: only validate() knows the raw bytes; migrate() just flags it
   const s: any = f.state;
   for (const k of NUM_FIELDS) if (typeof s[k] !== 'number' || !Number.isFinite(s[k]) || s[k] < 0) return { ok: false, reason: 'invalid_state' };
-  sanitizeLevels(s); if (f.v6State) sanitizeLevels(f.v6State);
+  if (!sanitizeLevels(s)) return { ok: false, reason: 'invalid_state' }; // CCR #47 m2: v6State is d.state, already sanitized above
   if (!Array.isArray(s.customers) || !s.workers || typeof s.workers !== 'object') return { ok: false, reason: 'invalid_state' };
   // BUG-6 / QA BUG-1+5: a missing, null, non-finite or <= 0 savedAt becomes NaN (Game grants 0 offline and re-stamps now).
   // The pre-2020 floor and the future check need a clock: they apply only when the caller passes `now` (pickNewest passes

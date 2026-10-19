@@ -52,22 +52,38 @@ describe('M2: levels above maxLevel (L31+ / L50+ save on a 30-cap build)', () =>
   });
 });
 
-describe('m1: garbage levels sanitize to finite integers (never NaN)', () => {
+describe('m1 (CCR #47): whole-number strings coerce; garbage levels reject and recover, never 0 over main', () => {
   it('sanitizeLevel', () => {
-    expect([2.9, 7, 0, -3, NaN, Infinity, -Infinity, '5', null, undefined, {}, true].map(sanitizeLevel)).toEqual([2, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    expect([2.9, 7, 0, '12', '0'].map(sanitizeLevel)).toEqual([2, 7, 0, 12, 0]);
+    expect([-3, NaN, Infinity, -Infinity, '2.5', '-1', '', ' 5', 'x', '1e3', null, undefined, {}, [], true].map(sanitizeLevel)).toEqual(Array(15).fill(null));
   });
-  const bad: unknown[] = [2.5, -3, 'x', '12', null, 1e999, -1e999, true, [], {}];
-  for (const on of [0, 1] as const) for (const v of bad) it(`M4 ${on ? 'on' : 'off'}: every level = ${JSON.stringify(v)}`, () => {
-    const b = cap30(on);
-    const st: any = { ...initialState(b, 1), coinsCents: 900, ...(on ? { tracksV7: 1, v6BackupId: ID } : {}) };
-    for (const k of ['farmLevel', 'collectionLevel', 'hensLevel', 'eggValueLevel']) st[k] = v;
-    const raw = JSON.stringify({ version: SAVE_VERSION, savedAt: T, state: st }); // no checksum: a hand-edited save
-    const r = validate(raw, b); expect(r.ok).toBe(true); if (!r.ok) return;
-    const want = typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0;
-    for (const k of ['farmLevel', 'collectionLevel', 'hensLevel', 'eggValueLevel'] as const) expect(r.file.state[k], k).toBe(want);
-    expect(finite(r.file.state, b)).toBe(true);
-    const { kv, g } = boot(raw, b); noCorrupt(kv); expect(finite(g.state, b)).toBe(true);
-    expect(Number.isFinite(g.state.pendingOfflineEggs) && Number.isFinite(g.state.coinsCents)).toBe(true);
+  const marked = (b: Balance, on: 0 | 1) => ({ ...initialState(b, 1), coinsCents: 900, ...(on ? { tracksV7: 1 as const, v6BackupId: ID } : {}) });
+  for (const on of [0, 1] as const) it(`M4 ${on ? 'on' : 'off'}: '12' loads as 12 and re-saves as the number 12`, () => {
+    const b = cap30(on); const st: any = { ...marked(b, on), farmLevel: '12', collectionLevel: '7', ...(on ? { hensLevel: '12', eggValueLevel: '9' } : {}) };
+    const raw = serialize(st, T); const r = validate(raw, b); expect(r.ok).toBe(true); if (!r.ok) return;
+    expect([r.file.state.farmLevel, r.file.state.collectionLevel]).toEqual([12, 7]); if (on) expect([r.file.state.hensLevel, r.file.state.eggValueLevel]).toEqual([12, 9]);
+    const { kv, g } = boot(raw, b); noCorrupt(kv); expect(g.state.farmLevel).toBe(12);
+    g.save(); expect(JSON.parse(kv.getItem(SAVE_KEY)!).state.farmLevel).toBe(12);
+  });
+  const bad: unknown[] = [null, -3, 'x', '2.5', 1e999, -1e999, true, [], {}]; // 1e999 = Infinity -> JSON null; NaN likewise
+  for (const on of [0, 1] as const) for (const k of ['farmLevel', 'collectionLevel', 'hensLevel', 'eggValueLevel'] as const) for (const v of bad) {
+    if (!on && (k === 'hensLevel' || k === 'eggValueLevel')) continue;
+    it(`M4 ${on ? 'on' : 'off'}: ${k} = ${JSON.stringify(v)} -> invalid_state, recovers from .bak, main never gets level 0`, () => {
+      const b = cap30(on); const good = serialize({ ...marked(b, on), farmLevel: 9, collectionLevel: 4 }, T - 60_000);
+      const raw = serialize({ ...marked(b, on), farmLevel: 12, [k]: v } as any, T); // checksum-valid: written by a buggy build
+      const r = validate(raw, b); expect(r.ok).toBe(false); if (!r.ok) expect(r.reason).toBe('invalid_state');
+      const kv = mem(); kv.setItem(SAVE_KEY, raw); kv.setItem(BAK_KEY, good);
+      const g = new Game(b, kv, () => T + 60_000, 1);
+      expect(g.recovery).toBeTruthy(); expect(g.recovery!.reason).toBe('invalid_state'); expect(g.recovery!.restored_from_backup).toBe(true);
+      expect([g.state.farmLevel, g.state.collectionLevel]).toEqual([9, 4]);
+      const main = kv.getItem(SAVE_KEY)!; const ms = JSON.parse(main).state; // main holds the bad bytes or the restored .bak farm; never a sanitized 0
+      expect(main === raw || (ms.farmLevel === 9 && ms.collectionLevel === 4)).toBe(true); expect(ms.farmLevel).not.toBe(0);
+      const corrupt = [...kv.m.entries()].filter(([key]) => key.startsWith('eggfarm.save.corrupt')).map(([, x]) => x);
+      expect(corrupt.some(x => x.includes(raw) || x === raw) || main === raw).toBe(true); // bad bytes kept for export
+    });
+  }
+  it('NaN (JSON null after stringify) rejects too', () => {
+    const b = cap30(1); const r = validate(serialize({ ...marked(b, 1), hensLevel: NaN } as any, T), b); expect(r.ok).toBe(false);
   });
   it('M4 on: missing track fields on a marked save default to 0', () => {
     const b = cap30(1); const st: any = { ...initialState(b, 1), tracksV7: 1, v6BackupId: ID }; delete st.hensLevel; delete st.eggValueLevel;
