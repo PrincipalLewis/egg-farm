@@ -91,8 +91,9 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
 export function verify(rows: Row[], p: EconomyParams) {
   for (const r of rows) {
     const t = tableRow(r.level, p) as Record<string, number>;
-    for (const [c, v] of Object.entries(r)) {
+    for (const c of Object.keys(r)) { // keys first, value only for verified columns (M41-5: csv-columns.ts tracks value reads)
       if (!(c in t)) continue;
+      const v = r[c];
       if (Math.abs(t[c] - v) > 1e-9) throw new Error(`sync-economy: economy.csv L${r.level} ${c}=${v} but formula gives ${t[c]}`);
     }
   }
