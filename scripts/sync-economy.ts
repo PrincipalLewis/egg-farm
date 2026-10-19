@@ -117,8 +117,9 @@ export function verify(rows: Row[], p: EconomyParams) {
   const demandDrift: string[] = [];
   for (const r of rows) {
     const t = tableRow(r.level, p) as Record<string, number>;
-    for (const [c, v] of Object.entries(r)) {
+    for (const c of Object.keys(r)) { // keys first, value only for verified columns (M41-5: csv-columns.ts tracks value reads)
       if (!(c in t)) continue;
+      const v = r[c];
       if (r.level > 30 && (c === 'demand_min' || c === 'demand_max')) { if (Math.abs(t[c] - v) > 1e-9) demandDrift.push(`L${r.level} ${c} csv ${v} formula ${t[c]}`); continue; } // see col30
       if (Math.abs(t[c] - v) > 1e-9) throw new Error(`sync-economy: economy.csv L${r.level} ${c}=${v} but formula gives ${t[c]}`);
     }
