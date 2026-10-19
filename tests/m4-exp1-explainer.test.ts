@@ -100,3 +100,27 @@ describe('M4-AC-EXP1 tracks explainer', () => {
     vi.advanceTimersByTime(EXP_MS); expect(cards()).toBe(0);
   });
 });
+
+describe('Saves m1: explainer only when the flag can be persisted', () => {
+  const fake = (o: any = {}) => { const saved: any[] = []; const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: false, ...o, save() { if (g.canPersist) saved.push(g.state.seenTracksExplainer); } }; return { g, saved }; };
+  it('read-only / inactive / held: no card, flag unset; once writable: card shows and the flag is saved', () => {
+    vi.useFakeTimers();
+    const { g, saved } = fake();
+    expect(showTracksExplainer(g)).toBeNull(); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(g.state.seenTracksExplainer).toBeUndefined();
+    vi.advanceTimersByTime(3000); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(saved).toEqual([]);
+    g.canPersist = true; vi.advanceTimersByTime(1000);
+    expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(saved).toEqual([true]);
+  });
+  it('real Game: readOnly and inactive both block canPersist', () => {
+    const g = boot(kvOf()); expect(g.canPersist).toBe(true);
+    g.readOnly = true; expect(g.canPersist).toBe(false); g.readOnly = false;
+    g.inactive = true; expect(g.canPersist).toBe(false); g.inactive = false;
+    g.holdUntil = Date.now() + 1e9; expect(g.canPersist).toBe(false);
+  });
+  it('hidden tab: no card until visible', () => {
+    vi.useFakeTimers(); const vis = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    const { g } = fake({ canPersist: true }); expect(showTracksExplainer(g)).toBeNull(); expect(g.state.seenTracksExplainer).toBeUndefined();
+    vis.mockReturnValue('visible'); vi.advanceTimersByTime(1000); expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(g.state.seenTracksExplainer).toBe(true);
+    vis.mockRestore();
+  });
+});

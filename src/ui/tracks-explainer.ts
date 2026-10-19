@@ -5,11 +5,14 @@ import { m4On } from '../config/formulas';
 export const EXP_TITLE = 'Upgrades got an upgrade!';
 export const EXP_BODY = 'Hens and Egg value are now separate. Top them up!';
 export const EXP_MS = 8000;
-type G = Pick<Game, 'state' | 'balance' | 'save'>;
+type G = Pick<Game, 'state' | 'balance' | 'save'> & { canPersist?: boolean };
+export const EXP_RETRY_MS = 1000;
 export const shouldShowTracksExplainer = (g: G) => m4On(g.balance) && !g.state.seenTracksExplainer;
 /** Call ONLY from Game.onTracksCommitted (existing save upgraded this session; fresh M4 farms never fire it). Shows the card once; persists seenTracksExplainer=true as soon as it is shown. Returns the card, or null if not shown. */
 export function showTracksExplainer(g: G, doc: Document = document): HTMLElement | null {
   if (!shouldShowTracksExplainer(g)) return null;
+  // Saves m1: only when the flag can actually be saved and the tab is visible; else retry (the on-load rule covers a reload).
+  if (g.canPersist === false || doc.visibilityState === 'hidden') { setTimeout(() => showTracksExplainer(g, doc), EXP_RETRY_MS); return null; }
   g.state = { ...g.state, seenTracksExplainer: true }; g.save();
   const el = doc.createElement('div');
   el.className = 'tracks-exp'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'tracks-exp-t');
