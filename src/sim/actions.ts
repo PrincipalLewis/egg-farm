@@ -1,7 +1,7 @@
 import type { Balance } from '../config/balance';
 import { GameState, eggsPerTap, collectionCost, farmCost } from './state';
 import { m4On } from '../config/formulas';
-import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
+import { Track, salePriceCents, trackLock, trackBuyCost, trackLevel, reachedMilestones } from './tracks';
 import type { Sink } from './events';
 import { saleValueCents } from './payout';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
@@ -33,7 +33,7 @@ function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): 
 /** M4-A: buy one Hens / Egg value level; refused at the cap (min(F+3, max)) or when unaffordable. Flag off => no-op. */
 function buyTrack(s: GameState, t: Track, b: Balance, ev?: Sink): GameState {
   if (!m4On(b) || trackLock(s, t, b)) return s;
-  const L = trackLevel(s, t), cost = trackCost(L, t, b) * 100; if (s.coinsCents < cost) return s;
+  const L = trackLevel(s, t), cost = trackBuyCost(s, t, b) * 100; if (s.coinsCents < cost) return s;
   ev?.push({ type: 'upgrade', upgrade: t, newLevel: L + 1, cost, coinsBefore: s.coinsCents, track: t === 'hens' ? 'hens' : 'egg_value' });
   return { ...s, coinsCents: s.coinsCents - cost, ...(t === 'hens' ? { hensLevel: L + 1 } : { eggValueLevel: L + 1 }) };
 }
