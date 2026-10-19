@@ -125,3 +125,8 @@ Harness code SHA: ccfcb6387ee6728f71902a711964775721074f5b (D-CEO-16 option (b) 
 - **G9:** farm/collection/hens/eggValue costs strictly rising.
 - **G10:** every column perturbed on every row; unread = no output change and no throw.
 - A gates.md v1.2 card is printed at the end with harness blob, full code SHA, CSV sha256 and baseline sha256.
+
+## Code-of-record history (arch/m41-integrated)
+1. 846178a80726eca2ab9590fdad2e16686295afb6: confirmed by the CEO as the code of record (gates.md v1.2). Harness: f31 play-equivalence only.
+2. ccfcb6387ee6728f71902a711964775721074f5b: harness commit for D-CEO-16 option (b) (first-l30plus-buy default and gating, f31 info, F28+ ranges, G1-G10 card). Docs at 31d00356ba4bb8c4e6dc95999e0370ad74956390. Harness blob 75c864752b5a. b.csv reference run: scratch/m4-retune/l30plus-runs/b84bd0b70-31d0035/.
+3. c98c873f7a8b1244101e12449e0e1d0b35ecbcac: merge of arch/m41-5-dead-cols-v2 at exactly b901e847bf6f64df27176f32057e95408e4fffc2 (PR #57, HoQA intake PASS). data/economy.csv = c7bb783f, and with the flag off balance.json is byte-identical to main's (sha256 2e7f0f3e…). Harness unchanged (same blob). The README commit on top changes docs only.
