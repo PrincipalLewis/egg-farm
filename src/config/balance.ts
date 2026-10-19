@@ -2,7 +2,10 @@ import raw from './balance.json';
 import { validateCostGrowthSegments, validateCostTable, type EconomyParams } from './formulas';
 /** TEST-ONLY scenario hooks (m2-proposal §8 item 17, AC-W1 casual). Never in balance.json; rejected in production builds. */
 export interface SimTestHooks { poisson_arrivals?: boolean; demand_scale?: number; }
-export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
+/** L30+ (type-only, HoE): per-Farm-row caps are optional on the m4 tracks, and tc may be any generated tc_* map (sync-economy fitM4). */
+type RawM4 = typeof raw.m4;
+type M4Json = Omit<RawM4, 'hens' | 'eggValue' | 'tc'> & { hens: RawM4['hens'] & { capOverFarmByFarm?: number[] }; eggValue: RawM4['eggValue'] & { capOverFarmByFarm?: number[] }; tc: RawM4['tc'] | Record<string, number> };
+export type Balance = Omit<typeof raw, 'm4'> & { m4?: M4Json } & EconomyParams & { sim_test?: SimTestHooks };
 function check(o: any, path: string) {
   for (const [k, v] of Object.entries(o)) {
     if (k.startsWith('_') || (path === '' && k === 'sim_test') || (path === '.farm' && (k === 'costGrowthSegments' || k === 'costTable'))) continue;
