@@ -765,6 +765,28 @@ sections.g5 = async () => {
     ok(`G5 storage blocked: no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
     await ctx.close();
   }
+  // HoE #49b: a real QuotaExceededError AFTER load (lease fine, so lease.storageBlocked stays false): the flag write fails
+  // (Game sets storageFailed), so the card must not appear.
+  for (const [w, h] of [[360, 800]]) {
+    let snap; { const o = await open({ w, h, ls: { 'eggfarm.save': fx('m2-rc1-v5-12min.json'), 'eggfarm.ui': DONE } }); await o.page.waitForTimeout(1500);
+      snap = await o.page.evaluate(() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))); await o.ctx.close(); }
+    // localStorage accepts everything (lease, boot saves) until the save carrying seenTracksExplainer=true: that write gets a real
+    // QuotaExceededError, as when the disk fills right then. Installed by an init script after seeding; Game.save sets storageFailed.
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } }); const page = await ctx.newPage(); const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.addInitScript(o => { if (sessionStorage.getItem('seeded')) return; for (const [k, v] of Object.entries(o)) localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }, snap);
+    await page.addInitScript(() => { window.__quota = 0; const orig = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (this === localStorage && String(v).includes('"seenTracksExplainer":true')) { window.__quota++; throw new DOMException('quota', 'QuotaExceededError'); } return orig.call(this, k, v); }; });
+    await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
+    const pre = await page.evaluate(() => ({ migrated: window.eggfarm.tracksMigratedWithBackup, quotaAtBoot: window.__quota }));
+    await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 2000 }).catch(() => {});
+    await page.waitForTimeout(EXP_WAIT_MS);
+    const st = await page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), failed: window.eggfarm.storageFailed, quota: window.__quota }));
+    ok(`G5 quota after load: precondition (migrated with backup, explainer due) at ${w}`, pre.migrated === true, JSON.stringify(pre));
+    ok(`G5 quota after load: QuotaExceededError on the flag write, no card at ${w}`, st.quota > 0 && st.failed === true && !st.card, JSON.stringify(st));
+    await shotIt(page, 'quota-after-load', w, h, 'QuotaExceededError after load (flag write failed): no explainer', st);
+    ok(`G5 quota after load: no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
+    await ctx.close();
+  }
   if (G5) { const { writeFileSync } = await import('node:fs'); writeFileSync(`${G5}/entries-${ENGINE}.json`, JSON.stringify(entries, null, 1)); }
 };
 for (const [n, f] of Object.entries(sections)) if (want(n)) { try { await f(); } catch (e) { ok(`${n} threw`, false, String(e).slice(0, 300)); } }

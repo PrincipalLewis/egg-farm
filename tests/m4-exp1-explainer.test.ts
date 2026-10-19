@@ -226,3 +226,17 @@ describe('HoE Major #49: storage blocked (localStorage.setItem throws)', () => {
     document.querySelector('.tracks-exp')?.remove();
   });
 });
+
+describe('HoE #49b: QuotaExceededError on the flag write (g.storageFailed)', () => {
+  it('save() fails on the flag write: no card; next load with storage still failing: no card', () => {
+    vi.useFakeTimers();
+    const mk = (failed = false) => { const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, storageFailed: failed, saves: 0,
+      save() { g.saves++; g.storageFailed = true; /* Game.save catches the QuotaExceededError and sets storageFailed */ } }; return g; };
+    const lease = { storageBlocked: false }; // a real quota error does not set the lease's flag
+    const g1 = mk(); expect(showTracksExplainer(g1, document, () => lease.storageBlocked || g1.storageFailed)).toBeNull();
+    expect(g1.saves).toBe(1); vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
+    const g2 = mk(true); expect(showTracksExplainer(g2, document, () => lease.storageBlocked || g2.storageFailed)).toBeNull(); // next load, still failing
+    vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(g2.saves).toBe(0);
+    vi.useRealTimers();
+  });
+});
