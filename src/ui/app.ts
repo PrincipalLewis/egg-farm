@@ -1,4 +1,5 @@
 import { IOS_FLAG_ENABLED } from './ios-tip';
+import { showTracksExplainer } from './tracks-explainer';
 /**
  * M1 UI (art-ux/layout-spec.md). Reads Game state, dispatches actions, reacts to GameEvents. No game rules here.
  */
@@ -697,5 +698,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const rates = () => { const s = g.state, inc = income.centsPerSec(now());
     return { incomeCentsPerSec: inc, wageCentsPerSec: totalWageCentsPerSec(s, b), netCentsPerSec: netCentsPerSec(inc, s, b), queueFull: queueFull(s, b),
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
+  g.onTracksCommitted = () => { showTracksExplainer(g); }; // M4-AC-EXP1: shown once, at the in-session commit
+  if (g.tracksMigratedWithBackup) showTracksExplainer(g); // D-HOP-2026-10-19-13: reload after commit, before it showed
   return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
 }
