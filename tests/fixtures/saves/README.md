@@ -9,3 +9,6 @@ Each "real" save was produced by **that tag's own code** (sim + `save()` from th
 | corrupt-truncated / wrong-type / version-99 / empty / missing-state | derived | AC14b cases |
 Baseline on bf1962a `migrate()`: 4 corrupt files throw (load → null → fresh game, no notice). **`corrupt-missing-state.json` loads silently as a fresh F0 game.** That's expected before hardening, and it's the AC14b case that must change by rc0.
 Engineering: copy into `game/tests/fixtures/saves/` (AC14a). Before any real-browser play saves are captured, they are additionally needed from V2 devices.
+
+## M4 migrate-v7 sample (Architect, 2026-10-19, rc/m4-t3-l30plus)
+| m4-pre-v7-F30-C30.json | save() on this branch, live balance (flag off) | v6, F30, C30, $1,234,567.89, H0/V0 (pre-M4): the shipping-max farm that migrateTracksV7 price-matches. Generator: inline (initialState + save, savedAt 2026-10-19 01:00 UTC). |
