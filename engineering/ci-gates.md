@@ -47,6 +47,18 @@ reference sim in `vendor/economy-sim/` (pins in `vendor/economy-sim/SHA256SUMS`)
 Features opens the PR that updates the copy (from the sha Economy hands over; see "decided rule" below), together with the CSV: replace the vendored files,
 update `SHA256SUMS` and `SOURCE` (source path, full sha256, vendoring date), and regenerate `data/economy.csv` in the same PR (`npm run sync-economy -- --check` must pass).
 
+## Unread economy.csv columns (G10, M41-5 / D-HOP-25)
+
+`npm run sync-economy` (and every gate that runs `sync-economy -- --check`: `npm test`, `npm run build`, `build:html`, `build:qa`)
+fails when `data/economy.csv` has a column the sync does not read into `src/config/balance.json`, unless the column is listed in
+the in-repo `product/economy/csv-column-allowlist.md` (Head of Product owns it). Implementation: `scripts/csv-columns.ts`.
+- Reads are tracked, not grepped: `buildBalance` runs on rows wrapped in a recording Proxy; a column counts as read when its value
+  is fetched. `in` checks and `Object.keys` do not count.
+- The allowlist is the first markdown table with `column | feature | owner | expires` headers, parsed at runtime (no other copy).
+  `name*` is a prefix entry (`tc_*`). `owner` and `expires` (YYYY-MM-DD) are required; a malformed row fails the sync.
+- Expired entries (today, UTC, after `expires`) print a WARNING; with `--strict-allowlist` or `ECONOMY_ALLOWLIST_STRICT=1` they fail.
+- Tests: `tests/csv-columns.test.ts`.
+
 ## No reads outside the repo
 
 Default CI, `npm test` and `npm run build` read only files in the repo. `data/economy.csv` is the
