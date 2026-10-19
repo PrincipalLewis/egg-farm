@@ -78,9 +78,12 @@ describe('market spec MK-*', () => {
     const x = structuredClone(b); x.customers.queue_max_step_levels = 10; expect(queueMax(10, x)).toBe(7);
   });
   it('MK-12 / Q3 price at sale time after farm upgrade; queued N unchanged', () => {
-    let s = { ...s0(), coinsCents: farmCost(0, b) * 100, basket: 5, customers: [cust(1, 5)] };
-    s = apply(s, { type: 'buyFarm' }, b); expect(s.customers[0].demand).toBe(5);
-    s = apply(s, { type: 'sell', customerId: 1 }, b); expect(s.coinsCents).toBe(5 * eggPriceCents(1, 0, b));
+    // M4 on (CCR m2): Farm only moves the price through Balanced (min(F,H,V), M4A-10). At H5/V5, F4 -> F5 crosses Balanced
+    // tier 1 (x1.1): 220 c -> 242 c (100 x (1+5 step)(1+5 bonus) x grade 1.1 [x Balanced 1.1]). The sale uses the price at sale time.
+    let s = { ...s0(), farmLevel: 4, hensLevel: 5, eggValueLevel: 5, coinsCents: farmCost(4, b) * 100, basket: 5, customers: [cust(1, 5)] };
+    expect(apply(s, { type: 'sell', customerId: 1 }, b).coinsCents - s.coinsCents).toBe(5 * 220); // before the upgrade
+    s = apply(s, { type: 'buyFarm' }, b); expect(s.farmLevel).toBe(5); expect(s.coinsCents).toBe(0); expect(s.customers[0].demand).toBe(5);
+    s = apply(s, { type: 'sell', customerId: 1 }, b); expect(s.coinsCents).toBe(5 * 242);
   });
   it('MK-9 sell all front-to-back stops at empty basket', () => {
     const s = apply({ ...s0(), basket: 9, customers: [cust(1, 4), cust(2, 4), cust(3, 4)] }, { type: 'sellAll' }, b);

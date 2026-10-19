@@ -3,19 +3,19 @@ import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
 import { save, load } from '../src/save/save';
 import { initialState } from '../src/sim/state';
-import { mem, expOffline } from './helpers';
+import { mem, expOffline, expOfflineV6 } from './helpers';
 const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 describe('welcome-back modal & one grant per load', () => {
   it('closing the modal without Collect still grants', () => {
     const kv = mem(); save(kv, initialState(b), T0); const g = new Game(b, kv, () => T0 + 600_000);
-    expect(g.state.pendingOfflineEggs).toBe(expOffline(600)); g.dispatch({ type: 'dismissOffline' });
-    expect(g.state.basket).toBe(expOffline(600)); expect(g.state.pendingOfflineEggs).toBe(0); expect(load(kv, b)!.state.basket).toBe(expOffline(600));
+    expect(g.state.pendingOfflineEggs).toBe(expOfflineV6(600)); g.dispatch({ type: 'dismissOffline' });
+    expect(g.state.basket).toBe(expOfflineV6(600)); expect(g.state.pendingOfflineEggs).toBe(0); expect(load(kv, b)!.state.basket).toBe(expOfflineV6(600));
   });
   it('closing the tab with the modal open: next load settles old grant + at most one new', () => {
     const kv = mem(); save(kv, initialState(b), T0);
     new Game(b, kv, () => T0 + 600_000);
     const g2 = new Game(b, kv, () => T0 + 720_000);
-    expect(g2.state.basket).toBe(expOffline(600)); expect(g2.state.pendingOfflineEggs).toBe(expOffline(120));
+    expect(g2.state.basket).toBe(expOfflineV6(600)); expect(g2.state.pendingOfflineEggs).toBe(expOfflineV6(120)); // still an unmarked v6 load (flag-off grant; CCR n1)
   });
   it('gap < 60s between save and load: no grant', () => {
     const kv = mem(); save(kv, initialState(b), T0); expect(new Game(b, kv, () => T0 + 59_999).state.pendingOfflineEggs).toBe(0);

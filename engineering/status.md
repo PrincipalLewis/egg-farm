@@ -90,3 +90,39 @@
 - done: merged origin/main 97a57c1 (e0c65c8) and 68950c0 (7519fb1) into fix/hidden-tab-offline; gates green on 7519fb1. Tab-guard Play here min-height 48px + rc0 hiddentabguard row (2340d61, b3e17fa WebKit settle fix); shots art-ux/reviews/pr25-2340d61-m1-deactivate/.
 - next: HoE push; CCR + QA on merge and tip; UI/Visual Designer re-check shots.
 - blocked: none. origin/main now 8e6d53e (#33/#34/#36), merges cleanly, not merged in.
+## 2026-10-19 00:40 Senior Software Architect (rc/m4-on-tests-2, stacked on #41)
+- done: M4-on test triage final (engineering/reviews/m4-on-test-triage.md). Unit 55->9 failed (854), slow 7 failed; all remaining = AC7/pacing bot vs balance (HoP/CEO-Product). 5 save suspects = test artifacts (Saves c3811f7). M4-on golden 403ca889 (2 runs identical); flag-off golden kept forced-off. rc0 chromium 249/249. No src/data changes.
+- next: PR against rc/m4-default-on; HoP retune / AC7 bot decision for the 16 balance tests.
+- blocked: none.
+## 2026-10-19 01:20 Senior Software Architect (#42, D-HOP-2026-10-19-01)
+- done: HENS/VALUE in AC7/pacing bots (tests/bot-m4.ts, payback pick). Unit 850/854 (4 fail: pacing L10 12.5 min, cheapest>=70% NEW, acw1, p4); slow 10/14 (4 seller-variance Python parity/quantiles). 10 of 16 fixed. M4-on golden trace re-pinned 9173492e (2 runs); flag-off unchanged. AC7 L10 P95 15.33/15.09 min (gate 12: FAIL), matches Economy within 0.1 %. Hint check: M4 next-goal is best payback (next-goal.ts:57/59), not cheapest; HoP condition not met.
+- next: HoP 03:30 retune; Art & UX hint check; Python fixture regen decision.
+- blocked: none.
+## 2026-10-19 01:35 Senior Software Architect (#42, D-HOP-02 + HoE follow-ups)
+- done: seller15 M4 bot = game pick over all purchasables + wait rule; seller-variance parity forced flag-off (own commit); first-purchase <= 30 s test (seeds 1-200); CCR m1-m3 + n1. Unit 855/858 (pacing L10 13.0, acw1, p4 = balance), slow 14/14. AC7 L10 P95 (1-200) 15.65/15.38 min (gate 12 FAIL), +2 % vs Economy. M4-on golden trace 723b91ab.
+- next: HoP 03:30 retune.
+- blocked: none.
+## 2026-10-19 02:20 Senior Software Architect (#42)
+- done: merged rc/m4-default-on 7fdb273 (clean); bot Farm-level log fix + regression test (HoQA). Unit 860/863 (3 balance reds), slow 14/14, goldens 4/4 unchanged. AC7 1-200 L10 P95 15.35 / 15.38 min (matches HoQA).
+- next: HoP 03:30 retune.
+- blocked: none.
+## 2026-10-19 02:45 Senior Software Architect (rc/m4-retune-t3, D-CEO-20261019-04)
+- done: T3 data (economy.csv b48be8a4; balance.json via sync-economy, only m4 hens/eggValue costs L0-L11), seller_variance.json fixture 4ea66e5c, T3 sha allowlisted (AC7 band, worst-seed, economy-sim parity), M4-on golden trace re-pinned a54c9cf9. L30+ pack a957b072 not landed (econ/l30plus-v2 only), so economy.T3.csv used.
+- gates: tsc ok; sync --check ok; unit 858/863; slow 14/14; goldens 4/4; check-economy-copy --product --strict FAILS (vendor/economy-sim/economy.f1-m4cols.csv still 6dca24cd vs product b48be8a4). rc0 chromium 246/247 (pt1: /tmp/axe axe-core missing, env).
+- AC7 seeds 1-200: L10 P95 12.02 nw / 12.08 w (gate <= 12: FAIL by 0.02/0.08), fastest 7.87 (>= 8: FAIL, ruling pending), L@30 19/19/20 and 21/22/22, L30 200/200 workers t30 P50 49.64 / P95 50.77 min. Matches Economy's README.
+- still red: cost-segments (data sha pin 6dca24cd), m4a-tracks TR-1 (hard-coded $48/$36 costs), pacing-acw1 (91% vs 95%), p4. Not edited (assertions).
+- next: HoE decisions (pins, vendor copy, gate ruling); PR.
+
+### 2026-10-19 03:20 (UTC+2) — PR #44 HoE rulings (Senior Software Architect)
+- cost-segments allowlists 6dca24cd + T3 b48be8a4; m4a-tracks TR-1 reads prices from config.
+- D-CEO-20261019-04 encoded in tests/ac7-dceo-04.slow.test.ts (decisions.md:51). 1-200: L10 P95 nw 12.02 / w 12.08, fastest 7.87 / 8.32 (pass). 201-300 strict: L10 P95 11.81/11.81, fastest 8.13/8.76, L@30 nw 19/20 w 21/22 (P5/P95), t18 spread 8.9%/5.7%, distinct 97/93, L18-25 variance P95 241 s / worst 261 s, fixed 180 s (pass).
+- L30+ step ratio NOT evaluable: T3 maxLevel 30, stepRatioGuard has no L30+ steps (test skipIf maxLevel<=30 until the L30+ pack a957b072 lands).
+- REAL MISSES, not changed: pacing-acw1 M4-on 91% / medF10 13.67 / medF18 25.00 (M4 off on T3: 100 / 10.33 / 21.33 = Python ref exactly); p4 M4-on W4 3.00 / W4b 3.25 / Manage 6.75 (M4 off: 4.50 / 5.25 / 6.88 = Economy ref exactly).
+- rc0 Chromium 249/249 (axe-core 4.14.0 at /tmp/axe). Unit 861/863 (the 2 above), slow 16+1 skip, goldens 4/4, tsc, sync --check, vendor pins, economy-copy strict OK.
+
+## 2026-10-19 ~04:05 (Senior Software Architect) — #44 M4-on targets + CCR fixes
+- p4 → M4-on: W4 3.0±0.3, W4b 3.25±0.3 (model-derived, Economy round 4, D-HOP-08/09); managePer15 6.75±10% REGRESSION BASELINE ONLY. Build: 3.00 / 3.25 / 6.75 → PASS.
+- acw1: Python refs replaced by M4 baselines 91±5 / 13.67±20% / 25.0±20% (REGRESSION BASELINE ONLY; Python has no M4 model); seeds now 1-200 and 201-299. Design gate UNCHANGED at ≥95% within 15 min (D-CEO-20261019-06 16-min gate is ON HOLD per its 03:52 amendment). Still RED: 91.0% / 90.9% at 900 s; at 960 s 98.0% / 97.0%; medF18 25.0 / 25.0.
+- 900 s run-cap check: no cap. runM2 T=7200 s (tests/bot-m2.ts:25). Buys only at 20 s sell check-ins, so reach times are on a 20 s grid; 900 s = check-in #45. Seeds at exactly 900 s: 16 (1-200), 7 (201-299).
+- CCR M1: tests/zz-t3.test.ts deleted. m2: stale "F1 6dca24cd only" titles fixed. n1: headers cite product/decisions.md:232/241.
+- tsc OK; vitest 862/864 (only the 2 acw1 gate tests fail); sync-economy --check OK.

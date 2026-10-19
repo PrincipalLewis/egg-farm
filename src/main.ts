@@ -114,7 +114,7 @@ async function boot() {
   // m4-design §3c: the session's rules switch from flag-off to M4 when the in-session migration commits; the UI reads
   // the live balance through this view (Game.balance).
   const liveB = new Proxy({} as typeof balance, { get: (_, k) => (g.balance as any)[k], has: (_, k) => k in g.balance, ownKeys: () => Reflect.ownKeys(g.balance), getOwnPropertyDescriptor: (_, k) => ({ ...Reflect.getOwnPropertyDescriptor(g.balance, k), configurable: true }) });
-  const ui = mountApp(root, g, liveB, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery });
+  const ui = mountApp(root, g, liveB, audio, VERSION, { newGame: g.isNewGame, recovery: g.recovery, storageBlocked: () => lease.storageBlocked || g.storageFailed });
   // CEO ruling: debug globals stay out of release. ui.rates() remains on the mountApp() return for m3/rc1-ui.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmUi = ui; // dev/QA builds only (__IOS_FLAG__), checked by check-release-build
   // D3/D4 (rc1): ?debug=1 cheat panel and ?perf=1 SM-9 sampler exist only in QA/dev builds. Same build-time flag as the

@@ -4,7 +4,7 @@ import { Game } from '../src/game';
 import { balance as b } from '../src/config/balance';
 import { save } from '../src/save/save';
 import { initialState, eggsPerSec } from '../src/sim/state';
-import { mem } from './helpers';
+import { mem, expOffline } from './helpers';
 const hooks = () => ({ step: vi.fn(), skip: vi.fn(), done: vi.fn() });
 describe('onboarding flow', () => {
   it('3 steps in order: collect -> sell -> upgrade, then done', () => {
@@ -34,7 +34,7 @@ describe('debug hooks', () => {
   it('debugAdvance runs the normal tick path', () => { const g = new Game(b, mem(), () => 0); g.debugAdvance(5000); expect(g.state.coop).toBeCloseTo(5 * eggsPerSec(0, b), 6); });
   it('debugBackdateSave produces an offline grant on next load', () => {
     const kv = mem(); let t = 10_000_000; const g = new Game(b, kv, () => t); g.debugBackdateSave(3_600_000); g.save(); // further saves suppressed
-    const g2 = new Game(b, kv, () => t); expect(g2.state.pendingOfflineEggs).toBe(Math.floor(3600 * b.offline.offlineRateMultiplier * eggsPerSec(0, b)));
+    const g2 = new Game(b, kv, () => t); expect(g2.state.pendingOfflineEggs).toBe(expOffline(3600, 0, b)); // M4-on: CSV offline table at Hens L0 (M4A-4)
   });
 });
 describe('M3 FTUE / Workers intro telemetry (AC4)', () => {

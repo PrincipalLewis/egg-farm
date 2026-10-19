@@ -2,13 +2,13 @@
 // write path #31 adds: saveWithQuotaRetry (plain and N2 quota-retry) and the IndexedDB mirror fallback. Never the live state.
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
-import { Game } from '../src/game';
+import { Game, tracksOff } from '../src/game';
 import { SAVE_KEY, V6_BACKUP_KEY, encodeBackup } from '../src/save/save';
 import { mem } from './helpers';
 const T0 = Date.UTC(2026, 9, 17, 8), HIDE = T0 + 5_000, SAVE_AT = HIDE + 30_000;
-function setup(mirror: any = null) {
+function setup(mirror: any = null, bal = b) {
   const kv = mem() as any; kv.removeItem = (k: string) => kv.m.delete(k);
-  let t = T0; const g = new Game(b, kv, () => t, 7, 'dev', mirror);
+  let t = T0; const g = new Game(bal, kv, () => t, 7, 'dev', mirror);
   g.state = { ...g.state, farmLevel: 15, coop: 51, coinsCents: 12_345 };
   g.save(); t = HIDE; g.onHidden(HIDE);
   // live state moves on while hidden (provisional sim / any mutation): must never reach storage
@@ -27,13 +27,24 @@ describe('save() while hidden persists the hide snapshot on every path', () => {
     isSnapshot(kv.getItem(SAVE_KEY)); expect(w).toHaveLength(1); isSnapshot(w[0]); expect(g.storageFailed).toBe(false);
   });
   it('saveWithQuotaRetry, N2 quota retry (own aborted v6 record removed, then retried): retry writes the snapshot', () => {
-    const { w, m } = mirrorSpy(); const { kv, g } = setup(m); w.length = 0;
+    // N2 only exists on an unmigrated v6 session after an aborted tracks migration (M4 runs under flag-off rules); with M4 on a
+    // fresh farm is committed v7 at creation (M4-22), where N2 must refuse, so run this path on the aborted-session balance.
+    const { w, m } = mirrorSpy(); const { kv, g } = setup(m, tracksOff(b)); w.length = 0;
     const ID = 'a1b2c3d4e5f60718'; (g as any).abortedMigrationId = ID; kv.setItem(V6_BACKUP_KEY, encodeBackup({ migrationId: ID, raw: 'old' }));
     const set = kv.setItem.bind(kv); let throws = 0;
     kv.setItem = (k: string, v: string) => { if (k === SAVE_KEY && kv.m.has(V6_BACKUP_KEY)) { throws++; throw new DOMException('full', 'QuotaExceededError'); } set(k, v); };
     g.save();
     expect(throws).toBe(1); expect(kv.getItem(V6_BACKUP_KEY)).toBeNull(); // the retry path really ran
     isSnapshot(kv.getItem(SAVE_KEY)); expect(w).toHaveLength(1); isSnapshot(w[0]); expect(g.storageFailed).toBe(false);
+  });
+  it('N2 REFUSES on a committed v7 farm with M4 on (src/game.ts:232 tracksV7 === 1; CCR m3): the backup record is never removed', () => {
+    const { m } = mirrorSpy(); const { kv, g } = setup(m); expect(g.state.tracksV7).toBe(1); // M4-22: committed at creation
+    const ID = 'a1b2c3d4e5f60718'; expect(g.state.v6BackupId).not.toBe(ID); // only the tracksV7 guard can refuse here
+    (g as any).abortedMigrationId = ID; kv.setItem(V6_BACKUP_KEY, encodeBackup({ migrationId: ID, raw: 'old' }));
+    const set = kv.setItem.bind(kv);
+    kv.setItem = (k: string, v: string) => { if (k === SAVE_KEY && kv.m.has(V6_BACKUP_KEY)) throw new DOMException('full', 'QuotaExceededError'); set(k, v); };
+    try { g.save(); } catch { /* a refused quota error may surface; the contract is below */ }
+    expect(kv.getItem(V6_BACKUP_KEY)).not.toBeNull(); // the only pre-M4 backup survives
   });
   it('mirror fallback (localStorage write fails): the IndexedDB copy is the snapshot, not the live state', () => {
     const { w, m } = mirrorSpy(); const { kv, g } = setup(m); w.length = 0; const before = kv.getItem(SAVE_KEY);

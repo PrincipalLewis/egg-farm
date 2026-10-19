@@ -10,16 +10,18 @@ import * as S from '../src/sim/state';
 import { prodEggsPerSec, salePriceCents, coopCap, trackLock, reachedMilestones, pendingMilestones, balancedStrip } from '../src/sim/tracks';
 import type { SimEvent } from '../src/sim/events';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
+/** Explicit forced-flag-off build (M4 ships ON since D-CEO-20261019-01 / rc 90a9c84); flag-off cases below run on it. */
+const off: Balance = { ...balance, m4: { ...balance.m4!, enabled: 0 } };
 const st = (o: Partial<ReturnType<typeof initialState>> = {}) => ({ ...initialState(on), ...o });
 const rich = 1e12;
-describe('M4-A flag off (default) = pre-M4 game', () => {
-  it('ships with enabled = 0', () => { expect(balance.m4!.enabled).toBe(0); });
+describe('M4-A forced flag off = pre-M4 game (M4 ships on)', () => {
+  it('ships with enabled = 1 (D-CEO-20261019-01)', () => { expect(balance.m4!.enabled).toBe(1); });
   it('eggs/s and price follow Farm/Collection; buyTrack is a no-op', () => {
-    const s = { ...initialState(balance), farmLevel: 7, collectionLevel: 3, hensLevel: 20, eggValueLevel: 20, coinsCents: rich };
-    expect(prodEggsPerSec(s, balance)).toBe(eggsPerSec(7, balance));
-    expect(salePriceCents(s, balance)).toBe(eggPriceCents(7, 3, balance));
-    expect(apply(s, { type: 'buyTrack', track: 'hens' }, balance)).toBe(s);
-    expect(pendingMilestones(s, balance)).toEqual([]);
+    const s = { ...initialState(off), farmLevel: 7, collectionLevel: 3, hensLevel: 20, eggValueLevel: 20, coinsCents: rich };
+    expect(prodEggsPerSec(s, off)).toBe(eggsPerSec(7, off));
+    expect(salePriceCents(s, off)).toBe(eggPriceCents(7, 3, off));
+    expect(apply(s, { type: 'buyTrack', track: 'hens' }, off)).toBe(s);
+    expect(pendingMilestones(s, off)).toEqual([]);
   });
 });
 describe('TR-1 costs from config', () => {
@@ -28,10 +30,13 @@ describe('TR-1 costs from config', () => {
   });
   it('buying charges the cost in cents and raises the level', () => {
     const ev: SimEvent[] = [];
+    // Prices from config (economy.csv egg_value_cost / hens_cost L0, $ -> cents), not hard-coded: survive retunes (HoE, #44).
+    const ev0 = on.m4!.eggValue.costs[0] * 100, h0 = on.m4!.hens.costs[0] * 100;
     const s = apply(st({ coinsCents: 10_000 }), { type: 'buyTrack', track: 'eggValue' }, on, ev);
-    expect(s.eggValueLevel).toBe(1); expect(s.coinsCents).toBe(10_000 - 4800);
-    expect(ev[0]).toMatchObject({ type: 'upgrade', upgrade: 'eggValue', newLevel: 1, cost: 4800 });
-    expect(apply(st({ coinsCents: 3599 }), { type: 'buyTrack', track: 'hens' }, on).hensLevel).toBe(0);
+    expect(s.eggValueLevel).toBe(1); expect(s.coinsCents).toBe(10_000 - ev0);
+    expect(ev[0]).toMatchObject({ type: 'upgrade', upgrade: 'eggValue', newLevel: 1, cost: ev0 });
+    expect(apply(st({ coinsCents: h0 - 1 }), { type: 'buyTrack', track: 'hens' }, on).hensLevel).toBe(0);
+    expect(apply(st({ coinsCents: h0 }), { type: 'buyTrack', track: 'hens' }, on).hensLevel).toBe(1);
   });
 });
 describe('TR-2 cap min(F+3, 30)', () => {
@@ -79,7 +84,7 @@ describe('TR-3 / production / price', () => {
     const M = on.m4!.milestones.hens, base = (F: number) => S.coopCapacity(F, on);
     for (const [H, m] of [[9, 1], [10, M[0].coopMult], [11, M[0].coopMult], [19, M[0].coopMult], [20, M[1].coopMult], [29, M[1].coopMult], [30, M[2].coopMult]] as const)
       expect(coopCap(st({ farmLevel: 12, hensLevel: H }), on)).toBe(Math.floor(base(12) * m));
-    expect(coopCap(st({ farmLevel: 12, hensLevel: 30 }), balance)).toBe(base(12));
+    expect(coopCap(st({ farmLevel: 12, hensLevel: 30 }), off)).toBe(base(12)); // flag off: no Hens mult
   });
   it('M4A-14 Grader multiplies the full graded/Balanced price; top-end x7.8 stack', () => {
     const top = on.m4!.milestones, stack = top.grades[2].mult * top.balanced[4].mult * on.workers.grader.tiers[on.workers.grader.tiers.length - 1].mult;

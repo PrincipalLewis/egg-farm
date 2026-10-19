@@ -98,11 +98,19 @@ describe('DualPicker: highlight = Farm-tab rows, hint = every option (UC7)', () 
     expect(r.hint!.key).toBe('COLL'); expect(r.highlight!.key).toBe('HENS');
     expect(selectGoal(S(1000), on, 100, r.hint!.key).key).toBe('COLL');
   });
-  it('fresh save: Collection (55.6 s) beats Farm bundle (111.9 s); hint shows Collection', () => {
-    const s = initialState(balance), sc = allScorer(s, balance);
+  // M4 ships ON (D-CEO-20261019-01). The pinned 55.6/111.9 paybacks are the flag-off economy: kept as an explicit forced-flag-off case.
+  const off: Balance = { ...balance, m4: { ...balance.m4!, enabled: 0 } };
+  it('fresh save, forced flag off: Collection (55.6 s) beats Farm bundle (111.9 s); hint shows Collection', () => {
+    const s = initialState(off), sc = allScorer(s, off);
     expect(sc.find(x => x.key === 'COLL')!.payback).toBeCloseTo(55.6, 1); expect(sc.find(x => x.key === 'FARM')!.payback).toBeCloseTo(111.9, 1);
-    const r = new DualPicker().tick(s, balance, 0); expect(r.hint!.key).toBe('COLL'); expect(r.highlight!.key).toBe('FARM');
-    expect(selectGoal(s, balance, 0).key).toBe('COLL');
+    const r = new DualPicker().tick(s, off, 0); expect(r.hint!.key).toBe('COLL'); expect(r.highlight!.key).toBe('FARM');
+    expect(selectGoal(s, off, 0).key).toBe('COLL');
+  });
+  it('fresh save, shipped (M4 on): hint = best payback over every option, highlight = best Farm-tab row, next-goal agrees (no balance numbers pinned)', () => {
+    const s = initialState(balance), sc = allScorer(s, balance), best = [...sc].sort((x, y) => x.payback - y.payback)[0];
+    const r = new DualPicker().tick(s, balance, 0); expect(r.hint!.key).toBe(best.key);
+    expect((FARM_ROWS as readonly string[]).includes(r.highlight!.key)).toBe(true);
+    expect(selectGoal(s, balance, 0).key).toBe(r.hint!.key);
   });
 });
 

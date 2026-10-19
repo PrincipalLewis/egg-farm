@@ -1,23 +1,22 @@
 /** AC7 scripted players driving the REAL sim (step/apply), per core-loop-spec AC7. */
 import type { Balance } from '../src/config/balance';
-import { initialState, collectionCost, farmCost, GameState } from '../src/sim/state';
+import { initialState, GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
+import { pickBuy, pickAction } from './bot-m4';
 export type Model = 'seller15' | 'cheapest';
 export interface BotResult { firstUpgradeS: number | null; upgradesAt: (s: number) => number; farmAt: (s: number) => number; farmReachedS: (L: number) => number | null;
   /** Farm level -> first time reached (s); 0 -> 0. */ reach: Map<number, number> }
-const can = (s: GameState, cents: number) => s.coinsCents >= cents;
-function buy(s: GameState, model: Model, b: Balance, log: (kind: 'c' | 'f') => void, cheapFirst = false): GameState {
+/** Buy step: tests/bot-m4.ts pickBuy (D-HOP-2026-10-19-01: + HENS/VALUE with M4 on; flag off = the old Farm/Collection rule).
+ *  Track buys log as 't' (they count as upgrades, never as Farm levels). */
+export function buy(s: GameState, model: Model, b: Balance, log: (kind: 'c' | 'f' | 't', next: GameState) => void, cheapFirst = false): GameState {
   for (let guard = 0; guard < 100; guard++) {
-    const cc = collectionCost(s.collectionLevel, b) * 100, fc = farmCost(s.farmLevel, b) * 100;
-    const cOk = s.collectionLevel < b.maxLevel && can(s, cc), fOk = s.farmLevel < b.maxLevel && can(s, fc);
-    let pick: 'c' | 'f' | null = null;
-    if (model === 'seller15' && cheapFirst && cOk) { pick = 'c'; cheapFirst = false; } // variance p_cheap_first: one affordable Collection, ignoring the 50 % rule
-    else if (model === 'seller15') pick = fOk ? 'f' : cOk && cc <= 0.5 * fc ? 'c' : null;
-    else pick = cOk && fOk ? (cc <= fc ? 'c' : 'f') : cOk ? 'c' : fOk ? 'f' : null;
+    const pick = pickBuy(s, b, model, cheapFirst);
+    if (pick === 'c' && cheapFirst) cheapFirst = false; // variance p_cheap_first: one affordable Collection, ignoring the 50 % rule
     if (!pick) return s;
-    s = apply(s, { type: pick === 'f' ? 'buyFarm' : 'buyCollection' }, b); log(pick);
+    const next = apply(s, pickAction(pick), b); if (next === s) return s; // refused buy: stop (no spin)
+    s = next; log(pick === 'f' ? 'f' : pick === 'c' ? 'c' : 't', next);
   }
   return s;
 }
@@ -27,7 +26,7 @@ export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEve
   if (V) V.trace = TRACE.fn;
   if (V && variance!.poisson) b = { ...b, sim_test: { ...b.sim_test, poisson_arrivals: true } };
   let s = initialState(b, seed); const dt = 1 / b.tickHz, n = Math.round(T * b.tickHz);
-  const buys: { t: number; kind: 'c' | 'f'; farm: number }[] = [];
+  const buys: { t: number; kind: 'c' | 'f' | 't'; farm: number }[] = [];
   let tapT = 1, sellT = V ? V.checkInterval(sellEvery) : sellEvery;
   const reach = new Map<number, number>([[0, 0]]);
   for (let i = 1; i <= n; i++) {
@@ -38,7 +37,8 @@ export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEve
       sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery; s = apply(s, { type: 'sellAll' }, b);
       if (V?.delay()) continue; // variance p_delay: this check-in skips buying
       const chf = V ? V.cheapFirst() : false;
-      s = buy(s, model, b, k => { const farm = s.farmLevel + (k === 'f' ? 1 : 0); buys.push({ t, kind: k, farm }); if (k === 'f') reach.set(farm, t); }, chf);
+      // HoQA ac7-twobot-528f1a7: record the level AFTER the buy (the outer `s` is stale inside buy(), so two Farm buys in one check-in were logged as the same level).
+      s = buy(s, model, b, (k, next) => { const farm = next.farmLevel; buys.push({ t, kind: k, farm }); if (k === 'f') reach.set(farm, t); }, chf);
     }
   }
   return {

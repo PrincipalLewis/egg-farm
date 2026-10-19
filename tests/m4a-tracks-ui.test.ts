@@ -75,7 +75,7 @@ describe('M4A-18 highlight = best payback (HoP 15:29) + next-goal', () => {
   });
   it('next-goal: GOAL_ORDER; HENS/VALUE only with the flag on, never capped/MAX; flag on uses the same best-payback pick', () => {
     expect(GOAL_ORDER.slice(0, 4)).toEqual(['FARM', 'HENS', 'VALUE', 'COLL']);
-    expect(candidates(st(0, 0, 0), balance).map(x => x.key)).not.toContain('HENS');
+    expect(candidates(st(0, 0, 0), { ...balance, m4: { ...balance.m4!, enabled: 0 } }).map(x => x.key)).not.toContain('HENS'); // forced flag off (M4 ships on, D-CEO-20261019-01)
     expect(candidates(st(0, 0, 0), on).map(x => x.key)).toEqual(expect.arrayContaining(['HENS', 'VALUE']));
     expect(candidates(st(0, 3, 3), on).map(x => x.key)).not.toContain('HENS');
     expect(candidates(st(30, 30, 30), on).map(x => x.key).filter(k => k === 'HENS' || k === 'VALUE')).toEqual([]);

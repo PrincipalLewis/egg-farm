@@ -11,7 +11,8 @@ import { applyOffline } from '../src/sim/offline';
 import { runBot } from './bot';
 const GOLDEN_MAIN_4AADCBF = '50a87ddbf89c44751ef33a008541022e146c48c0fed8e16d5114e6d787809de0';
 describe('M4-A flag off = main', () => {
-  it('balance.m4.enabled ships 0', () => { expect(live.m4!.enabled).toBe(0); });
+  // M4 ships ON (D-CEO-20261019-01, rc 90a9c84). This file keeps value as an explicit forced-flag-off parity test: the code below runs with enabled: 0.
+  it('balance.m4.enabled ships 1 (flag-off parity below is forced)', () => { expect(live.m4!.enabled).toBe(1); });
   // Code parity: this branch's code with the rc1 economy (main's CSV) and the M4 flag off reproduces main exactly.
   const balance = { ...rc1Balance, m4: { ...live.m4!, enabled: 0 } };
   it('sim trace hash equals main (rc1 economy, flag off)', () => {

@@ -1,7 +1,9 @@
 // CCR B1 (PR #31 @ 7621153): an M4 build running with the switch off writes saveSeq; a later flag-off build must carry it
 // forward (#12 hadSeq rule), else the IndexedDB mirror keeps the stale copy and reconcile restores it on reload.
 import { describe, it, expect } from 'vitest';
-import { balance as b } from '../src/config/balance';
+import { balance as shipped } from '../src/config/balance';
+// The flag-off build (main): the shipped balance with the switch at 0, not M4-build-off (markM4BuildOff).
+const b = { ...shipped, m4: { ...shipped.m4!, enabled: 0 } };
 import { SAVE_KEY, save, saveSeqOf, rankCompare, markM4BuildOff, serialize, validate } from '../src/save/save';
 import { pickNewest, reconcile } from '../src/save/idb-mirror';
 import { m4On } from '../src/config/formulas';

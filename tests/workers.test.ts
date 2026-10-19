@@ -71,7 +71,7 @@ describe('M2 workers (m2-proposal v1.1)', () => {
     expect(graderMult({ grader: { energy: 0, cdS: 0 } }, 2, b)).toBeCloseTo(1 + 1 * W.grader.asleep_bonus_share, 12);
     expect(apply({ ...s, farmLevel: 20 }, { type: 'buyGraderTier' }, b).graderTier).toBe(2); // tier 3 needs F21
     const sold = apply({ ...s, basket: 3, customers: [{ id: 1, demand: 3, filled: 0, waitedS: 0 }] }, { type: 'sellAll' }, b);
-    expect(sold.coinsCents - s.coinsCents).toBe(Math.round(3 * eggPriceCents(24, 5, b) * 2));
+    expect(sold.coinsCents - s.coinsCents).toBe(Math.round(3 * 100 * 2)); // M4 on, V0: base = 100 c literal x tier 2 (M4A-5/14; CCR m1)
   });
   it('offline: workers do nothing (no work, drain or wage)', () => {
     const s = apply({ ...rich(), coinsCents: 100_000 }, { type: 'hire', worker: 'market_hand' }, b);

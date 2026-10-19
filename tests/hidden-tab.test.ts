@@ -13,7 +13,8 @@ function setup(t0 = T0) {
   return { kv, g, clock };
 }
 const arrivals = (g: Game) => { const n = { v: 0 }; g.on((e: GameEvent) => { if (e.type === 'customer_arrive') n.v++; }); return n; };
-const view = (g: Game) => JSON.parse(JSON.stringify(g.state));
+/** M4-22 (src/game.ts:75): every fresh farm on an M4 build gets its own random v6BackupId (a per-farm backup identity, not game state), so two independent setup() farms never share it. Compare gameplay state without it. */
+const view = (g: Game) => { const v = JSON.parse(JSON.stringify(g.state)); delete v.v6BackupId; return v; };
 
 describe('S2 hidden tab: cumulative hidden budget, then offline grant (bug-offline-overcredit.md)', () => {
   it('balance key is the 60 s budget', () => { expect(b.offline.hiddenSimMaxSeconds).toBe(60); });
