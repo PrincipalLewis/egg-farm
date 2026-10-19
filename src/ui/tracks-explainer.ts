@@ -33,12 +33,12 @@ export function showTracksExplainer(g: G, doc: Document = document): HTMLElement
     const tab = doc.querySelector<HTMLElement>('[data-tab].active'), vis = tab && (tab.getClientRects().length > 0 || !tab.closest('[hidden]')) ? tab : null; // docked layout overrides [hidden]
     if (mine) (vis ?? (prev && prev.isConnected && prev !== doc.body ? prev : null) ?? doc.getElementById('collect'))?.focus({ preventScroll: true });
     doc.dispatchEvent(new Event(EXP_CLOSED)); };
-  // CEO D-07 amendment (swallow): a tap outside the card ONLY closes it; that click never reaches Buy/Collect.
-  const onAny = (e: Event) => { if (!el.isConnected) { off(); return; } if (!el.contains(e.target as Node)) { e.preventDefault(); e.stopPropagation(); close(); } };
+  // m4a-spec v1.15 (variant C): non-modal; taps outside register normally and never close it. A tap on the card
+  // closes it and does nothing else.
+  const onAny = (e: Event) => { if (!el.isConnected) { off(); return; } if (el.contains(e.target as Node)) { e.preventDefault(); e.stopPropagation(); close(); } };
   const onKey = (e: KeyboardEvent) => { if (!el.isConnected) return off(); if (e.key === 'Escape' || (e.key === 'Enter' && e.target === ok)) { e.preventDefault(); e.stopPropagation(); close(); } }; // Esc closes only the card, not the sheet behind it
   const ok = el.querySelector('button') as HTMLButtonElement;
   doc.addEventListener('click', onAny, true); doc.addEventListener('keydown', onKey, true);
-  el.querySelector('button')!.addEventListener('click', close);
   const t = setTimeout(close, EXP_MS); // starts when the card actually appears
   (el.querySelector('button') as HTMLButtonElement).focus({ preventScroll: true });
   return el;

@@ -81,17 +81,17 @@ describe('M4-AC-EXP1 tracks explainer', () => {
     const exported = serialize(st, 1760000000000); expect(validate(exported, on).ok).toBe(true);
     expect(validate(exported.replace('"seenTracksExplainer":true', '"seenTracksExplainer":false'), on).ok).toBe(false);
   });
-  it('swallow (D-07): a dismissing tap on Buy only closes the card (0 buys); the next tap buys exactly 1', async () => {
+  it('v1.15: a tap outside on Buy buys exactly 1 and the card stays; a tap on the card closes it', async () => {
     const kv = kvOf(); kv.setItem(SAVE_KEY, raw6(mainState()));
     const g = boot(kv); const { ui, cards } = await mount(g, on);
     document.getElementById('modal-layer')?.classList.remove('open');
     ui.openPanel('upgrades'); (document.querySelector('[data-tab=farm]') as HTMLElement).click(); ui.render();
     await g.startTracksMigration(); expect(cards()).toBe(1);
-    expect(document.querySelector('.tracks-exp')!.nextElementSibling).toBeNull(); // the card adds no backdrop of its own
+    expect(document.querySelector('.tracks-exp')!.nextElementSibling).toBeNull(); // no backdrop
     const dispatch = vi.spyOn(g, 'dispatch'); const buys = () => dispatch.mock.calls.filter(([a]) => a.type === 'buyFarm').length;
     const btn = () => document.querySelector<HTMLButtonElement>('#uRow button.buy[data-kind=farm]')!; expect(btn()).toBeTruthy();
-    btn().click(); expect(buys()).toBe(0); expect(cards()).toBe(0);
-    btn().click(); expect(buys()).toBe(1);
+    btn().click(); expect(buys()).toBe(1); expect(cards()).toBe(1);
+    (document.querySelector('.tracks-exp p') as HTMLElement).click(); expect(cards()).toBe(0); expect(buys()).toBe(1);
     // Esc and the 8 s timeout (direct, card re-shown on a fresh state)
     const fake = { state: { ...g.state, seenTracksExplainer: false }, balance: on, save() {} } as any;
     showTracksExplainer(fake); expect(cards()).toBe(1);
