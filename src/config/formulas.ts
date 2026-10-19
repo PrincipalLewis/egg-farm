@@ -115,7 +115,8 @@ export const patienceS = (_F: number, p: EconomyParams) => p.customers.customer_
 // ---------- M4-A tracks (product/farm/m4a-spec.md v1.2) ----------
 /** M4A-1: cost in coins of Hens/Egg value level L -> L+1 (CSV column at L). */
 /** L30+ D1: a track's max level is read from data (its CSV cost rows), independent of the Farm max (balance.maxLevel). */
-export const trackMaxLevel = (t: 'hens' | 'eggValue', p: EconomyParams) => p.m4![t].costs.length - 1;
+/** HoE (Saves M1): capped at the Farm max (balance.maxLevel = farmMaxLevel), so L51+ cost rows are pricing base only, never offered. */
+export const trackMaxLevel = (t: 'hens' | 'eggValue', p: EconomyParams) => Math.min(p.m4![t].costs.length - 1, p.maxLevel);
 const clampT = (L: number, t: 'hens' | 'eggValue', p: EconomyParams) => Math.max(0, Math.min(L, trackMaxLevel(t, p)));
 export const hensCost = (H: number, p: EconomyParams) => p.m4!.hens.costs[clampT(H, 'hens', p)];
 export const eggValueCost = (V: number, p: EconomyParams) => p.m4!.eggValue.costs[clampT(V, 'eggValue', p)];
