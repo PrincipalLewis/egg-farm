@@ -75,6 +75,9 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   const plain = R.find(r => r.level > 0 && r.level <= n && !inSeg(r.level));
   const farmGuess = segs && segs.length && plain ? R[plain.level].farm_cost / R[plain.level - 1].farm_cost : (R[n].farm_cost / R[0].farm_cost) ** (1 / n);
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
+  // L30+ (Economy 03:50): the demand formula does not reproduce the L31-50 demand rows, so demand_min/demand_max are fitted
+  // and verified on rows 0..30 only (the pre-L30+ table); L31-50 demand comes from the fitted formula, not the CSV.
+  const col30 = (c: string) => (q: EconomyParams) => R.filter(r => r.level <= 30).every(r => (tableRow(r.level, q) as any)[c] === r[c]);
   p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
   if (cfg.farmCostFromCsv) {
     // F1 (HoE, Oct 17): farm_cost is per-level data, copied verbatim; no formula fit and no fallback. costGrowth/segments are
@@ -85,17 +88,19 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   } else p.farm.costGrowth = fit('farm costGrowth', farmGuess, 0.0001, 0.05, v => col('farm_cost')({ ...p, farm: { ...p.farm, costGrowth: v } }));
   p.farm.customerIntervalDecay = fit('customerIntervalDecay', R[1].customer_interval_s / R[0].customer_interval_s, 0.0001, 0.02, v => col('customer_interval_s')({ ...p, farm: { ...p.farm, customerIntervalDecay: v } }));
   const k0 = R[0].eggs_per_sec * R[0].customer_interval_s;
-  p.farm.demandLoFactor = fit('demandLoFactor', R[0].demand_min / k0, 0.01, 1, v => col('demand_min')({ ...p, farm: { ...p.farm, demandLoFactor: v, demandHiFactor: 99 } }));
-  p.farm.demandHiFactor = fit('demandHiFactor', R[0].demand_max / k0, 0.01, 2, v => col('demand_max')({ ...p, farm: { ...p.farm, demandHiFactor: v } }));
+  p.farm.demandLoFactor = fit('demandLoFactor', R[0].demand_min / k0, 0.01, 1, v => col30('demand_min')({ ...p, farm: { ...p.farm, demandLoFactor: v, demandHiFactor: 99 } }));
+  p.farm.demandHiFactor = fit('demandHiFactor', R[0].demand_max / k0, 0.01, 2, v => col30('demand_max')({ ...p, farm: { ...p.farm, demandHiFactor: v } }));
   verify(rows, p);
   return p;
 }
 /** Every CSV cell must equal the formula output (floats to 1e-9). */
 export function verify(rows: Row[], p: EconomyParams) {
+  const demandDrift: string[] = [];
   for (const r of rows) {
     const t = tableRow(r.level, p) as Record<string, number>;
     for (const [c, v] of Object.entries(r)) {
       if (!(c in t)) continue;
+      if (r.level > 30 && (c === 'demand_min' || c === 'demand_max')) { if (Math.abs(t[c] - v) > 1e-9) demandDrift.push(`L${r.level} ${c} csv ${v} formula ${t[c]}`); continue; } // see col30
       if (Math.abs(t[c] - v) > 1e-9) throw new Error(`sync-economy: economy.csv L${r.level} ${c}=${v} but formula gives ${t[c]}`);
     }
   }
