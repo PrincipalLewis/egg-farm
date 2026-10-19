@@ -96,5 +96,32 @@ Base: main dd223f5. The #45 commits were cherry-picked (`-x`) from the remote ob
 
 Merged in: UI PR #50 `feat/collection-cost-table` 7346011c634d450298e80d680777a7467db06e34 (D-HOP-23, merge commit; the
 only conflict was in the sync-economy EconomyConfig interface), and PR #51 `arch/l30plus-cand-b` (164f4045, which contains d90a19d5).
-Harness code SHA: 7bab71cdc287cfe555b26a5901dd47ba462d180b (the merge commit that is the parent of this README commit). Run dir: `/workspace/wt-m41-integrated`
+Harness code SHA: ccfcb6387ee6728f71902a711964775721074f5b (D-CEO-16 option (b) harness commit; the README commit on top of it changes docs only). Run dir: `/workspace/wt-m41-integrated`
 (a read-only worktree of arch/m41-integrated). The shared pointer copy lists the final branch head.
+
+## D-CEO-20261019-16 option (b) (CEO ruling 09:56; gates.md v1.2). Harness commit ccfcb6387ee6728f71902a711964775721074f5b
+- **`--equiv-until first-l30plus-buy` (DEFAULT, gating) | `f31` (info only).** The summary always prints BOTH verdicts and
+  the D-CEO-15 row lines under each, and marks which one gates.
+- **L30+ purchase:** a buy whose TARGET level (the level after the buy = row + 1) is > 30 on Farm, Collection, Hens or Egg value.
+  Worker hires and Grader tiers never count.
+- **first-l30plus-buy:** each seed's trace (every purchase: tick, time, kind, row, coins, F/C/H/V, workers, grader, coop,
+  basket) is compared event by event with the baseline run of that seed, both cut before the candidate's first F31 tick.
+  - Identical: PASS.
+  - Otherwise the first differing event must be, on the candidate side, an L30+ purchase at a tick no later than the baseline's
+    event at that position: PASS.
+  - Anything else is a FAIL: a buy at level <= 30, a hire, a coin or timing shift, a missing event.
+  - Per seed it logs the divergence tick, the Farm level at divergence, both event keys and the first L30+ purchase (tick,
+    track, level). result.json has all seeds. The summary has the distribution and the first five.
+- **f31:** the sha256 of the whole trace up to the first F31 tick must match.
+- **D-CEO-15 rows 22-27 (buys to L23-L28):** PASS iff the equivalence verdict (per mode) passes AND 0 seeds buy the row
+  before F31. Otherwise FROZEN. Row 28 is info only, always FROZEN.
+- **Range:** G1/G2 step ratio, G3 top-step share and G4 cover **F28+**. The committed F30+ step range is printed for reference.
+  - G4 is conservative: the longest gap between consecutive bot purchases between reaching F28 and reaching Farm max, worst
+    seed and P95. The dead-zone list (P95 time on level > 180 s) is also limited to F28+.
+- **G5:** Workers L10 P95 + margin.
+- **G6:** acw1 casual model (tests/pacing-acw1.test.ts), seeds 1-200 and 201-299. Turn it off with `--no-acw1`.
+- **G7:** L0-30 + L30-row raw cells vs the baseline, plus the gating equivalence.
+- **G8:** sync = in-memory build + validateBalance. strict is n/a (Economy/CI, check-economy-copy --strict at landing).
+- **G9:** farm/collection/hens/eggValue costs strictly rising.
+- **G10:** every column perturbed on every row; unread = no output change and no throw.
+- A gates.md v1.2 card is printed at the end with harness blob, full code SHA, CSV sha256 and baseline sha256.
