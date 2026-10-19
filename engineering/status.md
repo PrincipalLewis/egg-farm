@@ -126,3 +126,9 @@
 - 900 s run-cap check: no cap. runM2 T=7200 s (tests/bot-m2.ts:25). Buys only at 20 s sell check-ins, so reach times are on a 20 s grid; 900 s = check-in #45. Seeds at exactly 900 s: 16 (1-200), 7 (201-299).
 - CCR M1: tests/zz-t3.test.ts deleted. m2: stale "F1 6dca24cd only" titles fixed. n1: headers cite product/decisions.md:232/241.
 - tsc OK; vitest 862/864 (only the 2 acw1 gate tests fail); sync-economy --check OK.
+
+## 2026-10-19 M41-2 arch/m41-l30plus-unlock (Senior Software Architect), draft PR #52, DO NOT MERGE
+- done: #45's 7 L30+ code commits cherry-picked onto main dd223f5. With main's data/economy.csv, sync-economy writes a balance.json byte-identical to main's. HoP cand (b) 84bd0b70 builds (Farm 50, tracks 55, coop table).
+- done: milestoneHint hides at the track's own max (+test). l30plus.test.ts runs on the tests/fixtures cand (b) copy (15 tests).
+- done: merged arch/l30plus-cand-b (#51) harness. measure:l30plus gained collectionCostFromCsv state/source + --collection-table on|off, the L30-row byte check vs main, play-equivalence to the first F31 tick (cached main baseline) and the Collection 22-27 first-buy report (+tests).
+- next: merge feat/collection-cost-table once its CI is green (red at 7346011). The conflict is the EconomyConfig interface in sync-economy.ts only. Economy reshape CSV: not started; it arrives separately.
