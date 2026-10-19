@@ -234,7 +234,7 @@ describe('HoE #49b: QuotaExceededError on the flag write (g.storageFailed)', () 
       save() { g.saves++; g.storageFailed = true; /* Game.save catches the QuotaExceededError and sets storageFailed */ } }; return g; };
     const lease = { storageBlocked: false }; // a real quota error does not set the lease's flag
     const g1 = mk(); expect(showTracksExplainer(g1, document, () => lease.storageBlocked || g1.storageFailed)).toBeNull();
-    expect(g1.saves).toBe(1); vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
+    expect(g1.saves).toBe(2); vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
     const g2 = mk(true); expect(showTracksExplainer(g2, document, () => lease.storageBlocked || g2.storageFailed)).toBeNull(); // next load, still failing
     vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(g2.saves).toBe(0);
     vi.useRealTimers();
@@ -253,8 +253,7 @@ describe('Saves/HoQA Major: a failed flag save leaves seen=false (memory, IDB mi
     expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
     expect(g.storageFailed).toBe(true);
     expect(g.state.seenTracksExplainer).toBe(false); // in memory
-    // The catch path inside Game.save (save code, not touched here) mirrors the state it was asked to save, i.e. the one
-    // write that carried seen=true. Record it honestly; the fix guarantees every LATER write is clean.
+    // The catch path inside Game.save mirrors the state it was asked to save (seen=true); the explainer then saves the reverted state.
     const atFail = writes.slice(flagWrite).map(r => r.includes('"seenTracksExplainer":true'));
     const afterFail = writes.length;
     g.save(); vi.advanceTimersByTime(60_000); g.save(); // next autosaves
@@ -262,6 +261,37 @@ describe('Saves/HoQA Major: a failed flag save leaves seen=false (memory, IDB mi
     expect(later.length).toBeGreaterThan(0);
     expect(later.some(r => r.includes('"seenTracksExplainer":true'))).toBe(false); // IDB mirror: no seen=true after the revert
     expect(m.getItem(SAVE_KEY) ?? '').not.toContain('"seenTracksExplainer":true'); // localStorage never got it
-    expect(atFail).toEqual([true]); // documents the residual: that single fallback mirror write (inside Game.save) still has seen=true until the next save overwrites it
+    expect(atFail).toEqual([true, false]); // the failed flag save's fallback mirror write carries seen=true; the explainer's revert save immediately rewrites it with seen=false
+  });
+});
+
+// Saves Q2 repro (ported from tests/tmp-review/gate4-explainer.qa.test.ts, last case): the tab dies right after the failed flag
+// save. The fallback mirror write (saveSeq ahead of localStorage) used to carry seen=true, so reconcile restored it on the next boot
+// and the card was never shown. Fixture: qa/m3-recheck/gate4-fixtures/EXP1-committed-unseen-4ccb9fd.json (ls), inlined.
+import { reconcile } from '../src/save/idb-mirror';
+import { rankCompare } from '../src/save/save';
+describe('Saves Q2: tab dies after a failed flag save', () => {
+  const EXP1_LS: Record<string, string> = {"eggfarm.save": "{\"version\":6,\"savedAt\":1792371631000,\"saveSeq\":3,\"sum\":\"eba589f1\",\"state\":{\"coinsCents\":123456789,\"coop\":0,\"basket\":0,\"collectionLevel\":30,\"farmLevel\":30,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":3700654487,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{},\"graderTier\":0,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{},\"hensLevel\":30,\"eggValueLevel\":20,\"celebratedMilestones\":[\"hens:10\",\"hens:20\",\"hens:30\",\"grade:5\",\"grade:10\",\"grade:20\",\"balanced:1\",\"balanced:2\",\"balanced:3\",\"balanced:4\"],\"tracksV7\":1,\"v6BackupId\":\"b42507d60308d615\"}}", "eggfarm.install_id": "426b6707-5f8c-46ed-b039-243317e39a8a", "eggfarm.save.bak": "{\"version\":6,\"savedAt\":1792371630000,\"saveSeq\":2,\"sum\":\"4b5db613\",\"state\":{\"coinsCents\":123456789,\"coop\":0,\"basket\":0,\"collectionLevel\":30,\"farmLevel\":30,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":3700654487,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{},\"graderTier\":0,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{}}}", "eggfarm.telemetry": "[{\"install_id\":\"426b6707-5f8c-46ed-b039-243317e39a8a\",\"build\":\"qa-exp1\",\"type\":\"session_start\",\"ts\":1792371630000,\"sessionMs\":0},{\"from\":6,\"to\":6,\"migration\":\"tracksV7_marker\",\"refund_cents\":0,\"farm_level\":30,\"backup_stores\":[\"ls\"],\"type\":\"save_migrated\",\"ts\":1792371631000,\"sessionMs\":1000}]", "eggfarm.save.v6_backup": "{\"migrationId\":\"b42507d60308d615\",\"raw\":\"{\\\"version\\\":6,\\\"savedAt\\\":1792371600000,\\\"saveSeq\\\":1,\\\"sum\\\":\\\"158acdeb\\\",\\\"state\\\":{\\\"coinsCents\\\":123456789,\\\"coop\\\":0,\\\"basket\\\":0,\\\"collectionLevel\\\":30,\\\"farmLevel\\\":30,\\\"customers\\\":[],\\\"nextCustomerInS\\\":10,\\\"nextCustomerId\\\":1,\\\"rng\\\":3700654487,\\\"pendingOfflineEggs\\\":0,\\\"celebratedTier\\\":0,\\\"workers\\\":{},\\\"graderTier\\\":0,\\\"manageCdS\\\":0,\\\"coopFullS\\\":0,\\\"wageFracCents\\\":{},\\\"hensLevel\\\":0,\\\"eggValueLevel\\\":0,\\\"celebratedMilestones\\\":[]}}\"}"};
+  const T = 1792371630000; const ON = structuredClone(balance); ON.m4!.enabled = 1;
+  const memQ = (init: Record<string, string>) => { const m = new Map(Object.entries(init)); return { m, getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k) } as any; };
+  const fakeIdb = () => { const st = { raw: null as string | null, writes: 0 }; return { st, mirror: { write: (r: string) => { st.raw = r; st.writes++; }, clear: async () => { st.raw = null; }, newer: null, onNewer: null } as any }; };
+  const seenIn = (raw: string | null) => raw ? (JSON.parse(raw).state.seenTracksExplainer ?? null) : null;
+  it('mirror vs localStorage on the next boot: the card is shown exactly once overall', async () => {
+    vi.useFakeTimers(); vi.setSystemTime(T);
+    const kv = memQ(EXP1_LS); const set = kv.setItem; const ctl = { mode: 'armed' as string };
+    kv.setItem = (k: string, val: string) => { if (k.startsWith('eggfarm.save')) { if (ctl.mode === 'armed' && val.includes('"seenTracksExplainer":true')) ctl.mode = 'full'; if (ctl.mode === 'full') throw new DOMException('quota', 'QuotaExceededError'); } set(k, val); };
+    const t0 = JSON.parse(kv.getItem(SAVE_KEY)).savedAt + 5000; const idb = fakeIdb();
+    const boot2 = (t: number) => { let src: any = 'none'; if (idb.st.raw) src = reconcile(kv, idb.st.raw, ON);
+      const g = new Game(ON, kv, () => t, 1, 'qa', idb.mirror, idb.st.raw); let k = 0;
+      const show = () => { const c = showTracksExplainer(g as any, document, () => g.storageFailed); if (c) { k++; c.remove(); } };
+      g.onTracksCommitted = show; if (g.tracksMigratedWithBackup) show(); return { g, n: () => k, src }; };
+    const s1 = boot2(t0); const ls0 = kv.getItem(SAVE_KEY), idb0 = idb.st.raw;
+    const ev: any = { shown1: s1.n(), mem1: !!s1.g.state.seenTracksExplainer, ls1: seenIn(ls0), idb1: seenIn(idb0), rank: rankCompare(idb0, ls0) };
+    ctl.mode = 'off'; // tab died: no further save; storage healthy on the next load
+    const s2 = boot2(t0 + 10_000); ev.src2 = s2.src; ev.shown2 = s2.n(); ev.ls2 = seenIn(kv.getItem(SAVE_KEY));
+    const s3 = boot2(t0 + 20_000); ev.shown3 = s3.n();
+    expect(ev.idb1, JSON.stringify(ev)).not.toBe(true); // mirror never left at seen=true
+    expect(ev.shown1 + ev.shown2 + ev.shown3, 'card shown exactly once overall: ' + JSON.stringify(ev)).toBe(1);
+    vi.useRealTimers();
   });
 });
