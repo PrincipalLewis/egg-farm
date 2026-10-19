@@ -5,7 +5,13 @@
 export interface CostGrowthSegment { from: number; to: number; growth: number }
 export interface EconomyParams {
   maxLevel: number;
-  collection: { baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number };
+  collection: {
+    baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number;
+    /** M4.1 D-HOP-23: collection_cost per level, copied verbatim from the CSV by sync-economy when economy-config
+     *  collectionCostFromCsv is on (index = level, 0..maxLevel). When present it is THE collection cost; costGrowth is then
+     *  informational only. Absent (flag off, the default) = baseCost * costGrowth^C, unchanged. */
+    costTable?: number[];
+  };
   farm: {
     baseCost: number; costGrowth: number; hensBase: number; hensPerLevel: number; eggsPerHenPerSec: number;
     coopCapacityBase: number; coopCapacityPerLevel: number; eggPriceCentsBase: number; eggPriceCentsPerLevel: number;
@@ -47,7 +53,11 @@ export interface M4Params {
 /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
 export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };
 export const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p.maxLevel));
-export const collectionCost = (C: number, p: EconomyParams) => Math.floor(p.collection.baseCost * p.collection.costGrowth ** clampL(C, p));
+export const collectionCost = (C: number, p: EconomyParams) => {
+  const t = p.collection.costTable, L = clampL(C, p);
+  if (t) { const v = t[L]; if (!Number.isInteger(v)) throw new Error(`balance.collection.costTable has no integer cost for level ${L}`); return v; }
+  return Math.floor(p.collection.baseCost * p.collection.costGrowth ** L);
+};
 export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerTapBase + p.collection.eggsPerTapPerLevel * clampL(C, p);
 export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
 export const farmCost = (F: number, p: EconomyParams) => {

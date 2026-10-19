@@ -5,6 +5,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'vendor', 'economy-sim', 'sim'))
 import economy_sim as m  # noqa: E402
 e = m.Eco(m.F1)
+import collection_cost_table as cct  # noqa: E402  M4.1 D-HOP-23: balance.collection.costTable when present (flag on); no-op otherwise
+cct.apply(e, *cct.read_table())
 N = 30
 rows = [dict(level=L, collection_cost=e.ccost(L), eggs_per_tap=e.tap(L), farm_cost=e.fcost(L), hens=e.hens(L), eggs_per_sec=e.rate(L),
              coop_capacity=e.cap(L), egg_price=e.price(L), customer_interval_s=e.iv(L), demand_min=e.dmin(L), demand_max=e.dmax(L),

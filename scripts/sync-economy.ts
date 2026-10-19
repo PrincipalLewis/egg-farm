@@ -12,7 +12,13 @@ export const OUT_PATH = here('../src/config/balance.json');
 /** Hand-set economy shape config (F1): farm cost growth segments. Not fitted from the CSV; every farm_cost row is verified against them. */
 export const ECON_CONFIG_PATH = here('../data/economy-config.json');
 /** farmCostFromCsv (F1): farm.costTable = the CSV farm_cost column and grader tiers carry the CSV w4_tier_cost (verified on every row). */
-export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmCostFromCsv?: boolean }
+/** collectionCostFromCsv (M4.1 D-HOP-23, default OFF): collection.costTable = the CSV collection_cost column (verified on every row);
+ *  no costGrowth fit. Mutually exclusive with any cost fit/segment option (farmCostGrowthSegments or any other collectionCost* key). */
+export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmCostFromCsv?: boolean; collectionCostFromCsv?: boolean }
+/** Config keys that select a fitted/segmented cost curve; none may be combined with collectionCostFromCsv. */
+export const collectionTableConflicts = (cfg: EconomyConfig): string[] => Object.entries(cfg as Record<string, unknown>)
+  .filter(([k, v]) => k !== 'collectionCostFromCsv' && (k.startsWith('collectionCost') || /Segments$/.test(k)) && v !== undefined && v !== null && v !== false && !(Array.isArray(v) && v.length === 0))
+  .map(([k]) => k);
 export const readEconomyConfig = (path = ECON_CONFIG_PATH): EconomyConfig => JSON.parse(readFileSync(path, 'utf8'));
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max', 'hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'];
@@ -72,7 +78,14 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   const plain = R.find(r => r.level > 0 && r.level <= n && !inSeg(r.level));
   const farmGuess = segs && segs.length && plain ? R[plain.level].farm_cost / R[plain.level - 1].farm_cost : (R[n].farm_cost / R[0].farm_cost) ** (1 / n);
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
-  p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
+  if (cfg.collectionCostFromCsv) {
+    // M4.1 D-HOP-23 (HoE): collection_cost is per-level data, copied verbatim (same pattern as farmCostFromCsv); no fit, no fallback.
+    // costGrowth is kept only as the pre-table shape (informational).
+    const bad = collectionTableConflicts(cfg);
+    if (bad.length) throw new Error(`sync-economy: economy-config collectionCostFromCsv and ${bad.join(', ')} are mutually exclusive`);
+    p.collection.costTable = R.map(r => r.collection_cost);
+    p.collection.costGrowth = prev.collection?.costGrowth ?? 1;
+  } else p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
   if (cfg.farmCostFromCsv) {
     // F1 (HoE, Oct 17): farm_cost is per-level data, copied verbatim; no formula fit and no fallback. costGrowth/segments are
     // not used for costs and are kept only as the pre-F1 shape (costGrowth = baseline growth, informational).
