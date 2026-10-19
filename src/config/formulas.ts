@@ -20,6 +20,9 @@ export interface EconomyParams {
      *  When present it is THE farm cost (covers the F1-GAP cuts and any later per-level edits); no formula fallback.
      *  Absent = baseCost/costGrowth/segments curve (pre-F1 behaviour). */
     costTable?: number[];
+    /** D-HOP-10 (HoE): coop_capacity per Farm level, copied from the CSV by sync-economy (index = level, 0..maxLevel) when the
+     *  column is not linear. Absent = coopCapacityBase + coopCapacityPerLevel x F (unchanged for linear tables). */
+    coopCapacityTable?: number[];
   };
   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
   offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number; hiddenSimMaxSeconds: number };
@@ -95,7 +98,11 @@ export function validateCostTable(t: unknown, maxLevel: number, where = 'farm.co
 export const hens = (F: number, p: EconomyParams) => p.farm.hensBase + p.farm.hensPerLevel * clampL(F, p);
 export const eggsPerSec = (F: number, p: EconomyParams) =>
   clampL(F, p) === 0 && p.farm.eggsPerSecL0 !== undefined ? p.farm.eggsPerSecL0 : roundHalfUp(hens(F, p) * p.farm.eggsPerHenPerSec, 4);
-export const coopCapacity = (F: number, p: EconomyParams) => p.farm.coopCapacityBase + p.farm.coopCapacityPerLevel * clampL(F, p);
+export const coopCapacity = (F: number, p: EconomyParams) => {
+  const t = p.farm.coopCapacityTable, L = clampL(F, p);
+  if (t) { const v = t[L]; if (!Number.isInteger(v)) throw new Error(`balance.farm.coopCapacityTable has no integer capacity for level ${L}`); return v; }
+  return p.farm.coopCapacityBase + p.farm.coopCapacityPerLevel * L;
+};
 /** Farm part of the egg price in cents (CSV egg_price x 100). */
 export const farmPriceCents = (F: number, p: EconomyParams) => p.farm.eggPriceCentsBase + p.farm.eggPriceCentsPerLevel * clampL(F, p);
 /** Sale price in cents: round_half_up((1.00 + 0.05F) x (1 + 0.12C), 2 dp), coefficients from config. */
