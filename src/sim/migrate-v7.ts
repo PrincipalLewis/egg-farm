@@ -11,7 +11,7 @@
  *  - Milestones / grades / Balanced tiers reached are seeded into celebratedMilestones silently (no toasts).
  */
 import type { Balance } from '../config/balance';
-import { eggPriceCents, trackPriceCents } from '../config/formulas';
+import { eggPriceCents, trackPriceCents, trackMaxLevel } from '../config/formulas';
 import type { GameState } from './state';
 import { reachedMilestones } from './tracks';
 export interface MigrateV7Opts { hensMax?: number; eggValueMax?: number }
@@ -22,7 +22,7 @@ export function priceMatchedV(F: number, H: number, targetCents: number, b: Bala
   return null;
 }
 export function migrateTracksV7(s: GameState, b: Balance, o: MigrateV7Opts = {}): MigrateV7Result {
-  const F = s.farmLevel, hMax = o.hensMax ?? b.maxLevel, vMax = o.eggValueMax ?? b.maxLevel;
+  const F = s.farmLevel, hMax = o.hensMax ?? trackMaxLevel("hens", b), vMax = o.eggValueMax ?? trackMaxLevel("eggValue", b); // L30+ D1: track max from data
   const v6PriceCents = eggPriceCents(F, s.collectionLevel, b);
   const wantH = F, wantV = priceMatchedV(F, wantH, v6PriceCents, b) ?? b.maxLevel;
   const H = Math.min(wantH, hMax), V = Math.min(wantV, vMax);
