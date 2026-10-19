@@ -87,3 +87,50 @@ describe('row convention matches the game (row C = collectionCost(C) = price of 
     expect(snap(1, 0.1, 'c', s1).row).toBe(22);
   });
 });
+import { isL30PlusBuy, firstL30PlusBuy, compareSeedB, summarizeB, distribution, longestGap, farmAt } from '../scripts/l30plus-trace';
+describe('option (b): equivalence up to the first L30+ purchase', () => {
+  const base = (): TraceEvent[] => [ev(10, 'f', 28, { row: 27 }), ev(20, 'c', 28, { row: 21, C: 22 }), ev(30, 'hens', 28, { row: 29, H: 30 })];
+  it('L30+ purchase = target level (row + 1) > 30 on Farm/Collection/Hens/Egg value; workers never', () => {
+    expect(isL30PlusBuy(ev(1, 'hens', 28, { row: 30 }))).toBe(true);   // H30 -> H31
+    expect(isL30PlusBuy(ev(1, 'hens', 28, { row: 29 }))).toBe(false);  // H29 -> H30
+    expect(isL30PlusBuy(ev(1, 'f', 31, { row: 30 }))).toBe(true);
+    expect(isL30PlusBuy(ev(1, 'c', 33, { row: 30 }))).toBe(true);
+    expect(isL30PlusBuy(ev(1, 'eggValue', 28, { row: 31 }))).toBe(true);
+    expect(isL30PlusBuy(ev(1, 'W2', 40, { row: 99 }))).toBe(false);
+    expect(firstL30PlusBuy([...base(), ev(40, 'hens', 28, { row: 30 })])).toEqual({ index: 3, tick: 40, t: 4, track: 'Hens', level: 31 });
+    expect(firstL30PlusBuy(base())).toBeNull();
+  });
+  it('identical through F31 -> PASS (no divergence)', () => {
+    const r = compareSeedB(1, base(), base());
+    expect(r).toMatchObject({ match: true, pass: true, divergence: null });
+  });
+  it('diverging AT an L30+ purchase -> PASS, logs tick, farm level and both events', () => {
+    const c = [...base(), ev(40, 'hens', 28, { row: 30, H: 31 })], m = [...base(), ev(45, 'c', 28, { row: 22 })];
+    const r = compareSeedB(2, c, m);
+    expect(r.pass).toBe(true); expect(r.match).toBe(false);
+    expect(r.divergence).toEqual({ index: 3, tick: 40, farm: 28, cand: eventKey(c[3]), main: eventKey(m[3]), causeIsL30PlusBuy: true });
+  });
+  it('diverging at anything else -> FAIL (Collection buy <= 30, hire, coin/timing shift, missing event)', () => {
+    const c1 = [...base(), ev(40, 'c', 28, { row: 22 })], m1 = [...base(), ev(40, 'hens', 28, { row: 30 })];
+    expect(compareSeedB(3, c1, m1).pass).toBe(false);
+    const c2 = base(); c2[1] = { ...c2[1], coins: 1 }; expect(compareSeedB(3, c2, base())).toMatchObject({ pass: false, divergence: { index: 1, causeIsL30PlusBuy: false } });
+    expect(compareSeedB(3, [...base(), ev(40, 'hire:hawker', 28)], base()).pass).toBe(false);
+    expect(compareSeedB(3, base().slice(0, 2), base()).pass).toBe(false); // candidate missing an event
+  });
+  it('an L30+ buy AFTER a baseline event at that position is not the cause -> FAIL', () => {
+    const c = [...base(), ev(50, 'hens', 28, { row: 30 })], m = [...base(), ev(41, 'c', 28, { row: 22 })];
+    expect(compareSeedB(4, c, m)).toMatchObject({ pass: false, divergence: { tick: 41, causeIsL30PlusBuy: false } });
+  });
+  it('events from the first F31 tick on are not compared', () => {
+    const c = [...base(), ev(60, 'f', 31, { row: 30 }), ev(61, 'c', 31, { row: 1 })];
+    expect(compareSeedB(5, c, base())).toMatchObject({ until: 60, match: true, pass: true });
+  });
+  it('summarizeB / distribution / farmAt / longestGap', () => {
+    const ok = compareSeedB(1, base(), base()), bad = compareSeedB(7, base().slice(0, 1), base());
+    expect(summarizeB([ok, bad])).toMatchObject({ verdict: 'FAIL', seeds: 2, failing: 1, identical: 1, firstFail: { seed: 7 } });
+    expect(summarizeB([ok])).toMatchObject({ verdict: 'PASS', failing: 0 });
+    expect(distribution([30, 28, 28, 29])).toEqual({ n: 4, min: 28, p50: 28, max: 30, hist: { 28: 2, 29: 1, 30: 1 } });
+    expect(farmAt(ev(1, 'f', 29, { row: 28 }))).toBe(28); expect(farmAt(ev(1, 'c', 29))).toBe(29);
+    expect(longestGap([ev(100, 'c', 1), ev(150, 'c', 1), ev(400, 'c', 1)], 5, 45)).toBe(25); // t = i/10: 10, 15, 40 -> gaps 5,5,25, tail 5
+  });
+});

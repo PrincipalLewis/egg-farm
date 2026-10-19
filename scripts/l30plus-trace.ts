@@ -46,6 +46,38 @@ export const DCEO15_ROWS = [22, 23, 24, 25, 26, 27];
 export function dceo15Verdicts(eqVerdict: 'PASS' | 'FAIL', fb: ReturnType<typeof firstBuys>) {
   return fb.map(r => { const eligible = DCEO15_ROWS.includes(r.row), ok = eqVerdict === 'PASS' && r.seedsBuyingBeforeF31 === 0;
     return { row: r.row, buysToLevel: r.row + 1, eligible, seedsBuyingBeforeF31: r.seedsBuyingBeforeF31, verdict: (eligible && ok ? 'PASS' : 'FROZEN') as 'PASS' | 'FROZEN',
-      reason: !eligible ? 'not eligible under D-CEO-15 (gate is rows 22-27)' : ok ? 'trace-identical through F31 and never bought before F31'
+      reason: !eligible ? 'not eligible under D-CEO-15 (gate is rows 22-27)' : ok ? 'play-equivalence PASS and never bought before F31'
         : [eqVerdict !== 'PASS' ? `play-equivalence ${eqVerdict}` : '', r.seedsBuyingBeforeF31 ? `${r.seedsBuyingBeforeF31} seeds buy it before F31` : ''].filter(Boolean).join('; ') }; });
 }
+// ---- D-CEO-20261019-16 option (b): equivalence up to each seed's first L30+ purchase (default, gating) ----
+/** Level tracks that have levels above 30. A purchase is an "L30+ purchase" when its TARGET level (row + 1, i.e. the level
+ *  after the buy) is > 30 on any of them: Farm (f), Collection (c), Hens, Egg value. Workers / Grader tiers have no such levels. */
+export const LEVEL_TRACKS: Record<string, string> = { f: 'Farm', c: 'Collection', hens: 'Hens', eggValue: 'Egg value' };
+export const isL30PlusBuy = (e: TraceEvent | null | undefined) => !!e && e.kind in LEVEL_TRACKS && e.row + 1 > 30;
+export const firstL30PlusBuy = (tr: TraceEvent[]) => { const k = tr.findIndex(isL30PlusBuy); return k < 0 ? null : { index: k, tick: tr[k].i, t: tr[k].t, track: LEVEL_TRACKS[tr[k].kind], level: tr[k].row + 1 }; };
+/** Farm level in force when event e happened (a Farm buy's F is the level after it). */
+export const farmAt = (e: TraceEvent) => e.kind === 'f' ? e.F - 1 : e.F;
+export interface SeedCompareB { seed: number; until: number; events: number; match: boolean; pass: boolean; firstL30: ReturnType<typeof firstL30PlusBuy>;
+  divergence: null | { index: number; tick: number; farm: number; cand: string | null; main: string | null; causeIsL30PlusBuy: boolean } }
+/** Option (b): compare the traces event by event, both cut before the candidate's first F31 tick (whole run if never). Identical
+ *  -> PASS. Otherwise the first differing event must be, on the candidate side, an L30+ purchase that happens no later than the
+ *  baseline's event at that position (else the baseline did something earlier that the candidate didn't) -> PASS; anything else
+ *  (a Collection/track buy <= 30, a hire, a timing or coin shift, a missing event) -> FAIL. */
+export function compareSeedB(seed: number, cand: TraceEvent[], main: TraceEvent[], L = 31): SeedCompareB {
+  const until = firstTickAt(cand, L), a = prefix(cand, until), m = prefix(main, until), fl = firstL30PlusBuy(cand);
+  const base = { seed, until: Number.isFinite(until) ? until : -1, events: a.length, firstL30: fl };
+  for (let k = 0; k < Math.max(a.length, m.length); k++) {
+    const x = a[k] ? eventKey(a[k]) : null, y = m[k] ? eventKey(m[k]) : null;
+    if (x === y) continue;
+    const cause = isL30PlusBuy(a[k]) && (!m[k] || a[k].i <= m[k].i), ref = a[k] && (!m[k] || a[k].i <= m[k].i) ? a[k] : m[k];
+    return { ...base, match: false, pass: cause, divergence: { index: k, tick: Math.min(a[k]?.i ?? Infinity, m[k]?.i ?? Infinity), farm: farmAt(ref), cand: x, main: y, causeIsL30PlusBuy: cause } };
+  }
+  return { ...base, match: true, pass: true, divergence: null };
+}
+export const summarizeB = (rs: SeedCompareB[]) => { const bad = rs.filter(r => !r.pass);
+  return { verdict: (bad.length ? 'FAIL' : 'PASS') as 'PASS' | 'FAIL', seeds: rs.length, failing: bad.length, identical: rs.filter(r => r.match).length, divergedByL30PlusBuy: rs.filter(r => !r.match && r.pass).length, ...(bad.length ? { firstFail: bad[0] } : {}) }; };
+/** min / P50 / max (nearest-rank on the sorted list) and a histogram of values. */
+export const distribution = (v: number[]) => { const s = [...v].sort((x, y) => x - y), hist: Record<string, number> = {}; for (const x of s) hist[x] = (hist[x] ?? 0) + 1;
+  return s.length ? { n: s.length, min: s[0], p50: s[Math.ceil(0.5 * s.length) - 1], max: s[s.length - 1], hist } : { n: 0, min: null, p50: null, max: null, hist }; };
+/** G4 (conservative): longest gap between consecutive bot purchases inside [from, to] seconds (edges count). */
+export const longestGap = (tr: TraceEvent[], from: number, to: number) => { if (!(to > from)) return null; let last = from, g = 0; for (const e of tr) { if (e.t <= from) continue; if (e.t > to) break; g = Math.max(g, e.t - last); last = e.t; } return Math.max(g, to - last); };
