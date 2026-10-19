@@ -125,6 +125,21 @@ describe('CCR #49 m1: storageBlocked survives the retry path', () => {
   });
 });
 
+describe('CCR #49 n1: storageFailed is sticky for the session (intended)', () => {
+  it('an earlier save failure withholds the card although storage has recovered: no flag write, seen unset; next load shows once', () => {
+    vi.useFakeTimers(); const kv = kvOf(); const { writes, mirror } = mirrorOf(); const g = new Game(ON, kv, () => T0, 1, 'test', mirror, null);
+    kv.ctl.failSave = true; g.save(); expect(g.storageFailed).toBe(true); kv.ctl.failSave = false; // storage recovered, flag stays set
+    const n = writes.length, nLs = kv.ctl.writes.length;
+    expect(showTracksExplainer(g, document, () => g.storageFailed)).toBeNull(); expect(cards()).toBe(0);
+    expect(g.state.seenTracksExplainer).toBeFalsy(); expect(JSON.parse(kv.m.get(SAVE_KEY)).state.seenTracksExplainer).toBeFalsy();
+    expect([writes.length, kv.ctl.writes.length]).toEqual([n, nLs]); // the early storageBlocked gate returns before any flag write
+    expect(JSON.parse(writes.at(-1)!).state.seenTracksExplainer).toBeFalsy();
+    vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(cards()).toBe(0); // no in-session retry
+    const g2 = new Game(ON, kv, () => T0 + 5000, 1, 'test'); expect(g2.storageFailed).toBe(false); // a new load starts clean
+    expect(showTracksExplainer(g2, document, () => g2.storageFailed)).not.toBeNull(); expect(cards()).toBe(1);
+  });
+});
+
 describe('CCR #49 n2 (#46 m2): the sim keeps stepping while the card is open', () => {
   it('state after N frames with the card open equals the same Game without the card (except seenTracksExplainer)', () => {
     vi.useFakeTimers(); let t = T0; const clock = () => t;
