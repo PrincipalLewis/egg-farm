@@ -102,3 +102,7 @@
 - done: seller15 M4 bot = game pick over all purchasables + wait rule; seller-variance parity forced flag-off (own commit); first-purchase <= 30 s test (seeds 1-200); CCR m1-m3 + n1. Unit 855/858 (pacing L10 13.0, acw1, p4 = balance), slow 14/14. AC7 L10 P95 (1-200) 15.65/15.38 min (gate 12 FAIL), +2 % vs Economy. M4-on golden trace 723b91ab.
 - next: HoP 03:30 retune.
 - blocked: none.
+## 2026-10-19 02:20 Senior Software Architect (#42)
+- done: merged rc/m4-default-on 7fdb273 (clean); bot Farm-level log fix + regression test (HoQA). Unit 860/863 (3 balance reds), slow 14/14, goldens 4/4 unchanged. AC7 1-200 L10 P95 15.35 / 15.38 min (matches HoQA).
+- next: HoP 03:30 retune.
+- blocked: none.

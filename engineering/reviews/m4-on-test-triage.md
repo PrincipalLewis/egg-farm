@@ -191,6 +191,13 @@ Also: pacing 'cheapest >= 70 % of seller15' (newly failing under -01) PASSES aga
 ### Gates now
 tsc clean; unit **855/858** (3 fail: pacing L10, pacing-acw1, p4 = balance, goes into HoP's 03:30 retune); slow **14/14**; goldens 4/4.
 
+## Merge of rc/m4-default-on 7fdb273 (#43) + bot Farm-log fix (HoQA ac7-twobot-528f1a7)
+- Merge: clean, no conflicts (package.json/package-lock.json jsdom devDependency, src/ui/app.ts, tests/pl1-key-guard.test.ts came in as-is). npm ci in this worktree.
+- tests/bot.ts: the Farm level is now read from the state after the buy (`next.farmLevel`); before, the 2nd of two Farm buys in one check-in was logged as the same level (buys[].farm, farmReachedS, farmAt). Regression test tests/bot-farm-log.test.ts fails on the old code (reach.get(2) undefined) and passes now.
+- Goldens: unchanged (flag-off f90d1678, M4-on 723b91ab; two runs each, identical). The golden trace records farmAt counts, which the bug did not affect.
+- Gates: tsc clean; unit **860/863** (3 balance reds: pacing L10 13.0 min, pacing-acw1, p4); slow **14/14**; goldens 4/4.
+- AC7 seeds 1-200: no workers L10 P95 **15.35 min** (HoQA expected 15.35: match; was 15.65), fastest 10.97, L@30 18/19/19, t18 P50 26.18, L30 0/200 in 60 min (median max F24). Workers L10 P95 **15.38** (unchanged, HoQA 15.38), L@30 20/20/21, L30 200/200 at P50 52.91 / P95 54.31 min.
+
 ## Golden hashes (sha256)
 | golden | old (flag-off, a01faea; still pinned in the forced-off test) | M4-on (new, engineering/golden/m4on-golden.90a9c84.test.ts) |
 |---|---|---|
