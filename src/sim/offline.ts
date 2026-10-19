@@ -1,12 +1,12 @@
 import type { Balance } from '../config/balance';
 import { GameState, eggsPerSec } from './state';
 import { prodEggsPerSec, offlineMult } from './tracks';
-import { m4On, clampL } from '../config/formulas';
+import { m4On, trackMaxLevel } from '../config/formulas';
 /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
 export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1): number {
   const o = b.offline, t = b.m4!.offline!; if (!isFinite(awayS) || awayS < o.offlineMinSeconds) return 0;
-  const L = clampL(hensLevel, b);
+  const L = Math.max(0, Math.min(hensLevel, trackMaxLevel('hens', b))); // Saves M1: Hens track max (55), not the Farm max
   return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * t.eggsPerSec[L], t.maxEggs2h[L]) * mult);
 }
 /** AC11: eggs = floor(min(away,cap) * mult * eggs_per_sec(saved farm L)); <60s or negative => 0. */

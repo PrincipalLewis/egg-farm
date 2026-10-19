@@ -1,5 +1,5 @@
 // Saves M1 / D-CEO-20261019-05 (B): a committed pre-M4 v6 sample save loads (SAVE_VERSION stays 6) and migrateTracksV7
-// never lands Hens/Egg value above the Farm max: the live table (30) and a 56-row L30+ table with farmMaxLevel 50.
+// never lands a track above its own max (live 30; 56-row L30+ table: tracks 55, Farm 50).
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { balance as live, type Balance } from '../src/config/balance';
@@ -23,12 +23,12 @@ describe('migrate-v7 sample save', () => {
     const r = migrateTracksV7(load(kvOf(raw), on)!.state, on);
     expect(r.state.hensLevel).toBeLessThanOrEqual(30); expect(r.state.eggValueLevel).toBeLessThanOrEqual(30);
   });
-  it('56-row L30+ table: every F0..50 x C0..50 migration stays <= 50', () => {
+  it('56-row L30+ table: every F0..50 x C0..50 migration stays <= track max 55 and Farm <= 50', () => {
     const s0 = load(kvOf(raw), big)!.state; let maxH = 0, maxV = 0;
     for (let F = 0; F <= 50; F++) for (let C = 0; C <= 50; C += 5) {
-      const r = migrateTracksV7({ ...s0, farmLevel: F, collectionLevel: C }, big);
+      const r = migrateTracksV7({ ...s0, farmLevel: F, collectionLevel: C }, big); expect(r.state.farmLevel).toBeLessThanOrEqual(50);
       maxH = Math.max(maxH, r.state.hensLevel); maxV = Math.max(maxV, r.state.eggValueLevel);
     }
-    expect(maxH).toBeLessThanOrEqual(50); expect(maxV).toBeLessThanOrEqual(50);
+    expect(maxH).toBeLessThanOrEqual(55); expect(maxV).toBeLessThanOrEqual(55); console.log(`migrate-v7 L30+ max H${maxH} V${maxV}`);
   });
 });
