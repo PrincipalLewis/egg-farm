@@ -6,7 +6,7 @@ import { fmtMoney } from './format';
 export const EXP_TITLE = 'Upgrades got an upgrade!';
 export const EXP_BODY = 'Hens and Egg value are now separate. Top them up!';
 export const EXP_MS = 8000;
-type G = Pick<Game, 'state' | 'balance'> & { save(o?: { mirrorOnFail?: boolean }): void } & { canPersist?: boolean; migrationRefundCents?: number };
+type G = Pick<Game, 'state' | 'balance'> & { save(o?: Parameters<Game['save']>[0]): void } & { canPersist?: boolean; migrationRefundCents?: number };
 /** §11 refund line, only when migrationRefundCents > 0. */
 export const refundLine = (cents: number) => cents > 0 ? `We refunded +${fmtMoney(cents)} for your old upgrades.` : '';
 export const EXP_RETRY_MS = 1000;

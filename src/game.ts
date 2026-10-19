@@ -248,9 +248,9 @@ export class Game {
       this.kv.removeItem?.(V6_BACKUP_KEY); return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed);
     }
   }
-  /** M41-6: mirrorOnFail=false skips the IndexedDB fallback write when the localStorage write throws (default true: the mirror
+  /** M41-6: opting out of the mirror fallback skips the IndexedDB write when the localStorage write throws (default: the mirror
    *  is the fallback when localStorage is full, SD design). For one-off writes whose failure the caller reverts (explainer flag). */
-  save({ mirrorOnFail = true }: { mirrorOnFail?: boolean } = {}) {
+  save({ mirrorOnFail: mirrorFallback = true }: { mirrorOnFail?: boolean } = {}) {
     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
     if (this.newerGuard()) return;
@@ -260,7 +260,7 @@ export class Game {
     try { const raw = this.saveWithQuotaRetry(t, base); this.lastMainRaw = raw; this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror && mirrorOnFail) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror && mirrorFallback) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
