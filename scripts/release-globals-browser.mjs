@@ -1,10 +1,10 @@
 // Release window-globals allowlist in a real engine: own properties of window on the booted release game (after some
 // play, Settings open, ?debug=1&perf=1&ios=1) minus those of a blank page on the same origin in the same engine.
 // Fails if anything other than ALLOWED appears. Usage: npm run build && node scripts/release-globals-browser.mjs [chromium|firefox|webkit]
-import pw from 'playwright-core'; import { serveOwn } from './serve-own.mjs';
+import pw from 'playwright-core'; import { serveOwn, expectHeadBuild } from './serve-own.mjs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', port = +(process.env.PORT ?? 0); // 0 = free port (serveOwn prints it)
 const ALLOWED = ['eggfarmExportTelemetry'];
-const srv = await serveOwn('dist', port);
+const srv = await serveOwn('dist', port); await expectHeadBuild(srv); // CCR n-d: the served dist must be HEAD's build
 const br = ENGINE === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[ENGINE].launch();
 const ctx = await br.newContext({ viewport: { width: 390, height: 844 } });
 await ctx.route('**/__blank', r => r.fulfill({ contentType: 'text/html', body: '<!doctype html><title>blank</title>' }));

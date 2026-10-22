@@ -1,14 +1,18 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
 // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
 import { chromium, webkit, firefox } from 'playwright-core';
-import { spawn } from 'node:child_process';
+import { serveOwn, expectHeadBuild } from './serve-own.mjs';
 import { readFileSync, mkdirSync } from 'node:fs';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
 if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
-const port = +(process.env.PORT ?? 4181); const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
-const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
-await new Promise(r => setTimeout(r, 1500));
+// CCR n-d: no fixed default port (4181 once served a stale foreign build). PORT unset = a free port from the OS; an explicit PORT
+// is honoured as-is. serveOwn checks the page on that port is THIS dist-qa (own entry chunk), and expectHeadBuild that its
+// build-id is this checkout's HEAD; either mismatch exits 2 before any check runs.
+const srv = await serveOwn('dist-qa', +(process.env.PORT ?? 0)).catch(e => { console.error(String(e?.message ?? e)); process.exit(2); });
+const BUILD_ID = await expectHeadBuild(srv).catch(e => { console.error(String(e?.message ?? e)); process.exit(2); });
+const port = srv.port; console.error(`rc0-browser: dist-qa ${BUILD_ID} on port ${port}`);
+const killSrv = () => srv.stop();
 const SHOTS = process.env.SHOTS ?? '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
 const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
