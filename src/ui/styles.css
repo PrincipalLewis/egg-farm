@@ -517,7 +517,8 @@ html,body{overflow-x:hidden;max-width:100%}
 @media (prefers-reduced-motion:reduce){.tracks-exp{animation:expfade .15s linear}}
 @keyframes expfade{from{opacity:0}to{opacity:1}}
 /* M41-8 F4 (art-ux/f4-next-goal-label.md; m4a-spec §18 F4-17): the whole-label ellipsis goes for the F4 strip; only the
-   track-name span may shrink (CSS ellipsis); star, level and suffix spans never shrink or wrap. */
+   track-name span may shrink (CSS ellipsis); star, level and suffix spans never shrink or wrap. Level + suffix sit inline in
+   one .ng-tail flex item (F4-14a: no accname space between them; same rendering). */
 .goal-label.ng{display:flex;align-items:baseline;text-overflow:clip;white-space:nowrap}
 .goal-label.ng>span{flex:none;white-space:nowrap}
 .goal-label.ng>.ng-star{white-space:pre} /* keep the space after ★ (a flex item trims trailing collapsible space) */

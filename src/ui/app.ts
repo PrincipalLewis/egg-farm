@@ -81,7 +81,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
       <button class="goal" id="goal" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
-      <div class="sr" aria-live="polite" id="goalLive"></div>
+      <div class="sr" aria-live="polite" id="goalLive"></div><div class="sr" id="goalDesc" aria-hidden="true"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
   const nav = h(`<nav class="actions">
@@ -406,22 +406,27 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   });
   let pendingLvPop = false;
   // ---------- M3-AC5 next-goal strip ----------
-  const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
+  const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive'), goalDesc = $('#goalDesc');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
   const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
-    const M4 = m4On(b), prevKey = hintPick?.key;
+    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = bestBuyMark(hintPick);
     if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
-    if (!goalNow && t - goalTickAt < 1000 && !(M4 && hintPick?.key !== prevKey)) return; // 1 Hz text tick; purchases / pick changes bypass
+    // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
+    // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
+    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || bestBuyMark(hintPick) !== prevMark))) return;
     const imm = goalNow || M4; goalNow = false; goalTickAt = t;
     const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? bestBuyMark(hintPick) : null), imm); goalShown = gl;
     if (gl.parts) { const html = goalLabelHtml(gl.parts); if (goalLbl.dataset.html !== html) { goalLbl.dataset.html = html; goalLbl.innerHTML = html; } goalLbl.classList.add('ng'); }
     else { if (goalLbl.dataset.html) { delete goalLbl.dataset.html; goalLbl.textContent = ''; } goalLbl.classList.remove('ng'); setText(goalLbl, gl.label); } setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
-    goalBtn.setAttribute('aria-label', goalAria(gl));
+    // m4a-spec v1.25 F4-14a (label-in-name, WCAG 2.5.3): F4 targets take their name from the visible text (★ / JS `…` are
+    // aria-hidden) and the spelled-out F4-14 sentence + status sentence as the description. Other targets keep the aria-label.
+    if (gl.parts) { goalBtn.removeAttribute('aria-label'); setText(goalDesc, goalAria(gl)); goalBtn.setAttribute('aria-describedby', 'goalDesc'); }
+    else { goalBtn.setAttribute('aria-label', goalAria(gl)); goalBtn.removeAttribute('aria-describedby'); setText(goalDesc, ''); }
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
       if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
       // B3: announce the CURRENT goal (same text as the chip's aria-label) on target or state change, then clear the

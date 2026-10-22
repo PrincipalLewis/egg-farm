@@ -8,7 +8,7 @@ import { optionGain, options } from '../src/econ/best-buy';
 import { incomePerSec } from '../src/econ/income';
 import { trackLock } from '../src/sim/tracks';
 import { selectGoal, goalAria } from '../src/ui/next-goal';
-import { goalLabelParts, goalLabelSpec, pctOf, bestRoiDelta, bestBuyMark, trackMilestone, NBSP, MAX_GOAL_LEN, type GoalLabelSpec, type Pct } from '../src/ui/goal-label';
+import { goalLabelParts, goalLabelSpec, goalLabelHtml, pctOf, bestRoiDelta, bestBuyMark, trackMilestone, compactNum, NBSP, MAX_GOAL_LEN, type GoalLabelSpec, type Pct } from '../src/ui/goal-label';
 import { DualPicker } from '../src/ui/pick-hysteresis';
 
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
@@ -134,6 +134,82 @@ describe('F4-12 one calculation: X == floor(best_roi delta %) from the same call
       checked++;
     }
     expect(checked).toBeGreaterThan(20); void under1;
+  });
+});
+
+describe('F4-12 base = the WORKING model (n4): states with hired Tired / Asleep workers tell the two bases apart', () => {
+  const W = (energy: number) => ({ energy, cdS: 1 });
+  const ws = (e: number) => ({ market_hand: W(e), coop_hand: W(e), hawker: W(e), grader: W(e) });
+  // [F, H, worker energy, key, X from the working base (spec), X a live-mood base would give]
+  const CASES = [[9, 11, 0, 'HENS', 8, 11], [14, 16, 0, 'HENS', 5, 8], [5, 7, 20, 'HENS', 12, 15], [14, 16, 20, 'VALUE', 7, 8]] as const;
+  it.each(CASES)('F%i H%i energy %i %s: X = %i (live base would say %i)', (F, H, e, key, want, live) => {
+    const s = st({ farmLevel: F, hensLevel: H, eggValueLevel: F, collectionLevel: F, coinsCents: 1e13, workers: ws(e), graderTier: 1 });
+    expect(incomePerSec(s, on)).toBeLessThan(incomePerSec(s, on, { assumeWorking: true })); // the bases really differ here
+    const gain = optionGain(s, on, key)!.gain;
+    expect(Math.floor(100 * gain / incomePerSec(s, on) + 1e-9)).toBe(live);
+    expect(goalLabelSpec(key, s, on, true).suffix).toEqual({ kind: 'pct', x: want });
+    expect(vis(selectGoal(s, on, 100, key, key).label)).toContain(`+${want}% income`);
+  });
+});
+
+describe('F4-11 at the strip: income/s now = 0 hides the % (CCR #62 M1)', () => {
+  it('fresh save before the first sale: `Hens L1`, no % and no "percent", although the working base is > 0', () => {
+    const s = { ...initialState(on, 1), coinsCents: 0 };
+    expect(incomePerSec(s, on, { assumeWorking: true })).toBeGreaterThan(0);
+    expect(bestRoiDelta(s, on, 'HENS')!.x).not.toBeNull(); // the model alone would show +X%
+    const g = selectGoal(s, on, 0, 'HENS', null);
+    expect(g.state).toBe('noincome');
+    expect(vis(g.label)).toBe('Hens L1');
+    expect(goalAria(g)).toBe('Next goal: Hens level 1. Sell eggs to earn coins.');
+    expect(vis(selectGoal(s, on, 5, 'HENS', null).label)).toMatch(/^Hens L1 · \+\d+% income$/); // income > 0 → shown
+  });
+  it('rate 0 with coins in hand (ready, best buy): still hidden, ★ kept; milestone / Collection variants unaffected', () => {
+    const s = st({ farmLevel: 1, coinsCents: 1e13 });
+    expect(vis(selectGoal(s, on, 0, 'HENS', 'HENS').label)).toBe('★ Hens L1');
+    expect(goalAria(selectGoal(s, on, 0, 'HENS', 'HENS'))).toBe('Next goal: best buy, Hens level 1. Ready now.');
+    expect(vis(selectGoal(st({ farmLevel: 2, hensLevel: 4, eggValueLevel: 4, coinsCents: 1e13 }), on, 0, 'VALUE', 'VALUE').label)).toBe('★ Egg value L5: Grade A');
+    expect(vis(selectGoal(st({ farmLevel: 3, collectionLevel: 0, coinsCents: 1e13 }), on, 0, 'COLL', 'COLL').label)).toMatch(/^★ Collection L1: \+\d+\/tap$/);
+  });
+});
+
+describe('n3 huge values: the label never exceeds 27, level + suffix are never cut (number goes compact as a last resort)', () => {
+  it('compactNum floors and stays short', () => {
+    expect(compactNum(999)).toBe('999'); expect(compactNum(9999)).toBe('9999'); expect(compactNum(12345)).toBe('12.3K');
+    expect(compactNum(1234567)).toBe('1.2M'); expect(compactNum(999999999)).toBe('999M'); expect(compactNum(123456789012)).toBe('123B');
+    expect(compactNum(1.5e13)).toBe('15T'); expect(compactNum(1e21)).toBe('1e21');
+  });
+  it('raw digits wherever they fit (F4-16 fixtures unchanged)', () => {
+    expect(T(tap(55, 1234567))).toBe('Coll. L55: +1234567/tap');
+    expect(T(tap(55, 123456789012))).toBe('Col… L55: +123456789012/tap');
+    expect(T(pct('Hens', 55, 999))).toBe('★ Hens L55 · +999% income');
+  });
+  it('property: X / Δtap up to 1e21 × levels 0..9999 × every track → ≤ 27, level intact, aria keeps raw digits', () => {
+    const big = [1e4, 123456, 1234567, 99999999, 123456789012, 9.99e14, 1e15, 1e21];
+    let n = 0;
+    for (const L of [0, 9, 55, 999, 1234, 9999]) for (const v of big) for (const star of [true, false]) {
+      for (const sp of [pct('Hens', L, v, star), pct('Egg value', L, v, star), pct('Supercalifragilistic', L, v, star), tap(L, v, star)]) {
+        const p = goalLabelParts(sp);
+        expect(cps(p.text), vis(p.text)).toBeLessThanOrEqual(MAX_GOAL_LEN);
+        expect(p.level).toBe(`${NBSP}L${L}`); expect(p.text.endsWith(p.level + p.suffix)).toBe(true);
+        expect(p.aria).toContain(String(v)); n++;
+      }
+    }
+    expect(n).toBe(6 * 8 * 2 * 4);
+    expect(T(pct('Hens', 1234567, 123456))).toBe('H… L1234567 · +123K% income'); // CCR's 28-char case → 27
+  });
+});
+
+describe('F4-14a accessible name (m4a-spec v1.25): visible text without ★ and without a JS `…`', () => {
+  it('accName = text minus the ★ and the ellipsis; the F4-14 sentence (description) is unchanged', () => {
+    for (const sp of [pct('Egg value', 5, 9), pct('Egg value', 9, 12), pct('Egg value', 30, 100), pct('Supercalifragilistic', 30, 12), ms('Hens', 10, 'bigger coop'), tap(55, 1234567), pct('Hens', 12, null, false)]) {
+      const p = goalLabelParts(sp);
+      expect(p.accName).toBe(p.text.replace(/^★ /, '').replace('…', ''));
+      expect(p.accName).not.toMatch(/[★…]/);
+      const html = goalLabelHtml(p);
+      if (p.star) expect(html).toContain('<span class="ng-star" aria-hidden="true">★ </span>');
+      if (p.name.endsWith('…')) expect(html).toContain('<span aria-hidden="true">…</span>');
+    }
+    expect(goalLabelParts(pct('Egg value', 30, 12)).aria).toBe('best buy, Egg value level 30, plus 12 percent income');
   });
 });
 

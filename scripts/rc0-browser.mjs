@@ -119,9 +119,20 @@ sections.b3 = async () => {
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 2, coinsCents: 500 }; });
   for (let i = 0; i < 6; i++) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'sellAll' })); await page.waitForTimeout(500); }
   await page.waitForTimeout(1200);
-  const r = await page.evaluate(() => ({ aria: document.querySelector('#goal').getAttribute('aria-label'), label: document.querySelector('.goal-label').textContent, status: document.querySelector('.goal-status').textContent, live: document.querySelector('#goalLive').textContent }));
-  const num = r.status.match(/\d+/)?.[0];
-  ok('B3 chip aria-label matches visible target/timer, no "1 minutes"', r.aria.includes(r.label.split(':')[0]) && (!num || r.aria.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(r.aria + r.live), JSON.stringify(r));
+  // m4a-spec v1.25 F4-14a: an F4 target (Hens / Egg value / Collection, M4 on) has no aria-label; its accessible name is the
+  // visible text (★ / JS `…` aria-hidden) and the spoken sentence is the aria-describedby description. Other targets keep
+  // the aria-label. `aria` below = the spoken sentence either way (aria-label, else the description).
+  const r = await page.evaluate(() => { const b = document.querySelector('#goal'), lbl = b.querySelector('.goal-label'), d = b.getAttribute('aria-describedby');
+    const vis = n => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent : c.getAttribute?.('aria-hidden') === 'true' ? '' : vis(c)).join('');
+    return { ariaLabel: b.getAttribute('aria-label'), desc: d ? document.getElementById(d)?.textContent ?? null : null, label: lbl.textContent, labelVis: vis(lbl), ng: lbl.classList.contains('ng'),
+      status: b.querySelector('.goal-status').textContent, live: document.querySelector('#goalLive').textContent }; });
+  const snap = await page.locator('#goal').ariaSnapshot(); r.name = snap.match(/^- button "(.*)"/)?.[1]?.replace(/\\"/g, '"') ?? null;
+  r.aria = r.ariaLabel ?? r.desc ?? '';
+  const num = r.status.match(/\d+/)?.[0], ws = v => (v ?? '').replace(/\s+/g, ' ').trim();
+  const f4 = r.ng && r.ariaLabel === null && r.desc !== null;
+  ok('B3 chip aria-label matches visible target/timer, no "1 minutes"', (f4
+      ? ws(r.name).includes(ws(r.labelVis)) && ws(r.name).includes(ws(r.status)) && /^Next goal: .+\. (Ready now|Ready in about .+|Sell eggs to earn coins)\.$/.test(r.desc) && !/[…★]/.test(r.name + r.desc)
+      : !!r.ariaLabel && r.aria.includes(r.label.split(':')[0])) && (!num || r.aria.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(r.aria + r.live), JSON.stringify(r));
   await page.waitForTimeout(4500);
   ok('B3 live region cleared after announcing (never stale)', (await page.locator('#goalLive').textContent()) === '' || (await page.locator('#goalLive').textContent()) === r.aria);
   await ctx.close();

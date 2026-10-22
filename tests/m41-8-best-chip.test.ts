@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // M41-8 F3 = UX-M4 ★ Best buy chip (art-ux/m4.1-ui-minors.md) + F4-13 (strip ★ and row chip from one source) + F4 markup.
-import { describe, it, expect, beforeAll, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
 import { DualPicker } from '../src/ui/pick-hysteresis';
@@ -37,7 +37,15 @@ async function mount(state: object, tab: string) {
   return { g, ui };
 }
 const strip = () => document.querySelector<HTMLElement>('#goal .goal-label')!;
-const goalAriaText = () => document.querySelector<HTMLElement>('#goal')!.getAttribute('aria-label')!;
+/** The spoken B3 sentence: F4 targets carry it as the aria-describedby description (m4a-spec v1.25 F4-14a), others as aria-label. */
+const goalAriaText = () => { const b = document.querySelector<HTMLElement>('#goal')!, d = b.getAttribute('aria-describedby');
+  return b.getAttribute('aria-label') ?? (d ? document.getElementById(d)!.textContent! : ''); };
+/** Accessible name from content (accname: no aria-label/labelledby on #goal → subtree text minus aria-hidden; img alt=""). */
+const nameFromContent = (n: Node): string => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent! : (c as Element).getAttribute?.('aria-hidden') === 'true' ? '' : (c as Element).tagName === 'IMG' ? (c as HTMLImageElement).alt : nameFromContent(c)).join('');
+const KEY_OF_TRACK: Record<string, string> = { Hens: 'HENS', 'Egg value': 'VALUE', Collection: 'COLL' };
+/** Key the strip's ★ marks (from its description), or null. */
+const stripStarKey = () => { const m = goalAriaText().match(/^Next goal: best buy, (Hens|Egg value|Collection) level/); return m ? KEY_OF_TRACK[m[1]] : null; };
+const chipKey = () => document.querySelector<HTMLElement>('.best-chip')?.dataset.bestBuy ?? null;
 
 describe('UX-M4 chip and the strip ★ agree (F4-13)', () => {
   it.each(['HENS', 'VALUE', 'COLL', 'FARM'] as const)('pick %s: chip on exactly that row; strip ★ (if its template has one) on the same target', async key => {
@@ -76,10 +84,11 @@ describe('UX-M4 chip and the strip ★ agree (F4-13)', () => {
       const before = document.querySelector<HTMLElement>('.best-chip')?.dataset.bestBuy;
       (document.querySelector<HTMLElement>(`.up.track[data-track=hens] button.buy`) ?? document.querySelector<HTMLElement>('button.buy'))?.click(); ui.render(); ui.render();
       expect(document.querySelectorAll('.best-chip').length).toBeLessThanOrEqual(1);
-      const after = document.querySelector<HTMLElement>('.best-chip')?.dataset.bestBuy;
+      const after = document.querySelector<HTMLElement>('.best-chip')?.dataset.bestBuy ?? null;
+      // CCR n1: the chip sits on the FRESH pick for the post-purchase state (purchases re-pick at once, no hysteresis hold).
       const want = bestBuyMark(new DualPicker().tick(g.state, on, 0).hint);
-      if (after && want && ['HENS', 'VALUE', 'FARM'].includes(want)) expect(['HENS', 'VALUE', 'FARM']).toContain(after);
-      if (before !== after) return; // moved
+      expect(after).toBe(want);
+      if (before !== after) { expect(after).not.toBe('HENS'); return; } // moved
     }
     throw new Error('chip never moved after 12 Hens buys');
   });
@@ -91,9 +100,79 @@ describe('F4 markup (art file): spans, NBSP, aria untruncated', () => {
     const lbl = strip();
     expect(lbl.querySelector('.ng-name')!.textContent).toMatch(/^(Egg value|Value|.*…)$/);
     expect(lbl.querySelector('.ng-lv')!.textContent).toMatch(/^\u00A0L\d+$/);
+    expect(lbl.querySelector(".ng-tail > .ng-lv")).not.toBeNull(); // F4-14a: level + suffix inline in one flex item
     const sfx = lbl.querySelector('.ng-sfx')?.textContent;
     if (sfx) expect(sfx).toMatch(/^(: .+|\u00A0·\u00A0\+(<1|\d+)% income)$/);
     expect(goalAriaText()).toMatch(/^Next goal: best buy, Egg value level \d+(, .+)?\. /);
     expect(goalAriaText()).not.toMatch(/…|★|Value level/);
+  });
+});
+
+describe('F4-14a label-in-name (m4a-spec v1.25): name = visible text, F4-14 sentence + status = description', () => {
+  it.each(['HENS', 'VALUE', 'COLL'] as const)('%s target: no aria-label; name from content = visible text minus ★ / …; describedby = sentence + status', async key => {
+    await mount(stateFor(key), TAB[key]);
+    const b = document.querySelector<HTMLElement>('#goal')!, lbl = strip(), st = b.querySelector('.goal-status')!.textContent!;
+    expect(b.hasAttribute('aria-label')).toBe(false);
+    expect(b.getAttribute('aria-describedby')).toBe('goalDesc');
+    const name = nameFromContent(b), visible = lbl.textContent!.replace(/^★ /, '').replace('…', '');
+    expect(name).toBe(visible + st);
+    expect(name).not.toMatch(/[…★]/);
+    const desc = document.getElementById('goalDesc')!.textContent!;
+    expect(desc).toMatch(/^Next goal: best buy, (Hens|Egg value|Collection) level \d+(, .+)?\. (Ready now|Ready in about .+|Sell eggs to earn coins)\.$/);
+    expect(desc).not.toMatch(/[…★]|Value level|Coll\./);
+  });
+  it('a JS-truncated name keeps its `…` out of the name (aria-hidden) and the ★ span is aria-hidden', async () => {
+    const { goalLabelParts, goalLabelHtml } = await import('../src/ui/goal-label');
+    const p = goalLabelParts({ track: 'Supercalifragilistic', n: 30, star: true, suffix: { kind: 'pct', x: 12 } });
+    const d = document.createElement('div'); d.innerHTML = goalLabelHtml(p);
+    expect(d.textContent).toBe(p.text); expect(nameFromContent(d)).toBe(p.accName);
+    expect(p.accName).toBe('Supercal\u00A0L30\u00A0·\u00A0+12% income');
+  });
+  it('a non-F4 target (FARM) keeps the aria-label and no description', async () => {
+    await mount(stateFor('FARM'), 'farm');
+    const b = document.querySelector<HTMLElement>('#goal')!;
+    expect(b.getAttribute('aria-label')).toMatch(/^Next goal: Farm L\d+/); expect(b.hasAttribute('aria-describedby')).toBe(false);
+  });
+});
+
+describe('same-frame agreement: strip ★ and chip from ONE render (CCR #62 m1 + m2)', () => {
+  /** A state whose shared pick is HENS, with its cost (coins 1e13 for the search). */
+  function hensPick() {
+    for (let F = 3; F < 28; F++) for (const dH of [-3, 0, 2]) {
+      const c = { ...initialState(on, 1), farmLevel: F, hensLevel: Math.max(0, F + dH), eggValueLevel: F, collectionLevel: F, coinsCents: 1e13, tracksV7: 1 as const };
+      const h = new DualPicker().tick(c, on, 0).hint; if (h?.key === 'HENS') return { s: c, cost: h.costCents };
+    }
+    throw new Error('no HENS pick');
+  }
+  afterEach(() => { vi.restoreAllMocks(); });
+  it('m1 (CCR repro /tmp/ccr-stale.test.ts.keep): coins cross the cost without a purchase → chip and strip ★ agree 100 ms later, in that same render', async () => {
+    const { s, cost } = hensPick();
+    let t = 1000; vi.spyOn(performance, 'now').mockImplementation(() => t);
+    const { g, ui } = await mount({ ...s, coinsCents: cost - 1 }, 'farm');
+    t += 2000; ui.render();
+    expect(chipKey()).toBeNull(); expect(stripStarKey()).toBeNull();
+    g.state = { ...g.state, coinsCents: cost + 1 } as any; t += 100; ui.render(); // one render, inside the 1 Hz window
+    expect(chipKey()).toBe('HENS');
+    expect(stripStarKey()).toBe('HENS');
+    expect(strip().querySelector('.ng-star')?.textContent ?? '★ ').toBe('★ ');
+    g.state = { ...g.state, coinsCents: cost - 1 } as any; t += 100; ui.render(); // and back (spend elsewhere / wage)
+    expect(chipKey()).toBeNull(); expect(stripStarKey()).toBeNull();
+  });
+  it('m2: after an offline grant and after each buy, ONE render() leaves chip and strip ★ on the same key (fails if the strip is drawn after the rows)', async () => {
+    const { s, cost } = hensPick();
+    let t = 1000; vi.spyOn(performance, 'now').mockImplementation(() => t);
+    const { g, ui } = await mount({ ...s, coinsCents: cost - 1 }, 'farm');
+    expect(chipKey()).toBeNull();
+    g.state = { ...g.state, coinsCents: 1e13 } as any; t += 3000; ui.render(); // offline grant: a single frame
+    expect(chipKey()).not.toBeNull(); expect(chipKey()).toBe(stripStarKey());
+    let moved = false;
+    for (let i = 0; i < 12 && !moved; i++) {
+      const before = chipKey();
+      g.dispatch({ type: 'buyTrack', track: 'hens' } as any); t += 50; ui.render(); // single render after the buy
+      expect(chipKey()).toBe(bestBuyMark(new DualPicker().tick(g.state, on, 0).hint));
+      if (['HENS', 'VALUE', 'COLL'].includes(chipKey() ?? '')) expect(stripStarKey()).toBe(chipKey());
+      moved = chipKey() !== before;
+    }
+    expect(moved).toBe(true);
   });
 });

@@ -64,7 +64,8 @@ export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shar
   const state: GoalState = (forced ? coins >= forced.costCents : ready) ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
   const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtTimeToAfford((t.costCents - coins) / rateCentsPerS);
   // M41-8 F4 (M4 on only; flag-off keeps the AC5 labels byte-identical): ★ / % / truncation for HENS, VALUE, COLL.
-  const parts = m4On(b) && (t.key === 'HENS' || t.key === 'VALUE' || t.key === 'COLL') ? goalLabelParts(goalLabelSpec(t.key, s, b, !!star && star === t.key)) : undefined;
+  // F4-11: the % is hidden while the strip's own income rate is 0 (fresh save before the first sale).
+  const parts = m4On(b) && (t.key === 'HENS' || t.key === 'VALUE' || t.key === 'COLL') ? goalLabelParts(goalLabelSpec(t.key, s, b, !!star && star === t.key, rateCentsPerS > 0)) : undefined;
   return { key: t.key, state, label: parts ? parts.text : labelFor(t.key, s, b), ...(parts ? { parts } : {}), status, costCents: t.costCents, tab: t.key === 'FARM' || t.key === 'HENS' || t.key === 'VALUE' ? 'farm' : t.key === 'COLL' ? 'collection' : 'workers' };
 }
 /** Anti-flicker (spec §1): without a purchase, a change of target or Ready<->Waiting is applied only after the new
@@ -86,5 +87,7 @@ const UNIT: Record<string, string> = { s: 'second', min: 'minute', h: 'hour' };
 /** "~1 min 5 s" -> "1 minute 5 seconds" (B3: singular for 1). */
 export const spokenDuration = (status: string) =>
   status.replace('~', '').replace(/(\d+)\s*(min|s|h)\b/g, (_, n: string, u: string) => `${n} ${UNIT[u]}${n === '1' ? '' : 's'}`).trim();
+/** B3 sentence. Targets without F4 parts: the #goal aria-label (unchanged). F4 targets (m4a-spec v1.25 F4-14a): the
+ *  accessible DESCRIPTION (aria-describedby), while the name comes from the visible text (parts.accName + status). */
 export const goalAria = (g: Goal) => g.state === 'done' ? 'Next goal: all upgrades done.' :
   `Next goal: ${g.parts ? g.parts.aria : g.label.replace(':', ',')}. ${g.state === 'ready' ? 'Ready now.' : g.state === 'noincome' ? 'Sell eggs to earn coins.' : `Ready in about ${spokenDuration(g.status)}.`}`;
