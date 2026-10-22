@@ -425,6 +425,9 @@ html,body{overflow-x:hidden;max-width:100%}
 .recovery-card .rc-link{margin-top:8px;min-width:120px;min-height:44px}
 .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:12px;border-radius:999px;background:var(--c-white);color:var(--c-wood-text);border:2px solid var(--c-wood-text);box-shadow:none;font:700 16px var(--f-body, Nunito, sans-serif);cursor:pointer}
 .recovery-card .rc-msg{margin-top:8px}.recovery-card .rc-msg:empty{margin-top:0}
+/* M41-7 (Art, Minor): the real hit area (getBoundingClientRect) is >= 48 / >= 44 even in a shrinking column card, recovery dialog only. */
+.recovery-layer[data-outcome] .recovery-card .rc-primary,.recovery-layer[data-outcome] .recovery-card .rc-link,.recovery-layer[data-outcome] .recovery-card .rc-export-q{flex:none;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center}
+.recovery-layer[data-outcome] .recovery-card .rc-primary{min-height:48px}.recovery-layer[data-outcome] .recovery-card .rc-link,.recovery-layer[data-outcome] .recovery-card .rc-export-q{min-height:44px}
 .recovery-card :focus-visible{outline:3px solid var(--c-focus);outline-offset:3px}
 .recovery-layer.kbd .recovery-card button:focus{outline:3px solid var(--c-focus);outline-offset:3px}
 .onb[hidden]{display:none!important}
