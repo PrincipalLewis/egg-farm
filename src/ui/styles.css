@@ -529,8 +529,10 @@ html,body{overflow-x:hidden;max-width:100%}
   15%{transform:translate(-50%,calc(-100% - 10px)) scale(1);animation-timing-function:ease-out}
   62.5%{opacity:1;transform:translate(-50%,calc(-100% - 32px)) scale(1)}100%{opacity:0;transform:translate(-50%,calc(-100% - 32px)) scale(1)}}
 .exp-coin{position:fixed;z-index:28;pointer-events:none;width:16px;height:16px;translate:-50% -50%;animation:expcoin 600ms ease-out forwards}
-@keyframes expcoin{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(14px,-48px) rotate(180deg)}}
+@keyframes expcoin{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx,14px),-40px) rotate(180deg)}}
 .reduced-motion .tracks-exp-out,.reduced-motion .exp-pop,.reduced-motion .exp-coin{display:none}
 @media (prefers-reduced-motion:reduce){.tracks-exp-out,.exp-pop,.exp-coin{display:none}}
 /* UX-M1: 3px focus ring on the explainer's focus targets; .kbd-focus is the WebKit fallback after its programmatic hand-off */
 nav.actions button:focus-visible,[data-tab]:focus-visible,#collect:focus-visible,.kbd-focus{outline:3px solid var(--c-focus);outline-offset:2px}
+/* Designer n1: the bottom-nav ring sits on the viewport edge on phones; inset it so all four sides show */
+nav.actions button:focus-visible,nav.actions button.kbd-focus{outline-offset:-3px}
