@@ -99,7 +99,7 @@ describe('M4-AC-EXP1 tracks explainer', () => {
     const fake = { state: { ...g.state, seenTracksExplainer: false }, balance: on, save() {} } as any;
     showTracksExplainer(fake); expect(cards()).toBe(1);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); expect(cards()).toBe(0);
-    const fake2 = { ...fake, state: { ...fake.state, seenTracksExplainer: false } }; // one card per Game per session (D-HOP-2026-10-22-06)
+    const fake2 = { ...fake, state: { ...fake.state, seenTracksExplainer: false } };
     vi.useFakeTimers(); showTracksExplainer(fake2); expect(cards()).toBe(1);
     vi.advanceTimersByTime(EXP_MS); expect(cards()).toBe(0); expect(fake2.state.seenTracksExplainer).toBe(false); // auto-hide never marks it seen
   });
@@ -228,7 +228,7 @@ describe('HoE Major #49: storage blocked (localStorage.setItem throws)', () => {
   it('control: same fake with storage writable shows the card once', () => {
     const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} };
     expect(showTracksExplainer(g, document, () => false)).not.toBeNull(); expect(document.querySelectorAll('.tracks-exp').length).toBe(1);
-    expect(showTracksExplainer(g, document, () => false)).toBeNull(); // once per session
+    expect(showTracksExplainer(g, document, () => false)).toBeNull(); // never a second card while one is up
     document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(g.state.seenTracksExplainer).toBe(true); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
   });
 });

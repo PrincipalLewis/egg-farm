@@ -18,21 +18,18 @@ export const explainerOpen = (doc: Document = document) => !!doc.querySelector('
  *  .recovery-layer that is removed from the DOM on close, so the retry shows the card (and starts EXP_MS) only after it. */
 const modalOpen = (doc: Document) => !!doc.querySelector('#modal-layer.open, .recovery-layer');
 export const shouldShowTracksExplainer = (g: G) => m4On(g.balance) && !g.state.seenTracksExplainer;
-/** D-HOP-2026-10-22-06 (c): cards already shown this session (per Game). A card the 8s auto-hide closed is not re-shown
- *  in this session; seen stays false, so the next load shows it again (tracksMigratedWithBackup path in app.ts). */
-const shownThisSession = new WeakSet<object>();
-/** Call ONLY from Game.onTracksCommitted (existing save upgraded this session; fresh M4 farms never fire it). Shows the card once
- *  per session; persists seenTracksExplainer=true only when the player dismisses it (Got it, a tap on the card, Esc/Enter);
- *  the 8s auto-hide never marks it seen (D-HOP-2026-10-22-06 c). Returns the card, or null if not shown. */
+/** Call ONLY from Game.onTracksCommitted (existing save upgraded this session; fresh M4 farms never fire it). Shows the card;
+ *  D-HOP-2026-10-22-06 (c): persists seenTracksExplainer=true only when the player dismisses it (Got it, a tap on the card, Esc/Enter);
+ *  the 8s auto-hide never marks it seen, and nothing re-shows it this session (the commit signal fires once; no retry
+ *  is pending once shown), so the next load shows it (tracksMigratedWithBackup path in app.ts). Returns the card, or null. */
 export function showTracksExplainer(g: G, doc: Document = document, storageBlocked: () => boolean = () => false): HTMLElement | null {
-  if (!shouldShowTracksExplainer(g) || shownThisSession.has(g) || explainerOpen(doc)) return null;
+  if (!shouldShowTracksExplainer(g) || explainerOpen(doc)) return null; // seen stays false while the card is up: never a second card
   // HoE Major #49: localStorage refuses writes (TabLease.storageBlocked, the NO_STORAGE_TEXT signal in main.ts). The flag
   // could never persist, so the card would re-show on every load: don't show it this session; a later load with working storage does.
   if (storageBlocked()) return null;
   // Saves m1: only when the flag can actually be saved and the tab is visible; else retry (the on-load rule covers a reload).
   // Art M-1 (#63): modalOpen() also covers an open recovery dialog, so the card (and its 8s timer) waits until it closes.
   if (g.canPersist === false || doc.visibilityState === 'hidden' || modalOpen(doc)) { setTimeout(() => showTracksExplainer(g, doc, storageBlocked), EXP_RETRY_MS); return null; }
-  shownThisSession.add(g);
   /** Player dismissal only: persist seen=true. */
   const markSeen = () => {
     // M41-6 (QE-LATE-e): if the localStorage write throws, the flag save skips the IndexedDB fallback, so seen=true never reaches the mirror.

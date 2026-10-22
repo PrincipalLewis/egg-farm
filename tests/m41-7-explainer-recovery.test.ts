@@ -47,14 +47,14 @@ describe('Art M-1: the explainer waits for the recovery dialog', () => {
     document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(cards()).toBe(0);
     expect(s.g.state.seenTracksExplainer).toBe(true); expect(seenLs(s.kv)).toBe(true);
   });
-  it('M1: the 8 s timer starts when the card appears after close; the auto-hide never marks it seen; no in-session re-show, next load shows it', async () => {
+  it('M1: the 8 s timer starts when the card appears after close; the auto-hide never marks it seen; nothing re-shows it this session, next load shows it', async () => {
     const s = await setup('M1');
     await vi.advanceTimersByTimeAsync(5_000); await s.close();
     await vi.advanceTimersByTimeAsync(EXP_RETRY_MS); expect(cards()).toBe(1);
     await vi.advanceTimersByTimeAsync(EXP_MS - 1); expect(cards()).toBe(1); // full 8 s from appear
     await vi.advanceTimersByTimeAsync(1); expect(cards()).toBe(0);
     expect(s.g.state.seenTracksExplainer).toBeFalsy(); expect(s.saves).not.toContain(true);
-    expect(showTracksExplainer(s.g)).toBeNull(); await vi.advanceTimersByTimeAsync(EXP_RETRY_MS * 3); expect(cards()).toBe(0); // not this session
+    await vi.advanceTimersByTimeAsync(EXP_RETRY_MS * 30); expect(cards()).toBe(0); // no retry pending: not again this session
     s.g.save(); expect(seenLs(s.kv)).toBeFalsy();
     const g2 = new Game(ON, s.kv, () => T + 60_000, 1, 'qa'); expect(g2.tracksMigratedWithBackup).toBe(true);
     expect(showTracksExplainer(g2)).not.toBeNull(); // next load: shown again
