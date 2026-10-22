@@ -18,8 +18,10 @@ const ON = structuredClone(live); ON.m4!.enabled = 1;
 const mem = (init: Record<string, string> = {}) => { const m = new Map(Object.entries(init)); return { m, getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k) } as any; };
 const T = JSON.parse(PRE).savedAt + 30_000;
 function boot(kv: any, t: number) { const g = new Game(ON, kv, () => t, 1, 'qa'); let shown = 0;
-  g.onTracksCommitted = () => { if (showTracksExplainer(g)) shown++; }; if (g.tracksMigratedWithBackup && showTracksExplainer(g)) shown++;
-  document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); return { g, count: () => shown }; }
+  // D-HOP-2026-10-22-06: seen is saved on dismissal, so the player dismisses each card as it appears.
+  const dismiss = (c: HTMLElement | null) => { if (c) { shown++; (c.querySelector('button') as HTMLButtonElement).click(); } };
+  g.onTracksCommitted = () => dismiss(showTracksExplainer(g)); if (g.tracksMigratedWithBackup) dismiss(showTracksExplainer(g));
+  return { g, count: () => shown }; }
 const seen = (kv: any) => JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer;
 describe('explainer (seenTracksExplainer)', () => {
   it('EXP-a existing save: shows exactly once at the in-session commit, persisted; reloads never show again', async () => {
@@ -78,6 +80,7 @@ describe('explainer while storage is blocked', () => {
       const r = boot(kv, t0 + 10_000); if (r.g.tracksMigrationPending) await r.g.startTracksMigration(); total = r.count(); }
     else lease.stop?.();
     expect(total, 'shown exactly once after unblock/reload').toBe(1);
+    document.querySelectorAll('.tracks-exp').forEach(e => (e.querySelector('button') as HTMLButtonElement).click()); // D-HOP-2026-10-22-06: seen is saved on dismissal
     expect(JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer).toBe(true);
     expect(boot(kv, t0 + 20_000).count(), 'never again').toBe(0);
   });
@@ -131,6 +134,7 @@ describe('EXP-SB-QE-LATE', () => {
     if (g.tracksMigratedWithBackup && show()) shown++;
     if (mode === 'commit-in-session') { const r = await g.startTracksMigration(); (globalThis as any).__r = r; }
     await vi.advanceTimersByTimeAsync(1500);
+    document.querySelectorAll('.tracks-exp').forEach(e => (e.querySelector('button') as HTMLButtonElement).click()); // D-HOP-2026-10-22-06: the flag write happens at dismissal, under QE
     const ev: any = { storageFailed: (g as any).storageFailed, mem: !!g.state.seenTracksExplainer, persistedBefore: JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer ?? null, cardsDuringQE: cards() + shown };
     ctl.quota = false; g.save(); await vi.advanceTimersByTimeAsync(3000);
     ev.persistedAfterAutosave = JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer ?? null; ev.storageFailedAfter = (g as any).storageFailed;
@@ -138,7 +142,8 @@ describe('EXP-SB-QE-LATE', () => {
     const r = boot(kv, t0 + 10_000); if (r.g.tracksMigrationPending) await r.g.startTracksMigration(); ev.cardsOnReload = r.count();
     ev.cardsOnReload2 = boot(kv, t0 + 20_000).count();
     console.log('QE_LATE ' + mode + ' ' + JSON.stringify(ev));
-    expect(ev.cardsDuringQE + ev.cardsOnReload + ev.cardsOnReload2, 'card must be seen exactly once overall').toBe(1);
+    // D-HOP-2026-10-22-06: shown during QE but its dismissal could not persist seen -> shown once more on reload, then never.
+    expect([ev.mem, ev.persistedAfterAutosave === true, ev.cardsOnReload, ev.cardsOnReload2], 'no seen=true without a persisted dismissal').toEqual([false, false, 1, 0]);
   });
 });
 
@@ -164,7 +169,7 @@ describe('EXP-SB-QE-LATE mirror/reload variants', () => {
     const mk = async (t: number) => { let src = 'ls'; if (useM && idb.raw) { try { src = reconcile(kv, idb.raw, ON) as any; } catch { src = 'blocked'; } }
       const lease = new TabLease(kv, null, () => {}, () => Date.now()); lease.claim();
       const g = new Game(ON, kv, () => t, 1, 'qa', useM ? mirror : null, useM ? idb.raw : null); g.canWrite = () => lease.owns();
-      const sb = () => lease.storageBlocked || (g as any).storageFailed; let n = 0; const show = () => { const c = (showTracksExplainer as any)(g, document, sb); if (c) { n++; c.remove(); } };
+      const sb = () => lease.storageBlocked || (g as any).storageFailed; let n = 0; const show = () => { const c = (showTracksExplainer as any)(g, document, sb); if (c) { n++; c.querySelector('button').click(); } }; // dismissed
       g.onTracksCommitted = show; if (g.tracksMigratedWithBackup) show();
       let mig: any = null; if (g.tracksMigrationPending) mig = await g.startTracksMigration();
       return { g, lease, n: () => n, src, mig, snap: { coins: g.state.coinsCents, F: g.state.farmLevel, H: (g.state as any).hensLevel, V: (g.state as any).eggValueLevel, bid: (g.state as any).v6BackupId, newer: g.newerSave, recovery: g.recovery && g.recovery.case, refund: g.migrationRefundCents, pending: g.tracksMigrationPending } }; };
@@ -181,8 +186,9 @@ describe('EXP-SB-QE-LATE mirror/reload variants', () => {
     console.log(`QE_LATE_${v} ` + JSON.stringify(ev));
     const mono = (a: number[]) => a.every((x, i) => i === 0 || x >= a[i - 1]);
     expect(ev.qeHit, 'quota hit the flag write').toBe(true);
-    expect(shown, 'no card while quota fails').toBe(0);
-    expect(ev.total, 'exactly once overall after quota frees + reload').toBe(1);
+    // D-HOP-2026-10-22-06: the card shows and its dismissal is the write that hits the quota; seen stays false, so the
+    // first reload shows it once more (that dismissal persists), then never.
+    expect([shown, ev.mem, ev.reload1, ev.reload2], 'shown until a dismissal persists').toEqual([1, false, 1, 0]);
     expect(mono(lsSeqs), 'LS saveSeq monotonic ' + lsSeqs).toBe(true); expect(mono(idbSeqs), 'IDB saveSeq monotonic ' + idbSeqs).toBe(true);
     for (const s of [ev.s2, ev.s3]) { expect(s.newer, 'R3 newer-save guard must not trip').toBeNull(); expect(s.recovery ?? null, 'no recovery').toBeNull(); expect(s.pending, 'no pending migration').toBeFalsy(); expect(s.mig ?? null, 'no second migration').toBeNull();
       expect([s.coins, s.F, s.H, s.V, s.bid], 'no double migration/refund').toEqual([ev.s1.coins, ev.s1.F, ev.s1.H, ev.s1.V, ev.s1.bid]); }
