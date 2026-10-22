@@ -1,4 +1,4 @@
-// CSR-AC-IDB1 (spec v0.3.3 FROZEN sha256 bca075fe…0bae9c, IDB1-1..5): IndexedDB corrupt.<ts>[-n] copies in store `save`,
+// CSR-AC-IDB1 (spec m41-final sha256 6131c290…33334d, = v0.3.3 IDB1 ACs; IDB1-1..5): IndexedDB corrupt.<ts>[-n] copies in store `save`,
 // non-string main = corrupt (wrong_type), dedupe, cap 3 in one transaction, copy failure -> mirror off, copy awaited before new Game.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -12,7 +12,7 @@ const NOW = 1_792_400_000_000;
 type Fail = { cloneOnPut?: boolean; quotaOnPut?: boolean };
 /** Fake IndexedDB, one store, ordered transactions; log = committed ops `${txId}:${op}:${key}`. */
 function fakeIdb(fail: Fail = {}) {
-  const data = new Map<string, unknown>(); const log: string[] = []; let txN = 0; let chain = Promise.resolve();
+  const data = new Map<string, unknown>(); const log: string[] = []; const ranges: unknown[] = []; let txN = 0; let chain = Promise.resolve();
   const later = (f: () => void) => setTimeout(f, 0);
   const db: any = { objectStoreNames: { contains: () => true }, createObjectStore() {},
     transaction(_n: string, mode: string) {
@@ -23,7 +23,7 @@ function fakeIdb(fail: Fail = {}) {
       const view = () => { const m = new Map(data); for (const [op, k, v] of staged) op === 'put' ? m.set(k, v) : m.delete(k); return m; };
       t.objectStore = () => ({
         get: (k: string) => { const r: any = {}; step(() => { r.result = view().get(k); r.onsuccess?.(); }); return r; },
-        getAllKeys: () => { const r: any = {}; step(() => { r.result = [...view().keys()].sort(); r.onsuccess?.(); }); return r; },
+        getAllKeys: (q?: { lower: string; upper: string }) => { ranges.push(q); const r: any = {}; step(() => { r.result = [...view().keys()].filter(k => !q || (k >= q.lower && k <= q.upper)).sort(); r.onsuccess?.(); }); return r; },
         put: (v: unknown, k: string) => {
           if (fail.cloneOnPut && k.startsWith('corrupt.')) throw new DOMException('x', 'DataCloneError');
           step(() => { if (fail.quotaOnPut && k.startsWith('corrupt.')) throw new DOMException('full', 'QuotaExceededError'); staged.push(['put', k, structuredClone(v)]); }); return {};
@@ -34,7 +34,7 @@ function fakeIdb(fail: Fail = {}) {
     } };
   void chain;
   const factory: any = { open: () => { const r: any = {}; later(() => { r.result = db; r.onupgradeneeded?.(); r.onsuccess?.(); }); return r; } };
-  return { db, data, log, factory };
+  return { db, data, log, factory, ranges };
 }
 const corruptKeys = (d: Map<string, unknown>) => [...d.keys()].filter(k => k.startsWith(IDB_CORRUPT_PREFIX));
 
@@ -52,6 +52,15 @@ describe('IDB1-1 names / key format / cap', () => {
     expect(corruptKeys(f.data).sort()).toEqual(['corrupt.1000', 'corrupt.900-10', 'corrupt.950']);
     const ops = f.log.filter(l => l.includes('corrupt.')); expect(new Set(ops.map(l => l.split(':')[0])).size).toBe(1);
     expect(ops).toContain(`${ops[0].split(':')[0]}:del:corrupt.900-2`);
+  });
+  it('enumerates by IDBKeyRange.bound("corrupt.", "corrupt.\\uffff") (no index key); keys outside the range are never touched', async () => {
+    const g = globalThis as any, had = 'IDBKeyRange' in g, prev = g.IDBKeyRange;
+    g.IDBKeyRange = { bound: (lower: string, upper: string) => ({ lower, upper }) };
+    try {
+      const f = fakeIdb(); f.data.set('other', 'o'); f.data.set('v6_backup', 'v'); const m = new IdbMirror(f.db);
+      expect(await m.preserveCorrupt('a', 1000)).toBe(true);
+      expect(f.ranges).toEqual([{ lower: 'corrupt.', upper: 'corrupt.\uffff' }]); expect(f.data.get('other')).toBe('o'); expect(f.data.get('v6_backup')).toBe('v');
+    } finally { if (had) g.IDBKeyRange = prev; else delete g.IDBKeyRange; }
   });
   it('preserveCorrupt clears main in the same transaction (the stale corrupt main can never outrank the new farm)', async () => {
     const f = fakeIdb(); f.data.set(IDB_KEY, 'bad'); const m = new IdbMirror(f.db); await m.preserveCorrupt('bad', 1000);
@@ -112,6 +121,6 @@ describe('IDB1-5 ordering: the copy completes before the first main put of the n
     await new Promise(r => setTimeout(r, 20));
     const iCopy = f.log.findIndex(l => l.includes(':put:corrupt.')), iMain = f.log.findIndex(l => l.endsWith(`:put:${IDB_KEY}`));
     expect(iCopy).toBeGreaterThanOrEqual(0); expect(iMain).toBeGreaterThan(iCopy);
-    expect(f.data.get(`corrupt.${NOW}`)).toEqual(val); expect(f.data.get(IDB_KEY)).toBe(kv.getItem(SAVE_KEY));
+    expect(f.data.get(`corrupt.${NOW}`)).toEqual(val); expect(f.data.get(IDB_KEY)).toBe(kv.getItem(SAVE_KEY)); expect(corruptKeys(f.data)).toHaveLength(1); // IDB1-1: main + exactly one corrupt.<ts>
   });
 });

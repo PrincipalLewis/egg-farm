@@ -13,6 +13,8 @@ export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** CSR-AC-IDB1 IDB1-1 (spec v0.3.3): corrupt copies live in the SAME store as `main`, keys corrupt.<ts> / corrupt.<ts>-<n>
  *  (the localStorage collision suffix, save.ts preserveCorrupt), no index key (enumerated by prefix), cap 3 per store. */
 export const IDB_CORRUPT_PREFIX = 'corrupt.', IDB_CORRUPT_KEEP = 3;
+/** IDB1-1: `IDBKeyRange.bound('corrupt.', 'corrupt.\uffff')`; undefined where IDBKeyRange is missing (the prefix filter below still applies). */
+export const corruptRange = (): IDBKeyRange | undefined => typeof IDBKeyRange === 'undefined' ? undefined : IDBKeyRange.bound(IDB_CORRUPT_PREFIX, `${IDB_CORRUPT_PREFIX}\uffff`);
 export type IdbValueKind = 'string' | 'nonstring' | 'none';
 const corruptParts = (k: string): [number, number] => { const m = /^corrupt\.(\d+)(?:-(\d+))?$/.exec(k); return m ? [Number(m[1]), m[2] ? Number(m[2]) : 0] : [Infinity, Infinity]; };
 /** Oldest first by parsed (ts, n), never lexical (corrupt.5-10 is newer than corrupt.5-2). */
@@ -87,7 +89,7 @@ export class IdbMirror {
       try {
         const t = this.tx('readwrite'), os = t.objectStore(IDB_STORE);
         t.oncomplete = () => fin(true); t.onerror = t.onabort = () => fin(false);
-        const fp = fingerprint(value), kr = os.getAllKeys();
+        const fp = fingerprint(value), kr = os.getAllKeys(corruptRange()); // IDB1-1: prefix range, no index key
         kr.onsuccess = () => {
           try {
             const keys = (kr.result as IDBValidKey[]).filter((k): k is string => typeof k === 'string' && k.startsWith(IDB_CORRUPT_PREFIX)).sort(idbCorruptOrder);
