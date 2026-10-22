@@ -80,7 +80,7 @@ export class IdbMirror {
     catch { return undefined; }
   }
   /** IDB1-1..4: keep a corrupt save/main value as corrupt.<ts>[-n] in this store, structured-cloned as is, deduped against every
-   *  existing corrupt.* value, oldest by (ts, n) evicted beyond IDB_CORRUPT_KEEP and `main` deleted, all in ONE readwrite
+   *  existing corrupt.* value, oldest by (ts, n) evicted beyond IDB_CORRUPT_KEEP and `main` deleted (only after a corrupt.* put), all in ONE readwrite
    *  transaction (so the stale corrupt main can't outrank the new farm's first write, idb-mirror write() rank guard). Resolves
    *  true once committed (or already kept), false on DataCloneError / QuotaExceededError / abort (IDB1-3). Never throws. */
   preserveCorrupt(value: unknown, ts: number): Promise<boolean> {
@@ -95,7 +95,10 @@ export class IdbMirror {
             const keys = (kr.result as IDBValidKey[]).filter((k): k is string => typeof k === 'string' && k.startsWith(IDB_CORRUPT_PREFIX)).sort(idbCorruptOrder);
             const vals: unknown[] = []; let left = keys.length;
             const next = () => {
-              if (fp !== null && vals.some(v => fingerprint(v) === fp)) { os.delete(IDB_KEY); return; } // already kept
+              const kept = fp !== null ? vals.findIndex(v => fingerprint(v) === fp) : -1;
+              // D-HOP-2026-10-22-01 (a): main is deleted ONLY after a corrupt.* put queued in this same transaction, so an abort
+              // (DataCloneError, quota, any abort) rolls both back. Already kept: re-put that entry (no new key), then delete.
+              if (kept >= 0) { os.put(vals[kept], keys[kept]); os.delete(IDB_KEY); return; }
               let key = `${IDB_CORRUPT_PREFIX}${ts}`; for (let n = 1; keys.includes(key); n++) key = `${IDB_CORRUPT_PREFIX}${ts}-${n}`;
               os.put(value, key); os.delete(IDB_KEY);
               const all = [...keys, key].sort(idbCorruptOrder); while (all.length > IDB_CORRUPT_KEEP) os.delete(all.shift()!);

@@ -333,7 +333,13 @@ function loadSafeInner(kv: KV, b: Balance, now: number, idbArg: IdbInput | strin
   let raw = kv.getItem(SAVE_KEY);
   let staleRestore = false;
   // 1. Stale-LS reconcile (non-corrupt only; reconcile() itself refuses a corrupt main, CSR-3).
-  if (!legacy && idbStr !== null && (raw === null ? bakNotCorrupt(kv, b) : validate(raw, b).ok) && pickNewest(raw, idbStr, b, now) === 'idb') { // G7: missing main + invalid .bak is CSR-1 recovery (M1), not stale
+  // D-HOP-2026-10-22-01 (d): no main, valid .bak AND valid IndexedDB -> CSR-2 tier A (rankCompare, tie -> .bak), silent;
+  // save_restore only when IndexedDB is picked. Missing main + invalid .bak stays a CSR-1 recovery (M1), not stale (G7).
+  if (!legacy && idbStr !== null && raw === null) {
+    const bk = kv.getItem(BAK_KEY), bkv = bk !== null ? validate(bk, b) : null, iv = validate(idbStr, b);
+    if (bkv?.ok && iv.ok && !(rankCompare(idbStr, bk, now) > 0)) return { file: bkv.file, recovery: null };
+  }
+  if (!legacy && idbStr !== null && (raw === null ? bakNotCorrupt(kv, b) : validate(raw, b).ok) && pickNewest(raw, idbStr, b, now) === 'idb') {
     try { kv.setItem(SAVE_KEY, idbStr); raw = idbStr; staleRestore = true; } catch { /* quota: localStorage as-is (rc1 behaviour) */ }
   }
   const mainV = raw !== null ? validate(raw, b) : null;
@@ -356,7 +362,9 @@ function loadSafeInner(kv: KV, b: Balance, now: number, idbArg: IdbInput | strin
     if (bv!.ok) return { file: bv!.file, recovery: { case: 'R', reason: 'missing', had_backup: true, restored_from_backup: true, copy_failed: false, raw: '', source: 'bak', store: 'ls', tried: [{ source: 'bak', result: 'valid' }], restored_version: storedVersion(bakRaw), migrated: !!bv!.file.tracksMigrated, ...restoredMeta(bv!.file, now) } };
     reason = (bv as { reason: CorruptReason }).reason;
   } else if (idbT.result === 'invalid') { reason = idbT.reason as CorruptReason; store = 'idb'; } // CSR-AC-IDB1 case (i)
-  else return { file: null, recovery: null }; // nothing stored (or IndexedDB unknown with no localStorage copy: legacy new game)
+  // Nothing stored. D-HOP-2026-10-22-01 (c): with IndexedDB unknown this is a fresh farm (CSR-1, no dialog) and the session
+  // never writes the mirror (a hidden IndexedDB farm is the M4.2 gap), so Game sets mirror = null.
+  else return { file: null, recovery: null, ...(idbT.result === 'unavailable' ? { mirrorOff: true } : {}) };
   const seen = new Set<string>();
   const copied = raw !== null ? preserveOnce(kv, raw, now, seen) : bakRaw !== null ? true : !idbCopyFailed;
   const bakT: Tried = bakRaw === null ? { source: 'bak', result: 'absent' } : bv!.ok ? { source: 'bak', result: 'valid' } : { source: 'bak', result: 'invalid', reason: (bv as { reason: string }).reason };
