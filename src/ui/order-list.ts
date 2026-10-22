@@ -69,6 +69,19 @@ export class OrderList {
     const w = Math.min(Math.max(88, max), Math.max(88, cap));
     this.list.style.setProperty('--sell-w', `${Math.ceil(w)}px`);
   }
+  /** QA4-1 / number-format-big §4 (the WebKit 'eggs' drop): count and $ never truncate and 'eggs' must stay whole, so a card
+   *  line that doesn't fit steps its font down (16 -> 14 -> 12px tight). Only cards whose .egg would ellipsize change; re-fit only
+   *  when the line text or the card width changes. The old .egg ellipsis stays as the last resort. */
+  private syncLineFit() {
+    for (const l1 of this.list.querySelectorAll<HTMLElement>('.order .l1')) {
+      const egg = l1.querySelector<HTMLElement>('.egg'); if (!egg) continue;
+      const key = `${l1.textContent}|${l1.clientWidth}`; if (l1.dataset.fit === key) continue;
+      l1.classList.remove('fit1', 'fit2');
+      const cut = () => egg.scrollWidth > egg.clientWidth + 0.5;
+      if (cut()) { l1.classList.add('fit1'); if (cut()) l1.classList.replace('fit1', 'fit2'); }
+      l1.dataset.fit = `${l1.textContent}|${l1.clientWidth}`;
+    }
+  }
   private make(v: OrderView) {
     const el = document.createElement('div'); el.dataset.row = String(v.id); el.dataset.id = String(v.id);
     el.innerHTML = `<div class="av"><img src="${this.avatar}" alt=""></div><div class="txt"><div class="l1"><span class="n"></span><span class="egg"></span><span class="v"></span></div><div class="bar" role="progressbar" aria-valuemin="0"><i></i></div></div><button data-id="${v.id}"></button>`;
@@ -124,7 +137,7 @@ export class OrderList {
       if (firstOrToggle || t - this.chipAt >= 2000) { clearTimeout(this.chipTimer); write(); }
       else if (!this.chipTimer) this.chipTimer = window.setTimeout(write, 2000 - (t - this.chipAt));
     }
-    this.syncSellWidth();
+    this.syncSellWidth(); this.syncLineFit();
     if (frozen) setTimeout(() => this.kick(), 320);
   }
   node(id: number) { return this.nodes.get(id); }

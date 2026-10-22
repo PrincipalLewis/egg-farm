@@ -91,3 +91,12 @@ describe('R5: Sell floor (approved): previews never show more than the credit', 
     expect(fmtMoneyPreview(1.999e15 * 100)).toBe('$1.9Qa'); expect(fmtCountFloor(9.999e36)).toBe('9.99e36');
   });
 });
+
+describe("QA4-1: the order card keeps 'eggs' whole (count and $ never truncate)", () => {
+  const css = readFileSync('src/ui/styles.css', 'utf8'), list = readFileSync('src/ui/order-list.ts', 'utf8');
+  it('fit tiers 14px / 12px tight, applied by OrderList.syncLineFit after the Sell width sync', () => {
+    expect(css).toMatch(/\.order \.l1\.fit1\{font-size:14px\}\.order \.l1\.fit2\{font-size:12px;letter-spacing:-\.02em\}/);
+    expect(list).toMatch(/this\.syncSellWidth\(\); this\.syncLineFit\(\);/);
+    expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/); expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
+  });
+});

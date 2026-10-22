@@ -4,6 +4,9 @@
 // Usage: npm run build:qa && node scripts/m41-9-bignum-shots.mjs <chromium|firefox|webkit> [outDir]
 //   one engine per run, under the browser-test flock. outDir defaults to /workspace/wt-ui-shots/m41-9-<sha7 of the served build>/
 //   and must end with -<sha7>; no environment override. A README names the served commit.
+// Clip rule: text overflowing its box (scrollWidth > clientWidth + 1) or the viewport; for the Sell button, its .sk/.sy text
+// leaving the button's border box (Firefox reports scrollWidth without the border, so the box test is the visual one).
+// Elements inside a closed sheet (display:none, width 0, scrollWidth 0) are logged as hidden, not scored.
 // Seeding (QA handle only, never a save): g.state = {...} for coins / basket / one customer. The farm cost comes from
 // balance.farm.costTable / the curve and can never reach $1e35, so the upgrade-row cost uses a SEEDED BALANCE OVERRIDE:
 // g.b is replaced by a copy whose farm.costTable is the target dollars at every level (UI reads g.balance live).
@@ -48,7 +51,8 @@ const nav = (p, n) => p.evaluate(n => { const b = document.querySelector(`nav [d
 const measure = p => p.evaluate(() => { const q = s => document.querySelector(s); const vw = innerWidth;
   const m = (k, el) => { if (!el) return { k, missing: true }; const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
     return { k, text: el.innerText ?? el.textContent, aria: el.getAttribute('aria-label'), sw: el.scrollWidth, cw: el.clientWidth, left: Math.round(r.left), right: Math.round(r.right), w: Math.round(r.width), vw,
-      clip: el.scrollWidth > el.clientWidth + 1 || r.right > vw + 0.5 || r.left < -0.5, ell: cs.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 1, visible: r.width > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' }; };
+      clip: (el.matches('.btn.sell') ? [...el.querySelectorAll('.sk,.sy')].some(t => { const q = t.getBoundingClientRect(); return q.left < r.left - 0.5 || q.right > r.right + 0.5; }) : el.scrollWidth > el.clientWidth + 1) || r.right > vw + 0.5 || r.left < -0.5,
+      font: cs.fontSize, cls: el.className, ell: cs.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 1, visible: r.width > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' }; };
   return [m('money pill #coins', q('#coins')), m('money pill .pill.coins', q('.pill.coins')), m('eggs counter #basket', q('#basket')), m('eggs counter .pill.basket', q('.pill.basket')),
     m('order card .l1', q('#mRows .order .l1')), m('order card .n', q('#mRows .order .l1 .n')), m('order card .egg', q('#mRows .order .l1 .egg')), m('order card .v', q('#mRows .order .l1 .v')),
     m('Sell button', q('#mRows .order .btn.sell')), m('Sell .sk', q('#mRows .order .btn.sell .sk')), m('Sell .sy', q('#mRows .order .btn.sell .sy')), m('Sell all', q('#sellAll')),
@@ -58,7 +62,7 @@ const eggsWord = (shot, ms) => { const e = ms.find(x => x.k === 'order card .egg
   const pass = e.visible && !e.ell && e.w >= 4 && e.text === 'eggs'; if (!pass) bad++;
   manifest.shots.push({ shot, eggsWord: { pass, text: e.text, w: e.w, ell: e.ell } }); console.log(`${shot} order card 'eggs' word: ${pass ? 'PASS' : 'FAIL'} ${JSON.stringify(e.text)} w=${e.w}`); };
 const record = (shot, ms) => { manifest.shots.push({ shot, elements: ms });
-  for (const e of ms) { if (e.missing) continue; const fail = e.clip || (e.k === 'order card .egg' && (!e.visible || e.w < 4 || e.ell));
+  for (const e of ms) { if (e.missing) continue; if (!e.visible && e.sw === 0 && e.w === 0) { console.log(`${shot} ${e.k}: hidden (sheet closed)`); continue; } const fail = e.clip || (e.k === 'order card .egg' && (!e.visible || e.w < 4 || e.ell));
     if (fail) bad++; console.log(`${shot} ${e.k}: ${fail ? 'CLIP/DROP' : 'ok'} sw=${e.sw} cw=${e.cw} w=${e.w} text=${JSON.stringify(e.text)}`); } };
 for (const [w, h] of WIDTHS) {
   const { ctx, p } = await open(w, h);
