@@ -423,15 +423,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (gl.parts) { const html = goalLabelHtml(gl.parts); if (goalLbl.dataset.html !== html) { goalLbl.dataset.html = html; goalLbl.innerHTML = html; } goalLbl.classList.add('ng'); }
     else { if (goalLbl.dataset.html) { delete goalLbl.dataset.html; goalLbl.textContent = ''; } goalLbl.classList.remove('ng'); setText(goalLbl, gl.label); } setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
-    // m4a-spec v1.25 F4-14a (label-in-name, WCAG 2.5.3): F4 targets take their name from the visible text (★ / JS `…` are
-    // aria-hidden) and the spelled-out F4-14 sentence + status sentence as the description. Other targets keep the aria-label.
-    if (gl.parts) { goalBtn.removeAttribute('aria-label'); setText(goalDesc, goalAria(gl)); goalBtn.setAttribute('aria-describedby', 'goalDesc'); }
-    else { goalBtn.setAttribute('aria-label', goalAria(gl)); goalBtn.removeAttribute('aria-describedby'); setText(goalDesc, ''); }
+    // m4a-spec v1.25 F4-14a + Art 2.5.3 ruling (label-in-name): EVERY target (F4, FARM, workers, done, flag-off) takes its
+    // name from the visible text (★ / JS `…` are aria-hidden) and the B3 sentence (goalAria; non-F4 labels spell L{n} out when M4 is on) is the
+    // description. No aria-label: `Next goal: …` is not visible and swapped `:` for `,`, so it failed axe on FARM / workers.
+    setText(goalDesc, goalAria(gl, M4)); if (goalBtn.getAttribute('aria-describedby') !== 'goalDesc') goalBtn.setAttribute('aria-describedby', 'goalDesc');
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
       if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
-      // B3: announce the CURRENT goal (same text as the chip's aria-label) on target or state change, then clear the
+      // B3: announce the CURRENT goal (same text as the #goal description) on target or state change, then clear the
       // live region so a screen reader browsing later never reads a stale target/timer.
-      setText(goalLive, goalAria(gl)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
+      setText(goalLive, goalAria(gl, M4)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
       if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (live.length <= 26) sparkle(goalSt, 4); }
       if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
     }

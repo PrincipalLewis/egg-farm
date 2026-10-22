@@ -87,7 +87,9 @@ const UNIT: Record<string, string> = { s: 'second', min: 'minute', h: 'hour' };
 /** "~1 min 5 s" -> "1 minute 5 seconds" (B3: singular for 1). */
 export const spokenDuration = (status: string) =>
   status.replace('~', '').replace(/(\d+)\s*(min|s|h)\b/g, (_, n: string, u: string) => `${n} ${UNIT[u]}${n === '1' ? '' : 's'}`).trim();
-/** B3 sentence. Targets without F4 parts: the #goal aria-label (unchanged). F4 targets (m4a-spec v1.25 F4-14a): the
- *  accessible DESCRIPTION (aria-describedby), while the name comes from the visible text (parts.accName + status). */
-export const goalAria = (g: Goal) => g.state === 'done' ? 'Next goal: all upgrades done.' :
-  `Next goal: ${g.parts ? g.parts.aria : g.label.replace(':', ',')}. ${g.state === 'ready' ? 'Ready now.' : g.state === 'noincome' ? 'Sell eggs to earn coins.' : `Ready in about ${spokenDuration(g.status)}.`}`;
+/** B3 sentence. Since m4a-spec v1.25 F4-14a + the Art 2.5.3 ruling it is the #goal accessible DESCRIPTION
+ *  (aria-describedby → #goalDesc) for every target, and the live-region text; the name is the visible text.
+ *  `spell` (M4 on; Art final call on #62): non-F4 labels spell `L{n}` out, `Farm L2` → `Next goal: Farm level 2. …`,
+ *  like the F4 sentences. Flag-off (spell = false) keeps the AC5 sentence byte-identical. */
+export const goalAria = (g: Goal, spell = false) => g.state === 'done' ? 'Next goal: all upgrades done.' :
+  `Next goal: ${g.parts ? g.parts.aria : (spell ? g.label.replace(/\bL(\d+)\b/, 'level $1') : g.label).replace(':', ',')}. ${g.state === 'ready' ? 'Ready now.' : g.state === 'noincome' ? 'Sell eggs to earn coins.' : `Ready in about ${spokenDuration(g.status)}.`}`;
