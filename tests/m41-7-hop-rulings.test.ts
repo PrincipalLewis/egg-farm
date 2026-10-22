@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
 import { IdbMirror, IDB_KEY, IDB_CORRUPT_PREFIX, bootPreserveIdb } from '../src/save/idb-mirror';
 import { Game } from '../src/game';
-import { SAVE_KEY, BAK_KEY, serialize, loadSafe, rankCompare } from '../src/save/save';
+import { SAVE_KEY, BAK_KEY, serialize, loadSafe, rankCompare, NO_MAIN_BAK_DIALOG } from '../src/save/save';
 import { initialState } from '../src/sim/state';
 import { mem } from './helpers';
 import { fakeIdb, type Fail } from './fake-idb';
@@ -17,6 +17,7 @@ const good = (F: number, seq = 5, at = NOW - 60_000) => serialize({ ...initialSt
 const corruptKeys = (d: Map<string, unknown>) => [...d.keys()].filter(k => k.startsWith(IDB_CORRUPT_PREFIX));
 const ev = (g: Game, t: string) => g.telemetry.events().filter((e: any) => e.type === t) as any[];
 const tick = (ms = 20) => new Promise(r => setTimeout(r, ms));
+const kvKeys = (kv: any): string[] => kv.m ? [...kv.m.keys()] : kv.keys ? [...kv.keys()] : Object.keys(kv.store ?? kv.data ?? {});
 const tx = (l: string) => l.split(':')[0];
 const ABC = fx('IDB1-abc.idb-main.raw');
 /** One autosave, one purchase and one pagehide save (CSR-13a / ruling (c) AC). */
@@ -102,29 +103,76 @@ describe('(c) no LS main, no .bak, IndexedDB unknown: fresh farm (CSR-1), no dia
   });
 });
 
-describe('(d) no LS main, valid .bak and valid IDB: CSR-2 tier A (rankCompare, tie -> .bak), silent', () => {
-  const run = (bak: string, idb: string) => {
+describe('(d) as amended by D-HOP-2026-10-22-04: no LS main, valid .bak and valid IDB: rankCompare, tie -> .bak; .bak -> M1 dialog, IDB -> silent', () => {
+  const run = (bak: string, idb: string | null, status: 'ok' | 'absent' = 'ok') => {
     const kv = mem(); kv.setItem(BAK_KEY, bak);
-    const g = new Game(b, kv, () => NOW, 1, 'test', null, idb, { idbBoot: 'ok' }); return { g, kv };
+    const g = new Game(b, kv, () => NOW, 1, 'test', null, idb, { idbBoot: status }); return { g, kv };
   };
-  it('IDB newer -> IDB, save_restore {source:idb} once, silent', () => {
+  const m1 = (g: Game) => { expect(g.recoveryOutcome).toBe('restored'); expect(g.recovery).toMatchObject({ case: 'R', source: 'bak', reason: 'missing', store: 'ls' }); expect(ev(g, 'save_restore')).toEqual([]); };
+  it('IDB newer -> IDB, no dialog, save_restore {source:idb} exactly once', () => {
     const bak = good(4, 5), idb = good(9, 9); expect(rankCompare(idb, bak, NOW)).toBeGreaterThan(0);
-    const { g } = run(bak, idb);
-    expect(g.state.farmLevel).toBe(9); expect(g.recovery).toBeNull(); expect(ev(g, 'save_corrupt')).toEqual([]);
-    expect(ev(g, 'save_restore')).toEqual([expect.objectContaining({ source: 'idb' })]);
+    const { g, kv } = run(bak, idb);
+    expect(g.state.farmLevel).toBe(9); expect(g.recovery).toBeNull(); expect(g.recoveryOutcome).toBeNull(); expect(ev(g, 'save_corrupt')).toEqual([]);
+    expect(ev(g, 'save_restore')).toHaveLength(1); expect(ev(g, 'save_restore')[0]).toMatchObject({ source: 'idb' });
+    g.save(); g.save(); expect(ev(g, 'save_restore')).toHaveLength(1); void kv;
   });
-  it('.bak newer -> .bak, no save_restore, silent', () => {
+  it('.bak newer -> .bak, M1 dialog (dd223f5 case R), no save_restore', () => {
     const bak = good(4, 9), idb = good(9, 5); expect(rankCompare(idb, bak, NOW)).toBeLessThan(0);
-    const { g } = run(bak, idb);
-    expect(g.state.farmLevel).toBe(4); expect(g.recovery).toBeNull(); expect(ev(g, 'save_corrupt')).toEqual([]); expect(ev(g, 'save_restore')).toEqual([]);
+    const { g } = run(bak, idb); expect(g.state.farmLevel).toBe(4); m1(g);
   });
-  it('tie -> .bak, no save_restore, silent', () => {
+  it('tie -> .bak, M1 dialog, no save_restore', () => {
     const bak = good(4, 5, NOW - 60_000), idb = good(9, 5, NOW - 60_000); expect(rankCompare(idb, bak, NOW)).toBe(0);
-    const { g } = run(bak, idb);
-    expect(g.state.farmLevel).toBe(4); expect(g.recovery).toBeNull(); expect(ev(g, 'save_restore')).toEqual([]);
+    const { g } = run(bak, idb); expect(g.state.farmLevel).toBe(4); m1(g);
   });
-  it('savedAt breaks a (version, committed, saveSeq) tie: newer savedAt IDB wins', () => {
+  it('-03 (4): .bak alone (IDB absent / no copy) -> M1 dialog, as at dd223f5', () => {
+    m1(run(good(4), null, 'absent').g); m1(run(good(4), null, 'ok').g);
+    const kv = mem(); kv.setItem(BAK_KEY, good(4)); const g = new Game(b, kv, () => NOW, 1, 'test'); m1(g); // legacy call
+  });
+  it('savedAt breaks a (version, committed, saveSeq) tie: newer savedAt IDB wins, silent', () => {
     const bak = good(4, 5, NOW - 120_000), idb = good(9, 5, NOW - 60_000); expect(rankCompare(idb, bak, NOW)).toBeGreaterThan(0);
-    expect(run(bak, idb).g.state.farmLevel).toBe(9);
+    const { g } = run(bak, idb); expect(g.state.farmLevel).toBe(9); expect(g.recovery).toBeNull();
+  });
+  it('the dialog-or-silent decision is one constant (NO_MAIN_BAK_DIALOG)', () => { expect(NO_MAIN_BAK_DIALOG).toBe(true); });
+});
+
+describe('D-HOP-2026-10-22-03', () => {
+  const BAD = '{"version":6,"savedAt":1,"state":{"coins';
+  const lsCopies = (kv: any) => { const out: string[] = []; for (const k of kvKeys(kv)) if (k.startsWith('eggfarm.save.corrupt.') && k !== 'eggfarm.save.corrupt.index') out.push(kv.getItem(k)); return out; };
+  it('(1) tried[] lists bak then idb every time; v6_backup only when tier A has no valid copy', () => {
+    const cases: [string | null, unknown, string[]][] = [
+      [good(4), good(9, 9), ['bak:valid', 'idb:valid']], [good(4, 9), good(9, 5), ['bak:valid', 'idb:valid']],
+      [null, good(9), ['bak:absent', 'idb:valid']], [good(4), null, ['bak:valid', 'idb:absent']],
+      ['{"b', '{"i', ['bak:invalid', 'idb:invalid', 'v6_backup:absent']], [null, null, ['bak:absent', 'idb:absent', 'v6_backup:absent']]];
+    for (const [bak, idb, want] of cases) {
+      const kv = mem(); kv.setItem(SAVE_KEY, BAD); if (bak !== null) kv.setItem(BAK_KEY, bak);
+      const r = loadSafe(kv, b, NOW, { status: 'ok', raw: idb });
+      expect(r.recovery!.tried!.map(t => `${t.source}:${t.result}`)).toEqual(want);
+    }
+    // no main + valid .bak (M1): both tier-A entries listed too
+    const kv = mem(); kv.setItem(BAK_KEY, good(4)); expect(loadSafe(kv, b, NOW, { status: 'ok', raw: null }).recovery!.tried!.map(t => t.source)).toEqual(['bak', 'idb']);
+  });
+  it('(2) defer: v6_backup never listed', () => {
+    const kv = mem(); kv.setItem(SAVE_KEY, BAD); kv.setItem('eggfarm.save.v6_backup', '{"migrationId":"x","raw":"{}"}');
+    const r = loadSafe(kv, b, NOW, { status: 'unknown', raw: null, reason: 'idb_timeout' });
+    expect(r.recovery!.case).toBe('D'); expect(r.recovery!.tried!.map(t => t.source)).toEqual(['bak', 'idb']);
+  });
+  it('(3) LS main corrupt + IDB corrupt (IDB1 case ii): LS bytes only in LS corrupt.*, IDB bytes only in IDB corrupt.*', async () => {
+    const f = fakeIdb(); f.data.set(IDB_KEY, ABC); const m = new IdbMirror(f.db); const kv = mem(); kv.setItem(SAVE_KEY, BAD);
+    const copy = await bootPreserveIdb(m, { status: 'ok', raw: ABC }, b, NOW); expect(copy).toBe('copied');
+    const g = new Game(b, kv, () => NOW, 1, 'test', m, ABC, { idbBoot: 'ok', idbCopy: copy }); await tick();
+    expect(g.recovery!.store).toBe('ls'); expect(lsCopies(kv)).toEqual([BAD]); expect(lsCopies(kv)).not.toContain(ABC);
+    expect(corruptKeys(f.data).map(k => f.data.get(k))).toEqual([ABC]);
+  });
+  it('(3) identical corrupt bytes in LS main and IDB: one copy per store (dedupe per store, not across)', async () => {
+    const f = fakeIdb(); f.data.set(IDB_KEY, BAD); const m = new IdbMirror(f.db); const kv = mem(); kv.setItem(SAVE_KEY, BAD);
+    const copy = await bootPreserveIdb(m, { status: 'ok', raw: BAD }, b, NOW); expect(copy).toBe('copied');
+    new Game(b, kv, () => NOW, 1, 'test', m, BAD, { idbBoot: 'ok', idbCopy: copy }); await tick();
+    expect(lsCopies(kv)).toEqual([BAD]); expect(corruptKeys(f.data).map(k => f.data.get(k))).toEqual([BAD]);
+  });
+  it('(3) corrupt .bak goes to LS only, never IDB', async () => {
+    const f = fakeIdb(); const m = new IdbMirror(f.db); f.data.set(IDB_KEY, good(2, 1)); const kv = mem(); kv.setItem(SAVE_KEY, BAD); kv.setItem(BAK_KEY, '{"bak');
+    expect(await bootPreserveIdb(m, { status: 'ok', raw: good(2, 1) }, b, NOW)).toBe('none');
+    new Game(b, kv, () => NOW, 1, 'test', m, good(2, 1), { idbBoot: 'ok', idbCopy: 'none' }); await tick();
+    expect(lsCopies(kv).sort()).toEqual([BAD, '{"bak'].sort()); expect(corruptKeys(f.data)).toEqual([]);
   });
 });
