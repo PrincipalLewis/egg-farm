@@ -104,10 +104,11 @@ export function recoveryNotice(r: CsrRecovery | null, o: { storageBlocked: boole
   const base = source === 'v6_backup' ? m2() : { id: 'M1' as NoticeId, source };
   return o.storageBlocked ? { ...base, id: 'M5' } : base;
 }
-/** Notice telemetry payload (interface §3) plus `store` (where the triggering corrupt copy was found, §4.9). Today's loader
- *  only recovers from localStorage, so an unset `store` on a corrupt-copy notice is 'ls'; 'cantsave' has no corrupt copy. */
+/** Notice telemetry payload (interface §3) plus `store` (where the triggering corrupt copy was found, §4.9). `store` is owned
+ *  by Saves' loader (required on save_corrupt) and is passed through as-is: it is NEVER defaulted here, since a guessed 'ls'
+ *  would mislabel the CSR-AC-IDB1 IDB-only case. Unset (including 'cantsave') -> null. */
 export function noticePayload(n: RecoveryNotice, r: CsrRecovery): Record<string, unknown> {
-  return { notice: n.id, source: n.source, ...(n.variant ? { variant: n.variant } : {}), store: r.store ?? (n.id === 'cantsave' ? null : 'ls') };
+  return { notice: n.id, source: n.source, ...(n.variant ? { variant: n.variant } : {}), store: r.store ?? null };
 }
 /** True once Saves' loader output (interface §1, `source`) is present: only then is the CSR-9 copy swapped in. Until then
  *  recoveryCopy() keeps today's AC14b strings byte for byte (interface line 4), so existing tests and shots keep passing. */
