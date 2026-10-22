@@ -147,12 +147,12 @@ describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates'
     expect(css).not.toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*text-overflow:ellipsis/);
     expect(listSrc).toMatch(/--sell-w/);
   });
-  it('3: row count and $ never truncate; only .egg may ellipsize (Art & UX)', () => {
+  it('3: row count and $ never truncate; .egg no longer ellipsizes either (Art ruling on #64 / HoE Oct 22: wrap instead)', () => {
     expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/);
     expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
     expect(css).toMatch(/\.order \.l1 \.v\{[^}]*overflow:visible/);
     expect(css).not.toMatch(/\.order \.l1 \.v\{[^}]*text-overflow:ellipsis/);
-    expect(css).toMatch(/\.order \.l1 \.egg\{[^}]*text-overflow:ellipsis/);
+    expect(css).not.toMatch(/\.order \.l1 \.egg\{[^}]*text-overflow:ellipsis/); expect(css).toMatch(/\.order \.l1 \.egg\{[^}]*flex-shrink:0/);
   });
   it('≤375 does not cap the Sell button at 96px', () => {
     expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell[^}]*max-width:96px/);
