@@ -1,8 +1,16 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
+// Usage (also: node scripts/rc0-browser.mjs --help):
+//   PORT=<n>       pin the preview port (default: a free port). Non-numeric = exit 2.
+//   The served dist-qa must be THIS checkout: build-id hash = HEAD and the same dirty state, else exit 2.
+//   ALLOW_DIRTY=1  admit a +dirty build while the tree is dirty (a deliberate flag-off run). ALLOW_NO_GIT=1 skips the check
+//                  when git is unavailable. A clean build on a dirty tree (incl. untracked files) is always refused.
+//   Flag-off rc0:  set m4.enabled=0 in src/config/balance.json, npm run build:qa, ALLOW_DIRTY=1 node scripts/rc0-browser.mjs;
+//                  then revert balance.json and npm run build:qa again (a +dirty build on a clean tree is refused).
 // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
 import { chromium, webkit, firefox } from 'playwright-core';
 import { serveForRun } from './serve-own.mjs';
 import { readFileSync, mkdirSync } from 'node:fs';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 9).map(l => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
 if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
