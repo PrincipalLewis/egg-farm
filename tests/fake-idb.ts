@@ -1,7 +1,7 @@
 // Test-only fake IndexedDB (moved from tests/csr-idb1-mirror.test.ts for reuse; M41-7 D-HOP-2026-10-22-01 adds abortOnCommit).
 export type Fail = { cloneOnPut?: boolean; quotaOnPut?: boolean; /** D-HOP-2026-10-22-01 (a): every request succeeds, then the transaction aborts (no commit). */ abortOnCommit?: boolean;
   /** CSR-8 8b (QA's injected delay): the FIRST readwrite transaction holds its commit until release(); every transaction created
-   *  after it waits for it first (IndexedDB runs overlapping-scope transactions in creation order). */ holdFirstReadwrite?: boolean };
+   *  after it waits for it first (IndexedDB runs overlapping-scope transactions in creation order). */ holdFirstReadwrite?: boolean; /** D-HOP-2026-10-23-01 AC4: a put to this exact key fails with QuotaExceededError (unhandled, so the transaction aborts). */ quotaOnPutKey?: string };
 /** Fake IndexedDB, one store, ordered transactions; log = committed ops `${txId}:${op}:${key}`. */
 export function fakeIdb(fail: Fail = {}) {
   const data = new Map<string, unknown>(); const log: string[] = []; const ranges: unknown[] = []; let txN = 0; let chain = Promise.resolve();
@@ -23,7 +23,7 @@ export function fakeIdb(fail: Fail = {}) {
         getAllKeys: (q?: { lower: string; upper: string }) => { ranges.push(q); const r: any = {}; step(() => { r.result = [...view().keys()].filter(k => !q || (k >= q.lower && k <= q.upper)).sort(); r.onsuccess?.(); }); return r; },
         put: (v: unknown, k: string) => {
           if (fail.cloneOnPut && k.startsWith('corrupt.')) throw new DOMException('x', 'DataCloneError');
-          step(() => { if (fail.quotaOnPut && k.startsWith('corrupt.')) throw new DOMException('full', 'QuotaExceededError'); staged.push(['put', k, structuredClone(v)]); }); return {};
+          step(() => { if (fail.quotaOnPutKey === k) throw new DOMException('full', 'QuotaExceededError'); if (fail.quotaOnPut && k.startsWith('corrupt.')) throw new DOMException('full', 'QuotaExceededError'); staged.push(['put', k, structuredClone(v)]); }); return {};
         },
         delete: (k: string) => { step(() => staged.push(['del', k, undefined])); return {}; },
       });

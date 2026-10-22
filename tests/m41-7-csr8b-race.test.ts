@@ -116,6 +116,35 @@ describe('CSR-8 8b criterion: no false trigger on old, already surfaced corrupt.
     const T = await open(f, kv, T0 + 3_600_000 + 5_000); T.lease.claim();
     const g = await finish(T, kv, T0 + 3_600_000 + 5_000) as Game; expect(g.isNewGame).toBe(true); assertIdb1(g); // never silent
   });
+  it('D-HOP-2026-10-23-01 AC3: the same corrupt.* copy present at Reset, clock rolled back 25 h before the reload: no dialog, silent fresh farm', async () => {
+    const f = withCopy(); f.data.set(IDB_KEY, good(7)); const kv = mem({ [SAVE_KEY]: good(7) });
+    vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(NOW);
+    try {
+      await reset(kv, new IdbMirror(f.db)); expect(f.data.get(IDB_RESET_KEY)).toEqual([OLD]);
+      const back = NOW - 25 * 3_600_000; vi.setSystemTime(back); // same old copy, no new one
+      expect(corruptKeys(f.data)).toEqual([OLD]);
+      const T = await open(f, kv, back); T.lease.claim();
+      expect(await bootOrphanIdb(T.mirror, { status: 'ok', raw: null }, kv, b)).toBeNull();
+      const g = await finish(T, kv, back) as Game;
+      expect(g.recovery).toBeNull(); expect(g.isNewGame).toBe(true); expect(ev(g, 'save_corrupt')).toHaveLength(0);
+      expect(corruptKeys(f.data)).toEqual([OLD]); expect(f.data.get(OLD)).toBe(ABC);
+    } finally { vi.useRealTimers(); }
+  });
+  it('D-HOP-2026-10-23-01 AC4: QuotaExceededError on the reset.surfaced put aborts the Reset tx: main, corrupt.* and reset.surfaced unchanged (no prior record / prior record); next boot unchanged', async () => {
+    for (const prior of [null, ['corrupt.1']] as const) {
+      const f = fakeIdb({ quotaOnPutKey: IDB_RESET_KEY }); f.data.set(OLD, ABC); f.data.set(IDB_KEY, good(7)); if (prior) f.data.set(IDB_RESET_KEY, [...prior]);
+      const before = new Map(f.data); const kv = mem({ [SAVE_KEY]: good(7) });
+      await reset(kv, new IdbMirror(f.db)); // resolves on abort, never throws
+      expect(f.log).toEqual([]); expect(f.data).toEqual(before);
+      expect(f.data.get(IDB_KEY)).toBe(good(7)); expect(corruptKeys(f.data)).toEqual([OLD]);
+      const m = new IdbMirror(f.db);
+      if (prior) expect(await m.readSurfaced()).toEqual(prior);
+      else { expect(f.data.has(IDB_RESET_KEY)).toBe(false); expect(await m.readSurfaced()).toEqual([]); } // [] = no record
+      const T = await open(f, kv, NOW); T.lease.claim(); expect(T.boot.value).toBe(good(7));
+      const g = await finish(T, kv, NOW) as Game;
+      expect(g.state.farmLevel).toBe(7); expect(ev(g, 'save_corrupt')).toHaveLength(0); expect(corruptKeys(f.data)).toEqual([OLD]);
+    }
+  });
   it('IndexedDB not definite (unknown / absent) or a read fails: no orphan (unchanged paths); clear() with no corrupt.* drops the record', async () => {
     const f = withCopy(); const kv = mem(); const m = new IdbMirror(f.db);
     expect(await bootOrphanIdb(m, { status: 'unknown', raw: null }, kv, b)).toBeNull();
