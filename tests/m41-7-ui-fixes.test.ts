@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // M41-7 rework (PR #63), Head of Art & UX P1/P2 on UI's src/ui/save-recovery.ts (art-ux/copy/csr9-recovery-copy.md
 // "Implementation confirmations"). Spec of record corrupt-save-recovery-spec.m41-final.md sha256 6131c290…433334d.
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { showRecoveryDialog, csrCopy, EXPORT_ARIA } from '../src/ui/save-recovery';
 import type { CsrRecovery } from '../src/ui/save-recovery';
 import type { Recovery } from '../src/save/save';
@@ -47,5 +47,30 @@ describe('P2 (WCAG 2.5.3): the accessible name starts with the visible label', (
     expect(EXPORT_ARIA.startsWith('Export old save')).toBe(true);
     const d = show(R({ case: 'Q', source: 'none', restored_from_backup: false, copy_failed: true }));
     expect(d.exp!.textContent).toBe('Export old save'); expect(d.exp!.getAttribute('aria-label')).toBe(EXPORT_ARIA); await d.close();
+  });
+});
+
+describe('CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered', () => {
+  const run = async (r: CsrRecovery, storageBlocked = false) => {
+    const track = vi.fn();
+    const p = showRecoveryDialog(r as unknown as Recovery, f => f, [], undefined, async () => true, { storageBlocked, now: NOW, track });
+    const shownBefore = track.mock.calls.filter(c => c[0] === 'save_recovery_notice_shown').length;
+    document.querySelector<HTMLButtonElement>('#rcGo')!.click(); await p;
+    const names = track.mock.calls.map(c => c[0]); return { shownBefore, names, calls: track.mock.calls };
+  };
+  const legacy = (x: Partial<CsrRecovery>) => { const r = R(x); delete (r as any).source; delete (r as any).store; return r; };
+  for (const [name, r, blocked] of [['legacy restored (would be M1)', legacy({}), false], ['legacy restored + storage blocked (would be M5)', legacy({}), true],
+    ['legacy fresh (would be M3)', legacy({ case: 'F', restored_from_backup: false }), false]] as [string, CsrRecovery, boolean][]) it(`${name}: no notice event`, async () => {
+    const { names } = await run(r, blocked);
+    expect(document.querySelector('.recovery-layer')).toBeNull(); // the dialog did render and close
+    expect(names.filter(n => n.startsWith('save_recovery_notice_'))).toEqual([]);
+  });
+  for (const [id, r, blocked] of [['M1', R({}), false], ['M2', R({ source: 'v6_backup', prevLevel: 17, restoredLevel: 12 }), false],
+    ['M3', R({ case: 'F', source: 'none', restored_from_backup: false }), false], ['M4', R({ case: 'D', source: 'deferred', restored_from_backup: false }), false],
+    ['M5', R({ live: () => '{live}' }), true]] as [string, CsrRecovery, boolean][]) it(`${id} (CSR copy): exactly one shown, one dismissed on close`, async () => {
+    const { shownBefore, names, calls } = await run(r, blocked);
+    expect(shownBefore).toBe(1);
+    expect(names.filter(n => n === 'save_recovery_notice_shown')).toHaveLength(1); expect(names.filter(n => n === 'save_recovery_notice_dismissed')).toHaveLength(1);
+    expect(calls.find(c => c[0] === 'save_recovery_notice_shown')![1]).toMatchObject({ notice: id });
   });
 });
