@@ -21,7 +21,7 @@ import { graderMult } from '../sim/workers';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
-import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, TRACK_FARM_MAX_TEXT, trackFarmMaxAria, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
@@ -493,12 +493,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const fx = t === 'hens'
       ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`]
       : [`Egg price ${arrow(fmtMoneyShort(trackPriceCents(F, H, V, b)), fmtMoneyShort(trackPriceCents(F, H, V + 1, b)))}`];
+    // D-HOP-40 (m4a-spec v1.24 §19 B1-9): capped with no Farm level <= farm max that unlocks it -> `Max for this farm`:
+    // no lock glyph (not .lock), muted MAX pill, no button / cost / .affordable, row-level aria like the MAX row.
+    const need = lock === 'cap' ? trackUnlockFarm(s, t, b) : null, farmMaxed = lock === 'cap' && need === null;
     const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
-      : lock === 'cap' ? (need => `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${need}.">${trackLockText(need)}</div>`)(trackUnlockFarm(s, t, b))
+      : farmMaxed ? `<span class="maxed farm-max" aria-hidden="true">${TRACK_FARM_MAX_TEXT}</span>`
+      : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${need}.">${trackLockText(need!)}</div>`
       : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
-    const best = rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
+    const best = !lock && rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
-    return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : ''}>
+    return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>
       <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
       <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;

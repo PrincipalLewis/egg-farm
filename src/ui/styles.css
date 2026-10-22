@@ -467,6 +467,8 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks .balanced .segs i b{display:block;height:100%;background:var(--c-yolk,#f6c445)}
 .tracks .balanced .segs i.weakest{outline:2px solid var(--c-yolk-dark,#c8901a);outline-offset:1px}
 @media (prefers-reduced-motion:reduce){.tracks .balanced .segs i b{transition:none}}
+/* D-HOP-40 B1-9: `Max for this farm` = the MAX pill, muted (Dust fill, ink text 7.5:1), no lock glyph, never wraps at 360 */
+.maxed.farm-max{background:var(--c-disabled);color:var(--c-text);white-space:nowrap}
 .up .lock{min-height:44px;display:flex;align-items:center;justify-content:flex-end;color:var(--c-ink,#3E2C23);font-weight:700}
 .up .lock::before{content:'';flex:none;width:12px;height:14px;margin-right:6px;background:
   linear-gradient(var(--c-disabled),var(--c-disabled)) 0 6px/12px 8px no-repeat,
