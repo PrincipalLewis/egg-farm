@@ -7,12 +7,15 @@
  * localStorage only, as in rc0.
  */
 import type { Balance } from '../config/balance';
-import { SAVE_KEY, BAK_KEY, RESET_AT_KEY, validate, newerStoredVersion, newerSaveVersion, rankCompare, pickNewest, type KV, type IdbInput } from './save';
+import { SAVE_KEY, BAK_KEY, validate, newerStoredVersion, newerSaveVersion, rankCompare, pickNewest, type KV, type IdbInput } from './save';
 export { pickNewest } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** CSR-AC-IDB1 IDB1-1 (spec v0.3.3): corrupt copies live in the SAME store as `main`, keys corrupt.<ts> / corrupt.<ts>-<n>
  *  (the localStorage collision suffix, save.ts preserveCorrupt), no index key (enumerated by prefix), cap 3 per store. */
 export const IDB_CORRUPT_PREFIX = 'corrupt.', IDB_CORRUPT_KEEP = 3;
+/** CSR-8 8b / Arch m1 (HoQA item 5): the corrupt.* keys that existed at the last Reset (already surfaced), written by clear().
+ *  Outside the corrupt.* range, so preserveCorrupt / readCorrupt never see it. */
+export const IDB_RESET_KEY = 'reset.surfaced';
 /** IDB1-1: `IDBKeyRange.bound('corrupt.', 'corrupt.\uffff')`; undefined where IDBKeyRange is missing (the prefix filter below still applies). */
 export const corruptRange = (): IDBKeyRange | undefined => typeof IDBKeyRange === 'undefined' ? undefined : IDBKeyRange.bound(IDB_CORRUPT_PREFIX, `${IDB_CORRUPT_PREFIX}\uffff`);
 export type IdbValueKind = 'string' | 'nonstring' | 'none';
@@ -114,6 +117,11 @@ export class IdbMirror {
     });
   }
 
+  /** Arch m1: the corrupt.* keys recorded by the last Reset ([] = none); undefined = the read failed / timed out. Never throws. */
+  async readSurfaced(ms?: number): Promise<string[] | undefined> {
+    try { const g = req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_RESET_KEY)); const v = await (ms === undefined ? g : timeout(g, ms)); return Array.isArray(v) ? v.filter((k): k is string => typeof k === 'string') : []; }
+    catch { return undefined; }
+  }
   /** CSR-8 8b: every corrupt.* entry in this store, oldest first by (ts, n); undefined = the read failed / timed out. Never throws. */
   async readCorrupt(ms?: number): Promise<{ key: string; value: unknown }[] | undefined> {
     try {
@@ -150,9 +158,14 @@ export class IdbMirror {
       return new Promise(res => { let fin = false; const done = (ok: boolean) => { if (fin) return; fin = true; this.pending--; if (!ok) this.failed = true; res(); }; t.oncomplete = () => done(true); t.onerror = t.onabort = () => done(false); });
     } catch { this.failed = true; return Promise.resolve(); }
   }
-  /** Reset save: remove the mirror copy (resolves once committed or failed). */
+  /** Reset save: remove the mirror copy (resolves once committed or failed). Arch m1 (HoQA item 5): in the SAME transaction,
+   *  record the corrupt.* keys that exist now as IDB_RESET_KEY (they were surfaced before this Reset; none -> the record is
+   *  removed), so bootOrphanIdb tells old copies from new ones by key membership, never by clock time. */
   clear(): Promise<void> {
-    try { const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); os.delete(IDB_KEY); return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
+    try { const t = this.tx('readwrite'); const os = t.objectStore(IDB_STORE); os.delete(IDB_KEY);
+      try { const kr = os.getAllKeys(corruptRange()); kr.onsuccess = () => { const keys = (kr.result as IDBValidKey[]).filter((k): k is string => typeof k === 'string' && k.startsWith(IDB_CORRUPT_PREFIX)); if (keys.length) os.put(keys, IDB_RESET_KEY); else os.delete(IDB_RESET_KEY); }; }
+      catch { /* no getAllKeys (pre-IDB 2.0): main is still cleared; no record, so an older copy may be offered once (M3, never loss) */ }
+      return new Promise(res => { t.oncomplete = t.onerror = t.onabort = () => res(); }); }
     catch { return Promise.resolve(); }
   }
 }
@@ -177,18 +190,18 @@ export async function bootPreserveIdb(mirror: Pick<IdbMirror, 'preserveCorrupt'>
 }
 /** CSR-8 8b (HoQA Major on dfdf49c): another tab's IDB1-5 copy transaction (put corrupt.* + delete main) committed while this tab
  *  booted, so this tab finds NO main anywhere. Criterion ("no matching main"): IndexedDB definite ('ok') with no save/main, no
- *  localStorage main and no .bak, and an invalid corrupt.* copy made after the last Reset (RESET_AT_KEY). A copy that was
- *  surfaced is always followed by that session's fresh-farm save (a main) unless the player reset, so old, already surfaced
- *  copies never trigger. Returns the newest such copy (main.ts hands it to loadSafe as the IndexedDB value: the IDB1 path,
+ *  localStorage main and no .bak, and an invalid corrupt.* copy whose key was not recorded by the last Reset (IDB_RESET_KEY,
+ *  Arch m1: key membership, so a skewed or rolled-back clock can't hide a new copy). A copy that was surfaced is always
+ *  followed by that session's fresh-farm save (a main) unless the player reset, so old, already surfaced copies never trigger. Returns the newest such copy (main.ts hands it to loadSafe as the IndexedDB value: the IDB1 path,
  *  M3 + save_corrupt {store:'idb'} + Export), else null. Read-only: nothing is written or moved. */
-export async function bootOrphanIdb(mirror: Pick<IdbMirror, 'readCorrupt'> | null, idb: IdbInput, kv: KV, b: Balance): Promise<{ key: string; value: unknown } | null> {
+export async function bootOrphanIdb(mirror: Pick<IdbMirror, 'readCorrupt' | 'readSurfaced'> | null, idb: IdbInput, kv: KV, b: Balance): Promise<{ key: string; value: unknown } | null> {
   if (!mirror || idb.status !== 'ok' || (idb.raw !== null && idb.raw !== undefined)) return null;
-  let resetAt = 0;
-  try { if (kv.getItem(SAVE_KEY) !== null || kv.getItem(BAK_KEY) !== null) return null; resetAt = Number(kv.getItem(RESET_AT_KEY)) || 0; } catch { return null; }
+  try { if (kv.getItem(SAVE_KEY) !== null || kv.getItem(BAK_KEY) !== null) return null; } catch { return null; }
   const list = await mirror.readCorrupt(IDB_BOOT_READ_TIMEOUT_MS); if (!list) return null;
+  const surfaced = await mirror.readSurfaced(IDB_BOOT_READ_TIMEOUT_MS); if (!surfaced) return null;
   for (let i = list.length - 1; i >= 0; i--) {
-    const c = list[i], ts = Number(/^corrupt\.(\d+)/.exec(c.key)?.[1]);
-    if (!(ts > resetAt)) continue;
+    const c = list[i];
+    if (surfaced.includes(c.key)) continue; // recorded at the last Reset: already surfaced
     if (c.value === null || c.value === undefined || (typeof c.value === 'string' && validate(c.value, b).ok)) continue;
     return c;
   }

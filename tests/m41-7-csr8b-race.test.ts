@@ -3,12 +3,12 @@
 // is the fake's held commit. Tab B claims while it is in flight; A's tx still commits put corrupt.* + delete main, so B finds
 // NO main. B must never boot silently: IDB1 path = M3 notice, save_corrupt {store:'idb'} once, Export of the corrupt bytes.
 // The steps mirror src/main.ts boot(): openForBoot -> claim -> owns() -> bootPreserveIdb(.., owns) -> bootOrphanIdb -> new Game.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
-import { IdbMirror, IDB_KEY, IDB_CORRUPT_PREFIX, bootPreserveIdb, bootOrphanIdb } from '../src/save/idb-mirror';
+import { IdbMirror, IDB_KEY, IDB_CORRUPT_PREFIX, IDB_RESET_KEY, bootPreserveIdb, bootOrphanIdb } from '../src/save/idb-mirror';
 import { Game } from '../src/game';
-import { SAVE_KEY, BAK_KEY, RESET_AT_KEY, resetProgress, serialize } from '../src/save/save';
+import { SAVE_KEY, BAK_KEY, RESET_KEYS, UI_KEY, resetProgress, serialize } from '../src/save/save';
 import { TabLease } from '../src/save/tab-lease';
 import { recoveryNotice, exportBytes, type CsrRecovery } from '../src/ui/save-recovery';
 import { initialState } from '../src/sim/state';
@@ -77,9 +77,12 @@ describe('CSR-8 8b: B takes the lease while A\'s IDB corrupt-copy transaction is
   });
 });
 
-describe('CSR-8 8b criterion: no false trigger on old, already surfaced corrupt.* copies', () => {
+/** The real Settings > Reset path (app.ts cReset): resetProgress(localStorage) + Game.clearMirror() -> IdbMirror.clear(). */
+const reset = async (kv: any, m: IdbMirror) => { resetProgress(kv); await m.clear(); };
+describe('CSR-8 8b criterion: no false trigger on old, already surfaced corrupt.* copies (Arch m1: key membership)', () => {
   const good = (F: number) => serialize({ ...initialState(b, 1), farmLevel: F, coinsCents: 1000 + F, tracksV7: 1 as const, v6BackupId: '00112233aabbccdd' } as any, NOW - 60_000, 5);
-  const withCopy = () => { const f = fakeIdb(); f.data.set(`${IDB_CORRUPT_PREFIX}${NOW - 86_400_000}`, ABC); return f; };
+  const OLD = `${IDB_CORRUPT_PREFIX}${NOW - 86_400_000}`;
+  const withCopy = () => { const f = fakeIdb(); f.data.set(OLD, ABC); return f; };
   it('surfaced copy + the fresh farm it led to (a main in LS): normal load, no recovery', async () => {
     const f = withCopy(); const kv = mem({ [SAVE_KEY]: good(7) }); const T = await open(f, kv, NOW); T.lease.claim();
     const g = await finish(T, kv, NOW) as Game; expect(g.recovery).toBeNull(); expect(g.state.farmLevel).toBe(7);
@@ -89,21 +92,38 @@ describe('CSR-8 8b criterion: no false trigger on old, already surfaced corrupt.
     expect(await bootOrphanIdb(T.mirror, { status: 'ok', raw: null }, kv, b)).toBeNull();
     const g = await finish(T, kv, NOW) as Game; expect((g.recovery as CsrRecovery).source).toBe('bak');
   });
-  it('Settings > Reset after a surfaced copy (main, .bak and IDB main gone, corrupt.* kept): silent fresh farm', async () => {
-    const f = withCopy(); const kv = mem({ [SAVE_KEY]: good(7) }); resetProgress(kv, NOW - 1000); expect(kv.getItem(RESET_AT_KEY)).toBe(String(NOW - 1000));
+  it('D-HOP-07 (b) AC: Settings > Reset after a surfaced copy (main, .bak and IDB main gone, corrupt.* kept): no dialog, silent fresh farm', async () => {
+    const f = withCopy(); f.data.set(IDB_KEY, good(7)); const kv = mem({ [SAVE_KEY]: good(7) });
+    await reset(kv, new IdbMirror(f.db)); expect(f.data.has(IDB_KEY)).toBe(false); expect(f.data.get(IDB_RESET_KEY)).toEqual([OLD]); expect(f.data.get(OLD)).toBe(ABC);
     const T = await open(f, kv, NOW); T.lease.claim();
     const g = await finish(T, kv, NOW) as Game; expect(g.recovery).toBeNull(); expect(g.isNewGame).toBe(true); expect(ev(g, 'save_corrupt')).toHaveLength(0);
   });
-  it('a copy made AFTER the last Reset with no main anywhere is unsurfaced: IDB1 path', async () => {
-    const f = withCopy(); const kv = mem(); kv.setItem(RESET_AT_KEY, String(NOW - 2 * 86_400_000));
-    const T = await open(f, kv, NOW); T.lease.claim(); assertIdb1(await finish(T, kv, NOW) as Game);
+  it('D-HOP-07 (b) AC: after a reset, a post-reset corrupt IndexedDB main still follows the CSR chain (IDB1, M3)', async () => {
+    const f = withCopy(); const kv = mem({ [SAVE_KEY]: 'x' }); await reset(kv, new IdbMirror(f.db)); f.data.set(IDB_KEY, ABC + ' ');
+    const T = await open(f, kv, NOW); T.lease.claim(); const g = await finish(T, kv, NOW) as Game;
+    expect(g.recovery).toMatchObject({ case: 'F', store: 'idb' }); expect(ev(g, 'save_corrupt')[0].store).toBe('idb');
   });
-  it('IndexedDB not definite (unknown / absent) or the corrupt.* read fails: no orphan (unchanged paths)', async () => {
+  it('a copy not recorded by any Reset with no main anywhere is unsurfaced: IDB1 path (also with no Reset ever)', async () => {
+    const f = withCopy(); const kv = mem(); const T = await open(f, kv, NOW); T.lease.claim(); assertIdb1(await finish(T, kv, NOW) as Game);
+  });
+  it('HoQA item 5: clock ahead at Reset, then rolled back; a later orphan copy (stamped before the Reset time) still surfaces as M3 + Export', async () => {
+    // Reset at F = T+2h (clock ahead); the clock rolls back to T; the race leaves a copy stamped T+1h < F. A time comparison (even
+    // with reset_at clamped to now) hides it -> silent new game. Key membership: corrupt.<T+1h> was not recorded at Reset -> IDB1.
+    const T0 = NOW, F = T0 + 2 * 3_600_000; const f = fakeIdb(); const m = new IdbMirror(f.db);
+    f.data.set(`${IDB_CORRUPT_PREFIX}${F + 5_000}`, 'pre-reset junk, future-stamped'); f.data.set(IDB_KEY, 'farm');
+    vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(F); const kv = mem({ [SAVE_KEY]: 'farm' }); await reset(kv, m); vi.useRealTimers();
+    f.data.set(`${IDB_CORRUPT_PREFIX}${T0 + 3_600_000}`, ABC); // clock rolled back: the race's copy, stamped T+1h
+    const T = await open(f, kv, T0 + 3_600_000 + 5_000); T.lease.claim();
+    const g = await finish(T, kv, T0 + 3_600_000 + 5_000) as Game; expect(g.isNewGame).toBe(true); assertIdb1(g); // never silent
+  });
+  it('IndexedDB not definite (unknown / absent) or a read fails: no orphan (unchanged paths); clear() with no corrupt.* drops the record', async () => {
     const f = withCopy(); const kv = mem(); const m = new IdbMirror(f.db);
     expect(await bootOrphanIdb(m, { status: 'unknown', raw: null }, kv, b)).toBeNull();
     expect(await bootOrphanIdb(m, { status: 'absent', raw: null }, kv, b)).toBeNull();
-    expect(await bootOrphanIdb({ readCorrupt: async () => undefined }, { status: 'ok', raw: null }, kv, b)).toBeNull();
+    expect(await bootOrphanIdb({ readCorrupt: async () => undefined, readSurfaced: async () => [] }, { status: 'ok', raw: null }, kv, b)).toBeNull();
+    expect(await bootOrphanIdb({ readCorrupt: async () => [{ key: OLD, value: ABC }], readSurfaced: async () => undefined }, { status: 'ok', raw: null }, kv, b)).toBeNull();
     expect((await bootOrphanIdb(m, { status: 'ok', raw: null }, kv, b))?.value).toBe(ABC);
+    const e = fakeIdb(); e.data.set(IDB_RESET_KEY, ['corrupt.1']); e.data.set(IDB_KEY, 'x'); await new IdbMirror(e.db).clear(); expect(e.data.size).toBe(0);
   });
 });
 
@@ -113,5 +133,27 @@ describe('CSR-8 8b wiring in src/main.ts (the boot sequence the tests above mirr
     expect(src).toMatch(/bootPreserveIdb\(mirror, idbIn, balance, Date\.now\(\), \(\) => lease\.owns\(\)\)/);
     expect(src).toMatch(/idbCopy === 'none' \? await bootOrphanIdb\(mirror, idbIn, localStorage, balance\) : null/);
     expect(src).toMatch(/if \(orphan\) \{ idbValue = orphan\.value; idbCopy = 'copied'; \}\s*\n\s*if \(idbCopy !== 'none'\) \{\s*\n\s*if \(!lease\.owns\(\)\) \{ otherTabModal\(\); return; \}/);
+  });
+});
+
+// Architect review engineering/reviews/pr63-reset-at-b986cd3.md: m1 done above (key membership, HoQA item 5); m2, m3 here.
+describe('Reset record (Arch m2, m3)', () => {
+  it('m2: the Reset record is not a localStorage key and not in RESET_KEYS; it sits outside the corrupt.* range; a second Reset replaces it', async () => {
+    expect((RESET_KEYS as readonly string[]).some(k => k.includes('reset'))).toBe(false);
+    expect(IDB_RESET_KEY.startsWith(IDB_CORRUPT_PREFIX)).toBe(false); expect(IDB_RESET_KEY).not.toBe(IDB_KEY);
+    const f = fakeIdb(); const m = new IdbMirror(f.db); const kv = mem({ [SAVE_KEY]: 'x' });
+    f.data.set('corrupt.1', 'a'); await reset(kv, m); expect([...kv.m.keys()]).toEqual([]); expect(f.data.get(IDB_RESET_KEY)).toEqual(['corrupt.1']);
+    expect((await m.readCorrupt())!.map(c => c.key)).toEqual(['corrupt.1']); // readCorrupt never returns the record
+    f.data.set('corrupt.2', 'b'); await reset(kv, m); expect(f.data.get(IDB_RESET_KEY)).toEqual(['corrupt.1', 'corrupt.2']);
+    expect(await m.preserveCorrupt('c', 3)).toBe(true); expect(f.data.get(IDB_RESET_KEY)).toEqual(['corrupt.1', 'corrupt.2']); // the copy cap never evicts it
+  });
+  it('m3: resetProgress survives a QuotaExceededError: removals done, no throw, UI prefs trim still runs; all writes refused: still no throw', () => {
+    const kv = mem({ [SAVE_KEY]: 'x', [BAK_KEY]: 'y', [UI_KEY]: JSON.stringify({ sfx: false, reducedMotion: true, onboardingDone: true }) });
+    let thrown = 0; const set = kv.setItem; kv.setItem = (k: string, v: string) => { if (k !== UI_KEY) { thrown++; throw new DOMException('full', 'QuotaExceededError'); } set(k, v); };
+    expect(() => resetProgress(kv)).not.toThrow(); expect(thrown).toBe(0); // Reset writes no other key
+    expect([kv.getItem(SAVE_KEY), kv.getItem(BAK_KEY)]).toEqual([null, null]);
+    expect(JSON.parse(kv.getItem(UI_KEY))).toEqual({ sfx: false, reducedMotion: true }); // trimmed: FTUE flag dropped
+    const all = mem({ [SAVE_KEY]: 'x', [UI_KEY]: '{"sfx":true}' }); all.setItem = () => { throw new DOMException('full', 'QuotaExceededError'); };
+    expect(() => resetProgress(all)).not.toThrow(); expect(all.getItem(SAVE_KEY)).toBeNull(); expect(all.getItem(UI_KEY)).toBeNull(); // trim failed -> UI key removed
   });
 });

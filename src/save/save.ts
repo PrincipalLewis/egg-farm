@@ -108,7 +108,10 @@ export function migrate(d: any, b: Balance): SaveFile {
   return { version: d.version, savedAt: d.savedAt, state: { ...migrateStoredTracksV7(state, b).state, tracksV7: 1 }, tracksMigrated: true, v6State: state, v6Keys: Object.keys(d.state ?? {}) };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
-/** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
+/** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2).
+ *  Arch m2/m1 (pr63-reset-at, HoQA item 5): Reset's record of already surfaced corrupt copies is NOT a localStorage key and not
+ *  here: IdbMirror.clear() writes it as IDB_RESET_KEY ('reset.surfaced') in the IndexedDB store, in the same transaction that
+ *  deletes main, and it must outlive the save. Any future 'clear all keys' / export-by-prefix in that store must skip it. */
 export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak', 'eggfarm.save.v6_backup', 'eggfarm.save.migration_attempts', 'eggfarm.save.headroom_probe'] as const; // N3: probe key too // review m4: Reset clears the v6 backup too (V6_BACKUP_KEY) // QA BUG-4: .bak too, so reset progress can't come back
 export const UI_KEY = 'eggfarm.ui';
 /** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
@@ -118,13 +121,9 @@ export function keepPrefsOnly(f: any): Record<string, unknown> {
   if (f?.iosHomeShown) o.iosHomeShown = true;
   return o;
 }
-/** CSR-8 8b (HoQA Major on dfdf49c): when the player last reset the save. IndexedDB corrupt.* copies made before it were already
- *  surfaced (Reset keeps them, IDB1-1) and never re-trigger the IndexedDB-orphan recovery (idb-mirror bootOrphanIdb). */
-export const RESET_AT_KEY = 'eggfarm.save.reset_at';
 /** Clear the save; keep telemetry + install_id; keep sfx/reducedMotion, drop FTUE/progress UI flags (PT1-2). */
-export function resetProgress(kv: KV, now = Date.now()) {
+export function resetProgress(kv: KV) {
   for (const k of RESET_KEYS) kv.removeItem?.(k);
-  try { kv.setItem(RESET_AT_KEY, String(now)); } catch { /* storage full: an older corrupt.* copy may be offered once more (M3, never data loss) */ }
   try {
     const raw = kv.getItem(UI_KEY); if (raw == null) return;
     kv.setItem(UI_KEY, JSON.stringify(keepPrefsOnly(JSON.parse(raw))));

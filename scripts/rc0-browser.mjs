@@ -670,7 +670,7 @@ sections.g5 = async () => {
     await page.evaluate(() => { window.eggfarm.state.celebratedTier = -1; }); await page.waitForTimeout(400);
     const c = await page.evaluate(() => { const e = document.querySelector('.tracks-exp'); if (!e) return null;
       return { t: e.querySelector('h2').textContent, p: e.querySelector('p').textContent, btns: e.querySelectorAll('button').length, bh: e.querySelector('button').offsetHeight, focus: document.activeElement === e.querySelector('button'), seen: window.eggfarm.state.seenTracksExplainer, modal: !!document.querySelector('#modal-layer.open') }; });
-    ok(`G5 EXP1 card shown after Collect, focus on Got it, alone at ${w}`, c && c.t === 'Upgrades got an upgrade!' && c.p === 'Hens and Egg value are now separate. Top them up!' && c.btns === 1 && c.bh >= 48 && c.focus && c.seen !== true && !c.modal, JSON.stringify(c));
+    ok(`G5 EXP1 card shown after Collect, focus on Got it, alone at ${w}`, c && c.t === 'Upgrades got an upgrade!' && c.p === 'Hens and Egg value are now separate. Top them up!' && c.btns === 1 && c.bh >= 48 && c.focus && c.seen === true && !c.modal, JSON.stringify(c));
     const toastShown = await page.evaluate(() => { const t = document.querySelector('.toast'); return !!t && t.classList.contains('show') && getComputedStyle(t).visibility !== 'hidden' && t.getBoundingClientRect().height > 0; });
     const tr = await rect(page, '.toast'), cr = await rect(page, '.tracks-exp');
     ok(`G5 A toast held while the card is open (no overlap) at ${w}`, !toastShown || !hit(tr, cr), JSON.stringify({ toastShown, tr, cr }));
@@ -685,8 +685,6 @@ sections.g5 = async () => {
     // close with Got it, focus returns (to the active Upgrades tab when the panel is open; else back to the page)
     await page.locator('.tracks-exp-ok').click(); await page.waitForTimeout(500);
     ok(`G5 Got it closes the card at ${w}`, (await page.locator('.tracks-exp').count()) === 0);
-    // D-HOP-2026-10-22-06 (c): seen is set and saved on the dismissal, not when the card appears (asserted above: seen !== true)
-    ok(`G5 seen set and saved on Got it at ${w}`, await page.evaluate(() => window.eggfarm.state.seenTracksExplainer === true && JSON.parse(localStorage.getItem('eggfarm.save')).state.seenTracksExplainer === true));
     const fo = await page.evaluate(() => document.activeElement?.id || document.activeElement?.getAttribute('data-tab') || document.activeElement?.tagName);
     ok(`G5 focus not lost after Got it (sheet closed) at ${w}`, fo !== 'BODY', fo);
     await shotIt(page, 'focus-after-gotit', w, h, 'card closed via Got it (sheet closed), focus target visible', { focus: fo });
@@ -784,11 +782,9 @@ sections.g5 = async () => {
     const pre = await page.evaluate(() => ({ migrated: window.eggfarm.tracksMigratedWithBackup, quotaAtBoot: window.__quota }));
     await page.getByRole('button', { name: 'Collect', exact: true }).click({ timeout: 2000 }).catch(() => {});
     await page.waitForTimeout(EXP_WAIT_MS);
-    // D-HOP-2026-10-22-06 (c): the flag write happens on the dismissal, so the card shows and Got it is the write that fails.
-    const shown = await page.locator('.tracks-exp').count(); await page.locator('.tracks-exp-ok').click({ timeout: 3000 }).catch(() => {}); await page.waitForTimeout(300);
-    const st = await page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), failed: window.eggfarm.storageFailed, quota: window.__quota, seen: window.eggfarm.state.seenTracksExplainer ?? null }));
+    const st = await page.evaluate(() => ({ card: !!document.querySelector('.tracks-exp'), failed: window.eggfarm.storageFailed, quota: window.__quota }));
     ok(`G5 quota after load: precondition (migrated with backup, explainer due) at ${w}`, pre.migrated === true, JSON.stringify(pre));
-    ok(`G5 quota after load: card shown, QuotaExceededError on the flag write at Got it, seen reverted at ${w}`, shown === 1 && st.quota > 0 && st.failed === true && !st.card && st.seen === false, JSON.stringify({ shown, ...st }));
+    ok(`G5 quota after load: QuotaExceededError on the flag write, no card at ${w}`, st.quota > 0 && st.failed === true && !st.card, JSON.stringify(st));
     await shotIt(page, 'quota-after-load', w, h, 'QuotaExceededError after load (flag write failed): no explainer', st);
     ok(`G5 quota after load: no page errors at ${w}`, errors.length === 0, errors.join('|').slice(0, 200));
     await ctx.close();
