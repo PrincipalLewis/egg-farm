@@ -137,7 +137,21 @@ describe('notice telemetry payload (interface §3)', () => {
     expect(noticePayload(n, r)).toEqual({ notice: 'M2', source: 'v6_backup', variant: 'age', store: 'idb' });
     const r1 = R(); expect(noticePayload(recoveryNotice(r1, { storageBlocked: false, now: NOW })!, r1)).toEqual({ notice: 'M1', source: 'bak', store: 'ls' });
   });
-  it('enum: notice in M1..M5|storage|cantsave, source RecoverySource|null, store ls|idb (null only for cantsave)', () => {
+  it('store is passed through as-is and never defaulted (Saves ruling): set -> unchanged, unset -> null, never a guessed ls', () => {
+    const cases: CsrRecovery[] = [R(), R({ source: 'v6_backup', prevLevel: 17, restoredLevel: 12 }), R({ source: 'idb' }),
+      R({ case: 'F', restored_from_backup: false, source: 'none' }), R({ case: 'D', restored_from_backup: false, source: 'deferred' }),
+      R({ case: 'Q', restored_from_backup: false, copy_failed: true, source: 'none' }), R({ case: 'Q', restored_from_backup: false, cantSave: true, source: 'none' })];
+    for (const blocked of [false, true]) for (const base of cases) {
+      for (const store of ['ls', 'idb'] as const) {
+        const r = { ...base, store }; expect(noticePayload(recoveryNotice(r, { storageBlocked: blocked, now: NOW })!, r).store).toBe(store);
+      }
+      const u = { ...base, store: undefined }, n = recoveryNotice(u, { storageBlocked: blocked, now: NOW })!, p = noticePayload(n, u);
+      expect(p.store ?? null).toBeNull(); expect(p.store).not.toBe('ls'); expect(JSON.stringify(p)).not.toContain('"ls"');
+      const { store: _s, ...noKey } = base; const p2 = noticePayload(recoveryNotice(noKey as CsrRecovery, { storageBlocked: blocked, now: NOW })!, noKey as CsrRecovery);
+      expect(p2.store ?? null).toBeNull();
+    }
+  });
+  it('enum: notice in M1..M5|storage|cantsave, source RecoverySource|null, store ls|idb|null (null iff unset)', () => {
     const NOTICES = ['M1', 'M2', 'M3', 'M4', 'M5', 'storage', 'cantsave'], SOURCES = ['bak', 'idb', 'v6_backup', 'none', 'deferred', null];
     const rs: CsrRecovery[] = [R(), R({ source: 'idb', store: 'idb' }), R({ source: 'v6_backup' }), R({ case: 'F', restored_from_backup: false, source: 'none' }),
       R({ case: 'D', restored_from_backup: false, source: 'deferred' }), R({ case: 'Q', restored_from_backup: false, copy_failed: true, source: 'none' }),
@@ -146,7 +160,7 @@ describe('notice telemetry payload (interface §3)', () => {
       const n = recoveryNotice(r, { storageBlocked: blocked, now: NOW })!, p = noticePayload(n, r);
       expect(NOTICES).toContain(p.notice); expect(SOURCES).toContain(p.source);
       expect(Object.keys(p).sort()).toEqual(['notice', 'source', 'store', ...(p.variant ? ['variant'] : [])].sort());
-      if (p.notice === 'cantsave') expect(p.store).toBeNull(); else expect(['ls', 'idb']).toContain(p.store);
+      if (r.store === undefined) expect(p.store).toBeNull(); else expect(p.store).toBe(r.store);
       if (p.variant !== undefined) expect(['level', 'age', 'fallback']).toContain(p.variant);
       expect(JSON.stringify(p)).not.toContain('corrupt'); // no save bytes
     }
@@ -208,7 +222,7 @@ describe('dialog (jsdom)', () => {
     expect(layer.querySelector('#rcT')!.textContent).toBe('Welcome back!');
     expect(layer.querySelector('#rcB')!.textContent).toBe('We loaded your backup. You may be a few moments behind.');
     expect(layer.querySelector('#rcExport')!.textContent).toBe('Export old save');
-    expect(track).toHaveBeenCalledWith('save_recovery_notice_shown', { notice: 'M1', source: null, store: 'ls' });
+    expect(track).toHaveBeenCalledWith('save_recovery_notice_shown', { notice: 'M1', source: null, store: null }); // unset store: never defaulted
     layer.querySelector<HTMLButtonElement>('#rcGo')!.click(); await p;
   });
 });
