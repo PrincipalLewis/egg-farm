@@ -20,36 +20,72 @@ export const shouldShowTracksExplainer = (g: G) => m4On(g.balance) && !g.state.s
 export const EXP_OUT_MS = 150, EXP_POP_MS = 800;
 const reducedMotion = (doc: Document) => doc.documentElement.classList.contains('reduced-motion') ||
   !!doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-export type ExpPlace = 'default' | 'above' | 'inside';
+/** 'default' = main's placement (top 72, over the tab row); 'none' = no clear slot: the card is kept out of the way (hidden via
+ *  [data-place=none] { visibility:hidden }, so it can't take a tap) until a scroll / resize opens a clear slot; taps never pass through it. */
+export type ExpPlace = 'default' | 'above' | 'inside' | 'band' | 'below' | 'nav' | 'none';
 type Box = { left: number; right: number; top: number; bottom: number };
 const meets = (a: Box, b: Box) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-/** UX-M3 + Art ruling on #65 (1): where the card goes when the Upgrades sheet is open. Pure (rects in viewport px).
- *  The card must never overlap a visible Buy hit area (`buys`). Order: above the sheet (top = sheet top - card height - 8, if
- *  that clears the top bar and every Buy); inside the sheet 8px below the tab row (if clear of every Buy); else main's
- *  placement (top 72, over the tab row) - on phones (360/375/390) the rows start right under the tabs, so this is the case.
- *  `sheet`/`tabs` null = sheet closed; a sheet that doesn't share the card's columns (docked 1280 panel) keeps the default. */
+/** Viewport facts for placeExplainer: vh = viewport height (a slot must fit inside it); bodyTop = top of the sheet's scroll
+ *  container (the tabs scroll away with it); navTop = top of the bottom nav. All optional (pure tests). */
+export type ExpEnv = { vh?: number; bodyTop?: number; navTop?: number };
+export const EXP_BAND_STEP = 4;
+/** UX-M3 + Art ruling on #65 (1) + CCR M1 on 7779088: where the card goes. Pure (rects in viewport px). The card NEVER overlaps
+ *  a visible Buy hit area or Collect (`buys`): EVERY candidate is clear-checked, first clear one wins, in this order:
+ *  1 above the sheet (sheet top - card height - 8); 2 inside the sheet 8px under the tabs (or under the scroll container top once
+ *  the tabs have scrolled away); 3 main's placement (top 72, over the tab row); 4 other tops in the header/tab band (minTop up to
+ *  the tabs / scroll-container top, EXP_BAND_STEP px apart); 5 8px below the lowest visible Buy; 6 8px above the bottom nav.
+ *  1/2 only when the sheet is open and shares the card's columns. 1, 2, 4, 5, 6 must sit at or below minTop (under the HUD)
+ *  and fit in the viewport. Nothing clear -> 'none'. */
 export function placeExplainer(card: { left: number; right: number; height: number }, sheet: { top: number; left: number; right: number } | null,
-  tabs: { bottom: number } | null, minTop: number, defTop = 72, buys: readonly Box[] = []): { place: ExpPlace; top: number } {
-  if (!sheet || !tabs || card.right <= sheet.left || card.left >= sheet.right) return { place: 'default', top: defTop };
-  const clear = (top: number) => !buys.some(b => meets({ left: card.left, right: card.right, top, bottom: top + card.height }, b));
-  const above = Math.round(sheet.top - card.height - 8), inside = Math.round(tabs.bottom + 8);
-  if (above >= minTop && clear(above)) return { place: 'above', top: above };
-  if (clear(inside)) return { place: 'inside', top: inside };
-  return { place: 'default', top: defTop };
+  tabs: { bottom: number } | null, minTop: number, defTop = 72, buys: readonly Box[] = [], env: ExpEnv = {}): { place: ExpPlace; top: number } {
+  const h = card.height, vh = env.vh ?? Infinity;
+  const clear = (top: number) => !buys.some(b => meets({ left: card.left, right: card.right, top, bottom: top + h }, b));
+  const fits = (top: number) => top >= minTop && top + h <= vh;
+  const open = !!sheet && !!tabs && card.right > sheet.left && card.left < sheet.right;
+  const under = open ? Math.max(tabs!.bottom, env.bodyTop ?? -Infinity) : defTop;
+  const cands: [ExpPlace, number][] = [];
+  if (open) cands.push(['above', Math.round(sheet!.top - h - 8)], ['inside', Math.round(under + 8)]);
+  cands.push(['default', defTop]);
+  for (let t = Math.ceil(minTop); t <= under; t += EXP_BAND_STEP) if (t !== defTop) cands.push(['band', t]);
+  if (buys.length) cands.push(['below', Math.round(Math.max(...buys.map(b => b.bottom)) + 8)]);
+  if (env.navTop !== undefined) cands.push(['nav', Math.round(env.navTop - h - 8)]);
+  for (const [place, top] of cands) if ((place === 'default' || fits(top)) && clear(top)) return { place, top };
+  return { place: 'none', top: defTop };
 }
 const visibleRect = (e: Element | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? r : null; };
-/** Visible Buy hit areas (upgrade rows, docked or in the sheet): rendered, inside the viewport. */
+const clip = (a: Box, b: Box): Box => ({ left: Math.max(a.left, b.left), right: Math.min(a.right, b.right), top: Math.max(a.top, b.top), bottom: Math.min(a.bottom, b.bottom) });
+const nonEmpty = (r: Box) => r.right > r.left && r.bottom > r.top, CLIPS = /^(auto|scroll|hidden|clip|overlay)$/;
+/** Visible Buy hit areas (upgrade rows, docked or in the sheet): each .btn.buy rect clipped to every clipping ancestor (the sheet's
+ *  scroll container) and to the viewport; fully clipped / hidden / zero-size ones are dropped. */
 export const buyRects = (doc: Document = document): Box[] => {
-  const vh = doc.defaultView?.innerHeight ?? 0;
-  return [...doc.querySelectorAll('.btn.buy')].map(b => visibleRect(b)).filter((r): r is DOMRect => !!r && r.bottom > 0 && r.top < vh);
+  const win = doc.defaultView, view: Box = { left: 0, top: 0, right: win?.innerWidth ?? 0, bottom: win?.innerHeight ?? 0 }, out: Box[] = [];
+  for (const b of doc.querySelectorAll('.btn.buy')) {
+    const r0 = visibleRect(b); if (!r0) continue;
+    let r = clip(r0, view);
+    for (let a = b.parentElement; a && a !== doc.body && a !== doc.documentElement && nonEmpty(r); a = a.parentElement) {
+      const cs = win?.getComputedStyle(a); if (cs && [cs.overflow, cs.overflowX, cs.overflowY].some(v => CLIPS.test(v ?? ''))) r = clip(r, a.getBoundingClientRect());
+    }
+    if (nonEmpty(r)) out.push(r);
+  }
+  return out;
 };
+/** CCR n3: #collect counts only when a tap at its centre would land on it (not when the sheet covers it); the card itself is skipped. */
+export const collectRect = (doc: Document = document): Box | null => {
+  const c = doc.getElementById('collect'), r = visibleRect(c); if (!c || !r || typeof doc.elementsFromPoint !== 'function') return null;
+  const top = doc.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find(e => !e.closest('.tracks-exp,.tracks-exp-out'));
+  return top && (top === c || c.contains(top)) ? r : null;
+};
+/** Everything the card must stay clear of: visible Buy hit areas + a hittable Collect. */
+export const blockRects = (doc: Document = document): Box[] => { const c = collectRect(doc); return c ? [...buyRects(doc), c] : buyRects(doc); };
 /** Measure and apply placeExplainer to the live card (data-place names the branch for QA). */
 export function placeCard(el: HTMLElement, doc: Document = document) {
   const sheet = visibleRect(doc.querySelector('#p-upgrades')); // [hidden] (closed / Market open) is display:none -> null; docked panel stays
-  const tabs = sheet ? visibleRect(doc.querySelector('#p-upgrades .tabs')) : null, r = el.getBoundingClientRect();
-  const hud = visibleRect(doc.querySelector('.hud')), minTop = (hud ? hud.bottom : 56) + 8;
-  const { place, top } = placeExplainer({ left: r.left, right: r.right, height: el.offsetHeight || r.height }, sheet, tabs, minTop, 72, buyRects(doc));
-  if (el.dataset.place !== place || el.style.top !== `${top}px`) { el.dataset.place = place; el.style.top = place === 'default' ? '' : `${top}px`; }
+  const tabs = sheet ? visibleRect(doc.querySelector('#p-upgrades .tabs')) : null, body = sheet ? visibleRect(doc.querySelector('#p-upgrades .body')) : null, r = el.getBoundingClientRect();
+  const hud = visibleRect(doc.querySelector('.hud')), minTop = (hud ? hud.bottom : 56) + 8, nav = visibleRect(doc.querySelector('nav.actions'));
+  const { place, top } = placeExplainer({ left: r.left, right: r.right, height: el.offsetHeight || r.height }, sheet, tabs, minTop, 72, blockRects(doc),
+    { vh: doc.defaultView?.innerHeight || Infinity, bodyTop: body?.top, navTop: nav?.top });
+  const css = place === 'default' || place === 'none' ? '' : `${top}px`;
+  if (el.dataset.place !== place || el.style.top !== css) { el.dataset.place = place; el.style.top = css; }
 }
 /** UX-M5 + Art ruling on #65 (3) (m4-tracks-explainer.md:21): on DISMISS, the coin pill gets the standard number pop (Sell style,
  *  number-pop-spec.md) and a coin burst; nothing while the card is up. Decorative (aria-hidden). Reduced motion: none; the
@@ -69,7 +105,7 @@ function refundPop(cents: number, doc: Document) {
 /** UX-M5: the card leaves the DOM at once (focus, EXP_CLOSED, explainerOpen() unchanged); an inert, aria-hidden copy plays the
  *  150 ms opacity + translateY(4px) out. Reduced motion: no copy (instant). */
 function fadeOut(el: HTMLElement, doc: Document) {
-  if (reducedMotion(doc)) return;
+  if (reducedMotion(doc) || el.dataset.place === 'none') return; // a kept-out-of-the-way card was not on screen: nothing to fade
   const ghost = el.cloneNode(true) as HTMLElement; ghost.className = 'tracks-exp-out'; ghost.removeAttribute('role'); ghost.removeAttribute('aria-modal');
   ghost.removeAttribute('aria-labelledby'); ghost.setAttribute('aria-hidden', 'true'); ghost.setAttribute('inert', ''); ghost.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
   doc.body.append(ghost); setTimeout(() => ghost.remove(), EXP_OUT_MS + 30);
@@ -96,9 +132,9 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
   el.className = 'tracks-exp'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'tracks-exp-t');
   el.innerHTML = `<h2 id="tracks-exp-t">${EXP_TITLE}</h2><p>${EXP_BODY}</p>${(g.migrationRefundCents ?? 0) > 0 ? `<p class="tracks-exp-refund"><img src="${import.meta.env.BASE_URL}assets/icon-coin.svg" alt="" width="16" height="16"> ${refundLine(g.migrationRefundCents!)}</p>` : ''}<button type="button" class="btn tracks-exp-ok">Got it</button>`;
   doc.body.append(el);
-  // UX-M3: placed at show, then re-placed only on events that can move the sheet or rows (CCR n3: no per-frame re-measure):
-  // resize, scroll (sheet body), the sheet's slide transition ending, and after any click (nav / tab switch). Coalesced to one
-  // measure per frame.
+  // UX-M3: placed at show, then re-placed only on events that can move the sheet or rows (no per-frame re-measure, no rAF loop):
+  // resize, scroll (sheet body: CCR M1 on 7779088, every scroll re-runs the clear check), the sheet's slide transition ending, and
+  // after any click (nav / tab switch / a Buy that re-renders rows). Coalesced to at most one measure per frame.
   const win = doc.defaultView, raf = win?.requestAnimationFrame?.bind(win) ?? ((f: () => void) => setTimeout(f, 16));
   let queued = false; const replace = () => { if (queued || !el.isConnected) return; queued = true; raf(() => { queued = false; if (el.isConnected) placeCard(el, doc); }); };
   const afterClick = () => setTimeout(replace, 0);

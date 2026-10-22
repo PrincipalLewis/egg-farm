@@ -32,17 +32,18 @@ describe('Art (1): the card never overlaps a visible Buy', () => {
     expect(placeExplainer(card, { top: 400, left: 0, right: 360 }, { bottom: 452 }, 64, 72, [{ left: 248, right: 336, top: 468, bottom: 512 }])).toEqual({ place: 'above', top: 242 });
     expect(placeExplainer(card, { top: 160, left: 0, right: 360 }, { bottom: 212 }, 64, 72, [{ left: 248, right: 336, top: 600, bottom: 644 }])).toEqual({ place: 'inside', top: 220 });
   });
-  it('property: whatever is chosen, no Buy rect intersects the card unless only main placement remains (and main is always clear of Buy rows below the tabs)', () => {
-    let n = 0;
-    for (let sheetTop = 100; sheetTop <= 700; sheetTop += 20) for (let rowGap = 0; rowGap <= 400; rowGap += 40) for (const h of [120, 150, 190]) {
-      const tabsB = sheetTop + 52, c = { left: 16, right: 344, height: h };
-      const buys = [0, 72, 144, 216].map(k => ({ left: 248, right: 336, top: tabsB + 16 + rowGap + k, bottom: tabsB + 60 + rowGap + k }));
-      const p = placeExplainer(c, { top: sheetTop, left: 0, right: 360 }, { bottom: tabsB }, 64, 72, buys);
+  it('property (CCR M1: no exemption): whatever is chosen, including main placement, no Buy rect intersects the card; nothing clear -> none', () => {
+    let n = 0, none = 0;
+    for (let sheetTop = 100; sheetTop <= 700; sheetTop += 20) for (let rowGap = -300; rowGap <= 400; rowGap += 20) for (const h of [120, 150, 190, 206]) {
+      const tabsB = sheetTop + 52, c = { left: 16, right: 344, height: h }, vh = sheetTop + 480;
+      const buys = [0, 72, 144, 216].map(k => ({ left: 248, right: 336, top: tabsB + 16 + rowGap + k, bottom: tabsB + 60 + rowGap + k }))
+        .map(b => ({ ...b, top: Math.max(b.top, sheetTop + 56) })).filter(b => b.bottom > b.top); // clipped to the scroll container
+      const p = placeExplainer(c, { top: sheetTop, left: 0, right: 360 }, { bottom: tabsB + rowGap }, 64, 72, buys, { vh, bodyTop: sheetTop + 56 });
+      if (p.place === 'none') { none++; continue; }
       const box = { ...c, top: p.top, bottom: p.top + h };
-      if (p.place !== 'default') { buys.forEach(b => expect(meets(box, b)).toBe(false)); n++; }
-      else if (72 + h <= tabsB + 16 + rowGap) buys.forEach(b => expect(meets(box, b)).toBe(false));
+      buys.forEach(b => expect(meets(box, b)).toBe(false)); n++;
     }
-    expect(n).toBeGreaterThan(50);
+    expect(n).toBeGreaterThan(500); expect(none).toBeGreaterThan(0);
   });
   it('placeCard feeds the visible .btn.buy rects (hidden / zero-size / off-screen ones are ignored)', () => {
     document.body.innerHTML = '<div class="hud"></div><section id="p-upgrades"><div class="tabs"></div><button class="btn buy" id="b1"></button><button class="btn buy" id="b0"></button></section><div class="tracks-exp"></div>';
