@@ -9,33 +9,7 @@ import { SAVE_KEY } from '../src/save/save';
 import { mem } from './helpers';
 const fx = (f: string) => readFileSync(new URL(`./fixtures/csr-idb1/${f}`, import.meta.url), 'utf8');
 const NOW = 1_792_400_000_000;
-type Fail = { cloneOnPut?: boolean; quotaOnPut?: boolean };
-/** Fake IndexedDB, one store, ordered transactions; log = committed ops `${txId}:${op}:${key}`. */
-function fakeIdb(fail: Fail = {}) {
-  const data = new Map<string, unknown>(); const log: string[] = []; const ranges: unknown[] = []; let txN = 0; let chain = Promise.resolve();
-  const later = (f: () => void) => setTimeout(f, 0);
-  const db: any = { objectStoreNames: { contains: () => true }, createObjectStore() {},
-    transaction(_n: string, mode: string) {
-      const id = ++txN; const t: any = { mode }; const staged: [string, string, unknown][] = []; let open = 0, bad: any = null;
-      const step = (f: () => void) => { open++; later(() => { try { f(); } catch (e) { bad = e; } if (--open === 0) finish(); }); };
-      const finish = () => later(() => { if (bad) { t.error = bad; (t.onabort ?? t.onerror)?.(); return; }
-        for (const [op, k, v] of staged) { if (op === 'put') data.set(k, v); else data.delete(k); log.push(`${id}:${op}:${k}`); } t.oncomplete?.(); });
-      const view = () => { const m = new Map(data); for (const [op, k, v] of staged) op === 'put' ? m.set(k, v) : m.delete(k); return m; };
-      t.objectStore = () => ({
-        get: (k: string) => { const r: any = {}; step(() => { r.result = view().get(k); r.onsuccess?.(); }); return r; },
-        getAllKeys: (q?: { lower: string; upper: string }) => { ranges.push(q); const r: any = {}; step(() => { r.result = [...view().keys()].filter(k => !q || (k >= q.lower && k <= q.upper)).sort(); r.onsuccess?.(); }); return r; },
-        put: (v: unknown, k: string) => {
-          if (fail.cloneOnPut && k.startsWith('corrupt.')) throw new DOMException('x', 'DataCloneError');
-          step(() => { if (fail.quotaOnPut && k.startsWith('corrupt.')) throw new DOMException('full', 'QuotaExceededError'); staged.push(['put', k, structuredClone(v)]); }); return {};
-        },
-        delete: (k: string) => { step(() => staged.push(['del', k, undefined])); return {}; },
-      });
-      return t;
-    } };
-  void chain;
-  const factory: any = { open: () => { const r: any = {}; later(() => { r.result = db; r.onupgradeneeded?.(); r.onsuccess?.(); }); return r; } };
-  return { db, data, log, factory, ranges };
-}
+import { fakeIdb, type Fail } from './fake-idb';
 const corruptKeys = (d: Map<string, unknown>) => [...d.keys()].filter(k => k.startsWith(IDB_CORRUPT_PREFIX));
 
 describe('IDB1-1 names / key format / cap', () => {
