@@ -30,6 +30,7 @@ import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
+import { trackToastSafe } from './toast-safe';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -105,6 +106,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
   const collectBtn = $('#collect'), meter = $('#meter'), meterFill = $('#meterFill'), meterText = $('#meterText'), yard = $('#yard');
+  trackToastSafe(collectBtn); // UX-M2: the no-storage notice sits above Collect
   const mRows = $('#mRows'), sellAllBtn = $('#sellAll'), uRow = $('#uRow');
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
   if (IOS_FLAG_ENABLED) (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts; compiled out of release
