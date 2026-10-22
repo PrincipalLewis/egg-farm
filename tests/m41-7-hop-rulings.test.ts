@@ -51,7 +51,7 @@ describe('(a) save/main is deleted only in the same transaction as a successful 
   }
   it('copy failure: main.ts hands Game no mirror (for the session), also when the LS main is valid', () => {
     const src = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8');
-    expect(src).toMatch(/bootPreserveIdb\(mirror, idbIn, balance, Date\.now\(\)\)/);
+    expect(src).toMatch(/bootPreserveIdb\(mirror, idbIn, balance, Date\.now\(\), \(\) => lease\.owns\(\)\)/); // CSR-8 8b: + the in-tx owns() check
     expect(src).toMatch(/idbCopy === 'failed' \? null : mirror/);
   });
   it('IDB1-1 after the new farm\'s first commit: main (= the new farm) plus exactly one corrupt.*', async () => {

@@ -7,7 +7,7 @@
  * localStorage only, as in rc0.
  */
 import type { Balance } from '../config/balance';
-import { SAVE_KEY, validate, newerStoredVersion, newerSaveVersion, rankCompare, pickNewest, type KV, type IdbInput } from './save';
+import { SAVE_KEY, BAK_KEY, RESET_AT_KEY, validate, newerStoredVersion, newerSaveVersion, rankCompare, pickNewest, type KV, type IdbInput } from './save';
 export { pickNewest } from './save';
 export const IDB_NAME = 'eggfarm', IDB_STORE = 'save', IDB_KEY = 'main';
 /** CSR-AC-IDB1 IDB1-1 (spec v0.3.3): corrupt copies live in the SAME store as `main`, keys corrupt.<ts> / corrupt.<ts>-<n>
@@ -83,7 +83,9 @@ export class IdbMirror {
    *  existing corrupt.* value, oldest by (ts, n) evicted beyond IDB_CORRUPT_KEEP and `main` deleted (only after a corrupt.* put), all in ONE readwrite
    *  transaction (so the stale corrupt main can't outrank the new farm's first write, idb-mirror write() rank guard). Resolves
    *  true once committed (or already kept), false on DataCloneError / QuotaExceededError / abort (IDB1-3). Never throws. */
-  preserveCorrupt(value: unknown, ts: number): Promise<boolean> {
+  /** CSR-8 8b (optional A side): `stillOwner` is checked synchronously inside the transaction, right before the put + delete;
+   *  false -> abort (nothing put, main kept, resolves false), so a tab that lost the lease mid-boot never deletes main. */
+  preserveCorrupt(value: unknown, ts: number, stillOwner?: () => boolean): Promise<boolean> {
     return new Promise(res => {
       let done = false; const fin = (ok: boolean) => { if (!done) { done = true; res(ok); } };
       try {
@@ -95,6 +97,7 @@ export class IdbMirror {
             const keys = (kr.result as IDBValidKey[]).filter((k): k is string => typeof k === 'string' && k.startsWith(IDB_CORRUPT_PREFIX)).sort(idbCorruptOrder);
             const vals: unknown[] = []; let left = keys.length;
             const next = () => {
+              if (stillOwner && !stillOwner()) { t.abort(); return; }
               const kept = fp !== null ? vals.findIndex(v => fingerprint(v) === fp) : -1;
               // D-HOP-2026-10-22-01 (a): main is deleted ONLY after a corrupt.* put queued in this same transaction, so an abort
               // (DataCloneError, quota, any abort) rolls both back. Already kept: re-put that entry (no new key), then delete.
@@ -111,6 +114,19 @@ export class IdbMirror {
     });
   }
 
+  /** CSR-8 8b: every corrupt.* entry in this store, oldest first by (ts, n); undefined = the read failed / timed out. Never throws. */
+  async readCorrupt(ms?: number): Promise<{ key: string; value: unknown }[] | undefined> {
+    try {
+      const p = new Promise<{ key: string; value: unknown }[]>((res, rej) => {
+        const os = this.tx('readonly').objectStore(IDB_STORE), kr = os.getAllKeys(corruptRange());
+        kr.onerror = () => rej(kr.error);
+        kr.onsuccess = () => { const keys = (kr.result as IDBValidKey[]).filter((k): k is string => typeof k === 'string' && k.startsWith(IDB_CORRUPT_PREFIX)).sort(idbCorruptOrder);
+          const out: { key: string; value: unknown }[] = []; let left = keys.length; if (!left) { res(out); return; }
+          keys.forEach((key, i) => { const g = os.get(key); g.onerror = () => rej(g.error); g.onsuccess = () => { out[i] = { key, value: g.result }; if (--left === 0) res(out); }; }); };
+      });
+      return await (ms === undefined ? p : timeout(p, ms));
+    } catch { return undefined; }
+  }
   private tx(mode: IDBTransactionMode) { return this.db.transaction(IDB_STORE, mode, { durability: 'strict' } as IDBTransactionOptions); }
   async read(ms = 1500): Promise<string | null> {
     try { const v = await timeout(req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_KEY)), ms); if (typeof v !== 'string') return null; this.seeNewer(v); return v; }
@@ -154,10 +170,29 @@ export function reconcile(kv: KV, idbRaw: string | null, b: Balance, now = Date.
 /** CSR-AC-IDB1 IDB1-5: boot step after lease.claim + owns() and BEFORE `new Game`: an invalid save/main value (corrupt string or
  *  any non-string) is copied into corrupt.* and the transaction awaited, so the new farm's first save can never destroy it.
  *  'none' = nothing to keep (no mirror, IDB not definite, no copy, or a valid copy); 'failed' => main.ts hands Game NO mirror. */
-export async function bootPreserveIdb(mirror: Pick<IdbMirror, 'preserveCorrupt'> | null, idb: IdbInput, b: Balance, now = Date.now()): Promise<'none' | 'copied' | 'failed'> {
+export async function bootPreserveIdb(mirror: Pick<IdbMirror, 'preserveCorrupt'> | null, idb: IdbInput, b: Balance, now = Date.now(), stillOwner?: () => boolean): Promise<'none' | 'copied' | 'failed'> {
   if (!mirror || idb.status !== 'ok' || idb.raw === null || idb.raw === undefined) return 'none';
   if (typeof idb.raw === 'string' && validate(idb.raw, b).ok) return 'none';
-  return (await mirror.preserveCorrupt(idb.raw, now)) ? 'copied' : 'failed';
+  return (await mirror.preserveCorrupt(idb.raw, now, stillOwner)) ? 'copied' : 'failed';
+}
+/** CSR-8 8b (HoQA Major on dfdf49c): another tab's IDB1-5 copy transaction (put corrupt.* + delete main) committed while this tab
+ *  booted, so this tab finds NO main anywhere. Criterion ("no matching main"): IndexedDB definite ('ok') with no save/main, no
+ *  localStorage main and no .bak, and an invalid corrupt.* copy made after the last Reset (RESET_AT_KEY). A copy that was
+ *  surfaced is always followed by that session's fresh-farm save (a main) unless the player reset, so old, already surfaced
+ *  copies never trigger. Returns the newest such copy (main.ts hands it to loadSafe as the IndexedDB value: the IDB1 path,
+ *  M3 + save_corrupt {store:'idb'} + Export), else null. Read-only: nothing is written or moved. */
+export async function bootOrphanIdb(mirror: Pick<IdbMirror, 'readCorrupt'> | null, idb: IdbInput, kv: KV, b: Balance): Promise<{ key: string; value: unknown } | null> {
+  if (!mirror || idb.status !== 'ok' || (idb.raw !== null && idb.raw !== undefined)) return null;
+  let resetAt = 0;
+  try { if (kv.getItem(SAVE_KEY) !== null || kv.getItem(BAK_KEY) !== null) return null; resetAt = Number(kv.getItem(RESET_AT_KEY)) || 0; } catch { return null; }
+  const list = await mirror.readCorrupt(IDB_BOOT_READ_TIMEOUT_MS); if (!list) return null;
+  for (let i = list.length - 1; i >= 0; i--) {
+    const c = list[i], ts = Number(/^corrupt\.(\d+)/.exec(c.key)?.[1]);
+    if (!(ts > resetAt)) continue;
+    if (c.value === null || c.value === undefined || (typeof c.value === 'string' && validate(c.value, b).ok)) continue;
+    return c;
+  }
+  return null;
 }
 /** save_restore telemetry (QA D1): 'idb' only when the IndexedDB copy wins and replaces localStorage; otherwise null
  *  (no copy, identical, or IndexedDB older/one save behind/invalid - the normal tab-close case). */

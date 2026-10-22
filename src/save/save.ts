@@ -118,9 +118,13 @@ export function keepPrefsOnly(f: any): Record<string, unknown> {
   if (f?.iosHomeShown) o.iosHomeShown = true;
   return o;
 }
+/** CSR-8 8b (HoQA Major on dfdf49c): when the player last reset the save. IndexedDB corrupt.* copies made before it were already
+ *  surfaced (Reset keeps them, IDB1-1) and never re-trigger the IndexedDB-orphan recovery (idb-mirror bootOrphanIdb). */
+export const RESET_AT_KEY = 'eggfarm.save.reset_at';
 /** Clear the save; keep telemetry + install_id; keep sfx/reducedMotion, drop FTUE/progress UI flags (PT1-2). */
-export function resetProgress(kv: KV) {
+export function resetProgress(kv: KV, now = Date.now()) {
   for (const k of RESET_KEYS) kv.removeItem?.(k);
+  try { kv.setItem(RESET_AT_KEY, String(now)); } catch { /* storage full: an older corrupt.* copy may be offered once more (M3, never data loss) */ }
   try {
     const raw = kv.getItem(UI_KEY); if (raw == null) return;
     kv.setItem(UI_KEY, JSON.stringify(keepPrefsOnly(JSON.parse(raw))));

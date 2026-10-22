@@ -5,7 +5,7 @@ import { Game } from './game';
 import { newerStoredVersion, storageBlockedRecovery, serialize } from './save/save';
 import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
-import { IdbMirror, bootPreserveIdb, IDB_BOOT_READ_TIMEOUT_MS } from './save/idb-mirror';
+import { IdbMirror, bootPreserveIdb, bootOrphanIdb, IDB_BOOT_READ_TIMEOUT_MS } from './save/idb-mirror';
 import { mountApp } from './ui/app';
 import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
@@ -94,7 +94,11 @@ async function boot() {
   // the transaction AWAITED before Game, so the new farm's first save can't destroy it; a failed copy => Game gets no mirror.
   if (!lease.owns()) { otherTabModal(); return; } // an even newer tab claimed while IndexedDB opened
   const idbIn = { status: idbBoot, raw: idbValue, reason: idbReason };
-  const idbCopy = await bootPreserveIdb(mirror, idbIn, balance, Date.now());
+  let idbCopy = await bootPreserveIdb(mirror, idbIn, balance, Date.now(), () => lease.owns()); // CSR-8 8b: A re-checks owns() inside its tx
+  // CSR-8 8b (HoQA Major): another tab's copy tx committed (put corrupt.* + delete main) while this tab booted: no main anywhere.
+  // Take the IDB1 path with that copy (M3, save_corrupt {store:'idb'}, Export) instead of a silent fresh farm.
+  const orphan = idbCopy === 'none' ? await bootOrphanIdb(mirror, idbIn, localStorage, balance) : null;
+  if (orphan) { idbValue = orphan.value; idbCopy = 'copied'; }
   if (idbCopy !== 'none') {
     if (!lease.owns()) { otherTabModal(); return; } // the copy awaited: re-check the claim and newer builds before any LS write
     let preNewer3: number | null = null; try { preNewer3 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
