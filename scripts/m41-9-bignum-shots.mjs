@@ -1,14 +1,15 @@
 // M41-9 evidence shots for Art (art-ux/number-format-big.md §6): money pill, Sell button, upgrade-row cost, eggs counter and the
 // order card (WebKit "eggs" drop) at $999.9Dc / $1.23e36 / $1.00e36 plus a >= $1e15 coin pop, at 360/375/390/1280.
 // Cloned from scripts/artux-shots.mjs (dist-qa build with the window.eggfarm QA handle, refuses a +dirty build).
-// Usage: node scripts/m41-9-bignum-shots.mjs chromium|firefox|webkit   (one engine per run; run under the browser-test flock)
-// OUT defaults to /workspace/wt-ui-shots/_script-out/m41-9-bignum-<hash>/; a README names the served commit.
+// Usage: npm run build:qa && node scripts/m41-9-bignum-shots.mjs <chromium|firefox|webkit> [outDir]
+//   one engine per run, under the browser-test flock. outDir defaults to /workspace/wt-ui-shots/m41-9-<sha7 of the served build>/
+//   and must end with -<sha7>; no environment override. A README names the served commit.
 // Seeding (QA handle only, never a save): g.state = {...} for coins / basket / one customer. The farm cost comes from
 // balance.farm.costTable / the curve and can never reach $1e35, so the upgrade-row cost uses a SEEDED BALANCE OVERRIDE:
 // g.b is replaced by a copy whose farm.costTable is the target dollars at every level (UI reads g.balance live).
 import { chromium, webkit, firefox } from 'playwright-core';
-import { spawn, execSync } from 'node:child_process'; import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
-const eng = process.argv[2] || 'chromium'; if (!['chromium', 'firefox', 'webkit'].includes(eng)) { console.error(`unknown engine ${eng}`); process.exit(2); }
+import { spawn, execSync } from 'node:child_process'; import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs'; import { basename } from 'node:path';
+const [eng = 'chromium', OUT_ARG] = process.argv.slice(2); if (!['chromium', 'firefox', 'webkit'].includes(eng)) { console.error(`unknown engine ${eng}`); process.exit(2); }
 const port = 5300 + Math.floor(Math.random() * 200);
 const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
 for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
@@ -20,7 +21,8 @@ if (!ver) die('no version string found in the served build');
 const [buildId, release, hash, dirty] = ver; if (dirty) die(`served build ${buildId} is +dirty; commit, rebuild (npm run build:qa) and re-run`);
 const sha = execSync('git rev-parse HEAD').toString().trim(), branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
 if (!sha.startsWith(hash)) die(`served build ${hash} is not HEAD ${sha}; rebuild dist-qa`);
-const OUT = process.env.OUT ?? `/workspace/wt-ui-shots/_script-out/m41-9-bignum-${hash}`, README = `${OUT}/README.txt`;
+const OUT = OUT_ARG ?? `/workspace/wt-ui-shots/m41-9-${hash.slice(0, 7)}`, README = `${OUT}/README.txt`;
+if (!basename(OUT).endsWith(`-${hash.slice(0, 7)}`)) die(`outDir ${OUT} must end with -${hash.slice(0, 7)} (the served build)`);
 if (existsSync(OUT)) { const named = existsSync(README) ? readFileSync(README, 'utf8') : ''; if (!named.includes(sha)) die(`${OUT} README does not name ${sha}; refusing to write`); }
 else { mkdirSync(OUT, { recursive: true }); writeFileSync(README, `m41-9-bignum-shots from commit ${sha} (branch ${branch}, build ${buildId}), first written ${new Date().toString()}.\n`); }
 console.log(`m41-9-bignum-shots: ${eng} build ${buildId} -> ${OUT}`);
@@ -51,6 +53,10 @@ const measure = p => p.evaluate(() => { const q = s => document.querySelector(s)
     m('order card .l1', q('#mRows .order .l1')), m('order card .n', q('#mRows .order .l1 .n')), m('order card .egg', q('#mRows .order .l1 .egg')), m('order card .v', q('#mRows .order .l1 .v')),
     m('Sell button', q('#mRows .order .btn.sell')), m('Sell .sk', q('#mRows .order .btn.sell .sk')), m('Sell .sy', q('#mRows .order .btn.sell .sy')), m('Sell all', q('#sellAll')),
     m('upgrade cost .num', q('#uRow .btn.buy[data-kind=farm] .num')), m('upgrade cost button', q('#uRow .btn.buy[data-kind=farm]'))]; });
+// Art: the order card must keep the word 'eggs' (the WebKit 360 drop, QA4-1); checked on every engine/width, named for WebKit 360.
+const eggsWord = (shot, ms) => { const e = ms.find(x => x.k === 'order card .egg'); if (!e || e.missing) return;
+  const pass = e.visible && !e.ell && e.w >= 4 && e.text === 'eggs'; if (!pass) bad++;
+  manifest.shots.push({ shot, eggsWord: { pass, text: e.text, w: e.w, ell: e.ell } }); console.log(`${shot} order card 'eggs' word: ${pass ? 'PASS' : 'FAIL'} ${JSON.stringify(e.text)} w=${e.w}`); };
 const record = (shot, ms) => { manifest.shots.push({ shot, elements: ms });
   for (const e of ms) { if (e.missing) continue; const fail = e.clip || (e.k === 'order card .egg' && (!e.visible || e.w < 4 || e.ell));
     if (fail) bad++; console.log(`${shot} ${e.k}: ${fail ? 'CLIP/DROP' : 'ok'} sw=${e.sw} cw=${e.cw} w=${e.w} text=${JSON.stringify(e.text)}`); } };
@@ -67,21 +73,21 @@ for (const [w, h] of WIDTHS) {
     await seed(p, st, sellEggs, sellEggs); await nav(p, 'market'); await p.waitForTimeout(700);
     const clamp = await p.evaluate(() => ({ coins: window.eggfarm.state.coinsCents, basket: window.eggfarm.state.basket }));
     manifest.shots.push({ shot: `seed ${st.name} w${w}`, perEggCents: per, seeded: { coins: st.coins, basket: sellEggs }, after: clamp, clamped: clamp.coins < st.coins * 0.999 || clamp.basket < sellEggs * 0.999 });
-    let f = `${st.name}-market-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` }); record(f, await measure(p));
+    let f = `${st.name}-market-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` }); { const ms = await measure(p); record(f, ms); eggsWord(f, ms); }
     await nav(p, 'upgrades'); await p.evaluate(() => document.querySelector('[data-tab=farm]')?.click()); await p.waitForTimeout(500);
     f = `${st.name}-upgrades-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` }); record(f, await measure(p));
     // B) eggs counter + order card count at the target count
     await seed(p, st, st.eggs, st.eggs); await nav(p, 'market'); await p.waitForTimeout(700);
-    f = `${st.name}-counter-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` }); record(f, await measure(p));
+    f = `${st.name}-counter-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` }); { const ms = await measure(p); record(f, ms); eggsWord(f, ms); }
   }
   // C) coin pop / +$ floater at >= $1e15 (1.2e15 dollars) after a real Sell tap
   { const st = { ...STATES[0], coins: 100, cost: 1e3 }; const k = Math.ceil(1.2e17 / per); await seed(p, st, k, k); await nav(p, 'market'); await p.waitForTimeout(600);
     await p.evaluate(() => { window.__pops = []; new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && /qpop|float/.test(n.className)) window.__pops.push({ cls: n.className, text: n.textContent }); }).observe(document.body, { childList: true, subtree: true }); });
     await p.locator('#mRows .order .btn.sell').first().click(); await p.waitForTimeout(120);
     const f = `pop-1.2Qa-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` });
-    const pops = await p.evaluate(() => window.__pops); const spelled = pops.some(x => /illion|times/.test(x.text));
-    if (spelled || !pops.length) bad++; manifest.shots.push({ shot: f, pops, spelled, live: await p.evaluate(() => document.querySelector('#live')?.textContent) });
-    console.log(`${f} pops=${JSON.stringify(pops)} ${spelled || !pops.length ? 'FAIL' : 'ok'}`); }
+    const pops = await p.evaluate(() => window.__pops); const spelled = pops.some(x => /illion|times/.test(x.text)), qa = pops.some(x => /\$1\.2Qa/.test(x.text));
+    if (spelled || !pops.length || !qa) bad++; manifest.shots.push({ shot: f, pops, spelled, live: await p.evaluate(() => document.querySelector('#live')?.textContent) });
+    console.log(`${f} pops=${JSON.stringify(pops)} ${spelled || !pops.length || !qa ? 'FAIL' : 'ok'}`); }
   await ctx.close();
 }
 writeFileSync(`${OUT}/manifest-${eng}.json`, JSON.stringify(manifest, null, 1));
