@@ -68,6 +68,8 @@ export const CSR_COPY = {
   'csr.age.few': 'a few minutes', 'csr.age.minute': '1 minute', 'csr.age.minutes': '{n} minutes',
   'csr.age.hour': 'about 1 hour', 'csr.age.hours': 'about {n} hours', 'csr.age.day': '1 day', 'csr.age.days': '{n} days',
   'csr.aria.old': 'Export old save file, downloads a copy of your old save file',
+  /** Art & UX P2 (WCAG 2.5.3): starts with the visible label 'Export save file' (M1/M2 copy_failed, M4). */
+  'csr.aria.file': 'Export save file, downloads a copy of your old save file',
   'csr.aria.live': 'Export save file, downloads a copy of your current farm',
 } as const;
 const fill = (t: string, k: string, v: string | number) => t.replace(`{${k}}`, String(v));
@@ -116,7 +118,8 @@ export const csrCopyActive = (r: CsrRecovery) => r.source !== undefined;
 /** CSR-9 copy for a notice. 'storage' and 'cantsave' stay on their v2.1/v2.2 copy (G2). */
 export function csrCopy(n: RecoveryNotice, r: CsrRecovery, S = CSR_COPY): RecoveryCopy | null {
   const restored = { outcome: 'restored' as DialogOutcome, icon: 'icon-coop.svg', badge: '\u2713' as const, badgeClass: 'ok' as const };
-  const oldLink = { exportLabel: S['csr.link'], exportAria: S['csr.aria.old'] };
+  const oldLink = { exportLabel: S['csr.link'], exportAria: S['csr.aria.file'] };
+  const warn = { icon: 'icon-coop.svg', badge: '!' as const, badgeClass: 'warn' as const }; // Art & UX P1: M4/M5, never red
   switch (n.id) {
     case 'M1': return { ...restored, title: S['csr.m1.title'], body: S['csr.m1.body'], button: S['csr.m1.button'], exportStyle: 'secondary', ...oldLink };
     case 'M2': {
@@ -124,10 +127,10 @@ export function csrCopy(n: RecoveryNotice, r: CsrRecovery, S = CSR_COPY): Recove
       return { ...restored, title: S['csr.m2.title'], body, button: S['csr.m2.button'], exportStyle: 'secondary', ...oldLink };
     }
     case 'M3': return { outcome: 'fresh', icon: 'char-chicken.svg', badge: '\u2605', badgeClass: 'new', title: S['csr.m3.title'], body: S['csr.m3.body'], button: S['csr.m3.button'], exportStyle: 'link', exportLabel: S['csr.m3.link'], exportAria: S['csr.aria.old'] };
-    case 'M4': return { outcome: 'fresh', icon: 'icon-coop.svg', badge: '!', badgeClass: 'warn', title: S['csr.m4.title'], body: S['csr.m4.body'], button: S['csr.m4.button'], exportStyle: 'link', exportLabel: S['csr.m4.link'], exportAria: S['csr.aria.old'] };
+    case 'M4': return { outcome: 'fresh', icon: 'icon-coop.svg', badge: '!', badgeClass: 'warn', title: S['csr.m4.title'], body: S['csr.m4.body'], button: S['csr.m4.button'], exportStyle: 'link', exportLabel: S['csr.m4.link'], exportAria: S['csr.aria.file'] };
     // G1: Continue stays primary; the Export secondary uses the AC14b storage-full layout (.rc-export-q, full width, 44px) and
     // exports the CURRENT restored farm through recovery.live(), never the corrupt bytes.
-    case 'M5': return { ...restored, title: S['csr.m5.title'], body: S['csr.m5.body'], button: S['csr.m5.button'], exportStyle: 'secondary', exportLabel: S['csr.m5.link'], exportAria: S['csr.aria.live'] };
+    case 'M5': return { ...restored, ...warn, title: S['csr.m5.title'], body: S['csr.m5.body'], button: S['csr.m5.button'], exportStyle: 'secondary', exportLabel: S['csr.m5.link'], exportAria: S['csr.aria.live'] };
     default: return recoveryCopy(r as Recovery);
   }
 }
