@@ -53,8 +53,7 @@ describe('M41-6 Game.save({ mirrorOnFail })', () => {
     const n0 = writes.length; kv.ctl.failSave = true;
     let failMirror = false; const w = mirror.write; mirror.write = (r: string) => { if (failMirror) throw new DOMException('quota', 'QuotaExceededError'); w(r); };
     const save = g.save.bind(g); let calls = 0; (g as any).save = (o?: any) => { calls++; if (calls === 2) failMirror = true; save(o); };
-    const c = showTracksExplainer(g, document, () => g.storageFailed); expect(c).not.toBeNull(); expect(calls).toBe(0);
-    c!.querySelector('button')!.click(); // D-HOP-2026-10-22-06: the flag save runs on dismissal
+    expect(showTracksExplainer(g, document, () => g.storageFailed)).toBeNull();
     expect(writes.slice(n0).some(r => r.includes('"seenTracksExplainer":true'))).toBe(false);
     expect(g.state.seenTracksExplainer).toBe(false); expect(cards()).toBe(0);
   });
@@ -96,8 +95,7 @@ describe('M41-6 canPersist matches save()', () => {
     vi.useFakeTimers(); const { g } = mk(); g.onHidden(T0);
     expect(showTracksExplainer(g, document)).toBeNull(); expect(g.state.seenTracksExplainer).toBeFalsy(); expect(cards()).toBe(0);
     g.onShown(T0 + 1000); vi.advanceTimersByTime(EXP_RETRY_MS);
-    expect(cards()).toBe(1); document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); // D-HOP-2026-10-22-06: saved on dismissal
-    expect(JSON.parse((g as any).kv.getItem(SAVE_KEY)).state.seenTracksExplainer).toBe(true);
+    expect(cards()).toBe(1); expect(JSON.parse((g as any).kv.getItem(SAVE_KEY)).state.seenTracksExplainer).toBe(true);
   });
 });
 
@@ -119,8 +117,7 @@ describe('CCR #49 m1: storageBlocked survives the retry path', () => {
       let blocked = blockedAtMount;
       mountApp(document.getElementById('app')!, g, ON, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false, storageBlocked: () => blocked });
       const atMount = cards(); if (blockLater) blocked = true; await vi.advanceTimersByTimeAsync(EXP_RETRY_MS * 2);
-      const after = cards(); document.querySelectorAll<HTMLButtonElement>('.tracks-exp-ok').forEach(b => b.click()); // D-HOP-2026-10-22-06: seen on dismissal
-      const r = { atMount, after, seen: !!g.state.seenTracksExplainer }; vi.useRealTimers(); return r;
+      const r = { atMount, after: cards(), seen: !!g.state.seenTracksExplainer }; vi.useRealTimers(); return r;
     };
     expect(await run(false, false, false)).toEqual({ atMount: 1, after: 1, seen: true });
     expect(await run(true, false, false)).toEqual({ atMount: 0, after: 0, seen: false });

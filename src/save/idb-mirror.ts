@@ -175,16 +175,20 @@ export async function bootPreserveIdb(mirror: Pick<IdbMirror, 'preserveCorrupt'>
   if (typeof idb.raw === 'string' && validate(idb.raw, b).ok) return 'none';
   return (await mirror.preserveCorrupt(idb.raw, now, stillOwner)) ? 'copied' : 'failed';
 }
+/** Arch m4: tolerance for a future-dated reset_at before it is treated as 0. */
+export const RESET_AT_FUTURE_MS = 86_400_000;
 /** CSR-8 8b (HoQA Major on dfdf49c): another tab's IDB1-5 copy transaction (put corrupt.* + delete main) committed while this tab
  *  booted, so this tab finds NO main anywhere. Criterion ("no matching main"): IndexedDB definite ('ok') with no save/main, no
  *  localStorage main and no .bak, and an invalid corrupt.* copy made after the last Reset (RESET_AT_KEY). A copy that was
  *  surfaced is always followed by that session's fresh-farm save (a main) unless the player reset, so old, already surfaced
  *  copies never trigger. Returns the newest such copy (main.ts hands it to loadSafe as the IndexedDB value: the IDB1 path,
  *  M3 + save_corrupt {store:'idb'} + Export), else null. Read-only: nothing is written or moved. */
-export async function bootOrphanIdb(mirror: Pick<IdbMirror, 'readCorrupt'> | null, idb: IdbInput, kv: KV, b: Balance): Promise<{ key: string; value: unknown } | null> {
+export async function bootOrphanIdb(mirror: Pick<IdbMirror, 'readCorrupt'> | null, idb: IdbInput, kv: KV, b: Balance, now = Date.now()): Promise<{ key: string; value: unknown } | null> {
   if (!mirror || idb.status !== 'ok' || (idb.raw !== null && idb.raw !== undefined)) return null;
   let resetAt = 0;
   try { if (kv.getItem(SAVE_KEY) !== null || kv.getItem(BAK_KEY) !== null) return null; resetAt = Number(kv.getItem(RESET_AT_KEY)) || 0; } catch { return null; }
+  // Arch m4: a reset_at more than a day in the future (clock ahead at Reset) is ignored, so it can't suppress orphans indefinitely.
+  if (resetAt > now + RESET_AT_FUTURE_MS) resetAt = 0;
   const list = await mirror.readCorrupt(IDB_BOOT_READ_TIMEOUT_MS); if (!list) return null;
   for (let i = list.length - 1; i >= 0; i--) {
     const c = list[i], ts = Number(/^corrupt\.(\d+)/.exec(c.key)?.[1]);

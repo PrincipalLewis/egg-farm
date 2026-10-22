@@ -6,9 +6,9 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
-import { IdbMirror, IDB_KEY, IDB_CORRUPT_PREFIX, bootPreserveIdb, bootOrphanIdb } from '../src/save/idb-mirror';
+import { IdbMirror, IDB_KEY, IDB_CORRUPT_PREFIX, bootPreserveIdb, bootOrphanIdb, RESET_AT_FUTURE_MS } from '../src/save/idb-mirror';
 import { Game } from '../src/game';
-import { SAVE_KEY, BAK_KEY, RESET_AT_KEY, resetProgress, serialize } from '../src/save/save';
+import { SAVE_KEY, BAK_KEY, RESET_AT_KEY, RESET_KEYS, UI_KEY, resetProgress, serialize } from '../src/save/save';
 import { TabLease } from '../src/save/tab-lease';
 import { recoveryNotice, exportBytes, type CsrRecovery } from '../src/ui/save-recovery';
 import { initialState } from '../src/sim/state';
@@ -113,5 +113,38 @@ describe('CSR-8 8b wiring in src/main.ts (the boot sequence the tests above mirr
     expect(src).toMatch(/bootPreserveIdb\(mirror, idbIn, balance, Date\.now\(\), \(\) => lease\.owns\(\)\)/);
     expect(src).toMatch(/idbCopy === 'none' \? await bootOrphanIdb\(mirror, idbIn, localStorage, balance\) : null/);
     expect(src).toMatch(/if \(orphan\) \{ idbValue = orphan\.value; idbCopy = 'copied'; \}\s*\n\s*if \(idbCopy !== 'none'\) \{\s*\n\s*if \(!lease\.owns\(\)\) \{ otherTabModal\(\); return; \}/);
+  });
+});
+
+// Architect review engineering/reviews/pr63-reset-at-b986cd3.md (m1 deferred to M4.2) + D-HOP-2026-10-22-07 (b) AC.
+describe('reset_at (D-HOP-2026-10-22-07 b; Arch m2, m3, m4)', () => {
+  it('m2: reset_at is deliberately outside RESET_KEYS; a second Reset keeps and advances it; alone it is not a save', async () => {
+    expect((RESET_KEYS as readonly string[]).includes(RESET_AT_KEY)).toBe(false); expect(RESET_AT_KEY.startsWith('eggfarm.save.')).toBe(true);
+    const kv = mem(); resetProgress(kv, NOW - 5000); resetProgress(kv, NOW - 1000); expect(kv.getItem(RESET_AT_KEY)).toBe(String(NOW - 1000));
+    for (const k of RESET_KEYS) expect(kv.getItem(k)).toBeNull();
+    const T = await open(fakeIdb(), kv, NOW); T.lease.claim(); const g = await finish(T, kv, NOW) as Game; // only reset_at stored
+    expect(g.recovery).toBeNull(); expect(g.isNewGame).toBe(true);
+  });
+  it('m3: resetProgress survives a QuotaExceededError on the reset_at write: removals done, no throw, UI prefs trim still runs', () => {
+    const kv = mem({ [SAVE_KEY]: 'x', [BAK_KEY]: 'y', [UI_KEY]: JSON.stringify({ sfx: false, reducedMotion: true, onboardingDone: true }) }); const set = kv.setItem;
+    kv.setItem = (k: string, v: string) => { if (k === RESET_AT_KEY) throw new DOMException('full', 'QuotaExceededError'); set(k, v); };
+    expect(() => resetProgress(kv, NOW)).not.toThrow();
+    expect([kv.getItem(SAVE_KEY), kv.getItem(BAK_KEY), kv.getItem(RESET_AT_KEY)]).toEqual([null, null, null]);
+    expect(JSON.parse(kv.getItem(UI_KEY))).toEqual({ sfx: false, reducedMotion: true }); // trimmed: FTUE flag dropped
+    const all = mem({ [SAVE_KEY]: 'x' }); all.setItem = () => { throw new DOMException('full', 'QuotaExceededError'); }; // every write refused
+    expect(() => resetProgress(all, NOW)).not.toThrow(); expect(all.getItem(SAVE_KEY)).toBeNull();
+  });
+  it('m4: a reset_at more than RESET_AT_FUTURE_MS ahead is ignored (orphan offered); up to that it still applies', async () => {
+    const f = fakeIdb(); f.data.set(`${IDB_CORRUPT_PREFIX}${NOW - 60_000}`, ABC); const m = new IdbMirror(f.db);
+    const kv = mem(); kv.setItem(RESET_AT_KEY, String(NOW + RESET_AT_FUTURE_MS + 1));
+    expect((await bootOrphanIdb(m, { status: 'ok', raw: null }, kv, b, NOW))?.value).toBe(ABC);
+    kv.setItem(RESET_AT_KEY, String(NOW + RESET_AT_FUTURE_MS));
+    expect(await bootOrphanIdb(m, { status: 'ok', raw: null }, kv, b, NOW)).toBeNull();
+    kv.setItem(RESET_AT_KEY, 'garbage'); expect((await bootOrphanIdb(m, { status: 'ok', raw: null }, kv, b, NOW))?.value).toBe(ABC); // NaN -> 0
+  });
+  it('AC: after a reset, a post-reset corrupt IndexedDB main still follows the CSR chain (IDB1, M3); the pre-reset copy is not used', async () => {
+    const f = fakeIdb(); f.data.set(`${IDB_CORRUPT_PREFIX}${NOW - 86_400_000}`, 'old-junk'); f.data.set(IDB_KEY, ABC);
+    const kv = mem({ [SAVE_KEY]: 'x' }); resetProgress(kv, NOW - 3_600_000);
+    const T = await open(f, kv, NOW); T.lease.claim(); const g = await finish(T, kv, NOW) as Game; assertIdb1(g);
   });
 });

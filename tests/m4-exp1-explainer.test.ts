@@ -40,10 +40,9 @@ describe('M4-AC-EXP1 tracks explainer', () => {
     expect(card.querySelector('h2')!.textContent).toBe(EXP_TITLE); expect(card.querySelector('p')!.textContent).toBe(EXP_BODY);
     expect(card.querySelectorAll('button').length).toBe(1); expect(card.querySelector('button')!.textContent).toBe('Got it');
     expect(card.getAttribute('aria-modal')).toBe('false');
-    expect(g.state.seenTracksExplainer).toBeUndefined(); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
-    (card.querySelector('button') as HTMLButtonElement).click(); expect(cards()).toBe(0);
     expect(g.state.seenTracksExplainer).toBe(true);
-    expect(JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer).toBe(true); // persisted when dismissed
+    expect(JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer).toBe(true); // persisted when shown
+    (card.querySelector('button') as HTMLButtonElement).click(); expect(cards()).toBe(0);
     g.onTracksCommitted!(); expect(cards()).toBe(0); // a second commit signal never re-shows
     const g2 = boot(kv); expect(g2.state.seenTracksExplainer).toBe(true); expect(g2.tracksMigrationPending).toBe(false);
     const m2 = await mount(g2, on); expect(await g2.startTracksMigration()).toBe('none'); expect(m2.cards()).toBe(0);
@@ -53,8 +52,7 @@ describe('M4-AC-EXP1 tracks explainer', () => {
     const g = boot(kv); g.onTracksCommitted = null; expect(await g.startTracksMigration()).toBe('committed'); // no UI yet
     expect(g.state.seenTracksExplainer).toBeUndefined();
     const g2 = boot(kv); expect(g2.tracksMigratedWithBackup).toBe(true);
-    const m2 = await mount(g2, on); expect(m2.cards()).toBe(1); expect(g2.state.seenTracksExplainer).toBeUndefined();
-    document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(g2.state.seenTracksExplainer).toBe(true); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
+    const m2 = await mount(g2, on); expect(m2.cards()).toBe(1); expect(g2.state.seenTracksExplainer).toBe(true);
     const g3 = boot(kv); const m3 = await mount(g3, on); expect(m3.cards()).toBe(0);
   });
   it('fresh M4 farm never sees it', async () => {
@@ -99,9 +97,8 @@ describe('M4-AC-EXP1 tracks explainer', () => {
     const fake = { state: { ...g.state, seenTracksExplainer: false }, balance: on, save() {} } as any;
     showTracksExplainer(fake); expect(cards()).toBe(1);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); expect(cards()).toBe(0);
-    const fake2 = { ...fake, state: { ...fake.state, seenTracksExplainer: false } };
-    vi.useFakeTimers(); showTracksExplainer(fake2); expect(cards()).toBe(1);
-    vi.advanceTimersByTime(EXP_MS); expect(cards()).toBe(0); expect(fake2.state.seenTracksExplainer).toBe(false); // auto-hide never marks it seen
+    vi.useFakeTimers(); fake.state.seenTracksExplainer = false; showTracksExplainer(fake); expect(cards()).toBe(1);
+    vi.advanceTimersByTime(EXP_MS); expect(cards()).toBe(0);
   });
 });
 
@@ -113,8 +110,7 @@ describe('Saves m1: explainer only when the flag can be persisted', () => {
     expect(showTracksExplainer(g)).toBeNull(); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(g.state.seenTracksExplainer).toBeUndefined();
     vi.advanceTimersByTime(3000); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(saved).toEqual([]);
     g.canPersist = true; vi.advanceTimersByTime(1000);
-    expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(saved).toEqual([]); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
-    document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(saved).toEqual([true]);
+    expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(saved).toEqual([true]);
   });
   it('real Game: readOnly and inactive both block canPersist', () => {
     const g = boot(kvOf()); expect(g.canPersist).toBe(true);
@@ -125,8 +121,7 @@ describe('Saves m1: explainer only when the flag can be persisted', () => {
   it('hidden tab: no card until visible', () => {
     vi.useFakeTimers(); const vis = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
     const { g } = fake({ canPersist: true }); expect(showTracksExplainer(g)).toBeNull(); expect(g.state.seenTracksExplainer).toBeUndefined();
-    vis.mockReturnValue('visible'); vi.advanceTimersByTime(1000); expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(g.state.seenTracksExplainer).toBeUndefined();
-    document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(g.state.seenTracksExplainer).toBe(true); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
+    vis.mockReturnValue('visible'); vi.advanceTimersByTime(1000); expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(g.state.seenTracksExplainer).toBe(true);
     vis.mockRestore();
   });
 });
@@ -228,19 +223,18 @@ describe('HoE Major #49: storage blocked (localStorage.setItem throws)', () => {
   it('control: same fake with storage writable shows the card once', () => {
     const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, save() {} };
     expect(showTracksExplainer(g, document, () => false)).not.toBeNull(); expect(document.querySelectorAll('.tracks-exp').length).toBe(1);
-    expect(showTracksExplainer(g, document, () => false)).toBeNull(); // never a second card while one is up
-    document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(g.state.seenTracksExplainer).toBe(true); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
+    expect(g.state.seenTracksExplainer).toBe(true); expect(showTracksExplainer(g, document, () => false)).toBeNull();
+    document.querySelector('.tracks-exp')?.remove();
   });
 });
 
 describe('HoE #49b: QuotaExceededError on the flag write (g.storageFailed)', () => {
-  it('save() fails on the flag write (at dismissal, D-HOP-2026-10-22-06): seen reverted; next load with storage still failing: no card', () => {
+  it('save() fails on the flag write: no card; next load with storage still failing: no card', () => {
     vi.useFakeTimers();
     const mk = (failed = false) => { const g: any = { state: { ...initialState(on), tracksV7: 1 }, balance: on, canPersist: true, storageFailed: failed, saves: 0,
       save() { g.saves++; g.storageFailed = true; /* Game.save catches the QuotaExceededError and sets storageFailed */ } }; return g; };
     const lease = { storageBlocked: false }; // a real quota error does not set the lease's flag
-    const g1 = mk(); const c1 = showTracksExplainer(g1, document, () => lease.storageBlocked || g1.storageFailed); expect(c1).not.toBeNull(); expect(g1.saves).toBe(0);
-    c1!.querySelector('button')!.click(); expect(g1.state.seenTracksExplainer).toBe(false);
+    const g1 = mk(); expect(showTracksExplainer(g1, document, () => lease.storageBlocked || g1.storageFailed)).toBeNull();
     expect(g1.saves).toBe(2); vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
     const g2 = mk(true); expect(showTracksExplainer(g2, document, () => lease.storageBlocked || g2.storageFailed)).toBeNull(); // next load, still failing
     vi.advanceTimersByTime(EXP_RETRY_MS * 5); expect(document.querySelectorAll('.tracks-exp').length).toBe(0); expect(g2.saves).toBe(0);
@@ -249,15 +243,15 @@ describe('HoE #49b: QuotaExceededError on the flag write (g.storageFailed)', () 
 });
 
 describe('Saves/HoQA Major: a failed flag save leaves seen=false (memory, IDB mirror, next autosave)', () => {
-  it('flag write (on dismissal) hits QuotaExceededError: seen=false in g.state; later saves never carry seen=true', () => {
+  it('flag write hits QuotaExceededError: no card, seen=false in g.state; later saves never carry seen=true', () => {
     vi.useFakeTimers();
     const m = mem(); const kv = { getItem: m.getItem, setItem: (k: string, v: string) => { if (v.includes('"seenTracksExplainer":true')) throw new DOMException('quota', 'QuotaExceededError'); m.setItem(k, v); } };
     const writes: string[] = []; const mirror = { write: (raw: string) => { writes.push(raw); return Promise.resolve(); } } as any;
     const g = new Game(on, kv, () => 1760000000500 + n++ * 1000, undefined, 'dev', mirror, null, { idbBoot: 'absent', newId: id });
     g.state = { ...g.state, tracksV7: 1 }; g.save(); expect(g.storageFailed).toBe(false);
     const flagWrite = writes.length;
-    const c = showTracksExplainer(g as any, document, () => g.storageFailed); expect(c).not.toBeNull(); expect(writes.length).toBe(flagWrite); // nothing saved at show
-    c!.querySelector('button')!.click(); expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
+    expect(showTracksExplainer(g as any, document, () => g.storageFailed)).toBeNull();
+    expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
     expect(g.storageFailed).toBe(true);
     expect(g.state.seenTracksExplainer).toBe(false); // in memory
     // M41-6: the flag save passes mirrorOnFail:false, so its failed write never reaches the mirror; only the revert save (seen=false) does.
@@ -281,14 +275,14 @@ describe('Saves Q2: tab dies after a failed flag save', () => {
   const memQ = (init: Record<string, string>) => { const m = new Map(Object.entries(init)); return { m, getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k) } as any; };
   const fakeIdb = () => { const st = { raw: null as string | null, writes: 0 }; return { st, mirror: { write: (r: string) => { st.raw = r; st.writes++; }, clear: async () => { st.raw = null; }, newer: null, onNewer: null } as any }; };
   const seenIn = (raw: string | null) => raw ? (JSON.parse(raw).state.seenTracksExplainer ?? null) : null;
-  it('mirror vs localStorage on the next boot: shown until a dismissal persists (failed one, then the next load), then never', async () => {
+  it('mirror vs localStorage on the next boot: the card is shown exactly once overall', async () => {
     vi.useFakeTimers(); vi.setSystemTime(T);
     const kv = memQ(EXP1_LS); const set = kv.setItem; const ctl = { mode: 'armed' as string };
     kv.setItem = (k: string, val: string) => { if (k.startsWith('eggfarm.save')) { if (ctl.mode === 'armed' && val.includes('"seenTracksExplainer":true')) ctl.mode = 'full'; if (ctl.mode === 'full') throw new DOMException('quota', 'QuotaExceededError'); } set(k, val); };
     const t0 = JSON.parse(kv.getItem(SAVE_KEY)).savedAt + 5000; const idb = fakeIdb();
     const boot2 = (t: number) => { let src: any = 'none'; if (idb.st.raw) src = reconcile(kv, idb.st.raw, ON);
       const g = new Game(ON, kv, () => t, 1, 'qa', idb.mirror, idb.st.raw); let k = 0;
-      const show = () => { const c = showTracksExplainer(g as any, document, () => g.storageFailed); if (c) { k++; c.querySelector('button')!.click(); } }; // dismissed
+      const show = () => { const c = showTracksExplainer(g as any, document, () => g.storageFailed); if (c) { k++; c.remove(); } };
       g.onTracksCommitted = show; if (g.tracksMigratedWithBackup) show(); return { g, n: () => k, src }; };
     const s1 = boot2(t0); const ls0 = kv.getItem(SAVE_KEY), idb0 = idb.st.raw;
     const ev: any = { shown1: s1.n(), mem1: !!s1.g.state.seenTracksExplainer, ls1: seenIn(ls0), idb1: seenIn(idb0), rank: rankCompare(idb0, ls0) };
@@ -296,8 +290,7 @@ describe('Saves Q2: tab dies after a failed flag save', () => {
     const s2 = boot2(t0 + 10_000); ev.src2 = s2.src; ev.shown2 = s2.n(); ev.ls2 = seenIn(kv.getItem(SAVE_KEY));
     const s3 = boot2(t0 + 20_000); ev.shown3 = s3.n();
     expect(ev.idb1, JSON.stringify(ev)).not.toBe(true); // mirror never left at seen=true
-    // D-HOP-2026-10-22-06: the failed dismissal did not persist seen, so the next load shows it again; never after a persisted one.
-    expect([ev.shown1, ev.mem1, ev.shown2, ev.ls2, ev.shown3], 'shown until a dismissal persists: ' + JSON.stringify(ev)).toEqual([1, false, 1, true, 0]);
+    expect(ev.shown1 + ev.shown2 + ev.shown3, 'card shown exactly once overall: ' + JSON.stringify(ev)).toBe(1);
     vi.useRealTimers();
   });
 });

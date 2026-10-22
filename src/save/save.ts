@@ -108,7 +108,9 @@ export function migrate(d: any, b: Balance): SaveFile {
   return { version: d.version, savedAt: d.savedAt, state: { ...migrateStoredTracksV7(state, b).state, tracksV7: 1 }, tracksMigrated: true, v6State: state, v6Keys: Object.keys(d.state ?? {}) };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
-/** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
+/** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2).
+ *  Arch m2 (pr63-reset-at): RESET_AT_KEY ('eggfarm.save.reset_at') is deliberately NOT here: Reset writes it and it must outlive the
+ *  save it describes. Any future 'clear all eggfarm.save*' or export-by-prefix must skip it. */
 export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak', 'eggfarm.save.v6_backup', 'eggfarm.save.migration_attempts', 'eggfarm.save.headroom_probe'] as const; // N3: probe key too // review m4: Reset clears the v6 backup too (V6_BACKUP_KEY) // QA BUG-4: .bak too, so reset progress can't come back
 export const UI_KEY = 'eggfarm.ui';
 /** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
