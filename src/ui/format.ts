@@ -15,9 +15,11 @@ type Rnd = (x: number) => number;
  *  15 significant digits so the rounding/roll-up edges (9.995Sx -> 10Sx, 999.95No -> 1Dc) behave like their decimal value. */
 const dec = (q: number, base: number) => base >= 1e15 ? Number(q.toPrecision(15)) : q;
 const rndOf = (opts?: { round?: 'nearest' | 'floor' }): Rnd => opts?.round === 'floor' ? Math.floor : Math.round;
-/** Scientific, 3 significant figures, no "+" in the exponent: 1.23e36. Floor mode never shows more than n. */
+/** Scientific, 3 significant figures, no "+" in the exponent: 1.23e36. Floor mode never shows more than n. CCR m1 on #64: the
+ *  mantissa x100 is snapped to 15 significant digits first (as dec() does for the tiers), so x.xx5 rounds half-up
+ *  (9.995e36 -> 1.00e37, 1.005e36 -> 1.01e36) and an exact 1.23e36 floors to itself. The snap replaces the old +1e-9 nudge. */
 export const fmtSci = (n: number, rnd: Rnd = Math.round): string => {
-  const [m, e] = n.toExponential(12).split('e'); let mant = rnd(parseFloat(m) * 100 + (rnd === Math.floor ? 1e-9 : 0)) / 100, exp = Number(e);
+  const [m, e] = n.toExponential(12).split('e'); let mant = rnd(Number((parseFloat(m) * 100).toPrecision(15))) / 100, exp = Number(e);
   if (mant >= 10) { mant /= 10; exp += 1; }
   return `${mant.toFixed(2)}e${exp}`;
 };

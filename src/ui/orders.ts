@@ -38,7 +38,9 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
   // MK-24 / HoP 15:14: visible button uses floored short money; aria uses fmtMoneyAria (= fmtMoneyExact below $1e15).
   const wait = `Need ${eggs(rem)}`;
   const button = state === 'wait' ? wait : `Sell ${eggsFloor(sell)} · +${preview(sellCents)}`;
-  const buttonAria = state === 'wait' ? wait : `Sell ${eggsAria(sell)} · +${exact(sellCents)}`;
+  // Art ruling (4) on #64: the Sell aria follows the visible floored count ('Sell 12.9K'); where the visible text is as on main
+  // (under 10K, or floor == nearest) it stays byte-identical. The money stays exact (its visible form is unchanged from main).
+  const buttonAria = state === 'wait' ? wait : `Sell ${spellShort(eggsFloor(sell))} · +${exact(sellCents)}`;
   const line = `${eggs(have)}/${eggs(want)}\u00a0eggs · ${value}`; // Art & UX: NBSP between count and eggs
   const lineAria = `${eggsAria(have)} of ${eggsAria(want)} eggs delivered, order worth ${exact(valueCents)}`;
   return { id: c.id, have, want, sell, valueCents, sellCents, state, line, lineAria, button, buttonAria };

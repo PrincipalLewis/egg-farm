@@ -100,7 +100,7 @@ describe('QA4-2: one rounding rule on a Sell (never more eggs than are sold)', (
   it('basket 12,960, demand 20,000 (QA repro): card and Sell all both read 12.9K / $12.9K', () => {
     const v = orderView(cust(20_000), 12_960, 100);
     expect(v.button).toBe(`Sell 12.9K${NB}· +$12.9K`);
-    expect(v.buttonAria).toBe(`Sell 13K${NB}· +$12,960.00`); // aria count as on main (Art ruling on #56)
+    expect(v.buttonAria).toBe(`Sell 12.9K${NB}· +$12,960.00`); // Art ruling (4) on #64 (CCR m3): the aria count follows the visible floored count
     expect(sellAllLabel(12_960, 1_296_000, fmtCountFloor, fmtMoneyFloor)).toBe(`Sell all (12.9K${NB}eggs${NB}· $12.9K)`);
   });
   it('floored count never exceeds the real count', () => {
@@ -157,7 +157,47 @@ describe('Art ruling on #56: spelled words only in aria/live; visible pops stay 
     for (const n of xs) for (const c of [n, n * 100 + 37]) if (c < 1e17) expect(liveText(c, n)).toBe(`${OLD.fmtMoney(c)}, ${OLD.fmtCount(n)} eggs`);
     for (const want of xs.filter(x => x > 0 && x < 999.95e12)) for (const [filled, basket] of [[0, 0], [0, Math.floor(want / 3)], [Math.floor(want / 2), want], [0, want]]) for (const price of [1, 37, 100]) {
       const c = cust(want, filled), a = orderView(c, basket, price), o = OLDO.orderView(c, basket, price);
-      expect(a.lineAria).toBe(o.lineAria); expect(a.buttonAria).toBe(o.buttonAria);
+      expect(a.lineAria).toBe(o.lineAria);
+      // Art ruling (4) on #64: the Sell aria is byte-identical to main wherever the visible Sell text is; where the visible
+      // count changed (floored), the aria follows it.
+      if (a.button === o.button) expect(a.buttonAria).toBe(o.buttonAria);
+      else if (a.state !== 'wait') expect(a.buttonAria).toBe(o.buttonAria.replace(/^Sell [^\u00a0]+/, `Sell ${NEW.spellShort(/^Sell (\S+)\u00a0/.exec(a.button)![1])}`));
     }
+  });
+});
+
+describe('Art ruling (4) on #64 / CCR m3: the Sell aria count == the visible (floored) count', () => {
+  it('every floored Sell label above 10K: the aria names exactly the visible count (spelled only Qa+), money exact', () => {
+    let n = 0;
+    for (let e = 4; e < 37; e += 0.0371) {
+      const basket = Math.floor(10 ** e), v = orderView(cust(basket * 3), basket, 100);
+      const vis = /^Sell (\S+)\u00a0· \+/.exec(v.button)![1], aria = /^Sell (.+?)\u00a0· \+/.exec(v.buttonAria)![1];
+      expect(aria).toBe(NEW.spellShort(vis)); n++;
+    }
+    expect(n).toBeGreaterThan(800);
+  });
+  it('where the visible text is unchanged from main (under 10K, or floor == nearest), the Sell aria is byte-identical to main', () => {
+    for (const basket of [1, 7, 999, 9_999, 10_000, 12_000, 1_000_000, 2_500_000_000]) {
+      const v = orderView(cust(basket * 2), basket, 100), o = OLDO.orderView(cust(basket * 2), basket, 100);
+      if (v.button === o.button) expect(v.buttonAria).toBe(o.buttonAria);
+    }
+  });
+});
+
+describe('CCR m1 on #64: scientific notation rounds half-up on x.xx5 (15 s.f. snap, as dec() does for the tiers)', () => {
+  it.each([[9.995e36, '1.00e37'], [1.005e36, '1.01e36'], [1.255e36, '1.26e36'], [1.0049e36, '1.00e36'], [1e36, '1.00e36'], [9.994e40, '9.99e40']])('fmtSci(%s) = %s', (n, want) => {
+    expect(NEW.fmtSci(n)).toBe(want); expect(NEW.fmtCount(n)).toBe(want);
+  });
+  it('0 half-up misses over every x.xx5e36..e40 mantissa', () => {
+    for (let k = 100; k < 1000; k++) for (const ex of [36, 37, 40]) {
+      const n = Number(`${k}5e${ex - 3}`) , want = Math.round(k + 1) ; // k.5 (x100) -> rounds up to k+1
+      const got = NEW.fmtSci(n), [m, e] = got.split('e');
+      expect(Math.round(Number(m) * 100) * 10 ** (Number(e) - ex + 0)).toBe(want >= 1000 ? 1000 : want);
+    }
+  });
+  it('CCR n1: floor mode (the old +1e-9 floor, now the snap) floors an exact value to itself and never above n', () => {
+    for (const [n, want] of [[1.23e36, '1.23e36'], [4.56e38, '4.56e38'], [1.239e36, '1.23e36'], [9.999e36, '9.99e36'], [7e40, '7.00e40']] as const)
+      expect(NEW.fmtSci(n, Math.floor)).toBe(want);
+    for (let k = 100; k < 1000; k += 7) expect(NEW.fmtSci(Number(`${k}e34`), Math.floor)).toBe(`${(k / 100).toFixed(2)}e36`);
   });
 });

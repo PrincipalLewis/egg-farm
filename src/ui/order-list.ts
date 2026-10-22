@@ -138,12 +138,12 @@ export class OrderList {
   node(id: number) { return this.nodes.get(id); }
 }
 
-/** Order-card line fit (Art ruling on #64): 16px -> 14px (fit1) -> 12px with -0.02em (fit2) -> still too wide: WRAP to a second
- *  line at 12px (fit3; the card grows). Count, $ and 'eggs' are never clipped or ellipsized: wrapping replaces the old
- *  '.egg ellipsis' last resort. "Too wide" = the shrinkable .egg would be cut. Returns the step taken. */
+/** Order-card line fit (Art ruling on #64, HoE Oct 22): 16px -> 14px (fit1) -> 12px with -0.02em (fit2) -> still too wide: WRAP
+ *  to a second line at 12px (fit3; the card grows). Count, $ and 'eggs' never shrink, clip or ellipsize (no '.egg ellipsis'
+ *  path any more). "Too wide" = the line's content is wider than the line box. Returns the step taken. */
 export function fitLine(l1: HTMLElement): 0 | 1 | 2 | 3 {
-  const egg = l1.querySelector<HTMLElement>('.egg'); l1.classList.remove('fit1', 'fit2', 'fit3'); if (!egg) return 0;
-  const cut = () => egg.scrollWidth > egg.clientWidth + 0.5;
+  l1.classList.remove('fit1', 'fit2', 'fit3');
+  const cut = () => l1.scrollWidth > l1.clientWidth + 0.5;
   if (!cut()) return 0;
   l1.classList.add('fit1'); if (!cut()) return 1;
   l1.classList.replace('fit1', 'fit2'); if (!cut()) return 2;

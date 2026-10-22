@@ -1,4 +1,6 @@
-/** M41-9: Art rulings on #56 (Art & UX, Oct 19 10:06), one test block per ruling, so each is pinned by name.
+/** M41-9: Art rulings on #56 (art-ux/number-format-big.md: the 09:45 ruling and the 10:10 addendum, rulings 1-4), one test block
+ *  per ruling, so each is pinned by name. Mapping (CCR n4): R1 = 10:10 ruling 1, R2 = ruling 2, R3 = ruling 3 (aria), R4 = ruling 3
+ *  (visible), R5 = ruling 4.
  *  R1 compact money 1 decimal; counts + plain money 2 decimals under 10x the tier base.  R2 exactly 1e36 -> '1.00e36'.
  *  R3 spell out only Qa+ and only in aria/live; K–T aria/live byte-identical to main ('$1M').  R4 visible pops/floaters never
  *  spelled ('$1.2Qa').  R5 Sell floor approved (previews never above the credit). */
