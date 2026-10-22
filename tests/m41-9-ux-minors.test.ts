@@ -5,7 +5,8 @@ import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { balance, type Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
-import { showTracksExplainer, placeExplainer, explainerOpen, EXP_OUT_MS, EXP_POP_MS, EXP_CLOSED } from '../src/ui/tracks-explainer';
+import { showTracksExplainer, placeExplainer, explainerOpen, EXP_OUT_MS, EXP_POP_MS, EXP_CLOSED, EXP_MS } from '../src/ui/tracks-explainer';
+import { fmtMoney } from '../src/ui/format';
 import { toastSafeBottom, TOAST_GAP } from '../src/ui/toast-safe';
 const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
 const css = readFileSync('src/ui/styles.css', 'utf8');
@@ -112,5 +113,49 @@ describe('UX-M5: close fade and refund pop', () => {
   });
   it('pop styling per number-pop-spec (Coin Gold, 2px Soil Brown stroke, 26px, 800 ms)', () => {
     expect(css).toMatch(/\.exp-pop\{[^}]*font:700 26px var\(--f-display\);[^}]*color:#E8B020;-webkit-text-stroke:2px #3E2C23;paint-order:stroke fill;[^}]*animation:exppop 800ms forwards\}/);
+  });
+});
+
+describe('Art ruling on #65, UX-M3: docked inside the sheet the card is transient', () => {
+  const sheetPage = () => { document.body.innerHTML = '<nav class="actions"><button data-nav="upgrades">Upgrades</button></nav><button id="collect" class="btn xl">Collect</button><div id="uRow"><button class="btn buy" data-kind="collection">$10.00</button></div>'; };
+  const inside = () => { const el = showTracksExplainer(game() as any)!; el.dataset.place = 'inside'; return el; };
+  it('a tap outside (on the covered Buy) dismisses it AND reaches the Buy in the same tap', () => {
+    sheetPage(); let buys = 0; document.querySelector('.buy')!.addEventListener('click', () => buys++);
+    inside(); (document.querySelector('.buy') as HTMLButtonElement).click();
+    expect(explainerOpen()).toBe(false); expect(buys).toBe(1);
+  });
+  it('Got it dismisses it; the Buy is clickable straight after (the fade copy is inert, aria-hidden, no pointer events)', () => {
+    sheetPage(); let buys = 0; document.querySelector('.buy')!.addEventListener('click', () => buys++);
+    const el = inside(); (el.querySelector('.tracks-exp-ok') as HTMLButtonElement).click(); expect(buys).toBe(0);
+    expect(explainerOpen()).toBe(false); (document.querySelector('.buy') as HTMLButtonElement).click(); expect(buys).toBe(1);
+    const ghost = document.querySelector('.tracks-exp-out'); expect(ghost?.hasAttribute('inert')).toBe(true);
+    expect(css).toMatch(/\.tracks-exp-out\{pointer-events:none;/);
+  });
+  it('never longer than the normal lifetime: gone at EXP_MS (8 s) with no interaction', () => {
+    vi.useFakeTimers(); sheetPage(); inside();
+    vi.advanceTimersByTime(EXP_MS - 1); expect(explainerOpen()).toBe(true); vi.advanceTimersByTime(1); expect(explainerOpen()).toBe(false);
+  });
+  it('default / above placement keeps variant C: an outside tap registers and the card stays', () => {
+    sheetPage(); let buys = 0; document.querySelector('.buy')!.addEventListener('click', () => buys++);
+    showTracksExplainer(game() as any); (document.querySelector('.buy') as HTMLButtonElement).click();
+    expect(buys).toBe(1); expect(explainerOpen()).toBe(true);
+  });
+});
+
+describe('Art ruling on #65, UX-M5 reduced motion: no pop, balance updates instantly', () => {
+  it('reduced motion: the HUD balance shows the refunded total on the same render, no pop, no timers needed', async () => {
+    vi.useFakeTimers(); rmMatches = true;
+    const { Game } = await import('../src/game'); const { mem } = await import('./helpers'); const { mountApp } = await import('../src/ui/app');
+    (globalThis as any).requestAnimationFrame ??= (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0);
+    const g = new Game(on, mem() as any, () => 1760000000000, undefined, 'dev', null, null, { idbBoot: 'absent' } as any);
+    document.body.innerHTML = '<div id="app"></div>';
+    const ui = mountApp(document.getElementById('app')!, g, on, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
+    g.state = { ...g.state, coinsCents: 500, seenTracksExplainer: false } as any; ui.render();
+    // the refund is credited in the migrated state; the card shows on the commit hook
+    g.migrationRefundCents = 123_450; g.state = { ...g.state, coinsCents: 500 + 123_450 } as any; g.onTracksCommitted?.(); ui.render();
+    expect(document.querySelector('.tracks-exp')).not.toBeNull();
+    expect(document.getElementById('coins')!.textContent).toBe(fmtMoney(500 + 123_450));
+    expect(document.querySelector('.exp-pop,.exp-coin')).toBeNull();
+    expect(readFileSync('src/ui/app.ts', 'utf8')).toMatch(/setText\(coinsEl, fmtMoney\(s\.coinsCents\)\)/); // no tween on the counter
   });
 });

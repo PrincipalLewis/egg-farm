@@ -87,7 +87,7 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
   placeCard(el, doc); raf?.(follow);
   if ((g.migrationRefundCents ?? 0) > 0) refundPop(el, g.migrationRefundCents!, doc);
   const off = () => { clearTimeout(t); doc.removeEventListener('click', onAny, true); doc.removeEventListener('keydown', onKey, true); };
-  const close = (how: 'key' | 'ok' | 'card' | 'timeout' = 'timeout') => { if (!el.isConnected) return off(); const ae = doc.activeElement, mine = !ae || ae === doc.body || el.contains(ae); off(); el.remove(); fadeOut(el, doc);
+  const close = (how: 'key' | 'ok' | 'card' | 'outside' | 'timeout' = 'timeout') => { if (!el.isConnected) return off(); const ae = doc.activeElement, mine = !ae || ae === doc.body || el.contains(ae); off(); el.remove(); fadeOut(el, doc);
     // P46-M1 (CCR major): only when focus was on the card; the active Upgrades tab if rendered, else where it was
     // Art & UX B-M1 order: sheet open -> active Upgrades tab; sheet closed -> bottom-nav Upgrades; last resort #collect.
     const shown = (e: HTMLElement | null) => !!e && (e.getClientRects().length > 0 || !e.closest('[hidden]')) ? e : null; // docked overrides [hidden]
@@ -96,7 +96,11 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
     doc.dispatchEvent(new Event(EXP_CLOSED)); };
   // m4a-spec v1.15 (variant C): non-modal; taps outside register normally and never close it. A tap on the card
   // closes it and does nothing else.
-  const onAny = (e: Event) => { if (!el.isConnected) { off(); return; } if (el.contains(e.target as Node)) { e.preventDefault(); e.stopPropagation(); close(ok.contains(e.target as Node) ? 'ok' : 'card'); } };
+  // Art ruling on #65 (UX-M3): docked INSIDE the sheet the card covers rows (Buy), so there it is transient: an outside tap
+  // still registers normally (variant C: never swallowed) AND dismisses the card. Elsewhere (default / above) variant C stands.
+  const onAny = (e: Event) => { if (!el.isConnected) { off(); return; }
+    if (el.contains(e.target as Node)) { e.preventDefault(); e.stopPropagation(); close(ok.contains(e.target as Node) ? 'ok' : 'card'); }
+    else if (el.dataset.place === 'inside') close('outside'); };
   const onKey = (e: KeyboardEvent) => { if (!el.isConnected) return off(); if (e.key === 'Escape' || (e.key === 'Enter' && e.target === ok)) { e.preventDefault(); e.stopPropagation(); close('key'); } }; // Esc closes only the card, not the sheet behind it
   const ok = el.querySelector('button') as HTMLButtonElement;
   doc.addEventListener('click', onAny, true); doc.addEventListener('keydown', onKey, true);

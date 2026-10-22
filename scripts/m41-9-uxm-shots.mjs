@@ -83,6 +83,28 @@ for (const lab of ['before', 'after']) {
     ok(lab, `UX-M3 sheet open: every [data-tab] fully visible with the card up (refund ${refund ? 'line' : 'none'}) at ${w}`, tabs.length === 3 && tabs.every(t => !hit(t, cr) && t.covered === 0 && t.inView), { place, card: cr, tabs });
     await shot(p, lab, 'UX-M3', `sheet-open-card${refund ? '-refund' : ''}`, w, h); await ctx.close();
   }
+  // Art ruling on #65 (UX-M3 at 360x640): docked inside the sheet the card must be transient. Got it, then the covered Buy straight
+  // after; an outside tap on the covered Buy dismisses the card and buys in the same tap; untouched it is gone by the 8 s lifetime.
+  if (lab === 'after') {
+    const { ctx, p } = await open(lab, 360, 640);
+    await p.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: 1e12 }; });
+    await p.locator('[data-nav=upgrades]').click(); await p.waitForTimeout(400);
+    const covered = async () => { const cr = await rect(p, '.tracks-exp'); const bs = await p.evaluate(() => [...document.querySelectorAll('#uRow .btn.buy')].map((b, i) => { const r = b.getBoundingClientRect(); return { i, l: r.left, r: r.right, t: r.top, b: r.bottom }; }));
+      return { cr, buy: bs.find(b => hit(b, cr)) ?? null }; };
+    const lvl = () => p.evaluate(() => window.eggfarm.state.collectionLevel);
+    for (const how of ['gotit-then-buy', 'outside-tap-on-buy']) {
+      await showCard(p); const place = await p.evaluate(() => document.querySelector('.tracks-exp')?.dataset.place); const { cr, buy } = await covered();
+      const L0 = await lvl();
+      if (how === 'gotit-then-buy') await p.locator('.tracks-exp-ok').click();
+      if (buy) await p.mouse.click((buy.l + buy.r) / 2, (buy.t + buy.b) / 2); // straight after: no wait (Got it case) / the outside tap itself
+      await p.waitForTimeout(250); const L1 = await lvl(), open1 = await p.locator('.tracks-exp').count();
+      ok(lab, `UX-M3 ruling: inside-docked card (${how}) dismissed and the covered Buy bought straight after at 360`, place === 'inside' && !!buy && open1 === 0 && L1 === L0 + 1, { place, card: cr, buy, L0, L1, open: open1 });
+      await shot(p, lab, 'UX-M3', `ruling-${how}`, 360, 640);
+    }
+    await showCard(p); const t0 = Date.now(); await p.waitForFunction(() => !document.querySelector('.tracks-exp'), null, { timeout: 12000 }).catch(() => {});
+    const gone = Date.now() - t0; ok(lab, 'UX-M3 ruling: untouched inside-docked card gone within its 8 s lifetime at 360', gone <= 8000 + 600, { goneAfterMs: gone });
+    await ctx.close();
+  }
   // UX-M5: refund pop frames and the close fade frames (360, 1280), then reduced motion
   for (const [w, h] of [[360, 640], [1280, 800]]) {
     const { ctx, p } = await open(lab, w, h);
@@ -109,7 +131,10 @@ for (const lab of ['before', 'after']) {
     // reduced motion: no pop, no fade copy (instant)
     const rm = await open(lab, w, h, { reducedMotion: 'reduce' });
     await rm.p.evaluate(() => { window.__fx = []; new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && /exp-pop|exp-coin|tracks-exp-out/.test(n.className)) window.__fx.push(n.className); }).observe(document.body, { childList: true }); });
-    await rm.p.evaluate(() => { const g = window.eggfarm; g.migrationRefundCents = 123450; g.state = { ...g.state, seenTracksExplainer: false }; g.onTracksCommitted(); });
+    await rm.p.evaluate(() => { const g = window.eggfarm; g.migrationRefundCents = 123450; g.state = { ...g.state, coinsCents: 123450, seenTracksExplainer: false }; g.onTracksCommitted(); });
+    // Art ruling on #65: no pop under reduced motion, but the balance updates at once (credited state, next frame, no count-up)
+    { const bal = await rm.p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r(document.getElementById('coins')?.textContent)))));
+      ok(lab, `UX-M5 ruling: reduced motion balance shows the refunded total within 2 frames at ${w}`, bal === '$1,234.50', { bal }); }
     await rm.p.waitForSelector('.tracks-exp', { timeout: 3000 }); await rm.p.waitForTimeout(250); await shot(rm.p, lab, 'UX-M5', 'reduced-motion-card', w, h);
     await rm.p.keyboard.press('Escape'); await rm.p.waitForTimeout(30); await shot(rm.p, lab, 'UX-M5', 'reduced-motion-after-close', w, h);
     const fx3 = await rm.p.evaluate(() => ({ fx: window.__fx, card: !!document.querySelector('.tracks-exp') }));
