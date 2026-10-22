@@ -321,6 +321,9 @@ export interface LoadResult {
  * 5. Tier B: v6_backup record -> decodeBackup -> validate (normal migration path). 6. Tier C: fresh (F, or Q if the copy failed).
  * `idb` may be a legacy raw string/null (newer check only, no IndexedDB tier): pre-M41-7 call sites and tests.
  */
+/** D-HOP-2026-10-22-04 (the one switch for HoP's (4)/(d) call): with no LS main, whenever .bak is the copy chosen (alone, by
+ *  winning rankCompare, or on a tie with a valid IndexedDB copy), show the M1 Restored dialog (dd223f5 case R). false = silent. */
+export const NO_MAIN_BAK_DIALOG = true;
 export function loadSafe(kv: KV, b: Balance, now = Date.now(), idb: IdbInput | string | null = null, idbCopyFailed = false): LoadResult {
   const r = loadSafeInner(kv, b, now, idb, idbCopyFailed); return { ...r, outcome: recoveryOutcome(r.recovery) };
 }
@@ -333,13 +336,12 @@ function loadSafeInner(kv: KV, b: Balance, now: number, idbArg: IdbInput | strin
   let raw = kv.getItem(SAVE_KEY);
   let staleRestore = false;
   // 1. Stale-LS reconcile (non-corrupt only; reconcile() itself refuses a corrupt main, CSR-3).
-  // D-HOP-2026-10-22-01 (d): no main, valid .bak AND valid IndexedDB -> CSR-2 tier A (rankCompare, tie -> .bak), silent;
-  // save_restore only when IndexedDB is picked. Missing main + invalid .bak stays a CSR-1 recovery (M1), not stale (G7).
-  if (!legacy && idbStr !== null && raw === null) {
-    const bk = kv.getItem(BAK_KEY), bkv = bk !== null ? validate(bk, b) : null, iv = validate(idbStr, b);
-    if (bkv?.ok && iv.ok && !(rankCompare(idbStr, bk, now) > 0)) return { file: bkv.file, recovery: null };
-  }
-  if (!legacy && idbStr !== null && (raw === null ? bakNotCorrupt(kv, b) : validate(raw, b).ok) && pickNewest(raw, idbStr, b, now) === 'idb') {
+  // D-HOP-2026-10-22-01(d) as amended by -04: no main + valid .bak + valid IndexedDB -> CSR-2 tier A (rankCompare, tie -> .bak).
+  // IndexedDB picked: silent stale restore (save_restore once); .bak picked: the case R branch below (NO_MAIN_BAK_DIALOG).
+  // Missing main + invalid .bak stays a CSR-1 recovery (M1), not stale (G7).
+  const noMainIdbWins = (bk: string | null) => bk === null ? pickNewest(null, idbStr, b, now) === 'idb'
+    : validate(bk, b).ok && validate(idbStr!, b).ok && rankCompare(idbStr, bk, now) > 0;
+  if (!legacy && idbStr !== null && (raw === null ? noMainIdbWins(kv.getItem(BAK_KEY)) : validate(raw, b).ok && pickNewest(raw, idbStr, b, now) === 'idb')) {
     try { kv.setItem(SAVE_KEY, idbStr); raw = idbStr; staleRestore = true; } catch { /* quota: localStorage as-is (rc1 behaviour) */ }
   }
   const mainV = raw !== null ? validate(raw, b) : null;
@@ -359,7 +361,7 @@ function loadSafeInner(kv: KV, b: Balance, now: number, idbArg: IdbInput | strin
   if (raw !== null) reason = (mainV as { ok: false; reason: CorruptReason }).reason;
   else if (bakRaw !== null) {
     // QA BUG-3: main missing but .bak exists: restore it like case R, never start fresh over a valid .bak.
-    if (bv!.ok) return { file: bv!.file, recovery: { case: 'R', reason: 'missing', had_backup: true, restored_from_backup: true, copy_failed: false, raw: '', source: 'bak', store: 'ls', tried: [{ source: 'bak', result: 'valid' }], restored_version: storedVersion(bakRaw), migrated: !!bv!.file.tracksMigrated, ...restoredMeta(bv!.file, now) } };
+    if (bv!.ok) return !NO_MAIN_BAK_DIALOG ? { file: bv!.file, recovery: null } : { file: bv!.file, recovery: { case: 'R', reason: 'missing', had_backup: true, restored_from_backup: true, copy_failed: false, raw: '', source: 'bak', store: 'ls', tried: [{ source: 'bak', result: 'valid' }, idbT], restored_version: storedVersion(bakRaw), migrated: !!bv!.file.tracksMigrated, ...restoredMeta(bv!.file, now) } };
     reason = (bv as { reason: CorruptReason }).reason;
   } else if (idbT.result === 'invalid') { reason = idbT.reason as CorruptReason; store = 'idb'; } // CSR-AC-IDB1 case (i)
   // Nothing stored. D-HOP-2026-10-22-01 (c): with IndexedDB unknown this is a fresh farm (CSR-1, no dialog) and the session
@@ -396,7 +398,6 @@ const restoredMeta = (f: SaveFile, now: number) => {
   const lvl = (f.v6State ?? f.state).farmLevel, at = f.savedAt;
   return { ...(typeof lvl === 'number' ? { restoredLevel: lvl } : {}), ...(validSavedAt(at, now) ? { restoredSavedAt: at } : {}) };
 };
-const bakNotCorrupt = (kv: KV, b: Balance) => { const r = kv.getItem(BAK_KEY); return r === null || validate(r, b).ok; };
 const safeText = (v: unknown): string => { try { return JSON.stringify(v) ?? String(v); } catch { return String(v); } };
 
 /** AC14d: the second tab reads the save but every write is dropped (also the load-time save and .bak rotation). */
