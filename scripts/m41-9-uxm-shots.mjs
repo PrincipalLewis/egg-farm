@@ -69,17 +69,19 @@ for (const lab of ['before', 'after']) {
     ok(lab, `UX-M2 no-storage notice clear of Collect and Collect tappable at ${w}`, !!n && !!c && !hit(n, c) && b1 > b0, { notice: n, collect: c, basket: [b0, b1] });
     await shot(p, lab, 'UX-M2', 'no-storage', w, h); await ctx.close();
   }
-  // UX-M3: Upgrades sheet open + card, every [data-tab] fully visible (360, 1280)
-  for (const [w, h] of [[360, 640], [1280, 800]]) {
+  // UX-M3: Upgrades sheet open + card (plain, and with the refund line, which makes it taller), at 360 and 1280: every [data-tab]
+  // fully visible = inside the viewport, no rect overlap with the card, and no hit-test point on a 5x3 grid inside the tab lands
+  // on the card (the pill's rounded corners hit .tabs, so "lands on the card" is the occlusion test, not "lands on the tab").
+  for (const [w, h] of [[360, 640], [1280, 800]]) for (const refund of [0, 123450]) {
     const { ctx, p } = await open(lab, w, h);
     if (w < 900) await p.locator('[data-nav=upgrades]').click(); await p.waitForTimeout(400);
-    await showCard(p);
+    await showCard(p, refund);
     const cr = await rect(p, '.tracks-exp'), place = await p.evaluate(() => document.querySelector('.tracks-exp')?.dataset.place ?? null);
-    const tabs = await p.evaluate(() => [...document.querySelectorAll('[data-tab]')].map(e => { const r = e.getBoundingClientRect(); return { tab: e.dataset.tab, l: r.left, r: r.right, t: r.top, b: r.bottom }; }));
-    const vis = await p.evaluate(() => [...document.querySelectorAll('[data-tab]')].every(e => { const r = e.getBoundingClientRect(); const pts = [[r.left + 3, r.top + 3], [r.right - 3, r.top + 3], [r.left + 3, r.bottom - 3], [r.right - 3, r.bottom - 3], [(r.left + r.right) / 2, (r.top + r.bottom) / 2]];
-      return r.width > 0 && pts.every(([x, y]) => e.contains(document.elementFromPoint(x, y))); }));
-    ok(lab, `UX-M3 sheet open: every [data-tab] fully visible with the card up at ${w}`, tabs.length === 3 && tabs.every(t => !hit(t, cr)) && vis, { place, card: cr, tabs });
-    await shot(p, lab, 'UX-M3', 'sheet-open-card', w, h); await ctx.close();
+    const tabs = await p.evaluate(() => [...document.querySelectorAll('[data-tab]')].map(e => { const r = e.getBoundingClientRect(); const card = document.querySelector('.tracks-exp'); let covered = 0;
+      for (const fx of [0.15, 0.5, 0.85]) for (const fy of [0.2, 0.5, 0.8]) { const t = document.elementFromPoint(r.left + fx * r.width, r.top + fy * r.height); if (card && card.contains(t)) covered++; }
+      return { tab: e.dataset.tab, l: r.left, r: r.right, t: r.top, b: r.bottom, covered, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth }; }));
+    ok(lab, `UX-M3 sheet open: every [data-tab] fully visible with the card up (refund ${refund ? 'line' : 'none'}) at ${w}`, tabs.length === 3 && tabs.every(t => !hit(t, cr) && t.covered === 0 && t.inView), { place, card: cr, tabs });
+    await shot(p, lab, 'UX-M3', `sheet-open-card${refund ? '-refund' : ''}`, w, h); await ctx.close();
   }
   // UX-M5: refund pop frames and the close fade frames (360, 1280), then reduced motion
   for (const [w, h] of [[360, 640], [1280, 800]]) {
