@@ -222,7 +222,8 @@ describe('dialog (jsdom)', () => {
     expect(layer.querySelector('#rcT')!.textContent).toBe('Welcome back!');
     expect(layer.querySelector('#rcB')!.textContent).toBe('We loaded your backup. You may be a few moments behind.');
     expect(layer.querySelector('#rcExport')!.textContent).toBe('Export old save');
-    expect(track).toHaveBeenCalledWith('save_recovery_notice_shown', { notice: 'M1', source: null, store: null }); // unset store: never defaulted
+    // CCR #58 m3 (M41-7 rework): the legacy copy logs no notice event (unset store -> null stays covered by the noticePayload enum test).
+    expect(track.mock.calls.filter(c => String(c[0]).startsWith('save_recovery_notice_'))).toEqual([]);
     layer.querySelector<HTMLButtonElement>('#rcGo')!.click(); await p;
   });
 });

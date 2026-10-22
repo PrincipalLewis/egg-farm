@@ -154,7 +154,8 @@ export function showRecoveryDialog(r0: Recovery | null, asset: (f: string) => st
   // M41-7: notice selection is pure (interface §2); the CSR-9 copy is used only once the loader supplies `source`.
   const notice = r ? recoveryNotice(r, { storageBlocked: !!o.storageBlocked, now: o.now ?? Date.now() }) : null;
   const active = !!r && csrCopyActive(r);
-  const c = r ? (active && notice ? csrCopy(notice, r) : recoveryCopy(r0!)) : null;
+  const csr = active && !!notice; // CCR #58 m3: the CSR-9 copy is rendered (also gates the notice telemetry below)
+  const c = r ? (csr ? csrCopy(notice!, r) : recoveryCopy(r0!)) : null;
   if (!r || !c) return Promise.resolve();
   o.onNotice?.(notice);
   const layer = document.createElement('div'); layer.className = 'recovery-layer'; layer.dataset.outcome = c.outcome; if (c.variant) layer.dataset.variant = c.variant;
@@ -203,9 +204,9 @@ export function showRecoveryDialog(r0: Recovery | null, asset: (f: string) => st
   });
   go.focus();
   // Interface §3: notice telemetry through the existing telemetry layer (Game.telemetry.track, passed in by app.ts).
-  if (notice) o.track?.('save_recovery_notice_shown', noticePayload(notice, r));
+  if (csr) o.track?.('save_recovery_notice_shown', noticePayload(notice!, r));
   return new Promise(res => go.addEventListener('click', () => {
-    if (notice) o.track?.('save_recovery_notice_dismissed', noticePayload(notice, r));
+    if (csr) o.track?.('save_recovery_notice_dismissed', noticePayload(notice!, r));
     document.removeEventListener('keydown', onKey, true); window.removeEventListener('popstate', onPop); document.removeEventListener('focusin', onFocusIn, true); layer.removeEventListener('focusout', keep);
     for (const el of inertEls) el.inert = false;
     layer.remove(); document.dispatchEvent(new Event(RECOVERY_CLOSED)); res();
