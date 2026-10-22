@@ -69,17 +69,12 @@ export class OrderList {
     const w = Math.min(Math.max(88, max), Math.max(88, cap));
     this.list.style.setProperty('--sell-w', `${Math.ceil(w)}px`);
   }
-  /** QA4-1 / number-format-big §4 (the WebKit 'eggs' drop): count and $ never truncate and 'eggs' must stay whole, so a card
-   *  line that doesn't fit steps its font down (16 -> 14 -> 12px tight). Only cards whose .egg would ellipsize change; re-fit only
-   *  when the line text or the card width changes. The old .egg ellipsis stays as the last resort. */
+  /** QA4-1 / number-format-big §4 (the WebKit 'eggs' drop) + Art ruling on #64: see fitLine. Re-fit only when the line text or
+   *  the card width changes. */
   private syncLineFit() {
     for (const l1 of this.list.querySelectorAll<HTMLElement>('.order .l1')) {
-      const egg = l1.querySelector<HTMLElement>('.egg'); if (!egg) continue;
       const key = `${l1.textContent}|${l1.clientWidth}`; if (l1.dataset.fit === key) continue;
-      l1.classList.remove('fit1', 'fit2');
-      const cut = () => egg.scrollWidth > egg.clientWidth + 0.5;
-      if (cut()) { l1.classList.add('fit1'); if (cut()) l1.classList.replace('fit1', 'fit2'); }
-      l1.dataset.fit = `${l1.textContent}|${l1.clientWidth}`;
+      fitLine(l1); l1.dataset.fit = `${l1.textContent}|${l1.clientWidth}`;
     }
   }
   private make(v: OrderView) {
@@ -141,4 +136,16 @@ export class OrderList {
     if (frozen) setTimeout(() => this.kick(), 320);
   }
   node(id: number) { return this.nodes.get(id); }
+}
+
+/** Order-card line fit (Art ruling on #64): 16px -> 14px (fit1) -> 12px with -0.02em (fit2) -> still too wide: WRAP to a second
+ *  line at 12px (fit3; the card grows). Count, $ and 'eggs' are never clipped or ellipsized: wrapping replaces the old
+ *  '.egg ellipsis' last resort. "Too wide" = the shrinkable .egg would be cut. Returns the step taken. */
+export function fitLine(l1: HTMLElement): 0 | 1 | 2 | 3 {
+  const egg = l1.querySelector<HTMLElement>('.egg'); l1.classList.remove('fit1', 'fit2', 'fit3'); if (!egg) return 0;
+  const cut = () => egg.scrollWidth > egg.clientWidth + 0.5;
+  if (!cut()) return 0;
+  l1.classList.add('fit1'); if (!cut()) return 1;
+  l1.classList.replace('fit1', 'fit2'); if (!cut()) return 2;
+  l1.classList.replace('fit2', 'fit3'); return 3;
 }

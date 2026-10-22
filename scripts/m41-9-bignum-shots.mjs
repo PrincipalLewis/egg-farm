@@ -84,6 +84,19 @@ for (const [w, h] of WIDTHS) {
     await seed(p, st, st.eggs, st.eggs); await nav(p, 'market'); await p.waitForTimeout(700);
     f = `${st.name}-counter-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` }); { const ms = await measure(p); record(f, ms); eggsWord(f, ms); }
   }
+  // D) Art ruling on #64, FORCED over-12px case: '999Dc/999.9Dc eggs · $999.9Dc' (delivered + wanted both Dc) cannot fit at 12px
+  //    at 360, so the line must WRAP (fit3, card grows): nothing clipped, nothing ellipsized, 'eggs' whole.
+  { await seed(p, STATES[0], 0, 9.9994e35); await p.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, customers: [{ id: 4243, demand: 9.9994e35, filled: 9.99e35, waitedS: 0 }] }; });
+    await nav(p, 'market'); await p.waitForTimeout(700);
+    const r = await p.evaluate(() => { const l1 = document.querySelector('#mRows .order .l1'), card = l1?.closest('.order'); if (!l1) return null;
+      const lr = l1.getBoundingClientRect(), cr = card.getBoundingClientRect(), lh = parseFloat(getComputedStyle(l1).fontSize) * 1.2;
+      const parts = [...l1.children].map(e => { const q = e.getBoundingClientRect(); return { cls: e.className, text: e.textContent, sw: e.scrollWidth, cw: e.clientWidth, inLine: q.left >= lr.left - 0.5 && q.right <= lr.right + 0.5, inCard: q.top >= cr.top - 0.5 && q.bottom <= cr.bottom + 0.5 && q.right <= cr.right + 0.5,
+        ell: getComputedStyle(e).textOverflow === 'ellipsis' && e.scrollWidth > e.clientWidth + 0.5 }; });
+      return { cls: l1.className, font: getComputedStyle(l1).fontSize, lines: Math.round(lr.height / lh), cardH: cr.height, cardClip: card.scrollHeight > card.clientHeight + 1, parts }; });
+    const step = r ? (/fit3/.test(r.cls) ? 3 : /fit2/.test(r.cls) ? 2 : /fit1/.test(r.cls) ? 1 : 0) : -1;
+    const pass = !!r && !r.cardClip && r.parts.every(x => x.inLine && x.inCard && !x.ell && x.sw <= x.cw + 1) && r.parts.find(x => /egg/.test(x.cls))?.text === 'eggs' && (w !== 360 || (step === 3 && r.lines >= 2));
+    if (!pass) bad++; const f = `wrap-forced-w${w}-${eng}.png`; await p.screenshot({ path: `${OUT}/${f}` });
+    manifest.shots.push({ shot: f, forcedOver12px: { pass, step, ...r } }); console.log(`${f} forced over-12px: step=${step} lines=${r?.lines} ${pass ? 'PASS' : 'FAIL'} ${JSON.stringify(r)}`); }
   // C) coin pop / +$ floater at >= $1e15 (1.2e15 dollars) after a real Sell tap
   { const st = { ...STATES[0], coins: 100, cost: 1e3 }; const k = Math.ceil(1.2e17 / per); await seed(p, st, k, k); await nav(p, 'market'); await p.waitForTimeout(600);
     await p.evaluate(() => { window.__pops = []; new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && /qpop|float/.test(n.className)) window.__pops.push({ cls: n.className, text: n.textContent }); }).observe(document.body, { childList: true, subtree: true }); });

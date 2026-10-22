@@ -347,6 +347,8 @@ html,body{overflow-x:hidden;max-width:100%}
 .order .l1 .n{flex:0 0 auto;flex-shrink:0}.order .l1 .egg{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:visible;text-overflow:clip;flex:0 0 auto;flex-shrink:0}
 /* QA4-1 (number-format-big §4): a card line that would cut 'eggs' steps down (order-list syncLineFit); count and $ stay whole */
 .order .l1.fit1{font-size:14px}.order .l1.fit2{font-size:12px;letter-spacing:-.02em}
+/* Art ruling on #64: past 12px the line WRAPS (second line, card grows); nothing on it shrinks, clips or ellipsizes */
+.order .l1.fit3{font-size:12px;letter-spacing:-.02em;flex-wrap:wrap}.order .l1.fit3>*{flex-shrink:0}.order:has(.l1.fit3){height:auto;min-height:60px}
 .order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
 .order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
 .order .sell{min-height:44px;border-radius:22px}
