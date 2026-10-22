@@ -1,15 +1,11 @@
 /** M41-7 (spec v0.3.3 FROZEN sha256 bca075fea10f7fb973f56dad941870229129738a52846fea72bf2146050bae9c), HoE: Saves' exported
- *  Recovery must match UI's local CsrRecovery (src/ui/save-recovery.ts @ 66680eb, PR #58) exactly. The declaration below is
- *  copied VERBATIM from `git show 66680eb:src/ui/save-recovery.ts` lines 47-51; after the #58 integration merge, replace it with
- *  `import type { CsrRecovery, RecoverySource as UiSource } from '../src/ui/save-recovery'`. Checked by tsc (tests are in tsconfig). */
+ *  Recovery must match UI's local CsrRecovery (src/ui/save-recovery.ts @ 66680eb, PR #58) exactly. Its declaration is
+ *  imported from UI's file after the #58 integration merge (f35cda5); checked by tsc (tests are in tsconfig).
+ *  Spec of record: corrupt-save-recovery-spec.m41-final.md sha256 6131c290bf0a6878026ad6c53a9ed71754f00fdf9b2e9c09ee8afc242433334d. */
 import { describe, it, expect } from 'vitest';
 import type { Recovery, RecoverySource } from '../src/save/save';
 
-type UiRecoverySource = 'bak' | 'idb' | 'v6_backup' | 'none' | 'deferred';
-type CsrRecovery = Omit<Recovery, 'case'> & {
-  case: Recovery['case'] | 'D'; source?: UiRecoverySource; store?: 'ls' | 'idb';
-  prevLevel?: number; restoredLevel?: number; restoredSavedAt?: number;
-};
+import type { CsrRecovery, RecoverySource as UiRecoverySource } from '../src/ui/save-recovery';
 /** Exact type equality (fails on any extra/missing/widened field, optionality or readonly difference). */
 type Equals<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
 const assert = <T extends true>(v: T) => v;

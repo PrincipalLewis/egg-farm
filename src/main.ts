@@ -7,7 +7,7 @@ import { startAutosave } from './save/autosave';
 import { TabLease, channel } from './save/tab-lease';
 import { IdbMirror, bootPreserveIdb, IDB_BOOT_READ_TIMEOUT_MS } from './save/idb-mirror';
 import { mountApp } from './ui/app';
-import { showTabGuardDialog, showNewerSaveDialog, showRecoveryDialog, recoveryCopy, RECOVERY_CLOSED } from './ui/save-recovery';
+import { showTabGuardDialog, showNewerSaveDialog, RECOVERY_CLOSED } from './ui/save-recovery';
 import { IOS_FLAG_ENABLED } from './ui/ios-tip';
 import { Audio, AUDIO_UNLOCK_MS, withTimeout } from './ui/audio';
 import { RenderPump } from './ui/render-pump';
@@ -104,15 +104,8 @@ async function boot() {
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
-  if (g.recoveryOutcome === 'deferred' && g.recovery) { // CSR-13 defer (M4): read-only Game, no save write; "Try again" reloads.
-    lease.release(); lease.stop();
-    // UI owns the M4 copy (PR #58). Until it lands, recoveryCopy has no 'deferred' entry: fall back to the existing
-    // "Couldn't load — Retry" button (user-initiated reload, so never an automatic reload loop).
-    if (!recoveryCopy(g.recovery)) { g.telemetry.track('save_recovery_notice_shown', { notice: 'M4', source: 'deferred' }); g.telemetry.flush(true); document.body.append(start); showError(); return; }
-    g.telemetry.track('save_recovery_notice_shown', { notice: 'M4', source: 'deferred' }); g.telemetry.flush(true);
-    void showRecoveryDialog(g.recovery, asset, [root]).then(() => { g.telemetry.track('save_recovery_notice_dismissed', { notice: 'M4', source: 'deferred' }); g.telemetry.flush(true); location.reload(); });
-    return;
-  }
+  // CSR-13 defer (M4): Game is read-only (no save write of any kind); the M4 notice, its telemetry and the "Try again"
+  // reload are UI's (PR #58: mountApp -> showRecoveryDialog, app.ts reloads on M4), so it takes the normal recovery path.
   holdNotices = !!(g.recoveryOutcome && g.recovery) || !!lease.storageBlocked;
   // v4 (QA f6): localStorage refused the lease write. This lone tab still owns the save (never 'Game open in another tab');
   // report it as the storage-full outcome (art-ux/save-recovery-dialog.md v2.1 'storage') plus the no-storage notice.

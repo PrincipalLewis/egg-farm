@@ -259,6 +259,9 @@ describe('CSR-15 no silent zero: random corruptions of a valid main always recov
       const k = kvm(); k.setItem(SAVE_KEY, raw); const g = new Game(b, k, () => NOW, 1, 'test', null, null, { idbBoot: 'absent' });
       if (validate(raw, b).ok) { expect(g.recovery).toBeNull(); continue; } invalid++; expect(g.recovery).not.toBeNull();
       expect(ev(g, 'save_corrupt')).toHaveLength(1); expect(['fresh', 'storage', 'restored']).toContain(g.recoveryOutcome);
+      // IDB1-6: store is set by the loader on every corrupt path (UI does not default it), also on the legacy (no idbBoot) path.
+      expect(['ls', 'idb']).toContain(g.recovery!.store); expect(ev(g, 'save_corrupt')[0].store).toBe(g.recovery!.store);
+      const k2 = kvm(); k2.setItem(SAVE_KEY, raw); expect(new Game(b, k2, () => NOW, 1, 'test').recovery!.store).toBe('ls');
     }
     expect(invalid).toBeGreaterThan(150);
   });
