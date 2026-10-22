@@ -7,7 +7,7 @@ import { initialState } from '../src/sim/state';
 import { loadSafe, validate, serialize, checksum, encodeBackup, SAVE_KEY, BAK_KEY, V6_BACKUP_KEY, CORRUPT_PREFIX, CORRUPT_INDEX_KEY, type IdbInput } from '../src/save/save';
 import { reconcile } from '../src/save/idb-mirror';
 import { Game } from '../src/game';
-import { recoveryNotice, recoveryCopy } from '../src/ui/save-recovery';
+import { recoveryCopy } from '../src/ui/save-recovery';
 
 const NOW = 1_792_400_000_000; // 2026-10-19, after every fixture savedAt
 const fx = (f: string) => readFileSync(new URL(`./fixtures/csr-idb1/${f}`, import.meta.url), 'utf8');
@@ -134,10 +134,9 @@ describe('CSR-13 IDB unknown: defer (no v6_backup / fresh commit, no save write)
     for (let i = 0; i < 4; i++) loadSafe(k, b, NOW + i * 10, unknownIdb());
     expect(corrupt(k).sort()).toEqual([BAD, '{"bak'].sort());
   });
-  it('M4 notice: final copy, Try again', () => {
+  it('M4 loader fields: case D, source deferred, outcome deferred (UI #58 maps it to M4)', () => {
     const k = kvm(); k.setItem(SAVE_KEY, BAD); const r = loadSafe(k, b, NOW, unknownIdb());
-    expect(recoveryNotice(r.recovery, { storageBlocked: false, now: NOW })).toMatchObject({ id: 'M4' });
-    expect(recoveryCopy(r.recovery!)).toMatchObject({ outcome: 'deferred', title: "Couldn't load your farm", button: 'Try again' });
+    expect(r.recovery).toMatchObject({ case: 'D', source: 'deferred', store: 'ls' }); expect(r.outcome).toBe('deferred');
   });
 });
 
@@ -192,28 +191,27 @@ describe('CSR-7 dedupe / cap', () => {
   });
 });
 
-describe('CSR-9a prevLevel / restoredLevel / restoredSavedAt; notice ids', () => {
+describe('CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids', () => {
   const v6 = (main: string, bak?: string, at?: number) => { const k = kvm(); k.setItem(SAVE_KEY, main); if (bak) k.setItem(BAK_KEY, bak); k.setItem(V6_BACKUP_KEY, encodeBackup({ migrationId: ID, raw: v6raw(12, at) })); return loadSafe(k, b, NOW, ok(null)).recovery!; };
   const mainF = (F: unknown) => `{"version":6,"savedAt":1,"sum":"00000000","state":{"farmLevel":${JSON.stringify(F)}}}`;
   it('CSR-9a-1: corrupt main JSON farmLevel 17 -> prevLevel 17, M2 level variant', () => {
-    const r = v6(mainF(17)); expect(r.prevLevel).toBe(17); expect(recoveryNotice(r, { storageBlocked: false, now: NOW })).toMatchObject({ id: 'M2', variant: 'level', level: 12 });
+    const r = v6(mainF(17)); expect(r.prevLevel).toBe(17); expect(r).toMatchObject({ source: 'v6_backup', restoredLevel: 12, store: 'ls' });
   });
   it('CSR-9a-2: main unparseable, .bak bytes carry farmLevel 15 -> prevLevel 15', () => { expect(v6(BAD, mainF(15)).prevLevel).toBe(15); });
   it('CSR-9a-3: none -> unset, age variant from the v6 raw savedAt; invalid savedAt -> fallback', () => {
-    const r = v6(BAD); expect(r.prevLevel).toBeUndefined(); expect(recoveryNotice(r, { storageBlocked: false, now: NOW })).toMatchObject({ id: 'M2', variant: 'age', ageMs: 86_400_000 * 3 });
-    const r2 = v6(BAD, undefined, -5); expect(r2.restoredSavedAt).toBeUndefined(); expect(recoveryNotice(r2, { storageBlocked: false, now: NOW })).toMatchObject({ variant: 'fallback' });
+    const r = v6(BAD); expect(r.prevLevel).toBeUndefined(); expect(r.restoredSavedAt).toBe(NOW - 86_400_000 * 3);
+    const r2 = v6(BAD, undefined, -5); expect(r2.restoredSavedAt).toBeUndefined();
   });
   it('CSR-9a-4: 12.5, null, -1, "17" rejected (falls to .bak, then unset); 31 accepted', () => {
     for (const F of [12.5, null, -1, '17']) expect(v6(mainF(F)).prevLevel).toBeUndefined();
     expect(v6(mainF(null), mainF(9)).prevLevel).toBe(9); expect(v6(mainF(31)).prevLevel).toBe(31);
   });
-  it('level equal to prevLevel -> age variant', () => { expect(recoveryNotice(v6(mainF(12)), { storageBlocked: false, now: NOW })).toMatchObject({ variant: 'age' }); });
-  it('M1 / M3 / M5 / storage / cantsave ids', () => {
-    const k = kvm(); k.setItem(SAVE_KEY, BAD); k.setItem(BAK_KEY, good(4)); const r = loadSafe(k, b, NOW, ok(null)).recovery;
-    expect(recoveryNotice(r, { storageBlocked: false, now: NOW }).id).toBe('M1'); expect(recoveryNotice(r, { storageBlocked: true, now: NOW }).id).toBe('M5');
-    const k2 = kvm(); k2.setItem(SAVE_KEY, BAD); expect(recoveryNotice(loadSafe(k2, b, NOW, ok(null)).recovery, { storageBlocked: false, now: NOW }).id).toBe('M3');
-    const k3 = kvm(s => s.startsWith(CORRUPT_PREFIX)); k3.m.set(SAVE_KEY, BAD); expect(recoveryNotice(loadSafe(k3, b, NOW, ok(null)).recovery, { storageBlocked: false, now: NOW }).id).toBe('storage');
-    expect(recoveryNotice(null, { storageBlocked: true, now: NOW }).id).toBe('cantsave'); expect(recoveryNotice(null, { storageBlocked: false, now: NOW }).id).toBeNull();
+  it('level equal to prevLevel: both fields set and equal (UI picks age)', () => { expect(v6(mainF(12))).toMatchObject({ prevLevel: 12, restoredLevel: 12 }); });
+  it('loader fields behind M1 / M3 / storage: source + case + store', () => {
+    const k = kvm(); k.setItem(SAVE_KEY, BAD); k.setItem(BAK_KEY, good(4));
+    expect(loadSafe(k, b, NOW, ok(null)).recovery).toMatchObject({ case: 'R', source: 'bak', store: 'ls' });
+    const k2 = kvm(); k2.setItem(SAVE_KEY, BAD); expect(loadSafe(k2, b, NOW, ok(null)).recovery).toMatchObject({ case: 'F', source: 'none', store: 'ls' });
+    const k3 = kvm(s => s.startsWith(CORRUPT_PREFIX)); k3.m.set(SAVE_KEY, BAD); expect(loadSafe(k3, b, NOW, ok(null)).recovery).toMatchObject({ case: 'Q', source: 'none', store: 'ls', copy_failed: true });
   });
   it('legacy AC14b strings still shown for M1/M3 until UI swaps copy', () => {
     const k = kvm(); k.setItem(SAVE_KEY, BAD); k.setItem(BAK_KEY, good(4));
