@@ -92,11 +92,16 @@ for (const lab of ['before', 'after']) {
     const covered = async () => { const cr = await rect(p, '.tracks-exp'); const bs = await p.evaluate(() => [...document.querySelectorAll('#uRow .btn.buy')].map((b, i) => { const r = b.getBoundingClientRect(); return { i, l: r.left, r: r.right, t: r.top, b: r.bottom }; }));
       return { cr, buy: bs.find(b => hit(b, cr)) ?? null }; };
     const lvl = () => p.evaluate(() => window.eggfarm.state.collectionLevel);
-    for (const how of ['gotit-then-buy', 'outside-tap-on-buy']) {
+    // The covered Buy sits UNDER the card, so a tap there lands on the card (variant C: closes it, does nothing else). Three ways
+    // out, each followed straight away (no wait) by a tap on the covered Buy, which must buy exactly once:
+    //   Got it; a tap on the card where the Buy is; an outside tap (the sheet title).
+    for (const how of ['gotit-then-buy', 'card-tap-over-buy-then-buy', 'outside-tap-then-buy']) {
       await showCard(p); const place = await p.evaluate(() => document.querySelector('.tracks-exp')?.dataset.place); const { cr, buy } = await covered();
-      const L0 = await lvl();
+      const L0 = await lvl(), at = buy ? [(buy.l + buy.r) / 2, (buy.t + buy.b) / 2] : [0, 0];
       if (how === 'gotit-then-buy') await p.locator('.tracks-exp-ok').click();
-      if (buy) await p.mouse.click((buy.l + buy.r) / 2, (buy.t + buy.b) / 2); // straight after: no wait (Got it case) / the outside tap itself
+      else if (how === 'card-tap-over-buy-then-buy') await p.mouse.click(at[0], at[1]);
+      else { const h2 = await rect(p, '#p-upgrades header h2'); await p.mouse.click(h2.l + 4, (h2.t + h2.b) / 2); }
+      if (buy) await p.mouse.click(at[0], at[1]);
       await p.waitForTimeout(250); const L1 = await lvl(), open1 = await p.locator('.tracks-exp').count();
       ok(lab, `UX-M3 ruling: inside-docked card (${how}) dismissed and the covered Buy bought straight after at 360`, place === 'inside' && !!buy && open1 === 0 && L1 === L0 + 1, { place, card: cr, buy, L0, L1, open: open1 });
       await shot(p, lab, 'UX-M3', `ruling-${how}`, 360, 640);

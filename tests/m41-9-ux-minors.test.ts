@@ -119,7 +119,7 @@ describe('UX-M5: close fade and refund pop', () => {
 describe('Art ruling on #65, UX-M3: docked inside the sheet the card is transient', () => {
   const sheetPage = () => { document.body.innerHTML = '<nav class="actions"><button data-nav="upgrades">Upgrades</button></nav><button id="collect" class="btn xl">Collect</button><div id="uRow"><button class="btn buy" data-kind="collection">$10.00</button></div>'; };
   const inside = () => { const el = showTracksExplainer(game() as any)!; el.dataset.place = 'inside'; return el; };
-  it('a tap outside (on the covered Buy) dismisses it AND reaches the Buy in the same tap', () => {
+  it('an outside tap dismisses it and still registers on what it hit (same tap; variant C never swallows)', () => {
     sheetPage(); let buys = 0; document.querySelector('.buy')!.addEventListener('click', () => buys++);
     inside(); (document.querySelector('.buy') as HTMLButtonElement).click();
     expect(explainerOpen()).toBe(false); expect(buys).toBe(1);
@@ -130,6 +130,12 @@ describe('Art ruling on #65, UX-M3: docked inside the sheet the card is transien
     expect(explainerOpen()).toBe(false); (document.querySelector('.buy') as HTMLButtonElement).click(); expect(buys).toBe(1);
     const ghost = document.querySelector('.tracks-exp-out'); expect(ghost?.hasAttribute('inert')).toBe(true);
     expect(css).toMatch(/\.tracks-exp-out\{pointer-events:none;/);
+  });
+  it('a tap on the card over the covered Buy closes it (does nothing else); the next tap buys straight away', () => {
+    sheetPage(); let buys = 0; document.querySelector('.buy')!.addEventListener('click', () => buys++);
+    const el = inside(); el.querySelector('p')!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(explainerOpen()).toBe(false); expect(buys).toBe(0);
+    (document.querySelector('.buy') as HTMLButtonElement).click(); expect(buys).toBe(1);
   });
   it('never longer than the normal lifetime: gone at EXP_MS (8 s) with no interaction', () => {
     vi.useFakeTimers(); sheetPage(); inside();
