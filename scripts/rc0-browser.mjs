@@ -485,8 +485,10 @@ sections.resetbak = async () => {
 
 // AC14b save-recovery dialog v2.1 (art-ux/save-recovery-dialog.md): one section per loader outcome.
 const RC = {
-  restored: { title: 'Welcome back!', body: 'We loaded your backup. You may be a few moments behind.', btn: 'Keep farming', badge: '\u2713', exp: null },
-  fresh: { title: 'A fresh start', body: "We couldn't open your farm. Your old save is kept safe.", btn: 'Start farming', badge: '\u2605', exp: 'rc-link' },
+  // M41-7 integration (Saves loader + UI #58): the loader now supplies `source`, so restored/fresh show the CSR-9 FINAL copy
+  // (spec corrupt-save-recovery-spec.m41-final.md CSR-9 M1/M3, sha256 6131c290…433334d; UI strings src/ui/save-recovery.ts CSR_COPY).
+  restored: { title: 'Your farm is back!', body: 'We fixed a hiccup and restored your latest save.', btn: 'Continue', badge: '\u2713', exp: null },
+  fresh: { title: 'A fresh start', body: "We couldn't recover your save, so we started a new farm for you.", btn: 'Start farming', badge: '\u2605', exp: 'rc-link', expText: 'Export old save file', aria: 'Export old save file, downloads a copy of your old save file' },
   storage: { title: 'A fresh start', body: "We couldn't open your farm. Export it now to keep a copy.", btn: 'Start farming', badge: '!', exp: 'rc-export-q' },
   cantsave: { title: 'Saving is paused', body: "Your farm is fine, but your browser won't let us save right now. Export a copy to keep your progress.", btn: 'Keep farming', badge: '!', exp: 'rc-export-q', expText: 'Export save', aria: 'Export save, downloads a copy of your current farm', icon: 'icon-coop', outcome: 'storage', variant: 'cantsave', maxLines: 3, file: /^eggfarm-save-\d{8}-\d{4}\.json$/ },
 };
