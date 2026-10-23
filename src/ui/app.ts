@@ -27,6 +27,7 @@ import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
+import { bestBuyMark, goalLabelHtml } from './goal-label';
 import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
@@ -80,7 +81,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
       <button class="goal" id="goal" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
-      <div class="sr" aria-live="polite" id="goalLive"></div>
+      <div class="sr" aria-live="polite" id="goalLive"></div><div class="sr" id="goalDesc" aria-hidden="true"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
   const nav = h(`<nav class="actions">
@@ -405,26 +406,32 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   });
   let pendingLvPop = false;
   // ---------- M3-AC5 next-goal strip ----------
-  const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
+  const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive'), goalDesc = $('#goalDesc');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
   const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
-    const M4 = m4On(b), prevKey = hintPick?.key;
+    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = bestBuyMark(hintPick);
     if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
-    if (!goalNow && t - goalTickAt < 1000 && !(M4 && hintPick?.key !== prevKey)) return; // 1 Hz text tick; purchases / pick changes bypass
+    // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
+    // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
+    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || bestBuyMark(hintPick) !== prevMark))) return;
     const imm = goalNow || M4; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined), imm); goalShown = gl;
-    setText(goalLbl, gl.label); setText(goalSt, gl.status);
+    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? bestBuyMark(hintPick) : null), imm); goalShown = gl;
+    if (gl.parts) { const html = goalLabelHtml(gl.parts); if (goalLbl.dataset.html !== html) { goalLbl.dataset.html = html; goalLbl.innerHTML = html; } goalLbl.classList.add('ng'); }
+    else { if (goalLbl.dataset.html) { delete goalLbl.dataset.html; goalLbl.textContent = ''; } goalLbl.classList.remove('ng'); setText(goalLbl, gl.label); } setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
-    goalBtn.setAttribute('aria-label', goalAria(gl));
+    // m4a-spec v1.25 F4-14a + Art 2.5.3 ruling (label-in-name): EVERY target (F4, FARM, workers, done, flag-off) takes its
+    // name from the visible text (★ / JS `…` are aria-hidden) and the B3 sentence (goalAria; non-F4 labels spell L{n} out when M4 is on) is the
+    // description. No aria-label: `Next goal: …` is not visible and swapped `:` for `,`, so it failed axe on FARM / workers.
+    setText(goalDesc, goalAria(gl, M4)); if (goalBtn.getAttribute('aria-describedby') !== 'goalDesc') goalBtn.setAttribute('aria-describedby', 'goalDesc');
     if (prev && (prev.key !== gl.key || prev.state !== gl.state)) {
       if (prev.key !== gl.key && !rm()) retrigger(goalLbl, 'xfade');
-      // B3: announce the CURRENT goal (same text as the chip's aria-label) on target or state change, then clear the
+      // B3: announce the CURRENT goal (same text as the #goal description) on target or state change, then clear the
       // live region so a screen reader browsing later never reads a stale target/timer.
-      setText(goalLive, goalAria(gl)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
+      setText(goalLive, goalAria(gl, M4)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
       if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (live.length <= 26) sparkle(goalSt, 4); }
       if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
     }
@@ -479,12 +486,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
-      <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+      <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>${max ? '' : bestChip(isF ? 'FARM' : 'COLL')}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div></div></div>`;
   };
+  /** M41-8 F3 = UX-M4 ★ Best buy chip: on the one row bestBuyMark names (same source as the strip ★, F4-13). */
+  const bestChip = (key: string) => m4On(b) && bestBuyMark(hintPick) === key ? `<div class="best-chip" data-best-buy="${key}"><span aria-hidden="true">★</span> Best buy</div>` : '';
   /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
   const trackRowHtml = (t: Track) => {
     const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
@@ -504,7 +513,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
     return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>
       <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
-      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
+      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${lock ? '' : bestChip(t === 'hens' ? 'HENS' : 'VALUE')}${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
   };
   const farmTabHtml = () => {
@@ -571,13 +580,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const { eggs, cents } = sellAllPreview(s, b); // same per-order Grader math + rounding as the sellAll action
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
     }
+    // M41-8: the shared pick is refreshed first so the row outline, the UX-M4 chip and the strip ★ use the same frame's pick.
+    renderGoal();
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
       if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
-    renderGoal();
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
     { const hide = goalHidden; if (goalBtn.hidden !== hide) goalBtn.hidden = hide; }
     if (shouldShowCoopTip(s, b, coopTipShown)) { coopTipShown = true; g.telemetry.track('coop_hand_tip', { phase: 'shown', farm: F }); showTip(); }

@@ -114,17 +114,70 @@ sections.b2 = async () => {
 };
 
 // ---------- B3 goal chip SR text ----------
+/** CCR m1-new: the description must name the strip's OWN target and status, not just have the right shape.
+ *  F4 label → `{Track} level {n}` (`Value`→`Egg value`, `Coll.`→`Collection`; a JS-ellipsised name matches as a prefix);
+ *  non-F4 label → `Next goal: {label, L{n} → level {n} (M4 on; f4 = 'off' keeps L{n}), first : → ,}.`; done → `Next goal: all upgrades done.`; status pill → its sentence. */
+const descMatchesTarget = (desc, labelText, status, f4) => {
+  if (!desc) return false;
+  const lbl = labelText.replace(/\u00a0/g, ' ').replace(/^★ /, '');
+  if (/^All upgrades done!$/.test(lbl)) return desc === 'Next goal: all upgrades done.';
+  const st = status === 'Ready!' ? 'Ready now.' : status === '—' ? 'Sell eggs to earn coins.' : status.startsWith('~') ? 'Ready in about ' : null;
+  if (!st || !desc.includes(` ${st}`)) return false;
+  if (f4 === 'off') return desc.startsWith(`Next goal: ${lbl.replace(':', ',')}. `); // flag-off AC5 sentence, byte-identical
+  if (!f4) return desc.startsWith(`Next goal: ${lbl.replace(/\bL(\d+)\b/, 'level $1').replace(':', ',')}. `); // M4 on: `Farm L2` → `Farm level 2`
+  const m = lbl.match(/^(.*?) L(\d+)(?=[: ]|$)/); if (!m) return false;
+  const cut = m[1].endsWith('…'), name = cut ? m[1].slice(0, -1) : ({ Value: 'Egg value', 'Coll.': 'Collection' })[m[1]] ?? m[1];
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^Next goal: (best buy, )?${esc(name)}${cut ? '[^,]*' : ''} level ${m[2]}(,|\\.)`).test(desc) && (/^★/.test(labelText) === /^Next goal: best buy, /.test(desc));
+};
 sections.b3 = async () => {
   const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE } });
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 2, coinsCents: 500 }; });
   for (let i = 0; i < 6; i++) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'sellAll' })); await page.waitForTimeout(500); }
+  // CCR n6: seed one real sale so the rolling income is > 0 and B3 covers the `+X% income` + timer variant (F4-11 hides it at 0).
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 20, customers: [{ id: 99001, demand: 5, filled: 0, waitedS: 0 }] }; g.dispatch({ type: 'sellAll' });
+    g.state = { ...g.state, coinsCents: 500, customers: [], nextCustomerInS: 1e9 }; });
   await page.waitForTimeout(1200);
-  const r = await page.evaluate(() => ({ aria: document.querySelector('#goal').getAttribute('aria-label'), label: document.querySelector('.goal-label').textContent, status: document.querySelector('.goal-status').textContent, live: document.querySelector('#goalLive').textContent }));
-  const num = r.status.match(/\d+/)?.[0];
-  ok('B3 chip aria-label matches visible target/timer, no "1 minutes"', r.aria.includes(r.label.split(':')[0]) && (!num || r.aria.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(r.aria + r.live), JSON.stringify(r));
+  // m4a-spec v1.25 F4-14a + Art 2.5.3 ruling: #goal has no aria-label for ANY target; the accessible name is the visible
+  // text (★ / JS `…` aria-hidden) and must START with it; the spoken B3 sentence is the aria-describedby description.
+  const r = await page.evaluate(() => { const b = document.querySelector('#goal'), lbl = b.querySelector('.goal-label'), d = b.getAttribute('aria-describedby');
+    const vis = n => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent : c.getAttribute?.('aria-hidden') === 'true' ? '' : vis(c)).join('');
+    return { ariaLabel: b.getAttribute('aria-label'), desc: d ? document.getElementById(d)?.textContent ?? null : null, label: lbl.textContent, labelVis: vis(lbl), ng: lbl.classList.contains('ng'),
+      status: b.querySelector('.goal-status').textContent, live: document.querySelector('#goalLive').textContent }; });
+  const snap = await page.locator('#goal').ariaSnapshot(); r.name = snap.match(/^- '?button "(.*)"'?:?$/m)?.[1]?.replace(/\\"/g, '"') ?? null;
+  r.aria = r.desc ?? '';
+  const num = r.status.match(/\d+/)?.[0], ws = v => (v ?? '').replace(/\s+/g, ' ').trim(), visible = ws(`${r.labelVis} ${r.status}`);
+  ok('B3 chip aria-label matches visible target/timer, no "1 minutes"', r.ariaLabel === null && visible.length > 0 && ws(r.name).startsWith(visible)
+      && /^Next goal: (.+\. (Ready now|Ready in about .+|Sell eggs to earn coins)|all upgrades done)\.$/.test(r.desc ?? '') && !/[…★]/.test(r.name + r.desc)
+      && (!num || r.aria.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(r.aria + r.live)
+      && descMatchesTarget(r.desc, r.label, r.status, r.ng), JSON.stringify(r)); // m1-new: the sentence names THIS target
   await page.waitForTimeout(4500);
   ok('B3 live region cleared after announcing (never stale)', (await page.locator('#goalLive').textContent()) === '' || (await page.locator('#goalLive').textContent()) === r.aria);
   await ctx.close();
+  // Art 2.5.3 ruling: the non-F4 targets too (FARM, a worker, done). Flag-off is build-time config (not reachable from
+  // dist-qa); it shares this code path and is covered in jsdom (tests/m41-8-best-chip.test.ts).
+  const W = { energy: 100, cdS: 1 };
+  for (const [name, re, st] of [
+    ['FARM', /^Farm L\d+/, { farmLevel: 0, hensLevel: 3, eggValueLevel: 3, collectionLevel: 0, coinsCents: 0 }],
+    ['FARM ready', /^Farm L\d+/, { farmLevel: 0, hensLevel: 3, eggValueLevel: 3, collectionLevel: 0, coinsCents: 1e13 }],
+    ['W1 Market Hand', /^Hire Market Hand$/, { farmLevel: 11, hensLevel: 16, eggValueLevel: 16, collectionLevel: 6, coinsCents: 1e13, workers: { hawker: W } }],
+    ['W3 Hawker', /^Hire Hawker$/, { farmLevel: 8, hensLevel: 11, eggValueLevel: 11, collectionLevel: 2, coinsCents: 0 }],
+    ['worker', /^Grader tier \d+: ×/, { farmLevel: 18, hensLevel: 15, eggValueLevel: 15, collectionLevel: 15, coinsCents: 0 }],
+    ['done', /^All upgrades done!$/, { farmLevel: 30, hensLevel: 99, eggValueLevel: 99, collectionLevel: 30, coinsCents: 0, graderTier: 'max', workers: { market_hand: W, coop_hand: W, hawker: W, grader: W } }]]) {
+    const { ctx: c2, page: p2 } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, seenSlots: 6 }) } });
+    await p2.evaluate(st => { const g = window.eggfarm;
+      g.state = { ...g.state, basket: 20, customers: [{ id: 99001, demand: 5, filled: 0, waitedS: 0 }] }; g.dispatch({ type: 'sellAll' });
+      g.state = { ...g.state, ...st, ...(st.graderTier === 'max' ? { graderTier: g.b.workers.grader.tiers.length } : {}), tracksV7: 1, seenTracksExplainer: true, customers: [], nextCustomerInS: 1e9 }; }, st);
+    await p2.waitForTimeout(1500);
+    const q = await p2.evaluate(() => { const b = document.querySelector('#goal'), lbl = b.querySelector('.goal-label'), d = b.getAttribute('aria-describedby');
+      return { ariaLabel: b.getAttribute('aria-label'), desc: d ? document.getElementById(d)?.textContent ?? null : null, label: lbl.textContent, ng: lbl.classList.contains('ng'), status: b.querySelector('.goal-status').textContent }; });
+    q.name = (await p2.locator('#goal').ariaSnapshot()).match(/^- '?button "(.*)"'?:?$/m)?.[1]?.replace(/\\"/g, '"') ?? null;
+    const ws = v => (v ?? '').replace(/\s+/g, ' ').trim(), visible = ws(`${q.label} ${q.status}`), num = q.status.match(/\d+/)?.[0];
+    ok(`B3 ${name} target: no aria-label, name starts with the visible text, B3 sentence is the description`, !q.ng && re.test(ws(q.label)) && q.ariaLabel === null
+      && ws(q.name).startsWith(visible) && /^Next goal: (.+\. (Ready now|Ready in about .+|Sell eggs to earn coins)|all upgrades done)\.$/.test(q.desc ?? '')
+      && (!num || q.desc.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(q.desc) && descMatchesTarget(q.desc, q.label, q.status, false), JSON.stringify(q));
+    await c2.close();
+  }
 };
 
 // ---------- B6 desktop Collect bar vs side panel ----------

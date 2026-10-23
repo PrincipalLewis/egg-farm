@@ -518,3 +518,13 @@ html,body{overflow-x:hidden;max-width:100%}
 @keyframes expin{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 @media (prefers-reduced-motion:reduce){.tracks-exp{animation:expfade .15s linear}}
 @keyframes expfade{from{opacity:0}to{opacity:1}}
+/* M41-8 F4 (art-ux/f4-next-goal-label.md; m4a-spec §18 F4-17): the whole-label ellipsis goes for the F4 strip; only the
+   track-name span may shrink (CSS ellipsis); star, level and suffix spans never shrink or wrap. Level + suffix sit inline in
+   one .ng-tail flex item (F4-14a: no accname space between them; same rendering). */
+.goal-label.ng{display:flex;align-items:baseline;text-overflow:clip;white-space:nowrap}
+.goal-label.ng>span{flex:none;white-space:nowrap}
+.goal-label.ng>.ng-star{white-space:pre} /* keep the space after ★ (a flex item trims trailing collapsible space) */
+.goal-label.ng>.ng-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* M41-8 F3 = UX-M4 (art-ux/m4.1-ui-minors.md): ★ Best buy chip, gold #F2B233, ink label 7.0:1, ★ glyph so it isn't colour-only. */
+.best-chip{display:inline-flex;align-items:center;gap:4px;width:max-content;height:20px;margin:4px 0 0;padding:0 8px;border-radius:var(--r-pill);
+  background:#F2B233;color:var(--c-text);font:800 12px var(--f-body);white-space:nowrap;pointer-events:none;user-select:none}
