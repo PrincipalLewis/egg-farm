@@ -1,14 +1,25 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
+// Usage (also: node scripts/rc0-browser.mjs --help):
+//   PORT=<n>       pin the preview port (default: a free port). Non-numeric = exit 2.
+//   The served dist-qa must be THIS checkout: build-id hash = HEAD and the same dirty state, else exit 2.
+//   ALLOW_DIRTY=1  admit a +dirty build while the tree is dirty (a deliberate flag-off run). ALLOW_NO_GIT=1 skips the check
+//                  when git is unavailable. A clean build on a dirty tree (incl. untracked files) is always refused.
+//   Flag-off rc0:  set m4.enabled=0 in src/config/balance.json, npm run build:qa, ALLOW_DIRTY=1 node scripts/rc0-browser.mjs;
+//                  then revert balance.json and npm run build:qa again (a +dirty build on a clean tree is refused).
 // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
 import { chromium, webkit, firefox } from 'playwright-core';
-import { spawn } from 'node:child_process';
+import { serveForRun } from './serve-own.mjs';
 import { readFileSync, mkdirSync } from 'node:fs';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 9).map(l => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
 if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
-const port = +(process.env.PORT ?? 4181); const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
-const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
-await new Promise(r => setTimeout(r, 1500));
+// CCR n-d: no fixed default port (4181 once served a stale foreign build). PORT unset = a free port from the OS; an explicit PORT
+// is honoured as-is. serveOwn checks the page on that port is THIS dist-qa (own entry chunk), and expectHeadBuild that its
+// build-id is this checkout's HEAD with the same dirty state (ALLOW_DIRTY=1 admits a +dirty build); any mismatch, or a
+// non-numeric PORT, exits 2 before any check runs. The server is stopped on every exit path.
+const srv = await serveForRun('dist-qa', 'rc0-browser'), port = srv.port; // exits 2 on a bad PORT / foreign or stale build
+const killSrv = () => srv.stop();
 const SHOTS = process.env.SHOTS ?? '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
 const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
