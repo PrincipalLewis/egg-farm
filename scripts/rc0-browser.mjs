@@ -781,8 +781,11 @@ sections.g5 = async () => {
       if (w === 360) await shotIt(page, `focus-after-${how.toLowerCase()}`, w, h, `card closed via ${how}, focus ring on the Farm tab`);
     }
     {
-      await page.evaluate(() => { const g = window.eggfarm; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
+      // #65 CCR M1: the Buy click above scrolled the sheet (Farm Buy into view); a 206px refund card has no slot clear of every Buy
+      // there (place 'none', kept hidden; covered by scripts/m41-9-scroll-sweep.mjs), so this shot re-shows it with the sheet at the top.
+      await page.evaluate(() => { const g = window.eggfarm; const b = document.querySelector('#p-upgrades .body'); if (b) b.scrollTop = 0; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
       await page.waitForSelector('.tracks-exp-refund', { timeout: 3000 }).catch(() => {});
+      { const pl = await page.evaluate(() => document.querySelector('.tracks-exp')?.dataset.place ?? null); ok(`G5 refund card on screen (place ${pl}, not none) with the sheet at the top at ${w}`, !!pl && pl !== 'none', pl); }
       const rl = await page.evaluate(() => document.querySelector('.tracks-exp-refund')?.textContent.trim() ?? null);
       ok(`G5 refund line shown when migrationRefundCents > 0 at ${w}`, rl === 'We refunded +$1,234.56 for your old upgrades.', rl);
       await cardUp(page, 'refund-line', w);
