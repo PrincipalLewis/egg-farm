@@ -2,23 +2,30 @@ name: ci
 # D-CEO-20261024-02 CI diet: one run per commit (push to main, or PR events), drafts skipped,
 # superseded runs cancelled, docs-only changes skipped, one shared `npm ci` for the gate.
 # Work PRs open as Draft and are marked Ready only at the gate SHA (ready_for_review triggers the run).
+# Paths (CCR M1 on #68): everything except Markdown and docs/, but Markdown that the gate reads or ships is re-included:
+# vendor/** (sha256-pinned seller-variance-proposal.md, check-vendor-pins), README.md (## Credits asserted by
+# tests/art-ux-rc0.test.ts), public/** (LICENSES.md shipped in dist), tests/** (fixtures). Order matters: later
+# patterns override earlier ones, so the re-includes must stay after the negations.
 on:
   push:
     branches: [main]
-    paths-ignore: ['**/*.md', 'docs/**']
+    paths: ['**', '!**/*.md', '!docs/**', 'vendor/**', 'README.md', 'public/**', 'tests/**']
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore: ['**/*.md', 'docs/**']
+    paths: ['**', '!**/*.md', '!docs/**', 'vendor/**', 'README.md', 'public/**', 'tests/**']
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+  # PRs: keyed on the PR number, and a newer commit cancels the older run. main pushes queue instead of cancelling,
+  # so every main SHA gets a verdict.
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   gate:
     # Replaces unit + slow + release-globals (chromium) + release-html: same commands, one checkout, one `npm ci`.
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,12 +55,14 @@ jobs:
         with: { name: egg-farm-html, path: dist-html/egg-farm.html }
   release-globals:
     # Required (QA rc1): release window globals must be exactly eggfarmExportTelemetry, in every engine.
-    # Chromium runs inside `gate`; Firefox/WebKit only on main, rc/* pushes, and PRs from rc/* branches (e.g. #67).
+    # Chromium runs inside `gate`; Firefox/WebKit only on pushes to main and on non-draft PRs from rc/* branches (e.g. #67).
+    # rc/* branches are gated through their (ready) PR; a push to rc/* with no PR does not trigger CI.
     needs: gate
     if: >-
       (github.event_name != 'pull_request' || !github.event.pull_request.draft) &&
-      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/rc/') || startsWith(github.head_ref, 'rc/'))
+      (github.ref == 'refs/heads/main' || startsWith(github.head_ref, 'rc/'))
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
