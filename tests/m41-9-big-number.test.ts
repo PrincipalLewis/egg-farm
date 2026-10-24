@@ -119,7 +119,7 @@ describe('NBSP (U+00A0) before unit words', () => {
   });
   it('app.ts: welcome-back eggs and hen pill use NBSP; Sell all uses the floored formatters', () => {
     const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
-    expect(src).toContain('+${fmtCount(eggs)}\\u00a0eggs</div>'); expect(src).toContain('`×${fmtCount(S.hens(F, b))}\\u00a0hens`');
+    expect(src).toContain('+${fmtCount(eggs)}\\u00a0eggs</div>'); expect(src).toContain('`×${fmtCount(hensN)}\\u00a0hens`');
     expect(src).toContain('sellAllLabel(eggs, cents, fmtCountFloor, fmtMoneyFloor)');
     expect(src).not.toMatch(/\$\{fmtCount\([^)]*\)\} (eggs|hens)</);
   });
