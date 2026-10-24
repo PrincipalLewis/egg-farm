@@ -67,8 +67,10 @@ describe('D2 IndexedDB mirror', () => {
     kv.setItem(SAVE_KEY, serialize(st({ farmLevel: 3 }), 1000));
     expect(reconcile(kv, neu, b, T)).toBe('idb'); expect(load(kv, b)!.state.farmLevel).toBe(4);
     const kv2 = mem(); kv2.setItem(SAVE_KEY, '{"trunc');
-    expect(reconcile(kv2, neu, b, 77)).toBe('idb');
-    expect(kv2.getItem('eggfarm.save.corrupt.77')).toBe('{"trunc'); expect(JSON.parse(kv2.getItem(CORRUPT_INDEX_KEY)!)).toEqual(['eggfarm.save.corrupt.77']);
+    // M41-7 (spec v0.3.3 OQ-7/CSR-8): reconcile no longer handles a corrupt localStorage main; it writes nothing and loadSafe
+    // owns the copy + recovery (tests/csr-loadsafe.test.ts "reconcile refuses a corrupt LS main" / CSR-2 tier A).
+    expect(reconcile(kv2, neu, b, 77)).toBe('ls');
+    expect(kv2.getItem('eggfarm.save.corrupt.77')).toBeNull(); expect(kv2.getItem(CORRUPT_INDEX_KEY)).toBeNull(); expect(kv2.getItem(SAVE_KEY)).toBe('{"trunc');
     const kv3 = mem(); expect(reconcile(kv3, null, b)).toBe('ls'); expect(kv3.getItem(SAVE_KEY)).toBeNull();
   });
   it('older saves in IndexedDB still load through migrations (v4 fixture)', () => {

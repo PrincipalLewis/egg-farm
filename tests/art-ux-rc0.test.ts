@@ -8,7 +8,7 @@ describe('F1 slot toast only when a slot is added', () => {
   it('true only at F5/10/15/20', () => { expect([...Array(31).keys()].filter(F => slotAdded(F, b))).toEqual([5, 10, 15, 20]); });
 });
 describe('F2 greyed Sell all', () => {
-  it('"No eggs to sell", never $0.00', () => { expect(sellAllLabel(0, 0, String, c => `$${c / 100}`)).toBe('No eggs to sell'); expect(sellAllLabel(3, 300, String, c => `$${c / 100}`)).toBe('Sell all (3 eggs\u00a0· $3)'); });
+  it('"No eggs to sell", never $0.00', () => { expect(sellAllLabel(0, 0, String, c => `$${c / 100}`)).toBe('No eggs to sell'); expect(sellAllLabel(3, 300, String, c => `$${c / 100}`)).toBe('Sell all (3\u00a0eggs\u00a0· $3)'); });
 });
 describe('F4 separator', () => { it('" · " with spaces on both sides', () => {
   expect(orderView({ id: 1, demand: 50, filled: 48, waitedS: 0 }, 0, 748).line).toMatch(/^48\/50\u00a0eggs · \$/);

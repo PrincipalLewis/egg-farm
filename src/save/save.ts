@@ -108,7 +108,10 @@ export function migrate(d: any, b: Balance): SaveFile {
   return { version: d.version, savedAt: d.savedAt, state: { ...migrateStoredTracksV7(state, b).state, tracksV7: 1 }, tracksMigrated: true, v6State: state, v6Keys: Object.keys(d.state ?? {}) };
 }
 export interface KV { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void; }
-/** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2). */
+/** Settings > Reset save: the progress save and its .bak (the IndexedDB copy is cleared by Game.clearMirror). eggfarm.install_id and eggfarm.telemetry are kept (M3-AC7 / PT1-2).
+ *  Arch m2/m1 (pr63-reset-at, HoQA item 5): Reset's record of already surfaced corrupt copies is NOT a localStorage key and not
+ *  here: IdbMirror.clear() writes it as IDB_RESET_KEY ('reset.surfaced') in the IndexedDB store, in the same transaction that
+ *  deletes main, and it must outlive the save. Any future 'clear all keys' / export-by-prefix in that store must skip it. */
 export const RESET_KEYS = ['eggfarm.save', 'eggfarm.save.bak', 'eggfarm.save.v6_backup', 'eggfarm.save.migration_attempts', 'eggfarm.save.headroom_probe'] as const; // N3: probe key too // review m4: Reset clears the v6 backup too (V6_BACKUP_KEY) // QA BUG-4: .bak too, so reset progress can't come back
 export const UI_KEY = 'eggfarm.ui';
 /** UI flags that survive a reset / fresh-start fallback: player prefs (+ install-level AC14g session count and tip state). */
@@ -229,12 +232,19 @@ export function validate(raw: string, b: Balance, now = 0): { ok: true; file: Sa
   if (!validSavedAt(f.savedAt, now)) f.savedAt = NaN;
   return { ok: true, file: f };
 }
+/** M41-7 (spec v0.3.3 CSR-10): where a recovery restored from ('none' = fresh, 'deferred' = CSR-13 defer). */
+export type RecoverySource = 'bak' | 'idb' | 'v6_backup' | 'none' | 'deferred';
+export interface Tried { source: 'bak' | 'idb' | 'v6_backup'; result: 'valid' | 'invalid' | 'absent' | 'unavailable'; reason?: string }
 export interface Recovery {
-  case: 'R' | 'F' | 'Q'; reason: CorruptReason; had_backup: boolean; restored_from_backup: boolean; copy_failed: boolean;
+  /** R restored, F fresh, Q fresh + corrupt copy failed (storage), D deferred (CSR-13: IndexedDB unknown, nothing written). */
+  case: 'R' | 'F' | 'Q' | 'D'; reason: CorruptReason; had_backup: boolean; restored_from_backup: boolean; copy_failed: boolean;
   /** Raw bytes of the bad main save, kept in memory for "Export old save" (QA case 3). */
   raw: string;
   /** v2.2 'Can't save': storage refused but the farm loaded; Export takes the CURRENT farm from `live`. */
   cantSave?: true; live?: () => string;
+  /** M41-7 (engineering/reviews/m41-7-copy-interface.md §1): additive; all optional so older call sites keep compiling. */
+  source?: RecoverySource; store?: 'ls' | 'idb'; tried?: Tried[]; prevLevel?: number; restoredLevel?: number; restoredSavedAt?: number;
+  restored_version?: number; migrated?: boolean;
 }
 const isQuota = (e: unknown) => e instanceof Error && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || /quota/i.test(e.message));
 /** Preserve raw bytes under eggfarm.save.corrupt.<ts>, keep the last CORRUPT_KEEP. One attempt, never retried. */
@@ -255,41 +265,143 @@ export function preserveCorrupt(kv: KV, raw: string, ts: number): boolean {
  * - main bad: preserve it; restore from a valid .bak (case R), else start fresh (F; Q when the copy failed).
  *   A bad .bak is preserved as well (QA case 1).
  */
-/** Product 15:15: the single recovery outcome the AC14b dialog (art-ux/save-recovery-dialog.md v2.1) attaches to. */
-export type RecoveryOutcome = 'restored' | 'fresh' | 'storage' | null;
-export const recoveryOutcome = (r: Recovery | null): RecoveryOutcome => !r ? null : r.restored_from_backup ? 'restored' : r.case === 'Q' ? 'storage' : 'fresh';
+/** Product 15:15: the single recovery outcome the AC14b dialog (art-ux/save-recovery-dialog.md v2.1) attaches to. M41-7: + 'deferred' (M4). */
+export type RecoveryOutcome = 'restored' | 'fresh' | 'storage' | 'deferred' | null;
+export const recoveryOutcome = (r: Recovery | null): RecoveryOutcome => !r ? null : r.case === 'D' ? 'deferred' : r.restored_from_backup ? 'restored' : r.case === 'Q' ? 'storage' : 'fresh';
 /** v4 f6 + AC14b v2.1: the lease write was refused (storage full) and the loader found nothing to recover. Route it
  *  through the dialog as outcome 'storage' with the v2.2 'Can't save' copy; Export takes the current farm. */
 export function storageBlockedRecovery(kv: KV): Recovery {
   let raw = ''; try { raw = kv.getItem(SAVE_KEY) ?? ''; } catch { /* blocked */ }
   return { case: 'Q', reason: 'missing', had_backup: false, restored_from_backup: false, copy_failed: false, raw, cantSave: true };
 }
-export function loadSafe(kv: KV, b: Balance, now = Date.now(), idbRaw: string | null = null): { file: SaveFile | null; recovery: Recovery | null; outcome: RecoveryOutcome; newer?: number } {
-  const r = loadSafeInner(kv, b, now, idbRaw); return { ...r, outcome: recoveryOutcome(r.recovery) };
+/** M41-7 boot IndexedDB input (spec v0.3.3 §1 "IDB tier status"): 'ok' = open + both reads definite; 'absent' = no global /
+ *  SecurityError / private mode; 'unknown' = blocked / timeout / read error. `raw` is the value at save/main as read (a
+ *  string, null = no copy, or any non-string value: corrupt, reason wrong_type, CSR-AC-IDB1 IDB1-2). */
+export type IdbStatus = 'ok' | 'absent' | 'unknown';
+export interface IdbInput { status: IdbStatus; raw: unknown; reason?: string }
+/** Newest valid copy (moved from idb-mirror.ts so loadSafe owns it; re-exported there). Ties and an invalid/missing IndexedDB
+ *  copy keep localStorage. */
+export function pickNewest(lsRaw: string | null, idbRaw: string | null, b: Balance, now = Date.now()): 'ls' | 'idb' {
+  if (idbRaw === null || idbRaw === lsRaw) return 'ls';
+  const iv = validate(idbRaw, b); if (!iv.ok) return 'ls';
+  if (lsRaw === null) return 'idb';
+  const lv = validate(lsRaw, b); if (!lv.ok) return 'idb';
+  // v4 (QA e3, Reviewer N2): a savedAt invalid for offline earnings (missing, null, <= 0, pre-2020, or in the future beyond
+  // SAVED_AT_SKEW_MS) is the OLDEST copy and never beats a valid one; both invalid -> tie -> localStorage.
+  // M4-19: version, then committed (tracksV7 + v6BackupId), then savedAt as the tie-break only.
+  const c = rankCompare(idbRaw, lsRaw, now); if (c !== 0) return c > 0 ? 'idb' : 'ls';
+  return savedAtRank(iv.file.savedAt, now) > savedAtRank(lv.file.savedAt, now) ? 'idb' : 'ls';
 }
-function loadSafeInner(kv: KV, b: Balance, now: number, idbRaw: string | null): { file: SaveFile | null; recovery: Recovery | null; newer?: number } {
+/** CSR-9a: a farmLevel read from raw bytes only when it is a finite integer >= 0 (no coercion; above maxLevel accepted). */
+const strictLevel = (raw: string | null | undefined): number | undefined => {
+  if (!raw) return undefined; try { const v = JSON.parse(raw)?.state?.farmLevel; return typeof v === 'number' && Number.isInteger(v) && v >= 0 ? v : undefined; } catch { return undefined; }
+};
+const storedVersion = (raw: string): number | undefined => { try { const v = JSON.parse(raw)?.version; return typeof v === 'number' ? v : undefined; } catch { return undefined; } };
+/** CSR-7 / G6: preserve each corrupt copy once, per boot (`seen`) and across boots (any entry already in the LS index). */
+function preserveOnce(kv: KV, raw: string, ts: number, seen: Set<string>): boolean {
+  if (seen.has(raw)) return true;
+  let idx: unknown = []; try { idx = JSON.parse(kv.getItem(CORRUPT_INDEX_KEY) ?? '[]'); } catch { /* preserveCorrupt rebuilds */ }
+  if (Array.isArray(idx) && idx.some(k => typeof k === 'string' && kv.getItem(k) === raw)) { seen.add(raw); return true; }
+  const ok = preserveCorrupt(kv, raw, ts); if (ok) seen.add(raw); return ok;
+}
+export interface LoadResult {
+  file: SaveFile | null; recovery: Recovery | null; outcome: RecoveryOutcome; newer?: number;
+  /** G7 / D-HOP-35: the non-corrupt stale-LS case: a newer valid IndexedDB copy was written into main (save_restore {source:'idb'}). */
+  staleRestore?: boolean;
+  /** CSR-13: restored from .bak while IndexedDB is unknown: the session must not write the mirror (Game sets mirror = null). */
+  mirrorOff?: boolean;
+}
+/**
+ * M41-7 single owner of the load order (spec v0.3.3 FROZEN, OQ-7 / CSR-1..16, CSR-AC-IDB1). Runs inside `new Game`, after the
+ * lease claim and the owns() check (main.ts, CSR-8). Never touches eggfarm.install_id.
+ * 0. Any newer-build copy (main, .bak, IndexedDB) refuses the load before any write (M4A-31(b)).
+ * 1. Not corrupt: a valid (or missing) main loses to a newer valid IndexedDB copy -> that copy is written into main
+ *    (`reconcile`, the stale-LS case, save_restore); a valid main loads.
+ * 2. Trigger (CSR-1): main present and invalid; or main missing and .bak invalid; or (CSR-AC-IDB1 case i) no main, no .bak and
+ *    the IndexedDB copy invalid. Corrupt main/.bak bytes are preserved once (CSR-7); the IndexedDB copy is preserved IN
+ *    IndexedDB by main.ts before Game (bootPreserveIdb, IDB1-5), never in localStorage.
+ * 3. Tier A: valid .bak / IndexedDB (both valid: rankCompare, tie -> .bak). 4. IndexedDB unknown -> defer (CSR-13, case D).
+ * 5. Tier B: v6_backup record -> decodeBackup -> validate (normal migration path). 6. Tier C: fresh (F, or Q if the copy failed).
+ * `idb` may be a legacy raw string/null (newer check only, no IndexedDB tier): pre-M41-7 call sites and tests.
+ */
+/** D-HOP-2026-10-22-04 (the one switch for HoP's (4)/(d) call): with no LS main, whenever .bak is the copy chosen (alone, by
+ *  winning rankCompare, or on a tie with a valid IndexedDB copy), show the M1 Restored dialog (dd223f5 case R). false = silent. */
+export const NO_MAIN_BAK_DIALOG = true;
+export function loadSafe(kv: KV, b: Balance, now = Date.now(), idb: IdbInput | string | null = null, idbCopyFailed = false): LoadResult {
+  const r = loadSafeInner(kv, b, now, idb, idbCopyFailed); return { ...r, outcome: recoveryOutcome(r.recovery) };
+}
+function loadSafeInner(kv: KV, b: Balance, now: number, idbArg: IdbInput | string | null, idbCopyFailed: boolean): Omit<LoadResult, 'outcome'> {
+  const idb: IdbInput = idbArg !== null && typeof idbArg === 'object' ? idbArg : { status: 'absent', raw: null, reason: 'legacy' };
+  const legacy = idbArg === null || typeof idbArg !== 'object';
+  const idbStr = legacy ? (idbArg as string | null) : typeof idb.raw === 'string' ? idb.raw : null;
   // B1/m2: any newer copy (main, .bak or IndexedDB) refuses the load before any write, including corrupt-copy preservation.
-  const newer = newerStoredVersion(kv, idbRaw); if (newer !== null) return { file: null, recovery: null, newer };
-  const raw = kv.getItem(SAVE_KEY);
-  if (raw === null) {
-    // QA BUG-3: main missing (localStorage and IndexedDB; reconcile ran first) but .bak exists: restore it like case R,
-    // never start fresh over a valid .bak. A bad .bak is preserved, then a fresh start (it never rotates over the copy).
-    const bakRaw = kv.getItem(BAK_KEY); if (bakRaw === null) return { file: null, recovery: null };
-    const bv = validate(bakRaw, b);
-    if (bv.ok) return { file: bv.file, recovery: { case: 'R', reason: 'missing', had_backup: true, restored_from_backup: true, copy_failed: false, raw: '' } };
-    // SD4-3 / Code Reviewer N5: a bad .bak with no main is still a recovery -> 'fresh' (or 'storage' if the copy failed), never silent.
-    const bakCopied = preserveCorrupt(kv, bakRaw, now + 1);
-    return { file: null, recovery: { case: bakCopied ? 'F' : 'Q', reason: bv.reason, had_backup: true, restored_from_backup: false, copy_failed: !bakCopied, raw: bakRaw } };
+  const newer = newerStoredVersion(kv, idbStr); if (newer !== null) return { file: null, recovery: null, newer };
+  let raw = kv.getItem(SAVE_KEY);
+  let staleRestore = false;
+  // 1. Stale-LS reconcile (non-corrupt only; reconcile() itself refuses a corrupt main, CSR-3).
+  // D-HOP-2026-10-22-01(d) as amended by -04: no main + valid .bak + valid IndexedDB -> CSR-2 tier A (rankCompare, tie -> .bak).
+  // IndexedDB picked: silent stale restore (save_restore once); .bak picked: the case R branch below (NO_MAIN_BAK_DIALOG).
+  // Missing main + invalid .bak stays a CSR-1 recovery (M1), not stale (G7).
+  const noMainIdbWins = (bk: string | null) => bk === null ? pickNewest(null, idbStr, b, now) === 'idb'
+    : validate(bk, b).ok && validate(idbStr!, b).ok && rankCompare(idbStr, bk, now) > 0;
+  if (!legacy && idbStr !== null && (raw === null ? noMainIdbWins(kv.getItem(BAK_KEY)) : validate(raw, b).ok && pickNewest(raw, idbStr, b, now) === 'idb')) {
+    try { kv.setItem(SAVE_KEY, idbStr); raw = idbStr; staleRestore = true; } catch { /* quota: localStorage as-is (rc1 behaviour) */ }
   }
-  const v = validate(raw, b);
-  if (v.ok) return { file: v.file, recovery: null };
-  const copied = preserveCorrupt(kv, raw, now);
+  const mainV = raw !== null ? validate(raw, b) : null;
+  if (mainV?.ok) return { file: mainV.file, recovery: null, staleRestore };
   const bakRaw = kv.getItem(BAK_KEY), had_backup = bakRaw !== null;
   const bv = bakRaw !== null ? validate(bakRaw, b) : null;
-  if (bv?.ok) return { file: bv.file, recovery: { case: 'R', reason: v.reason, had_backup, restored_from_backup: true, copy_failed: !copied, raw } };
-  if (bakRaw !== null) preserveCorrupt(kv, bakRaw, now + 1);
-  return { file: null, recovery: { case: copied ? 'F' : 'Q', reason: v.reason, had_backup, restored_from_backup: false, copy_failed: !copied, raw } };
+  // IndexedDB tier classification (spec §1).
+  let idbT: Tried, idbFile: SaveFile | null = null;
+  if (legacy || idb.status === 'absent') idbT = { source: 'idb', result: 'absent', ...(legacy ? {} : idb.reason ? { reason: idb.reason } : {}) };
+  else if (idb.status === 'unknown') idbT = { source: 'idb', result: 'unavailable', reason: idb.reason ?? 'idb_read_error' };
+  else if (idb.raw === null || idb.raw === undefined) idbT = { source: 'idb', result: 'absent' };
+  else if (typeof idb.raw !== 'string') idbT = { source: 'idb', result: 'invalid', reason: 'wrong_type' };
+  else if (raw !== null && idb.raw === raw) idbT = { source: 'idb', result: 'invalid', reason: (mainV as { reason: string }).reason }; // CSR-3: identical bytes
+  else { const iv = validate(idb.raw, b); if (iv.ok) { idbT = { source: 'idb', result: 'valid' }; idbFile = iv.file; } else idbT = { source: 'idb', result: 'invalid', reason: iv.reason }; }
+  // 2. Trigger.
+  let reason: CorruptReason, store: 'ls' | 'idb' = 'ls';
+  if (raw !== null) reason = (mainV as { ok: false; reason: CorruptReason }).reason;
+  else if (bakRaw !== null) {
+    // QA BUG-3: main missing but .bak exists: restore it like case R, never start fresh over a valid .bak.
+    if (bv!.ok) return !NO_MAIN_BAK_DIALOG ? { file: bv!.file, recovery: null } : { file: bv!.file, recovery: { case: 'R', reason: 'missing', had_backup: true, restored_from_backup: true, copy_failed: false, raw: '', source: 'bak', store: 'ls', tried: [{ source: 'bak', result: 'valid' }, idbT], restored_version: storedVersion(bakRaw), migrated: !!bv!.file.tracksMigrated, ...restoredMeta(bv!.file, now) } };
+    reason = (bv as { reason: CorruptReason }).reason;
+  } else if (idbT.result === 'invalid') { reason = idbT.reason as CorruptReason; store = 'idb'; } // CSR-AC-IDB1 case (i)
+  // Nothing stored. D-HOP-2026-10-22-01 (c): with IndexedDB unknown this is a fresh farm (CSR-1, no dialog) and the session
+  // never writes the mirror (a hidden IndexedDB farm is the M4.2 gap), so Game sets mirror = null.
+  else return { file: null, recovery: null, ...(idbT.result === 'unavailable' ? { mirrorOff: true } : {}) };
+  const seen = new Set<string>();
+  const copied = raw !== null ? preserveOnce(kv, raw, now, seen) : bakRaw !== null ? true : !idbCopyFailed;
+  const bakT: Tried = bakRaw === null ? { source: 'bak', result: 'absent' } : bv!.ok ? { source: 'bak', result: 'valid' } : { source: 'bak', result: 'invalid', reason: (bv as { reason: string }).reason };
+  let bakCopyOk = true;
+  if (bakRaw !== null && !bv!.ok) bakCopyOk = preserveOnce(kv, bakRaw, now + 1, seen); // QA case 1
+  const tried: Tried[] = [bakT, idbT];
+  const prevLevel = strictLevel(raw) ?? strictLevel(bakRaw);
+  const base = { reason, had_backup, raw: raw ?? (bakRaw ?? (typeof idb.raw === 'string' ? idb.raw : idb.raw != null ? safeText(idb.raw) : '')), store, tried, ...(prevLevel !== undefined ? { prevLevel } : {}) };
+  const copyFailed = raw !== null ? !copied : bakRaw !== null ? !bakCopyOk : idbCopyFailed;
+  const restore = (file: SaveFile, source: RecoverySource, srcRaw: string, extra: object = {}) => ({ file, recovery: { ...base, case: 'R' as const, restored_from_backup: true, copy_failed: copyFailed, source, restored_version: storedVersion(srcRaw), migrated: !!file.tracksMigrated, ...restoredMeta(file, now) }, ...extra });
+  // 3. Tier A.
+  if (bv?.ok && idbFile) return rankCompare(idb.raw, bakRaw, now) > 0 ? restore(idbFile, 'idb', idb.raw as string) : restore(bv.file, 'bak', bakRaw!);
+  if (bv?.ok) return restore(bv.file, 'bak', bakRaw!, idbT.result === 'unavailable' ? { mirrorOff: true } : {});
+  if (idbFile) return restore(idbFile, 'idb', idb.raw as string);
+  // 4. CSR-13 defer: IndexedDB unknown and no valid .bak: no v6_backup / fresh commit, no save write.
+  if (idbT.result === 'unavailable') return { file: null, recovery: { ...base, case: 'D', restored_from_backup: false, copy_failed: copyFailed, source: 'deferred' } };
+  // 5. Tier B: v6_backup (CSR-4/5): never deleted, edited or copied to corrupt.* here.
+  const rec = kv.getItem(V6_BACKUP_KEY);
+  if (rec === null) tried.push({ source: 'v6_backup', result: 'absent' });
+  else {
+    const d = decodeBackup(rec);
+    if (!d) tried.push({ source: 'v6_backup', result: 'invalid', reason: 'parse' });
+    else { const v6 = validate(d.raw, b); if (v6.ok) { tried.push({ source: 'v6_backup', result: 'valid' }); return restore(v6.file, 'v6_backup', d.raw); } tried.push({ source: 'v6_backup', result: 'invalid', reason: v6.reason }); }
+  }
+  // 6. Tier C: fresh (CSR-6), never silent.
+  return { file: null, recovery: { ...base, case: raw !== null ? (copied ? 'F' : 'Q') : bakRaw !== null ? (bakCopyOk ? 'F' : 'Q') : 'F', restored_from_backup: false, copy_failed: copyFailed, source: 'none' } };
 }
+const restoredMeta = (f: SaveFile, now: number) => {
+  const lvl = (f.v6State ?? f.state).farmLevel, at = f.savedAt;
+  return { ...(typeof lvl === 'number' ? { restoredLevel: lvl } : {}), ...(validSavedAt(at, now) ? { restoredSavedAt: at } : {}) };
+};
+const safeText = (v: unknown): string => { try { return JSON.stringify(v) ?? String(v); } catch { return String(v); } };
 
 /** AC14d: the second tab reads the save but every write is dropped (also the load-time save and .bak rotation). */
 export const readOnlyKV = (kv: KV): KV => ({ getItem: k => kv.getItem(k), setItem: () => {}, removeItem: () => {} });

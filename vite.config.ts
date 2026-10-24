@@ -1,10 +1,10 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
-import { gitBuildId } from './scripts/build-id';
+import { gitBuildId, BUILD_PREFIX } from './scripts/build-id';
 import balance from './src/config/balance.json';
 
-/** Injected into session_start.build as m3-rc1-pre+<short>[+dirty] (QA PT1-1, rc0 item 6). */
+/** Injected into session_start.build as <BUILD_PREFIX>+<short>[+dirty] (QA PT1-1, rc0 item 6; prefix = scripts/build-id.ts, M41-10). */
 const BUILD = gitBuildId();
 
 /** Debug URL flags (?ios=) exist only outside release builds: `vite build` (mode production) compiles them out;
@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [buildIdHtml, m4Preload],
   define: {
     __BUILD__: JSON.stringify(BUILD),
+    __BUILD_PREFIX__: JSON.stringify(BUILD_PREFIX),
     __IOS_FLAG__: JSON.stringify(mode !== 'production'),
   },
   // *.slow.test.ts (e.g. the 100-seed seller-variance parity) is skipped by default `vitest run`; CI runs it via `npm run test:slow`.

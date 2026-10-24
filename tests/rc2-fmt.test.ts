@@ -21,12 +21,12 @@ describe('rc2 FMT-1/FMT-2 money + count formatting', () => {
     expect(fmtCount(9_999)).toBe('9,999'); expect(fmtCount(10_000)).toBe('10K'); expect(fmtCount(1_000_000)).toBe('1M');
     expect(fmtCount(1e9)).toBe('1B'); expect(fmtCount(1e12)).toBe('1T');
   });
-  it('fmtCount above 1,000T: separator, no decimals', () => {
-    expect(fmtCount(2.5e12)).toBe('2.5T'); expect(fmtCount(1e15)).toBe('1,000T'); expect(fmtCount(1.2345e15)).toBe('1,235T');
+  it('fmtCount at 1,000T rolls up to Qa (M41-9, number-format-big)', () => {
+    expect(fmtCount(2.5e12)).toBe('2.5T'); expect(fmtCount(1e15)).toBe('1Qa'); expect(fmtCount(1.2345e15)).toBe('1.23Qa');
   });
   it('fmtMoney rounding and roll-up', () => {
     expect(fmtMoney(9_995_000_00)).toBe('$10M'); expect(fmtMoney(9_990_000_00)).toBe('$9.99M');
-    expect(fmtMoney(99_999_999)).toBe('$1M'); expect(fmtMoney(999_999.6)).toBe('$10K'); expect(fmtMoney(1e17)).toBe('$1,000T');
+    expect(fmtMoney(99_999_999)).toBe('$1M'); expect(fmtMoney(999_999.6)).toBe('$10K'); expect(fmtMoney(1e17)).toBe('$1Qa');
     expect(fmtMoney(1_234_500)).toBe('$12.3K');
   });
   it('fmtMoneyShort half-up, matching fmtMoney', () => {
@@ -36,15 +36,15 @@ describe('rc2 FMT-1/FMT-2 money + count formatting', () => {
   it('fmtMoneyShort edges and roll-up', () => {
     expect(fmtMoneyShort(99_999)).toBe('$999.99'); expect(fmtMoneyShort(99_999.9)).toBe('$1K');
     expect(fmtMoneyShort(99_995_000)).toBe('$1M'); expect(fmtMoneyShort(99_995_000_000)).toBe('$1B'); expect(fmtMoneyShort(99_995_000_000_000)).toBe('$1T');
-    expect(fmtMoneyShort(1e17)).toBe('$1,000T'); expect(fmtMoneyShort(1.2345e17)).toBe('$1,234.5T');
+    expect(fmtMoneyShort(1e17)).toBe('$1Qa'); expect(fmtMoneyShort(1.2345e17)).toBe('$1.2Qa');
   });
   it('fmtCount: — for NaN/±Infinity', () => { for (const x of [NaN, Infinity, -Infinity]) expect(fmtCount(x)).toBe('—'); });
   it('fmtMoney: — for NaN/±Infinity', () => { for (const x of [NaN, Infinity, -Infinity]) expect(fmtMoney(x)).toBe('—'); });
   it('fmtMoneyShort: — for NaN/±Infinity', () => { for (const x of [NaN, Infinity, -Infinity]) expect(fmtMoneyShort(x)).toBe('—'); });
-  it('order card eggs labels at 1,000T and in the K band', () => {
+  it('order card eggs labels at 1Qa (was 1,000T) and in the K band', () => {
     const c = (d: number, f = 0) => ({ id: 1, demand: d, filled: f, waitedS: 0 });
-    expect(orderView(c(1e15), 0, 1).line).toMatch(/^0\/1,000T\u00a0eggs · /);
-    expect(orderView(c(1e15), 0, 1).button).toBe('Need 1,000T');
+    expect(orderView(c(1e15), 0, 1).line).toMatch(/^0\/1Qa\u00a0eggs · /);
+    expect(orderView(c(1e15), 0, 1).button).toBe('Need 1Qa');
     expect(orderView(c(9_999, 1_250), 0, 1).line).toMatch(/^1\.2K\/9\.9K\u00a0eggs/); // Product (#25): line shows delivered (filled) eggs
     expect(orderView(c(12_350), 0, 1).line).toMatch(/^0\/12\.4K\u00a0eggs/);
   });

@@ -14,12 +14,12 @@ const run = (n: string, ...a: string[]) => exec(fx(n), ...a);
 const keys = (js: string) => findGlobalWrites(js).map((h: { key: string }) => h.key);
 it.each(['pass', 'pass-assign-allowed'])('%s passes', n => { const r = run(n); expect(r.stderr).toBe(''); expect(r.status).toBe(0); });
 it('--build-id <id> and --build-id=<id>', () => {
-  expect(run('pass', '--build-id', 'm3-rc1-pre+abc1234').status).toBe(0); expect(run('pass', '--build-id=m3-rc1-pre+abc1234').status).toBe(0);
-  expect(run('pass', '--build-id', 'm3-rc1-pre+0000000').status).toBe(1); expect(run('pass', '--build-id=m3-rc1-pre+0000000').status).toBe(1);
+  expect(run('pass', '--build-id', 'm4.1+abc1234').status).toBe(0); expect(run('pass', '--build-id=m4.1+abc1234').status).toBe(0);
+  expect(run('pass', '--build-id', 'm4.1+0000000').status).toBe(1); expect(run('pass', '--build-id=m4.1+0000000').status).toBe(1);
   const r = run('pass', '--build-id'); expect(r.status).toBe(1); expect(r.stderr).toMatch(/needs a value/);
   expect(run('pass', '--build-id=').status).toBe(1);
   // meta = data-build-id = script id, but all != --build-id
-  expect(run('pass', '--build-id=m3-rc1-pre+def5678').stderr).toMatch(/!= expected m3-rc1-pre\+def5678/);
+  expect(run('pass', '--build-id=m4.1+def5678').stderr).toMatch(/!= expected m4\.1\+def5678/);
 });
 it.each([
   ['fail-computed-key', /eggfarmDbg/], ['fail-template-key', /computed `eggfarm\$\{x\}`/],
@@ -28,11 +28,11 @@ it.each([
   ['fail-srcset', /srcset https:\/\/cdn/], ['fail-websocket', /wss:\/\/evil/], ['fail-xhr', /XHR open https:\/\/evil/],
   ['fail-object-data', /object data https:\/\/evil/], ['fail-meta-refresh', /meta refresh https:\/\/evil/], ['fail-sourcemap', /sourceMappingURL/],
   ['fail-css-url', /css url\(\) https:\/\/cdn/], ['fail-css-import', /@import https:\/\/fonts/],
-  ['fail-wrong-build-id', /does not match m3-rc1-pre\+abc1234/], ['fail-dirty-build-id', /\+dirty/],
+  ['fail-wrong-build-id', /does not match m4\.1\+abc1234/], ['fail-dirty-build-id', /\+dirty/],
   ['fail-unknown-build-id', /\+unknown/], ['fail-multiple-build-ids', /exactly one build id/],
   ['fail-meta-missing', /exactly one <meta name="build-id">, found 0/], ['fail-meta-duplicate', /exactly one <meta name="build-id">, found 2/],
   ['fail-data-attr-missing', /exactly one data-build-id attribute, found 0/], ['fail-data-attr-duplicate', /exactly one data-build-id attribute, found 2/],
-  ['fail-meta-mismatch', /<meta name="build-id"> content "m3-rc1-pre\+def5678" != script build id/], ['fail-data-attr-mismatch', /data-build-id "m3-rc1-pre\+def5678" != script/],
+  ['fail-meta-mismatch', /<meta name="build-id"> content "m4\.1\+def5678" != script build id/], ['fail-data-attr-mismatch', /data-build-id "m4\.1\+def5678" != script/],
   ['fail-url-dot-data', /unresolved .*url\(\) \.data:/], ['fail-relative-font-url', /unresolved .*url\(\) \.\.\/fonts\/fredoka/],
   ['fail-relative-asset-href', /unresolved .*href \.\/fonts\/nunito/], ['fail-js-asset-path', /unresolved .*js asset path \.\/assets\/icon-egg\.svg/],
   ['fail-regex-in-key', /unparsed key/],
@@ -40,7 +40,7 @@ it.each([
 ])('%s fails', (n, msg) => { const r = run(n); expect(r.status).toBe(1); expect(r.stderr).toMatch(msg); });
 const dist = (files: Record<string, string>) => { const d = mkdtempSync(join(tmpdir(), 'rbd-')); mkdirSync(join(d, 'assets'));
   for (const [f, s] of Object.entries(files)) writeFileSync(join(d, f), s); return d; };
-const okJs = { 'assets/i.js': 'const B="m3-rc1-pre+abc1234";' };
+const okJs = { 'assets/i.js': 'const B="m4.1+abc1234";' };
 it('dist mode: CSS url()/@import, .map files and a missing index.html fail', () => {
   const html = { 'index.html': '<!doctype html><script type="module" src="/assets/i.js"></script>' };
   expect(exec(dist({ ...okJs, ...html, 'assets/i.css': 'a{color:red}' })).status).toBe(0);
@@ -108,4 +108,8 @@ it('L-3: comments inside a bracket key do not end it early', () => {
   expect(keys('window[k /* ] */]=1')).toEqual(['[computed k /* ] */]']);
   expect(keys('window["eggfarmExportTelemetry" // c ]\n]=1')).toHaveLength(1); // commented const key: flagged (fail closed)
   expect(keys('window[k // ]')).toEqual(['[unparsed key]']);
+});
+it('M41-10: single file and --build-id must carry the release prefix m4.1 (BUILD_PREFIX)', () => {
+  const r = run('pass', '--build-id', 'm3-rc1-pre+abc1234'); expect(r.status).toBe(1); expect(r.stderr).toMatch(/--build-id m3-rc1-pre\+abc1234 does not carry the release prefix m4\.1/);
+  expect(run('pass', '--build-id', 'm4.1+abc1234').status).toBe(0);
 });
