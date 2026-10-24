@@ -801,6 +801,45 @@ sections.sceneGuard = async () => {
   await ctx.close();
 };
 
+// ---------- HoQA m-RC1-1: the explainer (refund line) entry animation must never put the card over a visible Buy. 375x667, Upgrades >
+// Farm, refund card, scrollTop 150..260 (step 10, incl. 200 = the QA repro, data-place band). Every keyframe sample: the card's expin
+// animation is paused and stepped through currentTime 0..200 ms every 2 ms (plus the settled frame); the card rect must not intersect
+// any Buy rect clipped to the sheet body. ----------
+sections.mrc1 = async () => {
+  const W = 375, H = 667;
+  const { ctx, page, errors } = await open({ w: W, h: H, touch: true, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, seenSlots: 10, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+  await page.evaluate(() => { document.getElementById('modal-layer')?.classList.remove('open'); document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); const g = window.eggfarm;
+    g.state = { ...g.state, farmLevel: 3, hensLevel: 2, eggValueLevel: 2, collectionLevel: 1, coinsCents: 5e7, seenTracksExplainer: true, customers: [], nextCustomerInS: 1e9 }; window.eggfarmUi.render(); });
+  await page.locator('[data-nav=upgrades]').click(); await page.waitForTimeout(400); await page.locator('[data-tab=farm]').click(); await page.waitForTimeout(400);
+  const rows = [];
+  for (let s = 150; s <= 260; s += 10) {
+    await page.evaluate(s => { document.querySelector('#p-upgrades .body').scrollTop = s; }, s);
+    await page.evaluate(() => new Promise(r => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(r)), 40)));
+    rows.push(await page.evaluate(async s => {
+      document.querySelectorAll('.tracks-exp,.tracks-exp-out,.exp-pop,.exp-coin').forEach(e => e.remove());
+      const g = window.eggfarm; g.migrationRefundCents = 123450; g.state = { ...g.state, seenTracksExplainer: false }; g.onTracksCommitted();
+      const c = document.querySelector('.tracks-exp'); if (!c) return { s, card: false };
+      const anims = c.getAnimations(); anims.forEach(a => a.pause());
+      const body = document.querySelector('#p-upgrades .body').getBoundingClientRect();
+      const buys = () => [...document.querySelectorAll('#p-upgrades .btn.buy')].map(b => { const r = b.getBoundingClientRect(); return { row: b.closest('.up')?.querySelector('h3')?.textContent, l: r.left, r: r.right, t: Math.max(r.top, body.top, 0), b: Math.min(r.bottom, body.bottom, innerHeight) }; }).filter(x => x.b > x.t);
+      let worst = { px: -Infinity }, samples = 0, maxScale = 0;
+      const sample = t => { const r = c.getBoundingClientRect(), painted = c.dataset.place !== 'none' && getComputedStyle(c).visibility !== 'hidden'; samples++;
+        const m = /matrix\(([^,]+)/.exec(getComputedStyle(c).transform); if (m) maxScale = Math.max(maxScale, +m[1]);
+        if (!painted) return; for (const b of buys()) if (r.left < b.r && b.l < r.right) { const px = Math.min(r.bottom, b.b) - Math.max(r.top, b.t); if (px > worst.px) worst = { px: +px.toFixed(3), t, row: b.row, card: [+r.top.toFixed(3), +r.bottom.toFixed(3)], buy: [+b.t.toFixed(3), +b.b.toFixed(3)] }; } };
+      for (let t = 0; t <= 200; t += 2) { anims.forEach(a => { a.currentTime = t; }); sample(t); }
+      anims.forEach(a => a.finish()); sample('settled');
+      return { s, card: true, place: c.dataset.place, anims: anims.map(a => a.animationName), samples, maxScale: +maxScale.toFixed(4), worst };
+    }, s));
+  }
+  console.log(`MRC1 [${ENGINE}] ${JSON.stringify(rows.map(r => [r.s, r.place, r.maxScale, r.worst?.px]))}`);
+  const s200 = rows.find(r => r.s === 200);
+  ok('HoQA m-RC1-1 375x667: QA repro state reached (scroll 200, refund card placed "band", expin sampled)', s200?.card && s200.place === 'band' && s200.anims.includes('expin') && s200.samples === 102, JSON.stringify(s200));
+  ok('HoQA m-RC1-1 375x667: the explainer card never overlaps a visible Buy at any expin keyframe sample (0..200 ms step 2 + settled), scroll 150..260', rows.every(r => !r.card || !(r.worst.px > 0)), JSON.stringify(rows.filter(r => r.worst?.px > 0)));
+  ok('HoQA m-RC1-1: expin has no scale overshoot (max scale <= 1)', rows.every(r => !r.card || r.maxScale <= 1 + 1e-6), JSON.stringify(rows.map(r => r.maxScale)));
+  ok('HoQA m-RC1-1: no page errors', errors.length === 0, errors.join('|').slice(0, 200));
+  await ctx.close();
+};
+
 // SECTIONS
 // ---------- Major P3: Collection card 'Limited by coop' must not overlap 'Need $X more' (320/360/375/390, still shown at 1280) ----------
 sections.p3card = async () => {

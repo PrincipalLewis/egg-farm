@@ -521,7 +521,7 @@ html,body{overflow-x:hidden;max-width:100%}
 .ghosts .bubble.soldout{animation:fadeout 800ms ease forwards}
 .rm .ghosts .ghost img,.rm .ghosts .ghost.leave img{animation:none}
 /* M4-AC-EXP1 tracks explainer: non-blocking coach card (no scrim), top-centre under the top bar */
-.tracks-exp,.tracks-exp-out{position:fixed;z-index:27;left:50%;top:72px;transform:translateX(-50%);width:min(296px,calc(100vw - 32px));box-sizing:border-box;background:var(--c-white);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:var(--s-3);color:#3E2C23;box-shadow:var(--shadow);animation:expin .2s var(--ease-pop,ease-out)}
+.tracks-exp,.tracks-exp-out{position:fixed;z-index:27;left:50%;top:72px;transform:translateX(-50%);width:min(296px,calc(100vw - 32px));box-sizing:border-box;background:var(--c-white);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:var(--s-3);color:#3E2C23;box-shadow:var(--shadow);animation:expin .2s cubic-bezier(.34,1,.64,1)} /* HoQA m-RC1-1: --ease-pop's curve with y1 1.56 -> 1 (no scale overshoot past 1, which put the card <=0.27px over the Hens Buy at 375x667); same timing and start, no other change */
 .tracks-exp h2,.tracks-exp-out h2{margin:0 0 4px;font:700 18px var(--f-display,var(--f-body))}
 .tracks-exp p,.tracks-exp-out p{margin:0 0 8px;font:400 16px var(--f-body)}
 .tracks-exp-ok,.tracks-exp-out .btn{min-height:48px;min-width:48px;width:100%}
