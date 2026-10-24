@@ -730,7 +730,7 @@ sections.dash = async () => {
 // ---------- art-ux rc2-workers-copy §6 worker banners: one line at 360/390/1280, Nunito 700 >= 12px, 14px SVG icon, longest strings fit, role dropped first (review 23a3798 #2) ----------
 sections.bannerFit = async () => {
   const FCS = process.env.FC_SHOTS;
-  const LONG = [['Market Hand asleep: sales stopped', 'Asleep: sales stopped'], ['Market Hand unpaid: sales stopped', 'Unpaid: sales stopped'], ['Market Hand asleep: production stopped', 'Asleep: production stopped'], ['Market Hand unpaid: production stopped', 'Unpaid: production stopped'], ['Coop Hand unpaid: collecting stopped', 'Unpaid: collecting stopped'], ['Coop Hand asleep: collecting stopped', 'Asleep: collecting stopped']];
+  const LONG = [['Market Hand asleep: sales stopped', 'Asleep: sales stopped'], ['Market Hand unpaid: sales stopped', 'Unpaid: sales stopped'], ['Coop Hand unpaid: collecting stopped', 'Unpaid: collecting stopped'], ['Coop Hand asleep: collecting stopped', 'Asleep: collecting stopped']];
   for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
     const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 20, farmLevel: 30, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 3,
       workers: { market_hand: { energy: 50, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1, manageCdS: 0, coopFullS: 0 } });

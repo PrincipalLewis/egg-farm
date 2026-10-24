@@ -534,7 +534,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     setText(coinsEl, fmtMoney(s.coinsCents)); setText(basketEl, fmtCount(s.basket));
     // S2-8 / AC-R2 HUD net rate (<= 1 update/s, real incomePerSec from the live worker moods); first negative tick shakes the line (not under reduced motion)
     if (now() - rateAt >= 1000) { rateAt = now();
-      const v = headerRate(s, b); // ruling (a): real rate; shared 'stopped' threshold (salesStopped)
+      const v = headerRate(s, b); // ruling (a): real rate; aria ', sales stopped' only for a stalled Market Hand (HoE Oct 24)
       setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
       if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }

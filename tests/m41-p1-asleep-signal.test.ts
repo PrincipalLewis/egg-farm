@@ -45,7 +45,8 @@ describe('S2-8 / AC-R2 HUD rate (T6: text === aria money)', () => {
       expect(v.text.replace('⚠ ', '').replace('\u2212', '').replace('+', '')).toBe(`${v.money}/s`);
     }
     const pos = rateView(13461, { stopped: true }); expect(pos.sign).toBe('pos'); expect(pos.money).toBe('$134.61');
-    const z = rateView(0, { stopped: true }); expect(z.sign).toBe('neg'); expect(z.aria).toContain('production stopped');
+    const z = rateView(0, { stopped: true }); expect(z.sign).toBe('neg'); expect(z.aria).toBe('Net income $0.00 per second, sales stopped');
+    expect(rateView(-25, { stopped: true }).aria).toBe('Net income minus $0.25 per second, sales stopped'); expect(rateView(0).aria).toBe('Net income $0.00 per second');
   });
   it('M41-9 big rates use the shared short form (never "$1000.0M"); Qa+ spelled in aria', () => {
     expect(rateView(1e5).text).toBe('+$1K/s'); expect(rateView(123_456_789_00).text).toBe('+$123.5M/s'); expect(rateView(1e11).text).toBe('+$1B/s');
@@ -84,14 +85,34 @@ describe('PM Workers ruling (a) + art-ux §6 banners; review 23a3798 #3 #4 #5', 
     const u = S(ws({ coop_hand: { energy: 50, cdS: 0, unpaid: true } }));
     expect(workerBanner('coop_hand', 'unpaid', u, b)).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', short: 'Unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.', icon: 'icon-warning.svg' });
   });
-  it('one shared threshold: "stopped" only when gross sales round to $0.00; a negative net rate is not "stopped"', () => {
+  it('HoE Oct 24: each banner effect comes ONLY from its own role/state, never from the global salesStopped()', () => {
     const s = st({ farmLevel: 1, coinsCents: 0, workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 0, cdS: 0 } } });
-    expect(Math.round(grossSalesPerSec(s, noSales) * 100)).toBe(0); expect(salesStopped(s, noSales)).toBe(true);
-    expect(workerBanner('coop_hand', 'asleep', s, noSales)!.text).toBe('Coop Hand asleep: production stopped');
-    const hv = headerRate(s, noSales); expect(hv.sign).toBe('neg'); expect(hv.aria).toContain('production stopped'); // rate = -wages
-    const bw = { ...b, workers: { ...b.workers, market_hand: { ...b.workers.market_hand, wage_per_farm_per_min: 1e6 } } } as any; // wages > sales: negative, still producing
-    expect(salesStopped(s, bw)).toBe(false); const nv = headerRate(s, bw); expect(nv.sign).toBe('neg'); expect(nv.aria).not.toMatch(/stopped/);
-    expect(workerBanner('coop_hand', 'asleep', s, bw)!.text).toBe('Coop Hand asleep: collecting stopped');
+    expect(salesStopped(s, noSales)).toBe(true); // gross sales $0.00 (no customers) ...
+    expect(workerBanner('coop_hand', 'asleep', s, noSales)!.text).toBe('Coop Hand asleep: collecting stopped'); // ... but the Coop Hand keeps its own copy
+    const hv = headerRate(s, noSales); expect(hv.sign).toBe('neg'); expect(hv.aria).not.toMatch(/stopped/); // the Market Hand is working: no HUD reason
+    const h = st({ farmLevel: 30, coinsCents: 0, workers: { market_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1 });
+    expect(salesStopped(h, b)).toBe(true);
+    expect(workerBanner('hawker', 'asleep', h, b)!.text).toBe('Hawker asleep: sales slowed');
+    expect(workerBanner('grader', 'asleep', h, b)!.text).toMatch(/^Grader asleep: bonus down to \d+%$/);
+    for (const x of workersHtml(h, b).match(/<div class="wk-banner[^]*?<\/div>/g) ?? []) expect(x).not.toMatch(/production stopped|Production is stopped/);
+  });
+  it('Market Hand asleep + Coop Hand unpaid: each banner its own copy; HUD aria ", sales stopped"', () => {
+    const s = S({ market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 50, cdS: 0, unpaid: true } });
+    expect(workerBanner('market_hand', 'asleep', s, b)).toMatchObject({ text: 'Market Hand asleep: sales stopped', aria: 'Market Hand is asleep. Auto-sales have stopped.' });
+    expect(workerBanner('coop_hand', 'unpaid', s, b)).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.' });
+    const html = workersHtml(s, b);
+    expect(html).toContain('data-full="Market Hand asleep: sales stopped"'); expect(html).toContain('data-full="Coop Hand unpaid: collecting stopped"');
+    const v = headerRate(s, b); expect(v.sign).toBe('neg'); expect(v.aria).toMatch(/^Net income (minus \$[\d.,]+ |\$0\.00 )per second, sales stopped$/);
+    expect(headerRateText(v)).toMatch(/^⚠ ▼ /);
+    const u = S({ market_hand: { energy: 60, cdS: 0, unpaid: true }, coop_hand: { energy: 90, cdS: 0 } }); // Market Hand unpaid alone
+    expect(headerRate(u, b).aria).toMatch(/, sales stopped$/);
+  });
+  it('only the Coop Hand off (Market Hand working): no "sales stopped" anywhere; the rate stays the real figure', () => {
+    for (const ch of [{ energy: 0, cdS: 0 }, { energy: 50, cdS: 0, unpaid: true }]) {
+      const s = S({ market_hand: { energy: 100, cdS: 0 }, coop_hand: ch });
+      const v = headerRate(s, b); expect(v.aria).not.toMatch(/stopped/); expect(v.sign).toBe('pos');
+      const html = workersHtml(s, b); expect(html).not.toMatch(/sales stopped|production stopped/); expect(html).toMatch(/Coop Hand (asleep|unpaid): collecting stopped/);
+    }
   });
   it('review #8: copy numbers come from balance', () => {
     const b2 = { ...b, workers: { ...b.workers, energy: { ...b.workers.energy, manage_prompt_threshold: 0.5 }, grader: { ...b.workers.grader, asleep_bonus_share: 0.2 } } } as any;

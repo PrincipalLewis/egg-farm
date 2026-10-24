@@ -3,7 +3,6 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
-import { salesStopped } from '../econ/income';
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
@@ -61,7 +60,7 @@ export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) =>
   !needsPrompt(w, b) ? `Rested, refill below ${Math.round(b.workers.energy.manage_prompt_threshold * 100)}%` : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
 /** art-ux/rc2-workers-copy.md §6 (signed off 07:19): role first, colon, effect; 14px SVG icon (moon = asleep, warning = unpaid), no emoji.
  *  Nunito 700 12px, one line; `short` drops the role name (360 fallback); aria always has the role.
- *  "production stopped" only at a true zero (salesStopped, shared with the header). */
+ *  The effect comes ONLY from the role itself and its own state (HoE ruling, Oct 24): never from the global salesStopped(). */
 export const BANNER_ROLE: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Grader' };
 /** The ONE place the banner icons are named (Art ruling (A), Oct 24: icon-moon.svg / icon-warning.svg byte-identical to rc1 8a49d35,
  *  14px, aria-hidden; not overlay-asleep.svg, which is the worker-card Zzz overlay). */
@@ -77,7 +76,6 @@ export function workerBanner(id: WorkerId, m: string | null, s: GameState, b: Ba
   const role = BANNER_ROLE[id], st = m, pct = Math.round(b.workers.grader.asleep_bonus_share * 100);
   const [eff, effAria] = id === 'grader' ? [`bonus down to ${pct}%`, `Bonus down to ${pct} percent.`]
     : id === 'market_hand' && copy === 'stopped' ? ['sales stopped', 'Auto-sales have stopped.'] // art-ux/rc2-workers-copy.md §6 (amended 16:52)
-    : salesStopped(s, b) ? ['production stopped', 'Production is stopped.']
     : id === 'coop_hand' ? ['collecting stopped', 'Auto-collecting has stopped.'] // rc1-asleep-state-spec v1.0.6 / art-ux §6 (amended 16:57): auto-collect is 0 while Asleep/Unpaid
     : ['sales slowed', 'Sales are slowed.'];
   const short = `${st[0].toUpperCase()}${st.slice(1)}: ${eff}`;

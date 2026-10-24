@@ -69,6 +69,6 @@ describe('other roles unchanged by D-HOP-14 / -17', () => {
   });
   it('the "slowed" switch value still gives the rc1 rule for the Market Hand (switch is the only difference)', () => {
     const s = st({ market_hand: MH_ASLEEP });
-    expect(workerBanner('market_hand', 'asleep', s, b, 'slowed')!.text).toBe('Market Hand asleep: production stopped');
+    expect(workerBanner('market_hand', 'asleep', s, b, 'slowed')!.text).toBe('Market Hand asleep: sales slowed'); // own-state rule: never 'production stopped'
   });
 });
