@@ -681,7 +681,7 @@ sections.s28rate = async () => {
   ok('PM Workers ruling (a) real path: asleep Coop Hand -> header shows the real positive rate, not red, no ⚠ / "stopped"', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(ch.text) && ch.sign === 'pos' && ch.color !== 'rgb(184, 59, 55)' && !/stopped/.test(ch.aria ?? ''), JSON.stringify(ch));
   // AC-R1m + sales-stopped-spec §4.2 (patch 3/4): an asleep Market Hand sells nothing -> real rate <= 0, red ⚠ ▼, aria "stopped".
   for (const mh of [{ energy: 0, cdS: 5 }, { energy: 60, cdS: 5, unpaid: true }]) {
-    await page.evaluate(mh => { const g = window.eggfarm; g.state = { ...g.state, workers: { market_hand: mh } }; }, mh);
+    await page.evaluate(mh => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: mh.unpaid ? 0 : g.state.coinsCents, workers: { market_hand: mh } }; }, mh); // coins 0: an Unpaid worker auto-resumes when it can be paid
     await page.waitForTimeout(1300);
     const r = await read();
     ok(`AC-R1m / §4.2 real path: Market Hand ${mh.unpaid ? 'unpaid' : 'asleep'} -> HUD rate <= 0 in red (⚠ ▼), aria "stopped"`, /^⚠ ▼ (\u2212)?\$[\d.,]+[A-Za-z]*\/s$/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && /stopped$/.test(r.aria ?? ''), JSON.stringify(r));
@@ -759,6 +759,46 @@ sections.bannerFit = async () => {
     if (FCS && (w === 360 || w === 1280)) { mkdirSync(FCS, { recursive: true }); await page.locator('.wk-banner').first().scrollIntoViewIfNeeded(); await page.screenshot({ path: `${FCS}/banners-${w}-${ENGINE}.png` }); }
     await ctx.close();
   }
+};
+
+// ---------- HoQA (via HoE): #scene counts any click as a Collect; real touch taps at 360 on the asleep/unpaid banners, the asleep badges and
+// the Refill controls must credit no Collect (no 'collect' dispatch, basket unchanged) and still do their own action. ----------
+sections.sceneGuard = async () => {
+  const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0 /* Unpaid Coop Hand stays Unpaid: no auto-collect into the basket */, seenTracksExplainer: true, coop: 40, basket: 7, collectionLevel: 10, farmLevel: 20, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 3,
+    workers: { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 50, cdS: 0, unpaid: true }, hawker: { energy: 20, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1, manageCdS: 0, coopFullS: 0 } });
+  const { ctx, page, errors } = await open({ w: 360, h: 800, touch: true, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+  await page.waitForTimeout(400);
+  await page.evaluate(() => { const g = window.eggfarm; g.__acts = []; const d = g.dispatch.bind(g); g.dispatch = a => { g.__acts.push(a.type); return d(a); }; });
+  const snap = () => page.evaluate(() => ({ acts: window.eggfarm.__acts.slice(), basket: window.eggfarm.state.basket, hawker: window.eggfarm.state.workers.hawker?.energy }));
+  const reset = () => page.evaluate(() => { window.eggfarm.__acts.length = 0; });
+  const tapEl = async sel => { const loc = typeof sel === 'string' ? page.locator(sel).first() : sel; sel = String(sel); const bb = await loc.boundingBox(); if (!bb) return { sel, missing: true };
+    const x = bb.x + bb.width / 2, y = bb.y + bb.height / 2;
+    const hit = await page.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return { tag: e ? `${e.tagName.toLowerCase()}.${e.className}` : null, inScene: !!e?.closest('#scene') }; }, [x, y]);
+    await page.touchscreen.tap(x, y); await page.waitForTimeout(250); return { sel, x: Math.round(x), y: Math.round(y), ...hit }; };
+  // control: a real tap on #scene is a Collect (proves the spy)
+  const c = await tapEl('#scene'); const c1 = await snap();
+  ok('sceneGuard 360 control: a touch tap on #scene dispatches collect', c1.acts.includes('collect'), JSON.stringify({ c, c1 }));
+  await reset(); let b0 = (await snap()).basket;
+  const t1 = await tapEl('[data-nav=upgrades] .asleep-badge'); const s1 = await snap(), up = await page.evaluate(() => !document.querySelector('#p-upgrades').hidden);
+  ok('sceneGuard 360: tap on the Upgrades nav asleep badge -> no Collect, basket unchanged, opens Upgrades', !t1.missing && !t1.inScene && !s1.acts.includes('collect') && s1.basket === b0 && up, JSON.stringify({ t1, s1, up }));
+  const t2 = await tapEl('.tabs [data-tab=workers] .asleep-badge'); await page.waitForSelector('.wk-banner', { timeout: 3000 }).catch(() => {}); const s2 = await snap();
+  ok('sceneGuard 360: tap on the Workers tab asleep badge -> no Collect, basket unchanged, Workers tab shown', !t2.missing && !t2.inScene && !s2.acts.includes('collect') && s2.basket === b0 && (await page.locator('.wk-banner').count()) >= 3, JSON.stringify({ t2, s2 }));
+  const nb = await page.locator('.wk-banner').count(), bt = [];
+  for (let i = 0; i < nb; i++) { await page.locator('.wk-banner').nth(i).scrollIntoViewIfNeeded(); bt.push(await tapEl(page.locator('.wk-banner').nth(i))); }
+  const s3 = await snap();
+  ok(`sceneGuard 360: taps on all ${nb} asleep/unpaid banners -> no Collect, basket unchanged`, nb >= 3 && bt.every(x => !x.missing && !x.inScene) && !s3.acts.includes('collect') && s3.basket === b0, JSON.stringify({ bt, s3 }));
+  const t4 = await tapEl('#uRow .refill-wrap .manage-all'); const s4 = await snap();
+  ok('sceneGuard 360: tap on the Workers-tab Refill -> refills (manageAll, Hawker 100), no Collect, basket unchanged', !t4.missing && !t4.inScene && s4.acts.includes('manageAll') && s4.hawker >= 99 && !s4.acts.includes('collect') && s4.basket === b0, JSON.stringify({ t4, s4 }));
+  // nav Refill: reopen the farm view, reset the cooldown and tire the Hawker again
+  await page.locator('.sheet:not([hidden]) .close').click(); await page.waitForTimeout(250);
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, manageCdS: 0, workers: { ...g.state.workers, hawker: { energy: 20, cdS: 0 } } }; g.__acts.length = 0; });
+  await page.waitForTimeout(400); b0 = (await snap()).basket;
+  const t5 = await tapEl('nav [data-act=manageAll]'); const s5 = await snap();
+  ok('sceneGuard 360: tap on the nav Refill -> refills (manageAll, Hawker 100), no Collect, basket unchanged', !t5.missing && !t5.inScene && s5.acts.includes('manageAll') && s5.hawker >= 99 && !s5.acts.includes('collect') && s5.basket === b0, JSON.stringify({ t5, s5 }));
+  const t6 = await tapEl('nav [data-act=manageAll] .nav-lbl'); const s6 = await snap(); // during cooldown
+  ok('sceneGuard 360: tap on the nav Refill label during cooldown -> no Collect, basket unchanged', !t6.missing && !t6.inScene && !s6.acts.includes('collect') && s6.basket === b0, JSON.stringify({ t6, s6 }));
+  ok('sceneGuard 360: no page errors', errors.length === 0, errors.join('|').slice(0, 200));
+  await ctx.close();
 };
 
 // SECTIONS
