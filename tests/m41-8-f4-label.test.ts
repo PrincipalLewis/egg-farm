@@ -146,7 +146,10 @@ describe('F4-12 base = the WORKING model (n4): states with hired Tired / Asleep 
     const s = st({ farmLevel: F, hensLevel: H, eggValueLevel: F, collectionLevel: F, coinsCents: 1e13, workers: ws(e), graderTier: 1 });
     expect(incomePerSec(s, on)).toBeLessThan(incomePerSec(s, on, { assumeWorking: true })); // the bases really differ here
     const gain = optionGain(s, on, key)!.gain;
-    expect(Math.floor(100 * gain / incomePerSec(s, on) + 1e-9)).toBe(live);
+    // M4.1 patch 1 (3/4), sales-stopped-spec §4.2: with the Market Hand asleep (energy 0) the LIVE base is now <= 0 (no sales), so a
+    // live-base % has no value at all; the 'live' column (8 / 11) is the pre-§4.2 live figure. The planner X (want) is unchanged.
+    if (e === 0) expect(incomePerSec(s, on)).toBeLessThanOrEqual(0);
+    else expect(Math.floor(100 * gain / incomePerSec(s, on) + 1e-9)).toBe(live);
     expect(goalLabelSpec(key, s, on, true).suffix).toEqual({ kind: 'pct', x: want });
     expect(vis(selectGoal(s, on, 100, key, key).label)).toContain(`+${want}% income`);
   });

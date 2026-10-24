@@ -36,7 +36,17 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): 
   return tap * (1 + (every_s / tired_every_s) * 0.5);
 }
 
+/** sales-stopped-spec §4.2 (D-HOP-2026-10-24-13/-14): live mode only. A hired Market Hand that is Asleep or Unpaid sells
+ *  nothing, so the eggs-sold term is 0. Unchanged: not hired, Working, Tired, or Paused (the player chose to sell by hand;
+ *  `paused` is the m5-worker-pause flag and reads false until that build ships). The planner path (`assumeWorking`:
+ *  best-buy, goal-label %, ★ pick, bot) never reaches this branch. */
+export function marketHandStalled(s: GameState, b: Balance): boolean {
+  const w = s.workers.market_hand as (Workers['market_hand'] & { paused?: boolean }) | undefined;
+  return !!w && w.paused !== true && isOff(mood(w, b));
+}
+
 export function demandPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
+  if (!opts.assumeWorking && marketHandStalled(s, b)) return 0;
   const F = s.farmLevel;
   const [lo, hi] = demandRange(F, b);
   const ws = opts.assumeWorking ? workingClone(s.workers) : s.workers;

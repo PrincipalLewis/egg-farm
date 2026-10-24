@@ -679,6 +679,13 @@ sections.s28rate = async () => {
   await page.waitForTimeout(1300);
   const ch = await read();
   ok('PM Workers ruling (a) real path: asleep Coop Hand -> header shows the real positive rate, not red, no ⚠ / "stopped"', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(ch.text) && ch.sign === 'pos' && ch.color !== 'rgb(184, 59, 55)' && !/stopped/.test(ch.aria ?? ''), JSON.stringify(ch));
+  // AC-R1m + sales-stopped-spec §4.2 (patch 3/4): an asleep Market Hand sells nothing -> real rate <= 0, red ⚠ ▼, aria "stopped".
+  for (const mh of [{ energy: 0, cdS: 5 }, { energy: 60, cdS: 5, unpaid: true }]) {
+    await page.evaluate(mh => { const g = window.eggfarm; g.state = { ...g.state, workers: { market_hand: mh } }; }, mh);
+    await page.waitForTimeout(1300);
+    const r = await read();
+    ok(`AC-R1m / §4.2 real path: Market Hand ${mh.unpaid ? 'unpaid' : 'asleep'} -> HUD rate <= 0 in red (⚠ ▼), aria "stopped"`, /^⚠ ▼ (\u2212)?\$[\d.,]+[A-Za-z]*\/s$/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && /stopped$/.test(r.aria ?? ''), JSON.stringify(r));
+  }
   if (shot) await page.screenshot({ path: `${SHOTS}/m41p1-s2-8-rate-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
   await ctx.close();
 };
