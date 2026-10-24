@@ -1,5 +1,5 @@
 // M4.1 patch 1 Art shots (Art ruling A; D-HOP-2026-10-24-14 / -17 final copy): asleep/unpaid banner (incl. role-dropped variant),
-// asleep badges, Refill label, HUD rate, HUD rate with M41-9 big numbers, HUD rate during the refund pop at the coin pill.
+// Coop Hand asleep/unpaid + Market Hand asleep with Coop Hand unpaid (D-HOP-29, HoE own-state rule), asleep badges, Refill label, HUD rate, HUD rate with M41-9 big numbers, HUD rate during the refund pop at the coin pill.
 // 360x800 / 390x844 / 1280x800. Usage: npm run build:qa && node scripts/m41-p1-shots.mjs [chromium|firefox|webkit]
 //   Serves THIS checkout's dist-qa (serveForRun: build-id must be HEAD, clean). Writes /workspace/wt-ui-shots/m41-p1-<sha7>/
 //   (<engine>-<view>-<w>.png) + manifest.json (label, state, viewport, engine, file, sha256, measured text). Run inside the
@@ -42,25 +42,35 @@ const hudClip = async (page, w) => { const bb = await page.locator('header.hud')
 const rateInfo = page => page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { rate: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, coins: document.querySelector('#coins').textContent }; });
 const MH_ASLEEP = { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 30, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
 const MH_UNPAID = { market_hand: { energy: 60, cdS: 0, unpaid: true }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 30, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
+const CH_ASLEEP = { market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 90, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
+const CH_UNPAID = { market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 60, cdS: 0, unpaid: true }, hawker: { energy: 90, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
+const MH_ASLEEP_CH_UNPAID = { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 60, cdS: 0, unpaid: true }, hawker: { energy: 90, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
 for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
   // 1) Market Hand asleep / unpaid banners (final copy), Workers tab, full viewport
-  for (const [view, ws, lab] of [['banner-mh-asleep', MH_ASLEEP, 'Market Hand asleep banner: "Market Hand asleep: sales stopped"'], ['banner-mh-unpaid', MH_UNPAID, 'Market Hand unpaid banner: "Market Hand unpaid: sales stopped"']]) {
-    const { ctx, page, errors } = await open(w, h, { workers: ws, coinsCents: view.endsWith('asleep') ? 1e9 : 0 }); // Unpaid needs 0 coins (auto-resume)
+  // + Coop Hand copy (rc1-b1-coop-full v1.0.6, D-HOP-29) and the HoE own-state rule (Market Hand asleep + Coop Hand unpaid)
+  for (const [view, ws, lab, wants] of [['banner-mh-asleep', MH_ASLEEP, 'Market Hand asleep banner: "Market Hand asleep: sales stopped"', ['Market Hand asleep: sales stopped']],
+    ['banner-mh-unpaid', MH_UNPAID, 'Market Hand unpaid banner: "Market Hand unpaid: sales stopped"', ['Market Hand unpaid: sales stopped']],
+    ['banner-ch-asleep', CH_ASLEEP, 'Coop Hand asleep banner: "Coop Hand asleep: collecting stopped"', ['Coop Hand asleep: collecting stopped']],
+    ['banner-ch-unpaid', CH_UNPAID, 'Coop Hand unpaid banner: "Coop Hand unpaid: collecting stopped"', ['Coop Hand unpaid: collecting stopped']],
+    ['banner-mh-asleep-ch-unpaid', MH_ASLEEP_CH_UNPAID, 'Market Hand asleep + Coop Hand unpaid: each banner its own copy (HoE own-state rule)', ['Market Hand asleep: sales stopped', 'Coop Hand unpaid: collecting stopped']]]) {
+    const { ctx, page, errors } = await open(w, h, { workers: ws, coinsCents: /unpaid/.test(view) ? 0 : 1e9 }); // Unpaid needs 0 coins (auto-resume)
     await toWorkers(page); await page.locator('.wk-banner').first().scrollIntoViewIfNeeded(); await page.waitForTimeout(200);
-    const bi = await bannerInfo(page); const mh = bi.find(x => /^Market Hand/.test(x.aria ?? ''));
-    const want = view.endsWith('asleep') ? 'Market Hand asleep: sales stopped' : 'Market Hand unpaid: sales stopped';
-    if (!mh || mh.full !== want || !mh.fits || errors.length) { fails++; console.error(`FAIL ${view} ${w}`, JSON.stringify({ mh, errors })); }
-    await shot(page, view, w, `${lab}${mh?.dropped ? ' - role dropped naturally' : ''}`, view, { banner: mh });
+    const bi = await bannerInfo(page); const role = wants[0].replace(/ (asleep|unpaid):.*/, ''); const mh = bi.find(x => x.aria?.startsWith(role));
+    const got = bi.map(x => x.full);
+    if (!mh || got.join('|') !== wants.join('|') || bi.some(x => !x.fits) || errors.length) { fails++; console.error(`FAIL ${view} ${w}`, JSON.stringify({ bi, errors })); }
+    if (/mh/.test(view)) { const r = await rateInfo(page); if (!/, sales stopped$/.test(r.aria ?? '')) { fails++; console.error(`FAIL ${view} ${w} HUD aria`, JSON.stringify(r)); } }
+    if (/^banner-ch/.test(view)) { const r = await rateInfo(page); if (/stopped/.test(r.aria ?? '')) { fails++; console.error(`FAIL ${view} ${w} HUD aria`, JSON.stringify(r)); } }
+    await shot(page, view, w, `${lab}${mh?.dropped ? ' - role dropped naturally' : ''}`, view, { banner: mh, banners: bi, rate: await rateInfo(page), captions: await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('[id^=cap-]')].map(e => [e.id, e.textContent]))) });
     // 2) role-dropped variant: natural if it triggered, else the app's own fit on a forced narrow (230px) banner
-    if (view === 'banner-mh-asleep') {
-      const forced = !mh?.dropped;
-      const r = await page.evaluate(forced => { const bn = [...document.querySelectorAll('.wk-banner')].find(b => /^Market Hand/.test(b.querySelector('.sr')?.textContent ?? ''));
+    if (['banner-mh-asleep', 'banner-ch-asleep', 'banner-ch-unpaid'].includes(view)) {
+      const forced = !mh?.dropped, wantShort = wants[0].slice(role.length + 1).replace(/^./, c => c.toUpperCase());
+      const r = await page.evaluate(([forced, role]) => { const bn = [...document.querySelectorAll('.wk-banner')].find(b => (b.querySelector('.sr')?.textContent ?? '').startsWith(role));
         if (forced) { bn.style.width = '230px'; bn.style.maxWidth = '230px'; window.eggfarmQaFitBanners(); }
-        const t = bn.querySelector('.bt'); bn.scrollIntoView({ block: 'center' }); return { text: t.textContent, aria: bn.querySelector('.sr').textContent, fits: t.scrollWidth <= t.clientWidth + 0.5 }; }, forced);
+        const t = bn.querySelector('.bt'); bn.scrollIntoView({ block: 'center' }); return { text: t.textContent, aria: bn.querySelector('.sr').textContent, fits: t.scrollWidth <= t.clientWidth + 0.5 }; }, [forced, role]);
       await page.waitForTimeout(150);
-      if (r.text !== 'Asleep: sales stopped' || !r.fits) { fails++; console.error(`FAIL role-drop ${w}`, JSON.stringify(r)); }
-      const bb = await page.locator('.wk-banner').first().evaluate(() => 0).then(() => page.evaluate(() => { const bn = [...document.querySelectorAll('.wk-banner')].find(b => /^Market Hand/.test(b.querySelector('.sr')?.textContent ?? '')); const r = bn.closest('.wk').getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; }));
-      await shot(page, 'banner-mh-role-dropped', w, `Role-dropped variant "Asleep: sales stopped" (${forced ? 'forced 230px banner, app fitBanners; full string fits naturally at this width' : 'natural'}), aria keeps the role`, view, { ...r, forced },
+      if (r.text !== wantShort || !r.fits) { fails++; console.error(`FAIL role-drop ${w}`, JSON.stringify(r)); }
+      const bb = await page.locator('.wk-banner').first().evaluate(() => 0).then(() => page.evaluate(role => { const bn = [...document.querySelectorAll('.wk-banner')].find(b => (b.querySelector('.sr')?.textContent ?? '').startsWith(role)); const r = bn.closest('.wk').getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; }, role));
+      await shot(page, view === 'banner-mh-asleep' ? 'banner-mh-role-dropped' : `${view}-role-dropped`, w, `Role-dropped variant "${wantShort}" (${forced ? 'forced 230px banner, app fitBanners; full string fits naturally at this width' : 'natural'}), aria keeps the role`, view, { ...r, forced },
         { x: Math.max(0, bb.x - 8), y: Math.max(0, bb.y - 8), width: Math.min(w - Math.max(0, bb.x - 8), bb.width + 16), height: bb.height + 16 });
     }
     await ctx.close();
