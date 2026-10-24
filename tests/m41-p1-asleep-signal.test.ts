@@ -78,11 +78,11 @@ describe('PM Workers ruling (a) + art-ux §6 banners; review 23a3798 #3 #4 #5', 
     expect(workerBanner('grader', 'asleep', s, b)).toMatchObject({ text: `Grader asleep: bonus down to ${pct}%`, aria: `Grader is asleep. Bonus down to ${pct} percent.` });
     const html = workersHtml(s, b), bans = html.match(/<div class="wk-banner[^]*?<\/div>/g) ?? []; expect(bans.length).toBe(2); for (const x of bans) expect(x).not.toMatch(/production stopped|💤|⚠/); expect(html).toContain('icon-moon.svg');
   });
-  it('§6 copy: Coop Hand collecting; unpaid uses the same rule with the warning icon', () => {
+  it('§6 copy (spec v1.0.6, AC-R1c): Coop Hand "collecting stopped"; unpaid uses its own row with the warning icon', () => {
     const s = S(ws({ coop_hand: { energy: 0, cdS: 0 } })); expect(salesStopped(s, b)).toBe(false);
-    expect(workerBanner('coop_hand', 'asleep', s, b)!.text).toBe('Coop Hand asleep: collecting slowed');
+    expect(workerBanner('coop_hand', 'asleep', s, b)).toMatchObject({ text: 'Coop Hand asleep: collecting stopped', short: 'Asleep: collecting stopped', aria: 'Coop Hand is asleep. Auto-collecting has stopped.', icon: 'icon-moon.svg' });
     const u = S(ws({ coop_hand: { energy: 50, cdS: 0, unpaid: true } }));
-    expect(workerBanner('coop_hand', 'unpaid', u, b)).toMatchObject({ text: 'Coop Hand unpaid: collecting slowed', aria: 'Coop Hand is unpaid. Collecting is slowed.', icon: 'icon-warning.svg' });
+    expect(workerBanner('coop_hand', 'unpaid', u, b)).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', short: 'Unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.', icon: 'icon-warning.svg' });
   });
   it('one shared threshold: "stopped" only when gross sales round to $0.00; a negative net rate is not "stopped"', () => {
     const s = st({ farmLevel: 1, coinsCents: 0, workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 0, cdS: 0 } } });
@@ -91,7 +91,7 @@ describe('PM Workers ruling (a) + art-ux §6 banners; review 23a3798 #3 #4 #5', 
     const hv = headerRate(s, noSales); expect(hv.sign).toBe('neg'); expect(hv.aria).toContain('production stopped'); // rate = -wages
     const bw = { ...b, workers: { ...b.workers, market_hand: { ...b.workers.market_hand, wage_per_farm_per_min: 1e6 } } } as any; // wages > sales: negative, still producing
     expect(salesStopped(s, bw)).toBe(false); const nv = headerRate(s, bw); expect(nv.sign).toBe('neg'); expect(nv.aria).not.toMatch(/stopped/);
-    expect(workerBanner('coop_hand', 'asleep', s, bw)!.text).toBe('Coop Hand asleep: collecting slowed');
+    expect(workerBanner('coop_hand', 'asleep', s, bw)!.text).toBe('Coop Hand asleep: collecting stopped');
   });
   it('review #8: copy numbers come from balance', () => {
     const b2 = { ...b, workers: { ...b.workers, energy: { ...b.workers.energy, manage_prompt_threshold: 0.5 }, grader: { ...b.workers.grader, asleep_bonus_share: 0.2 } } } as any;
@@ -101,7 +101,7 @@ describe('PM Workers ruling (a) + art-ux §6 banners; review 23a3798 #3 #4 #5', 
   it('AC-R1 card: banner first, greyed body, Refill stays visible; aria carries the role; icon 14px aria-hidden', () => {
     const h = workersHtml(S(ws({ coop_hand: { energy: 0, cdS: 0 } })), b);
     expect(h).toMatch(/<div class="wk asleep is-off" data-w="coop_hand"><div class="wk-banner asleep" role="status"><img class="wb-ico" src="[^"]*icon-moon\.svg" width="14" height="14" alt="" aria-hidden="true">/);
-    expect(h).toContain('<span class="sr">Coop Hand is asleep. Collecting is slowed.</span>');
+    expect(h).toContain('<span class="sr">Coop Hand is asleep. Auto-collecting has stopped.</span>');
     expect(h).toMatch(/data-w="coop_hand"[^]*?<div class="wk-refill"><button class="btn secondary manage" aria-label="Refill Coop Hand"/);
     expect(workersHtml(S(ws({})), b)).not.toContain('wk-banner'); // AC-R5: cleared after Refill / resume
   });

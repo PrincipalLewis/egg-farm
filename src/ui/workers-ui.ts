@@ -78,7 +78,8 @@ export function workerBanner(id: WorkerId, m: string | null, s: GameState, b: Ba
   const [eff, effAria] = id === 'grader' ? [`bonus down to ${pct}%`, `Bonus down to ${pct} percent.`]
     : id === 'market_hand' && copy === 'stopped' ? ['sales stopped', 'Auto-sales have stopped.'] // art-ux/rc2-workers-copy.md §6 (amended 16:52)
     : salesStopped(s, b) ? ['production stopped', 'Production is stopped.']
-    : id === 'coop_hand' ? ['collecting slowed', 'Collecting is slowed.'] : ['sales slowed', 'Sales are slowed.'];
+    : id === 'coop_hand' ? ['collecting stopped', 'Auto-collecting has stopped.'] // rc1-asleep-state-spec v1.0.6 / art-ux §6 (amended 16:57): auto-collect is 0 while Asleep/Unpaid
+    : ['sales slowed', 'Sales are slowed.'];
   const short = `${st[0].toUpperCase()}${st.slice(1)}: ${eff}`;
   return { kind: m, text: `${role} ${st}: ${eff}`, short, aria: `${role} is ${st}. ${effAria}`, icon: BANNER_ICON[m] };
 }

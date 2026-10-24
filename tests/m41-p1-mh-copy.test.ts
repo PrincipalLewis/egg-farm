@@ -56,9 +56,12 @@ describe('other roles unchanged by D-HOP-14 / -17', () => {
     const u = st({ market_hand: { energy: 90, cdS: 0 }, hawker: { energy: 50, cdS: 0, unpaid: true } });
     expect(banner(u, 'hawker')).toMatchObject({ text: 'Hawker unpaid: sales slowed', aria: 'Hawker is unpaid. Sales are slowed.' });
   });
-  it('Coop Hand asleep with a working Market Hand: rc1 copy kept ("collecting slowed")', () => {
+  it('Coop Hand asleep / unpaid with a working Market Hand: spec v1.0.6 rows ("collecting stopped"), never "slowed"', () => {
     const s = st({ market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 0, cdS: 0 } });
-    expect(banner(s, 'coop_hand')).toMatchObject({ text: 'Coop Hand asleep: collecting slowed', aria: 'Coop Hand is asleep. Collecting is slowed.' });
+    expect(banner(s, 'coop_hand')).toMatchObject({ text: 'Coop Hand asleep: collecting stopped', aria: 'Coop Hand is asleep. Auto-collecting has stopped.', short: 'Asleep: collecting stopped' });
+    const u = st({ market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 50, cdS: 0, unpaid: true } });
+    expect(banner(u, 'coop_hand')).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.', short: 'Unpaid: collecting stopped' });
+    for (const x of [banner(s, 'coop_hand'), banner(u, 'coop_hand')]) expect(`${x.text} ${x.short} ${x.aria}`).not.toMatch(/slowed/);
   });
   it('Grader asleep: bonus string', () => {
     const s = st({ market_hand: { energy: 90, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, { graderTier: 1, farmLevel: 20 });
