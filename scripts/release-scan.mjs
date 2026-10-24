@@ -127,7 +127,8 @@ export function findExternalRefs(text) {
 }
 
 /** Build ids embedded in the bundle. */
-export const findBuildIds = js => [...new Set(js.match(/m\d+-rc\d[a-z0-9-]*\+(?:[0-9a-f]{7,40}|unknown)(?:\+dirty)?/g) ?? [])];
+/** Build ids: legacy `m<N>-rc<N>...` names (m3-rc0, m3-rc1-pre) and dotted release names (`m4.1`, M41-10). */
+export const findBuildIds = js => [...new Set(js.match(/(?:m\d+-rc\d[a-z0-9-]*|m\d+(?:\.\d+)+)\+(?:[0-9a-f]{7,40}|unknown)(?:\+dirty)?/g) ?? [])];
 
 /** Inline <script> bodies of a single-file html. Throws (fail closed) when the markup can't be split unambiguously. */
 export function extractScripts(html) {

@@ -34,11 +34,19 @@ const unknown = ids.filter(i => i.includes('+unknown')); if (unknown.length) fai
 const dirty = ids.filter(i => i.includes('+dirty'));
 if (dirty.length) { console.error(`check-release-build: build id ${dirty.join(', ')} - commit or stash your changes before a release build (git status --porcelain must be empty)`); process.exit(1); }
 console.log(`check-release-build: ${ids.join(', ')} ok`);
+// M41-10: the build id carries the release name. Every embedded id (and --build-id) must use the one release-prefix constant
+// BUILD_PREFIX in scripts/build-id.ts; the m3-rc0 tag build is the only legacy exception (its own HEAD check is below).
+const prefix = /BUILD_PREFIX\s*=\s*'([^']+)'/.exec(readFileSync(new URL('./build-id.ts', import.meta.url), 'utf8'))?.[1];
+if (!prefix) fail('cannot read BUILD_PREFIX from scripts/build-id.ts');
+const pre = id => id.slice(0, id.indexOf('+'));
+const offPrefix = ids.filter(i => pre(i) !== prefix && !i.startsWith('m3-rc0+'));
+if (offPrefix.length) fail(`build id ${offPrefix.join(', ')} does not carry the release prefix ${prefix} (scripts/build-id.ts BUILD_PREFIX)`);
+if (expectId && pre(expectId) !== prefix) fail(`--build-id ${expectId} does not carry the release prefix ${prefix} (scripts/build-id.ts BUILD_PREFIX)`);
+console.log(`check-release-build: release prefix ${prefix} ok`);
 if (single || expectId) {
   if (ids.length !== 1) fail(`expected exactly one build id, found ${ids.join(', ')}`);
   if (expectId) { if (ids[0] !== expectId) fail(`build id ${ids[0]} != expected ${expectId}`); }
   else {
-    const prefix = /BUILD_PREFIX\s*=\s*'([^']+)'/.exec(readFileSync(new URL('./build-id.ts', import.meta.url), 'utf8'))?.[1];
     const m = /^(.*)\+([0-9a-f]{7,40})$/.exec(ids[0]);
     if (!m || m[1] !== prefix || !head || !head.startsWith(m[2])) fail(`build id ${ids[0]} does not match ${prefix}+${head.slice(0, 7) || 'unknown HEAD'} (pass --build-id to check another commit)`);
   }

@@ -28,7 +28,7 @@ describe('M3-AC7 install_id + build', () => {
     expect(ss.build).toBe('m3-pt1+abcdef0'); expect(ss.install_id).toBe(s.getItem(INSTALL_ID_KEY)); expect(String(ss.install_id).length).toBeGreaterThan(8);
     g.save(); expect(s.getItem(SAVE_KEY)).not.toContain(String(ss.install_id));
   });
-  it('BUILD_ID is m3-rc1-pre+<short git hash>[+dirty] matching HEAD and the tree state (Vite define)', async () => {
+  it('BUILD_ID is m4.1+<short git hash>[+dirty] matching HEAD and the tree state (Vite define)', async () => {
     const { BUILD_ID, BUILD_ID_RE } = await import('../src/build-id');
     const { gitBuildId } = await import('../scripts/build-id');
     expect(BUILD_ID).toMatch(BUILD_ID_RE);
@@ -36,9 +36,9 @@ describe('M3-AC7 install_id + build', () => {
   });
   it('+dirty only for uncommitted changes', async () => {
     const { formatBuildId } = await import('../scripts/build-id');
-    expect(formatBuildId('abc1234', false)).toBe('m3-rc1-pre+abc1234');
-    expect(formatBuildId('abc1234', true)).toBe('m3-rc1-pre+abc1234+dirty');
-    expect(formatBuildId(null, false)).toBe('m3-rc1-pre+unknown');
+    expect(formatBuildId('abc1234', false)).toBe('m4.1+abc1234');
+    expect(formatBuildId('abc1234', true)).toBe('m4.1+abc1234+dirty');
+    expect(formatBuildId(null, false)).toBe('m4.1+unknown');
   });
   it('gitBuildId reflects a real dirty/clean tree', async () => {
     const { gitBuildId } = await import('../scripts/build-id');
@@ -47,9 +47,9 @@ describe('M3-AC7 install_id + build', () => {
     const d = mkdtempSync(join(tmpdir(), 'bid-')); const sh = (c: string) => execSync(c, { cwd: d, encoding: 'utf8' });
     sh('git init -q && git -c user.name=t -c user.email=t@t commit -q --allow-empty -m init');
     const short = sh('git rev-parse --short HEAD').trim();
-    expect(gitBuildId(d)).toBe(`m3-rc1-pre+${short}`);
-    writeFileSync(join(d, 'vite.config.ts.timestamp-1792099697515-abc.mjs'), 'x'); expect(gitBuildId(d)).toBe(`m3-rc1-pre+${short}`); // PT1-9
-    writeFileSync(join(d, 'x.txt'), '1'); expect(gitBuildId(d)).toBe(`m3-rc1-pre+${short}+dirty`);
+    expect(gitBuildId(d)).toBe(`m4.1+${short}`);
+    writeFileSync(join(d, 'vite.config.ts.timestamp-1792099697515-abc.mjs'), 'x'); expect(gitBuildId(d)).toBe(`m4.1+${short}`); // PT1-9
+    writeFileSync(join(d, 'x.txt'), '1'); expect(gitBuildId(d)).toBe(`m4.1+${short}+dirty`);
   });
   it('save reset keeps install_id, telemetry and sfx/reducedMotion; clears save and FTUE flags (PT1-2)', () => {
     const s = kv(); const g0 = new Game(b, s, () => 0, 1, 'm3-pt1+test'); const id = g0.installId;

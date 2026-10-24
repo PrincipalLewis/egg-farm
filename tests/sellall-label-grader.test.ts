@@ -44,7 +44,7 @@ describe('Sell all label = actual sellAll money delta', () => {
   });
   it('app.ts builds the #sellAll label from sellAllPreview (no second copy of the price math)', () => {
     const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
-    expect(src).toMatch(/const \{ eggs, cents \} = sellAllPreview\(s, b\);[^\n]*\n\s*setText\(sellAllBtn, sellAllLabel\(eggs, cents, fmtCount, fmtMoney\)\)/);
+    expect(src).toMatch(/const \{ eggs, cents \} = sellAllPreview\(s, b\);[^\n]*\n\s*setText\(sellAllBtn, sellAllLabel\(eggs, cents, fmtCountFloor, fmtMoneyFloor\)\)/ /* QA4-2: floored count + money */);
     expect(src.match(/sellAllLabel\(/g)?.length).toBe(1);
   });
   it('empty basket: nothing to sell', () => { expect(sellAllPreview(st(1, 100, 0.5), b)).toEqual({ eggs: 0, cents: 0 }); });

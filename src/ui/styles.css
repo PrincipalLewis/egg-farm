@@ -344,7 +344,12 @@ html,body{overflow-x:hidden;max-width:100%}
 .order[hidden]{display:none}
 .order>.txt{min-width:0}.order .av{width:40px;height:40px}.order .av img{width:100%;height:100%}
 .order .l1{display:flex;font:800 16px/1.2 var(--f-body);white-space:nowrap;font-variant-numeric:tabular-nums;color:#3E2C23;min-width:0}
-.order .l1 .n{flex:0 0 auto;flex-shrink:0}.order .l1 .egg{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:visible;text-overflow:clip;flex:0 0 auto;flex-shrink:0}
+.order .l1 .n{flex:0 0 auto;flex-shrink:0}.order .l1 .egg{flex:0 0 auto;flex-shrink:0;overflow:visible;text-overflow:clip}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:visible;text-overflow:clip;flex:0 0 auto;flex-shrink:0}
+/* QA4-1 (number-format-big §4): a card line that would cut 'eggs' steps down (order-list syncLineFit); count and $ stay whole */
+.order .l1.fit1{font-size:14px}.order .l1.fit2{font-size:12px;letter-spacing:-.02em}
+/* Art ruling on #64 + HoE Oct 22: past 12px the line WRAPS (second line, card grows). No item on the line shrinks, clips or
+   ellipsizes; the old '.egg ellipsis' last resort is removed (.egg is flex:0 0 auto like .n and .v) */
+.order .l1.fit3{font-size:12px;letter-spacing:-.02em;flex-wrap:wrap}.order .l1.fit3>*{flex-shrink:0}.order:has(.l1.fit3){height:auto;min-height:60px}
 .order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
 .order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
 .order .sell{min-height:44px;border-radius:22px}
@@ -410,7 +415,8 @@ html,body{overflow-x:hidden;max-width:100%}
 /* F1: below the strip the toast fades in place (a slide-up exit would cross the strip and the Queue full badge) */
 .toast.below{transform:translate(-50%,-8px)}.toast.below.show{transform:translate(-50%,0)}
 /* AC14c/AC14d save notice */
-.save-warn{position:fixed;z-index:40;left:12px;right:12px;bottom:calc(var(--nav-h) + 8px);max-width:480px;margin-inline:auto;background:#3E2C23;color:#fff;font:700 14px/1.35 var(--f-body);padding:10px 14px;border-radius:12px;text-align:center;pointer-events:none}
+/* UX-M2: above Collect (app.ts sets --toast-safe-b = viewport bottom - Collect top + 8px; nav + Collect + 8 on mobile) */
+.save-warn{position:fixed;z-index:40;left:12px;right:12px;bottom:var(--toast-safe-b,calc(var(--nav-h) + 8px));max-width:480px;margin-inline:auto;background:#3E2C23;color:#fff;font:700 14px/1.35 var(--f-body);padding:10px 14px;border-radius:12px;text-align:center;pointer-events:none}
 /* Recovery dialog v1.1: Q export = full-width outlined secondary button below the primary */
 /* AC14b v2.1 (art-ux/save-recovery-dialog.md §2) */
 .recovery-layer{background:var(--c-scrim)}
@@ -425,6 +431,9 @@ html,body{overflow-x:hidden;max-width:100%}
 .recovery-card .rc-link{margin-top:8px;min-width:120px;min-height:44px}
 .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:12px;border-radius:999px;background:var(--c-white);color:var(--c-wood-text);border:2px solid var(--c-wood-text);box-shadow:none;font:700 16px var(--f-body, Nunito, sans-serif);cursor:pointer}
 .recovery-card .rc-msg{margin-top:8px}.recovery-card .rc-msg:empty{margin-top:0}
+/* M41-7 (Art, Minor): the real hit area (getBoundingClientRect) is >= 48 / >= 44 even in a shrinking column card, recovery dialog only. */
+.recovery-layer[data-outcome] .recovery-card .rc-primary,.recovery-layer[data-outcome] .recovery-card .rc-link,.recovery-layer[data-outcome] .recovery-card .rc-export-q{flex:none;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center}
+.recovery-layer[data-outcome] .recovery-card .rc-primary{min-height:48px}.recovery-layer[data-outcome] .recovery-card .rc-link,.recovery-layer[data-outcome] .recovery-card .rc-export-q{min-height:44px}
 .recovery-card :focus-visible{outline:3px solid var(--c-focus);outline-offset:3px}
 .recovery-layer.kbd .recovery-card button:focus{outline:3px solid var(--c-focus);outline-offset:3px}
 .onb[hidden]{display:none!important}
@@ -467,6 +476,8 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks .balanced .segs i b{display:block;height:100%;background:var(--c-yolk,#f6c445)}
 .tracks .balanced .segs i.weakest{outline:2px solid var(--c-yolk-dark,#c8901a);outline-offset:1px}
 @media (prefers-reduced-motion:reduce){.tracks .balanced .segs i b{transition:none}}
+/* D-HOP-40 B1-9: `Max for this farm` = the MAX pill, muted (Dust fill, ink text 7.5:1), no lock glyph, never wraps at 360 */
+.maxed.farm-max{background:var(--c-disabled);color:var(--c-text);white-space:nowrap}
 .up .lock{min-height:44px;display:flex;align-items:center;justify-content:flex-end;color:var(--c-ink,#3E2C23);font-weight:700}
 .up .lock::before{content:'';flex:none;width:12px;height:14px;margin-right:6px;background:
   linear-gradient(var(--c-disabled),var(--c-disabled)) 0 6px/12px 8px no-repeat,
@@ -509,10 +520,42 @@ html,body{overflow-x:hidden;max-width:100%}
 .ghosts .bubble.soldout{animation:fadeout 800ms ease forwards}
 .rm .ghosts .ghost img,.rm .ghosts .ghost.leave img{animation:none}
 /* M4-AC-EXP1 tracks explainer: non-blocking coach card (no scrim), top-centre under the top bar */
-.tracks-exp{position:fixed;z-index:27;left:50%;top:72px;transform:translateX(-50%);width:min(296px,calc(100vw - 32px));box-sizing:border-box;background:var(--c-white);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:var(--s-3);color:#3E2C23;box-shadow:var(--shadow);animation:expin .2s var(--ease-pop,ease-out)}
-.tracks-exp h2{margin:0 0 4px;font:700 18px var(--f-display,var(--f-body))}
-.tracks-exp p{margin:0 0 8px;font:400 16px var(--f-body)}
-.tracks-exp-ok{min-height:48px;min-width:48px;width:100%}
+.tracks-exp,.tracks-exp-out{position:fixed;z-index:27;left:50%;top:72px;transform:translateX(-50%);width:min(296px,calc(100vw - 32px));box-sizing:border-box;background:var(--c-white);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:var(--s-3);color:#3E2C23;box-shadow:var(--shadow);animation:expin .2s var(--ease-pop,ease-out)}
+.tracks-exp h2,.tracks-exp-out h2{margin:0 0 4px;font:700 18px var(--f-display,var(--f-body))}
+.tracks-exp p,.tracks-exp-out p{margin:0 0 8px;font:400 16px var(--f-body)}
+.tracks-exp-ok,.tracks-exp-out .btn{min-height:48px;min-width:48px;width:100%}
+/* CCR M1 on #65 @7779088: no slot clear of every visible Buy / Collect -> the card is kept out of the way (no paint, no hit area)
+   until a scroll / resize opens one; taps never pass through a visible card */
+.tracks-exp[data-place=none]{visibility:hidden}
 @keyframes expin{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 @media (prefers-reduced-motion:reduce){.tracks-exp{animation:expfade .15s linear}}
 @keyframes expfade{from{opacity:0}to{opacity:1}}
+/* M41-8 F4 (art-ux/f4-next-goal-label.md; m4a-spec §18 F4-17): the whole-label ellipsis goes for the F4 strip; only the
+   track-name span may shrink (CSS ellipsis); star, level and suffix spans never shrink or wrap. Level + suffix sit inline in
+   one .ng-tail flex item (F4-14a: no accname space between them; same rendering). */
+.goal-label.ng{display:flex;align-items:baseline;text-overflow:clip;white-space:nowrap}
+.goal-label.ng>span{flex:none;white-space:nowrap}
+.goal-label.ng>.ng-star{white-space:pre} /* keep the space after ★ (a flex item trims trailing collapsible space) */
+.goal-label.ng>.ng-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* M41-8 F3 = UX-M4 (art-ux/m4.1-ui-minors.md): ★ Best buy chip, gold #F2B233, ink label 7.0:1, ★ glyph so it isn't colour-only. */
+.best-chip{display:inline-flex;align-items:center;gap:4px;width:max-content;height:20px;margin:4px 0 0;padding:0 8px;border-radius:var(--r-pill);
+  background:#F2B233;color:var(--c-text);font:800 12px var(--f-body);white-space:nowrap;pointer-events:none;user-select:none}
+/* UX-M5 (art-ux/m4.1-ui-minors.md): 150ms opacity + translateY(4px) out, played by an inert copy; reduced motion: instant */
+.tracks-exp-out{pointer-events:none;animation:expout 150ms ease-in forwards}
+@keyframes expout{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(4px)}}
+/* UX-M5 refund pop (art-ux/number-pop-spec.md, Sell style): Coin Gold fill, 2px Soil Brown stroke, 16px coin, 26px;
+   0.6->1.1->1.0 over 0-120ms, rise 32px to 500ms, fade 500-800ms; coin particle rises and fades with it */
+.exp-pop{position:fixed;z-index:28;pointer-events:none;display:flex;align-items:center;gap:4px;white-space:nowrap;font:700 26px var(--f-display);
+  color:#E8B020;-webkit-text-stroke:2px #3E2C23;paint-order:stroke fill;font-variant-numeric:tabular-nums;transform-origin:50% 100%;animation:exppop 800ms forwards}
+.exp-pop img{width:16px;height:16px}
+@keyframes exppop{0%{opacity:1;transform:translate(-50%,-100%) scale(.6);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+  15%{transform:translate(-50%,calc(-100% - 10px)) scale(1);animation-timing-function:ease-out}
+  62.5%{opacity:1;transform:translate(-50%,calc(-100% - 32px)) scale(1)}100%{opacity:0;transform:translate(-50%,calc(-100% - 32px)) scale(1)}}
+.exp-coin{position:fixed;z-index:28;pointer-events:none;width:16px;height:16px;translate:-50% -50%;animation:expcoin 600ms ease-out forwards}
+@keyframes expcoin{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx,14px),-40px) rotate(180deg)}}
+.reduced-motion .tracks-exp-out,.reduced-motion .exp-pop,.reduced-motion .exp-coin{display:none}
+@media (prefers-reduced-motion:reduce){.tracks-exp-out,.exp-pop,.exp-coin{display:none}}
+/* UX-M1: 3px focus ring on the explainer's focus targets; .kbd-focus is the WebKit fallback after its programmatic hand-off */
+nav.actions button:focus-visible,[data-tab]:focus-visible,#collect:focus-visible,.kbd-focus{outline:3px solid var(--c-focus);outline-offset:2px}
+/* Designer n1: the bottom-nav ring sits on the viewport edge on phones; inset it so all four sides show */
+nav.actions button:focus-visible,nav.actions button.kbd-focus{outline-offset:-3px}

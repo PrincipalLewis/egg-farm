@@ -17,8 +17,8 @@ describe('slotPreview (§6)', () => {
   });
   it('order-range line from config, K formatter, omitted when unchanged', () => {
     const [a, c] = [demandRange(4, b), demandRange(5, b)];
-    expect(text(row(4))).toContain(`Orders ${a[0]}–${a[1]} → ${c[0]}–${c[1]} eggs`);
-    expect(slotPreview(6, 7, [1200, 2400], [1300, 2600], 'i')).toContain('Orders 1.2K–2.4K → 1.3K–2.6K eggs');
+    expect(text(row(4))).toContain(`Orders ${a[0]}–${a[1]} → ${c[0]}–${c[1]}\u00a0eggs`);
+    expect(slotPreview(6, 7, [1200, 2400], [1300, 2600], 'i')).toContain('Orders 1.2K–2.4K → 1.3K–2.6K\u00a0eggs');
     expect(slotPreview(6, 7, [10, 20], [10, 20], 'i')).not.toContain('Orders');
   });
 });

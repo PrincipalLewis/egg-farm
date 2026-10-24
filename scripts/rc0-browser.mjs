@@ -1,14 +1,25 @@
 // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
+// Usage (also: node scripts/rc0-browser.mjs --help):
+//   PORT=<n>       pin the preview port (default: a free port). Non-numeric = exit 2.
+//   The served dist-qa must be THIS checkout: build-id hash = HEAD and the same dirty state, else exit 2.
+//   ALLOW_DIRTY=1  admit a +dirty build while the tree is dirty (a deliberate flag-off run). ALLOW_NO_GIT=1 skips the check
+//                  when git is unavailable. A clean build on a dirty tree (incl. untracked files) is always refused.
+//   Flag-off rc0:  set m4.enabled=0 in src/config/balance.json, npm run build:qa, ALLOW_DIRTY=1 node scripts/rc0-browser.mjs;
+//                  then revert balance.json and npm run build:qa again (a +dirty build on a clean tree is refused).
 // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
 import { chromium, webkit, firefox } from 'playwright-core';
-import { spawn } from 'node:child_process';
+import { serveForRun } from './serve-own.mjs';
 import { readFileSync, mkdirSync } from 'node:fs';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 9).map(l => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
 if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
 const headless = !process.env.HEADED;
-const port = +(process.env.PORT ?? 4181); const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
-const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
-await new Promise(r => setTimeout(r, 1500));
+// CCR n-d: no fixed default port (4181 once served a stale foreign build). PORT unset = a free port from the OS; an explicit PORT
+// is honoured as-is. serveOwn checks the page on that port is THIS dist-qa (own entry chunk), and expectHeadBuild that its
+// build-id is this checkout's HEAD with the same dirty state (ALLOW_DIRTY=1 admits a +dirty build); any mismatch, or a
+// non-numeric PORT, exits 2 before any check runs. The server is stopped on every exit path.
+const srv = await serveForRun('dist-qa', 'rc0-browser'), port = srv.port; // exits 2 on a bad PORT / foreign or stale build
+const killSrv = () => srv.stop();
 const SHOTS = process.env.SHOTS ?? '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
 const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
 const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
@@ -114,17 +125,70 @@ sections.b2 = async () => {
 };
 
 // ---------- B3 goal chip SR text ----------
+/** CCR m1-new: the description must name the strip's OWN target and status, not just have the right shape.
+ *  F4 label → `{Track} level {n}` (`Value`→`Egg value`, `Coll.`→`Collection`; a JS-ellipsised name matches as a prefix);
+ *  non-F4 label → `Next goal: {label, L{n} → level {n} (M4 on; f4 = 'off' keeps L{n}), first : → ,}.`; done → `Next goal: all upgrades done.`; status pill → its sentence. */
+const descMatchesTarget = (desc, labelText, status, f4) => {
+  if (!desc) return false;
+  const lbl = labelText.replace(/\u00a0/g, ' ').replace(/^★ /, '');
+  if (/^All upgrades done!$/.test(lbl)) return desc === 'Next goal: all upgrades done.';
+  const st = status === 'Ready!' ? 'Ready now.' : status === '—' ? 'Sell eggs to earn coins.' : status.startsWith('~') ? 'Ready in about ' : null;
+  if (!st || !desc.includes(` ${st}`)) return false;
+  if (f4 === 'off') return desc.startsWith(`Next goal: ${lbl.replace(':', ',')}. `); // flag-off AC5 sentence, byte-identical
+  if (!f4) return desc.startsWith(`Next goal: ${lbl.replace(/\bL(\d+)\b/, 'level $1').replace(':', ',')}. `); // M4 on: `Farm L2` → `Farm level 2`
+  const m = lbl.match(/^(.*?) L(\d+)(?=[: ]|$)/); if (!m) return false;
+  const cut = m[1].endsWith('…'), name = cut ? m[1].slice(0, -1) : ({ Value: 'Egg value', 'Coll.': 'Collection' })[m[1]] ?? m[1];
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^Next goal: (best buy, )?${esc(name)}${cut ? '[^,]*' : ''} level ${m[2]}(,|\\.)`).test(desc) && (/^★/.test(labelText) === /^Next goal: best buy, /.test(desc));
+};
 sections.b3 = async () => {
   const { ctx, page } = await open({ ls: { 'eggfarm.ui': DONE } });
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 2, coinsCents: 500 }; });
   for (let i = 0; i < 6; i++) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'sellAll' })); await page.waitForTimeout(500); }
+  // CCR n6: seed one real sale so the rolling income is > 0 and B3 covers the `+X% income` + timer variant (F4-11 hides it at 0).
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, basket: 20, customers: [{ id: 99001, demand: 5, filled: 0, waitedS: 0 }] }; g.dispatch({ type: 'sellAll' });
+    g.state = { ...g.state, coinsCents: 500, customers: [], nextCustomerInS: 1e9 }; });
   await page.waitForTimeout(1200);
-  const r = await page.evaluate(() => ({ aria: document.querySelector('#goal').getAttribute('aria-label'), label: document.querySelector('.goal-label').textContent, status: document.querySelector('.goal-status').textContent, live: document.querySelector('#goalLive').textContent }));
-  const num = r.status.match(/\d+/)?.[0];
-  ok('B3 chip aria-label matches visible target/timer, no "1 minutes"', r.aria.includes(r.label.split(':')[0]) && (!num || r.aria.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(r.aria + r.live), JSON.stringify(r));
+  // m4a-spec v1.25 F4-14a + Art 2.5.3 ruling: #goal has no aria-label for ANY target; the accessible name is the visible
+  // text (★ / JS `…` aria-hidden) and must START with it; the spoken B3 sentence is the aria-describedby description.
+  const r = await page.evaluate(() => { const b = document.querySelector('#goal'), lbl = b.querySelector('.goal-label'), d = b.getAttribute('aria-describedby');
+    const vis = n => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent : c.getAttribute?.('aria-hidden') === 'true' ? '' : vis(c)).join('');
+    return { ariaLabel: b.getAttribute('aria-label'), desc: d ? document.getElementById(d)?.textContent ?? null : null, label: lbl.textContent, labelVis: vis(lbl), ng: lbl.classList.contains('ng'),
+      status: b.querySelector('.goal-status').textContent, live: document.querySelector('#goalLive').textContent }; });
+  const snap = await page.locator('#goal').ariaSnapshot(); r.name = snap.match(/^- '?button "(.*)"'?:?$/m)?.[1]?.replace(/\\"/g, '"') ?? null;
+  r.aria = r.desc ?? '';
+  const num = r.status.match(/\d+/)?.[0], ws = v => (v ?? '').replace(/\s+/g, ' ').trim(), visible = ws(`${r.labelVis} ${r.status}`);
+  ok('B3 chip aria-label matches visible target/timer, no "1 minutes"', r.ariaLabel === null && visible.length > 0 && ws(r.name).startsWith(visible)
+      && /^Next goal: (.+\. (Ready now|Ready in about .+|Sell eggs to earn coins)|all upgrades done)\.$/.test(r.desc ?? '') && !/[…★]/.test(r.name + r.desc)
+      && (!num || r.aria.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(r.aria + r.live)
+      && descMatchesTarget(r.desc, r.label, r.status, r.ng), JSON.stringify(r)); // m1-new: the sentence names THIS target
   await page.waitForTimeout(4500);
   ok('B3 live region cleared after announcing (never stale)', (await page.locator('#goalLive').textContent()) === '' || (await page.locator('#goalLive').textContent()) === r.aria);
   await ctx.close();
+  // Art 2.5.3 ruling: the non-F4 targets too (FARM, a worker, done). Flag-off is build-time config (not reachable from
+  // dist-qa); it shares this code path and is covered in jsdom (tests/m41-8-best-chip.test.ts).
+  const W = { energy: 100, cdS: 1 };
+  for (const [name, re, st] of [
+    ['FARM', /^Farm L\d+/, { farmLevel: 0, hensLevel: 3, eggValueLevel: 3, collectionLevel: 0, coinsCents: 0 }],
+    ['FARM ready', /^Farm L\d+/, { farmLevel: 0, hensLevel: 3, eggValueLevel: 3, collectionLevel: 0, coinsCents: 1e13 }],
+    ['W1 Market Hand', /^Hire Market Hand$/, { farmLevel: 11, hensLevel: 16, eggValueLevel: 16, collectionLevel: 6, coinsCents: 1e13, workers: { hawker: W } }],
+    ['W3 Hawker', /^Hire Hawker$/, { farmLevel: 8, hensLevel: 11, eggValueLevel: 11, collectionLevel: 2, coinsCents: 0 }],
+    ['worker', /^Grader tier \d+: ×/, { farmLevel: 18, hensLevel: 15, eggValueLevel: 15, collectionLevel: 15, coinsCents: 0 }],
+    ['done', /^All upgrades done!$/, { farmLevel: 30, hensLevel: 99, eggValueLevel: 99, collectionLevel: 30, coinsCents: 0, graderTier: 'max', workers: { market_hand: W, coop_hand: W, hawker: W, grader: W } }]]) {
+    const { ctx: c2, page: p2 } = await open({ ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, seenSlots: 6 }) } });
+    await p2.evaluate(st => { const g = window.eggfarm;
+      g.state = { ...g.state, basket: 20, customers: [{ id: 99001, demand: 5, filled: 0, waitedS: 0 }] }; g.dispatch({ type: 'sellAll' });
+      g.state = { ...g.state, ...st, ...(st.graderTier === 'max' ? { graderTier: g.b.workers.grader.tiers.length } : {}), tracksV7: 1, seenTracksExplainer: true, customers: [], nextCustomerInS: 1e9 }; }, st);
+    await p2.waitForTimeout(1500);
+    const q = await p2.evaluate(() => { const b = document.querySelector('#goal'), lbl = b.querySelector('.goal-label'), d = b.getAttribute('aria-describedby');
+      return { ariaLabel: b.getAttribute('aria-label'), desc: d ? document.getElementById(d)?.textContent ?? null : null, label: lbl.textContent, ng: lbl.classList.contains('ng'), status: b.querySelector('.goal-status').textContent }; });
+    q.name = (await p2.locator('#goal').ariaSnapshot()).match(/^- '?button "(.*)"'?:?$/m)?.[1]?.replace(/\\"/g, '"') ?? null;
+    const ws = v => (v ?? '').replace(/\s+/g, ' ').trim(), visible = ws(`${q.label} ${q.status}`), num = q.status.match(/\d+/)?.[0];
+    ok(`B3 ${name} target: no aria-label, name starts with the visible text, B3 sentence is the description`, !q.ng && re.test(ws(q.label)) && q.ariaLabel === null
+      && ws(q.name).startsWith(visible) && /^Next goal: (.+\. (Ready now|Ready in about .+|Sell eggs to earn coins)|all upgrades done)\.$/.test(q.desc ?? '')
+      && (!num || q.desc.includes(num)) && !/\b1 (minutes|seconds|hours)\b/.test(q.desc) && descMatchesTarget(q.desc, q.label, q.status, false), JSON.stringify(q));
+    await c2.close();
+  }
 };
 
 // ---------- B6 desktop Collect bar vs side panel ----------
@@ -432,8 +496,10 @@ sections.resetbak = async () => {
 
 // AC14b save-recovery dialog v2.1 (art-ux/save-recovery-dialog.md): one section per loader outcome.
 const RC = {
-  restored: { title: 'Welcome back!', body: 'We loaded your backup. You may be a few moments behind.', btn: 'Keep farming', badge: '\u2713', exp: null },
-  fresh: { title: 'A fresh start', body: "We couldn't open your farm. Your old save is kept safe.", btn: 'Start farming', badge: '\u2605', exp: 'rc-link' },
+  // M41-7 integration (Saves loader + UI #58): the loader now supplies `source`, so restored/fresh show the CSR-9 FINAL copy
+  // (spec corrupt-save-recovery-spec.m41-final.md CSR-9 M1/M3, sha256 6131c290…433334d; UI strings src/ui/save-recovery.ts CSR_COPY).
+  restored: { title: 'Your farm is back!', body: 'We fixed a hiccup and restored your latest save.', btn: 'Continue', badge: '\u2713', exp: null },
+  fresh: { title: 'A fresh start', body: "We couldn't recover your save, so we started a new farm for you.", btn: 'Start farming', badge: '\u2605', exp: 'rc-link', expText: 'Export old save file', aria: 'Export old save file, downloads a copy of your old save file' },
   storage: { title: 'A fresh start', body: "We couldn't open your farm. Export it now to keep a copy.", btn: 'Start farming', badge: '!', exp: 'rc-export-q' },
   cantsave: { title: 'Saving is paused', body: "Your farm is fine, but your browser won't let us save right now. Export a copy to keep your progress.", btn: 'Keep farming', badge: '!', exp: 'rc-export-q', expText: 'Export save', aria: 'Export save, downloads a copy of your current farm', icon: 'icon-coop', outcome: 'storage', variant: 'cantsave', maxLines: 3, file: /^eggfarm-save-\d{8}-\d{4}\.json$/ },
 };
@@ -715,8 +781,11 @@ sections.g5 = async () => {
       if (w === 360) await shotIt(page, `focus-after-${how.toLowerCase()}`, w, h, `card closed via ${how}, focus ring on the Farm tab`);
     }
     {
-      await page.evaluate(() => { const g = window.eggfarm; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
+      // #65 CCR M1: the Buy click above scrolled the sheet (Farm Buy into view); a 206px refund card has no slot clear of every Buy
+      // there (place 'none', kept hidden; covered by scripts/m41-9-scroll-sweep.mjs), so this shot re-shows it with the sheet at the top.
+      await page.evaluate(() => { const g = window.eggfarm; const b = document.querySelector('#p-upgrades .body'); if (b) b.scrollTop = 0; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
       await page.waitForSelector('.tracks-exp-refund', { timeout: 3000 }).catch(() => {});
+      { const pl = await page.evaluate(() => document.querySelector('.tracks-exp')?.dataset.place ?? null); ok(`G5 refund card on screen (place ${pl}, not none) with the sheet at the top at ${w}`, !!pl && pl !== 'none', pl); }
       const rl = await page.evaluate(() => document.querySelector('.tracks-exp-refund')?.textContent.trim() ?? null);
       ok(`G5 refund line shown when migrationRefundCents > 0 at ${w}`, rl === 'We refunded +$1,234.56 for your old upgrades.', rl);
       await cardUp(page, 'refund-line', w);

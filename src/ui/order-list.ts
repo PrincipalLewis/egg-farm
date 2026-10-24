@@ -69,6 +69,14 @@ export class OrderList {
     const w = Math.min(Math.max(88, max), Math.max(88, cap));
     this.list.style.setProperty('--sell-w', `${Math.ceil(w)}px`);
   }
+  /** QA4-1 / number-format-big §4 (the WebKit 'eggs' drop) + Art ruling on #64: see fitLine. Re-fit only when the line text or
+   *  the card width changes. */
+  private syncLineFit() {
+    for (const l1 of this.list.querySelectorAll<HTMLElement>('.order .l1')) {
+      const key = `${l1.textContent}|${l1.clientWidth}`; if (l1.dataset.fit === key) continue;
+      fitLine(l1); l1.dataset.fit = `${l1.textContent}|${l1.clientWidth}`;
+    }
+  }
   private make(v: OrderView) {
     const el = document.createElement('div'); el.dataset.row = String(v.id); el.dataset.id = String(v.id);
     el.innerHTML = `<div class="av"><img src="${this.avatar}" alt=""></div><div class="txt"><div class="l1"><span class="n"></span><span class="egg"></span><span class="v"></span></div><div class="bar" role="progressbar" aria-valuemin="0"><i></i></div></div><button data-id="${v.id}"></button>`;
@@ -124,8 +132,20 @@ export class OrderList {
       if (firstOrToggle || t - this.chipAt >= 2000) { clearTimeout(this.chipTimer); write(); }
       else if (!this.chipTimer) this.chipTimer = window.setTimeout(write, 2000 - (t - this.chipAt));
     }
-    this.syncSellWidth();
+    this.syncSellWidth(); this.syncLineFit();
     if (frozen) setTimeout(() => this.kick(), 320);
   }
   node(id: number) { return this.nodes.get(id); }
+}
+
+/** Order-card line fit (Art ruling on #64, HoE Oct 22): 16px -> 14px (fit1) -> 12px with -0.02em (fit2) -> still too wide: WRAP
+ *  to a second line at 12px (fit3; the card grows). Count, $ and 'eggs' never shrink, clip or ellipsize (no '.egg ellipsis'
+ *  path any more). "Too wide" = the line's content is wider than the line box. Returns the step taken. */
+export function fitLine(l1: HTMLElement): 0 | 1 | 2 | 3 {
+  l1.classList.remove('fit1', 'fit2', 'fit3');
+  const cut = () => l1.scrollWidth > l1.clientWidth + 0.5;
+  if (!cut()) return 0;
+  l1.classList.add('fit1'); if (!cut()) return 1;
+  l1.classList.replace('fit1', 'fit2'); if (!cut()) return 2;
+  l1.classList.replace('fit2', 'fit3'); return 3;
 }
