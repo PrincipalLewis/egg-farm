@@ -16,9 +16,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  # PRs: keyed on the PR number, and a newer commit cancels the older run. main pushes queue instead of cancelling,
-  # so every main SHA gets a verdict.
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # PRs: keyed on the PR number, and a newer commit cancels the older run. main pushes are keyed per SHA,
+  # so they never share a group and every main SHA gets a verdict.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   gate:
