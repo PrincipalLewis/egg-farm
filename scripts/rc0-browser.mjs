@@ -730,7 +730,7 @@ sections.dash = async () => {
 // ---------- art-ux rc2-workers-copy §6 worker banners: one line at 360/390/1280, Nunito 700 >= 12px, 14px SVG icon, longest strings fit, role dropped first (review 23a3798 #2) ----------
 sections.bannerFit = async () => {
   const FCS = process.env.FC_SHOTS;
-  const LONG = [['Market Hand asleep: production stopped', 'Asleep: production stopped'], ['Market Hand unpaid: production stopped', 'Unpaid: production stopped'], ['Coop Hand unpaid: collecting slowed', 'Unpaid: collecting slowed']];
+  const LONG = [['Market Hand asleep: sales stopped', 'Asleep: sales stopped'], ['Market Hand unpaid: sales stopped', 'Unpaid: sales stopped'], ['Market Hand asleep: production stopped', 'Asleep: production stopped'], ['Market Hand unpaid: production stopped', 'Unpaid: production stopped'], ['Coop Hand unpaid: collecting slowed', 'Unpaid: collecting slowed']];
   for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
     const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 20, farmLevel: 30, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 3,
       workers: { market_hand: { energy: 50, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1, manageCdS: 0, coopFullS: 0 } });
@@ -752,8 +752,10 @@ sections.bannerFit = async () => {
     }, LONG);
     const liveOk = r.live.length >= 4 && r.live.every(x => x.fits && x.oneLine && x.fs >= 12 && x.fw === '700' && /Nunito/i.test(x.ff) && x.ic && x.ic[0] === 14 && /icon-(moon|warning)\.svg/.test(x.ic[1]) && x.inCard && !x.emoji && x.aria && /^(Market Hand|Coop Hand|Hawker|Grader) is (asleep|unpaid)\./.test(x.aria) && (x.text === x.full || x.text === x.full.replace(/^(Market Hand|Coop Hand|Hawker|Grader) (\w)/, (_, __, c) => c.toUpperCase())));
     ok(`§6 banners ${w}: live states (Coop Hand asleep, Market Hand unpaid, Hawker + Grader asleep) one line, Nunito 700 >= 12px, 14px moon/warning SVG, no emoji, aria with role`, liveOk, JSON.stringify(r.live));
+    { const mh = r.live.find(x => /^Market Hand /.test(x.aria ?? ''));
+      ok(`D-HOP-14/-17 banners ${w}: live Market Hand unpaid -> "Market Hand unpaid: sales stopped" (or role dropped "Unpaid: sales stopped"), aria "Market Hand is unpaid. Auto-sales have stopped."`, !!mh && mh.full === 'Market Hand unpaid: sales stopped' && (mh.text === mh.full || mh.text === 'Unpaid: sales stopped') && mh.aria === 'Market Hand is unpaid. Auto-sales have stopped.', JSON.stringify(mh)); }
     ok(`§6 banners ${w}: longest strings fit on one line (full, or role dropped first only when needed)`, r.longest.every(x => x.fits && x.oneLine && (x.got === x.want || x.dropped)), JSON.stringify(r.longest));
-    ok(`§6 banners ${w}: forced narrow banner drops the role name ("Asleep: production stopped"), one line, not clipped`, r.fallback.text === LONG[0][1] && r.fallback.fits && r.fallback.oneLine, JSON.stringify(r.fallback));
+    ok(`§6 banners ${w}: forced narrow banner drops the role name ("Asleep: sales stopped"), one line, not clipped`, r.fallback.text === LONG[0][1] && r.fallback.fits && r.fallback.oneLine, JSON.stringify(r.fallback));
     if (FCS && (w === 360 || w === 1280)) { mkdirSync(FCS, { recursive: true }); await page.locator('.wk-banner').first().scrollIntoViewIfNeeded(); await page.screenshot({ path: `${FCS}/banners-${w}-${ENGINE}.png` }); }
     await ctx.close();
   }

@@ -70,13 +70,13 @@ export const BANNER_ICON = { asleep: 'icon-moon.svg', unpaid: 'icon-warning.svg'
  *  a hired Market Hand that is Asleep/Unpaid serves nobody, so its banner always reads "Market Hand asleep: sales stopped"
  *  ("Market Hand unpaid: sales stopped"). */
 export type MarketHandCopy = 'slowed' | 'stopped';
-export const MARKET_HAND_COPY: MarketHandCopy = 'slowed';
+export const MARKET_HAND_COPY: MarketHandCopy = 'stopped'; // D-HOP-2026-10-24-14, amended by -17 (Unpaid)
 export interface WorkerBanner { kind: 'asleep' | 'unpaid'; text: string; short: string; aria: string; icon: string }
 export function workerBanner(id: WorkerId, m: string | null, s: GameState, b: Balance, copy: MarketHandCopy = MARKET_HAND_COPY): WorkerBanner | null {
   if (m !== 'asleep' && m !== 'unpaid') return null;
   const role = BANNER_ROLE[id], st = m, pct = Math.round(b.workers.grader.asleep_bonus_share * 100);
   const [eff, effAria] = id === 'grader' ? [`bonus down to ${pct}%`, `Bonus down to ${pct} percent.`]
-    : id === 'market_hand' && copy === 'stopped' ? ['sales stopped', 'Sales are stopped.']
+    : id === 'market_hand' && copy === 'stopped' ? ['sales stopped', 'Auto-sales have stopped.'] // art-ux/rc2-workers-copy.md §6 (amended 16:52)
     : salesStopped(s, b) ? ['production stopped', 'Production is stopped.']
     : id === 'coop_hand' ? ['collecting slowed', 'Collecting is slowed.'] : ['sales slowed', 'Sales are slowed.'];
   const short = `${st[0].toUpperCase()}${st.slice(1)}: ${eff}`;
