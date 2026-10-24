@@ -5,6 +5,7 @@
 :root{
   --c-yolk:#FFC93C;--c-yolk-dark:#F29E1F;--c-barn:#B83B37;--c-meadow:#6BBF59;--c-sky:#8FD3F4;--c-cream:#FFF6E5;--c-white:#FFFFFF;--c-wood:#A86B3C;
   --c-text:#3E2C23;--c-muted:#6B5D52;--c-meadow-strong:#3D7F33;--c-wood-text:#8A5528;--c-focus:#2B79A8;--c-slot-outline:#6B5D52;--c-floater:#3E2C23;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
+  --c-barn-ui:#B83B37;--c-danger:var(--c-barn-ui); /* rc1-upgrade-value v1.4 (M4.1 patch 1: asleep banner + badge red) */
   --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-pill:999px;
   --bw:2px;--shadow:0 4px 0 rgb(62 44 35 / .25);
   --f-display:"Fredoka",system-ui,sans-serif;--f-body:"Nunito",system-ui,sans-serif;
@@ -559,3 +560,62 @@ html,body{overflow-x:hidden;max-width:100%}
 nav.actions button:focus-visible,[data-tab]:focus-visible,#collect:focus-visible,.kbd-focus{outline:3px solid var(--c-focus);outline-offset:2px}
 /* Designer n1: the bottom-nav ring sits on the viewport edge on phones; inset it so all four sides show */
 nav.actions button:focus-visible,nav.actions button.kbd-focus{outline-offset:-3px}
+/* ===== M4.1 patch 1: S2 asleep signal (AC-R1-R9, rc1-asleep-state-spec), ported from rc1 8a49d35 / 7380b86. Not ported: the S2-8 wage
+   lines, the S2-9 queue dot, the cuta3 goal-pill rules (CCR Major 2) and the order-card rules (CCR minor 4). ===== */
+/* S2-5 (session2-ui-triage (b)): nav buttons share one anatomy (icon 28px + 12px label); Refill is a 4th equal column, no green fill */
+.actions .nav-lbl{font:700 12px/1.2 var(--f-body);color:var(--c-text);white-space:nowrap}
+.nav-ic{position:relative;display:inline-block;width:28px;height:28px}
+nav.actions button.nav-manage{flex:1;min-width:64px;height:auto;min-height:0;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--c-text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+nav.actions button.nav-manage[hidden]{display:none}
+nav.actions button.nav-manage .manage-ico{width:32px;height:32px}
+nav.actions button.nav-manage .manage-ico img{width:28px;height:28px;filter:none}
+nav.actions button.nav-manage[aria-disabled=true]{background:transparent;color:#5A4C42}
+nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
+.count-badge{position:absolute;top:6px;right:calc(50% - 26px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#B83B37;color:#fff;font:700 11px/16px var(--f-body);text-align:center;box-sizing:border-box}
+.count-badge[hidden]{display:none}
+@media (min-width:960px) and (orientation:landscape){
+  .sheet header button.nav-manage:not([hidden]){display:inline-flex;flex-direction:row;align-items:center;gap:6px;height:44px;min-height:44px;width:auto;padding:0 12px 0 0;border-radius:22px;border:2px solid var(--c-outline);background:var(--c-white);box-shadow:none;font:600 14px var(--f-display);color:var(--c-text);box-sizing:border-box}
+  .sheet header button.nav-manage .nav-lbl{font:600 14px var(--f-display)}
+  .sheet header button.nav-manage .manage-ico{width:44px;height:40px}
+  .sheet header button.nav-manage[aria-disabled=true]{background:#CFC6BA;color:#5A4C42}
+}
+/* Art & UX review rc1-ui-fc8e1cf #1: the phone-nav Refill icon greys out during cooldown (timer text stays #5A4C42) */
+.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55}
+nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55} /* beats the S2-5 filter:none reset */
+/* #2: docked Upgrades-header Refill pill never under 44px tall */
+@media (min-width:960px) and (orientation:landscape){.sheet header button.desk-manage-all:not([hidden]){min-height:44px;box-sizing:border-box}}
+/* S2-5: nav buttons are the full 64px (the 2px top rule is drawn over them instead of taking 2px of the track) */
+.actions{position:relative;border-top:0}
+.actions::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--bw);background:var(--c-outline);pointer-events:none;z-index:1}
+/* Workers v1.3 captions (m2-workers-layout §4.4, AC-R8): 12px Nunito #5A4C42, one line under the button */
+.wk-cap{font:400 12px/16px var(--f-body);color:#5A4C42;white-space:nowrap}
+.refill-wrap{position:sticky;top:0;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 6px}
+.refill-wrap .btn.manage-all{position:static;margin:0;width:calc(100% - 24px)}
+#uRow>.refill-wrap{background:var(--c-cream);padding-block:8px 10px;margin-inline:0;align-self:stretch;width:100%;box-sizing:border-box}
+.wk .btn.manage{min-height:44px;min-width:88px} /* Refill: tap target >=44x88 (Art AC-R8) */
+.wk .btn.manage .manage-ico img{width:28px;height:28px;filter:none}
+/* S2-8 / AC-R2: net rate under the money; red with ⚠ at <= 0 (colour never the only signal) */
+.coins-col{display:flex;flex-direction:column;line-height:1;min-width:0}
+.coins-col #coins{line-height:18px}
+.rate{font:700 11px/13px var(--f-body);color:#3D7F33;white-space:nowrap}
+.rate[data-sign=neg]{color:#B83B37}.rate[data-sign=zero]{color:#6B5D52}
+.pill .rate.neg,.rate.neg{color:var(--c-danger)!important}
+.rate.rshake{animation:rshake 300ms linear 1}@keyframes rshake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.rm .rate.rshake,.reduced-motion .rate.rshake{animation:none}
+@media (prefers-reduced-motion:reduce){.rate.rshake{animation:none}}
+/* Asleep / Unpaid card (Art v1.4 §7, rc2-workers-copy §6): red banner, 14px moon/warning SVG, Nunito 700 12px, one line */
+.wk{position:relative}
+.wk-banner{grid-column:1/-1;margin:-10px -10px 6px;height:32px;box-sizing:border-box;display:flex;align-items:center;padding:0 10px;background:var(--c-danger);color:#fff;font:700 12px/16px var(--f-body);border-radius:12px 12px 0 0;gap:6px;white-space:nowrap;min-width:0}
+.wk-banner .wb-ico{flex:none;width:14px;height:14px}.wk-banner .bt{min-width:0;overflow:hidden;text-overflow:clip} /* role dropped if it doesn't fit (fitBanners) */
+.wk.is-off .wk-body{opacity:.5}
+.wk.is-off .wk-banner,.wk.is-off .wk-refill{opacity:1}
+.wk.is-off,.wk.asleep,.wk.unpaid{opacity:1} /* override legacy .wk.asleep/.unpaid opacity */
+/* Asleep badge: Upgrades nav icon + Workers tab (Art FIX1: top-right corner; rc2 Art & UX 15:22: anchored to the nav icon -6/-6) */
+.asleep-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-danger);color:#fff;font:700 12px/18px var(--f-display);text-align:center;z-index:2;box-sizing:border-box}
+.asleep-badge[hidden]{display:none}
+.tabs [data-tab=workers]{position:relative}
+nav [data-nav=upgrades]{position:relative}
+nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
+.asleep-badge.badge-pulse{animation:badgePulse 400ms ease-out}
+@keyframes badgePulse{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.asleep-badge.badge-pulse{animation:none}}

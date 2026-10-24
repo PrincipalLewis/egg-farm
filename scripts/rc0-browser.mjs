@@ -224,11 +224,20 @@ sections.b58 = async () => {
     ok(`B5 workers at 81-98% -> no Manage all shown (${w})`, vis1 === 0, `dom=${n1}`);
     await set([30, 51, 98]); await page.waitForTimeout(300);
     const vis2 = await page.locator('.farm-manage-all:visible').count();
-    if (w > 900) { const bb = await page.locator('.farm-manage-all').boundingBox(); ok('B8 desktop Manage all sits in the Upgrades header, 44x44', bb && bb.width === 44 && bb.height === 44 && (await page.locator('#p-upgrades header .farm-manage-all').count()) === 1, JSON.stringify(bb)); }
+    if (w > 900) { const bb = await page.locator('.farm-manage-all').boundingBox(); ok('B8 desktop Manage sits in the Upgrades header, 44px tall, labelled (S2-5)', bb && bb.width >= 44 && bb.height === 44 && /Refill \d+ tired workers?/.test(await page.locator('.farm-manage-all').innerText()) && (await page.locator('#p-upgrades header .farm-manage-all').count()) === 1, JSON.stringify(bb)); }
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
+    if (w > 900) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await page.waitForTimeout(400);
+      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText }; });
+      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && /^Ready in \d+s$/.test(d.text.trim()), JSON.stringify(d));
+      { const bb = await page.evaluate(() => { const rs = [document.querySelector('.farm-manage-all'), ...document.querySelectorAll('.farm-manage-all *')].map(e => e.getBoundingClientRect()).filter(r => r.width);
+          const x = Math.min(...rs.map(r => r.left)), y = Math.min(...rs.map(r => r.top)); return { x, y, width: Math.max(...rs.map(r => r.right)) - x, height: Math.max(...rs.map(r => r.bottom)) - y }; }), pad = 16; // pill + overhanging icon // whole pill in frame (Art & UX 10:01)
+        ok(`Review #2b: docked Refill pill fully inside the viewport (${w}) — h=${bb && bb.height}px`, !!bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= w && bb.y + bb.height <= 900, JSON.stringify(bb));
+        console.log(`MEASURE docked Refill pill ${w}: button ${JSON.stringify(d)} painted ${JSON.stringify(bb)}`);
+        if (shot) { const x = Math.max(0, bb.x - pad), y = Math.max(0, bb.y - pad); await page.screenshot({ path: `${SHOTS}/rc1-review2-docked-refill-cooldown-${w}.png`, clip: { x, y, width: Math.min(w - x, bb.width + 2 * pad), height: bb.height + 2 * pad } }); } }
+      await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, manageCdS: 0 }; }); await page.waitForTimeout(300); }
     const pill = await page.locator('#uRow .manage-all').textContent().catch(() => '');
-    ok(`B5 one worker at/below threshold -> Farm View button visible + "(1 need it)" (${w})`, vis2 === 1 && /\(1 need it\)/.test(pill), `vis=${vis2} pill=${pill}`);
+    ok(`B5 one worker at/below threshold -> Farm View button visible + "Refill 1 tired worker" (${w})`, vis2 === 1 && /Refill 1 tired worker/.test(pill), `vis=${vis2} pill=${pill}`);
     await ctx.close();
   }
 };
@@ -651,6 +660,94 @@ sections.hiddentabguard = async () => {
     ok(`Tab guard 'Play here' min-height 48px at ${w} (art-ux dialog.html)`, st.playH >= 48, String(st.playH));
     await page.evaluate(() => document.getAnimations().forEach(a => { try { a.finish(); } catch { a.cancel(); } }));
     await page.screenshot({ path: `${SHOTS}/m1-deactivate-${ENGINE}-${w}.png` });
+    await ctx.close();
+  }
+};
+
+// ===== M4.1 patch 1: S2 asleep signal (AC-R1-R9), sections ported from rc1 7380b86 (s25, dash, bannerFit) onto serveForRun =====
+// ---------- S2-8 / AC-R2 HUD net rate (M4.1 patch 1; ported from rc1 7380b86 sections.s289 without the S2-8 wage lines and S2-9 dot) ----------
+sections.s28rate = async () => {
+  const UI = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true });
+  const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
+  await page.waitForTimeout(1300);
+  const read = () => page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, role: e.getAttribute('role') }; });
+  const awake = await read();
+  ok('S2-8 HUD rate: awake workers -> "+$X/s" 11px/700 green, role=status, aria "Net income plus …"', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(awake.text) && awake.sign === 'pos' && awake.color === 'rgb(61, 127, 51)' && awake.size === '11px' && awake.weight === '700' && awake.role === 'status' && /^Net income plus /.test(awake.aria ?? ''), JSON.stringify(awake));
+  // Reviewer m2: drive the real rateView -> headerRateText path (no injected text). Ruling (a): an asleep Coop Hand does not clamp the rate.
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: { ...g.state.workers, coop_hand: { ...g.state.workers.coop_hand, energy: 0 } } }; });
+  await page.waitForTimeout(1300);
+  const ch = await read();
+  ok('PM Workers ruling (a) real path: asleep Coop Hand -> header shows the real positive rate, not red, no ⚠ / "stopped"', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(ch.text) && ch.sign === 'pos' && ch.color !== 'rgb(184, 59, 55)' && !/stopped/.test(ch.aria ?? ''), JSON.stringify(ch));
+  if (shot) await page.screenshot({ path: `${SHOTS}/m41p1-s2-8-rate-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
+  await ctx.close();
+};
+// ---------- S2-5 nav: icon + visible label + aria-label on every button, also after a reload ----------
+sections.s25 = async () => {
+  const st = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 1e6, coop: 0, basket: 0, collectionLevel: 5, farmLevel: 10, customers: [], nextCustomerInS: 1e9, nextCustomerId: 1, rng: 5, pendingOfflineEggs: 0, celebratedTier: 2,
+    workers: { market_hand: { energy: 30, cdS: 1 }, coop_hand: { energy: 90, cdS: 1 }, hawker: { energy: 95, cdS: 0 } }, graderTier: 0, manageCdS: 0, coopFullS: 0 } });
+  const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.save': st, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+  const read = () => page.evaluate(() => [...document.querySelectorAll('nav.actions button')].filter(b => !b.hidden).map(b => { const r = b.getBoundingClientRect(); return { aria: b.getAttribute('aria-label'), label: b.querySelector('.nav-lbl')?.textContent, icon: !!b.querySelector('img'), badge: b.querySelector('.count-badge:not([hidden])')?.textContent, w: Math.round(r.width), h: Math.round(r.height) }; }));
+  const check = (r, tag) => ok(`S2-5 nav ${tag}: 4 buttons, each icon + visible label + aria-label, >=64x44`, r.length === 4 && r.every(x => x.icon && x.label && x.aria && x.w >= 64 && x.h >= 44) && r[2].label === 'Refill' && r[2].aria === 'Refill 1 tired worker' && r[2].h === 64 && r[2].badge === '1', JSON.stringify(r));
+  await page.waitForTimeout(300); check(await read(), 'fresh load');
+  await page.evaluate(() => window.eggfarm.save()); await page.reload(); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm); await page.waitForTimeout(400);
+  const r2 = await read(); check(r2, 'after reload');
+  ok('S2-5 exactly one worker button in the DOM after reload', (await page.locator('[data-act=manageAll]').count()) === 1);
+  await page.locator('nav [data-act=manageAll]').click(); await page.waitForTimeout(300);
+  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, lblHidden: b.querySelector('.nav-lbl').getAttribute('aria-hidden'), aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
+  ok('Review #1: nav Refill icon greyed during cooldown (grayscale(1), opacity .55)', cd.filter === 'grayscale(1)' && cd.op === '0.55', JSON.stringify(cd));
+  if (shot) await page.screenshot({ path: `${SHOTS}/rc1-review1-nav-refill-cooldown-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
+  ok('S2-5 cooldown: label "0:NN", aria "Refill, cooling down" with the countdown aria-hidden (review 23a3798 #1), aria-disabled', /^0:\d\d$/.test(cd.label) && cd.aria === 'Refill, cooling down' && cd.lblHidden === 'true' && cd.dis === 'true', JSON.stringify(cd));
+  if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-5-nav-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
+  await ctx.close();
+};
+// ---------- Art & UX 10:01: '▼−$0.01/s' double-dash check (code points, pseudo-elements, borders) + zoomed pill at 390 ----------
+sections.dash = async () => {
+  const { ctx, page } = await open({ w: 390, h: 844, dsf: 4, ls: { 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true }) } });
+  await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 1, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { coop_hand: { energy: 90, cdS: 5 } } }; });
+  // Art glyph check: paint the exact ▼−$0.01/s string (live net cannot go negative under P1q wages).
+  await page.evaluate(() => { const e = document.querySelector('#rate'); e.textContent = '\u25BC\u2212$0.01/s'; e.dataset.sign = 'neg'; e.classList.add('neg'); });
+  await page.waitForTimeout(200);
+  const r = await page.evaluate(() => { const e = document.querySelector('#rate'), out = { text: e.textContent, cps: [...e.textContent].map(c => 'U+' + c.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')), html: e.innerHTML, deco: [] };
+    for (const el of [e, ...e.querySelectorAll('*'), e.parentElement]) for (const ps of [null, '::before', '::after']) { const cs = getComputedStyle(el, ps);
+      const c = cs.content; if (ps && c && c !== 'none' && c !== 'normal') out.deco.push(`${el.id || el.className}${ps} content=${c}`);
+      if (!ps && el === e) { for (const k of ['borderLeftWidth', 'borderTopWidth', 'borderBottomWidth', 'textDecorationLine', 'outlineStyle', 'boxShadow', 'backgroundImage']) out[k] = cs[k]; } }
+    return out; });
+  const between = r.cps.slice(r.cps.indexOf('U+25BC') + 1, r.cps.indexOf('U+0024'));
+  console.log(`DASH [${ENGINE}] ${JSON.stringify(r)}`);
+  ok('Art & UX 10:01: "▼−$0.01/s" — only U+2212 between ▼ and $, no hyphen/dash, no pseudo content, border, underline or outline', r.text === '\u25BC\u2212$0.01/s' && between.join() === 'U+2212' && !/[-\u2010-\u2015\uFE58\uFE63\uFF0D]/.test(r.text) && r.html === r.text && r.deco.length === 0 && r.borderLeftWidth === '0px' && r.borderTopWidth === '0px' && r.borderBottomWidth === '0px' && r.textDecorationLine === 'none' && r.outlineStyle === 'none' && r.boxShadow === 'none' && r.backgroundImage === 'none', JSON.stringify({ between, ...r }));
+  if (shot) { const bb = await page.locator('#rate').boundingBox(), p = 6; await page.screenshot({ path: `${SHOTS}/rc1-review-rate-neg-001-zoom-390.png`, clip: { x: bb.x - p, y: bb.y - p, width: bb.width + 2 * p, height: bb.height + 2 * p } });
+    const pill = page.locator('#rate').locator('xpath=..'); await pill.screenshot({ path: `${SHOTS}/rc1-review-rate-neg-001-pill-zoom-390.png` }); }
+  await ctx.close();
+};
+// ---------- art-ux rc2-workers-copy §6 worker banners: one line at 360/390/1280, Nunito 700 >= 12px, 14px SVG icon, longest strings fit, role dropped first (review 23a3798 #2) ----------
+sections.bannerFit = async () => {
+  const FCS = process.env.FC_SHOTS;
+  const LONG = [['Market Hand asleep: production stopped', 'Asleep: production stopped'], ['Market Hand unpaid: production stopped', 'Unpaid: production stopped'], ['Coop Hand unpaid: collecting slowed', 'Unpaid: collecting slowed']];
+  for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
+    const sv = JSON.stringify({ version: 5, savedAt: Date.now(), state: { coinsCents: 0, coop: 0, basket: 0, collectionLevel: 20, farmLevel: 30, customers: [], nextCustomerInS: 1e9, nextCustomerId: 9, rng: 5, pendingOfflineEggs: 0, celebratedTier: 3,
+      workers: { market_hand: { energy: 50, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1, manageCdS: 0, coopFullS: 0 } });
+    const { ctx, page } = await open({ w, h, touch: w < 600, ls: { 'eggfarm.save': sv, 'eggfarm.ui': JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }) } });
+    if (await page.locator('[data-nav=upgrades]').isVisible()) await page.locator('[data-nav=upgrades]').click(); await page.locator('[data-tab=workers]').click();
+    await page.waitForSelector('.wk-banner', { timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400);
+    const r = await page.evaluate(async (LONG) => {
+      const meas = () => [...document.querySelectorAll('.wk-banner')].map(bn => { const t = bn.querySelector('.bt'), ic = bn.querySelector('img'), cs = getComputedStyle(t), br = bn.getBoundingClientRect(), tr = t.getBoundingClientRect(), card = bn.closest('.wk').getBoundingClientRect();
+        return { text: t.textContent, full: t.dataset.full, aria: bn.querySelector('.sr')?.textContent, fs: parseFloat(cs.fontSize), fw: cs.fontWeight, ff: cs.fontFamily.split(',')[0], ic: ic ? [Math.round(ic.getBoundingClientRect().width), ic.getAttribute('src').split('/').pop()] : null,
+          fits: t.scrollWidth <= t.clientWidth + 0.5, oneLine: tr.height <= parseFloat(cs.lineHeight) * 1.2 + 0.5, h: Math.round(br.height), inCard: br.left >= card.left - 0.5 && br.right <= card.right + 0.5, emoji: /[\u{1F300}-\u{1FAFF}\u26A0]/u.test(bn.textContent) }; });
+      const live = meas();
+      // longest approved strings on the real banner element, through the app's own fit (eggfarmQaFitBanners)
+      const bt = document.querySelector('.wk-banner .bt'), keep = [bt.dataset.full, bt.dataset.short], longest = [];
+      for (const [f, sh] of LONG) { bt.dataset.full = f; bt.dataset.short = sh; window.eggfarmQaFitBanners(); await new Promise(r => requestAnimationFrame(r)); const m = meas()[0]; longest.push({ want: f, got: m.text, fits: m.fits, oneLine: m.oneLine, dropped: m.text === sh }); }
+      // forced role-drop fallback: a narrow banner must show the short form, still one line, no clipping
+      const bn = bt.closest('.wk-banner'); bn.style.maxWidth = '230px'; bn.style.width = '230px'; bt.dataset.full = LONG[0][0]; bt.dataset.short = LONG[0][1]; window.eggfarmQaFitBanners(); await new Promise(r => requestAnimationFrame(r));
+      const fb = meas()[0]; bn.style.maxWidth = ''; bn.style.width = ''; bt.dataset.full = keep[0]; bt.dataset.short = keep[1]; window.eggfarmQaFitBanners();
+      return { live, longest, fallback: { text: fb.text, fits: fb.fits, oneLine: fb.oneLine } };
+    }, LONG);
+    const liveOk = r.live.length >= 4 && r.live.every(x => x.fits && x.oneLine && x.fs >= 12 && x.fw === '700' && /Nunito/i.test(x.ff) && x.ic && x.ic[0] === 14 && /icon-(moon|warning)\.svg/.test(x.ic[1]) && x.inCard && !x.emoji && x.aria && /^(Market Hand|Coop Hand|Hawker|Grader) is (asleep|unpaid)\./.test(x.aria) && (x.text === x.full || x.text === x.full.replace(/^(Market Hand|Coop Hand|Hawker|Grader) (\w)/, (_, __, c) => c.toUpperCase())));
+    ok(`§6 banners ${w}: live states (Coop Hand asleep, Market Hand unpaid, Hawker + Grader asleep) one line, Nunito 700 >= 12px, 14px moon/warning SVG, no emoji, aria with role`, liveOk, JSON.stringify(r.live));
+    ok(`§6 banners ${w}: longest strings fit on one line (full, or role dropped first only when needed)`, r.longest.every(x => x.fits && x.oneLine && (x.got === x.want || x.dropped)), JSON.stringify(r.longest));
+    ok(`§6 banners ${w}: forced narrow banner drops the role name ("Asleep: production stopped"), one line, not clipped`, r.fallback.text === LONG[0][1] && r.fallback.fits && r.fallback.oneLine, JSON.stringify(r.fallback));
+    if (FCS && (w === 360 || w === 1280)) { mkdirSync(FCS, { recursive: true }); await page.locator('.wk-banner').first().scrollIntoViewIfNeeded(); await page.screenshot({ path: `${FCS}/banners-${w}-${ENGINE}.png` }); }
     await ctx.close();
   }
 };

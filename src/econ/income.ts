@@ -64,6 +64,11 @@ export function incomePerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): n
   return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts);
 }
 
+/** Gross sales per second ($), before wages. */
+export const grossSalesPerSec = (s: GameState, b: Balance) => incomePerSec(s, b) + wagesPerSec(s, b);
+/** PM Workers ruling (a), one shared threshold (review 23a3798 #3): production is "stopped" only when gross sales round to $0.00/s.
+ *  A negative net rate (wages > sales) is not "stopped": production is running. Used by the header aria and the worker banners. */
+export const salesStopped = (s: GameState, b: Balance) => Math.round(grossSalesPerSec(s, b) * 100) <= 0;
 /** True when any hired worker is asleep/unpaid (Critic #3 / AC-R2). */
 export function productionStopped(s: GameState, b: Balance): boolean {
   for (const id of ['market_hand', 'coop_hand', 'hawker', 'grader'] as const) {
