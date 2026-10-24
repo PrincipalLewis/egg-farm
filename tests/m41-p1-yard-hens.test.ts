@@ -111,3 +111,20 @@ describe('M4.1-P1 yard hens + #henpill from the Hens track', () => {
     expect(sprites()).toBe(S.hens(1, off)); expect(pill().hidden).toBe(true);
   });
 });
+
+// CCR (reviews/pr69-c849ccf.md n1): the AC boundary "pill shown only when hens[H] > 12". The shipped CSV never lands on
+// 11-14 hens, so a synthetic balance puts hens[H] exactly on 12 and 13 (kills the `< 12` / `<= 11` / `<= 13` / `<= 14` mutants).
+const b12: Balance = { ...balance, farm: { ...balance.farm, hensBase: 12, hensPerLevel: 1 }, m4: { ...balance.m4!, enabled: 1 } };
+describe('M4.1-P1 boundary (CCR): hens[H] = 12 hidden, 13 shown', () => {
+  it('H with hens[H] = 12 (F≠H): 12 sprites, pill hidden', async () => {
+    await mount(b12, 5, 0); expect(S.hens(0, b12)).toBe(12); expect(S.hens(5, b12)).toBe(17);
+    expect(sprites()).toBe(12); expect(pill().hidden).toBe(true);
+  });
+  it('H with hens[H] = 13 (F≠H): 12 sprites, pill ×13 hens', async () => {
+    await mount(b12, 5, 1); expect(S.hens(1, b12)).toBe(13);
+    expect(sprites()).toBe(12); expect(pill()).toEqual({ hidden: false, text: '×13 hens' });
+  });
+  it('F with hens[F] = 13 but hens[H] = 12: pill hidden (Farm row ignored)', async () => {
+    await mount(b12, 1, 0); expect(S.hens(1, b12)).toBe(13); expect(pill().hidden).toBe(true);
+  });
+});
