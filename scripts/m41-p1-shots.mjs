@@ -41,10 +41,12 @@ const bannerInfo = page => page.evaluate(() => [...document.querySelectorAll('.w
 const hudClip = async (page, w) => { const bb = await page.locator('header.hud').boundingBox(); return { x: 0, y: 0, width: w, height: Math.ceil(bb.y + bb.height + 8) }; };
 const rateInfo = page => page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { rate: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, coins: document.querySelector('#coins').textContent }; });
 const MH_ASLEEP = { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 30, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
-const MH_UNPAID = { market_hand: { energy: 60, cdS: 0, unpaid: true }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 30, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
+// Unpaid views run at 0 coins (an Unpaid worker resumes once coins cover its wage), so every other hired worker would go Unpaid
+// too: those views hire only the role under test (plus the asleep Market Hand in the mixed view, whose wage is off while asleep).
+const MH_UNPAID = { market_hand: { energy: 60, cdS: 0, unpaid: true } };
 const CH_ASLEEP = { market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 0, cdS: 0 }, hawker: { energy: 90, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
-const CH_UNPAID = { market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 60, cdS: 0, unpaid: true }, hawker: { energy: 90, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
-const MH_ASLEEP_CH_UNPAID = { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 60, cdS: 0, unpaid: true }, hawker: { energy: 90, cdS: 0 }, grader: { energy: 90, cdS: 0 } };
+const CH_UNPAID = { coop_hand: { energy: 60, cdS: 0, unpaid: true } };
+const MH_ASLEEP_CH_UNPAID = { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 60, cdS: 0, unpaid: true } };
 for (const [w, h] of [[360, 800], [390, 844], [1280, 800]]) {
   // 1) Market Hand asleep / unpaid banners (final copy), Workers tab, full viewport
   // + Coop Hand copy (rc1-b1-coop-full v1.0.6, D-HOP-29) and the HoE own-state rule (Market Hand asleep + Coop Hand unpaid)
