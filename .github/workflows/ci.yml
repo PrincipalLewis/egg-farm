@@ -1,58 +1,80 @@
 name: ci
-on: [push, pull_request]
+# D-CEO-20261024-02 CI diet: one run per commit (push to main, or PR events), drafts skipped,
+# superseded runs cancelled, docs-only changes skipped, one shared `npm ci` for the gate.
+# Work PRs open as Draft and are marked Ready only at the gate SHA (ready_for_review triggers the run).
+# Paths (CCR M1 on #68): everything except Markdown and docs/, but Markdown that the gate reads or ships is re-included:
+# vendor/** (sha256-pinned seller-variance-proposal.md, check-vendor-pins), README.md (## Credits asserted by
+# tests/art-ux-rc0.test.ts), public/** (LICENSES.md shipped in dist), tests/** (fixtures). Order matters: later
+# patterns override earlier ones, so the re-includes must stay after the negations.
+on:
+  push:
+    branches: [main]
+    paths: ['**', '!**/*.md', '!docs/**', 'vendor/**', 'README.md', 'public/**', 'tests/**']
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths: ['**', '!**/*.md', '!docs/**', 'vendor/**', 'README.md', 'public/**', 'tests/**']
 permissions:
   contents: read
+concurrency:
+  # PRs: keyed on the PR number, and a newer commit cancels the older run. main pushes are keyed per SHA,
+  # so they never share a group and every main SHA gets a verdict.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
-  unit:
+  gate:
+    # Replaces unit + slow + release-globals (chromium) + release-html: same commands, one checkout, one `npm ci`.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: 20, cache: npm }
-      - run: npm ci
-      - run: npm test
-  slow:
-    # Slow suites (*.slow.test.ts, skipped by `npm test`): 100-seed seller-variance TS-vs-Python parity (PR #19). Always runs.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci
-      - run: npm run test:slow
-  release-globals:
-    # Required (QA rc1): release window globals must be exactly eggfarmExportTelemetry, in every engine.
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        engine: [chromium, webkit, firefox]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci
-      - name: Install browser (${{ matrix.engine }})
-        run: |
-          if [ "${{ matrix.engine }}" = chromium ]; then test -x /usr/bin/google-chrome; else npx playwright-core install --with-deps ${{ matrix.engine }}; fi
-      - name: Release build (includes check-release-build)
+      - name: npm ci
+        run: npm ci
+      - name: Unit tests (npm test; includes sync-economy --check)
+        run: npm test
+      - name: Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR #19)
+        run: npm run test:slow
+      - name: Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
         run: npm run build
-      - name: Release globals allowlist (${{ matrix.engine }})
-        run: npm run check-globals -- ${{ matrix.engine }}
-  release-html:
-    # PR #13 / Code Reviewer M1: the single-file release html must pass check-release-build (build id = HEAD,
-    # window globals = eggfarmExportTelemetry only, no external refs / sourcemaps / QA hooks).
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci
+      - name: Install browser (chromium)
+        run: test -x /usr/bin/google-chrome
+      - name: Release globals allowlist (chromium)
+        # Required (QA rc1): release window globals must be exactly eggfarmExportTelemetry. Serves dist/ from the build above.
+        run: npm run check-globals -- chromium
       - name: Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+        # PR #13 / Code Reviewer M1: build id = HEAD, window globals = eggfarmExportTelemetry only, no external refs / sourcemaps / QA hooks.
         run: npm run build:html
       - name: check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
         run: |
           prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
           node scripts/check-release-build.mjs dist-html/egg-farm.html --build-id "$prefix+$(git rev-parse --short HEAD)"
-      - uses: actions/upload-artifact@v4
-        with: { name: egg-farm-html, path: dist-html/egg-farm.html }
+      - name: Upload egg-farm-html artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with: { name: egg-farm-html, path: dist-html/egg-farm.html, retention-days: 14 }
+  release-globals:
+    # Required (QA rc1): release window globals must be exactly eggfarmExportTelemetry, in every engine.
+    # Chromium runs inside `gate`; Firefox/WebKit only on pushes to main and on non-draft PRs from rc/* branches (e.g. #67).
+    # rc/* branches are gated through their (ready) PR; a push to rc/* with no PR does not trigger CI.
+    # No draft guard here: `needs: gate` already skips this job whenever gate is skipped (draft PRs).
+    needs: gate
+    if: github.ref == 'refs/heads/main' || startsWith(github.head_ref, 'rc/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [webkit, firefox]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 20, cache: npm }
+      - name: npm ci
+        run: npm ci
+      - name: Install browser (${{ matrix.engine }})
+        run: npx playwright-core install --with-deps ${{ matrix.engine }}
+      - name: Release build (includes check-release-build)
+        run: npm run build
+      - name: Release globals allowlist (${{ matrix.engine }})
+        run: npm run check-globals -- ${{ matrix.engine }}
