@@ -525,14 +525,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     { const pend = pendingMilestones(s, b); if (pend.length) { g.dispatch({ type: 'markMilestones', ids: pend }); queueToasts(pend.map(id => milestoneToast(id, b))); } }
     renderQueue();
     if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
-    // hens
-    const hn = Math.min(S.hens(F, b), 12);
+    // hens: M4.1-P1, with M4 on the yard and #henpill follow the Hens track (CSV hens[hensLevel], the row eggs/s uses); M4 off keeps the legacy Farm count.
+    const hensN = m4On(b) ? S.hens(s.hensLevel, b) : S.hens(F, b);
+    const hn = Math.min(hensN, 12);
     if (hn !== henCount) {
       const order = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
       const slots = Array.from({ length: 12 }, (_, i) => `<span>${order.indexOf(i) < hn ? `<img class="hen ${i % 3 === 2 ? 'flip' : ''} ${henCount >= 0 && order.indexOf(i) >= henCount ? 'pop' : ''}" style="animation-delay:${(i * .15).toFixed(2)}s" src="${A('char-chicken.svg')}" alt="">` : ''}</span>`);
       yard.innerHTML = slots.join(''); henCount = hn;
     }
-    const hp = $('#henpill'); setHidden(hp, S.hens(F, b) <= 12); setText(hp, `×${fmtCount(S.hens(F, b))} hens`);
+    const hp = $('#henpill'); setHidden(hp, hensN <= 12); setText(hp, `×${fmtCount(hensN)} hens`);
     // meter, nest, full badge, collect label
     const atCap = s.coop >= cap;
     meterFill.style.width = `${Math.min(100, (s.coop / cap) * 100)}%`; meter.classList.toggle('atcap', atCap);
