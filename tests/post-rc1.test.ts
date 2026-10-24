@@ -39,7 +39,7 @@ describe('post-rc1 m-1: Manage all greyed during shared cooldown', () => {
   it('Workers tab pill: aria-disabled + is-cooldown, keeps countdown text and ring, like single Manage', () => {
     const html = manageAllHtml(s, b);
     expect(html).toContain('aria-disabled="true"'); expect(html).toContain('is-cooldown'); expect(html).toContain('ring-cooldown');
-    expect(html).toMatch(/0:16/);
+    expect(html).toMatch(/Ready in 16s/); // v1.3 caption (was "0:16"; rc1 7380b86)
     expect(workersHtml(s, b)).toMatch(/class="btn secondary manage is-cooldown"[^>]*aria-disabled="true"/);
     expect(manageAllHtml({ ...s, manageCdS: 0 }, b)).not.toContain('aria-disabled="true"');
   });

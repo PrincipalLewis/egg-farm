@@ -32,7 +32,9 @@ import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, type NavAria } from './workers-ui';
+import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
+import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -67,7 +69,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.innerHTML = '';
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
-    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="num" id="coins"></span></div>
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">$0/s</span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
@@ -85,11 +87,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="sr" aria-live="polite" id="goalLive"></div><div class="sr" id="goalDesc" aria-hidden="true"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
-  const nav = h(`<nav class="actions">
-    <button data-nav="market"><img src="${A('icon-market.svg')}" alt="">Market<span class="badge" hidden></span></button>
-    <button data-nav="upgrades"><img src="${A('icon-upgrade.svg')}" alt="">Upgrades<span class="badge" hidden></span></button>
-    <button class="btn manage farm-manage-all desk-manage-all" data-act="manageAll" hidden aria-label="Manage all"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span></button>
-    <button data-nav="farm"><img src="${A('icon-coop.svg')}" alt="">Farm</button></nav>`);
+  // S2-5 (art-ux/reviews/session2-ui-triage.md (b)) + AC-R1/R5: every nav button = icon + visible label + aria-label; the Upgrades
+  // icon carries the asleep count badge (.nav-ic, top-right -6/-6); the Refill button shows "Refill" + N (AC-R9 aria). Ported from rc1 7380b86.
+  const nav = h(`<nav class="actions" aria-label="Main">
+    <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
+    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span><span class="nav-lbl">Upgrades</span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span><span class="count-badge num" hidden></span></button>
+    <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
@@ -183,7 +187,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
-  let farmMAShown = false;
+  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate');
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
@@ -374,7 +378,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const from = (at?.isConnected ? at : queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
     const x = Math.min(Math.max(c.x, 48), innerWidth - 48), y = Math.max(c.y - 20, 40);
     spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyExact(cents)}</div>`), 650);
-    if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
+    if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, (coinsEl.closest('.pill') as HTMLElement), i, 20, i === 0 ? () => pulse((coinsEl.closest('.pill') as HTMLElement)) : undefined);
   };
 
   // ---------- Game events ----------
@@ -384,8 +388,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         dwell.sold(e.id, e.value);
         income.add(now(), e.value); sfx('sell');
         const src = lastSellSource ?? sellAllBtn;
-        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
-        else pulse(coinsEl.parentElement!);
+        if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, (coinsEl.closest('.pill') as HTMLElement), i, 20, i === 0 ? () => pulse((coinsEl.closest('.pill') as HTMLElement)) : undefined);
+        else pulse((coinsEl.closest('.pill') as HTMLElement));
         floatText(`+${fmtMoneyExact(e.value)}`, src, 'coin'); break;
       }
       case 'customer_arrive': sfx('customerArrive'); break;
@@ -528,6 +532,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   function render() {
     const s = g.state, F = s.farmLevel, cap = coopCap(s, b), coopWhole = Math.floor(s.coop);
     setText(coinsEl, fmtMoney(s.coinsCents)); setText(basketEl, fmtCount(s.basket));
+    // S2-8 / AC-R2 HUD net rate (<= 1 update/s, real incomePerSec from the live worker moods); first negative tick shakes the line (not under reduced motion)
+    if (now() - rateAt >= 1000) { rateAt = now();
+      const v = headerRate(s, b); // ruling (a): real rate; aria ', sales stopped' only for a stalled Market Hand (HoE Oct 24)
+      setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
+      if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
+      if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
     // coop tier + celebration (once per first reach, persisted in save)
     const tier = S.coopTier(F);
     if (tier !== lastTier) { coopImg.src = A(COOP_SPRITES[tier]); lastTier = tier; }
@@ -540,14 +550,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     { const pend = pendingMilestones(s, b); if (pend.length) { g.dispatch({ type: 'markMilestones', ids: pend }); queueToasts(pend.map(id => milestoneToast(id, b))); } }
     renderQueue();
     if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
-    // hens
-    const hn = Math.min(S.hens(F, b), 12);
+    // hens: M4.1-P1, with M4 on the yard and #henpill follow the Hens track (CSV hens[hensLevel], the row eggs/s uses); M4 off keeps the legacy Farm count.
+    const hensN = m4On(b) ? S.hens(s.hensLevel, b) : S.hens(F, b);
+    const hn = Math.min(hensN, 12);
     if (hn !== henCount) {
       const order = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
       const slots = Array.from({ length: 12 }, (_, i) => `<span>${order.indexOf(i) < hn ? `<img class="hen ${i % 3 === 2 ? 'flip' : ''} ${henCount >= 0 && order.indexOf(i) >= henCount ? 'pop' : ''}" style="animation-delay:${(i * .15).toFixed(2)}s" src="${A('char-chicken.svg')}" alt="">` : ''}</span>`);
       yard.innerHTML = slots.join(''); henCount = hn;
     }
-    const hp = $('#henpill'); setHidden(hp, S.hens(F, b) <= 12); setText(hp, `×${fmtCount(S.hens(F, b))}\u00a0hens`);
+    const hp = $('#henpill'); setHidden(hp, hensN <= 12); setText(hp, `×${fmtCount(hensN)}\u00a0hens`);
     // meter, nest, full badge, collect label
     const atCap = s.coop >= cap;
     meterFill.style.width = `${Math.min(100, (s.coop / cap) * 100)}%`; meter.classList.toggle('atcap', atCap);
@@ -562,12 +573,32 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
     { const mk = nav.querySelector('[data-nav=market]') as HTMLElement, qf = queueFull(s, b) ? 'true' : 'false'; if (mk.dataset.queueFull !== qf) mk.dataset.queueFull = qf; } // S2-9 badge hook (Art & UX styles it)
-    setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, !canUp);
+    // AC-R1 / AC-R5 (v1.4 §7): asleep/unpaid count badge on the Upgrades nav icon + the Workers tab; replaces the affordable dot while count > 0; one pulse on first show.
+    { const n = asleepOrUnpaidCount(s, b);
+      setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, n > 0 || !canUp);
+      const ensure = (host: Element | null) => {
+        if (!host) return null;
+        let ab = host.querySelector('.asleep-badge') as HTMLElement | null;
+        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(ab); }
+        return ab;
+      };
+      for (const ab of [ensure(nav.querySelector('[data-nav=upgrades] .nav-ic')), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
+        if (!ab) continue;
+        const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
+        if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
+      }
+      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement;
+      const al = n > 0 ? `Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
+      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al); }
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
       setHidden(fb, !farmMAShown);
-      if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r; }
+      if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
+        // S2-5 / AC-R9: visible "Refill" (or the aria-hidden "0:NN" countdown) + N badge; aria "Refill N tired workers" / "Refill, cooling down"
+        const v = navRefillState(s, b, docked.matches, maAria, now());
+        { const nl = fb.querySelector('.nav-lbl')!; setText(nl, v.label); const ah = v.hideLabel ? 'true' : 'false'; if (nl.getAttribute('aria-hidden') !== ah) nl.setAttribute('aria-hidden', ah); } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+        maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
     // market panel
@@ -587,7 +618,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
-      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
@@ -638,7 +669,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (introA) { const hide = modalKind === 'welcome' || !!open; if (introA.hidden !== hide) introA.hidden = hide; }
   };
   const unlockFarmMH = b.workers.market_hand.unlock_farm, hireCostMH = b.workers.market_hand.hire_cost * 100;
-  // Part B: first hire (any worker) -> energy bar, then Manage. Once per save.
+  // Part B: first hire (any worker) -> energy bar, then Refill. Once per save.
   g.on(e => {
     if (e.type !== 'worker_hire' || flags.workersIntroB) return;
     flags.workersIntroB = true; saveFlags(); introBStage = 1; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'shown' });
@@ -648,7 +679,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       coach('Workers get tired over time.', row?.querySelector('.ebar') ?? row ?? null, 3000);
       window.setTimeout(() => {
         const r2 = workerRow(e.worker), full = (g.state.workers[e.worker]?.energy ?? 0) >= 100;
-        coach(full ? 'Tap <b>Manage</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Manage</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
+        coach(full ? 'Tap <b>Refill</b> to perk them up!<br>…when their energy drops.' : 'Tap <b>Refill</b> to perk them up!', r2?.querySelector('[data-act=manage]') ?? r2 ?? null, 6000);
         introBStage = 2; g.telemetry.onboardingStep(7, 'workers_coach', { action: 'done' });
       }, 3100);
     }, 50);
@@ -701,6 +732,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   let gateT = 0; let onbFlow: OnboardingFlow | null = null;
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
+  // AC-R1 §6: banners refit on resize / dock change (wider or narrower card); QA-only hook for the rc0 bannerFit section, compiled out of release.
+  { const refit = () => fitBanners(uRow); addEventListener('resize', refit); docked.addEventListener?.('change', refit); }
+  if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
