@@ -1,0 +1,849 @@
+{
+ "F1 no MH": {
+  "income_working": 1.5,
+  "demand_working": 2.526316,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.025032,
+   "bundlePayback": 39.948718
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": 0,
+    "cost": 135,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 16,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 33,
+    "label": "★ Hens L1 · +33% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 18,
+    "label": "Egg value L1 · +18% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L2: +5/tap"
+   }
+  ],
+  "income_live": 1.5,
+  "demand_live": 2.526316,
+  "eta_1000": 666.666667
+ },
+ "F6 MH working": {
+  "income_working": 1.475,
+  "demand_working": 8.559783,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.038462,
+   "bundlePayback": 26
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.004167,
+    "cost": 560,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 65,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 33,
+    "label": "★ Hens L1 · +33% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 18,
+    "label": "Egg value L1 · +18% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L5: +5/tap"
+   }
+  ],
+  "income_live": 1.475,
+  "demand_live": 8.559783,
+  "eta_1000": 677.966102
+ },
+ "F6 MH tired": {
+  "income_working": 1.475,
+  "demand_working": 8.559783,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.038462,
+   "bundlePayback": 26
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.004167,
+    "cost": 560,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 65,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 33,
+    "label": "★ Hens L1 · +33% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 18,
+    "label": "Egg value L1 · +18% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L5: +5/tap"
+   }
+  ],
+  "income_live": 1.475,
+  "demand_live": 8.559783,
+  "eta_1000": 677.966102
+ },
+ "F6 MH asleep": {
+  "income_working": 1.475,
+  "demand_working": 8.559783,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.038462,
+   "bundlePayback": 26
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.004167,
+    "cost": 560,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 65,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 33,
+    "label": "★ Hens L1 · +33% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 18,
+    "label": "Egg value L1 · +18% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L5: +5/tap"
+   }
+  ],
+  "income_live": 1.5,
+  "demand_live": 8.559783,
+  "eta_1000": 666.666667
+ },
+ "F6 MH unpaid": {
+  "income_working": 1.475,
+  "demand_working": 8.559783,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.038462,
+   "bundlePayback": 26
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.004167,
+    "cost": 560,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 65,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 33,
+    "label": "★ Hens L1 · +33% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 18,
+    "label": "Egg value L1 · +18% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L5: +5/tap"
+   }
+  ],
+  "income_live": 1.5,
+  "demand_live": 8.559783,
+  "eta_1000": 666.666667
+ },
+ "F6 MH paused asleep": {
+  "income_working": 1.475,
+  "demand_working": 8.559783,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.038462,
+   "bundlePayback": 26
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.004167,
+    "cost": 560,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 65,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 33,
+    "label": "★ Hens L1 · +33% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 18,
+    "label": "Egg value L1 · +18% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L5: +5/tap"
+   }
+  ],
+  "income_live": 1.5,
+  "demand_live": 8.559783,
+  "eta_1000": 666.666667
+ },
+ "F12 MH asleep + CH/Hawker": {
+  "income_working": 1.35,
+  "demand_working": 19.907407,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.038462,
+   "bundlePayback": 26
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.0125,
+    "cost": 2138,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 687,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 37,
+    "label": "★ Hens L1 · +37% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 20,
+    "label": "Egg value L1 · +20% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L10: +5/tap"
+   }
+  ],
+  "income_live": 1.4,
+  "demand_live": 19.907407,
+  "eta_1000": 714.285714
+ },
+ "F12 MH unpaid + CH/Hawker asleep": {
+  "income_working": 1.35,
+  "demand_working": 19.907407,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.5,
+   "payback": 40,
+   "bundleScore": 0.038462,
+   "bundlePayback": 26
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.0125,
+    "cost": 2138,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.5,
+    "cost": 20,
+    "payback": 40
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "cost": 20,
+    "payback": 74.074074
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 687,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 37,
+    "label": "★ Hens L1 · +37% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 20,
+    "label": "Egg value L1 · +20% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L10: +5/tap"
+   }
+  ],
+  "income_live": 1.5,
+  "demand_live": 15.925926,
+  "eta_1000": 666.666667
+ },
+ "F20 all + grader, MH asleep": {
+  "income_working": 2,
+  "demand_working": 32.122905,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.75,
+   "payback": 26.666667,
+   "bundleScore": 0.057692,
+   "bundlePayback": 17.333333
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL",
+   "W4"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.0125,
+    "cost": 31050,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.75,
+    "cost": 20,
+    "payback": 26.666667
+   },
+   "VALUE": {
+    "gain": 0.405,
+    "cost": 20,
+    "payback": 49.382716
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 11529,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": {
+    "gain": 0.75,
+    "cost": 9100,
+    "payback": 12133.333333
+   }
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 37,
+    "label": "★ Hens L1 · +37% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 20,
+    "label": "Egg value L1 · +20% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L16: +5/tap"
+   }
+  ],
+  "income_live": 2.083333,
+  "demand_live": 32.122905,
+  "eta_1000": 480
+ },
+ "F15 H12 V8 MH asleep (demand-bound)": {
+  "income_working": 42.9725,
+  "demand_working": 24.24569,
+  "pick": {
+   "key": "VALUE",
+   "cost": 328,
+   "gain": 4.29,
+   "payback": 76.456876,
+   "bundleScore": 0.023191,
+   "bundlePayback": 43.12026
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.0125,
+    "cost": 4844,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 3.32,
+    "cost": 838,
+    "payback": 252.409639
+   },
+   "VALUE": {
+    "gain": 4.29,
+    "cost": 328,
+    "payback": 76.456876
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 7205,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 7,
+    "label": "Hens L13 · +7% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 9,
+    "label": "★ Egg value L9 · +9% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L15: +5/tap"
+   }
+  ],
+  "income_live": 43.035,
+  "demand_live": 24.24569,
+  "eta_1000": 23.2369
+ },
+ "F15 H12 V8 MH working (demand-bound)": {
+  "income_working": 42.9725,
+  "demand_working": 24.24569,
+  "pick": {
+   "key": "VALUE",
+   "cost": 328,
+   "gain": 4.29,
+   "payback": 76.456876,
+   "bundleScore": 0.023191,
+   "bundlePayback": 43.12026
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.0125,
+    "cost": 4844,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 3.32,
+    "cost": 838,
+    "payback": 252.409639
+   },
+   "VALUE": {
+    "gain": 4.29,
+    "cost": 328,
+    "payback": 76.456876
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 7205,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": null
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 7,
+    "label": "Hens L13 · +7% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 9,
+    "label": "★ Egg value L9 · +9% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L15: +5/tap"
+   }
+  ],
+  "income_live": 42.9725,
+  "demand_live": 24.24569,
+  "eta_1000": 23.270696
+ },
+ "F25 H20 V15 MH unpaid": {
+  "income_working": 308.3875,
+  "demand_working": 39.583333,
+  "pick": {
+   "key": "VALUE",
+   "cost": 3459,
+   "gain": 22.26,
+   "payback": 155.390836,
+   "bundleScore": 0.006435,
+   "bundlePayback": 155.390836
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL",
+   "W4"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.0125,
+    "cost": 97461,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 14.7,
+    "cost": 6841,
+    "payback": 465.37415
+   },
+   "VALUE": {
+    "gain": 22.26,
+    "cost": 3459,
+    "payback": 155.390836
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 309485,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": {
+    "gain": 77.175,
+    "cost": 20330,
+    "payback": 263.427276
+   }
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 4,
+    "label": "Hens L21 · +4% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 7,
+    "label": "Egg value L16 · +7% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L23: +5/tap"
+   }
+  ],
+  "income_live": 177.294167,
+  "demand_live": 39.583333,
+  "eta_1000": 5.640343
+ },
+ "F20 all + grader, MH working": {
+  "income_working": 2,
+  "demand_working": 32.122905,
+  "pick": {
+   "key": "HENS",
+   "cost": 20,
+   "gain": 0.75,
+   "payback": 26.666667,
+   "bundleScore": 0.057692,
+   "bundlePayback": 17.333333
+  },
+  "options": [
+   "FARM",
+   "HENS",
+   "VALUE",
+   "COLL",
+   "W4"
+  ],
+  "gains": {
+   "FARM": {
+    "gain": -0.0125,
+    "cost": 31050,
+    "payback": null
+   },
+   "HENS": {
+    "gain": 0.75,
+    "cost": 20,
+    "payback": 26.666667
+   },
+   "VALUE": {
+    "gain": 0.405,
+    "cost": 20,
+    "payback": 49.382716
+   },
+   "COLL": {
+    "gain": 0,
+    "cost": 11529,
+    "payback": null
+   },
+   "W1": null,
+   "W2": null,
+   "W3": null,
+   "W4": {
+    "gain": 0.75,
+    "cost": 9100,
+    "payback": 12133.333333
+   }
+  },
+  "goal": [
+   {
+    "k": "HENS",
+    "x": 37,
+    "label": "★ Hens L1 · +37% income"
+   },
+   {
+    "k": "VALUE",
+    "x": 20,
+    "label": "Egg value L1 · +20% income"
+   },
+   {
+    "k": "COLL",
+    "x": null,
+    "label": "Collection L16: +5/tap"
+   }
+  ],
+  "income_live": 2,
+  "demand_live": 32.122905,
+  "eta_1000": 500
+ }
+}
