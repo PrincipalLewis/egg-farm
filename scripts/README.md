@@ -24,7 +24,7 @@ What it does, in order:
 | 1 | A check failed. See `checks[]`: build id mismatch, NaN / Infinity / negative values, golden mismatch, or a missing or wrong build label. |
 | 2 | Usage error, or a profile that isn't available yet. |
 | 3 | Build failure. |
-| 4 | Save round-trip failed (VER-1a, CCR R1 on #71): the save handed to the browser doesn't load back as the run's end state with `src/save/save.ts` `validate()` (migrated on load, e.g. a missing `tracksV7` marker, or F/H/V/C, Grader tier, workers or coins differ). The browser step is skipped and no `verify.png` is written. |
+| 4 | Save round-trip failed (VER-1a/1b, CCR R1 on #71, F1 on #72). The save handed to the browser doesn't load back as the run's end state under the **shipped** balance (`src/config/balance.json`, the one the built html runs) with `src/save/save.ts` `validate()`. That covers: migrated on load (for example a missing `tracksV7` marker), F/H/V/C, Grader tier, workers or coins differing, or **`--flags` changing a shipped flag**. The browser step is skipped and no `verify.png` is written. **4 takes precedence over 1:** when the round-trip and another check both fail, the exit code is 4, and `checks[]` still lists every failure. |
 
 Runtime: about 20 s for `--hours 24` locally (build about 5 s, sim about 8 s, goldens about 2 s, browser about 3 s).
 
@@ -35,7 +35,15 @@ Both GOLDEN1 sim-trace hashes are recomputed on the shipped balance every run:
 - **flagOff** is pinned to `f90d1678` (`engineering/golden/flagoff-golden.a01faea.test.ts`). It is always enforced.
 - **m4On** is pinned to `a54c9cf9` (`engineering/golden/m4on-golden.90a9c84.test.ts`). It is enforced unless `--flags` changes a shipped flag. In that case it is reported but not enforced.
 
-### `verify.json` (schemaVersion 2)
+### `--flags` and the screenshot (VER-1b, CCR F1 on #72)
+
+`--flags` changes only the headless run. The built html always runs the shipped flags. A screenshot of a `--flags` run would show a farm the build can't reproduce: with `m4.enabled=0` it showed a migrated M4 farm (H30/V20, "Egg value L21") that the run never had.
+
+So when `--flags` changes a shipped flag, verify is honest rather than partial. It exits **4**, takes no screenshot, and records `saveRoundTrip.flagsDifferFromBuild: true` and `screenshot.skippedReason: "flags differ from build"`. The checkpoints, trace and goldens in `verify.json` are still the valid result of the flag run.
+
+An exit 4 with `flagsDifferFromBuild: true` is the expected outcome of a `--flags` experiment, not a game defect. To verify a flag-off build, change the flag in `src/config/balance.json`, build and run verify without `--flags`.
+
+### `verify.json` (schemaVersion 3)
 
 | Field | Content |
 |---|---|
@@ -44,10 +52,10 @@ Both GOLDEN1 sim-trace hashes are recomputed on the shipped balance every run:
 | `seed`, `hours`, `profile`, `flags`, `flagsOverridden` | The run's inputs. Flags are the effective values (balance.json plus overrides). |
 | `sim` | `{ tickHz, ticks, tickPath, bot }` |
 | `checkpoints[]` | At 1 h, then every N/4 (those of 1 h or more), ending at N. Each holds `hours`, `tick`, `eggs { coop, basket, collected, sold }`, `coinsCents`, `levels { farm, hens, eggValue, collection, graderTier }` and `workers { <id>: { state, energyPct } }`. |
-| `saveRoundTrip` | Added in schemaVersion 2: `{ pass, validator, ok, reason, migrated, tracksMigrated, version, fields, mismatches: [{ field, saved, end }] }`. It shows `validate()` of the exact save the browser gets, compared with `run.end`. A failure exits 4. |
+| `saveRoundTrip` | Added in schemaVersion 2 (`balance`, `flagsDifferFromBuild` added in 3): `{ pass, validator, ok, reason, migrated, tracksMigrated, version, fields, mismatches: [{ field, saved, end }] }`. It shows `validate()` of the exact save the browser gets, compared with `run.end`. A failure exits 4. |
 | `trace` | `{ name, sha256, events }`. The AC7 trace hash: every sim event of the run, plus the end state. |
 | `goldens[]` | `{ name: flagOff, m4On; source; expected; actual; pass }` |
-| `screenshot` | `{ file, viewport, browser, label, dataBuildId, metaBuildId, pageErrors }` |
+| `screenshot` | `{ skippedReason (3), file, viewport, browser, label, dataBuildId, metaBuildId, pageErrors }` |
 | `checks[]`, `result` | `{ id, pass, detail }`, and `PASS` or `FAIL`. |
 
 `verify.json` has no timestamps, durations, absolute paths, user or host names, or tokens. Paths are repo-relative, and a `no-private-data` check fails the run if anything token-, e-mail- or home-path-like is left.

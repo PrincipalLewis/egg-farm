@@ -2,7 +2,8 @@
 // 1 build:html from HEAD (build id + asset sha256), 2 N hours of seeded play on the real fixed-step sim, 3 verify.json,
 // 4 the built html with the end state in headless Chromium -> verify.png (390x844, build label), 5 non-zero exit on failure.
 // Exit codes: 0 PASS, 1 a check failed (see verify.json checks[]), 2 usage / unavailable profile, 3 build failed,
-// 4 the end-state save does not load back as the end state (saveRoundTrip; no browser step, no PNG).
+// 4 the end-state save does not load back as the end state under the shipped balance, or --flags differ from the build
+// (saveRoundTrip; no browser step, no PNG). 4 takes precedence over 1.
 // Studio tooling only: reads src/, writes only <out>/verify.json + verify.png (default verify-out/<buildId>/, git-ignored).
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -18,7 +19,7 @@ import { goldens } from './verify/golden';
 import { saveRoundTrip, ROUNDTRIP_FIELDS } from './verify/roundtrip';
 import { parseArgs, flagsOf, withFlags, sanitize, leaks, UsageError, USAGE } from './verify/cli';
 
-export const SCHEMA_VERSION = 2; // 2 (VER-1a): + saveRoundTrip, + checks[] save-roundtrip
+export const SCHEMA_VERSION = 3; // 2 (VER-1a): + saveRoundTrip, + checks[] save-roundtrip; 3 (VER-1b): + saveRoundTrip.balance/flagsDifferFromBuild, + screenshot.skippedReason
 /** savedAt of the end-state save: a fixed epoch + the simulated time (no wall clock anywhere in the output). */
 export const VERIFY_EPOCH_MS = Date.UTC(2026, 0, 1);
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -78,8 +79,12 @@ function main(): number {
   const endToSave = skipMarker ? run.end : markFreshM4(run.end, b);
   const raw = save(mem, { ...endToSave, seenTracksExplainer: true }, savedAt, b); // marked like a fresh M4 farm (QA-D-1027-GOALPILL)
   // CCR R1: the exact bytes the browser gets must validate back to run.end, unmigrated; else exit 4 before any browser step.
-  const rt = saveRoundTrip(raw, run.end, b);
-  check('save-roundtrip', rt.pass, rt.pass ? 'validate(raw) = run.end (not migrated; F/H/V/C, Grader tier, workers, coins equal)'
+  // CCR F1 on #72: validate with the SHIPPED balance, the one the built html runs, never the --flags one. When --flags changes
+  // a shipped flag, the build cannot reproduce this farm, so the round-trip fails outright (exit 4, no screenshot).
+  const rt0 = saveRoundTrip(raw, run.end, shipped), flagsDifferFromBuild = overridden;
+  const rt = { ...rt0, pass: rt0.pass && !flagsDifferFromBuild };
+  check('save-roundtrip', rt.pass, rt.pass ? 'validate(raw, shipped balance) = run.end (not migrated; F/H/V/C, Grader tier, workers, coins equal)'
+    : flagsDifferFromBuild ? `--flags differ from the build's shipped flags (${Object.keys(o.flags).filter(k => o.flags[k] !== flagsOf(shipped)[k]).map(k => `${k}=${o.flags[k]} vs ${flagsOf(shipped)[k]}`).join(', ')}): the built html cannot show this run's farm; round-trip under the shipped balance ${rt0.pass ? 'passes' : `fails (${rt0.migrated ? 'migrated' : 'not migrated'}; mismatches: ${rt0.mismatches.map(m => m.field).join(', ') || 'none'})`}`
     : !rt.ok ? `validate failed: ${rt.reason}` : `${rt.migrated ? `migrated on load (tracksMigrated ${rt.tracksMigrated}, version ${rt.version})` : 'not migrated'}; mismatches: ${rt.mismatches.map(m => m.field).join(', ') || 'none'}`);
   let shot: any = { ok: false, skipped: o.noShot };
   const png = join(outDir, 'verify.png');
@@ -97,7 +102,7 @@ function main(): number {
     if (!shot.ok) rmSync(png, { force: true });
   }
   const labelWant = `Egg Farm ${buildId}`;
-  check('build-label', !!shot.ok && shot.label === labelWant && shot.dataBuildId === buildId, shot.ok ? `label ${JSON.stringify(shot.label)}, #app data-build-id ${shot.dataBuildId}` : `no screenshot: ${shot.error ?? (o.noShot ? '--no-shot' : !rt.pass ? 'skipped: save-roundtrip failed' : 'unknown')}`);
+  check('build-label', !!shot.ok && shot.label === labelWant && shot.dataBuildId === buildId, shot.ok ? `label ${JSON.stringify(shot.label)}, #app data-build-id ${shot.dataBuildId}` : `no screenshot: ${shot.error ?? (o.noShot ? '--no-shot' : flagsDifferFromBuild ? 'skipped: --flags differ from the build' : !rt.pass ? 'skipped: save-roundtrip failed' : 'unknown')}`);
   // 3. verify.json (deterministic: no timestamps, durations or absolute paths)
   const report = {
     schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts',
@@ -107,10 +112,10 @@ function main(): number {
     flags: { ...flagsOf(shipped), ...o.flags }, flagsOverridden: overridden,
     sim: { tickHz: b.tickHz, ticks: run.ticks, tickPath: 'src/sim/tick.ts advance() per 1000 ms, then input (build order)', bot: 'AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s' },
     checkpoints: run.checkpoints,
-    saveRoundTrip: { pass: rt.pass, validator: rt.validator, ok: rt.ok, reason: rt.reason, migrated: rt.migrated, tracksMigrated: rt.tracksMigrated, version: rt.version, fields: [...ROUNDTRIP_FIELDS], mismatches: rt.mismatches, markerSkippedForTest: skipMarker || undefined },
+    saveRoundTrip: { pass: rt.pass, balance: 'shipped (src/config/balance.json, what the built html runs)', flagsDifferFromBuild, validator: rt.validator, ok: rt.ok, reason: rt.reason, migrated: rt.migrated, tracksMigrated: rt.tracksMigrated, version: rt.version, fields: [...ROUNDTRIP_FIELDS], mismatches: rt.mismatches, markerSkippedForTest: skipMarker || undefined },
     trace: { name: 'AC7 trace hash (every sim event of the run + end state)', sha256: run.traceSha256, events: run.events },
     goldens: gs.map(g => ({ name: g.name, source: g.source, expected: g.expected, actual: g.actual, pass: g.pass })),
-    screenshot: { file: shot.ok && existsSync(png) ? 'verify.png' : null, viewport: '390x844', browser: 'chromium (headless)', label: shot.label ?? null, dataBuildId: shot.dataBuildId ?? null, metaBuildId: shot.metaBuildId ?? null, pageErrors: (shot.pageErrors ?? []).length },
+    screenshot: { skippedReason: o.noShot ? '--no-shot' : flagsDifferFromBuild ? 'flags differ from build' : !rt.pass ? 'save-roundtrip failed' : null, file: shot.ok && existsSync(png) ? 'verify.png' : null, viewport: '390x844', browser: 'chromium (headless)', label: shot.label ?? null, dataBuildId: shot.dataBuildId ?? null, metaBuildId: shot.metaBuildId ?? null, pageErrors: (shot.pageErrors ?? []).length },
     checks, result: checks.every(c => c.pass) ? 'PASS' : 'FAIL',
   };
   // Public repo (DoD 9): sanitise paths / user / host, then refuse to ship anything that still looks private.
@@ -122,7 +127,7 @@ function main(): number {
   writeFileSync(join(outDir, 'verify.json'), text);
   const rel = relative(process.cwd(), outDir) || '.';
   log(`${report.result} ${buildId} seed ${o.seed} ${o.hours} h: trace ${run.traceSha256.slice(0, 12)}, goldens ${gs.map(g => `${g.name} ${g.pass ? 'ok' : 'MISMATCH'}`).join(', ')}, label ${shot.ok ? 'ok' : 'missing'} -> ${rel}/verify.json${shot.ok ? ', verify.png' : ''} (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
-  if (!rt.pass) return 4; // CCR R1: its own code, so CI and QA can tell a wrong-farm screenshot from other check failures
+  if (!rt.pass) return 4; // CCR R1: its own code, so CI and QA can tell a wrong-farm screenshot from other check failures; takes precedence over 1 (CCR N1 on #72)
   return report.result === 'PASS' ? 0 : 1;
 }
 process.exitCode = main();
