@@ -5,3 +5,4 @@ vite.config.ts.timestamp-*
 qa-out/
 __pycache__/
 dist-html
+verify-out/

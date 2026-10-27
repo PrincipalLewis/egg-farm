@@ -1,0 +1,46 @@
+name: verify-smoke
+# VER-1 (D-CEO-20261027-02): `npm run verify -- --hours 1` on the PR head, uploaded as the `verify-out` artifact.
+# Runs ONLY when a PR is marked Ready for review, or by hand (Actions > verify-smoke > Run workflow). Never on push, never on
+# opened/synchronize, so it adds nothing to the per-commit cost of ci.yml. Not a required check (branch protection unchanged)
+# until HoE flips it.
+on:
+  pull_request:
+    types: [ready_for_review]
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: 'Simulated hours (verify --hours)'
+        required: false
+        default: '1'
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify-smoke:
+    # Guard on the action too, so a future extra trigger type cannot make this run on every push.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action == 'ready_for_review')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # PRs: the head commit itself (not the merge ref), so verify.json's sha / build id is the SHA under review.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 20, cache: npm }
+      - name: npm ci
+        run: npm ci
+      - name: Browser (chromium, preinstalled google-chrome)
+        run: test -x /usr/bin/google-chrome
+      - name: npm run verify -- --hours N
+        env:
+          HOURS: ${{ inputs.hours || '1' }}
+        run: |
+          case "$HOURS" in (''|*[!0-9.]*) echo "hours must be a number, got: $HOURS"; exit 2;; esac
+          npm run verify -- --hours "$HOURS" --out verify-out/ci
+      - name: Upload verify-out artifact (verify.json + verify.png)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with: { name: verify-out, path: verify-out/ci, retention-days: 14, if-no-files-found: warn }
