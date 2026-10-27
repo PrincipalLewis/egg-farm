@@ -15,7 +15,7 @@ What it does, in order:
 1. **Build.** `npm run build:html` from HEAD into `dist-html/egg-farm.html`. It records the build id (`m4.1+<short sha>`, with `+dirty` when the tree has uncommitted changes) and the asset's sha256. On a dirty tree it runs the same steps minus `check-release-build`, which refuses `+dirty` by design, and says so in `asset.build`.
 2. **Run.** It fast-forwards N hours of seeded play through the real fixed-step sim (`src/sim/tick.ts` `advance()`, then input, in the build's order). It runs headless and reads no wall clock. Profile `idle` is the AC7 workers bot (`tests/bot-m2.ts` `runM2`, seller15, managed, no variance), and `tests/verify.test.ts` pins it to `runM2`.
 3. **Report.** It writes `verify.json` (schema below). Two runs at the same SHA, seed and flags give byte-identical JSON.
-4. **Screenshot.** It loads the built html with the end state in headless Chromium (playwright-core, `/usr/bin/google-chrome` or `CHROME=`). The page clock is frozen at the save time. It opens Settings, where the game shows its build label (`Egg Farm <build id>`), and saves one 390x844 `verify.png`.
+4. **Screenshot.** It loads the built html with the end state in headless Chromium (playwright-core, `/usr/bin/google-chrome` or `CHROME=`). The end state is saved marked like a fresh M4 farm (`tracksV7: 1` plus a fixed `v6BackupId`, as `src/game.ts` does), so the load doesn't price-match it as a pre-M4 save. The page clock is frozen at the save time. It opens Settings, where the game shows its build label (`Egg Farm <build id>`), and saves one 390x844 `verify.png`.
 5. **Exit code.** It exits non-zero on failure:
 
 | Code | Meaning |
@@ -53,7 +53,7 @@ Both GOLDEN1 sim-trace hashes are recomputed on the shipped balance every run:
 ### Profiles
 
 - `idle` is available.
-- `m5x-casual` is refused with exit 2 until `tests/bot-m5.ts` (the Q-ZG-H3 casual-profile port) is on main.
+- `m5x-casual` is refused with exit 2: "needs tests/bot-m5.ts (M5.1, on Vadim go)".
 
 `--skip-build` and `--no-shot` are for development only. Both are recorded in `verify.json`, and `--no-shot` fails the label check.
 

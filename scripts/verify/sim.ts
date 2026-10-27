@@ -14,10 +14,20 @@ import { WORKERS, mood, showManageAll, hireCostCents, unlockFarm, graderTierCost
 import { m4On } from '../../src/config/formulas';
 import { pickBuy, pickAction, M1_KEYS } from '../../tests/bot-m4';
 
+/** Fixed v6BackupId for verify's end-state save (MIGRATION_ID_HEX = 16 hex chars). A constant: no time, no randomness. */
+export const VERIFY_V6_BACKUP_ID = '7e51f1ed00000001';
+/** QA-D-1027-GOALPILL: mark the state the way Game marks a fresh M4 farm (src/game.ts:87, tracksV7 + v6BackupId), so the
+ *  built html loads it as-is instead of running the one-time v6 price-match (src/save/save.ts migrate). Flag off: unchanged.
+ *  Applied to the SAVED end state only, not the run: the sim never reads the marker, but the trace hash covers the end state,
+ *  so marking the run would move the trace for no change in play. */
+export function markFreshM4<T extends GameState>(s: T, b: Balance): T {
+  return m4On(b) ? { ...s, tracksV7: 1, v6BackupId: VERIFY_V6_BACKUP_ID } : s;
+}
+
 export const PROFILES = ['idle', 'm5x-casual'] as const;
 export type Profile = typeof PROFILES[number];
 /** Profiles that need code which is not on main yet. `m5x-casual` = tests/bot-m5.ts (Q-ZG-H3 port, Features 95daf662). */
-export const UNAVAILABLE: Partial<Record<Profile, string>> = { 'm5x-casual': 'needs tests/bot-m5.ts (the Q-ZG-H3 casual-profile port), which is not on main yet' };
+export const UNAVAILABLE: Partial<Record<Profile, string>> = { 'm5x-casual': 'needs tests/bot-m5.ts (M5.1, on Vadim go)' }; // HoE ruling (3)
 const SELL_EVERY_S = 15; // runM2 default check-in interval
 const USE: readonly WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
 const WKEY = { W1: 'market_hand', W2: 'coop_hand', W3: 'hawker', W4: 'grader' } as const;

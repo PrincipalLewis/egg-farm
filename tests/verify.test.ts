@@ -5,7 +5,9 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { balance } from '../src/config/balance';
 import { runM2 } from './bot-m2';
-import { runVerify, checkpointSeconds, badNumbers, UNAVAILABLE } from '../scripts/verify/sim';
+import { runVerify, checkpointSeconds, badNumbers, markFreshM4, VERIFY_V6_BACKUP_ID, UNAVAILABLE } from '../scripts/verify/sim';
+import { save, validate, MIGRATION_ID_HEX, type KV } from '../src/save/save';
+import { selectGoal } from '../src/ui/next-goal';
 import { goldens, GOLDEN_FLAG_OFF, GOLDEN_M4_ON } from '../scripts/verify/golden';
 import { parseArgs, parseFlags, flagsOf, withFlags, sanitize, leaks, UsageError } from '../scripts/verify/cli';
 
@@ -47,13 +49,43 @@ describe('verify: the run', () => {
     expect(off.checkpoints[0].levels.hens).toBe(0);
   }, 60_000);
   it('m5x-casual is refused until tests/bot-m5.ts lands', () => {
-    expect(UNAVAILABLE['m5x-casual']).toMatch(/bot-m5/);
+    expect(UNAVAILABLE['m5x-casual']).toBe('needs tests/bot-m5.ts (M5.1, on Vadim go)'); // HoE ruling (3)
     expect(() => runVerify(balance, { hours: 1, seed: 1, profile: 'm5x-casual' })).toThrow(/m5x-casual/);
   });
   it('badNumbers flags NaN, Infinity and negatives', () => {
     expect(badNumbers({ a: 1, b: [0, 2] })).toEqual([]);
     expect(badNumbers({ a: NaN, b: [Infinity, -1] })).toEqual(['$.a=NaN', '$.b[0]=Infinity', '$.b[1]=-1 (negative)']);
   });
+});
+
+describe('verify: end-state save round-trip (QA-D-1027-GOALPILL)', () => {
+  const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
+  const pick = (s: any) => ({ F: s.farmLevel, H: s.hensLevel, V: s.eggValueLevel, C: s.collectionLevel, tier: s.graderTier, workers: Object.keys(s.workers).sort(), coins: s.coinsCents });
+  it('validate(save(marked run.end)) is not tracksMigrated and keeps every level, tier, worker and coin', () => {
+    const run = runVerify(balance, { hours: 1, seed: 1, profile: 'idle' });
+    const r = validate(save(mem(), markFreshM4(run.end, balance), 1, balance), balance);
+    expect(r.ok).toBe(true); if (!r.ok) return;
+    expect(r.file.tracksMigrated).toBeFalsy();
+    expect(pick(r.file.state)).toEqual(pick(run.end));
+    expect(r.file.state.tracksV7).toBe(1); expect(r.file.state.v6BackupId).toBe(VERIFY_V6_BACKUP_ID);
+  }, 60_000);
+  it('the unmarked end state is what the bug was: the load price-matches V down', () => {
+    const run = runVerify(balance, { hours: 1, seed: 1, profile: 'idle' });
+    const r = validate(save(mem(), run.end, 1, balance), balance);
+    expect(r.ok && r.file.tracksMigrated).toBe(true);
+    expect(r.ok && r.file.state.eggValueLevel).toBeLessThan(run.end.eggValueLevel);
+  }, 60_000);
+  it('the marker is deterministic, the right length, and only added with M4 on', () => {
+    expect(VERIFY_V6_BACKUP_ID).toMatch(new RegExp(`^[0-9a-f]{${MIGRATION_ID_HEX}}$`));
+    const off = withFlags(balance, { 'm4.enabled': 0 }), s = runVerify(off, { hours: 0.1, seed: 1, profile: 'idle' }).end;
+    expect(markFreshM4(s, off)).toBe(s);
+  }, 60_000);
+  it('24 h seed 1: the loaded end state has nothing left to buy (pill = All upgrades done!)', () => {
+    const run = runVerify(balance, { hours: 24, seed: 1, profile: 'idle' });
+    const r = validate(save(mem(), markFreshM4(run.end, balance), 1, balance), balance);
+    expect(r.ok).toBe(true); if (!r.ok) return;
+    expect(selectGoal(r.file.state, balance, 1).label).toBe('All upgrades done!');
+  }, 120_000);
 });
 
 describe('verify: goldens', () => {
@@ -82,7 +114,7 @@ describe('verify: arguments and flags', () => {
   it('CLI: usage errors and unavailable profiles exit 2 before building anything', () => {
     const run = (a: string[]) => spawnSync(process.execPath, [`${ROOT}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8' });
     const r1 = run([]); expect(r1.status).toBe(2); expect(r1.stderr).toMatch(/--hours/);
-    const r2 = run(['--hours', '1', '--profile', 'm5x-casual']); expect(r2.status).toBe(2); expect(r2.stderr).toMatch(/bot-m5/);
+    const r2 = run(['--hours', '1', '--profile', 'm5x-casual']); expect(r2.status).toBe(2); expect(r2.stderr).toContain('verify: profile m5x-casual needs tests/bot-m5.ts (M5.1, on Vadim go)');
     const r3 = run(['--hours', '1', '--flags', 'nope=1']); expect(r3.status).toBe(2); expect(r3.stderr).toMatch(/unknown flag/);
   }, 60_000);
 });

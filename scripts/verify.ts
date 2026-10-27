@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { balance as shipped } from '../src/config/balance';
 import { save, type KV } from '../src/save/save';
 import { BUILD_PREFIX, gitBuildId } from './build-id';
-import { runVerify, badNumbers, UNAVAILABLE } from './verify/sim';
+import { runVerify, badNumbers, markFreshM4, UNAVAILABLE } from './verify/sim';
 import { goldens } from './verify/golden';
 import { parseArgs, flagsOf, withFlags, sanitize, leaks, UsageError, USAGE } from './verify/cli';
 
@@ -68,7 +68,7 @@ function main(): number {
   // 4. browser
   const kv = new Map<string, string>(), mem: KV = { getItem: k => kv.get(k) ?? null, setItem: (k, v) => { kv.set(k, v); }, removeItem: k => { kv.delete(k); } };
   const savedAt = VERIFY_EPOCH_MS + Math.round(o.hours * 3600) * 1000;
-  const raw = save(mem, { ...run.end, seenTracksExplainer: true }, savedAt, b);
+  const raw = save(mem, { ...markFreshM4(run.end, b), seenTracksExplainer: true }, savedAt, b); // marked like a fresh M4 farm (QA-D-1027-GOALPILL)
   let shot: any = { ok: false, skipped: o.noShot };
   const png = join(outDir, 'verify.png');
   if (!o.noShot) {
