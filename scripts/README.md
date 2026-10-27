@@ -65,3 +65,30 @@ Both GOLDEN1 sim-trace hashes are recomputed on the shipped balance every run:
 - someone triggers it by hand (`workflow_dispatch`, with an `hours` input).
 
 It never runs on push, open or synchronize. It uploads `verify-out` (`verify.json` + `verify.png`, 14 days). It is not a required check until HoE flips it.
+
+## `npm run measure:l30plus`
+
+The L30+ step-gate harness (`scripts/measure-l30plus.ts`, engineering/l30plus-harness.md), restored at its first committed version (47f0c12) for M4.2:
+
+```sh
+npm run measure:l30plus -- <csv> [--seeds 1-200] [--T 14400] [--out <dir>]
+```
+
+It is read-only and builds balance in memory from `<csv>`. The later M4.2 revisions stay on the parked L30+ branches.
+
+## Retired one-off scripts (VER-1, D-CEO-20261027-02)
+
+They were removed because `verify` or `scripts/rc0-browser.mjs` covers them. All of them are still in git history (`git show 2dfedbe:scripts/<name>`).
+
+| Script | Status | Covered by |
+|---|---|---|
+| screenshot-m2.mjs | removed | `verify.png` for the standard shot; rc0 `b58` (Manage all, desktop 44 px) |
+| screenshot-m3-pt1.mjs | removed | rc0 `pt1`, `b3` (next-goal strip), `s25` |
+| screenshot-nest.mjs | removed | `verify.png`; screenshot-only, no checks |
+| screenshot-post-rc1.mjs | removed | rc0 `b58` (Manage all cooldown) |
+| screenshot-qa-bug12.mjs | removed | rc0 `sellallgrader`, `sellallgraderfit` |
+| ac14-browser.mjs | removed | rc0 `recovery*` (AC14b dialog v2.1: role, focus, Esc/scrim, export, quota), `save-warn`, tab-guard-browser.mjs and rc0 `newertwotab` |
+| recovery-v11-browser.mjs | removed | rc0 `recovery*` (v2.1 replaces v1.1), `#sOldSave` |
+| b6-check.mjs | removed | rc0 `b6`, `b6b` |
+
+These are kept because nothing else covers them: d2-kill-browser.mjs (kill matrix), pt1-13-webkit.mjs (WebKit narrow phones), tab-guard-browser.mjs, queue-qa.mjs, mk24-1-overflow.mjs, perf-ab.mjs, perf-sm9.mjs, artux-shots.mjs, the m41-* shot and check scripts (M4.1 evidence), screenshot.mjs (`npm run screenshot`), smoke.mjs, rc0-browser.mjs, release-globals-browser.mjs, release-scan.mjs, serve-own.mjs, and the build, sync and fixture scripts.
