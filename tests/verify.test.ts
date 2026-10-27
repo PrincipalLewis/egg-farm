@@ -11,6 +11,7 @@ import { runM2 } from './bot-m2';
 import { runVerify, checkpointSeconds, badNumbers, markFreshM4, VERIFY_V6_BACKUP_ID, UNAVAILABLE } from '../scripts/verify/sim';
 import { save, validate, MIGRATION_ID_HEX, type KV } from '../src/save/save';
 import { saveRoundTrip } from '../scripts/verify/roundtrip';
+import { initialState } from '../src/sim/state';
 import { selectGoal } from '../src/ui/next-goal';
 import { goldens, GOLDEN_FLAG_OFF, GOLDEN_M4_ON } from '../scripts/verify/golden';
 import { parseArgs, parseFlags, flagsOf, withFlags, sanitize, leaks, UsageError } from '../scripts/verify/cli';
@@ -168,10 +169,12 @@ describe('verify: save round-trip guard (VER-1a, CCR R1)', () => {
     const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html, VERIFY_TEST_SKIP_MARKER: '1', CHROME: join(dir, 'must-not-launch') } });
     expect(r.status).toBe(4);
     const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
-    expect(j.schemaVersion).toBe(2);
+    expect(j.schemaVersion).toBe(3);
     expect(j.saveRoundTrip).toMatchObject({ pass: false, migrated: true, tracksMigrated: true, markerSkippedForTest: true });
     expect(j.checks.find((c: any) => c.id === 'save-roundtrip').pass).toBe(false);
     expect(j.checks.find((c: any) => c.id === 'build-label').detail).toMatch(/skipped: save-roundtrip failed/);
+    // CCR N1 on #72: the fake html's build id fails too (an exit-1 check), and 4 still wins.
+    expect(j.checks.find((c: any) => c.id === 'build-id').pass).toBe(false);
     expect(j.screenshot.file).toBeNull(); expect(j.result).toBe('FAIL');
     expect(existsSync(join(out, 'verify.png'))).toBe(false);
   }, 60_000);
@@ -184,6 +187,40 @@ describe('verify: save round-trip guard (VER-1a, CCR R1)', () => {
     const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
     expect(j.saveRoundTrip).toMatchObject({ pass: true, migrated: false, mismatches: [] });
     expect(j.saveRoundTrip.markerSkippedForTest).toBeUndefined();
+  }, 60_000);
+});
+
+describe('verify: VER-1b (CCR F1/N2 on #72)', () => {
+  const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
+  const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
+  it('N2: a save that migrates on load but leaves all 7 compared fields equal still fails the round-trip', () => {
+    const s = initialState(balance, 1); // unmarked fresh farm: the tracks migration runs, F/H/V/C stay 0
+    const r = saveRoundTrip(save(mem(), s, 1, balance), s, balance);
+    expect(r.mismatches).toEqual([]);
+    expect(r.migrated).toBe(true); expect(r.tracksMigrated).toBe(true);
+    expect(r.pass).toBe(false);
+  });
+  it('F1: --flags m4.enabled=0 no longer gives a false PASS: exit 4, flagsDifferFromBuild, no screenshot, no PNG', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'v-')), html = join(dir, 'fake.html'), out = join(dir, 'out');
+    writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000">');
+    mkdirSync(out); writeFileSync(join(out, 'verify.png'), 'stale');
+    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--flags', 'm4.enabled=0', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html, CHROME: join(dir, 'must-not-launch') } });
+    expect(r.status).toBe(4);
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j.result).toBe('FAIL'); expect(j.flagsOverridden).toBe(true);
+    expect(j.saveRoundTrip).toMatchObject({ pass: false, flagsDifferFromBuild: true, balance: expect.stringMatching(/^shipped/) });
+    expect(j.saveRoundTrip.tracksMigrated).toBe(true); // validated under the shipped (M4-on) balance, as the browser would load it
+    expect(j.checks.find((c: any) => c.id === 'save-roundtrip').detail).toMatch(/m4\.enabled=0 vs 1/);
+    expect(j.screenshot).toMatchObject({ file: null, skippedReason: 'flags differ from build' });
+    expect(existsSync(join(out, 'verify.png'))).toBe(false);
+  }, 60_000);
+  it('F1: --flags equal to the shipped flags (m4.enabled=1) is not an override and passes the round-trip', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'v-')), html = join(dir, 'fake.html'), out = join(dir, 'out');
+    writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000">');
+    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--no-shot', '--flags', 'm4.enabled=1', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html } });
+    expect(r.status).toBe(1); // fake html / no shot only
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j.saveRoundTrip).toMatchObject({ pass: true, flagsDifferFromBuild: false, migrated: false });
   }, 60_000);
 });
 
