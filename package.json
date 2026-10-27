@@ -16,7 +16,8 @@
     "preview": "vite preview",
     "build:qa": "vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build --mode qa --outDir dist-qa",
     "check-economy-copy": "node scripts/check-economy-copy.mjs",
-    "check-globals": "node scripts/release-globals-browser.mjs"
+    "check-globals": "node scripts/release-globals-browser.mjs",
+    "verify": "vite-node scripts/verify.ts --"
   },
   "devDependencies": {
     "@fontsource/fredoka": "^5.3.0",
