@@ -10,6 +10,7 @@ import { balance } from '../src/config/balance';
 import { runM2 } from './bot-m2';
 import { runVerify, checkpointSeconds, badNumbers, markFreshM4, VERIFY_V6_BACKUP_ID, UNAVAILABLE } from '../scripts/verify/sim';
 import { save, validate, MIGRATION_ID_HEX, type KV } from '../src/save/save';
+import { saveRoundTrip } from '../scripts/verify/roundtrip';
 import { selectGoal } from '../src/ui/next-goal';
 import { goldens, GOLDEN_FLAG_OFF, GOLDEN_M4_ON } from '../scripts/verify/golden';
 import { parseArgs, parseFlags, flagsOf, withFlags, sanitize, leaks, UsageError } from '../scripts/verify/cli';
@@ -140,6 +141,50 @@ describe('verify: public-repo hygiene', () => {
     for (const x of ['/home/someone/x', '/tmp/verify-abc/save.json', '/var/folders/x', '/opt/hostedtoolcache/node', 'C:\\Users\\bob\\x', '"C:\\\\Users\\\\bob"', 'D:/a/egg-farm', 'a@b.io'])
       expect(leaks(x), x).toHaveLength(1);
   });
+});
+
+describe('verify: save round-trip guard (VER-1a, CCR R1)', () => {
+  const mem = (): KV => { const m = new Map<string, string>(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => { m.set(k, v); }, removeItem: k => { m.delete(k); } }; };
+  it('saveRoundTrip passes for the marked end state and fails (tracksMigrated, V mismatch) for the unmarked one', () => {
+    const run = runVerify(balance, { hours: 1, seed: 1, profile: 'idle' });
+    const good = saveRoundTrip(save(mem(), { ...markFreshM4(run.end, balance), seenTracksExplainer: true }, 1, balance), run.end, balance);
+    expect(good).toMatchObject({ pass: true, ok: true, migrated: false, tracksMigrated: false, mismatches: [] });
+    const bad = saveRoundTrip(save(mem(), { ...run.end, seenTracksExplainer: true }, 1, balance), run.end, balance);
+    expect(bad.pass).toBe(false); expect(bad.tracksMigrated).toBe(true); expect(bad.migrated).toBe(true);
+    expect(bad.mismatches.map(m => m.field)).toContain('eggValueLevel');
+  }, 60_000);
+  it('saveRoundTrip flags a coin, worker or tier difference and an unreadable save', () => {
+    const run = runVerify(balance, { hours: 0.25, seed: 1, profile: 'idle' }), m = markFreshM4(run.end, balance);
+    const r = saveRoundTrip(save(mem(), { ...m, coinsCents: m.coinsCents + 1, graderTier: 0, workers: {} }, 1, balance), run.end, balance);
+    expect(r.pass).toBe(false); expect(r.migrated).toBe(false);
+    expect(r.mismatches.map(x => x.field).sort()).toEqual(['coinsCents', 'graderTier', 'workers'].filter(f => JSON.stringify((run.end as any)[f]) !== JSON.stringify(f === 'coinsCents' ? m.coinsCents + 1 : f === 'graderTier' ? 0 : {})).sort());
+    expect(saveRoundTrip('{', run.end, balance)).toMatchObject({ pass: false, ok: false, reason: 'parse' });
+  }, 60_000);
+  it('CLI: with the marker skipped (VERIFY_TEST_SKIP_MARKER=1) verify exits 4, records saveRoundTrip FAIL, and leaves no PNG', () => {
+    const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
+    const dir = mkdtempSync(join(tmpdir(), 'v-')), html = join(dir, 'fake.html'), out = join(dir, 'out');
+    writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000"><div id="app" data-build-id="m4.1+0000000"></div>');
+    mkdirSync(out); writeFileSync(join(out, 'verify.png'), 'stale');
+    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html, VERIFY_TEST_SKIP_MARKER: '1', CHROME: join(dir, 'must-not-launch') } });
+    expect(r.status).toBe(4);
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j.schemaVersion).toBe(2);
+    expect(j.saveRoundTrip).toMatchObject({ pass: false, migrated: true, tracksMigrated: true, markerSkippedForTest: true });
+    expect(j.checks.find((c: any) => c.id === 'save-roundtrip').pass).toBe(false);
+    expect(j.checks.find((c: any) => c.id === 'build-label').detail).toMatch(/skipped: save-roundtrip failed/);
+    expect(j.screenshot.file).toBeNull(); expect(j.result).toBe('FAIL');
+    expect(existsSync(join(out, 'verify.png'))).toBe(false);
+  }, 60_000);
+  it('CLI: with the marker applied the same run passes the round-trip (exit 1 here only for the fake html / no shot)', () => {
+    const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
+    const dir = mkdtempSync(join(tmpdir(), 'v-')), html = join(dir, 'fake.html'), out = join(dir, 'out');
+    writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000">');
+    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html } });
+    expect(r.status).toBe(1);
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j.saveRoundTrip).toMatchObject({ pass: true, migrated: false, mismatches: [] });
+    expect(j.saveRoundTrip.markerSkippedForTest).toBeUndefined();
+  }, 60_000);
 });
 
 describe('verify: exit codes and the browser step (CCR n1/n3)', () => {

@@ -1,7 +1,8 @@
 // VER-1 (D-CEO-20261027-02): `npm run verify -- --hours N [--seed S] [--profile idle|m5x-casual] [--flags k=v,...] [--out dir]`
 // 1 build:html from HEAD (build id + asset sha256), 2 N hours of seeded play on the real fixed-step sim, 3 verify.json,
 // 4 the built html with the end state in headless Chromium -> verify.png (390x844, build label), 5 non-zero exit on failure.
-// Exit codes: 0 PASS, 1 a check failed (see verify.json checks[]), 2 usage / unavailable profile, 3 build failed.
+// Exit codes: 0 PASS, 1 a check failed (see verify.json checks[]), 2 usage / unavailable profile, 3 build failed,
+// 4 the end-state save does not load back as the end state (saveRoundTrip; no browser step, no PNG).
 // Studio tooling only: reads src/, writes only <out>/verify.json + verify.png (default verify-out/<buildId>/, git-ignored).
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -14,9 +15,10 @@ import { save, type KV } from '../src/save/save';
 import { BUILD_PREFIX, gitBuildId } from './build-id';
 import { runVerify, badNumbers, markFreshM4, UNAVAILABLE } from './verify/sim';
 import { goldens } from './verify/golden';
+import { saveRoundTrip, ROUNDTRIP_FIELDS } from './verify/roundtrip';
 import { parseArgs, flagsOf, withFlags, sanitize, leaks, UsageError, USAGE } from './verify/cli';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2; // 2 (VER-1a): + saveRoundTrip, + checks[] save-roundtrip
 /** savedAt of the end-state save: a fixed epoch + the simulated time (no wall clock anywhere in the output). */
 export const VERIFY_EPOCH_MS = Date.UTC(2026, 0, 1);
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -70,11 +72,19 @@ function main(): number {
   // 4. browser
   const kv = new Map<string, string>(), mem: KV = { getItem: k => kv.get(k) ?? null, setItem: (k, v) => { kv.set(k, v); }, removeItem: k => { kv.delete(k); } };
   const savedAt = VERIFY_EPOCH_MS + Math.round(o.hours * 3600) * 1000;
-  const raw = save(mem, { ...markFreshM4(run.end, b), seenTracksExplainer: true }, savedAt, b); // marked like a fresh M4 farm (QA-D-1027-GOALPILL)
+  // VERIFY_TEST_SKIP_MARKER=1 (tests only): save the end state unmarked, i.e. the QA-D-1027-GOALPILL defect, so the
+  // round-trip guard below is proven to catch it.
+  const skipMarker = process.env.VERIFY_TEST_SKIP_MARKER === '1';
+  const endToSave = skipMarker ? run.end : markFreshM4(run.end, b);
+  const raw = save(mem, { ...endToSave, seenTracksExplainer: true }, savedAt, b); // marked like a fresh M4 farm (QA-D-1027-GOALPILL)
+  // CCR R1: the exact bytes the browser gets must validate back to run.end, unmigrated; else exit 4 before any browser step.
+  const rt = saveRoundTrip(raw, run.end, b);
+  check('save-roundtrip', rt.pass, rt.pass ? 'validate(raw) = run.end (not migrated; F/H/V/C, Grader tier, workers, coins equal)'
+    : !rt.ok ? `validate failed: ${rt.reason}` : `${rt.migrated ? `migrated on load (tracksMigrated ${rt.tracksMigrated}, version ${rt.version})` : 'not migrated'}; mismatches: ${rt.mismatches.map(m => m.field).join(', ') || 'none'}`);
   let shot: any = { ok: false, skipped: o.noShot };
   const png = join(outDir, 'verify.png');
   rmSync(png, { force: true }); // CCR n1: a failed or skipped shot must never leave an earlier run's PNG next to this verify.json
-  if (!o.noShot) {
+  if (!o.noShot && rt.pass) {
     const tmp = mkdtempSync(join(tmpdir(), 'verify-')), sp = join(tmp, 'save.json'); writeFileSync(sp, raw);
     for (let attempt = 1; attempt <= 2; attempt++) { // one retry: a cold first Chromium start can time out (seen once locally)
       const r = spawnSync(process.execPath, [join(ROOT, 'scripts/verify/shot.mjs'), resolve(ROOT, HTML), sp, png], { cwd: ROOT, encoding: 'utf8', timeout: 120_000 });
@@ -87,7 +97,7 @@ function main(): number {
     if (!shot.ok) rmSync(png, { force: true });
   }
   const labelWant = `Egg Farm ${buildId}`;
-  check('build-label', !!shot.ok && shot.label === labelWant && shot.dataBuildId === buildId, shot.ok ? `label ${JSON.stringify(shot.label)}, #app data-build-id ${shot.dataBuildId}` : `no screenshot: ${shot.error ?? (o.noShot ? '--no-shot' : 'unknown')}`);
+  check('build-label', !!shot.ok && shot.label === labelWant && shot.dataBuildId === buildId, shot.ok ? `label ${JSON.stringify(shot.label)}, #app data-build-id ${shot.dataBuildId}` : `no screenshot: ${shot.error ?? (o.noShot ? '--no-shot' : !rt.pass ? 'skipped: save-roundtrip failed' : 'unknown')}`);
   // 3. verify.json (deterministic: no timestamps, durations or absolute paths)
   const report = {
     schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts',
@@ -97,6 +107,7 @@ function main(): number {
     flags: { ...flagsOf(shipped), ...o.flags }, flagsOverridden: overridden,
     sim: { tickHz: b.tickHz, ticks: run.ticks, tickPath: 'src/sim/tick.ts advance() per 1000 ms, then input (build order)', bot: 'AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s' },
     checkpoints: run.checkpoints,
+    saveRoundTrip: { pass: rt.pass, validator: rt.validator, ok: rt.ok, reason: rt.reason, migrated: rt.migrated, tracksMigrated: rt.tracksMigrated, version: rt.version, fields: [...ROUNDTRIP_FIELDS], mismatches: rt.mismatches, markerSkippedForTest: skipMarker || undefined },
     trace: { name: 'AC7 trace hash (every sim event of the run + end state)', sha256: run.traceSha256, events: run.events },
     goldens: gs.map(g => ({ name: g.name, source: g.source, expected: g.expected, actual: g.actual, pass: g.pass })),
     screenshot: { file: shot.ok && existsSync(png) ? 'verify.png' : null, viewport: '390x844', browser: 'chromium (headless)', label: shot.label ?? null, dataBuildId: shot.dataBuildId ?? null, metaBuildId: shot.metaBuildId ?? null, pageErrors: (shot.pageErrors ?? []).length },
@@ -111,6 +122,7 @@ function main(): number {
   writeFileSync(join(outDir, 'verify.json'), text);
   const rel = relative(process.cwd(), outDir) || '.';
   log(`${report.result} ${buildId} seed ${o.seed} ${o.hours} h: trace ${run.traceSha256.slice(0, 12)}, goldens ${gs.map(g => `${g.name} ${g.pass ? 'ok' : 'MISMATCH'}`).join(', ')}, label ${shot.ok ? 'ok' : 'missing'} -> ${rel}/verify.json${shot.ok ? ', verify.png' : ''} (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
+  if (!rt.pass) return 4; // CCR R1: its own code, so CI and QA can tell a wrong-farm screenshot from other check failures
   return report.result === 'PASS' ? 0 : 1;
 }
 process.exitCode = main();
