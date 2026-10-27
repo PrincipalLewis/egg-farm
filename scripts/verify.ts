@@ -20,7 +20,9 @@ export const SCHEMA_VERSION = 1;
 /** savedAt of the end-state save: a fixed epoch + the simulated time (no wall clock anywhere in the output). */
 export const VERIFY_EPOCH_MS = Date.UTC(2026, 0, 1);
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const HTML = 'dist-html/egg-farm.html';
+const HTML_DEFAULT = 'dist-html/egg-farm.html';
+/** VERIFY_HTML (tests only, with --skip-build): read another html instead of dist-html/egg-farm.html. Reported as an override. */
+const HTML = process.env.VERIFY_HTML || HTML_DEFAULT, HTML_LABEL = process.env.VERIFY_HTML ? 'VERIFY_HTML override (test)' : HTML_DEFAULT;
 const git = (a: string[]) => { const r = spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
 const t0 = performance.now(), log = (s: string) => process.stderr.write(`verify: ${s}\n`);
 type Check = { id: string; pass: boolean; detail: string };
@@ -44,8 +46,8 @@ function main(): number {
       if (r.status !== 0) { console.error(`verify: FAIL build (${[cmd, ...args].join(' ')}) exited ${r.status}`); return 3; }
     }
   }
-  if (!existsSync(join(ROOT, HTML))) { console.error(`verify: FAIL ${HTML} missing`); return 3; }
-  const htmlBytes = readFileSync(join(ROOT, HTML)), html = htmlBytes.toString('utf8');
+  if (!existsSync(resolve(ROOT, HTML))) { console.error(`verify: FAIL ${HTML_LABEL} missing`); return 3; }
+  const htmlBytes = readFileSync(resolve(ROOT, HTML)), html = htmlBytes.toString('utf8');
   const buildId = /<meta name="build-id" content="([^"]*)">/.exec(html)?.[1] ?? '';
   const sha = git(['rev-parse', 'HEAD']), expectId = gitBuildId(ROOT);
   const outDir = o.out ? (isAbsolute(o.out) ? o.out : resolve(process.cwd(), o.out)) : join(ROOT, 'verify-out', buildId || 'unknown');
@@ -71,15 +73,18 @@ function main(): number {
   const raw = save(mem, { ...markFreshM4(run.end, b), seenTracksExplainer: true }, savedAt, b); // marked like a fresh M4 farm (QA-D-1027-GOALPILL)
   let shot: any = { ok: false, skipped: o.noShot };
   const png = join(outDir, 'verify.png');
+  rmSync(png, { force: true }); // CCR n1: a failed or skipped shot must never leave an earlier run's PNG next to this verify.json
   if (!o.noShot) {
     const tmp = mkdtempSync(join(tmpdir(), 'verify-')), sp = join(tmp, 'save.json'); writeFileSync(sp, raw);
     for (let attempt = 1; attempt <= 2; attempt++) { // one retry: a cold first Chromium start can time out (seen once locally)
-      const r = spawnSync(process.execPath, [join(ROOT, 'scripts/verify/shot.mjs'), join(ROOT, HTML), sp, png], { cwd: ROOT, encoding: 'utf8', timeout: 120_000 });
-      try { shot = JSON.parse(r.stdout.trim().split('\n').pop() || '{}'); } catch { shot = { ok: false, error: `shot.mjs exit ${r.status}: ${(r.stderr || '').split('\n')[0].slice(0, 200)}` }; }
+      const r = spawnSync(process.execPath, [join(ROOT, 'scripts/verify/shot.mjs'), resolve(ROOT, HTML), sp, png], { cwd: ROOT, encoding: 'utf8', timeout: 120_000 });
+      try { shot = JSON.parse(r.stdout.trim().split('\n').pop() || 'null'); } catch { shot = null; }
+      if (!shot || typeof shot !== 'object') shot = { ok: false, error: `shot.mjs exit ${r.status ?? r.signal}: ${(r.stderr || '').trim().split('\n')[0].slice(0, 200) || 'no output'}` };
       if (shot.ok) break;
       log(`browser step attempt ${attempt} failed: ${shot.error}`);
     }
     rmSync(tmp, { recursive: true, force: true });
+    if (!shot.ok) rmSync(png, { force: true });
   }
   const labelWant = `Egg Farm ${buildId}`;
   check('build-label', !!shot.ok && shot.label === labelWant && shot.dataBuildId === buildId, shot.ok ? `label ${JSON.stringify(shot.label)}, #app data-build-id ${shot.dataBuildId}` : `no screenshot: ${shot.error ?? (o.noShot ? '--no-shot' : 'unknown')}`);
@@ -87,14 +92,14 @@ function main(): number {
   const report = {
     schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts',
     buildId, sha, dirty: buildId.endsWith('+dirty'),
-    asset: { path: HTML, sha256: createHash('sha256').update(htmlBytes).digest('hex'), bytes: htmlBytes.length, build: buildHow },
+    asset: { path: HTML_LABEL, sha256: createHash('sha256').update(htmlBytes).digest('hex'), bytes: htmlBytes.length, build: buildHow },
     seed: o.seed, hours: o.hours, profile: o.profile,
     flags: { ...flagsOf(shipped), ...o.flags }, flagsOverridden: overridden,
     sim: { tickHz: b.tickHz, ticks: run.ticks, tickPath: 'src/sim/tick.ts advance() per 1000 ms, then input (build order)', bot: 'AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s' },
     checkpoints: run.checkpoints,
     trace: { name: 'AC7 trace hash (every sim event of the run + end state)', sha256: run.traceSha256, events: run.events },
     goldens: gs.map(g => ({ name: g.name, source: g.source, expected: g.expected, actual: g.actual, pass: g.pass })),
-    screenshot: { file: o.noShot ? null : 'verify.png', viewport: '390x844', browser: 'chromium (headless)', label: shot.label ?? null, dataBuildId: shot.dataBuildId ?? null, metaBuildId: shot.metaBuildId ?? null, pageErrors: (shot.pageErrors ?? []).length },
+    screenshot: { file: shot.ok && existsSync(png) ? 'verify.png' : null, viewport: '390x844', browser: 'chromium (headless)', label: shot.label ?? null, dataBuildId: shot.dataBuildId ?? null, metaBuildId: shot.metaBuildId ?? null, pageErrors: (shot.pageErrors ?? []).length },
     checks, result: checks.every(c => c.pass) ? 'PASS' : 'FAIL',
   };
   // Public repo (DoD 9): sanitise paths / user / host, then refuse to ship anything that still looks private.
@@ -105,7 +110,7 @@ function main(): number {
   for (const x of lk) text = text.split(x).join('<redacted>');
   writeFileSync(join(outDir, 'verify.json'), text);
   const rel = relative(process.cwd(), outDir) || '.';
-  log(`${report.result} ${buildId} seed ${o.seed} ${o.hours} h: trace ${run.traceSha256.slice(0, 12)}, goldens ${gs.map(g => `${g.name} ${g.pass ? 'ok' : 'MISMATCH'}`).join(', ')}, label ${shot.ok ? 'ok' : 'missing'} -> ${rel}/verify.json${o.noShot ? '' : ', verify.png'} (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
+  log(`${report.result} ${buildId} seed ${o.seed} ${o.hours} h: trace ${run.traceSha256.slice(0, 12)}, goldens ${gs.map(g => `${g.name} ${g.pass ? 'ok' : 'MISMATCH'}`).join(', ')}, label ${shot.ok ? 'ok' : 'missing'} -> ${rel}/verify.json${shot.ok ? ', verify.png' : ''} (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
   return report.result === 'PASS' ? 0 : 1;
 }
 process.exitCode = main();

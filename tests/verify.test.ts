@@ -2,6 +2,9 @@
 // the verify-smoke CI job and locally (`npm run verify -- --hours 1`), not here.
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { balance } from '../src/config/balance';
 import { runM2 } from './bot-m2';
@@ -122,11 +125,50 @@ describe('verify: arguments and flags', () => {
 describe('verify: public-repo hygiene', () => {
   it('sanitize makes paths repo-relative and hides the home dir', () => {
     expect(sanitize(`${ROOT.replace(/\/$/, '')}/dist-html/egg-farm.html`, ROOT.replace(/\/$/, ''))).toBe('./dist-html/egg-farm.html');
+    expect(sanitize('/home/alice/x and /Users/alice/y and C:\\\\Users\\\\alice\\\\z', '/repo', { home: '/nowhere', user: 'alice', host: 'h0st' }))
+      .toBe('/home/<user>/x and /Users/<user>/y and C:\\\\Users\\\\<user>\\\\z');
+    expect(sanitize('http://h0st:8080/ and me@h0st', '/repo', { home: '/nowhere', user: 'alice', host: 'h0st' })).toBe('http://<host>:8080/ and me@<host>');
   });
-  it('leaks finds tokens, absolute home/workspace paths and e-mail addresses', () => {
-    expect(leaks('{"a":"m4.1+d1fb206","sha":"d1fb206b8f59a1a1f19623526fdbf3003d12efce"}')).toEqual([]);
+  it('CCR m2: a host or user named like a JSON value (e.g. "working") leaves verify.json byte-identical', () => {
+    const json = JSON.stringify({ workers: { market_hand: { state: 'working' } }, profile: 'idle', result: 'PASS', sha: 'abc' }, null, 2);
+    for (const w of ['working', 'idle', 'PASS', 'sha', 'state'])
+      expect(sanitize(json, '/repo', { home: `/home/${w}`, user: w, host: w }), w).toBe(json);
+  });
+  it('leaks finds tokens, absolute paths (incl. /tmp /var /opt, Windows drives) and e-mail addresses', () => {
+    expect(leaks('{"a":"m4.1+d1fb206","sha":"d1fb206b8f59a1a1f19623526fdbf3003d12efce","p":"dist-html/egg-farm.html","t":"src/sim/tick.ts","u":"https://github.com/x"}')).toEqual([]);
     expect(leaks('ghp_' + 'a'.repeat(36))).toHaveLength(1);
-    expect(leaks('/home/someone/x')).toHaveLength(1);
-    expect(leaks('a@b.io')).toHaveLength(1);
+    for (const x of ['/home/someone/x', '/tmp/verify-abc/save.json', '/var/folders/x', '/opt/hostedtoolcache/node', 'C:\\Users\\bob\\x', '"C:\\\\Users\\\\bob"', 'D:/a/egg-farm', 'a@b.io'])
+      expect(leaks(x), x).toHaveLength(1);
   });
+});
+
+describe('verify: exit codes and the browser step (CCR n1/n3)', () => {
+  const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
+  const run = (a: string[], env: Record<string, string> = {}) => spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ...env } });
+  it('exit 3 when the html to verify is missing', () => {
+    const r = run(['--hours', '0.01', '--skip-build', '--no-shot', '--out', mkdtempSync(join(tmpdir(), 'v-'))], { VERIFY_HTML: join(tmpdir(), 'verify-no-such.html') });
+    expect(r.status).toBe(3); expect(r.stderr).toMatch(/VERIFY_HTML override \(test\) missing/);
+  }, 60_000);
+  it('exit 1 on a failed check (wrong build id, no screenshot); verify.json says FAIL and names no PNG', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'v-')), html = join(dir, 'fake.html'), out = join(dir, 'out');
+    writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000"><div id="app" data-build-id="m4.1+0000000"></div>');
+    mkdirSync(out); writeFileSync(join(out, 'verify.png'), 'stale');
+    const r = run(['--hours', '0.01', '--skip-build', '--no-shot', '--out', out], { VERIFY_HTML: html });
+    expect(r.status).toBe(1);
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j.result).toBe('FAIL');
+    expect(j.checks.find((c: any) => c.id === 'build-id').pass).toBe(false);
+    expect(j.checks.find((c: any) => c.id === 'build-label').pass).toBe(false);
+    expect(j.screenshot.file).toBeNull();
+    expect(existsSync(join(out, 'verify.png'))).toBe(false); // the stale PNG is gone
+  }, 60_000);
+  it('n1: a Chromium launch failure gives ok:false with the launch error and leaves no (stale) PNG', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'v-')), png = join(dir, 'verify.png'), sv = join(dir, 'save.json');
+    writeFileSync(png, 'stale'); writeFileSync(sv, JSON.stringify({ version: 6, savedAt: 1, state: {} }));
+    const r = spawnSync(process.execPath, [join(ROOT, 'scripts/verify/shot.mjs'), join(dir, 'x.html'), sv, png], { encoding: 'utf8', env: { ...process.env, CHROME: join(dir, 'no-chrome') } });
+    expect(r.status).toBe(0);
+    const o = JSON.parse(r.stdout.trim().split('\n').pop()!);
+    expect(o.ok).toBe(false); expect(o.error).toMatch(/launch/);
+    expect(existsSync(png)).toBe(false);
+  }, 60_000);
 });

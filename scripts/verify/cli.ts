@@ -49,17 +49,24 @@ export function withFlags(b: Balance, over: Record<string, number>): Balance {
   }
   return c as Balance;
 }
-/** Public repo: rewrite the repo root to '.', and the home dir, user name and host name to placeholders. */
-export function sanitize(text: string, repoRoot: string): string {
-  const subs: [string, string][] = [[repoRoot, '.'], [homedir(), '~']];
-  let u = ''; try { u = userInfo().username; } catch { /* none */ }
-  if (u.length >= 3) subs.push([u, '<user>']);
-  const h = hostname(); if (h.length >= 3) subs.push([h, '<host>']);
-  for (const [a, b] of subs) if (a && a !== '/' && a !== '.') text = text.split(a).join(b);
+/** Public repo: rewrite the repo root to '.' and the home dir to '~' (whole path strings only), and a user or host name
+ *  only where it sits in a path or URL: /home/<user>/, /Users/<user>/, C:\\Users\\<user>\\, //<host>, @<host>. Never bare words:
+ *  CCR m2 on #71, a host named "working" turned "state":"working" into "<host>". `env` is for tests. */
+export function sanitize(text: string, repoRoot: string, env: { home?: string; user?: string; host?: string } = {}): string {
+  let user = env.user; if (user === undefined) { try { user = userInfo().username; } catch { user = ''; } }
+  const home = env.home ?? homedir(), host = env.host ?? hostname();
+  for (const [a, b] of [[repoRoot.replace(/[\\/]+$/, ''), '.'], [home.replace(/[\\/]+$/, ''), '~']] as const)
+    if (a.length > 1 && /[\\/]/.test(a)) text = text.split(a).join(b);
+  const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (user) text = text.replace(new RegExp(`(/home/|/Users/|[A-Za-z]:(?:\\\\)+Users(?:\\\\)+)${esc(user)}(?=[/\\\\"'\\s]|$)`, 'g'), '$1<user>');
+  if (host) text = text.replace(new RegExp(`(//|@)${esc(host)}(?=[:/"'\\s]|$)`, 'g'), '$1<host>');
   return text;
 }
 /** Anything that looks like a token, an absolute home/workspace path or an e-mail address. Must be [] before writing. */
 export function leaks(text: string): string[] {
-  const re = [/gh[pousr]_[A-Za-z0-9]{20,}/g, /github_pat_[A-Za-z0-9_]{20,}/g, /GITHUB_TOKEN/g, /\/(?:home|Users|root|workspace)\/[^\s"']*/g, /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, /Bearer\s+[A-Za-z0-9._-]+/g];
+  const re = [/gh[pousr]_[A-Za-z0-9]{20,}/g, /github_pat_[A-Za-z0-9_]{20,}/g, /GITHUB_TOKEN/g,
+    /(?<![A-Za-z0-9._-])\/(?:home|Users|root|workspace|tmp|var|opt|private|mnt|srv|etc)\/[^\s"']*/g, // CCR n2: + /tmp /var /opt ...
+    /(?<![A-Za-z0-9])[A-Za-z]:(?:\\{1,2}|\/)[^\s"']*/g, // Windows drive paths (C:\Users\..., D:/...), raw or JSON-escaped
+    /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, /Bearer\s+[A-Za-z0-9._-]+/g];
   return re.flatMap(r => text.match(r) ?? []);
 }
