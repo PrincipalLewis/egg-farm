@@ -6,15 +6,26 @@ import { PROFILES, type Profile } from './sim';
 export const USAGE = 'usage: npm run verify -- --hours N [--seed S] [--profile idle|m5x-casual] [--flags k=v,...] [--out dir]';
 export interface Opts { hours: number; seed: number; profile: Profile; flags: Record<string, number>; out: string | null; skipBuild: boolean; noShot: boolean }
 export class UsageError extends Error {}
+/** S1 (CCR on #73): the --out value as written, read leniently so it is known even when parseArgs throws (last --out wins,
+ *  like parseArgs). null when absent or when its value is missing / another option. */
+export function outArg(argv: string[]): string | null {
+  let out: string | null = null;
+  for (let i = 0; i < argv.length; i++) if (argv[i] === '--out') { const x = argv[i + 1]; if (x !== undefined && !x.startsWith('--')) { out = x; i++; } }
+  return out;
+}
 
 export function parseArgs(argv: string[]): Opts {
   const a = argv.filter(x => x !== '--'), o: Opts = { hours: NaN, seed: 1, profile: 'idle', flags: {}, out: null, skipBuild: false, noShot: false };
+  let seenFlags = false;
   for (let i = 0; i < a.length; i++) {
     const k = a[i], v = () => { const x = a[++i]; if (x === undefined || x.startsWith('--')) throw new UsageError(`${k} needs a value`); return x; };
     if (k === '--hours') o.hours = Number(v());
     else if (k === '--seed') o.seed = Number(v());
     else if (k === '--profile') o.profile = v() as Profile;
-    else if (k === '--flags') o.flags = parseFlags(v());
+    else if (k === '--flags') { // CCR N-b on #73: a repeated --flags was silently last-wins; now a usage error
+      if (seenFlags) throw new UsageError('--flags given more than once (put every override in one --flags k=v,...)');
+      seenFlags = true; o.flags = parseFlags(v());
+    }
     else if (k === '--out') o.out = v();
     else if (k === '--skip-build') o.skipBuild = true; // dev/test only: reuse dist-html/ (recorded in verify.json as build.skipped)
     else if (k === '--no-shot') o.noShot = true; // dev/test only: no browser step (recorded; the run then FAILS the label check)
@@ -29,6 +40,7 @@ export function parseFlags(s: string): Record<string, number> {
   const out: Record<string, number> = {};
   for (const kv of s.split(',').map(x => x.trim()).filter(Boolean)) {
     const m = /^([A-Za-z0-9_.]+)=(-?\d+(?:\.\d+)?|true|false)$/.exec(kv); if (!m) throw new UsageError(`bad flag ${JSON.stringify(kv)} (want key=number)`);
+    if (Object.prototype.hasOwnProperty.call(out, m[1])) throw new UsageError(`flag ${m[1]} given more than once in --flags`); // CCR N-b on #73: no silent last-wins
     out[m[1]] = m[2] === 'true' ? 1 : m[2] === 'false' ? 0 : Number(m[2]);
   }
   return out;
