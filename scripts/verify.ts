@@ -44,6 +44,12 @@ function claimOut(ctx: Ctx, dir: string, writeFail: boolean) {
   ctx.outs.set(dir, writeFail);
   for (const f of ['verify.json', 'verify.png']) rmSync(join(dir, f), { force: true });
 }
+/** CCR N-1 on #75: a stderr line about a path is public too (CI logs): sanitise it (repo -> '.', home -> '~', user, host),
+ *  then redact anything still absolute or private, as verify.json does. */
+function scrub(s: string): string { let t = sanitize(s, ROOT); for (const x of leaks(t)) t = t.split(x).join('<redacted>'); return t; }
+/** CCR O-1 on #75: the html's build id names the default out dir only when it is a plain id (letters, digits, . + - _, not
+ *  starting with a dot), so a hostile `<meta name="build-id">` such as `../../x` cannot move the report out of OUT_ROOT. */
+const SAFE_BUILD_ID = /^[A-Za-z0-9][\w.+-]*$/;
 function earlyFail(ctx: Ctx, code: number, reason: string): number { ctx.reason = reason; console.error(`verify: ${reason}`); return code; }
 
 function main(ctx: Ctx): number {
@@ -76,7 +82,10 @@ function main(ctx: Ctx): number {
   const htmlBytes = readFileSync(resolve(ROOT, HTML)), html = htmlBytes.toString('utf8');
   const buildId = /<meta name="build-id" content="([^"]*)">/.exec(html)?.[1] ?? '';
   const sha = git(['rev-parse', 'HEAD']), expectId = gitBuildId(ROOT);
-  const outDir = o.out ? resolveOut(o.out) : join(OUT_ROOT, buildId || 'unknown');
+  const idDir = !buildId ? 'unknown' : SAFE_BUILD_ID.test(buildId) ? buildId : 'invalid-build-id';
+  if (!o.out && idDir === 'invalid-build-id') log(`html build id is not a plain id; default out dir is ${idDir}/`);
+  const outDir = o.out ? resolveOut(o.out) : join(OUT_ROOT, idDir);
+  if (!o.out && relative(OUT_ROOT, outDir).split(/[\\/]/)[0] === '..') throw new Error('verify: default out dir escapes the out root'); // belt and braces
   mkdirSync(outDir, { recursive: true }); claimOut(ctx, outDir, true); ctx.stage = 'run';
   const checks: Check[] = [];
   const check = (id: string, pass: boolean, detail: string) => { checks.push({ id, pass, detail }); if (!pass) log(`FAIL ${id}: ${detail}`); };
@@ -151,16 +160,24 @@ function main(ctx: Ctx): number {
   report.result = report.checks.every(c => c.pass) ? 'PASS' : 'FAIL';
   let text = sanitize(JSON.stringify(report, null, 2) + '\n', ROOT);
   for (const x of lk) text = text.split(x).join('<redacted>');
-  writeFileSync(join(outDir, 'verify.json'), text); ctx.done = true;
+  // CCR O-2 on #75: a full report that cannot be written (e.g. a read-only out dir) is logged, not thrown, so exit 4 stays 4;
+  // a run that would PASS exits 1 instead (no report, no PASS), and no PNG is left without its report.
+  let wrote = true;
+  try { writeFileSync(join(outDir, 'verify.json'), text); }
+  catch (w) {
+    wrote = false; try { rmSync(png, { force: true }); } catch { /* the png was never written there either */ }
+    log(`could not write the report (${scrub(outDir)}): ${scrub(String((w as Error)?.message ?? w).split('\n')[0].slice(0, 200))}; exit ${!rt.pass ? '4 (save round-trip) is kept' : '1 (no PASS without a report)'}`);
+  }
+  ctx.done = true; // the full report was attempted: no early FAIL json over it
   const rel = relative(process.cwd(), outDir) || '.';
-  log(`${report.result} ${buildId} seed ${o.seed} ${o.hours} h: trace ${run.traceSha256.slice(0, 12)}, goldens ${gs.map(g => `${g.name} ${g.pass ? 'ok' : 'MISMATCH'}`).join(', ')}, label ${shot.ok ? 'ok' : 'missing'} -> ${rel}/verify.json${shot.ok ? ', verify.png' : ''} (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
+  if (wrote) log(`${report.result} ${buildId} seed ${o.seed} ${o.hours} h: trace ${run.traceSha256.slice(0, 12)}, goldens ${gs.map(g => `${g.name} ${g.pass ? 'ok' : 'MISMATCH'}`).join(', ')}, label ${shot.ok ? 'ok' : 'missing'} -> ${rel}/verify.json${shot.ok ? ', verify.png' : ''} (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
   if (!rt.pass) return 4; // CCR R1: its own code, so CI and QA can tell a wrong-farm screenshot from other check failures; takes precedence over 1 (CCR N1 on #72)
-  return report.result === 'PASS' ? 0 : 1;
+  return report.result === 'PASS' && wrote ? 0 : 1;
 }
 /** CCR N-c on #74: a failure of the FAIL writer is logged (one sanitised line), never thrown, so the original exit code
  *  (2, 3) or the original error of a crash survives it, e.g. EISDIR when <out>/verify.json is a directory. */
 const writerFailed = (what: string, w: unknown, exit: number) =>
-  log(sanitize(`could not write the FAIL report (${what}): ${String((w as Error)?.message ?? w).split('\n')[0].slice(0, 200)}; exit ${exit} and the original error are kept`, ROOT));
+  log(`could not write the FAIL report (${scrub(what)}): ${scrub(String((w as Error)?.message ?? w).split('\n')[0].slice(0, 200))}; exit ${exit} and the original error are kept`);
 /** S1: the minimal FAIL verify.json of an early exit (usage 2, build 3, uncaught throw 1). Never PASS, never names a PNG.
  *  Never throws (N-c): each out dir is handled on its own, so one bad dir does not stop the others being cleared. */
 function writeEarly(ctx: Ctx, exit: number) {
