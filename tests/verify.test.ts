@@ -1,8 +1,8 @@
 // VER-1: tests for `npm run verify` itself (scripts/verify.ts + scripts/verify/*). Node only; the build + browser steps run in
 // the verify-smoke CI job and locally (`npm run verify -- --hours 1`), not here.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, copyFileSync, symlinkSync, chmodSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, copyFileSync, symlinkSync, chmodSync, rmSync, readdirSync, watch } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,16 @@ import { parseArgs, parseFlags, outArg, flagsOf, withFlags, sanitize, leaks, Usa
 import { gitBuildId } from '../scripts/build-id';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
+/** CCR N-3 on #75: every temp dir a VER-1d/1e test makes is tracked here and removed after each test, pass or fail (the tsc
+ *  break's repo copy included). rmSync never follows the copy's node_modules symlink: it unlinks the link only. */
+const madeTmp: string[] = [];
+const trackedTmp = (prefix: string) => { const d = mkdtempSync(join(tmpdir(), prefix)); madeTmp.push(d); return d; };
+afterEach(() => {
+  for (const d of madeTmp.splice(0)) {
+    try { chmodSync(d, 0o755); } catch { /* already gone */ }
+    rmSync(d, { recursive: true, force: true });
+  }
+});
 
 describe('verify: checkpoints', () => {
   it('1 h, then every N/4 (>= 1 h), ending at N', () => {
@@ -333,7 +343,7 @@ describe('verify: VER-1d (CCR m1/N-c on #74)', () => {
   // Every out dir here is a temp dir: --out, or VERIFY_OUT_ROOT standing in for <repo>/verify-out. Nothing is written into the worktree.
   const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
   const FAKE_ID = 'm4.1+0000000', FAKE = `<!doctype html><meta name="build-id" content="${FAKE_ID}">`;
-  const tmp = () => mkdtempSync(join(tmpdir(), 'v1d-'));
+  const tmp = () => trackedTmp('v1d-');
   /** A previous run's PASS verify.json + verify.png in `dir`, plus a decoy that must survive. */
   const seedStale = (dir: string) => {
     mkdirSync(dir, { recursive: true });
@@ -362,7 +372,6 @@ describe('verify: VER-1d (CCR m1/N-c on #74)', () => {
     expect(r.stderr).toMatch(/TS2322/); // tsc itself failed on the break, not some other step
     expect(r.status).toBe(3);
     expect(expectFail(out, 3, 'build').reason).toMatch(/^FAIL build \(.+\) exited [1-9]/);
-    rmSync(copy, { recursive: true, force: true });
   }, 180_000);
 
   it('m1 (M28/M29): without --out, a usage error clears the existing default dir verify-out/<HEAD id>/ and writes the FAIL report there', () => {
@@ -425,13 +434,108 @@ describe('verify: VER-1d (CCR m1/N-c on #74)', () => {
 
   it.skipIf(process.getuid?.() === 0)('N-c: an unwritable out dir keeps the original exit code (usage 2, not 1) and logs the writer failure', () => {
     const out = join(tmp(), 'ro');
-    mkdirSync(out); chmodSync(out, 0o555);
+    mkdirSync(out); chmodSync(out, 0o555); // restored below; the parent temp dir is removed by afterEach
     try {
       const r = cli(['--hours', '0', '--out', out]);
       expect(r.stderr).toMatch(/usage: --hours/);
       expect(r.stderr).toMatch(/verify: could not write the FAIL report \(.*\): EACCES.*; exit 2 and the original error are kept/);
       expect(r.status).toBe(2);
       expect(existsSync(join(out, 'verify.json'))).toBe(false);
+    } finally { chmodSync(out, 0o755); }
+  }, 60_000);
+});
+
+describe('verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)', () => {
+  // Temp dirs only (trackedTmp, removed after each test). Nothing is written into the worktree.
+  const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
+  const FAKE_ID = 'm4.1+0000000', fake = (id = FAKE_ID) => `<!doctype html><meta name="build-id" content="${id}">`;
+  const tmp = () => trackedTmp('v1e-');
+  const cli = (args: string[], env: Record<string, string> = {}) =>
+    spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...args], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ...env } });
+  const writerLine = (stderr: string) => stderr.split('\n').find(l => l.startsWith('verify: could not write the')) ?? '';
+  const nonRoot = process.getuid?.() !== 0; // a 0555 dir is writable for root
+
+  it.skipIf(!nonRoot)('N-1 (NC4): the writer-failure line is sanitised: an out dir under the home dir prints as ~', () => {
+    const home = tmp(), out = join(home, 'ro');
+    mkdirSync(out); chmodSync(out, 0o555);
+    try {
+      const r = cli(['--hours', '0', '--out', out], { HOME: home });
+      expect(r.status).toBe(2);
+      const l = writerLine(r.stderr);
+      expect(l).toBe("verify: could not write the FAIL report (~/ro): EACCES: permission denied, open '~/ro/verify.json'; exit 2 and the original error are kept");
+      expect(r.stderr).not.toContain(home);
+    } finally { chmodSync(out, 0o755); }
+  }, 60_000);
+
+  it.skipIf(!nonRoot)('N-1: an out dir outside the repo and home prints <redacted>, never an absolute path', () => {
+    const out = join(tmp(), 'ro');
+    mkdirSync(out); chmodSync(out, 0o555);
+    try {
+      const r = cli(['--hours', '0', '--out', out]);
+      expect(r.status).toBe(2);
+      const l = writerLine(r.stderr);
+      expect(l).toBe("verify: could not write the FAIL report (<redacted>): EACCES: permission denied, open '<redacted>'; exit 2 and the original error are kept");
+      expect(r.stderr).not.toContain(out);
+    } finally { chmodSync(out, 0o755); }
+  }, 60_000);
+
+  it.skipIf(!nonRoot)('N-4 (NC5): when the first of two claimed dirs cannot take the FAIL report, the second still gets it and loses its PNG', () => {
+    const root = tmp(), html = join(tmp(), 'old.html'), head = join(root, gitBuildId(ROOT)), d = join(root, FAKE_ID);
+    writeFileSync(html, fake());
+    expect(gitBuildId(ROOT)).not.toBe(FAKE_ID);
+    mkdirSync(head); chmodSync(head, 0o555); // exists, so it is claimed first (writeFail true), but is read-only
+    try {
+      const r = cli(['--hours', '0.1', '--skip-build', '--no-shot'], { VERIFY_OUT_ROOT: root, VERIFY_HTML: html, VERIFY_TEST_THROW: 'after-shot' });
+      expect(r.status).toBe(1);
+      expect(writerLine(r.stderr)).toMatch(/^verify: could not write the FAIL report \(<redacted>\): EACCES.*; exit 1 and the original error are kept$/);
+      expect(existsSync(join(d, 'verify.png'))).toBe(false); // the stand-in PNG of the second dir is removed...
+      expect(JSON.parse(readFileSync(join(d, 'verify.json'), 'utf8'))).toMatchObject({ complete: false, result: 'FAIL', exit: 1, stage: 'run' }); // ...and it gets the report
+      expect(readdirSync(head)).toEqual([]);
+    } finally { chmodSync(head, 0o755); }
+  }, 60_000);
+
+  it('N-4 (H2): the after-shot hook really writes its stand-in verify.png before the crash (seen by a watcher), and the writer removes it', async () => {
+    const dir = tmp(), out = join(dir, 'out'), html = join(dir, 'fake.html');
+    writeFileSync(html, fake()); mkdirSync(out); // no stale PNG: any verify.png event comes from the hook
+    const seen: string[] = [], w = watch(out, (_ev, f) => { if (f) seen.push(String(f)); });
+    try {
+      const p = spawn(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, env: { ...process.env, VERIFY_HTML: html, VERIFY_TEST_THROW: 'after-shot' }, stdio: ['ignore', 'ignore', 'pipe'] });
+      let err = ''; p.stderr.on('data', c => { err += c; });
+      const code = await new Promise<number | null>(done => p.on('exit', c => done(c)));
+      await new Promise(r => setTimeout(r, 300)); // let inotify deliver
+      expect(code).toBe(1);
+      expect(err).toMatch(/forced crash after the browser step/);
+    } finally { w.close(); }
+    expect(seen).toContain('verify.png');
+    expect(existsSync(join(out, 'verify.png'))).toBe(false);
+    expect(JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'))).toMatchObject({ complete: false, result: 'FAIL', exit: 1, stage: 'run' });
+  }, 60_000);
+
+  it('O-1: a hostile html build id (../../victim) cannot move the default out dir outside the out root', () => {
+    const base = tmp(), root = join(base, 'a', 'b', 'root'), html = join(base, 'evil.html');
+    mkdirSync(root, { recursive: true }); writeFileSync(html, fake('../../victim'));
+    const r = cli(['--hours', '0.01', '--skip-build', '--no-shot'], { VERIFY_OUT_ROOT: root, VERIFY_HTML: html });
+    expect(r.status).toBe(1); // the build-id check fails (and no shot)
+    expect(r.stderr).toMatch(/html build id is not a plain id; default out dir is invalid-build-id\//);
+    expect(existsSync(join(base, 'a', 'victim'))).toBe(false);
+    expect(readdirSync(join(base, 'a'))).toEqual(['b']);
+    expect(readdirSync(join(base, 'a', 'b'))).toEqual(['root']);
+    expect(readdirSync(root)).toEqual(['invalid-build-id']);
+    const j = JSON.parse(readFileSync(join(root, 'invalid-build-id', 'verify.json'), 'utf8'));
+    expect(j).toMatchObject({ complete: true, result: 'FAIL', buildId: '../../victim' });
+    expect(j.checks.find((c: any) => c.id === 'build-id').pass).toBe(false);
+  }, 60_000);
+
+  it.skipIf(!nonRoot)('O-2: a read-only out dir on a run that fails the save round-trip keeps exit 4 (not an uncaught 1) and logs one line', () => {
+    const dir = tmp(), out = join(dir, 'ro'), html = join(dir, 'fake.html');
+    writeFileSync(html, fake()); mkdirSync(out); chmodSync(out, 0o555);
+    try {
+      const r = cli(['--hours', '0.1', '--skip-build', '--flags', 'm4.enabled=0', '--out', out], { VERIFY_HTML: html, CHROME: join(dir, 'must-not-launch') });
+      expect(r.status).toBe(4);
+      expect(writerLine(r.stderr)).toBe("verify: could not write the report (<redacted>): EACCES: permission denied, open '<redacted>'; exit 4 (save round-trip) is kept");
+      expect(r.stderr).not.toMatch(/\n\s+at /); // no uncaught stack
+      expect(r.stderr.split('\n').filter(l => l.startsWith('verify: could not write'))).toHaveLength(1); // no early FAIL writer after it
+      expect(readdirSync(out)).toEqual([]);
     } finally { chmodSync(out, 0o755); }
   }, 60_000);
 });
