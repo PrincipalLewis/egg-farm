@@ -28,6 +28,9 @@ const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const HTML_DEFAULT = 'dist-html/egg-farm.html';
 /** VERIFY_HTML (tests only, with --skip-build): read another html instead of dist-html/egg-farm.html. Reported as an override. */
 const HTML = process.env.VERIFY_HTML || HTML_DEFAULT, HTML_LABEL = process.env.VERIFY_HTML ? 'VERIFY_HTML override (test)' : HTML_DEFAULT;
+/** VERIFY_OUT_ROOT (tests only, VER-1d): the parent of the default out dirs instead of <repo>/verify-out, so the default-dir
+ *  rules (S1) are tested in a temp dir and never write into the worktree. Not in verify.json; --out is unaffected. */
+const OUT_ROOT = process.env.VERIFY_OUT_ROOT ? resolve(process.env.VERIFY_OUT_ROOT) : join(ROOT, 'verify-out');
 const git = (a: string[]) => { const r = spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
 const t0 = performance.now(), log = (s: string) => process.stderr.write(`verify: ${s}\n`);
 type Check = { id: string; pass: boolean; detail: string };
@@ -49,7 +52,7 @@ function main(ctx: Ctx): number {
   // Without --out the dir is keyed by the built html's id, unknown before the build; until then it is the HEAD build id's dir
   // (where a build of HEAD writes), cleared and written only if it already exists.
   if (outRaw !== null) { mkdirSync(resolveOut(outRaw), { recursive: true }); claimOut(ctx, resolveOut(outRaw), true); }
-  else { const d = join(ROOT, 'verify-out', gitBuildId(ROOT)); claimOut(ctx, d, existsSync(d)); }
+  else { const d = join(OUT_ROOT, gitBuildId(ROOT)); claimOut(ctx, d, existsSync(d)); }
   let o; try { o = parseArgs(argv); } catch (e) { if (e instanceof UsageError) { console.error(USAGE); return earlyFail(ctx, 2, `usage: ${e.message}`); } throw e; }
   if (UNAVAILABLE[o.profile]) return earlyFail(ctx, 2, `profile ${o.profile} ${UNAVAILABLE[o.profile]}`);
   let b; try { b = withFlags(shipped, o.flags); } catch (e) { if (e instanceof UsageError) return earlyFail(ctx, 2, `usage: ${e.message}`); throw e; }
@@ -73,7 +76,7 @@ function main(ctx: Ctx): number {
   const htmlBytes = readFileSync(resolve(ROOT, HTML)), html = htmlBytes.toString('utf8');
   const buildId = /<meta name="build-id" content="([^"]*)">/.exec(html)?.[1] ?? '';
   const sha = git(['rev-parse', 'HEAD']), expectId = gitBuildId(ROOT);
-  const outDir = o.out ? resolveOut(o.out) : join(ROOT, 'verify-out', buildId || 'unknown');
+  const outDir = o.out ? resolveOut(o.out) : join(OUT_ROOT, buildId || 'unknown');
   mkdirSync(outDir, { recursive: true }); claimOut(ctx, outDir, true); ctx.stage = 'run';
   const checks: Check[] = [];
   const check = (id: string, pass: boolean, detail: string) => { checks.push({ id, pass, detail }); if (!pass) log(`FAIL ${id}: ${detail}`); };
@@ -122,6 +125,9 @@ function main(ctx: Ctx): number {
     rmSync(tmp, { recursive: true, force: true });
     if (!shot.ok) rmSync(png, { force: true });
   }
+  // VERIFY_TEST_THROW=after-shot (tests only, VER-1d): a crash after the browser step wrote verify.png (a stand-in PNG here),
+  // so the test proves the early-exit writer removes it. Always a throw: it can never yield a PASS.
+  if (process.env.VERIFY_TEST_THROW === 'after-shot') { writeFileSync(png, 'VERIFY_TEST_THROW stand-in'); throw new Error('VERIFY_TEST_THROW: forced crash after the browser step (test hook)'); }
   const labelWant = `Egg Farm ${buildId}`;
   check('build-label', !!shot.ok && shot.label === labelWant && shot.dataBuildId === buildId, shot.ok ? `label ${JSON.stringify(shot.label)}, #app data-build-id ${shot.dataBuildId}` : `no screenshot: ${shot.error ?? (o.noShot ? '--no-shot' : flagsDifferFromBuild ? 'skipped: --flags differ from the build' : !rt.pass ? 'skipped: save-roundtrip failed' : 'unknown')}`);
   // 3. verify.json (deterministic: no timestamps, durations or absolute paths)
@@ -151,15 +157,23 @@ function main(ctx: Ctx): number {
   if (!rt.pass) return 4; // CCR R1: its own code, so CI and QA can tell a wrong-farm screenshot from other check failures; takes precedence over 1 (CCR N1 on #72)
   return report.result === 'PASS' ? 0 : 1;
 }
-/** S1: the minimal FAIL verify.json of an early exit (usage 2, build 3, uncaught throw 1). Never PASS, never names a PNG. */
+/** CCR N-c on #74: a failure of the FAIL writer is logged (one sanitised line), never thrown, so the original exit code
+ *  (2, 3) or the original error of a crash survives it, e.g. EISDIR when <out>/verify.json is a directory. */
+const writerFailed = (what: string, w: unknown, exit: number) =>
+  log(sanitize(`could not write the FAIL report (${what}): ${String((w as Error)?.message ?? w).split('\n')[0].slice(0, 200)}; exit ${exit} and the original error are kept`, ROOT));
+/** S1: the minimal FAIL verify.json of an early exit (usage 2, build 3, uncaught throw 1). Never PASS, never names a PNG.
+ *  Never throws (N-c): each out dir is handled on its own, so one bad dir does not stop the others being cleared. */
 function writeEarly(ctx: Ctx, exit: number) {
-  const r = { schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts', complete: false, result: 'FAIL', exit, stage: ctx.stage, reason: ctx.reason, sha: git(['rev-parse', 'HEAD']), screenshot: { file: null } };
-  let text = sanitize(JSON.stringify(r, null, 2) + '\n', ROOT);
-  for (const x of leaks(text)) text = text.split(x).join('<redacted>');
-  for (const [dir, write] of ctx.outs) {
+  let text: string | null = null;
+  try {
+    const r = { schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts', complete: false, result: 'FAIL', exit, stage: ctx.stage, reason: ctx.reason, sha: git(['rev-parse', 'HEAD']), screenshot: { file: null } };
+    text = sanitize(JSON.stringify(r, null, 2) + '\n', ROOT);
+    for (const x of leaks(text)) text = text.split(x).join('<redacted>');
+  } catch (w) { writerFailed('report text', w, exit); }
+  for (const [dir, write] of ctx.outs) try {
     rmSync(join(dir, 'verify.png'), { force: true }); // a crash after the browser step must not leave its PNG without a report
-    if (write) { mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, 'verify.json'), text); }
-  }
+    if (write && text !== null) { mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, 'verify.json'), text); }
+  } catch (w) { writerFailed(dir, w, exit); }
 }
 const ctx: Ctx = { outs: new Map(), stage: 'usage', reason: '', done: false };
 let code = 1;
