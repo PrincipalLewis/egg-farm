@@ -534,6 +534,7 @@ describe('verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)', () => {
       expect(r.status).toBe(4);
       expect(writerLine(r.stderr)).toBe("verify: could not write the report (<redacted>): EACCES: permission denied, open '<redacted>'; exit 4 (save round-trip) is kept");
       expect(r.stderr).not.toMatch(/\n\s+at /); // no uncaught stack
+      expect(r.stderr.split('\n').filter(l => l.startsWith('verify: could not write'))).toHaveLength(1); // no early FAIL writer after it
       expect(readdirSync(out)).toEqual([]);
     } finally { chmodSync(out, 0o755); }
   }, 60_000);
