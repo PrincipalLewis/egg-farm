@@ -4,6 +4,8 @@
 // Exit codes: 0 PASS, 1 a check failed (see verify.json checks[]), 2 usage / unavailable profile, 3 build failed,
 // 4 the end-state save does not load back as the end state under the shipped balance, or --flags differ from the build
 // (saveRoundTrip; no browser step, no PNG). 4 takes precedence over 1.
+// S1 (CCR on #73): no exit path leaves an earlier run's verify.json / verify.png: both are removed from the out dir before
+// anything can fail, and every early exit (2, 3, uncaught throw) writes a minimal FAIL verify.json there (complete: false).
 // Studio tooling only: reads src/, writes only <out>/verify.json + verify.png (default verify-out/<buildId>/, git-ignored).
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -17,9 +19,9 @@ import { BUILD_PREFIX, gitBuildId } from './build-id';
 import { runVerify, badNumbers, markFreshM4, UNAVAILABLE } from './verify/sim';
 import { goldens } from './verify/golden';
 import { saveRoundTrip, ROUNDTRIP_FIELDS } from './verify/roundtrip';
-import { parseArgs, flagsOf, withFlags, sanitize, leaks, UsageError, USAGE } from './verify/cli';
+import { parseArgs, outArg, flagsOf, withFlags, sanitize, leaks, UsageError, USAGE } from './verify/cli';
 
-export const SCHEMA_VERSION = 3; // 2 (VER-1a): + saveRoundTrip, + checks[] save-roundtrip; 3 (VER-1b): + saveRoundTrip.balance/flagsDifferFromBuild, + screenshot.skippedReason
+export const SCHEMA_VERSION = 4; // 2 (VER-1a): + saveRoundTrip, + checks[] save-roundtrip; 3 (VER-1b): + saveRoundTrip.balance/flagsDifferFromBuild, + screenshot.skippedReason; 4 (VER-1c): + complete, + the early-exit FAIL shape
 /** savedAt of the end-state save: a fixed epoch + the simulated time (no wall clock anywhere in the output). */
 export const VERIFY_EPOCH_MS = Date.UTC(2026, 0, 1);
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -29,11 +31,29 @@ const HTML = process.env.VERIFY_HTML || HTML_DEFAULT, HTML_LABEL = process.env.V
 const git = (a: string[]) => { const r = spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
 const t0 = performance.now(), log = (s: string) => process.stderr.write(`verify: ${s}\n`);
 type Check = { id: string; pass: boolean; detail: string };
+/** S1: the out dirs this run may write to (explicit --out, else verify-out/<HEAD build id>, plus the html's default dir once
+ *  known), the stage reached, and whether the full report was written. */
+interface Ctx { outs: Map<string, boolean>; stage: 'usage' | 'build' | 'run'; reason: string; done: boolean }
+const resolveOut = (out: string) => isAbsolute(out) ? out : resolve(process.cwd(), out);
+/** Remove an earlier run's artifacts from `dir` (S1). `writeFail`: whether an early exit may write its FAIL json there. */
+function claimOut(ctx: Ctx, dir: string, writeFail: boolean) {
+  if (ctx.outs.has(dir)) return;
+  ctx.outs.set(dir, writeFail);
+  for (const f of ['verify.json', 'verify.png']) rmSync(join(dir, f), { force: true });
+}
+function earlyFail(ctx: Ctx, code: number, reason: string): number { ctx.reason = reason; console.error(`verify: ${reason}`); return code; }
 
-function main(): number {
-  let o; try { o = parseArgs(process.argv.slice(2)); } catch (e) { if (e instanceof UsageError) { console.error(`verify: ${e.message}\n${USAGE}`); return 2; } throw e; }
-  if (UNAVAILABLE[o.profile]) { console.error(`verify: profile ${o.profile} ${UNAVAILABLE[o.profile]}`); return 2; }
-  let b; try { b = withFlags(shipped, o.flags); } catch (e) { if (e instanceof UsageError) { console.error(`verify: ${e.message}`); return 2; } throw e; }
+function main(ctx: Ctx): number {
+  const argv = process.argv.slice(2), outRaw = outArg(argv);
+  // S1: the out dir is cleared before anything can fail. With --out it is that dir (created for the FAIL json if needed).
+  // Without --out the dir is keyed by the built html's id, unknown before the build; until then it is the HEAD build id's dir
+  // (where a build of HEAD writes), cleared and written only if it already exists.
+  if (outRaw !== null) { mkdirSync(resolveOut(outRaw), { recursive: true }); claimOut(ctx, resolveOut(outRaw), true); }
+  else { const d = join(ROOT, 'verify-out', gitBuildId(ROOT)); claimOut(ctx, d, existsSync(d)); }
+  let o; try { o = parseArgs(argv); } catch (e) { if (e instanceof UsageError) { console.error(USAGE); return earlyFail(ctx, 2, `usage: ${e.message}`); } throw e; }
+  if (UNAVAILABLE[o.profile]) return earlyFail(ctx, 2, `profile ${o.profile} ${UNAVAILABLE[o.profile]}`);
+  let b; try { b = withFlags(shipped, o.flags); } catch (e) { if (e instanceof UsageError) return earlyFail(ctx, 2, `usage: ${e.message}`); throw e; }
+  ctx.stage = 'build';
   // 1. build
   // Clean tree: the real `npm run build:html`. Dirty tree: the same steps minus its last one, check-release-build, which refuses
   // a +dirty id by design (release gate); the id is then recorded as +dirty and verify.json says how it was built (DoD 1).
@@ -46,20 +66,21 @@ function main(): number {
     for (const [cmd, ...args] of steps) {
       log([cmd, ...args].join(' '));
       const r = spawnSync(cmd, args, { cwd: ROOT, stdio: ['ignore', 2, 2] });
-      if (r.status !== 0) { console.error(`verify: FAIL build (${[cmd, ...args].join(' ')}) exited ${r.status}`); return 3; }
+      if (r.status !== 0) return earlyFail(ctx, 3, `FAIL build (${[cmd, ...args].join(' ')}) exited ${r.status}`);
     }
   }
-  if (!existsSync(resolve(ROOT, HTML))) { console.error(`verify: FAIL ${HTML_LABEL} missing`); return 3; }
+  if (!existsSync(resolve(ROOT, HTML))) return earlyFail(ctx, 3, `FAIL ${HTML_LABEL} missing`);
   const htmlBytes = readFileSync(resolve(ROOT, HTML)), html = htmlBytes.toString('utf8');
   const buildId = /<meta name="build-id" content="([^"]*)">/.exec(html)?.[1] ?? '';
   const sha = git(['rev-parse', 'HEAD']), expectId = gitBuildId(ROOT);
-  const outDir = o.out ? (isAbsolute(o.out) ? o.out : resolve(process.cwd(), o.out)) : join(ROOT, 'verify-out', buildId || 'unknown');
-  mkdirSync(outDir, { recursive: true });
+  const outDir = o.out ? resolveOut(o.out) : join(ROOT, 'verify-out', buildId || 'unknown');
+  mkdirSync(outDir, { recursive: true }); claimOut(ctx, outDir, true); ctx.stage = 'run';
   const checks: Check[] = [];
   const check = (id: string, pass: boolean, detail: string) => { checks.push({ id, pass, detail }); if (!pass) log(`FAIL ${id}: ${detail}`); };
   check('build-id', buildId === expectId && buildId.startsWith(`${BUILD_PREFIX}+`), `html ${buildId || '(none)'}, HEAD ${expectId}`);
   // 2. run
   log(`run ${o.hours} h, seed ${o.seed}, profile ${o.profile}, flags ${JSON.stringify({ ...flagsOf(shipped), ...o.flags })}`);
+  if (process.env.VERIFY_TEST_THROW === '1') throw new Error('VERIFY_TEST_THROW: forced crash (test hook)'); // tests only (S1)
   const run = runVerify(b, { hours: o.hours, seed: o.seed, profile: o.profile });
   const bad = [...badNumbers(run.checkpoints, '$.checkpoints'), ...badNumbers(run.end, '$.end', [], false).filter(x => !x.includes('negative'))];
   check('finite-non-negative', bad.length === 0, bad.length ? bad.slice(0, 10).join('; ') : 'every checkpoint value finite and >= 0; end state finite');
@@ -105,7 +126,7 @@ function main(): number {
   check('build-label', !!shot.ok && shot.label === labelWant && shot.dataBuildId === buildId, shot.ok ? `label ${JSON.stringify(shot.label)}, #app data-build-id ${shot.dataBuildId}` : `no screenshot: ${shot.error ?? (o.noShot ? '--no-shot' : flagsDifferFromBuild ? 'skipped: --flags differ from the build' : !rt.pass ? 'skipped: save-roundtrip failed' : 'unknown')}`);
   // 3. verify.json (deterministic: no timestamps, durations or absolute paths)
   const report = {
-    schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts',
+    schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts', complete: true,
     buildId, sha, dirty: buildId.endsWith('+dirty'),
     asset: { path: HTML_LABEL, sha256: createHash('sha256').update(htmlBytes).digest('hex'), bytes: htmlBytes.length, build: buildHow },
     seed: o.seed, hours: o.hours, profile: o.profile,
@@ -124,10 +145,29 @@ function main(): number {
   report.result = report.checks.every(c => c.pass) ? 'PASS' : 'FAIL';
   let text = sanitize(JSON.stringify(report, null, 2) + '\n', ROOT);
   for (const x of lk) text = text.split(x).join('<redacted>');
-  writeFileSync(join(outDir, 'verify.json'), text);
+  writeFileSync(join(outDir, 'verify.json'), text); ctx.done = true;
   const rel = relative(process.cwd(), outDir) || '.';
   log(`${report.result} ${buildId} seed ${o.seed} ${o.hours} h: trace ${run.traceSha256.slice(0, 12)}, goldens ${gs.map(g => `${g.name} ${g.pass ? 'ok' : 'MISMATCH'}`).join(', ')}, label ${shot.ok ? 'ok' : 'missing'} -> ${rel}/verify.json${shot.ok ? ', verify.png' : ''} (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
   if (!rt.pass) return 4; // CCR R1: its own code, so CI and QA can tell a wrong-farm screenshot from other check failures; takes precedence over 1 (CCR N1 on #72)
   return report.result === 'PASS' ? 0 : 1;
 }
-process.exitCode = main();
+/** S1: the minimal FAIL verify.json of an early exit (usage 2, build 3, uncaught throw 1). Never PASS, never names a PNG. */
+function writeEarly(ctx: Ctx, exit: number) {
+  const r = { schemaVersion: SCHEMA_VERSION, tool: 'scripts/verify.ts', complete: false, result: 'FAIL', exit, stage: ctx.stage, reason: ctx.reason, sha: git(['rev-parse', 'HEAD']), screenshot: { file: null } };
+  let text = sanitize(JSON.stringify(r, null, 2) + '\n', ROOT);
+  for (const x of leaks(text)) text = text.split(x).join('<redacted>');
+  for (const [dir, write] of ctx.outs) {
+    rmSync(join(dir, 'verify.png'), { force: true }); // a crash after the browser step must not leave its PNG without a report
+    if (write) { mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, 'verify.json'), text); }
+  }
+}
+const ctx: Ctx = { outs: new Map(), stage: 'usage', reason: '', done: false };
+let code = 1;
+try { code = main(ctx); }
+catch (e) {
+  ctx.reason = `uncaught error: ${String((e as Error)?.message ?? e).split('\n')[0].slice(0, 200)}`;
+  if (!ctx.done) writeEarly(ctx, 1);
+  throw e; // node prints the stack and exits 1
+}
+if (!ctx.done) writeEarly(ctx, code);
+process.exitCode = code;

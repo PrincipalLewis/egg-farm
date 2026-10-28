@@ -21,10 +21,31 @@ What it does, in order:
 | Code | Meaning |
 |---|---|
 | 0 | PASS |
-| 1 | A check failed. See `checks[]`: build id mismatch, NaN / Infinity / negative values, golden mismatch, or a missing or wrong build label. |
-| 2 | Usage error, or a profile that isn't available yet. |
-| 3 | Build failure. |
+| 1 | A check failed. See `checks[]`: build id mismatch, NaN / Infinity / negative values, golden mismatch, or a missing or wrong build label. Also an uncaught error, with node's stack on stderr and an early-exit `verify.json` (below). |
+| 2 | Usage error, or a profile that isn't available yet. This includes `--flags` given more than once, or one key given twice in `--flags` (VER-1c, CCR N-b on #73; earlier it was silently last-wins). |
+| 3 | Build failure, or the built html is missing. |
 | 4 | Save round-trip failed (VER-1a/1b, CCR R1 on #71, F1 on #72). The save handed to the browser doesn't load back as the run's end state under the **shipped** balance (`src/config/balance.json`, the one the built html runs) with `src/save/save.ts` `validate()`. That covers: migrated on load (for example a missing `tracksV7` marker), F/H/V/C, Grader tier, workers or coins differing, or **`--flags` changing a shipped flag**. The browser step is skipped and no `verify.png` is written. **4 takes precedence over 1:** when the round-trip and another check both fail, the exit code is 4, and `checks[]` still lists every failure. |
+
+### Stale output (VER-1c, CCR S1 on #73)
+
+No exit path leaves a previous run's `verify.json` or `verify.png` behind.
+
+- **Before anything can fail,** verify removes both files from the out dir.
+- **Every early exit writes a short FAIL report.** That covers exit 2, exit 3 and an uncaught throw (exit 1). It never says PASS and never names a PNG:
+
+  ```json
+  { "schemaVersion": 4, "tool": "scripts/verify.ts", "complete": false, "result": "FAIL", "exit": 2, "stage": "usage", "reason": "usage: --hours must be a number in (0, 720]", "sha": "<HEAD sha>", "screenshot": { "file": null } }
+  ```
+
+  - `stage` is `usage`, `build` or `run`.
+  - `reason` holds the same message as stderr. After a crash it is the first line of the error, and it is sanitised like the full report.
+  - A full run writes `complete: true` and the full report.
+
+Which out dir this applies to:
+
+- **With `--out dir`:** that dir. `--out` is read before the other arguments are validated, so a usage error elsewhere still clears it. The dir is created if needed.
+- **Without `--out`:** the default dir `verify-out/<buildId>/` is named after the built html's id, which isn't known before the build. Until then verify uses `verify-out/<HEAD build id>/`, the dir a build of HEAD writes to. It clears that dir, and writes the FAIL report there only if the dir already exists, so a usage error doesn't create empty dirs. Once the html is read, its own default dir is cleared too (they differ only with `--skip-build` and an older html).
+- **If `--out` has no value** (`--out --hours 1`), that's a usage error and the default dir rule applies.
 
 Runtime: about 20 s for `--hours 24` locally (build about 5 s, sim about 8 s, goldens about 2 s, browser about 3 s).
 
@@ -43,7 +64,10 @@ So when `--flags` changes a shipped flag, verify is honest rather than partial. 
 
 An exit 4 with `flagsDifferFromBuild: true` is the expected outcome of a `--flags` experiment, not a game defect. To verify a flag-off build, change the flag in `src/config/balance.json`, build and run verify without `--flags`.
 
-### `verify.json` (schemaVersion 3)
+### `verify.json` (schemaVersion 4)
+
+Two shapes, told apart by `complete`. `complete: false` is the early-exit FAIL report described under Stale output above. `complete: true` is the full report below; `complete` was added in 4 and everything else is unchanged from 3.
+
 
 | Field | Content |
 |---|---|

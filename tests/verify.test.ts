@@ -14,7 +14,7 @@ import { saveRoundTrip } from '../scripts/verify/roundtrip';
 import { initialState } from '../src/sim/state';
 import { selectGoal } from '../src/ui/next-goal';
 import { goldens, GOLDEN_FLAG_OFF, GOLDEN_M4_ON } from '../scripts/verify/golden';
-import { parseArgs, parseFlags, flagsOf, withFlags, sanitize, leaks, UsageError } from '../scripts/verify/cli';
+import { parseArgs, parseFlags, outArg, flagsOf, withFlags, sanitize, leaks, UsageError } from '../scripts/verify/cli';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -169,7 +169,7 @@ describe('verify: save round-trip guard (VER-1a, CCR R1)', () => {
     const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html, VERIFY_TEST_SKIP_MARKER: '1', CHROME: join(dir, 'must-not-launch') } });
     expect(r.status).toBe(4);
     const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
-    expect(j.schemaVersion).toBe(3);
+    expect(j.schemaVersion).toBe(4);
     expect(j.saveRoundTrip).toMatchObject({ pass: false, migrated: true, tracksMigrated: true, markerSkippedForTest: true });
     expect(j.checks.find((c: any) => c.id === 'save-roundtrip').pass).toBe(false);
     expect(j.checks.find((c: any) => c.id === 'build-label').detail).toMatch(/skipped: save-roundtrip failed/);
@@ -221,6 +221,79 @@ describe('verify: VER-1b (CCR F1/N2 on #72)', () => {
     expect(r.status).toBe(1); // fake html / no shot only
     const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
     expect(j.saveRoundTrip).toMatchObject({ pass: true, flagsDifferFromBuild: false, migrated: false });
+  }, 60_000);
+});
+
+describe('verify: VER-1c (CCR S1/N-a/N-b on #73)', () => {
+  const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
+  const FAKE = '<!doctype html><meta name="build-id" content="m4.1+0000000">';
+  /** An out dir holding a previous run's PASS verify.json and verify.png. */
+  const staleOut = () => {
+    const dir = mkdtempSync(join(tmpdir(), 'v-')), out = join(dir, 'out'), html = join(dir, 'fake.html');
+    mkdirSync(out); writeFileSync(html, FAKE);
+    writeFileSync(join(out, 'verify.json'), JSON.stringify({ schemaVersion: 3, result: 'PASS', screenshot: { file: 'verify.png' } }));
+    writeFileSync(join(out, 'verify.png'), 'stale');
+    return { dir, out, html };
+  };
+  const cli = (args: string[], env: Record<string, string> = {}) =>
+    spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...args], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ...env } });
+  const expectNoStale = (out: string, exit: number, stage: string) => {
+    expect(existsSync(join(out, 'verify.png'))).toBe(false);
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j).toMatchObject({ schemaVersion: 4, complete: false, result: 'FAIL', exit, stage, screenshot: { file: null } });
+    return j;
+  };
+  it('outArg reads --out leniently (last wins, a missing value or an option is not a value)', () => {
+    expect(outArg(['--hours', '0', '--out', 'a', '--bogus'])).toBe('a');
+    expect(outArg(['--out', 'a', '--out', 'b'])).toBe('b');
+    expect(outArg(['--out', '--hours', '1'])).toBeNull();
+    expect(outArg(['--out'])).toBeNull();
+    expect(outArg(['--hours', '1'])).toBeNull();
+  });
+  it('S1: a usage error (exit 2) leaves no stale PASS verify.json and no verify.png in --out', () => {
+    for (const args of [['--hours', '0'], ['--hours', '1', '--bogus'], ['--hours', '1', '--flags', 'm4.nope=1']]) {
+      const { out } = staleOut();
+      const r = cli([...args, '--out', out]);
+      expect(r.status, args.join(' ')).toBe(2);
+      expect(expectNoStale(out, 2, 'usage').reason).toMatch(/^usage: /);
+    }
+  }, 60_000);
+  it('S1: a build failure (exit 3) leaves no stale PASS verify.json and no verify.png in --out', () => {
+    const { dir, out } = staleOut();
+    const r = cli(['--hours', '1', '--skip-build', '--out', out], { VERIFY_HTML: join(dir, 'missing.html') });
+    expect(r.status).toBe(3);
+    expect(expectNoStale(out, 3, 'build').reason).toMatch(/missing/);
+  }, 60_000);
+  it('S1: an uncaught throw (exit 1) leaves no stale PASS verify.json and no verify.png in --out', () => {
+    const { out, html } = staleOut();
+    const r = cli(['--hours', '1', '--skip-build', '--out', out], { VERIFY_HTML: html, VERIFY_TEST_THROW: '1' });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toMatch(/VERIFY_TEST_THROW/);
+    expect(expectNoStale(out, 1, 'run').reason).toMatch(/^uncaught error: VERIFY_TEST_THROW/);
+  }, 60_000);
+  it('N-a: --flags m4.enabled=2 (round-trips under the shipped balance, but differs from the build) exits 4, no PNG', () => {
+    const { out, html } = staleOut();
+    const r = cli(['--hours', '0.1', '--skip-build', '--flags', 'm4.enabled=2', '--out', out], { VERIFY_HTML: html, CHROME: join(out, 'must-not-launch') });
+    expect(r.status).toBe(4);
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j).toMatchObject({ complete: true, result: 'FAIL', saveRoundTrip: { pass: false, flagsDifferFromBuild: true, migrated: false, mismatches: [] }, screenshot: { file: null, skippedReason: 'flags differ from build' } });
+    expect(j.checks.find((c: any) => c.id === 'save-roundtrip').detail).toMatch(/m4\.enabled=2 vs 1.*round-trip under the shipped balance passes/);
+    expect(existsSync(join(out, 'verify.png'))).toBe(false);
+  }, 60_000);
+  it('N-b: a repeated --flags or a duplicate key within --flags is a usage error', () => {
+    expect(() => parseArgs(['--hours', '1', '--flags', 'm4.enabled=0', '--flags', 'm4.enabled=1'])).toThrow(/--flags given more than once/);
+    expect(() => parseFlags('m4.enabled=0,m4.enabled=1')).toThrow(/flag m4\.enabled given more than once/);
+    expect(() => parseFlags('m4.enabled=1, m4.enabled=1')).toThrow(UsageError); // even when equal: still a typo
+    expect(parseFlags('m4.enabled=1')).toEqual({ 'm4.enabled': 1 });
+  });
+  it('N-b: the CLI exits 2 with a clear message for both, and writes no PASS', () => {
+    for (const [args, msg] of [[['--flags', 'm4.enabled=0', '--flags', 'm4.enabled=1'], /--flags given more than once/], [['--flags', 'm4.enabled=0,m4.enabled=1'], /flag m4\.enabled given more than once in --flags/]] as const) {
+      const { out } = staleOut();
+      const r = cli(['--hours', '1', ...args, '--out', out]);
+      expect(r.status).toBe(2);
+      expect(r.stderr).toMatch(msg);
+      expectNoStale(out, 2, 'usage');
+    }
   }, 60_000);
 });
 
