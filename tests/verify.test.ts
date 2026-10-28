@@ -1,10 +1,10 @@
 // VER-1: tests for `npm run verify` itself (scripts/verify.ts + scripts/verify/*). Node only; the build + browser steps run in
 // the verify-smoke CI job and locally (`npm run verify -- --hours 1`), not here.
 import { describe, it, expect } from 'vitest';
-import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, copyFileSync, symlinkSync, chmodSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { balance } from '../src/config/balance';
 import { runM2 } from './bot-m2';
@@ -15,6 +15,7 @@ import { initialState } from '../src/sim/state';
 import { selectGoal } from '../src/ui/next-goal';
 import { goldens, GOLDEN_FLAG_OFF, GOLDEN_M4_ON } from '../scripts/verify/golden';
 import { parseArgs, parseFlags, outArg, flagsOf, withFlags, sanitize, leaks, UsageError } from '../scripts/verify/cli';
+import { gitBuildId } from '../scripts/build-id';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -325,5 +326,112 @@ describe('verify: exit codes and the browser step (CCR n1/n3)', () => {
     const o = JSON.parse(r.stdout.trim().split('\n').pop()!);
     expect(o.ok).toBe(false); expect(o.error).toMatch(/launch/);
     expect(existsSync(png)).toBe(false);
+  }, 60_000);
+});
+
+describe('verify: VER-1d (CCR m1/N-c on #74)', () => {
+  // Every out dir here is a temp dir: --out, or VERIFY_OUT_ROOT standing in for <repo>/verify-out. Nothing is written into the worktree.
+  const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`;
+  const FAKE_ID = 'm4.1+0000000', FAKE = `<!doctype html><meta name="build-id" content="${FAKE_ID}">`;
+  const tmp = () => mkdtempSync(join(tmpdir(), 'v1d-'));
+  /** A previous run's PASS verify.json + verify.png in `dir`, plus a decoy that must survive. */
+  const seedStale = (dir: string) => {
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'verify.json'), JSON.stringify({ schemaVersion: 4, complete: true, result: 'PASS', screenshot: { file: 'verify.png' } }));
+    writeFileSync(join(dir, 'verify.png'), 'stale');
+    writeFileSync(join(dir, 'decoy.json'), 'keep');
+  };
+  const cli = (args: string[], env: Record<string, string> = {}, cwd = ROOT) =>
+    spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...args], { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
+  const expectFail = (dir: string, exit: number, stage: string) => {
+    expect(existsSync(join(dir, 'verify.png')), `${dir}/verify.png`).toBe(false);
+    expect(readFileSync(join(dir, 'decoy.json'), 'utf8')).toBe('keep');
+    const j = JSON.parse(readFileSync(join(dir, 'verify.json'), 'utf8'));
+    expect(j).toMatchObject({ schemaVersion: 4, complete: false, result: 'FAIL', exit, stage, screenshot: { file: null } });
+    return j;
+  };
+
+  it('m1 (M31): a real tsc break in a temp copy of the repo exits 3 (stage build), not 1, and leaves no stale PASS', () => {
+    const copy = tmp(), out = join(tmp(), 'out');
+    const files = spawnSync('git', ['ls-files', '-co', '--exclude-standard', '-z'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\0').filter(Boolean);
+    for (const f of files) if (existsSync(join(ROOT, f))) { mkdirSync(dirname(join(copy, f)), { recursive: true }); copyFileSync(join(ROOT, f), join(copy, f)); }
+    symlinkSync(join(ROOT, 'node_modules'), join(copy, 'node_modules'), 'dir');
+    writeFileSync(join(copy, 'src/main.ts'), readFileSync(join(copy, 'src/main.ts'), 'utf8') + "\nexport const verifyTscBreak: number = 'not a number'; // VER-1d test: a real type error\n");
+    seedStale(out);
+    const r = cli(['--hours', '1', '--no-shot', '--out', out], {}, copy);
+    expect(r.stderr).toMatch(/TS2322/); // tsc itself failed on the break, not some other step
+    expect(r.status).toBe(3);
+    expect(expectFail(out, 3, 'build').reason).toMatch(/^FAIL build \(.+\) exited [1-9]/);
+    rmSync(copy, { recursive: true, force: true });
+  }, 180_000);
+
+  it('m1 (M28/M29): without --out, a usage error clears the existing default dir verify-out/<HEAD id>/ and writes the FAIL report there', () => {
+    const root = tmp(), d = join(root, gitBuildId(ROOT));
+    seedStale(d);
+    const r = cli(['--hours', '0'], { VERIFY_OUT_ROOT: root });
+    expect(r.status).toBe(2);
+    expect(expectFail(d, 2, 'usage').reason).toMatch(/^usage: /);
+    // ...and does not create the default dir when it is absent
+    const root2 = tmp();
+    expect(cli(['--hours', '0'], { VERIFY_OUT_ROOT: root2 }).status).toBe(2);
+    expect(existsSync(join(root2, gitBuildId(ROOT)))).toBe(false);
+  }, 60_000);
+
+  it('m1 (M17/M18/M19): a run SIGKILLed mid-sim (no handler runs) leaves neither verify.json nor verify.png', async () => {
+    const dir = tmp(), out = join(dir, 'out'), html = join(dir, 'fake.html');
+    writeFileSync(html, FAKE); seedStale(out);
+    const p = spawn(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '24', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, env: { ...process.env, VERIFY_HTML: html }, stdio: ['ignore', 'ignore', 'pipe'] });
+    let err = '';
+    const res = await new Promise<{ code: number | null; signal: string | null }>(done => {
+      p.stderr.on('data', c => { err += c; if (/verify: run 24 h/.test(err) && !p.killed) p.kill('SIGKILL'); });
+      p.on('exit', (code, signal) => done({ code, signal }));
+    });
+    expect(err).toMatch(/verify: run 24 h/);
+    expect(res.signal).toBe('SIGKILL'); // killed mid-run, before any report
+    expect(existsSync(join(out, 'verify.json'))).toBe(false);
+    expect(existsSync(join(out, 'verify.png'))).toBe(false);
+    expect(readFileSync(join(out, 'decoy.json'), 'utf8')).toBe('keep');
+  }, 120_000);
+
+  it("m1 (M33): --skip-build with an older html clears that html's default dir; a crash then writes the FAIL report there", () => {
+    const root = tmp(), html = join(tmp(), 'old.html'), d = join(root, FAKE_ID);
+    writeFileSync(html, FAKE); seedStale(d);
+    expect(gitBuildId(ROOT)).not.toBe(FAKE_ID);
+    const r = cli(['--hours', '0.1', '--skip-build', '--no-shot'], { VERIFY_OUT_ROOT: root, VERIFY_HTML: html, VERIFY_TEST_THROW: '1' });
+    expect(r.status).toBe(1);
+    expect(expectFail(d, 1, 'run').reason).toMatch(/^uncaught error: VERIFY_TEST_THROW/);
+    expect(existsSync(join(root, gitBuildId(ROOT)))).toBe(false); // the HEAD id dir did not exist, so nothing is created there
+  }, 60_000);
+
+  it('m1 (M27): a crash after the browser step wrote verify.png removes that PNG with the FAIL report', () => {
+    const dir = tmp(), out = join(dir, 'out'), html = join(dir, 'fake.html');
+    writeFileSync(html, FAKE); seedStale(out);
+    const r = cli(['--hours', '0.1', '--skip-build', '--no-shot', '--out', out], { VERIFY_HTML: html, VERIFY_TEST_THROW: 'after-shot' });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toMatch(/forced crash after the browser step/);
+    expect(expectFail(out, 1, 'run').reason).toMatch(/^uncaught error: VERIFY_TEST_THROW: forced crash after the browser step/);
+  }, 60_000);
+
+  it('N-c: <out>/verify.json being a directory: the original error (rm EISDIR) is what fails the run; the writer failure is only logged', () => {
+    const out = join(tmp(), 'out');
+    mkdirSync(join(out, 'verify.json'), { recursive: true }); writeFileSync(join(out, 'verify.json', 'inner'), 'keep');
+    writeFileSync(join(out, 'verify.png'), 'stale');
+    const r = cli(['--hours', '0', '--out', out]);
+    expect(r.status).toBe(1); // the clear step itself throws (before argument parsing): an uncaught error, exit 1
+    expect(r.stderr).toMatch(/verify: could not write the FAIL report \(.*\): EISDIR.*; exit 1 and the original error are kept/);
+    expect(r.stderr).toMatch(/ERR_FS_EISDIR|rm returned EISDIR/); // the original error's stack, not the writer's
+    expect(readFileSync(join(out, 'verify.json', 'inner'), 'utf8')).toBe('keep'); // never rm -r
+  }, 60_000);
+
+  it.skipIf(process.getuid?.() === 0)('N-c: an unwritable out dir keeps the original exit code (usage 2, not 1) and logs the writer failure', () => {
+    const out = join(tmp(), 'ro');
+    mkdirSync(out); chmodSync(out, 0o555);
+    try {
+      const r = cli(['--hours', '0', '--out', out]);
+      expect(r.stderr).toMatch(/usage: --hours/);
+      expect(r.stderr).toMatch(/verify: could not write the FAIL report \(.*\): EACCES.*; exit 2 and the original error are kept/);
+      expect(r.status).toBe(2);
+      expect(existsSync(join(out, 'verify.json'))).toBe(false);
+    } finally { chmodSync(out, 0o755); }
   }, 60_000);
 });

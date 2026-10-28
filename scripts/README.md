@@ -47,6 +47,8 @@ Which out dir this applies to:
 - **Without `--out`:** the default dir `verify-out/<buildId>/` is named after the built html's id, which isn't known before the build. Until then verify uses `verify-out/<HEAD build id>/`, the dir a build of HEAD writes to. It clears that dir, and writes the FAIL report there only if the dir already exists, so a usage error doesn't create empty dirs. Once the html is read, its own default dir is cleared too (they differ only with `--skip-build` and an older html).
 - **If `--out` has no value** (`--out --hours 1`), that's a usage error and the default dir rule applies.
 
+If the FAIL report itself can't be written (VER-1d, CCR N-c on #74), for example because `<out>/verify.json` is a directory or the out dir is read-only, verify logs one line to stderr (`verify: could not write the FAIL report (...)`) and keeps the original exit code (2, 3) or the original error of a crash. It still removes `verify.png` from every other out dir.
+
 Runtime: about 20 s for `--hours 24` locally (build about 5 s, sim about 8 s, goldens about 2 s, browser about 3 s).
 
 ### Golden rules
@@ -89,7 +91,7 @@ Two shapes, told apart by `complete`. `complete: false` is the early-exit FAIL r
 - `idle` is available.
 - `m5x-casual` is refused with exit 2: "needs tests/bot-m5.ts (M5.1, on Vadim go)".
 
-`--skip-build` and `--no-shot` are for development only, as are `VERIFY_TEST_SKIP_MARKER=1` (tests: save the end state unmarked to prove the exit-4 guard) and `VERIFY_HTML=<file>` (tests: verify another html with `--skip-build`). A failed or skipped browser step deletes any earlier `verify.png` in the out dir and sets `screenshot.file` to null. Both are recorded in `verify.json`, and `--no-shot` fails the label check.
+`--skip-build` and `--no-shot` are for development only, as are `VERIFY_TEST_SKIP_MARKER=1` (tests: save the end state unmarked to prove the exit-4 guard) `VERIFY_HTML=<file>` (tests: verify another html with `--skip-build`), `VERIFY_OUT_ROOT=<dir>` (tests: the parent of the default out dirs instead of `verify-out/`, so the default-dir rules are tested outside the worktree) and `VERIFY_TEST_THROW=1` / `after-shot` (tests: a forced crash before the run / after the browser step, the latter with a stand-in `verify.png` that the early-exit writer must remove; always exit 1, never PASS). A failed or skipped browser step deletes any earlier `verify.png` in the out dir and sets `screenshot.file` to null. Both are recorded in `verify.json`, and `--no-shot` fails the label check.
 
 ### CI: `verify-smoke`
 
