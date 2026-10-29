@@ -647,7 +647,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
         // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
-        { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); }
+        { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+          const pad = sc ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0; // sticky top:0 sits at the scroller's content edge, scroll-margin at its padding edge (p2 browser sweep)
+          const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height + pad) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); }
         fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;

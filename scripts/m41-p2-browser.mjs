@@ -23,13 +23,14 @@ const browser = ENGINE === 'webkit' ? await webkit.launch() : ENGINE === 'firefo
 const URL0 = `http://127.0.0.1:${srv.port}/`, UI = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
 const results = []; let fails = 0;
 const check = (id, w, name, pass, data) => { results.push({ id, engine: ENGINE, w, name, pass: !!pass, data }); if (!pass) { fails++; console.error(`FAIL [${ENGINE} ${w}] ${id} ${name} ${JSON.stringify(data)}`); } else console.log(`ok   [${ENGINE} ${w}] ${id} ${name}`); };
-async function open(w, h, st, { rm = false } = {}) {
+async function open(w, h, st, { rm = false, freeze = false } = {}) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 600, reducedMotion: rm ? 'reduce' : 'no-preference' });
   const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.addInitScript(ui => localStorage.setItem('eggfarm.ui', ui), UI);
   await page.goto(URL0, { waitUntil: 'domcontentloaded' }); await page.getByText('Tap to start').click(); await page.waitForFunction(() => window.eggfarm);
   await page.evaluate(st => { document.getElementById('modal-layer')?.classList.remove('open'); const g = window.eggfarm;
-    g.state = { ...g.state, seenTracksExplainer: true, collectionLevel: 20, farmLevel: 30, customers: [], nextCustomerInS: 1e9, graderTier: 1, manageCdS: 0, coinsCents: 0, ...st }; }, st);
+    g.state = { ...g.state, seenTracksExplainer: true, collectionLevel: 20, farmLevel: 30, customers: [], nextCustomerInS: 1e9, graderTier: 1, manageCdS: 0, coinsCents: 0, ...st.st };
+    if (st.freeze) g.frame = () => {}; }, { st, freeze }); // freeze: QA snapshot scenes hold still (sim off, UI renders on)
   await page.waitForTimeout(700); return { ctx, page, errors };
 }
 async function shot(page, view, w, label, measured, clip) {
@@ -134,7 +135,7 @@ for (const [w, h] of SIZES) {
     await ctx.close(); }
   // ---- AC-R17 label in name (axe label-content-name-mismatch = 0; name starts with visible text) ----
   for (const [scene, ws] of R17) {
-    const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 30, cdS: 0 }, ...ws }, coinsCents: 0 });
+    const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 30, cdS: 0 }, ...ws }, coinsCents: 0 }, { freeze: true });
     await toTab(page, 'workers'); await page.waitForTimeout(300);
     const r = await page.evaluate(() => { const vis = el => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue : n.nodeType === 1 && n.checkVisibility?.({ visibilityProperty: true }) !== false && getComputedStyle(n).display !== 'none' ? vis(n) : '').join('');
       return ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', '[data-act=manageAll].nav-manage'].map(sel => { const e = document.querySelector(sel); if (!e || e.hidden || !e.getClientRects().length) return { sel, shown: false };
