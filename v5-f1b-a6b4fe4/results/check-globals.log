@@ -1,0 +1,9 @@
+
+> egg-farm@0.1.0 check-globals
+> node scripts/release-globals-browser.mjs chromium
+
+serveOwn: dist on port 46353 (free port; set PORT to pin)
+check-globals: dist m4.1+a6b4fe4 on port 46353
+PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+PASS [chromium] refused newer-save boot window globals vs blank page: []
+PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]

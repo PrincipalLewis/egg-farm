@@ -1,0 +1,20 @@
+
+> egg-farm@0.1.0 verify
+> vite-node scripts/verify.ts -- --hours 24 --out /workspace/egg-farm-studio/artifacts/v5-f1b-a6b4fe4/results/verify-24h
+
+verify: npm run -s build:html
+balance.json up to date with economy.csv
+build:html: dist-html/egg-farm.html (548363 bytes, 16 asset rewrites, 45 inlined files)
+check-release-build: single-file dist-html/egg-farm.html (548363 bytes)
+check-release-build: m4.1+a6b4fe4 ok
+check-release-build: release prefix m4.1 ok
+check-release-build: build id m4.1+a6b4fe4 matches HEAD ok
+check-release-build: build-id meta + data-build-id = m4.1+a6b4fe4 ok
+check-release-build: no eggfarmUi in release ok
+check-release-build: no ?debug/?perf/?ios/QA hooks ok
+check-release-build: window global writes only eggfarmExportTelemetry ok
+check-release-build: every asset/font URL inlined (data:) ok
+check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+verify: run 24 h, seed 1, profile idle, flags {"m4.enabled":1}
+verify: PASS m4.1+a6b4fe4 seed 1 24 h: trace 2c0d3ec37be1, goldens flagOff ok, m4On ok, label ok -> ../egg-farm-studio/artifacts/v5-f1b-a6b4fe4/results/verify-24h/verify.json, verify.png (21.1 s)
