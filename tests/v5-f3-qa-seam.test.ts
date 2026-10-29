@@ -13,7 +13,7 @@ const rows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.
 const withM4 = (m4: any) => ({ ...structuredClone(balance), m4: { ...structuredClone(balance.m4!), ...m4 } }) as typeof balance;
 const at = (o: any, path: string) => path.split('.').reduce((x, k) => x?.[k], o);
 
-describe('Q8 zero-gain paths (m4 namespace)', () => {
+describe('[Q8] Q8 zero-gain paths (m4 namespace)', () => {
   it('ships m4.flags.zeroGainUi = 0, m4.flags.bestBuyV2 = 0, m4.zeroGain.confirm = 0, and no m5 block', () => {
     expect(at(raw, 'm4.flags.zeroGainUi')).toBe(0);
     expect(at(raw, 'm4.flags.bestBuyV2')).toBe(0);
@@ -21,7 +21,7 @@ describe('Q8 zero-gain paths (m4 namespace)', () => {
     expect(raw.m4.zeroGain).toEqual({ confirm: 0 });
     expect('m5' in raw).toBe(false);
   });
-  it('ships m4.flags.fatigueCue = 0 (Rule 2 chip cut flag, D-HOP-2026-10-29-05) and m4.flags.pause = 0', () => {
+  it('[D-HOP-2026-10-29-05] ships m4.flags.fatigueCue = 0 (Rule 2 chip cut flag, D-HOP-2026-10-29-05) and m4.flags.pause = 0', () => {
     expect(at(raw, 'm4.flags.fatigueCue')).toBe(0); expect(at(raw, 'm4.flags.pause')).toBe(0);
   });
   it('confirm is live only with zeroGainUi on (and m4.enabled) and confirm === 1', () => {
@@ -54,7 +54,7 @@ const runJs = (body: string) => {
   finally { rmSync(d, { recursive: true, force: true }); made.push(d); } // CCR N-1 #82: no temp dir left behind
 };
 const made: string[] = [];
-describe('Q8 release gate rejects eggfarmQa*', () => {
+describe('[Q8] Q8 release gate rejects eggfarmQa*', () => {
   afterAll(() => { expect(made.length).toBeGreaterThan(0); for (const d of made) expect(existsSync(d), d).toBe(false); });
   const base = 'const B="m4.1+abc1234"; window.eggfarmExportTelemetry=()=>{};';
   it('a clean bundle passes', () => { expect(runJs(base).status).toBe(0); });

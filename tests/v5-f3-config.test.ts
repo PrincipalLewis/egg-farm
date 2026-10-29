@@ -12,7 +12,7 @@ const rows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.
 const withM4 = (m4: any) => ({ ...structuredClone(balance), m4: { ...structuredClone(balance.m4!), ...m4 } }) as typeof balance;
 const withTc = (tc: Record<string, number>) => withM4({ tc: { ...balance.m4!.tc, ...tc } });
 
-describe('F3 flags block (m4.flags.*, HoE D-C1)', () => {
+describe('[F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1)', () => {
   it('ships every known flag, all 0, with m4.enabled kept as shipped (1)', () => {
     expect(balance.m4!.enabled).toBe(1);
     expect(balance.m4!.flags).toEqual(Object.fromEntries(M5_FLAGS.map(f => [f, 0])));
@@ -35,7 +35,10 @@ describe('F3 flags block (m4.flags.*, HoE D-C1)', () => {
   });
 });
 
-describe('F3 CSV wiring', () => {
+describe('[F3][§9.5-1] F3 CSV wiring', () => {
+  it('[§9.5-1] M5_MAPPED_COLS is exactly the two ruled non-tc_ mappings (no vacuous loop below)', () => {
+    expect([...M5_MAPPED_COLS]).toEqual(['leave_attended_window_s', 'rest_recovery_mult']);
+  });
   it('every tc_* column lands in m4.tc (auto), plus the explicit non-tc_ mappings, values verbatim from the CSV', () => {
     const tc = balance.m4!.tc as Record<string, number>;
     for (const c of Object.keys(rows[0]).filter(c => c.startsWith('tc_'))) expect(tc[c.slice(3)]).toBe(rows[0][c]);
@@ -47,7 +50,7 @@ describe('F3 CSV wiring', () => {
   });
 });
 
-describe('F3 validateBalance M5 rules (rules from the specs; values are test inputs)', () => {
+describe('[F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs)', () => {
   const bad: [Record<string, number>, RegExp][] = [
     [{ egg_w_cash: 0.5 }, /weights must sum to 1/],
     [{ egg_gap_min_s: 301 }, /egg_gap_min_s/],
@@ -64,7 +67,7 @@ describe('F3 validateBalance M5 rules (rules from the specs; values are test inp
   ];
   it('the shipped balance passes', () => { expect(() => validateBalance(structuredClone(balance), false)).not.toThrow(); });
   for (const [tc, re] of bad) it(`rejects ${JSON.stringify(tc)}`, () => { expect(() => validateBalance(withTc(tc), false)).toThrow(re); });
-  it('tc_stall_hold_s = 0 is the supported kill switch (SS-23); keys a CSV does not carry yet are skipped', () => {
+  it('[SS-23] tc_stall_hold_s = 0 is the supported kill switch (SS-23); keys a CSV does not carry yet are skipped', () => {
     expect(() => validateBalance(withTc({ stall_hold_s: 0 }), false)).not.toThrow();
     expect(() => validateBalance(withTc({ warn_at_s: 20, urgent_at_s: 27 }), false)).not.toThrow(); // despawn 30 shipped
   });
@@ -84,7 +87,7 @@ const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT) = [0-9.
 const NEUTRAL = new Set(['0', '1', '1000', '1e-9', '0xffffffff', '1.0']);
 /** The F1/F3 M5 modules; every later M5 module that calls flagOn() is picked up automatically. */
 const M5_FILES = /(?:sim\/(?:rng|clock|timers|effects|m5-state)|config\/flags)\.ts$/;
-describe('F3 no literal tunables in src/', () => {
+describe('[F3-no-literal] F3 no literal tunables in src/', () => {
   const all = files(SRC);
   it('no code-default fallback for an m4.tc key', () => {
     const hits = all.flatMap(f => strip(readFileSync(f, 'utf8')).split('\n').map((l, i) => [f, i + 1, l] as const)

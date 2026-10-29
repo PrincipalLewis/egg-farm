@@ -14,7 +14,7 @@ const st = (mh: Worker, extra: Partial<GameState> = {}) => ({ ...initialState(b,
 const income = (s: GameState, bb: typeof b) => JSON.stringify([incomePerSec(s, bb), demandPerSec(s, bb), collectPerSec(s, bb), wagesPerSec(s, bb), marketHandStalled(s, bb),
   salesStopped(s, bb), productionStopped(s, bb), asleepOrUnpaidCount(s, bb), secondsToAffordSteady(s, bb, 100_000), incomePerSec(s, bb, { assumeWorking: true })]);
 
-describe('isPaused(w, b)', () => {
+describe('[row-8 isPaused] isPaused(w, b)', () => {
   it('shipped balance has m4.flags.pause = 0', () => { expect(b.m4!.flags!.pause).toBe(0); });
   it('false whenever pause = 0 (or m4.enabled = 0); true only with pause = 1 and paused === true', () => {
     const w: Worker = { energy: 0, cdS: 0, paused: true };
@@ -25,7 +25,7 @@ describe('isPaused(w, b)', () => {
   });
 });
 
-describe('pause = 0: paused:true leaves income byte-identical to the unpaused case', () => {
+describe('[row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case', () => {
   for (const [name, w] of [['asleep', { energy: 0, cdS: 0 }], ['working', { energy: 100, cdS: 0 }], ['tired', { energy: 30, cdS: 0 }], ['unpaid', { energy: 60, cdS: 0, unpaid: true }]] as const)
     it(name, () => {
       for (const bb of [b, withPause(0), withPause(1, 0)]) expect(income(st({ ...w, paused: true }), bb)).toBe(income(st({ ...w }), bb));
@@ -36,7 +36,7 @@ describe('pause = 0: paused:true leaves income byte-identical to the unpaused ca
   });
 });
 
-describe('pause = 1: paused is respected', () => {
+describe('[row-8 isPaused] pause = 1: paused is respected', () => {
   it('a paused asleep Market Hand is not stalled (the player sells by hand); unpaused it is', () => {
     const on = withPause(1), p = st({ energy: 0, cdS: 0, paused: true }), u = st({ energy: 0, cdS: 0 });
     expect(marketHandStalled(p, on)).toBe(false); expect(marketHandStalled(u, on)).toBe(true);
@@ -45,7 +45,7 @@ describe('pause = 1: paused is respected', () => {
   });
 });
 
-describe('every src read of `paused` goes through isPaused', () => {
+describe('[row-8 isPaused][QA-10] every src read of `paused` goes through isPaused', () => {
   it('no `.paused` / `["paused"]` / `paused !==|===` read outside sim/pause.ts isPaused', () => {
     const SRC = new URL('../src/', import.meta.url).pathname;
     const files = (d: string): string[] => readdirSync(d).flatMap(f => { const p = join(d, f); return statSync(p).isDirectory() ? files(p) : /\.(ts|mjs|js)$/.test(p) ? [p] : []; });
