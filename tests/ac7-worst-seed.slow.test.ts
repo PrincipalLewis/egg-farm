@@ -17,8 +17,8 @@ import { balance as b } from '../src/config/balance';
 import { runM2 } from './bot-m2';
 import { VAR_DEFAULT } from './seller-variance';
 import { loadTargets, l18to25Guard, l18to25FixedGuard, t20P95Warning, quantile } from './pacing-guards';
-const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5', T3_CSV = 'b48be8a4'; // T3: M4-on retune D-CEO-20261019-04, same guards as F1
-const GUARDED = csvSha_() === F1_CSV || csvSha_() === T3_CSV;
+const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5', T3_CSV = 'b48be8a4', M50_CSV = '8dc90e2b'; // T3: M4-on retune D-CEO-20261019-04; M50: M5.0 shipping CSV (D-HOP-2026-10-29-01); same guards as F1
+const GUARDED = csvSha_() === F1_CSV || csvSha_() === T3_CSV || csvSha_() === M50_CSV;
 function csvSha_() { return createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8); }
 // Same seeds as the AC7 band suite (tests/fixtures/seller_variance.json, 1..100; CCR m2).
 const fx = JSON.parse(readFileSync(new URL('./fixtures/seller_variance.json', import.meta.url), 'utf8')) as { seeds: number[] };
