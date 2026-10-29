@@ -25,6 +25,7 @@ import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milest
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
+import { wireAttendedProbe } from './attended';
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { bestBuyMark, goalLabelHtml } from './goal-label';
@@ -46,6 +47,7 @@ const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'f
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
 export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null; storageBlocked?: () => boolean } = { newGame: false }) {
+  wireAttendedProbe(g); // v5 F6a: visible + focused; the Market sheet counts as attended (Q-F1c-1). F6 moves this to ui/overlay.ts.
   let stored: any = {}; try { stored = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') ?? {}; } catch { /* bad flags: defaults */ }
   // PT1-4: a fresh-start fallback (AC14b F/Q) is a new farm: drop FTUE / Workers-tip progress flags, keep prefs.
   if (opts.recovery && !opts.recovery.restored_from_backup && opts.newGame) stored = keepPrefsOnly(stored);
