@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 // v5 F6a: the UI attended probe (API sheet §5, Q-F1c-1 D-HOP-2026-10-29-06). Attended = visible && focused; the Market
 // sheet is a play surface, so player sales made in it keep Frenzy/streak. Hidden or blurred => suspended.
+// ACs (QA-D-1029-V5SCAP trace): F6a-AC1 probe truth table; F6a-AC2 live read + Game wiring; F6a-AC3 sheet sell attended (Q-F1c-1);
+// F6a-AC4 sheet Sell all attended (Q-F1c-1); F6a-AC5 hidden/blurred => suspended (Q-F1c-1).
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import type { M5Flag } from '../src/config/flags';
@@ -26,6 +28,7 @@ beforeAll(() => {
   window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as any;
   (globalThis as any).requestAnimationFrame ??= (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0);
   (globalThis as any).cancelAnimationFrame ??= (i: number) => clearTimeout(i);
+  (Element.prototype as any).animate ??= () => ({ finished: Promise.resolve(), cancel() {}, onfinish: null, addEventListener() {} });
 });
 afterEach(() => { SALE_EFFECTS.length = 0; document.body.innerHTML = ''; vi.restoreAllMocks(); });
 /** Drive the real jsdom document: visibilityState getter + hasFocus(). */
@@ -36,15 +39,15 @@ const setDoc = (vis: DocumentVisibilityState, focus: boolean) => {
 
 describe('F6a attendedProbe: true iff visible && focused', () => {
   const doc = (visibilityState: DocumentVisibilityState, focus: boolean): AttendedDoc => ({ visibilityState, hasFocus: () => focus });
-  it('visible + focused => true', () => { expect(attendedProbe(doc('visible', true))).toBe(true); });
-  it('hidden => false (focused or not)', () => { expect(attendedProbe(doc('hidden', true))).toBe(false); expect(attendedProbe(doc('hidden', false))).toBe(false); });
-  it('visible but blurred => false', () => { expect(attendedProbe(doc('visible', false))).toBe(false); });
-  it('defaults to the live document and is re-read on every call (no cached state)', () => {
+  it('F6a-AC1: visible + focused => true', () => { expect(attendedProbe(doc('visible', true))).toBe(true); });
+  it('F6a-AC1: hidden => false (focused or not)', () => { expect(attendedProbe(doc('hidden', true))).toBe(false); expect(attendedProbe(doc('hidden', false))).toBe(false); });
+  it('F6a-AC1: visible but blurred => false', () => { expect(attendedProbe(doc('visible', false))).toBe(false); });
+  it('F6a-AC2: defaults to the live document and is re-read on every call (no cached state)', () => {
     setDoc('visible', true); expect(attendedProbe()).toBe(true);
     setDoc('hidden', true); expect(attendedProbe()).toBe(false);
     setDoc('visible', false); expect(attendedProbe()).toBe(false);
   });
-  it('wireAttendedProbe installs a live probe on Game (default probe is () => false)', () => {
+  it('F6a-AC2: wireAttendedProbe installs a live probe on Game (default probe is () => false)', () => {
     let probe: (() => boolean) | null = null; const d = { visibilityState: 'visible' as DocumentVisibilityState, focus: true };
     wireAttendedProbe({ setAttendedProbe: fn => { probe = fn; } }, { get visibilityState() { return d.visibilityState; }, hasFocus: () => d.focus });
     expect(probe!()).toBe(true); d.focus = false; expect(probe!()).toBe(false); d.focus = true; d.visibilityState = 'hidden'; expect(probe!()).toBe(false);
@@ -61,7 +64,7 @@ async function mountMarket() {
   document.body.innerHTML = '<div id="app"></div>';
   const ui = mountApp(document.getElementById('app')!, g, b, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
   document.getElementById('modal-layer')?.classList.remove('open');
-  ui.openPanel('market'); ui.render(); ui.render();
+  ui.openPanel('market'); ui.render(); await new Promise(r => setTimeout(r, 30)); ui.render(); await new Promise(r => setTimeout(r, 30)); ui.render();
   return { g, b, s0, ui };
 }
 const expectSheetOpen = () => {
@@ -69,20 +72,21 @@ const expectSheetOpen = () => {
   expect(document.getElementById('panel-layer')!.classList.contains('open')).toBe(true);
   expect(dialogOpen()).toBe(false); // the Market sheet is not a dialog (not in DIALOG_SEL)
 };
-const sellRow = (id: number) => document.querySelector<HTMLButtonElement>(`#mRows button[data-id="${id}"]`)!;
+const sellRow = (id: number) => { const bt = document.querySelector<HTMLButtonElement>(`#mRows button[data-id="${id}"]`);
+  expect(bt, `no sell button for order ${id}; #mRows = ${document.getElementById('mRows')?.innerHTML.slice(0, 400)}`).toBeTruthy(); return bt!; };
 
 describe('F6a wired probe + Market sheet (flags on): player sales attended => Frenzy/streak apply', () => {
-  it('sell from the open Market sheet while visible+focused is NOT suspended (credit == preview, frenzy+streak attributed)', async () => {
+  it('F6a-AC3 / Q-F1c-1: sell from the open Market sheet while visible+focused is NOT suspended (credit == preview, frenzy+streak attributed)', async () => {
     setDoc('visible', true);
     const { g, b, s0 } = await mountMarket(); expectSheetOpen();
     expect(saleEffectFactors(s0, b)).toEqual([{ id: 'frenzy', factor: 2 }, { id: 'streak', factor: 1.28 }]);
-    const row = sellRow(1); expect(row).toBeTruthy(); row.click();
+    sellRow(1).click();
     const k = 10, base = salePriceCents(s0, b), gm = graderMult(s0.workers, s0.graderTier, b);
     expect(g.state.coinsCents - s0.coinsCents).toBe(Math.round(k * base * gm * 2 * 1.28));
     expect(g.state.coinsCents - s0.coinsCents).toBe(saleValueCents(s0, k, b)); // sheet preview (attended ctx) == credit
     expectSheetOpen(); // selling does not close the sheet or turn it into a dialog
   });
-  it('Sell all from the open Market sheet while visible+focused is NOT suspended (== sellAllPreview)', async () => {
+  it('F6a-AC4 / Q-F1c-1: Sell all from the open Market sheet while visible+focused is NOT suspended (== sellAllPreview)', async () => {
     setDoc('visible', true);
     const { g, b, s0 } = await mountMarket(); expectSheetOpen();
     document.querySelector<HTMLButtonElement>('#sellAll')!.click();
@@ -95,7 +99,7 @@ describe('F6a wired probe + Market sheet (flags on): player sales attended => Fr
 
 describe('F6a wired probe (flags on): hidden or blurred => player sales suspended (no Frenzy/streak)', () => {
   for (const [vis, focus] of [['hidden', true], ['hidden', false], ['visible', false]] as const) {
-    it(`sell + Sell all with visibilityState=${vis}, hasFocus=${focus} are suspended`, async () => {
+    it(`F6a-AC5 / Q-F1c-1: sell + Sell all with visibilityState=${vis}, hasFocus=${focus} are suspended`, async () => {
       setDoc(vis, focus);
       const { g, b, s0 } = await mountMarket();
       const base = salePriceCents(s0, b), gm = graderMult(s0.workers, s0.graderTier, b);
