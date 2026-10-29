@@ -162,6 +162,21 @@
   },
   "m4": {
     "enabled": 1,
+    "flags": {
+      "golden": 0,
+      "streak": 0,
+      "tapCoins": 0,
+      "abilities": 0,
+      "broody": 0,
+      "salesStopped": 0,
+      "pause": 0,
+      "rc2Refill": 0,
+      "autoRefill": 0,
+      "clockWage": 0,
+      "breeds": 0,
+      "zeroGainUi": 0,
+      "bestBuyV2": 0
+    },
     "hens": {
       "costs": [
         20,
@@ -389,7 +404,9 @@
       "streak_decay_per_s": 0.03,
       "streak_hold_s": 3,
       "streak_max_taps_per_s": 1,
-      "streak_per_tap": 0.01
+      "streak_per_tap": 0.01,
+      "leave_attended_window_s": 30,
+      "rest_recovery_mult": 0.25
     }
   }
 }

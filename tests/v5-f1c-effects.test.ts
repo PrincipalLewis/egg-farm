@@ -11,7 +11,7 @@ import { prodEggsPerSec, salePriceCents } from '../src/sim/tracks';
 import { graderMult } from '../src/sim/workers';
 import { SALE_EFFECTS, LAY_EFFECTS, saleEffectFactors, layFactor, type SaleEffect, type LayEffect } from '../src/sim/effects';
 
-const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } });
+const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags: { ...(balance.m4 as any).flags, ...flags } } : {}) } }) as typeof balance;
 // Fixture effects (values are test inputs, not tunables): a Frenzy-like x2 on all sales, a Rush-like x1.15 on Market Hand sales,
 // a streak-like (1 + 0.28), and a Sweep-like x1.15 on laying.
 const frenzy: SaleEffect = { id: 'frenzy', flag: 'golden', factor: () => 2 };

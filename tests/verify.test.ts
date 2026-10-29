@@ -14,6 +14,7 @@ import { saveRoundTrip } from '../scripts/verify/roundtrip';
 import { initialState } from '../src/sim/state';
 import { selectGoal } from '../src/ui/next-goal';
 import { goldens, GOLDEN_FLAG_OFF, GOLDEN_M4_ON } from '../scripts/verify/golden';
+import { M5_FLAGS } from '../src/config/flags';
 import { parseArgs, parseFlags, outArg, flagsOf, withFlags, sanitize, leaks, UsageError } from '../scripts/verify/cli';
 import { gitBuildId } from '../scripts/build-id';
 
@@ -123,7 +124,8 @@ describe('verify: arguments and flags', () => {
     expect(() => withFlags(balance, { 'm4.nope': 1 })).toThrow(/unknown flag/);
   });
   it('flags default to balance.json and overrides do not touch the shipped balance', () => {
-    expect(flagsOf(balance)).toEqual({ 'm4.enabled': balance.m4!.enabled });
+    // v5 F3: the m4.flags.* release flags (all 0 at ship) are listed next to m4.enabled
+    expect(flagsOf(balance)).toEqual({ 'm4.enabled': balance.m4!.enabled, ...Object.fromEntries(M5_FLAGS.map(f => [`m4.flags.${f}`, 0])) });
     const off = withFlags(balance, { 'm4.enabled': 0 });
     expect(off.m4!.enabled).toBe(0); expect(balance.m4!.enabled).toBe(1);
   });
