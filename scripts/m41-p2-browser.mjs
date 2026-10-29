@@ -106,7 +106,8 @@ for (const [w, h] of SIZES) {
     const t = ok ? await page.evaluate(() => { const e = document.querySelector('.cooptip'), cs = getComputedStyle(e), r = e.getBoundingClientRect(), nav = document.querySelector('nav.actions'), nr = nav && getComputedStyle(nav).display !== 'none' ? nav.getBoundingClientRect() : null;
       return { font: `${cs.fontWeight} ${cs.fontSize}/${cs.lineHeight} ${cs.fontFamily}`, w: +r.width.toFixed(2), h: +r.height.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), bottom: +r.bottom.toFixed(2), navTop: nr?.top ?? null,
         lines: Math.round((r.height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / parseFloat(cs.lineHeight)), sw: e.scrollWidth, cw: e.clientWidth, sh: e.scrollHeight, ch: e.clientHeight }; }) : null;
-    check('UI-M8-1', w, '.cooptip computes 700 14px/18.2px Nunito', t && t.font.startsWith('700 14px/18.2px') && /Nunito/.test(t.font), t);
+    const lh = t ? parseFloat(t.font.split('/')[1]) : NaN; // WebKit serialises 14 x 1.3 as 18.199999px
+    check('UI-M8-1', w, '.cooptip computes 700 14px/18.2px (±0.01) Nunito', t && t.font.startsWith('700 14px/') && Math.abs(lh - 18.2) < 0.01 && /Nunito/.test(t.font), t);
     check('UI-M8-2/3', w, `.cooptip ${Math.min(320, w - 32)} wide, <= 2 lines, no overflow, inside the viewport, >= 8px above the nav (phone)`, t && Math.abs(t.w - Math.min(320, w - 32)) < 0.5 && t.lines <= 2 && t.sw <= t.cw && t.sh <= t.ch && t.left >= 16 - 0.5 && t.right <= w - 16 + 0.5 && (!phone || t.navTop === null || t.bottom <= t.navTop - 8), t);
     if (t) await shot(page, 'coop-tip', w, 'Coop Hand tip (m8: 700 14px/1.3 Nunito, max-content, min(320, 100vw-32))', t);
     await ctx.close(); }
