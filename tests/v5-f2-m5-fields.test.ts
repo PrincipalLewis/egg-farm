@@ -78,8 +78,8 @@ describe('F2 settle: a gap of 60 s or more (§9.1 / §9.1a)', () => {
     expect(ev).toEqual([
       { type: 'ability_ended', worker: 'market_hand', cause: 'offline', effect_s: tc.ability_s - 10 },
       { type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: 12 },
-      // #2 streak R11: the run ends with streak_peak{reason:"offline"} (no run stats in this fixture; tiers need the G3 tc columns)
-      { type: 'streak_peak', value: 0.28, duration_s: 0, credited_taps: 0, time_at_cap_s: 0, extra_coins: 0, frenzy_overlap_s: 0, reason: 'offline', max_tier: 0 }]);
+      // #2 streak R11: the run ends with streak_peak{reason:"offline"} (no run stats in this fixture; 0.28 >= T_4 = cap 0.27)
+      { type: 'streak_peak', value: 0.28, duration_s: 0, credited_taps: 0, time_at_cap_s: 0, extra_coins: 0, frenzy_overlap_s: 0, reason: 'offline', max_tier: 4 }]);
     expect(s.abilities).toEqual({ market_hand: { readyAt: NOW + 200_000 }, coop_hand: { readyAt: NOW + 50_000 } });
     expect('goldenEgg' in s).toBe(false); expect(s.evRngState).toBe(x); expect(s.nextSpawnRemainingS).toBe(tc.egg_gap_min_s + u * (tc.egg_gap_max_s - tc.egg_gap_min_s));
     expect(s).toMatchObject({ frenzyRemainingS: 11, broodyNestCents: 700, broodyHenIdx: 2, broodyNestScaled: 7_000_123, streakS: 0, streakHoldS: 0, rng: base().rng });

@@ -3,19 +3,17 @@
  * A credited Collect adds tc_streak_per_tap to s (max tc_streak_cap); s holds tc_streak_hold_s then decays
  * tc_streak_decay_per_s, both on FOCUS seconds only (R6/R7/R12); one (1 + s) price factor on every sale (R8). The
  * credit window is sim time (R2). s, hold, window and run stats are session only (save/m5-fields.ts M5_SESSION_KEYS).
- * Inert unless m4.flags.streak is on AND every tc column below exists (the G3 columns land with the Economy CSV PR).
+ * Off unless m4.flags.streak is on; validateBalance then requires its tc columns (M5_TC_KEYS; the G3 ones land with row 4).
  * No UI here (row 17): tier pops/meter read streakS and streakTier().
  */
 import type { Balance } from '../config/balance';
-import { m4On } from '../config/formulas';
+import { m4On, tcNum as tc } from '../config/formulas';
 import type { GameState } from './state';
 import type { SimEvent, Sink } from './events';
 /** One streak run (s > 0 until it ends), for streak_peak. Focus seconds; extraCents = the streak share of sale credits. */
 export interface StreakRun { peak: number; durationS: number; creditedTaps: number; timeAtCapS: number; extraCents: number; frenzyOverlapS: number; }
-const KEYS = ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'];
-const tc = (b: Balance, k: string): number => b.m4?.tc?.[k] ?? 0;
 const EPS = 1e-9, r12 = (x: number) => Math.round(x * 1e12) / 1e12, r2 = (x: number) => Math.round(x * 100) / 100;
-export const streakOn = (b: Balance) => m4On(b) && b.m4?.flags?.streak === 1 && KEYS.every(k => Number.isFinite(b.m4?.tc?.[k]));
+export const streakOn = (b: Balance) => m4On(b) && b.m4?.flags?.streak === 1;
 /** Streak hold, then decay, over `dtFocus` focus seconds in ONE step (spec §6 formula; dt < 0 counts as 0). */
 export function streakAfter(sv: number, holdS: number, dtFocus: number, b: Balance): { s: number; holdS: number } {
   const dt = Math.max(0, dtFocus); if (dt <= holdS) return { s: sv, holdS: holdS - dt };

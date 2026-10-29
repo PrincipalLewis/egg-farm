@@ -13,7 +13,7 @@ function setup(bb = ON) {
   const kv = mem(); let t = T0; const clock = { get t() { return t; }, set t(v) { t = v; } };
   const g = new Game(bb, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' }); const evs: any[] = []; g.on(e => evs.push(e));
   g.state = { ...g.state, farmLevel: 12, evRngState: 99, nextSpawnRemainingS: 50, frenzyRemainingS: 11, broodyNestCents: 700, broodyHenIdx: 2,
-    goldenEgg: { ageS: 12, slotId: 'S3', intervalS: 150 }, streakS: 0.28, streakHoldS: 2, abilities: { market_hand: { readyAt: T0 + 200_000, activeS: 10 } } };
+    goldenEgg: { ageS: 12, slotId: 'S3', intervalS: 150 }, streakS: 0.27, streakHoldS: 2, abilities: { market_hand: { readyAt: T0 + 200_000, activeS: 10 } } };
   return { kv, g, clock, evs };
 }
 const types = (evs: any[]) => evs.map(e => e.type).filter(t => ['ability_ended', 'collectible_expired'].includes(t));
@@ -32,9 +32,9 @@ describe('F2 settleHiddenPeriod', () => {
     const st = JSON.parse(kv.getItem(SAVE_KEY)!).state;
     expect(st.abilities).toEqual({ market_hand: { readyAt: T0 + 200_000 } }); // the cooldown ran out during the gap: ready on any read for (const k of ['goldenEgg', 'streakS', 'streakHoldS']) expect(k in st).toBe(false);
   });
-  it('hidden < 60 s: online path; egg, streak, Frenzy and the call are exactly as at the hide (R7, R10, AB-10)', () => {
+  it('hidden < 60 s: online path; egg, streak, Frenzy and the call are exactly as at the hide (R7, R10, AB-10; s = the ruled cap 0.27, since K18 clamps anything above it)', () => {
     const { g, clock, evs } = setup(); g.onHidden(clock.t); clock.t += 5_000; g.onShown(clock.t);
-    expect(types(evs)).toEqual([]); expect(g.state).toMatchObject({ streakS: 0.28, streakHoldS: 2, frenzyRemainingS: 11, goldenEgg: { ageS: 12 }, abilities: { market_hand: { readyAt: T0 + 200_000, activeS: 10 } } });
+    expect(types(evs)).toEqual([]); expect(g.state).toMatchObject({ streakS: 0.27, streakHoldS: 2, frenzyRemainingS: 11, goldenEgg: { ageS: 12 }, abilities: { market_hand: { readyAt: T0 + 200_000, activeS: 10 } } });
   });
   it('clock went back while hidden (mode none): no M5 change', () => {
     const { g, clock, evs } = setup(); g.onHidden(clock.t); clock.t -= 3_600_000; g.onShown(clock.t); expect(types(evs)).toEqual([]); expect((g.state as any).goldenEgg).toBeDefined();

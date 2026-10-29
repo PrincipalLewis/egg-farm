@@ -137,6 +137,16 @@ export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParam
   return Math.round(Number((100 * (1 + e.baseStep * v) * (1 + e.levelBonus * v) * gradeMult(v, F, p) * balancedMult(F, H, v, p)).toPrecision(12)));
 };
 export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
+/** v5: the tc_* columns each M5 flag reads. validateBalance requires them while that flag is on (missing = load error). */
+export const M5_TC_KEYS: Record<string, readonly string[]> = {
+  golden: ['egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s'], abilities: ['ability_s', 'ability_cd_s'],
+  streak: ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'],
+};
+/** A tc_* tunable; throws when missing or non-finite (never a silent 0; F3's flags.ts helpers replace this on merge). */
+export function tcNum(p: EconomyParams, k: string): number {
+  const v = p.m4?.tc?.[k]; if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error(`balance.m4.tc.${k} missing (economy.csv tc_${k})`);
+  return v;
+}
 /** One row in economy.csv column format, for verification/parity. */
 export function tableRow(L: number, p: EconomyParams) {
   const [demand_min, demand_max] = demandRange(L, p);

@@ -12,8 +12,10 @@ import { Game } from '../src/game';
 import { mem } from './helpers';
 import { TELEMETRY_KEY } from '../src/telemetry/telemetry';
 import { ON } from './v5-f2-helpers';
-const G3 = { streak_unlock_farm: 8, tap_credit_min_s: 1, streak_tier_count: 4, streak_cap: 0.27 };
-const SB = { ...ON, m4: { ...ON.m4!, tc: { ...ON.m4!.tc!, ...G3 } } } as typeof b;
+import { validateBalance } from '../src/config/balance';
+import { tcNum, M5_TC_KEYS } from '../src/config/formulas';
+import { drawGap } from '../src/save/m5-fields';
+const SB = ON;
 const OFF = { ...SB, m4: { ...SB.m4!, flags: { ...SB.m4!.flags, streak: 0 } } } as typeof b;
 const tc = SB.m4!.tc!, CAP = tc.streak_cap, STEP = tc.streak_per_tap, DT = 1 / SB.tickHz;
 const F = { focus: true }, U = { focus: false };
@@ -33,10 +35,10 @@ describe('#2 streak: credited taps (R1-R5, R13a)', () => {
     let s = tap(base()).s; s = run(s, Math.round(tc.tap_credit_min_s / DT) - 1, U); expect(tap(s).ev[0].credited).toBe(false);
     s = run(s, 1, U); const r = tap({ ...s, coop: 0 }); expect(r.ev[0]).toEqual({ type: 'collect', eggs: 0, credited: true }); expect(r.s.streakS).toBeCloseTo(2 * STEP, 12);
   });
-  it('below the unlock farm, with the flag off, or without the G3 tc columns: no credit and the rc1 collect event', () => {
+  it('below the unlock farm or with the flag off: no credit and the rc1 collect event', () => {
     expect(tap(base(SB, { farmLevel: 7 })).ev[0].credited).toBe(false);
-    for (const bb of [OFF, ON]) { const r = tap(base(bb), bb); expect(r.ev).toEqual([{ type: 'collect', eggs: expect.any(Number) }]); expect(r.s.streakS).toBeUndefined(); }
-    expect(streakOn(ON)).toBe(false); expect(streakOn(SB)).toBe(true);
+    const r = tap(base(OFF), OFF); expect(r.ev).toEqual([{ type: 'collect', eggs: expect.any(Number) }]); expect(r.s.streakS).toBeUndefined();
+    expect(streakOn(OFF)).toBe(false); expect(streakOn(SB)).toBe(true);
   });
   it('caps at tc_streak_cap exactly (K4), and K18 clamps a lowered cap on the next tick with no event', () => {
     const { s } = build(40); expect(s.streakS).toBe(CAP); expect(s.streakRun!.creditedTaps).toBe(40);
@@ -100,5 +102,23 @@ describe('#2 streak: offline / reload (R10/R11, D-HOP-08 #2)', () => {
     g.setAttendedProbe(() => true); for (let i = 0; i < 3; i++) { adv(1000); g.frame(); } expect(g.state.streakHoldS).toBeCloseTo(0, 9);
     adv(100); g.frame(); expect(g.state.streakS).toBeCloseTo(STEP - tc.streak_decay_per_s * 0.1, 9);
     g.endSession(); expect(kv.getItem(TELEMETRY_KEY)).toMatch(/"reason":"reload"[^{}]*"type":"streak_peak"|"type":"streak_peak"[^{}]*"reason":"reload"/);
+  });
+});
+describe('a missing tc_* tunable is caught, never read as 0 (HoE/Architect follow-up on F2)', () => {
+  const drop = (k: string) => { const t: any = { ...SB.m4!.tc }; delete t[k]; return { ...SB, m4: { ...SB.m4!, tc: t } } as typeof b; };
+  it('tcNum throws on a missing or non-finite key', () => {
+    expect(tcNum(SB, 'streak_cap')).toBe(0.27); expect(() => tcNum(drop('streak_cap'), 'streak_cap')).toThrow(/tc_streak_cap/);
+    expect(() => tcNum({ ...SB, m4: { ...SB.m4!, tc: { ...SB.m4!.tc, streak_cap: NaN } } } as typeof b, 'streak_cap')).toThrow(/tc_streak_cap/);
+  });
+  it('validateBalance rejects a flag that is on without every tc key it reads; off flags need nothing', () => {
+    expect(() => validateBalance(SB, false)).not.toThrow(); expect(() => validateBalance(b, false)).not.toThrow();
+    for (const [f, keys] of Object.entries(M5_TC_KEYS)) for (const k of keys) {
+      const bad = drop(k); if (!(SB.m4!.flags as any)[f]) continue;
+      expect(() => validateBalance(bad, false)).toThrow(new RegExp(`tc_${k}`));
+      expect(() => validateBalance({ ...bad, m4: { ...bad.m4!, flags: { ...bad.m4!.flags, [f]: 0 } } } as typeof b, false)).not.toThrow();
+    }
+  });
+  it('the F2 readers throw instead of defaulting (drawGap without tc_egg_gap_min_s)', () => {
+    expect(() => drawGap(base(), drop('egg_gap_min_s'))).toThrow(/tc_egg_gap_min_s/);
   });
 });

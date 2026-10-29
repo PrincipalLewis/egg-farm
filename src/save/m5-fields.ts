@@ -8,7 +8,7 @@
  * visible gap) elapses with no subtraction here; a load clamps the stored value to [now, now + cd] (E2, clock tamper).
  */
 import type { Balance } from '../config/balance';
-import { m4On } from '../config/formulas';
+import { m4On, tcNum } from '../config/formulas';
 import { type GameState, mixSeed, nextRand } from '../sim/state';
 import type { SimEvent } from '../sim/events';
 import { WORKERS } from '../sim/workers';
@@ -18,7 +18,7 @@ export type M5Flag = 'golden' | 'streak' | 'tapCoins' | 'broody' | 'abilities' |
 /** D-C1 (= F1a config/flags.ts flagOn): on only when m4.flags[k] === 1 and m4.enabled. */
 export const m5Flag = (b: Balance, k: M5Flag) => m4On(b) && b.m4?.flags?.[k] === 1;
 const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities'] as const).some(k => m5Flag(b, k));
-const tc = (b: Balance, k: string): number => b.m4?.tc?.[k] ?? 0;
+const tc = tcNum; // throws on a missing tc_* key (validateBalance rejects it at load while the flag is on)
 /** D-C2 salt (ASCII "evRn"), as F1b sim/rng.ts. */
 export const EV_RNG_SALT = 0x6576526e;
 /** D-C5: the Broody nest clamp (fmtMoneyExact limit) and the yard slot range 0..11. */
