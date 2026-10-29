@@ -6,7 +6,7 @@
  */
 import type { EconomyParams } from './formulas';
 export const M5_FLAGS = [
-  'golden', 'streak', 'tapCoins', 'abilities', 'broody', 'salesStopped', 'pause', // M5.0
+  'golden', 'streak', 'tapCoins', 'abilities', 'broody', 'salesStopped', 'fatigueCue', 'pause', // M5.0 (fatigueCue: Rule 2 chip's own cut flag, D-HOP-2026-10-29-05)
   'rc2Refill', 'autoRefill', 'clockWage', 'breeds', 'zeroGainUi', 'bestBuyV2', // M5.1
 ] as const;
 export type M5Flag = typeof M5_FLAGS[number];
