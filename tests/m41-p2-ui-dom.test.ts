@@ -89,3 +89,31 @@ describe('P2b AC-R11 / TP1-U2: a Refill tap on an Unpaid worker dispatches nothi
     btn('coop_hand').click(); expect(sent.filter(a => a.type === 'manage')).toEqual([{ type: 'manage', worker: 'coop_hand' }]); expect(g.state.workers.coop_hand!.energy).toBe(100);
   });
 });
+
+describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced', () => {
+  // Visible text the way axe's label-content-name-mismatch reads it (text nodes in DOM order joined with '', [hidden] skipped).
+  const visible = (el: Element): string => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue ?? '' : n.nodeType === 1 && !(n as HTMLElement).hidden ? visible(n as Element) : '').join('');
+  const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
+  const startsWithVisible = (el: Element) => { const v = norm(visible(el)), name = el.getAttribute('aria-label') ?? ''; return { v, name, ok: name.startsWith(v) }; };
+  const scenes: [string, Record<string, unknown>, number][] = [
+    ['MH asleep', { market_hand: { energy: 0, cdS: 5 } }, 1], ['CH asleep', { coop_hand: { energy: 0, cdS: 5 } }, 1],
+    ['MH + CH asleep', { market_hand: { energy: 0, cdS: 5 }, coop_hand: { energy: 0, cdS: 5 } }, 2],
+    ['MH unpaid', { market_hand: { energy: 60, cdS: 5, unpaid: true } }, 1], ['CH unpaid', { coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 1],
+    ['MH + CH unpaid', { market_hand: { energy: 60, cdS: 5, unpaid: true }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
+    ['MH asleep + CH unpaid', { market_hand: { energy: 0, cdS: 5 }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
+    ['none (N = 0)', { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } }, 0]];
+  for (const [name, workers, n] of scenes) it(`${name}: Upgrades nav, Workers tab, Refill nav`, async () => {
+    const { ui } = await mount({ farmLevel: 12, coinsCents: 0, manageCdS: 0, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 }, hawker: { energy: 30, cdS: 0 }, ...workers } }); // 3 hired: nav Refill shown
+    ui.openPanel('upgrades'); (document.querySelector('.tabs button[data-tab="workers"]') as HTMLElement).click(); ui.render();
+    const up = startsWithVisible(document.querySelector('nav [data-nav=upgrades]')!), wt = startsWithVisible(document.querySelector('.tabs [data-tab=workers]')!);
+    expect(up.ok, JSON.stringify(up)).toBe(true); expect(wt.ok, JSON.stringify(wt)).toBe(true);
+    if (n > 0) {
+      expect(up.v).toBe(`${n} Upgrades`); expect(up.name).toBe(`${n} Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid`);
+      expect(wt.v).toBe(`Workers ${n}`); expect(wt.name).toBe(`Workers ${n}, ${n} asleep or unpaid`); // count announced, never bare "Workers"
+    } else { expect(up.name).toBe('Upgrades'); expect(wt.name).toBe('Workers'); expect(wt.v).toBe('Workers'); }
+    const rf = document.querySelector('nav .nav-manage')! as HTMLElement; // the hawker at 30% is tired: N >= 1 (Unpaid never counted)
+    expect(rf.hidden).toBe(false); const r = startsWithVisible(rf);
+    expect(r.ok, JSON.stringify(r)).toBe(true); expect(r.v).toMatch(/^Refill \d+$/); expect(r.name).toMatch(/^Refill (1 tired worker|\d+ tired workers)$/);
+    expect(document.getElementById('rate')!.getAttribute('aria-label')).toMatch(/^Net income /); // frozen suffix form (TP1-R17d)
+  });
+});

@@ -88,12 +88,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="sr" aria-live="polite" id="goalLive"></div><div class="sr" id="goalDesc" aria-hidden="true"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
+  // AC-R17 (m-P1-1, WCAG 2.5.3): the plain spaces between the badge and label spans are not rendered (flex items) but separate the
+  // visible words, so the visible text reads "N Upgrades" / "Refill N" and each accessible name starts with it.
   // S2-5 (art-ux/reviews/session2-ui-triage.md (b)) + AC-R1/R5: every nav button = icon + visible label + aria-label; the Upgrades
   // icon carries the asleep count badge (.nav-ic, top-right -6/-6); the Refill button shows "Refill" + N (AC-R9 aria). Ported from rc1 7380b86.
   const nav = h(`<nav class="actions" aria-label="Main">
     <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
-    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span><span class="nav-lbl">Upgrades</span></button>
-    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span><span class="count-badge num" hidden></span></button>
+    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span> <span class="nav-lbl">Upgrades</span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span> <span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
@@ -598,7 +600,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const ensure = (host: Element | null) => {
         if (!host) return null;
         let ab = host.querySelector('.asleep-badge') as HTMLElement | null;
-        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(ab); }
+        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(' ', ab); } // AC-R17: ' ' = "Workers N" (absolute badge, no layout)
         return ab;
       };
       for (const ab of [ensure(nav.querySelector('[data-nav=upgrades] .nav-ic')), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
@@ -606,9 +608,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
         if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
       }
-      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement;
-      const al = n > 0 ? `Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
-      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al); }
+      // AC-R17 (rc1-asleep v1.0.11, WCAG 2.5.3): each name starts with the visible text in DOM order and announces the count:
+      // nav "N Upgrades, N workers asleep or unpaid" (badge before the label), Workers tab "Workers N, N asleep or unpaid"; N = 0 -> bare label.
+      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement, wt = document.querySelector('.tabs [data-tab=workers]') as HTMLElement | null;
+      const al = n > 0 ? `${n} Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
+      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al);
+      const tl = n > 0 ? `Workers ${n}, ${n} asleep or unpaid` : 'Workers';
+      if (wt && wt.getAttribute('aria-label') !== tl) wt.setAttribute('aria-label', tl); }
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
