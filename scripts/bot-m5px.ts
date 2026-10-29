@@ -5,7 +5,8 @@
 import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { parseEconomyCsv, buildBalance, readEconomyConfig } from './sync-economy';
 import { validateBalance, type Balance } from '../src/config/balance';
-import { pressureRuns } from '../tests/bot-m5';
+import { pressureRuns, BotUsageError } from '../tests/bot-m5';
 const prev = JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8'));
 const b = validateBalance(buildBalance(parseEconomyCsv(readFileSync(process.env.CSV ?? '../t3-draft.csv', 'utf8')), prev, readEconomyConfig() as any) as Balance, false);
-pressureRuns(b, process.env, { reset: f => writeFileSync(f, ''), append: (f, l) => appendFileSync(f, l), log: l => console.error(l), tog: (f, j) => writeFileSync(f, j) });
+try { pressureRuns(b, process.env, { reset: f => writeFileSync(f, ''), append: (f, l) => appendFileSync(f, l), log: l => console.error(l), tog: (f, j) => writeFileSync(f, j) }); }
+catch (e) { if (e instanceof BotUsageError) { console.error(`bot-m5px: ${e.message}`); process.exit(2); } throw e; }

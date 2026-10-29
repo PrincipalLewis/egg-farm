@@ -1,6 +1,8 @@
 // M5 bot (Q-ZG-H3 port, rc/v5): Economy's M5.0 full-stack runner scratch/v2-econ/h/m5.ts (sha256 29d423c5...) and its
 // window-gate driver m5x.ts (sha256 196e8ed5...), ported verbatim as test tooling. Play logic, RNG draw order and arithmetic
-// are unchanged, so results equal the original harness's on the same CSV and seeds (artifacts/bot-m5-parity).
+// are unchanged. Results equal the original harness's on the same CSV and seeds with today's src (artifacts/bot-m5-parity, CSVs b48be8a4
+// and 8dc90e2b): empirical, not structural (CCR O-1 on #78). The harness runs on its own src snapshot; on a CSV with L30+ columns the two
+// would diverge, and the port is the one that follows the shipped game. Also ported (B): m5p/m5l + m5px/m5lx, see refillGate()/pressureRuns().
 // Original header: real sim (src step/apply) + seller15 pickM4All bot (tests/bot-m4.ts), VAR_DEFAULT check-ins/taps, managed
 // (30 s cooldown, refill at <= 50%). M5.0 mechanics are layered HERE only (none exist in src): credited tap = >= 1.0 s of sim
 // time since the last credited tap (eggs moved or not); reference income I = trailing 60 s of PASSIVE sale coins (excl. golden
@@ -33,6 +35,35 @@ export interface Prof { tap: 'idle' | 'ac7' | number; checkBase: number; catchP:
 export const PROFS: Record<string, Prof> = { slow: { tap: 0.25, checkBase: 60, catchP: 0.4 }, idle: { tap: 'idle', checkBase: 15, catchP: 0 }, optimal: { tap: 3, checkBase: 5, catchP: 1 }, seller15: { tap: 'ac7', checkBase: 15, catchP: 0.75 }, casual: { tap: 0.5, checkBase: 30, catchP: 0.6 } };
 const rng = (seed: number) => { let a = (seed * 2654435761 + 99) >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 const WIDS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
+/** Bad driver input (CCR N-1/N-2 on #78): the CLIs exit 2 on it. */
+export class BotUsageError extends Error {}
+/** Own keys only (CCR N-1: `CF['__proto__']` / `PROFS['toString']` must not resolve to inherited members). */
+const own = <T>(o: Record<string, T>, k: string): T | undefined => Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined;
+/** Largest seed for which SellerVariance's PyRandom seed 1000003*(seed+1)+17 stays a safe integer (CCR N-2). */
+export const MAX_SEED = Math.floor((Number.MAX_SAFE_INTEGER - 17) / 1000003) - 1;
+/** Validates the numeric env of the drivers (same defaults as the originals, which never validated): SEEDS >= 1, S0 >= 0 and
+ *  S0+SEEDS-1 <= MAX_SEED (integers), T > 0 and STEP > 0 (finite); any other listed key must be a finite number. */
+export function checkEnv(E: Record<string, string | undefined>, extra: string[] = []): void {
+  const num = (k: string, d: number) => { const v = E[k]; return v === undefined ? d : v.trim() === '' ? NaN : Number(v); };
+  const NS = num('SEEDS', 200), S0 = num('S0', 1), T = num('T', 12000), STEP = num('STEP', 300);
+  if (!Number.isSafeInteger(NS) || NS < 1) throw new BotUsageError(`SEEDS must be an integer >= 1, got ${E.SEEDS}`);
+  if (!Number.isSafeInteger(S0) || S0 < 0) throw new BotUsageError(`S0 must be an integer >= 0, got ${E.S0}`);
+  if (S0 + NS - 1 > MAX_SEED) throw new BotUsageError(`seeds must be <= ${MAX_SEED} (S0+SEEDS-1 = ${S0 + NS - 1})`);
+  if (!(Number.isFinite(T) && T > 0)) throw new BotUsageError(`T must be a number > 0, got ${E.T}`);
+  if (!(Number.isFinite(STEP) && STEP > 0)) throw new BotUsageError(`STEP must be a number > 0, got ${E.STEP}`);
+  for (const k of extra) if (E[k] !== undefined && !Number.isFinite(num(k, 0))) throw new BotUsageError(`${k} must be a number, got ${E[k]}`);
+}
+/** CCR O-3 on #78: the bot layers its OWN model of the M5 mechanics (golden egg, streak, tap coins, Broody, abilities, pause) and of
+ *  M5.1 Refill charges. It may do so only while the matching src flags are off; once src implements them behind m4.flags.*, a run with
+ *  both would count them twice. So: a stack with `on` (or `rc2`) and any of those src flags on throws. Turn the bot model off
+ *  (`on: false` / no `rc2`) to run on the src mechanics. clockWage is not in the list: the bot never models it (it is src-only). */
+export const SRC_M5_FLAGS = ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const;
+export const SRC_M51_FLAGS = ['rc2Refill'] as const;
+export function assertNoDoubleModel(b: B, K: Stack): void {
+  const m4 = (b as any).m4, f = m4?.flags ?? {}, onSrc = (k: string) => m4?.enabled === 1 && f[k] === 1;
+  const both = [...(K.on ? SRC_M5_FLAGS.filter(onSrc) : []), ...(K.rc2 ? SRC_M51_FLAGS.filter(onSrc) : [])];
+  if (both.length) throw new Error(`bot-m5: the bot's own M5 model and src m4.flags.${both.join('/m4.flags.')} are both on; that would double-count. Use a stack with ${K.on ? 'on: false' : ''}${K.on && K.rc2 ? ' and ' : ''}${K.rc2 ? 'no rc2' : ''} to run on the src mechanics.`);
+}
 /** Read-only observers (port addition): they see events and states, never change them. */
 export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number;
   /** Every drained batch of sim events, with the run second it happened in. */ onEvents?: (t: number, evs: readonly SimEvent[]) => void;
@@ -43,6 +74,7 @@ export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]
    *  and at every buy check (`buyCheck`, before the buy loop). The clone means the callback cannot alias or mutate the run's state. */
   onObserve?: (kind: 'action' | 'buyCheck', action: string, t: number, s: GameState) => void; }
 export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: RunOpts = {}) {
+  assertNoDoubleModel(bal, K);
   const tsnaps: [number, number, GameState][] = [];
   const b = { ...bal, sim_test: { ...bal.sim_test, poisson_arrivals: true } } as B;
   const V = new SellerVariance(VAR_DEFAULT, seed), R = rng(seed);
@@ -210,6 +242,7 @@ export interface GateOpts { cfgs: string[]; profs: string[]; seeds: number; s0: 
   /** QA seam Q4: observe-only hook passed to every seed's main run (not the 10-min window runs). Outputs are identical with or without it. */ onObserve?: RunOpts['onObserve'] }
 /** m5x.ts env defaults: SEEDS 200, S0 1, T 12000, STEP 300, STEP_FROM 30, CFG AssZ, PROFS optimal,seller15,casual, NOWIN off. */
 export function gateOptsFromEnv(env: Record<string, string | undefined>, targets: PacingTargets): GateOpts {
+  checkEnv(env, ['STEP_FROM']);
   return { cfgs: (env.CFG ?? 'AssZ').split(','), profs: (env.PROFS ?? 'optimal,seller15,casual').split(','), seeds: +(env.SEEDS ?? 200), s0: +(env.S0 ?? 1),
     T: +(env.T ?? 12000), step: +(env.STEP ?? 300), stepFrom: +(env.STEP_FROM ?? 30), noWin: env.NOWIN === '1', targets };
 }
@@ -220,7 +253,7 @@ export function windowGate(b: B, g: GateOpts): Record<string, any> {
   const q = (a: number[], p: number) => { const x = a.filter(Number.isFinite); return x.length ? quantile(x, p) : NaN; }, mx = (a: number[]) => Math.max(...a.filter(Number.isFinite));
   const out: Record<string, any> = {};
   for (const ck of g.cfgs) for (const pf of g.profs) {
-    const K = CF[ck], P = PROFS[pf]; if (!K || !P) throw new Error(`windowGate: unknown ${!K ? `CFG ${ck}` : `profile ${pf}`}`);
+    const K = own(CF, ck), P = own(PROFS, pf); if (!K || !P) throw new BotUsageError(`windowGate: unknown ${!K ? `CFG ${ck}` : `profile ${pf}`}`);
     const seedMax: number[] = [], all: number[] = [], byBand: Record<string, number[]> = { 'F10-17': [], 'F18-23': [], 'F24-29': [], 'F30+': [] }, step: number[] = [], noAff: number[] = [], reachMax: number[] = [], prem: Record<string, number[]> = { 'F10-19': [], 'F20-29': [], 'F30+': [] };
     for (let i = 0; i < NS; i++) { const seed = S0 + i, r = run(b, seed, P, K, T, { snapEveryS: K.on ? STEP : undefined, onObserve: g.onObserve });
       step.push(maxStepRatio(r.reach, SF, tg.step_ratio_min_prev_s) ?? NaN); noAff.push(r.longestNoAff); reachMax.push(r.reach.has(b.maxLevel) ? 1 : 0);
@@ -246,6 +279,7 @@ export function windowGate(b: B, g: GateOpts): Record<string, any> {
 export interface RefillIO { csv: string; sha: string; log?: (line: string) => void; perSeed?: (path: string, json: string) => void }
 /** m5lx.ts driver. Env: AT RES REST WAIVE MANAT COST HOLD(1) NOWIN PROFS SEEDS S0 T STEP CFG WIN REGEN CAP ARES PERSEED (CLOCK, PAYWAGE echoed). */
 export function refillGate(b: B, E: Record<string, string | undefined>, tg: PacingTargets, io: RefillIO): Record<string, any> {
+  checkEnv(E, ['AT', 'RES', 'MANAT', 'COST', 'REGEN', 'CAP', 'ARES']);
   const HOLD = (E.HOLD ?? '1') === '1';
   const S: Stack = { on: true, streakCap: 0.28, tapShare: 0.03, broody: true, golden: { gapMin: 120, gapMax: 300 }, abil: true, sweep: 'A', sweepMult: 1.15, pause: false, warm: true, ssZero: true, hold: HOLD };
   const COST = +(E.COST ?? 10), MANAT = +(E.MANAT ?? 32), AUTO = { at: +(E.AT ?? 20), reserve: +(E.RES ?? 1), rest: (E.REST ?? '1') === '1', waive0: E.WAIVE === '1' };
@@ -260,7 +294,7 @@ export function refillGate(b: B, E: Record<string, string | undefined>, tg: Paci
   const r3 = (x: number) => +x.toFixed(3);
   const out: any = { LEV, ARES, csv: io.csv, sha: io.sha, seeds: [S0, S0 + NS - 1], T, STEP, HOLD, COST, MANAT, AUTO, WIN };
   for (const ck of (E.CFG ?? 'base').split(',')) for (const pf of (E.PROFS ?? 'optimal,seller15,casual').split(',')) {
-    const K = CF[ck], P = PROFS[pf]; if (!K || !P) throw new Error(`refillGate: unknown ${!K ? `CFG ${ck}` : `profile ${pf}`}`); const mech = K.on;
+    const K = own(CF, ck), P = own(PROFS, pf); if (!K || !P) throw new BotUsageError(`refillGate: unknown ${!K ? `CFG ${ck}` : `profile ${pf}`}`); const mech = K.on;
     const KW: Record<string, [Stack, any]> = ck === 'off' ? { man: [K, P], idle: [CF.offnone, PROFS.idle] } : { man: [{ ...K, rc2: rcMan }, P], auto: [{ ...K, rc2: rcAuto }, P], idle: [CF.none, PROFS.idle], idleA: [CF.noneA, PROFS.idle] };
     const wk = ck === 'off' ? ['man', 'idle'] : WIN; const W: Record<string, number[]> = {}; const seedMax: Record<string, number[]> = {}; const ratios = ['man/idle', 'auto/idle', 'man/idleA', 'auto/idleA', 'auto/man'];
     for (const r of ratios) { W[r] = []; seedMax[r] = []; }
@@ -308,7 +342,7 @@ export const M5PX_RC2: Record<'on' | 'off', RC2> = (() => { const off: RC2 = { c
 const enc = (a: number[]) => String.fromCharCode(...a.map(x => 48 + x));
 /** One m5px.ts jsonl row (key order as m5px) plus the run's Asleep<->Unpaid toggle counts (MH + Coop Hand, m5s/m5lx definition). */
 export function pressureSeed(b: B, seed: number, pf: string, ck: 'on' | 'off', pert: number, onObserve?: RunOpts['onObserve']) {
-  const P = PROFS[pf]; if (!P) throw new Error(`pressureSeed: unknown profile ${pf}`);
+  const P = own(PROFS, pf); if (!P) throw new BotUsageError(`pressureSeed: unknown profile ${pf}`);
   const z: Series = { start: -1, st: [], ex: [], el: [], pertT: null };
   const r = run(b, seed, P, { ...M5PX_STACK, rc2: M5PX_RC2[ck] }, 12000, { series: z, pert, onObserve });
   const row = { seed, t10: r.reach.get(10) ?? null, t30: r.reach.get(30) ?? null, start: z.start, st: enc(z.st), ex: enc(z.ex), el: enc(z.el), pertT: z.pertT, sc29: r.rm.t29 > 0 ? r.rm.scT29 / r.rm.t29 : null, bb5: r.g4m.bb5 };
@@ -318,9 +352,10 @@ export function pressureSeed(b: B, seed: number, pf: string, ck: 'on' | 'off', p
 export interface PressureIO { reset: (file: string) => void; append: (file: string, line: string) => void; log?: (line: string) => void; tog?: (file: string, json: string) => void }
 /** m5px.ts driver. Env: PROFS (optimal,seller15,casual) CFGS (on,off) PERT (0) SEEDS (200) S0 (1) OUT (required) TOG (optional toggle sidecar prefix). */
 export function pressureRuns(b: B, E: Record<string, string | undefined>, io: PressureIO) {
-  const NS = +(E.SEEDS ?? 200), S0 = +(E.S0 ?? 1), PERT = +(E.PERT ?? 0), OUT = E.OUT; if (!OUT) throw new Error('pressureRuns: OUT is required');
+  checkEnv(E, ['PERT']); const NS = +(E.SEEDS ?? 200), S0 = +(E.S0 ?? 1), PERT = +(E.PERT ?? 0), OUT = E.OUT; if (!OUT) throw new BotUsageError('pressureRuns: OUT is required');
+  for (const pf of (E.PROFS ?? 'optimal,seller15,casual').split(',')) if (!own(PROFS, pf)) throw new BotUsageError(`pressureRuns: unknown profile ${pf}`);
   for (const pf of (E.PROFS ?? 'optimal,seller15,casual').split(',')) for (const ck of (E.CFGS ?? 'on,off').split(',')) {
-    if (ck !== 'on' && ck !== 'off') throw new Error(`pressureRuns: unknown CFGS ${ck}`);
+    if (ck !== 'on' && ck !== 'off') throw new BotUsageError(`pressureRuns: unknown CFGS ${ck}`);
     const f = `${OUT}.${pf}.${ck}.p${PERT}.jsonl`; io.reset(f); const togs: any[] = [];
     for (let i = 0; i < NS; i++) { const { row, tog } = pressureSeed(b, S0 + i, pf, ck, PERT); io.append(f, JSON.stringify(row) + '\n'); togs.push(tog); }
     if (E.TOG) io.tog?.(`${E.TOG}.${pf}.${ck}.p${PERT}.json`, JSON.stringify({ prof: pf, cfg: ck, pert: PERT, d6Bar: 12, def: 'Asleep<->Unpaid mood flips of market_hand + coop_hand per 1800 s of run time (m5s/m5lx rm.tog)', rows: togs }));

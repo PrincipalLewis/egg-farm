@@ -29,8 +29,6 @@ export function markFreshM4<T extends GameState>(s: T, b: Balance): T {
 
 export const PROFILES = ['idle', 'm5x-casual'] as const;
 export type Profile = typeof PROFILES[number];
-/** Profiles that need code which is not on this branch yet (exit 2). Empty since tests/bot-m5.ts landed (rc/v5). */
-export const UNAVAILABLE: Partial<Record<Profile, string>> = {};
 /** What each profile runs (verify.json sim.bot / sim.tickPath). */
 export const PROFILE_BOT: Record<Profile, { bot: string; tickPath: string }> = {
   idle: { bot: 'AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s', tickPath: 'src/sim/tick.ts advance() per 1000 ms, then input (build order)' },
@@ -74,7 +72,6 @@ function sample(s: GameState, b: Balance, tSec: number, ticks: number, collected
 /** The seeded run. Every event of every tick and action is folded into one sha256 (the trace hash), so any change in
  *  what the sim does over the N hours moves it. */
 export function runVerify(b: Balance, o: { hours: number; seed: number; profile: Profile }): RunResult {
-  if (UNAVAILABLE[o.profile]) throw new Error(`profile ${o.profile} ${UNAVAILABLE[o.profile]}`);
   if (o.profile === 'm5x-casual') return runM5xCasual(b, o);
   const cps = checkpointSeconds(o.hours), endS = cps[cps.length - 1], tickMs = 1000 / b.tickHz;
   const h = createHash('sha256'), ev: SimEvent[] = [];

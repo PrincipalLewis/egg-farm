@@ -6,11 +6,11 @@ import { readFileSync, writeFileSync } from 'node:fs'; import { createHash } fro
 import { parseEconomyCsv, buildBalance, readEconomyConfig } from './sync-economy';
 import { validateBalance, type Balance } from '../src/config/balance';
 import { loadTargets } from '../tests/pacing-guards';
-import { refillGate } from '../tests/bot-m5';
+import { refillGate, BotUsageError } from '../tests/bot-m5';
 const E = process.env;
 if (E.CLOCK === '1' || E.PAYWAGE === '1') { console.error('bot-m5lx: CLOCK=1 / PAYWAGE=1 need src changes that are not on this tree (M5.1 src piece; H1 is closed)'); process.exit(2); }
 const csv = E.CSV ?? '../t3-draft.csv', raw = readFileSync(csv);
 const prev = JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8'));
 const b = validateBalance(buildBalance(parseEconomyCsv(raw.toString('utf8')), prev, readEconomyConfig() as any) as Balance, false);
-const out = refillGate(b, E, loadTargets(), { csv, sha: createHash('sha256').update(raw).digest('hex'), log: l => console.error(l), perSeed: (f, j) => writeFileSync(f, j) });
-console.log(JSON.stringify(out));
+try { const out = refillGate(b, E, loadTargets(), { csv, sha: createHash('sha256').update(raw).digest('hex'), log: l => console.error(l), perSeed: (f, j) => writeFileSync(f, j) }); console.log(JSON.stringify(out)); }
+catch (e) { if (e instanceof BotUsageError) { console.error(`bot-m5lx: ${e.message}`); process.exit(2); } throw e; }

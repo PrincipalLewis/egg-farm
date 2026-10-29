@@ -108,3 +108,50 @@ describe('bot-m5: onObserve (QA seam Q4) is observe-only', () => {
     expect(kinds.has('refill')).toBe(true); expect(states.size).toBeGreaterThan(100);
   }, 240_000);
 });
+
+// ---- CCR nits on #78 (VER-1h, self-review): N-1 guard + env checks, N-2 seed bound, O-3 no double model.
+import { gateOptsFromEnv as gOpts, checkEnv, BotUsageError, MAX_SEED, assertNoDoubleModel, M5PX_STACK } from './bot-m5';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+const ROOT5 = fileURLToPath(new URL('..', import.meta.url));
+describe('bot-m5: driver input (CCR N-1, N-2 on #78)', () => {
+  it('unknown CFG/PROFS names, including inherited prototype keys, are rejected (own keys only)', () => {
+    for (const bad of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) {
+      expect(() => windowGate(balance, gOpts({ CFG: bad, PROFS: 'casual', SEEDS: '1' }, loadTargets())), `CFG ${bad}`).toThrow(BotUsageError);
+      expect(() => windowGate(balance, gOpts({ CFG: 'AssZ', PROFS: bad, SEEDS: '1' }, loadTargets())), `PROFS ${bad}`).toThrow(BotUsageError);
+      expect(() => pressureSeed(balance, 1, bad, 'on', 0), `pressureSeed ${bad}`).toThrow(BotUsageError);
+      expect(() => refillGate(balance, { CFG: bad, PROFS: 'casual', SEEDS: '1', T: '10', NOWIN: '1' }, loadTargets(), { csv: 'x', sha: 'x' }), `refillGate CFG ${bad}`).toThrow(BotUsageError);
+    }
+  });
+  it('SEEDS/S0/T/STEP must be valid numbers, and the last seed must keep the PyRandom seed safe (<= MAX_SEED)', () => {
+    expect(MAX_SEED).toBe(9007172232);
+    for (const E of [{ SEEDS: 'abc' }, { SEEDS: '0' }, { SEEDS: '1.5' }, { S0: '-1' }, { T: '-5' }, { T: '' }, { STEP: '0' }, { STEP: 'x' }, { S0: '9007172233', SEEDS: '1' }, { S0: '9007172232', SEEDS: '2' }])
+      expect(() => checkEnv(E), JSON.stringify(E)).toThrow(BotUsageError);
+    expect(() => checkEnv({ S0: '9007172232', SEEDS: '1' })).not.toThrow(); expect(() => checkEnv({})).not.toThrow();
+    expect(() => run(balance, MAX_SEED, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // the bound is exact
+  });
+  it('the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts)', () => {
+    const cli = (script: string, env: Record<string, string>) => spawnSync(process.execPath, [`${ROOT5}node_modules/vite-node/vite-node.mjs`, script], { cwd: ROOT5, encoding: 'utf8', env: { ...process.env, CSV: 'data/economy.csv', ...env } });
+    for (const env of [{ CFG: '__proto__', PROFS: 'casual' }, { PROFS: 'toString' }, { SEEDS: 'abc' }, { T: '-5' }, { STEP: '0' }, { S0: '9007172233', SEEDS: '1' }] as Record<string, string>[]) {
+      const r = cli('scripts/bot-m5x.ts', { SEEDS: '1', T: '10', NOWIN: '1', ...env }); expect(r.status, `bot-m5x ${JSON.stringify(env)}: ${r.stderr}`).toBe(2);
+    }
+    expect(cli('scripts/bot-m5px.ts', { OUT: '/nonexistent/x', PROFS: 'constructor' }).status).toBe(2);
+    expect(cli('scripts/bot-m5lx.ts', { CFG: 'toString', SEEDS: '1' }).status).toBe(2);
+    expect(cli('scripts/bot-m5lx.ts', { CLOCK: '1' }).status).toBe(2);
+  }, 120_000);
+});
+describe('bot-m5: no double model (CCR O-3 on #78)', () => {
+  const withSrc = (flags: Record<string, number>, enabled = 1) => ({ ...balance, m4: { ...(balance as any).m4, enabled, flags } }) as any;
+  it('the bot M5 model (on) and any src m4.flags M5 mechanic on at once throws; either alone runs', () => {
+    for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'])
+      expect(() => run(withSrc({ [k]: 1 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1), k).toThrow(/double-count/);
+    expect(() => run(withSrc({ golden: 1 }), 1, PROFS.casual, M5X_STACKS.none, 1)).not.toThrow(); // bot model off: src mechanics only
+    expect(() => run(withSrc({ golden: 1 }, 0), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // src flags need m4.enabled
+    expect(() => run(withSrc({ golden: 0 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow();
+  });
+  it('bot Refill charges (rc2) and src m4.flags.rc2Refill at once throws', () => {
+    expect(() => assertNoDoubleModel(withSrc({ rc2Refill: 1 }), { ...M5PX_STACK, on: false, rc2: M5PX_RC2.on })).toThrow(/rc2Refill/);
+    expect(() => assertNoDoubleModel(withSrc({ rc2Refill: 1 }), { ...M5PX_STACK, on: false })).not.toThrow();
+    expect(() => assertNoDoubleModel(withSrc({ clockWage: 1 }), { ...M5PX_STACK, rc2: M5PX_RC2.on })).not.toThrow(); // the bot never models clock wage
+  });
+});
