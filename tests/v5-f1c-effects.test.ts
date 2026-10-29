@@ -163,7 +163,7 @@ import { incomePerSec } from '../src/econ/income';
 describe('F1c D-C3 through advance(): a long frame buys at most 1.0 s of uplift', () => {
   const mhExtra = (ms: number, focusMs?: number) => {
     const b = B({ golden: 1 }), s0: GameState = { ...farm(b), basket: 1_000_000, coinsCents: 1_000_000, workers: { market_hand: { energy: 100, cdS: 0 } },
-      customers: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, demand: 100_000, filled: 0, waitedS: 0 })) };
+      customers: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, demand: 20, filled: 0, waitedS: 0 })) };
     const run = (fx: boolean) => { SALE.length = 0; if (fx) SALE.push(frenzy); const ev: any[] = [];
       advance(s0, ms, 0, b, ev, focusMs === undefined ? undefined : { focusMs, nowMs: 1 });
       return { cents: ev.filter(e => e.type === 'sell' && e.by === 'market_hand').reduce((a, e) => a + e.value, 0), n: ev.filter(e => e.type === 'sell' && e.by === 'market_hand').length }; };
@@ -172,7 +172,8 @@ describe('F1c D-C3 through advance(): a long frame buys at most 1.0 s of uplift'
   it('[D-C3][R23 partial] one 59 s frame (focusMs 1000) with a x2 fixture effect and Market Hand sales pays at most the uplift of 1.0 s (10 focus ticks)', () => {
     const one = mhExtra(1_000, 1_000), long = mhExtra(59_000, focusFrameMs(59_000, true, 60));
     expect(long.sales).toBeGreaterThan(2 * one.sales); expect(long.base).toBeGreaterThan(2 * one.base); // Market Hand keeps selling after the first 1.0 s
-    expect(one.extra).toBeGreaterThan(0); expect(one.extra).toBe(one.base); // x2 on every focus tick of a 1 s frame
+    expect(long.extra).toBeLessThan(long.base / 2); // every-tick focus would pay ~x2 on the whole frame (extra ~ base)
+    expect(one.extra).toBeGreaterThan(0); expect(Math.abs(one.extra - one.base)).toBeLessThanOrEqual(one.sales); // x2 on every focus tick of a 1 s frame (1 cent rounding per sale)
     expect(long.extra).toBeGreaterThan(0); expect(long.extra).toBeLessThanOrEqual(one.extra);
   });
 });
