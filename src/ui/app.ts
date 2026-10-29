@@ -739,7 +739,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // v5 F6: overlay features (none registered in F6) + the build:qa-only window.eggfarmQa seam (compiled out of release).
   const overlay = mountOverlay({ g, b, root, scene: $('#scene'), docked, rm, audio: hooks, fx, dialogOpen: overlayDialogOpen, asset: A });
   if (IOS_FLAG_ENABLED) installQaSeam({ audio, fx, menu: { open: showSettings, close: () => { if (modalKind) closeModal(); } },
-    sheet: { stepClose: () => { if (modalKind) { closeModal(); return 'modal'; } const was = open; if (was) openPanel(null); return was; } } });
+    sheet: { stepClose: () => { if (modalKind) { closeModal(); return 'modal'; } const was = open; if (was) openPanel(null); return was; } }, overlay: overlay.ctx });
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)

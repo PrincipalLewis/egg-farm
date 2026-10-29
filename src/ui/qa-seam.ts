@@ -6,19 +6,21 @@
  *   fx.setMax(n)     FX budget cap (default 30, layout-spec §6), for FX-budget ACs
  *   menu.open()      opens the Settings menu (modal); menu.close() closes any open modal
  *   sheet.stepClose()  one Escape-like close step: the open modal first, else the open sheet; returns what it closed (or null)
+ *   overlay.spots()  read-only: {layout, spots, valid, zones} from the live rects (GE-AC15 / BH-AC13 spot checks)
  * Feature PRs extend the object (golden egg, streak, broody) in their own modules, never by editing app.ts.
  */
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import type { Audio } from './audio';
-import type { AudioLogEntry, FxBudget } from './overlay';
+import { domZones, type AudioLogEntry, type FxBudget, type LayoutKey, type OverlayCtx, type Spot, type Zone } from './overlay';
 
 export interface EggfarmQa {
   audio: { readonly log: AudioLogEntry[] };
   fx: { setMax(n: number): void; readonly max: number; readonly count: number };
   menu: { open(): void; close(): void };
   sheet: { stepClose(): string | null };
+  overlay?: { spots(): { layout: LayoutKey; spots: Spot[]; valid: Spot[]; zones: Zone[] } };
 }
-export interface QaSeamDeps { audio: Pick<Audio, 'qaLog'>; fx: FxBudget; menu: { open(): void; close(): void }; sheet: { stepClose(): string | null } }
+export interface QaSeamDeps { audio: Pick<Audio, 'qaLog'>; fx: FxBudget; menu: { open(): void; close(): void }; sheet: { stepClose(): string | null }; overlay?: Pick<OverlayCtx, 'layout' | 'spots' | 'validSpots'> }
 
 export function installQaSeam(d: QaSeamDeps, w: any = window): EggfarmQa | null {
   if (!IOS_FLAG_ENABLED) return null;
@@ -28,6 +30,8 @@ export function installQaSeam(d: QaSeamDeps, w: any = window): EggfarmQa | null 
     fx: { setMax: n => { d.fx.max = Math.max(0, Math.floor(n)); }, get max() { return d.fx.max; }, get count() { return d.fx.count; } },
     menu: { open: () => d.menu.open(), close: () => d.menu.close() },
     sheet: { stepClose: () => d.sheet.stepClose() },
+    ...(d.overlay ? { overlay: { spots: () => { const o = d.overlay!, layout = o.layout();
+      return { layout, spots: o.spots(), valid: o.validSpots(), zones: domZones(document, layout === 'docked' || layout === 'docked-compact') }; } } } : {}),
   };
   w.eggfarmQa = qa; return qa;
 }

@@ -292,13 +292,15 @@ describe('F6 eggfarmQa seam (build:qa only)', () => {
     qa.fx.setMax(5.7); expect(fx.max).toBe(5); expect(qa.fx.max).toBe(5); qa.menu.open(); qa.menu.close(); expect(qa.sheet.stepClose()).toBe('market');
     expect(calls).toEqual(['open', 'close', 'step']);
   });
-  it('F6-AC9: mountApp installs window.eggfarmQa in a qa/test build; menu.open opens Settings, sheet.stepClose closes modal then sheet', async () => {
+  it('F6-AC9: mountApp installs window.eggfarmQa in a qa/test build; menu.open opens Settings, sheet.stepClose closes modal then sheet, overlay.spots read-only', async () => {
     const { ui, settle } = await mountWith({}); const qa = (window as any).eggfarmQa; expect(qa).toBeTruthy();
     ui.openPanel('market'); await settle(); qa.menu.open(); await settle();
     expect(document.getElementById('modal-layer')!.classList.contains('open')).toBe(true);
     expect(qa.sheet.stepClose()).toBe('modal'); expect(document.getElementById('modal-layer')!.classList.contains('open')).toBe(false);
     expect(qa.sheet.stepClose()).toBe('market'); expect(document.getElementById('panel-layer')!.classList.contains('open')).toBe(false);
     expect(qa.sheet.stepClose()).toBe(null);
+    const sp = qa.overlay.spots(); expect(['phone-360', 'phone-375', 'docked', 'docked-compact']).toContain(sp.layout);
+    expect(Array.isArray(sp.spots) && Array.isArray(sp.valid) && Array.isArray(sp.zones)).toBe(true);
   });
   it('F6-AC9: check-release-build.mjs hook list rejects eggfarmQa (Architect-owned test, list extended by F6)', () => {
     const src = readFileSync('scripts/check-release-build.mjs', 'utf8'); const line = src.split('\n').find(l => l.startsWith('const hooks = ['))!;
