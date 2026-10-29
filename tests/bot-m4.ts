@@ -44,3 +44,8 @@ export function pickBuy(s: GameState, b: Balance, model: 'seller15' | 'cheapest'
   const aff = opts.filter(([, c]) => s.coinsCents >= c).sort((x, y) => x[1] - y[1]);
   return aff.length ? aff[0][0] : null;
 }
+/** QA seam Q4 (observe-only, test tooling): `action` = after every action the bot applies (collect, sellAll, buy:<pick>), `buyCheck` = at
+ *  every buy check, before pickBuy. The callback gets a deep clone (structuredClone) of the state, so it can neither alias nor mutate the run.
+ *  Same signature as tests/bot-m5.ts RunOpts.onObserve. */
+export type Observe = (kind: 'action' | 'buyCheck', action: string, t: number, s: GameState) => void;
+export const observe = (hook: Observe | undefined, kind: 'action' | 'buyCheck', action: string, t: number, s: GameState) => { if (hook) hook(kind, action, t, structuredClone(s)); };
