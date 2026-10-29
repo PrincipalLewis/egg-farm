@@ -1,0 +1,5 @@
+#!/bin/sh
+# Parity run 1: CSV m50 draft of record (8dc90e2b), seeds 1-200, CFG none,AssZ,AssZhold x PROFS optimal,seller15,casual, m5x.ts defaults otherwise.
+cd /workspace/egg-farm-studio/scratch/v2-econ/h && env CSV=/workspace/egg-farm-studio/scratch/v2-econ/economy.m50-draft.csv SEEDS=200 S0=1 CFG=none,AssZ,AssZhold PROFS=optimal,seller15,casual nice node node_modules/.bin/vite-node m5x.ts > /workspace/egg-farm-studio/artifacts/bot-m5-parity/results/m50.orig.json 2> /workspace/egg-farm-studio/artifacts/bot-m5-parity/results/m50.orig.log &
+cd /workspace/wt-v5-botm5 && env CSV=/workspace/egg-farm-studio/scratch/v2-econ/economy.m50-draft.csv SEEDS=200 S0=1 CFG=none,AssZ,AssZhold PROFS=optimal,seller15,casual nice node node_modules/.bin/vite-node scripts/bot-m5x.ts > /workspace/egg-farm-studio/artifacts/bot-m5-parity/results/m50.port.json 2> /workspace/egg-farm-studio/artifacts/bot-m5-parity/results/m50.port.log &
+wait; echo ALLDONE > /workspace/egg-farm-studio/artifacts/bot-m5-parity/results/m50.done
