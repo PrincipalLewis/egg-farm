@@ -11,7 +11,10 @@ import { tickFocusS, type StepClock } from './clock';
 import { ensureEvRng } from './rng';
 /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
 export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
-/** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng. */
+/** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
+ *  Q-F1b-1, ruled D-HOP-2026-10-29-06: seeded at the END of the first flag-on tick (stepTimers runs last in step()), i.e. AFTER
+ *  that tick's customer draws on state.rng; for initialState that equals GE-AC33's mixSeed(mixSeed(seed) ^ salt). This is the
+ *  only seeding path (save/m5-fields.ts re-exports ensureEvRng from sim/rng.ts). */
 const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(s) : s);
 export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng];
 export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
