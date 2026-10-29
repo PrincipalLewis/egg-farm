@@ -70,8 +70,8 @@ describe('m1 yard: keyed per-slot diff (UI-M1-1/3/4/5/6)', () => {
     for (const h of fresh) { expect(h.classList.contains('pop')).toBe(true); expect(h.style.animationDelay).toBe(`0s, ${(slotOf(h) * .15).toFixed(2)}s`); }
     for (const h of h0) expect(h.style.animationDelay).toBe(`${(slotOf(h) * .15).toFixed(2)}s`);
     // UI-M1-5: at the cap a further buy is 0 child mutations
-    const mo2 = new MutationObserver(ms => { created.push(...ms); }); const before = created.length; mo2.observe(yard, { childList: true, subtree: true, attributes: true });
+    let muts = 0; const mo2 = new MutationObserver(ms => { muts += ms.length; }); mo2.observe(yard, { childList: true, subtree: true, attributes: true });
     g.dispatch({ type: 'buyTrack', track: 'hens' } as any); ui.render(); await Promise.resolve(); mo2.disconnect();
-    expect(created.length).toBe(before);
+    expect(g.state.hensLevel).toBe(6); expect(muts).toBe(0);
   });
 });
