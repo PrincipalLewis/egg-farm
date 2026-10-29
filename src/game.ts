@@ -9,6 +9,7 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
 import { focusFrameMs } from './sim/clock';
+import { anyM5FlagOn } from './sim/timers';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -388,7 +389,7 @@ export class Game {
   }
   /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach open)? Set by the UI (F6 dialogOpen()).
    *  Default false: no focus time accrues, so M5 timers stay frozen until the UI wires it. Visibility is handled by frame()
-   *  itself (hidden frames never pass focus). Only read while M5 flags are on. */
+   *  itself (hidden frames never pass focus). Only read while an M5 flag is on (frame() skips it with every flag off). */
   private attendedProbe: () => boolean = () => false;
   setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
   frame() {
@@ -408,7 +409,7 @@ export class Game {
     if (gap > 0) {
       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
-      const focusMs = focusFrameMs(gap, !this.readOnly && this.attendedProbe(), this.b.offline.offlineMinSeconds);
+      const focusMs = focusFrameMs(gap, !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(), this.b.offline.offlineMinSeconds); // CCR N-1 #79: no probe read with every flag off
       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
       const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);

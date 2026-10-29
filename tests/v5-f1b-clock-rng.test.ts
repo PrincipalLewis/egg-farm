@@ -138,15 +138,19 @@ import { Game } from '../src/game';
 import { mem } from './helpers';
 describe('F1b Game wiring (attended probe)', () => {
   const T0 = Date.UTC(2026, 9, 29, 12);
-  const run = (attended: boolean) => {
-    let t = T0, calls = 0; const g = new Game(balance, mem(), () => t, 7);
+  const run = (attended: boolean, bal: typeof balance = balance) => {
+    let t = T0, calls = 0; const g = new Game(bal, mem(), () => t, 7);
     g.setAttendedProbe(() => { calls++; return attended; });
     for (let i = 0; i < 120; i++) { t += 500; g.frame(); }
     t += 61_000; g.frame(); // a >= 60 s visible gap: no focus (§9.1a)
     const v = JSON.parse(JSON.stringify(g.state)); delete v.v6BackupId; return { v, calls };
   };
-  it('visible frames read the probe; flags off: attended or not, the game state is identical', () => {
+  it('flags off: the probe is never read, and attended or not the game state is identical', () => {
     const a = run(true), b = run(false);
-    expect(a.calls).toBeGreaterThanOrEqual(120); expect(a.v).toEqual(b.v);
+    expect(a.calls).toBe(0); expect(b.calls).toBe(0); expect(a.v).toEqual(b.v); // CCR N-1 #79: no probe read with every flag off
+  });
+  it('visible frames read the probe once an M5 flag is on (streak)', () => {
+    const on = { ...balance, m4: { ...balance.m4!, enabled: 1, flags: { streak: 1 } } } as typeof balance;
+    expect(run(true, on).calls).toBeGreaterThanOrEqual(120); expect(run(false, on).calls).toBeGreaterThanOrEqual(120);
   });
 });
