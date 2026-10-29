@@ -8,7 +8,6 @@ import { M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import { M5_FLAGS, flagOn } from '../src/config/flags';
 import type { SimEvent } from '../src/sim/events';
 import { ON } from './v5-f2-helpers';
-import { M5_FLAGS } from '../src/config/flags';
 const NOW = Date.UTC(2026, 9, 29, 12), tc = b.m4!.tc!, CD = tc.ability_cd_s * 1000;
 const only = (k: string) => ({ ...b, m4: { ...b.m4!, flags: { [k]: 1 } } }) as typeof b;
 const base = (): GameState => ({ ...initialState(b, 7), farmLevel: 12 });
