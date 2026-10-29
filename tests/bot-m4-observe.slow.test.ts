@@ -17,13 +17,13 @@ const digest = (model: Model, T: number, variance: typeof VAR_DEFAULT | undefine
 // A hostile hook: it scribbles on what it gets. Because it gets a clone, the run must not notice.
 const hostile = (calls: Map<string, number>): Observe => (kind, a, _t, s: any) => { const k = kind + ':' + a.split(':')[0]; calls.set(k, (calls.get(k) ?? 0) + 1); s.coinsCents = -1; s.farmLevel = 99; s.workers = {}; };
 
-describe('runBot onObserve (QA seam Q4) is observe-only: AC7 digests byte-identical with and without the hook, seeds 1-200', () => {
+describe('[Q4][AC7] runBot onObserve (QA seam Q4) is observe-only: AC7 digests byte-identical with and without the hook, seeds 1-200', () => {
   for (const [model, T, v, pin] of [
     ['seller15', 1800, undefined, '8d06a5504429f186e55fcce00c8aa2ca30ec424ba1d432570d198f67bac9784c'],
     ['cheapest', 1800, undefined, '5eee607f2759f81f4e3c216b8115b94dad71bcfa3a7db1742a3edb87a94a1e4a'],
     ['seller15', 600, VAR_DEFAULT, 'f0863858fd65baf25f44cf240fdcc16fb3fb23d093687bf9a03cecd0ad56f7e7'],
   ] as [Model, number, typeof VAR_DEFAULT | undefined, string][]) {
-    it(`${model}${v ? ' + VAR_DEFAULT' : ''}, T=${T}s`, () => {
+    it(`[Q4][AC7] ${model}${v ? ' + VAR_DEFAULT' : ''}, T=${T}s: digest with hook == without hook == pin`, () => {
       const calls = new Map<string, number>();
       const off = digest(model, T, v), on = digest(model, T, v, hostile(calls));
       expect(on).toBe(off);
