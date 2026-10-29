@@ -610,9 +610,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
       }
       // AC-R17 (rc1-asleep v1.0.11, WCAG 2.5.3): each name starts with the visible text in DOM order and announces the count:
-      // nav "N Upgrades, N workers asleep or unpaid" (badge before the label), Workers tab "Workers N, N asleep or unpaid"; N = 0 -> bare label.
+      // nav "Upgrades, N available" (Art-c1, 2026-10-29 23:20: aria-label only, no DOM reorder; the count badge stays before the
+      // label in the DOM), Workers tab "Workers N, N asleep or unpaid"; N = 0 -> bare label.
       const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement, wt = document.querySelector('.tabs [data-tab=workers]') as HTMLElement | null;
-      const al = n > 0 ? `${n} Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
+      const al = n > 0 ? `Upgrades, ${n} available` : 'Upgrades';
       if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al);
       const tl = n > 0 ? `Workers ${n}, ${n} asleep or unpaid` : 'Workers';
       if (wt && wt.getAttribute('aria-label') !== tl) wt.setAttribute('aria-label', tl); }

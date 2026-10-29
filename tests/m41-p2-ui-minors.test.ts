@@ -141,3 +141,23 @@ describe('WCAG 2.4.11 port from rc1 7380b86 (source; keyboard sweep at 360/390/1
     expect(rule('.refill-wrap')).toMatch(/^position:sticky;top:0;/);
   });
 });
+
+describe('P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; reduced motion = static refused flash, no translate', () => {
+  const kf = (name: string) => css.match(new RegExp(`@keyframes ${name}\\{((?:[^{}]*\\{[^{}]*\\})*)\\}`))?.[1] ?? null;
+  it('P2b-U / Art-c2: the shake keyframes translate (motion kept for full-motion users)', () => {
+    expect(css).toContain('.shake{animation:shake var(--t-med) linear}'); expect(kf('shake')).toMatch(/translateX\(-4px\)/);
+  });
+  it('P2b-U / Art-c2: refusedFlash is static: a 2px inset --c-danger ring, no transform/translate, steps(1) (no tween)', () => {
+    const f = kf('refusedFlash'); expect(f).toBe('0%,100%{box-shadow:inset 0 0 0 2px var(--c-danger)}'); expect(f).not.toMatch(/transform|translate|opacity/);
+  });
+  it('P2b-U / Art-c2: prefers-reduced-motion and the .reduced-motion / .rm classes swap the Refill shake for refusedFlash (300ms, not --t-med = 0)', () => {
+    expect(css).toContain('@media (prefers-reduced-motion:reduce){.btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}}');
+    expect(css).toContain('.reduced-motion .btn.manage.shake,.rm .btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}');
+  });
+  it('P2b-U / Art-c2: the worker-card Refill is .btn.manage (the selector the swap keys on) and an Unpaid tap still goes through cantAfford (shake)', () => {
+    expect(wui).toMatch(/<button class="btn secondary manage\$\{/);
+    const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+    expect(app).toMatch(/if \(kind === 'manage' && g\.state\.workers\[[^\]]+\]\?\.unpaid\) return cantAfford\(bt\);/);
+    expect(app).toMatch(/const cantAfford = \(el: HTMLElement\) => \{ retrigger\(el, 'shake'\);/);
+  });
+});

@@ -102,18 +102,46 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
     ['MH + CH unpaid', { market_hand: { energy: 60, cdS: 5, unpaid: true }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
     ['MH asleep + CH unpaid', { market_hand: { energy: 0, cdS: 5 }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
     ['none (N = 0)', { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } }, 0]];
-  for (const [name, workers, n] of scenes) it(`AC-R17 P2a: ${name}: Upgrades nav, Workers tab, Refill nav`, async () => {
+  for (const [name, workers, n] of scenes) it(`AC-R17 P2a / Art-c1: ${name}: Upgrades nav, Workers tab, Refill nav`, async () => {
     const { ui } = await mount({ farmLevel: 12, coinsCents: 0, manageCdS: 0, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 }, hawker: { energy: 30, cdS: 0 }, ...workers } }); // 3 hired: nav Refill shown
     ui.openPanel('upgrades'); (document.querySelector('.tabs button[data-tab="workers"]') as HTMLElement).click(); ui.render();
     const up = startsWithVisible(document.querySelector('nav [data-nav=upgrades]')!), wt = startsWithVisible(document.querySelector('.tabs [data-tab=workers]')!);
-    expect(up.ok, JSON.stringify(up)).toBe(true); expect(wt.ok, JSON.stringify(wt)).toBe(true);
+    expect(wt.ok, JSON.stringify(wt)).toBe(true);
+    // AC-R17 / Art-c1 (2026-10-29 23:20): Upgrades aria-label is "Upgrades, N available", aria-label only, no DOM reorder. It starts
+    // with the visible label (.nav-lbl). The count badge stays before the label in the DOM, so the full subtree text still reads
+    // "N Upgrades" (asserted here so a change to that is noticed; flagged to HoE/Art as the 2.5.3-vs-no-reorder conflict).
+    const lbl = norm(document.querySelector('nav [data-nav=upgrades] .nav-lbl')!.textContent ?? '');
+    expect(lbl).toBe('Upgrades'); expect(up.name.startsWith(lbl), JSON.stringify(up)).toBe(true);
     if (n > 0) {
-      expect(up.v).toBe(`${n} Upgrades`); expect(up.name).toBe(`${n} Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid`);
+      expect(up.v).toBe(`${n} Upgrades`); expect(up.name).toBe(`Upgrades, ${n} available`);
       expect(wt.v).toBe(`Workers ${n}`); expect(wt.name).toBe(`Workers ${n}, ${n} asleep or unpaid`); // count announced, never bare "Workers"
     } else { expect(up.name).toBe('Upgrades'); expect(wt.name).toBe('Workers'); expect(wt.v).toBe('Workers'); }
     const rf = document.querySelector('nav .nav-manage')! as HTMLElement; // the hawker at 30% is tired: N >= 1 (Unpaid never counted)
     expect(rf.hidden).toBe(false); const r = startsWithVisible(rf);
     expect(r.ok, JSON.stringify(r)).toBe(true); expect(r.v).toMatch(/^Refill \d+$/); expect(r.name).toMatch(/^Refill (1 tired worker|\d+ tired workers)$/);
     expect(document.getElementById('rate')!.getAttribute('aria-label')).toMatch(/^Net income /); // frozen suffix form (TP1-R17d)
+  });
+  it('AC-R17 P2a (D-HOP-2026-10-29-10): count 0 → nav Refill not rendered: not focusable, no "Refill…" name in nav, Tab order Market → Upgrades → Farm', async () => {
+    const b = on, thr = b.workers.energy.manage_prompt_threshold * 100;
+    const rested = { energy: Math.max(90, thr + 1), cdS: 5 }; // > threshold: not tired; > 0: not asleep; no unpaid flag
+    const { g, ui } = await mount({ farmLevel: 12, coinsCents: 1e6, manageCdS: 0, customers: [], nextCustomerInS: 1e9, workers: { market_hand: rested, coop_hand: rested, hawker: rested } });
+    ui.render();
+    expect(Object.keys(g.state.workers).length).toBe(3); // 3 hired: at manage_all_min_workers, so only the count hides Refill
+    expect(Object.values(g.state.workers).every((w: any) => w.energy > thr && w.energy > 0 && !w.unpaid)).toBe(true);
+    const nav = document.querySelector('nav.actions')!;
+    const hiddenUp = (e: Element | null): boolean => { for (let x = e as HTMLElement | null; x; x = x.parentElement) if (x.hidden || x.hasAttribute('inert') || x.style?.display === 'none') return true; return false; };
+    const focusable = (e: Element) => !hiddenUp(e) && !(e as HTMLButtonElement).disabled && (e as HTMLElement).tabIndex >= 0;
+    const rf = nav.querySelector('.nav-manage') as HTMLElement | null;
+    if (rf) { expect(hiddenUp(rf)).toBe(true); expect(focusable(rf)).toBe(false); }
+    // accessible names of the exposed (not hidden) controls in nav: none starts with "Refill"
+    const exposed = [...nav.querySelectorAll<HTMLElement>('button, [role=button], a[href], [tabindex]')].filter(e => !hiddenUp(e));
+    const names = exposed.map(e => e.getAttribute('aria-label') ?? (e.textContent ?? '').replace(/\s+/g, ' ').trim());
+    expect(names.filter(x => /^Refill/.test(x)), JSON.stringify(names)).toEqual([]);
+    // keyboard: the nav's focusable list in DOM (Tab) order is exactly Market → Upgrades → Farm (Refill not in it; no gap, no trap)
+    const order = [...nav.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [tabindex]')].filter(focusable)
+      .map(e => e.dataset.nav ?? e.dataset.act ?? e.tagName);
+    expect(order).toEqual(['market', 'upgrades', 'farm']);
+    const ui0 = order.indexOf('upgrades'); expect(order[ui0 + 1]).toBe('farm'); // Upgrades → next control, nothing between
+    expect(nav.querySelectorAll('[tabindex]:not([tabindex="-1"])').length).toBe(0); // no positive tabindex that could trap/reorder
   });
 });

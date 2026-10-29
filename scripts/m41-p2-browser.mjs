@@ -140,10 +140,13 @@ for (const [w, h] of SIZES) {
     await toTab(page, 'workers'); await page.waitForTimeout(300);
     const r = await page.evaluate(() => { const vis = el => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue : n.nodeType === 1 && n.checkVisibility?.({ visibilityProperty: true }) !== false && getComputedStyle(n).display !== 'none' ? vis(n) : '').join('');
       return ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', '[data-act=manageAll].nav-manage'].map(sel => { const e = document.querySelector(sel); if (!e || e.hidden || !e.getClientRects().length) return { sel, shown: false };
-        const v = vis(e).replace(/\s+/g, ' ').trim(), name = e.getAttribute('aria-label'); return { sel, shown: true, v, name, ok: name.startsWith(v) }; }); });
+        // AC-R17 / Art-c1: the Upgrades nav name starts with its visible label (.nav-lbl "Upgrades"); the count badge stays before it in the DOM (no reorder)
+        const v = vis(e).replace(/\s+/g, ' ').trim(), name = e.getAttribute('aria-label'), lbl = sel.includes('upgrades') ? e.querySelector('.nav-lbl').textContent.trim() : v;
+        return { sel, shown: true, v, lbl, name, ok: name.startsWith(lbl) }; }); });
     const n = { 'mh-asleep': 1, 'ch-asleep': 1, 'both-asleep': 2, 'mh-unpaid': 1, 'ch-unpaid': 1, 'both-unpaid': 2, 'mh-asleep-ch-unpaid': 2, none: 0 }[scene];
     const shown = r.filter(x => x.shown), wt = r[1];
     check('AC-R17', w, `${scene}: every shown control's name starts with its visible text; Workers tab ${n ? `"Workers ${n}, …"` : '"Workers"'}`, shown.every(x => x.ok) && wt.shown && (n ? wt.name === `Workers ${n}, ${n} asleep or unpaid` : wt.name === 'Workers'), r);
+    check('AC-R17 / Art-c1', w, `${scene}: Upgrades nav aria-label ${n ? `"Upgrades, ${n} available"` : '"Upgrades"'}`, r[0].shown && r[0].name === (n ? `Upgrades, ${n} available` : 'Upgrades'), r[0]);
     if (axeSrc) { await page.addScriptTag({ content: axeSrc });
       const ax = await page.evaluate(async () => { const inc = ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', 'nav [data-act=manageAll]', '#p-upgrades header [data-act=manageAll]'].filter(s => document.querySelector(s));
         const res = await window.axe.run({ include: inc.map(s => [s]) }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } });
@@ -152,6 +155,22 @@ for (const [w, h] of SIZES) {
     } else check('AC-R17 axe', w, `${scene}: axe not run (AXE path missing)`, false, AXE);
     await ctx.close();
   }
+  // ---- AC-R17 P2a (D-HOP-2026-10-29-10): count 0 -> nav Refill not rendered (3 hired, all rested); Tab skips it ----
+  { const rested = { energy: 90, cdS: 0 }; const { ctx, page } = await open(w, h, { workers: { market_hand: rested, coop_hand: rested, hawker: rested }, coinsCents: 1e6 }, { freeze: true });
+    const r = await page.evaluate(() => { const nav = document.querySelector('nav.actions'), rf = nav.querySelector('.nav-manage');
+      const foc = [...nav.querySelectorAll('button, a[href], [tabindex]')].filter(e => e.checkVisibility() && !e.disabled && e.tabIndex >= 0 && !e.closest('[inert]'));
+      return { rfPresent: !!rf, rfShown: !!rf && rf.checkVisibility(), order: foc.map(e => e.dataset.nav ?? e.dataset.act ?? e.tagName), refillNames: foc.map(e => e.getAttribute('aria-label') ?? e.innerText).filter(x => /^Refill/.test(x)) }; });
+    const docked = w >= 960; // docked layout: nav keeps Market/Upgrades/Farm; the Refill copy lives in the Upgrades header
+    await page.locator('[data-nav=upgrades]').focus(); await page.keyboard.press('Tab'); const next = await page.evaluate(() => document.activeElement?.dataset.nav ?? document.activeElement?.dataset.act ?? document.activeElement?.tagName);
+    check('AC-R17 P2a count 0', w, 'D-HOP-2026-10-29-10: 3 rested workers -> nav Refill not rendered/focusable, no "Refill…" name in nav, Tab Upgrades -> next nav control', !r.rfShown && r.refillNames.length === 0 && !r.order.includes('manageAll') && r.order.join(',') === (docked ? r.order.join(',') : 'market,upgrades,farm') && next !== 'manageAll' && next === r.order[r.order.indexOf('upgrades') + 1], { ...r, next });
+    await ctx.close(); }
+  // ---- P2b-U / Art-c2: Unpaid Refill refused tap = shake; reduced motion = static refusedFlash, no translate ----
+  for (const rm of [false, true]) { const { ctx, page } = await open(w, h, { workers: { ...MH_UNPAID, coop_hand: { energy: 90, cdS: 0 } }, coinsCents: 0 }, { rm, freeze: true });
+    await toTab(page, 'workers');
+    const r = await page.evaluate(() => new Promise(res => { const bt = document.querySelector('#uRow [data-act=manage][data-w=market_hand]'); bt.click();
+      requestAnimationFrame(() => { const cs = getComputedStyle(bt); res({ cls: bt.className, anim: cs.animationName, dur: cs.animationDuration, tf: cs.transform, shadow: cs.boxShadow }); }); }));
+    check('P2b-U / Art-c2', w, rm ? 'reduced motion: refused Unpaid Refill tap = refusedFlash (300ms), no transform' : 'full motion: refused Unpaid Refill tap = shake', /\bshake\b/.test(r.cls) && (rm ? r.anim === 'refusedFlash' && r.dur === '0.3s' && r.tf === 'none' : r.anim === 'shake'), r);
+    await ctx.close(); }
   // ---- WCAG 2.4.11: keyboard focus through the Workers list never hidden under the sticky Refill bar ----
   { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 30, cdS: 0 }, coop_hand: { energy: 25, cdS: 0 }, hawker: { energy: 20, cdS: 0 }, grader: { energy: 90, cdS: 0 } }, coinsCents: 1e9, graderTier: 1 });
     await toTab(page, 'workers'); await page.waitForTimeout(300);
