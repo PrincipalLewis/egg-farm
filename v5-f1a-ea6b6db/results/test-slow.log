@@ -1,0 +1,49 @@
+
+> egg-farm@0.1.0 test:slow
+> node scripts/check-vendor-pins.mjs && vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1
+
+check-vendor-pins: 4 vendored file(s) match SHA256SUMS, no unlisted files
+
+ RUN  v2.1.9 /workspace/wt-v5-f1a
+
+stdout | tests/seller-variance.slow.test.ts > old deterministic bot (variance off) = Python var=None > m2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds
+m2 old: 87/100 seeds bit-exact
+
+stdout | tests/seller-variance.slow.test.ts > m1 variance bot vs Python, 100 seeds (distribution) > AC7 quantiles match; proposal targets 1-2 hold
+m1 variance t18 P5/P50/P95 TS 20.03/20.61/22.07 PY 20.04/20.63/22.05; spread TS 7.1% PY 6.8%; L@30 P5/P95 20/20
+
+stdout | tests/seller-variance.slow.test.ts > m2 variance bot vs Python, 100 seeds (distribution) > AC7 quantiles match; proposal targets 1-2 hold
+m2 variance t18 P5/P50/P95 TS 20.63/21.11/22.61 PY 20.56/21.06/22.39; spread TS 7.1% PY 6.3%; L@30 P5/P95 20/21
+
+ ✓ tests/seller-variance.slow.test.ts (11 tests) 152952ms
+   ✓ variance stream = CPython random.Random (exact) > m1: full action trace equals Python (seeds 1,2,3,4,5) 971ms
+   ✓ variance stream = CPython random.Random (exact) > m2: full action trace equals Python (seeds 1,2,3,4,5) 2117ms
+   ✓ old deterministic bot (variance off) = Python var=None > m1: per-seed reach times exact, 100 seeds 17060ms
+   ✓ old deterministic bot (variance off) = Python var=None > m2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds 31670ms
+   ✓ m1 variance bot vs Python, 100 seeds (distribution) > AC7 quantiles match; proposal targets 1-2 hold 16385ms
+   ✓ m2 variance bot vs Python, 100 seeds (distribution) > AC7 quantiles match; proposal targets 1-2 hold 26963ms
+   ✓ AC7 band, variance bot (data/economy.csv b48be8a4) > band per CSV sha b48be8a4 (T3: hard band) 57768ms
+stdout | tests/ac7-dceo-04.slow.test.ts > AC7 D-CEO-20261019-04 final-SHA gate > seeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min
+D-CEO-04 1-200 L10 nw P95 12.02 fastest 7.87 | w P95 12.08 fastest 8.32
+
+stdout | tests/ac7-dceo-04.slow.test.ts > AC7 D-CEO-20261019-04 final-SHA gate > seeds 201-300 pass all original gates strictly
+D-CEO-04 201-300 L10 nw P95 11.81 fastest 8.13 | w P95 11.81 fastest 8.76; L@30 nw P5/P95 19/20 w 21/22
+
+ ✓ tests/ac7-dceo-04.slow.test.ts (3 tests | 1 skipped) 332689ms
+   ✓ AC7 D-CEO-20261019-04 final-SHA gate > seeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min 183019ms
+   ✓ AC7 D-CEO-20261019-04 final-SHA gate > seeds 201-300 pass all original gates strictly 149669ms
+stdout | tests/ac7-worst-seed.slow.test.ts > AC7 worst-seed guards, workers variance bot (data/economy.csv b48be8a4) > F1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+variance L18-25 slowest level P95 236.4s (<= 390) worst 255.9s (<= 480); t20 P5/P50/P95/worst 1413/1476/1555/1583s (warn P95 > 1740)
+
+stdout | tests/ac7-worst-seed.slow.test.ts > AC7 worst-seed guards, workers variance bot (data/economy.csv b48be8a4) > F1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+fixed L18-25 slowest level P95 180.0s worst 180.0s (<= 360)
+
+ ✓ tests/ac7-worst-seed.slow.test.ts (3 tests) 129932ms
+   ✓ AC7 worst-seed guards, workers variance bot (data/economy.csv b48be8a4) > F1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) 62818ms
+   ✓ AC7 worst-seed guards, workers variance bot (data/economy.csv b48be8a4) > F1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) 67112ms
+
+ Test Files  3 passed (3)
+      Tests  16 passed | 1 skipped (17)
+   Start at  19:54:00
+   Duration  463.59s (transform 331ms, setup 0ms, collect 626ms, tests 615.57s, environment 1ms, prepare 225ms)
+

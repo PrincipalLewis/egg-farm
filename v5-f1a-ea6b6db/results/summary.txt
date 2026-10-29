@@ -1,0 +1,16 @@
+gate v5-f1a-ea6b6db
+HEAD ea6b6dbd2f3b49a3ad1eaf7f8fe650211ffeff25
+branch feat/v5-f1a-fields
+start 2026-10-29 19:49:14 CET
+tsc exit=0 (3s)
+sync-economy exit=0 (1s)
+vitest exit=0 (281s)
+test-slow exit=0 (464s)
+build exit=0 (8s)
+check-globals exit=0 (9s)
+verify-24h exit=0 (24s)
+vitest:       Tests  1571 passed | 1 skipped (1572)
+test:slow:       Tests  16 passed | 1 skipped (17)
+verify result PASS exit None
+verify trace {"name": "AC7 trace hash (every sim event of the run + end state)", "sha256": "2c0d3ec37be16e6e20460581f84bc8ade30049680d50d701085bd288e268883d", "events": 479715}
+end 2026-10-29 20:02:24 CET
