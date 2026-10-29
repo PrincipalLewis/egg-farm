@@ -107,3 +107,15 @@ describe('m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, C
     expect(app).toMatch(/class="btn buy \$\{can \? 'affordable' : ''\}"[^>]*aria-disabled="\$\{!can\}"/); expect(app).not.toMatch(/<button class="btn buy[^>]* disabled[ >=]/);
   });
 });
+
+describe('CCR #70 nits (n1 income.ts comment + test-only marks, n2 workerBanner without GameState)', () => {
+  const inc = readFileSync(new URL('../src/econ/income.ts', import.meta.url), 'utf8');
+  it('n1: grossSalesPerSec / salesStopped are marked TEST-ONLY and the stale "Used by the header aria and the worker banners" is gone', () => {
+    expect(inc).not.toContain('Used by the header aria and the worker banners');
+    expect(inc).toMatch(/TEST-ONLY[^\n]*\n?[^\n]*\nexport const grossSalesPerSec/); expect(inc).toMatch(/TEST-ONLY[\s\S]{0,400}\nexport const salesStopped/);
+  });
+  it('n2: workerBanner / workerBannerText take no GameState', () => {
+    expect(wui).toMatch(/export function workerBanner\(id: WorkerId, m: string \| null, b: Balance, copy/);
+    expect(wui).toMatch(/export const workerBannerText = \(id: WorkerId, m: string \| null, b: Balance\)/);
+  });
+});

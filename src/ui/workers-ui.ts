@@ -73,7 +73,8 @@ export const BANNER_ICON = { asleep: 'icon-moon.svg', unpaid: 'icon-warning.svg'
 export type MarketHandCopy = 'slowed' | 'stopped';
 export const MARKET_HAND_COPY: MarketHandCopy = 'stopped'; // D-HOP-2026-10-24-14, amended by -17 (Unpaid)
 export interface WorkerBanner { kind: 'asleep' | 'unpaid'; text: string; short: string; aria: string; icon: string }
-export function workerBanner(id: WorkerId, m: string | null, s: GameState, b: Balance, copy: MarketHandCopy = MARKET_HAND_COPY): WorkerBanner | null {
+/** CCR #70 n2: no GameState parameter; the banner reads only the role, its mood and balance (no global-state coupling). */
+export function workerBanner(id: WorkerId, m: string | null, b: Balance, copy: MarketHandCopy = MARKET_HAND_COPY): WorkerBanner | null {
   if (m !== 'asleep' && m !== 'unpaid') return null;
   const role = BANNER_ROLE[id], st = m, pct = Math.round(b.workers.grader.asleep_bonus_share * 100);
   const [eff, effAria] = id === 'grader' ? [`bonus down to ${pct}%`, `Bonus down to ${pct} percent.`]
@@ -84,7 +85,7 @@ export function workerBanner(id: WorkerId, m: string | null, s: GameState, b: Ba
   return { kind: m, text: `${role} ${st}: ${eff}`, short, aria: `${role} is ${st}. ${effAria}`, icon: BANNER_ICON[m] };
 }
 /** Visible banner text (full form); kept for callers/tests. */
-export const workerBannerText = (id: WorkerId, m: string | null, s: GameState, b: Balance) => workerBanner(id, m, s, b)?.text ?? '';
+export const workerBannerText = (id: WorkerId, m: string | null, b: Balance) => workerBanner(id, m, b)?.text ?? '';
 export const workerBannerHtml = (wb: WorkerBanner | null) => !wb ? '' :
   `<div class="wk-banner ${wb.kind}" role="status"><img class="wb-ico" src="${ASSET(wb.icon)}" width="14" height="14" alt="" aria-hidden="true"><span class="bt" aria-hidden="true" data-full="${wb.text}" data-short="${wb.short}">${wb.text}</span><span class="sr">${wb.aria}</span></div>`;
 /** 360 rule: if the full banner doesn't fit on one line, drop the role name (never wrap or ellipsise). Call after layout. */
@@ -107,7 +108,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const cap = manageCaption(w, cd, b);
     const off = m === 'asleep' || m === 'unpaid';
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid' : 'Asleep'; // m5: no emoji / text pictograph; the icon is the inline SVG after the word
-    const banner = workerBannerHtml(workerBanner(id, m, s, b));
+    const banner = workerBannerHtml(workerBanner(id, m, b));
     const yawn = isYawning(w, b);
     let extra = '';
     if (id === 'grader') {
