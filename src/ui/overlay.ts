@@ -72,7 +72,7 @@ export const DOM_ZONES: readonly DomZone[] = [
 /** Docked only: the docked column (#panel-layer is a fixed full-screen layer at phone layouts, so it is a zone there only while open). */
 export const DOCKED_COLUMN: DomZone = { name: 'docked-column', sel: '#panel-layer', clear: CLEAR_PX };
 const shown = (el: Element | null, always = false): el is HTMLElement => { if (!el || (el as HTMLElement).hidden) return false; const r = el.getBoundingClientRect();
-  if (r.width <= 0 || r.height <= 0) return false; const cs = getComputedStyle(el); return cs.display !== 'none' && (always || (cs.visibility !== 'hidden' && +cs.opacity > 0)); };
+  if (r.width <= 0 || r.height <= 0) return false; const cs = getComputedStyle(el); return cs.display !== 'none' && (always || (cs.visibility !== 'hidden' && parseFloat(cs.opacity || '1') > 0)); };
 const box = (r: DOMRect | Box): Box => ({ left: r.left, top: r.top, right: r.right, bottom: r.bottom });
 export function domZones(doc: Document = document, docked = false): Zone[] {
   const out: Zone[] = [];
