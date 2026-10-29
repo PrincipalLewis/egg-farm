@@ -4,7 +4,7 @@ import { initialState, GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
-import { pickBuy, pickAction } from './bot-m4';
+import { pickBuy, pickAction, observe, type Observe } from './bot-m4';
 export type Model = 'seller15' | 'cheapest';
 export interface BotResult { firstUpgradeS: number | null; upgradesAt: (s: number) => number; farmAt: (s: number) => number; farmReachedS: (L: number) => number | null;
   /** Farm level -> first time reached (s); 0 -> 0. */ reach: Map<number, number> }
@@ -21,7 +21,8 @@ export function buy(s: GameState, model: Model, b: Balance, log: (kind: 'c' | 'f
   return s;
 }
 /** `variance` (seller-variance-proposal.md): undefined = old deterministic bot (fixed 1 s taps, fixed sell grid). */
-export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEvery = 15, variance?: SellerVarianceParams): BotResult {
+/** `opts.onObserve`: QA seam Q4, observe-only (tests/bot-m4.ts Observe); results are byte-identical with or without it. */
+export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEvery = 15, variance?: SellerVarianceParams, opts: { onObserve?: Observe } = {}): BotResult {
   const V = variance ? new SellerVariance(variance, seed) : null;
   if (V) V.trace = TRACE.fn;
   if (V && variance!.poisson) b = { ...b, sim_test: { ...b.sim_test, poisson_arrivals: true } };
@@ -32,13 +33,14 @@ export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEve
   for (let i = 1; i <= n; i++) {
     const t = Math.round(i * dt * 10) / 10;
     s = step(s, dt, b);
-    if (t >= tapT) { tapT += V ? V.tapInterval() : 1; s = apply(s, { type: 'collect' }, b); }
+    if (t >= tapT) { tapT += V ? V.tapInterval() : 1; s = apply(s, { type: 'collect' }, b); observe(opts.onObserve, 'action', 'collect', t, s); }
     if (t >= sellT) {
-      sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery; s = apply(s, { type: 'sellAll' }, b);
+      sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery; s = apply(s, { type: 'sellAll' }, b); observe(opts.onObserve, 'action', 'sellAll', t, s);
       if (V?.delay()) continue; // variance p_delay: this check-in skips buying
       const chf = V ? V.cheapFirst() : false;
+      observe(opts.onObserve, 'buyCheck', 'buyCheck', t, s);
       // HoQA ac7-twobot-528f1a7: record the level AFTER the buy (the outer `s` is stale inside buy(), so two Farm buys in one check-in were logged as the same level).
-      s = buy(s, model, b, (k, next) => { const farm = next.farmLevel; buys.push({ t, kind: k, farm }); if (k === 'f') reach.set(farm, t); }, chf);
+      s = buy(s, model, b, (k, next) => { const farm = next.farmLevel; buys.push({ t, kind: k, farm }); if (k === 'f') reach.set(farm, t); observe(opts.onObserve, 'action', 'buy:' + k, t, next); }, chf);
     }
   }
   return {
