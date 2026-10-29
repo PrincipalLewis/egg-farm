@@ -146,6 +146,10 @@ describe('verify: arguments and flags', () => {
     const off = withFlags(balance, { 'm4.enabled': 0 });
     expect(off.m4!.enabled).toBe(0); expect(balance.m4!.enabled).toBe(1);
   });
+  it('[CCR-82-N2][D-C1] --flags m4.flags.* accepts only 0 or 1 (usage error otherwise, as validateM5)', () => {
+    for (const v of [2, -1, 0.5, NaN]) expect(() => withFlags(balance, { 'm4.flags.pause': v })).toThrow(UsageError);
+    expect(withFlags(balance, { 'm4.flags.pause': 1 }).m4!.flags!.pause).toBe(1); expect(withFlags(balance, { 'm4.flags.golden': 0 }).m4!.flags!.golden).toBe(0);
+  });
   it('CLI: usage errors and unavailable profiles exit 2 before building anything', () => {
     const run = (a: string[]) => spawnSync(process.execPath, [`${ROOT}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8' });
     const r1 = run([]); expect(r1.status).toBe(2); expect(r1.stderr).toMatch(/--hours/);

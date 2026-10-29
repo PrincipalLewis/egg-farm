@@ -1,8 +1,8 @@
 // v5 F3, QA seam Q8 (HoE): exact balance.json paths for the zero-gain UI pieces, and the release gate keeps QA hooks out.
 // Spec product/collection/m5.1-zero-gain-purchase-ui.md (sha1 1098f14e) names m5.flags.zeroGainUi, m5.flags.bestBuyV2 and
 // m5.zeroGain.confirm; the single-namespace ruling (manifest rule 5, rows 28/29) moves them to m4.flags.* / m4.zeroGain.*.
-import { describe, it, expect } from 'vitest';
-import { readFileSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { describe, it, expect, afterAll } from 'vitest';
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os'; import { join } from 'node:path'; import { spawnSync } from 'node:child_process';
 import raw from '../src/config/balance.json';
 import { balance, validateBalance } from '../src/config/balance';
@@ -50,9 +50,12 @@ describe('Q8 zero-gain paths (m4 namespace)', () => {
 const runJs = (body: string) => {
   const d = mkdtempSync(join(tmpdir(), 'rb-q8-')); mkdirSync(join(d, 'assets'));
   writeFileSync(join(d, 'assets', 'i.js'), body); writeFileSync(join(d, 'index.html'), '<!doctype html><script type="module" src="/assets/i.js"></script>');
-  return spawnSync('node', [new URL('../scripts/check-release-build.mjs', import.meta.url).pathname, d], { env: { ...process.env, HEAD_COMMIT: '19564ebaaaa' }, encoding: 'utf8' });
+  try { return spawnSync('node', [new URL('../scripts/check-release-build.mjs', import.meta.url).pathname, d], { env: { ...process.env, HEAD_COMMIT: '19564ebaaaa' }, encoding: 'utf8' }); }
+  finally { rmSync(d, { recursive: true, force: true }); made.push(d); } // CCR N-1 #82: no temp dir left behind
 };
+const made: string[] = [];
 describe('Q8 release gate rejects eggfarmQa*', () => {
+  afterAll(() => { expect(made.length).toBeGreaterThan(0); for (const d of made) expect(existsSync(d), d).toBe(false); });
   const base = 'const B="m4.1+abc1234"; window.eggfarmExportTelemetry=()=>{};';
   it('a clean bundle passes', () => { expect(runJs(base).status).toBe(0); });
   for (const s of ['window.eggfarmQaZeroGain=()=>{};', 'const w=window;w.eggfarmQaZeroGain=1;', 'const f=globalThis.eggfarmQaFitBanners;'])
