@@ -6,6 +6,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
+import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
@@ -86,6 +87,7 @@ export class Game {
     // migrationId, no backup, never touches an existing v6_backup.
     if (!f && m4On(b)) this.state = { ...this.state, tracksV7: 1, v6BackupId: (opts.newId ?? newMigrationId)() };
     this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
+    if (f) { const ev: SimEvent[] = []; this.state = m5Load(this.state, b, now(), ev); this.emit(ev); } // v5 F2: a reload is a >= 60 s gap (AB-1)
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
       // so each load produces at most one new grant.
@@ -369,12 +371,14 @@ export class Game {
         this.state = r.state; this.accMs = r.accMs;
         if (!this.bakAllowed) { this.playedMs += uncover; if (this.playedMs >= 60_000) this.allowBackup(); }
       }
+      this.state = m5ShortGap(this.state, this.b); // v5 F2
       this.emit(h.ev); this.checkCoopFull();
       // n2: capped when the 60 s budget limited credit (gap > budget); false while budget == offlineMin and gap < offlineMin.
       return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
     }
     this.state = h.state; this.accMs = 0;
     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
+    { const ev: SimEvent[] = []; this.state = m5Offline(this.state, this.b, ev); this.emit(ev); } // v5 F2, before grantOffline (§9.5 #3)
     const eggs = this.grantOffline(gap);
     if (eggs > 0) this.notify({ type: 'offline_grant', eggs, awayS: this.offline.awayS });
     this.checkCoopFull(); this.save();
@@ -397,7 +401,8 @@ export class Game {
     }
     if (gap > 0) {
       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
-      const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
+      const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
+      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
     }
     this.checkCoopFull(); this.telemetry.poll();

@@ -17,5 +17,8 @@ export type SimEvent =
   | { type: 'wage'; worker: WorkerId; cents: number }
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
-  | { type: 'balanced_tier'; id: string; tier: number; min_level: number };
+  | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
+  // v5 F2 (save/m5-fields.ts): the two members it emits, same shapes as F1a's M5SimEvent (on merge take F1a's union).
+  | { type: 'collectible_expired'; skin: 'golden_egg' | 'broody_hen'; reason: 'timeout' | 'offline' | 'reload' | 'takeover' | 'reset'; farm_level: number }
+  | { type: 'ability_ended'; worker: WorkerId; cause: 'expired' | 'paused' | 'offline' | 'asleep' | 'unpaid'; effect_s: number };
 export type Sink = SimEvent[] | undefined;
