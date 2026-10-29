@@ -5,7 +5,7 @@ import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
 import { WARN_SVG, MOON_SVG } from './icons';
 export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
-import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
+import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -22,8 +22,28 @@ const manageIcon = (s: GameState, b: Balance, icon: string, px = 22) =>
   `<span class="manage-ico"><img src="${ASSET(icon)}" width="${px}" height="${px}" alt="">${ringHtml(s, b)}</span>`;
 /** B5 (Product, Oct 15): a worker "needs" Manage only at energy <= manage_prompt_threshold (balance). */
 export const needsPrompt = (w: Worker | undefined, b: Balance) => canManageWorker(w, b);
-/** Workers counted by "Manage all (N need it)". */
-export const promptManage = (s: GameState, b: Balance) => WORKERS.filter(id => needsPrompt(s.workers[id], b));
+/** Workers counted by "Manage all (N need it)". P2b (rc1-asleep v1.0.8 rule 4, AC-R15): an Unpaid worker is never counted, since Refill
+ *  doesn't fix Unpaid. UI only: the sim's needManage (what Manage all refills) is unchanged, so traces and saves stay byte-identical. */
+export const promptManage = (s: GameState, b: Balance) => WORKERS.filter(id => needsPrompt(s.workers[id], b) && !s.workers[id]?.unpaid);
+/** P2b (rc1-asleep v1.0.8 rule 1, AC-R10/R14): the coins at which the tick resumes an Unpaid worker, X = reserved + need, mirroring
+ *  sim/tick.ts workerActions: reserved = 1 min of wage for every paid MH/CH (not Unpaid, energy > 0) plus every Unpaid one resumed
+ *  earlier in the same check (Market Hand first, then Coop Hand). null when the worker isn't Unpaid or pays no wage. */
+export function resumeAtCents(s: GameState, b: Balance, id: WorkerId): number | null {
+  if (id !== 'market_hand' && id !== 'coop_hand' || !s.workers[id]?.unpaid) return null;
+  const order = ['market_hand', 'coop_hand'] as const;
+  let reserved = 0;
+  for (const k of order) { const w = s.workers[k]; if (w && !w.unpaid && w.energy > 0) reserved += resumeNeedCents(k, s.farmLevel, b); }
+  for (const k of order) {
+    if (!s.workers[k]?.unpaid) continue;
+    const need = resumeNeedCents(k, s.farmLevel, b);
+    if (k === id) return reserved + need;
+    reserved += need;
+  }
+  return null;
+}
+/** P2b copy (rc1-asleep v1.0.9, Art-final): visible caption + the aria-describedby sentence on the disabled Refill. */
+export const unpaidCaption = (x: number) => `Resumes at ${fmtMoney(x)}`;
+export const unpaidDescription = (id: WorkerId, x: number) => `${WORKER_NAMES[id]} is unpaid. Work resumes automatically when you have ${fmtMoney(x)}. Sell eggs to earn coins.`;
 /** Farm View Manage-all button (§4.4): >= manage_all_min_workers hired (D-HOP-2026-10-17-05, main) and N > 0 (hidden when N is 0, B5). */
 export const showFarmManageAll = (s: GameState, b: Balance) => showManageAll(s.workers, b) && promptManage(s, b).length > 0;
 /** Visibility of the Farm View button: B5 hides it whenever N is 0 (including the cooldown right after Manage all). */
@@ -57,9 +77,10 @@ export function manageAllHtml(s: GameState, b: Balance): string {
   const label = refillTiredLabel(n);
   return `<div class="refill-wrap"><button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0}" aria-label="${label}"${cd > 0 ? ' aria-describedby="refillCap"' : ''}>${manageIcon(s, b, 'icon-manage.svg')}<span>${label}</span></button>${cd > 0 ? `<div class="wk-cap num" id="refillCap">Ready in ${cd}s</div>` : ''}</div>`;
 }
-/** v1.3 §4.4: caption under a greyed per-worker Manage: "Ready in Ns" during the shared cooldown, else "Rested, refill below N%" above manage_prompt_threshold. */
-export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance) =>
-  !needsPrompt(w, b) ? `Rested, refill below ${Math.round(b.workers.energy.manage_prompt_threshold * 100)}%` : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
+/** Caption under a greyed per-worker Refill. Precedence (rc1-asleep v1.0.12 rule 2): Unpaid "Resumes at $X" > "Rested, refill below T%"
+ *  (above manage_prompt_threshold) > "Ready in Ns" (shared cooldown) > none. `resumeCents` = resumeAtCents() for an Unpaid worker. */
+export const manageCaption = (w: Worker | undefined, cdS: number, b: Balance, resumeCents: number | null = null) =>
+  w?.unpaid && resumeCents !== null ? unpaidCaption(resumeCents) : !needsPrompt(w, b) ? `Rested, refill below ${Math.round(b.workers.energy.manage_prompt_threshold * 100)}%` : cdS > 0 ? `Ready in ${Math.ceil(cdS)}s` : '';
 /** art-ux/rc2-workers-copy.md §6 (signed off 07:19): role first, colon, effect; 14px SVG icon (moon = asleep, warning = unpaid), no emoji.
  *  Nunito 700 12px, one line; `short` drops the role name (360 fallback); aria always has the role.
  *  The effect comes ONLY from the role itself and its own state (HoE ruling, Oct 24): never from the global salesStopped(). */
@@ -104,8 +125,12 @@ export function workersHtml(s: GameState, b: Balance): string {
       return `<div class="wk" data-w="${id}"><h3>${WORKER_NAMES[id]}</h3><div class="meta">${WHAT[id]}</div>
         ${locked ? `<div class="hint">Unlocks at Farm L${unlockFarm(id, b)}</div>` : `<button class="btn buy ${can ? 'affordable' : ''}" data-act="hire" data-w="${id}" aria-disabled="${!can}">Hire ${fmtMoney(cost)}</button>`}</div>`;
     }
-    const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b); // B5: enabled only <= threshold
-    const cap = manageCaption(w, cd, b);
+    // B5: enabled only <= threshold. P2b (AC-R10/R11/U2): never for an Unpaid worker (Refill doesn't fix Unpaid), whatever the energy/cooldown.
+    const x = resumeAtCents(s, b, id), unpaid = x !== null;
+    const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b) && !w.unpaid;
+    const cap = manageCaption(w, cd, b, x);
+    // Unpaid: the button's name stays "Refill {Role}" (WCAG 2.5.3); the full resume sentence is its description (never aria-label).
+    const desc = unpaid ? `capd-${id}` : cap ? `cap-${id}` : '';
     const off = m === 'asleep' || m === 'unpaid';
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid' : 'Asleep'; // m5: no emoji / text pictograph; the icon is the inline SVG after the word
     const banner = workerBannerHtml(workerBanner(id, m, b));
@@ -120,7 +145,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}`;
-    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}`;
+    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}`;
     return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
 }

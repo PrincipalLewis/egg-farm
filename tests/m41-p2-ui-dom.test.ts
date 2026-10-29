@@ -75,3 +75,17 @@ describe('m1 yard: keyed per-slot diff (UI-M1-1/3/4/5/6)', () => {
     expect(g.state.hensLevel).toBe(6); expect(muts).toBe(0);
   });
 });
+
+describe('P2b AC-R11 / TP1-U2: a Refill tap on an Unpaid worker dispatches nothing', () => {
+  it('MH Unpaid at 30% (<= T), cooldown 0: tap -> no manage dispatch, energy/cooldown unchanged; a Tired worker still refills', async () => {
+    const { g, ui } = await mount({ farmLevel: 10, coinsCents: 100, manageCdS: 0, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 30, cdS: 5, unpaid: true }, coop_hand: { energy: 30, cdS: 5 } } });
+    ui.openPanel('upgrades'); (document.querySelector('.tabs button[data-tab="workers"]') as HTMLElement).click(); ui.render();
+    const sent: any[] = []; const orig = g.dispatch.bind(g); (g as any).dispatch = (a: any) => { sent.push(a); return orig(a); };
+    const btn = (id: string) => document.querySelector<HTMLElement>(`#uRow button[data-act="manage"][data-w="${id}"]`)!;
+    expect(btn('market_hand').getAttribute('aria-disabled')).toBe('true');
+    expect(btn('market_hand').getAttribute('aria-label')).toBe('Refill Market Hand');
+    btn('market_hand').click();
+    expect(sent.filter(a => a.type === 'manage')).toEqual([]); expect(g.state.workers.market_hand!.energy).toBe(30); expect(g.state.manageCdS).toBe(0);
+    btn('coop_hand').click(); expect(sent.filter(a => a.type === 'manage')).toEqual([{ type: 'manage', worker: 'coop_hand' }]); expect(g.state.workers.coop_hand!.energy).toBe(100);
+  });
+});
