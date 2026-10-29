@@ -553,10 +553,10 @@ html,body{overflow-x:hidden;max-width:100%}
   color:#E8B020;-webkit-text-stroke:2px #3E2C23;paint-order:stroke fill;font-variant-numeric:tabular-nums;transform-origin:50% 100%;animation:exppop 800ms forwards}
 .exp-pop img{width:16px;height:16px}
 @keyframes exppop{0%{opacity:1;transform:translate(-50%,-100%) scale(.6);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
-  15%{transform:translate(-50%,calc(-100% - 10px)) scale(1);animation-timing-function:ease-out}
-  62.5%{opacity:1;transform:translate(-50%,calc(-100% - 32px)) scale(1)}100%{opacity:0;transform:translate(-50%,calc(-100% - 32px)) scale(1)}}
+  15%{transform:translate(-50%,calc(-100% - 3px)) scale(1);animation-timing-function:ease-out}
+  62.5%{opacity:1;transform:translate(-50%,calc(-100% - 8px)) scale(1)}100%{opacity:0;transform:translate(-50%,calc(-100% - 8px)) scale(1)}} /* Art nit n1 on #70: rise 8px (was 32), starts below #rate (tracks-explainer REFUND_RISE_PX) */
 .exp-coin{position:fixed;z-index:28;pointer-events:none;width:16px;height:16px;translate:-50% -50%;animation:expcoin 600ms ease-out forwards}
-@keyframes expcoin{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx,14px),-40px) rotate(180deg)}}
+@keyframes expcoin{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx,14px),var(--dy,-40px)) rotate(180deg)}}
 .reduced-motion .tracks-exp-out,.reduced-motion .exp-pop,.reduced-motion .exp-coin{display:none}
 @media (prefers-reduced-motion:reduce){.tracks-exp-out,.exp-pop,.exp-coin{display:none}}
 /* UX-M1: 3px focus ring on the explainer's focus targets; .kbd-focus is the WebKit fallback after its programmatic hand-off */

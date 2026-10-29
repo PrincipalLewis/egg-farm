@@ -119,3 +119,14 @@ describe('CCR #70 nits (n1 income.ts comment + test-only marks, n2 workerBanner 
     expect(wui).toMatch(/export const workerBannerText = \(id: WorkerId, m: string \| null, b: Balance\)/);
   });
 });
+
+describe('Art nit n1 on #70: refund pop never covers #rate (geometry; per-frame overlap is measured in scripts/m41-p2-browser.mjs)', () => {
+  it('exppop rises REFUND_RISE_PX (8) at most; the start line leaves the 1.1x box (<= POP_BOX_H) >= 4px below the pill/#rate; coins end on that line', async () => {
+    const { REFUND_RISE_PX, POP_BOX_H } = await import('../src/ui/tracks-explainer');
+    const kf = css.slice(css.indexOf('@keyframes exppop{'), css.indexOf('}}', css.indexOf('@keyframes exppop{')) + 2);
+    const rises = [...kf.matchAll(/calc\(-100% - (\d+)px\)/g)].map(m => +m[1]);
+    expect(Math.max(...rises)).toBe(REFUND_RISE_PX); expect(kf).not.toContain('32px');
+    expect(POP_BOX_H).toBeGreaterThanOrEqual(Math.ceil(31 * 1.1)); // 26px Fredoka 700 line box (≈31) at the 1.1 overshoot
+    expect(css).toContain('transform:translate(var(--dx,14px),var(--dy,-40px)) rotate(180deg)');
+  });
+});
