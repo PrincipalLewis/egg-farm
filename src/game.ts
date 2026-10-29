@@ -9,6 +9,7 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
 import { focusFrameMs } from './sim/clock';
+import { anyM5FlagOn } from './sim/timers';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -388,11 +389,13 @@ export class Game {
   }
   /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach open)? Set by the UI (F6 dialogOpen()).
    *  Default false: no focus time accrues, so M5 timers stay frozen until the UI wires it. Visibility is handled by frame()
-   *  itself (hidden frames never pass focus). Only read while M5 flags are on. */
+   *  itself (hidden frames never pass focus). Only read while an M5 flag is on (frame() skips it with every flag off). */
   private attendedProbe: () => boolean = () => false;
   setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
   /** The one attended read (frame focus + player-sale suspension, Q-F1c-1 D-HOP-2026-10-29-06): live game and the UI probe says attended. */
-  private attendedNow() { return !this.readOnly && this.attendedProbe(); }
+  /** CCR N-1 #79: with every M5 flag off the probe is never read (no per-frame / per-dispatch DOM query); attended = false
+   *  then, which changes nothing: no timed effect is live, so suspension has nothing to suspend (goldens byte-identical). */
+  private attendedNow() { return !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(); }
   frame() {
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;

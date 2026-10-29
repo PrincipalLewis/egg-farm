@@ -3,6 +3,8 @@
 // and src/sim/actions.ts apply(), in the build's order: advance the elapsed time first, then apply the player's input.
 // Profile 'idle' = the AC7 workers bot (tests/bot-m2.ts runM2, model seller15, managed, no variance), re-driven here so the
 // state can be sampled at checkpoints; tests/verify.test.ts pins it to runM2 (same reach, manages, hires, tiers).
+// Profile 'm5x-casual' = tests/bot-m5.ts run() (port of Economy's m5.ts/m5x.ts) with m5x.ts's casual profile and AssZ stack
+// (the M5.0 mechanics layered in the bot, not in src), driven through src/sim/tick.ts step() per 0.1 s tick as m5.ts does.
 // It reads src/ and tests/ only; it changes neither.
 import { createHash } from 'node:crypto';
 import type { Balance } from '../../src/config/balance';
@@ -13,6 +15,7 @@ import type { SimEvent } from '../../src/sim/events';
 import { WORKERS, mood, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, type WorkerId } from '../../src/sim/workers';
 import { m4On } from '../../src/config/formulas';
 import { pickBuy, pickAction, M1_KEYS } from '../../tests/bot-m4';
+import { run as runM5, PROFS as M5_PROFS, M5X_STACKS } from '../../tests/bot-m5';
 
 /** Fixed v6BackupId for verify's end-state save (MIGRATION_ID_HEX = 16 hex chars). A constant: no time, no randomness. */
 export const VERIFY_V6_BACKUP_ID = '7e51f1ed00000001';
@@ -26,8 +29,13 @@ export function markFreshM4<T extends GameState>(s: T, b: Balance): T {
 
 export const PROFILES = ['idle', 'm5x-casual'] as const;
 export type Profile = typeof PROFILES[number];
-/** Profiles that need code which is not on main yet. `m5x-casual` = tests/bot-m5.ts (Q-ZG-H3 port, Features 95daf662). */
-export const UNAVAILABLE: Partial<Record<Profile, string>> = { 'm5x-casual': 'needs tests/bot-m5.ts (M5.1, on Vadim go)' }; // HoE ruling (3)
+/** Profiles that need code which is not on this branch yet (exit 2). Empty since tests/bot-m5.ts landed (rc/v5). */
+export const UNAVAILABLE: Partial<Record<Profile, string>> = {};
+/** What each profile runs (verify.json sim.bot / sim.tickPath). */
+export const PROFILE_BOT: Record<Profile, { bot: string; tickPath: string }> = {
+  idle: { bot: 'AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s', tickPath: 'src/sim/tick.ts advance() per 1000 ms, then input (build order)' },
+  'm5x-casual': { bot: 'tests/bot-m5.ts run(): m5x.ts casual profile (tap 0.5/s, check-in ~30 s with seller variance, 60% golden catch), AssZ stack (M5.0 mechanics in the bot), seller15 buys, managed, poisson arrivals', tickPath: 'src/sim/tick.ts step() per 0.1 s tick, then input (m5.ts order)' },
+};
 const SELL_EVERY_S = 15; // runM2 default check-in interval
 const USE: readonly WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
 const WKEY = { W1: 'market_hand', W2: 'coop_hand', W3: 'hawker', W4: 'grader' } as const;
@@ -47,7 +55,8 @@ export interface Checkpoint {
   levels: { farm: number; hens: number; eggValue: number; collection: number; graderTier: number };
   workers: Partial<Record<WorkerId, { state: string; energyPct: number }>>;
 }
-export interface RunResult { checkpoints: Checkpoint[]; end: GameState; ticks: number; events: number; traceSha256: string; manages: number; reach: Map<number, number> }
+/** `manages` is null for m5x-casual (bot-m5 applies Manage without events and does not count it). */
+export interface RunResult { checkpoints: Checkpoint[]; end: GameState; ticks: number; events: number; traceSha256: string; manages: number | null; reach: Map<number, number>; bot: string; tickPath: string }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000;
 function sample(s: GameState, b: Balance, tSec: number, ticks: number, collected: number, sold: number): Checkpoint {
@@ -66,6 +75,7 @@ function sample(s: GameState, b: Balance, tSec: number, ticks: number, collected
  *  what the sim does over the N hours moves it. */
 export function runVerify(b: Balance, o: { hours: number; seed: number; profile: Profile }): RunResult {
   if (UNAVAILABLE[o.profile]) throw new Error(`profile ${o.profile} ${UNAVAILABLE[o.profile]}`);
+  if (o.profile === 'm5x-casual') return runM5xCasual(b, o);
   const cps = checkpointSeconds(o.hours), endS = cps[cps.length - 1], tickMs = 1000 / b.tickHz;
   const h = createHash('sha256'), ev: SimEvent[] = [];
   let s: GameState = initialState(b, o.seed), acc = 0, ticks = 0, events = 0, collected = 0, sold = 0, manages = 0, ci = 0;
@@ -102,7 +112,27 @@ export function runVerify(b: Balance, o: { hours: number; seed: number; profile:
     if (t === cps[ci]) { out.push(sample(s, b, t, ticks, collected, sold)); ci++; }
   }
   h.update(`end|${JSON.stringify(s)}\n`);
-  return { checkpoints: out, end: s, ticks, events, traceSha256: h.digest('hex'), manages, reach };
+  return { checkpoints: out, end: s, ticks, events, traceSha256: h.digest('hex'), manages, reach, ...PROFILE_BOT.idle };
+}
+
+/** m5x-casual: bot-m5 run() for N h from initialState(b, seed). Same trace format and checkpoints as 'idle': every sim event
+ *  as `${second}|${json}` plus the end state; checkpoints sample the state at the end of each checkpoint second. */
+function runM5xCasual(b: Balance, o: { hours: number; seed: number }): RunResult {
+  const cps = checkpointSeconds(o.hours), endS = cps[cps.length - 1], h = createHash('sha256'), out: Checkpoint[] = [];
+  let events = 0, collected = 0, sold = 0, ci = 0;
+  const r = runM5(b, o.seed, M5_PROFS.casual, M5X_STACKS.AssZ, endS, {
+    onEvents: (t, evs) => {
+      for (const e of evs) {
+        if (e.type === 'collect' || e.type === 'worker_collect') collected += e.eggs;
+        else if (e.type === 'sell') sold += e.k;
+        h.update(`${t}|${JSON.stringify(e)}\n`);
+      }
+      events += evs.length;
+    },
+    onSecond: (t, s) => { if (t === cps[ci]) { out.push(sample(s, b, t, Math.round(t * b.tickHz), collected, sold)); ci++; } },
+  });
+  h.update(`end|${JSON.stringify(r.final)}\n`);
+  return { checkpoints: out, end: r.final, ticks: Math.round(endS * b.tickHz), events, traceSha256: h.digest('hex'), manages: null, reach: r.reach, ...PROFILE_BOT['m5x-casual'] };
 }
 
 /** NaN / Infinity anywhere in the end state or a checkpoint, or a negative count / level / balance / energy. Returns the paths. */

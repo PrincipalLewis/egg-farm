@@ -4,6 +4,8 @@ import { balance as b } from '../src/config/balance';
 import { initialState, mixSeed, nextRand, type GameState } from '../src/sim/state';
 import { serialize, checksum, SAVE_VERSION } from '../src/save/save';
 import { m5Load, m5Persist, m5Offline, m5ShortGap, m5Flag, streakAfter, drawGap, ensureEvRng, EV_RNG_SALT, M5_SESSION_KEYS } from '../src/save/m5-fields';
+import { M5_SESSION_FIELDS } from '../src/sim/m5-state';
+import { M5_FLAGS, flagOn } from '../src/config/flags';
 import type { SimEvent } from '../src/sim/events';
 import { ON } from './v5-f2-helpers';
 const NOW = Date.UTC(2026, 9, 29, 12), tc = b.m4!.tc!, CD = tc.ability_cd_s * 1000;
@@ -18,6 +20,12 @@ describe('F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled', () => {
     expect(b.m4!.flags).toBeUndefined(); for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const) expect(m5Flag(b, k)).toBe(false);
     expect(m5Flag({ ...ON, m4: { ...ON.m4!, enabled: 0 } }, 'golden')).toBe(false); expect(m5Flag(only('golden'), 'golden')).toBe(true);
     expect(m5Flag({ ...b, m4: { ...b.m4!, flags: { golden: true as any } } }, 'golden')).toBe(false); expect(SAVE_VERSION).toBe(6);
+  });
+  it('[CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)', () => {
+    for (const f of M5_FLAGS) for (const en of [0, 1]) for (const v of [0, 1, 2]) {
+      const bal = { ...b, m4: { ...b.m4!, enabled: en, flags: { [f]: v } } } as typeof b;
+      expect(m5Flag(bal, f)).toBe(flagOn(bal, f)); expect(m5Flag(bal, f)).toBe(en === 1 && v === 1);
+    }
   });
   it('flags off: m5Load / m5Offline / m5ShortGap return the SAME object, no events (byte-identical to the base)', () => {
     const s = { ...M5(), nextSpawnRemainingS: -1, streakS: 0.2, goldenEgg: egg }, ev: SimEvent[] = [];
@@ -68,6 +76,14 @@ describe('F2 persist (save shape)', () => {
     const s: any = { ...M5(), abilities: { market_hand: { readyAt: NOW + 42_500, activeS: 7 } }, ...Object.fromEntries(M5_SESSION_KEYS.map(k => [k, 1])) };
     const p: any = m5Persist(s); for (const k of M5_SESSION_KEYS) { expect(k in p).toBe(false); expect(s[k]).toBe(1); }
     expect(p.abilities).toEqual({ market_hand: { readyAt: NOW + 42_500, activeS: 7 } }); expect(JSON.parse(serialize(s, NOW)).state).toEqual(p);
+  });
+  it('[CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 8 spec keys; each one is dropped by persist and serialize', () => {
+    expect(M5_SESSION_KEYS).toBe(M5_SESSION_FIELDS);
+    expect([...M5_SESSION_FIELDS].sort()).toEqual(['brRngState', 'broodyNestScaled', 'goldenEgg', 'irefRingCents', 'refWarmS', 'streakHoldS', 'streakS', 'tapCreditCdS']);
+    for (const k of M5_SESSION_FIELDS) {
+      const s: any = { ...M5(), [k]: 1 };
+      expect(k in m5Persist(s)).toBe(false); expect(k in JSON.parse(serialize(s, NOW)).state).toBe(false);
+    }
   });
 });
 describe('F2 settle: a gap of 60 s or more (§9.1 / §9.1a)', () => {
