@@ -3,6 +3,8 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
+import { WARN_SVG, MOON_SVG } from './icons';
+export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../sim/workers';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
@@ -104,7 +106,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b); // B5: enabled only <= threshold
     const cap = manageCaption(w, cd, b);
     const off = m === 'asleep' || m === 'unpaid';
-    const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid ⚠' : 'Asleep 💤';
+    const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid' : 'Asleep'; // m5: no emoji / text pictograph; the icon is the inline SVG after the word
     const banner = workerBannerHtml(workerBanner(id, m, s, b));
     const yawn = isYawning(w, b);
     let extra = '';
@@ -114,7 +116,7 @@ export function workersHtml(s: GameState, b: Balance): string {
         ? F < tiers[i].farm ? `<div class="hint">Next grade ×${tiers[i].mult} at Farm L${tiers[i].farm}</div>`
           : `<button class="btn buy ${s.coinsCents >= graderTierCostCents(i, b) ? 'affordable' : ''}" data-act="tier" aria-disabled="${s.coinsCents < graderTierCostCents(i, b)}">Grade ×${tiers[i].mult} ${fmtMoney(graderTierCostCents(i, b))}</button>` : '');
     }
-    const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}</span></h3>
+    const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}`;
     const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${cap ? ` aria-describedby="cap-${id}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}`;

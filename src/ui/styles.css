@@ -610,6 +610,10 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 .wk.is-off .wk-body>.ebar{opacity:.5} /* m9 (art acfe36a7): only the energy bar (and a future portrait) dims; name/state + meta stay at 1 (12.53:1 / 6.01:1) */
 .wk.is-off .wk-banner,.wk.is-off .wk-refill{opacity:1}
 .wk.is-off,.wk.asleep,.wk.unpaid{opacity:1} /* override legacy .wk.asleep/.unpaid opacity */
+/* m5 (P-ICON-WARN + m5 asleep half): inline 14px state-word icon after the word; white fill, #3E2C23 outline/mark. The moon is all
+   currentColor, so it takes the .st ink (without .wi-moon it would be #fff on cream, 1.05:1) */
+.wk .st .wi{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-left:4px;color:#fff}
+.wk .st .wi.wi-moon{color:inherit}
 /* Asleep badge: Upgrades nav icon + Workers tab (Art FIX1: top-right corner; rc2 Art & UX 15:22: anchored to the nav icon -6/-6) */
 .asleep-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-danger);color:#fff;font:700 12px/18px var(--f-display);text-align:center;z-index:2;box-sizing:border-box}
 .asleep-badge[hidden]{display:none}
