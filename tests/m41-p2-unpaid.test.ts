@@ -17,7 +17,7 @@ const capOf = (c: string) => c.match(/<div class="wk-cap num" id="cap-[a-z_]+">(
 const describedText = (c: string) => { const id = refillBtn(c).match(/aria-describedby="([^"]+)"/)?.[1]; return id ? c.match(new RegExp(`id="${id}">([^<]*)<`))![1] : null; };
 
 describe('P2b Unpaid caption / Refill (AC-R10..R14, U1..U3)', () => {
-  it('fmtMoney check (spec v1.0.10 §2)', () => {
+  it('AC-R16 P2b: fmtMoney check (spec v1.0.10 §2)', () => {
     expect([500, 99_990_000, 99_995_000, 123_000_000, 999_999].map(c => fmtMoney(c))).toEqual(['$5.00', '$999.9K', '$1M', '$1.23M', '$9,999.99']);
   });
   it('AC-R10 (above T): MH F10 Unpaid energy 70 coins $1.00 -> "Resumes at $2.50", Refill aria-disabled, name "Refill Market Hand", describedby sentence', () => {
@@ -79,7 +79,7 @@ describe('P2b Unpaid caption / Refill (AC-R10..R14, U1..U3)', () => {
 });
 
 describe('P2b nav / Manage all exclude Unpaid (AC-R15)', () => {
-  it('3 hired, CH Unpaid 30%, MH Tired 30%: count 1, aria "Refill 1 tired worker"; the sim needManage still has both (Manage all behaviour unchanged)', () => {
+  it('AC-R15 P2b: 3 hired, CH Unpaid 30%, MH Tired 30%: count 1, aria "Refill 1 tired worker"; the sim needManage still has both (Manage all behaviour unchanged)', () => {
     const s = st({ farmLevel: 12, coinsCents: 0, manageCdS: 0, workers: { market_hand: W(30), coop_hand: W(30, true), hawker: W(90) } });
     expect(promptManage(s, b)).toEqual(['market_hand']); expect(refillCount(s, b)).toBe(1);
     expect(manageAllHtml(s, b)).toContain('aria-label="Refill 1 tired worker"');
@@ -87,14 +87,14 @@ describe('P2b nav / Manage all exclude Unpaid (AC-R15)', () => {
     expect(needManage(s.workers, b)).toEqual(['market_hand', 'coop_hand']); // sim unchanged: refilling an Unpaid worker's energy is harmless
     const after = apply(s, { type: 'manageAll' } as any, b); expect(after.workers.coop_hand).toMatchObject({ energy: 100, unpaid: true });
   });
-  it('only an Unpaid worker <= T -> N = 0: no Refill bar, nav hidden (AC-R9 hidden at 0)', () => {
+  it('AC-R15 AC-R9 P2b: only an Unpaid worker <= T -> N = 0: no Refill bar, nav hidden (AC-R9 hidden at 0)', () => {
     const s = st({ farmLevel: 12, coinsCents: 0, manageCdS: 0, workers: { market_hand: W(90), coop_hand: W(30, true), hawker: W(90) } });
     expect(refillCount(s, b)).toBe(0); expect(manageAllHtml(s, b)).toBe('');
   });
 });
 
 describe('AC-R16 copy forms (fit is browser-measured in scripts/m41-p2-browser.mjs at 360/390/1280 x 3 engines)', () => {
-  it('the five captions', () => {
+  it('AC-R16 P2b: the five captions', () => {
     expect([500, 99_990_000, 99_995_000, 123_000_000, 999_999].map(x => manageCaption(W(70, true), 0, b, x)))
       .toEqual(['Resumes at $5.00', 'Resumes at $999.9K', 'Resumes at $1M', 'Resumes at $1.23M', 'Resumes at $9,999.99']);
   });

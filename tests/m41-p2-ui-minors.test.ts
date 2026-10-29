@@ -16,7 +16,7 @@ const sha1 = (t: string) => createHash('sha1').update(t).digest('hex');
 const asset = (svg: string, cls: string, eol = '') => svg.replace(` class="${cls}" aria-hidden="true" focusable="false"`, '') + eol;
 
 describe('m8 .cooptip (UI-M8-1)', () => {
-  it('valid font shorthand 700 14px/1.3 var(--f-body), width max-content, max-width min(320px, 100vw - 32px), radius 12 kept', () => {
+  it('UI-M8-1 m8: valid font shorthand 700 14px/1.3 var(--f-body), width max-content, max-width min(320px, 100vw - 32px), radius 12 kept', () => {
     const r = rule('.cooptip');
     expect(r).toContain('font:700 14px/1.3 var(--f-body)'); expect(r).not.toMatch(/inherit/);
     expect(r).toContain('width:max-content'); expect(r).toContain('max-width:min(320px,calc(100vw - 32px))'); expect(r).toContain('border-radius:12px');
@@ -25,7 +25,7 @@ describe('m8 .cooptip (UI-M8-1)', () => {
 });
 
 describe('m9 asleep/unpaid card undim (UI-M9-1/2/6 source rules)', () => {
-  it('only .ebar dims on an .is-off card; no .wk-body opacity rule; unpaid word var(--c-danger)', () => {
+  it('UI-M9-1/2/6 m9: only .ebar dims on an .is-off card; no .wk-body opacity rule; unpaid word var(--c-danger)', () => {
     expect(css).not.toMatch(/\.wk\.is-off \.wk-body\{opacity/);
     expect(rule('.wk.is-off .wk-body>.ebar')).toBe('opacity:.5');
     expect(rule('.wk.unpaid .st')).toBe('color:var(--c-danger)'); expect(css).not.toMatch(/\.wk\.unpaid \.st\{color:#c55/);
@@ -69,7 +69,7 @@ describe('m5 card state word: text + inline SVG, no pictograph (UI-M5-1..8, UI-W
 
 describe('m6 HUD rate CSS (UI-M6-2/6/7)', () => {
   const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8'), eco = readFileSync(new URL('../src/ui/s2-economy-ui.ts', import.meta.url), 'utf8');
-  it('11px icon at -1.5px, 2px gap, white fill; hidden without .warn; no U+FE0E route; the model strings keep the ⚠ marker (option A)', () => {
+  it('UI-M6-2/6/7 m6: 11px icon at -1.5px, 2px gap, white fill; hidden without .warn; no U+FE0E route; the model strings keep the ⚠ marker (option A)', () => {
     expect(rule('.rate .wi')).toBe('display:inline-block;width:11px;height:11px;vertical-align:-1.5px;margin-right:2px;color:#fff');
     expect(rule('.rate:not(.warn) .wi')).toBe('display:none');
     expect(app + eco).not.toMatch(/\uFE0E|\\uFE0E/);
@@ -79,7 +79,7 @@ describe('m6 HUD rate CSS (UI-M6-2/6/7)', () => {
 });
 
 describe('m1 yard reduced motion (UI-M1-9 source rules; bob/popin unchanged, UI-M1-4)', () => {
-  it('media + .rm rules right after the .hen.pop rule; bob 1.6s infinite and popin 300ms x1 unchanged', () => {
+  it('UI-M1-9 UI-M1-4 m1: media + .rm rules right after the .hen.pop rule; bob 1.6s infinite and popin 300ms x1 unchanged', () => {
     expect(css).toContain('.hen.pop{animation:popin 300ms var(--ease-pop),bob 1.6s ease-in-out infinite}@keyframes popin{from{scale:0}}\n/* m1');
     expect(css).toContain('@media (prefers-reduced-motion:reduce){.yard .hen,.yard .hen.pop{animation:none}}');
     expect(css).toContain('.rm .yard .hen,.rm .yard .hen.pop{animation:none}');
@@ -90,19 +90,19 @@ describe('m1 yard reduced motion (UI-M1-9 source rules; bob/popin unchanged, UI-
 describe('m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, CSS only)', () => {
   const lum = (hex: string) => { const c = hex.match(/[0-9a-f]{2}/gi)!.map(h => { const v = parseInt(h, 16) / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
   const ratio = (a: string, c: string) => { const [x, y] = [lum(a), lum(c)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
-  it('token defined exactly once, in the first :root colour row next to --c-muted, = #5A4C42', () => {
+  it('UI-M10-8 m10: token defined exactly once, in the first :root colour row next to --c-muted, = #5A4C42', () => {
     expect(css.match(/--c-muted-strong:/g)!.length).toBe(1);
     const root = css.slice(css.indexOf(':root{'), css.indexOf('}', css.indexOf(':root{')));
     expect(root).toContain('--c-muted:#6B5D52;--c-muted-strong:#5A4C42;');
   });
-  it('shared :39 rule and PT1-14 both use var(--c-muted-strong); cursor:not-allowed; no #5A4C42 literal in either', () => {
+  it('UI-M10-1/9 m10: shared :39 rule and PT1-14 both use var(--c-muted-strong); cursor:not-allowed; no #5A4C42 literal in either', () => {
     expect(rule('.btn[aria-disabled=true]')).toBe('background:var(--c-disabled);color:var(--c-muted-strong);box-shadow:none;animation:none;cursor:not-allowed');
     expect(rule('.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]', true)).toBe('color:var(--c-muted-strong);background:#CFC6BA'); // PT1-14 (the later rule; :218 keeps its own grey and is overridden)
   });
-  it('contrast: #5A4C42 on #CFC6BA >= 4.5 (4.88); old #6B5D52 was 3.76', () => {
+  it('UI-M10-2 m10: contrast: #5A4C42 on #CFC6BA >= 4.5 (4.88); old #6B5D52 was 3.76', () => {
     expect(ratio('5A4C42', 'CFC6BA')).toBeGreaterThanOrEqual(4.5); expect(ratio('5A4C42', 'CFC6BA')).toBeCloseTo(4.88, 1); expect(ratio('6B5D52', 'CFC6BA')).toBeCloseTo(3.76, 1);
   });
-  it('Buy stays aria-disabled, never native disabled (UI-M10-5)', () => {
+  it('UI-M10-5 m10: Buy stays aria-disabled, never native disabled (UI-M10-5)', () => {
     const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
     expect(app).toMatch(/class="btn buy \$\{can \? 'affordable' : ''\}"[^>]*aria-disabled="\$\{!can\}"/); expect(app).not.toMatch(/<button class="btn buy[^>]* disabled[ >=]/);
   });
@@ -110,18 +110,18 @@ describe('m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, C
 
 describe('CCR #70 nits (n1 income.ts comment + test-only marks, n2 workerBanner without GameState)', () => {
   const inc = readFileSync(new URL('../src/econ/income.ts', import.meta.url), 'utf8');
-  it('n1: grossSalesPerSec / salesStopped are marked TEST-ONLY and the stale "Used by the header aria and the worker banners" is gone', () => {
+  it('CCR-70-n1: n1: grossSalesPerSec / salesStopped are marked TEST-ONLY and the stale "Used by the header aria and the worker banners" is gone', () => {
     expect(inc).not.toContain('Used by the header aria and the worker banners');
     expect(inc).toMatch(/TEST-ONLY[^\n]*\n?[^\n]*\nexport const grossSalesPerSec/); expect(inc).toMatch(/TEST-ONLY[\s\S]{0,400}\nexport const salesStopped/);
   });
-  it('n2: workerBanner / workerBannerText take no GameState', () => {
+  it('CCR-70-n2: n2: workerBanner / workerBannerText take no GameState', () => {
     expect(wui).toMatch(/export function workerBanner\(id: WorkerId, m: string \| null, b: Balance, copy/);
     expect(wui).toMatch(/export const workerBannerText = \(id: WorkerId, m: string \| null, b: Balance\)/);
   });
 });
 
 describe('Art nit n1 on #70: refund pop never covers #rate (geometry; per-frame overlap is measured in scripts/m41-p2-browser.mjs)', () => {
-  it('exppop rises REFUND_RISE_PX (8) at most; the start line leaves the 1.1x box (<= POP_BOX_H) >= 4px below the pill/#rate; coins end on that line', async () => {
+  it('ART-70-n1: exppop rises REFUND_RISE_PX (8) at most; the start line leaves the 1.1x box (<= POP_BOX_H) >= 4px below the pill/#rate; coins end on that line', async () => {
     const { REFUND_RISE_PX, POP_BOX_H } = await import('../src/ui/tracks-explainer');
     const kf = css.slice(css.indexOf('@keyframes exppop{'), css.indexOf('}}', css.indexOf('@keyframes exppop{')) + 2);
     const rises = [...kf.matchAll(/calc\(-100% - (\d+)px\)/g)].map(m => +m[1]);
@@ -133,7 +133,7 @@ describe('Art nit n1 on #70: refund pop never covers #rate (geometry; per-frame 
 
 describe('WCAG 2.4.11 port from rc1 7380b86 (source; keyboard sweep at 360/390/1280 x 3 engines in scripts/m41-p2-browser.mjs)', () => {
   const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
-  it('--refill-bar-h = measured sticky bar + scroller padding-top + 8px (0 without), re-measured on resize/dock; cards and their focusables use it as scroll-margin-top', () => {
+  it('WCAG-2.4.11: --refill-bar-h = measured sticky bar + scroller padding-top + 8px (0 without), re-measured on resize/dock; cards and their focusables use it as scroll-margin-top', () => {
     expect(app).toContain("const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height + pad) + 8}px` : '0px'");
     expect(app).toContain('const pad = sc ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0;');
     expect(app).toContain("addEventListener('resize', mark); docked.addEventListener?.('change', mark);");

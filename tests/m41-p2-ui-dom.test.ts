@@ -32,7 +32,7 @@ const W = (e: number, unpaid = false) => ({ energy: e, cdS: 5, ...(unpaid ? { un
 
 describe('m6 HUD #rate: static WARN_SVG + aria-hidden ▼ (UI-M6-1/5/6/8)', () => {
   const rate = () => { const e = document.getElementById('rate')!; return { e, text: e.textContent, tri: e.querySelector('.tri')!, rt: e.querySelector('.rt')!, svgs: e.querySelectorAll('svg.wi'), warn: e.classList.contains('warn'), aria: e.getAttribute('aria-label') }; };
-  it('neg (Market Hand asleep, nothing else): no U+26A0 text, ▼ in .tri[aria-hidden], money in .rt, one svg.wi from WARN_SVG, aria unchanged', async () => {
+  it('UI-M6-1/5/8 m6: neg (Market Hand asleep, nothing else): no U+26A0 text, ▼ in .tri[aria-hidden], money in .rt, one svg.wi from WARN_SVG, aria unchanged', async () => {
     await mount({ farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: W(0) } });
     const r = rate();
     expect(r.text).not.toContain('\u26A0'); expect(r.text!.startsWith('\u25BC')).toBe(true);
@@ -41,7 +41,7 @@ describe('m6 HUD #rate: static WARN_SVG + aria-hidden ▼ (UI-M6-1/5/6/8)', () =
     expect(r.svgs[0].getAttribute('aria-hidden')).toBe('true'); expect(r.svgs[0].getAttribute('focusable')).toBe('false');
     expect(r.warn).toBe(true); expect(r.aria).toMatch(/^Net income .* per second, sales stopped$/); // D-HOP-32 (a) suffix kept, byte form unchanged
   });
-  it('pos: no .warn (icon hidden by CSS), .tri empty, text "+$X/s"', async () => {
+  it('UI-M6-1 m6: pos: no .warn (icon hidden by CSS), .tri empty, text "+$X/s"', async () => {
     await mount({ farmLevel: 6, coinsCents: 1e6, collectionLevel: 5, workers: { market_hand: W(90), coop_hand: W(90) } });
     const r = rate(); expect(r.warn).toBe(false); expect(r.tri.textContent).toBe(''); expect(r.text).toMatch(/^\+\$/); expect(r.svgs.length).toBe(1);
   });
@@ -49,7 +49,7 @@ describe('m6 HUD #rate: static WARN_SVG + aria-hidden ▼ (UI-M6-1/5/6/8)', () =
 
 describe('m1 yard: keyed per-slot diff (UI-M1-1/3/4/5/6)', () => {
   const hens = () => [...document.querySelectorAll<HTMLImageElement>('#yard img.hen')];
-  it('first render: no .pop; Hens buys keep every existing node, add only new hens with .pop + "0s, <stagger>", cap 12 = 0 mutations', async () => {
+  it('UI-M1-1/3/4/5/6 m1: first render: no .pop; Hens buys keep every existing node, add only new hens with .pop + "0s, <stagger>", cap 12 = 0 mutations', async () => {
     const { g, ui } = await mount({ farmLevel: 10, hensLevel: 0, coinsCents: 1e15 });
     const yard = document.getElementById('yard')!;
     expect(yard.children.length).toBe(12); const h0 = hens(); expect(h0.length).toBe(5);
@@ -77,7 +77,7 @@ describe('m1 yard: keyed per-slot diff (UI-M1-1/3/4/5/6)', () => {
 });
 
 describe('P2b AC-R11 / TP1-U2: a Refill tap on an Unpaid worker dispatches nothing', () => {
-  it('MH Unpaid at 30% (<= T), cooldown 0: tap -> no manage dispatch, energy/cooldown unchanged; a Tired worker still refills', async () => {
+  it('AC-R11 TP1-U2 P2b: MH Unpaid at 30% (<= T), cooldown 0: tap -> no manage dispatch, energy/cooldown unchanged; a Tired worker still refills', async () => {
     const { g, ui } = await mount({ farmLevel: 10, coinsCents: 100, manageCdS: 0, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 30, cdS: 5, unpaid: true }, coop_hand: { energy: 30, cdS: 5 } } });
     ui.openPanel('upgrades'); (document.querySelector('.tabs button[data-tab="workers"]') as HTMLElement).click(); ui.render();
     const sent: any[] = []; const orig = g.dispatch.bind(g); (g as any).dispatch = (a: any) => { sent.push(a); return orig(a); };
@@ -102,7 +102,7 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
     ['MH + CH unpaid', { market_hand: { energy: 60, cdS: 5, unpaid: true }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
     ['MH asleep + CH unpaid', { market_hand: { energy: 0, cdS: 5 }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
     ['none (N = 0)', { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } }, 0]];
-  for (const [name, workers, n] of scenes) it(`${name}: Upgrades nav, Workers tab, Refill nav`, async () => {
+  for (const [name, workers, n] of scenes) it(`AC-R17 P2a: ${name}: Upgrades nav, Workers tab, Refill nav`, async () => {
     const { ui } = await mount({ farmLevel: 12, coinsCents: 0, manageCdS: 0, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 }, hawker: { energy: 30, cdS: 0 }, ...workers } }); // 3 hired: nav Refill shown
     ui.openPanel('upgrades'); (document.querySelector('.tabs button[data-tab="workers"]') as HTMLElement).click(); ui.render();
     const up = startsWithVisible(document.querySelector('nav [data-nav=upgrades]')!), wt = startsWithVisible(document.querySelector('.tabs [data-tab=workers]')!);
