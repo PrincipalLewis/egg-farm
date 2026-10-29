@@ -14,11 +14,12 @@ export type Action =
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
 /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
-export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
+/** v5 F1c: `suspended` = the sale happens on a tick without focus (worker sales under a menu/hide): timed effects count as 1. */
+export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player', suspended = false): GameState {
   const c = s.customers.find(c => c.id === id); if (!c) return s;
   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
   // One payout function (sim/payout.ts) for credit and every UI preview.
-  const price = salePriceCents(s, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
+  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, suspended ? { by, suspended } : by === 'player' ? undefined : { by }), filled = c.filled + k, done = filled >= c.demand;
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);

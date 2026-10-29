@@ -9,8 +9,11 @@
 import type { Balance } from '../config/balance';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensOfflineMult, eggsPerSec, eggPriceCents, coopCapacity, hensCap, eggValueCap, hensCost, eggValueCost, balancedTier, clampL } from '../config/formulas';
 import type { GameState } from './state';
+import { layFactor, type LayCtx } from './effects';
 export type Track = 'hens' | 'eggValue';
-export const prodEggsPerSec = (s: GameState, b: Balance) => m4On(b) ? trackEggsPerSec(s.hensLevel, b) : eggsPerSec(s.farmLevel, b);
+/** Eggs/s into the coop. With `ctx` (the live tick only), live LAY_EFFECTS multiply it (Sweep, F1c); without ctx it is the base
+ *  rate, so offline grants, income previews and golden-egg E never see a timed effect (sizing §9.5 edge 3). */
+export const prodEggsPerSec = (s: GameState, b: Balance, ctx?: LayCtx) => (m4On(b) ? trackEggsPerSec(s.hensLevel, b) : eggsPerSec(s.farmLevel, b)) * layFactor(s, b, ctx);
 /** M4A-4/8: coop capacity (Farm, x Hens coop milestone when on). */
 export const coopCap = (s: GameState, b: Balance) => m4On(b) ? trackCoopCapacity(s.farmLevel, s.hensLevel, b) : coopCapacity(s.farmLevel, b);
 /** M4A-4/8 offline multiplier on eggs and on the 2 h egg cap (x1.0 when off or below the first Hens milestone). */
