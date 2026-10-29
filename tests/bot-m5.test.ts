@@ -149,9 +149,11 @@ describe('bot-m5: no double model (CCR O-3 on #78)', () => {
     expect(() => run(withSrc({ golden: 1 }, 0), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // src flags need m4.enabled
     expect(() => run(withSrc({ golden: 0 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow();
   });
-  it('bot Refill charges (rc2) and src m4.flags.rc2Refill at once throws', () => {
+  it('bot Refill charges (rc2) and src m4.flags.rc2Refill or m4.flags.autoRefill at once throws', () => {
     expect(() => assertNoDoubleModel(withSrc({ rc2Refill: 1 }), { ...M5PX_STACK, on: false, rc2: M5PX_RC2.on })).toThrow(/rc2Refill/);
     expect(() => assertNoDoubleModel(withSrc({ rc2Refill: 1 }), { ...M5PX_STACK, on: false })).not.toThrow();
+    expect(() => assertNoDoubleModel(withSrc({ autoRefill: 1 }), { ...M5PX_STACK, on: false, rc2: M5PX_RC2.on })).toThrow(/autoRefill/);
+    expect(() => assertNoDoubleModel(withSrc({ autoRefill: 1 }), { ...M5PX_STACK, on: false })).not.toThrow();
     expect(() => assertNoDoubleModel(withSrc({ clockWage: 1 }), { ...M5PX_STACK, rc2: M5PX_RC2.on })).not.toThrow(); // the bot never models clock wage
   });
 });

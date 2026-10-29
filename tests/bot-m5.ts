@@ -54,11 +54,11 @@ export function checkEnv(E: Record<string, string | undefined>, extra: string[] 
   for (const k of extra) if (E[k] !== undefined && !Number.isFinite(num(k, 0))) throw new BotUsageError(`${k} must be a number, got ${E[k]}`);
 }
 /** CCR O-3 on #78: the bot layers its OWN model of the M5 mechanics (golden egg, streak, tap coins, Broody, abilities, pause) and of
- *  M5.1 Refill charges. It may do so only while the matching src flags are off; once src implements them behind m4.flags.*, a run with
+ *  M5.1 Refill charges + C2 auto-refill (src: m4.flags.rc2Refill / autoRefill). It may do so only while the matching src flags are off; once src implements them behind m4.flags.*, a run with
  *  both would count them twice. So: a stack with `on` (or `rc2`) and any of those src flags on throws. Turn the bot model off
  *  (`on: false` / no `rc2`) to run on the src mechanics. clockWage is not in the list: the bot never models it (it is src-only). */
 export const SRC_M5_FLAGS = ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const;
-export const SRC_M51_FLAGS = ['rc2Refill'] as const;
+export const SRC_M51_FLAGS = ['rc2Refill', 'autoRefill'] as const; // manifest row 25: the M5.1 src refill piece (charges + C2 auto-refill)
 export function assertNoDoubleModel(b: B, K: Stack): void {
   const m4 = (b as any).m4, f = m4?.flags ?? {}, onSrc = (k: string) => m4?.enabled === 1 && f[k] === 1;
   const both = [...(K.on ? SRC_M5_FLAGS.filter(onSrc) : []), ...(K.rc2 ? SRC_M51_FLAGS.filter(onSrc) : [])];
