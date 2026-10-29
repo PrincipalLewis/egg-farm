@@ -349,6 +349,31 @@ export function pressureSeed(b: B, seed: number, pf: string, ck: 'on' | 'off', p
   const rm = r.rm, tog = { seed, tog: rm.tog, tog10: rm.tog10, tAll: +rm.tAll.toFixed(1), t10: +rm.t10.toFixed(1), per30m_all: rm.tAll > 0 ? +(rm.tog / rm.tAll * 1800).toFixed(4) : null, per30m_F10: rm.t10 > 0 ? +(rm.tog10 / rm.t10 * 1800).toFixed(4) : null, unpEnter: rm.unpEnter };
   return { row, tog };
 }
+/** First divergence between two m5px jsonl outputs (REQUIREMENTS L35: on any parity break, report the first divergent tick).
+ *  Returns null when the bytes are equal. Else the first differing line/seed and field. For the per-second series (st/ex/el, one char
+ *  per second from `start`), char i covers run time (start+i, start+i+1] s, so the first divergent tick lies in [tickFrom, tickTo]
+ *  (tick n = n*STEP s; STEP 0.1 as in m5px). Scalar fields (t10, sc29, ...) are per-seed aggregates: tick is null there, and
+ *  the per-tick tracer (scratch/bot-m5b-harness/orig-trace tr.ts) is the next step. */
+export function firstDivergence(ref: string, port: string, STEP = 0.1): null | { line: number; seed: number | null; field: string; ref: unknown; port: unknown; second?: number; tickFrom?: number; tickTo?: number; tick: null | [number, number] } {
+  if (ref === port) return null;
+  const A = ref.split('\n'), Bl = port.split('\n');
+  for (let i = 0; i < Math.max(A.length, Bl.length); i++) {
+    if (A[i] === Bl[i]) continue;
+    if (A[i] === undefined || Bl[i] === undefined || A[i] === '' || Bl[i] === '') return { line: i + 1, seed: null, field: '(line count)', ref: A.length, port: Bl.length, tick: null };
+    const a = JSON.parse(A[i]), z = JSON.parse(Bl[i]), seed = typeof a.seed === 'number' ? a.seed : null;
+    for (const k of [...Object.keys(a), ...Object.keys(z).filter(k => !(k in a))]) {
+      const x = a[k], y = z[k]; if (JSON.stringify(x) === JSON.stringify(y)) continue;
+      if ((k === 'st' || k === 'ex' || k === 'el') && typeof x === 'string' && typeof y === 'string' && a.start === z.start) {
+        let c = 0; while (c < Math.min(x.length, y.length) && x[c] === y[c]) c++;
+        const t0 = a.start + c, from = Math.round(t0 / STEP) + 1, to = Math.round((t0 + 1) / STEP);
+        return { line: i + 1, seed, field: `${k}[${c}]`, ref: x.slice(c, c + 12), port: y.slice(c, c + 12), second: t0 + 1, tickFrom: from, tickTo: to, tick: [from, to] };
+      }
+      return { line: i + 1, seed, field: k, ref: x, port: y, tick: null };
+    }
+    return { line: i + 1, seed, field: '(formatting)', ref: A[i].slice(0, 80), port: Bl[i].slice(0, 80), tick: null };
+  }
+  return null;
+}
 export interface PressureIO { reset: (file: string) => void; append: (file: string, line: string) => void; log?: (line: string) => void; tog?: (file: string, json: string) => void }
 /** m5px.ts driver. Env: PROFS (optimal,seller15,casual) CFGS (on,off) PERT (0) SEEDS (200) S0 (1) OUT (required) TOG (optional toggle sidecar prefix). */
 export function pressureRuns(b: B, E: Record<string, string | undefined>, io: PressureIO) {

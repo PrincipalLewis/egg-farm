@@ -65,13 +65,13 @@ describe('verify: the run', () => {
     expect(off.traceSha256).not.toBe(on.traceSha256);
     expect(off.checkpoints[0].levels.hens).toBe(0);
   }, 60_000);
-  it('CCR N-5 on #78: m5x-casual 0.25 h seed 1 trace and checkpoint egg counters are pinned (24 h pin 07139bdd: tests/bot-m5-trace.slow.test.ts)', () => {
+  it('[VER-1h N-5] CCR N-5 on #78: m5x-casual 0.25 h seed 1 trace and checkpoint egg counters are pinned (24 h pin 07139bdd: tests/bot-m5-trace.slow.test.ts)', () => {
     const v = runVerify(balance, { hours: 0.25, seed: 1, profile: 'm5x-casual' });
     expect(v.traceSha256).toBe('751ebe169ce66082e53fd52d5a05cbca677c3b3d9a27a3f037c2c201fc379689');
     expect(v.events).toBe(1801);
     expect(v.checkpoints.map(c => c.eggs)).toEqual([{ coop: 17.14, basket: 1061, collected: 6944, sold: 5883 }]);
   }, 60_000);
-  it('CCR N-2/N-3 on #78: m5x-casual seed above the PyRandom bound and a repeated --profile are usage errors', () => {
+  it('[VER-1h N-2][VER-1h N-3] CCR N-2/N-3 on #78: m5x-casual seed above the PyRandom bound and a repeated --profile are usage errors', () => {
     expect(() => parseArgs(['--hours', '1', '--profile', 'm5x-casual', '--seed', '9007172233'])).toThrow(UsageError);
     expect(parseArgs(['--hours', '1', '--profile', 'm5x-casual', '--seed', '9007172232']).seed).toBe(9007172232);
     expect(parseArgs(['--hours', '1', '--seed', '9007199254740991']).seed).toBe(9007199254740991); // idle: unchanged
@@ -157,7 +157,7 @@ describe('verify: arguments and flags', () => {
     const off = withFlags(balance, { 'm4.enabled': 0 });
     expect(off.m4!.enabled).toBe(0); expect(balance.m4!.enabled).toBe(1);
   });
-  it('CLI: usage errors exit 2 before building anything', () => {
+  it('[VER-1h N-4] CLI: usage errors exit 2 before building anything (no UNAVAILABLE path)', () => {
     const run = (a: string[]) => spawnSync(process.execPath, [`${ROOT}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8' });
     const r1 = run([]); expect(r1.status).toBe(2); expect(r1.stderr).toMatch(/--hours/);
     const r3 = run(['--hours', '1', '--flags', 'nope=1']); expect(r3.status).toBe(2); expect(r3.stderr).toMatch(/unknown flag/);

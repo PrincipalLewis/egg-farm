@@ -62,7 +62,7 @@ const sha = (s: string | Buffer) => createHash('sha256').update(s).digest('hex')
 const csvRaw = () => readFileSync(new URL('../data/economy.csv', import.meta.url));
 
 describe('bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)', () => {
-  it('pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2', () => {
+  it('[REQ-d M5.2] pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2', () => {
     const b = csvBalance();
     const pins: Record<string, string> = { 'off.p0': '69695d09a1ce0e01f32a96a721763f0ca5c8d9f607959a37486adf5db34e3af2', 'off.p1': 'f3567fd4a46f1cc3eee910db7a2880a5b51ff09907913b1bbab8e4c47c5f6fe8',
       'on.p0': '91adb309939100681eaae33caf8ca0340d2ef6c419d2c9505238894dc076708f', 'on.p1': '53c8b991dc0f560e5619ab99d0bd1a4983e0309b86301fdaf4c2227ee24d6347' };
@@ -71,14 +71,14 @@ describe('bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)', () => {
       expect(sha(lines), `${ck}.p${p}`).toBe(pins[`${ck}.p${p}`]);
     }
   }, 240_000);
-  it('refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32', () => {
+  it('[REQ-d M5.1] refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32', () => {
     const E = { SEEDS: '2', T: '3000', NOWIN: '1', AT: '30', RES: '0', REST: '0', MANAT: '32', CFG: 'base,auto,off', PROFS: 'casual' };
     const out = refillGate(csvBalance(), E, loadTargets(), { csv: 'economy.b48be8a4.csv', sha: sha(csvRaw()) });
     // m5lx.ts stdout bytes = console.log(JSON.stringify(out)), i.e. with the trailing newline
     expect(sha(JSON.stringify(out) + '\n')).toBe('541425dbe1050199c83aab61ba1004015c8f0f1f584ec2c0c594f584a67e73c3');
     expect(out['auto|casual'].refillsPer30m_F10).toEqual({ manual: 0, auto: 10.269 });
   }, 240_000);
-  it('charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only', () => {
+  it('[REQ-d M5.1] charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only', () => {
     const b = csvBalance(); const seen: number[] = [];
     const K = { ...M5X_STACKS.AssZ, hold: true, rc2: M5PX_RC2.on };
     run(b, 7, PROFS.casual, K, 3000, { onSecond: (_t, s) => { seen.push((s as any).__ch); } });
@@ -88,8 +88,8 @@ describe('bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)', () => {
   }, 120_000);
 });
 
-describe('bot-m5: onObserve (QA seam Q4) is observe-only', () => {
-  it('windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given', () => {
+describe('[Q4] bot-m5: onObserve (QA seam Q4) is observe-only', () => {
+  it('[Q4][AC7] windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given', () => {
     const g = gateOptsFromEnv({ SEEDS: '2', S0: '1', T: '3000', CFG: 'none,AssZ', PROFS: 'casual' }, loadTargets());
     const kinds = new Set<string>(); let calls = 0;
     const hook = (kind: 'action' | 'buyCheck', a: string, _t: number, s: any) => { calls++; kinds.add(kind + ':' + a.split(':')[0]); s.coinsCents = -1; s.farmLevel = 99; s.workers = {}; };
@@ -98,7 +98,7 @@ describe('bot-m5: onObserve (QA seam Q4) is observe-only', () => {
     expect(calls).toBeGreaterThan(1000);
     for (const k of ['action:collect', 'action:sellAll', 'action:buy', 'action:activate', 'buyCheck:buyCheck']) expect(kinds.has(k), k).toBe(true);
   }, 120_000);
-  it('M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call', () => {
+  it('[Q4] M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call', () => {
     const b = csvBalance(); const kinds = new Set<string>(); const states = new Set<object>();
     const hook = (_k: 'action' | 'buyCheck', a: string, _t: number, s: any) => { kinds.add(a.split(':')[0]); states.add(s); Object.freeze(s); };
     for (const ck of ['on', 'off'] as const) {
@@ -115,7 +115,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 const ROOT5 = fileURLToPath(new URL('..', import.meta.url));
 describe('bot-m5: driver input (CCR N-1, N-2 on #78)', () => {
-  it('unknown CFG/PROFS names, including inherited prototype keys, are rejected (own keys only)', () => {
+  it('[VER-1h N-1] unknown CFG/PROFS names, including inherited prototype keys, are rejected (own keys only)', () => {
     for (const bad of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) {
       expect(() => windowGate(balance, gOpts({ CFG: bad, PROFS: 'casual', SEEDS: '1' }, loadTargets())), `CFG ${bad}`).toThrow(BotUsageError);
       expect(() => windowGate(balance, gOpts({ CFG: 'AssZ', PROFS: bad, SEEDS: '1' }, loadTargets())), `PROFS ${bad}`).toThrow(BotUsageError);
@@ -123,14 +123,14 @@ describe('bot-m5: driver input (CCR N-1, N-2 on #78)', () => {
       expect(() => refillGate(balance, { CFG: bad, PROFS: 'casual', SEEDS: '1', T: '10', NOWIN: '1' }, loadTargets(), { csv: 'x', sha: 'x' }), `refillGate CFG ${bad}`).toThrow(BotUsageError);
     }
   });
-  it('SEEDS/S0/T/STEP must be valid numbers, and the last seed must keep the PyRandom seed safe (<= MAX_SEED)', () => {
+  it('[VER-1h N-1][VER-1h N-2] SEEDS/S0/T/STEP must be valid numbers, and the last seed must keep the PyRandom seed safe (<= MAX_SEED)', () => {
     expect(MAX_SEED).toBe(9007172232);
     for (const E of [{ SEEDS: 'abc' }, { SEEDS: '0' }, { SEEDS: '1.5' }, { S0: '-1' }, { T: '-5' }, { T: '' }, { STEP: '0' }, { STEP: 'x' }, { S0: '9007172233', SEEDS: '1' }, { S0: '9007172232', SEEDS: '2' }])
       expect(() => checkEnv(E), JSON.stringify(E)).toThrow(BotUsageError);
     expect(() => checkEnv({ S0: '9007172232', SEEDS: '1' })).not.toThrow(); expect(() => checkEnv({})).not.toThrow();
     expect(() => run(balance, MAX_SEED, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // the bound is exact
   });
-  it('the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts)', () => {
+  it('[VER-1h N-1][VER-1h N-2] the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts)', () => {
     const cli = (script: string, env: Record<string, string>) => spawnSync(process.execPath, [`${ROOT5}node_modules/vite-node/vite-node.mjs`, script], { cwd: ROOT5, encoding: 'utf8', env: { ...process.env, CSV: 'data/economy.csv', ...env } });
     for (const env of [{ CFG: '__proto__', PROFS: 'casual' }, { PROFS: 'toString' }, { SEEDS: 'abc' }, { T: '-5' }, { STEP: '0' }, { S0: '9007172233', SEEDS: '1' }] as Record<string, string>[]) {
       const r = cli('scripts/bot-m5x.ts', { SEEDS: '1', T: '10', NOWIN: '1', ...env }); expect(r.status, `bot-m5x ${JSON.stringify(env)}: ${r.stderr}`).toBe(2);
@@ -142,18 +142,52 @@ describe('bot-m5: driver input (CCR N-1, N-2 on #78)', () => {
 });
 describe('bot-m5: no double model (CCR O-3 on #78)', () => {
   const withSrc = (flags: Record<string, number>, enabled = 1) => ({ ...balance, m4: { ...(balance as any).m4, enabled, flags } }) as any;
-  it('the bot M5 model (on) and any src m4.flags M5 mechanic on at once throws; either alone runs', () => {
+  it('[O-3] the bot M5 model (on) and any src m4.flags M5 mechanic on at once throws; either alone runs', () => {
     for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'])
       expect(() => run(withSrc({ [k]: 1 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1), k).toThrow(/double-count/);
     expect(() => run(withSrc({ golden: 1 }), 1, PROFS.casual, M5X_STACKS.none, 1)).not.toThrow(); // bot model off: src mechanics only
     expect(() => run(withSrc({ golden: 1 }, 0), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // src flags need m4.enabled
     expect(() => run(withSrc({ golden: 0 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow();
   });
-  it('bot Refill charges (rc2) and src m4.flags.rc2Refill or m4.flags.autoRefill at once throws', () => {
+  it('[O-3] bot Refill charges (rc2) and src m4.flags.rc2Refill or m4.flags.autoRefill at once throws', () => {
     expect(() => assertNoDoubleModel(withSrc({ rc2Refill: 1 }), { ...M5PX_STACK, on: false, rc2: M5PX_RC2.on })).toThrow(/rc2Refill/);
     expect(() => assertNoDoubleModel(withSrc({ rc2Refill: 1 }), { ...M5PX_STACK, on: false })).not.toThrow();
     expect(() => assertNoDoubleModel(withSrc({ autoRefill: 1 }), { ...M5PX_STACK, on: false, rc2: M5PX_RC2.on })).toThrow(/autoRefill/);
     expect(() => assertNoDoubleModel(withSrc({ autoRefill: 1 }), { ...M5PX_STACK, on: false })).not.toThrow();
     expect(() => assertNoDoubleModel(withSrc({ clockWage: 1 }), { ...M5PX_STACK, rc2: M5PX_RC2.on })).not.toThrow(); // the bot never models clock wage
   });
+});
+import { firstDivergence } from './bot-m5';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+describe('[REQ-L35] bot-m5 B: parity-break report and toggle metric', () => {
+  const row = (o: Record<string, unknown>) => JSON.stringify({ seed: 3, t10: 720.2, start: 720, st: '0000000000', ex: '0000000000', el: 'HHHHHHHHHH', pertT: null, sc29: 0.5, ...o });
+  it('[REQ-L35 FDT] firstDivergence: null on identical bytes; a series diff maps char i to second start+i+1 and its tick range (STEP 0.1)', () => {
+    const ref = row({}) + '\n' + row({ seed: 4 }) + '\n';
+    expect(firstDivergence(ref, ref)).toBeNull();
+    const d = firstDivergence(ref, row({}) + '\n' + row({ seed: 4, ex: '0000010000' }) + '\n')!;
+    expect(d).toMatchObject({ line: 2, seed: 4, field: 'ex[5]', second: 726, tick: [7251, 7260] }); // (725, 726] s = ticks 7251..7260
+    expect(firstDivergence(ref, row({}) + '\n' + row({ seed: 4, sc29: 0.6 }) + '\n')).toMatchObject({ line: 2, seed: 4, field: 'sc29', ref: 0.5, port: 0.6, tick: null });
+    expect(firstDivergence(ref, row({}) + '\n')).toMatchObject({ line: 2, field: '(line count)', tick: null });
+  });
+  it('[REQ-L35 FDT] scripts/bot-m5-diverge.ts exits 0 on identical files, 1 with the first divergence, 2 on usage', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'b5d-')), a = join(dir, 'a.jsonl'), z = join(dir, 'z.jsonl'), y = join(dir, 'y.jsonl');
+    writeFileSync(a, row({}) + '\n'); writeFileSync(z, row({}) + '\n'); writeFileSync(y, row({ st: '0100000000' }) + '\n');
+    const cli = (...args: string[]) => spawnSync(process.execPath, [`${ROOT5}node_modules/vite-node/vite-node.mjs`, 'scripts/bot-m5-diverge.ts', ...args], { cwd: ROOT5, encoding: 'utf8' });
+    expect(cli(a, z).status).toBe(0);
+    const r = cli(a, y); expect(r.status).toBe(1); expect(JSON.parse(r.stdout.trim().split('\n').pop()!)).toMatchObject({ field: 'st[1]', second: 722, tick: [7211, 7220] });
+    expect(cli(a).status).toBe(2);
+  }, 120_000);
+  it('[REQ-L35 D6] toggle sidecar: Asleep<->Unpaid flips per 30 min = tog / tAll * 1800, F10 variant on t10, casual seeds 1-2 within the D6 bar (<= 12)', () => {
+    const b = csvBalance();
+    for (const seed of [1, 2]) for (const ck of ['on', 'off'] as const) {
+      const { tog } = pressureSeed(b, seed, 'casual', ck, 0);
+      expect(tog.tAll).toBe(12000);
+      expect(tog.per30m_all).toBe(+(tog.tog / tog.tAll * 1800).toFixed(4));
+      expect(tog.per30m_F10).toBeCloseTo(tog.tog10 / tog.t10 * 1800, 3); // t10 in the sidecar is rounded to 0.1 s
+      expect(tog.tog10).toBeLessThanOrEqual(tog.tog);
+      expect(tog.per30m_all).toBeLessThanOrEqual(12);
+    }
+  }, 120_000);
 });

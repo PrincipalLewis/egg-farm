@@ -6,7 +6,7 @@ import { runVerify, checkpointSeconds } from '../scripts/verify/sim';
 import { run, PROFS, M5X_STACKS } from './bot-m5';
 
 describe('verify m5x-casual: pinned trace and checkpoint counters (CCR N-5)', () => {
-  it('24 h seed 1: trace 07139bdd, and eggs.collected/sold at each checkpoint equal sums over bot-m5 events', () => {
+  it('[VER-1h N-5] 24 h seed 1: trace 07139bdd, and eggs.collected/sold at each checkpoint equal sums over bot-m5 events', () => {
     const v = runVerify(balance, { hours: 24, seed: 1, profile: 'm5x-casual' });
     expect(v.traceSha256).toBe('07139bdd505a060e3daf27b33f10bd6cd8f2e7c118b6bf1c917d597b4ddd965e');
     expect(v.events).toBe(391661);
