@@ -8,7 +8,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { balance } from '../src/config/balance';
 import { runM2 } from './bot-m2';
-import { runVerify, checkpointSeconds, badNumbers, markFreshM4, VERIFY_V6_BACKUP_ID, UNAVAILABLE } from '../scripts/verify/sim';
+import { runVerify, checkpointSeconds, badNumbers, markFreshM4, VERIFY_V6_BACKUP_ID, UNAVAILABLE, PROFILE_BOT } from '../scripts/verify/sim';
+import { run as runM5, PROFS as M5_PROFS, M5X_STACKS } from './bot-m5';
 import { save, validate, MIGRATION_ID_HEX, type KV } from '../src/save/save';
 import { saveRoundTrip } from '../scripts/verify/roundtrip';
 import { initialState } from '../src/sim/state';
@@ -64,9 +65,25 @@ describe('verify: the run', () => {
     expect(off.traceSha256).not.toBe(on.traceSha256);
     expect(off.checkpoints[0].levels.hens).toBe(0);
   }, 60_000);
-  it('m5x-casual is refused until tests/bot-m5.ts lands', () => {
-    expect(UNAVAILABLE['m5x-casual']).toBe('needs tests/bot-m5.ts (M5.1, on Vadim go)'); // HoE ruling (3)
-    expect(() => runVerify(balance, { hours: 1, seed: 1, profile: 'm5x-casual' })).toThrow(/m5x-casual/);
+  it('m5x-casual is available and is tests/bot-m5.ts run() (casual, AssZ): same end state and Farm reach', () => {
+    expect(UNAVAILABLE).toEqual({});
+    const v = runVerify(balance, { hours: 0.5, seed: 3, profile: 'm5x-casual' }), r = runM5(balance, 3, M5_PROFS.casual, M5X_STACKS.AssZ, 1800);
+    expect(JSON.stringify(v.end)).toBe(JSON.stringify(r.final));
+    expect([...v.reach]).toEqual([...r.reach]);
+    expect(v.ticks).toBe(1800 * balance.tickHz); expect(v.manages).toBeNull();
+    expect(v.bot).toBe(PROFILE_BOT['m5x-casual'].bot); expect(v.bot).toMatch(/bot-m5/);
+    expect(v.checkpoints.map(c => c.hours)).toEqual([0.5]); expect(v.checkpoints[0].coinsCents).toBe(r.final.coinsCents);
+  }, 60_000);
+  it('m5x-casual is deterministic, differs from idle, and its checkpoints are finite, non-negative, integer cents', () => {
+    const a = runVerify(balance, { hours: 0.25, seed: 1, profile: 'm5x-casual' }), b = runVerify(balance, { hours: 0.25, seed: 1, profile: 'm5x-casual' });
+    expect(a.traceSha256).toBe(b.traceSha256); expect(JSON.stringify(a.checkpoints)).toBe(JSON.stringify(b.checkpoints));
+    expect(runVerify(balance, { hours: 0.25, seed: 2, profile: 'm5x-casual' }).traceSha256).not.toBe(a.traceSha256);
+    expect(runVerify(balance, { hours: 0.25, seed: 1, profile: 'idle' }).traceSha256).not.toBe(a.traceSha256);
+    expect(badNumbers(a.checkpoints)).toEqual([]); expect(a.events).toBeGreaterThan(0);
+    for (const c of a.checkpoints) expect(Number.isInteger(c.coinsCents)).toBe(true);
+  }, 60_000);
+  it('idle keeps its verify.json bot / tickPath strings (no change to the idle report)', () => {
+    expect(PROFILE_BOT.idle).toEqual({ bot: 'AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s', tickPath: 'src/sim/tick.ts advance() per 1000 ms, then input (build order)' });
   });
   it('badNumbers flags NaN, Infinity and negatives', () => {
     expect(badNumbers({ a: 1, b: [0, 2] })).toEqual([]);
@@ -130,7 +147,6 @@ describe('verify: arguments and flags', () => {
   it('CLI: usage errors and unavailable profiles exit 2 before building anything', () => {
     const run = (a: string[]) => spawnSync(process.execPath, [`${ROOT}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8' });
     const r1 = run([]); expect(r1.status).toBe(2); expect(r1.stderr).toMatch(/--hours/);
-    const r2 = run(['--hours', '1', '--profile', 'm5x-casual']); expect(r2.status).toBe(2); expect(r2.stderr).toContain('verify: profile m5x-casual needs tests/bot-m5.ts (M5.1, on Vadim go)');
     const r3 = run(['--hours', '1', '--flags', 'nope=1']); expect(r3.status).toBe(2); expect(r3.stderr).toMatch(/unknown flag/);
   }, 60_000);
 });
@@ -165,6 +181,21 @@ describe('verify: save round-trip guard (VER-1a, CCR R1)', () => {
     expect(bad.pass).toBe(false); expect(bad.tracksMigrated).toBe(true); expect(bad.migrated).toBe(true);
     expect(bad.mismatches.map(m => m.field)).toContain('eggValueLevel');
   }, 60_000);
+  it('m5x-casual: the marked end state round-trips under the shipped balance (not migrated, no mismatches)', () => {
+    const run = runVerify(balance, { hours: 1, seed: 1, profile: 'm5x-casual' });
+    expect(saveRoundTrip(save(mem(), { ...markFreshM4(run.end, balance), seenTracksExplainer: true }, 1, balance), run.end, balance))
+      .toMatchObject({ pass: true, ok: true, migrated: false, mismatches: [] });
+  }, 60_000);
+  it('CLI: --profile m5x-casual runs (no exit 2) and records its profile and bot in verify.json', () => {
+    const vn = `${ROOT}node_modules/vite-node/vite-node.mjs`, dir = trackedTmp('v5m5-'), html = join(dir, 'fake.html'), out = join(dir, 'out');
+    writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000"><div id="app" data-build-id="m4.1+0000000"></div>');
+    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--profile', 'm5x-casual', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html } });
+    expect(r.status).not.toBe(2); expect(r.stderr).not.toMatch(/needs tests\/bot-m5/);
+    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
+    expect(j.profile).toBe('m5x-casual'); expect(j.complete).toBe(true);
+    expect(j.sim.bot).toBe(PROFILE_BOT['m5x-casual'].bot); expect(j.sim.tickPath).toBe(PROFILE_BOT['m5x-casual'].tickPath);
+    expect(j.checks.find((c: any) => c.id === 'save-roundtrip').pass).toBe(true);
+  }, 120_000);
   it('saveRoundTrip flags a coin, worker or tier difference and an unreadable save', () => {
     const run = runVerify(balance, { hours: 0.25, seed: 1, profile: 'idle' }), m = markFreshM4(run.end, balance);
     const r = saveRoundTrip(save(mem(), { ...m, coinsCents: m.coinsCents + 1, graderTier: 0, workers: {} }, 1, balance), run.end, balance);
