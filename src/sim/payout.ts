@@ -16,9 +16,10 @@ export function saleValueCents(s: GameState, k: number, b: Balance, ctx: SaleCtx
   const base = salePriceCents(s, b), m = saleMultipliers(s, b, ctx).reduce((a, x) => a * x, 1);
   return m === 1 ? k * base : Math.round(k * base * m);
 }
-/** Preview of Sell all: same per-customer walk as the 'sellAll' action. */
-export function sellAllPreview(s: GameState, b: Balance): { eggs: number; cents: number } {
+/** Preview of Sell all: same per-customer walk as the 'sellAll' action. Pass the SAME ctx the credit will use
+ *  (Game.playerSaleCtx() = playerSaleCtx(attended)), so preview == credit for either attended value (CCR m1 #80). */
+export function sellAllPreview(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE): { eggs: number; cents: number } {
   let left = Math.floor(s.basket), eggs = 0, cents = 0;
-  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(s, k, b); }
+  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(s, k, b, ctx); }
   return { eggs, cents };
 }

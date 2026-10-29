@@ -4,6 +4,7 @@ import { m4On } from '../config/formulas';
 import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
 import type { Sink } from './events';
 import { saleValueCents } from './payout';
+import { playerSaleCtx } from './effects';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
@@ -19,7 +20,7 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
   const c = s.customers.find(c => c.id === id); if (!c) return s;
   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
   // One payout function (sim/payout.ts) for credit and every UI preview.
-  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, suspended ? { by, suspended } : by === 'player' ? undefined : { by }), filled = c.filled + k, done = filled >= c.demand;
+  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, by === 'player' ? playerSaleCtx(!suspended) : suspended ? { by, suspended } : { by }), filled = c.filled + k, done = filled >= c.demand;
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);

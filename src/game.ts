@@ -10,6 +10,7 @@ import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
 import { focusFrameMs } from './sim/clock';
 import { anyM5FlagOn } from './sim/timers';
+import { playerSaleCtx, type SaleCtx } from './sim/effects';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -396,6 +397,9 @@ export class Game {
   /** CCR N-1 #79: with every M5 flag off the probe is never read (no per-frame / per-dispatch DOM query); attended = false
    *  then, which changes nothing: no timed effect is live, so suspension has nothing to suspend (goldens byte-identical). */
   private attendedNow() { return !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(); }
+  /** CCR m1 #80: the sale context a player sell/sellAll dispatched now would be credited with. UI previews (order cards, Sell all)
+   *  pass it to saleValueCents / sellAllPreview so the preview equals the credit for the same attended read. */
+  playerSaleCtx(): SaleCtx { return playerSaleCtx(this.attendedNow()); }
   frame() {
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
