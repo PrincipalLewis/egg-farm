@@ -1,4 +1,5 @@
 import type { Balance } from '../config/balance';
+import type { StreakRun } from './streak';
 import type { Workers, WorkerId } from './workers';
 /** demand = original order; filled = eggs sold so far. MK-10: a partly served customer (filled > 0) still leaves
  *  customer_patience_s after arrival (logged customer_partial); the timer is never reset by a sale. */
@@ -33,6 +34,8 @@ export interface GameState {
   abilities?: Partial<Record<WorkerId, { readyAt?: number; activeS?: number }>>; abilitiesUnlocked?: boolean; abilitiesCoachSeen?: boolean;
   /** Session only, never saved (save/m5-fields.ts M5_SESSION_KEYS): the on-screen golden egg, the streak value and hold. */
   goldenEgg?: { ageS: number; slotId: string; intervalS: number }; streakS?: number; streakHoldS?: number;
+  /** v5 #2 (session only): sim seconds until the next credited tap (R2), and the current run's streak_peak stats. */
+  tapCreditCdS?: number; streakRun?: StreakRun;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

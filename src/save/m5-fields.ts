@@ -12,6 +12,8 @@ import { m4On } from '../config/formulas';
 import { type GameState, mixSeed, nextRand } from '../sim/state';
 import type { SimEvent } from '../sim/events';
 import { WORKERS } from '../sim/workers';
+import { streakAfter, endStreak } from '../sim/streak';
+export { streakAfter };
 export type M5Flag = 'golden' | 'streak' | 'tapCoins' | 'broody' | 'abilities' | 'pause';
 /** D-C1 (= F1a config/flags.ts flagOn): on only when m4.flags[k] === 1 and m4.enabled. */
 export const m5Flag = (b: Balance, k: M5Flag) => m4On(b) && b.m4?.flags?.[k] === 1;
@@ -22,7 +24,7 @@ export const EV_RNG_SALT = 0x6576526e;
 /** D-C5: the Broody nest clamp (fmtMoneyExact limit) and the yard slot range 0..11. */
 export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
 /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
-export const M5_SESSION_KEYS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const;
+export const M5_SESSION_KEYS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'streakRun', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const;
 const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
@@ -32,11 +34,6 @@ export const ensureEvRng = (s: GameState): GameState => isU32(s.evRngState) ? s 
 export function drawGap(s: GameState, b: Balance): GameState {
   const e = ensureEvRng(s), [x, u] = nextRand(e.evRngState!), lo = tc(b, 'egg_gap_min_s'), hi = tc(b, 'egg_gap_max_s');
   return { ...e, evRngState: x, nextSpawnRemainingS: lo + u * (hi - lo) };
-}
-/** Streak hold, then decay, over `dtFocus` focus seconds in ONE step (streak spec §6 formula; dt < 0 counts as 0). */
-export function streakAfter(sv: number, holdS: number, dtFocus: number, b: Balance): { s: number; holdS: number } {
-  const dt = Math.max(0, dtFocus); if (dt <= holdS) return { s: sv, holdS: holdS - dt };
-  return { s: Math.max(0, sv - tc(b, 'streak_decay_per_s') * (dt - holdS)), holdS: 0 };
 }
 /** The save shape: session-only keys dropped. The same object (so the same bytes) when none is present. */
 export function m5Persist(s: GameState): GameState {
@@ -75,7 +72,7 @@ export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): G
 /** A hidden-tab or visible frame gap of 60 s or more (§9.1/§9.1a), applied to the state AT THE START of the gap: calls end
  *  (`offline`), an on-screen egg expires (`collectible_expired{reason:"offline"}`, no reward, fresh R3 gap that runs on the
  *  focus clock, so it starts once welcome-back closes), streak s = 0, Frenzy frozen, Broody nest kept with no accrual.
- *  Cooldowns need nothing: readyAt is wall clock. The #2 streak sim adds streak_peak{reason:"offline"} here (needs its stats). */
+ *  Cooldowns need nothing: readyAt is wall clock. The streak run ends with streak_peak{reason:"offline"} if s > 0 (#2, R11). */
 export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (!anyFlag(b)) return s;
   let o: any = { ...s };
@@ -83,7 +80,7 @@ export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (m5Flag(b, 'golden') && o.goldenEgg) {
     delete o.goldenEgg; ev.push({ type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: o.farmLevel }); o = drawGap(o, b);
   }
-  if (m5Flag(b, 'streak') && 'streakS' in o) { o.streakS = 0; o.streakHoldS = 0; }
+  if (m5Flag(b, 'streak') && 'streakS' in o) o = endStreak(o, 'offline', b, ev);
   return o;
 }
 /** A hidden gap under 60 s: the streak grace/decay in one step over the gap's focus time, which is 0 while hidden
