@@ -206,7 +206,8 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
 /** m5x.ts's stacks: `none` = no mechanics, `AssZ` = the full M5.0 stack, `AssZhold` = AssZ holding calls for a Frenzy. */
 export const M5X_BASE: Stack = { on: true, streakCap: 0.28, tapShare: 0.03, broody: true, golden: { gapMin: 120, gapMax: 300 }, abil: true, sweep: 'A', sweepMult: 1.15, pause: false, warm: true, ssZero: true };
 export const M5X_STACKS: Record<string, Stack> = { none: { ...M5X_BASE, on: false }, AssZ: M5X_BASE, AssZhold: { ...M5X_BASE, hold: true } };
-export interface GateOpts { cfgs: string[]; profs: string[]; seeds: number; s0: number; T: number; step: number; stepFrom: number; noWin: boolean; targets: PacingTargets; onResult?: (key: string, o: any) => void }
+export interface GateOpts { cfgs: string[]; profs: string[]; seeds: number; s0: number; T: number; step: number; stepFrom: number; noWin: boolean; targets: PacingTargets; onResult?: (key: string, o: any) => void;
+  /** QA seam Q4: observe-only hook passed to every seed's main run (not the 10-min window runs). Outputs are identical with or without it. */ onObserve?: RunOpts['onObserve'] }
 /** m5x.ts env defaults: SEEDS 200, S0 1, T 12000, STEP 300, STEP_FROM 30, CFG AssZ, PROFS optimal,seller15,casual, NOWIN off. */
 export function gateOptsFromEnv(env: Record<string, string | undefined>, targets: PacingTargets): GateOpts {
   return { cfgs: (env.CFG ?? 'AssZ').split(','), profs: (env.PROFS ?? 'optimal,seller15,casual').split(','), seeds: +(env.SEEDS ?? 200), s0: +(env.S0 ?? 1),
@@ -221,7 +222,7 @@ export function windowGate(b: B, g: GateOpts): Record<string, any> {
   for (const ck of g.cfgs) for (const pf of g.profs) {
     const K = CF[ck], P = PROFS[pf]; if (!K || !P) throw new Error(`windowGate: unknown ${!K ? `CFG ${ck}` : `profile ${pf}`}`);
     const seedMax: number[] = [], all: number[] = [], byBand: Record<string, number[]> = { 'F10-17': [], 'F18-23': [], 'F24-29': [], 'F30+': [] }, step: number[] = [], noAff: number[] = [], reachMax: number[] = [], prem: Record<string, number[]> = { 'F10-19': [], 'F20-29': [], 'F30+': [] };
-    for (let i = 0; i < NS; i++) { const seed = S0 + i, r = run(b, seed, P, K, T, { snapEveryS: K.on ? STEP : undefined });
+    for (let i = 0; i < NS; i++) { const seed = S0 + i, r = run(b, seed, P, K, T, { snapEveryS: K.on ? STEP : undefined, onObserve: g.onObserve });
       step.push(maxStepRatio(r.reach, SF, tg.step_ratio_min_prev_s) ?? NaN); noAff.push(r.longestNoAff); reachMax.push(r.reach.has(b.maxLevel) ? 1 : 0);
       let m = 0; if (K.on && !NOWIN) for (const [t, F, st] of r.tsnaps) { const a = run(b, seed * 7919 + Math.round(t), P, K, 600, { start: st, noBuy: true }), z = run(b, seed * 7919 + Math.round(t), PROFS.idle, CF.none, 600, { start: st, noBuy: true });
         const ca = a.final.coinsCents - st.coinsCents, cz = z.final.coinsCents - st.coinsCents; if (!(cz > 0)) continue; const x = ca / cz; all.push(x); m = Math.max(m, x);

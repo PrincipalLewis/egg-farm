@@ -53,3 +53,58 @@ describe('bot-m5: run()', () => {
     expect(JSON.stringify(balance)).toBe(before);
   });
 });
+
+// ---- bot-m5 B: m5p/m5px (M5.2) and m5l/m5lx (M5.1) port. Pins are the ORIGINAL harnesses' bytes on this tree's CSV (b48be8a4) with clock wage
+// off (scratch/bot-m5b-harness/orig-noclock: h2/src, m5px.ts with only L8 __clockWage=false; m5lx.ts with CLOCK unset). Clock-wage-on parity
+// (o1a, 200 seeds, artifacts/m51-o1a + m52-o1a) needs the h2 tick.ts diff (M5.1 src piece): artifacts/bot-m5b-parity (studio folder).
+import { pressureSeed, refillGate, M5PX_RC2 } from './bot-m5';
+const sha = (s: string | Buffer) => createHash('sha256').update(s).digest('hex');
+const csvRaw = () => readFileSync(new URL('../data/economy.csv', import.meta.url));
+
+describe('bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)', () => {
+  it('pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2', () => {
+    const b = csvBalance();
+    const pins: Record<string, string> = { 'off.p0': '69695d09a1ce0e01f32a96a721763f0ca5c8d9f607959a37486adf5db34e3af2', 'off.p1': 'f3567fd4a46f1cc3eee910db7a2880a5b51ff09907913b1bbab8e4c47c5f6fe8',
+      'on.p0': '91adb309939100681eaae33caf8ca0340d2ef6c419d2c9505238894dc076708f', 'on.p1': '53c8b991dc0f560e5619ab99d0bd1a4983e0309b86301fdaf4c2227ee24d6347' };
+    for (const ck of ['off', 'on'] as const) for (const p of [0, 1]) {
+      const lines = [1, 2].map(seed => JSON.stringify(pressureSeed(b, seed, 'casual', ck, p).row) + '\n').join('');
+      expect(sha(lines), `${ck}.p${p}`).toBe(pins[`${ck}.p${p}`]);
+    }
+  }, 240_000);
+  it('refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32', () => {
+    const E = { SEEDS: '2', T: '3000', NOWIN: '1', AT: '30', RES: '0', REST: '0', MANAT: '32', CFG: 'base,auto,off', PROFS: 'casual' };
+    const out = refillGate(csvBalance(), E, loadTargets(), { csv: 'economy.b48be8a4.csv', sha: sha(csvRaw()) });
+    // m5lx.ts stdout bytes = console.log(JSON.stringify(out)), i.e. with the trailing newline
+    expect(sha(JSON.stringify(out) + '\n')).toBe('541425dbe1050199c83aab61ba1004015c8f0f1f584ec2c0c594f584a67e73c3');
+    expect(out['auto|casual'].refillsPer30m_F10).toEqual({ manual: 0, auto: 10.269 });
+  }, 240_000);
+  it('charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only', () => {
+    const b = csvBalance(); const seen: number[] = [];
+    const K = { ...M5X_STACKS.AssZ, hold: true, rc2: M5PX_RC2.on };
+    run(b, 7, PROFS.casual, K, 3000, { onSecond: (_t, s) => { seen.push((s as any).__ch); } });
+    expect(Math.min(...seen)).toBeGreaterThanOrEqual(0); expect(Math.max(...seen)).toBeLessThanOrEqual(2);
+    const a = run(b, 7, PROFS.casual, K, 3000), z = run(b, 7, PROFS.casual, K, 3000, { series: { start: -1, st: [], ex: [], el: [], pertT: null }, pert: 0 });
+    expect(JSON.stringify(z.final)).toBe(JSON.stringify(a.final)); expect(a.rm.refM).toBe(0); expect(a.rm.refA).toBeGreaterThan(0);
+  }, 120_000);
+});
+
+describe('bot-m5: onObserve (QA seam Q4) is observe-only', () => {
+  it('windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given', () => {
+    const g = gateOptsFromEnv({ SEEDS: '2', S0: '1', T: '3000', CFG: 'none,AssZ', PROFS: 'casual' }, loadTargets());
+    const kinds = new Set<string>(); let calls = 0;
+    const hook = (kind: 'action' | 'buyCheck', a: string, _t: number, s: any) => { calls++; kinds.add(kind + ':' + a.split(':')[0]); s.coinsCents = -1; s.farmLevel = 99; s.workers = {}; };
+    const out = windowGate(csvBalance(), { ...g, onObserve: hook });
+    expect(sha(JSON.stringify(out))).toBe('41324ef47af46e79255f22b72d9e982f198eed45da26ff031f4c4d188abea985'); // same pin as without the hook (above)
+    expect(calls).toBeGreaterThan(1000);
+    for (const k of ['action:collect', 'action:sellAll', 'action:buy', 'action:activate', 'buyCheck:buyCheck']) expect(kinds.has(k), k).toBe(true);
+  }, 120_000);
+  it('M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call', () => {
+    const b = csvBalance(); const kinds = new Set<string>(); const states = new Set<object>();
+    const hook = (_k: 'action' | 'buyCheck', a: string, _t: number, s: any) => { kinds.add(a.split(':')[0]); states.add(s); Object.freeze(s); };
+    for (const ck of ['on', 'off'] as const) {
+      const a = pressureSeed(b, 3, 'casual', ck, 1), h = pressureSeed(b, 3, 'casual', ck, 1, hook);
+      expect(JSON.stringify(h)).toBe(JSON.stringify(a));
+    }
+    expect(kinds.has('refill')).toBe(true); expect(states.size).toBeGreaterThan(100);
+  }, 240_000);
+});
