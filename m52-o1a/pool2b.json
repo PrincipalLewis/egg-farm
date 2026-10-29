@@ -1,0 +1,50 @@
+{
+ "optimal": {
+  "on+1": {
+   "seed_dShare_p50": 0.0,
+   "seed_dShare_p95abs": 0.0678490566037736,
+   "oneSeed_dPooled_max": 0.0006216030609241807,
+   "oneSeed_dRatio_max": 0.004100383895419224,
+   "oneSeed_dRatio_med": 0.0
+  },
+  "off+1": {
+   "seed_dShare_p50": -0.006493506493506496,
+   "seed_dShare_p95abs": 0.11816,
+   "oneSeed_dPooled_max": 0.0008483821094185384,
+   "oneSeed_dRatio_max": 0.012295852173174637,
+   "oneSeed_dRatio_med": 0.0029844830802980837
+  }
+ },
+ "seller15": {
+  "on+1": {
+   "seed_dShare_p50": 0.0,
+   "seed_dShare_p95abs": 0.06704089815557335,
+   "oneSeed_dPooled_max": 0.0005916044206311089,
+   "oneSeed_dRatio_max": 0.003468096234838125,
+   "oneSeed_dRatio_med": 0.0
+  },
+  "off+1": {
+   "seed_dShare_p50": -0.013578394598649679,
+   "seed_dShare_p95abs": 0.13658927141713373,
+   "oneSeed_dPooled_max": 0.0009604294039155803,
+   "oneSeed_dRatio_max": 0.010755264514118457,
+   "oneSeed_dRatio_med": 0.001518206717699977
+  }
+ },
+ "casual": {
+  "on+1": {
+   "seed_dShare_p50": -0.007576953433307054,
+   "seed_dShare_p95abs": 0.10241465445462117,
+   "oneSeed_dPooled_max": 0.0006898964039057098,
+   "oneSeed_dRatio_max": 0.003549360604393259,
+   "oneSeed_dRatio_med": 0.0001799567943976399
+  },
+  "off+1": {
+   "seed_dShare_p50": -0.03258017492711371,
+   "seed_dShare_p95abs": 0.1293943870014771,
+   "oneSeed_dPooled_max": 0.001102678571428567,
+   "oneSeed_dRatio_max": 0.009000545888176115,
+   "oneSeed_dRatio_med": 0.0016528945701022035
+  }
+ }
+}

@@ -1,0 +1,34 @@
+# artifacts/m52-o1a — M5.2 pressure-metric o1a re-run (spec §10.3 harness m5p.ts 9eed2879, m5px.ts c20ad937; runner h2/press-o1a-art.sh = copy of pinned press-o1a.sh 29db7fae with output dir -> artifacts/m52-o1a/ and P loop 0 1 only), CSV o1a a8c4e268, seeds 1-200. Analysis pool2.py c0e99c3a, pool2b.py 8281d19d, press.py edd65d81, PDIR=artifacts/m52-o1a. Reproduced 2026-10-28 08:41-09:50 CET, node v20.19.2, substitute node_modules /workspace/wt-ver1c/node_modules (vite-node 2.1.9, vite 5.4.21).
+# Lines below: sha256sum format (check: sha256sum -c MANIFEST.sha256). sha1 in comments.
+# sha1 679049195c7b7198b4aeefd7a8b434b01a85d0c5  pool2.json
+# sha1 e010a0e4a9b1a3e84aa1f328f88b7623d2d959cc  pool2b.json
+# sha1 13f0f47623b859f240b7daabf7c83d4f6e67f603  pr.casual.off.p0.jsonl
+# sha1 f56d436456141a42ff2ac890b0bbf9b5dabd58cf  pr.casual.off.p1.jsonl
+# sha1 081e960697671c0915d21e5af76b9f281737f4d1  pr.casual.on.p0.jsonl
+# sha1 ad0b0233dd7d0f9993147e0d578af638426d6e50  pr.casual.on.p1.jsonl
+# sha1 ce5ae019e0c73b962bb7453b6f51bb8ef2257353  pr.optimal.off.p0.jsonl
+# sha1 78b04a5ff480cce9f28092399be4a5b466f8d8ea  pr.optimal.off.p1.jsonl
+# sha1 d7252dd646de4b586661895f9d56b4b1eced70c5  pr.optimal.on.p0.jsonl
+# sha1 0f8cc5f096e553401f7492f47a293b12df63e4f6  pr.optimal.on.p1.jsonl
+# sha1 c56a7907bcf1468685d585733d3c9ca30cb82749  pr.seller15.off.p0.jsonl
+# sha1 75b82a1a8a0ca5f0b57eee2a9226e76f8bef25f1  pr.seller15.off.p1.jsonl
+# sha1 ad02f9e00dcff210929635c735b0dc2f2b5a7e6a  pr.seller15.on.p0.jsonl
+# sha1 0e691ac4b8a38a8d5d3e5d59865fad996e21b2a8  pr.seller15.on.p1.jsonl
+# sha1 0a13b97e432dbbdc14305464e97c91c11372c4dc  press-off.log
+# sha1 e3217a0ed6a5d7cb5308cfe3fa7512bee6d679ba  press-on.log
+036262a90f9fe2872c8c24c96c7e9b4fce95a5b23e7761d1c4e148743e7b7dab  pool2.json
+4395b1751cfbe8304421b9b2fa9df00b0a25046e3a8e37b3b0053b53bbc3268c  pool2b.json
+6774b90cc3b4a429f3e1dcf935306047c41553906a973b64422cf9d65a11cb88  pr.casual.off.p0.jsonl
+2a9ceeb942685f3fa39707070a86e5e40db7d35a42241d8c6b510d354dc80682  pr.casual.off.p1.jsonl
+786ba0ecde99b11886af7ca6a8eae73939c24cc8bf2950706ca4e6cc2db43195  pr.casual.on.p0.jsonl
+f48b677f35cfa67daf6b1713df52dcfb9f3ecf5d23f7137ed7e10b6f181eeb38  pr.casual.on.p1.jsonl
+aa66e51934bfc20edfd1d71881874840385c6f4ba01f0eb4ab157f061646957e  pr.optimal.off.p0.jsonl
+24f950c200ec6562e3cbd590cc4cbe655c92273c71dcd1ea0cd5917a0d0b44d2  pr.optimal.off.p1.jsonl
+7b93f8400e74853447afe2bc763fe794737c3fffb0db2aed32b049de0cead328  pr.optimal.on.p0.jsonl
+09ee86a317f41ed7f54ed493dcc22cbdd150b788963b6695ec6675b7d126e198  pr.optimal.on.p1.jsonl
+97b10219d141d0eb88168f79e55fa53e806b9e195eb35eb4f532edd50e6bbc24  pr.seller15.off.p0.jsonl
+c78d451d90d3bd7fda8a09d59065c0364b98f039dd06ca6ad73e2892d67ec07e  pr.seller15.off.p1.jsonl
+5c041e0349c3d288f70190977fc3e043ba6a85d26e003c7a8be00fc67d19c3c8  pr.seller15.on.p0.jsonl
+c02cd6cdcf01af6c2cdf62b91bbe6754e62e63c1815ec2c9fe626007da1197cd  pr.seller15.on.p1.jsonl
+98f58b9625d011cb055c443ed9dbfba52572cb8d34d549e987f59a4e790f6cfe  press-off.log
+eea65cb9ab57aa7181b326063ff56be079c4bee143ea2a28444c347b11c3619a  press-on.log

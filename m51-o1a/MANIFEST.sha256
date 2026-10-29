@@ -1,0 +1,28 @@
+# artifacts/m51-o1a — Workers o1a re-run (D-HOP-2026-10-25-11 §10 commands: h2/o1aA.sh ddae94c2, o1aB.sh 51b41706; m5l.ts e930c8c7, m5lx.ts 7123fc25), CSV o1a a8c4e268, seeds 1-200. Reproduced 2026-10-28 08:01-08:53 CET with node v20.19.2 and substitute node_modules /workspace/wt-ver1c/node_modules (vite-node 2.1.9, vite 5.4.21). Eval: scratch/m51-ship/o1aeval-art.py.
+# Lines below: sha256sum format (check with: sha256sum -c MANIFEST.sha256). sha1 listed in comments.
+# sha1 f29eb90cc724a8eeca3c64ea723ff54f2859cc44  eval.json
+# sha1 5c8b8262eb116d018cf6c6a4235973a33389ea48  g1.json
+# sha1 0cc4108ccf655ab8246ea9236c6b5a5f3d6d663f  g1.log
+# sha1 576e659e65a93368fda65ff1c0bf4e84f0b95219  nw-auto.json
+# sha1 5a7942f5a1349b87e554afe18efbe9c5b39d79c9  nw-auto.log
+# sha1 b758c3d3cac9c7ec55e99cd2b4ec53f3ffda33db  nw-base.json
+# sha1 7ab36f188dde992b3c4700a0ecaa054c4f87116a  nw-base.log
+# sha1 340cc7efcc1b2b08a0ffd7360536ed67eb2788c7  ps-o1a.auto.casual.json
+# sha1 53001d793a1d4d13945dd493e0d47e54bd3cf905  ps-o1a.auto.optimal.json
+# sha1 864da8c3a31e1084c7d4fa3707735d012dc43c12  ps-o1a.auto.seller15.json
+# sha1 2f78f6e05f1564b60318ea65bba927ffa46963e2  ps-o1a.base.casual.json
+# sha1 d9e925acd7116c6f5e6597ce47f2a4f087e24b91  ps-o1a.base.optimal.json
+# sha1 f29ef1defcee97afc8c500d2523995693d33c115  ps-o1a.base.seller15.json
+c3e11689b0c2b50496759ac72ee382be64ac58b31cc7fb6ad13c3b291cbc1fb5  eval.json
+2e3bb05d98f7f19429db02894a8481148df9e3e3976e3a4455f5a7b06ebf494b  g1.json
+c42caebd5bd57246dcb96d7a3a20d593ce4f1d87d041a9bceb80368589cec028  g1.log
+5d1975842865de537d9de783bab9aca5e034412b48b658e6b5520b74e52c51a5  nw-auto.json
+0aa48dc3287e47a1683314e2830514c1d0fc9807b6eb7d7a88603cb1b0e4b403  nw-auto.log
+5e09189baf1aabec24d2e0efab7409684af1b53cb82c3d37f00fda19a405fca3  nw-base.json
+bb76f278e8d9fd9ff4daedf1725460bb2be1c573ee64b74a9b31a790bc9f12e0  nw-base.log
+eaed41dbec6091cc4aee66d129221e013baf11c727e88510fa33abc5c8769da7  ps-o1a.auto.casual.json
+d6864c49eeceb537efe48019c49a6fae18b1dbdb6a8338441b0ff65e76513d86  ps-o1a.auto.optimal.json
+32825de0737b18034d8ad4f0f1ce5814b27ca1f85f97fd5a3968272d08ba9b86  ps-o1a.auto.seller15.json
+5e271215bcc4057d4bf4ef821b77d6efc5d1905e4af10d1cd018cc48e2a71edf  ps-o1a.base.casual.json
+df27acf2aac61c95cd0df1db2055dce9366eeedd5295310a84dcfd0fc53b3239  ps-o1a.base.optimal.json
+72659d31098e179a7d803a055f147749fe80219d9bd9d24ac1a5f706257a73b6  ps-o1a.base.seller15.json
