@@ -1,9 +1,12 @@
 import type { Balance } from '../config/balance';
 import type { Workers } from './workers';
+import type { M5Fields } from './m5-state';
+export type { M5Fields } from './m5-state';
 /** demand = original order; filled = eggs sold so far. MK-10: a partly served customer (filled > 0) still leaves
  *  customer_patience_s after arrival (logged customer_partial); the timer is never reset by a sale. */
 export interface Customer { id: number; demand: number; filled: number; waitedS: number; }
-export interface GameState {
+/** M5 optional fields (sim/m5-state.ts) are declared once and absent while their m4.flags.* are off. */
+export interface GameState extends M5Fields {
   coinsCents: number; coop: number; basket: number;
   collectionLevel: number; farmLevel: number;
   customers: Customer[]; nextCustomerInS: number; nextCustomerId: number;
