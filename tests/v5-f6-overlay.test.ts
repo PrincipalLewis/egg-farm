@@ -271,10 +271,12 @@ describe('F6 feature registration API', () => {
   it('F6-AC8: ctx.registerZone feeds validSpots; ctx.layout/spots follow the live viewport', () => {
     let ctx: any; registerFeature({ id: 'probe', mount: c => { ctx = c; } }); const d = deps(B()); mountOverlay(d);
     const scene = d.scene; scene.getBoundingClientRect = () => ({ left: 8, top: 156, right: 352, bottom: 414, width: 344, height: 258, x: 8, y: 156, toJSON() {} }) as DOMRect;
-    vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(360); vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(640);
-    expect(ctx.layout() as LayoutKey).toBe('phone-360'); expect(ctx.spots()).toHaveLength(8); expect(ctx.validSpots()).toHaveLength(8);
-    ctx.registerZone('broody', () => bx(282, 200, 340, 420)); expect(ctx.validSpots().map((s: any) => s.id)).toEqual(['S1', 'S2', 'S3', 'S4']);
-    ctx.registerZone('gone', () => null); expect(ctx.validSpots()).toHaveLength(4);
+    const de = document.documentElement; Object.defineProperty(de, 'clientWidth', { configurable: true, get: () => 360 }); Object.defineProperty(de, 'clientHeight', { configurable: true, get: () => 640 });
+    try {
+      expect(ctx.layout() as LayoutKey).toBe('phone-360'); expect(ctx.spots()).toHaveLength(8); expect(ctx.validSpots()).toHaveLength(8);
+      ctx.registerZone('broody', () => bx(282, 200, 340, 420)); expect(ctx.validSpots().map((s: any) => s.id)).toEqual(['S1', 'S2', 'S3', 'S4']);
+      ctx.registerZone('gone', () => null); expect(ctx.validSpots()).toHaveLength(4);
+    } finally { delete (de as any).clientWidth; delete (de as any).clientHeight; }
   });
   it('F6-AC8: app.ts mounts registered features (ui/features.ts import) and renders them each frame, without editing app.ts', async () => {
     const frames: number[] = []; let got: any = null;
