@@ -139,9 +139,9 @@ describe('Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a p
   });
 });
 describe('F1c registries are readonly in src (CCR nit #80)', () => {
-  it('[F1(c)][CCR-80-N] no src file mutates SALE_EFFECTS / LAY_EFFECTS (push/splice/pop/shift/unshift/length =/index assign)', () => {
+  it('[F1(c)][CCR-80-N] no src file mutates or casts away SALE_EFFECTS / LAY_EFFECTS (push/splice/pop/shift/unshift/length =/index assign/as)', () => {
     const files = readdirSync('src', { recursive: true }).map(String).filter(f => f.endsWith('.ts'));
-    const bad = /\b(SALE_EFFECTS|LAY_EFFECTS)\s*(\.\s*(push|splice|pop|shift|unshift|sort|reverse|fill|copyWithin)\s*\(|\.\s*length\s*=[^=]|\[[^\]]*\]\s*=[^=])/;
+    const bad = /\b(SALE_EFFECTS|LAY_EFFECTS)\s*(\s+as\s|\)\s*\.\s*(push|splice)|\.\s*(push|splice|pop|shift|unshift|sort|reverse|fill|copyWithin)\s*\(|\.\s*length\s*=[^=]|\[[^\]]*\]\s*=[^=])/;
     expect(files.length).toBeGreaterThan(10);
     for (const f of files) expect(bad.test(readFileSync(join('src', f), 'utf8')), f).toBe(false);
   });
@@ -152,5 +152,42 @@ describe('Q-F1c-2 (D-HOP-2026-10-29-06): Sweep is excluded from golden E', () =>
     expect(goldenEEggsPerSec(s, b)).toBe(prodEggsPerSec(s, b));
     expect(prodEggsPerSec(s, b, { suspended: false })).toBeGreaterThan(goldenEEggsPerSec(s, b));
     LAY.length = 0; expect(goldenEEggsPerSec(s, b)).toBe(prodEggsPerSec(s, b, { suspended: false }));
+  });
+});
+
+// Saves QA V5SCAP gaps 2/3 on #80.
+import { advance } from '../src/sim/tick';
+import { focusFrameMs } from '../src/sim/clock';
+import { applyOffline } from '../src/sim/offline';
+import { incomePerSec } from '../src/econ/income';
+describe('F1c D-C3 through advance(): a long frame buys at most 1.0 s of uplift', () => {
+  const mhExtra = (ms: number, focusMs?: number) => {
+    const b = B({ golden: 1 }), s0: GameState = { ...farm(b), basket: 1_000_000, coinsCents: 1_000_000, workers: { market_hand: { energy: 100, cdS: 0 } },
+      customers: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, demand: 100_000, filled: 0, waitedS: 0 })) };
+    const run = (fx: boolean) => { SALE.length = 0; if (fx) SALE.push(frenzy); const ev: any[] = [];
+      advance(s0, ms, 0, b, ev, focusMs === undefined ? undefined : { focusMs, nowMs: 1 });
+      return { cents: ev.filter(e => e.type === 'sell' && e.by === 'market_hand').reduce((a, e) => a + e.value, 0), n: ev.filter(e => e.type === 'sell' && e.by === 'market_hand').length }; };
+    const on = run(true), off = run(false); return { extra: on.cents - off.cents, sales: off.n, base: off.cents };
+  };
+  it('[D-C3][R23 partial] one 59 s frame (focusMs 1000) with a x2 fixture effect and Market Hand sales pays at most the uplift of 1.0 s (10 focus ticks)', () => {
+    const one = mhExtra(1_000, 1_000), long = mhExtra(59_000, focusFrameMs(59_000, true, 60));
+    expect(long.sales).toBeGreaterThan(2 * one.sales); expect(long.base).toBeGreaterThan(2 * one.base); // Market Hand keeps selling after the first 1.0 s
+    expect(one.extra).toBeGreaterThan(0); expect(one.extra).toBe(one.base); // x2 on every focus tick of a 1 s frame
+    expect(long.extra).toBeGreaterThan(0); expect(long.extra).toBeLessThanOrEqual(one.extra);
+  });
+});
+describe('F1c §9.5 edge 3 / R24: offline grant and income preview never see a live lay effect (callers, not the helper)', () => {
+  const tiny: LayEffect = { id: 'sweep-tiny', flag: 'abilities', factor: () => 0.01 }; // test input: makes laying the binding term
+  it('[§9.5-e3][R24 partial] applyOffline and incomePerSec are identical with a live x0.01 lay effect registered', () => {
+    // both offline paths: the shipped M4 offline model, and the legacy prodEggsPerSec path (m4.offline absent; test input)
+    const b = B({ abilities: 1 }), legacy = { ...b, m4: { ...b.m4!, offline: undefined } } as unknown as typeof b;
+    for (const bb of [b, legacy]) {
+      LAY.length = 0; const s = { ...farm(bb), coop: 0, basket: 0 };
+      const off0 = applyOffline(s, 3_600_000, bb), inc0 = incomePerSec(s, bb);
+      expect(off0.eggs).toBeGreaterThan(0); expect(inc0).not.toBe(0);
+      LAY.push(tiny);
+      expect(prodEggsPerSec(s, bb, { suspended: false })).toBeLessThan(prodEggsPerSec(s, bb)); // the effect IS live for a live ctx
+      expect(JSON.stringify(applyOffline(s, 3_600_000, bb))).toBe(JSON.stringify(off0)); expect(incomePerSec(s, bb)).toBe(inc0);
+    }
   });
 });
