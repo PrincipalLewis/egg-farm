@@ -66,3 +66,14 @@ describe('m5 card state word: text + inline SVG, no pictograph (UI-M5-1..8, UI-W
     expect(h).toContain('icon-moon.svg'); expect(h).toContain('icon-warning.svg'); expect(h).not.toMatch(/wk-banner[^>]*>\s*<svg/);
   });
 });
+
+describe('m6 HUD rate CSS (UI-M6-2/6/7)', () => {
+  const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8'), eco = readFileSync(new URL('../src/ui/s2-economy-ui.ts', import.meta.url), 'utf8');
+  it('11px icon at -1.5px, 2px gap, white fill; hidden without .warn; no U+FE0E route; the model strings keep the ⚠ marker (option A)', () => {
+    expect(rule('.rate .wi')).toBe('display:inline-block;width:11px;height:11px;vertical-align:-1.5px;margin-right:2px;color:#fff');
+    expect(rule('.rate:not(.warn) .wi')).toBe('display:none');
+    expect(app + eco).not.toMatch(/\uFE0E|\\uFE0E/);
+    expect(eco).toContain('`⚠ ${money}/s`'); expect(eco).toContain('`⚠ \\u2212${money}/s`'); expect(eco).toContain('`⚠ ▼ ${');
+    expect(app).toContain('${WARN_SVG}<span class="tri" aria-hidden="true"></span><span class="rt">$0/s</span>');
+  });
+});

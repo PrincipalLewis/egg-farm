@@ -33,7 +33,8 @@ import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, type NavAria } from './workers-ui';
-import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
+import { headerRate, headerRateText } from './s2-economy-ui';
+import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -69,7 +70,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.innerHTML = '';
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
-    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">$0/s</span></span></div>
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">${WARN_SVG}<span class="tri" aria-hidden="true"></span><span class="rt">$0/s</span></span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
@@ -187,7 +188,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
-  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate');
+  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate'), rateTri = $('#rate .tri'), rateTxt = $('#rate .rt'); // m6: ▼ in an aria-hidden .tri, money in .rt
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
@@ -535,7 +536,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-8 / AC-R2 HUD net rate (<= 1 update/s, real incomePerSec from the live worker moods); first negative tick shakes the line (not under reduced motion)
     if (now() - rateAt >= 1000) { rateAt = now();
       const v = headerRate(s, b); // ruling (a): real rate; aria ', sales stopped' only for a stalled Market Hand (HoE Oct 24)
-      setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
+      // m6 (option A, art acfe36a7): headerRateText keeps '⚠ ' as the model's warn marker; it is never painted. The icon is the static WARN_SVG
+      // toggled by .warn, ▼ goes in the aria-hidden .tri (Q-M6-2), and the 1 s tick only writes text + classes (no innerHTML).
+      { const t = headerRateText(v), warn = t.startsWith('\u26A0 '), body = warn ? t.slice(2) : t, down = body.startsWith('\u25BC ');
+        setText(rateTri, down ? '\u25BC ' : ''); setText(rateTxt, down ? body.slice(2) : body); rateEl.classList.toggle('warn', warn); }
+      rateEl.classList.toggle('neg', v.sign === 'neg');
       if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
     // coop tier + celebration (once per first reach, persisted in save)

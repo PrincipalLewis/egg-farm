@@ -671,9 +671,10 @@ sections.s28rate = async () => {
   const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
   await page.waitForTimeout(1300);
-  const read = () => page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, role: e.getAttribute('role') }; });
+  // m6 (v5 p2): the warning sign is the inline WARN_SVG (shown only with .warn), ▼ sits in an aria-hidden .tri; the text has no U+26A0
+  const read = () => page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e), wi = e.querySelector('svg.wi'); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, role: e.getAttribute('role'), icon: !!wi && getComputedStyle(wi).display !== 'none', tri: e.querySelector('.tri')?.getAttribute('aria-hidden') }; });
   const awake = await read();
-  ok('S2-8 HUD rate: awake workers -> "+$X/s" 11px/700 green, role=status, aria "Net income plus …"', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(awake.text) && awake.sign === 'pos' && awake.color === 'rgb(61, 127, 51)' && awake.size === '11px' && awake.weight === '700' && awake.role === 'status' && /^Net income plus /.test(awake.aria ?? ''), JSON.stringify(awake));
+  ok('S2-8 HUD rate: awake workers -> "+$X/s" 11px/700 green, role=status, aria "Net income plus …", no warn icon (m6)', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(awake.text) && !awake.icon && awake.sign === 'pos' && awake.color === 'rgb(61, 127, 51)' && awake.size === '11px' && awake.weight === '700' && awake.role === 'status' && /^Net income plus /.test(awake.aria ?? ''), JSON.stringify(awake));
   // Reviewer m2: drive the real rateView -> headerRateText path (no injected text). Ruling (a): an asleep Coop Hand does not clamp the rate.
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: { ...g.state.workers, coop_hand: { ...g.state.workers.coop_hand, energy: 0 } } }; });
   await page.waitForTimeout(1300);
@@ -684,7 +685,7 @@ sections.s28rate = async () => {
     await page.evaluate(mh => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: mh.unpaid ? 0 : g.state.coinsCents, workers: { market_hand: mh } }; }, mh); // coins 0: an Unpaid worker auto-resumes when it can be paid
     await page.waitForTimeout(1300);
     const r = await read();
-    ok(`AC-R1m / §4.2 real path: Market Hand ${mh.unpaid ? 'unpaid' : 'asleep'} -> HUD rate <= 0 in red (⚠ ▼), aria "stopped"`, /^⚠ ▼ (\u2212)?\$[\d.,]+[A-Za-z]*\/s$/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && /stopped$/.test(r.aria ?? ''), JSON.stringify(r));
+    ok(`AC-R1m / §4.2 real path: Market Hand ${mh.unpaid ? 'unpaid' : 'asleep'} -> HUD rate <= 0 in red (warn SVG + aria-hidden ▼, m6), aria "stopped"`, /^▼ (\u2212)?\$[\d.,]+[A-Za-z]*\/s$/.test(r.text) && r.icon && r.tri === 'true' && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && /stopped$/.test(r.aria ?? ''), JSON.stringify(r));
   }
   if (shot) await page.screenshot({ path: `${SHOTS}/m41p1-s2-8-rate-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
   await ctx.close();
