@@ -26,30 +26,37 @@ const run = (s: GameState, n: number, c?: { focus: boolean }, bb = SB, ev: any[]
 function build(n: number, s = base()) { const ev: any[] = []; for (let i = 0; i < n; i++) { s = apply(s, { type: 'collect' }, SB, ev); s = run(s, Math.round(tc.tap_credit_min_s / DT), U); } return { s, ev }; }
 const strip = (s: any) => { const { customers, ...r } = s; return r; };
 describe('#2 streak: credited taps (R1-R5, R13a)', () => {
-  it('a Collect at F >= unlock credits +per_tap, restarts the hold, starts the window and emits streak_started once', () => {
+  it('ST-AC2: a Collect at F >= unlock credits +per_tap, restarts the hold, starts the window and emits streak_started once', () => {
     const r = tap(base()); expect(r.s.streakS).toBeCloseTo(STEP, 12); expect(r.s.streakHoldS).toBe(tc.streak_hold_s); expect(r.s.tapCreditCdS).toBe(tc.tap_credit_min_s);
     expect(r.ev).toEqual([{ type: 'collect', eggs: expect.any(Number), credited: true }, { type: 'streak_started', farm_level: 8, collection_level: 4 }]);
     const r2 = tap(r.s); expect(r2.s.streakS).toBe(r.s.streakS); expect(r2.ev).toEqual([{ type: 'collect', eggs: expect.any(Number), credited: false }]);
   });
-  it('the window is sim time, hidden ticks included (R2/K1/K19); credited even when the coop is empty (K2)', () => {
+  it('ST-AC16c, ST-AC3, ST-AC4: the window is sim time, hidden ticks included (R2/K1/K19); credited even when the coop is empty (K2)', () => {
     let s = tap(base()).s; s = run(s, Math.round(tc.tap_credit_min_s / DT) - 1, U); expect(tap(s).ev[0].credited).toBe(false);
     s = run(s, 1, U); const r = tap({ ...s, coop: 0 }); expect(r.ev[0]).toEqual({ type: 'collect', eggs: 0, credited: true }); expect(r.s.streakS).toBeCloseTo(2 * STEP, 12);
   });
-  it('below the unlock farm or with the flag off: no credit and the rc1 collect event', () => {
+  it('ST-AC1, ST-AC29: below the unlock farm or with the flag off: no credit and the rc1 collect event', () => {
     expect(tap(base(SB, { farmLevel: 7 })).ev[0].credited).toBe(false);
     const r = tap(base(OFF), OFF); expect(r.ev).toEqual([{ type: 'collect', eggs: expect.any(Number) }]); expect(r.s.streakS).toBeUndefined();
     expect(streakOn(OFF)).toBe(false); expect(streakOn(SB)).toBe(true);
   });
-  it('caps at tc_streak_cap exactly (K4), and K18 clamps a lowered cap on the next tick with no event', () => {
+  it('ST-AC28: caps at tc_streak_cap exactly (K4), and K18 clamps a lowered cap on the next tick with no event', () => {
     const { s } = build(40); expect(s.streakS).toBe(CAP); expect(s.streakRun!.creditedTaps).toBe(40);
     const ev: any[] = []; const t = streakTick({ ...s, streakS: 0.4 }, DT, 0, SB, ev); expect(t.streakS).toBe(CAP); expect(ev).toEqual([]);
   });
-  it('§3.3 tiers: T_k = round_to_step(cap x k/4); max_tier', () => {
+  it('ST-AC11: §3.3 tiers T_k = round_to_step(cap x k/4) from config (0.27 and 0.40); max_tier', () => {
     expect([0.06, 0.07, 0.13, 0.14, 0.2, 0.26, 0.27].map(v => streakTier(v, SB))).toEqual([0, 1, 1, 2, 3, 3, 4]);
+    const c40 = { ...SB, m4: { ...SB.m4!, tc: { ...tc, streak_cap: 0.4 } } } as typeof b;
+    expect([0.09, 0.1, 0.2, 0.3, 0.39, 0.4].map(v => streakTier(v, c40))).toEqual([0, 1, 2, 3, 3, 4]);
+  });
+  it('ST-AC14: a Coop Hand collect and the welcome-back Collect are never credited (R3)', () => {
+    const hired = base(SB, { workers: { coop_hand: { energy: 100, cdS: 0 } } as any, coinsCents: 1e6, pendingOfflineEggs: 5 }), ev: any[] = [];
+    const w = run(hired, 30, F, SB, ev); expect(ev.some(e => e.type === 'worker_collect')).toBe(true); expect(w.streakS).toBeUndefined();
+    const o = apply(hired, { type: 'collectOffline' }, SB, ev); expect(o.streakS).toBeUndefined(); expect(o.tapCreditCdS).toBeUndefined();
   });
 });
 describe('#2 streak: hold and decay on the focus clock (R6/R7/R12, D-C3)', () => {
-  it('K5: stop at the cap: hold 3 s then decay to 0 at 12.0 s (cap 0.27), then streak_peak{reason:"decay"}', () => {
+  it('ST-AC5, ST-AC28: K5 stop at the cap: hold 3 s then decay to 0 at 12.0 s (cap 0.27), then streak_peak{reason:"decay"}', () => {
     const { s: s0 } = build(27); const ev: any[] = []; let s = run(s0, 30, F, SB, ev); expect(s.streakS).toBe(CAP); expect(s.streakHoldS).toBeCloseTo(0, 9);
     s = run(s, 89, F, SB, ev); expect(s.streakS).toBeGreaterThan(0); s = run(s, 1, F, SB, ev);
     expect(s.streakS).toBe(0); expect(s.streakRun).toBeUndefined();
@@ -59,43 +66,43 @@ describe('#2 streak: hold and decay on the focus clock (R6/R7/R12, D-C3)', () =>
     const bb = { ...SB, m4: { ...SB.m4!, tc: { ...tc, streak_cap: 0.28 } } } as typeof b; let s: GameState = { ...base(bb), streakS: 0.28, streakHoldS: tc.streak_hold_s };
     s = run(s, 123, F, bb); expect(s.streakS).toBeGreaterThan(0); s = run(s, 1, F, bb); expect(s.streakS).toBe(0);
   });
-  it('K10/R12: unfocused ticks freeze s and the hold; a credited tap during decay stops it and restarts the hold (R7)', () => {
+  it('ST-AC13, ST-AC6: K10/R12 unfocused ticks freeze s and the hold; a credited tap during decay stops it and restarts the hold (R7)', () => {
     let s = build(10).s; s = run(s, 100, U); expect(s.streakS).toBeCloseTo(0.1, 12); expect(s.streakHoldS).toBe(tc.streak_hold_s);
     s = run(s, 40, F); expect(s.streakS).toBeCloseTo(0.1 - tc.streak_decay_per_s * 1, 9); s = tap(s).s; expect(s.streakS).toBeCloseTo(0.08, 9); expect(s.streakHoldS).toBe(tc.streak_hold_s);
   });
-  it('D-C3: only the first ceil(focusMs/tick) ticks of a frame carry focus', () => {
+  it('ST-AC13: D-C3 (R12) only the first ceil(focusMs/tick) ticks of a frame carry focus', () => {
     const s = { ...base(), streakS: 0.1, streakHoldS: 0 }; const r = advance(s, 1000, 0, SB, undefined, { focusMs: 250 });
     expect(r.state.streakS).toBeCloseTo(0.1 - tc.streak_decay_per_s * 0.3, 12);
   });
 });
 describe('#2 streak: the (1 + s) sale factor (R8/R9/R12)', () => {
   const sell = (bb = SB, x: Partial<GameState> = {}) => ({ ...base(bb), basket: 10, customers: [{ id: 1, demand: 5, filled: 0, waitedS: 0 }], ...x });
-  it('player sale and preview get (1 + s); extra_coins accrues the streak share only', () => {
+  it('ST-AC7: player sale and preview get (1 + s); extra_coins accrues the streak share only', () => {
     const s = sell(SB, { streakS: 0.2 }); expect(saleMultipliers(s, SB)).toEqual([1, 1.2]); const v = saleValueCents(s, 5, SB);
     const o = apply(s, { type: 'sell', customerId: 1 }, SB); expect(o.coinsCents).toBe(v); expect(o.streakRun!.extraCents).toBe(v - saleValueCents({ ...s, streakS: 0 }, 5, SB));
   });
-  it('suspended (unfocused tick) and flag off: no factor; a worker sale under a menu is 1x (K10)', () => {
+  it('ST-AC13, ST-AC29: suspended (unfocused tick) and flag off: no factor; a worker sale under a menu is 1x (K10)', () => {
     expect(saleMultipliers(sell(SB, { streakS: 0.2 }), SB, { by: 'market_hand', suspended: true })).toEqual([1]);
     expect(saleMultipliers(sell(OFF, { streakS: 0.2 }), OFF)).toEqual([1]);
   });
-  it('flag off: step with or without a clock is identical, and no streak fields appear', () => {
+  it('ST-AC29: flag off: step with or without a clock is identical, and no streak fields appear', () => {
     let a = sell(OFF), c = sell(OFF); for (let i = 0; i < 50; i++) { a = step(a, DT, OFF); c = step(c, DT, OFF, undefined, F); } expect(c).toEqual(a);
     expect(Object.keys(strip(tap(sell(OFF), OFF).s)).some(k => k.startsWith('streak') || k === 'tapCreditCdS')).toBe(false);
   });
 });
 describe('#2 streak: offline / reload (R10/R11, D-HOP-08 #2)', () => {
-  it('a >= 60 s gap: streak_peak{reason:"offline"} with the run stats, s = 0, run dropped; nothing at s = 0', () => {
+  it('ST-AC12: a >= 60 s gap: streak_peak{reason:"offline"} with the run stats, s = 0, run dropped; nothing at s = 0', () => {
     const { s } = build(5); const ev: any[] = []; const o = m5Offline(s, SB, ev);
     expect(ev).toEqual([{ type: 'streak_peak', value: 0.05, duration_s: 0, credited_taps: 5, time_at_cap_s: 0, extra_coins: 0, frenzy_overlap_s: 0, reason: 'offline', max_tier: 0 }]);
     expect(o).toMatchObject({ streakS: 0, streakHoldS: 0 }); expect(o.streakRun).toBeUndefined();
     const ev2: any[] = []; m5Offline(o, SB, ev2); expect(ev2).toEqual([]);
   });
-  it('the run stats are session only (never saved)', () => { expect(m5Persist(build(3).s)).not.toHaveProperty('streakRun'); });
+  it('ST-AC12: the run stats are session only (never saved)', () => { expect(m5Persist(build(3).s)).not.toHaveProperty('streakRun'); });
   function game() {
     const kv = mem(); let t = Date.UTC(2026, 9, 29, 12); const g = new Game(SB, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
     g.state = { ...g.state, farmLevel: 8, coop: 50 }; return { kv, g, now: () => t, adv: (ms: number) => { t += ms; } };
   }
-  it('Game: attended frames decay, unattended frames and a 5 s hide freeze (K8); pagehide sends streak_peak{reason:"reload"}', () => {
+  it('ST-AC12a, ST-AC12, ST-AC13: Game: attended frames decay, unattended frames and a 5 s hide freeze (K8); pagehide sends streak_peak{reason:"reload"}', () => {
     const { kv, g, now, adv } = game(); g.frame(); g.dispatch({ type: 'collect' }); expect(g.state.streakS).toBeCloseTo(STEP, 12);
     adv(5000); g.frame(); expect(g.state.streakS).toBeCloseTo(STEP, 12);
     g.onHidden(now()); adv(5000); g.frame(); g.onShown(now()); expect(g.state.streakS).toBeCloseTo(STEP, 12);
@@ -106,11 +113,11 @@ describe('#2 streak: offline / reload (R10/R11, D-HOP-08 #2)', () => {
 });
 describe('a missing tc_* tunable is caught, never read as 0 (HoE/Architect follow-up on F2)', () => {
   const drop = (k: string) => { const t: any = { ...SB.m4!.tc }; delete t[k]; return { ...SB, m4: { ...SB.m4!, tc: t } } as typeof b; };
-  it('tcNum throws on a missing or non-finite key', () => {
+  it('ST-AC18: tcNum throws on a missing or non-finite key', () => {
     expect(tcNum(SB, 'streak_cap')).toBe(0.27); expect(() => tcNum(drop('streak_cap'), 'streak_cap')).toThrow(/tc_streak_cap/);
     expect(() => tcNum({ ...SB, m4: { ...SB.m4!, tc: { ...SB.m4!.tc, streak_cap: NaN } } } as typeof b, 'streak_cap')).toThrow(/tc_streak_cap/);
   });
-  it('validateBalance rejects a flag that is on without every tc key it reads; off flags need nothing', () => {
+  it('ST-AC18: validateBalance rejects a flag that is on without every tc key it reads; off flags need nothing', () => {
     expect(() => validateBalance(SB, false)).not.toThrow(); expect(() => validateBalance(b, false)).not.toThrow();
     for (const [f, keys] of Object.entries(M5_TC_KEYS)) for (const k of keys) {
       const bad = drop(k); if (!(SB.m4!.flags as any)[f]) continue;
@@ -118,7 +125,7 @@ describe('a missing tc_* tunable is caught, never read as 0 (HoE/Architect follo
       expect(() => validateBalance({ ...bad, m4: { ...bad.m4!, flags: { ...bad.m4!.flags, [f]: 0 } } } as typeof b, false)).not.toThrow();
     }
   });
-  it('the F2 readers throw instead of defaulting (drawGap without tc_egg_gap_min_s)', () => {
+  it('ST-AC18: the F2 readers throw instead of defaulting (drawGap without tc_egg_gap_min_s)', () => {
     expect(() => drawGap(base(), drop('egg_gap_min_s'))).toThrow(/tc_egg_gap_min_s/);
   });
 });
