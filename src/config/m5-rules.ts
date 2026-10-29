@@ -18,6 +18,13 @@ export function validateM5(m4: any, workers: any): void {
     if (!(M5_FLAGS as readonly string[]).includes(k)) fail(`flags.${k} is not a known flag (${M5_FLAGS.join(', ')})`);
     if (v !== 0 && v !== 1) fail(`flags.${k} must be 0 or 1`);
   }
+  // m4.zeroGain (zero-gain UI spec 1098f14e "m5.zeroGain.confirm"; m4 namespace per manifest row 28): object, known keys, 0/1
+  const zg = m4.zeroGain ?? {};
+  if (typeof zg !== 'object' || Array.isArray(zg)) fail('zeroGain must be an object');
+  for (const [k, v] of Object.entries(zg)) {
+    if (k !== 'confirm') fail(`zeroGain.${k} is not a known key (confirm)`);
+    if (v !== 0 && v !== 1) fail(`zeroGain.${k} must be 0 or 1`);
+  }
   const tc: TC = m4.tc ?? {};
   for (const [f, keys] of Object.entries(M5_REQUIRED_TC)) if (flags[f] === 1) for (const k of keys!) if (!has(tc, k)) fail(`tc.${k} is required while flags.${f} is on`);
   // #1 golden egg (spec §5 validateBalance line)

@@ -162,8 +162,18 @@ export function keepFlags(prev: any): Record<string, number> {
   for (const f of M5_FLAGS) { const v = p[f] ?? 0; if (v !== 0 && v !== 1) throw new Error(`sync-economy: m4.flags.${f} must be 0 or 1, got ${JSON.stringify(v)}`); out[f] = v; }
   return out;
 }
+/** v5 F3 (QA seam Q8): balance.json-only tunables block m4.zeroGain (spec "m5.zeroGain.confirm", m4 namespace per manifest
+ *  row 28). Kept whole like the flags: `confirm` 0/1, absent = 0, unknown keys fail the sync. */
+export const ZERO_GAIN_KEYS = ['confirm'] as const;
+export function keepZeroGain(prev: any): { confirm: number } {
+  const p = prev?.m4?.zeroGain ?? {};
+  if (typeof p !== 'object' || Array.isArray(p)) throw new Error('sync-economy: balance.json m4.zeroGain must be an object');
+  for (const k of Object.keys(p)) if (!(ZERO_GAIN_KEYS as readonly string[]).includes(k)) throw new Error(`sync-economy: unknown key m4.zeroGain.${k} (known: ${ZERO_GAIN_KEYS.join(', ')})`);
+  const v = p.confirm ?? 0; if (v !== 0 && v !== 1) throw new Error(`sync-economy: m4.zeroGain.confirm must be 0 or 1, got ${JSON.stringify(v)}`);
+  return { confirm: v };
+}
 /** hens_cost / egg_value_cost are floor(base x growth^L) per row; caps, milestone/grade/Balanced/price-term and tc_* are constant.
- *  A CSV with no M4 columns at all produces no m4 block. From balance.json only `enabled` and the `flags` block are kept. */
+ *  A CSV with no M4 columns at all produces no m4 block. From balance.json only `enabled`, the `flags` block and `zeroGain` are kept. */
 export function fitM4(rows: Row[], prev: any) {
   const R = rows, has = (c: string) => c in R[0];
   if (!M4_COLS.some(has)) return undefined;
@@ -179,7 +189,7 @@ export function fitM4(rows: Row[], prev: any) {
     if (!out.length) throw new Error(`sync-economy: economy.csv has no ${pre}1_level column`);
     return out;
   };
-  return { enabled: prev.m4?.enabled ?? 0, flags: keepFlags(prev),
+  return { enabled: prev.m4?.enabled ?? 0, flags: keepFlags(prev), zeroGain: keepZeroGain(prev),
     hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
     offline: { eggsPerSec: R.map(r => r.offline_eggs_per_sec), maxEggs2h: R.map(r => r.offline_max_eggs_2h) }, // spec v1.14 M4A-4
     eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm'), baseStep: one('egg_value_base_step'), levelBonus: one('egg_value_level_bonus') },

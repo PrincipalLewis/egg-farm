@@ -177,6 +177,9 @@
       "zeroGainUi": 0,
       "bestBuyV2": 0
     },
+    "zeroGain": {
+      "confirm": 0
+    },
     "hens": {
       "costs": [
         20,
