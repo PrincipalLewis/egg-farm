@@ -53,6 +53,8 @@ export interface M5Fields {
   // ---- #5 Broody Hen (session only) ----
   /** Nest in 1/10000 cent (R7 `nestScaled`); load sets it to broodyNestCents x 10000. */
   broodyNestScaled?: number;
+  /** brRng position (D-C4): derived from evRngState, never saved, only Broody draws from it. */
+  brRngState?: number;
   // ---- #4 abilities (saved, abilities spec rule 1/3, E2) ----
   abilities?: Partial<Record<WorkerId, AbilityState>>;
   abilitiesUnlocked?: boolean;
@@ -62,5 +64,5 @@ export interface M5Fields {
 /** Fields F2 persists (optional, absent = default). */
 export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen'] as const satisfies readonly (keyof M5Fields)[];
 /** Fields that live only for a page session: F2 strips them before serialize (specs: never saved). */
-export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const satisfies readonly (keyof M5Fields)[];
 export const M5_FIELDS: readonly (keyof M5Fields)[] = [...M5_SAVED_FIELDS, ...M5_SESSION_FIELDS];

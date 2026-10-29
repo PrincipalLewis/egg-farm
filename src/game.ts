@@ -7,6 +7,7 @@ import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import type { SimEvent } from './sim/events';
+import { focusFrameMs } from './sim/clock';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -381,6 +382,11 @@ export class Game {
     const capS = this.b.offline.offlineCapSeconds;
     return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
   }
+  /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach open)? Set by the UI (F6 dialogOpen()).
+   *  Default false: no focus time accrues, so M5 timers stay frozen until the UI wires it. Visibility is handled by frame()
+   *  itself (hidden frames never pass focus). Only read while M5 flags are on. */
+  private attendedProbe: () => boolean = () => false;
+  setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
   frame() {
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
@@ -397,7 +403,9 @@ export class Game {
     }
     if (gap > 0) {
       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
-      const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
+      // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
+      const focusMs = focusFrameMs(gap, !this.readOnly && this.attendedProbe(), this.b.offline.offlineMinSeconds);
+      const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
     }
     this.checkCoopFull(); this.telemetry.poll();

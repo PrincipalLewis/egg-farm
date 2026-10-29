@@ -1,0 +1,22 @@
+/**
+ * v5 F1b: one stepTimers() sub-call per M5 system (engineering/m5.0-sizing.md §4 hotspot 4). Runs at the END of step(),
+ * after the rc1 tick order (AC3), and ONLY when an M5 flag is on: with every m4.flags.* off, step() is byte-identical.
+ * Each feature PR (golden #1, streak #2, income-ref #3, abilities #4, Broody #5) appends one TimerSystem to TIMER_SYSTEMS.
+ */
+import type { Balance } from '../config/balance';
+import { M5_FLAGS, flagOn, evRngFlagOn } from '../config/flags';
+import type { Sink } from './events';
+import type { GameState } from './state';
+import { tickFocusS, type StepClock } from './clock';
+import { ensureEvRng } from './rng';
+/** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
+export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
+/** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng. */
+const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(s) : s);
+export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng];
+export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
+  const f = tickFocusS(dt, clock);
+  for (const sys of systems) s = sys(s, dt, f, b, clock, ev);
+  return s;
+}
