@@ -9,7 +9,7 @@ import { workersHtml, WARN_SVG, MOON_SVG } from '../src/ui/workers-ui';
 const css = readFileSync(new URL('../src/ui/styles.css', import.meta.url), 'utf8');
 const wui = readFileSync(new URL('../src/ui/workers-ui.ts', import.meta.url), 'utf8');
 const st = (o: Record<string, unknown> = {}): any => ({ ...initialState(b, 1), ...o });
-const rule = (sel: string) => { const i = css.indexOf(`${sel}{`); expect(i, sel).toBeGreaterThanOrEqual(0); return css.slice(i + sel.length + 1, css.indexOf('}', i)); };
+const rule = (sel: string, last = false) => { const i = last ? css.lastIndexOf(`${sel}{`) : css.indexOf(`${sel}{`); expect(i, sel).toBeGreaterThanOrEqual(0); return css.slice(i + sel.length + 1, css.indexOf('}', i)); };
 const sha1 = (t: string) => createHash('sha1').update(t).digest('hex');
 // art-ux/assets/*.svg bytes: the inline constants minus the 3 injected attributes must hash to the signed asset sha1
 // (icon-warn.svg is one line with no trailing LF; icon-moon-ink.svg ends with one LF).
@@ -84,5 +84,26 @@ describe('m1 yard reduced motion (UI-M1-9 source rules; bob/popin unchanged, UI-
     expect(css).toContain('@media (prefers-reduced-motion:reduce){.yard .hen,.yard .hen.pop{animation:none}}');
     expect(css).toContain('.rm .yard .hen,.rm .yard .hen.pop{animation:none}');
     expect(css).toContain('.hen{width:min(15cqw,48px);width:48px;animation:bob 1.6s ease-in-out infinite}');
+  });
+});
+
+describe('m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, CSS only)', () => {
+  const lum = (hex: string) => { const c = hex.match(/[0-9a-f]{2}/gi)!.map(h => { const v = parseInt(h, 16) / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const ratio = (a: string, c: string) => { const [x, y] = [lum(a), lum(c)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  it('token defined exactly once, in the first :root colour row next to --c-muted, = #5A4C42', () => {
+    expect(css.match(/--c-muted-strong:/g)!.length).toBe(1);
+    const root = css.slice(css.indexOf(':root{'), css.indexOf('}', css.indexOf(':root{')));
+    expect(root).toContain('--c-muted:#6B5D52;--c-muted-strong:#5A4C42;');
+  });
+  it('shared :39 rule and PT1-14 both use var(--c-muted-strong); cursor:not-allowed; no #5A4C42 literal in either', () => {
+    expect(rule('.btn[aria-disabled=true]')).toBe('background:var(--c-disabled);color:var(--c-muted-strong);box-shadow:none;animation:none;cursor:not-allowed');
+    expect(rule('.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]', true)).toBe('color:var(--c-muted-strong);background:#CFC6BA'); // PT1-14 (the later rule; :218 keeps its own grey and is overridden)
+  });
+  it('contrast: #5A4C42 on #CFC6BA >= 4.5 (4.88); old #6B5D52 was 3.76', () => {
+    expect(ratio('5A4C42', 'CFC6BA')).toBeGreaterThanOrEqual(4.5); expect(ratio('5A4C42', 'CFC6BA')).toBeCloseTo(4.88, 1); expect(ratio('6B5D52', 'CFC6BA')).toBeCloseTo(3.76, 1);
+  });
+  it('Buy stays aria-disabled, never native disabled (UI-M10-5)', () => {
+    const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+    expect(app).toMatch(/class="btn buy \$\{can \? 'affordable' : ''\}"[^>]*aria-disabled="\$\{!can\}"/); expect(app).not.toMatch(/<button class="btn buy[^>]* disabled[ >=]/);
   });
 });

@@ -4,7 +4,7 @@
 @font-face{font-family:"Nunito";font-weight:700;font-display:swap;src:url(/fonts/nunito-latin-700-normal.woff2) format("woff2")}
 :root{
   --c-yolk:#FFC93C;--c-yolk-dark:#F29E1F;--c-barn:#B83B37;--c-meadow:#6BBF59;--c-sky:#8FD3F4;--c-cream:#FFF6E5;--c-white:#FFFFFF;--c-wood:#A86B3C;
-  --c-text:#3E2C23;--c-muted:#6B5D52;--c-meadow-strong:#3D7F33;--c-wood-text:#8A5528;--c-focus:#2B79A8;--c-slot-outline:#6B5D52;--c-floater:#3E2C23;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
+  --c-text:#3E2C23;--c-muted:#6B5D52;--c-muted-strong:#5A4C42;--c-meadow-strong:#3D7F33;--c-wood-text:#8A5528;--c-focus:#2B79A8;--c-slot-outline:#6B5D52;--c-floater:#3E2C23;--c-gold:#E8B020;--c-disabled:#CFC6BA;--c-outline:rgb(62 44 35 / .8);--c-scrim:rgb(62 44 35 / .55);
   --c-barn-ui:#B83B37;--c-danger:var(--c-barn-ui); /* rc1-upgrade-value v1.4 (M4.1 patch 1: asleep banner + badge red) */
   --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-pill:999px;
   --bw:2px;--shadow:0 4px 0 rgb(62 44 35 / .25);
@@ -36,7 +36,7 @@ img{user-select:none;-webkit-user-drag:none}
 .btn.buy.affordable{animation:glow 1.6s infinite}
 @keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(61 127 51/.35)}}
 .btn.secondary{background:var(--c-white);min-height:44px}.btn.danger{background:var(--c-barn);color:#fff;min-height:44px}
-.btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
+.btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted-strong);box-shadow:none;animation:none;cursor:not-allowed} /* m10: 3.76 -> 4.88:1 */
 /* MAX is a label, not a button (m4-tracks-copy.md line 10, layout-spec.md lines 110/159): yolk pill, --c-text, no shadow, no press, not focusable */
 .maxed{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:var(--r-pill);background:var(--c-yolk);color:var(--c-text);font:700 var(--fs-base) var(--f-display);box-shadow:none;pointer-events:none;user-select:none}
 .btn img{width:20px;height:20px}
@@ -399,8 +399,8 @@ html,body{overflow-x:hidden;max-width:100%}
 .goal-label,.goal-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .collectbar{box-sizing:border-box}
 @media (max-width:375px){#collect,.collectbar .btn,.row .btn{min-width:0;max-width:96px}#collect{max-width:none}}
-/* PT1-14: greyed Manage all = #5A4C42 on #CFC6BA (4.88:1); focus ring unchanged */
-.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{color:#5A4C42;background:#CFC6BA}
+/* PT1-14: greyed Manage all = var(--c-muted-strong) #5A4C42 on #CFC6BA (4.88:1); focus ring unchanged */
+.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{color:var(--c-muted-strong);background:#CFC6BA}
 /* Rotate-to-portrait prompt (art-ux/m3-rotate-portrait-prompt.md §5); shown/hidden in JS from the same media query */
 #rotate-prompt{display:flex;position:fixed;inset:0;z-index:1000;background:#FFF6E5;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);color:#3E2C23}
 #rotate-prompt[hidden]{display:none}
