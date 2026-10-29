@@ -46,3 +46,32 @@ describe('m6 HUD #rate: static WARN_SVG + aria-hidden ▼ (UI-M6-1/5/6/8)', () =
     const r = rate(); expect(r.warn).toBe(false); expect(r.tri.textContent).toBe(''); expect(r.text).toMatch(/^\+\$/); expect(r.svgs.length).toBe(1);
   });
 });
+
+describe('m1 yard: keyed per-slot diff (UI-M1-1/3/4/5/6)', () => {
+  const hens = () => [...document.querySelectorAll<HTMLImageElement>('#yard img.hen')];
+  it('first render: no .pop; Hens buys keep every existing node, add only new hens with .pop + "0s, <stagger>", cap 12 = 0 mutations', async () => {
+    const { g, ui } = await mount({ farmLevel: 10, hensLevel: 0, coinsCents: 1e15 });
+    const yard = document.getElementById('yard')!;
+    expect(yard.children.length).toBe(12); const h0 = hens(); expect(h0.length).toBe(5);
+    expect(h0.every(h => !h.classList.contains('pop'))).toBe(true); // UI-M1-6
+    // UI-M1-6: slot order [2,3,1,4,0,5,8,9,7,10,6,11] and flip on i%3 = 2
+    const slotOf = (h: Element) => [...yard.children].indexOf(h.parentElement!);
+    expect(h0.map(slotOf).sort((a, c) => a - c)).toEqual([0, 1, 2, 3, 4]);
+    for (const h of h0) expect(h.classList.contains('flip')).toBe(slotOf(h) % 3 === 2);
+    const created: Node[] = [], removed: Node[] = [];
+    const mo = new MutationObserver(ms => { for (const m of ms) { created.push(...m.addedNodes); removed.push(...m.removedNodes); } }); mo.observe(yard, { childList: true, subtree: true });
+    for (let k = 0; k < 5; k++) { g.dispatch({ type: 'buyTrack', track: 'hens' } as any); ui.render(); }
+    await Promise.resolve(); mo.disconnect();
+    expect(g.state.hensLevel).toBe(5);
+    const h1 = hens(); expect(h1.length).toBe(12);
+    for (const h of h0) expect(h1).toContain(h); // UI-M1-1: same objects
+    expect(created.length).toBe(7); expect(removed.length).toBe(0); // 5 -> 10 -> 12 (cap): 7 created, 0 discarded
+    const fresh = h1.filter(h => !h0.includes(h));
+    for (const h of fresh) { expect(h.classList.contains('pop')).toBe(true); expect(h.style.animationDelay).toBe(`0s, ${(slotOf(h) * .15).toFixed(2)}s`); }
+    for (const h of h0) expect(h.style.animationDelay).toBe(`${(slotOf(h) * .15).toFixed(2)}s`);
+    // UI-M1-5: at the cap a further buy is 0 child mutations
+    const mo2 = new MutationObserver(ms => { created.push(...ms); }); const before = created.length; mo2.observe(yard, { childList: true, subtree: true, attributes: true });
+    g.dispatch({ type: 'buyTrack', track: 'hens' } as any); ui.render(); await Promise.resolve(); mo2.disconnect();
+    expect(created.length).toBe(before);
+  });
+});

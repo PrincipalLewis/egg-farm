@@ -85,6 +85,9 @@ img{user-select:none;-webkit-user-drag:none}
 .hen{width:min(15cqw,48px);width:48px;animation:bob 1.6s ease-in-out infinite}
 .hen.flip{transform:scaleX(-1)}@keyframes bob{50%{translate:0 -2px}}
 .hen.pop{animation:popin 300ms var(--ease-pop),bob 1.6s ease-in-out infinite}@keyframes popin{from{scale:0}}
+/* m1 (UI-M1-9, Q-M1-2/Q-M1-4): reduced motion (OS setting or the in-app toggle .rm) = no bob, and a new hen appears at full size */
+@media (prefers-reduced-motion:reduce){.yard .hen,.yard .hen.pop{animation:none}}
+.rm .yard .hen,.rm .yard .hen.pop{animation:none}
 .henpill{position:absolute;left:4px;bottom:4px;font:700 var(--fs-sm) var(--f-display);background:var(--c-white);border-radius:var(--r-pill);padding:0 8px;border:var(--bw) solid var(--c-outline)}
 .collectbar{display:flex;flex-direction:column;gap:var(--s-2)}
 .meter{position:relative;height:16px;border-radius:var(--r-pill);background:var(--c-white);border:var(--bw) solid var(--c-outline);overflow:hidden}

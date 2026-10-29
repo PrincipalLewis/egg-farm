@@ -559,9 +559,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const hensN = m4On(b) ? S.hens(s.hensLevel, b) : S.hens(F, b);
     const hn = Math.min(hensN, 12);
     if (hn !== henCount) {
+      // m1 (art acfe36a7, UI-M1-1..6): keyed per-slot diff instead of rebuilding all 12 cells. Existing hens are never touched, so their
+      // `bob` keeps its phase; only appearing hens are appended (with .pop after the first render) and only vanishing ones removed.
+      // A new hen's delay list is `0s, <stagger>`: popin plays at the tap, bob keeps its per-slot stagger. Reduced motion is CSS only.
       const order = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
-      const slots = Array.from({ length: 12 }, (_, i) => `<span>${order.indexOf(i) < hn ? `<img class="hen ${i % 3 === 2 ? 'flip' : ''} ${henCount >= 0 && order.indexOf(i) >= henCount ? 'pop' : ''}" style="animation-delay:${(i * .15).toFixed(2)}s" src="${A('char-chicken.svg')}" alt="">` : ''}</span>`);
-      yard.innerHTML = slots.join(''); henCount = hn;
+      if (yard.children.length !== 12) yard.innerHTML = '<span></span>'.repeat(12);
+      for (let i = 0; i < 12; i++) {
+        const cell = yard.children[i], img = cell.firstElementChild, want = order.indexOf(i) < hn;
+        if (want && !img) {
+          const pop = henCount >= 0, d = `${(i * .15).toFixed(2)}s`, el = document.createElement('img');
+          el.className = `hen${i % 3 === 2 ? ' flip' : ''}${pop ? ' pop' : ''}`;
+          el.style.animationDelay = pop ? `0s, ${d}` : d;
+          el.src = A('char-chicken.svg'); el.alt = ''; cell.appendChild(el);
+        } else if (!want && img) img.remove();
+      }
+      henCount = hn;
     }
     const hp = $('#henpill'); setHidden(hp, hensN <= 12); setText(hp, `×${fmtCount(hensN)}\u00a0hens`);
     // meter, nest, full badge, collect label

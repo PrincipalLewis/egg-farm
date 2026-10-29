@@ -77,3 +77,12 @@ describe('m6 HUD rate CSS (UI-M6-2/6/7)', () => {
     expect(app).toContain('${WARN_SVG}<span class="tri" aria-hidden="true"></span><span class="rt">$0/s</span>');
   });
 });
+
+describe('m1 yard reduced motion (UI-M1-9 source rules; bob/popin unchanged, UI-M1-4)', () => {
+  it('media + .rm rules right after the .hen.pop rule; bob 1.6s infinite and popin 300ms x1 unchanged', () => {
+    expect(css).toContain('.hen.pop{animation:popin 300ms var(--ease-pop),bob 1.6s ease-in-out infinite}@keyframes popin{from{scale:0}}\n/* m1');
+    expect(css).toContain('@media (prefers-reduced-motion:reduce){.yard .hen,.yard .hen.pop{animation:none}}');
+    expect(css).toContain('.rm .yard .hen,.rm .yard .hen.pop{animation:none}');
+    expect(css).toContain('.hen{width:min(15cqw,48px);width:48px;animation:bob 1.6s ease-in-out infinite}');
+  });
+});
