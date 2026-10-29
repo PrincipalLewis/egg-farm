@@ -130,3 +130,13 @@ describe('Art nit n1 on #70: refund pop never covers #rate (geometry; per-frame 
     expect(css).toContain('transform:translate(var(--dx,14px),var(--dy,-40px)) rotate(180deg)');
   });
 });
+
+describe('WCAG 2.4.11 port from rc1 7380b86 (source; keyboard sweep at 360/390/1280 x 3 engines in scripts/m41-p2-browser.mjs)', () => {
+  const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+  it('--refill-bar-h = measured sticky bar + 8px (0 without), re-measured on resize/dock; cards and their focusables use it as scroll-margin-top', () => {
+    expect(app).toContain("const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height) + 8}px` : '0px'");
+    expect(app).toContain("addEventListener('resize', mark); docked.addEventListener?.('change', mark);");
+    expect(rule('#uRow .wk,#uRow .wk :is(button,[tabindex])')).toBe('scroll-margin-top:var(--refill-bar-h,0px)');
+    expect(rule('.refill-wrap')).toMatch(/^position:sticky;top:0;/);
+  });
+});

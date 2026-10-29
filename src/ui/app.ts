@@ -119,6 +119,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
   if (IOS_FLAG_ENABLED) (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts; compiled out of release
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
+  let refillDirty = false; { const mark = () => { refillDirty = true; }; addEventListener('resize', mark); docked.addEventListener?.('change', mark); } // WCAG 2.4.11: --refill-bar-h follows wraps from resize/rotation/dock (7380b86 review 56513e7 #3)
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
   const live: HTMLElement[] = [];
@@ -643,7 +644,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
-      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; }
+        // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
+        // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
+        { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); }
+        fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }

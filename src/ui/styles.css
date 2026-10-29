@@ -595,6 +595,7 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 .refill-wrap{position:sticky;top:0;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 6px}
 .refill-wrap .btn.manage-all{position:static;margin:0;width:calc(100% - 24px)}
 #uRow>.refill-wrap{background:var(--c-cream);padding-block:8px 10px;margin-inline:0;align-self:stretch;width:100%;box-sizing:border-box}
+#uRow .wk,#uRow .wk :is(button,[tabindex]){scroll-margin-top:var(--refill-bar-h,0px)} /* WCAG 2.4.11 (port of 7380b86): set from the measured sticky Refill bar (+8px), 0 when no bar; on the focusables too, since focus scrolling uses the focused element's own margin */
 .wk .btn.manage{min-height:44px;min-width:88px} /* Refill: tap target >=44x88 (Art AC-R8) */
 .wk .btn.manage .manage-ico img{width:28px;height:28px;filter:none}
 /* S2-8 / AC-R2: net rate under the money; red with ⚠ at <= 0 (colour never the only signal) */
