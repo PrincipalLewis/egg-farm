@@ -18,10 +18,12 @@ export interface LayCtx { suspended?: boolean; }
 export interface SaleEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance, ctx: SaleCtx): number; }
 export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance): number; }
 /** Feature PRs append their entry IN THIS FILE (one line each). Order is documentation only: factors multiply (golden X7).
- *  Mutable only so tests can push a fixture entry and remove it in a finally block; src never mutates them at runtime. */
-export const SALE_EFFECTS: SaleEffect[] = [];
-export const LAY_EFFECTS: LayEffect[] = [];
+ *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
+export const SALE_EFFECTS: readonly SaleEffect[] = [];
+export const LAY_EFFECTS: readonly LayEffect[] = [];
 export const PLAYER_SALE: SaleCtx = { by: 'player' };
+/** CCR m1 #80: the ONE player-sale context for a given attended value (Q-F1c-1). sellTo credits with it; every preview uses it. */
+export const playerSaleCtx = (attended: boolean): SaleCtx => attended ? PLAYER_SALE : { by: 'player', suspended: true };
 /** Live sale factors with attribution: [{id, factor}] for entries whose flag is on and that are not neutral (factor !== 1). */
 export function saleEffectFactors(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE, effects: readonly SaleEffect[] = SALE_EFFECTS): { id: string; factor: number }[] {
   if (ctx.suspended || !effects.length) return [];

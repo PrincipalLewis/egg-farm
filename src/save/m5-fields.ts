@@ -8,13 +8,14 @@
  * visible gap) elapses with no subtraction here; a load clamps the stored value to [now, now + cd] (E2, clock tamper).
  */
 import type { Balance } from '../config/balance';
-import { m4On } from '../config/formulas';
 import { type GameState, nextRand } from '../sim/state';
 import type { SimEvent } from '../sim/events';
 import { WORKERS } from '../sim/workers';
-export type M5Flag = 'golden' | 'streak' | 'tapCoins' | 'broody' | 'abilities' | 'pause';
-/** D-C1 (= F1a config/flags.ts flagOn): on only when m4.flags[k] === 1 and m4.enabled. */
-export const m5Flag = (b: Balance, k: M5Flag) => m4On(b) && b.m4?.flags?.[k] === 1;
+import { type M5Flag, flagOn } from '../config/flags';
+import { M5_SESSION_FIELDS } from '../sim/m5-state';
+export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
+/** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
+export const m5Flag = (b: Balance, k: M5Flag): boolean => flagOn(b, k);
 const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities'] as const).some(k => m5Flag(b, k));
 const tc = (b: Balance, k: string): number => b.m4?.tc?.[k] ?? 0;
 /** D-C2 salt + seeding: ONE code path, re-exported from F1b sim/rng.ts (identical formula and validity rule). */
@@ -23,7 +24,7 @@ export { EV_RNG_SALT, ensureEvRng };
 /** D-C5: the Broody nest clamp (fmtMoneyExact limit) and the yard slot range 0..11. */
 export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
 /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
-export const M5_SESSION_KEYS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const;
+export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
 const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
