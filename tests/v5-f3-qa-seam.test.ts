@@ -21,6 +21,9 @@ describe('Q8 zero-gain paths (m4 namespace)', () => {
     expect(raw.m4.zeroGain).toEqual({ confirm: 0 });
     expect('m5' in raw).toBe(false);
   });
+  it('ships m4.flags.fatigueCue = 0 (Rule 2 chip cut flag, D-HOP-2026-10-29-05) and m4.flags.pause = 0', () => {
+    expect(at(raw, 'm4.flags.fatigueCue')).toBe(0); expect(at(raw, 'm4.flags.pause')).toBe(0);
+  });
   it('confirm is live only with zeroGainUi on (and m4.enabled) and confirm === 1', () => {
     expect(zeroGainConfirmOn(balance)).toBe(false);
     expect(zeroGainConfirmOn(withM4({ zeroGain: { confirm: 1 } }))).toBe(false);

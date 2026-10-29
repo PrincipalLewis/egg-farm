@@ -169,6 +169,7 @@
       "abilities": 0,
       "broody": 0,
       "salesStopped": 0,
+      "fatigueCue": 0,
       "pause": 0,
       "rc2Refill": 0,
       "autoRefill": 0,
