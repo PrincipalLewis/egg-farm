@@ -300,7 +300,7 @@ export class Game {
     if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
-    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();
+    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
   }
@@ -391,6 +391,8 @@ export class Game {
    *  itself (hidden frames never pass focus). Only read while M5 flags are on. */
   private attendedProbe: () => boolean = () => false;
   setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
+  /** The one attended read (frame focus + player-sale suspension, Q-F1c-1 D-HOP-2026-10-29-06): live game and the UI probe says attended. */
+  private attendedNow() { return !this.readOnly && this.attendedProbe(); }
   frame() {
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
@@ -408,7 +410,7 @@ export class Game {
     if (gap > 0) {
       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
-      const focusMs = focusFrameMs(gap, !this.readOnly && this.attendedProbe(), this.b.offline.offlineMinSeconds);
+      const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
       const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
