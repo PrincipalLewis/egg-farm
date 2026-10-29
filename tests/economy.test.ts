@@ -71,6 +71,7 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
     '6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455': 'f1', // F1 m4cols + AC7 L21 trim (was 86f0e80e, #17)
     'b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857': 'f1', // M4-on retune T3 (D-CEO-20261019-04): only hens/egg_value cost L0-L11 (m4 columns, not emitted by the sim)
     '8dc90e2b36ae18619b6d870c095e77d09a83043788cbe2154feecbf94378996b': 'f1', // M5.0 shipping CSV of record (D-HOP-2026-10-29-01 addendum 19:50): +29 tc_* cols, tc_streak_cap 0.28, w2_asleep_collect_share 0.15, guard_* dropped; farm_cost/w4 unchanged
+    'a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f': 'f1', // M5.1 o1a (D-HOP-2026-10-29-01): 8dc90e2b + farm_cost L27/28/29 = 160000/175000/190000 only
   };
   it('fixture is fresh vs the vendored reference sim (config chosen by economy.csv sha256)', () => {
     checkPins();
