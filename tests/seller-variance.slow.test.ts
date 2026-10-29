@@ -122,7 +122,8 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python, 
 // After the CSV changes, regenerate the fixture first: scripts/gen-seller-variance-fixtures.py.
 export const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
 /** Hard-band CSVs: F1 6dca24cd and the M4-on retune T3 b48be8a4 (D-CEO-20261019-04: hens/egg_value cost L0-L11 only). */
-export const T3_CSV = 'b48be8a4', HARD_BAND_CSV: readonly string[] = [F1_CSV, T3_CSV];
+/** M5.0 shipping CSV 8dc90e2b (D-HOP-2026-10-29-01 addendum 19:50); same band as T3. */
+export const T3_CSV = 'b48be8a4', M50_CSV = '8dc90e2b', HARD_BAND_CSV: readonly string[] = [F1_CSV, T3_CSV, M50_CSV];
 const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
 const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const;
 export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): void {
