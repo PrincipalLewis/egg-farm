@@ -51,11 +51,14 @@ function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Si
   }
   return after;
 }
-export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState {
+/** v5 F1c, Q-F1c-1 ruled D-HOP-2026-10-29-06: the Market sheet is a play surface. A player sale is suspended (no Frenzy/streak)
+ *  ONLY when the tick's attended probe is false; Game.dispatch passes `attended` from the same probe frame() uses. The UI never
+ *  passes suspended for the sheet. Default true keeps every existing caller (tests, bots, verify) unchanged. */
+export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
   switch (a.type) {
     case 'collect': { const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)); ev?.push({ type: 'collect', eggs: n }); return { ...s, coop: s.coop - n, basket: s.basket + n }; }
-    case 'sell': return sellTo(s, a.customerId, b, ev);
-    case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev); } return r; }
+    case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
+    case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
     case 'buyCollection': return buy(s, 'collection', b, ev);
     case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);

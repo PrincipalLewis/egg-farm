@@ -94,3 +94,40 @@ describe('F1c flags off = byte-identical', () => {
     expect(withFx).toBe(run(B()));
   });
 });
+
+// D-HOP-2026-10-29-06 rulings on the F1c open questions.
+import { Game } from '../src/game';
+import { mem } from './helpers';
+import { goldenEEggsPerSec } from '../src/sim/tracks';
+describe('Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended', () => {
+  const sale = (attended: boolean, viaGame: boolean) => {
+    SALE_EFFECTS.push(frenzy, streak); const b = B({ golden: 1, streak: 1 }), s0 = farm(b), ev: any[] = [];
+    if (!viaGame) { apply(s0, { type: 'sell', customerId: 1 }, b, ev, attended); }
+    else {
+      const g = new Game(b as any, mem(), () => Date.UTC(2026, 9, 29, 12), 3); g.state = { ...s0 };
+      g.setAttendedProbe(() => attended); g.dispatch({ type: 'sell', customerId: 1 });
+      return { value: g.state.coinsCents - s0.coinsCents, s0, b };
+    }
+    return { value: ev.find(e => e.type === 'sell')!.value, s0, b };
+  };
+  for (const viaGame of [false, true]) it(`attended=true: Frenzy and streak apply; attended=false: suspended (${viaGame ? 'Game.dispatch + probe' : 'apply'})`, () => {
+    const on = sale(true, viaGame); SALE_EFFECTS.length = 0; const off = sale(false, viaGame);
+    const k = 10, g = graderMult(on.s0.workers, on.s0.graderTier, on.b), base = salePriceCents(on.s0, on.b);
+    expect(on.value).toBe(Math.round(k * base * g * 2 * 1.28));
+    expect(off.value).toBe(Math.round(k * base * g));
+    expect(on.value).toBe(saleValueCents(on.s0, k, on.b)); // the sheet preview (default ctx, attended) == credit
+  });
+  it('sellAll follows the same rule; default (no attended arg) is attended', () => {
+    SALE_EFFECTS.push(frenzy, streak); const b = B({ golden: 1, streak: 1 }), s0 = farm(b);
+    const a = apply(s0, { type: 'sellAll' }, b), t = apply(s0, { type: 'sellAll' }, b, undefined, true), f = apply(s0, { type: 'sellAll' }, b, undefined, false);
+    expect(a.coinsCents).toBe(t.coinsCents); expect(t.coinsCents).toBe(sellAllPreview(s0, b).cents); expect(f.coinsCents).toBeLessThan(t.coinsCents);
+  });
+});
+describe('Q-F1c-2 (D-HOP-2026-10-29-06): Sweep is excluded from golden E', () => {
+  it('goldenEEggsPerSec is the base prodEggsPerSec (no ctx) even with a live Sweep', () => {
+    LAY_EFFECTS.push(sweep); const b = B({ abilities: 1 }), s = farm(b);
+    expect(goldenEEggsPerSec(s, b)).toBe(prodEggsPerSec(s, b));
+    expect(prodEggsPerSec(s, b, { suspended: false })).toBeGreaterThan(goldenEEggsPerSec(s, b));
+    LAY_EFFECTS.length = 0; expect(goldenEEggsPerSec(s, b)).toBe(prodEggsPerSec(s, b, { suspended: false }));
+  });
+});

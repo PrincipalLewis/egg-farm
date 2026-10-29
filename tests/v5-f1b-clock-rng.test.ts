@@ -34,6 +34,19 @@ describe('F1b evRng / brRng', () => {
     expect(s1.evRngState).toBe(deriveEvRngState(s1.rng));
     expect(isRngState(s1.evRngState)).toBe(true);
   });
+  it('Q-F1b-1 (D-HOP-2026-10-29-06): seeded at the END of the first flag-on tick, after that tick\'s customer draws', async () => {
+    const b = B({ golden: 1 });
+    // initialState: no arrival on tick 0, so the seed is exactly GE-AC33's mixSeed(mixSeed(7) ^ salt)
+    const s0 = initialState(b, 7), s1 = step(s0, 0.1, b);
+    expect(s1.rng).toBe(s0.rng); expect(s1.evRngState).toBe(mixSeed((mixSeed(7) ^ EV_RNG_SALT) >>> 0));
+    // a customer arrives on the first flag-on tick: state.rng moves, and the seed uses the post-draw rng
+    const a0 = { ...initialState(b, 7), nextCustomerInS: 0.05 }, a1 = step(a0, 0.1, b);
+    expect(a1.rng).not.toBe(a0.rng);
+    expect(a1.evRngState).toBe(deriveEvRngState(a1.rng)); expect(a1.evRngState).not.toBe(deriveEvRngState(a0.rng));
+    // one seeding path: Saves' save/m5-fields.ts uses the same ensureEvRng / salt
+    const f2 = await import('../src/save/m5-fields');
+    expect(f2.ensureEvRng).toBe(ensureEvRng); expect(f2.EV_RNG_SALT).toBe(EV_RNG_SALT);
+  });
   it('seeded once: later ticks never re-read state.rng', () => {
     const b = B({ golden: 1 }); let s = step(initialState(b, 7), 0.1, b); const seed = s.evRngState;
     for (let i = 0; i < 3000; i++) s = step(s, 0.1, b);
