@@ -1,5 +1,5 @@
 import type { Balance } from '../config/balance';
-import type { Workers } from './workers';
+import type { Workers, WorkerId } from './workers';
 /** demand = original order; filled = eggs sold so far. MK-10: a partly served customer (filled > 0) still leaves
  *  customer_patience_s after arrival (logged customer_partial); the timer is never reset by a sale. */
 export interface Customer { id: number; demand: number; filled: number; waitedS: number; }
@@ -26,6 +26,13 @@ export interface GameState {
   seenTracksExplainer?: boolean;
   /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the interim track migration). */
   celebratedMilestones: string[];
+  /** v5 F2: the M5 optional fields F2 needs, absent while the m4.flags are off (no SAVE_VERSION bump). Names and shapes are a
+   *  subset of F1a sim/m5-state.ts M5Fields (ea6b6db, not on rc/v5 yet); on merge take F1a's declaration. Saved: */
+  nextSpawnRemainingS?: number; frenzyRemainingS?: number; evRngState?: number; broodyNestCents?: number; broodyHenIdx?: number;
+  /** Per worker: readyAt = epoch ms (wall clock), activeS = focus seconds left on a running call (abilities E2). */
+  abilities?: Partial<Record<WorkerId, { readyAt?: number; activeS?: number }>>; abilitiesUnlocked?: boolean; abilitiesCoachSeen?: boolean;
+  /** Session only, never saved (save/m5-fields.ts M5_SESSION_KEYS): the on-screen golden egg, the streak value and hold. */
+  goldenEgg?: { ageS: number; slotId: string; intervalS: number }; streakS?: number; streakHoldS?: number;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

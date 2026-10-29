@@ -2,6 +2,7 @@ import type { Balance } from '../config/balance';
 import { GameState, initialState, coopTier } from '../sim/state';
 import { m4On } from '../config/formulas';
 import { migrateStoredTracksV7 } from '../sim/migrate-v7';
+import { m5Persist } from './m5-fields';
 export const SAVE_KEY = 'eggfarm.save';
 export const SAVE_VERSION = 6;
 export interface SaveFile { version: number; savedAt: number; state: GameState;
@@ -142,7 +143,7 @@ export function checksum(text: string): string {
 }
 /** Serialise a save; `sum` covers the state JSON. */
 export function serialize(state: GameState, now: number, saveSeq?: number): string {
-  const st = JSON.stringify(state);
+  const st = JSON.stringify(m5Persist(state)); // v5 F2: session-only M5 keys never saved; same object (bytes) when none exist
   return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
 }
 /** Balances of an M4 build whose session runs with the switch off until the migration commits (game.ts tracksOff). */

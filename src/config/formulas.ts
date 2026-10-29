@@ -43,6 +43,8 @@ export interface M4Params {
   };
   /** Later-M4 scalar tunables (tc_* columns), carried through verbatim; unused by M4-A code. */
   tc?: Record<string, number>;
+  /** v5 release flags (D-C1, m4.flags.*; 0/1, default 0 = absent). F3 makes sync keep them; F2 only reads them. */
+  flags?: Partial<Record<'golden' | 'streak' | 'tapCoins' | 'broody' | 'abilities' | 'pause', number>>;
 }
 /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
 export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };
