@@ -1,0 +1,18 @@
+gate v5-f1c-e87562c
+HEAD e87562c4c416d00f8b69ebc93607274173885b83
+branch feat/v5-f1c-effects
+start 2026-10-29 20:14:55 CET
+tsc exit=0 (4s)
+sync-economy exit=0 (0s)
+vitest exit=0 (224s)
+test-slow exit=0 (471s)
+build exit=0 (6s)
+check-globals exit=0 (9s)
+verify-24h exit=0 (22s)
+vitest:       Tests  1595 passed | 1 skipped (1596)
+test:slow:       Tests  16 passed | 1 skipped (17)
+verify result PASS
+verify golden flagOff f90d1678 expected f90d1678 PASS
+verify golden m4On a54c9cf9 expected a54c9cf9 PASS
+verify trace24h 2c0d3ec37be16e6e20460581f84bc8ade30049680d50d701085bd288e268883d MATCH
+end 2026-10-29 20:27:11 CET

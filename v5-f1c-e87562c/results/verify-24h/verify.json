@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 4,
+  "tool": "scripts/verify.ts",
+  "complete": true,
+  "buildId": "m4.1+e87562c",
+  "sha": "e87562c4c416d00f8b69ebc93607274173885b83",
+  "dirty": false,
+  "asset": {
+    "path": "dist-html/egg-farm.html",
+    "sha256": "f95221d1d44d42fec26a34e76b10152d94eb297fac7ef1be667e96f0b2820dce",
+    "bytes": 549036,
+    "build": "npm run build:html"
+  },
+  "seed": 1,
+  "hours": 24,
+  "profile": "idle",
+  "flags": {
+    "m4.enabled": 1
+  },
+  "flagsOverridden": false,
+  "sim": {
+    "tickHz": 10,
+    "ticks": 864000,
+    "tickPath": "src/sim/tick.ts advance() per 1000 ms, then input (build order)",
+    "bot": "AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s"
+  },
+  "checkpoints": [
+    {
+      "hours": 1,
+      "tick": 36000,
+      "eggs": {
+        "coop": 0.5,
+        "basket": 0,
+        "collected": 82312,
+        "sold": 82312
+      },
+      "coinsCents": 45526601,
+      "levels": {
+        "farm": 30,
+        "hens": 30,
+        "eggValue": 30,
+        "collection": 25,
+        "graderTier": 5
+      },
+      "workers": {
+        "market_hand": {
+          "state": "working",
+          "energyPct": 95
+        },
+        "coop_hand": {
+          "state": "working",
+          "energyPct": 66.667
+        },
+        "hawker": {
+          "state": "working",
+          "energyPct": 73.333
+        },
+        "grader": {
+          "state": "working",
+          "energyPct": 51.667
+        }
+      }
+    },
+    {
+      "hours": 6,
+      "tick": 216000,
+      "eggs": {
+        "coop": 0.5,
+        "basket": 0,
+        "collected": 640312,
+        "sold": 640312
+      },
+      "coinsCents": 3047123101,
+      "levels": {
+        "farm": 30,
+        "hens": 30,
+        "eggValue": 30,
+        "collection": 30,
+        "graderTier": 5
+      },
+      "workers": {
+        "market_hand": {
+          "state": "working",
+          "energyPct": 58.333
+        },
+        "coop_hand": {
+          "state": "working",
+          "energyPct": 81.667
+        },
+        "hawker": {
+          "state": "working",
+          "energyPct": 88.333
+        },
+        "grader": {
+          "state": "working",
+          "energyPct": 66.667
+        }
+      }
+    },
+    {
+      "hours": 12,
+      "tick": 432000,
+      "eggs": {
+        "coop": 0.5,
+        "basket": 0,
+        "collected": 1309912,
+        "sold": 1309912
+      },
+      "coinsCents": 9053964301,
+      "levels": {
+        "farm": 30,
+        "hens": 30,
+        "eggValue": 30,
+        "collection": 30,
+        "graderTier": 5
+      },
+      "workers": {
+        "market_hand": {
+          "state": "working",
+          "energyPct": 86.667
+        },
+        "coop_hand": {
+          "state": "working",
+          "energyPct": 58.333
+        },
+        "hawker": {
+          "state": "working",
+          "energyPct": 65
+        },
+        "grader": {
+          "state": "working",
+          "energyPct": 95
+        }
+      }
+    },
+    {
+      "hours": 18,
+      "tick": 648000,
+      "eggs": {
+        "coop": 0.5,
+        "basket": 0,
+        "collected": 1979512,
+        "sold": 1979512
+      },
+      "coinsCents": 15060805501,
+      "levels": {
+        "farm": 30,
+        "hens": 30,
+        "eggValue": 30,
+        "collection": 30,
+        "graderTier": 5
+      },
+      "workers": {
+        "market_hand": {
+          "state": "working",
+          "energyPct": 63.333
+        },
+        "coop_hand": {
+          "state": "working",
+          "energyPct": 86.667
+        },
+        "hawker": {
+          "state": "working",
+          "energyPct": 93.333
+        },
+        "grader": {
+          "state": "working",
+          "energyPct": 71.667
+        }
+      }
+    },
+    {
+      "hours": 24,
+      "tick": 864000,
+      "eggs": {
+        "coop": 0.5,
+        "basket": 0,
+        "collected": 2649112,
+        "sold": 2649112
+      },
+      "coinsCents": 21067646701,
+      "levels": {
+        "farm": 30,
+        "hens": 30,
+        "eggValue": 30,
+        "collection": 30,
+        "graderTier": 5
+      },
+      "workers": {
+        "market_hand": {
+          "state": "working",
+          "energyPct": 91.667
+        },
+        "coop_hand": {
+          "state": "working",
+          "energyPct": 63.333
+        },
+        "hawker": {
+          "state": "working",
+          "energyPct": 70
+        },
+        "grader": {
+          "state": "working",
+          "energyPct": 100
+        }
+      }
+    }
+  ],
+  "saveRoundTrip": {
+    "pass": true,
+    "balance": "shipped (src/config/balance.json, what the built html runs)",
+    "flagsDifferFromBuild": false,
+    "validator": "src/save/save.ts validate(raw, balance)",
+    "ok": true,
+    "reason": null,
+    "migrated": false,
+    "tracksMigrated": false,
+    "version": 6,
+    "fields": [
+      "farmLevel",
+      "hensLevel",
+      "eggValueLevel",
+      "collectionLevel",
+      "graderTier",
+      "workers",
+      "coinsCents"
+    ],
+    "mismatches": []
+  },
+  "trace": {
+    "name": "AC7 trace hash (every sim event of the run + end state)",
+    "sha256": "2c0d3ec37be16e6e20460581f84bc8ade30049680d50d701085bd288e268883d",
+    "events": 479715
+  },
+  "goldens": [
+    {
+      "name": "flagOff",
+      "source": "engineering/golden/flagoff-golden.a01faea.test.ts",
+      "expected": "f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544",
+      "actual": "f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544",
+      "pass": true
+    },
+    {
+      "name": "m4On",
+      "source": "engineering/golden/m4on-golden.90a9c84.test.ts",
+      "expected": "a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5",
+      "actual": "a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5",
+      "pass": true
+    }
+  ],
+  "screenshot": {
+    "skippedReason": null,
+    "file": "verify.png",
+    "viewport": "390x844",
+    "browser": "chromium (headless)",
+    "label": "Egg Farm m4.1+e87562c",
+    "dataBuildId": "m4.1+e87562c",
+    "metaBuildId": "m4.1+e87562c",
+    "pageErrors": 0
+  },
+  "checks": [
+    {
+      "id": "build-id",
+      "pass": true,
+      "detail": "html m4.1+e87562c, HEAD m4.1+e87562c"
+    },
+    {
+      "id": "finite-non-negative",
+      "pass": true,
+      "detail": "every checkpoint value finite and >= 0; end state finite"
+    },
+    {
+      "id": "golden-flagOff",
+      "pass": true,
+      "detail": "match f90d1678 vs f90d1678 (engineering/golden/flagoff-golden.a01faea.test.ts)"
+    },
+    {
+      "id": "golden-m4On",
+      "pass": true,
+      "detail": "match a54c9cf9 vs a54c9cf9 (engineering/golden/m4on-golden.90a9c84.test.ts)"
+    },
+    {
+      "id": "save-roundtrip",
+      "pass": true,
+      "detail": "validate(raw, shipped balance) = run.end (not migrated; F/H/V/C, Grader tier, workers, coins equal)"
+    },
+    {
+      "id": "build-label",
+      "pass": true,
+      "detail": "label \"Egg Farm m4.1+e87562c\", #app data-build-id m4.1+e87562c"
+    },
+    {
+      "id": "no-private-data",
+      "pass": true,
+      "detail": "no tokens, e-mail addresses or absolute paths"
+    }
+  ],
+  "result": "PASS"
+}
