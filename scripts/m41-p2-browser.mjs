@@ -90,12 +90,12 @@ for (const [w, h] of SIZES) {
         return { cap: cap?.textContent, dis: bt.getAttribute('aria-disabled'), name: bt.getAttribute('aria-label'), desc: d?.textContent, refillW: c.querySelector('.wk-refill').getBoundingClientRect().width }; });
       const role = view === 'cards-ch-unpaid' ? 'Coop Hand' : 'Market Hand', X = view === 'cards-ch-unpaid' ? '$15.00' : '$7.50'; // F30: CH $0.50 x 30, MH $0.25 x 30
       check('AC-R10/U1', w, `${role} Unpaid: "Resumes at ${X}", aria-disabled, name "Refill ${role}", describedby sentence`, p2b.cap === `Resumes at ${X}` && p2b.dis === 'true' && p2b.name === `Refill ${role}` && p2b.desc === `${role} is unpaid. Work resumes automatically when you have ${X}. Sell eggs to earn coins.`, p2b);
-      const fits = [];
+      const fits = [], cap0 = await page.evaluate(() => document.querySelector('.wk.unpaid .wk-cap').textContent);
       for (const t of ['Resumes at $5.00', 'Resumes at $999.9K', 'Resumes at $1M', 'Resumes at $1.23M', 'Resumes at $9,999.99'])
         fits.push(await page.evaluate(t => { const cap = document.querySelector('.wk.unpaid .wk-cap'); cap.textContent = t; const r = cap.getBoundingClientRect(), lh = parseFloat(getComputedStyle(cap).lineHeight);
           return { t, sw: cap.scrollWidth, cw: cap.clientWidth, h: +r.height.toFixed(2), w: +r.width.toFixed(2), oneLine: r.height <= lh + 0.5, ok: cap.scrollWidth <= cap.clientWidth && r.height <= lh + 0.5 && getComputedStyle(cap).textOverflow !== 'ellipsis' }; }, t));
       check('AC-R16', w, `${role}: the 5 forced captions fit one line, no wrap/ellipsis (card refill column ${p2b.refillW.toFixed(1)}px)`, fits.every(f => f.ok), fits);
-      await page.evaluate(() => window.eggfarmUi?.render?.());
+      await page.evaluate(t => { document.querySelector('.wk.unpaid .wk-cap').textContent = t; }, cap0); // the real caption back for the shot
     }
     await shot(page, view, w, view === 'cards-asleep' ? 'Worker cards asleep (m9 undim, m5 moon after "Asleep")' : `Worker card ${view.includes('ch') ? 'Coop Hand' : 'Market Hand'} unpaid (m9 red word, m5 warn icon, P2b "Resumes at $X")`, cards.map(c => ({ w: c.w, st: c.stText, h3Contrast: c.h3Contrast, stContrast: c.stContrast, icon: c.icon && `${c.icon.w}x${c.icon.h}` })));
     check('no page errors', w, view, errors.length === 0, errors); await ctx.close();
@@ -168,8 +168,12 @@ for (const [w, h] of SIZES) {
     const all = [...fwd, ...back];
     check('WCAG 2.4.11', w, `keyboard Tab / Shift+Tab through the Workers list: every focused control fully visible, none under the sticky Refill bar (${fwd.length}+${back.length} stops, bar ${hasBar ? 'shown' : 'absent'})`, hasBar && fwd.length >= 4 && back.length >= 4 && all.every(p => p.ok), { fwd, back });
     // shot at the stop closest to the bar on the way back up (the case 2.4.11 is about)
-    for (let i = 0; i < 24; i++) { const p = await probe(); if (p && worst && p.el === worst.el) break; await page.keyboard.press(i < 12 ? 'Tab' : 'Shift+Tab'); }
-    await shot(page, 'focus-under-refill-bar', w, 'Keyboard focus just below the sticky Refill bar after Shift+Tab (WCAG 2.4.11 scroll-margin-top = measured bar + 8px)', worst);
+    // shot: Tab to the last card, then Shift+Tab back up to the first card's Refill (scrolls up under the stuck bar — the 2.4.11 case)
+    for (let i = 0; i < fwd.length; i++) await page.keyboard.press('Tab');
+    for (let i = 0; i < 24; i++) { await page.keyboard.press('Shift+Tab'); await page.waitForTimeout(80); const p = await probe(); if (!p || p.el === 'BUTTON[manage:market_hand]') break; }
+    await page.waitForTimeout(250); const at = await probe();
+    check('WCAG 2.4.11', w, `shot state: focus on the first card's Refill after Shift+Tab, fully below the bar (top ${at?.top} >= bar ${at?.barBottom})`, at && at.el === 'BUTTON[manage:market_hand]' && at.ok, at);
+    await shot(page, 'focus-under-refill-bar', w, "Keyboard focus on the first card's Refill after Shift+Tab, just below the stuck Refill bar (WCAG 2.4.11: scroll-margin-top = bar + scroller padding + 8px)", { shot: at, worstBackStop: worst });
     await ctx.close(); }
   // ---- Art nit n1 on #70: refund pop never covers #rate (every frame for 1 s) ----
   { const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 600 }); const page = await ctx.newPage();
