@@ -4,6 +4,7 @@ import { balance as b } from '../src/config/balance';
 import { initialState, mixSeed, nextRand, type GameState } from '../src/sim/state';
 import { serialize, checksum, SAVE_VERSION } from '../src/save/save';
 import { m5Load, m5Persist, m5Offline, m5ShortGap, m5Flag, streakAfter, drawGap, ensureEvRng, EV_RNG_SALT, M5_SESSION_KEYS } from '../src/save/m5-fields';
+import { M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import type { SimEvent } from '../src/sim/events';
 import { ON } from './v5-f2-helpers';
 const NOW = Date.UTC(2026, 9, 29, 12), tc = b.m4!.tc!, CD = tc.ability_cd_s * 1000;
@@ -68,6 +69,14 @@ describe('F2 persist (save shape)', () => {
     const s: any = { ...M5(), abilities: { market_hand: { readyAt: NOW + 42_500, activeS: 7 } }, ...Object.fromEntries(M5_SESSION_KEYS.map(k => [k, 1])) };
     const p: any = m5Persist(s); for (const k of M5_SESSION_KEYS) { expect(k in p).toBe(false); expect(s[k]).toBe(1); }
     expect(p.abilities).toEqual({ market_hand: { readyAt: NOW + 42_500, activeS: 7 } }); expect(JSON.parse(serialize(s, NOW)).state).toEqual(p);
+  });
+  it('CCR m1 (#77): the strip list IS F1a M5_SESSION_FIELDS, pinned to the 8 spec keys; each one is dropped by persist and serialize', () => {
+    expect(M5_SESSION_KEYS).toBe(M5_SESSION_FIELDS);
+    expect([...M5_SESSION_FIELDS].sort()).toEqual(['brRngState', 'broodyNestScaled', 'goldenEgg', 'irefRingCents', 'refWarmS', 'streakHoldS', 'streakS', 'tapCreditCdS']);
+    for (const k of M5_SESSION_FIELDS) {
+      const s: any = { ...M5(), [k]: 1 };
+      expect(k in m5Persist(s)).toBe(false); expect(k in JSON.parse(serialize(s, NOW)).state).toBe(false);
+    }
   });
 });
 describe('F2 settle: a gap of 60 s or more (§9.1 / §9.1a)', () => {
