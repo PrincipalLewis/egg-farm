@@ -33,8 +33,8 @@ import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, type NavAria } from './workers-ui';
-import { headerRate, headerRateText } from './s2-economy-ui';
-import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
+import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
+import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
