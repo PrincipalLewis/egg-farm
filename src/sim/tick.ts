@@ -3,11 +3,14 @@ import { GameState, eggsPerTap, coopCapacity, customerIntervalS, demandRange, ne
 import type { Sink } from './events';
 import { sellTo } from './actions';
 import { prodEggsPerSec, coopCap } from './tracks';
+import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
+import { streakTick } from './streak';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
-export function step(s: GameState, dt: number, b: Balance, ev?: Sink): GameState {
+/** v5 (F1b signature): `clock.focus` = this tick carries focus time. Without a clock every tick is unfocused. */
+export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: StepClock): GameState {
   const L = s.farmLevel, E = b.workers.energy;
   // Energy: Working and Tired workers drain 1% per drain_s_per_pct; Asleep stays at 0 until managed; Unpaid doesn't drain (ruling 1).
   let workers: Workers = s.workers;
@@ -48,12 +51,12 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink): GameState
     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
   }
   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev);
-  return out;
+  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !clock?.focus);
+  return streakTick(out, dt, clock?.focus ? dt : 0, b, ev); // v5 #2: identity unless m4.flags.streak
 }
 /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
  *  (front first, like Sell all) every every_s / tired_every_s. Wage is charged per action interval. Asleep = nothing, no wage. */
-function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameState {
+function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, suspended = false): GameState {
   const ws = { ...s.workers };
   // §8 items 15.5 + 16 (R9): Unpaid workers resume one at a time, W1 then W2. Each needs coins >= 1 min of its own wage
   // plus 1 min for every worker already being paid (Working/Tired) and every worker resumed earlier in this check.
@@ -84,16 +87,18 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameSta
       if (id === 'coop_hand') {
         const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b));
         if (n > 0) { s = { ...s, coop: s.coop - n, basket: s.basket + n }; ev?.push({ type: 'worker_collect', eggs: n }); }
-      } else for (const c of s.customers) { if (s.basket < 1) break; s = sellTo(s, c.id, b, ev, 'market_hand'); }
+      } else for (const c of s.customers) { if (s.basket < 1) break; s = sellTo(s, c.id, b, ev, 'market_hand', suspended); }
     }
     ws[id] = { ...w, cdS };
   }
   return { ...s, workers: { ...ws } };
 }
 /** Fixed-timestep accumulator: runs whole 1/tickHz ticks, returns leftover ms. */
-export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balance, ev?: Sink) {
+/** v5 F1b: `clock.focusMs` = attended ms of this frame; the first ceil(focusMs / tick) ticks carry focus (D-C3). */
+export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balance, ev?: Sink, clock?: FrameClock) {
   const dtMs = 1000 / b.tickHz;
   let acc = accMs + elapsedMs, ticks = 0;
-  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev); acc -= dtMs; ticks++; }
+  const nFocus = clock ? focusTicks(clock.focusMs, dtMs) : 0;
+  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, clock ? tickClock(ticks, nFocus, clock) : undefined); acc -= dtMs; ticks++; }
   return { state: s, accMs: Math.max(0, acc), ticks };
 }

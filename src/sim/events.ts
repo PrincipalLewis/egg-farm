@@ -7,7 +7,9 @@ export type SimEvent =
   | { type: 'customer_lost'; reason: 'timeout' | 'full_queue'; id?: number; N?: number }
   | { type: 'sell'; id: number; k: number; N: number; price: number; value: number; by: 'player' | 'market_hand' }
   | { type: 'upgrade'; upgrade: 'collection' | 'farm' | 'hens' | 'eggValue'; newLevel: number; cost: number; coinsBefore: number; track?: 'farm' | 'hens' | 'egg_value' | 'collection' }
-  | { type: 'collect'; eggs: number }
+  | { type: 'collect'; eggs: number; credited?: boolean } // v5 #2: credited only while the streak is on (F1a shape)
+  | { type: 'streak_started'; farm_level: number; collection_level: number }
+  | { type: 'streak_peak'; value: number; duration_s: number; credited_taps: number; time_at_cap_s: number; extra_coins: number; frenzy_overlap_s: number; reason: string; max_tier: number }
   | { type: 'worker_collect'; eggs: number }
   | { type: 'worker_hire'; worker: WorkerId; cost: number; farm: number }
   | { type: 'worker_manage'; worker: WorkerId; energyBefore: number }
