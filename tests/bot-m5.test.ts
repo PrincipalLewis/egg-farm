@@ -9,14 +9,21 @@ import { loadTargets } from './pacing-guards';
 import { run, PROFS, M5X_STACKS, windowGate, gateOptsFromEnv } from './bot-m5';
 import type { SimEvent } from '../src/sim/events';
 
-// Built exactly as m5x.ts / scripts/bot-m5x.ts build it: data/economy.csv over src/config/balance.json.
-const csvBalance = (): Balance => validateBalance(buildBalance(parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8')),
+// Built exactly as m5x.ts / scripts/bot-m5x.ts build it: an economy CSV over src/config/balance.json.
+// The parity pin below was captured with data/economy.csv b48be8a4, so the test reads a byte-exact fixture copy of that CSV
+// (tests/fixtures/economy-b48be8a4.csv, from 0808fa6:data/economy.csv), not the live file: farm_cost retunes must not break a
+// port-equivalence check (D-HOE-20261030-03).
+const PARITY_CSV_URL = new URL('./fixtures/economy-b48be8a4.csv', import.meta.url);
+const PARITY_CSV_SHA256 = 'b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857';
+const csvBalance = (csv: string): Balance => validateBalance(buildBalance(parseEconomyCsv(csv),
   JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8')), readEconomyConfig() as any) as Balance, false);
 
 describe('bot-m5: parity with m5x.ts', () => {
   it('windowGate equals the original harness (scratch/v2-econ/h m5x.ts, CSV data/economy.csv b48be8a4, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual)', () => {
     const g = gateOptsFromEnv({ SEEDS: '2', S0: '1', T: '3000', CFG: 'none,AssZ', PROFS: 'casual' }, loadTargets());
-    const out = windowGate(csvBalance(), g), s = JSON.stringify(out);
+    const csv = readFileSync(PARITY_CSV_URL);
+    expect(createHash('sha256').update(csv).digest('hex')).toBe(PARITY_CSV_SHA256); // fixture is still the b48be8a4 CSV
+    const out = windowGate(csvBalance(csv.toString('utf8')), g), s = JSON.stringify(out);
     // Captured from the original m5x.ts run (stdout minus its csv/sha/seeds/T/STEP header keys); identical bytes from the port.
     expect(createHash('sha256').update(s).digest('hex')).toBe('41324ef47af46e79255f22b72d9e982f198eed45da26ff031f4c4d188abea985');
     expect(out['AssZ|casual'].win).toEqual({ P95_allWindows: 1.59, P95_ofSeedMax: 1.59, worstSeed: 1.59, median: 1.491 });
