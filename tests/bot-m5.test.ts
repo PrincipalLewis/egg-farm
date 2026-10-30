@@ -61,13 +61,15 @@ describe('bot-m5: run()', () => {
   });
 });
 
-// ---- bot-m5 B: m5p/m5px (M5.2) and m5l/m5lx (M5.1) port. Pins are the ORIGINAL harnesses' bytes on this tree's CSV (b48be8a4) with clock wage
+// ---- bot-m5 B: m5p/m5px (M5.2) and m5l/m5lx (M5.1) port. Pins are the ORIGINAL harnesses' bytes on the b48be8a4 CSV with clock wage
 // off (scratch/bot-m5b-harness/orig-noclock: h2/src, m5px.ts with only L8 __clockWage=false; m5lx.ts with CLOCK unset). Clock-wage-on parity
 // (o1a, 200 seeds, artifacts/m51-o1a + m52-o1a) needs the h2 tick.ts diff (M5.1 src piece): artifacts/bot-m5b-parity (studio folder).
+// D-HOE-20261030-05: these pins assert balance-derived values, so they read the committed fixture (PARITY_CSV_URL, sha256 asserted on
+// every read), never the live data/economy.csv (a8c4e268 since #92). The base is src/config/balance.json, as for the #88 pin above.
 import { pressureSeed, refillGate, M5PX_RC2 } from './bot-m5';
 const sha = (s: string | Buffer) => createHash('sha256').update(s).digest('hex');
-const csvRaw = () => readFileSync(new URL('../data/economy.csv', import.meta.url));
-const csvB = () => csvBalance(csvRaw().toString('utf8')); // #88 made csvBalance take the CSV text
+const csvRaw = () => { const csv = readFileSync(PARITY_CSV_URL); expect(sha(csv)).toBe(PARITY_CSV_SHA256); return csv; };
+const csvB = () => csvBalance(csvRaw().toString('utf8'));
 
 describe('bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)', () => {
   it('[REQ-d M5.2] pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2', () => {
