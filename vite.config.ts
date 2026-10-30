@@ -29,5 +29,5 @@ export default defineConfig(({ mode }) => ({
     __IOS_FLAG__: JSON.stringify(mode !== 'production'),
   },
   // *.slow.test.ts (e.g. the 100-seed seller-variance parity) is skipped by default `vitest run`; CI runs it via `npm run test:slow`.
-  test: { exclude: [...configDefaults.exclude, '**/*.slow.test.ts'] },
+  test: { exclude: [...configDefaults.exclude, '**/*.slow.test.ts', '**/*.k10.test.ts'] }, // *.k10.test.ts: npm run test:k10
 }));
