@@ -3,13 +3,14 @@ import { GameState, eggsPerTap, coopCapacity, customerIntervalS, demandRange, ne
 import type { Sink } from './events';
 import { sellTo } from './actions';
 import { prodEggsPerSec, coopCap } from './tracks';
+import { anyM5FlagOn, stepTimers } from './timers';
 import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
-import { streakTick } from './streak';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
-/** v5 (F1b signature): `clock.focus` = this tick carries focus time. Without a clock every tick is unfocused. */
+/** v5 F1b: `clock` (optional) says whether this tick carries focus time and gives the injected wall clock. It only feeds
+ *  the M5 stepTimers() sub-calls, which run only while an m4.flags.* flag is on. */
 export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: StepClock): GameState {
   const L = s.farmLevel, E = b.workers.energy;
   // Energy: Working and Tired workers drain 1% per drain_s_per_pct; Asleep stays at 0 until managed; Unpaid doesn't drain (ruling 1).
@@ -51,8 +52,9 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
   }
   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !clock?.focus);
-  return streakTick(out, dt, clock?.focus ? dt : 0, b, ev); // v5 #2: identity unless m4.flags.streak
+  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !clock?.focus); // v5 #2: no focus = suspended sale (R12)
+  if (anyM5FlagOn(b)) out = stepTimers(out, dt, b, clock, ev);
+  return out;
 }
 /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
  *  (front first, like Sell all) every every_s / tired_every_s. Wage is charged per action interval. Asleep = nothing, no wage. */
