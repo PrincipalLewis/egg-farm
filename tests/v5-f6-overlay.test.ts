@@ -22,7 +22,7 @@ import { SFX, Audio } from '../src/ui/audio';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import {
-  layoutKey, spotCentres, validSpots, domZones, DOM_ZONES, DOCKED_1280x800, makeDialogOpen, wireAttended, AudioHooks, AUDIO_HOOKS,
+  layoutKey, spotCentres, validSpots, domZones, DOM_ZONES, DOCKED_1280x800, makeDialogOpen, wireAttended, registerSheet, anySheetOpen, openSheets, clearSheets, AudioHooks, AUDIO_HOOKS,
   registerAudioHook, reducedMotion, FxBudget, registerFeature, registeredFeatures, clearFeatures, mountOverlay, type Box, type Zone, type LayoutKey,
 } from '../src/ui/overlay';
 import { installQaSeam } from '../src/ui/qa-seam';
@@ -48,7 +48,7 @@ beforeAll(() => {
   (Element.prototype as any).animate ??= () => ({ finished: Promise.resolve(), cancel() {}, onfinish: null, addEventListener() {} });
 });
 const SALE = SALE_EFFECTS as SaleEffect[]; // test-only fixture seam, as tests/v5-f1c-effects.test.ts (registries are readonly in src)
-afterEach(() => { SALE.length = 0; clearFeatures(); document.body.innerHTML = ''; document.documentElement.className = ''; vi.restoreAllMocks(); delete (window as any).eggfarmQa; });
+afterEach(() => { SALE.length = 0; clearFeatures(); clearSheets(); document.body.innerHTML = ''; document.documentElement.className = ''; vi.restoreAllMocks(); delete (window as any).eggfarmQa; });
 const setDoc = (vis: DocumentVisibilityState, focus: boolean) => { vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(vis); vi.spyOn(document, 'hasFocus').mockReturnValue(focus); };
 
 describe('F6 layout keys (Art v1.1 §2.1)', () => {
@@ -320,3 +320,49 @@ describe('F6 hens pill testid', () => {
     await mountWith({}); const p = document.querySelector('[data-testid="hens-pill"]'); expect(p).toBeTruthy(); expect(p!.id).toBe('henpill');
   });
 });
+
+describe('F6-AC-SHEET: any registered sheet/menu is not-attended from open until sheetCloseComplete, at every width (D-HOE-20261030-18)', () => {
+  const docked = () => vi.spyOn(window, 'matchMedia').mockImplementation(((q: string) => ({ matches: /min-width:\s*960px/.test(q), media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as any);
+  it('F6-AC-SHEET registry: opened() => open until closeComplete(); still closing => open; ids are independent; re-register = same entry', () => {
+    const a = registerSheet('shift'), b2 = registerSheet('other');
+    expect(anySheetOpen()).toBe(false);
+    a.opened(); expect(a.isOpen).toBe(true); expect(anySheetOpen()).toBe(true); expect(openSheets()).toEqual(['shift']);
+    b2.opened(); b2.closeComplete(); expect(openSheets()).toEqual(['shift']);
+    expect(registerSheet('shift').isOpen).toBe(true); // same entry
+    a.closeComplete(); expect(anySheetOpen()).toBe(false);
+  });
+  it('F6-AC-SHEET dialogOpen counts a registered open sheet even with no sheet and no DIALOG_SEL match', () => {
+    const dlg = makeDialogOpen({ sheet: () => null, doc: { querySelector: () => null } as any }), h = registerSheet('shift');
+    expect(dlg()).toBe(false); h.opened(); expect(dlg()).toBe(true); h.closeComplete(); expect(dlg()).toBe(false);
+  });
+  it('F6-AC-SHEET docked sheet open → attended false; after sheetCloseComplete → true', async () => {
+    setDoc('visible', true); docked();
+    const { g, settle } = await mountWith(); await settle();
+    expect(matchMedia('(min-width:960px) and (orientation:landscape)').matches).toBe(true); // docked layout
+    expect((g as any).attendedNow()).toBe(true);
+    const shift = registerSheet('shift'); // e.g. the rc2 Shift sheet
+    shift.opened(); expect((g as any).attendedNow()).toBe(false);
+    shift.closeComplete(); expect((g as any).attendedNow()).toBe(true);
+  });
+  it('F6-AC-SHEET docked sheet still closing (close started, no sheetCloseComplete yet) → attended false', async () => {
+    setDoc('visible', true); docked();
+    const { g, settle } = await mountWith(); await settle();
+    const shift = registerSheet('shift'); shift.opened();
+    // the close animation has started (the sheet's own lifecycle), but sheetCloseComplete has not fired: still a menu
+    await new Promise(r => setTimeout(r, 30)); expect((g as any).attendedNow()).toBe(false);
+    shift.closeComplete(); expect((g as any).attendedNow()).toBe(true);
+  });
+  it('F6-AC-SHEET phone width: registered sheet open → attended false; after sheetCloseComplete → true', async () => {
+    setDoc('visible', true);
+    const { g, settle } = await mountWith(); await settle();
+    const shift = registerSheet('shift'); shift.opened(); expect((g as any).attendedNow()).toBe(false);
+    shift.closeComplete(); expect((g as any).attendedNow()).toBe(true);
+  });
+  it('F6-AC-SHEET features get registerSheet through the overlay ctx', async () => {
+    const { mountOverlay } = await import('../src/ui/overlay');
+    document.body.innerHTML = '<div id="scene"></div>';
+    const o = mountOverlay({ g: {} as any, b: B(), root: document.body, scene: document.getElementById('scene')!, docked: { matches: true }, rm: () => false, audio: {} as any, fx: {} as any, dialogOpen: () => anySheetOpen(), asset: f => f });
+    const h = o.ctx.registerSheet('feature-sheet'); h.opened(); expect(o.ctx.dialogOpen()).toBe(true); h.closeComplete(); expect(o.ctx.dialogOpen()).toBe(false);
+  });
+});
+
