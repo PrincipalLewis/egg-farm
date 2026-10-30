@@ -11,7 +11,6 @@
  * Pure refactor while every M5 flag is off: no feature is registered, no DOM is added, nothing reads the spots.
  */
 import { DIALOG_SEL } from './onboarding';
-import { explainerOpen } from './tracks-explainer';
 import type { Audio, SfxName } from './audio';
 import { SFX } from './audio';
 import { flagOn, type M5Flag } from '../config/flags';
@@ -109,14 +108,12 @@ export const anySheetOpen = (): boolean => { for (const v of SHEETS.values()) if
 export const openSheets = (): string[] => [...SHEETS].filter(([, v]) => v).map(([k]) => k);
 /** Tests only: forget every registration. */
 export const clearSheets = () => { SHEETS.clear(); };
-export interface DialogSources { sheet(): SheetName; doc?: Pick<Document, 'querySelector'> }
-/** F6 dialogOpen(): a modal (settings/welcome/confirm, recovery, rotate prompt, any alertdialog = onboarding DIALOG_SEL), the tracks
- *  explainer, or the Upgrades sheet. The Market sheet is a play surface (Q-F1c-1): it never counts, whatever else is shown.
- *  F6-AC-SHEET: or any sheet/menu registered with registerSheet() that has not reached closeComplete(). */
-export const makeDialogOpen = (src: DialogSources) => (): boolean => {
-  const doc = src.doc ?? document;
-  return !!doc.querySelector(DIALOG_SEL) || explainerOpen(doc as Document) || src.sheet() === 'upgrades' || anySheetOpen();
-};
+export interface DialogSources { doc?: Pick<Document, 'querySelector'> }
+/** The dialog half of the ONE attended probe (CCR F-2 on F6): a modal (settings/welcome/confirm, recovery, rotate prompt, any
+ *  alertdialog = onboarding DIALOG_SEL, unchanged) OR any sheet/menu registered with registerSheet() that has not reached its
+ *  closeComplete(), at every width (F6-AC-SHEET). The Upgrades sheet and the tracks explainer register the same way as the rc2 Shift
+ *  sheet will. The Market sheet never registers: it is a play surface (Q-F1c-1, D-HOP-2026-10-29-06). */
+export const makeDialogOpen = (src: DialogSources = {}) => (): boolean => !!(src.doc ?? document).querySelector(DIALOG_SEL) || anySheetOpen();
 /** The one wiring line for Game's attended probe: visible && focused && !dialogOpen(). The UI never passes `suspended` for sheet sales.
  *  CCR F-2 (D-HOE-20261030-08/-15): this is the ONLY probe (F6a's ui/attended.ts is folded in here); the Market previews read
  *  the same attended state through Game.playerSaleCtx(), so preview == credit. */

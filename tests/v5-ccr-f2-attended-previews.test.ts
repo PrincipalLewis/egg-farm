@@ -21,7 +21,8 @@ import { graderMult } from '../src/sim/workers';
 import { SALE_EFFECTS, PLAYER_SALE, playerSaleCtx, type SaleEffect } from '../src/sim/effects';
 import { sellAllLabel, orderView } from '../src/ui/orders';
 import { fmtCountFloor, fmtMoneyFloor } from '../src/ui/format';
-import { attendedProbe, makeDialogOpen, wireAttended, type AttendedDoc } from '../src/ui/overlay';
+import { attendedProbe, makeDialogOpen, wireAttended, registerSheet, clearSheets, anySheetOpen, type AttendedDoc } from '../src/ui/overlay';
+import { showTracksExplainer, EXP_OUT_MS } from '../src/ui/tracks-explainer';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 
@@ -49,7 +50,7 @@ beforeAll(() => {
   (Element.prototype as any).animate ??= () => ({ finished: Promise.resolve(), cancel() {}, onfinish: null, addEventListener() {} });
 });
 beforeEach(() => { rec.f.length = 0; });
-afterEach(() => { SALE.length = 0; document.body.innerHTML = ''; vi.restoreAllMocks(); delete (window as any).eggfarmQa; });
+afterEach(() => { clearSheets(); SALE.length = 0; document.body.innerHTML = ''; vi.restoreAllMocks(); delete (window as any).eggfarmQa; });
 const setDoc = (vis: DocumentVisibilityState, focus: boolean) => {
   vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(vis);
   vi.spyOn(document, 'hasFocus').mockReturnValue(focus);
@@ -70,6 +71,8 @@ async function mountMarket(flags: Partial<Record<M5Flag, number>> = { golden: 1,
 }
 const sellRow = (id: number) => { const bt = document.querySelector<HTMLButtonElement>(`#mRows button[data-id="${id}"]`);
   expect(bt, `no sell button for order ${id}; #mRows = ${document.getElementById('mRows')?.innerHTML.slice(0, 400)}`).toBeTruthy(); return bt!; };
+/** Shows the real tracks explainer card (one-time coach card) for a farm that has not seen it. */
+const showExp = (b: Balance) => showTracksExplainer({ state: { ...initialState(b, 1), seenTracksExplainer: false }, balance: b, save() {}, canPersist: true } as any, document)!;
 const sellAllText = () => document.querySelector<HTMLButtonElement>('#sellAll')!.textContent;
 /** Focus seconds the sim got over n frames of 500 ms (each frame's focus is min(gap, 1 s) when attended, else 0). */
 const focusOver = (g: Game, clock: { t: number }, n = 10) => { rec.f.length = 0; for (let i = 0; i < n; i++) { clock.t += 500; g.frame(); } return sum(rec.f); };
@@ -142,21 +145,20 @@ describe('CCR-F2-3: the probe excludes open dialogs; the Market sheet is a play 
     expect(attendedProbe(doc('visible', false))).toBe(false);
     expect(attendedProbe(doc('hidden', true))).toBe(false);
   });
-  it('CCR-F2-3 dialogOpen: Upgrades sheet counts, Market sheet and no sheet do not', () => {
-    const d = doc('visible', true);
-    expect(makeDialogOpen({ sheet: () => 'upgrades', doc: d })()).toBe(true);
-    expect(makeDialogOpen({ sheet: () => 'market', doc: d })()).toBe(false);
-    expect(makeDialogOpen({ sheet: () => null, doc: d })()).toBe(false);
+  it('CCR-F2-3 dialogOpen: DIALOG_SEL modal or any registered sheet until closeComplete; nothing else', () => {
+    const dlg = makeDialogOpen({ doc: doc('visible', true) }), up = registerSheet('upgrades');
+    expect(dlg()).toBe(false); up.opened(); expect(dlg()).toBe(true); up.closeComplete(); expect(dlg()).toBe(false);
+    expect(makeDialogOpen({ doc: doc('visible', true, ['#modal-layer.open']) })()).toBe(true);
+    expect(makeDialogOpen({ doc: doc('visible', true, ['.tracks-exp']) })()).toBe(false); // a bare .tracks-exp node is not the registered explainer
   });
   it('CCR-F2-3 wireAttended: probe = visible && focused && !dialogOpen, read live on every call', () => {
-    let probe: (() => boolean) | null = null; let sheet: 'market' | 'upgrades' | null = 'market'; let d = doc('visible', true);
+    let probe: (() => boolean) | null = null; let d = doc('visible', true); const up = registerSheet('upgrades');
     const live = { get visibilityState() { return d.visibilityState; }, hasFocus: () => d.hasFocus(), querySelector: (q: string) => d.querySelector(q) } as any;
-    wireAttended({ setAttendedProbe: fn => { probe = fn; } }, makeDialogOpen({ sheet: () => sheet, doc: live }), live as AttendedDoc);
+    wireAttended({ setAttendedProbe: fn => { probe = fn; } }, makeDialogOpen({ doc: live }), live as AttendedDoc);
     expect(probe!()).toBe(true);
-    sheet = 'upgrades'; expect(probe!()).toBe(false);
-    sheet = null; expect(probe!()).toBe(true);
+    up.opened(); expect(probe!()).toBe(false);
+    up.closeComplete(); expect(probe!()).toBe(true);
     d = doc('visible', true, ['#modal-layer.open']); expect(probe!()).toBe(false);
-    d = doc('visible', true, ['.tracks-exp']); expect(probe!()).toBe(false);
     d = doc('visible', false); expect(probe!()).toBe(false);
   });
   it('CCR-F2-3 mounted: settings modal open => not attended; closed again => attended', async () => {
@@ -177,10 +179,20 @@ describe('CCR-F2-3: the probe excludes open dialogs; the Market sheet is a play 
     ui.openPanel(null); expect(g.playerSaleCtx()).toEqual(PLAYER_SALE);
     ui.openPanel('market'); expect(g.playerSaleCtx()).toEqual(PLAYER_SALE);
   });
-  it('CCR-F2-3 mounted: tracks explainer / rotate prompt / alertdialog / recovery in the DOM => not attended', async () => {
+  it('CCR-F2-3 mounted: tracks explainer (registered sheet) => not attended from show, still while its close fade runs, attended after closeComplete', async () => {
+    setDoc('visible', true);
+    const { g, b } = await mountMarket();
+    const el = showExp(b); expect(el).toBeTruthy();
+    expect(g.playerSaleCtx()).toEqual(playerSaleCtx(false));
+    el.querySelector('button')!.click(); expect(document.querySelector('.tracks-exp')).toBeNull(); // the card left the DOM at once
+    expect(g.playerSaleCtx()).toEqual(playerSaleCtx(false)); // still closing (fade copy on screen): counts as open
+    await new Promise(r => setTimeout(r, EXP_OUT_MS + 60));
+    expect(anySheetOpen()).toBe(false); expect(g.playerSaleCtx()).toEqual(PLAYER_SALE);
+  });
+  it('CCR-F2-3 mounted: rotate prompt / alertdialog / recovery in the DOM (DIALOG_SEL) => not attended', async () => {
     setDoc('visible', true);
     const { g } = await mountMarket();
-    for (const html of ['<div class="tracks-exp"></div>', '<div id="rotate-prompt"></div>', '<div role="alertdialog"></div>', '<div class="recovery-layer"></div>']) {
+    for (const html of ['<div id="rotate-prompt"></div>', '<div role="alertdialog"></div>', '<div class="recovery-layer"></div>']) {
       const host = document.createElement('div'); host.innerHTML = html; document.body.appendChild(host);
       expect(g.playerSaleCtx(), html).toEqual(playerSaleCtx(false));
       host.remove(); expect(g.playerSaleCtx()).toEqual(PLAYER_SALE);
@@ -203,9 +215,9 @@ describe('ST-AC13 / GE-AC19 / BH-AC9: menus freeze the focus clock through the o
     const { g, ui, clock } = await mountMarket({ golden: 1, streak: 1, broody: 1 });
     ui.openPanel('upgrades'); expect(focusOver(g, clock)).toBe(0);
     ui.openPanel(null); expect(focusOver(g, clock)).toBeGreaterThan(0);
-    const host = document.createElement('div'); host.innerHTML = '<div class="tracks-exp"></div>'; document.body.appendChild(host);
-    expect(focusOver(g, clock)).toBe(0); host.remove();
-    expect(focusOver(g, clock)).toBeGreaterThan(0);
+    const el = showExp(B({ golden: 1, streak: 1, broody: 1 })); expect(focusOver(g, clock)).toBe(0);
+    el.querySelector('button')!.click(); expect(focusOver(g, clock)).toBe(0); // closing still counts as open
+    await new Promise(r => setTimeout(r, EXP_OUT_MS + 60)); expect(focusOver(g, clock)).toBeGreaterThan(0);
   });
   it('ST-AC13 GE-AC19 BH-AC9 focus time is 0 while blurred or hidden', async () => {
     setDoc('visible', false);

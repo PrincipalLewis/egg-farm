@@ -25,7 +25,7 @@ import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milest
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
-import { AudioHooks, FxBudget, makeDialogOpen, mountOverlay, reducedMotion, wireAttended } from './overlay'; // v5 F6
+import { AudioHooks, FxBudget, makeDialogOpen, mountOverlay, reducedMotion, wireAttended, registerSheet } from './overlay'; // v5 F6
 import { installQaSeam } from './qa-seam';
 import './features'; // v5 F6: M5 scene features register here (one line each), never in app.ts
 import { mountRotatePrompt } from './rotate-prompt';
@@ -176,17 +176,19 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
 
   // ---------- Panels ----------
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
+  const upgradesSheet = registerSheet('upgrades'); // CCR F-2: not attended while open (docked: the column is never opened, open stays null)
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
     if (open === 'market' && p !== 'market') ordersExpanded = false;
     open = p; panelLayer.classList.toggle('open', !!p);
+    if (p === 'upgrades') upgradesSheet.opened(); else upgradesSheet.closeComplete(); // #p-upgrades is [hidden] (display:none) at once: close completes now
     $('#p-market').hidden = p !== 'market'; $('#p-upgrades').hidden = p !== 'upgrades';
     nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
     dirty = true;
   };
   // v5 F6 + CCR F-2: the ONE attended probe = visible && focused && !dialogOpen(); the Market sheet is a play surface, never a dialog (Q-F1c-1, D-HOP-2026-10-29-06).
-  const overlayDialogOpen = makeDialogOpen({ sheet: () => open }); wireAttended(g, overlayDialogOpen);
+  const overlayDialogOpen = makeDialogOpen(); wireAttended(g, overlayDialogOpen);
   // Farm View Manage all: mobile nav button + desktop docked copy next to the Upgrades header (same rule/action/cooldown/ring)
   // B8: ONE Farm View Manage-all button, moved between the mobile nav and the docked Upgrades header (no hidden duplicate).
   const farmMA = nav.querySelector('.farm-manage-all') as HTMLButtonElement, farmMAs = [farmMA], yawnSfx = new YawnSfx();

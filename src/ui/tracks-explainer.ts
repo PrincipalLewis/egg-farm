@@ -3,6 +3,7 @@
 import type { Game } from '../game';
 import { m4On } from '../config/formulas';
 import { fmtMoney, fmtMoneyShort } from './format';
+import { registerSheet } from './overlay';
 export const EXP_TITLE = 'Upgrades got an upgrade!';
 export const EXP_BODY = 'Hens and Egg value are now separate. Top them up!';
 export const EXP_MS = 8000;
@@ -115,11 +116,12 @@ function refundPop(cents: number, doc: Document) {
 }
 /** UX-M5: the card leaves the DOM at once (focus, EXP_CLOSED, explainerOpen() unchanged); an inert, aria-hidden copy plays the
  *  150 ms opacity + translateY(4px) out. Reduced motion: no copy (instant). */
-function fadeOut(el: HTMLElement, doc: Document) {
-  if (reducedMotion(doc) || el.dataset.place === 'none') return; // a kept-out-of-the-way card was not on screen: nothing to fade
+/** Returns how long the inert copy stays on screen (0 = no copy): the card counts as open until then (CCR F-2, F6-AC-SHEET). */
+function fadeOut(el: HTMLElement, doc: Document): number {
+  if (reducedMotion(doc) || el.dataset.place === 'none') return 0; // a kept-out-of-the-way card was not on screen: nothing to fade
   const ghost = el.cloneNode(true) as HTMLElement; ghost.className = 'tracks-exp-out'; ghost.removeAttribute('role'); ghost.removeAttribute('aria-modal');
   ghost.removeAttribute('aria-labelledby'); ghost.setAttribute('aria-hidden', 'true'); ghost.setAttribute('inert', ''); ghost.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
-  doc.body.append(ghost); setTimeout(() => ghost.remove(), EXP_OUT_MS + 30);
+  doc.body.append(ghost); setTimeout(() => ghost.remove(), EXP_OUT_MS + 30); return EXP_OUT_MS + 30;
 }
 /** UX-M1: WebKit skips :focus-visible after a programmatic focus, so a KEYBOARD close (Esc, Enter, Space on Got it) marks the target .kbd-focus
  *  (same 3px ring) until it blurs or the next pointer press. */
@@ -158,6 +160,8 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
   el.className = 'tracks-exp'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'tracks-exp-t');
   el.innerHTML = `<h2 id="tracks-exp-t">${EXP_TITLE}</h2><p>${EXP_BODY}</p>${(g.migrationRefundCents ?? 0) > 0 ? `<p class="tracks-exp-refund"><img src="${import.meta.env.BASE_URL}assets/icon-coin.svg" alt="" width="16" height="16"> ${refundLine(g.migrationRefundCents!)}</p>` : ''}<button type="button" class="btn tracks-exp-ok">Got it</button>`;
   doc.body.append(el);
+  // CCR F-2 / F6-AC-SHEET: registered with the overlay like any sheet/menu: not attended from show until its close (fade) completes.
+  const sheet = registerSheet('tracks-explainer'); sheet.opened();
   // UX-M3: placed at show, then re-placed only on events that can move the sheet or rows (no per-frame re-measure, no rAF loop):
   // resize, scroll (sheet body: CCR M1 on 7779088, every scroll re-runs the clear check), the sheet's slide transition ending, and
   // after any click (nav / tab switch / a Buy that re-renders rows). Coalesced to at most one measure per frame.
@@ -166,10 +170,10 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
   const afterClick = () => setTimeout(replace, 0);
   placeCard(el, doc);
   win?.addEventListener('resize', replace); doc.addEventListener('scroll', replace, true); doc.addEventListener('transitionend', replace, true); doc.addEventListener('click', afterClick);
-  const refund = g.migrationRefundCents ?? 0;
-  const off = () => { clearTimeout(t); doc.removeEventListener('click', onAny, true); doc.removeEventListener('keydown', onKey, true);
+  const refund = g.migrationRefundCents ?? 0; let closing = false;
+  const off = () => { if (!el.isConnected && !closing) sheet.closeComplete(); clearTimeout(t); doc.removeEventListener('click', onAny, true); doc.removeEventListener('keydown', onKey, true);
     win?.removeEventListener('resize', replace); doc.removeEventListener('scroll', replace, true); doc.removeEventListener('transitionend', replace, true); doc.removeEventListener('click', afterClick); };
-  const close = (how: 'key' | 'ok' | 'card' | 'timeout' = 'timeout') => { if (!el.isConnected) return off(); const ae = doc.activeElement, mine = !ae || ae === doc.body || el.contains(ae); off(); el.remove(); fadeOut(el, doc); refundPop(refund, doc); // (3): the pop plays on dismiss, once (close() returns early once removed)
+  const close = (how: 'key' | 'ok' | 'card' | 'timeout' = 'timeout') => { if (!el.isConnected) return off(); const ae = doc.activeElement, mine = !ae || ae === doc.body || el.contains(ae); closing = true; off(); el.remove(); { const ms = fadeOut(el, doc); if (ms) setTimeout(sheet.closeComplete, ms); else sheet.closeComplete(); } refundPop(refund, doc); // (3): the pop plays on dismiss, once (close() returns early once removed)
     // P46-M1 (CCR major): only when focus was on the card; the active Upgrades tab if rendered, else where it was
     // Art & UX B-M1 order: sheet open -> active Upgrades tab; sheet closed -> bottom-nav Upgrades; last resort #collect.
     const shown = (e: HTMLElement | null) => !!e && (e.getClientRects().length > 0 || !e.closest('[hidden]')) ? e : null; // docked overrides [hidden]

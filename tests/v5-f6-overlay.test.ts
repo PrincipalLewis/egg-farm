@@ -146,13 +146,14 @@ describe('F6 live-rect validation (§2 runtime rule 2)', () => {
 });
 
 describe('F6 dialogOpen() (Q-F1c-1, D-HOP-2026-10-29-06)', () => {
-  it('F6-AC4: Market sheet open => NOT a dialog; Upgrades sheet => dialog; nothing open => false', () => {
-    let sheet: 'market' | 'upgrades' | null = null; const dlg = makeDialogOpen({ sheet: () => sheet });
-    expect(dlg()).toBe(false); sheet = 'market'; expect(dlg()).toBe(false); sheet = 'upgrades'; expect(dlg()).toBe(true);
+  it('F6-AC4: Upgrades sheet (registered) => dialog until closeComplete; nothing open => false', () => {
+    // CCR F-2: the Upgrades sheet registers (registerSheet('upgrades') in app.ts openPanel); the Market sheet never registers
+    const dlg = makeDialogOpen(), up = registerSheet('upgrades');
+    expect(dlg()).toBe(false); up.opened(); expect(dlg()).toBe(true); up.closeComplete(); expect(dlg()).toBe(false);
   });
-  it('F6-AC4: modal / recovery / rotate prompt / alertdialog / tracks explainer => dialog, even with the Market sheet open', () => {
-    const dlg = makeDialogOpen({ sheet: () => 'market' });
-    for (const html of ['<div id="modal-layer" class="open"></div>', '<div class="recovery-layer"></div>', '<div id="rotate-prompt"></div>', '<div role="alertdialog"></div>', '<div class="tracks-exp"></div>']) {
+  it('F6-AC4: modal / recovery / rotate prompt / alertdialog => dialog, even with the Market sheet open', () => {
+    const dlg = makeDialogOpen(); // the tracks explainer registers as a sheet (CCR F-2): see tests/v5-ccr-f2-attended-previews.test.ts CCR-F2-3
+    for (const html of ['<div id="modal-layer" class="open"></div>', '<div class="recovery-layer"></div>', '<div id="rotate-prompt"></div>', '<div role="alertdialog"></div>']) {
       document.body.innerHTML = html; expect(dlg(), html).toBe(true);
     }
     document.body.innerHTML = '<div id="modal-layer"></div><div id="rotate-prompt" hidden></div><div role="alertdialog" class="onb-cap"></div>'; expect(dlg()).toBe(false);
@@ -332,7 +333,7 @@ describe('F6-AC-SHEET: any registered sheet/menu is not-attended from open until
     a.closeComplete(); expect(anySheetOpen()).toBe(false);
   });
   it('F6-AC-SHEET dialogOpen counts a registered open sheet even with no sheet and no DIALOG_SEL match', () => {
-    const dlg = makeDialogOpen({ sheet: () => null, doc: { querySelector: () => null } as any }), h = registerSheet('shift');
+    const dlg = makeDialogOpen({ doc: { querySelector: () => null } as any }), h = registerSheet('shift');
     expect(dlg()).toBe(false); h.opened(); expect(dlg()).toBe(true); h.closeComplete(); expect(dlg()).toBe(false);
   });
   it('F6-AC-SHEET docked sheet open → attended false; after sheetCloseComplete → true', async () => {
