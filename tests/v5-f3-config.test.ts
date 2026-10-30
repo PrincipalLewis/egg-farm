@@ -90,6 +90,11 @@ const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$
 /** Named code constants that are not CSV columns, by ruling: FOCUS_DT_MAX_S (HoP, sizing §13 GE-15), the RNG salts (D-C2, D-C4),
  *  and the uint32 bound of the xorshift state (D-C5 sanitising). tc_broody_max_on_screen = 1 is "fixed by design" (§12.2). */
 const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT) = [0-9.xa-fA-F]+;$/;
+/** Named save-schema constants (D-HOE-20261030-01): BROODY_NEST_MAX_CENTS and BROODY_SLOTS in src/save/m5-fields.ts are the
+ *  save-schema bounds from F2 #81 (sanitiser clamp / slot range), not economy tunables, so they are not CSV columns. Allowed only
+ *  in that file, only as whole `export const NAME = <number>;` declarations. */
+const SAVE_SCHEMA_FILE = /save\/m5-fields\.ts$/;
+const SAVE_SCHEMA_OK = /^(?:export const (?:BROODY_NEST_MAX_CENTS|BROODY_SLOTS) = [0-9.e]+;\s*)+$/;
 const NEUTRAL = new Set(['0', '1', '1000', '1e-9', '0xffffffff', '1.0']);
 /** The F1/F3 M5 modules; every later M5 module that calls flagOn() is picked up automatically. */
 const M5_FILES = /(?:sim\/(?:rng|clock|timers|effects|m5-state)|config\/flags)\.ts$/;
@@ -107,6 +112,7 @@ describe('[F3-no-literal] F3 no literal tunables in src/', () => {
     for (const f of m5) {
       strip(readFileSync(f, 'utf8')).split('\n').forEach((l, i) => {
         if (NAMED_OK.test(l.trim())) return;
+        if (SAVE_SCHEMA_FILE.test(f) && SAVE_SCHEMA_OK.test(l.trim())) return; // D-HOE-20261030-01
         for (const m of l.matchAll(/(?<![\w.$])(\d[\d_]*(?:\.\d+)?(?:e-?\d+)?|0x[0-9a-fA-F]+)(?![\w$])/g)) if (!NEUTRAL.has(m[1])) bad.push(`${f.slice(SRC.length)}:${i + 1} ${m[1]}`);
       });
     }
