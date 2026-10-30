@@ -16,6 +16,9 @@ import { SFX } from './audio';
 import { flagOn, type M5Flag } from '../config/flags';
 import type { Balance } from '../config/balance';
 import type { Game } from '../game';
+import { AUDIO_MIN_GAP_MS, COMPACT_LEFT_INSET_PX, COMPACT_RIGHT_INSET_PX, COMPACT_ROW_GAP_PX, DOCKED_COLUMN_PX, DOCKED_COMPACT_MAX_VH, DOCKED_HUD_PX,
+  DOCKED_PLAY_REF_PX, DOCKED_REF_CENTRES, DOCKED_SCENE_REF_PX, FX_MAX_LIVE, HALF, PHONE_375_MIN_VW, PHONE_COLUMN_INSET_PX, PHONE_SPOT_FRACTIONS,
+  SPAWN_CLEAR_PX, SPAWN_HIT_PX } from './overlay-spec';
 
 // ---------------------------------------------------------------- spawn spots (Art v1.1 §2)
 export type LayoutKey = 'phone-360' | 'phone-375' | 'docked' | 'docked-compact';
@@ -24,32 +27,34 @@ export interface Box { left: number; top: number; right: number; bottom: number 
 export interface Spot { id: SpotId; x: number; y: number }
 export const SPOT_IDS: SpotId[] = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'];
 /** Hit box 56 (visual 40), §2: ≥ 16 px clear of every zone and ≥ 16 px inside the viewport; 0 px for the ×N hens pill. */
-export const HIT_PX = 56, CLEAR_PX = 16;
+export const HIT_PX = SPAWN_HIT_PX, CLEAR_PX = SPAWN_CLEAR_PX;
 /** §2.2 1280×800 docked reference centres (S1..S8); docked layouts derive from these (§2.1). */
-export const DOCKED_1280x800: readonly (readonly [number, number])[] = [[110, 240], [230, 330], [110, 440], [230, 540], [680, 240], [770, 330], [650, 440], [770, 560]];
-const PHONE_F = [0.32, 0.50, 0.68, 0.86];
+export const DOCKED_1280x800 = DOCKED_REF_CENTRES;
+const PHONE_F = PHONE_SPOT_FRACTIONS, COLS = PHONE_SPOT_FRACTIONS.length; // 4 spots per column
 /** §2.1 layout key. `dockedMq` = the app's own matchMedia('(min-width:960px) and (orientation:landscape)'). */
 export function layoutKey(vw: number, vh: number, dockedMq: boolean): LayoutKey {
-  if (!dockedMq) return vw < 368 ? 'phone-360' : 'phone-375';
-  return vw - 400 < 880 || vh < 700 ? 'docked-compact' : 'docked';
+  if (!dockedMq) return vw < PHONE_375_MIN_VW ? 'phone-360' : 'phone-375';
+  return vw - DOCKED_COLUMN_PX < DOCKED_PLAY_REF_PX || vh < DOCKED_COMPACT_MAX_VH ? 'docked-compact' : 'docked';
 }
 /** §2.1 spot centres (whole px) for a layout, from live rects (scene; docked-compact also queue + meter), plus safe-area insets. */
 export function spotCentres(key: LayoutKey, vw: number, vh: number, r: { scene: Box; queue?: Box; meter?: Box }, inset = { left: 0, top: 0 }): Spot[] {
   let pts: [number, number][];
   if (key === 'phone-360' || key === 'phone-375') {
     const s = r.scene, h = s.bottom - s.top;
-    pts = SPOT_IDS.map((_, i) => [i < 4 ? s.left + 42 : s.right - 42, s.top + Math.round(PHONE_F[i % 4] * h)]);
+    pts = SPOT_IDS.map((_, i) => [i < COLS ? s.left + PHONE_COLUMN_INSET_PX : s.right - PHONE_COLUMN_INSET_PX, s.top + Math.round(PHONE_F[i % COLS] * h)]);
   } else if (key === 'docked') {
-    const dx = (vw - 400 - 880) / 2, k = (vh - 56) / 744;
-    pts = DOCKED_1280x800.map(([x, y]) => [x + dx, 56 + (y - 56) * k]);
+    const dx = (vw - DOCKED_COLUMN_PX - DOCKED_PLAY_REF_PX) / HALF, k = (vh - DOCKED_HUD_PX) / DOCKED_SCENE_REF_PX;
+    pts = DOCKED_1280x800.map(([x, y]) => [x + dx, DOCKED_HUD_PX + (y - DOCKED_HUD_PX) * k]);
   } else {
-    const s = r.scene, L = s.left + 58, R = s.right - 44, yt = r.queue!.bottom + 48, yb = r.meter!.top - 48, ym = Math.round((yt + yb) / 2);
+    const s = r.scene, L = s.left + COMPACT_LEFT_INSET_PX, R = s.right - COMPACT_RIGHT_INSET_PX, yt = r.queue!.bottom + COMPACT_ROW_GAP_PX,
+      yb = r.meter!.top - COMPACT_ROW_GAP_PX, ym = Math.round((yt + yb) / HALF);
     pts = [[L, yt], [L, ym], [L, yb], [NaN, NaN], [R, yt], [R, ym], [R, yb], [NaN, NaN]]; // S4/S8 unused
   }
   return pts.map(([x, y], i) => ({ id: SPOT_IDS[i], x: Math.round(x) + inset.left, y: Math.round(y) + inset.top })).filter(p => Number.isFinite(p.x));
 }
 export interface Zone { name: string; box: Box; clear: number }
-const hit = (p: Spot): Box => ({ left: p.x - HIT_PX / 2, top: p.y - HIT_PX / 2, right: p.x + HIT_PX / 2, bottom: p.y + HIT_PX / 2 });
+const R_HIT = HIT_PX / HALF;
+const hit = (p: Spot): Box => ({ left: p.x - R_HIT, top: p.y - R_HIT, right: p.x + R_HIT, bottom: p.y + R_HIT });
 /** Gap between two boxes (0 when they touch/overlap; Chebyshev-style per axis, the clearance §2 measures). */
 export const gap = (a: Box, b: Box) => Math.max(0, Math.max(b.left - a.right, a.left - b.right, b.top - a.bottom, a.top - b.bottom));
 const overlaps = (a: Box, b: Box) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
@@ -111,7 +116,7 @@ export class AudioHooks {
   /** Plays a registered hook; true iff a sound actually started. semi defaults to 0 (+2 only for Frenzy player sells, GE-AC24). */
   play(hook: string, opts: { semi?: number; minGapMs?: number } = {}): boolean {
     const file = AUDIO_HOOKS.get(hook); if (!file) return false;
-    const semi = opts.semi ?? 0, gapMs = opts.minGapMs ?? 60;
+    const semi = opts.semi ?? 0, gapMs = opts.minGapMs ?? AUDIO_MIN_GAP_MS;
     if (this.audio.playFile) return this.audio.playFile(file, gapMs, semi, hook);
     this.audio.play?.(hook as SfxName, gapMs); return false;
   }
@@ -129,7 +134,7 @@ export function reducedMotion(flag: () => boolean, root: HTMLElement, mq: Pick<M
 // ---------------------------------------------------------------- FX budget
 /** ≤ max live FX elements (30, layout-spec §6); the oldest is recycled. `max` is QA-settable (eggfarmQa.fx.setMax). */
 export class FxBudget {
-  max = 30; readonly live: HTMLElement[] = [];
+  max = FX_MAX_LIVE; readonly live: HTMLElement[] = [];
   admit(el: HTMLElement) { while (this.live.length >= this.max) this.live.shift()?.remove(); this.live.push(el); }
   release(el: HTMLElement) { const i = this.live.indexOf(el); if (i >= 0) this.live.splice(i, 1); }
   get count() { return this.live.length; }
