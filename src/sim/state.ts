@@ -1,4 +1,5 @@
 import type { Balance } from '../config/balance';
+import type { StreakRun } from './streak';
 import type { Workers } from './workers';
 import type { M5Fields } from './m5-state';
 export type { M5Fields } from './m5-state';
@@ -29,6 +30,8 @@ export interface GameState extends M5Fields {
   seenTracksExplainer?: boolean;
   /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the interim track migration). */
   celebratedMilestones: string[];
+  /** v5 #2 (session only, outside F1a M5Fields): the current run's streak_peak stats. */
+  streakRun?: StreakRun;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

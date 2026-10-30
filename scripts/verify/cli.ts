@@ -57,6 +57,7 @@ export function withFlags(b: Balance, over: Record<string, number>): Balance {
   const known = flagsOf(b); const c: any = structuredClone(b);
   for (const [k, v] of Object.entries(over)) {
     if (!(k in known)) throw new UsageError(`unknown flag ${k} (known: ${Object.keys(known).join(', ') || 'none'})`);
+    if (k.startsWith('m4.flags.') && v !== 0 && v !== 1) throw new UsageError(`${k} must be 0 or 1 (got ${v})`); // CCR N-2 #82, as validateM5
     const p = k.split('.'); let o = c; for (const x of p.slice(0, -1)) o = o[x]; o[p[p.length - 1]] = v;
   }
   return c as Balance;

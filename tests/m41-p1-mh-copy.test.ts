@@ -9,7 +9,7 @@ import { salesStopped } from '../src/econ/income';
 import { workerBanner, workerBannerHtml, workersHtml, MARKET_HAND_COPY, BANNER_ICON } from '../src/ui/workers-ui';
 const st = (workers: object, o: object = {}): any => ({ ...initialState(b, 1), farmLevel: 12, collectionLevel: 9, coinsCents: 1e9, ...o, workers });
 const MH_ASLEEP = { energy: 0, cdS: 0 }, MH_UNPAID = { energy: 60, cdS: 0, unpaid: true };
-const banner = (s: any, id: 'market_hand' | 'coop_hand' | 'hawker' | 'grader' = 'market_hand') => workerBanner(id, mood(s.workers[id], b), s, b)!;
+const banner = (s: any, id: 'market_hand' | 'coop_hand' | 'hawker' | 'grader' = 'market_hand') => workerBanner(id, mood(s.workers[id], b), b)!;
 const CASES = [
   ['asleep', MH_ASLEEP, 'Market Hand asleep: sales stopped', 'Market Hand is asleep. Auto-sales have stopped.', 'Asleep: sales stopped', 'icon-moon.svg'],
   ['unpaid', MH_UNPAID, 'Market Hand unpaid: sales stopped', 'Market Hand is unpaid. Auto-sales have stopped.', 'Unpaid: sales stopped', 'icon-warning.svg'],
@@ -69,6 +69,6 @@ describe('other roles unchanged by D-HOP-14 / -17', () => {
   });
   it('the "slowed" switch value still gives the rc1 rule for the Market Hand (switch is the only difference)', () => {
     const s = st({ market_hand: MH_ASLEEP });
-    expect(workerBanner('market_hand', 'asleep', s, b, 'slowed')!.text).toBe('Market Hand asleep: sales slowed'); // own-state rule: never 'production stopped'
+    expect(workerBanner('market_hand', 'asleep', b, 'slowed')!.text).toBe('Market Hand asleep: sales slowed'); // own-state rule: never 'production stopped'
   });
 });

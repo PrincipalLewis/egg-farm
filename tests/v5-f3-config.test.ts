@@ -6,13 +6,14 @@ import { join } from 'node:path';
 import { balance } from '../src/config/balance';
 import { validateBalance } from '../src/config/balance';
 import { M5_FLAGS } from '../src/config/flags';
+import { validateM5 } from '../src/config/m5-rules';
 import { parseEconomyCsv, buildBalance, readEconomyConfig, keepFlags, M5_MAPPED_COLS } from '../scripts/sync-economy';
 
 const rows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
 const withM4 = (m4: any) => ({ ...structuredClone(balance), m4: { ...structuredClone(balance.m4!), ...m4 } }) as typeof balance;
 const withTc = (tc: Record<string, number>) => withM4({ tc: { ...balance.m4!.tc, ...tc } });
 
-describe('F3 flags block (m4.flags.*, HoE D-C1)', () => {
+describe('[F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1)', () => {
   it('ships every known flag, all 0, with m4.enabled kept as shipped (1)', () => {
     expect(balance.m4!.enabled).toBe(1);
     expect(balance.m4!.flags).toEqual(Object.fromEntries(M5_FLAGS.map(f => [f, 0])));
@@ -35,7 +36,10 @@ describe('F3 flags block (m4.flags.*, HoE D-C1)', () => {
   });
 });
 
-describe('F3 CSV wiring', () => {
+describe('[F3][§9.5-1] F3 CSV wiring', () => {
+  it('[§9.5-1] M5_MAPPED_COLS is exactly the two ruled non-tc_ mappings (no vacuous loop below)', () => {
+    expect([...M5_MAPPED_COLS]).toEqual(['leave_attended_window_s', 'rest_recovery_mult']);
+  });
   it('every tc_* column lands in m4.tc (auto), plus the explicit non-tc_ mappings, values verbatim from the CSV', () => {
     const tc = balance.m4!.tc as Record<string, number>;
     for (const c of Object.keys(rows[0]).filter(c => c.startsWith('tc_'))) expect(tc[c.slice(3)]).toBe(rows[0][c]);
@@ -47,7 +51,7 @@ describe('F3 CSV wiring', () => {
   });
 });
 
-describe('F3 validateBalance M5 rules (rules from the specs; values are test inputs)', () => {
+describe('[F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs)', () => {
   const bad: [Record<string, number>, RegExp][] = [
     [{ egg_w_cash: 0.5 }, /weights must sum to 1/],
     [{ egg_gap_min_s: 301 }, /egg_gap_min_s/],
@@ -64,9 +68,22 @@ describe('F3 validateBalance M5 rules (rules from the specs; values are test inp
   ];
   it('the shipped balance passes', () => { expect(() => validateBalance(structuredClone(balance), false)).not.toThrow(); });
   for (const [tc, re] of bad) it(`rejects ${JSON.stringify(tc)}`, () => { expect(() => validateBalance(withTc(tc), false)).toThrow(re); });
-  it('tc_stall_hold_s = 0 is the supported kill switch (SS-23); keys a CSV does not carry yet are skipped', () => {
+  it('[SS-23] tc_stall_hold_s = 0 is the supported kill switch (SS-23); keys a CSV does not carry yet are skipped', () => {
     expect(() => validateBalance(withTc({ stall_hold_s: 0 }), false)).not.toThrow();
     expect(() => validateBalance(withTc({ warn_at_s: 20, urgent_at_s: 27 }), false)).not.toThrow(); // despawn 30 shipped
+  });
+  it('[Pause-§6] rest_recovery_mult range [0, 0.35] (pause spec §6; D-HOE-20261030-02): 0 and 0.35 pass; negative, NaN, Infinity and 0.4 fail', () => {
+    // 0 is valid (pause spec §6; AC-P17 checks the card text at 0)
+    expect(() => validateBalance(withTc({ rest_recovery_mult: 0 }), false)).not.toThrow();
+    expect(() => validateBalance(withTc({ rest_recovery_mult: 0.35 }), false)).not.toThrow();
+    // negative / non-finite: refused by validateBalance's generic leaf check ("... invalid") before validateM5 runs...
+    for (const v of [-0.25, NaN, Infinity]) expect(() => validateBalance(withTc({ rest_recovery_mult: v }), false)).toThrow(/m4\.tc\.rest_recovery_mult/);
+    // ...and by validateM5's own guard when called directly (no reliance on the leaf check)
+    const m4 = (v: number) => ({ ...structuredClone(balance.m4!), tc: { ...balance.m4!.tc, rest_recovery_mult: v } });
+    for (const v of [-0.25, NaN, Infinity, -Infinity]) expect(() => validateM5(m4(v), balance.workers)).toThrow(/rest_recovery_mult must be a finite number >= 0/);
+    expect(() => validateM5(m4(0), balance.workers)).not.toThrow();
+    // upper bound unchanged
+    expect(() => validateBalance(withTc({ rest_recovery_mult: 0.4 }), false)).toThrow(/rest_recovery_mult must be <= 0\.35/);
   });
 });
 
@@ -81,10 +98,15 @@ const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$
 /** Named code constants that are not CSV columns, by ruling: FOCUS_DT_MAX_S (HoP, sizing §13 GE-15), the RNG salts (D-C2, D-C4),
  *  and the uint32 bound of the xorshift state (D-C5 sanitising). tc_broody_max_on_screen = 1 is "fixed by design" (§12.2). */
 const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT) = [0-9.xa-fA-F]+;$/;
+/** Named save-schema constants (D-HOE-20261030-01): BROODY_NEST_MAX_CENTS and BROODY_SLOTS in src/save/m5-fields.ts are the
+ *  save-schema bounds from F2 #81 (sanitiser clamp / slot range), not economy tunables, so they are not CSV columns. Allowed only
+ *  in that file, only as whole `export const NAME = <number>;` declarations. */
+const SAVE_SCHEMA_FILE = /save\/m5-fields\.ts$/;
+const SAVE_SCHEMA_OK = /^(?:export const (?:BROODY_NEST_MAX_CENTS|BROODY_SLOTS) = [0-9.e]+;\s*)+$/;
 const NEUTRAL = new Set(['0', '1', '1000', '1e-9', '0xffffffff', '1.0']);
 /** The F1/F3 M5 modules; every later M5 module that calls flagOn() is picked up automatically. */
 const M5_FILES = /(?:sim\/(?:rng|clock|timers|effects|m5-state)|config\/flags)\.ts$/;
-describe('F3 no literal tunables in src/', () => {
+describe('[F3-no-literal] F3 no literal tunables in src/', () => {
   const all = files(SRC);
   it('no code-default fallback for an m4.tc key', () => {
     const hits = all.flatMap(f => strip(readFileSync(f, 'utf8')).split('\n').map((l, i) => [f, i + 1, l] as const)
@@ -98,6 +120,7 @@ describe('F3 no literal tunables in src/', () => {
     for (const f of m5) {
       strip(readFileSync(f, 'utf8')).split('\n').forEach((l, i) => {
         if (NAMED_OK.test(l.trim())) return;
+        if (SAVE_SCHEMA_FILE.test(f) && SAVE_SCHEMA_OK.test(l.trim())) return; // D-HOE-20261030-01
         for (const m of l.matchAll(/(?<![\w.$])(\d[\d_]*(?:\.\d+)?(?:e-?\d+)?|0x[0-9a-fA-F]+)(?![\w$])/g)) if (!NEUTRAL.has(m[1])) bad.push(`${f.slice(SRC.length)}:${i + 1} ${m[1]}`);
       });
     }

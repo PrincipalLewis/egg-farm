@@ -15,6 +15,9 @@ The freshness test picks the sim `--config` from the sha256 of `data/economy.csv
 | data/economy.csv sha256 | --config | meaning |
 |---|---|---|
 | `6dca24cd…` | `f1` | F1 m4cols CSV with the AC7 L21 trim (HoP-approved; was 86f0e80e from #17/#32), main today (`current` == `f1` since sim 10f29a4a) |
+| `b48be8a4…` | `f1` | M4-on retune T3 (D-CEO-20261019-04) |
+| `8dc90e2b…` | `f1` | M5.0 shipping CSV of record (D-HOP-2026-10-29-01): T3 + 29 tc_* cols, tc_streak_cap 0.28, w2_asleep_collect_share 0.15, guard_* dropped |
+| `a8c4e268…` | `f1` | M5.1 o1a: 8dc90e2b + farm_cost L27/28/29 = 160000/175000/190000 (D-HOP-2026-10-29-01) |
 | anything else | — | hard failure: `unknown economy.csv <sha>: update vendor/economy-sim` |
 
 It compares the 46 columns the sim's CSV writer emits. Pins are verified in a `beforeAll` before the sim runs.
