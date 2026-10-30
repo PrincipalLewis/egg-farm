@@ -4,6 +4,16 @@
 import type { Customer } from '../sim/state';
 import { orderView, moreLabel, moreName, type OrderView } from './orders';
 export interface ListInput { customers: Customer[]; basket: number; unit: number | ((k: number) => number); visible: number; expanded: boolean; rm: boolean; /** F5 shared coalesced queue length */ waitingLen?: number }
+/** QA-PRERUN-2: px added to the measured Sell label width (Firefox lays Nunito 800 out ~1-2px wider than Chromium/WebKit). */
+export const SELL_SLACK = 1;
+/** QA-PRERUN-2: a button's border-box width at its current width (fractional). The used value of `width` (border-box under
+ *  box-sizing:border-box) ignores transforms (the sell pop); falls back to the layout rect, then scrollWidth + borders (jsdom). */
+export function sellBoxWidth(b: HTMLElement): number {
+  const cs = b.ownerDocument.defaultView?.getComputedStyle(b), w = cs ? parseFloat(cs.width) : NaN;
+  if (Number.isFinite(w) && w > 0) return cs!.boxSizing === 'border-box' ? w : w + ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'].reduce((a, k) => a + (parseFloat((cs as any)[k]) || 0), 0);
+  const r = b.getBoundingClientRect().width; if (r > 0) return r;
+  return b.scrollWidth + (cs ? (parseFloat(cs.borderLeftWidth) || 0) + (parseFloat(cs.borderRightWidth) || 0) : 0);
+}
 export class OrderList {
   private nodes = new Map<number, HTMLElement>(); private pending: ListInput | null = null; private raf = 0;
   private lastSlide = -Infinity; private lastLeave = -Infinity; private frozenUntil = 0; private pointer = false;
@@ -53,7 +63,10 @@ export class OrderList {
     const bc = `btn sell${v.state === 'wait' ? '' : ' buy affordable'}`; if (btn.className !== bc) btn.className = bc;
     const dis = String(v.state === 'wait'); if (btn.getAttribute('aria-disabled') !== dis) btn.setAttribute('aria-disabled', dis);
   }
-  /** Art & UX MK-24-1 v3: one shared Sell button width = max(88, widest content), capped by 45% of the row. */
+  /** Art & UX MK-24-1 v3: one shared Sell button width = max(88, widest content), capped by 45% of the row.
+   *  QA-PRERUN-2 (Firefox 375 clip): --sell-w is a border-box width (box-sizing:border-box), so the widest content is measured as the
+   *  button's fractional BORDER-box width at max-content (sellBoxWidth), not scrollWidth (padding box: 2 x 2px border short, and
+   *  rounded to an integer), then ceil + SELL_SLACK px for engine text-width differences. */
   private syncSellWidth() {
     const btns = [...this.list.querySelectorAll<HTMLButtonElement>('.order .btn.sell')];
     if (!btns.length) { this.list.style.removeProperty('--sell-w'); return; }
@@ -61,7 +74,7 @@ export class OrderList {
     for (const b of btns) {
       const prev = b.style.width;
       b.style.width = 'max-content';
-      max = Math.max(max, b.scrollWidth);
+      max = Math.max(max, Math.ceil(sellBoxWidth(b)) + SELL_SLACK);
       b.style.width = prev;
     }
     const order = this.list.querySelector('.order') as HTMLElement | null;
