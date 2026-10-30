@@ -62,14 +62,21 @@ describe('k10 harness', () => {
 
 describe('k10 trigger', () => {
   const H = 'level,farm_cost,tc_streak_cap,bc_settle_s\n';
-  it('fires on tc_* / bc_* cell, add or remove; not on other columns', () => {
+  it('fires on tc_* / bc_* / farm_cost cell, add or remove; not on other columns', () => {
     const a = H + '0,10,0.28,300\n1,20,0.28,300\n';
     expect(csvMechChanges(a, a)).toEqual([]);
-    expect(csvMechChanges(a, a.replace('1,20', '1,25'))).toEqual([]); // farm_cost only
+    expect(csvMechChanges(a, a.replace('level,farm_cost', 'level,hens_cost'))).toEqual(['economy.csv: column farm_cost removed']);
     expect(csvMechChanges(a, a.replace('1,20,0.28', '1,20,0.27'))).toEqual(['economy.csv: tc_streak_cap changed (row L1: 0.28 -> 0.27)']);
     expect(csvMechChanges(a, a.replace(/,300/g, ',301'))[0]).toMatch(/bc_settle_s changed/);
     expect(csvMechChanges('level,farm_cost\n0,10\n', 'level,farm_cost,bc_x\n0,10,1\n')).toEqual(['economy.csv: column bc_x added']);
     expect(csvMechChanges(a.replace(/\n/g, '\r\n'), a)).toEqual([]); // EOL-only change is not a K10 change
+  });
+  it('fires on a farm_cost-only diff (D-HOP-23; #92 L27-29 retune flipped B4)', () => {
+    const a = H + '0,10,0.28,300\n1,20,0.28,300\n';
+    expect(csvMechChanges(a, a.replace('1,20,', '1,25,'))).toEqual(['economy.csv: farm_cost changed (row L1: 20 -> 25)']);
+    expect(k10Reasons(['data/economy.csv'], [a, a.replace('1,20,', '1,25,')])).toEqual(['economy.csv: farm_cost changed (row L1: 20 -> 25)']);
+    const o = 'level,farm_cost,hens_cost\n0,10,5\n1,20,6\n';
+    expect(csvMechChanges(o, o.replace('1,20,6', '1,20,7'))).toEqual([]); // other non-mechanic columns still do not trigger
   });
   it('fires on streak / tap-coins / Broody / golden / breeds code and the harness; not on unrelated files', () => {
     expect(k10Reasons(['src/sim/streak.ts', 'src/sim/breeds.ts', 'src/sim/golden-egg.ts', 'src/ui/broody-chip.ts', 'src/sim/tap-coins.ts', 'tests/k10-breeds-offset.ts'], [null, null])).toHaveLength(6);
