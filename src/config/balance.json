@@ -162,6 +162,25 @@
   },
   "m4": {
     "enabled": 1,
+    "flags": {
+      "golden": 0,
+      "streak": 0,
+      "tapCoins": 0,
+      "abilities": 0,
+      "broody": 0,
+      "salesStopped": 0,
+      "fatigueCue": 0,
+      "pause": 0,
+      "rc2Refill": 0,
+      "autoRefill": 0,
+      "clockWage": 0,
+      "breeds": 0,
+      "zeroGainUi": 0,
+      "bestBuyV2": 0
+    },
+    "zeroGain": {
+      "confirm": 0
+    },
     "hens": {
       "costs": [
         20,
@@ -418,7 +437,9 @@
       "tap_credit_min_s": 1,
       "tap_income_share": 0.03,
       "urgent_at_s": 27,
-      "warn_at_s": 20
+      "warn_at_s": 20,
+      "leave_attended_window_s": 30,
+      "rest_recovery_mult": 0.25
     }
   }
 }

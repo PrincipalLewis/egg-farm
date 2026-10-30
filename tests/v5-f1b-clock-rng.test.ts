@@ -9,8 +9,9 @@ import { apply } from '../src/sim/actions';
 import { EV_RNG_SALT, BR_RNG_SALT, deriveEvRngState, ensureEvRng, evDraw, brDraw, isRngState, pickIndex } from '../src/sim/rng';
 import { FOCUS_DT_MAX_S, focusFrameMs, focusTicks, tickClock, wallRemainingMs, wallReady, tickFocusS } from '../src/sim/clock';
 import { stepTimers, type TimerSystem } from '../src/sim/timers';
+import { G3 } from './v5-f2-helpers';
 
-const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } });
+const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags: { ...(balance.m4 as any).flags, ...flags } } : {}) } }) as typeof balance;
 /** 10 min of 10 Hz play with collects/sells/buys; returns the customer-facing trace + final state. */
 function play(b: ReturnType<typeof B>, seed: number, onTick?: (s: GameState) => GameState) {
   let s: GameState = { ...initialState(b, seed), coinsCents: 5_000_000 }; const ev: any[] = [];
@@ -75,7 +76,8 @@ describe('F1b evRng / brRng', () => {
   });
   it('[D-C2] flags off (or only non-RNG flags on): no evRngState is ever created', () => {
     expect('evRngState' in play(B(), 5).s).toBe(false);
-    expect('evRngState' in play(B({ streak: 1, abilities: 1 }), 5).s).toBe(false);
+    const SA = B({ streak: 1, abilities: 1 }); // #87: the streak flag needs its tc columns (validateBalance/tcNum), G3 until the CSV PR
+    expect('evRngState' in play({ ...SA, m4: { ...SA.m4, tc: { ...SA.m4.tc!, ...G3 } } } as typeof SA, 5).s).toBe(false);
     expect('evRngState' in play(B({ golden: 1 }, 0), 5).s).toBe(false); // m4.enabled off wins
   });
   it('[F1(a)] pickIndex stays in range', () => { expect(pickIndex(0, 8)).toBe(0); expect(pickIndex(0.999999999, 8)).toBe(7); expect(pickIndex(0.5, 6)).toBe(3); });

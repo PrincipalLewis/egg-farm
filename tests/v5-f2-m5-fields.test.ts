@@ -17,9 +17,10 @@ const egg = { ageS: 12, slotId: 'S3', intervalS: 150 };
 
 describe('F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled', () => {
   it('shipping balance has no m4.flags: every M5 flag off; SAVE_VERSION stays 6', () => {
-    expect(b.m4!.flags).toBeUndefined(); for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const) expect(m5Flag(b, k)).toBe(false);
+    // F3 merge: shipping balance now carries the m4.flags block (F3), every flag 0 (was: no block at all)
+    expect(b.m4!.flags).toEqual(Object.fromEntries(M5_FLAGS.map(f => [f, 0]))); for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const) expect(m5Flag(b, k)).toBe(false);
     expect(m5Flag({ ...ON, m4: { ...ON.m4!, enabled: 0 } }, 'golden')).toBe(false); expect(m5Flag(only('golden'), 'golden')).toBe(true);
-    expect(m5Flag({ ...b, m4: { ...b.m4!, flags: { golden: true as any } } }, 'golden')).toBe(false); expect(SAVE_VERSION).toBe(6);
+    expect(m5Flag({ ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, golden: true as any } } }, 'golden')).toBe(false); expect(SAVE_VERSION).toBe(6);
   });
   it('[CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)', () => {
     for (const f of M5_FLAGS) for (const en of [0, 1]) for (const v of [0, 1, 2]) {
@@ -93,7 +94,9 @@ describe('F2 settle: a gap of 60 s or more (§9.1 / §9.1a)', () => {
     const ev: SimEvent[] = [], s: any = m5Offline(live(), ON, ev), [x, u] = nextRand(99);
     expect(ev).toEqual([
       { type: 'ability_ended', worker: 'market_hand', cause: 'offline', effect_s: tc.ability_s - 10 },
-      { type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: 12 }]);
+      { type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: 12 },
+      // #2 streak R11: the run ends with streak_peak{reason:"offline"} (no run stats in this fixture; 0.28 = T_4 = cap of record 0.28)
+      { type: 'streak_peak', value: 0.28, duration_s: 0, credited_taps: 0, time_at_cap_s: 0, extra_coins: 0, frenzy_overlap_s: 0, reason: 'offline', max_tier: 4 }]);
     expect(s.abilities).toEqual({ market_hand: { readyAt: NOW + 200_000 }, coop_hand: { readyAt: NOW + 50_000 } });
     expect('goldenEgg' in s).toBe(false); expect(s.evRngState).toBe(x); expect(s.nextSpawnRemainingS).toBe(tc.egg_gap_min_s + u * (tc.egg_gap_max_s - tc.egg_gap_min_s));
     expect(s).toMatchObject({ frenzyRemainingS: 11, broodyNestCents: 700, broodyHenIdx: 2, broodyNestScaled: 7_000_123, streakS: 0, streakHoldS: 0, rng: base().rng });

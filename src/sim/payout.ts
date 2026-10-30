@@ -4,18 +4,22 @@ import type { Balance } from '../config/balance';
 import type { GameState } from './state';
 import { salePriceCents } from './tracks';
 import { graderMult } from './workers';
-/** Price multipliers applied to a sale, in order. M4 adds streak / frenzy entries here (one place for credit + previews). */
-export function saleMultipliers(s: GameState, b: Balance): number[] {
-  return [graderMult(s.workers, s.graderTier, b)];
+import { PLAYER_SALE, saleEffectFactors, type SaleCtx } from './effects';
+/** Price multipliers applied to a sale: the Grader, then every live timed effect from the F1c registry (sim/effects.ts).
+ *  ctx defaults to a player sale with focus (UI previews and player credits); worker sales pass by/suspended. */
+export function saleMultipliers(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE): number[] {
+  const g = graderMult(s.workers, s.graderTier, b), fx = saleEffectFactors(s, b, ctx);
+  return fx.length ? [g, ...fx.map(e => e.factor)] : [g];
 }
-/** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult). */
-export function saleValueCents(s: GameState, k: number, b: Balance): number {
-  const base = salePriceCents(s, b), m = saleMultipliers(s, b).reduce((a, x) => a * x, 1);
+/** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult) (rounded once, X7). */
+export function saleValueCents(s: GameState, k: number, b: Balance, ctx: SaleCtx = PLAYER_SALE): number {
+  const base = salePriceCents(s, b), m = saleMultipliers(s, b, ctx).reduce((a, x) => a * x, 1);
   return m === 1 ? k * base : Math.round(k * base * m);
 }
-/** Preview of Sell all: same per-customer walk as the 'sellAll' action. */
-export function sellAllPreview(s: GameState, b: Balance): { eggs: number; cents: number } {
+/** Preview of Sell all: same per-customer walk as the 'sellAll' action. Pass the SAME ctx the credit will use
+ *  (Game.playerSaleCtx() = playerSaleCtx(attended)), so preview == credit for either attended value (CCR m1 #80). */
+export function sellAllPreview(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE): { eggs: number; cents: number } {
   let left = Math.floor(s.basket), eggs = 0, cents = 0;
-  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(s, k, b); }
+  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(s, k, b, ctx); }
   return { eggs, cents };
 }
