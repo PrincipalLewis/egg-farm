@@ -72,7 +72,7 @@ describe('[F3-validate] F3 validateBalance M5 rules (rules from the specs; value
     expect(() => validateBalance(withTc({ stall_hold_s: 0 }), false)).not.toThrow();
     expect(() => validateBalance(withTc({ warn_at_s: 20, urgent_at_s: 27 }), false)).not.toThrow(); // despawn 30 shipped
   });
-  it('[Pause-§6] rest_recovery_mult range [0, 0.35] (pause spec §6; D-HOE-20261030-02): 0 and 0.35 pass; negative, NaN, Infinity and 0.4 fail', () => {
+  it('[Pause-§6] rest_recovery_mult range [0, 0.35] (pause spec §6; D-HOE-20261030-02): 0 and 0.35 pass; negative, NaN, Infinity, 0.3500001, 0.36 and 0.4 fail', () => {
     // 0 is valid (pause spec §6; AC-P17 checks the card text at 0)
     expect(() => validateBalance(withTc({ rest_recovery_mult: 0 }), false)).not.toThrow();
     expect(() => validateBalance(withTc({ rest_recovery_mult: 0.35 }), false)).not.toThrow();
@@ -83,7 +83,8 @@ describe('[F3-validate] F3 validateBalance M5 rules (rules from the specs; value
     for (const v of [-0.25, NaN, Infinity, -Infinity]) expect(() => validateM5(m4(v), balance.workers)).toThrow(/rest_recovery_mult must be a finite number >= 0/);
     expect(() => validateM5(m4(0), balance.workers)).not.toThrow();
     // upper bound unchanged
-    expect(() => validateBalance(withTc({ rest_recovery_mult: 0.4 }), false)).toThrow(/rest_recovery_mult must be <= 0\.35/);
+    // upper bound pinned tight: a bound mutated to <= 0.36 or <= 0.3500001 must be caught (Saves QA, pr82-2facc3f)
+    for (const v of [0.3500001, 0.36, 0.4]) expect(() => validateBalance(withTc({ rest_recovery_mult: v }), false)).toThrow(/rest_recovery_mult must be <= 0\.35/);
   });
 });
 
@@ -113,7 +114,7 @@ describe('[F3-no-literal] F3 no literal tunables in src/', () => {
       .filter(([, , l]) => /\btc(?:\.\w+|\[[^\]]+\])\s*(?:\?\?|\|\|)\s*-?\d/.test(l))).map(([f, n]) => `${f.slice(SRC.length)}:${n}`);
     expect(hits).toEqual([]);
   });
-  it('M5 modules carry no bare numeric literal (only 0/1/1000/1e-9/uint32 and the ruled named constants)', () => {
+  it('[D-HOE-20261030-01] M5 modules carry no bare numeric literal (only 0/1/1000/1e-9/uint32, the ruled named constants and the save-schema bounds)', () => {
     const m5 = all.filter(f => M5_FILES.test(f) || /\b(?:evRng)?[fF]lagOn\(/.test(strip(readFileSync(f, 'utf8'))));
     expect(m5.filter(f => M5_FILES.test(f))).toHaveLength(6);
     const bad: string[] = [];
