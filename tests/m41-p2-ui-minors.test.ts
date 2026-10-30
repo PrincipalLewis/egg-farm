@@ -177,3 +177,15 @@ describe('Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, s
     expect(rules.length).toBeGreaterThan(2); for (const m of rules) expect(m[2], m[1]).not.toMatch(/(^|;)\s*content\s*:/);
   });
 });
+
+describe('AC-R17 D-HOP-2026-10-30-02: cooldown Refill label CSS', () => {
+  it('AC-R17 D-HOP-2026-10-30-02: the countdown is generated content from data-cd, one line, tabular digits (no jump as it ticks)', () => {
+    expect(css).toMatch(/\.nav-lbl\[data-cd\]::after\{content:attr\(data-cd\);white-space:pre;font-variant-numeric:tabular-nums\}/);
+    expect(css).toMatch(/\.actions \.nav-lbl\{[^}]*white-space:nowrap/);
+  });
+  it('AC-R17 D-HOP-2026-10-30-02: fmtCooldown is m:ss; every countdown up to manage_cooldown_s has the same glyph count', async () => {
+    const { fmtCooldown } = await import('../src/ui/workers-ui'); const { balance } = await import('../src/config/balance');
+    const max = balance.workers.energy.manage_cooldown_s; expect(fmtCooldown(30)).toBe('0:30'); expect(fmtCooldown(7)).toBe('0:07'); expect(fmtCooldown(75)).toBe('1:15');
+    const lens = new Set(Array.from({ length: Math.ceil(max) }, (_, i) => fmtCooldown(i + 1).length)); expect(lens.size).toBe(1);
+  });
+});

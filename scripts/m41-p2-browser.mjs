@@ -21,7 +21,7 @@ const MAN = `${OUT}/manifest.json`, manifest = existsSync(MAN) ? JSON.parse(read
 manifest.shots = manifest.shots.filter(s => s.engine !== ENGINE);
 const browser = ENGINE === 'webkit' ? await webkit.launch() : ENGINE === 'firefox' ? await firefox.launch() : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const URL0 = `http://127.0.0.1:${srv.port}/`, UI = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
-const results = []; let fails = 0;
+const results = [], fit = []; let fails = 0;
 // info(): recorded in results-<engine>.json with its real pass/fail and printed as INFO, never counted as a gate failure. Used only for a
 // finding outside the ruled scope that waits for a ruling (named in the check text).
 const info = (id, w, name, pass, data) => { results.push({ id, engine: ENGINE, w, name, pass: !!pass, info: true, data }); console.log(`INFO [${ENGINE} ${w}] ${id} ${pass ? 'pass' : 'FINDING'} ${name} ${pass ? '' : JSON.stringify(data)}`); };
@@ -147,7 +147,7 @@ for (const [w, h] of SIZES) {
         // AC-R17 / Art-c1 (HoE 2026-10-30 00:19): the Upgrades badge follows the label in the DOM, so the visible text reads "Upgrades N";
         // the name "Upgrades, N worker(s) need(s) attention" starts with it (punctuation dropped, as axe compares)
         const v = vis(e).replace(/\s+/g, ' ').trim(), name = e.getAttribute('aria-label');
-        return { sel, shown: true, v, name, ok: sel.includes('upgrades') ? words(name).startsWith(words(v)) && name.startsWith('Upgrades') : name.startsWith(v) }; }); });
+        return { sel, shown: true, v, name, ok: v.length > 0 && (sel.includes('upgrades') ? words(name).startsWith(words(v)) && name.startsWith('Upgrades') : name.startsWith(v)) }; }); }); // F3: non-empty visible text
     const n = { 'mh-asleep': 1, 'ch-asleep': 1, 'both-asleep': 2, 'mh-unpaid': 1, 'ch-unpaid': 1, 'both-unpaid': 2, 'mh-asleep-ch-unpaid': 2, none: 0 }[scene];
     const shown = r.filter(x => x.shown), wt = r[1];
     check('AC-R17', w, `${scene}: every shown control's name starts with its visible text; Workers tab ${n ? `"Workers ${n}, …"` : '"Workers"'}`, shown.every(x => x.ok) && wt.shown && (n ? wt.name === `Workers ${n}, ${n} asleep or unpaid` : wt.name === 'Workers'), r);
@@ -191,11 +191,11 @@ for (const [w, h] of SIZES) {
       const shown = e.checkVisibility(), name = e.getAttribute('aria-label'), v = vis(e).replace(/\s+/g, ' ').trim(), lbl = e.querySelector('.nav-lbl');
       e.click(); window.eggfarmUi.render();
       const st2 = JSON.stringify({ cd: window.eggfarm.state.manageCdS, w: window.eggfarm.state.workers, c: window.eggfarm.state.coinsCents });
-      return { present: true, shown, name, v, countdown: lbl?.textContent ?? null, countdownAriaHidden: lbl?.getAttribute('aria-hidden') ?? null, ariaDisabled: e.getAttribute('aria-disabled'), unchanged: st === st2 }; }, [sel, vis.toString()]);
+      return { present: true, shown, name, v, label: lbl?.textContent ?? null, countdown: lbl?.dataset.cd ?? null, hiddenText: [...e.querySelectorAll('[aria-hidden=true]')].map(x => x.textContent.trim()).filter(Boolean), ariaDisabled: e.getAttribute('aria-disabled'), unchanged: st === st2 }; }, [sel, vis.toString()]);
     if (how === 'tab') {
-      check('D-HOP-10-addendum', w, `cooldown, count 0: ${phone ? 'nav' : 'header'} Refill visible, name "Refill, cooling down" starts with its visible text (countdown aria-hidden), aria-disabled, a tap changes nothing`, d.present && d.shown && d.name === 'Refill, cooling down' && d.name.startsWith(d.v) && d.countdownAriaHidden === 'true' && d.ariaDisabled === 'true' && d.unchanged, d);
+      check('D-HOP-10-addendum / D-HOP-2026-10-30-02', w, `cooldown, count 0: ${phone ? 'nav' : 'header'} Refill visible, visible text "Refill" (non-empty, F3) + countdown "${phone ? ' ' : ' · '}0:20" (CSS data-cd), name "Refill, cooling down" starts with it, aria-disabled, a tap changes nothing`, d.present && d.shown && d.name === 'Refill, cooling down' && d.v === 'Refill' && d.v.length > 0 && d.name.startsWith(d.v) && d.countdown === (phone ? ' 0:20' : ' · 0:20') && d.ariaDisabled === 'true' && d.unchanged, d);
       if (axeSrc) { await page.addScriptTag({ content: axeSrc }); const ax = await page.evaluate(async sel => { const res = await window.axe.run({ include: [[sel]] }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } }); return { v: res.violations.flatMap(x => x.nodes.map(n => n.target.join(' '))) }; }, sel);
-        info('D-HOP-10-addendum axe', w, 'cooldown Refill: axe 4.14 label-content-name-mismatch (axe counts the aria-hidden "0:NN" countdown as visible text; behaviour unchanged per HoP 00:22, escalated to HoE for a ruling)', ax.v.length === 0, ax); }
+        check('AC-R17 D-HOP-2026-10-30-02 axe', w, `cooldown ${phone ? 'nav' : 'header'} Refill: axe 4.14 label-content-name-mismatch violations = 0`, ax.v.length === 0, ax); }
     }
     if (phone) { // focus on Refill when the cooldown ends at count 0: Tab -> Farm, Shift+Tab -> Upgrades (no gap, no trap); then a full Tab sweep of the nav
       await page.waitForTimeout(400); await page.locator(sel).focus();
@@ -212,6 +212,33 @@ for (const [w, h] of SIZES) {
       const gone = await page.evaluate(sel => !document.querySelector(sel).checkVisibility(), sel);
       check('D-HOP-10-addendum', w, 'cooldown ends at count 0 (docked): the header Refill copy is hidden (nav not displayed)', gone, { gone });
     }
+    await ctx.close(); }
+  // ---- D-HOP-2026-10-30-02 (b) fit (Art 08:53): "Refill" + countdown on one line, no clip/ellipsis, tabular (no jump), target >= 44, contrast >= 4.5:1.
+  // Widest countdown = manage_cooldown_s (30 s -> "0:30"), typical "0:07"; Upgrades badge on (MH asleep) in the same frame. Measurements -> cooldown-fit-<engine>.json
+  for (const cd of [30, 7]) { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 90, cdS: 0 } }, coinsCents: 1e6, manageCdS: cd }, { freeze: true });
+    if (!phone) await toTab(page, 'workers'); await page.evaluate(PAGE_LIB); await page.waitForTimeout(300);
+    const sel = phone ? 'nav.actions .nav-manage' : '#p-upgrades header [data-act=manageAll]';
+    const f = await page.evaluate(([sel, max]) => { const P = window.__p2, e = document.querySelector(sel), nl = e.querySelector('.nav-lbl'), b = e.getBoundingClientRect(), l = nl.getBoundingClientRect();
+      const lh = parseFloat(getComputedStyle(nl).lineHeight) || parseFloat(getComputedStyle(nl).fontSize) * 1.2, cd0 = nl.dataset.cd;
+      const widths = {}; for (let i = 1; i <= max; i++) { nl.dataset.cd = cd0.replace(/\d+:\d\d$/, `${Math.floor(i / 60)}:${String(i % 60).padStart(2, '0')}`); widths[i] = +nl.getBoundingClientRect().width.toFixed(2); } nl.dataset.cd = cd0;
+      const ws = Object.values(widths), after = getComputedStyle(nl, '::after'), fg = P.rgb(after.color), bg = P.bgOf(e), op = P.effOpacity(nl);
+      const up = document.querySelector('nav [data-nav=upgrades] > .asleep-badge');
+      return { text: nl.textContent + cd0, label: nl.textContent, countdown: cd0, name: e.getAttribute('aria-label'), lines: nl.getClientRects().length, labelH: +l.height.toFixed(2), lineH: +lh.toFixed(2),
+        btn: P.r(e), lbl: P.r(nl), inside: l.left >= b.left - 0.5 && l.right <= b.right + 0.5 && l.top >= b.top - 0.5 && l.bottom <= b.bottom + 0.5, inView: b.left >= -0.5 && b.right <= innerWidth + 0.5,
+        overflow: e.scrollWidth > e.clientWidth + 0.5, ellipsis: getComputedStyle(nl).textOverflow, afterContent: after.content, numeric: after.fontVariantNumeric,
+        widthMin: Math.min(...ws), widthMax: Math.max(...ws), color: after.color, bg: `rgb(${bg.r}, ${bg.g}, ${bg.b})`, opacity: op, contrastRaw: P.ratio(fg, bg), contrastEff: P.contrast(nl),
+        badge: up ? { shown: up.checkVisibility(), text: up.textContent } : null }; }, [sel, 30]);
+    f.engine = ENGINE; f.w = w; f.h = h; f.cd = cd; fit.push(f);
+    const oneLine = f.lines === 1 && f.labelH <= f.lineH * 1.5, noClip = f.inside && f.inView && !f.overflow, noJump = f.widthMax - f.widthMin < 0.01 && /tabular-nums/.test(f.numeric);
+    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: "${f.text}" on one line (${f.lines} line box, ${f.labelH}px), not clipped/ellipsised, inside the button`, oneLine && noClip && f.ellipsis !== 'ellipsis', f);
+    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: tabular digits, label width constant over 0:01..0:30 (${f.widthMin}..${f.widthMax}px)`, noJump, { widthMin: f.widthMin, widthMax: f.widthMax, numeric: f.numeric });
+    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: tap target ${f.btn.w}x${f.btn.h} >= 44x44`, f.btn.w >= 44 && f.btn.h >= 44, f.btn);
+    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: countdown/label contrast ${f.contrastEff}:1 >= 4.5:1 (${f.color} on ${f.bg}, opacity ${f.opacity})`, f.contrastEff >= 4.5, { color: f.color, bg: f.bg, opacity: f.opacity, contrast: f.contrastEff });
+    if (phone) check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: Upgrades badge on (N=1) in the same frame`, f.badge?.shown && f.badge.text === '1', f.badge);
+    const clip = phone ? await (async () => { const bb = await page.locator('nav.actions').boundingBox(); return { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 }; })()
+      : await page.evaluate(() => { const a = document.querySelector('#p-upgrades header').getBoundingClientRect(), t = document.querySelector('#p-upgrades .tabs')?.getBoundingClientRect() ?? a;
+        const x = Math.floor(Math.min(a.left, t.left)), y = Math.floor(Math.min(a.top, t.top)); return { x, y, width: Math.ceil(Math.max(a.right, t.right)) - x, height: Math.ceil(Math.max(a.bottom, t.bottom)) - y + 4 }; });
+    await shot(page, `cooldown-${cd === 30 ? 'max-0-30' : 'typ-0-07'}`, w, `${phone ? 'Bottom nav' : 'Docked Upgrades header + tabs'}: Refill cooldown "${f.text.trim()}" (D-HOP-2026-10-30-02 (b)), ${phone ? 'Upgrades badge N=1' : 'Workers tab badge 1'} on`, f, clip);
     await ctx.close(); }
   // ---- P2b-U / Art-c2: Unpaid Refill refused tap = shake; reduced motion = static refusedFlash, no translate ----
   for (const rm of [false, true]) { const { ctx, page } = await open(w, h, { workers: { ...MH_UNPAID, coop_hand: { energy: 90, cdS: 0 } }, coinsCents: 0 }, { rm, freeze: true });
@@ -289,6 +316,7 @@ for (const [w, h] of SIZES) for (const rm of [false, true]) {
 }
 await browser.close(); srv.stop();
 writeFileSync(MAN, JSON.stringify(manifest, null, 1) + '\n');
+writeFileSync(`${OUT}/cooldown-fit-${ENGINE}.json`, JSON.stringify({ head, buildId: srv.buildId, engine: ENGINE, fit }, null, 1) + '\n');
 writeFileSync(`${OUT}/results-${ENGINE}.json`, JSON.stringify({ head, buildId: srv.buildId, engine: ENGINE, checks: results.length, fails, results }, null, 1) + '\n');
 console.log(`m41-p2-browser [${ENGINE}] ${results.filter(r => !r.info).length - fails}/${results.filter(r => !r.info).length} checks pass (+${results.filter(r => r.info).length} INFO, ${results.filter(r => r.info && !r.pass).length} findings), ${manifest.shots.filter(s => s.engine === ENGINE).length} shots -> ${OUT}`);
 process.exitCode = fails ? 1 : 0;

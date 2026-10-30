@@ -624,9 +624,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     for (const fb of farmMAs) {
       setHidden(fb, !farmMAShown);
       if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
-        // S2-5 / AC-R9: visible "Refill" (or the aria-hidden "0:NN" countdown) + N badge; aria "Refill N tired workers" / "Refill, cooling down"
+        // S2-5 / AC-R9: visible "Refill" + N badge, or "Refill" + the CSS-drawn countdown (D-HOP-2026-10-30-02); aria "Refill N tired workers" / "Refill, cooling down"
         const v = navRefillState(s, b, docked.matches, maAria, now());
-        { const nl = fb.querySelector('.nav-lbl')!; setText(nl, v.label); const ah = v.hideLabel ? 'true' : 'false'; if (nl.getAttribute('aria-hidden') !== ah) nl.setAttribute('aria-hidden', ah); } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+        { const nl = fb.querySelector('.nav-lbl') as HTMLElement; setText(nl, v.label); if (nl.dataset.cd !== v.countdown) nl.dataset.cd = v.countdown; } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');

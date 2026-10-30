@@ -97,7 +97,12 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
   const domText = (el: Element): string => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue ?? '' : n.nodeType === 1 && !(n as HTMLElement).hidden ? domText(n as Element) : '').join('');
   const words = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim(); // axe-style: punctuation dropped
   const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
-  const startsWithVisible = (el: Element) => { const v = norm(visible(el)), name = el.getAttribute('aria-label') ?? ''; return { v, name, ok: name.startsWith(v) }; };
+  // QA pre-review F3: an empty visible text would make name.startsWith('') vacuously true, so the visible text must be non-empty.
+  const startsWithVisible = (el: Element) => { const v = norm(visible(el)), name = el.getAttribute('aria-label') ?? ''; return { v, name, ok: v.trim().length > 0 && name.startsWith(v) }; };
+  it('AC-R17 F3: the starts-with-visible-text check fails on empty visible text (all aria-hidden)', () => {
+    const el = document.createElement('button'); el.setAttribute('aria-label', 'Refill, cooling down'); el.innerHTML = '<span aria-hidden="true">0:20</span>';
+    document.body.append(el); try { const r = startsWithVisible(el); expect(r.v).toBe(''); expect(r.ok).toBe(false); } finally { el.remove(); }
+  });
   const scenes: [string, Record<string, unknown>, number][] = [
     ['MH asleep', { market_hand: { energy: 0, cdS: 5 } }, 1], ['CH asleep', { coop_hand: { energy: 0, cdS: 5 } }, 1],
     ['MH + CH asleep', { market_hand: { energy: 0, cdS: 5 }, coop_hand: { energy: 0, cdS: 5 } }, 2],
@@ -169,14 +174,23 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
     const { g, ui } = await restedCd(20);
     const rf = document.querySelector('nav .nav-manage') as HTMLElement;
     expect(rf.hidden).toBe(false); expect(navOrder()).toEqual(['market', 'upgrades', 'manageAll', 'farm']);
-    const r = startsWithVisible(rf); // the "0:20" countdown is aria-hidden (review 23a3798 #1), so axe's visible text is the exposed rest
-    expect(rf.querySelector('.nav-lbl')!.textContent).toBe('0:20'); expect(rf.querySelector('.nav-lbl')!.getAttribute('aria-hidden')).toBe('true');
+    const r = startsWithVisible(rf); // D-HOP-2026-10-30-02 (b): visible "Refill"; the countdown is CSS generated content from data-cd
+    const nl = rf.querySelector('.nav-lbl') as HTMLElement; expect(nl.textContent).toBe('Refill'); expect(nl.dataset.cd).toBe(' 0:20'); expect(nl.hasAttribute('aria-hidden')).toBe(false);
     expect(r.name).toBe('Refill, cooling down'); expect(r.ok, JSON.stringify(r)).toBe(true); expect(r.name.startsWith('Refill')).toBe(true);
     expect(rf.getAttribute('aria-disabled')).toBe('true'); expect(rf.classList.contains('is-cooldown')).toBe(true);
     const before = JSON.stringify({ cd: g.state.manageCdS, w: g.state.workers, c: g.state.coinsCents });
     rf.click(); ui.render();
     expect(JSON.stringify({ cd: g.state.manageCdS, w: g.state.workers, c: g.state.coinsCents })).toBe(before); // refused: no Refill, no spend
     expect(rf.classList.contains('shake')).toBe(true); // the refused-tap feedback (cantAfford)
+  });
+  it('AC-R17 D-HOP-2026-10-30-02: cooldown Refill accessible name starts with the visible label text', async () => {
+    for (const [cd, want] of [[30, ' 0:30'], [7, ' 0:07'], [0.4, ' 0:01']] as const) {
+      await restedCd(cd); const rf = document.querySelector('nav .nav-manage') as HTMLElement, r = startsWithVisible(rf);
+      expect(r.v).toBe('Refill'); expect(r.name).toBe('Refill, cooling down'); expect(r.ok, JSON.stringify(r)).toBe(true);
+      expect((rf.querySelector('.nav-lbl') as HTMLElement).dataset.cd).toBe(want); expect([...rf.querySelectorAll('[aria-hidden=true]')].filter(x => x.textContent!.trim()).length).toBe(0); // no hidden text (decorative ring only)
+    }
+    const { navManageView } = await import('../src/ui/workers-ui'); // docked header copy: same rule
+    const d = navManageView(0, 20, true, { text: '', at: 0 }, 0); expect(d.label).toBe('Refill'); expect(d.countdown).toBe(' · 0:20'); expect(d.aria.text.startsWith(d.label)).toBe(true);
   });
   it('D-HOP-10-addendum: the cooldown ends at count 0 -> nav Refill leaves the nav; Tab order Market → Upgrades → Farm (no gap, no trap), also with focus on Refill', async () => {
     const { g, ui } = await restedCd(20);

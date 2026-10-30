@@ -228,8 +228,8 @@ sections.b58 = async () => {
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
     if (w > 900) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await page.waitForTimeout(400);
-      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText }; });
-      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && /^Ready in \d+s$/.test(d.text.trim()), JSON.stringify(d));
+      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText, cd: document.querySelector('.farm-manage-all .nav-lbl')?.dataset.cd }; });
+      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && d.text.trim() === 'Refill' && /^ · \d+:\d\d$/.test(d.cd ?? ''), JSON.stringify(d)); // D-HOP-2026-10-30-02 (b): "Refill · 0:NN", countdown from data-cd
       { const bb = await page.evaluate(() => { const rs = [document.querySelector('.farm-manage-all'), ...document.querySelectorAll('.farm-manage-all *')].map(e => e.getBoundingClientRect()).filter(r => r.width);
           const x = Math.min(...rs.map(r => r.left)), y = Math.min(...rs.map(r => r.top)); return { x, y, width: Math.max(...rs.map(r => r.right)) - x, height: Math.max(...rs.map(r => r.bottom)) - y }; }), pad = 16; // pill + overhanging icon // whole pill in frame (Art & UX 10:01)
         ok(`Review #2b: docked Refill pill fully inside the viewport (${w}) — h=${bb && bb.height}px`, !!bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= w && bb.y + bb.height <= 900, JSON.stringify(bb));
@@ -702,10 +702,10 @@ sections.s25 = async () => {
   const r2 = await read(); check(r2, 'after reload');
   ok('S2-5 exactly one worker button in the DOM after reload', (await page.locator('[data-act=manageAll]').count()) === 1);
   await page.locator('nav [data-act=manageAll]').click(); await page.waitForTimeout(300);
-  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, lblHidden: b.querySelector('.nav-lbl').getAttribute('aria-hidden'), aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
+  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, cdText: b.querySelector('.nav-lbl').dataset.cd, hiddenKids: [...b.querySelectorAll('[aria-hidden=true]')].filter(x => x.textContent.trim()).length, aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
   ok('Review #1: nav Refill icon greyed during cooldown (grayscale(1), opacity .55)', cd.filter === 'grayscale(1)' && cd.op === '0.55', JSON.stringify(cd));
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-review1-nav-refill-cooldown-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
-  ok('S2-5 cooldown: label "0:NN", aria "Refill, cooling down" with the countdown aria-hidden (review 23a3798 #1), aria-disabled', /^0:\d\d$/.test(cd.label) && cd.aria === 'Refill, cooling down' && cd.lblHidden === 'true' && cd.dis === 'true', JSON.stringify(cd));
+  ok('S2-5 cooldown (D-HOP-2026-10-30-02 (b)): label "Refill" + countdown " 0:NN" (CSS data-cd), aria "Refill, cooling down" (review 23a3798 #1), aria-disabled', cd.label === 'Refill' && /^ \d+:\d\d$/.test(cd.cdText ?? '') && cd.hiddenKids === 0 && cd.aria === 'Refill, cooling down' && cd.dis === 'true', JSON.stringify(cd));
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-5-nav-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
   await ctx.close();
 };

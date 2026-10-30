@@ -158,18 +158,22 @@ export function shouldShowCoopTip(s: GameState, b: Balance, shownThisSession: bo
   return !shownThisSession && !s.workers.coop_hand && s.farmLevel >= t.coop_hand_tip_min_farm && s.coopFullS >= t.coop_hand_tip_full_s;
 }
 export const COOP_TIP_TEXT = 'Coop full! Hire a Coop Hand to collect eggs for you.';
-/** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav (Art & UX 08:47, v1.3 copy): "Refill" / "0:28" + N badge; docked header: "Refill tired (N)" /
- *  "Ready in Ns". aria-label "Refill N tired workers" / "Refill, cooling down" during the cooldown (countdown label aria-hidden, review 23a3798 #1); the cooldown aria text changes at most every 5 s. */
+/** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav (Art & UX 08:47, v1.3 copy): "Refill" + N badge; docked header: "Refill N tired workers".
+ *  Cooldown (D-HOP-2026-10-30-02 (b)): "Refill 0:28" (docked "Refill · 0:28"), the countdown drawn by CSS from data-cd. aria-label "Refill N tired workers" /
+ *  "Refill, cooling down" during the cooldown (review 23a3798 #1). */
 export interface NavAria { text: string; at: number }
 /** Pure nav/docked Refill state from the game state (what app.ts renders); same count as the Refill bar (refillCount). */
 export const navRefillState = (s: GameState, b: Balance, docked: boolean, prev: NavAria, nowMs: number) => navManageView(refillCount(s, b), s.manageCdS, docked, prev, nowMs);
 export const REFILL_COOLDOWN_ARIA = 'Refill, cooling down';
-export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; badge: string; aria: NavAria; hideLabel: boolean } {
+/** D-HOP-2026-10-30-02: m:ss for the cooldown countdown (manage_cooldown_s is 30 today, so "0:30" … "0:01"). */
+export const fmtCooldown = (cd: number) => `${Math.floor(cd / 60)}:${String(cd % 60).padStart(2, '0')}`;
+export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; countdown: string; badge: string; aria: NavAria } {
   const cd = Math.ceil(cdS - 1e-9);
   if (cd > 0) {
-    const label = docked ? `Ready in ${cd}s` : `0:${String(cd).padStart(2, '0')}`;
-    // review 23a3798 #1: the countdown is a visual-only, aria-hidden label; the name is stable for the whole cooldown, so it never goes stale
-    return { label, badge: '', hideLabel: true, aria: prev.text === REFILL_COOLDOWN_ARIA ? prev : { text: REFILL_COOLDOWN_ARIA, at: nowMs } };
+    // D-HOP-2026-10-30-02 option (b): the visible label is "Refill" next to the countdown; the name stays "Refill, cooling down" (review
+    // 23a3798 #1: stable for the whole cooldown, never stale). The countdown is CSS generated content (.nav-lbl[data-cd]::after), not text
+    // in the button: axe 4.14 counts aria-hidden text as visible (label-content-name-mismatch), and the aria-label keeps it out of the name.
+    return { label: 'Refill', countdown: docked ? ` · ${fmtCooldown(cd)}` : ` ${fmtCooldown(cd)}`, badge: '', aria: prev.text === REFILL_COOLDOWN_ARIA ? prev : { text: REFILL_COOLDOWN_ARIA, at: nowMs } };
   }
-  return { hideLabel: false, label: docked ? refillTiredLabel(n) : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
+  return { label: docked ? refillTiredLabel(n) : 'Refill', countdown: '', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
 }

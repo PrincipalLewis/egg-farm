@@ -140,15 +140,15 @@ describe('S2-5 nav labels + AC-R9 / AC-R8 Refill copy', () => {
     for (const x of btns) { expect(x).toMatch(/aria-label="[^"]+"/); expect(x).toMatch(/<img /); expect(x).toMatch(/class="nav-lbl[^"]*">[^<]+</); }
   });
   it('ready: "Refill" + N badge; aria "Refill N tired workers"', () => {
-    expect(navManageView(2, 0, false, P, 0)).toEqual({ hideLabel: false, label: 'Refill', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
+    expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Refill', countdown: '', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
     expect(navManageView(2, 0, true, P, 0).label).toBe('Refill 2 tired workers');
   });
-  it('cooldown: "0:28" visual-only (aria-hidden), stable name for the whole cooldown (review 23a3798 #1)', () => {
-    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe(''); expect(a.hideLabel).toBe(true);
+  it('cooldown (D-HOP-2026-10-30-02 (b)): visible "Refill" + countdown " 0:28" (CSS data-cd), stable name for the whole cooldown (review 23a3798 #1)', () => {
+    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('Refill'); expect(a.countdown).toBe(' 0:28'); expect(a.badge).toBe('');
     expect(a.aria.text).toBe('Refill, cooling down');
-    for (const [cd, t] of [[25.1, 3000], [22.9, 6100], [1.2, 27000]]) { const v = navManageView(1, cd, false, a.aria, t); expect(v.aria).toBe(a.aria); expect(v.hideLabel).toBe(true); }
-    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Ready in 28s'); expect(d.hideLabel).toBe(true); expect(d.aria.text).toBe('Refill, cooling down');
-    expect(navManageView(2, 0, false, a.aria, 30000)).toMatchObject({ hideLabel: false, aria: { text: 'Refill 2 tired workers' } });
+    for (const [cd, t] of [[25.1, 3000], [22.9, 6100], [1.2, 27000]]) { const v = navManageView(1, cd, false, a.aria, t); expect(v.aria).toBe(a.aria); expect(v.label).toBe('Refill'); }
+    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Refill'); expect(d.countdown).toBe(' · 0:28'); expect(d.aria.text).toBe('Refill, cooling down');
+    expect(navManageView(2, 0, false, a.aria, 30000)).toMatchObject({ countdown: '', aria: { text: 'Refill 2 tired workers' } });
   });
   it('AC-R9: "Refill N tired workers", N = workers at <= threshold; hidden at N=0', () => {
     const h = manageAllHtml(S([T, T + 1, 10]), b); expect(h).toContain('Refill 2 tired workers'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested|1 tired workers|Refill tired \(/);
