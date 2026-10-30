@@ -6,7 +6,8 @@
 //      visible && focused && !dialogOpen(), dialogOpen = DIALOG_SEL modal (settings/welcome/confirm, recovery, rotate prompt,
 //      alertdialog) | tracks explainer | Upgrades sheet. The Market sheet is a play surface (Q-F1c-1, D-HOP-2026-10-29-06).
 // ACs (V5SCAP): CCR-F2-1 previews use playerSaleCtx (preview == credit through Game); CCR-F2-2 one probe installed by mountApp;
-// CCR-F2-3 probe excludes open dialogs, Market sheet attended; CCR-F2-4 no second probe in src.
+// CCR-F2-3 probe excludes open dialogs, Market sheet attended; CCR-F2-4 no second probe in src;
+// CCR-F2-5 coach-mark steps register as sheets (API sheet L79, D-HOE-20261030-25).
 // Menu-freeze ACs this probe serves (focus time = 0 while a menu/modal is open, so M5 timers freeze): ST-AC13 (streak decay/hold),
 // GE-AC19 (golden egg life), BH-AC9 (Broody nest growth); GE-AC20 (docked/phone Market sheet keeps the focus clock).
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
@@ -23,6 +24,7 @@ import { sellAllLabel, orderView } from '../src/ui/orders';
 import { fmtCountFloor, fmtMoneyFloor } from '../src/ui/format';
 import { attendedProbe, makeDialogOpen, wireAttended, registerSheet, clearSheets, anySheetOpen, type AttendedDoc } from '../src/ui/overlay';
 import { showTracksExplainer, EXP_OUT_MS } from '../src/ui/tracks-explainer';
+import { OnboardingFlow, mountOnboarding } from '../src/ui/onboarding';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 
@@ -237,3 +239,28 @@ describe('CCR-F2-4: one probe in src', () => {
     expect(app.match(/wireAttended\(/g)?.length).toBe(1);
   });
 });
+
+describe('CCR-F2-5: coach-mark steps register with the overlay as sheets (API sheet L79, D-HOE-20261030-25)', () => {
+  const flowAt = () => new OnboardingFlow({ step() {}, done() {}, timeout() {} } as any);
+  it('CCR-F2-5 coach-mark step registered → attended false; after closeComplete → true', async () => {
+    setDoc('visible', true);
+    const { g } = await mountMarket();
+    expect(g.playerSaleCtx()).toEqual(PLAYER_SALE);
+    const flow = flowAt(), update = mountOnboarding(flow, () => document.getElementById('collect'));
+    flow.mode = 'mark'; update(); // a coach mark is on screen
+    expect(registerSheet('coach-mark').isOpen).toBe(true); expect(g.playerSaleCtx()).toEqual(playerSaleCtx(false));
+    flow.mode = 'hint'; update(); // the step's mark went away (neutral wait hint): closeComplete
+    expect(registerSheet('coach-mark').isOpen).toBe(false); expect(g.playerSaleCtx()).toEqual(PLAYER_SALE);
+    flow.mode = 'mark'; update(); expect(g.playerSaleCtx()).toEqual(playerSaleCtx(false));
+    flow.finished = true; update(); // tutorial done / skipped: layer removed, closeComplete
+    expect(anySheetOpen()).toBe(false); expect(g.playerSaleCtx()).toEqual(PLAYER_SALE);
+  });
+  it('CCR-F2-5 coach-mark step: focus time is 0 while the mark is shown (ST-AC13 GE-AC19 BH-AC9), back after closeComplete', async () => {
+    setDoc('visible', true);
+    const { g, clock } = await mountMarket({ golden: 1, streak: 1, broody: 1 });
+    const flow = flowAt(), update = mountOnboarding(flow, () => document.getElementById('collect'));
+    flow.mode = 'mark'; update(); expect(focusOver(g, clock)).toBe(0);
+    flow.mode = 'none'; update(); expect(focusOver(g, clock)).toBeGreaterThan(0);
+  });
+});
+

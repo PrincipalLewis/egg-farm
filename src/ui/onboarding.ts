@@ -4,6 +4,7 @@
  * Pointer anchoring follows art-ux/m3-ftue-spec.md §1 (no CSS rotate/mirror; up/down asset variants).
  */
 import type { GameEvent } from '../game';
+import { registerSheet } from './sheets';
 export const STEPS = [
   { name: 'collect', caption: 'Tap Collect to gather eggs from the coop.' },
   { name: 'sell', caption: 'A customer is waiting! Tap them, then Sell your eggs.' },
@@ -153,6 +154,9 @@ export function mountOnboarding(
   const layer = document.createElement('div'); layer.className = 'onb';
   layer.innerHTML = `<div class="onb-ring"></div><img class="onb-hand" aria-hidden="true" alt="" src="${handSrc}" width="40" height="40"><div class="onb-cap" role="dialog" aria-label="Tutorial" aria-live="polite"><span class="onb-txt"></span><span class="onb-dots" aria-hidden="true"></span></div><button class="onb-skip">Skip</button>`;
   document.body.append(layer);
+  // CCR F-2 (D-HOE-20261030-25, API sheet L79): a coach-mark step is a menu for the attended probe: registered open while a coach
+  // mark is shown, closeComplete when the step's mark goes away (hint / none / paused under a dialog / finished; no close animation).
+  const coach = registerSheet('coach-mark');
   const ring = layer.querySelector('.onb-ring') as HTMLElement, cap = layer.querySelector('.onb-cap') as HTMLElement, hand = layer.querySelector('.onb-hand') as HTMLImageElement;
   layer.querySelector('.onb-skip')!.addEventListener('click', () => { flow.skip(); });
   const esc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !flow.finished && !dialogOpen()) { e.stopImmediatePropagation(); flow.skip(); } };
@@ -174,9 +178,9 @@ export function mountOnboarding(
     return out;
   };
   return function update() {
-    if (flow.finished) { layer.remove(); document.removeEventListener('keydown', esc, true); return false; }
-    const paused = dialogOpen(); if (layer.hidden !== paused) layer.hidden = paused; if (paused) return true; // R1: resume when the dialog closes
-    const mode = flow.mode; layer.classList.toggle('hint', mode !== 'mark'); cap.hidden = mode === 'none';
+    if (flow.finished) { coach.closeComplete(); layer.remove(); document.removeEventListener('keydown', esc, true); return false; }
+    const paused = dialogOpen(); if (layer.hidden !== paused) layer.hidden = paused; if (paused) { coach.closeComplete(); return true; } // R1: resume when the dialog closes
+    const mode = flow.mode; if (mode === 'mark') coach.opened(); else coach.closeComplete(); layer.classList.toggle('hint', mode !== 'mark'); cap.hidden = mode === 'none';
     const el = mode === 'mark' ? target(flow.step) : null;
     const text = mode === 'mark' ? caption(flow.step) : flow.hint; if (text !== last) { txt.innerHTML = text; dotEl.textContent = dots(flow.step); last = text; }
     if (!el) { ring.style.display = hand.style.display = 'none'; cap.style.cssText = mode === 'mark' ? 'left:50%;top:40%;transform:translateX(-50%)' : 'left:50%;top:96px;transform:translateX(-50%)'; return true; }

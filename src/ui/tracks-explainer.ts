@@ -3,7 +3,7 @@
 import type { Game } from '../game';
 import { m4On } from '../config/formulas';
 import { fmtMoney, fmtMoneyShort } from './format';
-import { registerSheet } from './overlay';
+import { registerSheet } from './sheets';
 export const EXP_TITLE = 'Upgrades got an upgrade!';
 export const EXP_BODY = 'Hens and Egg value are now separate. Top them up!';
 export const EXP_MS = 8000;
