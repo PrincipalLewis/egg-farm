@@ -146,7 +146,7 @@ function main(ctx: Ctx): number {
     asset: { path: HTML_LABEL, sha256: createHash('sha256').update(htmlBytes).digest('hex'), bytes: htmlBytes.length, build: buildHow },
     seed: o.seed, hours: o.hours, profile: o.profile,
     flags: { ...flagsOf(shipped), ...o.flags }, flagsOverridden: overridden,
-    sim: { tickHz: b.tickHz, ticks: run.ticks, tickPath: 'src/sim/tick.ts advance() per 1000 ms, then input (build order)', bot: 'AC7 workers bot: tests/bot-m2.ts runM2 seller15, managed, no variance; tap 1/s, check-in every 15 s' },
+    sim: { tickHz: b.tickHz, ticks: run.ticks, tickPath: run.tickPath, bot: run.bot },
     checkpoints: run.checkpoints,
     saveRoundTrip: { pass: rt.pass, balance: 'shipped (src/config/balance.json, what the built html runs)', flagsDifferFromBuild, validator: rt.validator, ok: rt.ok, reason: rt.reason, migrated: rt.migrated, tracksMigrated: rt.tracksMigrated, version: rt.version, fields: [...ROUNDTRIP_FIELDS], mismatches: rt.mismatches, markerSkippedForTest: skipMarker || undefined },
     trace: { name: 'AC7 trace hash (every sim event of the run + end state)', sha256: run.traceSha256, events: run.events },
