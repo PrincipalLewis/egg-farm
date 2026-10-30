@@ -6,7 +6,7 @@
 # "not RC gate, re-run on RC SHA". Exit 0 only for an RC gate.
 set -uo pipefail
 OUT=${1:?usage: pacing-x1-trees-check.sh <results-dir> <rc-sha>}; RC=${2:?rc sha required}
-cd "$OUT" || exit 2; REPO=$(git -C "$(dirname "$(readlink -f "$0")")" rev-parse --show-toplevel) || exit 2
+REPO=$(git -C "$(dirname "$(readlink -f "$0")")" rev-parse --show-toplevel) || exit 2; cd "$OUT" || exit 2
 sha256sum -c --quiet SHA256SUMS || { echo "SHA256SUMS does not verify: results changed since the run" >&2; exit 2; }
 T_TREE=$(sed -n 's/^tested_tree=//p' trees.txt); T_SHA=$(sed -n 's/^tested_sha=//p' trees.txt)
 RC_SHA=$(git -C "$REPO" rev-parse --verify --quiet "$RC^{commit}") || { echo "unknown rc ref $RC" >&2; exit 2; }
