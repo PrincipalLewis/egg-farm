@@ -3,7 +3,7 @@
 // is the tree's shipped data/economy.csv (HoE 10:57), hashed. No balance values are asserted here.
 import { describe, it, expect } from 'vitest';
 import { X1_DATA, X1_SOURCES } from './pacing-x1/source';
-import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, PENDING_REPRED, type Shard, type Gate } from './pacing-x1/compare';
+import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate } from './pacing-x1/compare';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { X1_PRED, pinned, parsePred, x1Balance, x1Stacks } from './pacing-x1/harness';
@@ -33,11 +33,11 @@ describe('pacing-x1-stack: verdict rules', () => {
     expect(nums('+61.3 / +64.8 / +64.9%')).toEqual([61.3, 64.8, 64.9]); expect(nums('2.407 (\u22120.58)')).toEqual([2.407]); expect(nums('84 / 160 / 234')).toEqual([84, 160, 234]);
     expect(inBand(1.2, 1)).toBe(true); expect(inBand(0.8, 1)).toBe(true); expect(inBand(1.2001, 1)).toBe(false); expect(inBand(0.7999, 1)).toBe(false);
   });
-  const gate = (o: Partial<Gate> & { p95?: number; worst?: number }): Gate => ({ G4_noAff_F10_to_max: [84, 160, 234], windows: 900, stepL30: [2.407, 2.608], reachedMax: 200,
+  const gate = (o: Partial<Gate> & { p95?: number; worst?: number }): Gate => ({ G4_noAff_F10_to_max: [68, 114, 143], windows: 900, stepL30: [2.407, 2.608], reachedMax: 200,
     win: { P95_allWindows: o.p95 ?? 1.755, P95_ofSeedMax: 1.791, worstSeed: o.worst ?? 1.917, median: 1.656 }, byBand: { 'F10-17': [1.6, 1.75, 1.8], 'F18-23': [1.6, 1.77, 1.8], 'F24-29': [1.6, 1.74, 1.8] },
     premium: { 'F10-19': [61.3, 70], 'F20-29': [64.8, 70], 'F30+': [64.9, 70] }, ...o });
   const shard = (N: Gate): Shard => ({ profile: 'optimal', source: 'v5hop1-8dc90e2b', seeds: [1, 200], T: 4000, csvSha256: '', balanceSha256: '', l10P95Min: 11.05, l30MedianMin: 34.4,
-    gate: { none: gate({ stepL30: [2.989, 3.453], G4_noAff_F10_to_max: [129, 260, 381], win: undefined }), N, H: gate({ G4_noAff_F10_to_max: [84, 166, 272], stepL30: [2.435, 2.634] }) },
+    gate: { none: gate({ stepL30: [2.989, 3.453], G4_noAff_F10_to_max: [104, 161, 202], win: undefined }), N, H: gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }) },
     toggles: { golden: gate({ p95: 1.6 }), streak: 'n/a' } });
   const opt = () => rows().filter(r => r.profile === 'optimal');
   it('the predicted optimal values pass every handled optimal row; pause rows are EXCLUDED, never PASS', () => {
@@ -46,11 +46,16 @@ describe('pacing-x1-stack: verdict rules', () => {
     expect(o.filter(x => x.line >= 906).every(x => x.status === 'EXCLUDED')).toBe(true);
     expect(o.filter(x => NOT_WIRED[x.line] != null).every(x => x.status === 'NOT-WIRED')).toBe(true);
   });
-  it('L894-896 are PENDING-REPRED (never PASS/FAIL) until the signed re-prediction lands, except the 180 s cap, which still FAILS', () => {
-    expect(Object.keys(PENDING_REPRED).map(Number).sort()).toEqual([894, 895, 896]);
-    const ok = evaluate(opt(), { optimal: shard(gate({})) }); for (const l of [894, 895, 896]) expect(ok.find(x => x.line === l)!.status).toBe('PENDING-REPRED');
-    const over = evaluate(opt(), { optimal: shard(gate({ G4_noAff_F10_to_max: [84, 190, 234] })) });
-    expect(over.find(x => x.line === 896)!.status).toBe('FAIL'); expect(over.find(x => x.line === 894)!.status).toBe('PENDING-REPRED');
+  it('L894-896 use the HoP-signed re-prediction (D-HOP-2026-10-30-08): signed bands, worst <= 1.2 x same-seed no-mech worst, P95 cap 180 s', () => {
+    expect(Object.keys(PENDING_REPRED)).toEqual([]); expect(SIGNED_REPRED.sha1).toBe('1c7a39bdc9936ac25f4eff8060fdb59df102f01c');
+    const sig = (N: Gate, H: Gate, none: Gate) => { const sh = shard(N); sh.gate.H = H; sh.gate.none = none; return evaluate(opt(), { optimal: sh }); };
+    const none = gate({ stepL30: [2.989, 3.453], G4_noAff_F10_to_max: [104, 161, 202], win: undefined });
+    const ok = sig(gate({ G4_noAff_F10_to_max: [68, 114, 143] }), gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }), none);
+    for (const l of [894, 895, 896]) expect(ok.find(x => x.line === l)!.status, `L${l}`).toBe('PASS');
+    const old = sig(gate({ G4_noAff_F10_to_max: [84, 160, 234] }), gate({ G4_noAff_F10_to_max: [84, 166, 272], stepL30: [2.435, 2.634] }), none); // the 8dc90e2b values miss the signed bands
+    expect(old.find(x => x.line === 894)!.status).toBe('FAIL');
+    const worst = sig(gate({ G4_noAff_F10_to_max: [68, 114, 143] }), gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }), gate({ ...none, G4_noAff_F10_to_max: [104, 161, 150] }));
+    expect(worst.find(x => x.line === 895)!.why).toMatch(/1.2 × same-seed/); expect(worst.find(x => x.line === 895)!.status).toBe('FAIL'); // 191 > 1.2 x 150
   });
   it('a blocking row outside the band FAILS even when its absolute gate holds; above the absolute gate FAILS too', () => {
     const low = evaluate(opt(), { optimal: shard(gate({ p95: 1.3 })) }); // 1.3 < 0.8 x 1.755, still <= 2.00

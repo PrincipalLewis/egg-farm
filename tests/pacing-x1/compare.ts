@@ -26,13 +26,17 @@ export const NOT_WIRED: Record<number, string> = {
   903: 'SS-21 needs the sales-stopped chip (manifest row 23, m4.flags.salesStopped), not on rc/v5 yet',
   904: 'AC7 flags-off byte-identity vs c7bb783f is not run by this job (ci.yml gate runs the AC7 suites); needs an owner ruling',
 };
-/** Rows whose §13.2a prediction is being replaced (D-HOP-2026-10-30-07 amendment 10:51: Econ re-predicts L894-896 incl. L895 on
- *  the V5-HOP-1 CSV a8c4e268; HoP signs it; BLOCKING before #92 merges). Until the signed rows are in the pinned table, these are
- *  measured and shown against the current table, but reported PENDING-REPRED: neither PASS nor FAIL (HoE 10:57). Remove a line
- *  here in the same commit that re-pins the table with HoP's signed values. Proposal: product/economy/reprediction-l894-896-a8c4e268.md. */
-export const PENDING_REPRED: Record<number, string> = {
-  894: 'HoP-signed re-prediction pending (D-HOP-2026-10-30-07 amendment)', 895: 'HoP-signed re-prediction pending (D-HOP-2026-10-30-07 amendment)', 896: 'HoP-signed re-prediction pending (D-HOP-2026-10-30-07 amendment)',
-};
+/** HoP-SIGNED re-prediction of the G4 dead-zone rows on the V5-HOP-1 CSV a8c4e268 (D-HOP-2026-10-30-08, 11:02;
+ *  product/economy/reprediction-l894-896-a8c4e268.md sha1 1c7a39bdc9936ac25f4eff8060fdb59df102f01c, §5 Option A). It replaces
+ *  the pinned table's predicted cells and gate clauses for L894-896: bands ±20% of these values; L894/895 absolute =
+ *  worst ≤ 1.2 × same-seed no-mechanics worst (CFG=none, same seeds, same CSV); the 180 s cap at P95 on every row (ruling 2).
+ *  L896 holds N / H. Values per profile, in the row's order. */
+export const SIGNED_REPRED = { doc: 'product/economy/reprediction-l894-896-a8c4e268.md', sha1: '1c7a39bdc9936ac25f4eff8060fdb59df102f01c', decision: 'D-HOP-2026-10-30-08',
+  rows: { 894: { optimal: [68, 114, 143], seller15: [47, 77, 132], casual: [36, 64, 92] }, 895: { optimal: [70, 107, 191], seller15: [47, 86, 120], casual: [40, 81, 140] },
+    896: { optimal: [114, 107], seller15: [77, 86], casual: [64, 81] } } as Record<number, Record<string, number[]>> };
+/** Rows still waiting for a signed re-prediction: measured, shown against the current table, reported PENDING-REPRED (never
+ *  PASS/FAIL) except the 180 s cap. Empty since D-HOP-2026-10-30-08 signed L894-896. */
+export const PENDING_REPRED: Record<number, string> = {};
 export const isPauseRow = (r: PredRow) => /^G5-P\b/.test(r.metric) || (+r.source_line >= 906 && +r.source_line <= 913);
 /** Lines this verdict knows; the unit test asserts every non-pause row of the pinned table is one of them. */
 export const HANDLED = new Set([879, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 900, 901, 905]);
@@ -48,7 +52,7 @@ export function evaluate(rows: PredRow[], shards: Record<string, Shard>): Out[] 
     if (isPauseRow(r)) { push('EXCLUDED', '', 'G5-P pause rows stay out until Features delivers the driver (X1 note, D-HOE-20261029-05)'); continue; }
     if (NOT_WIRED[line]) { push('NOT-WIRED', '', NOT_WIRED[line]); continue; }
     const sh = shards[r.profile]; if (!sh) { push(Y ? 'FAIL' : 'WARN', '', `no shard for profile ${r.profile}`); continue; }
-    const p = nums(r.predicted), fails: string[] = [], caps: string[] = []; // caps: the 180 s dead-zone cap, which applies to every row even while re-predicted (D-HOP-07 amendment)
+    const sp = SIGNED_REPRED.rows[line]?.[r.profile], p = sp ?? nums(r.predicted), fails: string[] = [], caps: string[] = []; // caps: the 180 s dead-zone cap, which applies to every row even while re-predicted (D-HOP-07 amendment)
     const band = (v: number | null | undefined, pr: number | undefined, tag = '') => { if (pr == null) return; if (v == null || !Number.isFinite(v)) fails.push(`${tag}no value`); else if (!inBand(v, pr)) fails.push(`${tag}${f(v)} outside ×0.8–1.2 of ${pr} [${f(0.8 * pr)}, ${f(1.2 * pr)}]`); };
     const abs = (ok: boolean, msg: string) => { if (!ok) fails.push(msg); };
     let measured = '';
@@ -62,8 +66,10 @@ export function evaluate(rows: PredRow[], shards: Record<string, Shard>): Out[] 
       case 888: case 889: { const ks = ['F10-19', 'F20-29', 'F30+'], v = ks.map(k => g.premium?.[k]?.[0] ?? NaN); measured = v.map(x => `+${f(x, 1)}%`).join(' / '); ks.forEach((k, i) => band(v[i], p[i], `${k} `)); break; }
       case 890: case 891: case 892: case 893: { const i = line <= 891 ? 0 : 1, v = g.stepL30[i], b0 = sh.gate.none.stepL30[i], d = v != null && b0 != null ? v - b0 : NaN;
         measured = `${f(v)} (${d >= 0 ? '+' : ''}${f(d, 2)} vs no-mechanics ${f(b0)})`; band(v, p[0]); abs(d <= 0.10 + 1e-9, `delta ${f(d)} > +0.10 vs no-mechanics`); break; }
-      case 894: case 895: { const v = g.G4_noAff_F10_to_max, b0 = sh.gate.none.G4_noAff_F10_to_max; measured = `${v.join(' / ')} (baseline ${b0.join('/')})`; ['P50 ', 'P95 ', 'worst '].forEach((t, i) => band(v[i], p[i], t)); abs(v[2] <= b0[2], `worst ${v[2]} > baseline worst ${b0[2]}`); break; }
-      case 896: { const n = sh.gate.N.G4_noAff_F10_to_max[1], h = sh.gate.H.G4_noAff_F10_to_max[1]; measured = `${n} / ${h} (N / H)`; band(n, p[0], 'N '); if (!(n <= 180 && h <= 180)) caps.push(`P95 ${Math.max(n, h)} > 180 s cap`); break; }
+      case 894: case 895: { const v = g.G4_noAff_F10_to_max, b0 = sh.gate.none.G4_noAff_F10_to_max; measured = `${v.join(' / ')} (baseline ${b0.join('/')})`; ['P50 ', 'P95 ', 'worst '].forEach((t, i) => band(v[i], p[i], t));
+        if (sp) { abs(v[2] <= 1.2 * b0[2] + 1e-9, `worst ${v[2]} > 1.2 × same-seed no-mechanics worst ${b0[2]} (${f(1.2 * b0[2], 1)})`); if (!(v[1] <= 180)) caps.push(`P95 ${v[1]} > 180 s cap`); }
+        else abs(v[2] <= b0[2], `worst ${v[2]} > baseline worst ${b0[2]}`); break; }
+      case 896: { const n = sh.gate.N.G4_noAff_F10_to_max[1], h = sh.gate.H.G4_noAff_F10_to_max[1]; measured = `${n} / ${h} (N / H)`; band(n, p[0], 'N '); if (sp) band(h, p[1], 'H '); if (!(n <= 180 && h <= 180)) caps.push(`P95 ${Math.max(n, h)} > 180 s cap`); break; }
       case 897: { const n = sh.gate.N.G4_noAff_F10_to_max[2], h = sh.gate.H.G4_noAff_F10_to_max[2]; measured = `${n} / ${h}`; abs(n <= 180 && h <= 180, `worst ${Math.max(n, h)} > 180 s (pre-existing L0–30 dead zone, known risk)`); break; }
       case 900: { const v = sh.l10P95Min; measured = f(v, 2); band(v, p[0]); if (r.profile === 'seller15') abs(v <= 12.1, `${f(v, 2)} > 12.1 min`); break; }
       case 901: { const v = sh.l30MedianMin; measured = f(v, 1); band(v, p[0]); break; }
