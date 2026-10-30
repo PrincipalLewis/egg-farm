@@ -5,7 +5,9 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 // @ts-expect-error plain .mjs helper without types
-import { recordPid, recordProblem, killRecorded, stopChild, readStat, bootId } from '../scripts/recorded-pid.mjs';
+import { recordPid, recordProblem, killRecorded, stopChild, readStat, bootId, spawnRecorded, groupMembers, groupProbe, survivors, stopGroup } from '../scripts/recorded-pid.mjs';
+// @ts-expect-error plain .mjs helper without types
+import { stopReport } from '../scripts/serve-own.mjs';
 
 const mine: ChildProcess[] = [];
 function sleeper(detached = true): ChildProcess { const c = spawn('sleep', ['30'], { stdio: 'ignore', detached }); mine.push(c); return c; }
@@ -113,6 +115,65 @@ describe('m7/M1: no /proc walk or pattern kill left in the two scripts', () => {
   for (const f of ['scripts/d2-kill-browser.mjs', 'scripts/serve-own.mjs', 'scripts/recorded-pid.mjs']) it(f, () => {
     const src = fs.readFileSync(f, 'utf8');
     expect(src).not.toMatch(/readdirSync\(\s*['"]\/proc/); expect(src).not.toMatch(/\/cmdline/); expect(src).not.toMatch(/pkill|killall|pgrep/);
-    expect(src.match(/process\.kill\(/g) ?? []).toHaveLength(f.endsWith('recorded-pid.mjs') ? 1 : 0);
+    expect(src.match(/process\.kill\(/g) ?? []).toHaveLength(f.endsWith('recorded-pid.mjs') ? 2 : 0); // the guarded kill + the signal-0 group probe
+  });
+});
+
+// UI QA #89 F2: a TERM-ignoring grandchild survives the group TERM; it must be found (by the spawn-time snapshot, no
+// /proc scan), reported with its PID and a non-ok result, and never signalled again. It is a `sleep 2` that expires on
+// its own; each test waits for that by its own PID + start time.
+const gone = async (m: { pid: number; starttime: string }) => { for (let i = 0; i < 100; i++) { const st = readStat(m.pid); if (!st || st.starttime !== m.starttime) return true; await new Promise(r => setTimeout(r, 50)); } return false; };
+async function termIgnoringGroup() {
+  const { child, rec } = spawnRecorded('sh', ['-c', '(trap "" TERM; exec sleep 2) & echo $!; wait'], { stdio: ['ignore', 'pipe', 'ignore'] }); mine.push(child);
+  const g = +(await new Promise<string>(r => child.stdout!.once('data', d => r(String(d))))).trim();
+  await new Promise(r => setTimeout(r, 100)); // let the subshell exec sleep (TERM stays ignored across exec)
+  const members = groupMembers(rec); return { child, rec, g, members, gm: members.find((m: any) => m.pid === g) };
+}
+describe('F2: group survivors are found and reported, never dropped', () => {
+  it('spawnRecorded: a detached, recorded group leader; groupMembers snapshots its descendants with start times', async () => {
+    const { child, rec, g, members } = await termIgnoringGroup();
+    expect(rec).toMatchObject({ pid: child.pid, parent: process.pid }); expect(readStat(child.pid).pgrp).toBe(child.pid);
+    expect(members).toEqual([{ pid: g, starttime: readStat(g).starttime, pgrp: child.pid }]);
+    expect(groupProbe(rec)).toBe('members');
+    expect(stopGroup(child, rec, { graceMs: 200 }).survivors).toEqual([g]); await exited(child); expect(await gone({ pid: g, starttime: members[0].starttime })).toBe(true);
+  });
+  it('stopGroup: TERM reaches the group, the TERM-ignoring grandchild survives -> ok false, its PID reported, no second signal', async () => {
+    const { child, rec, g, gm } = await termIgnoringGroup(); const spy = vi.spyOn(process, 'kill');
+    const res = stopGroup(child, rec, { graceMs: 300 });
+    expect(res).toMatchObject({ ok: false, signalled: true, reason: 'group members remain', survivors: [g] });
+    expect(spy.mock.calls.filter(c => c[1] !== 0)).toEqual([[-child.pid!, 'SIGTERM']]); // one real signal, the recorded group
+    await exited(child); expect(child.signalCode).toBe('SIGTERM');
+    expect(survivors(rec, [gm])).toEqual({ live: [g], probe: 'members' }); // leader reaped: the group probe confirms it
+    expect(stopReport(res, child.pid)).toMatch(new RegExp(`^serveOwn: SURVIVORS vite group ${child.pid}: group members remain; surviving pids: ${g} `));
+    expect(await gone(gm)).toBe(true); expect(survivors(rec, [gm])).toEqual({ live: [], probe: 'empty' });
+  });
+  it('leader already exited before stop while a member lives -> ok false with that PID, nothing signalled (signal-0 probe only)', async () => {
+    const { child, rec, g, members, gm } = await termIgnoringGroup();
+    expect(killRecorded(rec, 'SIGTERM', { group: false }).ok).toBe(true); await exited(child); // only the leader dies
+    const spy = vi.spyOn(process, 'kill');
+    const res = stopGroup(child, rec, { members, graceMs: 200 });
+    expect(res).toMatchObject({ ok: false, signalled: false, reason: 'group members remain', survivors: [g], probe: 'members' });
+    expect(spy.mock.calls.every(c => c[0] === -child.pid! && c[1] === 0)).toBe(true); expect(spy).toHaveBeenCalled();
+    expect(stopReport(res, child.pid)).toMatch(/SURVIVORS .*surviving pids: \d+ \(group probe members\)/);
+    expect(await gone(gm)).toBe(true);
+  });
+  it('clean stop: the whole group exits on TERM -> ok true, no survivors, stopReport null; afterwards the probe is empty', async () => {
+    const { child, rec } = spawnRecorded('sh', ['-c', 'sleep 30 & wait'], { stdio: 'ignore' }); mine.push(child);
+    await new Promise(r => setTimeout(r, 100)); const members = groupMembers(rec); expect(members).toHaveLength(1);
+    const res = stopGroup(child, rec); expect(res).toMatchObject({ ok: true, signalled: true, survivors: [] }); expect(stopReport(res, child.pid)).toBeNull();
+    await exited(child); expect(survivors(rec, members)).toEqual({ live: [], probe: 'empty' });
+  });
+  it('groupProbe and groupMembers refuse records that are not ours (no signal, not even 0)', () => {
+    const c = sleeper(); const rec = recordPid(c.pid); const spy = noSignal();
+    for (const r of [null, undefined, 7, { ...rec, pid: 1 }, { ...rec, parent: process.ppid }, { ...rec, bootId: 'x' }, { ...rec, starttime: 'x' }]) {
+      expect(groupProbe(r)).toBe('refused'); expect(groupMembers(r)).toEqual([]);
+    }
+    expect(spy).not.toHaveBeenCalled();
+  });
+  it('an identity refusal (reused pid) is not a silent stop: ok false, refused, nothing signalled', () => {
+    const c = sleeper(); const rec = recordPid(c.pid); const spy = noSignal();
+    const res = stopGroup(c, { ...rec, starttime: String(+rec.starttime - 1) });
+    expect(res.ok).toBe(false); expect(res.reason).toMatch(/^refused: .*reused pid/); expect(spy).not.toHaveBeenCalled();
+    expect(stopReport(res, c.pid)).toMatch(/^serveOwn: SURVIVORS/);
   });
 });

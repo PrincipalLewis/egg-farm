@@ -4,7 +4,7 @@
 // /proc/<pid>/stat for that ONE pid and refuse if anything differs: gone or zombie, another boot, another start time (a
 // reused PID), not our child, or (for a group signal) not the leader of its own process group.
 // There is no /proc walk and no name or pattern matching here, by design. Linux only.
-import fs from 'node:fs';
+import fs from 'node:fs'; import { spawn } from 'node:child_process';
 const BOOT_ID = '/proc/sys/kernel/random/boot_id';
 const PID_MAX = 4194304; // kernel ceiling for pid_max
 export const bootId = () => fs.readFileSync(BOOT_ID, 'utf8').trim();
@@ -58,4 +58,63 @@ export function killRecorded(rec, signal = 'SIGTERM', { group = true } = {}) {
 export function stopChild(child, rec, signal = 'SIGTERM', opts = {}) {
   if (child.exitCode !== null || child.signalCode !== null) return { ok: false, pid: rec?.pid ?? null, reason: 'exited' };
   return killRecorded(rec, signal, opts);
+}
+
+// ---- process groups (UI QA #89 F2) ---------------------------------------------------------------------------------
+/** Spawn `cmd` detached (a new process group led by the child) and record it at once. The only detached spawn the
+ *  repo scripts may use; `rec` is null if it could not be recorded (then nothing is ever signalled). */
+export function spawnRecorded(cmd, args = [], opts = {}) {
+  const child = spawn(cmd, args, { ...opts, detached: true }); // rule-21 guarded site: detached spawn, recorded below
+  return { child, rec: child.pid ? recordPid(child.pid) : null };
+}
+/** Direct children of ONE pid, from its own /proc/<pid>/task/<tid>/children files (no /proc scan). */
+function childrenOf(pid) {
+  let tids = []; try { tids = fs.readdirSync(`/proc/${pid}/task`); } catch { return []; } // rule-21 guarded site: one recorded pid
+  const out = [];
+  for (const t of tids) { try { out.push(...fs.readFileSync(`/proc/${pid}/task/${t}/children`, 'utf8').trim().split(/\s+/).filter(Boolean).map(Number)); } catch {} } // rule-21 guarded site
+  return out;
+}
+/** Snapshot of the recorded leader's live descendants, each with its own start time (taken while the leader is still
+ *  ours; [] otherwise). Survivors are later identified against this list, never by name or pattern. */
+export function groupMembers(rec) {
+  if (recordProblem(rec, { group: true })) return [];
+  const out = [], seen = new Set([rec.pid]), todo = [rec.pid];
+  while (todo.length && out.length < 512) for (const k of childrenOf(todo.shift())) {
+    if (seen.has(k)) continue; seen.add(k);
+    const st = readStat(k); if (st && st.state !== 'Z') { out.push(Object.freeze({ pid: k, starttime: st.starttime, pgrp: st.pgrp })); todo.push(k); }
+  }
+  return out;
+}
+/** Does the recorded process group still have members? Signal 0 only (nothing is delivered), and only for our own,
+ *  same-boot record. 'empty' | 'members' | 'foreign' (EPERM: someone else's group) | 'refused' | 'error'. */
+export function groupProbe(rec) {
+  if (rec === null || rec === undefined || pidProblem(rec?.pid) || malformed(rec) || rec.parent !== process.pid || rec.bootId !== bootId()) return 'refused';
+  try { process.kill(-rec.pid, 0); return 'members'; } // rule-21 guarded site: signal 0 probe
+  catch (e) { return e?.code === 'ESRCH' ? 'empty' : e?.code === 'EPERM' ? 'foreign' : 'error'; }
+}
+/** Who of the recorded leader + snapshot is still alive (same start time), plus a group probe once the leader is
+ *  reaped. While the leader is an unreaped zombie it still counts as a group member, so then the snapshot is the
+ *  evidence (probe 'leader-unreaped'). If the leader's pid now has another start time it was reused, which the kernel
+ *  only allows once no process group with that id exists any more: our group is empty, and -pid is never probed then.
+ *  `probe: false` = snapshot only, no signal at all (used after an identity refusal). */
+export function survivors(rec, members = [], { probe = true } = {}) {
+  const alive = m => { const st = readStat(m.pid); return !!st && st.state !== 'Z' && st.starttime === m.starttime; };
+  const live = members.filter(alive).map(m => m.pid);
+  const lst = rec ? readStat(rec.pid) : null, leaderHere = !!lst && lst.starttime === rec.starttime;
+  if (leaderHere && lst.state !== 'Z') live.unshift(rec.pid);
+  return { live, probe: !probe ? 'not probed' : leaderHere ? 'leader-unreaped' : lst ? 'empty' : groupProbe(rec) };
+}
+const nap = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); // sync: also usable in 'exit' handlers
+/** Stop a recorded group and verify it is empty. Synchronous. Signals only the recorded group (once, after the identity
+ *  check); survivors are REPORTED, never signalled again and never dropped: { ok, signalled, reason, survivors, probe }.
+ *  ok is true only when the group is verifiably gone. */
+export function stopGroup(child, rec, { signal = 'SIGTERM', graceMs = 3000, members = [] } = {}) {
+  const exitedBefore = child.exitCode !== null || child.signalCode !== null;
+  const snap = [...members, ...(exitedBefore ? [] : groupMembers(rec))].filter((m, i, a) => a.findIndex(x => x.pid === m.pid && x.starttime === m.starttime) === i);
+  const r = exitedBefore ? { ok: false, reason: 'leader exited before stop' } : stopChild(child, rec, signal);
+  if (!exitedBefore && !r.ok) { const s = survivors(rec, snap, { probe: false }); return { ok: false, signalled: false, reason: `refused: ${r.reason}`, survivors: s.live, probe: s.probe }; }
+  let s = survivors(rec, snap);
+  for (let t = 0; t < graceMs && s.live.length; t += 50) { nap(50); s = survivors(rec, snap); }
+  const clean = s.live.length === 0 && (s.probe === 'empty' || s.probe === 'leader-unreaped');
+  return { ok: clean, signalled: r.ok, reason: clean ? (r.ok ? null : r.reason) : 'group members remain', survivors: s.live, probe: s.probe };
 }
