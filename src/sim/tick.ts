@@ -3,11 +3,15 @@ import { GameState, eggsPerTap, coopCapacity, customerIntervalS, demandRange, ne
 import type { Sink } from './events';
 import { sellTo } from './actions';
 import { prodEggsPerSec, coopCap } from './tracks';
+import { anyM5FlagOn, stepTimers } from './timers';
+import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
-export function step(s: GameState, dt: number, b: Balance, ev?: Sink): GameState {
+/** v5 F1b: `clock` (optional) says whether this tick carries focus time and gives the injected wall clock. It only feeds
+ *  the M5 stepTimers() sub-calls, which run only while an m4.flags.* flag is on. */
+export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: StepClock): GameState {
   const L = s.farmLevel, E = b.workers.energy;
   // Energy: Working and Tired workers drain 1% per drain_s_per_pct; Asleep stays at 0 until managed; Unpaid doesn't drain (ruling 1).
   let workers: Workers = s.workers;
@@ -49,6 +53,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink): GameState
   }
   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
   if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev);
+  if (anyM5FlagOn(b)) out = stepTimers(out, dt, b, clock, ev);
   return out;
 }
 /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
@@ -91,9 +96,11 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameSta
   return { ...s, workers: { ...ws } };
 }
 /** Fixed-timestep accumulator: runs whole 1/tickHz ticks, returns leftover ms. */
-export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balance, ev?: Sink) {
+/** v5 F1b: `clock.focusMs` = attended ms of this frame; the first ceil(focusMs / tick) ticks carry focus (D-C3). */
+export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balance, ev?: Sink, clock?: FrameClock) {
   const dtMs = 1000 / b.tickHz;
   let acc = accMs + elapsedMs, ticks = 0;
-  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev); acc -= dtMs; ticks++; }
+  const nFocus = clock ? focusTicks(clock.focusMs, dtMs) : 0;
+  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, clock ? tickClock(ticks, nFocus, clock) : undefined); acc -= dtMs; ticks++; }
   return { state: s, accMs: Math.max(0, acc), ticks };
 }
