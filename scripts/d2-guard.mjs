@@ -42,5 +42,47 @@ export function createRunGuard({ engine, evidenceDir, log = console.log, leftove
     if (!s.clean) return halt(`group leftovers after SIGKILL of ${launch.rec.pid}: pids ${s.live.join(' ') || '(none in the snapshot)'}, probe ${s.probe}`, launch);
     return s;
   }
-  return { state, halt, afterKill, writeEvidence, stopListPath, evidencePath };
+  // ---- F5 (HoO ruling on Playwright's own group kill) -----------------------------------------------------------------
+  // (a) d2 never asks Playwright to force-kill: no forced-kill API, no close() options, no patched timeouts (source check
+  //     in tests/d2-guard.test.ts). (b) If Playwright's own group SIGKILL may have fired anyway (our close() watchdog expired, close()
+  //     failed, or the browser exited/disconnected while we did not expect it), the run HALTS with the leftover check and
+  //     the stop list. The watchdog only observes; it never shortens or replaces Playwright's own close.
+  const unexpected = [];
+  /** Watch a launch: a 'close' (browser exit/disconnect) that we did not announce with expectExit is recorded. */
+  function watch(launch) { launch.expectedExit = false; launch.ctx.on('close', () => { if (!launch.expectedExit) unexpected.push({ pid: launch.rec?.pid ?? null, at: new Date().toISOString(), launch }); }); return launch; }
+  const expectExit = launch => { launch.expectedExit = true; };
+  const pwHalt = (reason, launch) => { state.playwrightKillPossible = true; return halt(reason, launch); };
+  /** Halts if any watched browser exited or disconnected unexpectedly. */
+  async function checkpoint() { if (unexpected.length) { const u = unexpected[0]; return pwHalt(`browser ${u.pid} exited/disconnected unexpectedly at ${u.at} (Playwright may have group-killed it)`, u.launch); } }
+  /** ctx.close() under an observing watchdog (default 90 s); a timeout or a failure halts. */
+  async function closeCtx(launch, { watchdogMs = 90000 } = {}) {
+    expectExit(launch); let timer;
+    const r = await Promise.race([launch.ctx.close().then(() => 'closed', e => `failed: ${String(e?.message ?? e).split('\n')[0]}`), new Promise(res => { timer = setTimeout(() => res('timeout'), watchdogMs); })]);
+    clearTimeout(timer);
+    if (r === 'timeout') return pwHalt(`close() of browser ${launch.rec?.pid} did not finish in ${watchdogMs} ms (Playwright's force-kill may fire)`, launch);
+    if (r !== 'closed') return pwHalt(`close() of browser ${launch.rec?.pid} ${r} (Playwright's force-kill may have fired)`, launch);
+  }
+  /** Reason for a non-Halt error: an unexpected exit/disconnect wins over the raw error text. */
+  function haltFor(e, launch) {
+    if (unexpected.length) return checkpoint();
+    return halt(`error: ${String(e?.message ?? e).split('\n')[0]}`, launch);
+  }
+  return { state, halt, afterKill, writeEvidence, stopListPath, evidencePath, watch, expectExit, checkpoint, closeCtx, haltFor };
+}
+/** F5 (c): the installed playwright-core (and @playwright/test, if used) must be exactly the lockfile version, and the
+ *  package.json spec must name that same version. null when pinned, else the problem. */
+export function playwrightPinProblem(root) {
+  const rd = f => JSON.parse(fs.readFileSync(path.join(root, f), 'utf8'));
+  const pkg = rd('package.json'), lock = rd('package-lock.json'), deps = { ...pkg.dependencies, ...pkg.devDependencies };
+  const names = ['playwright-core', '@playwright/test'].filter(n => deps[n] || lock.packages?.[`node_modules/${n}`]);
+  if (!names.includes('playwright-core')) return 'playwright-core is not in package.json/package-lock.json';
+  for (const n of names) {
+    const spec = deps[n], lockV = lock.packages?.[`node_modules/${n}`]?.version, rootSpec = { ...lock.packages?.['']?.dependencies, ...lock.packages?.['']?.devDependencies }[n];
+    let inst = null; try { inst = rd(`node_modules/${n}/package.json`).version; } catch {}
+    if (!spec || !lockV) return `${n}: package.json spec ${spec ?? '(none)'} / lockfile ${lockV ?? '(none)'}`;
+    if (spec.replace(/^[\^~=]/, '') !== lockV) return `${n}: package.json spec ${spec} does not name the lockfile version ${lockV}`;
+    if (rootSpec !== spec) return `${n}: package-lock.json root spec ${rootSpec} != package.json ${spec}`;
+    if (inst !== lockV) return `${n}: installed ${inst ?? '(missing)'} != lockfile ${lockV}`;
+  }
+  return null;
 }
