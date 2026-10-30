@@ -55,12 +55,12 @@ const mount = (html: string, cw: number, need: number) => {
 describe.each(ROWS)('Coop Hand %s (rc1-b1-coop-full v1.0.6, frozen)', (state, w, text, aria, short) => {
   const s = st({ market_hand: { energy: 90, cdS: 0 }, coop_hand: w });
   it('visible text, aria and short variant exactly', () => {
-    const wb = workerBanner('coop_hand', mood(s.workers.coop_hand, b), s, b)!;
+    const wb = workerBanner('coop_hand', mood(s.workers.coop_hand, b), b)!;
     expect(wb).toMatchObject({ kind: state, text, aria, short });
     expect(`${wb.text} ${wb.aria} ${wb.short}`).not.toMatch(/slowed|production/);
   });
   it('role-drop only when the full string does not fit (app fitBanners)', () => {
-    const html = workerBannerHtml(workerBanner('coop_hand', state, s, b));
+    const html = workerBannerHtml(workerBanner('coop_hand', state, b));
     const fits = mount(html, 260, 240); expect(fits.textContent).toBe(text); // fits -> full string
     const tight = mount(html, 200, 240); expect(tight.textContent).toBe(short); // doesn't fit -> role dropped
     expect(document.querySelector('.wk-banner .sr')!.textContent).toBe(aria); // aria always keeps the role
@@ -72,7 +72,7 @@ describe('Tired unchanged', () => {
   it('a Tired Coop Hand has no banner and no "stopped" copy; its card still reads "Tired"', () => {
     const s = st({ market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 20, cdS: 0 } });
     expect(mood(s.workers.coop_hand, b)).toBe('tired');
-    expect(workerBanner('coop_hand', 'tired', s, b)).toBeNull();
+    expect(workerBanner('coop_hand', 'tired', b)).toBeNull();
     const html = workersHtml(s, b);
     expect(html).toMatch(/data-w="coop_hand"[^]*?Tired/); expect(html).not.toMatch(/collecting stopped|wk-banner/);
   });
