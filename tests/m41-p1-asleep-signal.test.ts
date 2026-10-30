@@ -74,32 +74,32 @@ describe('PM Workers ruling (a) + art-ux §6 banners; review 23a3798 #3 #4 #5', 
     const s = S(ws({ hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }));
     expect(mood(s.workers.hawker, b)).toBe('asleep'); expect(mood(s.workers.grader, b)).toBe('asleep');
     const v = headerRate(s, b); expect(v.sign).toBe('pos'); expect(headerRateText(v)).not.toMatch(/⚠|▼/); expect(v.aria).not.toMatch(/stopped/);
-    expect(workerBanner('hawker', 'asleep', s, b)).toMatchObject({ text: 'Hawker asleep: sales slowed', short: 'Asleep: sales slowed', aria: 'Hawker is asleep. Sales are slowed.', icon: 'icon-moon.svg' });
+    expect(workerBanner('hawker', 'asleep', b)).toMatchObject({ text: 'Hawker asleep: sales slowed', short: 'Asleep: sales slowed', aria: 'Hawker is asleep. Sales are slowed.', icon: 'icon-moon.svg' });
     const pct = Math.round(b.workers.grader.asleep_bonus_share * 100);
-    expect(workerBanner('grader', 'asleep', s, b)).toMatchObject({ text: `Grader asleep: bonus down to ${pct}%`, aria: `Grader is asleep. Bonus down to ${pct} percent.` });
+    expect(workerBanner('grader', 'asleep', b)).toMatchObject({ text: `Grader asleep: bonus down to ${pct}%`, aria: `Grader is asleep. Bonus down to ${pct} percent.` });
     const html = workersHtml(s, b), bans = html.match(/<div class="wk-banner[^]*?<\/div>/g) ?? []; expect(bans.length).toBe(2); for (const x of bans) expect(x).not.toMatch(/production stopped|💤|⚠/); expect(html).toContain('icon-moon.svg');
   });
   it('§6 copy (spec v1.0.6, AC-R1c): Coop Hand "collecting stopped"; unpaid uses its own row with the warning icon', () => {
     const s = S(ws({ coop_hand: { energy: 0, cdS: 0 } })); expect(salesStopped(s, b)).toBe(false);
-    expect(workerBanner('coop_hand', 'asleep', s, b)).toMatchObject({ text: 'Coop Hand asleep: collecting stopped', short: 'Asleep: collecting stopped', aria: 'Coop Hand is asleep. Auto-collecting has stopped.', icon: 'icon-moon.svg' });
+    expect(workerBanner('coop_hand', 'asleep', b)).toMatchObject({ text: 'Coop Hand asleep: collecting stopped', short: 'Asleep: collecting stopped', aria: 'Coop Hand is asleep. Auto-collecting has stopped.', icon: 'icon-moon.svg' });
     const u = S(ws({ coop_hand: { energy: 50, cdS: 0, unpaid: true } }));
-    expect(workerBanner('coop_hand', 'unpaid', u, b)).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', short: 'Unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.', icon: 'icon-warning.svg' });
+    expect(workerBanner('coop_hand', 'unpaid', b)).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', short: 'Unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.', icon: 'icon-warning.svg' });
   });
   it('HoE Oct 24: each banner effect comes ONLY from its own role/state, never from the global salesStopped()', () => {
     const s = st({ farmLevel: 1, coinsCents: 0, workers: { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 0, cdS: 0 } } });
     expect(salesStopped(s, noSales)).toBe(true); // gross sales $0.00 (no customers) ...
-    expect(workerBanner('coop_hand', 'asleep', s, noSales)!.text).toBe('Coop Hand asleep: collecting stopped'); // ... but the Coop Hand keeps its own copy
+    expect(workerBanner('coop_hand', 'asleep', noSales)!.text).toBe('Coop Hand asleep: collecting stopped'); // ... but the Coop Hand keeps its own copy
     const hv = headerRate(s, noSales); expect(hv.sign).toBe('neg'); expect(hv.aria).not.toMatch(/stopped/); // the Market Hand is working: no HUD reason
     const h = st({ farmLevel: 30, coinsCents: 0, workers: { market_hand: { energy: 0, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 } }, graderTier: 1 });
     expect(salesStopped(h, b)).toBe(true);
-    expect(workerBanner('hawker', 'asleep', h, b)!.text).toBe('Hawker asleep: sales slowed');
-    expect(workerBanner('grader', 'asleep', h, b)!.text).toMatch(/^Grader asleep: bonus down to \d+%$/);
+    expect(workerBanner('hawker', 'asleep', b)!.text).toBe('Hawker asleep: sales slowed');
+    expect(workerBanner('grader', 'asleep', b)!.text).toMatch(/^Grader asleep: bonus down to \d+%$/);
     for (const x of workersHtml(h, b).match(/<div class="wk-banner[^]*?<\/div>/g) ?? []) expect(x).not.toMatch(/production stopped|Production is stopped/);
   });
   it('Market Hand asleep + Coop Hand unpaid: each banner its own copy; HUD aria ", sales stopped"', () => {
     const s = S({ market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 50, cdS: 0, unpaid: true } });
-    expect(workerBanner('market_hand', 'asleep', s, b)).toMatchObject({ text: 'Market Hand asleep: sales stopped', aria: 'Market Hand is asleep. Auto-sales have stopped.' });
-    expect(workerBanner('coop_hand', 'unpaid', s, b)).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.' });
+    expect(workerBanner('market_hand', 'asleep', b)).toMatchObject({ text: 'Market Hand asleep: sales stopped', aria: 'Market Hand is asleep. Auto-sales have stopped.' });
+    expect(workerBanner('coop_hand', 'unpaid', b)).toMatchObject({ text: 'Coop Hand unpaid: collecting stopped', aria: 'Coop Hand is unpaid. Auto-collecting has stopped.' });
     const html = workersHtml(s, b);
     expect(html).toContain('data-full="Market Hand asleep: sales stopped"'); expect(html).toContain('data-full="Coop Hand unpaid: collecting stopped"');
     const v = headerRate(s, b); expect(v.sign).toBe('neg'); expect(v.aria).toMatch(/^Net income (minus \$[\d.,]+ |\$0\.00 )per second, sales stopped$/);
@@ -117,7 +117,7 @@ describe('PM Workers ruling (a) + art-ux §6 banners; review 23a3798 #3 #4 #5', 
   it('review #8: copy numbers come from balance', () => {
     const b2 = { ...b, workers: { ...b.workers, energy: { ...b.workers.energy, manage_prompt_threshold: 0.5 }, grader: { ...b.workers.grader, asleep_bonus_share: 0.2 } } } as any;
     expect(manageCaption({ energy: 90, cdS: 0 } as any, 0, b2)).toBe('Rested, refill below 50%');
-    expect(workerBannerText('grader', 'asleep', S(ws({})), b2)).toContain('20%');
+    expect(workerBannerText('grader', 'asleep', b2)).toContain('20%');
   });
   it('AC-R1 card: banner first, greyed body, Refill stays visible; aria carries the role; icon 14px aria-hidden', () => {
     const h = workersHtml(S(ws({ coop_hand: { energy: 0, cdS: 0 } })), b);
@@ -137,18 +137,18 @@ describe('S2-5 nav labels + AC-R9 / AC-R8 Refill copy', () => {
     const navHtml = app.slice(app.indexOf('<nav class="actions"'), app.indexOf('</nav>'));
     const btns = navHtml.split('<button').slice(1);
     expect(btns).toHaveLength(4);
-    for (const x of btns) { expect(x).toMatch(/aria-label="[^"]+"/); expect(x).toMatch(/<img /); expect(x).toMatch(/class="nav-lbl[^"]*">[^<]+</); }
+    for (const x of btns) { expect(x).toMatch(/aria-label="[^"]+"/); expect(x).toMatch(/<img /); expect(x).toMatch(/class="nav-lbl[^"]*">(<span class="nav-txt">)?[^<]+</); }
   });
   it('ready: "Refill" + N badge; aria "Refill N tired workers"', () => {
-    expect(navManageView(2, 0, false, P, 0)).toEqual({ hideLabel: false, label: 'Refill', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
+    expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Refill', countdown: '', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
     expect(navManageView(2, 0, true, P, 0).label).toBe('Refill 2 tired workers');
   });
-  it('cooldown: "0:28" visual-only (aria-hidden), stable name for the whole cooldown (review 23a3798 #1)', () => {
-    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe(''); expect(a.hideLabel).toBe(true);
+  it('cooldown (D-HOP-2026-10-30-02 (b)): visible "Refill" + countdown " 0:28" (CSS data-cd), stable name for the whole cooldown (review 23a3798 #1)', () => {
+    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('Refill'); expect(a.countdown).toBe(' 0:28'); expect(a.badge).toBe('');
     expect(a.aria.text).toBe('Refill, cooling down');
-    for (const [cd, t] of [[25.1, 3000], [22.9, 6100], [1.2, 27000]]) { const v = navManageView(1, cd, false, a.aria, t); expect(v.aria).toBe(a.aria); expect(v.hideLabel).toBe(true); }
-    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Ready in 28s'); expect(d.hideLabel).toBe(true); expect(d.aria.text).toBe('Refill, cooling down');
-    expect(navManageView(2, 0, false, a.aria, 30000)).toMatchObject({ hideLabel: false, aria: { text: 'Refill 2 tired workers' } });
+    for (const [cd, t] of [[25.1, 3000], [22.9, 6100], [1.2, 27000]]) { const v = navManageView(1, cd, false, a.aria, t); expect(v.aria).toBe(a.aria); expect(v.label).toBe('Refill'); }
+    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Refill'); expect(d.countdown).toBe(' · 0:28'); expect(d.aria.text).toBe('Refill, cooling down');
+    expect(navManageView(2, 0, false, a.aria, 30000)).toMatchObject({ countdown: '', aria: { text: 'Refill 2 tired workers' } });
   });
   it('AC-R9: "Refill N tired workers", N = workers at <= threshold; hidden at N=0', () => {
     const h = manageAllHtml(S([T, T + 1, 10]), b); expect(h).toContain('Refill 2 tired workers'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested|1 tired workers|Refill tired \(/);

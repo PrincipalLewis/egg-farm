@@ -30,5 +30,6 @@ export function rateView(cps: number, opts: { stopped?: boolean } = {}): { text:
   if (c < 0) return { text: `⚠ \u2212${money}/s`, sign: 'neg', aria: `Net income minus ${spoken} per second${opts.stopped ? ', sales stopped' : ''}`, money };
   return { text: `+${money}/s`, sign: 'pos', aria: `Net income plus ${spoken} per second`, money };
 }
-/** HUD header rate (Cut A FIX3, T6): negative/stopped -> '⚠ ▼ <rest>' (e.g. '⚠ ▼ $0.00/s', '⚠ ▼ −$0.03/s'); otherwise rateView's text. Pure, shared by app.ts and tests (reviewer m2). */
+/** m6 (option A): '⚠ ' is a marker only; app.ts renders it as the inline WARN_SVG and never paints the glyph.
+ *  HUD header rate (Cut A FIX3, T6): negative/stopped -> '⚠ ▼ <rest>' (e.g. '⚠ ▼ $0.00/s', '⚠ ▼ −$0.03/s'); otherwise rateView's text. Pure, shared by app.ts and tests (reviewer m2). */
 export const headerRateText = (v: { text: string; sign: RateSign }) => v.sign === 'neg' ? `⚠ ▼ ${v.text.replace(/^⚠ /, '')}` : v.text;

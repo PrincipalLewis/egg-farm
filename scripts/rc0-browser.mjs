@@ -228,8 +228,8 @@ sections.b58 = async () => {
     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
     if (w > 900) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await page.waitForTimeout(400);
-      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText }; });
-      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && /^Ready in \d+s$/.test(d.text.trim()), JSON.stringify(d));
+      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText, cd: document.querySelector('.farm-manage-all .nav-cd')?.dataset.cd }; });
+      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && d.text.trim() === 'Refill' && /^ · \d+:\d\d$/.test(d.cd ?? ''), JSON.stringify(d)); // D-HOP-2026-10-30-02 (b): "Refill · 0:NN", countdown from data-cd
       { const bb = await page.evaluate(() => { const rs = [document.querySelector('.farm-manage-all'), ...document.querySelectorAll('.farm-manage-all *')].map(e => e.getBoundingClientRect()).filter(r => r.width);
           const x = Math.min(...rs.map(r => r.left)), y = Math.min(...rs.map(r => r.top)); return { x, y, width: Math.max(...rs.map(r => r.right)) - x, height: Math.max(...rs.map(r => r.bottom)) - y }; }), pad = 16; // pill + overhanging icon // whole pill in frame (Art & UX 10:01)
         ok(`Review #2b: docked Refill pill fully inside the viewport (${w}) — h=${bb && bb.height}px`, !!bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= w && bb.y + bb.height <= 900, JSON.stringify(bb));
@@ -671,9 +671,10 @@ sections.s28rate = async () => {
   const { ctx, page } = await open({ w: 390, h: 844, ls: { 'eggfarm.ui': UI } });
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, farmLevel: 6, coinsCents: 1e6, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } } }; });
   await page.waitForTimeout(1300);
-  const read = () => page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, role: e.getAttribute('role') }; });
+  // m6 (v5 p2): the warning sign is the inline WARN_SVG (shown only with .warn), ▼ sits in an aria-hidden .tri; the text has no U+26A0
+  const read = () => page.evaluate(() => { const e = document.querySelector('#rate'), cs = getComputedStyle(e), wi = e.querySelector('svg.wi'); return { text: e.textContent, aria: e.getAttribute('aria-label'), sign: e.dataset.sign, color: cs.color, size: cs.fontSize, weight: cs.fontWeight, role: e.getAttribute('role'), icon: !!wi && getComputedStyle(wi).display !== 'none', tri: e.querySelector('.tri')?.getAttribute('aria-hidden') }; });
   const awake = await read();
-  ok('S2-8 HUD rate: awake workers -> "+$X/s" 11px/700 green, role=status, aria "Net income plus …"', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(awake.text) && awake.sign === 'pos' && awake.color === 'rgb(61, 127, 51)' && awake.size === '11px' && awake.weight === '700' && awake.role === 'status' && /^Net income plus /.test(awake.aria ?? ''), JSON.stringify(awake));
+  ok('S2-8 HUD rate: awake workers -> "+$X/s" 11px/700 green, role=status, aria "Net income plus …", no warn icon (m6)', /^\+\$[\d.,]+[A-Za-z]*\/s$/.test(awake.text) && !awake.icon && awake.sign === 'pos' && awake.color === 'rgb(61, 127, 51)' && awake.size === '11px' && awake.weight === '700' && awake.role === 'status' && /^Net income plus /.test(awake.aria ?? ''), JSON.stringify(awake));
   // Reviewer m2: drive the real rateView -> headerRateText path (no injected text). Ruling (a): an asleep Coop Hand does not clamp the rate.
   await page.evaluate(() => { const g = window.eggfarm; g.state = { ...g.state, workers: { ...g.state.workers, coop_hand: { ...g.state.workers.coop_hand, energy: 0 } } }; });
   await page.waitForTimeout(1300);
@@ -684,7 +685,7 @@ sections.s28rate = async () => {
     await page.evaluate(mh => { const g = window.eggfarm; g.state = { ...g.state, coinsCents: mh.unpaid ? 0 : g.state.coinsCents, workers: { market_hand: mh } }; }, mh); // coins 0: an Unpaid worker auto-resumes when it can be paid
     await page.waitForTimeout(1300);
     const r = await read();
-    ok(`AC-R1m / §4.2 real path: Market Hand ${mh.unpaid ? 'unpaid' : 'asleep'} -> HUD rate <= 0 in red (⚠ ▼), aria "stopped"`, /^⚠ ▼ (\u2212)?\$[\d.,]+[A-Za-z]*\/s$/.test(r.text) && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && /stopped$/.test(r.aria ?? ''), JSON.stringify(r));
+    ok(`AC-R1m / §4.2 real path: Market Hand ${mh.unpaid ? 'unpaid' : 'asleep'} -> HUD rate <= 0 in red (warn SVG + aria-hidden ▼, m6), aria "stopped"`, /^▼ (\u2212)?\$[\d.,]+[A-Za-z]*\/s$/.test(r.text) && r.icon && r.tri === 'true' && r.sign === 'neg' && r.color === 'rgb(184, 59, 55)' && /stopped$/.test(r.aria ?? ''), JSON.stringify(r));
   }
   if (shot) await page.screenshot({ path: `${SHOTS}/m41p1-s2-8-rate-390.png`, clip: { x: 0, y: 0, width: 390, height: 120 } });
   await ctx.close();
@@ -701,10 +702,10 @@ sections.s25 = async () => {
   const r2 = await read(); check(r2, 'after reload');
   ok('S2-5 exactly one worker button in the DOM after reload', (await page.locator('[data-act=manageAll]').count()) === 1);
   await page.locator('nav [data-act=manageAll]').click(); await page.waitForTimeout(300);
-  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, lblHidden: b.querySelector('.nav-lbl').getAttribute('aria-hidden'), aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
+  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, cdText: b.querySelector('.nav-cd').dataset.cd, hiddenKids: [...b.querySelectorAll('[aria-hidden=true]')].filter(x => x.textContent.trim()).length, aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
   ok('Review #1: nav Refill icon greyed during cooldown (grayscale(1), opacity .55)', cd.filter === 'grayscale(1)' && cd.op === '0.55', JSON.stringify(cd));
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-review1-nav-refill-cooldown-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
-  ok('S2-5 cooldown: label "0:NN", aria "Refill, cooling down" with the countdown aria-hidden (review 23a3798 #1), aria-disabled', /^0:\d\d$/.test(cd.label) && cd.aria === 'Refill, cooling down' && cd.lblHidden === 'true' && cd.dis === 'true', JSON.stringify(cd));
+  ok('S2-5 cooldown (D-HOP-2026-10-30-02 (b)): label "Refill" + countdown " 0:NN" (CSS data-cd), aria "Refill, cooling down" (review 23a3798 #1), aria-disabled', cd.label === 'Refill' && /^ \d+:\d\d$/.test(cd.cdText ?? '') && cd.hiddenKids === 0 && cd.aria === 'Refill, cooling down' && cd.dis === 'true', JSON.stringify(cd));
   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-5-nav-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
   await ctx.close();
 };
