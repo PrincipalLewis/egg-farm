@@ -19,7 +19,7 @@ const csvBalance = (csv: string): Balance => validateBalance(buildBalance(parseE
   JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8')), readEconomyConfig() as any) as Balance, false);
 
 describe('bot-m5: parity with m5x.ts', () => {
-  it('windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual)', () => {
+  it('[F-1][AC5] windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual)', () => {
     const g = gateOptsFromEnv({ SEEDS: '2', S0: '1', T: '3000', CFG: 'none,AssZ', PROFS: 'casual' }, loadTargets());
     const csv = readFileSync(PARITY_CSV_URL);
     expect(createHash('sha256').update(csv).digest('hex')).toBe(PARITY_CSV_SHA256); // fixture is still the b48be8a4 CSV
@@ -210,12 +210,14 @@ import { runVerify } from '../scripts/verify/sim';
 // (node:child_process/fs/os/path/url imports are shared with the bot-m5 B tests above)
 import { withFlags } from '../scripts/verify/cli';
 describe('bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1)', () => {
+  // #90 AC ids (QA M1, qa/v5-saves/trace-reviews/pr90-27157b0.md §5): AC1/AC4 run(), AC2 repro, AC3 CLI, AC6 list (+ tsc `satisfies`).
+  // AC5 (shipped behaviour unchanged) is the parity pin '[F-1][AC5] windowGate equals the original harness' (41324ef4, fixture b48be8a4).
   const fx = () => { const csv = readFileSync(PARITY_CSV_URL); expect(createHash('sha256').update(csv).digest('hex')).toBe(PARITY_CSV_SHA256); return csvBalance(csv.toString('utf8')); };
   const withSrc = (b: Balance, flags: Record<string, number>, enabled = 1) => ({ ...b, m4: { ...(b as any).m4, enabled, flags: { ...(b as any).m4?.flags, ...flags } } }) as Balance;
-  it('[F-1][O-3] the guarded list is exactly the mechanics the bot models itself', () => {
+  it('[F-1][O-3][AC6] the guarded list is exactly the mechanics the bot models itself', () => {
     expect([...SRC_M5_FLAGS]).toEqual(['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause']);
   });
-  it('[F-1][O-3] run(): bot M5 model (stack on) + any modelled src flag on throws, naming the flag; either alone runs', () => {
+  it('[F-1][O-3][AC1][AC4] run(): bot M5 model (stack on) + any modelled src flag on throws, naming the flag; either alone runs', () => {
     const b = fx();
     for (const k of SRC_M5_FLAGS) expect(() => run(withSrc(b, { [k]: 1 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1), k).toThrow(new RegExp(`bot-m5 models M5 itself.*m4\\.flags\\.${k}.*double-count`));
     expect(() => run(withSrc(b, { golden: 1 }), 1, PROFS.casual, M5X_STACKS.none, 1)).not.toThrow(); // bot model off: src mechanics only
@@ -223,12 +225,12 @@ describe('bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1)', () => {
     expect(() => run(withSrc(b, {}), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // shipped flags (all 0): unchanged
     expect(() => run(withSrc(b, { clockWage: 1, zeroGainUi: 1 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // not modelled by the bot
   });
-  it('[F-1][O-3] repro: runVerify m5x-casual and windowGate with m4.flags.golden=1 fail loudly instead of returning', () => {
+  it('[F-1][O-3][AC2] repro: runVerify m5x-casual and windowGate with m4.flags.golden=1 fail loudly instead of returning', () => {
     const b = withFlags(fx(), { 'm4.flags.golden': 1 });
     expect(() => runVerify(b, { hours: 0.25, seed: 1, profile: 'm5x-casual' })).toThrow(/bot-m5 models M5 itself.*m4\.flags\.golden/);
     expect(() => windowGate(b, gateOptsFromEnv({ CFG: 'AssZ', PROFS: 'casual', SEEDS: '1', T: '10', NOWIN: '1' }, loadTargets()))).toThrow(/m4\.flags\.golden/);
   });
-  it('[F-1][O-3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4)', () => {
+  it('[F-1][O-3][AC3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4)', () => {
     const root = fileURLToPath(new URL('..', import.meta.url)), dir = mkdtempSync(join(tmpdir(), 'o3-')), html = join(dir, 'fake.html'), out = join(dir, 'out');
     writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000"><div id="app" data-build-id="m4.1+0000000"></div>');
     const r = spawnSync(process.execPath, [`${root}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', '--hours', '0.1', '--profile', 'm5x-casual', '--skip-build', '--no-shot', '--flags', 'm4.flags.golden=1', '--out', out],
