@@ -1,0 +1,1 @@
+timeout -k 5 600 node x.mjs

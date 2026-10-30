@@ -1,0 +1,1 @@
+timeout --signal=TERM 600 node x.mjs

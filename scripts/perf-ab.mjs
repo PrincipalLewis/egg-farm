@@ -1,9 +1,9 @@
 // F24 Market perf A/B (one change per variant) with the SM-9 sampler (?perf=1).
 // Usage: [HEADED=1] [SEC=15] node scripts/perf-ab.mjs [webkit|chromium] [variant,...]   (expects dist-qa)
 import { webkit, chromium } from 'playwright-core';
-import { spawn } from 'node:child_process';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
 const eng = process.argv[2] || 'webkit'; const port = 4900 + Math.floor(Math.random() * 90);
-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const V = {
   base: '',
@@ -42,4 +42,4 @@ for (const name of pick) {
   await p.waitForFunction(() => window.eggfarmPerf?.done, null, { timeout: 120000 }); const s = await p.evaluate(() => window.eggfarmPerf.result);
   const cb = await p.evaluate(() => window.__cb); console.log(name.padEnd(16), 'rafJS/frame', (cb.ms / Math.max(1, cb.n)).toFixed(2), 'max', cb.max.toFixed(1), 'p50', s.p50.toFixed(1), 'p95', s.p95.toFixed(1), 'over20%', s.over20Pct.toFixed(1)); await ctx.close();
 }
-await br.close(); process.kill(-srv.pid);
+await br.close(); stopOrReport(srv, srvRec, 'perf-ab');
