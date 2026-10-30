@@ -159,14 +159,25 @@ for (const [w, h] of SIZES) {
         return { bd: true, ah: bd.getAttribute('aria-hidden'), afterLbl: bd.previousElementSibling?.classList.contains('nav-lbl') ?? false, text: bd.textContent,
           dRight: +(a.right - c.right).toFixed(2), dTop: +(c.top - a.top).toFixed(2), w: +a.width.toFixed(2), h: +a.height.toFixed(2), gen: [gen(bd, '::before'), gen(bd, '::after'), gen(up, '::before'), gen(up, '::after')] }; });
       check('Art-c1', w, `${scene}: Upgrades badge after the label, aria-hidden, at the icon's top-right (+6 right, -6 top, ±0.5 px), no CSS-generated count`, g.bd && g.ah === 'true' && g.afterLbl && g.text === String(n) && Math.abs(g.dRight - 6) <= 0.5 && Math.abs(g.dTop - 6) <= 0.5 && g.gen.every(x => x === 'none' || x === 'normal'), g);
-      if (scene === 'mh-asleep' || scene === 'both-asleep') { const bb = await page.locator('nav.actions').boundingBox();
-        await shot(page, `nav-upgrades-n${n}`, w, `Bottom nav, Upgrades badge N=${n} after the label (Art-c1: aria-hidden, icon top-right -6/-6)`, g, { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 }); } }
+    }
     if (axeSrc) { await page.addScriptTag({ content: axeSrc });
       const ax = await page.evaluate(async () => { const inc = ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', 'nav [data-act=manageAll]', '#p-upgrades header [data-act=manageAll]'].filter(s => document.querySelector(s));
         const res = await window.axe.run({ include: inc.map(s => [s]) }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } });
         return { v: res.violations.flatMap(x => x.nodes.map(n => n.target.join(' '))), passes: res.passes.flatMap(x => x.nodes.length), incomplete: res.incomplete.flatMap(x => x.nodes.map(n => n.target.join(' '))) }; });
       check('AC-R17 axe', w, `${scene}: axe 4.14 label-content-name-mismatch violations = 0`, ax.v.length === 0, ax);
     } else check('AC-R17 axe', w, `${scene}: axe not run (AXE path missing)`, false, AXE);
+    // QA pre-review F6: the nav-upgrades shots must frame the bottom nav, so close the Upgrades sheet first (Escape = openPanel(null));
+    // badge on at N=1 / N=2, off at N=0. The frame is verified (sheet closed, nav on screen, badge state) before the shot.
+    if (phone && (scene === 'mh-asleep' || scene === 'both-asleep' || scene === 'none')) {
+      await page.keyboard.press('Escape'); await page.waitForTimeout(450);
+      const f = await page.evaluate(() => { const nav = document.querySelector('nav.actions'), r = nav.getBoundingClientRect(), x = innerWidth / 2, y = r.top + r.height / 2;
+        const top = document.elementFromPoint(x, y), bd = document.querySelector('nav [data-nav=upgrades] > .asleep-badge');
+        return { sheetOpen: !!document.querySelector('#panel-layer.open'), navOnTop: nav.contains(top), navTop: r.top, navH: r.height, vh: innerHeight, badge: bd && bd.checkVisibility() ? bd.textContent : null }; });
+      const want = n ? String(n) : null;
+      check('Art-c1 shot frame (F6)', w, `${scene}: Upgrades sheet closed, bottom nav on top, badge ${want ? `"${want}" shown` : 'off'} before the nav-upgrades-n${n} shot`, !f.sheetOpen && f.navOnTop && f.badge === want, f);
+      const bb = await page.locator('nav.actions').boundingBox();
+      await shot(page, `nav-upgrades-n${n}`, w, `Bottom nav (Upgrades sheet closed), Upgrades badge ${n ? `N=${n} after the label (Art-c1: aria-hidden, icon top-right -6/-6)` : 'off (N=0)'}`, f, { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 });
+    }
     await ctx.close();
   }
   // ---- AC-R17 P2a (D-HOP-2026-10-29-10): count 0 -> nav Refill not rendered (3 hired, all rested); Tab skips it ----
