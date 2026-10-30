@@ -1,5 +1,5 @@
 /**
- * v5 #2 Collect Streak sim (product/collection/m5-streak-tap-coins-spec.md v1.1 §3/§8, sizing §2 #2 and §9.5, D-HOP-08 #2).
+ * v5 #2 Collect Streak sim (product/collection/m5-streak-tap-coins-spec.md v1.3.2 sha1 acb4cdbb §3/§8 (plan v0.8 403c2c46, frozen on v1.3.1 895ca903), sizing §2 #2 and §9.5, D-HOP-08 #2).
  * A credited Collect adds tc_streak_per_tap to s (max tc_streak_cap); s holds tc_streak_hold_s then decays
  * tc_streak_decay_per_s, both on FOCUS seconds only (R6/R7/R12); one (1 + s) price factor on every sale (R8). The
  * credit window is sim time (R2). s, hold, window and run stats are session only (save/m5-fields.ts M5_SESSION_KEYS).
