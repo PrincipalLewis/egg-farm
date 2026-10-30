@@ -47,7 +47,8 @@ beforeAll(() => {
   (globalThis as any).cancelAnimationFrame ??= (i: number) => clearTimeout(i);
   (Element.prototype as any).animate ??= () => ({ finished: Promise.resolve(), cancel() {}, onfinish: null, addEventListener() {} });
 });
-afterEach(() => { SALE_EFFECTS.length = 0; clearFeatures(); document.body.innerHTML = ''; document.documentElement.className = ''; vi.restoreAllMocks(); delete (window as any).eggfarmQa; });
+const SALE = SALE_EFFECTS as SaleEffect[]; // test-only fixture seam, as tests/v5-f1c-effects.test.ts (registries are readonly in src)
+afterEach(() => { SALE.length = 0; clearFeatures(); document.body.innerHTML = ''; document.documentElement.className = ''; vi.restoreAllMocks(); delete (window as any).eggfarmQa; });
 const setDoc = (vis: DocumentVisibilityState, focus: boolean) => { vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(vis); vi.spyOn(document, 'hasFocus').mockReturnValue(focus); };
 
 describe('F6 layout keys (Art v1.1 §2.1)', () => {
@@ -165,7 +166,7 @@ describe('F6 dialogOpen() (Q-F1c-1, D-HOP-2026-10-29-06)', () => {
 });
 
 async function mountWith(flags: Partial<Record<M5Flag, number>> = { golden: 1, streak: 1 }, audio: any = { enabled: false, play() {}, unlock() {} }) {
-  SALE_EFFECTS.push(frenzy, streak);
+  SALE.push(frenzy, streak);
   const b = B(flags), s0 = farm(b);
   const g = new Game(b as any, mem() as any, () => Date.UTC(2026, 9, 29, 12), 3, 'test'); g.state = { ...s0 };
   const { mountApp } = await import('../src/ui/app');
