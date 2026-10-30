@@ -8,6 +8,7 @@ import { validateBalance, balance, type Balance } from '../src/config/balance';
 import { loadTargets } from './pacing-guards';
 import { run, PROFS, M5X_STACKS, windowGate, gateOptsFromEnv } from './bot-m5';
 import type { SimEvent } from '../src/sim/events';
+import { initialState, type GameState } from '../src/sim/state';
 
 // Built exactly as m5x.ts / scripts/bot-m5x.ts build it: an economy CSV over src/config/balance.json.
 // The parity pin below was captured with data/economy.csv b48be8a4, so the test reads a byte-exact fixture copy of that CSV
@@ -92,7 +93,11 @@ describe('bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)', () => {
     const b = csvB(); const seen: number[] = [];
     const K = { ...M5X_STACKS.AssZ, hold: true, rc2: M5PX_RC2.on };
     run(b, 7, PROFS.casual, K, 3000, { onSecond: (_t, s) => { seen.push((s as any).__ch); } });
-    expect(Math.min(...seen)).toBeGreaterThanOrEqual(0); expect(Math.max(...seen)).toBeLessThanOrEqual(2);
+    // RF4 (HoQA pr94-40bff29): a non-empty series of exactly one sample per run second, and the cap the runner uses for this arm
+    // (bot-m5.ts run(): CAP = K.rc2.cap ?? 2, the RC2 default documented on M5PX_RC2; no economy/balance key exists for it).
+    const CAP = K.rc2!.cap ?? 2;
+    expect(seen).toHaveLength(3000);
+    expect(Math.min(...seen)).toBeGreaterThanOrEqual(0); expect(Math.max(...seen)).toBeLessThanOrEqual(CAP);
     const a = run(b, 7, PROFS.casual, K, 3000), z = run(b, 7, PROFS.casual, K, 3000, { series: { start: -1, st: [], ex: [], el: [], pertT: null }, pert: 0 });
     expect(JSON.stringify(z.final)).toBe(JSON.stringify(a.final)); expect(a.rm.refM).toBe(0); expect(a.rm.refA).toBeGreaterThan(0);
   }, 120_000);
@@ -199,6 +204,17 @@ describe('[REQ-L35] bot-m5 B: parity-break report and toggle metric', () => {
       expect(tog.tog10).toBeLessThanOrEqual(tog.tog);
       expect(tog.per30m_all).toBeLessThanOrEqual(12);
     }
+  }, 120_000);
+  it('[REQ-L35 D6][RF3 positive control] a forced Unpaid->Asleep flip is counted: tog = tog10 = 1 pinned, per-30-min = 3 over 600 s', () => {
+    // RF3 (HoQA pr94-40bff29): the casual seeds above have tog = 0, so they cannot catch a counter that never increments.
+    // Constructed start: F10, 0 coins, both wage workers Unpaid at energy 0. As the bot earns coins, R9 resumes them one at a time
+    // (tick.ts workerActions) into Asleep (energy 0), which is the Unpaid->Asleep flip the D6 metric counts (bot-m5.ts run, rm.tog).
+    const b = csvB(), s0 = initialState(b, 7);
+    const start = { ...s0, farmLevel: 10, coinsCents: 0, workers: { market_hand: { energy: 0, cdS: 0, unpaid: true }, coop_hand: { energy: 0, cdS: 0, unpaid: true } } } as GameState;
+    const r = run(b, 7, PROFS.casual, { ...M5PX_STACK }, 600, { start });
+    expect(r.rm.tog).toBe(1); expect(r.rm.tog10).toBe(1); // pinned: exactly one Unpaid->Asleep flip in this 600 s run (deterministic, seed 7)
+    expect(r.rm.tAll).toBeCloseTo(600, 6);
+    expect(+(r.rm.tog / r.rm.tAll * 1800).toFixed(4)).toBe(3); // the D6 per-30-min formula used by the sidecar (pressureSeed)
   }, 120_000);
 });
 
