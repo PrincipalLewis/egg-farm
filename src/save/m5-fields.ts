@@ -16,7 +16,7 @@ import { type M5Flag, flagOn } from '../config/flags';
 import { M5_SESSION_FIELDS } from '../sim/m5-state';
 import { sanitizePausedOnLoad } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
-import { sanitizeBreedsOnLoad } from '../sim/breeds';
+import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
 export { streakAfter };
 export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
 /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
@@ -43,7 +43,8 @@ export function drawGap(s: GameState, b: Balance): GameState {
 /** The save shape: session-only keys dropped. The same object (so the same bytes) when none is present. */
 export function m5Persist(s: GameState): GameState {
   if (!SESSION_ONLY_KEYS.some(k => k in s)) return s;
-  const o: any = { ...s }; for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
+  const o: any = { ...s, ...(s.breedsRawSlots && s.breeds && { breeds: breedsSaveView(s) }) }; // E10 / PMC Q5: raw unknown slot ids kept
+  for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
 }
 /** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
 function endCalls(o: any, b: Balance, ev: SimEvent[]) {
