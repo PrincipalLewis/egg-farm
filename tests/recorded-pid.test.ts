@@ -10,12 +10,12 @@ import { recordPid, recordProblem, killRecorded, stopChild, readStat, bootId, sp
 import { stopReport } from '../scripts/serve-own.mjs';
 
 const mine: ChildProcess[] = [];
-function sleeper(detached = true): ChildProcess { const c = spawn('sleep', ['30'], { stdio: 'ignore', detached }); mine.push(c); return c; }
+function sleeper(detached = true): ChildProcess { const c = detached ? spawnRecorded('sleep', ['30'], { stdio: 'ignore' }).child : spawn('sleep', ['30'], { stdio: 'ignore' }); mine.push(c); return c; }
 const exited = (c: ChildProcess) => c.exitCode !== null || c.signalCode !== null ? Promise.resolve() : new Promise<void>(r => c.once('exit', () => r()));
 function noSignal() { return vi.spyOn(process, 'kill').mockImplementation(() => { throw new Error('process.kill must not be called'); }); }
 afterEach(async () => {
   vi.restoreAllMocks();
-  for (const c of mine.splice(0)) if (c.exitCode === null && c.signalCode === null && c.pid) { process.kill(c.pid, 'SIGKILL'); await exited(c); }
+  for (const c of mine.splice(0)) if (c.exitCode === null && c.signalCode === null && c.pid) { expect(killRecorded(recordPid(c.pid), 'SIGKILL', { group: false }).ok).toBe(true); await exited(c); } // N2: own children, guarded API
 });
 
 describe('M1/m7: the recorded process is stopped', () => {
@@ -49,8 +49,8 @@ describe('M1/m7: a foreign or reused pid is refused and nothing is signalled', (
   it("F1: a forged record naming a foreign process's REAL parent is refused (sleep spawned by a child shell)", async () => {
     // our detached sh is the parent of a `sleep 3`; that sleep is NOT our child. A record that names its real parent passes
     // every check except "ours", which is now always process.pid.
-    const sh = spawn('sh', ['-c', 'sleep 3 & echo $!; wait'], { stdio: ['ignore', 'pipe', 'ignore'], detached: true }); mine.push(sh);
-    const g = +(await new Promise<string>(r => sh.stdout!.once('data', d => r(String(d))))).trim();
+    const { child: sh } = spawnRecorded('sh', ['-c', 'sleep 3 & echo $!; wait'], { stdio: ['ignore', 'pipe', 'ignore'] }); mine.push(sh);
+    const g = +(await new Promise<string>(r => sh.stdout!.once("data", (d: Buffer) => r(String(d))))).trim();
     const st = readStat(g); expect(st.ppid).toBe(sh.pid);
     expect(recordPid(g)).toBeNull();
     expect((recordPid as any)(g, { parent: sh.pid })).toBeNull(); // the old parent option is gone and ignored
@@ -102,7 +102,7 @@ describe('M1/m7: a foreign or reused pid is refused and nothing is signalled', (
     expect(spy).not.toHaveBeenCalled(); expect(c.exitCode).toBeNull(); expect(c.signalCode).toBeNull();
   });
   it('an exited child is refused by stopChild and by killRecorded (gone or zombie), and no record means no signal', async () => {
-    const c = sleeper(); const rec = recordPid(c.pid); process.kill(c.pid!, 'SIGKILL'); await exited(c);
+    const c = sleeper(); const rec = recordPid(c.pid); expect(killRecorded(rec, 'SIGKILL').ok).toBe(true); await exited(c);
     const spy = noSignal();
     expect(stopChild(c, rec)).toMatchObject({ ok: false, reason: 'exited' });
     expect(killRecorded(rec).reason).toMatch(/^(gone|exited \(zombie\)|start time .* \(reused pid\))$/);
@@ -111,13 +111,7 @@ describe('M1/m7: a foreign or reused pid is refused and nothing is signalled', (
   });
 });
 
-describe('m7/M1: no /proc walk or pattern kill left in the two scripts', () => {
-  for (const f of ['scripts/d2-kill-browser.mjs', 'scripts/serve-own.mjs', 'scripts/recorded-pid.mjs']) it(f, () => {
-    const src = fs.readFileSync(f, 'utf8');
-    expect(src).not.toMatch(/readdirSync\(\s*['"]\/proc/); expect(src).not.toMatch(/\/cmdline/); expect(src).not.toMatch(/pkill|killall|pgrep/);
-    expect(src.match(/process\.kill\(/g) ?? []).toHaveLength(f.endsWith('recorded-pid.mjs') ? 2 : 0); // the guarded kill + the signal-0 group probe
-  });
-});
+// The source check (no /proc walk, no pattern or raw kill) lives in tests/rule21-source.test.ts (UI QA #89 F3).
 
 // UI QA #89 F2: a TERM-ignoring grandchild survives the group TERM; it must be found (by the spawn-time snapshot, no
 // /proc scan), reported with its PID and a non-ok result, and never signalled again. It is a `sleep 2` that expires on
@@ -125,7 +119,7 @@ describe('m7/M1: no /proc walk or pattern kill left in the two scripts', () => {
 const gone = async (m: { pid: number; starttime: string }) => { for (let i = 0; i < 100; i++) { const st = readStat(m.pid); if (!st || st.starttime !== m.starttime) return true; await new Promise(r => setTimeout(r, 50)); } return false; };
 async function termIgnoringGroup() {
   const { child, rec } = spawnRecorded('sh', ['-c', '(trap "" TERM; exec sleep 2) & echo $!; wait'], { stdio: ['ignore', 'pipe', 'ignore'] }); mine.push(child);
-  const g = +(await new Promise<string>(r => child.stdout!.once('data', d => r(String(d))))).trim();
+  const g = +(await new Promise<string>(r => child.stdout!.once("data", (d: Buffer) => r(String(d))))).trim();
   await new Promise(r => setTimeout(r, 100)); // let the subshell exec sleep (TERM stays ignored across exec)
   const members = groupMembers(rec); return { child, rec, g, members, gm: members.find((m: any) => m.pid === g) };
 }

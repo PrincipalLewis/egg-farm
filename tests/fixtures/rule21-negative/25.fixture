@@ -1,0 +1,1 @@
+signal.pthread_kill(t, 15)
