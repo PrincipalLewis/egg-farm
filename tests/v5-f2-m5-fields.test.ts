@@ -17,9 +17,10 @@ const egg = { ageS: 12, slotId: 'S3', intervalS: 150 };
 
 describe('F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled', () => {
   it('shipping balance has no m4.flags: every M5 flag off; SAVE_VERSION stays 6', () => {
-    expect(b.m4!.flags).toBeUndefined(); for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const) expect(m5Flag(b, k)).toBe(false);
+    // F3 merge: shipping balance now carries the m4.flags block (F3), every flag 0 (was: no block at all)
+    expect(b.m4!.flags).toEqual(Object.fromEntries(M5_FLAGS.map(f => [f, 0]))); for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const) expect(m5Flag(b, k)).toBe(false);
     expect(m5Flag({ ...ON, m4: { ...ON.m4!, enabled: 0 } }, 'golden')).toBe(false); expect(m5Flag(only('golden'), 'golden')).toBe(true);
-    expect(m5Flag({ ...b, m4: { ...b.m4!, flags: { golden: true as any } } }, 'golden')).toBe(false); expect(SAVE_VERSION).toBe(6);
+    expect(m5Flag({ ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, golden: true as any } } }, 'golden')).toBe(false); expect(SAVE_VERSION).toBe(6);
   });
   it('[CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)', () => {
     for (const f of M5_FLAGS) for (const en of [0, 1]) for (const v of [0, 1, 2]) {

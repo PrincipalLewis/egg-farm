@@ -1,5 +1,6 @@
 import raw from './balance.json';
 import { validateCostGrowthSegments, validateCostTable, type EconomyParams } from './formulas';
+import { validateM5 } from './m5-rules';
 /** TEST-ONLY scenario hooks (m2-proposal §8 item 17, AC-W1 casual). Never in balance.json; rejected in production builds. */
 export interface SimTestHooks { poisson_arrivals?: boolean; demand_scale?: number; }
 export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
@@ -40,6 +41,7 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
   if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))
     throw new Error('balance.workers.grader.tiers: farm and mult must increase, mult > 1');
   for (const k of ['tired_bonus_share', 'asleep_bonus_share'] as const) if (W.grader[k] > 1) throw new Error(`balance.workers.grader.${k} must be <= 1`);
+  validateM5(b.m4, W); // v5 F3: m4.flags (0/1, known names) + M5 tunable rules
   return b;
 }
 export const balance: Balance = validateBalance(raw as Balance);
