@@ -175,7 +175,7 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
     const rf = document.querySelector('nav .nav-manage') as HTMLElement;
     expect(rf.hidden).toBe(false); expect(navOrder()).toEqual(['market', 'upgrades', 'manageAll', 'farm']);
     const r = startsWithVisible(rf); // D-HOP-2026-10-30-02 (b): visible "Refill"; the countdown is CSS generated content from data-cd
-    const nl = rf.querySelector('.nav-lbl') as HTMLElement; expect(nl.textContent).toBe('Refill'); expect(nl.dataset.cd).toBe(' 0:20'); expect(nl.hasAttribute('aria-hidden')).toBe(false);
+    const nl = rf.querySelector('.nav-lbl') as HTMLElement, cdEl = rf.querySelector('.nav-cd') as HTMLElement; expect(nl.textContent).toBe('Refill'); expect(cdEl.dataset.cd).toBe(' 0:20'); expect(cdEl.getAttribute('aria-hidden')).toBe('true'); expect(cdEl.textContent).toBe(''); expect(nl.hasAttribute('aria-hidden')).toBe(false);
     expect(r.name).toBe('Refill, cooling down'); expect(r.ok, JSON.stringify(r)).toBe(true); expect(r.name.startsWith('Refill')).toBe(true);
     expect(rf.getAttribute('aria-disabled')).toBe('true'); expect(rf.classList.contains('is-cooldown')).toBe(true);
     const before = JSON.stringify({ cd: g.state.manageCdS, w: g.state.workers, c: g.state.coinsCents });
@@ -187,7 +187,7 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
     for (const [cd, want] of [[30, ' 0:30'], [7, ' 0:07'], [0.4, ' 0:01']] as const) {
       await restedCd(cd); const rf = document.querySelector('nav .nav-manage') as HTMLElement, r = startsWithVisible(rf);
       expect(r.v).toBe('Refill'); expect(r.name).toBe('Refill, cooling down'); expect(r.ok, JSON.stringify(r)).toBe(true);
-      expect((rf.querySelector('.nav-lbl') as HTMLElement).dataset.cd).toBe(want); expect([...rf.querySelectorAll('[aria-hidden=true]')].filter(x => x.textContent!.trim()).length).toBe(0); // no hidden text (decorative ring only)
+      expect((rf.querySelector('.nav-cd') as HTMLElement).dataset.cd).toBe(want); expect([...rf.querySelectorAll('[aria-hidden=true]')].filter(x => x.textContent!.trim()).length).toBe(0); // no hidden text (decorative ring only)
     }
     const { navManageView } = await import('../src/ui/workers-ui'); // docked header copy: same rule
     const d = navManageView(0, 20, true, { text: '', at: 0 }, 0); expect(d.label).toBe('Refill'); expect(d.countdown).toBe(' · 0:20'); expect(d.aria.text.startsWith(d.label)).toBe(true);

@@ -95,7 +95,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const nav = h(`<nav class="actions" aria-label="Main">
     <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
     <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span> <span class="nav-lbl">Upgrades</span></button>
-    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span> <span class="count-badge num" hidden></span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num"><span class="nav-txt">Refill</span><span class="nav-cd" aria-hidden="true"></span></span> <span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
@@ -626,7 +626,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
         // S2-5 / AC-R9: visible "Refill" + N badge, or "Refill" + the CSS-drawn countdown (D-HOP-2026-10-30-02); aria "Refill N tired workers" / "Refill, cooling down"
         const v = navRefillState(s, b, docked.matches, maAria, now());
-        { const nl = fb.querySelector('.nav-lbl') as HTMLElement; setText(nl, v.label); if (nl.dataset.cd !== v.countdown) nl.dataset.cd = v.countdown; } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+        { setText(fb.querySelector('.nav-txt')!, v.label); const cdEl = fb.querySelector('.nav-cd') as HTMLElement; if (cdEl.dataset.cd !== v.countdown) cdEl.dataset.cd = v.countdown; } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');

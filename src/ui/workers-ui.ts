@@ -171,7 +171,7 @@ export function navManageView(n: number, cdS: number, docked: boolean, prev: Nav
   const cd = Math.ceil(cdS - 1e-9);
   if (cd > 0) {
     // D-HOP-2026-10-30-02 option (b): the visible label is "Refill" next to the countdown; the name stays "Refill, cooling down" (review
-    // 23a3798 #1: stable for the whole cooldown, never stale). The countdown is CSS generated content (.nav-lbl[data-cd]::after), not text
+    // 23a3798 #1: stable for the whole cooldown, never stale). The countdown is CSS generated content (.nav-cd[data-cd]::after on an aria-hidden, text-free span), not text
     // in the button: axe 4.14 counts aria-hidden text as visible (label-content-name-mismatch), and the aria-label keeps it out of the name.
     return { label: 'Refill', countdown: docked ? ` · ${fmtCooldown(cd)}` : ` ${fmtCooldown(cd)}`, badge: '', aria: prev.text === REFILL_COOLDOWN_ARIA ? prev : { text: REFILL_COOLDOWN_ARIA, at: nowMs } };
   }

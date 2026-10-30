@@ -137,7 +137,7 @@ describe('S2-5 nav labels + AC-R9 / AC-R8 Refill copy', () => {
     const navHtml = app.slice(app.indexOf('<nav class="actions"'), app.indexOf('</nav>'));
     const btns = navHtml.split('<button').slice(1);
     expect(btns).toHaveLength(4);
-    for (const x of btns) { expect(x).toMatch(/aria-label="[^"]+"/); expect(x).toMatch(/<img /); expect(x).toMatch(/class="nav-lbl[^"]*">[^<]+</); }
+    for (const x of btns) { expect(x).toMatch(/aria-label="[^"]+"/); expect(x).toMatch(/<img /); expect(x).toMatch(/class="nav-lbl[^"]*">(<span class="nav-txt">)?[^<]+</); }
   });
   it('ready: "Refill" + N badge; aria "Refill N tired workers"', () => {
     expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Refill', countdown: '', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });

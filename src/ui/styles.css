@@ -595,12 +595,13 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
 /* Art & UX review rc1-ui-fc8e1cf #1: the phone-nav Refill icon greys out during cooldown (timer text stays #5A4C42) */
 .nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55}
 nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55} /* beats the S2-5 filter:none reset */
-/* D-HOP-2026-10-30-02 (b): cooldown label = "Refill" + the countdown from data-cd (generated content: not text in the button, so axe
-   label-content-name-mismatch sees "Refill" and the name "Refill, cooling down" starts with it). One line; tabular digits so it never jumps. */
-.nav-lbl[data-cd]::after{content:attr(data-cd);white-space:pre;font-variant-numeric:tabular-nums}
+/* D-HOP-2026-10-30-02 (b): cooldown label = "Refill" + the countdown, drawn from data-cd on the aria-hidden, text-free .nav-cd span: axe
+   label-content-name-mismatch ignores generated content (sees "Refill"), and aria-hidden keeps the digits out of the accessibility tree (a ::after on
+   an exposed element shows up as a StaticText child, HoP condition 10:49). One line; tabular digits so it never jumps. */
+.nav-cd[data-cd]::after{content:attr(data-cd);white-space:pre;font-variant-numeric:tabular-nums}
 /* Docked header pill: Fredoka has no tabular digits (tabular-nums is ignored; " · 0:01".." · 0:30" measured 31.27-36.52 px at 600 14px in Cr/FF/WK,
    8be9ae7), so the countdown reserves its widest width (2.609em -> 2.65em) and the pill never changes size as it ticks (Art 08:53 fit rule). */
-@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-lbl[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}
+@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-cd[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}
 /* #2: docked Upgrades-header Refill pill never under 44px tall */
 @media (min-width:960px) and (orientation:landscape){.sheet header button.desk-manage-all:not([hidden]){min-height:44px;box-sizing:border-box}}
 /* S2-5: nav buttons are the full 64px (the 2px top rule is drawn over them instead of taking 2px of the track) */

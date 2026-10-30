@@ -202,7 +202,7 @@ for (const [w, h] of SIZES) {
       const shown = e.checkVisibility(), name = e.getAttribute('aria-label'), v = vis(e).replace(/\s+/g, ' ').trim(), lbl = e.querySelector('.nav-lbl');
       e.click(); window.eggfarmUi.render();
       const st2 = JSON.stringify({ cd: window.eggfarm.state.manageCdS, w: window.eggfarm.state.workers, c: window.eggfarm.state.coinsCents });
-      return { present: true, shown, name, v, label: lbl?.textContent ?? null, countdown: lbl?.dataset.cd ?? null, hiddenText: [...e.querySelectorAll('[aria-hidden=true]')].map(x => x.textContent.trim()).filter(Boolean), ariaDisabled: e.getAttribute('aria-disabled'), unchanged: st === st2 }; }, [sel, vis.toString()]);
+      return { present: true, shown, name, v, label: lbl?.textContent ?? null, countdown: e.querySelector('.nav-cd')?.dataset.cd ?? null, hiddenText: [...e.querySelectorAll('[aria-hidden=true]')].map(x => x.textContent.trim()).filter(Boolean), ariaDisabled: e.getAttribute('aria-disabled'), unchanged: st === st2 }; }, [sel, vis.toString()]);
     if (how === 'tab') {
       check('D-HOP-10-addendum / D-HOP-2026-10-30-02', w, `cooldown, count 0: ${phone ? 'nav' : 'header'} Refill visible, visible text "Refill" (non-empty, F3) + countdown "${phone ? ' ' : ' · '}0:20" (CSS data-cd), name "Refill, cooling down" starts with it, aria-disabled, a tap changes nothing`, d.present && d.shown && d.name === 'Refill, cooling down' && d.v === 'Refill' && d.v.length > 0 && d.name.startsWith(d.v) && d.countdown === (phone ? ' 0:20' : ' · 0:20') && d.ariaDisabled === 'true' && d.unchanged, d);
       if (axeSrc) { await page.addScriptTag({ content: axeSrc }); const ax = await page.evaluate(async sel => { const res = await window.axe.run({ include: [[sel]] }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } }); return { v: res.violations.flatMap(x => x.nodes.map(n => n.target.join(' '))) }; }, sel);
@@ -229,12 +229,12 @@ for (const [w, h] of SIZES) {
   for (const cd of [30, 7]) { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 90, cdS: 0 } }, coinsCents: 1e6, manageCdS: cd }, { freeze: true });
     if (!phone) await toTab(page, 'workers'); await page.evaluate(PAGE_LIB); await page.waitForTimeout(300);
     const sel = phone ? 'nav.actions .nav-manage' : '#p-upgrades header [data-act=manageAll]';
-    const f = await page.evaluate(([sel, max]) => { const P = window.__p2, e = document.querySelector(sel), nl = e.querySelector('.nav-lbl'), b = e.getBoundingClientRect(), l = nl.getBoundingClientRect();
-      const lh = parseFloat(getComputedStyle(nl).lineHeight) || parseFloat(getComputedStyle(nl).fontSize) * 1.2, cd0 = nl.dataset.cd;
-      const widths = {}; for (let i = 1; i <= max; i++) { nl.dataset.cd = cd0.replace(/\d+:\d\d$/, `${Math.floor(i / 60)}:${String(i % 60).padStart(2, '0')}`); widths[i] = +nl.getBoundingClientRect().width.toFixed(2); } nl.dataset.cd = cd0;
-      const ws = Object.values(widths), after = getComputedStyle(nl, '::after'), fg = P.rgb(after.color), bg = P.bgOf(e), op = P.effOpacity(nl);
+    const f = await page.evaluate(([sel, max]) => { const P = window.__p2, e = document.querySelector(sel), nl = e.querySelector('.nav-lbl'), ce = e.querySelector('.nav-cd'), b = e.getBoundingClientRect(), l = nl.getBoundingClientRect();
+      const lh = parseFloat(getComputedStyle(nl).lineHeight) || parseFloat(getComputedStyle(nl).fontSize) * 1.2, cd0 = ce.dataset.cd;
+      const widths = {}; for (let i = 1; i <= max; i++) { ce.dataset.cd = cd0.replace(/\d+:\d\d$/, `${Math.floor(i / 60)}:${String(i % 60).padStart(2, '0')}`); widths[i] = +nl.getBoundingClientRect().width.toFixed(2); } ce.dataset.cd = cd0;
+      const ws = Object.values(widths), after = getComputedStyle(ce, '::after'), fg = P.rgb(after.color), bg = P.bgOf(e), op = P.effOpacity(nl);
       const up = document.querySelector('nav [data-nav=upgrades] > .asleep-badge');
-      return { text: nl.textContent + cd0, label: nl.textContent, countdown: cd0, name: e.getAttribute('aria-label'), lines: nl.getClientRects().length, labelH: +l.height.toFixed(2), lineH: +lh.toFixed(2),
+      return { text: nl.textContent + cd0, cdAriaHidden: ce.getAttribute('aria-hidden'), cdText: ce.textContent, label: nl.textContent, countdown: cd0, name: e.getAttribute('aria-label'), lines: nl.getClientRects().length, labelH: +l.height.toFixed(2), lineH: +lh.toFixed(2),
         btn: P.r(e), lbl: P.r(nl), inside: l.left >= b.left - 0.5 && l.right <= b.right + 0.5 && l.top >= b.top - 0.5 && l.bottom <= b.bottom + 0.5, inView: b.left >= -0.5 && b.right <= innerWidth + 0.5,
         overflow: e.scrollWidth > e.clientWidth + 0.5, ellipsis: getComputedStyle(nl).textOverflow, afterContent: after.content, numeric: after.fontVariantNumeric,
         widthMin: Math.min(...ws), widthMax: Math.max(...ws), color: after.color, bg: `rgb(${bg.r}, ${bg.g}, ${bg.b})`, opacity: op, contrastRaw: P.ratio(fg, bg), contrastEff: P.contrast(nl),
@@ -250,6 +250,43 @@ for (const [w, h] of SIZES) {
       : await page.evaluate(() => { const a = document.querySelector('#p-upgrades header').getBoundingClientRect(), t = document.querySelector('#p-upgrades .tabs')?.getBoundingClientRect() ?? a;
         const x = Math.floor(Math.min(a.left, t.left)), y = Math.floor(Math.min(a.top, t.top)); return { x, y, width: Math.ceil(Math.max(a.right, t.right)) - x, height: Math.ceil(Math.max(a.bottom, t.bottom)) - y + 4 }; });
     await shot(page, `cooldown-${cd === 30 ? 'max-0-30' : 'typ-0-07'}`, w, `${phone ? 'Bottom nav' : 'Docked Upgrades header + tabs'}: Refill cooldown "${f.text.trim()}" (D-HOP-2026-10-30-02 (b)), ${phone ? 'Upgrades badge N=1' : 'Workers tab badge 1'} on`, f, clip);
+    // Art-b focus: keyboard-focused cooldown Refill (Shift+Tab, Tab -> :focus-visible ring) clears the bar: the ring box (button rect grown by
+    // outline-offset + outline-width) is inside the viewport, inside the nav / header bar and every overflow-clipping ancestor, and nothing else covers it.
+    { await page.locator(sel).focus(); await page.keyboard.press('Shift+Tab'); await page.keyboard.press('Tab'); await page.waitForTimeout(150);
+      const fr = await page.evaluate(sel => { const e = document.querySelector(sel), cs = getComputedStyle(e), b = e.getBoundingClientRect();
+        const ow = parseFloat(cs.outlineWidth) || 0, oo = parseFloat(cs.outlineOffset) || 0, g = cs.outlineStyle === 'none' ? 0 : ow + oo;
+        const ring = { left: b.left - g, top: b.top - g, right: b.right + g, bottom: b.bottom + g }, rr = x => ({ l: +x.left.toFixed(2), t: +x.top.toFixed(2), r: +x.right.toFixed(2), b: +x.bottom.toFixed(2) });
+        const inside = (a, c) => a.left >= c.left - 0.5 && a.top >= c.top - 0.5 && a.right <= c.right + 0.5 && a.bottom <= c.bottom + 0.5;
+        const bar = e.closest('nav.actions') ?? e.closest('header'), barR = bar.getBoundingClientRect();
+        const clips = []; for (let x = e.parentElement; x && x !== document.documentElement; x = x.parentElement) { const c = getComputedStyle(x); if (c.overflowX !== 'visible' || c.overflowY !== 'visible') clips.push({ el: x.tagName + (x.id ? '#' + x.id : '') + (x.className && typeof x.className === 'string' ? '.' + x.className.split(' ')[0] : ''), r: rr(x.getBoundingClientRect()), ok: inside(ring, x.getBoundingClientRect()) }); }
+        const pts = [[ring.left + 1, (ring.top + ring.bottom) / 2], [ring.right - 1, (ring.top + ring.bottom) / 2], [(ring.left + ring.right) / 2, ring.top + 1], [(ring.left + ring.right) / 2, ring.bottom - 1]];
+        const hits = pts.map(([x, y]) => { const t = document.elementFromPoint(x, y); return { x: +x.toFixed(1), y: +y.toFixed(1), hit: t ? t.tagName + (t.className && typeof t.className === 'string' ? '.' + t.className.split(' ')[0] : '') : null, ok: !!t && (e.contains(t) || t.contains(e)) }; });
+        return { active: document.activeElement === e, focusVisible: e.matches(':focus-visible'), outline: `${cs.outlineStyle} ${cs.outlineWidth} offset ${cs.outlineOffset}`, btn: rr(b), ring: rr(ring), bar: bar.tagName + (bar.className ? '.' + String(bar.className).split(' ')[0] : ''), barR: rr(barR),
+          inView: inside(ring, { left: 0, top: 0, right: innerWidth, bottom: innerHeight }), inBar: inside(ring, barR), clips, hits }; }, sel);
+      f.focus = fr; console.log(`ART-B-FOCUS [${ENGINE} ${w}] cd=${cd} ${JSON.stringify(fr)}`);
+      check('Art-b focus', w, `cooldown ${cd}s ${phone ? 'nav' : 'docked header'} Refill, keyboard focus: :focus-visible ring (${fr.outline}) inside the viewport and the ${fr.bar} bar, not clipped by an overflow ancestor, not covered (4 edge probes)`,
+        fr.active && fr.focusVisible && !fr.outline.startsWith('none') && fr.inView && fr.inBar && fr.clips.every(c => c.ok) && fr.hits.every(h => h.ok), fr);
+      if (cd === 30) await shot(page, 'cooldown-focus', w, `${phone ? 'Bottom nav' : 'Docked Upgrades header'}: keyboard-focused cooldown Refill (Art-b focus)`, fr, phone ? await (async () => { const bb = await page.locator('nav.actions').boundingBox(); return { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 }; })() : await page.evaluate(() => { const a = document.querySelector('#p-upgrades header').getBoundingClientRect(); return { x: Math.floor(a.left), y: Math.max(0, Math.floor(a.top) - 4), width: Math.ceil(a.width), height: Math.ceil(a.height) + 8 }; }));
+      await page.evaluate(() => document.activeElement?.blur()); }
+    // D-HOP-2026-10-30-02 a11y-tree (HoP condition for the push): the name comes from aria-label and the accessibility tree shows exactly
+    // "Refill, cooling down", no countdown digits / ':' (browsers can fold ::after content into a content-derived name; aria-label must win).
+    { const NAME = 'Refill, cooling down', loc = page.getByRole('button', { name: NAME, exact: true });
+      const count = await loc.count(), isIt = count ? await loc.evaluateAll((els, sel) => els.includes(document.querySelector(sel)), sel) : false;
+      const src = await page.evaluate(sel => { const e = document.querySelector(sel); return { ariaLabel: e.getAttribute('aria-label'), labelledby: e.getAttribute('aria-labelledby'), after: getComputedStyle(e.querySelector('.nav-cd'), '::after').content }; }, sel);
+      const snap = await page.locator(sel).ariaSnapshot();
+      let ax = null;
+      if (ENGINE === 'chromium') { try { const cdp = await ctx.newCDPSession(page); await cdp.send('DOM.enable'); await cdp.send('Accessibility.enable');
+        const { root } = await cdp.send('DOM.getDocument', { depth: 0 }), { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: sel });
+        const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false }), n = nodes.find(x => x.role?.value === 'button') ?? nodes[0];
+        const { nodes: all } = await cdp.send('Accessibility.getFullAXTree'), sub = [], walk = id => { const x = all.find(q => q.nodeId === id); if (!x) return; if (!x.ignored) sub.push(`${x.role?.value}:${x.name?.value ?? ''}`); (x.childIds ?? []).forEach(walk); };
+        walk(all.find(q => q.backendDOMNodeId === n.backendDOMNodeId)?.nodeId);
+        ax = { role: n.role?.value, name: n.name?.value, from: (n.name?.sources ?? []).filter(x => x.value || x.attributeValue).map(x => `${x.type}${x.attribute ? ':' + x.attribute : ''}${x.superseded ? ' (superseded)' : ''}`), subtree: sub }; await cdp.detach(); } catch (err) { ax = { error: String(err) }; } }
+      const snapOk = snap.includes(`"${NAME}"`) && !/\d/.test(snap) && !/\d:\d|: ?\d|\d ?:/.test(snap);
+      const axOk = ENGINE !== 'chromium' || (ax && ax.name === NAME && ax.from.some(x => x === 'attribute:aria-label') && ax.subtree?.length >= 1 && !ax.subtree.some(x => /\d/.test(x)));
+      const a11y = { count, isIt, source: src.labelledby ? 'aria-labelledby' : src.ariaLabel !== null ? 'aria-label' : 'content', ariaLabel: src.ariaLabel, labelledby: src.labelledby, afterContent: src.after, snapshot: snap, cdp: ax };
+      f.a11y = a11y; console.log(`A11Y-TREE [${ENGINE} ${w}] cd=${cd} ${JSON.stringify(a11y)}`);
+      check('D-HOP-2026-10-30-02 a11y-tree', w, `cooldown ${cd}s ${phone ? 'nav' : 'docked header'} Refill: getByRole(button, "${NAME}", exact) resolves to it (${count}); name from aria-label; ariaSnapshot has "${NAME}" and no countdown digit/':'${ENGINE === 'chromium' ? `; CDP AX name "${ax?.name}" from ${ax?.from?.join(', ')}; AX subtree ${JSON.stringify(ax?.subtree)} has no digit` : ''}`,
+        count >= 1 && isIt && a11y.source === 'aria-label' && src.ariaLabel === NAME && snapOk && axOk, a11y); }
     await ctx.close(); }
   // ---- P2b-U / Art-c2: Unpaid Refill refused tap = shake; reduced motion = static refusedFlash, no translate ----
   for (const rm of [false, true]) { const { ctx, page } = await open(w, h, { workers: { ...MH_UNPAID, coop_hand: { energy: 90, cdS: 0 } }, coinsCents: 0 }, { rm, freeze: true });

@@ -202,15 +202,28 @@ describe('Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, s
 
 describe('AC-R17 D-HOP-2026-10-30-02: cooldown Refill label CSS', () => {
   it('AC-R17 D-HOP-2026-10-30-02: the countdown is generated content from data-cd, one line, tabular digits (no jump as it ticks)', () => {
-    expect(css).toMatch(/\.nav-lbl\[data-cd\]::after\{content:attr\(data-cd\);white-space:pre;font-variant-numeric:tabular-nums\}/);
+    expect(css).toMatch(/\.nav-cd\[data-cd\]::after\{content:attr\(data-cd\);white-space:pre;font-variant-numeric:tabular-nums\}/);
     expect(css).toMatch(/\.actions \.nav-lbl\{[^}]*white-space:nowrap/);
   });
   it('AC-R17 D-HOP-2026-10-30-02: docked header pill reserves the widest Fredoka countdown (2.65em >= measured 2.609em), only while a countdown shows', () => {
-    expect(css).toContain('@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-lbl[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}');
+    expect(css).toContain('@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-cd[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}');
   });
   it('AC-R17 D-HOP-2026-10-30-02: fmtCooldown is m:ss; every countdown up to manage_cooldown_s has the same glyph count', async () => {
     const { fmtCooldown } = await import('../src/ui/workers-ui'); const { balance } = await import('../src/config/balance');
     const max = balance.workers.energy.manage_cooldown_s; expect(fmtCooldown(30)).toBe('0:30'); expect(fmtCooldown(7)).toBe('0:07'); expect(fmtCooldown(75)).toBe('1:15');
     const lens = new Set(Array.from({ length: Math.ceil(max) }, (_, i) => fmtCooldown(i + 1).length)); expect(lens.size).toBe(1);
+  });
+});
+
+describe('D-HOP-2026-10-30-02 m:ss: cooldown countdown formatter (workers-ui fmtCooldown, as navManageView renders it)', () => {
+  it('D-HOP-2026-10-30-02 m:ss: 1 -> 0:01, 30 -> 0:30, 59 -> 0:59, 60 -> 1:00, 65 -> 1:05, 600 -> 10:00', async () => {
+    const { fmtCooldown } = await import('../src/ui/workers-ui');
+    for (const [s, want] of [[1, '0:01'], [30, '0:30'], [59, '0:59'], [60, '1:00'], [65, '1:05'], [600, '10:00']] as const) expect(fmtCooldown(s), String(s)).toBe(want);
+  });
+  it('D-HOP-2026-10-30-02 m:ss: fractional seconds round up like the UI (Math.ceil(cdS - 1e-9)) in the nav and docked copy', async () => {
+    const { navManageView } = await import('../src/ui/workers-ui'); const P = { text: '', at: 0 };
+    for (const [cd, want] of [[0.4, '0:01'], [29.2, '0:30'], [59.01, '1:00'], [60, '1:00'], [60.0000000001, '1:00'], [64.5, '1:05'], [599.9, '10:00']] as const) {
+      expect(navManageView(1, cd, false, P, 0).countdown, String(cd)).toBe(` ${want}`); expect(navManageView(1, cd, true, P, 0).countdown, String(cd)).toBe(` · ${want}`);
+    }
   });
 });
