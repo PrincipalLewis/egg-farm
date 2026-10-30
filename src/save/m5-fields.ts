@@ -16,7 +16,7 @@ import { type M5Flag, flagOn } from '../config/flags';
 import { M5_SESSION_FIELDS } from '../sim/m5-state';
 import { sanitizePausedOnLoad } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
-import { sanitizeBreedsOnLoad } from '../sim/breeds';
+import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
 export { streakAfter };
 export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
 /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
@@ -31,7 +31,7 @@ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
 /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
 export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
 /** Session keys outside F1a M5Fields: the #2 streak run stats (streak_peak, sim/streak.ts). Never saved either. */
-const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun'];
+const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots']; // + M5.1 breeds E10 shadow (PMC Q5)
 const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
@@ -43,7 +43,8 @@ export function drawGap(s: GameState, b: Balance): GameState {
 /** The save shape: session-only keys dropped. The same object (so the same bytes) when none is present. */
 export function m5Persist(s: GameState): GameState {
   if (!SESSION_ONLY_KEYS.some(k => k in s)) return s;
-  const o: any = { ...s }; for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
+  const o: any = { ...s, ...(s.breedsRawSlots && s.breeds && { breeds: breedsSaveView(s) }) }; // E10 / PMC Q5: raw unknown slot ids kept
+  for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
 }
 /** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
 function endCalls(o: any, b: Balance, ev: SimEvent[]) {

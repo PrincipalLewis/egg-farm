@@ -8,8 +8,8 @@ import { step } from '../src/sim/tick';
 import { applyOffline } from '../src/sim/offline';
 import { serialize, SAVE_KEY, BAK_KEY, SAVE_VERSION } from '../src/save/save';
 import { IdbMirror, IDB_KEY } from '../src/save/idb-mirror';
-import { BREEDS_RNG_SALT } from '../src/config/breeds';
-import { ensureBreeds, type BreedsSave } from '../src/sim/breeds';
+import { BREEDS_RNG_SALT, BREEDS_SANITISE_EVENT } from '../src/config/breeds';
+import { ensureBreeds, sanitizeBreedsOnLoad, type BreedsSave } from '../src/sim/breeds';
 import { fakeIdb } from './fake-idb';
 import { mem } from './helpers';
 import { ON } from './v5-f2-helpers';
@@ -131,6 +131,30 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
     const kv = saved(st({ slots: ['leghorn', 'sussex', null], flockCompleteLogged: 7 as any, sinceUnlockBackfilled: 3 as any, sinceUnlockMs: -4 }), T0);
     const x = boot(BR, kv, T0 + 30_000).g.state.breeds!;
     expect(x.slots).toEqual(['leghorn', null, null]); expect(x).toMatchObject({ flockCompleteLogged: 0, sinceUnlockBackfilled: 1, sinceUnlockMs: 0 });
+  });
+  it('[BR-AC26 E10 / PMC Q5] unknown slot id: null at runtime, raw id written back on a save with no slot change', () => {
+    const kv = saved(st({ owned: { leghorn: { stars: 0 }, silkie: { stars: 1 } } as any, slots: ['leghorn', 'silkie', null], incubator: null }, 14), T0);
+    const { g } = boot(BR, kv, T0 + 30_000); expect(g.state.breeds!.slots).toEqual(['leghorn', null, null]);
+    g.save(); const x = stored(kv).breeds; expect(x.slots[1]).toBe('silkie'); expect(x.slots).toEqual(['leghorn', 'silkie', null]); expect(x.owned.silkie).toEqual({ stars: 1 });
+    expect(migrated(kv)).toEqual([]); // E10 alone changes nothing in the save
+  });
+  it('[BR-AC26 E10 / PMC Q5] a real slot change overwrites the raw id (auto-slot of an offline reveal into the runtime-empty slot)', () => {
+    const kv = saved(st({ owned: { leghorn: { stars: 0 }, silkie: { stars: 1 } } as any, slots: ['leghorn', 'silkie', null] }, 14), T0);
+    const { g } = boot(BR, kv, T0 + 600_000); expect(g.state.breeds!.slots).toEqual(['leghorn', 'brahma', null]);
+    g.save(); expect(stored(kv).breeds.slots).toEqual(['leghorn', 'brahma', null]); expect(stored(kv).breeds.owned.silkie).toEqual({ stars: 1 });
+  });
+  it.each([['NaN', NaN], ['Infinity', Infinity], ['-Infinity', -Infinity], ['null', null], ['a string', 'x']])('[BR-AC26 E12 / PMC Q6] non-finite remainingMs (%s) becomes 60,000, one save_migrated', (_n, v) => {
+    const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ incubator: { breed: 'brahma', remainingMs: v as any, costCents: 1 } }), BR, ev);
+    expect(r.breeds!.incubator!.remainingMs).toBe(60_000); expect(ev).toEqual([BREEDS_SANITISE_EVENT]);
+  });
+  it.each([
+    ['freeHatchUsed 5 -> 1 (never a second free hatch)', { freeHatchUsed: 5, hatches: 0 }, { freeHatchUsed: 1 }],
+    ['pity -3 -> 0', { pity: -3 }, { pity: 0 }], ['pity 2.5 -> 0', { pity: 2.5 }, { pity: 0 }],
+    ['hatches "7" -> 0', { hatches: '7' }, { hatches: 0 }],
+    ['rng 0 -> mixSeed(state.rng ^ K)', { rng: 0 }, { rng: mixSeed((initialState(b, 7).rng ^ BREEDS_RNG_SALT) >>> 0) }],
+  ] as const)('[BR-AC26 E12 / PMC Q7] %s, one save_migrated', (_n, bad, want) => {
+    const kv = saved(st(bad as any), T0); const { g } = boot(BR, kv, T0 + 30_000);
+    expect(g.state.breeds).toMatchObject(want); expect(migrated(kv)).toHaveLength(1);
   });
   it('[BR-AC1 / E11] flag off: the same corrupt save is left untouched (no sanitise, no event)', () => {
     const s = st({ owned: { leghorn: { stars: 5 } }, slots: ['leghorn', 'leghorn', null] }), kv = saved(s, T0); const { g } = boot(b, kv, T0 + 30_000);

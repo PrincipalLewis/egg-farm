@@ -71,12 +71,23 @@ export function sanitizeBreedsOnLoad(s: GameState, b: Balance, ev: SimEvent[]): 
   const settleMs = SLOT_IDX.map(i => Math.min(bc(b, 'settle_s') * 1000, int0(br0.settleMs?.[i]))) as BreedsSave['settleMs'];
   const br: any = { ...br0, owned, slots, incubator, settleMs };
   if ('sinceUnlockMs' in br0 && int0(br0.sinceUnlockMs) !== br0.sinceUnlockMs) br.sinceUnlockMs = 0; // under-reports, never over
-  for (const k of ['hatches', 'pity'] as const) if (int0(br0[k]) !== br0[k]) br[k] = int0(br0[k]);
-  if (br0.freeHatchUsed !== 0 && br0.freeHatchUsed !== 1) br.freeHatchUsed = br0.hatches > 0 ? 1 : 0;
+  for (const k of ['hatches', 'pity'] as const) if (int0(br0[k]) !== br0[k]) br[k] = 0; // PMC Q7: invalid pity -> 0 (hatches likewise, telemetry count only)
+  if (br0.freeHatchUsed !== 0 && br0.freeHatchUsed !== 1) br.freeHatchUsed = 1; // PMC Q7: conservative, never a second free hatch
   if (!isRngState(br0.rng)) br.rng = mixSeed((s.rng ^ BREEDS_RNG_SALT) >>> 0); // only future rolls; a running hatch keeps its breed (BR-R9)
   if (br0.flockCompleteLogged !== 0 && br0.flockCompleteLogged !== 1) br.flockCompleteLogged = isFlockComplete(br, b) ? 1 : 0;
   if ('sinceUnlockBackfilled' in br0 && br0.sinceUnlockBackfilled !== 0 && br0.sinceUnlockBackfilled !== 1) br.sinceUnlockBackfilled = 1;
-  if (JSON.stringify(br) === JSON.stringify(br0) && coinsCents === s.coinsCents) return s;
+  // E10 / PMC Q5 (spec-literal): an unknown slot id is null at runtime (no trait, never drawn, empty for auto-slot) but the raw
+  // id is KEPT in the save: a session-only shadow (breedsRawSlots, never saved) puts it back in m5Persist unless the slot changed.
+  const raw = SLOT_IDX.map(i => { const x = br0.slots?.[i]; return typeof x === 'string' && !isBreedId(x) ? x : null; });
+  const out: GameState = { ...s, breeds: br, coinsCents, ...(raw.some(x => x !== null) && { breedsRawSlots: raw }) };
+  if (JSON.stringify(breedsSaveView(out)) === JSON.stringify(br0) && coinsCents === s.coinsCents) return out; // E10 alone is not a sanitise
   ev.push({ ...BREEDS_SANITISE_EVENT });
-  return { ...s, breeds: br, coinsCents };
+  return out;
+}
+/** The saved `breeds` (E10 / PMC Q5): a slot that is null at runtime and still has a raw unknown id writes that id back.
+ *  A real change clears it: the auto-slot fills the slot (non-null), and placeBreed (PR B) drops the shadow entry. */
+export function breedsSaveView(s: GameState): BreedsSave | undefined {
+  const x = s.breeds, raw = s.breedsRawSlots; if (!x || !raw) return x;
+  const slots = x.slots.map((v, i) => (v === null && raw[i] ? raw[i] : v));
+  return slots.every((v, i) => v === x.slots[i]) ? x : { ...x, slots };
 }
