@@ -10,9 +10,9 @@ export const fx = (F: number, H: number, V: number, C: number, extra: Partial<Ga
   ({ ...initialState(ON, 1), farmLevel: F, hensLevel: H, eggValueLevel: V, collectionLevel: C, tracksV7: 1, ...extra } as GameState);
 const W3 = { market_hand: W, coop_hand: W, hawker: W };
 export const ALLW = { workers: { ...W3, grader: W }, graderTier: 5 } as Partial<GameState>;
-/** FX-L17 = the SG-3 fixture (stopgap v1.2.5 §3): F17 H19 V18 C10, Market Hand, Coop Hand, Hawker at energy 100, Grader tier 0. */
+/** FX-L17 (BBv2 spec v1.0.3 BB-AC2 / Card #12 B1): F17 H19 V18 C10, Market Hand, Coop Hand, Hawker at energy 100, Grader tier 0. */
 export const L17 = (coinsCents: number) => fx(17, 19, 18, 10, { workers: { ...W3 } as any, graderTier: 0, coinsCents });
-/** BB-1 fixtures F10/C10, F14/C10, F17/C14, F22/C18 (H/V/workers chosen here; the stopgap's committed JSONs are not in v5, D-HOE-33). */
+/** BB-1 fixtures F10/C10, F14/C10, F17/C14, F22/C18 (H/V/workers chosen here; built in this file, no stopgap fixture, D-HOE-33). */
 export const BB1 = {
   'F10/C10': (c: number) => fx(10, 10, 9, 10, { workers: { market_hand: W, coop_hand: W } as any, coinsCents: c }),
   'F14/C10': (c: number) => fx(14, 15, 13, 10, { workers: { ...W3 } as any, coinsCents: c }),

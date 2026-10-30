@@ -58,7 +58,7 @@ export function ac9(b: Balance, ss: number[]) {
  *  zero-gain row while a meaningful row is offered. Also counts `suppressed` (hint !== null && mark === null, PMFU BB12) split by
  *  hint affordability, and the subset with an affordable hint below L30 (must be 0: suppression only in the post-L30 net). */
 export function ac14(b: Balance, ss: number[]) {
-  const out = { states: 0, violations: 0, suppressed: 0, suppressedAffordable: 0, suppressedAffordableBelow30: 0, suppressedEvents: 0, examples: [] as string[] };
+  const out = { states: 0, violations: 0, suppressed: 0, suppressedAffordable: 0, suppressedAffordableBelow30: 0, examples: [] as string[] };
   try {
     for (const sd of ss) for (const [bot, run] of Object.entries(BOTS)) {
       const P = appPicker(b); // CONFIRMATORY ship run: the #97 ZG filter is in front of Part A, as in the build
@@ -71,5 +71,5 @@ export function ac14(b: Balance, ss: number[]) {
       run(b, sd);
     }
   } finally { STATE_TRACE.fn = null; }
-  return out; // suppressedEvents: no best_buy_suppressed_zero_gain emitter exists in v5 (D-HOE-33), always 0
+  return out; // v5 has no SG-8 emitter (spec v1.0.3 §5, D-HOE-33): no event count is probed here
 }

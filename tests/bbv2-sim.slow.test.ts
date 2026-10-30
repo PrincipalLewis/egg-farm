@@ -12,6 +12,6 @@ describe('BBV2-AC9 seeds 1–200', () => {
 describe('BBV2-AC14 seeds 1–200 (DECISIVE first, then CONFIRMATORY ship)', () => {
   for (const [label, b] of Object.entries(AC14_CONFIGS)) it(label, () => {
     const r = ac14(b, S); console.log(`AC14 ${label} seeds 1-200: ${JSON.stringify(r)}`);
-    expect(r.violations).toBe(0); expect(r.suppressedAffordableBelow30).toBe(0); expect(r.suppressedEvents).toBe(0);
+    expect(r.violations).toBe(0); expect(r.suppressedAffordableBelow30).toBe(0);
   }, 3_600_000);
 });

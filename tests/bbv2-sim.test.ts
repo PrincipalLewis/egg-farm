@@ -29,6 +29,5 @@ describe('BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row i
     const r = ac14(b, seeds(1, 3)); console.log(`AC14 ${label} seeds 1-3: ${JSON.stringify(r)}`);
     expect(r.states).toBeGreaterThan(0); expect(r.violations).toBe(0); expect(r.examples).toEqual([]);
     expect(r.suppressedAffordableBelow30).toBe(0); // suppressed with an affordable hint only in the post-L30 mark-null net
-    expect(r.suppressedEvents).toBe(0); // no SG-8 emitter in v5 (D-HOE-33)
   }, 120_000);
 });

@@ -82,7 +82,7 @@ describe('PMFU BB12: mark is the exact ★ the chip and the strip render; suppre
       if (q.suppressed && q.hint?.affordable) expect(meaningfulKeys(g.state, ON).size, name).toBe(0); }
   });
   // NOTE (open Q to PMFU/HoQA): the literal SG-12 formula is also true for an UNAFFORDABLE hint (single-arg bestBuyMark = null),
-  // e.g. FX-L17 $3,000 hint FARM affordable:false at either flag value. The ship-config assertion is therefore on the stopgap state
+  // e.g. FX-L17 $3,000 hint FARM affordable:false at either flag value. The ship-config assertion is therefore on the nulled state
   // = an affordable hint whose ★ was nulled.
   it('ship config (bestBuyV2 1 + zeroGainUi 1), below Farm L30: never an affordable hint with a null ★ (fixtures + a 240 s FX-L17 run; post-L30 needs the #97 ZG filter)', async () => {
     const SHIP = bal(1, { zeroGainUi: 1 }), nulled = (q: any) => q.suppressed && q.hint?.affordable;
@@ -106,7 +106,7 @@ describe('BBV2-AC2 (a)/(b) jsdom analog on FX-L17 (DOM/page.clock checks on the 
       if (q.mark) expect(meaningfulKeys(g.state, ON).has(q.mark), `mark ${q.mark}`).toBe(true);
       if (g.state.coinsCents >= 3.73e6) { expect(q.hint.key).toBe('FARM'); expect(q.mark).toBe('FARM'); } }
     expect(seen.some(h => h.key === 'COLL' || h.mark === 'COLL')).toBe(false);
-    // flag-off control: the same run shows COLL (the SG-3 known limit) -> the test is not vacuous
+    // flag-off control: pre-BBv2 rc/v5 (spec §5) picks COLL here -> the test is not vacuous
     const { g: g0, ui: u0 } = await mount(L17(3e5), OFF); expect(u0.qaPicker().hint.key).toBe('COLL'); void g0;
   });
 });
