@@ -3,7 +3,8 @@
  * golden egg / streak meter / broody mount through one registration line (ui/features.ts) instead of editing app.ts:
  *  - spawn spots: 8 per layout (Art & UX m4-timed-collectible.md v1.1 §2.1-§2.3, which superseded v1.0 §2), checked
  *    against LIVE rects of the no-spawn zones (+ zones features register: streak meter +16, broody box, …);
- *  - the attended signal: dialogOpen() (modal / Upgrades sheet / tracks explainer / recovery / rotate / alertdialog), with
+ *  - the attended signal: dialogOpen() (modal / Upgrades sheet / tracks explainer / recovery / rotate / alertdialog / any sheet or menu
+ *    registered with registerSheet() until its closeComplete(), at every width: F6-AC-SHEET), with
  *    the Market sheet a play surface, never a dialog (D-HOP-2026-10-29-06 Q-F1c-1); attended = visible && focused && !dialogOpen();
  *  - the audio hook registry (QA contract decisions.md 2026-10-29 23:07: one {hook, file, tMs, semi} per sound started);
  *  - the reduced-motion switch; the FX budget (≤ 30 live elements).
@@ -92,12 +93,29 @@ export type AttendedDoc = Pick<Document, 'visibilityState' | 'hasFocus'>;
 /** true iff document.visibilityState === 'visible' && document.hasFocus() (F6a, unchanged). */
 export const attendedProbe = (doc: AttendedDoc = document): boolean => doc.visibilityState === 'visible' && doc.hasFocus();
 export type SheetName = 'market' | 'upgrades' | null;
+// ---------------------------------------------------------------- sheet / menu registry (F6-AC-SHEET, D-HOE-20261030-18)
+/** Any sheet or menu (the rc2 Shift sheet, M5 sheets, …) registers here and reports its own lifecycle; it does NOT go into
+ *  onboarding DIALOG_SEL. It counts as OPEN (player not attended) from opened() until closeComplete(), at EVERY width, docked
+ *  (min-width:960px, landscape) included: the registry never looks at the layout. A sheet that is still closing counts as open
+ *  (abilities rule 10 / R6, PMW ruling). Re-registering an id returns a handle to the same entry. */
+export interface SheetHandle { readonly id: string; opened(): void; closeComplete(): void; readonly isOpen: boolean }
+const SHEETS = new Map<string, boolean>();
+export function registerSheet(id: string): SheetHandle {
+  if (!SHEETS.has(id)) SHEETS.set(id, false);
+  return { id, opened: () => { SHEETS.set(id, true); }, closeComplete: () => { SHEETS.set(id, false); }, get isOpen() { return SHEETS.get(id) === true; } };
+}
+/** true while any registered sheet/menu is between opened() and closeComplete(). */
+export const anySheetOpen = (): boolean => { for (const v of SHEETS.values()) if (v) return true; return false; };
+export const openSheets = (): string[] => [...SHEETS].filter(([, v]) => v).map(([k]) => k);
+/** Tests only: forget every registration. */
+export const clearSheets = () => { SHEETS.clear(); };
 export interface DialogSources { sheet(): SheetName; doc?: Pick<Document, 'querySelector'> }
 /** F6 dialogOpen(): a modal (settings/welcome/confirm, recovery, rotate prompt, any alertdialog = onboarding DIALOG_SEL), the tracks
- *  explainer, or the Upgrades sheet. The Market sheet is a play surface (Q-F1c-1): it never counts, whatever else is shown. */
+ *  explainer, or the Upgrades sheet. The Market sheet is a play surface (Q-F1c-1): it never counts, whatever else is shown.
+ *  F6-AC-SHEET: or any sheet/menu registered with registerSheet() that has not reached closeComplete(). */
 export const makeDialogOpen = (src: DialogSources) => (): boolean => {
   const doc = src.doc ?? document;
-  return !!doc.querySelector(DIALOG_SEL) || explainerOpen(doc as Document) || src.sheet() === 'upgrades';
+  return !!doc.querySelector(DIALOG_SEL) || explainerOpen(doc as Document) || src.sheet() === 'upgrades' || anySheetOpen();
 };
 /** The one wiring line for Game's attended probe: visible && focused && !dialogOpen(). The UI never passes `suspended` for sheet sales. */
 export const wireAttended = (g: Pick<Game, 'setAttendedProbe'>, dialogOpen: () => boolean, doc: AttendedDoc = document) =>
@@ -148,6 +166,8 @@ export interface OverlayCtx {
   rm(): boolean; audio: AudioHooks; fx: FxBudget; dialogOpen(): boolean; attended(): boolean;
   layout(): LayoutKey; spots(): Spot[]; validSpots(): Spot[];
   registerZone(name: string, rect: () => Box | null, clear?: number): void;
+  /** F6-AC-SHEET: a feature's sheet/menu reports opened() / closeComplete(); open => not attended, at every width. */
+  registerSheet(id: string): SheetHandle;
   asset(f: string): string;
 }
 export interface OverlayFeature {
@@ -179,6 +199,7 @@ export function mountOverlay(d: OverlayDeps) {
       return spotCentres(ctx.layout(), vw(), vh(), { scene: sc, queue: q('#queue'), meter: q('#meter') }); },
     validSpots: () => validSpots(ctx.spots(), [...domZones(doc, d.docked.matches), ...extra.flatMap(z => { const r = z.rect(); return r ? [{ name: z.name, box: r, clear: z.clear }] : []; })], vw(), vh()),
     registerZone: (name, rect, clear = CLEAR_PX) => { extra.push({ name, rect, clear }); },
+    registerSheet,
   };
   const live = REGISTRY.filter(f => !f.flag || flagOn(d.b, f.flag)), unmounts: (() => void)[] = [];
   for (const f of live) { const u = f.mount(ctx); if (u) unmounts.push(u); }
