@@ -12,6 +12,7 @@ import { apply } from '../src/sim/actions';
 import { Game } from '../src/game';
 import { SRC_M5_FLAGS, SRC_M51_FLAGS } from './bot-m5';
 import { mem } from './helpers';
+import type { SimEvent } from '../src/sim/events';
 
 const ALL0 = Object.fromEntries(M5_FLAGS.map(f => [f, 0])) as Record<M5Flag, number>;
 const B = (on: readonly M5Flag[] = []) => ({ ...balance, m4: { ...balance.m4!, enabled: 1, flags: { ...ALL0, ...Object.fromEntries(on.map(f => [f, 1])) } } }) as Balance;
@@ -41,7 +42,7 @@ describe('D-HOE-38 flag classification', () => {
 
 /** 10 min at 10 Hz, alternating focus, with player actions; returns JSON of the full state (incl. rng) and the event trace. */
 function play(b: Balance, seed: number): string {
-  let s: GameState = { ...initialState(b, seed), coinsCents: 5_000_000 }; const ev: unknown[] = [];
+  let s: GameState = { ...initialState(b, seed), coinsCents: 5_000_000 }; const ev: SimEvent[] = [];
   for (let i = 0; i < 6000; i++) {
     s = step(s, 0.1, b, ev, { focus: i % 2 === 0 });
     if (i % 3 === 0) s = apply(s, { type: 'collect' }, b, ev);
