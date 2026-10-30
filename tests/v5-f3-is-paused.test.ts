@@ -54,7 +54,7 @@ describe('[row-8 isPaused][QA-10] every src read of `paused` goes through isPaus
     const noBlock = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '));
     for (const f of files(SRC)) noBlock(readFileSync(f, 'utf8')).split('\n').forEach((l, i) => {
       const code = l.replace(/\/\/.*$/, '');
-      if (/\.paused\b|\[['"`]paused['"`]\]|\{[^}]*\bpaused\b[^}]*\}\s*=\s*\w/.test(code) && !/export const isPaused = /.test(code)) hits.push(`${f.slice(SRC.length)}:${i + 1}: ${l.trim()}`);
+      if (/\.paused\b|\[['"`]paused['"`]\]|\{[^}]*\bpaused\b[^}]*\}\s*=\s*\w/.test(code) && !/export const (?:isPaused|sanitizePausedOnLoad) = /.test(code)) hits.push(`${f.slice(SRC.length)}:${i + 1}: ${l.trim()}`);
     });
     expect(hits).toEqual([]);
   });

@@ -150,6 +150,11 @@ describe('a missing tc_* tunable is caught, never read as 0 (HoE/Architect follo
       expect(() => validateBalance({ ...bad, m4: { ...bad.m4!, flags: { ...bad.m4!.flags, [f]: 0 } } } as typeof b, false)).not.toThrow();
     }
   });
+  it('ST-AC18 [QA pr87-694468e M1]: the 7 streak tc keys are pinned here (spec §5 / G3), not derived from src M5_TC_KEYS', () => {
+    const STREAK_TC = ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'];
+    expect([...M5_TC_KEYS.streak].sort()).toEqual([...STREAK_TC].sort());
+    for (const k of STREAK_TC) expect(() => validateBalance(drop(k), false), k).toThrow(new RegExp(`tc_${k}`));
+  });
   it('ST-AC18: the F2 readers throw instead of defaulting (drawGap without tc_egg_gap_min_s)', () => {
     expect(() => drawGap(base(), drop('egg_gap_min_s'))).toThrow(/tc_egg_gap_min_s/);
   });
