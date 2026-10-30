@@ -51,6 +51,7 @@ export function breedsOffline(s: GameState, awayMs: number, b: Balance): { state
   let br: BreedsSave = br0, reveal: BreedId | null = null;
   if (br.incubator) { br = { ...br, incubator: { ...br.incubator, remainingMs: Math.max(0, br.incubator.remainingMs - ms) } };
     const r = revealHatch(br, b, unlockedSlots(s.farmLevel, b)); br = r.br; reveal = r.revealed; }
+  if (br !== br0 && s.breedsRawSlots) s = dropRawSlots(s, br0.slots, br.slots); // E10 / PMC Q5: the auto-slot index drops its raw id
   if (s.farmLevel >= bc(b, 'unlock_farm') && br.flockCompleteLogged !== 1) br = { ...br, sinceUnlockMs: int0(br.sinceUnlockMs) + ms };
   return br === br0 ? { state: s, reveal } : { state: { ...s, breeds: br }, reveal };
 }
@@ -84,8 +85,15 @@ export function sanitizeBreedsOnLoad(s: GameState, b: Balance, ev: SimEvent[]): 
   ev.push({ ...BREEDS_SANITISE_EVENT });
   return out;
 }
+/** E10 / PMC Q5: drop the raw-id shadow at every slot index whose runtime value changed (auto-slot, a placement's target and
+ *  source), plus `also` (an explicit placement, even null over null). Same state object when nothing is dropped. */
+export function dropRawSlots(s: GameState, before: readonly (string | null)[], after: readonly (string | null)[], also = -1): GameState {
+  const raw0 = s.breedsRawSlots; if (!raw0) return s;
+  const raw = raw0.map((v, i) => (i === also || before[i] !== after[i] ? null : v));
+  return raw.every((v, i) => v === raw0[i]) ? s : { ...s, breedsRawSlots: raw };
+}
 /** The saved `breeds` (E10 / PMC Q5): a slot that is null at runtime and still has a raw unknown id writes that id back.
- *  A real change clears it: the auto-slot fills the slot (non-null), and placeBreed (PR B) drops the shadow entry. */
+ *  A real change clears it: dropRawSlots runs on the auto-slot (tick and offline) and on placeBreed (PR B). */
 export function breedsSaveView(s: GameState): BreedsSave | undefined {
   const x = s.breeds, raw = s.breedsRawSlots; if (!x || !raw) return x;
   const slots = x.slots.map((v, i) => (v === null && raw[i] ? raw[i] : v));

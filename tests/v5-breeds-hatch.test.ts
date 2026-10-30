@@ -9,8 +9,8 @@ import { apply } from '../src/sim/actions';
 import { farmCost } from '../src/config/formulas';
 import { incomePerSec } from '../src/econ/income';
 import { BREED_IDS, ROSTER, BREEDS_RNG_SALT, type BreedId } from '../src/config/breeds';
-import { revealHatch, type BreedsSave } from '../src/sim/breeds';
-import { rollBreed, startHatch, hatchCostCents, placeBreed, slotTraitBp, hatchEstimate } from '../src/sim/breeds-hatch';
+import { revealHatch, breedsOffline, type BreedsSave } from '../src/sim/breeds';
+import { rollBreed, startHatch, hatchCostCents, hatchCostFrom, placeBreed, slotTraitBp, hatchEstimate } from '../src/sim/breeds-hatch';
 import { installBreedsQa } from '../src/debug/breeds-qa';
 import { mem } from './helpers';
 import { m5Persist } from '../src/save/m5-fields';
@@ -193,5 +193,55 @@ describe('BR-AC31e eggfarmQa.breeds.hatchEstimate (debug-only)', () => {
     const inc = { defaultPerS: 1e9 };
     expect(hatchEstimate(st({}, 28), BR, inc).show).toBe(false); expect(hatchEstimate(st({ owned: maxed(BREED_IDS), freeHatchUsed: 1 }, 28), BR, inc).show).toBe(false);
     expect(hatchEstimate(st({ freeHatchUsed: 1 }, BR.maxLevel), BR, inc).show).toBe(false); expect(hatchEstimate(st({ freeHatchUsed: 1 }, 28), BR, inc).show).toBe(true);
+  });
+});
+
+describe('#96 Architect review d7df1f9: BR-R17 guard, BR-R5 literals, E10 shadow, slot index, rarity boundary', () => {
+  const ref = (p: bigint, step: bigint) => { const fb = (step * 10000n + 5000n) / 10000n, a = p * 45n; return a < fb ? a : fb; }; // BigInt min()
+  it('[BR-AC13] planRefCents 200,159,983,438,688 takes the exact Number path; ...689 takes the Farm branch without overflow; both equal the BigInt min()', () => {
+    const step = 9_007_199_254_740_990; // largest farm step whose farm branch is exact in Number (floor(step / 45) = ...688)
+    expect(hatchCostFrom(200_159_983_438_688, step, BR)).toBe(9_007_199_254_740_960);
+    expect(BigInt(hatchCostFrom(200_159_983_438_688, step, BR))).toBe(ref(200_159_983_438_688n, BigInt(step)));
+    expect(hatchCostFrom(200_159_983_438_689, step, BR)).toBe(step);
+    expect(BigInt(hatchCostFrom(200_159_983_438_689, step, BR))).toBe(ref(200_159_983_438_689n, BigInt(step)));
+    expect(Number.isSafeInteger(hatchCostFrom(200_159_983_438_689, step, BR))).toBe(true);
+  });
+  it('[BR-AC13 guard boundary] planRef == floor(farmBranch / 45) keeps planRef x 45 (the min), one cent more takes the Farm branch', () => {
+    expect(hatchCostFrom(3040, 136_801, BR)).toBe(136_800); // floor(136,801 / 45) = 3040: 3040 x 45 = 136,800 < 136,801
+    expect(hatchCostFrom(3041, 136_801, BR)).toBe(136_801);
+  });
+  it('[BR-AC6] F28 277,973 -> 12,508,785; F10 8,486 -> 136,800 (one Farm step); F30 277,971 -> 12,508,695 (row 30 does not bind)', () => {
+    expect(hatchCostFrom(277_973, 23_979_200, BR)).toBe(12_508_785);
+    expect(hatchCostFrom(8_486, 136_800, BR)).toBe(136_800);
+    expect(hatchCostFrom(277_971, 62_431_600, BR)).toBe(12_508_695);
+    expect(hatchCostFrom(1, 136_800, BR)).toBe(50_000); // bc_hatch_min_cents floor
+    for (const F of [10, 14, 20, 28, 30]) { const s = st({ freeHatchUsed: 1 }, F);
+      expect(hatchCostCents(s, BR)).toBe(hatchCostFrom(Math.round(incomePerSec(s, BR, { assumeWorking: true }) * 100), farmCost(F, BR) * 100, BR)); }
+  });
+  it('[BR-AC26 E10 / PMC Q5] an auto-slot over a raw-id slot drops the shadow; moving that breed on does not resurrect the raw id', () => {
+    const s0 = { ...st({ owned: { leghorn: { stars: 0 } }, slots: ['leghorn', null, null], incubator: { breed: 'brahma', remainingMs: 100, costCents: 0 } }, 20),
+      breedsRawSlots: [null, 'silkie', null] };
+    const s1 = step(s0, 0.1, BR); expect(s1.breeds!.slots).toEqual(['leghorn', 'brahma', null]); expect(s1.breedsRawSlots?.[1] ?? null).toBeNull();
+    const s2 = placeBreed(s1, BR, 2, 'brahma'); expect((m5Persist(s2) as GameState).breeds!.slots).toEqual(['leghorn', null, 'brahma']);
+  });
+  it('[BR-AC26 E10 / PMC Q5] placeBreed clears the shadow at the source slot too', () => {
+    const s = { ...st({ owned: { leghorn: { stars: 0 } }, slots: [null, null, 'leghorn'] }, 20), breedsRawSlots: [null, null, 'silkie'] };
+    const r = placeBreed(placeBreed(s, BR, 0, 'leghorn'), BR, 0, null); // 'silkie' raw sat under slot 2 (non-null at runtime): moving out must not write it back
+    expect((m5Persist(r) as GameState).breeds!.slots).toEqual([null, null, null]);
+  });
+  it('[BR-AC26 E10 / PMC Q5, BR-AC25] the offline reveal auto-slot drops the shadow at its slot', () => {
+    const s0 = { ...st({ slots: [null, null, null], incubator: { breed: 'brahma', remainingMs: 1000, costCents: 0 } }, 20), breedsRawSlots: ['silkie', null, null] };
+    const r = breedsOffline(s0, 120_000, BR).state; expect(r.breeds!.slots).toEqual(['brahma', null, null]);
+    const r2 = placeBreed(r, BR, 1, 'brahma'); expect((m5Persist(r2) as GameState).breeds!.slots).toEqual([null, 'brahma', null]);
+  });
+  it('[BR-AC4 / Architect Minor 2] a non-integer, negative, NaN or out-of-range slot is a no-op (same state object)', () => {
+    const s = st({ owned: { leghorn: { stars: 0 } } }, 20);
+    for (const k of [0.5, -1, NaN, 3, Infinity]) expect(placeBreed(s, BR, k, 'leghorn')).toBe(s);
+  });
+  it('[BR-AC9 / harness roll() boundary] u x tot landing exactly on a cumulative weight picks that rarity (<=): Epic+Legendary only, u = 7/8', () => {
+    const rng = 0xee007000; expect(nextRand(rng)[1]).toBe(0.875); // tot = 7 + 1 = 8, w = 7 -> 0 after Epic
+    const x = fresh({ rng, pity: 7, freeHatchUsed: 1, owned: maxed(RAREP.filter(id => ROSTER[id][0] === 'R')) });
+    const r = rollBreed(x, 24, BR, false)!; expect(ROSTER[r.id][0]).toBe('E');
+    expect([r.id, r.rng]).toEqual(harnessRoll(x, 24, false));
   });
 });
