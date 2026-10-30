@@ -1,10 +1,13 @@
 import type { Balance } from '../config/balance';
 import type { StreakRun } from './streak';
-import type { Workers, WorkerId } from './workers';
+import type { Workers } from './workers';
+import type { M5Fields } from './m5-state';
+export type { M5Fields } from './m5-state';
 /** demand = original order; filled = eggs sold so far. MK-10: a partly served customer (filled > 0) still leaves
  *  customer_patience_s after arrival (logged customer_partial); the timer is never reset by a sale. */
 export interface Customer { id: number; demand: number; filled: number; waitedS: number; }
-export interface GameState {
+/** M5 optional fields (sim/m5-state.ts) are declared once and absent while their m4.flags.* are off. */
+export interface GameState extends M5Fields {
   coinsCents: number; coop: number; basket: number;
   collectionLevel: number; farmLevel: number;
   customers: Customer[]; nextCustomerInS: number; nextCustomerId: number;
@@ -27,15 +30,8 @@ export interface GameState {
   seenTracksExplainer?: boolean;
   /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the interim track migration). */
   celebratedMilestones: string[];
-  /** v5 F2: the M5 optional fields F2 needs, absent while the m4.flags are off (no SAVE_VERSION bump). Names and shapes are a
-   *  subset of F1a sim/m5-state.ts M5Fields (ea6b6db, not on rc/v5 yet); on merge take F1a's declaration. Saved: */
-  nextSpawnRemainingS?: number; frenzyRemainingS?: number; evRngState?: number; broodyNestCents?: number; broodyHenIdx?: number;
-  /** Per worker: readyAt = epoch ms (wall clock), activeS = focus seconds left on a running call (abilities E2). */
-  abilities?: Partial<Record<WorkerId, { readyAt?: number; activeS?: number }>>; abilitiesUnlocked?: boolean; abilitiesCoachSeen?: boolean;
-  /** Session only, never saved (save/m5-fields.ts M5_SESSION_KEYS): the on-screen golden egg, the streak value and hold. */
-  goldenEgg?: { ageS: number; slotId: string; intervalS: number }; streakS?: number; streakHoldS?: number;
-  /** v5 #2 (session only): sim seconds until the next credited tap (R2), and the current run's streak_peak stats. */
-  tapCreditCdS?: number; streakRun?: StreakRun;
+  /** v5 #2 (session only, outside F1a M5Fields): the current run's streak_peak stats. */
+  streakRun?: StreakRun;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

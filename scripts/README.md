@@ -89,7 +89,7 @@ Two shapes, told apart by `complete`. `complete: false` is the early-exit FAIL r
 ### Profiles
 
 - `idle` is available.
-- `m5x-casual` is refused with exit 2: "needs tests/bot-m5.ts (M5.1, on Vadim go)".
+- `m5x-casual` (rc/v5): `tests/bot-m5.ts` `run()`, the port of Economy's `m5.ts`/`m5x.ts` (sha256 29d423c5 / 196e8ed5), with m5x.ts's `casual` profile (tap 0.5/s, check-in about every 30 s with seller variance, 60% golden-egg catch) and its `AssZ` stack. The M5.0 mechanics (golden egg, streak, tap coins, Broody, calls) are modelled **in the bot**, not in `src/`, so this profile does not exercise shipping M5 code. It ticks through `step()` per 0.1 s as m5.ts does; the trace hash, checkpoints and goldens work as for `idle`, and `verify.json` `sim.bot` / `sim.tickPath` name the profile's bot. Window-gate CLI with m5x.ts's env interface and output: `CSV=data/economy.csv SEEDS=200 CFG=AssZ PROFS=casual npx vite-node scripts/bot-m5x.ts`.
 
 `--skip-build` and `--no-shot` are for development only, as are `VERIFY_TEST_SKIP_MARKER=1` (tests: save the end state unmarked to prove the exit-4 guard) `VERIFY_HTML=<file>` (tests: verify another html with `--skip-build`), `VERIFY_OUT_ROOT=<dir>` (tests: the parent of the default out dirs instead of `verify-out/`, so the default-dir rules are tested outside the worktree) and `VERIFY_TEST_THROW=1` / `after-shot` (tests: a forced crash before the run / after the browser step, the latter with a stand-in `verify.png` that the early-exit writer must remove; always exit 1, never PASS). A failed or skipped browser step deletes any earlier `verify.png` in the out dir and sets `screenshot.file` to null. Both are recorded in `verify.json`, and `--no-shot` fails the label check.
 
