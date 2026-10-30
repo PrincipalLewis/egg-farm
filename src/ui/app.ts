@@ -267,10 +267,19 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const ZG_GUARD_MS = 350; let zgOpen: { kind: string; at: number } | null = null, zgRevealT = 0;
   const zgEls = (kind: string) => { const st = uRow.querySelector<HTMLElement>(`.zg-confirm[data-zg-kind="${kind}"]`);
     return st ? { st, buy: uRow.querySelector<HTMLElement>(`button.btn[data-kind="${kind}"]`) } : null; };
+  /** Which uRow control had focus before a re-render swaps the markup (Architect review 546de85 Minor 2): a strip button
+   *  (`zg:<confirm|cancel>`) or a row Buy (`kind:<kind>`); null when focus was outside the upgrades rows. */
+  const zgFocusKey = (): string | null => { const a = document.activeElement as HTMLElement | null; if (!a || !uRow.contains(a)) return null;
+    return a.dataset.zg ? `zg:${a.dataset.zg}` : a.dataset.kind ? `kind:${a.dataset.kind}` : null; };
   /** Re-apply the open strip after any tab re-render (markup always renders it closed). D-COL-2026-10-30-29: a re-render that no
-   *  longer has the strip (tab switch, row no longer ZG / MAX) closes it with exactly one cancel, no buy, focus left alone. */
-  const zgApply = () => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { const k = zgOpen.kind; zgOpen = null; clearTimeout(zgRevealT); zgLog(k, 'cancel'); return; }
-    if (e.st.hidden) { const had = document.activeElement === document.body; e.st.hidden = false; if (e.buy?.hasAttribute('aria-controls')) e.buy.setAttribute('aria-expanded', 'true'); if (had) e.st.querySelector<HTMLElement>('[data-zg=confirm]')?.focus({ preventScroll: true }); } };
+   *  longer has the strip (tab switch, row no longer ZG / MAX) closes it with exactly one cancel, no buy, focus left alone.
+   *  Minor 2: focus goes back to the SAME control it was on before the swap (never moved to "Buy anyway"); only zgOpenStrip focuses
+   *  "Buy anyway", and the 350 ms guard (zgOpen.at) stays the opening time, so it is correct for the control that had focus. */
+  const zgApply = (focusKey: string | null = null) => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { const k = zgOpen.kind; zgOpen = null; clearTimeout(zgRevealT); zgLog(k, 'cancel'); return; }
+    if (e.st.hidden) { e.st.hidden = false; if (e.buy?.hasAttribute('aria-controls')) e.buy.setAttribute('aria-expanded', 'true'); }
+    const f = focusKey?.startsWith('zg:') ? e.st.querySelector<HTMLElement>(`[data-zg="${focusKey.slice(3)}"]`)
+      : focusKey?.startsWith('kind:') ? uRow.querySelector<HTMLElement>(`button.btn[data-kind="${focusKey.slice(5)}"]`) : null;
+    if (f && document.activeElement !== f) f.focus({ preventScroll: true }); };
   const zgLog = (kind: string, outcome: 'confirm' | 'cancel') => g.telemetry.track('zero_gain_confirm', { upgrade_id: kind, outcome });
   const zgClose = (outcome: 'cancel' | null, focusBuy = true) => {
     const o = zgOpen; if (!o) return; zgOpen = null; clearTimeout(zgRevealT);
@@ -729,7 +738,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
-      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; if (ZGC) zgApply(); }
+      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; const zf = ZGC ? zgFocusKey() : null; uRow.innerHTML = html; if (ZGC) zgApply(zf); }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
         // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
         { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
