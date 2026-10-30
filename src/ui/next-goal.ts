@@ -8,7 +8,7 @@ import { fmtTimeToAfford } from './format';
 import { m4On } from '../config/formulas';
 import { trackLock, trackCost, trackLevel } from '../sim/tracks';
 import { trackGoalLabel } from './tracks-ui';
-import { bestPaybackAmong } from '../econ/best-buy';
+import { bestPaybackAmong, rankable } from '../econ/best-buy';
 import { goalLabelParts, goalLabelSpec, type GoalLabelParts } from './goal-label';
 export type GoalKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
 export type GoalState = 'ready' | 'waiting' | 'noincome' | 'done';
@@ -53,13 +53,14 @@ export function labelFor(key: GoalKey, s: GameState, b: Balance): string {
  *  always matches the Farm-tab highlight (M4A-41). Omitted = stateless best-payback / cheapest rule. */
 /** `star` (M41-8 F4): the key that carries ★ = goal-label.ts bestBuyMark (the same source as the UX-M4 row chip). */
 export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shared?: GoalKey | null, star?: GoalKey | null): Goal {
-  const c = candidates(s, b);
-  if (!c.length) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
+  const c0 = candidates(s, b), rk = rankable(s, b, c0.map(x => x.key)); // BBv2-1/-4 (flag on): rank meaningful rows only, before affordable-first
+  const cf = rk.length === c0.length ? c0 : c0.filter(x => rk.includes(x.key)), c = cf.length ? cf : c0;
+  if (!c0.length) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
   const coins = Math.round(s.coinsCents); // coins at 2 dp vs integer cost; equal = affordable
   const aff = c.filter(x => coins >= x.costCents), ready = aff.length > 0;
   // M4-A (HoP 15:29): with the flag on, the hint follows the same best-payback rule as the Farm-tab highlight. Off = main.
   const pool = ready ? aff : c, bp = m4On(b) ? bestPaybackAmong(s, b, pool.map(x => x.key)) : null;
-  const forced = m4On(b) && shared ? c.find(x => x.key === shared) : undefined;
+  const forced = m4On(b) && shared ? c0.find(x => x.key === shared) : undefined;
   const t = forced ?? (bp ? pool.find(x => x.key === bp.key) : null) ?? cheapest(pool)!;
   const state: GoalState = (forced ? coins >= forced.costCents : ready) ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
   const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtTimeToAfford((t.costCents - coins) / rateCentsPerS);
