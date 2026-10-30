@@ -135,8 +135,16 @@ export function shardProblems(shards: Record<string, Pick<Shard, 'profile' | 'se
     if (s.T !== RC_T) p.push(`shard ${s.profile}: T ${s.T} != ${RC_T}`);
   }
   for (const k of ['csvSha256', 'balanceSha256'] as const) { const v = new Set(ss.map(s => s[k])); if (v.size > 1) p.push(`shards disagree on ${k}: ${[...v].join(', ')}`); }
+  for (const k of ['csvSha256', 'balanceSha256'] as const) for (const s of ss) if (!/^[0-9a-f]{64}$/.test(s[k] ?? '')) p.push(`shard ${s.profile}: ${k} missing or not a sha256 (${s[k] || 'empty'})`);
   return p;
 }
+/** F9 (HoQA, non-blocking): the D-HOP-2026-10-30-08 watch list, G4 no-affordable worst (F10 to max) over 180 s per shard and
+ *  policy. 898/899 (G4M) are NOT-WIRED here, so their worst values come from the signed re-prediction doc, never from X1. */
+export const watchListLine = (shards: Record<string, Pick<Shard, 'profile' | 'gate'>>) => {
+  const w: string[] = [];
+  for (const s of Object.values(shards)) for (const pol of ['none', 'N', 'H'] as const) { const v = s.gate?.[pol]?.G4_noAff_F10_to_max?.[2]; if (v != null && v > 180) w.push(`${s.profile} ${pol} ${v} s`); }
+  return `G4 worst > 180 s: ${w.length ? w.join(', ') : 'none'}; 898/899 not measured by X1 (NOT-WIRED): cite product/economy/reprediction-l894-896-a8c4e268.md (sha1 1c7a39bd) for them`;
+};
 export const verdictOf = (o: Out[]) => (o.some(x => x.status === 'FAIL') || blockingUnjudged(o).length ? 'FAIL' : 'PASS');
 /** Static guard: NOT_WIRED may only hold non-blocking rows of the pinned table. Throws otherwise (called by evaluate). */
 export function assertNotWiredNonBlocking(rows: PredRow[]) {

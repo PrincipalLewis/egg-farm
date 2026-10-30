@@ -1,7 +1,7 @@
 name: pacing-x1-stack
 # v5 manifest row 1: CI check `pacing-x1-stack` (economy §13.2a AC-X1, sizing §15b; HoE owns the check).
 # The whole bot-modelled M5.0 stack plus each flag's off/on delta, seeds 1-200, against Econ's §13.2a prediction table
-# (tests/fixtures/x1/pred-13.2a-e4369888.csv): blocks-merge=Y rows fail the check, N rows warn. G5-P pause rows stay out
+# (tests/fixtures/x1/pred-13.2a-7bbb5925.csv: §13.2a e4369888 + row-904 cell per QA-D-1030-X1-TREE): blocks-merge=Y rows fail the check, N rows warn. G5-P pause rows stay out
 # until Features delivers the driver (X1 note, D-HOE-20261029-05). Data source: X1_DATA in tests/pacing-x1/source.ts.
 # Not a required check: branch protection is HoE's call after Vadim's go on M5 (§15b). Same triggers, path filter and draft
 # skip as ci.yml. The three profile shards run in parallel; the job named `pacing-x1-stack` is the status check.

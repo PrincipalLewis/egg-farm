@@ -14,6 +14,9 @@
 #  (4) harness/sim/config are the tree's (worktree at the SHA); everything from outside the tree is hashed in
 #      outside-tree.txt (this script if it differs from the tree's copy, node, npm, node_modules lock, python3, the AC7
 #      script and product/sim/m4/m4_active.py).
+#  (3b) QA-D-1030-SHIPFLAGS (HoE): the tree's src/config/balance.json: sha256, m4.enabled and every m4.flags value in balance.txt
+#      (+ balance.json.record.json), a byte copy in inputs/src/config/balance.json (so SHA256SUMS has its own sha256 line), and every
+#      shard's balanceSha256 must equal it. A bot-modelled src M5 flag ON (bot-m5 O-3 guard) fails a condition.
 #  (5) SHA256SUMS over results-dir; `sha256sum -c SHA256SUMS` is run and must pass.
 # Any failed condition writes rc-gate.txt = "not RC gate, re-run on RC SHA". The trees check can only downgrade it.
 set -uo pipefail
@@ -64,6 +67,12 @@ git status --porcelain --untracked-files=all > "$OUT/porcelain-after-install.txt
 SHIP=data/economy.csv
 [ -f "$SHIP" ] || fail "shipped CSV $SHIP missing from the tree"
 SHIP_SHA=$(sha256sum < "$SHIP" | cut -d' ' -f1); echo "$SHIP_SHA  $SHIP (tree $TREE, blob $(git rev-parse "$SHA:$SHIP"))" > "$OUT/shipped-csv.txt"
+# (3b) QA-D-1030-SHIPFLAGS: balance.json sha256 + m4 flags recorded (balance.txt, inputs/ copy covered by SHA256SUMS)
+BAL=src/config/balance.json; BAL_SHA=$(sha256sum < "$BAL" | cut -d' ' -f1)
+npx vite-node scripts/pacing-x1-stack.ts -- inputs --out "$OUT" > "$OUT/balance.log" 2>&1 || fail "balance.json record: bot-modelled src M5 flag ON or record failed (balance.log)"
+[ "$(head -c 64 "$OUT/balance.txt" 2>/dev/null)" = "$BAL_SHA" ] || fail "balance.txt sha256 != tree $BAL $BAL_SHA"
+[ "$(sha256sum < "$OUT/inputs/$BAL" 2>/dev/null | cut -d' ' -f1)" = "$BAL_SHA" ] || fail "inputs/$BAL copy != tree $BAL"
+log "balance.json $BAL_SHA (blob $(git rev-parse "$SHA:$BAL")): $(sed -n 's/^summary: //p' "$OUT/balance.txt")"
 X1_KEY=$(sed -n "s/^export const X1_DATA: X1SourceKey = '\(.*\)';/\1/p" tests/pacing-x1/source.ts)
 log "X1_DATA=$X1_KEY shipped CSV $SHIP_SHA"
 # (3) + row 904: AC7's 2x active/idle gate per QA-D-1030-X1-TREE (R6 of QA-D-1030-PR93-1; HoE 11:51) PASSES on the tree's
@@ -107,6 +116,8 @@ log "X1 verdict exit $VRC: $(head -1 "$OUT/summary.md" 2>/dev/null)"
 [ "$VRC" = 0 ] || fail "X1 verdict FAIL (summary.md)"
 MEAS=$(node -e "const fs=require('fs');const s=new Set(fs.readdirSync(process.argv[1]).filter(f=>/^shard-.*\.json$/.test(f)).map(f=>JSON.parse(fs.readFileSync(process.argv[1]+'/'+f)).csvSha256));console.log([...s].join(','))" "$OUT")
 [ "$MEAS" = "$SHIP_SHA" ] || fail "X1 measured CSV $MEAS != shipped CSV $SHIP_SHA (X1_DATA=$X1_KEY)"
+MBAL=$(node -e "const fs=require('fs');const s=new Set(fs.readdirSync(process.argv[1]).filter(f=>/^shard-.*\.json$/.test(f)).map(f=>JSON.parse(fs.readFileSync(process.argv[1]+'/'+f)).balanceSha256));console.log([...s].join(','))" "$OUT")
+[ "$MBAL" = "$BAL_SHA" ] || fail "X1 measured balance.json $MBAL != tree $BAL $BAL_SHA (QA-D-1030-SHIPFLAGS)"
 node -e "const fs=require('fs');for(const f of fs.readdirSync(process.argv[1]).filter(f=>/^shard-.*\.json$/.test(f))){const s=JSON.parse(fs.readFileSync(process.argv[1]+'/'+f));if(s.head!==process.argv[2]||s.dirty)process.exit(1)}" "$OUT" "$SHA" || fail "a shard ran on a different or dirty HEAD"
 git status --porcelain --untracked-files=all > "$OUT/porcelain-after.txt"; [ -s "$OUT/porcelain-after.txt" ] && fail "tree dirty after the run (porcelain-after.txt)"
 { echo "tested_sha=$SHA"; echo "conditions_failed=${#FAILS[@]}"; for f in "${FAILS[@]}"; do echo "fail: $f"; done; } > "$OUT/conditions.txt"
