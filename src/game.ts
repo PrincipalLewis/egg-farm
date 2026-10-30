@@ -34,6 +34,10 @@ export class Game {
   state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
   /** M5.1 BR-R18: a hatch revealed by the offline settle; the UI shows it after welcome-back closes, then clears it. Not saved. */
   pendingReveal: BreedId | null = null;
+  /** M5.1 Q4: Farm level at the end of the last visible frame (the next frame's start). */
+  private frameFarm?: number;
+  /** BR-AC31e debug hook override (eggfarmQa.breeds.hatchEstimate, dev/QA builds only); the Flock UI passes it to hatchEstimate. */
+  breedsEstimateOverride: { defaultPerS?: number; assumeWorkingPerS?: number } | null = null;
   /** Set during "Reset save" so pagehide doesn't write the old state back. */
   resetting = false;
   /** True when no save existed at load (drives onboarding). */
@@ -425,8 +429,8 @@ export class Game {
       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
       const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
-      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
-      this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t, slotsFarm: this.frameFarm });
+      this.state = r.state; this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
     }
     this.checkCoopFull(); this.telemetry.poll();
   }
