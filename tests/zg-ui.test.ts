@@ -280,3 +280,23 @@ describe('D-COL-2026-10-30-29 (a): every opened strip ends in exactly one confir
     expect(zgc(g)).toEqual([{ id: 'collection', o: 'confirm' }]); expect(g.state.collectionLevel).toBe(2);
   });
 });
+
+describe('D-COL-2026-10-30-29 (b): an unaffordable ZG row keeps its disabled Buy, opens no strip, logs no event (spec L212, E11)', () => {
+  it.each([[0], [1]])('confirm=%i: unaffordable ZG Collection and Hens: aria-disabled, no disclosure attrs, tap = no strip, no event, no buy', async (confirm) => {
+    const B = mk(1, confirm);
+    for (const [s, tab, k] of [[COLL_ZG(0), 'collection', 'COLL'], [{ ...FX.FLIP(), coinsCents: 0 }, 'farm', 'HENS']] as const) {
+      t += 10000; const { g } = await mount(s, tab, B); expect(isZeroGain(g.state, B, k as any), `${k} precondition`).toBe(true);
+      const b = buyOf(k); expect(row(k).matches('.zg')).toBe(true);
+      expect(b.getAttribute('aria-disabled')).toBe('true'); expect(b.hasAttribute('aria-expanded')).toBe(false); expect(b.hasAttribute('aria-controls')).toBe(false);
+      const n0 = g.telemetry.events().length, st0 = JSON.stringify(g.state);
+      b.click(); b.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); b.click();
+      expect(document.querySelector('.zg-confirm:not([hidden])'), `${k} no strip`).toBeNull();
+      expect(g.telemetry.events().length, `${k} no event`).toBe(n0); expect(JSON.stringify(g.state)).toBe(st0);
+    }
+  });
+  it('confirm=1, stale markup (rendered affordable, live coins now short): the tap opens no strip and logs nothing (live state decides, S2-4a)', async () => {
+    t += 10000; const { g } = await mount(COLL_ZG(), 'collection', mk(1, 1)); const b = buyOf('COLL'); expect(b.getAttribute('aria-controls')).toBe('zgc-coll');
+    g.state = { ...g.state, coinsCents: 0 } as any; const n0 = g.telemetry.events().length;
+    b.click(); expect(document.querySelector<HTMLElement>('#zgc-coll')!.hidden).toBe(true); expect(g.telemetry.events().length).toBe(n0); expect(g.state.collectionLevel).toBe(1);
+  });
+});

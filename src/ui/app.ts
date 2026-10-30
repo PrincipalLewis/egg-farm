@@ -30,7 +30,7 @@ import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onb
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { bestBuyMark, goalLabelHtml } from './goal-label';
-import { tryDispatch } from './tap-guard';
+import { tryDispatch, wouldApply } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
@@ -254,9 +254,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let lastBuyBtn: HTMLElement | null = null;
   /** The row buy (unchanged dispatch). ZG-AC9/AC15: with the flag on, the `upgrade` telemetry record of a collection/hens/eggValue
    *  buy gets `zero_gain` = isZeroGain on the PRE-buy state, set here after the dispatch returns (sim events unchanged). */
+  function buyAction(bk: string | undefined): Parameters<typeof g.dispatch>[0] {
+    return bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' };
+  }
   function buyRow(bk: string | undefined, bt: HTMLElement): boolean {
     const zk = ZG && bk && bk in ZG_KEY_OF ? ZG_KEY_OF[bk as keyof typeof ZG_KEY_OF] : null, zgPre = zk ? isZeroGain(g.state, b, zk) : null;
-    if (!act(bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' })) { cantAfford(bt); return false; }
+    if (!act(buyAction(bk))) { cantAfford(bt); return false; }
     if (zgPre !== null) g.telemetry.annotateLast('upgrade', { zero_gain: zgPre });
     return true;
   }
@@ -267,7 +270,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** Re-apply the open strip after any tab re-render (markup always renders it closed). D-COL-2026-10-30-29: a re-render that no
    *  longer has the strip (tab switch, row no longer ZG / MAX) closes it with exactly one cancel, no buy, focus left alone. */
   const zgApply = () => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { const k = zgOpen.kind; zgOpen = null; clearTimeout(zgRevealT); zgLog(k, 'cancel'); return; }
-    if (e.st.hidden) { const had = document.activeElement === document.body; e.st.hidden = false; e.buy?.setAttribute('aria-expanded', 'true'); if (had) e.st.querySelector<HTMLElement>('[data-zg=confirm]')?.focus({ preventScroll: true }); } };
+    if (e.st.hidden) { const had = document.activeElement === document.body; e.st.hidden = false; if (e.buy?.hasAttribute('aria-controls')) e.buy.setAttribute('aria-expanded', 'true'); if (had) e.st.querySelector<HTMLElement>('[data-zg=confirm]')?.focus({ preventScroll: true }); } };
   const zgLog = (kind: string, outcome: 'confirm' | 'cancel') => g.telemetry.track('zero_gain_confirm', { upgrade_id: kind, outcome });
   const zgClose = (outcome: 'cancel' | null, focusBuy = true) => {
     const o = zgOpen; if (!o) return; zgOpen = null; clearTimeout(zgRevealT);
@@ -294,8 +297,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       uRow.querySelector<HTMLElement>(`button.btn[data-kind="${o.kind}"]`)?.focus({ preventScroll: true }); // UI-ZG-15: focus on the row Buy
       return true;
     }
-    if (!bt.hasAttribute('aria-controls') || !bt.dataset.kind) return false; // not a ZG row Buy: normal buy
-    if (zgOpen?.kind === bt.dataset.kind) zgClose('cancel'); else zgOpenStrip(bt.dataset.kind); // A3: re-tap closes, focus stays on Buy
+    const k = bt.dataset.kind; if (!k) return false;
+    if (zgOpen?.kind === k) { zgClose('cancel'); return true; } // A3: re-tap closes, focus stays on Buy
+    // Not a ZG row Buy -> normal buy. D-COL-2026-10-30-29 (b) / spec L212, E11: an unaffordable ZG Buy (live state, as S2-4a) stays the
+    // existing disabled Buy: no strip, no event (the normal path refuses it).
+    if (!bt.hasAttribute('aria-describedby') || !(k in ZG_KEY_OF) || !wouldApply(g.state, buyAction(k), b)) return false;
+    zgOpenStrip(k); return true;
     return true;
   }
   if (ZGC) {
@@ -565,14 +572,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <ul class="fx">${slotLines ?? ''}${fxLines(fx, zg)}</ul>${max ? '' : bestChip(isF ? 'FARM' : 'COLL')}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
-        noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`)}
+        noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`)}
       <div>${hint}</div>${zgDesc(zg, kind)}</div></div>${zgStrip(zg, kind)}`;
   };
   // ---------- v5 zeroGainUi row pieces (UI doc art-ux/m5.1-zero-gain-ui.md v1.4 §1/§2/§5; all '' when the row is not ZG) ----------
   const ZK = { collection: 'coll', hens: 'hens', eggValue: 'value' } as const; type ZRow = keyof typeof ZK;
   /** First effect line gets the chip; the others are unchanged. Not ZG -> byte-identical to the flag-off markup. */
   const fxLines = (fx: string[], zg: boolean) => fx.map((l, i) => zg && i === 0 ? `<li class="zg-line"><span class="fx-t">${l}</span><span class="zg-chip">${ZG_CHIP}</span></li>` : `<li>${l}</li>`).join('');
-  const zgBuyAttrs = (zg: boolean, k: string) => !zg ? '' : ` aria-describedby="zg-desc-${ZK[k as ZRow]}"${ZGC ? ` aria-expanded="false" aria-controls="zgc-${ZK[k as ZRow]}"` : ''}`;
+  const zgBuyAttrs = (zg: boolean, k: string, can: boolean) => !zg ? '' : ` aria-describedby="zg-desc-${ZK[k as ZRow]}"${ZGC && can ? ` aria-expanded="false" aria-controls="zgc-${ZK[k as ZRow]}"` : ''}`;
   /** UI-ZG-4: an affordable ZG Buy drops `.affordable` (no glow); the class attribute then equals the unaffordable one. */
   const noGlow = (zg: boolean, html: string) => zg ? html.replace('class="btn buy affordable"', 'class="btn buy "') : html;
   const zgDesc = (zg: boolean, k: string) => zg ? `<span id="zg-desc-${ZK[k as ZRow]}" hidden>${ZG_DESC}</span>` : '';
@@ -595,7 +602,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
       : farmMaxed ? `<span class="maxed farm-max" aria-hidden="true">${TRACK_FARM_MAX_TEXT}</span>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${need}.">${trackLockText(need!)}</div>`
-      : noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`);
+      : noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`);
     const best = !lock && rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
     return `<div class="up track${best}${zg ? ' zg' : ''}" data-track="${t}"${zg ? ` data-zero-gain="${ZG_KEY_OF[t]}"` : ''}${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>
