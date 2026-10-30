@@ -52,6 +52,7 @@ describe('pacing-x1-stack: verdict rules', () => {
     const none = gate({ stepL30: [2.989, 3.453], G4_noAff_F10_to_max: [104, 161, 202], win: undefined });
     const ok = sig(gate({ G4_noAff_F10_to_max: [68, 114, 143] }), gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }), none);
     for (const l of [894, 895, 896]) expect(ok.find(x => x.line === l)!.status, `L${l}`).toBe('PASS');
+    expect(ok.find(x => x.line === 895)!.predicted).toMatch(/^70 \/ 107 \/ 191 \(signed re-pred D-HOP-2026-10-30-08; table had 84 \/ 166 \/ 272\)$/);
     const old = sig(gate({ G4_noAff_F10_to_max: [84, 160, 234] }), gate({ G4_noAff_F10_to_max: [84, 166, 272], stepL30: [2.435, 2.634] }), none); // the 8dc90e2b values miss the signed bands
     expect(old.find(x => x.line === 894)!.status).toBe('FAIL');
     const worst = sig(gate({ G4_noAff_F10_to_max: [68, 114, 143] }), gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }), gate({ ...none, G4_noAff_F10_to_max: [104, 161, 150] }));

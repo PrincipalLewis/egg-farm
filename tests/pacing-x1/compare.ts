@@ -47,7 +47,8 @@ const pol = (flag: string): 'N' | 'H' => (flag.trim() === 'H' ? 'H' : 'N');
 export function evaluate(rows: PredRow[], shards: Record<string, Shard>): Out[] {
   const out: Out[] = [];
   for (const r of rows) {
-    const line = +r.source_line, Y = r.blocks_merge.trim().startsWith('Y'), base = { line, profile: r.profile, flag: r.flag, metric: r.metric.slice(0, 90), blocks: Y, predicted: r.predicted };
+    const line = +r.source_line, Y = r.blocks_merge.trim().startsWith('Y'), sp0 = SIGNED_REPRED.rows[line]?.[r.profile],
+      base = { line, profile: r.profile, flag: r.flag, metric: r.metric.slice(0, 90), blocks: Y, predicted: sp0 ? `${sp0.join(' / ')} (signed re-pred ${SIGNED_REPRED.decision}; table had ${r.predicted})` : r.predicted };
     const push = (status: Status, measured: string, why: string) => out.push({ ...base, status, measured, why });
     if (isPauseRow(r)) { push('EXCLUDED', '', 'G5-P pause rows stay out until Features delivers the driver (X1 note, D-HOE-20261029-05)'); continue; }
     if (NOT_WIRED[line]) { push('NOT-WIRED', '', NOT_WIRED[line]); continue; }
