@@ -205,6 +205,9 @@ describe('AC-R17 D-HOP-2026-10-30-02: cooldown Refill label CSS', () => {
     expect(css).toMatch(/\.nav-lbl\[data-cd\]::after\{content:attr\(data-cd\);white-space:pre;font-variant-numeric:tabular-nums\}/);
     expect(css).toMatch(/\.actions \.nav-lbl\{[^}]*white-space:nowrap/);
   });
+  it('AC-R17 D-HOP-2026-10-30-02: docked header pill reserves the widest Fredoka countdown (2.65em >= measured 2.609em), only while a countdown shows', () => {
+    expect(css).toContain('@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-lbl[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}');
+  });
   it('AC-R17 D-HOP-2026-10-30-02: fmtCooldown is m:ss; every countdown up to manage_cooldown_s has the same glyph count', async () => {
     const { fmtCooldown } = await import('../src/ui/workers-ui'); const { balance } = await import('../src/config/balance');
     const max = balance.workers.energy.manage_cooldown_s; expect(fmtCooldown(30)).toBe('0:30'); expect(fmtCooldown(7)).toBe('0:07'); expect(fmtCooldown(75)).toBe('1:15');
