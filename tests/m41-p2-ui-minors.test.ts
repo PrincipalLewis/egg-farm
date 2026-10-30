@@ -167,8 +167,8 @@ describe('P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; 
 });
 
 describe('Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, same place on screen, no CSS-generated count', () => {
-  it('Art-c1: the nav badge is positioned on the icon\'s top-right -6/-6 from the button (out of flow), the Workers tab badge rule unchanged', () => {
-    expect(css).toContain('nav [data-nav=upgrades]>.asleep-badge{top:calc(50% - (28px + 2px + 12px * 1.2) / 2 - 6px);right:calc(50% - 14px - 6px)}');
+  it('Art-c1: the nav badge sits on the icon\'s top-right -6/-6 (flex static position + margin, out of flow), the Workers tab badge rule unchanged', () => {
+    expect(css).toContain('nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);margin-bottom:calc(28px + 2px + 12px * 1.2 - 6px)}');
     expect(css).toMatch(/\.asleep-badge\{position:absolute;top:-6px;right:-6px/); expect(css).toContain('nav [data-nav=upgrades]{position:relative}');
     expect(css).toMatch(/\.actions \.nav-lbl\{font:700 12px\/1\.2 /); expect(css).toMatch(/\.nav-ic\{position:relative;display:inline-block;width:28px;height:28px\}/); // the calc's inputs
   });

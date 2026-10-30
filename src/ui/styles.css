@@ -635,9 +635,10 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 nav [data-nav=upgrades]{position:relative}
 nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
 /* Art-c1 (HoE 2026-10-30 00:19): the Upgrades count badge follows the label in the DOM (aria-hidden); it keeps the icon's top-right -6/-6.
-   The button centres .nav-ic (28px) + 2px gap + .nav-lbl (12px/1.2) in a column; the badge is out of flow, so icon top = 50% - 22.2px
-   and icon right = 50% + 14px. No generated content: the count is the badge's own text. */
-nav [data-nav=upgrades]>.asleep-badge{top:calc(50% - (28px + 2px + 12px * 1.2) / 2 - 6px);right:calc(50% - 14px - 6px)}
+   Vertical: top:auto = the flex static position, centred in the content box like the .nav-ic (28) + 2px gap + .nav-lbl (12px/1.2) stack
+   (so the engine's own button padding, e.g. WebKit's 2px/3px, cancels out); margin-bottom = stack + 12 - 18 puts the badge top 6px above
+   the icon. Horizontal: icon right = 50% + 14px (symmetric 6px padding), badge right 6px past it. No generated content. */
+nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);margin-bottom:calc(28px + 2px + 12px * 1.2 - 6px)}
 .asleep-badge.badge-pulse{animation:badgePulse 400ms ease-out}
 @keyframes badgePulse{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.asleep-badge.badge-pulse{animation:none}}
