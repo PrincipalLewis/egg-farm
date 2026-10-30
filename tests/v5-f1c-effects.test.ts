@@ -31,7 +31,7 @@ describe('F1c registry composition', () => {
     expect(saleMultipliers(s, b)).toEqual([graderMult(s.workers, s.graderTier, b)]);
     expect(prodEggsPerSec(s, b, { suspended: false })).toBe(prodEggsPerSec(s, b));
   });
-  it('[F1(c)] factors multiply with the Grader and round once (golden X7 example shape)', () => {
+  it('[F1(c)][X7] factors multiply with the Grader and round once (golden X7 example shape)', () => {
     SALE.push(frenzy, streak); const b = B({ golden: 1, streak: 1 }), s = farm(b);
     const g = graderMult(s.workers, s.graderTier, b), base = salePriceCents(s, b);
     expect(saleMultipliers(s, b)).toEqual([g, 2, 1.28]);
@@ -64,7 +64,7 @@ describe('F1c registry composition', () => {
 });
 
 describe('F1c laying (prodEggsPerSec)', () => {
-  it('[F1(c)] Sweep-like factor applies only with a live ctx: offline / income / golden E (no ctx) see the base rate', () => {
+  it('[F1(c)] helper: prodEggsPerSec applies a Sweep-like factor only with a live ctx; with no ctx it returns the base rate (callers: see [§9.5-e3])', () => {
     LAY.push(sweep); const b = B({ abilities: 1 }), s = farm(b), base = prodEggsPerSec(s, b);
     expect(prodEggsPerSec(s, b, { suspended: false })).toBeCloseTo(base * 1.15, 12);
     expect(prodEggsPerSec(s, b, { suspended: true })).toBe(base);
