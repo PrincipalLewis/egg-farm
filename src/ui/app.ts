@@ -267,10 +267,19 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const ZG_GUARD_MS = 350; let zgOpen: { kind: string; at: number } | null = null, zgRevealT = 0;
   const zgEls = (kind: string) => { const st = uRow.querySelector<HTMLElement>(`.zg-confirm[data-zg-kind="${kind}"]`);
     return st ? { st, buy: uRow.querySelector<HTMLElement>(`button.btn[data-kind="${kind}"]`) } : null; };
+  /** Which uRow control had focus before a re-render swaps the markup (Architect review 546de85 Minor 2): a strip button
+   *  (`zg:<confirm|cancel>`) or a row Buy (`kind:<kind>`); null when focus was outside the upgrades rows. */
+  const zgFocusKey = (): string | null => { const a = document.activeElement as HTMLElement | null; if (!a || !uRow.contains(a)) return null;
+    return a.dataset.zg ? `zg:${a.dataset.zg}` : a.dataset.kind ? `kind:${a.dataset.kind}` : null; };
   /** Re-apply the open strip after any tab re-render (markup always renders it closed). D-COL-2026-10-30-29: a re-render that no
-   *  longer has the strip (tab switch, row no longer ZG / MAX) closes it with exactly one cancel, no buy, focus left alone. */
-  const zgApply = () => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { const k = zgOpen.kind; zgOpen = null; clearTimeout(zgRevealT); zgLog(k, 'cancel'); return; }
-    if (e.st.hidden) { const had = document.activeElement === document.body; e.st.hidden = false; if (e.buy?.hasAttribute('aria-controls')) e.buy.setAttribute('aria-expanded', 'true'); if (had) e.st.querySelector<HTMLElement>('[data-zg=confirm]')?.focus({ preventScroll: true }); } };
+   *  longer has the strip (tab switch, row no longer ZG / MAX) closes it with exactly one cancel, no buy, focus left alone.
+   *  Minor 2: focus goes back to the SAME control it was on before the swap (never moved to "Buy anyway"); only zgOpenStrip focuses
+   *  "Buy anyway", and the 350 ms guard (zgOpen.at) stays the opening time, so it is correct for the control that had focus. */
+  const zgApply = (focusKey: string | null = null) => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { const k = zgOpen.kind; zgOpen = null; clearTimeout(zgRevealT); zgLog(k, 'cancel'); return; }
+    if (e.st.hidden) { e.st.hidden = false; if (e.buy?.hasAttribute('aria-controls')) e.buy.setAttribute('aria-expanded', 'true'); }
+    const f = focusKey?.startsWith('zg:') ? e.st.querySelector<HTMLElement>(`[data-zg="${focusKey.slice(3)}"]`)
+      : focusKey?.startsWith('kind:') ? uRow.querySelector<HTMLElement>(`button.btn[data-kind="${focusKey.slice(5)}"]`) : null;
+    if (f && document.activeElement !== f) f.focus({ preventScroll: true }); };
   const zgLog = (kind: string, outcome: 'confirm' | 'cancel') => g.telemetry.track('zero_gain_confirm', { upgrade_id: kind, outcome });
   const zgClose = (outcome: 'cancel' | null, focusBuy = true) => {
     const o = zgOpen; if (!o) return; zgOpen = null; clearTimeout(zgRevealT);
@@ -303,8 +312,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // existing disabled Buy: no strip, no event (the normal path refuses it).
     if (!bt.hasAttribute('aria-describedby') || !(k in ZG_KEY_OF) || !wouldApply(g.state, buyAction(k), b)) return false;
     zgOpenStrip(k); return true;
-    return true;
   }
+  /** N2 (review 546de85): the strip's listeners live as long as this mount; `ui.dispose()` removes them (tests that remount). */
+  const zgAC = new AbortController();
   if (ZGC) {
     // Esc inside the strip closes it (not the panel). Held Enter/Space on the strip buttons: ignored (UI-ZG-18, a local copy of PL-1);
     // no stopPropagation for those keys, so the document PL-1 guard still sees them.
@@ -312,9 +322,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const inStrip = !!(e.target as Element | null)?.closest?.('.zg-confirm');
       if (inStrip && e.repeat && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); return; }
       if (inStrip && e.key === 'Escape' && zgOpen) { e.preventDefault(); e.stopPropagation(); zgClose('cancel'); }
-    });
+    }, { signal: zgAC.signal });
     document.addEventListener('pointerdown', e => { if (!zgOpen) return; const t = e.target as Element | null, el = zgEls(zgOpen.kind);
-      if (el && t && (el.st.contains(t) || el.buy?.contains(t))) return; zgClose('cancel'); }, true);
+      if (el && t && (el.st.contains(t) || el.buy?.contains(t))) return; zgClose('cancel'); }, { capture: true, signal: zgAC.signal });
   }
 
   // ---------- Modals ----------
@@ -572,7 +582,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <ul class="fx">${slotLines ?? ''}${fxLines(fx, zg)}</ul>${max ? '' : bestChip(isF ? 'FARM' : 'COLL')}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
-        noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`)}
+        `<button class="btn buy ${glowCls(can, zg)}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div>${zgDesc(zg, kind)}</div></div>${zgStrip(zg, kind)}`;
   };
   // ---------- v5 zeroGainUi row pieces (UI doc art-ux/m5.1-zero-gain-ui.md v1.4 §1/§2/§5; all '' when the row is not ZG) ----------
@@ -580,8 +590,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** First effect line gets the chip; the others are unchanged. Not ZG -> byte-identical to the flag-off markup. */
   const fxLines = (fx: string[], zg: boolean) => fx.map((l, i) => zg && i === 0 ? `<li class="zg-line"><span class="fx-t">${l}</span><span class="zg-chip">${ZG_CHIP}</span></li>` : `<li>${l}</li>`).join('');
   const zgBuyAttrs = (zg: boolean, k: string, can: boolean) => !zg ? '' : ` aria-describedby="zg-desc-${ZK[k as ZRow]}"${ZGC && can ? ` aria-expanded="false" aria-controls="zgc-${ZK[k as ZRow]}"` : ''}`;
-  /** UI-ZG-4: an affordable ZG Buy drops `.affordable` (no glow); the class attribute then equals the unaffordable one. */
-  const noGlow = (zg: boolean, html: string) => zg ? html.replace('class="btn buy affordable"', 'class="btn buy "') : html;
+  /** UI-ZG-4: an affordable ZG Buy has no `.affordable` (no glow); its class attribute then equals the unaffordable one. N3 (review
+   *  546de85): a value in the template, not a string replace; not ZG -> exactly `can ? 'affordable' : ''` (flag-off bytes unchanged). */
+  const glowCls = (can: boolean, zg: boolean) => can && !zg ? 'affordable' : '';
   const zgDesc = (zg: boolean, k: string) => zg ? `<span id="zg-desc-${ZK[k as ZRow]}" hidden>${ZG_DESC}</span>` : '';
   /** Confirm strip (only m4.zeroGain.confirm = 1): rendered once as the row's next sibling, always hidden in the markup; open state is
    *  applied on the DOM (zgApply), so toggling never re-renders the tab (UI-ZG-15). */
@@ -602,7 +613,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
       : farmMaxed ? `<span class="maxed farm-max" aria-hidden="true">${TRACK_FARM_MAX_TEXT}</span>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${need}.">${trackLockText(need!)}</div>`
-      : noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`);
+      : `<button class="btn buy ${glowCls(can, zg)}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
     const best = !lock && rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
     return `<div class="up track${best}${zg ? ' zg' : ''}" data-track="${t}"${zg ? ` data-zero-gain="${ZG_KEY_OF[t]}"` : ''}${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>
@@ -729,7 +740,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
-      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; if (ZGC) zgApply(); }
+      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; const zf = ZGC ? zgFocusKey() : null; uRow.innerHTML = html; if (ZGC) zgApply(zf); }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
         // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
         { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
@@ -874,5 +885,5 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
   if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
+  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort() };
 }

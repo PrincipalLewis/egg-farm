@@ -104,7 +104,9 @@ describe('m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, C
   });
   it('UI-M10-5 m10: Buy stays aria-disabled, never native disabled (UI-M10-5)', () => {
     const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
-    expect(app).toMatch(/class="btn buy \$\{can \? 'affordable' : ''\}"[^>]*aria-disabled="\$\{!can\}"/); expect(app).not.toMatch(/<button class="btn buy[^>]* disabled[ >=]/);
+    // v5 zeroGainUi N3 (review 546de85): the Farm/Collection/track Buys render the glow via glowCls(can, zg) (= can ? 'affordable' : '' when not ZG).
+    expect(app).toMatch(/class="btn buy \$\{(can \? 'affordable' : ''|glowCls\(can, zg\))\}"[^>]*aria-disabled="\$\{!can\}"/);
+    expect(app).toMatch(/const glowCls = \(can: boolean, zg: boolean\) => can && !zg \? 'affordable' : '';/); expect(app).not.toMatch(/<button class="btn buy[^>]* disabled[ >=]/);
   });
 });
 
