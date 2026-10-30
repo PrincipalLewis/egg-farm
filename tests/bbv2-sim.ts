@@ -4,7 +4,8 @@ import type { Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
-import { DualPicker } from '../src/ui/pick-hysteresis';
+import { DualPicker, defaultScorer, allScorer } from '../src/ui/pick-hysteresis';
+import { zeroGainUiOn, zgFiltered } from '../src/ui/zero-gain';
 import { bbv2Mark, meaningfulKeys } from '../src/econ/best-buy';
 import { buyKeyOf } from '../src/telemetry/bbv2';
 import { runBot, BUY_TRACE, STATE_TRACE } from './bot';
@@ -17,6 +18,8 @@ export const AC14_CONFIGS = {
   'DECISIVE bestBuyV2=1 zeroGainUi=0': bal(1, { zeroGainUi: 0 }),
   'CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1': bal(1, { zeroGainUi: 1 }),
 } as const;
+/** The picker app.ts builds (rc/v5 >= 0ad018de, #97): with zeroGainUi on, ZG rows are dropped from both scorers before the pick. */
+export const appPicker = (b: Balance) => zeroGainUiOn(b) ? new DualPicker(zgFiltered(defaultScorer), zgFiltered(allScorer)) : new DualPicker();
 export const seeds = (a: number, z: number) => Array.from({ length: z - a + 1 }, (_, i) => a + i);
 
 /** BBV2-AC8: fresh save, VAR_DEFAULT taps; sells at the 15 s check-in grid (`cadence: 'fixed'`, gating, as ac7-first-purchase's
@@ -24,7 +27,7 @@ export const seeds = (a: number, z: number) => Array.from({ length: z - a + 1 },
  *  Per seed: time of the first non-null ★ (sim s, picker ticked every 0.1 s) and whether the first non-null hint was meaningful. */
 export function ac8(b: Balance, seed: number, cadence: 'fixed' | 'variance', T = 120) {
   const V = new SellerVariance(VAR_DEFAULT, seed); let s = initialState(b, seed); const dt = 1 / b.tickHz;
-  let tapT = 1, sellT = cadence === 'fixed' ? 15 : V.checkInterval(15); const P = new DualPicker(); let firstHintMeaningful: boolean | null = null;
+  let tapT = 1, sellT = cadence === 'fixed' ? 15 : V.checkInterval(15); const P = appPicker(b); let firstHintMeaningful: boolean | null = null;
   for (let i = 1; i <= T * b.tickHz; i++) {
     const t = Math.round(i * dt * 10) / 10; s = step(s, dt, b);
     if (t >= tapT) { tapT += V.tapInterval(); s = apply(s, { type: 'collect' }, b); }
@@ -58,7 +61,7 @@ export function ac14(b: Balance, ss: number[]) {
   const out = { states: 0, violations: 0, suppressed: 0, suppressedAffordable: 0, suppressedAffordableBelow30: 0, suppressedEvents: 0, examples: [] as string[] };
   try {
     for (const sd of ss) for (const [bot, run] of Object.entries(BOTS)) {
-      const P = new DualPicker();
+      const P = appPicker(b); // CONFIRMATORY ship run: the #97 ZG filter is in front of Part A, as in the build
       STATE_TRACE.fn = (t, s) => {
         out.states++; const h = P.tick(s, b, t * 1000).hint; if (!h) return;
         const m = meaningfulKeys(s, b);

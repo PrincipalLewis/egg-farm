@@ -3,7 +3,8 @@
 // (spec v0.3.7 f86de04e + errata v0.3.8 rev 2 4cfe6895). Per cell: verdict / ★-filter parity with the (bb 0, confirm 0) reference,
 // Buy behaviour (direct at confirm 0, strip at confirm 1), upgrade.zero_gain, ★ never on a ZG row. Flag-off cells (zeroGainUi = 0) at
 // each bestBuyV2 (and confirm) value: DOM and telemetry identical to the m4-on/zeroGainUi-0 config pinned to 65a7443 in zg-flagoff-dom.
-// BBv2 mechanics are row 29 and not built here: bestBuyV2 = 1 is expected to change nothing in these cells.
+// BBv2 (row 29, gen/bbv2) is built: bestBuyV2 = 1 changes verdicts (Q-E2 collect fix) and the ★ (Part A), so every parity below is
+// asserted PER bestBuyV2 value (reference = the same bb with confirm 0 / zeroGainUi 0); bb 0 cells keep the 65a7443-pinned reference.
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import { Game } from '../src/game';
@@ -54,12 +55,11 @@ function dump() {
   return [document.querySelector('#uRow')!.innerHTML, (document.querySelector('[data-nav=upgrades] .badge') as HTMLElement).hidden,
     document.querySelector('#goal')!.outerHTML, document.querySelector('#goalDesc')?.textContent ?? '', b?.outerHTML ?? ''].join('\u0001');
 }
-const REF = mk(1, 0, 0);
 const CELLS = [[0, 0], [0, 1], [1, 0], [1, 1]] as const;
 
 describe.each(CELLS)('ZG matrix zeroGainUi=1, bestBuyV2=%i, confirm=%i', (bb, confirm) => {
-  const B = mk(1, confirm, bb);
-  it('verdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18)', async () => {
+  const B = mk(1, confirm, bb), REF = mk(1, 0, bb);
+  it('verdict + ★ filter parity with (same bb, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18)', async () => {
     let zgRows = 0, stars = 0; // non-vacuity: the fixtures must show ZG rows and a ★ somewhere
     for (const [n, f] of Object.entries(FIX)) {
       for (const k of KEYS) expect(isZeroGain(f() as any, B, k), `${n} ${k}`).toBe(isZeroGain(f() as any, REF, k));
@@ -101,8 +101,8 @@ describe.each(CELLS)('ZG matrix zeroGainUi=1, bestBuyV2=%i, confirm=%i', (bb, co
 });
 
 describe.each([0, 1])('ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=%i', (bb) => {
-  const REF0 = mk(0, 0, 0);
-  it.each([0, 1])('confirm=%i: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19)', async (confirm) => {
+  const REF0 = mk(0, 0, bb); // bb 0: the 65a7443-pinned zeroGainUi-0 config; bb 1: the BBv2 flag-on config
+  it.each([0, 1])('confirm=%i: DOM byte-identical to the zeroGainUi-0 config at the same bestBuyV2 on every fixture/tab; no ZG nodes (ZG-AC12/19)', async (confirm) => {
     for (const [n, f] of Object.entries(FIX)) for (const tab of TABS) {
       await mount(f(), tab, REF0); const ref = dump();
       await mount(f(), tab, mk(0, confirm, bb)); expect(dump(), `${n}/${tab}`).toBe(ref);
