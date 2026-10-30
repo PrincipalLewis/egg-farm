@@ -11,12 +11,13 @@
 // balance.farm.costTable / the curve and can never reach $1e35, so the upgrade-row cost uses a SEEDED BALANCE OVERRIDE:
 // g.b is replaced by a copy whose farm.costTable is the target dollars at every level (UI reads g.balance live).
 import { chromium, webkit, firefox } from 'playwright-core';
-import { spawn, execSync } from 'node:child_process'; import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs'; import { basename } from 'node:path';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+import { execSync } from 'node:child_process'; import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs'; import { basename } from 'node:path';
 const [eng = 'chromium', OUT_ARG] = process.argv.slice(2); if (!['chromium', 'firefox', 'webkit'].includes(eng)) { console.error(`unknown engine ${eng}`); process.exit(2); }
 const port = 5300 + Math.floor(Math.random() * 200);
-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
-const die = m => { console.error(`m41-9-bignum-shots: ${m}`); process.kill(-srv.pid); process.exit(2); };
+const die = m => { console.error(`m41-9-bignum-shots: ${m}`); stopOrReport(srv, srvRec, 'm41-9-bignum-shots'); process.exit(2); };
 const html = await (await fetch(`http://127.0.0.1:${port}/`)).text();
 const srcs = [...html.matchAll(/src="([^"]+\.js)"/g)].map(m => m[1]);
 let ver = null; for (const u of srcs) { const m = (await (await fetch(`http://127.0.0.1:${port}${u}`)).text()).match(/["'`](m\d+[a-z0-9.-]*)\+([0-9a-f]{7,40})(\+dirty)?["'`]/); if (m) { ver = m; break; } }
@@ -127,4 +128,4 @@ writeFileSync(`${OUT}/manifest-${eng}.json`, JSON.stringify(manifest, null, 1));
 { const MF = `${OUT}/manifest.json`, m = existsSync(MF) ? JSON.parse(readFileSync(MF, 'utf8')) : { script: 'scripts/m41-9-bignum-shots.mjs', sha, buildId, shots: [] };
   m.shots = [...m.shots.filter(x => x.engine !== eng), ...index]; writeFileSync(MF, JSON.stringify(m, null, 1) + '\n'); }
 console.log(`m41-9-bignum-shots ${eng}: ${bad ? `${bad} CLIP/DROP/FAIL` : 'all ok'}`);
-await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
+await br.close(); const stopped = stopOrReport(srv, srvRec, 'm41-9-bignum-shots'); process.exit(bad ? 1 : stopped ? 0 : 3);

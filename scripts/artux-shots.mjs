@@ -1,13 +1,14 @@
 // Art & UX rc0 review shots + rotate-prompt checks (art-ux/m3-rotate-portrait-prompt.md §6.2/§6.3). Usage: node scripts/artux-shots.mjs [webkit|chromium]
 import { chromium, webkit } from 'playwright-core';
-import { spawn } from 'node:child_process'; import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 const eng = process.argv[2] || 'chromium'; const port = 5100 + Math.floor(Math.random() * 200);
-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 // Output folder comes from the served build's version string: engineering/screenshots/artux-<release>-<hash>/.
 // Refuses a +dirty build, and any existing folder whose README names a different commit (or has no README).
 // OUT= is allowed only if that folder's README names the served build's hash.
-const die = m => { console.error(`artux-shots: ${m}`); process.kill(-srv.pid); process.exit(2); };
+const die = m => { console.error(`artux-shots: ${m}`); stopOrReport(srv, srvRec, 'artux-shots'); process.exit(2); };
 const html = await (await fetch(`http://127.0.0.1:${port}/`)).text();
 const srcs = [...html.matchAll(/src="([^"]+\.js)"/g)].map(m => m[1]);
 let ver = null; for (const u of srcs) { const m = (await (await fetch(`http://127.0.0.1:${port}${u}`)).text()).match(/["'`](m\d+-[a-z0-9-]+)\+([0-9a-f]{7,40})(\+dirty)?["'`]/); if (m) { ver = m; break; } }
@@ -102,4 +103,4 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
   ok('D1 OFL link inline-block >=44px, no overlap with Reset save, corner taps land on it', d1.display === 'inline-block' && d1.box[3] >= 44 && !d1.overlap && d1.hits.every(Boolean), d1);
   const lic = await (await fetch(`http://127.0.0.1:${port}/fonts/OFL.txt`)).text();
   ok('R2/R4 font credits: one <p>, link with >=44px tap target, OFL ships', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && r.tag === 'P' && r.blocks === 0 && !r.authorsAlone && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
-await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
+await br.close(); const stopped = stopOrReport(srv, srvRec, 'artux-shots'); process.exit(bad ? 1 : stopped ? 0 : 3);

@@ -50,7 +50,7 @@ for (const D of DELAYS) for (let rep = 0; rep < REPS; rep++) {
   const after = await p2.evaluate(() => ({ L: window.eggfarm.state.farmLevel + 100 * window.eggfarm.state.collectionLevel, recovery: document.querySelectorAll('.recovery-card').length }));
   const pass = n > 0 && L1 > L0 && after.L === L1 && after.recovery === 0; if (!pass) fails++;
   rows.push({ D, rep, pass, L0, L1, after: after.L, killed: n });
-  console.log(`${pass ? 'PASS' : 'FAIL'} [${ENGINE}] kill ${D} ms rep ${rep}: ${L0}->${L1}, reopen ${after.L}, SIGKILLed recorded browser group ${k.pid} (${n ? 'ok' : 'refused'})`);
+  console.log(`${pass ? 'PASS' : 'FAIL'} [${ENGINE}] SIGKILL at ${D} ms rep ${rep}: ${L0}->${L1}, reopen ${after.L}, SIGKILLed recorded browser group ${k.pid} (${n ? 'ok' : 'refused'})`);
   await ctx.close().catch(() => {}); fs.rmSync(dir, { recursive: true, force: true });
 }
 // D3/D4: query params inert in release

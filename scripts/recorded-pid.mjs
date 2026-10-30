@@ -11,7 +11,7 @@ export const bootId = () => fs.readFileSync(BOOT_ID, 'utf8').trim();
 /** /proc/<pid>/stat of exactly this pid, or null when it does not exist. The comm field may hold spaces or ')', so
  *  fields are counted from the LAST ')'. */
 export function readStat(pid) {
-  let s; try { s = fs.readFileSync(`/proc/${pid}/stat`, 'utf8'); } catch { return null; }
+  let s; try { s = fs.readFileSync(`/proc/${pid}/stat`, 'utf8'); } catch { return null; } // rule-21 guarded site: one pid
   const f = s.slice(s.lastIndexOf(')') + 2).split(' '); // f[0] = field 3 (state) ... f[19] = field 22 (starttime)
   return { state: f[0], ppid: +f[1], pgrp: +f[2], starttime: f[19] };
 }
@@ -50,7 +50,8 @@ export function recordProblem(rec, { group = true } = {}) {
 export function killRecorded(rec, signal = 'SIGTERM', { group = true } = {}) {
   const reason = recordProblem(rec, { group });
   if (reason) return { ok: false, pid: rec?.pid ?? null, reason };
-  try { process.kill(group ? -rec.pid : rec.pid, signal); } catch (e) { return { ok: false, pid: rec.pid, reason: `kill failed (${e?.code ?? e})` }; }
+  try { process.kill(group ? -rec.pid : rec.pid, signal); } catch (e) { // rule-21 guarded site: after recordProblem
+    return { ok: false, pid: rec.pid, reason: `signal failed (${e?.code ?? e})` }; }
   return { ok: true, pid: rec.pid, reason: null };
 }
 /** killRecorded for a ChildProcess we hold: also refused once Node has seen it exit (so a reaped and reused pid is
@@ -117,4 +118,10 @@ export function stopGroup(child, rec, { signal = 'SIGTERM', graceMs = 3000, memb
   for (let t = 0; t < graceMs && s.live.length; t += 50) { nap(50); s = survivors(rec, snap); }
   const clean = s.live.length === 0 && (s.probe === 'empty' || s.probe === 'leader-unreaped');
   return { ok: clean, signalled: r.ok, reason: clean ? (r.ok ? null : r.reason) : 'group members remain', survivors: s.live, probe: s.probe };
+}
+/** For the plain browser scripts: stopGroup + one loud line when the group is not verifiably gone. Returns ok. */
+export function stopOrReport(child, rec, tag) {
+  const r = stopGroup(child, rec); if (r.ok) return true;
+  console.error(`${tag}: SURVIVORS vite group ${rec?.pid ?? child.pid ?? '?'}: ${r.reason}; surviving pids: ${r.survivors.length ? r.survivors.join(' ') : 'none in the snapshot'} (group probe ${r.probe}); not signalled again`);
+  if (!process.exitCode) process.exitCode = 3; return false;
 }
