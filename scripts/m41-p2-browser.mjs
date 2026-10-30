@@ -139,14 +139,25 @@ for (const [w, h] of SIZES) {
     const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 90, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 30, cdS: 0 }, ...ws }, coinsCents: 0 }, { freeze: true });
     await toTab(page, 'workers'); await page.waitForTimeout(300);
     const r = await page.evaluate(() => { const vis = el => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue : n.nodeType === 1 && n.checkVisibility?.({ visibilityProperty: true }) !== false && getComputedStyle(n).display !== 'none' ? vis(n) : '').join('');
-      return ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', '[data-act=manageAll].nav-manage'].map(sel => { const e = document.querySelector(sel); if (!e || e.hidden || !e.getClientRects().length) return { sel, shown: false };
-        // AC-R17 / Art-c1: the Upgrades nav name starts with its visible label (.nav-lbl "Upgrades"); the count badge stays before it in the DOM (no reorder)
-        const v = vis(e).replace(/\s+/g, ' ').trim(), name = e.getAttribute('aria-label'), lbl = sel.includes('upgrades') ? e.querySelector('.nav-lbl').textContent.trim() : v;
-        return { sel, shown: true, v, lbl, name, ok: name.startsWith(lbl) }; }); });
+      const words = t => t.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim(); // axe-style: punctuation dropped
+      return ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', '[data-act=manageAll].nav-manage'].map(sel => { const e = document.querySelector(sel); if (!e || e.hidden || !e.getClientRects().length) return { sel, shown: false, name: e?.getAttribute('aria-label') ?? null };
+        // AC-R17 / Art-c1 (HoE 2026-10-30 00:19): the Upgrades badge follows the label in the DOM, so the visible text reads "Upgrades N";
+        // the name "Upgrades, N worker(s) need(s) attention" starts with it (punctuation dropped, as axe compares)
+        const v = vis(e).replace(/\s+/g, ' ').trim(), name = e.getAttribute('aria-label');
+        return { sel, shown: true, v, name, ok: sel.includes('upgrades') ? words(name).startsWith(words(v)) && name.startsWith('Upgrades') : name.startsWith(v) }; }); });
     const n = { 'mh-asleep': 1, 'ch-asleep': 1, 'both-asleep': 2, 'mh-unpaid': 1, 'ch-unpaid': 1, 'both-unpaid': 2, 'mh-asleep-ch-unpaid': 2, none: 0 }[scene];
     const shown = r.filter(x => x.shown), wt = r[1];
     check('AC-R17', w, `${scene}: every shown control's name starts with its visible text; Workers tab ${n ? `"Workers ${n}, …"` : '"Workers"'}`, shown.every(x => x.ok) && wt.shown && (n ? wt.name === `Workers ${n}, ${n} asleep or unpaid` : wt.name === 'Workers'), r);
-    check('AC-R17 / Art-c1', w, `${scene}: Upgrades nav aria-label ${n ? `"Upgrades, ${n} available"` : '"Upgrades"'}`, r[0].shown && r[0].name === (n ? `Upgrades, ${n} available` : 'Upgrades'), r[0]);
+    const upName = n === 0 ? 'Upgrades' : n === 1 ? 'Upgrades, 1 worker needs attention' : `Upgrades, ${n} workers need attention`;
+    check('AC-R17 / Art-c1', w, `${scene}: Upgrades nav aria-label "${upName}"${phone ? ', visible text "Upgrades' + (n ? ' ' + n : '') + '"' : ' (docked: nav not displayed, attribute checked)'}`, r[0].name === upName && (!phone || (r[0].shown && r[0].v === (n ? `Upgrades ${n}` : 'Upgrades'))), r[0]);
+    // Art-c1 geometry: badge after the label in the DOM, aria-hidden, same place as before (icon top-right -6/-6), no generated content
+    if (phone && n > 0) { const g = await page.evaluate(() => { const up = document.querySelector('nav [data-nav=upgrades]'), bd = up.querySelector(':scope > .asleep-badge'), ic = up.querySelector('.nav-ic');
+        if (!bd) return { bd: false, inIcon: !!up.querySelector('.nav-ic .asleep-badge') }; const a = bd.getBoundingClientRect(), c = ic.getBoundingClientRect(), gen = (el, p) => getComputedStyle(el, p).content;
+        return { bd: true, ah: bd.getAttribute('aria-hidden'), afterLbl: bd.previousElementSibling?.classList.contains('nav-lbl') ?? false, text: bd.textContent,
+          dRight: +(a.right - c.right).toFixed(2), dTop: +(c.top - a.top).toFixed(2), w: +a.width.toFixed(2), h: +a.height.toFixed(2), gen: [gen(bd, '::before'), gen(bd, '::after'), gen(up, '::before'), gen(up, '::after')] }; });
+      check('Art-c1', w, `${scene}: Upgrades badge after the label, aria-hidden, at the icon's top-right (+6 right, -6 top, ±0.5 px), no CSS-generated count`, g.bd && g.ah === 'true' && g.afterLbl && g.text === String(n) && Math.abs(g.dRight - 6) <= 0.5 && Math.abs(g.dTop - 6) <= 0.5 && g.gen.every(x => x === 'none' || x === 'normal'), g);
+      if (scene === 'mh-asleep' || scene === 'both-asleep') { const bb = await page.locator('nav.actions').boundingBox();
+        await shot(page, `nav-upgrades-n${n}`, w, `Bottom nav, Upgrades badge N=${n} after the label (Art-c1: aria-hidden, icon top-right -6/-6)`, g, { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 }); } }
     if (axeSrc) { await page.addScriptTag({ content: axeSrc });
       const ax = await page.evaluate(async () => { const inc = ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', 'nav [data-act=manageAll]', '#p-upgrades header [data-act=manageAll]'].filter(s => document.querySelector(s));
         const res = await window.axe.run({ include: inc.map(s => [s]) }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } });
@@ -160,9 +171,44 @@ for (const [w, h] of SIZES) {
     const r = await page.evaluate(() => { const nav = document.querySelector('nav.actions'), rf = nav.querySelector('.nav-manage');
       const foc = [...nav.querySelectorAll('button, a[href], [tabindex]')].filter(e => e.checkVisibility() && !e.disabled && e.tabIndex >= 0 && !e.closest('[inert]'));
       return { rfPresent: !!rf, rfShown: !!rf && rf.checkVisibility(), order: foc.map(e => e.dataset.nav ?? e.dataset.act ?? e.tagName), refillNames: foc.map(e => e.getAttribute('aria-label') ?? e.innerText).filter(x => /^Refill/.test(x)) }; });
-    const docked = w >= 960; // docked layout: nav keeps Market/Upgrades/Farm; the Refill copy lives in the Upgrades header
-    await page.locator('[data-nav=upgrades]').focus(); await page.keyboard.press('Tab'); const next = await page.evaluate(() => document.activeElement?.dataset.nav ?? document.activeElement?.dataset.act ?? document.activeElement?.tagName);
-    check('AC-R17 P2a count 0', w, 'D-HOP-2026-10-29-10: 3 rested workers -> nav Refill not rendered/focusable, no "Refill…" name in nav, Tab Upgrades -> next nav control', !r.rfShown && r.refillNames.length === 0 && !r.order.includes('manageAll') && r.order.join(',') === (docked ? r.order.join(',') : 'market,upgrades,farm') && next !== 'manageAll' && next === r.order[r.order.indexOf('upgrades') + 1], { ...r, next });
+    if (phone) { await page.locator('[data-nav=upgrades]').focus(); await page.keyboard.press('Tab'); const next = await page.evaluate(() => document.activeElement?.dataset.nav ?? document.activeElement?.dataset.act ?? document.activeElement?.tagName);
+      check('AC-R17 P2a count 0', w, 'D-HOP-2026-10-29-10: 3 rested workers -> nav Refill not rendered/focusable, no "Refill…" name in nav, Tab order Market, Upgrades, Farm; Tab Upgrades -> Farm', !r.rfShown && r.refillNames.length === 0 && r.order.join(',') === 'market,upgrades,farm' && next === 'farm', { ...r, next });
+    } else { const hd = await page.evaluate(() => { const e = document.querySelector('#p-upgrades header [data-act=manageAll]'); return { present: !!e, shown: !!e && e.checkVisibility() }; });
+      // docked (>= 960): the bottom nav is not displayed; the Refill copy lives in the Upgrades header and follows the same count rule
+      check('AC-R17 P2a count 0', w, 'D-HOP-2026-10-29-10 (docked): nav not displayed, no visible Refill in it; the header Refill copy hidden at count 0', !r.rfShown && r.refillNames.length === 0 && r.order.length === 0 && !hd.shown, { ...r, hd }); }
+    await ctx.close(); }
+  // ---- HoP addendum to D-HOP-2026-10-29-10 (00:22): nav Refill stays during the cooldown (count 0), hides when it ends; focus order/no trap ----
+  for (const how of ['tab', 'shift-tab']) { const rested = { energy: 90, cdS: 0 };
+    const { ctx, page } = await open(w, h, { workers: { market_hand: rested, coop_hand: rested, hawker: rested }, coinsCents: 1e6, manageCdS: 20 }, { freeze: true });
+    const sel = phone ? 'nav.actions .nav-manage' : '#p-upgrades header [data-act=manageAll]';
+    if (!phone) await toTab(page, 'workers');
+    const vis = el => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue : n.nodeType === 1 && n.getAttribute?.('aria-hidden') !== 'true' && n.checkVisibility?.({ visibilityProperty: true }) !== false && getComputedStyle(n).display !== 'none' ? vis(n) : '').join('');
+    const d = await page.evaluate(([sel, visSrc]) => { const vis = eval(visSrc), e = document.querySelector(sel); if (!e) return { present: false };
+      const st = JSON.stringify({ cd: window.eggfarm.state.manageCdS, w: window.eggfarm.state.workers, c: window.eggfarm.state.coinsCents });
+      const shown = e.checkVisibility(), name = e.getAttribute('aria-label'), v = vis(e).replace(/\s+/g, ' ').trim(), lbl = e.querySelector('.nav-lbl');
+      e.click(); window.eggfarmUi.render();
+      const st2 = JSON.stringify({ cd: window.eggfarm.state.manageCdS, w: window.eggfarm.state.workers, c: window.eggfarm.state.coinsCents });
+      return { present: true, shown, name, v, countdown: lbl?.textContent ?? null, countdownAriaHidden: lbl?.getAttribute('aria-hidden') ?? null, ariaDisabled: e.getAttribute('aria-disabled'), unchanged: st === st2 }; }, [sel, vis.toString()]);
+    if (how === 'tab') {
+      check('D-HOP-10-addendum', w, `cooldown, count 0: ${phone ? 'nav' : 'header'} Refill visible, name "Refill, cooling down" starts with its visible text (countdown aria-hidden), aria-disabled, a tap changes nothing`, d.present && d.shown && d.name === 'Refill, cooling down' && d.name.startsWith(d.v) && d.countdownAriaHidden === 'true' && d.ariaDisabled === 'true' && d.unchanged, d);
+      if (axeSrc) { await page.addScriptTag({ content: axeSrc }); const ax = await page.evaluate(async sel => { const res = await window.axe.run({ include: [[sel]] }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } }); return { v: res.violations.flatMap(x => x.nodes.map(n => n.target.join(' '))) }; }, sel);
+        check('D-HOP-10-addendum axe', w, 'cooldown Refill: axe 4.14 label-content-name-mismatch violations = 0', ax.v.length === 0, ax); }
+    }
+    if (phone) { // focus on Refill when the cooldown ends at count 0: Tab -> Farm, Shift+Tab -> Upgrades (no gap, no trap); then a full Tab sweep of the nav
+      await page.waitForTimeout(400); await page.locator(sel).focus();
+      await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, manageCdS: 0 }; window.eggfarmUi.render(); }); await page.waitForTimeout(300);
+      const after = await page.evaluate(sel => { const e = document.querySelector(sel), nav = document.querySelector('nav.actions');
+        return { shown: e.checkVisibility(), order: [...nav.querySelectorAll('button, a[href], [tabindex]')].filter(x => x.checkVisibility() && !x.disabled && x.tabIndex >= 0).map(x => x.dataset.nav ?? x.dataset.act ?? x.tagName) }; }, sel);
+      await page.keyboard.press(how === 'tab' ? 'Tab' : 'Shift+Tab'); const k1 = await page.evaluate(() => document.activeElement?.dataset.nav ?? document.activeElement?.dataset.act ?? document.activeElement?.tagName);
+      await page.locator('[data-nav=market]').focus(); const sweep = ['market'];
+      for (let i = 0; i < 2; i++) { await page.keyboard.press('Tab'); sweep.push(await page.evaluate(() => document.activeElement?.dataset.nav ?? document.activeElement?.dataset.act ?? document.activeElement?.tagName)); }
+      const want = how === 'tab' ? 'farm' : 'upgrades';
+      check('D-HOP-10-addendum', w, `cooldown ends at count 0 with focus on Refill: Refill leaves the nav, order Market, Upgrades, Farm; ${how === 'tab' ? 'Tab' : 'Shift+Tab'} -> ${want[0].toUpperCase() + want.slice(1)}; Tab sweep from Market = Market, Upgrades, Farm`, !after.shown && after.order.join(',') === 'market,upgrades,farm' && k1 === want && sweep.join(',') === 'market,upgrades,farm', { after, k1, sweep });
+    } else if (how === 'tab') {
+      await page.evaluate(() => { window.eggfarm.state = { ...window.eggfarm.state, manageCdS: 0 }; window.eggfarmUi.render(); }); await page.waitForTimeout(300);
+      const gone = await page.evaluate(sel => !document.querySelector(sel).checkVisibility(), sel);
+      check('D-HOP-10-addendum', w, 'cooldown ends at count 0 (docked): the header Refill copy is hidden (nav not displayed)', gone, { gone });
+    }
     await ctx.close(); }
   // ---- P2b-U / Art-c2: Unpaid Refill refused tap = shake; reduced motion = static refusedFlash, no translate ----
   for (const rm of [false, true]) { const { ctx, page } = await open(w, h, { workers: { ...MH_UNPAID, coop_hand: { energy: 90, cdS: 0 } }, coinsCents: 0 }, { rm, freeze: true });

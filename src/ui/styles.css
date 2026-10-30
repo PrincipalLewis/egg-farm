@@ -41,6 +41,9 @@ img{user-select:none;-webkit-user-drag:none}
 .maxed{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:var(--r-pill);background:var(--c-yolk);color:var(--c-text);font:700 var(--fs-base) var(--f-display);box-shadow:none;pointer-events:none;user-select:none}
 .btn img{width:20px;height:20px}
 .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
+/* Art-c2: a refused Refill is aria-disabled, and .btn[aria-disabled=true]{animation:none} (0,2,0) beat .shake (0,1,0), so the full-motion
+   shake never played on it (found by the 1befa17 browser check). Same specificity as the reduced-motion swap below, placed before it. */
+.btn.manage.shake{animation:shake var(--t-med) linear}
 /* P2b-U / Art-c2 (2026-10-29 23:20): a refused Refill tap (Unpaid) keeps the shake; under reduced motion it is a static refused flash, no translate. */
 @keyframes refusedFlash{0%,100%{box-shadow:inset 0 0 0 2px var(--c-danger)}}
 @media (prefers-reduced-motion:reduce){.btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}}
@@ -631,6 +634,10 @@ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);op
 .tabs [data-tab=workers]{position:relative}
 nav [data-nav=upgrades]{position:relative}
 nav [data-nav=upgrades] .nav-ic .badge{top:-6px;right:-6px}
+/* Art-c1 (HoE 2026-10-30 00:19): the Upgrades count badge follows the label in the DOM (aria-hidden); it keeps the icon's top-right -6/-6.
+   The button centres .nav-ic (28px) + 2px gap + .nav-lbl (12px/1.2) in a column; the badge is out of flow, so icon top = 50% - 22.2px
+   and icon right = 50% + 14px. No generated content: the count is the badge's own text. */
+nav [data-nav=upgrades]>.asleep-badge{top:calc(50% - (28px + 2px + 12px * 1.2) / 2 - 6px);right:calc(50% - 14px - 6px)}
 .asleep-badge.badge-pulse{animation:badgePulse 400ms ease-out}
 @keyframes badgePulse{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.asleep-badge.badge-pulse{animation:none}}

@@ -160,4 +160,20 @@ describe('P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; 
     expect(app).toMatch(/if \(kind === 'manage' && g\.state\.workers\[[^\]]+\]\?\.unpaid\) return cantAfford\(bt\);/);
     expect(app).toMatch(/const cantAfford = \(el: HTMLElement\) => \{ retrigger\(el, 'shake'\);/);
   });
+  it('P2b-U / Art-c2: the full-motion shake beats .btn[aria-disabled=true]{animation:none} on a refused Refill (.btn.manage.shake, before the reduced-motion swap)', () => {
+    const i = css.indexOf('.btn.manage.shake{animation:shake var(--t-med) linear}'), j = css.indexOf('@media (prefers-reduced-motion:reduce){.btn.manage.shake');
+    expect(i).toBeGreaterThan(-1); expect(j).toBeGreaterThan(i); expect(css).toContain('.btn[aria-disabled=true]{');
+  });
+});
+
+describe('Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, same place on screen, no CSS-generated count', () => {
+  it('Art-c1: the nav badge is positioned on the icon\'s top-right -6/-6 from the button (out of flow), the Workers tab badge rule unchanged', () => {
+    expect(css).toContain('nav [data-nav=upgrades]>.asleep-badge{top:calc(50% - (28px + 2px + 12px * 1.2) / 2 - 6px);right:calc(50% - 14px - 6px)}');
+    expect(css).toMatch(/\.asleep-badge\{position:absolute;top:-6px;right:-6px/); expect(css).toContain('nav [data-nav=upgrades]{position:relative}');
+    expect(css).toMatch(/\.actions \.nav-lbl\{font:700 12px\/1\.2 /); expect(css).toMatch(/\.nav-ic\{position:relative;display:inline-block;width:28px;height:28px\}/); // the calc's inputs
+  });
+  it('Art-c1: no generated content (content:) on the badge or the Upgrades nav button', () => {
+    const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(m => /asleep-badge|data-nav=upgrades/.test(m[1]));
+    expect(rules.length).toBeGreaterThan(2); for (const m of rules) expect(m[2], m[1]).not.toMatch(/(^|;)\s*content\s*:/);
+  });
 });

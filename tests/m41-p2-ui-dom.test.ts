@@ -91,8 +91,11 @@ describe('P2b AC-R11 / TP1-U2: a Refill tap on an Unpaid worker dispatches nothi
 });
 
 describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced', () => {
-  // Visible text the way axe's label-content-name-mismatch reads it (text nodes in DOM order joined with '', [hidden] skipped).
-  const visible = (el: Element): string => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue ?? '' : n.nodeType === 1 && !(n as HTMLElement).hidden ? visible(n as Element) : '').join('');
+  // Visible text the way axe's label-content-name-mismatch reads it (text nodes in DOM order joined with '', [hidden] and
+  // aria-hidden subtrees skipped). domText keeps aria-hidden nodes: what a sighted user reads, in DOM order.
+  const visible = (el: Element): string => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue ?? '' : n.nodeType === 1 && !(n as HTMLElement).hidden && (n as HTMLElement).getAttribute('aria-hidden') !== 'true' ? visible(n as Element) : '').join('');
+  const domText = (el: Element): string => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue ?? '' : n.nodeType === 1 && !(n as HTMLElement).hidden ? domText(n as Element) : '').join('');
+  const words = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim(); // axe-style: punctuation dropped
   const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
   const startsWithVisible = (el: Element) => { const v = norm(visible(el)), name = el.getAttribute('aria-label') ?? ''; return { v, name, ok: name.startsWith(v) }; };
   const scenes: [string, Record<string, unknown>, number][] = [
@@ -102,20 +105,26 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
     ['MH + CH unpaid', { market_hand: { energy: 60, cdS: 5, unpaid: true }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
     ['MH asleep + CH unpaid', { market_hand: { energy: 0, cdS: 5 }, coop_hand: { energy: 60, cdS: 5, unpaid: true } }, 2],
     ['none (N = 0)', { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 } }, 0]];
-  for (const [name, workers, n] of scenes) it(`AC-R17 P2a / Art-c1: ${name}: Upgrades nav, Workers tab, Refill nav`, async () => {
+  for (const [name, workers, n] of scenes) it(`AC-R17 P2a / Art-c1: ${name}: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav`, async () => {
     const { ui } = await mount({ farmLevel: 12, coinsCents: 0, manageCdS: 0, customers: [], nextCustomerInS: 1e9, workers: { market_hand: { energy: 90, cdS: 5 }, coop_hand: { energy: 90, cdS: 5 }, hawker: { energy: 30, cdS: 0 }, ...workers } }); // 3 hired: nav Refill shown
     ui.openPanel('upgrades'); (document.querySelector('.tabs button[data-tab="workers"]') as HTMLElement).click(); ui.render();
     const up = startsWithVisible(document.querySelector('nav [data-nav=upgrades]')!), wt = startsWithVisible(document.querySelector('.tabs [data-tab=workers]')!);
     expect(wt.ok, JSON.stringify(wt)).toBe(true);
-    // AC-R17 / Art-c1 (2026-10-29 23:20): Upgrades aria-label is "Upgrades, N available", aria-label only, no DOM reorder. It starts
-    // with the visible label (.nav-lbl). The count badge stays before the label in the DOM, so the full subtree text still reads
-    // "N Upgrades" (asserted here so a change to that is noticed; flagged to HoE/Art as the 2.5.3-vs-no-reorder conflict).
-    const lbl = norm(document.querySelector('nav [data-nav=upgrades] .nav-lbl')!.textContent ?? '');
-    expect(lbl).toBe('Upgrades'); expect(up.name.startsWith(lbl), JSON.stringify(up)).toBe(true);
+    // Art-c1 (HoE ruling 2026-10-30 00:19/00:20): name "Upgrades, N workers need attention" / "Upgrades, 1 worker needs attention" /
+    // N = 0 "Upgrades". The count badge follows the label in the DOM and is aria-hidden, so the visible text reads "Upgrades N" and
+    // the name starts with it (axe-style, punctuation dropped) as well as with the exposed label "Upgrades".
+    const upB = document.querySelector('nav [data-nav=upgrades]')!, lbl = norm(upB.querySelector('.nav-lbl')!.textContent ?? '');
+    expect(lbl).toBe('Upgrades'); expect(up.v).toBe('Upgrades'); expect(up.ok, JSON.stringify(up)).toBe(true);
+    const badge = upB.querySelector('.asleep-badge') as HTMLElement;
+    expect(badge.parentElement).toBe(upB); expect(badge.getAttribute('aria-hidden')).toBe('true');
+    expect(badge.previousElementSibling?.classList.contains('nav-lbl')).toBe(true); // after the label in DOM order, not inside .nav-ic
+    expect(upB.querySelector('.nav-ic .asleep-badge')).toBeNull();
+    expect(words(up.name).startsWith(words(domText(upB))), JSON.stringify({ dom: domText(upB), name: up.name })).toBe(true);
     if (n > 0) {
-      expect(up.v).toBe(`${n} Upgrades`); expect(up.name).toBe(`Upgrades, ${n} available`);
+      expect(norm(domText(upB))).toBe(`Upgrades ${n}`); expect(badge.textContent).toBe(String(n)); expect(badge.hidden).toBe(false);
+      expect(up.name).toBe(n === 1 ? 'Upgrades, 1 worker needs attention' : `Upgrades, ${n} workers need attention`);
       expect(wt.v).toBe(`Workers ${n}`); expect(wt.name).toBe(`Workers ${n}, ${n} asleep or unpaid`); // count announced, never bare "Workers"
-    } else { expect(up.name).toBe('Upgrades'); expect(wt.name).toBe('Workers'); expect(wt.v).toBe('Workers'); }
+    } else { expect(up.name).toBe('Upgrades'); expect(norm(domText(upB))).toBe('Upgrades'); expect(badge.hidden).toBe(true); expect(wt.name).toBe('Workers'); expect(wt.v).toBe('Workers'); }
     const rf = document.querySelector('nav .nav-manage')! as HTMLElement; // the hawker at 30% is tired: N >= 1 (Unpaid never counted)
     expect(rf.hidden).toBe(false); const r = startsWithVisible(rf);
     expect(r.ok, JSON.stringify(r)).toBe(true); expect(r.v).toMatch(/^Refill \d+$/); expect(r.name).toMatch(/^Refill (1 tired worker|\d+ tired workers)$/);
@@ -143,5 +152,38 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in 
     expect(order).toEqual(['market', 'upgrades', 'farm']);
     const ui0 = order.indexOf('upgrades'); expect(order[ui0 + 1]).toBe('farm'); // Upgrades → next control, nothing between
     expect(nav.querySelectorAll('[tabindex]:not([tabindex="-1"])').length).toBe(0); // no positive tabindex that could trap/reorder
+  });
+  it('Art-c1: upgradesNavName pluralises: N = 0 "Upgrades", N = 1 "Upgrades, 1 worker needs attention", N = 2/3 "… workers need attention"', async () => {
+    const { upgradesNavName } = await import('../src/ui/workers-ui');
+    expect(upgradesNavName(0)).toBe('Upgrades'); expect(upgradesNavName(1)).toBe('Upgrades, 1 worker needs attention');
+    expect(upgradesNavName(2)).toBe('Upgrades, 2 workers need attention'); expect(upgradesNavName(3)).toBe('Upgrades, 3 workers need attention');
+  });
+  // HoP addendum to D-HOP-2026-10-29-10 (00:22, no behaviour change): nav Refill stays visible during the cooldown and is hidden only
+  // when the count is 0 and no cooldown runs. 3 rested workers = count 0; manageCdS > 0 = cooldown.
+  const restedCd = async (cd: number) => { const b = on, thr = b.workers.energy.manage_prompt_threshold * 100, rested = { energy: Math.max(90, thr + 1), cdS: 5 };
+    const m = await mount({ farmLevel: 12, coinsCents: 1e6, manageCdS: cd, customers: [], nextCustomerInS: 1e9, workers: { market_hand: rested, coop_hand: rested, hawker: rested } }); m.ui.render(); return m; };
+  const navOrder = () => { const nav = document.querySelector('nav.actions')!;
+    const hid = (e: Element | null): boolean => { for (let x = e as HTMLElement | null; x; x = x.parentElement) if (x.hidden || x.hasAttribute('inert')) return true; return false; };
+    return [...nav.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [tabindex]')].filter(e => !hid(e) && !(e as HTMLButtonElement).disabled && e.tabIndex >= 0).map(e => e.dataset.nav ?? e.dataset.act ?? e.tagName); };
+  it('D-HOP-10-addendum: count 0 during the cooldown -> nav Refill visible, name starts with its visible text, not actionable', async () => {
+    const { g, ui } = await restedCd(20);
+    const rf = document.querySelector('nav .nav-manage') as HTMLElement;
+    expect(rf.hidden).toBe(false); expect(navOrder()).toEqual(['market', 'upgrades', 'manageAll', 'farm']);
+    const r = startsWithVisible(rf); // the "0:20" countdown is aria-hidden (review 23a3798 #1), so axe's visible text is the exposed rest
+    expect(rf.querySelector('.nav-lbl')!.textContent).toBe('0:20'); expect(rf.querySelector('.nav-lbl')!.getAttribute('aria-hidden')).toBe('true');
+    expect(r.name).toBe('Refill, cooling down'); expect(r.ok, JSON.stringify(r)).toBe(true); expect(r.name.startsWith('Refill')).toBe(true);
+    expect(rf.getAttribute('aria-disabled')).toBe('true'); expect(rf.classList.contains('is-cooldown')).toBe(true);
+    const before = JSON.stringify({ cd: g.state.manageCdS, w: g.state.workers, c: g.state.coinsCents });
+    rf.click(); ui.render();
+    expect(JSON.stringify({ cd: g.state.manageCdS, w: g.state.workers, c: g.state.coinsCents })).toBe(before); // refused: no Refill, no spend
+    expect(rf.classList.contains('shake')).toBe(true); // the refused-tap feedback (cantAfford)
+  });
+  it('D-HOP-10-addendum: the cooldown ends at count 0 -> nav Refill leaves the nav; Tab order Market → Upgrades → Farm (no gap, no trap), also with focus on Refill', async () => {
+    const { g, ui } = await restedCd(20);
+    const rf = document.querySelector('nav .nav-manage') as HTMLElement; rf.focus(); expect(document.activeElement).toBe(rf);
+    g.state = { ...g.state, manageCdS: 0 }; ui.render();
+    expect(rf.hidden).toBe(true); expect(navOrder()).toEqual(['market', 'upgrades', 'farm']);
+    expect(document.querySelectorAll('nav.actions [tabindex]:not([tabindex="-1"])').length).toBe(0);
+    // focus left on the now-hidden button is browser-measured (scripts/m41-p2-browser.mjs: Tab -> Farm, Shift+Tab -> Upgrades); jsdom keeps focus on hidden nodes
   });
 });

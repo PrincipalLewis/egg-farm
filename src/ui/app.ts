@@ -32,7 +32,7 @@ import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, type NavAria } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
@@ -598,22 +598,24 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // AC-R1 / AC-R5 (v1.4 §7): asleep/unpaid count badge on the Upgrades nav icon + the Workers tab; replaces the affordable dot while count > 0; one pulse on first show.
     { const n = asleepOrUnpaidCount(s, b);
       setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, n > 0 || !canUp);
-      const ensure = (host: Element | null) => {
+      const ensure = (host: Element | null, ariaHidden = false) => {
         if (!host) return null;
-        let ab = host.querySelector('.asleep-badge') as HTMLElement | null;
-        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(' ', ab); } // AC-R17: ' ' = "Workers N" (absolute badge, no layout)
+        let ab = host.querySelector(':scope > .asleep-badge') as HTMLElement | null;
+        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; if (ariaHidden) ab.setAttribute('aria-hidden', 'true'); host.append(' ', ab); } // AC-R17: ' ' = "Workers N" (absolute badge, no layout)
         return ab;
       };
-      for (const ab of [ensure(nav.querySelector('[data-nav=upgrades] .nav-ic')), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
+      // Art-c1 (HoE 2026-10-30 00:19): the Upgrades count badge sits after the "Upgrades" label in the DOM (visible text "Upgrades N"),
+      // aria-hidden (the name carries the count); CSS keeps it at the icon's top-right (styles.css, same -6/-6 as before). No CSS-generated count.
+      for (const ab of [ensure(nav.querySelector('[data-nav=upgrades]'), true), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
         if (!ab) continue;
         const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
         if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
       }
       // AC-R17 (rc1-asleep v1.0.11, WCAG 2.5.3): each name starts with the visible text in DOM order and announces the count:
-      // nav "Upgrades, N available" (Art-c1, 2026-10-29 23:20: aria-label only, no DOM reorder; the count badge stays before the
-      // label in the DOM), Workers tab "Workers N, N asleep or unpaid"; N = 0 -> bare label.
+      // nav (Art-c1 as ruled by HoE 2026-10-30 00:19/00:20) "Upgrades, N workers need attention" / "Upgrades, 1 worker needs attention",
+      // Workers tab "Workers N, N asleep or unpaid"; N = 0 -> bare label.
       const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement, wt = document.querySelector('.tabs [data-tab=workers]') as HTMLElement | null;
-      const al = n > 0 ? `Upgrades, ${n} available` : 'Upgrades';
+      const al = upgradesNavName(n);
       if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al);
       const tl = n > 0 ? `Workers ${n}, ${n} asleep or unpaid` : 'Workers';
       if (wt && wt.getAttribute('aria-label') !== tl) wt.setAttribute('aria-label', tl); }

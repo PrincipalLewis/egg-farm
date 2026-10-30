@@ -64,6 +64,9 @@ export class YawnSfx {
   }
 }
 /** AC-R9 plural: "Refill 1 tired worker" / "Refill N tired workers" (never "1 tired workers"). */
+/** AC-R17 / Art-c1 (HoE ruling 2026-10-30 00:19/00:20, WCAG 2.5.3): accessible name of the Upgrades nav button. It starts with the
+ *  visible label "Upgrades"; the aria-hidden count badge after it is announced as N workers needing attention. N = 0 -> "Upgrades". */
+export const upgradesNavName = (n: number) => n > 0 ? `Upgrades, ${n} ${n === 1 ? 'worker needs' : 'workers need'} attention` : 'Upgrades';
 export const refillTiredLabel = (n: number) =>
   n === 1 ? 'Refill 1 tired worker' : `Refill ${n} tired workers`;
 
