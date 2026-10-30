@@ -312,8 +312,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // existing disabled Buy: no strip, no event (the normal path refuses it).
     if (!bt.hasAttribute('aria-describedby') || !(k in ZG_KEY_OF) || !wouldApply(g.state, buyAction(k), b)) return false;
     zgOpenStrip(k); return true;
-    return true;
   }
+  /** N2 (review 546de85): the strip's listeners live as long as this mount; `ui.dispose()` removes them (tests that remount). */
+  const zgAC = new AbortController();
   if (ZGC) {
     // Esc inside the strip closes it (not the panel). Held Enter/Space on the strip buttons: ignored (UI-ZG-18, a local copy of PL-1);
     // no stopPropagation for those keys, so the document PL-1 guard still sees them.
@@ -321,9 +322,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const inStrip = !!(e.target as Element | null)?.closest?.('.zg-confirm');
       if (inStrip && e.repeat && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); return; }
       if (inStrip && e.key === 'Escape' && zgOpen) { e.preventDefault(); e.stopPropagation(); zgClose('cancel'); }
-    });
+    }, { signal: zgAC.signal });
     document.addEventListener('pointerdown', e => { if (!zgOpen) return; const t = e.target as Element | null, el = zgEls(zgOpen.kind);
-      if (el && t && (el.st.contains(t) || el.buy?.contains(t))) return; zgClose('cancel'); }, true);
+      if (el && t && (el.st.contains(t) || el.buy?.contains(t))) return; zgClose('cancel'); }, { capture: true, signal: zgAC.signal });
   }
 
   // ---------- Modals ----------
@@ -581,7 +582,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <ul class="fx">${slotLines ?? ''}${fxLines(fx, zg)}</ul>${max ? '' : bestChip(isF ? 'FARM' : 'COLL')}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
-        noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`)}
+        `<button class="btn buy ${glowCls(can, zg)}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
       <div>${hint}</div>${zgDesc(zg, kind)}</div></div>${zgStrip(zg, kind)}`;
   };
   // ---------- v5 zeroGainUi row pieces (UI doc art-ux/m5.1-zero-gain-ui.md v1.4 §1/§2/§5; all '' when the row is not ZG) ----------
@@ -589,8 +590,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** First effect line gets the chip; the others are unchanged. Not ZG -> byte-identical to the flag-off markup. */
   const fxLines = (fx: string[], zg: boolean) => fx.map((l, i) => zg && i === 0 ? `<li class="zg-line"><span class="fx-t">${l}</span><span class="zg-chip">${ZG_CHIP}</span></li>` : `<li>${l}</li>`).join('');
   const zgBuyAttrs = (zg: boolean, k: string, can: boolean) => !zg ? '' : ` aria-describedby="zg-desc-${ZK[k as ZRow]}"${ZGC && can ? ` aria-expanded="false" aria-controls="zgc-${ZK[k as ZRow]}"` : ''}`;
-  /** UI-ZG-4: an affordable ZG Buy drops `.affordable` (no glow); the class attribute then equals the unaffordable one. */
-  const noGlow = (zg: boolean, html: string) => zg ? html.replace('class="btn buy affordable"', 'class="btn buy "') : html;
+  /** UI-ZG-4: an affordable ZG Buy has no `.affordable` (no glow); its class attribute then equals the unaffordable one. N3 (review
+   *  546de85): a value in the template, not a string replace; not ZG -> exactly `can ? 'affordable' : ''` (flag-off bytes unchanged). */
+  const glowCls = (can: boolean, zg: boolean) => can && !zg ? 'affordable' : '';
   const zgDesc = (zg: boolean, k: string) => zg ? `<span id="zg-desc-${ZK[k as ZRow]}" hidden>${ZG_DESC}</span>` : '';
   /** Confirm strip (only m4.zeroGain.confirm = 1): rendered once as the row's next sibling, always hidden in the markup; open state is
    *  applied on the DOM (zgApply), so toggling never re-renders the tab (UI-ZG-15). */
@@ -611,7 +613,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
       : farmMaxed ? `<span class="maxed farm-max" aria-hidden="true">${TRACK_FARM_MAX_TEXT}</span>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${need}.">${trackLockText(need!)}</div>`
-      : noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`);
+      : `<button class="btn buy ${glowCls(can, zg)}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
     const best = !lock && rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
     return `<div class="up track${best}${zg ? ' zg' : ''}" data-track="${t}"${zg ? ` data-zero-gain="${ZG_KEY_OF[t]}"` : ''}${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>
@@ -883,5 +885,5 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
   if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
+  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort() };
 }

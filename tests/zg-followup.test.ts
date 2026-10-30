@@ -68,3 +68,14 @@ describe('Minor 2: an unrelated re-render while the strip is open keeps focus wh
   });
 });
 
+describe('N2: the strip listeners are scoped to the mount', () => {
+  it('ui.dispose() removes them: after dispose an outside pointerdown no longer cancels', async () => {
+    t = 50_000; const { g, ui } = await mount(COLL_ZG(), C1); buy().click(); t += 1000;
+    (ui as any).dispose(); document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    expect(zgc(g)).toEqual([]); expect(strip().hidden).toBe(false);
+  });
+  it('without dispose an outside pointerdown cancels (control)', async () => {
+    t = 60_000; const { g } = await mount(COLL_ZG(), C1); buy().click(); t += 1000;
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true })); expect(zgc(g)).toEqual(['cancel']);
+  });
+});
