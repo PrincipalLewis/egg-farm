@@ -27,6 +27,7 @@ const B = (flags?: Partial<Record<M5Flag, number>>) => ({ ...balance, m4: { ...b
 // Fixture effects (test inputs, not tunables), same shapes as tests/v5-f1c-effects.test.ts: Frenzy-like x2, streak-like x1.28.
 const frenzy: SaleEffect = { id: 'frenzy', flag: 'golden', factor: () => 2 };
 const streak: SaleEffect = { id: 'streak', flag: 'streak', factor: () => 1.28 };
+const SALE = SALE_EFFECTS as SaleEffect[]; // test-only fixture seam, as tests/v5-f1c-effects.test.ts (registries are readonly in src)
 const farm = (b: Balance): GameState => ({ ...initialState(b, 3), farmLevel: 12, hensLevel: 12, eggValueLevel: 12, graderTier: 2, basket: 500, coinsCents: 0,
   workers: { grader: { energy: 100, cdS: 0 }, market_hand: { energy: 100, cdS: 0 } },
   customers: [{ id: 1, demand: 10, filled: 0, waitedS: 0 }, { id: 2, demand: 7, filled: 0, waitedS: 0 }] });
@@ -37,7 +38,7 @@ beforeAll(() => {
   (globalThis as any).cancelAnimationFrame ??= (i: number) => clearTimeout(i);
   (Element.prototype as any).animate ??= () => ({ finished: Promise.resolve(), cancel() {}, onfinish: null, addEventListener() {} });
 });
-afterEach(() => { SALE_EFFECTS.length = 0; document.body.innerHTML = ''; vi.restoreAllMocks(); });
+afterEach(() => { SALE.length = 0; document.body.innerHTML = ''; vi.restoreAllMocks(); });
 /** Drive the real jsdom document: visibilityState getter + hasFocus(). */
 const setDoc = (vis: DocumentVisibilityState, focus: boolean) => {
   vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(vis);
@@ -46,7 +47,7 @@ const setDoc = (vis: DocumentVisibilityState, focus: boolean) => {
 const tick = () => new Promise(r => setTimeout(r, 30));
 /** The real mountApp with golden+streak on and the fixture effects registered, Market sheet open. */
 async function mountMarket(flags: Partial<Record<M5Flag, number>> = { golden: 1, streak: 1 }) {
-  SALE_EFFECTS.push(frenzy, streak);
+  SALE.push(frenzy, streak);
   const b = B(flags), s0 = farm(b);
   const g = new Game(b as any, mem() as any, () => Date.UTC(2026, 9, 30, 12), 3, 'test');
   g.state = { ...s0 };
