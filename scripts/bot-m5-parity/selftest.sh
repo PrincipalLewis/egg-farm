@@ -21,6 +21,13 @@ expect 0  "all jobs succeed -> run_all 0"                       runall "$T/a/out
 expect nz "one px job fails (optimal.off.p1, stream B) -> non-zero" runall "$T/b/out" stubB optimal.off.p1
 expect nz "lx auto fails (last job of stream B) -> non-zero"    runall "$T/c/out" stubC auto
 expect nz "g1 fails (last job of stream A) -> non-zero"         runall "$T/d/out" stubD base
+rt() { ( set -euo pipefail; O=$1; cd "$2"; log() { :; }; . "$D/jobs.sh"; log() { :; }; record_tree "$3" ); }
+expect 0  "record_tree on this tree -> writes balance.json sha256 + m4.flags"  rt "$T/r/out" "$D/../.." port
+grep -E "^(src/config/balance.json sha256|m4.flags) " "$T/r/results/tree-port.txt" | cut -c1-120 | sed 's/^/       | /'
+mkdir -p "$T/nobal/src/config"; git -C "$T/nobal" init -q; git -C "$T/nobal" -c user.name=t -c user.email=t@t commit -q --allow-empty -m t
+expect nz "record_tree on a tree with no src/config/balance.json -> FAIL"       rt "$T/s/out" "$T/nobal" port
+cp "$D/../../data/economy.csv" "$T/nobal/" 2>/dev/null || true; echo '{"m4":{"enabled":1}}' > "$T/nobal/src/config/balance.json"; mkdir -p "$T/nobal/data"; cp "$D/../../data/economy.csv" "$T/nobal/data/"
+expect nz "record_tree on a balance.json without m4.flags -> FAIL"             rt "$T/u/out" "$T/nobal" port
 echo "# compare-smoke.py on the stub outputs"
 cp -r "$T/a/out" "$T/a/ref"
 expect 0  "identical full sets -> PASS"                          python3 "$D/compare-smoke.py" "$T/a/ref" "$T/a/out" 20

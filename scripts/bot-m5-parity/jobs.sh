@@ -18,3 +18,19 @@ run_all() { local s=$1 a b ra=0 rb=0; mkdir -p "$O" || exit 1; log "$s" "start h
   streamA "$s" & a=$!; streamB "$s" & b=$!; wait "$a" || ra=$?; wait "$b" || rb=$?
   log "$s" "streams rc A=$ra B=$rb"; [ "$ra" = 0 ] && [ "$rb" = 0 ] || exit 1
   if [ "$SEEDS" = 200 ]; then for p in pool2 pool2b; do job "$s" "$p" env PDIR="$O" PYTHONPATH="$D/econ-orig" python3 "$D/econ-orig/$p.py" > "$O/$p.stdout" || exit 1; done; fi; }
+# QA-D-1030-SHIPFLAGS: record the tree's src/config/balance.json sha256 and its m4.enabled / m4.flags values (and the CSV sha256)
+# in <outroot>/results/tree-<side>.txt; covered by run-smoke.sh's SHA256SUMS. Fails (exit 1) if any of it cannot be read.
+record_tree() { local side=$1 r="$O/../results" t; mkdir -p "$r" || exit 1; t="$r/tree-$side.txt"
+  python3 - "$side" > "$t" <<'PY' || { echo "record_tree: cannot read src/config/balance.json m4.flags in $(pwd)" >&2; rm -f "$t"; exit 1; }
+import hashlib, json, subprocess, sys
+raw = open("src/config/balance.json", "rb").read()
+b = json.loads(raw); m4 = b["m4"]; flags = m4["flags"]
+assert isinstance(flags, dict) and flags, "m4.flags missing or empty"
+print(f"side {sys.argv[1]}")
+print("head " + subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip())
+print("src/config/balance.json sha256 " + hashlib.sha256(raw).hexdigest())
+print("data/economy.csv sha256 " + hashlib.sha256(open("data/economy.csv", "rb").read()).hexdigest())
+print("m4.enabled " + json.dumps(m4["enabled"]))
+print("m4.flags " + json.dumps(flags, sort_keys=True, separators=(",", ":")))
+PY
+  [ -s "$t" ] || exit 1; log "$side" "tree: $(sed -n 3p "$t")"; }

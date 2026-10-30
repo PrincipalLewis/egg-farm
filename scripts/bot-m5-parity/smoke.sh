@@ -5,6 +5,7 @@ set -euo pipefail
 SHA=$1 W=$2 O=$3; SEEDS=${SEEDS:-20}; D=$(cd "$(dirname "$0")" && pwd)
 . "$D/jobs.sh"
 cd "$W"; check_tree "$SHA" ""
+mkdir -p "$O"; record_tree port
 VN=(node node_modules/vite-node/vite-node.mjs)
 PX=(scripts/bot-m5px.ts) LX=(scripts/bot-m5lx.ts)
 run_all port
