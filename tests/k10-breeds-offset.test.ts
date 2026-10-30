@@ -3,17 +3,23 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { parseEconomyCsv, buildBalance, readEconomyConfig } from '../scripts/sync-economy';
+import { parseEconomyCsv, buildBalance } from '../scripts/sync-economy';
 import { validateBalance, type Balance } from '../src/config/balance';
-import { loadTargets } from './pacing-guards';
+import type { PacingTargets } from './pacing-guards';
 import { b4Gate, b4Stack, bcFromCsv, bcDefaults, hasBreedsCols, Breeds, bsInit, run, PROFS, B4_BASE } from './k10-breeds-offset';
 // @ts-expect-error plain .mjs script without types
 import { csvMechChanges, k10Reasons } from '../scripts/k10-trigger.mjs';
 
 // Byte copy of Economy's M5.1 draft CSV ad27fe73 (scratch/m51-econ/economy.m51-draft.csv): M5.0 CSV 8dc90e2b + the 32 bc_* columns.
 const FIX = new URL('./fixtures/economy-ad27fe73.csv', import.meta.url), FIX_SHA = 'ad27fe73eab91b5ae0005b719d9822fb063f3a2d1561cfc917e853e1f4d7d477';
-const csvBalance = (csv: string): Balance => validateBalance(buildBalance(parseEconomyCsv(csv),
-  JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8')), readEconomyConfig() as any) as Balance, false);
+// D-HOE-20261030-05: the seed-1 parity line below is balance-value output, so every input is a committed fixture with a sha256
+// assert (byte copies of rc/v5 65a7443 src/config/balance.json, data/economy-config.json, data/pacing-targets.json), never the live files.
+const PIN = (name: string, sha: string) => { const raw = readFileSync(new URL('./fixtures/k10/' + name, import.meta.url));
+  expect(createHash('sha256').update(raw).digest('hex'), name).toBe(sha); return JSON.parse(raw.toString('utf8')); };
+const balJson = () => PIN('balance-9a73bd8a.json', '9a73bd8a6ebb936792c9c5fc667f37d295ecb9f8b74149112d50b297d228bb89');
+const econCfg = () => PIN('economy-config-5540ab95.json', '5540ab9567505aaa1b0e399fbb3cce32411abf083c92a32588228a0c4b4e3cdd');
+const loadTargets = (): PacingTargets => PIN('pacing-targets-7ef4daec.json', '7ef4daec61536ecac25b2fc11861a285dbc856418988cc0eea7c21dd4ef7296e');
+const csvBalance = (csv: string): Balance => validateBalance(buildBalance(parseEconomyCsv(csv), balJson(), econCfg() as any) as Balance, false);
 
 describe('k10 harness', () => {
   const raw = readFileSync(FIX), csv = raw.toString('utf8');
@@ -31,6 +37,7 @@ describe('k10 harness', () => {
     expect(() => bcFromCsv(two)).toThrow(/1 incubator/);
   });
   it('seed 1 equals the scratch harness of record (g1csv.ts -> g1tap/m5tap/breeds 76c07ecf, SEEDS=1, g1max @0.27)', () => {
+    expect(createHash('sha256').update(raw).digest('hex')).toBe(FIX_SHA);
     const b = csvBalance(csv), cb = bcFromCsv(csv);
     const o = b4Gate(b, b4Stack('g1F', 0.27, cb), 'AssZhold_g1F', { seeds: 1, s0: 1, T: 12000, step: 300, prof: 'optimal', targets: loadTargets() }, cb.env);
     // Captured from the scratch run (stderr result line), 2026-10-30, scratch/k10-breeds/parity/seed1-scratch.txt.
