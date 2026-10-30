@@ -10,6 +10,7 @@ import type { GameState } from '../sim/state';
 import { eggsPerTap, demandRange, customerIntervalS } from '../sim/state';
 import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
 import { mood, isOff, graderMult, hawkerDemandMult, type Workers } from '../sim/workers';
+import { isPaused } from '../sim/pause';
 
 export type IncomeOpts = {
   /** When true, treat every hired worker as Working (Economy best() scoring). */
@@ -38,11 +39,11 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): 
 
 /** sales-stopped-spec §4.2 (D-HOP-2026-10-24-13/-14): live mode only. A hired Market Hand that is Asleep or Unpaid sells
  *  nothing, so the eggs-sold term is 0. Unchanged: not hired, Working, Tired, or Paused (the player chose to sell by hand;
- *  `paused` is the m5-worker-pause flag and reads false until that build ships). The planner path (`assumeWorking`:
+ *  `paused` is read only through isPaused(), which is false while m4.flags.pause is 0). The planner path (`assumeWorking`:
  *  best-buy, goal-label %, ★ pick, bot) never reaches this branch. */
 export function marketHandStalled(s: GameState, b: Balance): boolean {
-  const w = s.workers.market_hand as (Workers['market_hand'] & { paused?: boolean }) | undefined;
-  return !!w && w.paused !== true && isOff(mood(w, b));
+  const w = s.workers.market_hand;
+  return !!w && !isPaused(w, b) && isOff(mood(w, b));
 }
 
 export function demandPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
