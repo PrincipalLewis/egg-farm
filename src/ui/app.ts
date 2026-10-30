@@ -562,7 +562,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <ul class="fx">${slotLines ?? ''}${fxLines(fx, zg)}</ul>${max ? '' : bestChip(isF ? 'FARM' : 'COLL')}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
-        `<button class="btn buy ${can && !zg ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
+        noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`)}
       <div>${hint}</div>${zgDesc(zg, kind)}</div></div>${zgStrip(zg, kind)}`;
   };
   // ---------- v5 zeroGainUi row pieces (UI doc art-ux/m5.1-zero-gain-ui.md v1.4 §1/§2/§5; all '' when the row is not ZG) ----------
@@ -570,6 +570,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** First effect line gets the chip; the others are unchanged. Not ZG -> byte-identical to the flag-off markup. */
   const fxLines = (fx: string[], zg: boolean) => fx.map((l, i) => zg && i === 0 ? `<li class="zg-line"><span class="fx-t">${l}</span><span class="zg-chip">${ZG_CHIP}</span></li>` : `<li>${l}</li>`).join('');
   const zgBuyAttrs = (zg: boolean, k: string) => !zg ? '' : ` aria-describedby="zg-desc-${ZK[k as ZRow]}"${ZGC ? ` aria-expanded="false" aria-controls="zgc-${ZK[k as ZRow]}"` : ''}`;
+  /** UI-ZG-4: an affordable ZG Buy drops `.affordable` (no glow); the class attribute then equals the unaffordable one. */
+  const noGlow = (zg: boolean, html: string) => zg ? html.replace('class="btn buy affordable"', 'class="btn buy "') : html;
   const zgDesc = (zg: boolean, k: string) => zg ? `<span id="zg-desc-${ZK[k as ZRow]}" hidden>${ZG_DESC}</span>` : '';
   /** Confirm strip (only m4.zeroGain.confirm = 1): rendered once as the row's next sibling, always hidden in the markup; open state is
    *  applied on the DOM (zgApply), so toggling never re-renders the tab (UI-ZG-15). */
@@ -590,7 +592,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
       : farmMaxed ? `<span class="maxed farm-max" aria-hidden="true">${TRACK_FARM_MAX_TEXT}</span>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${need}.">${trackLockText(need!)}</div>`
-      : `<button class="btn buy ${can && !zg ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
+      : noGlow(zg, `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`);
     const best = !lock && rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
     return `<div class="up track${best}${zg ? ' zg' : ''}" data-track="${t}"${zg ? ` data-zero-gain="${ZG_KEY_OF[t]}"` : ''}${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>

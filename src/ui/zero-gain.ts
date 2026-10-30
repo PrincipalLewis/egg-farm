@@ -17,10 +17,11 @@ export const ZG_KEYS: readonly BuyKey[] = ['COLL', 'HENS', 'VALUE'];
 /** Buy's accessible description (UI doc §2 / ZG-AC4), exact text. */
 export const ZG_DESC = "No income gain now. Buying won't raise income.";
 export const ZG_CHIP = 'No gain now';
-/** HoE 03:19 dev assert: finite and |x| <= 2^53 (not a safe-integer check). */
+/** HoE 03:19 dev assert: finite and |x| <= 2^53 (not a safe-integer check). 2^53 = MAX_SAFE_INTEGER + 1, exact in a double. */
+const LIM = Number.MAX_SAFE_INTEGER + 1;
 const DEV = !!import.meta.env?.DEV;
 const assertNum = (x: number, what: string) => {
-  if (!(Number.isFinite(x) && Math.abs(x) <= 2 ** 53)) throw new Error(`zeroGainVerdict: ${what} = ${x} is not finite with |x| <= 2^53`);
+  if (!(Number.isFinite(x) && Math.abs(x) <= LIM)) throw new Error(`zeroGainVerdict: ${what} = ${x} is not finite with |x| <= 2^53`);
 };
 /** Spec §5.2: ZG iff incAfter <= incBefore (unrounded $/s, no ε) AND dCap <= 0. `NaN <= x` is false, so an assert-free
  *  build gives false (not ZG) for NaN. `dev` defaults to the build's DEV flag; tests pass it explicitly. */
