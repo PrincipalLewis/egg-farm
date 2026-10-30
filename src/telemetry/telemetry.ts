@@ -1,4 +1,5 @@
 import type { KV } from '../save/save';
+import { EVENT_SCHEMA } from './schema';
 export const TELEMETRY_KEY = 'eggfarm.telemetry';
 /** M3-AC7: random per-install id under its OWN key (never in the save), so it survives a save reset and the corrupt-save fallback. */
 export const INSTALL_ID_KEY = 'eggfarm.install_id';
@@ -20,7 +21,7 @@ export interface TelemetryConfig { ring_size: number; flush_interval_s: number; 
  * Taps are aggregated into one `tap` event per tap_batch_ms window ({count, eggs}).
  */
 export class Telemetry {
-  private buf: TEvent[]; private dirty = false; private sessionStart: number;
+  private buf: TEvent[]; private dirty = false; private warned = new Set<string>(); private sessionStart: number;
   private tapWin: { start: number; count: number; eggs: number } | null = null;
   private sumWin: { start: number; v: Record<string, number> } | null = null;
   writes = 0;
@@ -36,6 +37,8 @@ export class Telemetry {
     let drop = free - cap; this.buf = this.buf.filter(e => { if (drop > 0 && !isPinned(e.type)) { drop--; return false; } return true; });
   }
   track(type: string, data: Record<string, unknown> = {}) {
+    // T-AC9: unknown types warn once in dev and are still recorded; release builds never drop or check (tree-shaken).
+    if (import.meta.env.DEV && !Object.prototype.hasOwnProperty.call(EVENT_SCHEMA, type) && !this.warned.has(type)) { this.warned.add(type); console.warn(`[telemetry] unknown event type: ${type}`); }
     if (type !== 'tap') this.closeTapWindow();
     const t = this.now(); this.buf.push({ ...data, type, ts: t, sessionMs: t - this.sessionStart }); this.trim(); this.dirty = true;
   }
