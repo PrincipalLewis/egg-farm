@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // K10 trigger (engineering/decisions.md 2026-10-25 03:52 item (6)): decides whether CI job `k10-breeds-offset` must run the slow
 // `npm run test:k10`. It fires when the diff BASE...HEAD
-//   (a) changes any tc_* or bc_* column of data/economy.csv (header add/remove/rename or any cell, compared column by column), or
+//   (a) changes any tc_* or bc_* column, or any farm_cost cell, of data/economy.csv (header add/remove/rename or any cell, compared
+//       column by column; farm_cost added per D-HOP-23: #92's farm_cost-only L27-29 retune flipped B4), or
 //   (b) touches the streak / tap-coins / Broody / golden / breeds sim code (src/ paths below), or the K10 harness itself.
 // Otherwise it prints a no-op line and exits 0, so the status check always reports. Exit 2 = usage/git error (never a silent pass).
 // Usage: node scripts/k10-trigger.mjs [--base <ref>] [--head <ref>] [--exec]
@@ -18,9 +19,9 @@ export const CODE_PATTERNS = [
   /^src\/config\/(flags|m5-rules)\.ts$/,                       // flag gating and M5 balance rules
   /^tests\/k10-breeds-offset[^/]*$/, /^vitest\.k10\.config\.ts$/, /^scripts\/k10-trigger\.mjs$/, // the K10 harness itself
 ];
-const isMechCol = (c) => /^(tc|bc)_/.test(c);
+const isMechCol = (c) => /^(tc|bc)_/.test(c) || c === 'farm_cost';
 
-/** Column-wise tc_* and bc_* changes between two CSV texts (LF or CRLF). Returns a list of human-readable reasons. */
+/** Column-wise tc_*, bc_* and farm_cost changes between two CSV texts (LF or CRLF). Returns a list of human-readable reasons. */
 export function csvMechChanges(before, after) {
   const parse = (t) => { if (t == null) return null; const rows = t.replace(/\r?\n$/, '').split(/\r?\n/).map((l) => l.split(',')); return { h: rows[0], rows: rows.slice(1) }; };
   const A = parse(before), B = parse(after), out = [];
@@ -56,7 +57,7 @@ function main(argv) {
   catch (e) { console.error(`k10-trigger: git failed (${String(e.message).split('\n')[0]})`); return 2; }
   const reasons = k10Reasons(files, files.includes(CSV_PATH) ? [show(mb, CSV_PATH), show(head, CSV_PATH)] : [null, null]);
   const run = reasons.length > 0;
-  console.log(run ? `K10: TRIGGERED (${reasons.length} reason${reasons.length > 1 ? 's' : ''}) base ${mb.slice(0, 7)} head ${head}` : `K10: no-op PASS: diff ${mb.slice(0, 7)}..${head} touches no tc_*/bc_* column and no streak/tap-coins/Broody/golden/breeds code`);
+  console.log(run ? `K10: TRIGGERED (${reasons.length} reason${reasons.length > 1 ? 's' : ''}) base ${mb.slice(0, 7)} head ${head}` : `K10: no-op PASS: diff ${mb.slice(0, 7)}..${head} touches no tc_*/bc_*/farm_cost column and no streak/tap-coins/Broody/golden/breeds code`);
   for (const r of reasons) console.log(`  - ${r}`);
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `run=${run}\nreasons=${reasons.join('; ').replace(/[\r\n]/g, ' ')}\n`);
   if (run && exec) { const r = spawnSync('npm', ['run', 'test:k10'], { stdio: 'inherit' }); return r.status ?? 1; }
