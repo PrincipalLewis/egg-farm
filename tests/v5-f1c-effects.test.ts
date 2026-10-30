@@ -1,6 +1,6 @@
 // v5 F1c (engineering/m5.0-sizing.md §1 F1(c)): timed-effects registry feeding saleMultipliers() and prodEggsPerSec(),
 // with `by` attribution (Rush = Market Hand sales only) and suspension on ticks without focus (D-C3, golden R23).
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { balance } from '../src/config/balance';
 import type { M5Flag } from '../src/config/flags';
 import { initialState, type GameState } from '../src/sim/state';
@@ -21,7 +21,7 @@ const rush: SaleEffect = { id: 'rush', flag: 'abilities', factor: (_s, _b, c) =>
 const streak: SaleEffect = { id: 'streak', flag: 'streak', factor: () => 1.28 };
 const sweep: LayEffect = { id: 'sweep', flag: 'abilities', factor: () => 1.15 };
 const SALE = SALE_EFFECTS as SaleEffect[], LAY = LAY_EFFECTS as LayEffect[]; // test-only fixture seam (registries are readonly in src)
-afterEach(() => { SALE.length = 0; LAY.length = 0; });
+const reset = () => { SALE.length = 0; LAY.length = 0; }; beforeEach(reset); afterEach(reset); // #87: the registry now ships the streak entry; fixtures start empty
 const farm = (b: any): GameState => ({ ...initialState(b, 3), farmLevel: 12, hensLevel: 12, eggValueLevel: 12, graderTier: 2, basket: 500, coinsCents: 0,
   workers: { grader: { energy: 100, cdS: 0 }, market_hand: { energy: 100, cdS: 0 } }, customers: [{ id: 1, demand: 10, filled: 0, waitedS: 0 }] });
 
