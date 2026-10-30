@@ -19,7 +19,7 @@ const csvBalance = (csv: string): Balance => validateBalance(buildBalance(parseE
   JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8')), readEconomyConfig() as any) as Balance, false);
 
 describe('bot-m5: parity with m5x.ts', () => {
-  it('windowGate equals the original harness (scratch/v2-econ/h m5x.ts, CSV data/economy.csv b48be8a4, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual)', () => {
+  it('windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual)', () => {
     const g = gateOptsFromEnv({ SEEDS: '2', S0: '1', T: '3000', CFG: 'none,AssZ', PROFS: 'casual' }, loadTargets());
     const csv = readFileSync(PARITY_CSV_URL);
     expect(createHash('sha256').update(csv).digest('hex')).toBe(PARITY_CSV_SHA256); // fixture is still the b48be8a4 CSV
