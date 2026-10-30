@@ -11,6 +11,14 @@ export const M5_FLAGS = [
 ] as const;
 export type M5Flag = typeof M5_FLAGS[number];
 export type M5Flags = Partial<Record<M5Flag, number>>;
+/** D-HOE-38: every M5 flag is classified exactly once (tests/v5-sim-flag-list.test.ts guards it, so a new flag can't go
+ *  unclassified). UI_ONLY flags change rendering only and must never change sim behaviour; SIM flags are what anyM5FlagOn
+ *  (sim/timers.ts) counts, i.e. what turns on F1c fx suspension (sim/tick.ts) and the attended probe (game.ts). */
+export const UI_ONLY_M5_FLAGS = ['zeroGainUi', 'bestBuyV2'] as const satisfies readonly M5Flag[];
+export const SIM_M5_FLAGS = [
+  'golden', 'streak', 'tapCoins', 'abilities', 'broody', 'salesStopped', 'fatigueCue', 'pause', // M5.0
+  'rc2Refill', 'autoRefill', 'clockWage', 'breeds', // M5.1
+] as const satisfies readonly M5Flag[];
 /** True only when balance.m4.enabled AND balance.m4.flags[f] === 1. */
 export const flagOn = (p: EconomyParams, f: M5Flag): boolean => !!p.m4?.enabled && p.m4.flags?.[f] === 1;
 /** Any M5 flag that reads the event RNG is on (golden or broody: golden spec R10a, HoE Q4 ruling). */

@@ -4,7 +4,7 @@
  * Each feature PR (golden #1, streak #2, income-ref #3, abilities #4, Broody #5) appends one TimerSystem to TIMER_SYSTEMS.
  */
 import type { Balance } from '../config/balance';
-import { M5_FLAGS, flagOn, evRngFlagOn } from '../config/flags';
+import { SIM_M5_FLAGS, flagOn, evRngFlagOn } from '../config/flags';
 import type { Sink } from './events';
 import type { GameState } from './state';
 import { tickFocusS, type StepClock } from './clock';
@@ -25,7 +25,8 @@ const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev)
  *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
 const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
 export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds];
-export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+/** D-HOE-38: SIM flags only. UI-only flags (zeroGainUi, bestBuyV2; config/flags.ts UI_ONLY_M5_FLAGS) never make the sim live. */
+export const anyM5FlagOn = (b: Balance) => SIM_M5_FLAGS.some(f => flagOn(b, f));
 export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
   const f = tickFocusS(dt, clock);
   for (const sys of systems) s = sys(s, dt, f, b, clock, ev);
