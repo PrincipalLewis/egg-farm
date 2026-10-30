@@ -17,23 +17,31 @@ export function readStat(pid) {
 }
 const pidProblem = pid => !Number.isInteger(pid) || pid <= 1 || pid > PID_MAX ? `invalid pid ${JSON.stringify(pid)}` : pid === process.pid ? 'own pid' : null;
 /** Record a process right after we spawned it. Returns null (nothing may ever be signalled) unless `pid` is a live
- *  child of `parent` (default: this process). */
-export function recordPid(pid, { parent = process.pid } = {}) {
+ *  child of THIS process. There is deliberately no parent option (UI QA #89 F1): "ours" always means process.pid. */
+export function recordPid(pid) {
   if (pidProblem(pid)) return null;
   const st = readStat(pid);
-  if (!st || st.state === 'Z' || st.ppid !== parent) return null;
-  return Object.freeze({ pid, starttime: st.starttime, bootId: bootId(), parent });
+  if (!st || st.state === 'Z' || st.ppid !== process.pid) return null;
+  return Object.freeze({ pid, starttime: st.starttime, bootId: bootId(), parent: process.pid });
+}
+/** Shape check of a record (UI QA #89 F6): a non-object or a missing or ill-typed field is refused outright. */
+function malformed(rec) {
+  if (typeof rec !== 'object' || Array.isArray(rec)) return `malformed record (${Array.isArray(rec) ? 'array' : typeof rec})`;
+  if (typeof rec.starttime !== 'string' || !/^\d+$/.test(rec.starttime)) return 'malformed record (starttime)';
+  if (typeof rec.bootId !== 'string' || !rec.bootId) return 'malformed record (bootId)';
+  return null;
 }
 /** null when `rec` still names the process we recorded, else the reason to refuse. */
 export function recordProblem(rec, { group = true } = {}) {
-  if (!rec) return 'no record (not started by us, or it exited before it was recorded)';
-  const bad = pidProblem(rec.pid); if (bad) return bad;
+  if (rec === null || rec === undefined) return 'no record (not started by us, or it exited before it was recorded)';
+  const bad = pidProblem(rec?.pid) ?? malformed(rec); if (bad) return bad;
+  if (rec.parent !== process.pid) return `recorded parent ${rec.parent} is not this process ${process.pid} (not our record)`;
   if (rec.bootId !== bootId()) return 'recorded on another boot';
   const st = readStat(rec.pid);
   if (!st) return 'gone';
   if (st.state === 'Z') return 'exited (zombie)';
   if (st.starttime !== rec.starttime) return `start time ${st.starttime} != recorded ${rec.starttime} (reused pid)`;
-  if (st.ppid !== rec.parent) return `parent ${st.ppid} != recorded ${rec.parent} (not our child)`;
+  if (st.ppid !== process.pid) return `parent ${st.ppid} != this process ${process.pid} (not our child)`;
   if (group && st.pgrp !== rec.pid) return `not a process-group leader (pgrp ${st.pgrp})`;
   return null;
 }
