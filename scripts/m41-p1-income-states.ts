@@ -29,6 +29,8 @@ export const STATES: Record<string, Partial<GameState>> = {
   'F25 H20 V15 MH unpaid': { farmLevel: 25, collectionLevel: 22, hensLevel: 20, eggValueLevel: 15, coinsCents: 2e10, graderTier: 2, workers: W(unpaid, { ...others, grader: { energy: 0, cdS: 0 } }) },
   'F20 all + grader, MH working': { farmLevel: 20, collectionLevel: 15, coinsCents: 1e9, graderTier: 1, workers: W(awake, { ...others, grader: { energy: 90, cdS: 0 } }) },
 };
+/** v5 F3: shipped balance with m4.flags.pause = 1 (the 'paused' fixture states model the m5 Pause build). */
+export const pauseOn = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, pause: 1 } } } as typeof b;
 export const build = (o: Partial<GameState>): GameState => ({ ...initialState(b, 1), ...o }) as GameState;
 const r6 = (x: number | null | undefined) => x == null || !Number.isFinite(x) ? x ?? null : Math.round(x * 1e6) / 1e6;
 export function planner(s: GameState) {
@@ -38,9 +40,10 @@ export function planner(s: GameState) {
   return { income_working: r6(incomePerSec(s, b, { assumeWorking: true })), demand_working: r6(demandPerSec(s, b, { assumeWorking: true })),
     pick: pick ? { key: pick.key, cost: pick.cost, gain: r6(pick.gain), payback: r6(pick.payback), bundleScore: r6(pick.bundleScore), bundlePayback: r6(pick.bundlePayback) } : null, options: options(s, b).map(o => o.key), gains, goal };
 }
-export const live = (s: GameState) => ({ income_live: r6(incomePerSec(s, b)), demand_live: r6(demandPerSec(s, b)), eta_1000: r6(secondsToAffordSteady(s, b, 100_000)) });
+/** `bb` (v5 F3): the paused states are read with m4.flags.pause = 1, because isPaused() ignores `paused` while the flag is 0. */
+export const live = (s: GameState, bb: typeof b = b) => ({ income_live: r6(incomePerSec(s, bb)), demand_live: r6(demandPerSec(s, bb)), eta_1000: r6(secondsToAffordSteady(s, bb, 100_000)) });
 if (process.argv.includes('--write')) {
-  const out = Object.fromEntries(Object.entries(STATES).map(([n, o]) => { const s = build(o); return [n, { ...planner(s), ...live(s) }]; }));
+  const out = Object.fromEntries(Object.entries(STATES).map(([n, o]) => { const s = build(o); return [n, { ...planner(s), ...live(s, /paused/.test(n) ? pauseOn : b) }]; }));
   writeFileSync(new URL('../tests/fixtures/m41-p1/income-before.json', import.meta.url), JSON.stringify(out, null, 1) + '\n');
   console.log(`wrote ${Object.keys(out).length} states`);
 }

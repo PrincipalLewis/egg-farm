@@ -11,7 +11,7 @@ import { FOCUS_DT_MAX_S, focusFrameMs, focusTicks, tickClock, wallRemainingMs, w
 import { stepTimers, type TimerSystem } from '../src/sim/timers';
 import { G3 } from './v5-f2-helpers';
 
-const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } });
+const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags: { ...(balance.m4 as any).flags, ...flags } } : {}) } }) as typeof balance;
 /** 10 min of 10 Hz play with collects/sells/buys; returns the customer-facing trace + final state. */
 function play(b: ReturnType<typeof B>, seed: number, onTick?: (s: GameState) => GameState) {
   let s: GameState = { ...initialState(b, seed), coinsCents: 5_000_000 }; const ev: any[] = [];

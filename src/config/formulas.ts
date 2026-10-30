@@ -46,6 +46,9 @@ export interface M4Params {
   tc?: Record<string, number>;
   /** v5 release flags (config/flags.ts), 0/1, default 0; each needs `enabled`. Kept whole by sync-economy fitM4 (F3). */
   flags?: M5Flags;
+  /** v5 F3: zero-gain UI tunables (spec product/collection/m5.1-zero-gain-purchase-ui.md 1098f14e "m5.zeroGain.confirm", moved to
+   *  m4.zeroGain.* by the single-namespace ruling, manifest row 28). `confirm` 0/1, default 0 (spec "false", off in M5.1). */
+  zeroGain?: { confirm: number };
 }
 /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
 export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };

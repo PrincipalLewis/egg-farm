@@ -9,7 +9,7 @@ import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import type { SimEvent, M5SimEvent } from '../src/sim/events';
 
-const withFlags = (enabled: number, flags?: Partial<Record<M5Flag, number>>) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } });
+const withFlags = (enabled: number, flags?: Partial<Record<M5Flag, number>>) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags: { ...(balance.m4 as any).flags, ...flags } } : {}) } }) as typeof balance;
 
 describe('F1a M5 fields', () => {
   it('[F1(e)] saved and session lists are disjoint and unique', () => {
