@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # pacing-x1-stack: full local run on ONE commit, recorded for the RC gate (HoE 10:52 ruling; HoQA QA-D-1030-X1-TREE).
-# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200] [--sequential]   (X1_STUDIO=studio root)
+# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200] [--sequential] [--ac7-from <commit>:<path>]   (X1_STUDIO=studio root)
 #   e.g. scripts/pacing-x1-run.sh ci/v5-pacing-x1-stack /workspace/egg-farm-studio/artifacts/pacing-x1-stack/results
 # Long-running (~35 min at 3 parallel shards): start it with ops/tools/lane-run.sh <lane> -- (studio rule 21).
 # What it enforces and records (results-dir, then SHA256SUMS over every file, rule 19):
@@ -9,8 +9,8 @@
 #  (2) a FRESH dedicated worktree at the SHA (never an existing checkout); `git status --porcelain --untracked-files=all`
 #      must be empty before and after the run (porcelain-*.txt); otherwise it refuses / marks the run not-RC.
 #  (3) shipped CSV = <tree>/data/economy.csv, sha256 recorded; every X1 shard must have measured exactly that CSV;
-#      AC7 runs as `python3 <studio>/qa/m3-scripts/ac7-active-idle-gate.py 30 --csv <tree>/data/economy.csv` (HoE 10:57).
-#      No fallback: if the script has no --csv arg yet (Econ's PR), AC7 is not run, FAILS loudly, and the run is not-RC.
+#      row 904 AC7 runs as `python3 <ac7-script> 30 --csv <tree>/data/economy.csv` (HoE 10:57/11:30); --csv support is
+#      checked statically and by the gate's own header naming that CSV; otherwise row 904 FAILS loudly (see the AC7 block).
 #  (4) harness/sim/config are the tree's (worktree at the SHA); everything from outside the tree is hashed in
 #      outside-tree.txt (this script if it differs from the tree's copy, node, npm, node_modules lock, python3, the AC7
 #      script and product/sim/m4/m4_active.py).
@@ -18,8 +18,8 @@
 # Any failed condition writes rc-gate.txt = "not RC gate, re-run on RC SHA". The trees check can only downgrade it.
 set -uo pipefail
 REF=${1:?usage: pacing-x1-run.sh <ref|sha> <results-dir> [--seeds a-b]}; OUT=${2:?results-dir required}; shift 2
-SEEDS=1-200; SEQ=0
-while [ $# -gt 0 ]; do case "$1" in --seeds) SEEDS=${2:?}; shift 2;; --sequential) SEQ=1; shift;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
+SEEDS=1-200; SEQ=0; AC7_FROM=
+while [ $# -gt 0 ]; do case "$1" in --seeds) SEEDS=${2:?}; shift 2;; --sequential) SEQ=1; shift;; --ac7-from) AC7_FROM=${2:?}; shift 2;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
 STUDIO=${X1_STUDIO:-/workspace/egg-farm-studio}
 SELF=$(readlink -f "$0"); REPO=$(git -C "$(dirname "$SELF")" rev-parse --show-toplevel) || exit 2
 SHA=$(git -C "$REPO" rev-parse --verify --quiet "$REF^{commit}") || { echo "REFUSED: unknown ref $REF" >&2; exit 2; }
@@ -57,28 +57,43 @@ SHIP=data/economy.csv
 SHIP_SHA=$(sha256sum < "$SHIP" | cut -d' ' -f1); echo "$SHIP_SHA  $SHIP (tree $TREE, blob $(git rev-parse "$SHA:$SHIP"))" > "$OUT/shipped-csv.txt"
 X1_KEY=$(sed -n "s/^export const X1_DATA: X1SourceKey = '\(.*\)';/\1/p" tests/pacing-x1/source.ts)
 log "X1_DATA=$X1_KEY shipped CSV $SHIP_SHA"
-# (3) AC7 (HoE 10:57): QA's 2x active/idle gate, called directly, reading the tree's shipped CSV. It lives OUTSIDE the repo
-# tree (studio qa/m3-scripts, reads product/sim/m4/m4_active.py), so both are hashed into outside-tree.txt (condition 4).
-# No fallback: the script reads only argv[1] today, so `--csv` would be silently ignored; until Econ's --csv arg is in the
-# script, the AC7 step is NOT run and FAILS loudly (DEPENDENCY MISSING).
-AC7=$STUDIO/qa/m3-scripts/ac7-active-idle-gate.py; AC7_SIM=$STUDIO/product/sim/m4/m4_active.py
-for f in "$AC7" "$AC7_SIM"; do if [ -f "$f" ]; then echo "$(sha256sum < "$f" | cut -d' ' -f1)  $f (outside the tree; AC7)" >> "$OUT/outside-tree.txt"; else fail "AC7 input missing: $f"; fi; done
+# (3) + row 904: AC7 with every M5.0 flag off = QA's 2x active/idle gate on the tree's shipped CSV (HoE 10:57, 11:30).
+# Source (job input): default = the tree's qa/m3-scripts/ac7-active-idle-gate.py if the tree has one, else the studio's
+# ($STUDIO/qa/m3-scripts/...). Fallback = --ac7-from <commit>:<path> (an Econ PR head in this repo; fetch it first): the script
+# is taken with `git show` and recorded with its commit. It reads product/sim/m4/m4_active.py from the studio (hashed below).
+# --csv support is checked twice and never assumed: (a) static, the script must parse --csv (argparse/argv handling naming
+# '--csv'); (b) for real, the gate's own header line must name exactly the CSV passed in. A script that only reads argv[1]
+# fails (a) and is NOT run; row 904 FAILS loudly. Results: ac7.json (read by the verdict, --require-ac7), ac7.log.
+if [ -n "$AC7_FROM" ]; then
+  AC7_COMMIT=${AC7_FROM%%:*}; AC7_PATH=${AC7_FROM#*:}; AC7_SRC="econ-pr"; mkdir -p "$OUT/ac7-src"
+  AC7_COMMIT=$(git -C "$REPO" rev-parse --verify --quiet "$AC7_COMMIT^{commit}") || fail "--ac7-from commit ${AC7_FROM%%:*} not in this repo (fetch the Econ PR head first)"
+  AC7="$OUT/ac7-src/$(basename "$AC7_PATH")"; git -C "$REPO" show "$AC7_COMMIT:$AC7_PATH" > "$AC7" 2>/dev/null || fail "--ac7-from: $AC7_PATH not in $AC7_COMMIT"
+elif [ -f "qa/m3-scripts/ac7-active-idle-gate.py" ]; then AC7="$WT/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="tree"; AC7_COMMIT=""
+else AC7="$STUDIO/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="studio"; AC7_COMMIT=""; fi
+AC7_SIM=$STUDIO/product/sim/m4/m4_active.py
+for f in "$AC7" "$AC7_SIM"; do if [ -s "$f" ]; then echo "$(sha256sum < "$f" | cut -d' ' -f1)  $f (AC7, source $AC7_SRC${AC7_COMMIT:+ commit $AC7_COMMIT path $AC7_PATH})" >> "$OUT/outside-tree.txt"; else fail "AC7 input missing: $f"; fi; done
 echo "$(sha256sum < "$(readlink -f "$(command -v python3)")" | cut -d' ' -f1)  python3 $(python3 -V 2>&1 | cut -d' ' -f2) $(readlink -f "$(command -v python3)")" >> "$OUT/outside-tree.txt"
-if [ -f "$AC7" ] && grep -q -- '--csv' "$AC7"; then
-  log "AC7: python3 $AC7 30 --csv $WT/$SHIP"
-  if python3 "$AC7" 30 --csv "$WT/$SHIP" > "$OUT/ac7.log" 2>&1; then log "AC7 PASS"; else fail "AC7 (--csv $SHIP) FAIL or error: ac7.log"; fi
-  grep -q -- "CSV $WT/$SHIP" "$OUT/ac7.log" || fail "AC7 header does not name the tree's shipped CSV $WT/$SHIP (did it read --csv?)"
+CSVABS="$WT/$SHIP"; AC7_RC=null; AC7_ST=FAIL; AC7_WHY=""; AC7_NAMED=false; AC7_RES=""
+if [ ! -s "$AC7" ]; then AC7_WHY="AC7 script missing ($AC7_SRC)"; echo "$AC7_WHY" > "$OUT/ac7.log"
+elif ! grep -Eq "add_argument\(\s*['\"]--csv['\"]|['\"]--csv['\"]\s+in\s+sys\.argv|sys\.argv\.index\(\s*['\"]--csv['\"]" "$AC7"; then
+  AC7_WHY="--csv NOT SUPPORTED by $AC7 ($AC7_SRC): it does not parse --csv (argv[1]-only would silently use its built-in CSV). Not run. Dependency: Econ's --csv PR, or pass --ac7-from <commit>:<path>"
+  echo "DEPENDENCY MISSING: $AC7_WHY" > "$OUT/ac7.log"
 else
-  { echo "DEPENDENCY MISSING: $AC7 has no --csv argument (Econ is adding it). AC7 NOT run; no fallback to its built-in CSV."
-    [ -f "$AC7" ] && echo "script sha256 $(sha256sum < "$AC7" | cut -d' ' -f1)"; } > "$OUT/ac7.log"
-  fail "AC7 --csv arg missing in $AC7 (Econ PR dependency); AC7 not run"
+  log "AC7 (row 904): python3 $AC7 30 --csv $CSVABS"
+  python3 "$AC7" 30 --csv "$CSVABS" > "$OUT/ac7.log" 2>&1; AC7_RC=$?
+  AC7_RES=$(grep -m1 '^RESULT:' "$OUT/ac7.log" || true)
+  if grep -qF "CSV $CSVABS |" "$OUT/ac7.log"; then AC7_NAMED=true; else AC7_WHY="AC7 header does not name the CSV passed in ($CSVABS): --csv not honoured"; fi
+  if [ "$AC7_NAMED" = true ] && [ "$AC7_RC" = 0 ]; then AC7_ST=PASS; elif [ "$AC7_NAMED" = true ]; then AC7_WHY="AC7 exit $AC7_RC: ${AC7_RES:-no RESULT line}"; fi
 fi
+[ "$AC7_ST" = PASS ] && log "AC7 PASS ($AC7_RES)" || fail "row 904 AC7: $AC7_WHY"
+node -e 'const [o,...a]=process.argv.slice(1);const j={status:a[0],why:a[1],source:a[2],script:a[3],scriptSha256:a[4],commit:a[5]||undefined,csv:a[6],csvSha256:a[7],csvNamed:a[8]==="true",exitCode:a[9]==="null"?null:+a[9],result:a[10]||undefined};require("fs").writeFileSync(o+"/ac7.json",JSON.stringify(j,null,1)+"\n")' \
+  "$OUT" "$AC7_ST" "$AC7_WHY" "$AC7_SRC" "$AC7" "$( [ -s "$AC7" ] && sha256sum < "$AC7" | cut -d' ' -f1)" "$AC7_COMMIT" "$SHIP" "$SHIP_SHA" "$AC7_NAMED" "$AC7_RC" "$AC7_RES"
 # the X1 job itself, exactly as CI runs it
 log "X1 shards (optimal / seller15 / casual in parallel), seeds $SEEDS"
 if [ "$SEQ" = 1 ]; then for p in optimal seller15 casual; do log "shard $p (sequential)"; npx vite-node scripts/pacing-x1-stack.ts -- shard --profile "$p" --seeds "$SEEDS" --out "$OUT" > "$OUT/shard-$p.log" 2>&1 || fail "shard $p exited non-zero"; done
 else pids=(); for p in optimal seller15 casual; do npx vite-node scripts/pacing-x1-stack.ts -- shard --profile "$p" --seeds "$SEEDS" --out "$OUT" > "$OUT/shard-$p.log" 2>&1 & pids+=($!); done
   for pid in "${pids[@]}"; do wait "$pid" || fail "a shard exited non-zero (see shard-*.log)"; done; fi
-npx vite-node scripts/pacing-x1-stack.ts -- verdict --in "$OUT" --out "$OUT" > "$OUT/verdict.log" 2>&1; VRC=$?
+npx vite-node scripts/pacing-x1-stack.ts -- verdict --in "$OUT" --out "$OUT" --require-ac7 > "$OUT/verdict.log" 2>&1; VRC=$?
 log "X1 verdict exit $VRC: $(head -1 "$OUT/summary.md" 2>/dev/null)"
 [ "$VRC" = 0 ] || fail "X1 verdict FAIL (summary.md)"
 MEAS=$(node -e "const fs=require('fs');const s=new Set(fs.readdirSync(process.argv[1]).filter(f=>/^shard-.*\.json$/.test(f)).map(f=>JSON.parse(fs.readFileSync(process.argv[1]+'/'+f)).csvSha256));console.log([...s].join(','))" "$OUT")

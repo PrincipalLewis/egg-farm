@@ -1,7 +1,7 @@
 // CI check `pacing-x1-stack` (v5 manifest row 1; economy §13.2a AC-X1; sizing §15b). Owner of the check: HoE.
 // Usage (read-only; writes only under --out):
 //   npx vite-node scripts/pacing-x1-stack.ts -- shard --profile <optimal|seller15|casual> --out <dir> [--seeds 1-200] [--data <key>]
-//   npx vite-node scripts/pacing-x1-stack.ts -- verdict --in <dir with shard-*.json> --out <dir>
+//   npx vite-node scripts/pacing-x1-stack.ts -- verdict --in <dir with shard-*.json [+ ac7.json]> --out <dir> [--require-ac7]
 // shard: builds balance IN MEMORY from the tree's shipped data/economy.csv + balance.json (tests/pacing-x1/source.ts; sha256
 //   recorded, HoE 10:57), then runs
 //   tests/bot-m5.ts windowGate() (Econ's m5x.ts harness of record, ported byte-exact in #78) for none / N (AssZ) / H (AssZhold)
@@ -14,7 +14,8 @@ import { execSync } from 'node:child_process';
 import { loadTargets, quantile } from '../tests/pacing-guards';
 import { run, PROFS, windowGate } from '../tests/bot-m5';
 import { X1_DATA, X1_SOURCES, type X1SourceKey, type X1Toggle } from '../tests/pacing-x1/source';
-import { evaluate, verdictOf, type Shard, type Gate } from '../tests/pacing-x1/compare';
+import { evaluate, verdictOf, type Shard, type Gate, type Ac7 } from '../tests/pacing-x1/compare';
+import { existsSync } from 'node:fs';
 import { X1_PRED, X1_RUN, pinned, parsePred, x1Balance, x1Stacks } from '../tests/pacing-x1/harness';
 
 const args = process.argv.slice(2).filter(a => a !== '--'), opt = (k: string, d?: string) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
@@ -45,13 +46,14 @@ function verdict() {
   const ss = Object.values(shards), keys = new Set(ss.map(s => s.source)), heads = new Set(ss.map(s => s.head));
   const problems: string[] = []; if (keys.size > 1) problems.push(`shards ran different data sources: ${[...keys].join(', ')}`); if (heads.size > 1) problems.push(`shards ran different commits: ${[...heads].join(', ')}`);
   for (const p of ['optimal', 'seller15', 'casual']) if (!shards[p]) problems.push(`missing shard ${p}`);
-  const o = evaluate(rows, shards), v = problems.length ? 'FAIL' : verdictOf(o), key = [...keys][0] as X1SourceKey, src = X1_SOURCES[key];
+  const ac7File = `${inDir}/ac7.json`, ac7: Ac7 | null = existsSync(ac7File) ? JSON.parse(readFileSync(ac7File, 'utf8')) : null;
+  const o = evaluate(rows, shards, ac7, args.includes('--require-ac7')), v = problems.length ? 'FAIL' : verdictOf(o), key = [...keys][0] as X1SourceKey, src = X1_SOURCES[key];
   const drift: string[] = []; const s0 = ss[0];
   const n = (st: string) => o.filter(x => x.status === st).length;
   const md = [`## pacing-x1-stack: **${v}**`, '', `- data: \`${key}\` (${src?.label ?? '?'}); CSV ${s0?.files?.csv} sha256 ${s0?.csvSha256}, ${s0?.files?.balanceJson} sha256 ${s0?.balanceSha256} (read from the tree, sha256 recorded)`,
     `- run: seeds ${s0?.seeds.join('-')}, T ${X1_RUN.T} s, windows every ${X1_RUN.step} s (A1/A2), step ratio from L${X1_RUN.stepFrom}; commit ${s0?.head?.slice(0, 12)}${s0?.dirty ? ' DIRTY' : ''}; shard runtimes ${ss.map(s => `${s.profile} ${s.runtimeS}s`).join(', ')}`,
     `- table: ${X1_PRED.fixture} sha256 ${X1_PRED.sha256.slice(0, 8)} (§13.2a of record, economy.c0d9492b.md L879-913)`,
-    `- rows: ${n('PASS')} PASS, ${n('FAIL')} FAIL, ${n('WARN')} WARN, ${n('INFO')} INFO, ${n('PENDING-REPRED')} PENDING-REPRED (not judged until HoP signs the re-prediction), ${n('NOT-WIRED')} NOT-WIRED (${o.filter(x => x.status === 'NOT-WIRED' && x.blocks).length} blocking), ${n('EXCLUDED')} EXCLUDED (G5-P pause rows)`,
+    `- rows: ${n('PASS')} PASS, ${n('FAIL')} FAIL, ${n('WARN')} WARN, ${n('INFO')} INFO, ${n('PENDING-REPRED')} PENDING-REPRED (not judged until HoP signs the re-prediction), ${n('N/A')} N/A (row 903, D-CEO-20261030-04), ${n('NOT-WIRED')} NOT-WIRED (${o.filter(x => x.status === 'NOT-WIRED' && x.blocks).length} blocking), ${n('EXCLUDED')} EXCLUDED (G5-P pause rows)`,
     ...problems.map(p => `- **problem:** ${p}`), ...drift.map(d => `- **drift (warning):** ${d}`), '',
     '| line | profile | policy | metric | Y/N | predicted | measured | status | why |', '|---|---|---|---|---|---|---|---|---|',
     ...o.map(x => `| ${x.line} | ${x.profile} | ${x.flag} | ${x.metric.replace(/\|/g, '/')} | ${x.blocks ? 'Y' : 'N'} | ${x.predicted.replace(/\|/g, '/')} | ${x.measured.replace(/\|/g, '/')} | ${x.status} | ${x.why.replace(/\|/g, '/')} |`)].join('\n') + '\n';

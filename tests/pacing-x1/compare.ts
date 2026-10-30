@@ -11,7 +11,7 @@ export interface Gate { G4_noAff_F10_to_max: [number, number, number]; windows: 
   win?: { P95_allWindows: number; P95_ofSeedMax: number; worstSeed: number; median: number }; byBand?: Record<string, [number, number, number | null]>; premium?: Record<string, [number, number]> }
 export interface Shard { profile: string; source: string; seeds: [number, number]; T: number; csvSha256: string; balanceSha256: string;
   gate: { none: Gate; N: Gate; H: Gate }; l10P95Min: number; l30MedianMin: number; toggles: Partial<Record<X1Toggle, Gate | 'n/a'>> }
-export type Status = 'PASS' | 'FAIL' | 'WARN' | 'INFO' | 'NOT-WIRED' | 'EXCLUDED' | 'PENDING-REPRED';
+export type Status = 'PASS' | 'FAIL' | 'WARN' | 'INFO' | 'NOT-WIRED' | 'EXCLUDED' | 'PENDING-REPRED' | 'N/A';
 export interface Out { line: number; profile: string; flag: string; metric: string; blocks: boolean; predicted: string; measured: string; status: Status; why: string }
 
 /** Every number in a predicted cell, in order; parenthesised asides like "(−0.58)" dropped; U+2212 minus read as '-'. */
@@ -23,9 +23,16 @@ export const NOT_WIRED: Record<number, string> = {
   898: 'G4 meaningful-rows counting (G4M, D-HOP-36) is not in tests/bot-m5.ts',
   899: 'G4 meaningful-rows counting (G4M, D-HOP-36) is not in tests/bot-m5.ts',
   902: 'peak per-sale multiplier is a formula row; no measured counterpart in windowGate()',
-  903: 'SS-21 needs the sales-stopped chip (manifest row 23, m4.flags.salesStopped), not on rc/v5 yet',
-  904: 'AC7 flags-off byte-identity vs c7bb783f is not run by this job (ci.yml gate runs the AC7 suites); needs an owner ruling',
 };
+/** Explicit NOT APPLICABLE rows (neither PASS nor FAIL), mirroring HoQA's v5-saves-gate N/A registry (QA-D-1030-SS15-NA).
+ *  Only row 903 may be N/A: any other key throws at load (and the unit test pins the key set). */
+export const NOT_APPLICABLE: Record<number, string> = {
+  903: 'NOT APPLICABLE: QA-D-1030-SS15-NA / D-CEO-20261030-04: #5b not in RC (manifest row 23); salesStopped ships flag-off with no code, so there is no chip on/off trace to compare',
+};
+for (const k of Object.keys(NOT_APPLICABLE)) if (k !== '903') throw new Error(`pacing-x1-stack: only row 903 may be N/A (got ${k})`);
+/** Row 904 (AC7 with every M5.0 flag off) result, written by scripts/pacing-x1-run.sh as ac7.json in the results folder. */
+export interface Ac7 { status: 'PASS' | 'FAIL'; why: string; source: string; script: string; scriptSha256: string; commit?: string; csv: string; csvSha256: string; csvNamed: boolean; exitCode: number | null; result?: string }
+const AC7_NOT_RUN = 'AC7 runs only inside the recorded RC run (scripts/pacing-x1-run.sh writes ac7.json; verdict --require-ac7)';
 /** HoP-SIGNED re-prediction of the G4 dead-zone rows on the V5-HOP-1 CSV a8c4e268 (D-HOP-2026-10-30-08, 11:02;
  *  product/economy/reprediction-l894-896-a8c4e268.md sha1 1c7a39bdc9936ac25f4eff8060fdb59df102f01c, §5 Option A). It replaces
  *  the pinned table's predicted cells and gate clauses for L894-896: bands ±20% of these values; L894/895 absolute =
@@ -39,12 +46,12 @@ export const SIGNED_REPRED = { doc: 'product/economy/reprediction-l894-896-a8c4e
 export const PENDING_REPRED: Record<number, string> = {};
 export const isPauseRow = (r: PredRow) => /^G5-P\b/.test(r.metric) || (+r.source_line >= 906 && +r.source_line <= 913);
 /** Lines this verdict knows; the unit test asserts every non-pause row of the pinned table is one of them. */
-export const HANDLED = new Set([879, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 900, 901, 905]);
+export const HANDLED = new Set([903, 904, 879, 880, 881, 882, 883, 884, 885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 900, 901, 905]);
 
 const f = (x: number | null | undefined, d = 3) => (x == null || !Number.isFinite(x) ? 'n/a' : (+x.toFixed(d)).toString());
 const pol = (flag: string): 'N' | 'H' => (flag.trim() === 'H' ? 'H' : 'N');
 
-export function evaluate(rows: PredRow[], shards: Record<string, Shard>): Out[] {
+export function evaluate(rows: PredRow[], shards: Record<string, Shard>, ac7?: Ac7 | null, requireAc7 = false): Out[] {
   const out: Out[] = [];
   for (const r of rows) {
     const line = +r.source_line, Y = r.blocks_merge.trim().startsWith('Y'), sp0 = SIGNED_REPRED.rows[line]?.[r.profile],
@@ -52,6 +59,12 @@ export function evaluate(rows: PredRow[], shards: Record<string, Shard>): Out[] 
     const push = (status: Status, measured: string, why: string) => out.push({ ...base, status, measured, why });
     if (isPauseRow(r)) { push('EXCLUDED', '', 'G5-P pause rows stay out until Features delivers the driver (X1 note, D-HOE-20261029-05)'); continue; }
     if (NOT_WIRED[line]) { push('NOT-WIRED', '', NOT_WIRED[line]); continue; }
+    if (NOT_APPLICABLE[line]) { push('N/A', '', NOT_APPLICABLE[line]); continue; }
+    if (line === 904) { // AC7 with every M5.0 flag off (QA's ac7-active-idle-gate.py on the tree's shipped CSV via --csv)
+      if (!ac7) { if (requireAc7) push('FAIL', '', 'ac7.json missing: AC7 did not run'); else push('NOT-WIRED', '', AC7_NOT_RUN); continue; }
+      const src = `${ac7.source}${ac7.commit ? ` @${ac7.commit}` : ''} ${ac7.script} sha256 ${ac7.scriptSha256}; csv ${ac7.csv} sha256 ${ac7.csvSha256}`;
+      const ok = ac7.status === 'PASS' && ac7.csvNamed && ac7.exitCode === 0;
+      push(ok ? 'PASS' : 'FAIL', `${ac7.result ?? ''} | ${src}`, ok ? '' : ac7.why || 'AC7 failed'); continue; }
     const sh = shards[r.profile]; if (!sh) { push(Y ? 'FAIL' : 'WARN', '', `no shard for profile ${r.profile}`); continue; }
     const sp = SIGNED_REPRED.rows[line]?.[r.profile], p = sp ?? nums(r.predicted), fails: string[] = [], caps: string[] = []; // caps: the 180 s dead-zone cap, which applies to every row even while re-predicted (D-HOP-07 amendment)
     const band = (v: number | null | undefined, pr: number | undefined, tag = '') => { if (pr == null) return; if (v == null || !Number.isFinite(v)) fails.push(`${tag}no value`); else if (!inBand(v, pr)) fails.push(`${tag}${f(v)} outside ×0.8–1.2 of ${pr} [${f(0.8 * pr)}, ${f(1.2 * pr)}]`); };

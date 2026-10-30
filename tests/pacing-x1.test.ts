@@ -3,7 +3,7 @@
 // is the tree's shipped data/economy.csv (HoE 10:57), hashed. No balance values are asserted here.
 import { describe, it, expect } from 'vitest';
 import { X1_DATA, X1_SOURCES } from './pacing-x1/source';
-import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate } from './pacing-x1/compare';
+import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, NOT_APPLICABLE, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate, type Ac7 } from './pacing-x1/compare';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { X1_PRED, pinned, parsePred, x1Balance, x1Stacks } from './pacing-x1/harness';
@@ -57,6 +57,25 @@ describe('pacing-x1-stack: verdict rules', () => {
     expect(old.find(x => x.line === 894)!.status).toBe('FAIL');
     const worst = sig(gate({ G4_noAff_F10_to_max: [68, 114, 143] }), gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }), gate({ ...none, G4_noAff_F10_to_max: [104, 161, 150] }));
     expect(worst.find(x => x.line === 895)!.why).toMatch(/1.2 × same-seed/); expect(worst.find(x => x.line === 895)!.status).toBe('FAIL'); // 191 > 1.2 x 150
+  });
+  it('row 903 is an explicit N/A (D-CEO-20261030-04), neither PASS nor FAIL; no other row may be N/A', () => {
+    expect(Object.keys(NOT_APPLICABLE)).toEqual(['903']); expect(NOT_APPLICABLE[903]).toMatch(/QA-D-1030-SS15-NA.*D-CEO-20261030-04/);
+    const all = evaluate(rows(), { optimal: shard(gate({})), seller15: { ...shard(gate({})), profile: 'seller15' }, casual: { ...shard(gate({})), profile: 'casual' } });
+    expect(all.filter(x => x.line === 903).map(x => x.status)).toEqual(['N/A', 'N/A', 'N/A']);
+    expect(all.filter(x => x.status === 'N/A').every(x => x.line === 903)).toBe(true);
+    const na = all.filter(x => x.line === 903); expect(verdictOf(na)).toBe('PASS'); expect(verdictOf([...na, { ...na[0], line: 1, status: 'FAIL' }])).toBe('FAIL');
+  });
+  const ac7 = (o: Partial<Ac7> = {}): Ac7 => ({ status: 'PASS', why: '', source: 'studio', script: 'qa/m3-scripts/ac7-active-idle-gate.py', scriptSha256: 'ab', csv: 'data/economy.csv',
+    csvSha256: 'cd', csvNamed: true, exitCode: 0, result: 'RESULT: PASS', ...o });
+  it('row 904 (AC7) is judged on ac7.json: PASS only if it ran, exited 0 and its header named the CSV passed in; missing in the RC run FAILS', () => {
+    const r904 = opt().filter(r => r.source_line === '904'), sh = { optimal: shard(gate({})) };
+    expect(evaluate(r904, sh, ac7())[0].status).toBe('PASS');
+    expect(evaluate(r904, sh, ac7({ commit: 'abc123', source: 'econ-pr' }))[0].measured).toMatch(/econ-pr @abc123 .* sha256 ab/);
+    expect(evaluate(r904, sh, ac7({ csvNamed: false }))[0].status).toBe('FAIL');                          // argv[1]-only: never passes
+    expect(evaluate(r904, sh, ac7({ status: 'FAIL', exitCode: null, why: '--csv NOT SUPPORTED' }))[0]).toMatchObject({ status: 'FAIL', why: '--csv NOT SUPPORTED' });
+    expect(evaluate(r904, sh, ac7({ exitCode: 1, status: 'FAIL' }))[0].status).toBe('FAIL');
+    expect(evaluate(r904, sh, null, true)[0].status).toBe('FAIL');
+    expect(evaluate(r904, sh, null, false)[0].status).toBe('NOT-WIRED');
   });
   it('a blocking row outside the band FAILS even when its absolute gate holds; above the absolute gate FAILS too', () => {
     const low = evaluate(opt(), { optimal: shard(gate({ p95: 1.3 })) }); // 1.3 < 0.8 x 1.755, still <= 2.00
