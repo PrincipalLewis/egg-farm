@@ -11,6 +11,7 @@ import { eggsPerTap, demandRange, customerIntervalS } from '../sim/state';
 import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
 import { mood, isOff, graderMult, hawkerDemandMult, type Workers } from '../sim/workers';
 import { isPaused } from '../sim/pause';
+import { bestBuyV2On } from '../config/flags';
 
 export type IncomeOpts = {
   /** When true, treat every hired worker as Working (Economy best() scoring). */
@@ -29,7 +30,9 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): 
   const tap = eggsPerTap(s.collectionLevel, b);
   const w = s.workers.coop_hand;
   if (!w) return tap;
-  if (opts.assumeWorking) return tap * 1.5;
+  // BBv2 Q-E2 (spec v1.0.3 §2.5, Econ 14:05): planner path only, flag on, Coop Hand hired -> 0 player taps,
+  // collect = eggs_per_tap[C] / coop_hand.every_s. The live path (no assumeWorking) below is unchanged.
+  if (opts.assumeWorking) return bestBuyV2On(b) ? tap / b.workers.coop_hand.every_s : tap * 1.5;
   const m = mood(w, b);
   if (!m || isOff(m)) return tap; // asleep / unpaid / paused → no auto collect
   if (m === 'working') return tap * 1.5;
