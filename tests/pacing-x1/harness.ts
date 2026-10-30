@@ -8,7 +8,7 @@ import { M5X_BASE, M5X_STACKS, type Stack } from '../bot-m5';
 import { X1_SOURCES, X1_TOGGLES, type X1SourceKey, type X1Toggle } from './source';
 import type { PredRow } from './compare';
 
-export const X1_PRED = { fixture: 'tests/fixtures/x1/pred-13.2a-e4369888.csv', sha256: 'e43698888405f86420bcb7255ddc14327761b6306bd5e7cac055efc6a889d173' };
+export const X1_PRED = { fixture: 'tests/fixtures/x1/pred-13.2a-cf653963.csv', sha256: 'cf653963b983e3230be269ea2849a41b9606260ed0930f1ec45b9e8e5d786971' };
 export const X1_RUN = { T: 4000, step: 300, stepFrom: 11 } as const; // §13.2a commands: T=4000, STEP 300 (A1), STEP_FROM=11
 export const ROOT = new URL('../../', import.meta.url);
 export const sha256 = (b: Buffer | string) => createHash('sha256').update(b).digest('hex');

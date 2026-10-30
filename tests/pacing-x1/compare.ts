@@ -18,7 +18,7 @@ export interface Out { line: number; profile: string; flag: string; metric: stri
 export const nums = (cell: string): number[] => (cell.replace(/\([^)]*\)/g, '').replace(/\u2212/g, '-').match(/[-+]?\d+(?:\.\d+)?/g) ?? []).map(Number);
 export const inBand = (v: number, p: number) => v >= 0.8 * p - 1e-9 && v <= 1.2 * p + 1e-9;
 
-/** Rows measured nowhere in this job yet: line -> reason. A Y row here is reported NOT-WIRED (pending), it does not pass. */
+/** Rows measured nowhere in this job yet: line -> reason. Only N rows may be here (assertNotWiredNonBlocking). */
 export const NOT_WIRED: Record<number, string> = {
   898: 'G4 meaningful-rows counting (G4M, D-HOP-36) is not in tests/bot-m5.ts',
   899: 'G4 meaningful-rows counting (G4M, D-HOP-36) is not in tests/bot-m5.ts',
@@ -30,8 +30,10 @@ export const NOT_APPLICABLE: Record<number, string> = {
   903: 'NOT APPLICABLE: QA-D-1030-SS15-NA / D-CEO-20261030-04: #5b not in RC (manifest row 23); salesStopped ships flag-off with no code, so there is no chip on/off trace to compare',
 };
 for (const k of Object.keys(NOT_APPLICABLE)) if (k !== '903') throw new Error(`pacing-x1-stack: only row 903 may be N/A (got ${k})`);
-/** Row 904 (AC7 with every M5.0 flag off) result, written by scripts/pacing-x1-run.sh as ac7.json in the results folder. */
-export interface Ac7 { status: 'PASS' | 'FAIL'; why: string; source: string; script: string; scriptSha256: string; commit?: string; csv: string; csvSha256: string; csvNamed: boolean; exitCode: number | null; result?: string }
+/** Row 904 (HoE 11:51: AC7's 2x active/idle gate PASSES on the tree's data/economy.csv, CSV-RECORD captured) result, written by scripts/pacing-x1-run.sh as ac7.json in the results folder. */
+export interface Ac7 { status: 'PASS' | 'FAIL'; why: string; source: string; script: string; scriptSha256: string; commit?: string; csv: string; csvSha256: string;
+  csvNamed: boolean; csvRecord?: string; csvRecordOk?: boolean; exitCode: number | null; result?: string;
+  sim?: { path: string; sha256: string; source: string; commit?: string; commitSha256?: string; match: 'MATCH' | 'MISMATCH' | 'not-in-commit' | 'n/a' } }
 const AC7_NOT_RUN = 'AC7 runs only inside the recorded RC run (scripts/pacing-x1-run.sh writes ac7.json; verdict --require-ac7)';
 /** HoP-SIGNED re-prediction of the G4 dead-zone rows on the V5-HOP-1 CSV a8c4e268 (D-HOP-2026-10-30-08, 11:02;
  *  product/economy/reprediction-l894-896-a8c4e268.md sha1 1c7a39bdc9936ac25f4eff8060fdb59df102f01c, §5 Option A). It replaces
@@ -52,6 +54,7 @@ const f = (x: number | null | undefined, d = 3) => (x == null || !Number.isFinit
 const pol = (flag: string): 'N' | 'H' => (flag.trim() === 'H' ? 'H' : 'N');
 
 export function evaluate(rows: PredRow[], shards: Record<string, Shard>, ac7?: Ac7 | null, requireAc7 = false): Out[] {
+  assertNotWiredNonBlocking(rows);
   const out: Out[] = [];
   for (const r of rows) {
     const line = +r.source_line, Y = r.blocks_merge.trim().startsWith('Y'), sp0 = SIGNED_REPRED.rows[line]?.[r.profile],
@@ -60,10 +63,11 @@ export function evaluate(rows: PredRow[], shards: Record<string, Shard>, ac7?: A
     if (isPauseRow(r)) { push('EXCLUDED', '', 'G5-P pause rows stay out until Features delivers the driver (X1 note, D-HOE-20261029-05)'); continue; }
     if (NOT_WIRED[line]) { push('NOT-WIRED', '', NOT_WIRED[line]); continue; }
     if (NOT_APPLICABLE[line]) { push('N/A', '', NOT_APPLICABLE[line]); continue; }
-    if (line === 904) { // AC7 with every M5.0 flag off (QA's ac7-active-idle-gate.py on the tree's shipped CSV via --csv)
+    if (line === 904) { // HoE 11:51: QA's ac7-active-idle-gate.py 2x gate PASS on the tree's shipped CSV via --csv, CSV-RECORD captured
       if (!ac7) { if (requireAc7) push('FAIL', '', 'ac7.json missing: AC7 did not run'); else push('NOT-WIRED', '', AC7_NOT_RUN); continue; }
-      const src = `${ac7.source}${ac7.commit ? ` @${ac7.commit}` : ''} ${ac7.script} sha256 ${ac7.scriptSha256}; csv ${ac7.csv} sha256 ${ac7.csvSha256}`;
-      const ok = ac7.status === 'PASS' && ac7.csvNamed && ac7.exitCode === 0;
+      const sim = ac7.sim ? `; m4_active ${ac7.sim.source} sha256 ${ac7.sim.sha256}${ac7.sim.commit ? ` vs commit copy ${ac7.sim.commitSha256 ?? '-'}: ${ac7.sim.match}` : ''}` : '';
+      const src = `${ac7.source}${ac7.commit ? ` @${ac7.commit}` : ''} ${ac7.script} sha256 ${ac7.scriptSha256}; ${ac7.csvRecord ?? 'NO CSV-RECORD'}${sim}`;
+      const ok = ac7.status === 'PASS' && ac7.csvNamed && ac7.csvRecordOk === true && ac7.exitCode === 0 && ac7.sim?.match !== 'MISMATCH';
       push(ok ? 'PASS' : 'FAIL', `${ac7.result ?? ''} | ${src}`, ok ? '' : ac7.why || 'AC7 failed'); continue; }
     const sh = shards[r.profile]; if (!sh) { push(Y ? 'FAIL' : 'WARN', '', `no shard for profile ${r.profile}`); continue; }
     const sp = SIGNED_REPRED.rows[line]?.[r.profile], p = sp ?? nums(r.predicted), fails: string[] = [], caps: string[] = []; // caps: the 180 s dead-zone cap, which applies to every row even while re-predicted (D-HOP-07 amendment)
@@ -103,4 +107,20 @@ export function evaluate(rows: PredRow[], shards: Record<string, Shard>, ac7?: A
   return out;
 }
 
-export const verdictOf = (o: Out[]) => (o.some(x => x.status === 'FAIL') ? 'FAIL' : 'PASS');
+/** Blocking (Y) rows may end in a status other than PASS/FAIL only via these two cited exemptions. Every other blocking
+ *  non-PASS row (NOT-WIRED, PENDING-REPRED, EXCLUDED, WARN, INFO, ...) makes the verdict FAIL. */
+export const BLOCKING_EXEMPT = {
+  'N/A': { ok: (x: Out) => x.line === 903, why: 'row 903 only (QA-D-1030-SS15-NA / D-CEO-20261030-04)' },
+  EXCLUDED: { ok: (x: Out) => isPauseRow({ metric: x.metric, source_line: String(x.line) } as PredRow),
+    why: 'G5-P pause rows only (D-HOE-20261029-05: X1 is wired without the G5-P rows until Features delivers them)' },
+} as const;
+const exempt = (x: Out) => (BLOCKING_EXEMPT as Record<string, { ok: (x: Out) => boolean }>)[x.status]?.ok(x) ?? false;
+/** Why the verdict fails on blocking rows that were not judged PASS/FAIL, e.g. 'blocking row 904 optimal NOT-WIRED'. */
+export const blockingUnjudged = (o: Out[]) => o.filter(x => x.blocks && x.status !== 'PASS' && x.status !== 'FAIL' && !exempt(x))
+  .map(x => `blocking row ${x.line} ${x.profile} ${x.status}`);
+export const verdictOf = (o: Out[]) => (o.some(x => x.status === 'FAIL') || blockingUnjudged(o).length ? 'FAIL' : 'PASS');
+/** Static guard: NOT_WIRED may only hold non-blocking rows of the pinned table. Throws otherwise (called by evaluate). */
+export function assertNotWiredNonBlocking(rows: PredRow[]) {
+  const bad = rows.filter(r => NOT_WIRED[+r.source_line] != null && r.blocks_merge.trim().startsWith('Y'));
+  if (bad.length) throw new Error(`pacing-x1-stack: blocking row(s) in NOT_WIRED: ${[...new Set(bad.map(r => r.source_line))].join(', ')} (a blocking row must be measured or FAIL)`);
+}

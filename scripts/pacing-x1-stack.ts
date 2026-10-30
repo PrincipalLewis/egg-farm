@@ -7,14 +7,14 @@
 //   tests/bot-m5.ts windowGate() (Econ's m5x.ts harness of record, ported byte-exact in #78) for none / N (AssZ) / H (AssZhold)
 //   on seeds 1-200, T 4000, window step 300 s, step ratio from L11, plus the stack with each modelled flag toggled off (N),
 //   plus the workers L10 P95 / L30 median from the N stack's own runs.
-// verdict: compares the shards with the pinned §13.2a table (tests/fixtures/x1/pred-13.2a-e4369888.csv); exit 1 on any
+// verdict: compares the shards with the pinned §13.2a table (tests/fixtures/x1/pred-13.2a-cf653963.csv (§13.2a e4369888 + HoE 11:51 row-904 cell)); exit 1 on any
 //   blocks-merge=Y row that misses, else 0. G5-P pause rows are excluded (X1 note). Writes verdict.json and summary.md.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { loadTargets, quantile } from '../tests/pacing-guards';
 import { run, PROFS, windowGate } from '../tests/bot-m5';
 import { X1_DATA, X1_SOURCES, type X1SourceKey, type X1Toggle } from '../tests/pacing-x1/source';
-import { evaluate, verdictOf, type Shard, type Gate, type Ac7 } from '../tests/pacing-x1/compare';
+import { evaluate, verdictOf, blockingUnjudged, type Shard, type Gate, type Ac7 } from '../tests/pacing-x1/compare';
 import { existsSync } from 'node:fs';
 import { X1_PRED, X1_RUN, pinned, parsePred, x1Balance, x1Stacks } from '../tests/pacing-x1/harness';
 
@@ -54,12 +54,14 @@ function verdict() {
     `- run: seeds ${s0?.seeds.join('-')}, T ${X1_RUN.T} s, windows every ${X1_RUN.step} s (A1/A2), step ratio from L${X1_RUN.stepFrom}; commit ${s0?.head?.slice(0, 12)}${s0?.dirty ? ' DIRTY' : ''}; shard runtimes ${ss.map(s => `${s.profile} ${s.runtimeS}s`).join(', ')}`,
     `- table: ${X1_PRED.fixture} sha256 ${X1_PRED.sha256.slice(0, 8)} (§13.2a of record, economy.c0d9492b.md L879-913)`,
     `- rows: ${n('PASS')} PASS, ${n('FAIL')} FAIL, ${n('WARN')} WARN, ${n('INFO')} INFO, ${n('PENDING-REPRED')} PENDING-REPRED (not judged until HoP signs the re-prediction), ${n('N/A')} N/A (row 903, D-CEO-20261030-04), ${n('NOT-WIRED')} NOT-WIRED (${o.filter(x => x.status === 'NOT-WIRED' && x.blocks).length} blocking), ${n('EXCLUDED')} EXCLUDED (G5-P pause rows)`,
+    ...blockingUnjudged(o).map(b => `- **FAIL: ${b}**`),
     ...problems.map(p => `- **problem:** ${p}`), ...drift.map(d => `- **drift (warning):** ${d}`), '',
     '| line | profile | policy | metric | Y/N | predicted | measured | status | why |', '|---|---|---|---|---|---|---|---|---|',
     ...o.map(x => `| ${x.line} | ${x.profile} | ${x.flag} | ${x.metric.replace(/\|/g, '/')} | ${x.blocks ? 'Y' : 'N'} | ${x.predicted.replace(/\|/g, '/')} | ${x.measured.replace(/\|/g, '/')} | ${x.status} | ${x.why.replace(/\|/g, '/')} |`)].join('\n') + '\n';
   mkdirSync(outDir, { recursive: true }); writeFileSync(`${outDir}/verdict.json`, JSON.stringify({ verdict: v, source: key, problems, drift, rows: o }, null, 1) + '\n'); writeFileSync(`${outDir}/summary.md`, md);
   if (process.env.GITHUB_STEP_SUMMARY) writeFileSync(process.env.GITHUB_STEP_SUMMARY, md, { flag: 'a' });
   console.log(md.split('\n').slice(0, 9).join('\n')); for (const x of o.filter(x => x.status === 'FAIL' || x.status === 'WARN' || x.status === 'PENDING-REPRED')) console.log(`${x.status} L${x.line} ${x.profile} ${x.flag}: ${x.why}`);
+  for (const b of blockingUnjudged(o)) console.log(`FAIL: ${b}`);
   process.exit(v === 'PASS' ? 0 : 1);
 }
 

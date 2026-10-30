@@ -3,7 +3,7 @@
 // is the tree's shipped data/economy.csv (HoE 10:57), hashed. No balance values are asserted here.
 import { describe, it, expect } from 'vitest';
 import { X1_DATA, X1_SOURCES } from './pacing-x1/source';
-import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, NOT_APPLICABLE, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate, type Ac7 } from './pacing-x1/compare';
+import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, NOT_APPLICABLE, blockingUnjudged, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate, type Ac7 } from './pacing-x1/compare';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { X1_PRED, pinned, parsePred, x1Balance, x1Stacks } from './pacing-x1/harness';
@@ -66,7 +66,8 @@ describe('pacing-x1-stack: verdict rules', () => {
     const na = all.filter(x => x.line === 903); expect(verdictOf(na)).toBe('PASS'); expect(verdictOf([...na, { ...na[0], line: 1, status: 'FAIL' }])).toBe('FAIL');
   });
   const ac7 = (o: Partial<Ac7> = {}): Ac7 => ({ status: 'PASS', why: '', source: 'studio', script: 'qa/m3-scripts/ac7-active-idle-gate.py', scriptSha256: 'ab', csv: 'data/economy.csv',
-    csvSha256: 'cd', csvNamed: true, exitCode: 0, result: 'RESULT: PASS', ...o });
+    csvSha256: 'cd', csvNamed: true, csvRecord: 'CSV-RECORD path=/wt/data/economy.csv sha256=cd', csvRecordOk: true, exitCode: 0, result: 'RESULT: PASS',
+    sim: { path: 'm4_active.py', sha256: 'ee', source: 'studio', match: 'n/a' }, ...o });
   it('row 904 (AC7) is judged on ac7.json: PASS only if it ran, exited 0 and its header named the CSV passed in; missing in the RC run FAILS', () => {
     const r904 = opt().filter(r => r.source_line === '904'), sh = { optimal: shard(gate({})) };
     expect(evaluate(r904, sh, ac7())[0].status).toBe('PASS');
@@ -76,6 +77,33 @@ describe('pacing-x1-stack: verdict rules', () => {
     expect(evaluate(r904, sh, ac7({ exitCode: 1, status: 'FAIL' }))[0].status).toBe('FAIL');
     expect(evaluate(r904, sh, null, true)[0].status).toBe('FAIL');
     expect(evaluate(r904, sh, null, false)[0].status).toBe('NOT-WIRED');
+    expect(evaluate(r904, sh, ac7({ csvRecordOk: false, csvRecord: undefined }))[0].status).toBe('FAIL');   // HoE 11:51: CSV-RECORD must be captured
+    expect(evaluate(r904, sh, ac7({ sim: { path: 'm4_active.py', sha256: 'ee', source: 'studio', commit: 'abc', commitSha256: 'ff', match: 'MISMATCH' } }))[0].status).toBe('FAIL');
+    expect(evaluate(r904, sh, ac7({ commit: 'abc', sim: { path: 'm4_active.py', sha256: 'ee', source: 'studio', commit: 'abc', match: 'not-in-commit' } }))[0].status).toBe('PASS');
+    expect(r904[0].metric).toMatch(/2x active\/idle gate/); expect(r904.every(r => !/c7bb783f/.test(r.metric))).toBe(true);
+  });
+  const all3 = () => ({ optimal: shard(gate({})), seller15: { ...shard(gate({})), profile: 'seller15' }, casual: { ...shard(gate({})), profile: 'casual' } });
+  const one = (o: Partial<ReturnType<typeof evaluate>[number]>) => ({ line: 890, profile: 'optimal', flag: 'N', metric: 'm', blocks: true, predicted: '', measured: '', status: 'PASS' as const, why: '', ...o });
+  it('a blocking row that is NOT-WIRED (e.g. 904 in plain CI) makes the verdict FAIL, with the reason named', () => {
+    const o = evaluate(rows().filter(r => r.source_line === '904'), all3(), null, false);
+    expect(o.every(x => x.status === 'NOT-WIRED' && x.blocks)).toBe(true);
+    expect(verdictOf(o)).toBe('FAIL'); expect(blockingUnjudged(o)).toEqual(['blocking row 904 optimal NOT-WIRED', 'blocking row 904 seller15 NOT-WIRED', 'blocking row 904 casual NOT-WIRED']);
+  });
+  it('a blocking PENDING-REPRED (or WARN/INFO, or EXCLUDED outside the pause rows, or N/A outside 903) row FAILS the verdict', () => {
+    for (const status of ['PENDING-REPRED', 'WARN', 'INFO', 'EXCLUDED', 'N/A', 'NOT-WIRED'] as const) expect(verdictOf([one({}), one({ status })]), status).toBe('FAIL');
+    expect(verdictOf([one({ status: 'PENDING-REPRED', blocks: false })])).toBe('PASS');
+  });
+  it('non-blocking NOT-WIRED rows (898, 899, 902) still let the verdict PASS', () => {
+    const o = evaluate(rows().filter(r => ['898', '899', '902'].includes(r.source_line)), all3());
+    expect(o.length).toBe(9); expect(o.every(x => x.status === 'NOT-WIRED' && !x.blocks)).toBe(true); expect(verdictOf(o)).toBe('PASS');
+  });
+  it('blocking exemptions: row 903 N/A and the G5-P pause rows EXCLUDED (D-HOE-20261029-05) do not FAIL the verdict', () => {
+    const o = evaluate(rows().filter(r => r.source_line === '903' || +r.source_line >= 906), all3());
+    expect(o.filter(x => x.blocks).length).toBeGreaterThan(0); expect(blockingUnjudged(o)).toEqual([]); expect(verdictOf(o)).toBe('PASS');
+  });
+  it('static guard: a blocking row added to NOT_WIRED throws', () => {
+    NOT_WIRED[890] = 'mutation'; try { expect(() => evaluate(rows(), all3())).toThrow(/blocking row\(s\) in NOT_WIRED: 890/); } finally { delete NOT_WIRED[890]; }
+    expect(() => evaluate(rows(), all3())).not.toThrow();
   });
   it('a blocking row outside the band FAILS even when its absolute gate holds; above the absolute gate FAILS too', () => {
     const low = evaluate(opt(), { optimal: shard(gate({ p95: 1.3 })) }); // 1.3 < 0.8 x 1.755, still <= 2.00
@@ -84,7 +112,7 @@ describe('pacing-x1-stack: verdict rules', () => {
     expect(high.find(x => x.line === 883)!.status).toBe('FAIL');
   });
   it('a non-blocking row outside the band only WARNS; a missing profile shard fails its blocking rows', () => {
-    const o = evaluate(opt(), { optimal: shard(gate({ premium: { 'F10-19': [10, 0], 'F20-29': [10, 0], 'F30+': [10, 0] } })) });
+    const o = evaluate(opt(), { optimal: shard(gate({ premium: { 'F10-19': [10, 0], 'F20-29': [10, 0], 'F30+': [10, 0] } })) }, ac7()); // 904 judged, else it is blocking NOT-WIRED
     expect(o.find(x => x.line === 888)!.status).toBe('WARN'); expect(verdictOf(o)).toBe('PASS');
     expect(verdictOf(evaluate(opt(), {}))).toBe('FAIL');
   });

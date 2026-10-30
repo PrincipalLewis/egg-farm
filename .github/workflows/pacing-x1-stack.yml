@@ -51,7 +51,10 @@ jobs:
         run: npm ci
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with: { pattern: 'x1-shard-*', path: x1-out, merge-multiple: true }
-      - name: Verdict vs §13.2a (Y rows fail, N rows warn; a missing shard fails)
+      # AC7 (row 904, blocking) runs only in the recorded RC run (scripts/pacing-x1-run.sh, verdict --require-ac7). Here it
+      # is NOT-WIRED, and a blocking NOT-WIRED row FAILS the verdict, so this check is honestly red until AC7 is wired in CI.
+      # pacing-x1-stack is not a required check; the RC X1 gate is the recorded run on the final RC SHA (HoE).
+      - name: Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)
         run: npx vite-node scripts/pacing-x1-stack.ts -- verdict --in x1-out --out x1-out
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
