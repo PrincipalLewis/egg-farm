@@ -14,12 +14,13 @@ import type { SimEvent } from '../sim/events';
 import { WORKERS } from '../sim/workers';
 import { type M5Flag, flagOn } from '../config/flags';
 import { M5_SESSION_FIELDS } from '../sim/m5-state';
+import { sanitizePausedOnLoad } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
 export { streakAfter };
 export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
 /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
 export const m5Flag = (b: Balance, k: M5Flag): boolean => flagOn(b, k);
-const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities'] as const).some(k => m5Flag(b, k));
+const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const).some(k => m5Flag(b, k)); // CCR-F4: + pause
 const tc = tcNum; // throws on a missing tc_* key (validateBalance rejects it at load while the flag is on)
 /** D-C2 salt + seeding: ONE code path, re-exported from F1b sim/rng.ts (identical formula and validity rule). */
 import { EV_RNG_SALT, ensureEvRng } from '../sim/rng';
@@ -70,7 +71,22 @@ export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): G
         const { readyAt, ...rest } = a; o.abilities[id] = fin(readyAt) ? { ...rest, readyAt: clamp(readyAt, now, now + cdMs) } : rest; }
       endCalls(o, b, ev); }
   }
+  if (m5Flag(b, 'pause') && o.workers && typeof o.workers === 'object') o.workers = pauseLoad(o.workers, o.farmLevel, b);
   return o;
+}
+/** CCR-F4, Pause spec v1.3.6 rule 1 / rule 7 (B5) / E9 / E12: a non-boolean `paused` is false (absent); below
+ *  tc_pause_unlock_farm nothing is paused or locked; `callLockoutS` (Market Hand only, sim seconds, not a timestamp) is
+ *  absent when non-finite, <= 0 or not a number, else capped at tc_pause_call_lockout_s. Unchanged workers keep their object.
+ *  Both tunables are read through tcNum (throws if missing); validateBalance requires them while pause is on (M5_REQUIRED_TC.pause). */
+function pauseLoad(ws: any, farmLevel: number, b: Balance): any {
+  const open = farmLevel >= tc(b, 'pause_unlock_farm'), cap = tc(b, 'pause_call_lockout_s'); let out = ws;
+  for (const id of WORKERS) { const w = ws[id]; if (!w || typeof w !== 'object') continue;
+    const n: any = sanitizePausedOnLoad(w, open); // the `paused` key is only touched in sim/pause.ts (row-8 QA-10 grep)
+    if ('callLockoutS' in n) { const { callLockoutS: v, ...rest } = n;
+      if (!open || id !== 'market_hand' || !fin(v) || v === 0) { if (out === ws) out = { ...ws }; out[id] = rest; continue; }
+      if (v > cap) { if (out === ws) out = { ...ws }; out[id] = { ...n, callLockoutS: cap }; continue; } }
+    if (n !== w) { if (out === ws) out = { ...ws }; out[id] = n; } }
+  return out;
 }
 /** A hidden-tab or visible frame gap of 60 s or more (§9.1/§9.1a), applied to the state AT THE START of the gap: calls end
  *  (`offline`), an on-screen egg expires (`collectible_expired{reason:"offline"}`, no reward, fresh R3 gap that runs on the
