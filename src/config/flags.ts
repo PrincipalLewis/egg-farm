@@ -15,7 +15,7 @@ export type M5Flags = Partial<Record<M5Flag, number>>;
 export const flagOn = (p: EconomyParams, f: M5Flag): boolean => !!p.m4?.enabled && p.m4.flags?.[f] === 1;
 /** Any M5 flag that reads the event RNG is on (golden or broody: golden spec R10a, HoE Q4 ruling). */
 export const evRngFlagOn = (p: EconomyParams) => flagOn(p, 'golden') || flagOn(p, 'broody');
-/** Zero-gain confirm strip (spec "m5.zeroGain.confirm", here m4.zeroGain.confirm): only with zeroGainUi on AND confirm === 1. Off in M5.1. */
 /** Best buy v2 (spec m5.1-bestbuy-rebaseline-proposal v1.0.3 27e753d8 Part I, "m5.flags.bestBuyV2", here m4.flags.bestBuyV2). */
 export const bestBuyV2On = (p: EconomyParams): boolean => flagOn(p, 'bestBuyV2');
+/** Zero-gain confirm strip (spec "m5.zeroGain.confirm", here m4.zeroGain.confirm): only with zeroGainUi on AND confirm === 1. Off in M5.1. */
 export const zeroGainConfirmOn = (p: EconomyParams): boolean => flagOn(p, 'zeroGainUi') && p.m4?.zeroGain?.confirm === 1;

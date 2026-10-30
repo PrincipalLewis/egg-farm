@@ -2,10 +2,14 @@
 import type { Balance } from '../src/config/balance';
 import { initialState, GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
-import { apply } from '../src/sim/actions';
+import { apply, type Action } from '../src/sim/actions';
 import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
 import { pickBuy, pickAction } from './bot-m4';
 export type Model = 'seller15' | 'cheapest';
+/** BBV2-AC9: optional purchase observer (state before, action, state after); null = no observer (default; zero effect on runs). */
+/** BBV2-AC14: optional state observer, called once per integer sim second after the tick and the tap (before sell/buy); null = none. */
+export const STATE_TRACE: { fn: ((t: number, s: GameState) => void) | null } = { fn: null };
+export const BUY_TRACE: { fn: ((prev: GameState, a: Action, next: GameState) => void) | null } = { fn: null };
 export interface BotResult { firstUpgradeS: number | null; upgradesAt: (s: number) => number; farmAt: (s: number) => number; farmReachedS: (L: number) => number | null;
   /** Farm level -> first time reached (s); 0 -> 0. */ reach: Map<number, number> }
 /** Buy step: tests/bot-m4.ts pickBuy (D-HOP-2026-10-19-01: + HENS/VALUE with M4 on; flag off = the old Farm/Collection rule).
@@ -15,7 +19,8 @@ export function buy(s: GameState, model: Model, b: Balance, log: (kind: 'c' | 'f
     const pick = pickBuy(s, b, model, cheapFirst);
     if (pick === 'c' && cheapFirst) cheapFirst = false; // variance p_cheap_first: one affordable Collection, ignoring the 50 % rule
     if (!pick) return s;
-    const next = apply(s, pickAction(pick), b); if (next === s) return s; // refused buy: stop (no spin)
+    const act = pickAction(pick), next = apply(s, act, b); if (next === s) return s; // refused buy: stop (no spin)
+    BUY_TRACE.fn?.(s, act, next);
     s = next; log(pick === 'f' ? 'f' : pick === 'c' ? 'c' : 't', next);
   }
   return s;
@@ -33,6 +38,7 @@ export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEve
     const t = Math.round(i * dt * 10) / 10;
     s = step(s, dt, b);
     if (t >= tapT) { tapT += V ? V.tapInterval() : 1; s = apply(s, { type: 'collect' }, b); }
+    if (STATE_TRACE.fn && Number.isInteger(t)) STATE_TRACE.fn(t, s);
     if (t >= sellT) {
       sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery; s = apply(s, { type: 'sellAll' }, b);
       if (V?.delay()) continue; // variance p_delay: this check-in skips buying
