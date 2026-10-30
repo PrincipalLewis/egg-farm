@@ -232,6 +232,7 @@ describe('#96 Architect review d7df1f9: BR-R17 guard, BR-R5 literals, E10 shadow
   it('[BR-AC26 E10 / PMC Q5, BR-AC25] the offline reveal auto-slot drops the shadow at its slot', () => {
     const s0 = { ...st({ slots: [null, null, null], incubator: { breed: 'brahma', remainingMs: 1000, costCents: 0 } }, 20), breedsRawSlots: ['silkie', null, null] };
     const r = breedsOffline(s0, 120_000, BR).state; expect(r.breeds!.slots).toEqual(['brahma', null, null]);
+    expect(r.breedsRawSlots?.[0] ?? null).toBeNull(); expect((m5Persist(r) as GameState).breeds!.slots).toEqual(['brahma', null, null]);
     const r2 = placeBreed(r, BR, 1, 'brahma'); expect((m5Persist(r2) as GameState).breeds!.slots).toEqual([null, 'brahma', null]);
   });
   it('[BR-AC4 / Architect Minor 2] a non-integer, negative, NaN or out-of-range slot is a no-op (same state object)', () => {
