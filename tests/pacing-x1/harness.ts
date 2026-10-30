@@ -1,5 +1,5 @@
-// pacing-x1-stack harness pieces shared by scripts/pacing-x1-stack.ts and tests/pacing-x1.test.ts: pinned inputs (sha256-asserted,
-// D-HOE-20261030-05), the §13.2a table parser, the in-memory balance build and the x1 stacks. No CLI side effects on import.
+// pacing-x1-stack harness pieces shared by scripts/pacing-x1-stack.ts and tests/pacing-x1.test.ts: the pinned §13.2a table (sha256-asserted,
+// D-HOE-20261030-05), its parser, the in-tree shipped data read (hashed), the in-memory balance build and the x1 stacks. No CLI side effects on import.
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { parseEconomyCsv, buildBalance, readEconomyConfig } from '../../scripts/sync-economy';
@@ -21,10 +21,12 @@ export function parsePred(txt: string): PredRow[] { // RFC 4180 CSV (quoted fiel
   if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
   const [h, ...body] = rows; return body.map(r => Object.fromEntries(h.map((k, i) => [k, r[i] ?? ''])) as unknown as PredRow);
 }
-export function x1Balance(key: X1SourceKey): { b: Balance; csvSha256: string; balanceSha256: string } {
-  const src = X1_SOURCES[key], csv = pinned(src.csv.fixture, src.csv.sha256), bj = pinned(src.balanceJson.fixture, src.balanceJson.sha256);
+/** Builds the balance IN MEMORY from the source's tree files, exactly as sync-economy does; returns their sha256 for the record.
+ *  `root` = the tree to read (default: this checkout). Nothing is pinned here: X1 measures what the tree ships (HoE 10:57). */
+export function x1Balance(key: X1SourceKey, root: URL = ROOT): { b: Balance; csvSha256: string; balanceSha256: string } {
+  const src = X1_SOURCES[key], csv = readFileSync(new URL(src.csv, root)), bj = readFileSync(new URL(src.balanceJson, root));
   const b = validateBalance(buildBalance(parseEconomyCsv(csv.toString('utf8')), JSON.parse(bj.toString('utf8')), readEconomyConfig() as any) as Balance, false);
-  return { b, csvSha256: src.csv.sha256, balanceSha256: src.balanceJson.sha256 };
+  return { b, csvSha256: sha256(csv), balanceSha256: sha256(bj) };
 }
 /** The N / H stacks for a data source (AssZ / AssZhold plus the source's overrides), registered under x1 names so windowGate()
  *  can run them unmodified; same for each toggled-off variant. Registration only adds keys; AssZ/AssZhold/none are untouched. */

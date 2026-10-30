@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # pacing-x1-stack: full local run on ONE commit, recorded for the RC gate (HoE 10:52 ruling; HoQA QA-D-1030-X1-TREE).
-# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200]
+# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200] [--sequential]   (X1_STUDIO=studio root)
 #   e.g. scripts/pacing-x1-run.sh ci/v5-pacing-x1-stack /workspace/egg-farm-studio/artifacts/pacing-x1-stack/results
 # Long-running (~35 min at 3 parallel shards): start it with ops/tools/lane-run.sh <lane> -- (studio rule 21).
 # What it enforces and records (results-dir, then SHA256SUMS over every file, rule 19):
@@ -8,16 +8,19 @@
 #      fills the RC SHA/tree after the squash and prints MATCH / MISMATCH.
 #  (2) a FRESH dedicated worktree at the SHA (never an existing checkout); `git status --porcelain --untracked-files=all`
 #      must be empty before and after the run (porcelain-*.txt); otherwise it refuses / marks the run not-RC.
-#  (3) shipped CSV = <tree>/data/economy.csv, sha256 recorded; the X1 data source must be that same CSV for an RC run;
-#      AC7 runs as `npm run ac7 -- --csv data/economy.csv` from the tree. No fallback: if the tree has no AC7 `--csv`
-#      entry point (Econ's PR), the AC7 step FAILS loudly and the run is not-RC.
+#  (3) shipped CSV = <tree>/data/economy.csv, sha256 recorded; every X1 shard must have measured exactly that CSV;
+#      AC7 runs as `python3 <studio>/qa/m3-scripts/ac7-active-idle-gate.py 30 --csv <tree>/data/economy.csv` (HoE 10:57).
+#      No fallback: if the script has no --csv arg yet (Econ's PR), AC7 is not run, FAILS loudly, and the run is not-RC.
 #  (4) harness/sim/config are the tree's (worktree at the SHA); everything from outside the tree is hashed in
-#      outside-tree.txt (this script if it differs from the tree's copy, node binary, npm, node_modules lock).
+#      outside-tree.txt (this script if it differs from the tree's copy, node, npm, node_modules lock, python3, the AC7
+#      script and product/sim/m4/m4_active.py).
 #  (5) SHA256SUMS over results-dir; `sha256sum -c SHA256SUMS` is run and must pass.
 # Any failed condition writes rc-gate.txt = "not RC gate, re-run on RC SHA". The trees check can only downgrade it.
 set -uo pipefail
 REF=${1:?usage: pacing-x1-run.sh <ref|sha> <results-dir> [--seeds a-b]}; OUT=${2:?results-dir required}; shift 2
-SEEDS=1-200; [ "${1:-}" = "--seeds" ] && SEEDS=${2:?}
+SEEDS=1-200; SEQ=0
+while [ $# -gt 0 ]; do case "$1" in --seeds) SEEDS=${2:?}; shift 2;; --sequential) SEQ=1; shift;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
+STUDIO=${X1_STUDIO:-/workspace/egg-farm-studio}
 SELF=$(readlink -f "$0"); REPO=$(git -C "$(dirname "$SELF")" rev-parse --show-toplevel) || exit 2
 SHA=$(git -C "$REPO" rev-parse --verify --quiet "$REF^{commit}") || { echo "REFUSED: unknown ref $REF" >&2; exit 2; }
 TREE=$(git -C "$REPO" rev-parse "$SHA^{tree}")
@@ -54,19 +57,27 @@ SHIP=data/economy.csv
 SHIP_SHA=$(sha256sum < "$SHIP" | cut -d' ' -f1); echo "$SHIP_SHA  $SHIP (tree $TREE, blob $(git rev-parse "$SHA:$SHIP"))" > "$OUT/shipped-csv.txt"
 X1_KEY=$(sed -n "s/^export const X1_DATA: X1SourceKey = '\(.*\)';/\1/p" tests/pacing-x1/source.ts)
 log "X1_DATA=$X1_KEY shipped CSV $SHIP_SHA"
-# (3) AC7 with --csv from the tree; no fallback to any hard-coded CSV
-if node -e "process.exit(require('./package.json').scripts?.ac7 ? 0 : 1)"; then
-  log "AC7: npm run ac7 -- --csv $SHIP"
-  if npm run ac7 -- --csv "$SHIP" > "$OUT/ac7.log" 2>&1; then log "AC7 PASS"; else fail "AC7 (--csv $SHIP) failed: ac7.log"; fi
-  grep -q -- "$SHIP_SHA" "$OUT/ac7.log" || fail "AC7 log does not show the shipped CSV sha256 $SHIP_SHA (did it read --csv?)"
+# (3) AC7 (HoE 10:57): QA's 2x active/idle gate, called directly, reading the tree's shipped CSV. It lives OUTSIDE the repo
+# tree (studio qa/m3-scripts, reads product/sim/m4/m4_active.py), so both are hashed into outside-tree.txt (condition 4).
+# No fallback: the script reads only argv[1] today, so `--csv` would be silently ignored; until Econ's --csv arg is in the
+# script, the AC7 step is NOT run and FAILS loudly (DEPENDENCY MISSING).
+AC7=$STUDIO/qa/m3-scripts/ac7-active-idle-gate.py; AC7_SIM=$STUDIO/product/sim/m4/m4_active.py
+for f in "$AC7" "$AC7_SIM"; do if [ -f "$f" ]; then echo "$(sha256sum < "$f" | cut -d' ' -f1)  $f (outside the tree; AC7)" >> "$OUT/outside-tree.txt"; else fail "AC7 input missing: $f"; fi; done
+echo "$(sha256sum < "$(readlink -f "$(command -v python3)")" | cut -d' ' -f1)  python3 $(python3 -V 2>&1 | cut -d' ' -f2) $(readlink -f "$(command -v python3)")" >> "$OUT/outside-tree.txt"
+if [ -f "$AC7" ] && grep -q -- '--csv' "$AC7"; then
+  log "AC7: python3 $AC7 30 --csv $WT/$SHIP"
+  if python3 "$AC7" 30 --csv "$WT/$SHIP" > "$OUT/ac7.log" 2>&1; then log "AC7 PASS"; else fail "AC7 (--csv $SHIP) FAIL or error: ac7.log"; fi
+  grep -q -- "CSV $WT/$SHIP" "$OUT/ac7.log" || fail "AC7 header does not name the tree's shipped CSV $WT/$SHIP (did it read --csv?)"
 else
-  echo "DEPENDENCY MISSING: the tree has no 'ac7' npm script taking --csv (Econ's AC7 --csv PR). No fallback to a hard-coded CSV." > "$OUT/ac7.log"
-  fail "AC7 --csv entry point missing on the tip (Econ PR dependency)"
+  { echo "DEPENDENCY MISSING: $AC7 has no --csv argument (Econ is adding it). AC7 NOT run; no fallback to its built-in CSV."
+    [ -f "$AC7" ] && echo "script sha256 $(sha256sum < "$AC7" | cut -d' ' -f1)"; } > "$OUT/ac7.log"
+  fail "AC7 --csv arg missing in $AC7 (Econ PR dependency); AC7 not run"
 fi
 # the X1 job itself, exactly as CI runs it
 log "X1 shards (optimal / seller15 / casual in parallel), seeds $SEEDS"
-pids=(); for p in optimal seller15 casual; do npx vite-node scripts/pacing-x1-stack.ts -- shard --profile "$p" --seeds "$SEEDS" --out "$OUT" > "$OUT/shard-$p.log" 2>&1 & pids+=($!); done
-for pid in "${pids[@]}"; do wait "$pid" || fail "a shard exited non-zero (see shard-*.log)"; done
+if [ "$SEQ" = 1 ]; then for p in optimal seller15 casual; do log "shard $p (sequential)"; npx vite-node scripts/pacing-x1-stack.ts -- shard --profile "$p" --seeds "$SEEDS" --out "$OUT" > "$OUT/shard-$p.log" 2>&1 || fail "shard $p exited non-zero"; done
+else pids=(); for p in optimal seller15 casual; do npx vite-node scripts/pacing-x1-stack.ts -- shard --profile "$p" --seeds "$SEEDS" --out "$OUT" > "$OUT/shard-$p.log" 2>&1 & pids+=($!); done
+  for pid in "${pids[@]}"; do wait "$pid" || fail "a shard exited non-zero (see shard-*.log)"; done; fi
 npx vite-node scripts/pacing-x1-stack.ts -- verdict --in "$OUT" --out "$OUT" > "$OUT/verdict.log" 2>&1; VRC=$?
 log "X1 verdict exit $VRC: $(head -1 "$OUT/summary.md" 2>/dev/null)"
 [ "$VRC" = 0 ] || fail "X1 verdict FAIL (summary.md)"

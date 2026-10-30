@@ -1,25 +1,25 @@
 // pacing-x1-stack (v5 manifest row 1): pinned inputs, the data-source switch, table coverage and the verdict rules.
-// Fast: no 200-seed runs here (the CI job runs those). Every input is a committed fixture with a sha256 assert (D-HOE-20261030-05).
+// Fast: no 200-seed runs here (the CI job runs those). The §13.2a table is a pinned fixture (sha256 assert); the economy data
+// is the tree's shipped data/economy.csv (HoE 10:57), hashed. No balance values are asserted here.
 import { describe, it, expect } from 'vitest';
 import { X1_DATA, X1_SOURCES } from './pacing-x1/source';
-import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, type Shard, type Gate } from './pacing-x1/compare';
+import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, PENDING_REPRED, type Shard, type Gate } from './pacing-x1/compare';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { X1_PRED, pinned, parsePred, x1Balance, x1Stacks } from './pacing-x1/harness';
 import { M5X_STACKS, assertNoDoubleModel } from './bot-m5';
 
 const rows = () => parsePred(pinned(X1_PRED.fixture, X1_PRED.sha256).toString('utf8'));
 
-describe('pacing-x1-stack: pinned inputs and data source', () => {
-  it('every fixture of every source matches its sha256 pin and builds a valid L0-30 balance with all src M5 flags off', () => {
-    for (const k of Object.keys(X1_SOURCES) as (keyof typeof X1_SOURCES)[]) {
-      const { b } = x1Balance(k); expect(b.maxLevel).toBe(30);
-      expect(() => assertNoDoubleModel(b, x1Stacks(k).N)).not.toThrow(); // bot models M5; src flags must stay off in the fixture
-    }
-  });
-  it('the switch names a known source; the fallback runs streak and pause off, 8dc90e2b runs the AssZ stack unchanged', () => {
-    expect(Object.keys(X1_SOURCES)).toContain(X1_DATA);
-    const fb = x1Stacks('rcv5-b48be8a4-nostreak'); expect(fb.N.streakCap).toBe(0); expect(fb.N.pause).toBe(false); expect(fb.H.hold).toBe(true); expect(fb.toggles.streak).toBe('n/a');
-    const hop = x1Stacks('v5hop1-8dc90e2b'); expect(hop.N).toEqual(M5X_STACKS.AssZ); expect({ ...hop.H }).toEqual(M5X_STACKS.AssZhold);
-    expect(Object.keys(hop.toggles).sort()).toEqual(['abilities', 'broody', 'golden', 'streak', 'tapCoins']);
+describe('pacing-x1-stack: data source and pinned table', () => {
+  it('the switch reads the shipped data/economy.csv + balance.json from the tree with the full stack, and hashes what it read', () => {
+    expect(X1_DATA).toBe('shipped-tree'); const src = X1_SOURCES[X1_DATA];
+    expect(src.csv).toBe('data/economy.csv'); expect(src.balanceJson).toBe('src/config/balance.json'); expect(src.stack).toEqual({});
+    const { b, csvSha256 } = x1Balance(X1_DATA);
+    expect(csvSha256).toBe(createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex'));
+    const st = x1Stacks(X1_DATA); expect(st.N).toEqual(M5X_STACKS.AssZ); expect({ ...st.H }).toEqual(M5X_STACKS.AssZhold);
+    expect(() => assertNoDoubleModel(b, st.N)).not.toThrow(); // bot models M5 itself; the shipped balance.json keeps src M5 flags off
+    expect(Object.keys(st.toggles).sort()).toEqual(['abilities', 'broody', 'golden', 'streak', 'tapCoins']);
   });
   it('the §13.2a table parses to 105 rows, 72 blocking, and every row is handled, NOT-WIRED, or a G5-P pause row', () => {
     const r = rows(); expect(r.length).toBe(105); expect(r.filter(x => x.blocks_merge.startsWith('Y')).length).toBe(72);
@@ -45,6 +45,12 @@ describe('pacing-x1-stack: verdict rules', () => {
     expect(o.filter(x => x.status === 'FAIL')).toEqual([]);
     expect(o.filter(x => x.line >= 906).every(x => x.status === 'EXCLUDED')).toBe(true);
     expect(o.filter(x => NOT_WIRED[x.line] != null).every(x => x.status === 'NOT-WIRED')).toBe(true);
+  });
+  it('L894-896 are PENDING-REPRED (never PASS/FAIL) until the signed re-prediction lands, except the 180 s cap, which still FAILS', () => {
+    expect(Object.keys(PENDING_REPRED).map(Number).sort()).toEqual([894, 895, 896]);
+    const ok = evaluate(opt(), { optimal: shard(gate({})) }); for (const l of [894, 895, 896]) expect(ok.find(x => x.line === l)!.status).toBe('PENDING-REPRED');
+    const over = evaluate(opt(), { optimal: shard(gate({ G4_noAff_F10_to_max: [84, 190, 234] })) });
+    expect(over.find(x => x.line === 896)!.status).toBe('FAIL'); expect(over.find(x => x.line === 894)!.status).toBe('PENDING-REPRED');
   });
   it('a blocking row outside the band FAILS even when its absolute gate holds; above the absolute gate FAILS too', () => {
     const low = evaluate(opt(), { optimal: shard(gate({ p95: 1.3 })) }); // 1.3 < 0.8 x 1.755, still <= 2.00
