@@ -184,6 +184,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
     if (open === 'market' && p !== 'market') ordersExpanded = false;
+    if (open === 'upgrades' && ZGC) zgHidden(); // D-COL-29: hiding the Upgrades panel closes an open strip with one cancel
     open = p; panelLayer.classList.toggle('open', !!p);
     $('#p-market').hidden = p !== 'market'; $('#p-upgrades').hidden = p !== 'upgrades';
     nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
@@ -263,8 +264,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const ZG_GUARD_MS = 350; let zgOpen: { kind: string; at: number } | null = null, zgRevealT = 0;
   const zgEls = (kind: string) => { const st = uRow.querySelector<HTMLElement>(`.zg-confirm[data-zg-kind="${kind}"]`);
     return st ? { st, buy: uRow.querySelector<HTMLElement>(`button.btn[data-kind="${kind}"]`) } : null; };
-  /** Re-apply the open strip after any tab re-render (markup always renders it closed). The row stopped being ZG -> state dropped. */
-  const zgApply = () => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { zgOpen = null; return; }
+  /** Re-apply the open strip after any tab re-render (markup always renders it closed). D-COL-2026-10-30-29: a re-render that no
+   *  longer has the strip (tab switch, row no longer ZG / MAX) closes it with exactly one cancel, no buy, focus left alone. */
+  const zgApply = () => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { const k = zgOpen.kind; zgOpen = null; clearTimeout(zgRevealT); zgLog(k, 'cancel'); return; }
     if (e.st.hidden) { const had = document.activeElement === document.body; e.st.hidden = false; e.buy?.setAttribute('aria-expanded', 'true'); if (had) e.st.querySelector<HTMLElement>('[data-zg=confirm]')?.focus({ preventScroll: true }); } };
   const zgLog = (kind: string, outcome: 'confirm' | 'cancel') => g.telemetry.track('zero_gain_confirm', { upgrade_id: kind, outcome });
   const zgClose = (outcome: 'cancel' | null, focusBuy = true) => {
@@ -279,6 +281,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     e.st.querySelector<HTMLElement>('[data-zg=confirm]')?.focus({ preventScroll: true });
     zgRevealT = window.setTimeout(() => { if (zgOpen?.kind === kind) zgEls(kind)?.st.scrollIntoView({ block: 'nearest' }); }, ZG_GUARD_MS);
   };
+  function zgHidden() { zgClose('cancel', false); }
   /** Click routing for the strip and for a ZG row's Buy (a disclosure while the strip is on). True = handled. */
   function zgClick(bt: HTMLElement): boolean {
     const z = bt.dataset.zg;

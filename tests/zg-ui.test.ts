@@ -242,3 +242,41 @@ describe('ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only)
     expect(strip().hidden).toBe(false); expect(buyOf('COLL').getAttribute('aria-expanded')).toBe('true');
   });
 });
+
+describe('D-COL-2026-10-30-29 (a): every opened strip ends in exactly one confirm or one cancel (ZG-AC10, spec L379-382)', () => {
+  const C1 = mk(1, 1);
+  const zgc = (g: Game) => g.telemetry.events().filter(e => e.type === 'zero_gain_confirm').map(e => ({ id: e.upgrade_id, o: e.outcome }));
+  it('re-tap on Buy while open: closes, no buy, exactly one cancel, focus stays on Buy', async () => {
+    t = 80000; const { g } = await mount(COLL_ZG(), 'collection', C1); const b = buyOf('COLL'); const coins = g.state.coinsCents;
+    b.focus(); b.click(); t += 1000; b.click();
+    expect(document.querySelector<HTMLElement>('#zgc-coll')!.hidden).toBe(true); expect(document.activeElement).toBe(b);
+    expect(zgc(g)).toEqual([{ id: 'collection', o: 'cancel' }]); expect(g.state.collectionLevel).toBe(1); expect(g.state.coinsCents).toBe(coins);
+  });
+  it('tab switch while open: exactly one cancel, no buy; the strip is not re-opened on return', async () => {
+    t = 81000; const { g, ui } = await mount(COLL_ZG(), 'collection', C1); buyOf('COLL').click();
+    (document.querySelector('[data-tab=farm]') as HTMLElement).click(); ui.render(); ui.render();
+    expect(zgc(g)).toEqual([{ id: 'collection', o: 'cancel' }]); expect(g.state.collectionLevel).toBe(1);
+    (document.querySelector('[data-tab=collection]') as HTMLElement).click(); ui.render(); ui.render();
+    expect(document.querySelector<HTMLElement>('#zgc-coll')!.hidden).toBe(true); expect(buyOf('COLL').getAttribute('aria-expanded')).toBe('false');
+    expect(zgc(g)).toHaveLength(1);
+  });
+  it('re-render that drops the strip (row no longer ZG): exactly one cancel, no buy', async () => {
+    t = 82000; const { g, ui } = await mount(COLL_ZG(), 'collection', C1); buyOf('COLL').click();
+    g.state = { ...g.state, collectionLevel: 0 } as any; expect(isZeroGain(g.state, C1, 'COLL')).toBe(false); t += 1000; ui.render(); ui.render();
+    expect(document.querySelector('#zgc-coll')).toBeNull(); expect(zgc(g)).toEqual([{ id: 'collection', o: 'cancel' }]);
+    expect(g.telemetry.events().some(e => e.type === 'upgrade')).toBe(false);
+    ui.render(); expect(zgc(g)).toHaveLength(1);
+  });
+  it('closing the Upgrades panel while open: exactly one cancel, no buy; reopening shows it closed', async () => {
+    t = 83000; const { g, ui } = await mount(COLL_ZG(), 'collection', C1); buyOf('COLL').click();
+    ui.openPanel(null); ui.render(); expect(zgc(g)).toEqual([{ id: 'collection', o: 'cancel' }]);
+    ui.openPanel('upgrades'); ui.render(); ui.render();
+    expect(document.querySelector<HTMLElement>('#zgc-coll')!.hidden).toBe(true); expect(zgc(g)).toHaveLength(1); expect(g.state.collectionLevel).toBe(1);
+  });
+  it('unrelated re-render keeps the strip open with no event; the later confirm is the only event', async () => {
+    t = 84000; const { g, ui } = await mount(COLL_ZG(), 'collection', C1); buyOf('COLL').click();
+    g.state = { ...g.state, coinsCents: g.state.coinsCents + 1 }; ui.render(); expect(zgc(g)).toEqual([]);
+    t += 400; (document.querySelector('#zgc-coll [data-zg=confirm]') as HTMLElement).click();
+    expect(zgc(g)).toEqual([{ id: 'collection', o: 'confirm' }]); expect(g.state.collectionLevel).toBe(2);
+  });
+});
