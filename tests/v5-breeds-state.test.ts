@@ -12,6 +12,7 @@ import { BREEDS_RNG_SALT } from '../src/config/breeds';
 import { ensureBreeds, type BreedsSave } from '../src/sim/breeds';
 import { fakeIdb } from './fake-idb';
 import { mem } from './helpers';
+import { ON } from './v5-f2-helpers';
 import { TELEMETRY_KEY } from '../src/telemetry/telemetry';
 const T0 = Date.UTC(2026, 9, 30, 12);
 const BR = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, breeds: 1 } } } as typeof b; // flag on (default 0 in shipping)
@@ -44,6 +45,9 @@ describe('BR-AC2e / Q2: breeds is created at the end of the first flag-on tick, 
     const kv = mem(); const { g } = boot(b, kv, T0); g.state = { ...g.state, farmLevel: 12 };
     let s = g.state; for (let i = 0; i < 600; i++) s = step(s, 0.1, b); g.state = s; g.save();
     expect('breeds' in s).toBe(false); expect('breeds' in stored(kv)).toBe(false);
+  });
+  it('[BR-AC1] other M5 flags on, breeds off: stepTimers runs but never creates breeds', () => {
+    let s: GameState = { ...initialState(b, 7), farmLevel: 12 }; for (let i = 0; i < 20; i++) s = step(s, 0.1, ON); expect('breeds' in s).toBe(false);
   });
 });
 
@@ -114,6 +118,9 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
     const { g } = boot(BR, kv, T0 + 30_000); const x = g.state.breeds!;
     expect(x.owned).toEqual({ leghorn: { stars: 2 }, silkie: { stars: 1 } }); expect(x.slots).toEqual(['leghorn', null, null]);
     expect(migrated(kv)).toHaveLength(1); expect(migrated(kv)[0]).toMatchObject({ migration: 'breeds_sanitise', from: 6, to: 6 });
+  });
+  it('[BR-AC26 E12] duplicate slot with every slot open (F20): the second copy is nulled, the first kept', () => {
+    const kv = saved(st({ slots: [null, 'sussex', 'sussex'] }, 20), T0); expect(boot(BR, kv, T0 + 30_000).g.state.breeds!.slots).toEqual([null, 'sussex', null]);
   });
   it('[BR-AC26 E12] unknown incubator breed is dropped and its costCents refunded; remainingMs clamped to [0, 60,000]', () => {
     const s = st({ incubator: { breed: 'silkie', remainingMs: 5, costCents: 12_345 } }), kv = saved(s, T0); const { g } = boot(BR, kv, T0 + 30_000);
