@@ -88,5 +88,6 @@ export function sanitizeBreedsOnLoad(s: GameState, b: Balance, ev: SimEvent[]): 
  *  A real change clears it: the auto-slot fills the slot (non-null), and placeBreed (PR B) drops the shadow entry. */
 export function breedsSaveView(s: GameState): BreedsSave | undefined {
   const x = s.breeds, raw = s.breedsRawSlots; if (!x || !raw) return x;
-  return x.slots.some((v, i) => v === null && raw[i]) ? { ...x, slots: x.slots.map((v, i) => (v === null && raw[i] ? raw[i] : v)) } : x;
+  const slots = x.slots.map((v, i) => (v === null && raw[i] ? raw[i] : v));
+  return slots.every((v, i) => v === x.slots[i]) ? x : { ...x, slots };
 }
