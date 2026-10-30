@@ -19,7 +19,9 @@ export interface SaleEffect { id: string; flag: M5Flag; factor(s: GameState, b: 
 export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance): number; }
 /** Feature PRs append their entry IN THIS FILE (one line each). Order is documentation only: factors multiply (golden X7).
  *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
-export const SALE_EFFECTS: readonly SaleEffect[] = [];
+export const SALE_EFFECTS: readonly SaleEffect[] = [
+  { id: 'streak', flag: 'streak', factor: s => 1 + (s.streakS ?? 0) }, // #2 Collect Streak R8: (1 + s) on every sale while live
+];
 export const LAY_EFFECTS: readonly LayEffect[] = [];
 export const PLAYER_SALE: SaleCtx = { by: 'player' };
 /** CCR m1 #80: the ONE player-sale context for a given attended value (Q-F1c-1). sellTo credits with it; every preview uses it. */

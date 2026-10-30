@@ -9,6 +9,7 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
 import { focusFrameMs } from './sim/clock';
+import { streakOn, streakPeak } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
@@ -299,7 +300,9 @@ export class Game {
     this.onNewerSave?.(v);
   }
   endSession() {
-    if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    if (this.resetting || this.inactive || this.held()) return;
+    const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
+    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
