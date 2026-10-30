@@ -71,6 +71,12 @@ describe('[F3-validate] F3 validateBalance M5 rules (rules from the specs; value
     expect(() => validateBalance(withTc({ stall_hold_s: 0 }), false)).not.toThrow();
     expect(() => validateBalance(withTc({ warn_at_s: 20, urgent_at_s: 27 }), false)).not.toThrow(); // despawn 30 shipped
   });
+  it('[Pause-§6] rest_recovery_mult must be > 0 (pause spec §6 range (0, 0.35]): 0 and a negative value fail; 0.35 passes', () => {
+    expect(() => validateBalance(withTc({ rest_recovery_mult: 0 }), false)).toThrow(/rest_recovery_mult must be > 0/);
+    // a negative value is already refused by validateBalance's generic leaf check ("... invalid"), before validateM5 runs
+    expect(() => validateBalance(withTc({ rest_recovery_mult: -0.25 }), false)).toThrow(/m4\.tc\.rest_recovery_mult/);
+    expect(() => validateBalance(withTc({ rest_recovery_mult: 0.35 }), false)).not.toThrow();
+  });
 });
 
 // No literal tunables in src/ (sizing §1 F3, §12.2). Two checks:
