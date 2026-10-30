@@ -49,6 +49,7 @@ export function validateM5(m4: any, workers: any): void {
   if (has(tc, 'fatigue_cue_clear_share', 'fatigue_cue_min_share') && !(tc.fatigue_cue_clear_share < tc.fatigue_cue_min_share)) fail('tc.fatigue_cue_clear_share must be < fatigue_cue_min_share');
   // #4 abilities / Pause
   if (has(tc, 'ability_s', 'ability_cd_s') && !(tc.ability_s > 0 && tc.ability_s <= tc.ability_cd_s)) fail('tc.ability_s must be > 0 and <= ability_cd_s');
-  if (has(tc, 'rest_recovery_mult') && !(tc.rest_recovery_mult > 0)) fail('tc.rest_recovery_mult must be > 0 (pause spec §6)');
+  // D-HOE-20261030-02: [0, 0.35]; 0 is valid (pause spec §6, AC-P17). Non-finite is refused here too, not only by the leaf check.
+  if (has(tc, 'rest_recovery_mult') && !(Number.isFinite(tc.rest_recovery_mult) && tc.rest_recovery_mult >= 0)) fail('tc.rest_recovery_mult must be a finite number >= 0 (pause spec §6; 0 is valid, AC-P17)');
   if (has(tc, 'rest_recovery_mult') && !(tc.rest_recovery_mult <= 0.35)) fail('tc.rest_recovery_mult must be <= 0.35 (pause spec §6, decisions.md:9)');
 }

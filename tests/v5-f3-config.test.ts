@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { balance } from '../src/config/balance';
 import { validateBalance } from '../src/config/balance';
 import { M5_FLAGS } from '../src/config/flags';
+import { validateM5 } from '../src/config/m5-rules';
 import { parseEconomyCsv, buildBalance, readEconomyConfig, keepFlags, M5_MAPPED_COLS } from '../scripts/sync-economy';
 
 const rows = parseEconomyCsv(readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8'));
@@ -71,11 +72,18 @@ describe('[F3-validate] F3 validateBalance M5 rules (rules from the specs; value
     expect(() => validateBalance(withTc({ stall_hold_s: 0 }), false)).not.toThrow();
     expect(() => validateBalance(withTc({ warn_at_s: 20, urgent_at_s: 27 }), false)).not.toThrow(); // despawn 30 shipped
   });
-  it('[Pause-§6] rest_recovery_mult must be > 0 (pause spec §6 range (0, 0.35]): 0 and a negative value fail; 0.35 passes', () => {
-    expect(() => validateBalance(withTc({ rest_recovery_mult: 0 }), false)).toThrow(/rest_recovery_mult must be > 0/);
-    // a negative value is already refused by validateBalance's generic leaf check ("... invalid"), before validateM5 runs
-    expect(() => validateBalance(withTc({ rest_recovery_mult: -0.25 }), false)).toThrow(/m4\.tc\.rest_recovery_mult/);
+  it('[Pause-§6] rest_recovery_mult range [0, 0.35] (pause spec §6; D-HOE-20261030-02): 0 and 0.35 pass; negative, NaN, Infinity and 0.4 fail', () => {
+    // 0 is valid (pause spec §6; AC-P17 checks the card text at 0)
+    expect(() => validateBalance(withTc({ rest_recovery_mult: 0 }), false)).not.toThrow();
     expect(() => validateBalance(withTc({ rest_recovery_mult: 0.35 }), false)).not.toThrow();
+    // negative / non-finite: refused by validateBalance's generic leaf check ("... invalid") before validateM5 runs...
+    for (const v of [-0.25, NaN, Infinity]) expect(() => validateBalance(withTc({ rest_recovery_mult: v }), false)).toThrow(/m4\.tc\.rest_recovery_mult/);
+    // ...and by validateM5's own guard when called directly (no reliance on the leaf check)
+    const m4 = (v: number) => ({ ...structuredClone(balance.m4!), tc: { ...balance.m4!.tc, rest_recovery_mult: v } });
+    for (const v of [-0.25, NaN, Infinity, -Infinity]) expect(() => validateM5(m4(v), balance.workers)).toThrow(/rest_recovery_mult must be a finite number >= 0/);
+    expect(() => validateM5(m4(0), balance.workers)).not.toThrow();
+    // upper bound unchanged
+    expect(() => validateBalance(withTc({ rest_recovery_mult: 0.4 }), false)).toThrow(/rest_recovery_mult must be <= 0\.35/);
   });
 });
 
