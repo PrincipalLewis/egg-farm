@@ -18,5 +18,5 @@ echo "$M tested $T_SHA tree $T_TREE | rc $RC_SHA tree $RC_TREE"
 if [ "$M" = MATCH ] && [ "$NF" = 0 ]; then echo "RC gate: yes (tested $T_SHA tree == rc $RC_SHA tree $RC_TREE)" > rc-gate.txt; R=0
 else echo "not RC gate, re-run on RC SHA $RC_SHA ($M; conditions failed: $NF): scripts/pacing-x1-run.sh $RC_SHA <fresh results-dir>" > rc-gate.txt; R=1; fi
 cat rc-gate.txt
-find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | sort | xargs sha256sum > SHA256SUMS && sha256sum -c --quiet SHA256SUMS || exit 2
+find . -type f ! -path ./SHA256SUMS -printf '%P\n' | sort | xargs sha256sum > SHA256SUMS && sha256sum -c --quiet SHA256SUMS || exit 2
 exit $R

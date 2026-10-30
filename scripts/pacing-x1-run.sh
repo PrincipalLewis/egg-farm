@@ -71,7 +71,8 @@ if [ -n "$AC7_FROM" ]; then
 elif [ -f "qa/m3-scripts/ac7-active-idle-gate.py" ]; then AC7="$WT/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="tree"; AC7_COMMIT=""
 else AC7="$STUDIO/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="studio"; AC7_COMMIT=""; fi
 AC7_SIM=$STUDIO/product/sim/m4/m4_active.py
-for f in "$AC7" "$AC7_SIM"; do if [ -s "$f" ]; then echo "$(sha256sum < "$f" | cut -d' ' -f1)  $f (AC7, source $AC7_SRC${AC7_COMMIT:+ commit $AC7_COMMIT path $AC7_PATH})" >> "$OUT/outside-tree.txt"; else fail "AC7 input missing: $f"; fi; done
+if [ -s "$AC7" ]; then echo "$(sha256sum < "$AC7" | cut -d' ' -f1)  $AC7 (AC7 script, row 904, source $AC7_SRC${AC7_COMMIT:+ commit $AC7_COMMIT path $AC7_PATH})" >> "$OUT/outside-tree.txt"; else fail "AC7 script missing: $AC7"; fi
+if [ -s "$AC7_SIM" ]; then echo "$(sha256sum < "$AC7_SIM" | cut -d' ' -f1)  $AC7_SIM (AC7 sim module, studio)" >> "$OUT/outside-tree.txt"; else fail "AC7 input missing: $AC7_SIM"; fi
 echo "$(sha256sum < "$(readlink -f "$(command -v python3)")" | cut -d' ' -f1)  python3 $(python3 -V 2>&1 | cut -d' ' -f2) $(readlink -f "$(command -v python3)")" >> "$OUT/outside-tree.txt"
 CSVABS="$WT/$SHIP"; AC7_RC=null; AC7_ST=FAIL; AC7_WHY=""; AC7_NAMED=false; AC7_RES=""
 if [ ! -s "$AC7" ]; then AC7_WHY="AC7 script missing ($AC7_SRC)"; echo "$AC7_WHY" > "$OUT/ac7.log"
@@ -105,5 +106,5 @@ if [ ${#FAILS[@]} -eq 0 ]; then echo "pending trees check: run scripts/pacing-x1
 else echo "not RC gate, re-run on RC SHA (${#FAILS[@]} condition(s) failed: conditions.txt)" > "$OUT/rc-gate.txt"; fi
 log "rc-gate: $(cat "$OUT/rc-gate.txt")"
 # (5) rule 19 manifest
-( cd "$OUT" && find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | sort | xargs sha256sum > SHA256SUMS && sha256sum -c --quiet SHA256SUMS ) || { echo "SHA256SUMS failed" >&2; exit 1; }
+( cd "$OUT" && find . -type f ! -path ./SHA256SUMS -printf '%P\n' | sort | xargs sha256sum > SHA256SUMS && sha256sum -c --quiet SHA256SUMS ) || { echo "SHA256SUMS failed" >&2; exit 1; }
 [ ${#FAILS[@]} -eq 0 ]
