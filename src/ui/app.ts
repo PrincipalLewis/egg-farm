@@ -25,6 +25,7 @@ import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milest
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
 import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
+import { wireAttended } from './attended-probe';
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { bestBuyMark, goalLabelHtml } from './goal-label';
@@ -181,6 +182,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
     dirty = true;
   };
+  // v5 CCR F-2 (D-HOE-20261030-08): attended = visible && focused && !dialogOpen(); the Market sheet is a play surface, never a dialog (Q-F1c-1).
+  wireAttended(g, () => open);
   // Farm View Manage all: mobile nav button + desktop docked copy next to the Upgrades header (same rule/action/cooldown/ring)
   // B8: ONE Farm View Manage-all button, moved between the mobile nav and the docked Upgrades header (no hidden duplicate).
   const farmMA = nav.querySelector('.farm-manage-all') as HTMLButtonElement, farmMAs = [farmMA], yawnSfx = new YawnSfx();
@@ -604,13 +607,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
-      const unit = (k: number) => saleValueCents(s, k, b);
+      const saleCtx = g.playerSaleCtx(); // CCR F-2: the ctx Game.dispatch credits a player sell/sellAll with now, so preview == credit
+      const unit = (k: number) => saleValueCents(s, k, b, saleCtx);
       const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
       if (s.customers.length <= vis) ordersExpanded = false;
       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
       mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
-      const { eggs, cents } = sellAllPreview(s, b); // same per-order Grader math + rounding as the sellAll action
+      const { eggs, cents } = sellAllPreview(s, b, saleCtx); // same per-order Grader math + rounding as the sellAll action
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCountFloor, fmtMoneyFloor)); setDisabled(sellAllBtn, eggs === 0);
     }
     // M41-8: the shared pick is refreshed first so the row outline, the UX-M4 chip and the strip ★ use the same frame's pick.
