@@ -497,6 +497,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // BBv2 (spec v1.0.3 §6, PMFU BB12): `hintMark` is THE ★ key the chip and the strip render from (flag read once at boot):
   // bestBuyV2 = 1 -> the Part A ★ (affordable AND meaningful, else null = the inert mark-null net); 0 -> today's single-arg bestBuyMark.
   const BB2 = bestBuyV2On(b); let hintMark: BuyKey | null = null;
+  let bbMarkSinceT = 0; if (g.bbTel) g.bbCtx = () => { const t = now(); return { t, mark: hintMark, markSinceT: bbMarkSinceT, rateCentsPerS: income.centsPerSec(t) }; };
   // SG-12 qaPicker history (stopgap v1.2.6 fdc1c199 SG-12; QA/dev builds only, compiled out of release with IOS_FLAG_ENABLED).
   const qaHist: { t: number; key: string | null; affordable: boolean | null; mark: string | null }[] = []; let qaKeySinceT = 0, qaLast: string | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
@@ -510,6 +511,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       if (sig !== qaLast) { if (qaLast === null || k !== (qaHist[qaHist.length - 1]?.key ?? null)) qaKeySinceT = t; qaLast = sig;
         qaHist.push({ t, key: k, affordable: hintPick?.affordable ?? null, mark: hintMark }); if (qaHist.length > 32) qaHist.shift(); }
     }
+    // BBv2 §8 (errata rev 12 #19/#20): ms_since_shown runs on this picker clock from the last ★ switch; g.bbTel is null at flag 0.
+    if (g.bbTel) { if (hintMark !== null && hintMark !== prevMark) bbMarkSinceT = t; g.bbTel.shown(t, g.state, hintPick, income.centsPerSec(t)); }
     // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
     // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
     if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || hintMark !== prevMark))) return;
