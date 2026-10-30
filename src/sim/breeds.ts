@@ -17,7 +17,7 @@ export interface BreedsSave {
   settleMs: [number, number, number]; hatches: number; pity: number; rng: number; freeHatchUsed: 0 | 1; flockCompleteLogged: 0 | 1;
   sinceUnlockMs?: number; sinceUnlockBackfilled?: 0 | 1;
 }
-const on = (s: GameState, b: Balance) => flagOn(b, 'breeds') && !!s.breeds;
+export const on = (s: GameState, b: Balance) => flagOn(b, 'breeds') && !!s.breeds;
 const int0 = (v: unknown) => (Number.isInteger(v) && (v as number) >= 0 ? (v as number) : 0);
 /** Q2 (tick-semantics note; HoE may re-rule): `breeds` is created at the END of the first flag-on tick (TIMER_SYSTEMS,
  *  like seedEvRng / Q-F1b-1), never at load. §6 migration shape; backfilled = 1 when created at F >= bc_unlock_farm (BR-AC2e). */
