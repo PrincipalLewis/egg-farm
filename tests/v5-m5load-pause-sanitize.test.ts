@@ -71,7 +71,8 @@ describe('[CCR-F4][E9][AC-P1] flag off / M4.1-style load: Pause fields are ignor
 
 describe('[CCR-F4][F-5] validateBalance requires the Pause tc keys m5Load reads while m4.flags.pause is on', () => {
   it('missing tc_pause_call_lockout_s / tc_pause_unlock_farm is a load error, never a silent 0', () => {
-    const on = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, pause: 1 } } } as typeof b;
+    const { pause_unlock_farm: _u, pause_call_lockout_s: _c, ...tcNoPause } = b.m4!.tc as any; // V5-HOP-1 ships these keys; strip them so the missing-key path is still exercised
+    const on = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, pause: 1 }, tc: tcNoPause } } as typeof b;
     expect(() => validateBalance(on)).toThrow(/tc\.pause_(unlock_farm|call_lockout_s) is required while flags\.pause is on/);
     expect(() => validateBalance(PZ)).not.toThrow();
     expect(() => validateBalance(b)).not.toThrow();
