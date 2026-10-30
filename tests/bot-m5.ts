@@ -20,17 +20,29 @@ import { candidates } from '../src/ui/next-goal';
 import { priceDollars } from '../src/econ/income';
 import { prodEggsPerSec, coopCap } from '../src/sim/tracks';
 import { maxStepRatio, quantile, type PacingTargets } from './pacing-guards';
+import { flagOn, type M5Flag } from '../src/config/flags';
 type B = Balance;
 export interface Stack { on: boolean; streakCap: number; tapShare: number; broody: boolean; golden: { gapMin: number; gapMax: number } | null; abil: boolean; sweep: 'A' | 'B'; sweepMult: number; pause: boolean; pat?: 'none' | 'yawn' | 'long' | 'fullcoop' | 'wages' | 'stock' | 'bench' | 'grader'; lockoutS?: number; hold?: boolean; ssZero?: boolean; warm?: boolean; }
 export interface Prof { tap: 'idle' | 'ac7' | number; checkBase: number; catchP: number; }
 export const PROFS: Record<string, Prof> = { slow: { tap: 0.25, checkBase: 60, catchP: 0.4 }, idle: { tap: 'idle', checkBase: 15, catchP: 0 }, optimal: { tap: 3, checkBase: 5, catchP: 1 }, seller15: { tap: 'ac7', checkBase: 15, catchP: 0.75 }, casual: { tap: 0.5, checkBase: 30, catchP: 0.6 } };
 const rng = (seed: number) => { let a = (seed * 2654435761 + 99) >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 const WIDS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
+/** CCR O-3 on #78 / CCR rcv5-vs-main-1a61b36 F-1 (D-HOE-20261030-08): the bot layers its OWN model of the M5 mechanics (golden egg,
+ *  streak, tap coins, Broody, abilities, pause) on the real step()/apply(). It may do so only while the matching src flags are off;
+ *  once src implements them behind m4.flags.*, a run with both would count them twice. So a stack with `on` and any of those src
+ *  flags on (src flagOn: m4.enabled and flag === 1) throws. Turn the bot model off (`on: false`) to run on the src mechanics.
+ *  Flags the bot does not model (clockWage, UI flags, ...) are not in the list. */
+export const SRC_M5_FLAGS = ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const satisfies readonly M5Flag[];
+export function assertNoDoubleModel(b: B, K: Stack): void {
+  const both = K.on ? SRC_M5_FLAGS.filter(k => flagOn(b, k)) : [];
+  if (both.length) throw new Error(`bot-m5 models M5 itself: its own M5 model (stack on) and src m4.flags.${both.join('/m4.flags.')} are both on; that would double-count. Turn those src flags off, or use a stack with on: false to run on the src mechanics.`);
+}
 /** Read-only observers (port addition): they see events and states, never change them. */
 export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number;
   /** Every drained batch of sim events, with the run second it happened in. */ onEvents?: (t: number, evs: readonly SimEvent[]) => void;
   /** The state at the end of each run second (after taps, check-in and buys). */ onSecond?: (t: number, s: GameState) => void; }
 export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: RunOpts = {}) {
+  assertNoDoubleModel(bal, K);
   const tsnaps: [number, number, GameState][] = [];
   const b = { ...bal, sim_test: { ...bal.sim_test, poisson_arrivals: true } } as B;
   const V = new SellerVariance(VAR_DEFAULT, seed), R = rng(seed);
