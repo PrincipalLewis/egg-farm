@@ -197,7 +197,7 @@ describe('F6 Market sheet is a play surface (Q-F1c-1) with the F6 wiring in moun
     document.getElementById('modal-layer')!.classList.add('open'); expect((g as any).attendedNow()).toBe(false);
   });
   it('F6-AC5: the UI never passes suspended:true for sheet sales (no "suspended" literal in ui/ sources)', () => {
-    for (const f of ['app.ts', 'overlay.ts', 'attended.ts']) expect(readFileSync(`src/ui/${f}`, 'utf8')).not.toMatch(/suspended\s*:\s*true/);
+    for (const f of ['app.ts', 'overlay.ts'] /* ui/attended.ts folded into overlay.ts (CCR F-2) */) expect(readFileSync(`src/ui/${f}`, 'utf8')).not.toMatch(/suspended\s*:\s*true/);
   });
 });
 

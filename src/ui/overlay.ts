@@ -99,7 +99,9 @@ export const makeDialogOpen = (src: DialogSources) => (): boolean => {
   const doc = src.doc ?? document;
   return !!doc.querySelector(DIALOG_SEL) || explainerOpen(doc as Document) || src.sheet() === 'upgrades';
 };
-/** The one wiring line for Game's attended probe: visible && focused && !dialogOpen(). The UI never passes `suspended` for sheet sales. */
+/** The one wiring line for Game's attended probe: visible && focused && !dialogOpen(). The UI never passes `suspended` for sheet sales.
+ *  CCR F-2 (D-HOE-20261030-08/-15): this is the ONLY probe (F6a's ui/attended.ts is folded in here); the Market previews read
+ *  the same attended state through Game.playerSaleCtx(), so preview == credit. */
 export const wireAttended = (g: Pick<Game, 'setAttendedProbe'>, dialogOpen: () => boolean, doc: AttendedDoc = document) =>
   g.setAttendedProbe(() => attendedProbe(doc) && !dialogOpen());
 

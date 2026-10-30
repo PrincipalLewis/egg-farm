@@ -11,7 +11,7 @@ import { saleValueCents, sellAllPreview } from '../src/sim/payout';
 import { salePriceCents } from '../src/sim/tracks';
 import { graderMult } from '../src/sim/workers';
 import { SALE_EFFECTS, saleEffectFactors, type SaleEffect } from '../src/sim/effects';
-import { attendedProbe, wireAttendedProbe, type AttendedDoc } from '../src/ui/attended';
+import { attendedProbe, wireAttended, type AttendedDoc } from '../src/ui/overlay'; // CCR F-2: ui/attended.ts folded into overlay (one probe)
 import { dialogOpen } from '../src/ui/onboarding';
 import { Game } from '../src/game';
 import { mem } from './helpers';
@@ -48,9 +48,9 @@ describe('F6a attendedProbe: true iff visible && focused', () => {
     setDoc('hidden', true); expect(attendedProbe()).toBe(false);
     setDoc('visible', false); expect(attendedProbe()).toBe(false);
   });
-  it('F6a-AC2: wireAttendedProbe installs a live probe on Game (default probe is () => false)', () => {
+  it('F6a-AC2: wireAttended (no dialog open) installs a live probe on Game (default probe is () => false)', () => {
     let probe: (() => boolean) | null = null; const d = { visibilityState: 'visible' as DocumentVisibilityState, focus: true };
-    wireAttendedProbe({ setAttendedProbe: fn => { probe = fn; } }, { get visibilityState() { return d.visibilityState; }, hasFocus: () => d.focus });
+    wireAttended({ setAttendedProbe: fn => { probe = fn; } }, () => false, { get visibilityState() { return d.visibilityState; }, hasFocus: () => d.focus });
     expect(probe!()).toBe(true); d.focus = false; expect(probe!()).toBe(false); d.focus = true; d.visibilityState = 'hidden'; expect(probe!()).toBe(false);
   });
 });
