@@ -1,0 +1,38 @@
+name: k10-breeds-offset
+# K10 breeds offset test (engineering/decisions.md 2026-10-25 03:52 item (6), D-HOP-2026-10-24-47 B4; trigger per D-HOP-23).
+# NOT a required check (HoE): its own workflow and job, separate from `ci` / `gate`, which this PR does not touch. It stays
+# non-required until the retune passes (Sat 10:00 CET), then HoE makes it required. It is honestly red while K10 fails; never
+# tune data to make it pass. scripts/k10-trigger.mjs decides whether the diff (PR base...head) can move K10: any tc_* / bc_* /
+# farm_cost change in data/economy.csv, or streak / tap-coins / Broody / golden / breeds sim code or the harness. Otherwise the
+# job logs a no-op PASS so the check always reports.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      base: { description: 'Base ref for the trigger diff (default origin/rc/v5)', required: false, default: 'origin/rc/v5' }
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  k10-breeds-offset:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { fetch-depth: 0 } # the trigger needs the merge-base with the PR base
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 20, cache: npm }
+      - name: npm ci
+        run: npm ci
+      - name: K10 trigger + 200-seed offset test when triggered (npm run test:k10)
+        env:
+          K10_BASE: ${{ github.event.pull_request.base.sha || inputs.base || 'origin/rc/v5' }}
+          K10_OUT: k10-out/k10-result.json
+        run: mkdir -p k10-out && node scripts/k10-trigger.mjs --base "$K10_BASE" --head HEAD --exec
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with: { name: k10-result, path: k10-out/, retention-days: 14, if-no-files-found: ignore }
