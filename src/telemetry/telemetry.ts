@@ -12,9 +12,11 @@ export function installId(kv: KV, rnd: () => string = () => (globalThis.crypto?.
 export const isPinned = (type: string) => type === 'session_start' || type === 'session_end' || type === 'upgrade' || type.startsWith('onboarding_')
   || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset'
   || type === 'milestone_reached' || type === 'balanced_tier'
-  || type === 'save_migrated' || type === 'save_migration_aborted'; // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'save_migrated' || type === 'save_migration_aborted' // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'zero_gain_purchase' || type === 'dead_zone'; // BBv2 errata v5 rev 12 #21/#22 (pinned; emitted only with bestBuyV2 = 1); #19/#20 stay ring
 export interface TEvent { type: string; ts: number; sessionMs: number; [k: string]: unknown; }
-export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; }
+export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number;
+  bbv2?: { shown_min_gap_s: number; zero_gain_eta_max_s: number; dead_zone_min_s: number; zero_gain_purchase_cap: number }; }
 /**
  * Ring buffer (cap ring_size) persisted in batches: track() only touches memory; flush() writes storage.
  * Taps are aggregated into one `tap` event per tap_batch_ms window ({count, eggs}).

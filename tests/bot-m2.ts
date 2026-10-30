@@ -7,7 +7,7 @@ import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import type { SimEvent } from '../src/sim/events';
 import { WorkerId, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../src/sim/workers';
-import type { Model } from './bot';
+import { BUY_TRACE, STATE_TRACE, type Model } from './bot';
 import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
 import { pickBuy, pickAction, M1_KEYS } from './bot-m4';
 import { m4On } from '../src/config/formulas';
@@ -35,6 +35,7 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
     const t = Math.round(i * dt * 10) / 10, f = s.farmLevel;
     s = step(s, dt, b, ev); drain(t, f);
     if (t >= tapT) { tapT += V ? V.tapInterval() : 1; if (!o.taps || ((tapT - 2) % o.taps[0]) < o.taps[1]) s = apply(s, { type: 'collect' }, b); }
+    if (STATE_TRACE.fn && Number.isInteger(t)) STATE_TRACE.fn(t, s);
     if (t < sellT) continue;
     sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery;
     s = apply(s, { type: 'sellAll' }, b, ev); drain(t, s.farmLevel);
@@ -56,7 +57,7 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
       // D-HOP-2026-10-19-02: tests/bot-m4.ts pickBuy (M4 on, seller15: game pick over every purchasable incl. workers, wait rule; flag off = old rule).
       let kind = pickBuy(s, b, o.model, chf, [...M1_KEYS, ...(['W1', 'W2', 'W3', 'W4'] as const).filter(k => use.has(({ W1: 'market_hand', W2: 'coop_hand', W3: 'hawker', W4: 'grader' } as const)[k]))]);
       if (kind === 'c' && chf && !allPick) chf = false; // variance p_cheap_first
-      if (kind) { const next = apply(s, pickAction(kind), b); if (next === s) kind = null; else { s = next; if (kind === 'f') reach.set(s.farmLevel, t); } }
+      if (kind) { const act = pickAction(kind), next = apply(s, act, b); if (next === s) kind = null; else { BUY_TRACE.fn?.(s, act, next); s = next; if (kind === 'f') reach.set(s.farmLevel, t); } }
       if (!kind && !bought) break;
     }
   }

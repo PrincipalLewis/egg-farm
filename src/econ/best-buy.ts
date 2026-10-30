@@ -11,6 +11,7 @@ import { farmCost, collectionCost } from '../sim/state';
 import { hireCostCents, unlockFarm, graderTierCostCents, mood, isOff, type WorkerId } from '../sim/workers';
 import { incomePerSec } from './income';
 import { m4On } from '../config/formulas';
+import { bestBuyV2On } from '../config/flags';
 import { trackLock, trackCost } from '../sim/tracks';
 
 export type BuyKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
@@ -67,6 +68,28 @@ export function options(s: GameState, b: Balance): BuyOpt[] {
 }
 
 const working = { assumeWorking: true as const };
+
+/** BBv2 (spec v1.0.3 27e753d8 §2; m4.flags.bestBuyV2). Exempt keys: always meaningful (Farm's single-step gain is negative by design). */
+export const BBV2_EXEMPT: readonly BuyKey[] = ['FARM', 'W1', 'W2', 'W3', 'W4'];
+/** Offered keys that are meaningful: exempt, or single-step gain > 0 ($/s, assumeWorking, ε = 0; = optionGain().gain > 0). */
+export function meaningfulKeys(s: GameState, b: Balance): Set<BuyKey> {
+  const base = incomePerSec(s, b, working), out = new Set<BuyKey>();
+  for (const o of options(s, b)) if (BBV2_EXEMPT.includes(o.key) || incomePerSec(o.after, b, working) - base > 0) out.add(o.key);
+  return out;
+}
+export const isMeaningful = (s: GameState, b: Balance, key: BuyKey): boolean => meaningfulKeys(s, b).has(key);
+/** BBv2-1: the keys a picker may rank. Flag off: `keys` unchanged. Flag on: only the meaningful ones while any meaningful row is
+ *  offered; when none is offered (after Farm L30 = MAX) every key stays (zero-gain strip target allowed, never ★). */
+export function rankable<K extends BuyKey>(s: GameState, b: Balance, keys: readonly K[]): K[] {
+  if (!bestBuyV2On(b)) return [...keys];
+  const m = meaningfulKeys(s, b);
+  return m.size ? keys.filter(k => m.has(k)) : [...keys];
+}
+/** BBv2 ★ key (PMFU BB12): the hint's key when it is affordable and meaningful, else null (the inert mark-null net). */
+export const bbv2Mark = (pick: { key: BuyKey; affordable: boolean } | null | undefined, s: GameState, b: Balance): BuyKey | null =>
+  pick?.affordable && isMeaningful(s, b, pick.key) ? pick.key : null;
+/** BBv2-3: two ∞ paybacks tie on BUY_ORDER alone (FARM first); cost never decides an ∞-tie. Finite ties unchanged. */
+export const infTie = (bb: boolean, a: number, z: number) => bb && a === Infinity && z === Infinity;
 
 /** Depth-3 look-ahead: pick first item of the best Σgain/Σcost bundle. Ties → BUY_ORDER. */
 export function bestBuy(s: GameState, b: Balance): BestBuy | null {
@@ -150,12 +173,14 @@ export function paybackOf(s: GameState, b: Balance, key: BuyKey): number {
 /** Best-payback option among `keys` (only those currently offered). Tie-breaks: payback, then cost, then BUY_ORDER. */
 export function bestPaybackAmong(s: GameState, b: Balance, keys: BuyKey[]): { key: BuyKey; cost: number; payback: number } | null {
   let best: { key: BuyKey; cost: number; payback: number } | null = null;
+  const bb = bestBuyV2On(b), ranked = rankable(s, b, keys); // BBv2-1: zero-gain keys are never ranked (flag off: keys)
   for (const o of options(s, b)) {
-    if (!keys.includes(o.key)) continue;
+    if (!ranked.includes(o.key)) continue;
     const c = { key: o.key, cost: o.cost, payback: paybackOf(s, b, o.key) };
     const tie = c.payback === best?.payback || (best !== null && Math.abs(c.payback - best.payback) <= 1e-12);
+    const order = best !== null && BUY_ORDER.indexOf(c.key) < BUY_ORDER.indexOf(best.key);
     const better = !best || (!tie && c.payback < best.payback)
-      || (tie && (c.cost < best.cost || (c.cost === best.cost && BUY_ORDER.indexOf(c.key) < BUY_ORDER.indexOf(best.key))));
+      || (tie && (infTie(bb, c.payback, best.payback) ? order : (c.cost < best.cost || (c.cost === best.cost && order))));
     if (better) best = c;
   }
   return best;

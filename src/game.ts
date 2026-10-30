@@ -18,6 +18,7 @@ import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
+import { Bbv2Tel, bbv2TelOn, buyKeyOf, type BuyCtx } from './telemetry/bbv2';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
@@ -51,6 +52,10 @@ export class Game {
   /** QA case 2: after a fresh start, `.bak` rotation waits for a valid save + progress (1 purchase or 60 s played). */
   private bakAllowed = true; private playedMs = 0;
   installId = ''; telemetry: Telemetry; private coopFullSince: number | null = null;
+  /** BBv2 §8 telemetry (rows #19–22): null unless m4.flags.bestBuyV2 = 1 and m4.enabled, so flag 0 runs no BBv2 code path. */
+  bbTel: Bbv2Tel | null = null; private bbSimMs = 0;
+  /** UI context at a purchase (picker clock, rendered ★, its switch time, live income); set by the app. */
+  bbCtx: () => BuyCtx = () => ({ t: this.now(), mark: null, markSinceT: this.now(), rateCentsPerS: 0 });
   private listeners: ((e: GameEvent) => void)[] = [];
   /** Subscribe to sim/game events (UI feedback, sfx). Returns unsubscribe. */
   on(fn: (e: GameEvent) => void) { this.listeners.push(fn); return () => { this.listeners = this.listeners.filter(f => f !== fn); }; }
@@ -62,6 +67,7 @@ export class Game {
     this.telemetry = new Telemetry(kv, b.telemetry, now);
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
+    if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
     // tier (CSR-2/3/13, CSR-AC-IDB1) and the stale-LS reconcile runs inside it; without it (tests, refused-newer) the legacy
     // raw is only used for the newer-build check.
@@ -309,10 +315,14 @@ export class Game {
   endSession() {
     if (this.resetting || this.inactive || this.held()) return;
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    if (this.bbTel) { this.bbTel.flushOpen(Math.floor(this.bbSimMs / 1000)); this.telemetry.track('session_end', this.bbTel.sessionEndFields()); }
+    else this.telemetry.track('session_end');
+    this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
+    const before = this.state, bbKey = this.bbTel ? buyKeyOf(a) : null;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
+    if (bbKey && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.bbTel!.purchase(before, bbKey, this.bbCtx());
     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
   }
@@ -350,6 +360,7 @@ export class Game {
   onHidden(at = this.now()) {
     if (this.hidden) return;
     this.frame(); // bring the sim up to the hide
+    this.bbTel?.flushOpen(Math.floor(this.bbSimMs / 1000)); // V-2d (a): background flush, fresh sampling on resume
     this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
   }
   /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
@@ -431,6 +442,7 @@ export class Game {
       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
       const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t, slotsFarm: this.frameFarm });
       this.state = r.state; this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+      if (this.bbTel) { this.bbSimMs += Math.min(gap, maxMs); this.bbTel.sample(Math.floor(this.bbSimMs / 1000), this.state); } // V-2d: integer sim seconds
     }
     this.checkCoopFull(); this.telemetry.poll();
   }

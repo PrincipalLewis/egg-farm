@@ -3,7 +3,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { balancedStrip, trackLock, trackCost, trackLevel } from '../sim/tracks';
-import { options, bestPaybackAmong } from '../econ/best-buy';
+import { options, bestPaybackAmong, rankable } from '../econ/best-buy';
 import { gradeMult } from '../config/formulas';
 const pct = (mult: number) => Math.round((mult - 1) * 100);
 export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
@@ -72,7 +72,7 @@ const KEY_ROW = { HENS: 'hens', VALUE: 'eggValue', FARM: 'farm' } as const;
  *  bundle payback, ties lower cost then Farm > Hens > Egg value = BUY_ORDER). If none is affordable: the best-payback row
  *  overall with affordable = false (the UI shows its ETA). null only when every row is capped / MAX. */
 export function highlightPick(s: GameState, b: Balance): { row: RowKey; affordable: boolean; costCents: number } | null {
-  const offered = options(s, b).filter(o => o.key in KEY_ROW);
+  const rk = rankable(s, b, ['FARM', 'HENS', 'VALUE'] as const), offered = options(s, b).filter(o => o.key in KEY_ROW && rk.includes(o.key as never)); // BBv2-1
   const aff = offered.filter(o => s.coinsCents >= Math.round(o.cost * 100)).map(o => o.key);
   const pick = bestPaybackAmong(s, b, aff.length ? aff : offered.map(o => o.key));
   return pick ? { row: KEY_ROW[pick.key as keyof typeof KEY_ROW], affordable: aff.length > 0, costCents: Math.round(pick.cost * 100) } : null;
