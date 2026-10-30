@@ -6,7 +6,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, copyFi
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { balance } from '../src/config/balance';
+import { balance, validateBalance } from '../src/config/balance';
+import { createHash } from 'node:crypto';
 import { runM2 } from './bot-m2';
 import { runVerify, checkpointSeconds, badNumbers, markFreshM4, VERIFY_V6_BACKUP_ID, PROFILE_BOT } from '../scripts/verify/sim';
 import { run as runM5, PROFS as M5_PROFS, M5X_STACKS } from './bot-m5';
@@ -67,7 +68,10 @@ describe('verify: the run', () => {
     expect(off.checkpoints[0].levels.hens).toBe(0);
   }, 60_000);
   it('[VER-1h N-5] CCR N-5 on #78: m5x-casual 0.25 h seed 1 trace and checkpoint egg counters are pinned (24 h pin 07139bdd: tests/bot-m5-trace.slow.test.ts)', () => {
-    const v = runVerify(balance, { hours: 0.25, seed: 1, profile: 'm5x-casual' });
+    // D-HOE-20261030-05: balance-dependent pin -> committed fixture (a923206:src/config/balance.json, pre-#92), sha256 asserted.
+    const raw = readFileSync(new URL('./fixtures/balance-883d1b0d.json', import.meta.url));
+    expect(createHash('sha256').update(raw).digest('hex')).toBe('883d1b0dbc29c44af2f032ee81529aa0d138bf6fe44c41e5f517202aa605dc18');
+    const v = runVerify(validateBalance(JSON.parse(raw.toString('utf8')), false) as typeof balance, { hours: 0.25, seed: 1, profile: 'm5x-casual' });
     expect(v.traceSha256).toBe('751ebe169ce66082e53fd52d5a05cbca677c3b3d9a27a3f037c2c201fc379689');
     expect(v.events).toBe(1801);
     expect(v.checkpoints.map(c => c.eggs)).toEqual([{ coop: 17.14, basket: 1061, collected: 6944, sold: 5883 }]);

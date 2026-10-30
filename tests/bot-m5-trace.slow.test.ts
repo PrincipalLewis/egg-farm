@@ -1,12 +1,22 @@
 // CCR N-5 on #78: pin the m5x-casual verify trace (24 h, seed 1, shipped balance) = the trace in #78's self-review and CCR's re-run
 // (`npm run verify -- --hours 24 --profile m5x-casual`), and the checkpoint egg counters against an independent onEvents counter.
+// D-HOE-20261030-05: the pin is balance-dependent, so it runs on a committed fixture, never the live balance.json (#92 retuned it):
+// tests/fixtures/balance-883d1b0d.json = a923206:src/config/balance.json (rc/v5 just before #92, synced from data/economy.csv b48be8a4),
+// sha256 asserted. d3b5a53's balance.json (where the pin was captured) gives the same trace.
 import { describe, it, expect } from 'vitest';
-import { balance } from '../src/config/balance';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { validateBalance, type Balance } from '../src/config/balance';
 import { runVerify, checkpointSeconds } from '../scripts/verify/sim';
 import { run, PROFS, M5X_STACKS } from './bot-m5';
 
+const PIN_BALANCE_URL = new URL('./fixtures/balance-883d1b0d.json', import.meta.url);
+const PIN_BALANCE_SHA256 = '883d1b0dbc29c44af2f032ee81529aa0d138bf6fe44c41e5f517202aa605dc18';
+
 describe('verify m5x-casual: pinned trace and checkpoint counters (CCR N-5)', () => {
   it('[VER-1h N-5] 24 h seed 1: trace 07139bdd, and eggs.collected/sold at each checkpoint equal sums over bot-m5 events', () => {
+    const raw = readFileSync(PIN_BALANCE_URL); expect(createHash('sha256').update(raw).digest('hex')).toBe(PIN_BALANCE_SHA256);
+    const balance = validateBalance(JSON.parse(raw.toString('utf8')), false) as Balance;
     const v = runVerify(balance, { hours: 24, seed: 1, profile: 'm5x-casual' });
     expect(v.traceSha256).toBe('07139bdd505a060e3daf27b33f10bd6cd8f2e7c118b6bf1c917d597b4ddd965e');
     expect(v.events).toBe(391661);
