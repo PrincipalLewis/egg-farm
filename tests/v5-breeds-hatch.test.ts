@@ -107,6 +107,10 @@ describe('roll (BR-R9/R10; BR-AC9, BR-AC10; D-HOE-20261030-14 Q3, Econ-confirmed
     }
     expect(forcedSeen).toBeGreaterThan(0); expect(unforcedCommon).toBeGreaterThan(0); // the 7th draw (pity 6) can still be a Common
   });
+  it('[BR-AC9] a Rare+ hatch resets pity to 0 (pity 7 at F20 forces Rare+); a Common hatch adds 1', () => {
+    const s = startHatch(st({ freeHatchUsed: 1, pity: 7 }, 20, 1e12), BR); expect(ROSTER[s.breeds!.incubator!.breed as BreedId][0]).not.toBe('C'); expect(s.breeds!.pity).toBe(0);
+    const c = startHatch(st({ freeHatchUsed: 1, pity: 3 }, 13, 1e12), BR); expect(c.breeds!.pity).toBe(4);
+  });
   it('[BR-AC9 / E6] pity due but no Rare+ eligible (F13): normal pool, pity keeps counting', () => {
     const s = startHatch(st({ freeHatchUsed: 1, pity: 9 }, 13, 1e12), BR); expect(ROSTER[s.breeds!.incubator!.breed as BreedId][0]).toBe('C'); expect(s.breeds!.pity).toBe(10);
   });
