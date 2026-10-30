@@ -42,6 +42,39 @@ cp -r "$T/a/out" "$T/g"; echo x > "$T/g/pr.casual.on.p0.jsonl.tog.json"
 expect nz "extra file on port side -> FAIL"                      python3 "$D/compare-smoke.py" "$T/a/ref" "$T/g" 20
 expect nz "same files but SEEDS=200 (pool outputs missing) -> FAIL" python3 "$D/compare-smoke.py" "$T/a/ref" "$T/a/out" 200
 expect nz "usage error -> non-zero"                              python3 "$D/compare-smoke.py" "$T/a/ref"
+echo "# JOBS=pool2 (QA-D-1030-PR94-POOL2): 12 px + pool2/pool2b at SEEDS=200 only"
+# Stub px writing SEEDS rows (STUBSHORT=<profile.cfg.pPERT> writes one row less); stub pools (POOLD) write PDIR/<name>.json.
+cat > "$T/stub200.sh" <<'S'
+#!/usr/bin/env bash
+k="${PROFS:-}.${CFGS:-}.p${PERT:-}"; n=$SEEDS; [ "$k" = "${STUBSHORT:-}" ] && n=$((n-1))
+[ -n "${OUT:-}" ] || { echo "stub200: not a px call" >&2; exit 9; }
+for i in $(seq 1 "$n"); do echo "{\"seed\":$i,\"k\":\"$k\"}"; done > "$OUT.$PROFS.$CFGS.p$PERT.jsonl"; echo "$k done" >&2
+S
+mkdir -p "$T/pools"; for p in pool2 pool2b; do printf 'import glob,json,os\nPD=os.environ["PDIR"]\nr={f:sum(1 for _ in open(f)) for f in sorted(glob.glob(PD+"/pr.*.jsonl"))}\njson.dump(r,open(PD+"/%s.json","w"))\nprint(len(r))\n' "$p" > "$T/pools/$p.py"; done
+runpool() { ( set -euo pipefail; export STUBSHORT=${4:-} JOBS=pool2 POOLD="$T/pools"; O=$1 SEEDS=$3 VN=(bash "$T/stub200.sh") PX=() LX=(); cd "$D"; . "$D/jobs.sh"; run_all "$2" ); local rc=$?; grep -h "FAIL\|streams\|rows" "$1/../run.log" 2>/dev/null || true; return $rc; }
+expect nz "JOBS=pool2 with SEEDS=20 -> refused"                    runpool "$T/p20/out" pool20 20
+expect nz "JOBS=pool2 with SEEDS=199 -> refused"                   runpool "$T/p199/out" pool199 199
+expect 0  "JOBS=pool2 SEEDS=200, all 12 px + both pools -> 0"       runpool "$T/pa/out" poolA 200
+ls "$T/pa/out" | tr '\n' ' ' | sed 's/^/       | files: /'; echo; ls "$T/pa/pxlogs-poolA" | wc -l | sed 's/^/       | px stderr logs moved out of the compared set: /'
+expect nz "JOBS=pool2: a px jsonl with 199 rows -> FAIL before the pools" runpool "$T/pb/out" poolB 200 seller15.off.p1
+expect nz "JOBS=unknown -> refused"                                env JOBS=bogus bash -c '. "$0/jobs.sh"; check_mode' "$D"
+cp -r "$T/pa/out" "$T/pa/ref"
+expect 0  "compare JOBS=pool2: identical 12 jsonl + 4 pool files -> PASS" env JOBS=pool2 python3 "$D/compare-smoke.py" "$T/pa/ref" "$T/pa/out" 200
+cp -r "$T/pa/out" "$T/pc"; python3 - "$T/pc/pool2.json" <<'Q'
+import sys; p=sys.argv[1]; b=bytearray(open(p,'rb').read()); b[2]^=1; open(p,'wb').write(b)
+Q
+expect nz "compare JOBS=pool2: 1-byte diff in pool2.json -> FAIL"   env JOBS=pool2 python3 "$D/compare-smoke.py" "$T/pa/ref" "$T/pc" 200
+cp -r "$T/pa/out" "$T/pd"; rm "$T/pd/pool2b.json"
+expect nz "compare JOBS=pool2: pool2b.json missing on port -> FAIL" env JOBS=pool2 python3 "$D/compare-smoke.py" "$T/pa/ref" "$T/pd" 200
+cp -r "$T/pa/out" "$T/pe"; rm "$T/pe/pr.optimal.on.p0.jsonl"
+expect nz "compare JOBS=pool2: a px jsonl missing on port -> FAIL"  env JOBS=pool2 python3 "$D/compare-smoke.py" "$T/pa/ref" "$T/pe" 200
+cp -r "$T/pa/out" "$T/pf"; cp -r "$T/pa/out" "$T/pf2"; for d in pf pf2; do sed -i '$d' "$T/$d/pr.casual.on.p1.jsonl"; done
+expect nz "compare JOBS=pool2: same short (199-row) jsonl on BOTH sides -> FAIL" env JOBS=pool2 python3 "$D/compare-smoke.py" "$T/pf" "$T/pf2" 200
+cp -r "$T/pa/out" "$T/pg"; echo x > "$T/pg/pr.casual.on.p0.log"
+expect nz "compare JOBS=pool2: extra file (a px log) on port -> FAIL" env JOBS=pool2 python3 "$D/compare-smoke.py" "$T/pa/ref" "$T/pg" 200
+expect nz "compare JOBS=pool2 with SEEDS=20 -> refused"             env JOBS=pool2 python3 "$D/compare-smoke.py" "$T/pa/ref" "$T/pa/out" 20
+expect nz "run-smoke.sh JOBS=pool2 SEEDS=20 -> refused before any worktree" env JOBS=pool2 SEEDS=20 bash "$D/run-smoke.sh" "$(git -C "$D" rev-parse HEAD)" "$T/rs-new"
+[ ! -e "$T/rs-new" ] && echo "       | no outroot created" || { echo "BAD  outroot created"; bad=1; }
 echo "# entry scripts"
 expect nz "smoke.sh with a HEAD other than the expected SHA"      bash "$D/smoke.sh" 0000000000000000000000000000000000000000 "$D/../.." "$T/h/out"
 cp -r "$D" "$T/tamper"; printf ' ' >> "$T/tamper/econ-orig/m5px.ts"
