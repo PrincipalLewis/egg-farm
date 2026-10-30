@@ -9,32 +9,37 @@
 // 2. ?debug=1 / ?perf=1 do nothing in release (no panel, no overlay, no chunk request).
 // Usage: npm run build && npm run build:qa && ENGINE=chromium|firefox|webkit [DELAYS=0,100,500,1000,2000,3000] [REPS=3] node scripts/d2-kill-browser.mjs
 // Based on QA's qa/m3-scripts/rc0-ac14f-kill.mjs. Linux only (/proc/<pid>/stat of the recorded pid).
-import pw from 'playwright-core'; import { spawn } from 'node:child_process'; import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
+import pw from 'playwright-core'; import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', port = +(process.env.PORT ?? 4720), REPS = +(process.env.REPS ?? 3);
 const DELAYS = (process.env.DELAYS ?? '0,100,500,1000,2000,3000').split(',').map(Number);
-import { serveOwn } from './serve-own.mjs'; import { recordPid, killRecorded } from './recorded-pid.mjs';
-const s1 = await serveOwn('dist-qa', port), s2 = await serveOwn('dist', port + 1); const srv = { pid: 0 }, srvRel = { pid: 0 };
+import { serveOwn } from './serve-own.mjs'; import { recordPid, killRecorded, groupMembers } from './recorded-pid.mjs'; import { createRunGuard, Halt } from './d2-guard.mjs';
+// F4: evidence + STOP-LIST-for-HoO.txt go here (D2_EVIDENCE_DIR, else a fresh dir under the OS tmpdir, printed at start)
+const EVID = process.env.D2_EVIDENCE_DIR || fs.mkdtempSync(path.join(os.tmpdir(), `d2-evidence-${ENGINE}-`));
+const guard = createRunGuard({ engine: ENGINE, evidenceDir: EVID }); console.log(`d2-kill [${ENGINE}]: evidence ${guard.evidencePath}`);
+let s1 = null, s2 = null, fails = 0, halted = false, current = null; // current = the latest launch, for a halt's stop list
+const rows = guard.state.rows;
+try { // F7: whatever happens below, both vite servers are stopped in finally
+s1 = await serveOwn('dist-qa', port); s2 = await serveOwn('dist', port + 1);
 for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port + 1}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
 const URL0 = `http://127.0.0.1:${port}/`, URLREL = `http://127.0.0.1:${port + 1}/`, fx = fs.readFileSync(new URL('../tests/fixtures/saves/m2-rc1-v5-40min.json', import.meta.url), 'utf8');
 const T = pw[ENGINE]; const opts = ENGINE === 'chromium' ? { args: ['--no-sandbox'] } : {};
 const REAL_EXE = ENGINE === 'chromium' ? (process.env.CHROME ?? '/usr/bin/google-chrome') : T.executablePath();
 const sq = s => `'${String(s).replace(/'/g, `'\\''`)}'`;
-/** `root` is our own mkdtemp dir: profile in root/profile, wrapper and pid file beside it. Returns { ctx, rec }. */
+/** `root` is our own mkdtemp dir: profile in root/profile, wrapper and pid file beside it. Returns { ctx, rec, members }. */
 async function launch(root) {
   const wrap = path.join(root, 'launch.sh'), pidFile = path.join(root, 'browser.pid'); fs.rmSync(pidFile, { force: true });
   fs.writeFileSync(wrap, `#!/bin/sh\necho $$ > ${sq(pidFile)}\nexec ${sq(REAL_EXE)} "$@"\n`, { mode: 0o700 });
   const ctx = await T.launchPersistentContext(path.join(root, 'profile'), { ...opts, executablePath: wrap, viewport: { width: 390, height: 844 } });
   const pid = +fs.readFileSync(pidFile, 'utf8').trim(), rec = recordPid(pid);
-  if (!rec) { await ctx.close().catch(() => {}); throw new Error(`d2-kill: browser pid ${pid} from ${pidFile} is not a live child of this process`); }
-  return { ctx, rec };
+  if (!rec) await guard.halt(`browser pid ${pid} from ${pidFile} is not a live child of this process (not recorded)`, { pid });
+  return (current = { ctx, rec, members: groupMembers(rec) });
 }
 async function start(ctx, q = '') { const p = ctx.pages()[0] ?? await ctx.newPage(); await p.goto(URL0 + q); await p.getByText('Tap to start').click(); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(500);
   const wb = p.locator('#wbCollect'); if (await wb.isVisible().catch(() => false)) { await wb.click(); await p.waitForTimeout(300); } return p; }
-const rows = []; let fails = 0;
 for (const D of DELAYS) for (let rep = 0; rep < REPS; rep++) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), `d2kill-${ENGINE}-`));
-  let { ctx, rec } = await launch(dir); const p = await ctx.newPage(); await p.goto(URL0);
+  let L = await launch(dir), { ctx } = L; const p = await ctx.newPage(); await p.goto(URL0);
   await p.evaluate(([r]) => { localStorage.setItem('eggfarm.save', r); localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, sessions: 3, workersIntroA: true, workersIntroB: true })); }, [fx]);
   await p.close(); const pg = await start(ctx);
   await pg.evaluate(() => { window.eggfarm.state.coinsCents = 1e12; });
@@ -43,13 +48,15 @@ for (const D of DELAYS) for (let rep = 0; rep < REPS; rep++) {
   const L0 = await pg.evaluate(lv);
   await pg.waitForSelector('button.buy[aria-disabled=false]', { state: 'attached', timeout: 10000 }); await pg.evaluate(() => document.querySelector('button.buy[aria-disabled=false]').click());
   const L1 = await pg.evaluate(lv); await new Promise(r => setTimeout(r, D));
-  const k = killRecorded(rec, 'SIGKILL', { group: true }); const n = k.ok ? 1 : 0; // groups signalled: only the recorded one
+  L.members = [...L.members, ...groupMembers(L.rec)]; // refresh the snapshot (renderers etc.) right before the SIGKILL
+  const k = killRecorded(L.rec, 'SIGKILL', { group: true }); const n = k.ok ? 1 : 0; // groups signalled: only the recorded one
   if (!k.ok) console.log(`d2-kill: REFUSED browser group ${k.pid}: ${k.reason}`);
+  await guard.afterKill(k, L); // F4: halts (stop list, non-zero) on a refusal or on any leftover in the group
   await ctx.close().catch(() => {}); await new Promise(r => setTimeout(r, 500));
-  ({ ctx, rec } = await launch(dir)); const p2 = await start(ctx);
+  L = await launch(dir); ({ ctx } = L); const p2 = await start(ctx);
   const after = await p2.evaluate(() => ({ L: window.eggfarm.state.farmLevel + 100 * window.eggfarm.state.collectionLevel, recovery: document.querySelectorAll('.recovery-card').length }));
   const pass = n > 0 && L1 > L0 && after.L === L1 && after.recovery === 0; if (!pass) fails++;
-  rows.push({ D, rep, pass, L0, L1, after: after.L, killed: n });
+  rows.push({ D, rep, pass, L0, L1, after: after.L, killed: n, pid: k.pid }); guard.writeEvidence();
   console.log(`${pass ? 'PASS' : 'FAIL'} [${ENGINE}] SIGKILL at ${D} ms rep ${rep}: ${L0}->${L1}, reopen ${after.L}, SIGKILLed recorded browser group ${k.pid} (${n ? 'ok' : 'refused'})`);
   await ctx.close().catch(() => {}); fs.rmSync(dir, { recursive: true, force: true });
 }
@@ -64,5 +71,10 @@ for (const D of DELAYS) for (let rep = 0; rep < REPS; rep++) {
   await ctx.close(); fs.rmSync(dir, { recursive: true, force: true }); }
 const by = {}; for (const r of rows) { by[r.D] ??= [0, 0]; by[r.D][1]++; if (r.pass) by[r.D][0]++; }
 console.log(`SUMMARY [${ENGINE}] ` + Object.entries(by).map(([d, [a, n]]) => `${d}ms ${a}/${n}`).join(', '));
-s1.stop(); s2.stop();
-process.exit(fails ? 1 : 0);
+} catch (e) {
+  halted = true;
+  if (!(e instanceof Halt)) await guard.halt(`error: ${String(e?.message ?? e).split('\n')[0]}`, current).catch(() => {}); // any other throw halts too
+} finally {
+  s1?.stop(); s2?.stop(); guard.writeEvidence();
+}
+process.exit(halted ? 3 : fails ? 1 : (process.exitCode || 0)); // 3 = halted (or a vite group not cleanly stopped)
