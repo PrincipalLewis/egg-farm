@@ -25,9 +25,13 @@ export const shouldShowTracksExplainer = (g: G) => m4On(g.balance) && !g.state.s
 export const EXP_OUT_MS = 150, EXP_POP_MS = 800;
 const reducedMotion = (doc: Document) => doc.documentElement.classList.contains('reduced-motion') ||
   !!doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-/** 'default' = main's placement (top 72, over the tab row); 'none' = no clear slot: the card is kept out of the way (hidden via
- *  [data-place=none] { visibility:hidden }, so it can't take a tap) until a scroll / resize opens a clear slot; taps never pass through it. */
-export type ExpPlace = 'default' | 'above' | 'inside' | 'band' | 'below' | 'nav' | 'none';
+/** 'default' = main's placement (top 72, over the tab row); 'none' = no clear slot: the card is kept out of the way (not painted, no
+ *  hit area via [data-place=none] { opacity:0 !important; pointer-events:none }) until a scroll / resize opens a clear slot; taps never
+ *  pass through a painted card. QA-PRERUN-1: 'none' no longer uses visibility:hidden, which also made Got it unfocusable (375x800
+ *  Farm + refund: Shift+Tab from Got it focuses the last Buy, the engine scrolls it into view, every slot is blocked, the card goes
+ *  'none', and Tab / .focus() then skip the hidden Got it, so the keyboard never reaches it again). A 'none' card stays in the tab order;
+ *  'focus' = the card holds KEYBOARD focus but no slot is clear: it is painted at main's placement (top 72) until focus leaves it. */
+export type ExpPlace = 'default' | 'above' | 'inside' | 'band' | 'below' | 'nav' | 'none' | 'focus';
 type Box = { left: number; right: number; top: number; bottom: number };
 const meets = (a: Box, b: Box) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 /** Viewport facts for placeExplainer: vh = viewport height (a slot must fit inside it); bodyTop = top of the sheet's scroll
@@ -82,15 +86,29 @@ export const collectRect = (doc: Document = document): Box | null => {
 };
 /** Everything the card must stay clear of: visible Buy hit areas + a hittable Collect. */
 export const blockRects = (doc: Document = document): Box[] => { const c = collectRect(doc); return c ? [...buyRects(doc), c] : buyRects(doc); };
-/** Measure and apply placeExplainer to the live card (data-place names the branch for QA). */
-export function placeCard(el: HTMLElement, doc: Document = document) {
+/** QA-PRERUN-1: last input modality per document (true = keyboard: the last keydown came after the last pointer/mouse/touch press).
+ *  Tracked from module load (capture listeners, never removed: one set per document), so a card that opens after keyboard use
+ *  knows it; WebKit does not match :focus-visible after a programmatic focus, so that can't be the signal. */
+const kbdInput = new WeakMap<Document, boolean>();
+export function trackInputModality(doc: Document = document) {
+  if (kbdInput.has(doc)) return; kbdInput.set(doc, false);
+  doc.addEventListener('keydown', () => kbdInput.set(doc, true), true);
+  for (const t of ['pointerdown', 'mousedown', 'touchstart']) doc.addEventListener(t, () => kbdInput.set(doc, false), true);
+}
+export const keyboardInput = (doc: Document = document) => kbdInput.get(doc) ?? false;
+if (typeof document !== 'undefined') trackInputModality(document);
+/** Measure and apply placeExplainer to the live card (data-place names the branch for QA). QA-PRERUN-1: kbdFocus = the card, or
+ *  something inside it, has keyboard focus: a focused card is never kept out of the way ('none' -> 'focus'). Returns the place. */
+export function placeCard(el: HTMLElement, doc: Document = document, kbdFocus = false): ExpPlace {
   const sheet = visibleRect(doc.querySelector('#p-upgrades')); // [hidden] (closed / Market open) is display:none -> null; docked panel stays
   const tabs = sheet ? visibleRect(doc.querySelector('#p-upgrades .tabs')) : null, body = sheet ? visibleRect(doc.querySelector('#p-upgrades .body')) : null, r = el.getBoundingClientRect();
   const hud = visibleRect(doc.querySelector('.hud')), minTop = (hud ? hud.bottom : 56) + 8, nav = visibleRect(doc.querySelector('nav.actions'));
-  const { place, top } = placeExplainer({ left: r.left, right: r.right, height: el.offsetHeight || r.height }, sheet, tabs, minTop, 72, blockRects(doc),
+  const p = placeExplainer({ left: r.left, right: r.right, height: el.offsetHeight || r.height }, sheet, tabs, minTop, 72, blockRects(doc),
     { vh: doc.defaultView?.innerHeight || Infinity, bodyTop: body?.top, navTop: nav?.top });
-  const css = place === 'default' || place === 'none' ? '' : `${top}px`;
+  const place: ExpPlace = p.place === 'none' && kbdFocus ? 'focus' : p.place, top = p.top;
+  const css = place === 'default' || place === 'none' || place === 'focus' ? '' : `${top}px`;
   if (el.dataset.place !== place || el.style.top !== css) { el.dataset.place = place; el.style.top = css; }
+  return place;
 }
 /** UX-M5 + Art ruling on #65 (3) (m4-tracks-explainer.md:21): on DISMISS, the coin pill gets the standard number pop (Sell style,
  *  number-pop-spec.md) and a coin burst; nothing while the card is up. Decorative (aria-hidden). Reduced motion: none; the
@@ -156,19 +174,26 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
   // resize, scroll (sheet body: CCR M1 on 7779088, every scroll re-runs the clear check), the sheet's slide transition ending, and
   // after any click (nav / tab switch / a Buy that re-renders rows). Coalesced to at most one measure per frame.
   const win = doc.defaultView, raf = win?.requestAnimationFrame?.bind(win) ?? ((f: () => void) => setTimeout(f, 16));
-  let queued = false; const replace = () => { if (queued || !el.isConnected) return; queued = true; raf(() => { queued = false; if (el.isConnected) placeCard(el, doc); }); };
+  // QA-PRERUN-1: never hide a focused card. Keyboard focus inside the card (last input = keyboard, keyboardInput) keeps it painted
+  // ('focus' when no slot is clear), and focus moving in (Tab / Shift+Tab / .focus() into a 'none' card, which stays in the tab order)
+  // re-places it at once (focusin, synchronously, before paint). Pointer users keep the M41-9 rule (never painted over a visible Buy):
+  // a 'none' card that still holds the show-time programmatic focus hands it to the close() target first, so no hidden element has focus.
+  const has = () => el.contains(doc.activeElement);
+  const place = () => { if (!el.isConnected) return; const p = placeCard(el, doc, has() && keyboardInput(doc)); if (p === 'none' && has()) focusTarget()?.focus({ preventScroll: true }); };
+  let queued = false; const replace = () => { if (queued || !el.isConnected) return; queued = true; raf(() => { queued = false; place(); }); };
   const afterClick = () => setTimeout(replace, 0);
   placeCard(el, doc);
   win?.addEventListener('resize', replace); doc.addEventListener('scroll', replace, true); doc.addEventListener('transitionend', replace, true); doc.addEventListener('click', afterClick);
+  el.addEventListener('focusin', place); el.addEventListener('focusout', replace);
   const refund = g.migrationRefundCents ?? 0;
   const off = () => { clearTimeout(t); doc.removeEventListener('click', onAny, true); doc.removeEventListener('keydown', onKey, true);
-    win?.removeEventListener('resize', replace); doc.removeEventListener('scroll', replace, true); doc.removeEventListener('transitionend', replace, true); doc.removeEventListener('click', afterClick); };
+    win?.removeEventListener('resize', replace); doc.removeEventListener('scroll', replace, true); doc.removeEventListener('transitionend', replace, true); doc.removeEventListener('click', afterClick);
+    el.removeEventListener('focusin', place); el.removeEventListener('focusout', replace); };
   const close = (how: 'key' | 'ok' | 'card' | 'timeout' = 'timeout') => { if (!el.isConnected) return off(); const ae = doc.activeElement, mine = !ae || ae === doc.body || el.contains(ae); off(); el.remove(); fadeOut(el, doc); refundPop(refund, doc); // (3): the pop plays on dismiss, once (close() returns early once removed)
     // P46-M1 (CCR major): only when focus was on the card; the active Upgrades tab if rendered, else where it was
     // Art & UX B-M1 order: sheet open -> active Upgrades tab; sheet closed -> bottom-nav Upgrades; last resort #collect.
-    const shown = (e: HTMLElement | null) => !!e && (e.getClientRects().length > 0 || !e.closest('[hidden]')) ? e : null; // docked overrides [hidden]
     if (onDismiss && how !== 'timeout') markSeen(); // D-HOP-07: Got it / Esc / card tap on a restore boot
-    const target = shown(doc.querySelector<HTMLElement>('[data-tab].active')) ?? shown(doc.querySelector<HTMLElement>('[data-nav=upgrades]')) ?? doc.getElementById('collect');
+    const target = focusTarget();
     if (mine && target) { target.focus({ preventScroll: true }); if (how === 'key') markKbdFocus(target, doc); } // Designer M-1: keyboard activation only (Esc / Enter / Space); a pointer Got it gets no forced ring
     doc.dispatchEvent(new Event(EXP_CLOSED)); };
   // m4a-spec v1.15 (variant C): non-modal; taps outside register normally and never close it. A tap on the card
@@ -176,8 +201,12 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
   const onAny = (e: Event) => { if (!el.isConnected) { off(); return; } if (el.contains(e.target as Node)) { e.preventDefault(); e.stopPropagation(); close(ok.contains(e.target as Node) ? ((e as MouseEvent).detail === 0 ? 'key' : 'ok') : 'card'); } }; // Designer M-1: detail 0 = keyboard (Space) / el.click()
   const onKey = (e: KeyboardEvent) => { if (!el.isConnected) return off(); if (e.key === 'Escape' || (e.key === 'Enter' && e.target === ok)) { e.preventDefault(); e.stopPropagation(); close('key'); } }; // Esc closes only the card, not the sheet behind it
   const ok = el.querySelector('button') as HTMLButtonElement;
+  // Art & UX B-M1 order (P46-M1): sheet open -> active Upgrades tab; sheet closed -> bottom-nav Upgrades; last resort #collect.
+  function focusTarget() { const shown = (e: HTMLElement | null) => !!e && (e.getClientRects().length > 0 || !e.closest('[hidden]')) ? e : null; // docked overrides [hidden]
+    return shown(doc.querySelector<HTMLElement>('[data-tab].active')) ?? shown(doc.querySelector<HTMLElement>('[data-nav=upgrades]')) ?? doc.getElementById('collect'); }
   doc.addEventListener('click', onAny, true); doc.addEventListener('keydown', onKey, true);
   const t = setTimeout(() => close('timeout'), EXP_MS); // starts when the card actually appears; never marks seen on restore boot
   (el.querySelector('button') as HTMLButtonElement).focus({ preventScroll: true });
+  place(); // QA-PRERUN-1: a card that opens with no clear slot keeps keyboard focus painted ('focus'); after pointer input it hands focus to focusTarget()
   return el;
 }

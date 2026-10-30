@@ -526,8 +526,9 @@ html,body{overflow-x:hidden;max-width:100%}
 .tracks-exp p,.tracks-exp-out p{margin:0 0 8px;font:400 16px var(--f-body)}
 .tracks-exp-ok,.tracks-exp-out .btn{min-height:48px;min-width:48px;width:100%}
 /* CCR M1 on #65 @7779088: no slot clear of every visible Buy / Collect -> the card is kept out of the way (no paint, no hit area)
-   until a scroll / resize opens one; taps never pass through a visible card */
-.tracks-exp[data-place=none]{visibility:hidden}
+   until a scroll / resize opens one; taps never pass through a visible card. QA-PRERUN-1: opacity, not visibility:hidden, so Got it
+   stays focusable (a focused card is re-placed at once, tracks-explainer.ts); !important also beats the expin/expfade opacity. */
+.tracks-exp[data-place=none]{opacity:0!important;pointer-events:none}
 @keyframes expin{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 @media (prefers-reduced-motion:reduce){.tracks-exp{animation:expfade .15s linear}}
 @keyframes expfade{from{opacity:0}to{opacity:1}}

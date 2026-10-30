@@ -11,7 +11,7 @@
 // Per state: the card is shown at scroll 0 (g.onTracksCommitted, the in-session hook), THEN the sheet body is scrolled (the CCR
 //   repro order: the card must re-place on scroll). Measured independently of the app's own placement code:
 //   - overlap: the painted card's rect vs every Buy rect clipped to the sheet's scroll container and the viewport, and #collect if
-//     elementsFromPoint at its centre (skipping the card) is Collect; a [data-place=none] card has visibility:hidden (no paint, no
+//     elementsFromPoint at its centre (skipping the card) is Collect; a [data-place=none] card has opacity 0 + pointer-events none since QA-PRERUN-1 (no paint, no
 //     hit area) and is recorded as such.
 //   - first tap: for EACH visible Buy (centre hit-testable with no card), re-arm state + card, scroll, tap the hittable centre once:
 //     BUY (level +1, coins down) / DISMISS-ONLY (card closed, nothing bought) / NOTHING. Exit: 0 overlaps, 0 DISMISS-ONLY, 0 NOTHING.
@@ -56,7 +56,7 @@ const MEASURE = () => {
   const buys = [...document.querySelectorAll('#p-upgrades .btn.buy')].map((e, i) => ({ i, kind: e.dataset.kind ?? e.dataset.act ?? '', ...clip(e.getBoundingClientRect()) })).filter(r => r.r > r.l && r.b > r.t);
   const c = document.getElementById('collect'), cr = c.getBoundingClientRect(), top = document.elementsFromPoint(cr.left + cr.width / 2, cr.top + cr.height / 2).find(notCard);
   const collect = top && (top === c || c.contains(top)) ? { kind: 'collect', l: cr.left, r: cr.right, t: cr.top, b: cr.bottom } : null;
-  const cs = card && getComputedStyle(card), k = card?.getBoundingClientRect(), painted = !!card && cs.visibility === 'visible' && cs.display !== 'none';
+  const cs = card && getComputedStyle(card), k = card?.getBoundingClientRect(), painted = !!card && cs.visibility === 'visible' && cs.display !== 'none' && parseFloat(cs.opacity) > 0; // QA-PRERUN-1: 'none' = opacity 0, no hit area
   const cardR = k ? { l: k.left, r: k.right, t: k.top, b: k.bottom } : null, hit = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
   const overlaps = painted ? [...buys, ...(collect ? [collect] : [])].filter(r => hit(cardR, r)).map(r => r.kind) : [];
   const efp = buys.map(b => { const e = document.elementFromPoint((b.l + b.r) / 2, (b.t + b.b) / 2); return { kind: b.kind, onBuy: !!e?.closest('.btn.buy'), onCard: !!e?.closest('.tracks-exp') }; });
@@ -99,7 +99,7 @@ for (const w of WIDTHS) {
           const t = Math.max(r.top, body.top, 0), b = Math.min(r.bottom, body.bottom, innerHeight), x = r.left + r.width / 2, y = (t + b) / 2, hit = document.elementFromPoint(x, y);
           return { i, kind: e.dataset.kind, x, y, ok: b > t && !!hit && (hit === e || e.contains(hit)) }; }).filter(b => b.ok));
         for (const tg of targets) {
-          await arm(refund, s); const pre = await p.evaluate(([i, k]) => { const g = window.eggfarm.state, c = document.querySelector('.tracks-exp'); return { lv: g[k], coins: g.coinsCents, place: c?.dataset.place ?? null, painted: !!c && getComputedStyle(c).visibility === 'visible', scrollTop: Math.round(document.querySelector('#p-upgrades .body').scrollTop) }; }, [tg.i, LV[tg.kind]]);
+          await arm(refund, s); const pre = await p.evaluate(([i, k]) => { const g = window.eggfarm.state, c = document.querySelector('.tracks-exp'); return { lv: g[k], coins: g.coinsCents, place: c?.dataset.place ?? null, painted: !!c && getComputedStyle(c).visibility === 'visible' && parseFloat(getComputedStyle(c).opacity) > 0, scrollTop: Math.round(document.querySelector('#p-upgrades .body').scrollTop) }; }, [tg.i, LV[tg.kind]]);
           const cur = await p.evaluate(i => { const e = document.querySelectorAll('#p-upgrades #uRow .btn.buy[data-kind]')[i], body = document.querySelector('#p-upgrades .body').getBoundingClientRect(), r = e.getBoundingClientRect();
             const t = Math.max(r.top, body.top, 0), b = Math.min(r.bottom, body.bottom, innerHeight); return { x: r.left + r.width / 2, y: (t + b) / 2 }; }, tg.i);
           if (input === 'mouse') await p.mouse.click(cur.x, cur.y); else await p.touchscreen.tap(cur.x, cur.y); await p.waitForTimeout(300);

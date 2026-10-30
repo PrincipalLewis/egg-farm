@@ -64,8 +64,9 @@ describe('CCR M1: the scrolled sheet (no fallback exemption)', () => {
     }
     expect(seen.has('none')).toBe(true); expect(seen.has('default')).toBe(true);
   });
-  it('none: hidden via [data-place=none] (visibility:hidden: no paint, no hit area); no fade copy on dismiss; the pop still plays', () => {
-    expect(readFileSync('src/ui/styles.css', 'utf8')).toMatch(/\.tracks-exp\[data-place=none\]\{visibility:hidden\}/);
+  // QA-PRERUN-1: opacity 0 + pointer-events none (no paint, no hit area) instead of visibility:hidden, which made Got it unfocusable.
+  it('none: hidden via [data-place=none] (opacity:0 + pointer-events:none: no paint, no hit area); no fade copy on dismiss; the pop still plays', () => {
+    expect(readFileSync('src/ui/styles.css', 'utf8')).toMatch(/\.tracks-exp\[data-place=none\]\{opacity:0!important;pointer-events:none\}/);
     vi.useFakeTimers(); document.body.innerHTML = '<nav class="actions"><button data-nav="upgrades">Upgrades</button></nav><button id="collect">Collect</button>';
     const el = showTracksExplainer(game(12_345) as any)!; el.dataset.place = 'none';
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
