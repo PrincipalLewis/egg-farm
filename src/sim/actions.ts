@@ -4,6 +4,7 @@ import { m4On } from '../config/formulas';
 import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
 import type { Sink } from './events';
 import { saleValueCents } from './payout';
+import { playerSaleCtx } from './effects';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
@@ -14,11 +15,12 @@ export type Action =
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
 /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
-export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
+/** v5 F1c: `suspended` = the sale happens on a tick without focus (worker sales under a menu/hide): timed effects count as 1. */
+export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player', suspended = false): GameState {
   const c = s.customers.find(c => c.id === id); if (!c) return s;
   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
   // One payout function (sim/payout.ts) for credit and every UI preview.
-  const price = salePriceCents(s, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
+  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, by === 'player' ? playerSaleCtx(!suspended) : suspended ? { by, suspended } : { by }), filled = c.filled + k, done = filled >= c.demand;
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
@@ -50,11 +52,14 @@ function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Si
   }
   return after;
 }
-export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState {
+/** v5 F1c, Q-F1c-1 ruled D-HOP-2026-10-29-06: the Market sheet is a play surface. A player sale is suspended (no Frenzy/streak)
+ *  ONLY when the tick's attended probe is false; Game.dispatch passes `attended` from the same probe frame() uses. The UI never
+ *  passes suspended for the sheet. Default true keeps every existing caller (tests, bots, verify) unchanged. */
+export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
   switch (a.type) {
     case 'collect': { const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)); ev?.push({ type: 'collect', eggs: n }); return { ...s, coop: s.coop - n, basket: s.basket + n }; }
-    case 'sell': return sellTo(s, a.customerId, b, ev);
-    case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev); } return r; }
+    case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
+    case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
     case 'buyCollection': return buy(s, 'collection', b, ev);
     case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);

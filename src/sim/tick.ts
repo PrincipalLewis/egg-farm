@@ -25,7 +25,8 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
       workers[id] = w;
     }
   }
-  const cap = coopCap(s, b), coop = Math.min(cap, s.coop + prodEggsPerSec(s, b) * dt);
+  const live = anyM5FlagOn(b), fx = live ? { suspended: !clock?.focus } : undefined; // F1c: timed effects only on focus ticks
+  const cap = coopCap(s, b), coop = Math.min(cap, s.coop + prodEggsPerSec(s, b, fx) * dt);
   const coopFullS = coop >= cap - 1e-9 ? s.coopFullS + dt : 0;
   // MK-10: every customer not fully served leaves customer_patience_s after arrival, including partly served ones
   // (timer never reset). Partly served leaver => customer_partial event, never-served => customer_lost.
@@ -52,13 +53,13 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
   }
   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev);
-  if (anyM5FlagOn(b)) out = stepTimers(out, dt, b, clock, ev);
+  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
+  if (live) out = stepTimers(out, dt, b, clock, ev);
   return out;
 }
 /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
  *  (front first, like Sell all) every every_s / tired_every_s. Wage is charged per action interval. Asleep = nothing, no wage. */
-function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameState {
+function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspended = false): GameState {
   const ws = { ...s.workers };
   // §8 items 15.5 + 16 (R9): Unpaid workers resume one at a time, W1 then W2. Each needs coins >= 1 min of its own wage
   // plus 1 min for every worker already being paid (Working/Tired) and every worker resumed earlier in this check.
@@ -89,7 +90,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink): GameSta
       if (id === 'coop_hand') {
         const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b));
         if (n > 0) { s = { ...s, coop: s.coop - n, basket: s.basket + n }; ev?.push({ type: 'worker_collect', eggs: n }); }
-      } else for (const c of s.customers) { if (s.basket < 1) break; s = sellTo(s, c.id, b, ev, 'market_hand'); }
+      } else for (const c of s.customers) { if (s.basket < 1) break; s = sellTo(s, c.id, b, ev, 'market_hand', fxSuspended); }
     }
     ws[id] = { ...w, cdS };
   }
