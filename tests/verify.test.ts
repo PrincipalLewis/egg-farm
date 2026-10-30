@@ -15,6 +15,7 @@ import { saveRoundTrip } from '../scripts/verify/roundtrip';
 import { initialState } from '../src/sim/state';
 import { selectGoal } from '../src/ui/next-goal';
 import { goldens, GOLDEN_FLAG_OFF, GOLDEN_M4_ON } from '../scripts/verify/golden';
+import { M5_FLAGS } from '../src/config/flags';
 import { parseArgs, parseFlags, outArg, flagsOf, withFlags, sanitize, leaks, UsageError, M5X_MAX_SEED } from '../scripts/verify/cli';
 import { gitBuildId } from '../scripts/build-id';
 
@@ -153,9 +154,14 @@ describe('verify: arguments and flags', () => {
     expect(() => withFlags(balance, { 'm4.nope': 1 })).toThrow(/unknown flag/);
   });
   it('flags default to balance.json and overrides do not touch the shipped balance', () => {
-    expect(flagsOf(balance)).toEqual({ 'm4.enabled': balance.m4!.enabled });
+    // v5 F3: the m4.flags.* release flags (all 0 at ship) are listed next to m4.enabled
+    expect(flagsOf(balance)).toEqual({ 'm4.enabled': balance.m4!.enabled, ...Object.fromEntries(M5_FLAGS.map(f => [`m4.flags.${f}`, 0])) });
     const off = withFlags(balance, { 'm4.enabled': 0 });
     expect(off.m4!.enabled).toBe(0); expect(balance.m4!.enabled).toBe(1);
+  });
+  it('[CCR-82-N2][D-C1] --flags m4.flags.* accepts only 0 or 1 (usage error otherwise, as validateM5)', () => {
+    for (const v of [2, -1, 0.5, NaN]) expect(() => withFlags(balance, { 'm4.flags.pause': v })).toThrow(UsageError);
+    expect(withFlags(balance, { 'm4.flags.pause': 1 }).m4!.flags!.pause).toBe(1); expect(withFlags(balance, { 'm4.flags.golden': 0 }).m4!.flags!.golden).toBe(0);
   });
   it('[VER-1h N-4] CLI: usage errors exit 2 before building anything (no UNAVAILABLE path)', () => {
     const run = (a: string[]) => spawnSync(process.execPath, [`${ROOT}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8' });

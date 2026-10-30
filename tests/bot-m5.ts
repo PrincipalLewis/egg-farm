@@ -23,6 +23,7 @@ import { optionGain, type BuyKey } from '../src/econ/best-buy';
 import { priceDollars } from '../src/econ/income';
 import { prodEggsPerSec, coopCap } from '../src/sim/tracks';
 import { maxStepRatio, quantile, type PacingTargets } from './pacing-guards';
+import { flagOn, type M5Flag } from '../src/config/flags';
 type B = Balance;
 export interface Stack { on: boolean; streakCap: number; tapShare: number; broody: boolean; golden: { gapMin: number; gapMax: number } | null; abil: boolean; sweep: 'A' | 'B'; sweepMult: number; pause: boolean; pat?: 'none' | 'yawn' | 'long' | 'fullcoop' | 'wages' | 'stock' | 'bench' | 'grader'; lockoutS?: number; hold?: boolean; ssZero?: boolean; warm?: boolean; rc2?: RC2; }
 /** M5.1 (m5p.ts 9eed2879 / m5l.ts e930c8c7): rc2 v1.2 Refill charges (regen 150 s, cap 2, Refillable <= 50%) replacing the Manage model, + call energy
@@ -53,16 +54,17 @@ export function checkEnv(E: Record<string, string | undefined>, extra: string[] 
   if (!(Number.isFinite(STEP) && STEP > 0)) throw new BotUsageError(`STEP must be a number > 0, got ${E.STEP}`);
   for (const k of extra) if (E[k] !== undefined && !Number.isFinite(num(k, 0))) throw new BotUsageError(`${k} must be a number, got ${E[k]}`);
 }
-/** CCR O-3 on #78: the bot layers its OWN model of the M5 mechanics (golden egg, streak, tap coins, Broody, abilities, pause) and of
- *  M5.1 Refill charges + C2 auto-refill (src: m4.flags.rc2Refill / autoRefill). It may do so only while the matching src flags are off; once src implements them behind m4.flags.*, a run with
- *  both would count them twice. So: a stack with `on` (or `rc2`) and any of those src flags on throws. Turn the bot model off
- *  (`on: false` / no `rc2`) to run on the src mechanics. clockWage is not in the list: the bot never models it (it is src-only). */
-export const SRC_M5_FLAGS = ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const;
-export const SRC_M51_FLAGS = ['rc2Refill', 'autoRefill'] as const; // manifest row 25: the M5.1 src refill piece (charges + C2 auto-refill)
+/** CCR O-3 on #78 / CCR rcv5-vs-main-1a61b36 F-1 (D-HOE-20261030-08): the bot layers its OWN model of the M5 mechanics (golden egg,
+ *  streak, tap coins, Broody, abilities, pause) on the real step()/apply(). It may do so only while the matching src flags are off;
+ *  once src implements them behind m4.flags.*, a run with both would count them twice. So a stack with `on` and any of those src
+ *  flags on (src flagOn: m4.enabled and flag === 1) throws. Turn the bot model off (`on: false`) to run on the src mechanics.
+ *  bot-m5 B: the same holds for the bot's M5.1 Refill charges + C2 auto-refill (`rc2`) and src m4.flags.rc2Refill / autoRefill
+ *  (manifest row 25); use no `rc2` to run on the src refill. Flags the bot does not model (clockWage, UI flags, ...) are not in the lists. */
+export const SRC_M5_FLAGS = ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const satisfies readonly M5Flag[];
+export const SRC_M51_FLAGS = ['rc2Refill', 'autoRefill'] as const satisfies readonly M5Flag[]; // manifest row 25: the M5.1 src refill piece (charges + C2 auto-refill)
 export function assertNoDoubleModel(b: B, K: Stack): void {
-  const m4 = (b as any).m4, f = m4?.flags ?? {}, onSrc = (k: string) => m4?.enabled === 1 && f[k] === 1;
-  const both = [...(K.on ? SRC_M5_FLAGS.filter(onSrc) : []), ...(K.rc2 ? SRC_M51_FLAGS.filter(onSrc) : [])];
-  if (both.length) throw new Error(`bot-m5: the bot's own M5 model and src m4.flags.${both.join('/m4.flags.')} are both on; that would double-count. Use a stack with ${K.on ? 'on: false' : ''}${K.on && K.rc2 ? ' and ' : ''}${K.rc2 ? 'no rc2' : ''} to run on the src mechanics.`);
+  const both = [...(K.on ? SRC_M5_FLAGS.filter(k => flagOn(b, k)) : []), ...(K.rc2 ? SRC_M51_FLAGS.filter(k => flagOn(b, k)) : [])];
+  if (both.length) throw new Error(`bot-m5 models M5 itself: its own M5 model (stack ${K.on && K.rc2 ? 'on/rc2' : K.on ? 'on' : 'rc2'}) and src m4.flags.${both.join('/m4.flags.')} are both on; that would double-count. Turn those src flags off, or use a stack with ${K.on ? 'on: false' : ''}${K.on && K.rc2 ? ' and ' : ''}${K.rc2 ? 'no rc2' : ''} to run on the src mechanics.`);
 }
 /** Read-only observers (port addition): they see events and states, never change them. */
 export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number;
