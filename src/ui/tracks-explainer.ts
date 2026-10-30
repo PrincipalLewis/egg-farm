@@ -96,15 +96,21 @@ export function placeCard(el: HTMLElement, doc: Document = document) {
  *  number-pop-spec.md) and a coin burst; nothing while the card is up. Decorative (aria-hidden). Reduced motion: none; the
  *  balance itself is already credited (migration) and rendered, so it updates at once. */
 export const EXP_BURST = 3;
+/** Refund pop geometry (Art nit n1 on #70): rise and the box height budget (26px Fredoka line ≈ 31-33px, x1.1 overshoot) in CSS px. */
+export const REFUND_RISE_PX = 8, POP_BOX_H = 36;
 function refundPop(cents: number, doc: Document) {
   if (!(cents > 0) || reducedMotion(doc)) return;
-  const pill = visibleRect(doc.querySelector('.pill.coins') ?? doc.getElementById('coins'));
-  const x = pill ? pill.left + pill.width / 2 : (doc.defaultView?.innerWidth ?? 0) / 2, y = pill ? pill.bottom + 30 : 64; // rises 32px onto the pill
+  const pill = visibleRect(doc.querySelector('.pill.coins') ?? doc.getElementById('coins')), rate = visibleRect(doc.getElementById('rate'));
+  // Art nit on #70 (n1, art-ux/reviews/m41-pr70-30b29d3.md (a)): the pop must never cover the HUD #rate. Its box (bottom-anchored, up to
+  // POP_BOX_H at the 1.1 overshoot) starts below the pill + #rate and rises only REFUND_RISE_PX (CSS exppop -8px), so its top stays >= 4px
+  // below them for the whole 800 ms. The coin burst ends at the same line (--dy).
+  const clear = Math.max(pill?.bottom ?? 0, rate?.bottom ?? 0) + 4;
+  const x = pill ? pill.left + pill.width / 2 : (doc.defaultView?.innerWidth ?? 0) / 2, y = pill ? clear + POP_BOX_H + REFUND_RISE_PX : 64;
   const coin = `${import.meta.env.BASE_URL}assets/icon-coin.svg`;
   const pop = doc.createElement('div'); pop.className = 'exp-pop num'; pop.setAttribute('aria-hidden', 'true');
   pop.style.left = `${x}px`; pop.style.top = `${y}px`; pop.innerHTML = `<img src="${coin}" alt="" width="16" height="16">+${fmtMoneyShort(cents)}`;
   const parts = Array.from({ length: EXP_BURST }, (_, i) => { const p = doc.createElement('img'); p.className = 'exp-coin'; p.alt = ''; p.setAttribute('aria-hidden', 'true');
-    p.src = coin; p.width = p.height = 16; p.style.left = `${x}px`; p.style.top = `${pill ? pill.top + pill.height / 2 : y}px`; p.style.setProperty('--dx', `${(i - (EXP_BURST - 1) / 2) * 18}px`); return p; });
+    p.src = coin; p.width = p.height = 16; p.style.left = `${x}px`; p.style.top = `${y - 8}px`; p.style.setProperty('--dx', `${(i - (EXP_BURST - 1) / 2) * 18}px`); if (pill) p.style.setProperty('--dy', `${Math.min(0, Math.round(clear + 8 - (y - 8)))}px`); return p; });
   doc.body.append(pop, ...parts); setTimeout(() => { pop.remove(); parts.forEach(p => p.remove()); }, EXP_POP_MS + 50);
 }
 /** UX-M5: the card leaves the DOM at once (focus, EXP_CLOSED, explainerOpen() unchanged); an inert, aria-hidden copy plays the

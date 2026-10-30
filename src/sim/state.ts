@@ -32,6 +32,9 @@ export interface GameState extends M5Fields {
   celebratedMilestones: string[];
   /** v5 #2 (session only, outside F1a M5Fields): the current run's streak_peak stats. */
   streakRun?: StreakRun;
+  /** M5.1 breeds E10 / PMC Q5 (session only, outside F1a M5Fields like streakRun): raw unknown slot ids from the save, written
+   *  back by m5Persist (breedsSaveView) while that slot stays null; stripped by m5Persist SESSION_ONLY_KEYS. */
+  breedsRawSlots?: (string | null)[];
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,
