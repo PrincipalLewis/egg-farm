@@ -43,11 +43,14 @@ img{user-select:none;-webkit-user-drag:none}
 .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
 /* Art-c2: a refused Refill is aria-disabled, and .btn[aria-disabled=true]{animation:none} (0,2,0) beat .shake (0,1,0), so the full-motion
    shake never played on it (found by the 1befa17 browser check). Same specificity as the reduced-motion swap below, placed before it. */
-.btn.manage.shake{animation:shake var(--t-med) linear}
-/* P2b-U / Art-c2 (2026-10-29 23:20): a refused Refill tap (Unpaid) keeps the shake; under reduced motion it is a static refused flash, no translate. */
+.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:shake var(--t-med) linear}
+/* P2b-U / Art-c2 (2026-10-29 23:20; scope = ALL Refill buttons, Art 2026-10-30 08:59, QA pre-review F4): a refused Refill tap keeps the shake;
+   under reduced motion it is a static refused flash, no translate, on the worker-card Refill, the nav / docked-header Refill (.nav-manage,
+   no .btn) and the Workers-tab Refill bar (.btn.manage-all; (0,4,0) beats its [aria-disabled=true]{animation:none} rule further down). */
 @keyframes refusedFlash{0%,100%{box-shadow:inset 0 0 0 2px var(--c-danger)}}
-@media (prefers-reduced-motion:reduce){.btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}}
-.reduced-motion .btn.manage.shake,.rm .btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}
+@media (prefers-reduced-motion:reduce){.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}}
+.reduced-motion .btn.manage.shake,.rm .btn.manage.shake,.reduced-motion .manage.nav-manage.shake,.rm .manage.nav-manage.shake,
+.reduced-motion .btn.manage-all.shake[aria-disabled=true],.rm .btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}
 .icon-btn{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;display:grid;place-items:center;padding:0}.icon-btn img{width:28px;height:28px}
 /* HUD */
 .hud{display:flex;align-items:center;gap:var(--s-2);padding:0 var(--s-3);background:var(--c-wood);border-bottom:var(--bw) solid var(--c-outline)}

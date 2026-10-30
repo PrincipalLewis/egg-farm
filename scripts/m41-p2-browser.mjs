@@ -247,6 +247,17 @@ for (const [w, h] of SIZES) {
       requestAnimationFrame(() => { const cs = getComputedStyle(bt); res({ cls: bt.className, anim: cs.animationName, dur: cs.animationDuration, tf: cs.transform, shadow: cs.boxShadow }); }); }));
     check('P2b-U / Art-c2', w, rm ? 'reduced motion: refused Unpaid Refill tap = refusedFlash (300ms), no transform' : 'full motion: refused Unpaid Refill tap = shake', /\bshake\b/.test(r.cls) && (rm ? r.anim === 'refusedFlash' && r.dur === '0.3s' && r.tf === 'none' : r.anim === 'shake'), r);
     await ctx.close(); }
+  // ---- Art-c2 (all Refill buttons, Art 2026-10-30 08:59; QA F4): refused tap during the cooldown on the nav (phone) / docked-header Refill and
+  // on the Workers-tab Refill bar: full motion = shake; reduced motion (emulated prefers-reduced-motion) = refusedFlash 300ms, no transform ----
+  for (const rm of [false, true]) { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 30, cdS: 0 }, coop_hand: { energy: 25, cdS: 0 }, hawker: { energy: 20, cdS: 0 } }, coinsCents: 1e9, manageCdS: 20 }, { rm, freeze: true });
+    const probe = sel => page.evaluate(sel => new Promise(res => { const bt = document.querySelector(sel); if (!bt || !bt.checkVisibility()) return res({ missing: sel }); bt.click();
+      requestAnimationFrame(() => { const cs = getComputedStyle(bt); res({ sel, cls: bt.className, anim: cs.animationName, dur: cs.animationDuration, tf: cs.transform, shadow: cs.boxShadow, cd: window.eggfarm.state.manageCdS }); }); }), sel);
+    const ok = r => !r.missing && /\bshake\b/.test(r.cls) && r.cd > 0 && (rm ? r.anim === 'refusedFlash' && r.dur === '0.3s' && r.tf === 'none' : r.anim === 'shake');
+    if (phone) { const r = await probe('nav.actions .nav-manage'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused nav Refill tap (cooldown) = ${rm ? 'refusedFlash (300ms), no transform' : 'shake'}`, ok(r), r); }
+    await toTab(page, 'workers'); await page.waitForTimeout(300);
+    if (!phone) { const r = await probe('#p-upgrades header [data-act=manageAll]'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused docked-header Refill tap (cooldown) = ${rm ? 'refusedFlash (300ms), no transform' : 'shake'}`, ok(r), r); }
+    const r = await probe('#uRow > .refill-wrap button.manage-all'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused Workers-tab Refill bar tap (cooldown) = ${rm ? 'refusedFlash (300ms), no transform' : 'shake'}`, ok(r), r);
+    await ctx.close(); }
   // ---- WCAG 2.4.11: keyboard focus through the Workers list never hidden under the sticky Refill bar ----
   { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 30, cdS: 0 }, coop_hand: { energy: 25, cdS: 0 }, hawker: { energy: 20, cdS: 0 }, grader: { energy: 90, cdS: 0 } }, coinsCents: 1e9, graderTier: 1 });
     await toTab(page, 'workers'); await page.waitForTimeout(300);

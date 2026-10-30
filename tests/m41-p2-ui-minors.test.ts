@@ -151,8 +151,8 @@ describe('P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; 
     const f = kf('refusedFlash'); expect(f).toBe('0%,100%{box-shadow:inset 0 0 0 2px var(--c-danger)}'); expect(f).not.toMatch(/transform|translate|opacity/);
   });
   it('P2b-U / Art-c2: prefers-reduced-motion and the .reduced-motion / .rm classes swap the Refill shake for refusedFlash (300ms, not --t-med = 0)', () => {
-    expect(css).toContain('@media (prefers-reduced-motion:reduce){.btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}}');
-    expect(css).toContain('.reduced-motion .btn.manage.shake,.rm .btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}');
+    expect(css).toContain('@media (prefers-reduced-motion:reduce){.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}}');
+    expect(css).toContain('.reduced-motion .btn.manage.shake,.rm .btn.manage.shake,.reduced-motion .manage.nav-manage.shake,.rm .manage.nav-manage.shake,\n.reduced-motion .btn.manage-all.shake[aria-disabled=true],.rm .btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}');
   });
   it('P2b-U / Art-c2: the worker-card Refill is .btn.manage (the selector the swap keys on) and an Unpaid tap still goes through cantAfford (shake)', () => {
     expect(wui).toMatch(/<button class="btn secondary manage\$\{/);
@@ -161,8 +161,30 @@ describe('P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; 
     expect(app).toMatch(/const cantAfford = \(el: HTMLElement\) => \{ retrigger\(el, 'shake'\);/);
   });
   it('P2b-U / Art-c2: the full-motion shake beats .btn[aria-disabled=true]{animation:none} on a refused Refill (.btn.manage.shake, before the reduced-motion swap)', () => {
-    const i = css.indexOf('.btn.manage.shake{animation:shake var(--t-med) linear}'), j = css.indexOf('@media (prefers-reduced-motion:reduce){.btn.manage.shake');
+    const i = css.indexOf('.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:shake var(--t-med) linear}'), j = css.indexOf('@media (prefers-reduced-motion:reduce){.btn.manage.shake');
     expect(i).toBeGreaterThan(-1); expect(j).toBeGreaterThan(i); expect(css).toContain('.btn[aria-disabled=true]{');
+  });
+});
+
+describe('Art-c2 (all Refill buttons, Art 2026-10-30 08:59; QA F4): refused tap on the nav / header and Workers-bar Refill', () => {
+  const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+  it('Art-c2: the nav / docked-header Refill is .manage.nav-manage (no .btn) and a refused tap goes through cantAfford (shake)', () => {
+    expect(app).toMatch(/<button class="manage nav-manage farm-manage-all desk-manage-all"/);
+    expect(app).toMatch(/for \(const fb of farmMAs\) fb\.addEventListener\('click', e => \{ e\.stopPropagation\(\); if \(!act\(\{ type: 'manageAll' \}\)\) return cantAfford\(fb\);/);
+  });
+  it('Art-c2: the Workers-tab Refill bar is .btn.manage.manage-all; the shake / refusedFlash rule (0,4,0) outranks its [aria-disabled=true]{animation:none} (0,3,0)', () => {
+    expect(wui).toMatch(/<button class="btn manage manage-all\$\{/);
+    expect(css).toContain('.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}');
+    expect(css).toMatch(/\.btn\.manage-all\.shake\[aria-disabled=true\]\{animation:shake var\(--t-med\) linear\}/);
+  });
+  it('Art-c2: every Refill surface (card, nav/header, Workers bar) has both the full-motion shake and the reduced-motion refusedFlash (media query + .reduced-motion + .rm)', () => {
+    const full = css.split('\n').find(l => l.endsWith('{animation:shake var(--t-med) linear}') && l.includes('.nav-manage'))!;
+    const media = css.split('\n').find(l => l.startsWith('@media (prefers-reduced-motion:reduce){') && l.includes('refusedFlash 300ms'))!;
+    const cls = css.slice(css.indexOf('.reduced-motion .btn.manage.shake'), css.indexOf('{animation:refusedFlash 300ms', css.indexOf('.reduced-motion .btn.manage.shake')));
+    for (const sel of ['.btn.manage.shake', '.manage.nav-manage.shake', '.btn.manage-all.shake[aria-disabled=true]']) {
+      expect(full.split('{')[0].split(',')).toContain(sel); expect(media.split('{')[1].split(',')).toContain(sel);
+      for (const c of ['.reduced-motion ', '.rm ']) expect(cls.split(/,\n?/)).toContain(c + sel);
+    }
   });
 });
 
