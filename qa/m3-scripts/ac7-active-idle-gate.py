@@ -3,12 +3,28 @@
 10-min window; >=30 seeds; P95<=2.0 and worst<=2.25; F22-24 exception P95<=2.15 (worst still <=2.25).
 Strictest reading: check F in {10,18,22,23,24}; player=optimal with ALL stack (Focus 10% as in logged exception);
 TR h_base=36/v_base=48 (adopted). Uses product/sim/m4/m4_active.py read-only.
-Exit 0 PASS / 1 FAIL.
+Exit 0 PASS / 1 FAIL / 2 usage or --csv error.
+Usage: ac7-active-idle-gate.py [N] [--csv <path>]  (no --csv: m4_active.CSV as before; --csv never falls back)
+The CSV resolved path and sha256 are written to stderr as "CSV-RECORD path=... sha256=..." (stdout unchanged).
 """
-import math, sys, statistics as st
+import math, sys, statistics as st, os, csv, hashlib
 sys.path.insert(0, '/workspace/egg-farm-studio/product/sim/m4')
 import m4_active as a
-N = int(sys.argv[1]) if len(sys.argv) > 1 else 30
+args = sys.argv[1:]
+if '--csv' in args:  # HoE 2026-10-30: gate of record reads the shipped CSV; missing/unreadable -> exit 2, never fall back
+  i = args.index('--csv')
+  if i + 1 >= len(args):
+    print('ERROR: --csv needs a path', file=sys.stderr); sys.exit(2)
+  path = os.path.realpath(args.pop(i + 1)); args.pop(i)
+  try:
+    a.CSV = path
+    a.R = [{k: float(v) for k, v in r.items()} for r in csv.DictReader(open(path))]
+    a.SP = a.m.spec_from_csv(path)
+  except Exception as e:
+    print(f'ERROR: --csv {path}: cannot read/parse: {e!r}', file=sys.stderr); sys.exit(2)
+with open(a.CSV, 'rb') as f:
+  print(f'CSV-RECORD path={os.path.realpath(a.CSV)} sha256={hashlib.sha256(f.read()).hexdigest()}', file=sys.stderr)
+N = int(args[0]) if args else 30
 if N < 30:
   print('ERROR: need >=30 seeds'); sys.exit(2)
 # Strictest: adopted F1/M4 track bases; ALL stack matching run_ratio / HoP Focus exception context
