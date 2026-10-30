@@ -1,7 +1,7 @@
 // VER-1 (D-CEO-20261027-02): `npm run verify -- --hours N [--seed S] [--profile idle|m5x-casual] [--flags k=v,...] [--out dir]`
 // 1 build:html from HEAD (build id + asset sha256), 2 N hours of seeded play on the real fixed-step sim, 3 verify.json,
 // 4 the built html with the end state in headless Chromium -> verify.png (390x844, build label), 5 non-zero exit on failure.
-// Exit codes: 0 PASS, 1 a check failed (see verify.json checks[]), 2 usage / unavailable profile, 3 build failed,
+// Exit codes: 0 PASS, 1 a check failed (see verify.json checks[]), 2 usage, 3 build failed,
 // 4 the end-state save does not load back as the end state under the shipped balance, or --flags differ from the build
 // (saveRoundTrip; no browser step, no PNG). 4 takes precedence over 1.
 // S1 (CCR on #73): no exit path leaves an earlier run's verify.json / verify.png: both are removed from the out dir before
@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { balance as shipped } from '../src/config/balance';
 import { save, type KV } from '../src/save/save';
 import { BUILD_PREFIX, gitBuildId } from './build-id';
-import { runVerify, badNumbers, markFreshM4, UNAVAILABLE } from './verify/sim';
+import { runVerify, badNumbers, markFreshM4 } from './verify/sim';
 import { goldens } from './verify/golden';
 import { saveRoundTrip, ROUNDTRIP_FIELDS } from './verify/roundtrip';
 import { parseArgs, outArg, flagsOf, withFlags, sanitize, leaks, UsageError, USAGE } from './verify/cli';
@@ -60,7 +60,6 @@ function main(ctx: Ctx): number {
   if (outRaw !== null) { mkdirSync(resolveOut(outRaw), { recursive: true }); claimOut(ctx, resolveOut(outRaw), true); }
   else { const d = join(OUT_ROOT, gitBuildId(ROOT)); claimOut(ctx, d, existsSync(d)); }
   let o; try { o = parseArgs(argv); } catch (e) { if (e instanceof UsageError) { console.error(USAGE); return earlyFail(ctx, 2, `usage: ${e.message}`); } throw e; }
-  if (UNAVAILABLE[o.profile]) return earlyFail(ctx, 2, `profile ${o.profile} ${UNAVAILABLE[o.profile]}`);
   let b; try { b = withFlags(shipped, o.flags); } catch (e) { if (e instanceof UsageError) return earlyFail(ctx, 2, `usage: ${e.message}`); throw e; }
   ctx.stage = 'build';
   // 1. build
