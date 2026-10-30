@@ -32,8 +32,9 @@ import { tryDispatch } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, type NavAria } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
+import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -69,7 +70,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.innerHTML = '';
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
-    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">$0/s</span></span></div>
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">${WARN_SVG}<span class="tri" aria-hidden="true"></span><span class="rt">$0/s</span></span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
@@ -87,12 +88,14 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="sr" aria-live="polite" id="goalLive"></div><div class="sr" id="goalDesc" aria-hidden="true"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
+  // AC-R17 (m-P1-1, WCAG 2.5.3): the plain spaces between the badge and label spans are not rendered (flex items) but separate the
+  // visible words, so the visible text reads "N Upgrades" / "Refill N" and each accessible name starts with it.
   // S2-5 (art-ux/reviews/session2-ui-triage.md (b)) + AC-R1/R5: every nav button = icon + visible label + aria-label; the Upgrades
   // icon carries the asleep count badge (.nav-ic, top-right -6/-6); the Refill button shows "Refill" + N (AC-R9 aria). Ported from rc1 7380b86.
   const nav = h(`<nav class="actions" aria-label="Main">
     <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
-    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span><span class="nav-lbl">Upgrades</span></button>
-    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span><span class="count-badge num" hidden></span></button>
+    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span> <span class="nav-lbl">Upgrades</span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num"><span class="nav-txt">Refill</span><span class="nav-cd" aria-hidden="true"></span></span> <span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
   const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
@@ -116,6 +119,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
   if (IOS_FLAG_ENABLED) (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts; compiled out of release
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
+  let refillDirty = false; { const mark = () => { refillDirty = true; }; addEventListener('resize', mark); docked.addEventListener?.('change', mark); } // WCAG 2.4.11: --refill-bar-h follows wraps from resize/rotation/dock (7380b86 review 56513e7 #3)
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
   const live: HTMLElement[] = [];
@@ -187,7 +191,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
-  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate');
+  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate'), rateTri = $('#rate .tri'), rateTxt = $('#rate .rt'); // m6: ▼ in an aria-hidden .tri, money in .rt
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
@@ -234,6 +238,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
+    // P2b (AC-R11 / TP1-U2): a Refill tap on an Unpaid worker dispatches nothing (no worker_manage); the refused-tap feedback still plays.
+    if (kind === 'manage' && g.state.workers[wid as keyof typeof g.state.workers]?.unpaid) return cantAfford(bt);
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
     lastBuyBtn = bt; const bk = bt.dataset.kind;
     if (!act(bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
@@ -535,7 +541,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-8 / AC-R2 HUD net rate (<= 1 update/s, real incomePerSec from the live worker moods); first negative tick shakes the line (not under reduced motion)
     if (now() - rateAt >= 1000) { rateAt = now();
       const v = headerRate(s, b); // ruling (a): real rate; aria ', sales stopped' only for a stalled Market Hand (HoE Oct 24)
-      setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
+      // m6 (option A, art acfe36a7): headerRateText keeps '⚠ ' as the model's warn marker; it is never painted. The icon is the static WARN_SVG
+      // toggled by .warn, ▼ goes in the aria-hidden .tri (Q-M6-2), and the 1 s tick only writes text + classes (no innerHTML).
+      { const t = headerRateText(v), warn = t.startsWith('\u26A0 '), body = warn ? t.slice(2) : t, down = body.startsWith('\u25BC ');
+        setText(rateTri, down ? '\u25BC ' : ''); setText(rateTxt, down ? body.slice(2) : body); rateEl.classList.toggle('warn', warn); }
+      rateEl.classList.toggle('neg', v.sign === 'neg');
       if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
     // coop tier + celebration (once per first reach, persisted in save)
@@ -554,9 +564,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const hensN = m4On(b) ? S.hens(s.hensLevel, b) : S.hens(F, b);
     const hn = Math.min(hensN, 12);
     if (hn !== henCount) {
+      // m1 (art acfe36a7, UI-M1-1..6): keyed per-slot diff instead of rebuilding all 12 cells. Existing hens are never touched, so their
+      // `bob` keeps its phase; only appearing hens are appended (with .pop after the first render) and only vanishing ones removed.
+      // A new hen's delay list is `0s, <stagger>`: popin plays at the tap, bob keeps its per-slot stagger. Reduced motion is CSS only.
       const order = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
-      const slots = Array.from({ length: 12 }, (_, i) => `<span>${order.indexOf(i) < hn ? `<img class="hen ${i % 3 === 2 ? 'flip' : ''} ${henCount >= 0 && order.indexOf(i) >= henCount ? 'pop' : ''}" style="animation-delay:${(i * .15).toFixed(2)}s" src="${A('char-chicken.svg')}" alt="">` : ''}</span>`);
-      yard.innerHTML = slots.join(''); henCount = hn;
+      if (yard.children.length !== 12) yard.innerHTML = '<span></span>'.repeat(12);
+      for (let i = 0; i < 12; i++) {
+        const cell = yard.children[i], img = cell.firstElementChild, want = order.indexOf(i) < hn;
+        if (want && !img) {
+          const pop = henCount >= 0, d = `${(i * .15).toFixed(2)}s`, el = document.createElement('img');
+          el.className = `hen${i % 3 === 2 ? ' flip' : ''}${pop ? ' pop' : ''}`;
+          el.style.animationDelay = pop ? `0s, ${d}` : d;
+          el.src = A('char-chicken.svg'); el.alt = ''; cell.appendChild(el);
+        } else if (!want && img) img.remove();
+      }
+      henCount = hn;
     }
     const hp = $('#henpill'); setHidden(hp, hensN <= 12); setText(hp, `×${fmtCount(hensN)}\u00a0hens`);
     // meter, nest, full badge, collect label
@@ -576,28 +598,35 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // AC-R1 / AC-R5 (v1.4 §7): asleep/unpaid count badge on the Upgrades nav icon + the Workers tab; replaces the affordable dot while count > 0; one pulse on first show.
     { const n = asleepOrUnpaidCount(s, b);
       setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, n > 0 || !canUp);
-      const ensure = (host: Element | null) => {
+      const ensure = (host: Element | null, ariaHidden = false) => {
         if (!host) return null;
-        let ab = host.querySelector('.asleep-badge') as HTMLElement | null;
-        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(ab); }
+        let ab = host.querySelector(':scope > .asleep-badge') as HTMLElement | null;
+        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; if (ariaHidden) ab.setAttribute('aria-hidden', 'true'); host.append(' ', ab); } // AC-R17: ' ' = "Workers N" (absolute badge, no layout)
         return ab;
       };
-      for (const ab of [ensure(nav.querySelector('[data-nav=upgrades] .nav-ic')), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
+      // Art-c1 (HoE 2026-10-30 00:19): the Upgrades count badge sits after the "Upgrades" label in the DOM (visible text "Upgrades N"),
+      // aria-hidden (the name carries the count); CSS keeps it at the icon's top-right (styles.css, same -6/-6 as before). No CSS-generated count.
+      for (const ab of [ensure(nav.querySelector('[data-nav=upgrades]'), true), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
         if (!ab) continue;
         const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
         if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
       }
-      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement;
-      const al = n > 0 ? `Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
-      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al); }
+      // AC-R17 (rc1-asleep v1.0.11, WCAG 2.5.3): each name starts with the visible text in DOM order and announces the count:
+      // nav (Art-c1 as ruled by HoE 2026-10-30 00:19/00:20) "Upgrades, N workers need attention" / "Upgrades, 1 worker needs attention",
+      // Workers tab "Workers N, N asleep or unpaid"; N = 0 -> bare label.
+      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement, wt = document.querySelector('.tabs [data-tab=workers]') as HTMLElement | null;
+      const al = upgradesNavName(n);
+      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al);
+      const tl = n > 0 ? `Workers ${n}, ${n} asleep or unpaid` : 'Workers';
+      if (wt && wt.getAttribute('aria-label') !== tl) wt.setAttribute('aria-label', tl); }
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
       setHidden(fb, !farmMAShown);
       if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
-        // S2-5 / AC-R9: visible "Refill" (or the aria-hidden "0:NN" countdown) + N badge; aria "Refill N tired workers" / "Refill, cooling down"
+        // S2-5 / AC-R9: visible "Refill" + N badge, or "Refill" + the CSS-drawn countdown (D-HOP-2026-10-30-02); aria "Refill N tired workers" / "Refill, cooling down"
         const v = navRefillState(s, b, docked.matches, maAria, now());
-        { const nl = fb.querySelector('.nav-lbl')!; setText(nl, v.label); const ah = v.hideLabel ? 'true' : 'false'; if (nl.getAttribute('aria-hidden') !== ah) nl.setAttribute('aria-hidden', ah); } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+        { setText(fb.querySelector('.nav-txt')!, v.label); const cdEl = fb.querySelector('.nav-cd') as HTMLElement; if (cdEl.dataset.cd !== v.countdown) cdEl.dataset.cd = v.countdown; } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
@@ -618,7 +647,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
-      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; }
+        // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
+        // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
+        { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+          const pad = sc ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0; // sticky top:0 sits at the scroller's content edge, scroll-margin at its padding edge (p2 browser sweep)
+          const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height + pad) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); }
+        fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
