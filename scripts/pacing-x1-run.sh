@@ -9,8 +9,8 @@
 #  (2) a FRESH dedicated worktree at the SHA (never an existing checkout); `git status --porcelain --untracked-files=all`
 #      must be empty before and after the run (porcelain-*.txt); otherwise it refuses / marks the run not-RC.
 #  (3) shipped CSV = <tree>/data/economy.csv, sha256 recorded; every X1 shard must have measured exactly that CSV;
-#      row 904 = AC7's 2x active/idle gate PASSES on <tree>/data/economy.csv via --csv, CSV-RECORD captured (HoE 11:51);
-#      --csv is checked statically and by the gate's header + CSV-RECORD; otherwise row 904 FAILS loudly (see the AC7 block).
+#      row 904 = AC7's 2x active/idle gate (QA-D-1030-X1-TREE) PASSES on <tree>/data/economy.csv via --csv with its CSV-RECORD
+#      sha256 == the shipped CSV (behavioural, scripts/pacing-x1-ac7.py); otherwise row 904 FAILS loudly (see the AC7 block).
 #  (4) harness/sim/config are the tree's (worktree at the SHA); everything from outside the tree is hashed in
 #      outside-tree.txt (this script if it differs from the tree's copy, node, npm, node_modules lock, python3, the AC7
 #      script and product/sim/m4/m4_active.py).
@@ -24,6 +24,15 @@ STUDIO=${X1_STUDIO:-/workspace/egg-farm-studio}
 SELF=$(readlink -f "$0"); REPO=$(git -C "$(dirname "$SELF")" rev-parse --show-toplevel) || exit 2
 SHA=$(git -C "$REPO" rev-parse --verify --quiet "$REF^{commit}") || { echo "REFUSED: unknown ref $REF" >&2; exit 2; }
 TREE=$(git -C "$REPO" rev-parse "$SHA^{tree}")
+# R3 (QA-D-1030-PR93-1): --ac7-from must be <commit>:<path>, the commit must resolve in this repo and hold <path>. Anything else
+# is a HARD STOP before any result is written; there is never a fallback to an index/staged/studio copy.
+AC7_COMMIT=""; AC7_PATH=""
+if [ -n "$AC7_FROM" ]; then
+  [[ "$AC7_FROM" =~ ^([^:]+):(.+)$ ]] || { echo "REFUSED: --ac7-from '$AC7_FROM' is not <commit>:<path>" >&2; exit 2; }
+  AC7_PATH=${BASH_REMATCH[2]}
+  AC7_COMMIT=$(git -C "$REPO" rev-parse --verify --quiet "${BASH_REMATCH[1]}^{commit}") || { echo "REFUSED: --ac7-from commit ${BASH_REMATCH[1]} does not resolve in $REPO (hard stop; fetch the Econ PR head or run from a checkout that has it)" >&2; exit 2; }
+  git -C "$REPO" cat-file -e "$AC7_COMMIT:$AC7_PATH" 2>/dev/null || { echo "REFUSED: --ac7-from: $AC7_PATH not in $AC7_COMMIT (hard stop)" >&2; exit 2; }
+fi
 if [ -e "$OUT" ] && [ -n "$(ls -A "$OUT" 2>/dev/null)" ]; then echo "REFUSED: $OUT exists and is not empty (never mix runs)" >&2; exit 2; fi
 mkdir -p "$OUT" && OUT=$(readlink -f "$OUT")
 WT=$(mktemp -d "${TMPDIR:-/tmp}/x1-wt-${SHA:0:12}-XXXX")/wt
@@ -57,62 +66,37 @@ SHIP=data/economy.csv
 SHIP_SHA=$(sha256sum < "$SHIP" | cut -d' ' -f1); echo "$SHIP_SHA  $SHIP (tree $TREE, blob $(git rev-parse "$SHA:$SHIP"))" > "$OUT/shipped-csv.txt"
 X1_KEY=$(sed -n "s/^export const X1_DATA: X1SourceKey = '\(.*\)';/\1/p" tests/pacing-x1/source.ts)
 log "X1_DATA=$X1_KEY shipped CSV $SHIP_SHA"
-# (3) + row 904 (HoE 11:51): AC7's 2x active/idle gate PASSES on the tree's data/economy.csv, with its CSV-RECORD line
-# captured in results/ (ac7-csv-record.txt). Not a byte-identity check against c7bb783f.
-# Source (job input): default = the tree's qa/m3-scripts/ac7-active-idle-gate.py if the tree has one, else the studio's
-# ($STUDIO/qa/m3-scripts/...). Fallback = --ac7-from <commit>:<path> (an Econ PR head in this repo; fetch it first): the script
-# is taken with `git show` and recorded with its commit. The gate imports m4_active.py from the studio path; with --ac7-from,
-# the commit's product/sim/m4/m4_active.py (if it has one) is fetched too and compared: a differing copy is a MISMATCH and
-# row 904 FAILS (the gate ran the studio copy, not the PR's). Without one it is recorded as studio-sourced.
-# --csv support is checked, never assumed: (a) static, the script must parse --csv (argparse / '--csv' in argv list / .index);
-# (b) for real, the gate's header must name the CSV passed in AND its CSV-RECORD line must carry that realpath and the shipped
-# sha256. A script that only reads argv[1] fails (a) and is NOT run; row 904 FAILS loudly. Results: ac7.json (read by the
-# verdict, --require-ac7), ac7.log (stdout+stderr), ac7-csv-record.txt.
-AC7_COMMIT=""; AC7_PATH=""; SIM_COMMIT_SHA=""; SIM_MATCH="n/a"; AC7_SIM=$STUDIO/product/sim/m4/m4_active.py; SIM_SRC=studio
-if [ -n "$AC7_FROM" ]; then
-  AC7_COMMIT=${AC7_FROM%%:*}; AC7_PATH=${AC7_FROM#*:}; AC7_SRC="econ-pr"; mkdir -p "$OUT/ac7-src"
-  AC7_COMMIT=$(git -C "$REPO" rev-parse --verify --quiet "$AC7_COMMIT^{commit}") || fail "--ac7-from commit ${AC7_FROM%%:*} not in this repo (fetch the Econ PR head first)"
-  AC7="$OUT/ac7-src/$(basename "$AC7_PATH")"; git -C "$REPO" show "$AC7_COMMIT:$AC7_PATH" > "$AC7" 2>/dev/null || fail "--ac7-from: $AC7_PATH not in $AC7_COMMIT"
-  if [ -n "$AC7_COMMIT" ] && git -C "$REPO" cat-file -e "$AC7_COMMIT:product/sim/m4/m4_active.py" 2>/dev/null; then
-    git -C "$REPO" show "$AC7_COMMIT:product/sim/m4/m4_active.py" > "$OUT/ac7-src/m4_active.py"
-    SIM_COMMIT_SHA=$(sha256sum < "$OUT/ac7-src/m4_active.py" | cut -d' ' -f1)
-    echo "$SIM_COMMIT_SHA  $OUT/ac7-src/m4_active.py (AC7 sim module, commit $AC7_COMMIT path product/sim/m4/m4_active.py)" >> "$OUT/outside-tree.txt"
-    if [ -s "$AC7_SIM" ] && [ "$(sha256sum < "$AC7_SIM" | cut -d' ' -f1)" = "$SIM_COMMIT_SHA" ]; then SIM_MATCH=MATCH; else SIM_MATCH=MISMATCH; fi
-  else SIM_MATCH="not-in-commit"; fi
+# (3) + row 904: AC7's 2x active/idle gate per QA-D-1030-X1-TREE (R6 of QA-D-1030-PR93-1; HoE 11:51) PASSES on the tree's
+# data/economy.csv, with its CSV-RECORD line captured (ac7-csv-record.txt). Not a byte-identity check against c7bb783f.
+# Source (job input): default = the tree's qa/m3-scripts/ac7-active-idle-gate.py if the tree has one, else the studio's.
+# Fallback = --ac7-from <commit>:<path>, validated above (R3): the script is taken from that commit with `git show`.
+# Judged by scripts/pacing-x1-ac7.py (R2): behavioural only, CSV-RECORD path+sha256 must equal the shipped CSV, the header must
+# name it and the gate must exit 0; no static source check. Its studio imports are hashed (R4), and m4_active.py as imported
+# is compared with the --ac7-from commit's copy (HoE (b); MISMATCH fails 904). Results: ac7.json, ac7.log, ac7-csv-record.txt.
+H="$WT/scripts/pacing-x1-ac7.py"; [ -f "$H" ] || H="$(dirname "$SELF")/pacing-x1-ac7.py"
+if [ -n "$AC7_FROM" ]; then AC7_SRC="econ-pr"; mkdir -p "$OUT/ac7-src"; AC7="$OUT/ac7-src/$(basename "$AC7_PATH")"
+  git -C "$REPO" show "$AC7_COMMIT:$AC7_PATH" > "$AC7" || { fail "--ac7-from: git show $AC7_COMMIT:$AC7_PATH failed"; : > "$AC7"; }
 elif [ -f "qa/m3-scripts/ac7-active-idle-gate.py" ]; then AC7="$WT/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="tree"
 else AC7="$STUDIO/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="studio"; fi
 if [ -s "$AC7" ]; then echo "$(sha256sum < "$AC7" | cut -d' ' -f1)  $AC7 (AC7 script, row 904, source $AC7_SRC${AC7_COMMIT:+ commit $AC7_COMMIT path $AC7_PATH})" >> "$OUT/outside-tree.txt"; else fail "AC7 script missing: $AC7"; fi
-SIM_SHA=$( [ -s "$AC7_SIM" ] && sha256sum < "$AC7_SIM" | cut -d' ' -f1)
-if [ -n "$SIM_SHA" ]; then echo "$SIM_SHA  $AC7_SIM (AC7 sim module as imported, studio-sourced${AC7_COMMIT:+; vs commit $AC7_COMMIT copy: $SIM_MATCH})" >> "$OUT/outside-tree.txt"; else fail "AC7 input missing: $AC7_SIM"; fi
-[ "$SIM_MATCH" = MISMATCH ] && fail "row 904 AC7: m4_active.py MISMATCH: studio $SIM_SHA != commit $AC7_COMMIT copy $SIM_COMMIT_SHA (the gate imports the studio copy)"
+python3 "$H" inputs "$STUDIO" > "$OUT/ac7-inputs.json" || fail "AC7 studio inputs missing (ac7-inputs.json)"
+node -e 'for (const i of JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).inputs) console.log(`${i.sha256}  ${i.path} (AC7 import, studio-sourced)`)' "$OUT/ac7-inputs.json" >> "$OUT/outside-tree.txt"
+python3 "$H" sim "$REPO" "$AC7_COMMIT" "$STUDIO" "$OUT/ac7-src" > "$OUT/ac7-sim.json"; SIMRC=$?
+node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); if (j.commit) console.log(`${j.commitSha256 ?? "-"}  m4_active.py at --ac7-from commit ${j.commit} (product/sim/m4/m4_active.py): ${j.match} vs the studio copy imported (${j.sha256})`)' "$OUT/ac7-sim.json" >> "$OUT/outside-tree.txt"
+[ "$SIMRC" = 0 ] || fail "row 904 AC7: m4_active.py $(node -p 'JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).match' "$OUT/ac7-sim.json") (ac7-sim.json)"
 echo "$(sha256sum < "$(readlink -f "$(command -v python3)")" | cut -d' ' -f1)  python3 $(python3 -V 2>&1 | cut -d' ' -f2) $(readlink -f "$(command -v python3)")" >> "$OUT/outside-tree.txt"
-CSVABS=$(readlink -f "$WT/$SHIP"); AC7_RC=null; AC7_ST=FAIL; AC7_WHY=""; AC7_NAMED=false; AC7_REC=""; AC7_REC_OK=false; AC7_RES=""
-if [ ! -s "$AC7" ]; then AC7_WHY="AC7 script missing ($AC7_SRC)"; echo "$AC7_WHY" > "$OUT/ac7.log"
-elif ! grep -Eq "add_argument\(\s*['\"]--csv['\"]|['\"]--csv['\"]\s+in\s+[A-Za-z_.]+|\.index\(\s*['\"]--csv['\"]" "$AC7"; then
-  AC7_WHY="--csv NOT SUPPORTED by $AC7 ($AC7_SRC): it does not parse --csv (argv[1]-only would silently use its built-in CSV). Not run. Dependency: Econ's --csv PR, or pass --ac7-from <commit>:<path>"
-  echo "DEPENDENCY MISSING: $AC7_WHY" > "$OUT/ac7.log"
-else
-  log "AC7 (row 904): python3 $AC7 30 --csv $CSVABS"
-  python3 "$AC7" 30 --csv "$CSVABS" > "$OUT/ac7.log" 2>&1; AC7_RC=$?
-  AC7_RES=$(grep -m1 '^RESULT:' "$OUT/ac7.log" || true); AC7_REC=$(grep -m1 '^CSV-RECORD ' "$OUT/ac7.log" || true)
-  printf '%s\n' "${AC7_REC:-NO CSV-RECORD LINE in ac7.log}" > "$OUT/ac7-csv-record.txt"
-  grep -qF "CSV $CSVABS |" "$OUT/ac7.log" && AC7_NAMED=true
-  [ "$AC7_REC" = "CSV-RECORD path=$CSVABS sha256=$SHIP_SHA" ] && AC7_REC_OK=true
-  if [ "$AC7_NAMED" != true ]; then AC7_WHY="AC7 header does not name the CSV passed in ($CSVABS): --csv not honoured"
-  elif [ "$AC7_REC_OK" != true ]; then AC7_WHY="CSV-RECORD missing or wrong: got '${AC7_REC:-none}', want 'CSV-RECORD path=$CSVABS sha256=$SHIP_SHA'"
-  elif [ "$AC7_RC" != 0 ]; then AC7_WHY="AC7 exit $AC7_RC: ${AC7_RES:-no RESULT line}"
-  elif [ "$SIM_MATCH" = MISMATCH ]; then AC7_WHY="m4_active.py MISMATCH vs commit $AC7_COMMIT"
-  else AC7_ST=PASS; fi
-fi
-[ "$AC7_ST" = PASS ] && log "AC7 PASS ($AC7_RES; $AC7_REC)" || fail "row 904 AC7: $AC7_WHY"
-AC7J_STATUS=$AC7_ST AC7J_WHY=$AC7_WHY AC7J_SOURCE=$AC7_SRC AC7J_SCRIPT=$AC7 AC7J_SCRIPTSHA=$( [ -s "$AC7" ] && sha256sum < "$AC7" | cut -d' ' -f1) AC7J_COMMIT=$AC7_COMMIT \
-AC7J_CSV=$SHIP AC7J_CSVSHA=$SHIP_SHA AC7J_NAMED=$AC7_NAMED AC7J_REC=$AC7_REC AC7J_RECOK=$AC7_REC_OK AC7J_RC=$AC7_RC AC7J_RES=$AC7_RES \
-AC7J_SIM=$AC7_SIM AC7J_SIMSHA=$SIM_SHA AC7J_SIMSRC=$SIM_SRC AC7J_SIMMATCH=$SIM_MATCH AC7J_SIMCSHA=$SIM_COMMIT_SHA node -e '
-const e=process.env, u=v=>v||undefined; const j={status:e.AC7J_STATUS, why:e.AC7J_WHY, source:e.AC7J_SOURCE, script:e.AC7J_SCRIPT, scriptSha256:e.AC7J_SCRIPTSHA,
- commit:u(e.AC7J_COMMIT), csv:e.AC7J_CSV, csvSha256:e.AC7J_CSVSHA, csvNamed:e.AC7J_NAMED==="true", csvRecord:u(e.AC7J_REC), csvRecordOk:e.AC7J_RECOK==="true",
- exitCode:e.AC7J_RC==="null"?null:+e.AC7J_RC, result:u(e.AC7J_RES),
- sim:{path:e.AC7J_SIM, sha256:e.AC7J_SIMSHA, source:e.AC7J_SIMSRC, commit:u(e.AC7J_COMMIT), commitSha256:u(e.AC7J_SIMCSHA), match:e.AC7J_SIMMATCH}};
-require("fs").writeFileSync(process.argv[1]+"/ac7.json", JSON.stringify(j,null,1)+"\n")' "$OUT"
+log "AC7 (row 904): python3 $AC7 30 --csv $(readlink -f "$WT/$SHIP")"
+python3 "$H" run "$AC7" "$WT/$SHIP" "$SHIP_SHA" "$OUT/ac7.log" > "$OUT/ac7-run.json"
+node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(j.csvRecord ?? "NO CSV-RECORD LINE in ac7.log")' "$OUT/ac7-run.json" > "$OUT/ac7-csv-record.txt"
+AC7J_SOURCE=$AC7_SRC AC7J_SCRIPT=$AC7 AC7J_SCRIPTSHA=$( [ -s "$AC7" ] && sha256sum < "$AC7" | cut -d' ' -f1) AC7J_COMMIT=$AC7_COMMIT AC7J_CSV=$SHIP AC7J_CSVSHA=$SHIP_SHA AC7J_SIMRC=$SIMRC node -e '
+const fs=require("fs"), e=process.env, o=process.argv[1], r=JSON.parse(fs.readFileSync(o+"/ac7-run.json","utf8")), sim=JSON.parse(fs.readFileSync(o+"/ac7-sim.json","utf8")), inp=JSON.parse(fs.readFileSync(o+"/ac7-inputs.json","utf8"));
+const bad = sim.match==="MISMATCH" ? "m4_active.py MISMATCH vs commit "+e.AC7J_COMMIT : inp.missing.length ? "studio inputs missing: "+inp.missing.join(", ") : "";
+const j={...r, status: r.status==="PASS" && !bad ? "PASS" : "FAIL", why: r.why || bad, source:e.AC7J_SOURCE, script:e.AC7J_SCRIPT, scriptSha256:e.AC7J_SCRIPTSHA,
+ commit:e.AC7J_COMMIT||undefined, csv:e.AC7J_CSV, csvSha256:e.AC7J_CSVSHA, sim, inputs: inp.inputs, ruling: "QA-D-1030-X1-TREE (R6 of QA-D-1030-PR93-1): AC7 2x active/idle gate; not byte-identity vs c7bb783f"};
+fs.writeFileSync(o+"/ac7.json", JSON.stringify(j,null,1)+"\n"); console.log(j.status+" "+(j.why||j.result||""))' "$OUT" > "$OUT/ac7-status.txt"
+grep -q '^PASS' "$OUT/ac7-status.txt" && log "AC7 PASS ($(cat "$OUT/ac7-csv-record.txt"))" || fail "row 904 AC7: $(cat "$OUT/ac7-status.txt")"
+# R5: the recorded RC run is seeds 1-200 at T 4000 (the verdict checks every shard too)
+[ "$SEEDS" = 1-200 ] || fail "seeds $SEEDS != 1-200: not an RC run (R5)"
 # the X1 job itself, exactly as CI runs it
 log "X1 shards (optimal / seller15 / casual in parallel), seeds $SEEDS"
 if [ "$SEQ" = 1 ]; then for p in optimal seller15 casual; do log "shard $p (sequential)"; npx vite-node scripts/pacing-x1-stack.ts -- shard --profile "$p" --seeds "$SEEDS" --out "$OUT" > "$OUT/shard-$p.log" 2>&1 || fail "shard $p exited non-zero"; done

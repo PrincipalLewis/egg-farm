@@ -3,10 +3,10 @@
 // is the tree's shipped data/economy.csv (HoE 10:57), hashed. No balance values are asserted here.
 import { describe, it, expect } from 'vitest';
 import { X1_DATA, X1_SOURCES } from './pacing-x1/source';
-import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, NOT_APPLICABLE, blockingUnjudged, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate, type Ac7 } from './pacing-x1/compare';
+import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, NOT_APPLICABLE, blockingUnjudged, shardProblems, notJudgedLine, RC_SEEDS, RC_T, PAUSE_WHY, AC7_RULING, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate, type Ac7 } from './pacing-x1/compare';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { X1_PRED, pinned, parsePred, x1Balance, x1Stacks } from './pacing-x1/harness';
+import { X1_PRED, X1_RUN, pinned, parsePred, x1Balance, x1Stacks } from './pacing-x1/harness';
 import { M5X_STACKS, assertNoDoubleModel } from './bot-m5';
 
 const rows = () => parsePred(pinned(X1_PRED.fixture, X1_PRED.sha256).toString('utf8'));
@@ -73,7 +73,7 @@ describe('pacing-x1-stack: verdict rules', () => {
     expect(evaluate(r904, sh, ac7())[0].status).toBe('PASS');
     expect(evaluate(r904, sh, ac7({ commit: 'abc123', source: 'econ-pr' }))[0].measured).toMatch(/econ-pr @abc123 .* sha256 ab/);
     expect(evaluate(r904, sh, ac7({ csvNamed: false }))[0].status).toBe('FAIL');                          // argv[1]-only: never passes
-    expect(evaluate(r904, sh, ac7({ status: 'FAIL', exitCode: null, why: '--csv NOT SUPPORTED' }))[0]).toMatchObject({ status: 'FAIL', why: '--csv NOT SUPPORTED' });
+    expect(evaluate(r904, sh, ac7({ status: 'FAIL', exitCode: null, why: '--csv NOT SUPPORTED' }))[0]).toMatchObject({ status: 'FAIL', why: expect.stringMatching(/^--csv NOT SUPPORTED \(judged per QA-D-1030-X1-TREE/) });
     expect(evaluate(r904, sh, ac7({ exitCode: 1, status: 'FAIL' }))[0].status).toBe('FAIL');
     expect(evaluate(r904, sh, null, true)[0].status).toBe('FAIL');
     expect(evaluate(r904, sh, null, false)[0].status).toBe('NOT-WIRED');
@@ -100,6 +100,29 @@ describe('pacing-x1-stack: verdict rules', () => {
   it('blocking exemptions: row 903 N/A and the G5-P pause rows EXCLUDED (D-HOE-20261029-05) do not FAIL the verdict', () => {
     const o = evaluate(rows().filter(r => r.source_line === '903' || +r.source_line >= 906), all3());
     expect(o.filter(x => x.blocks).length).toBeGreaterThan(0); expect(blockingUnjudged(o)).toEqual([]); expect(verdictOf(o)).toBe('PASS');
+  });
+  it('R1: in plain CI (no ac7.json) row 904 is labelled not run in CI (RC-only) and the headline verdict is FAIL, never a bare PASS', () => {
+    const o = evaluate(opt(), { optimal: shard(gate({})) }, null, false);
+    expect(o.filter(x => x.line === 904).every(x => x.status === 'NOT-WIRED' && /^not run in CI \(RC-only\)/.test(x.why))).toBe(true);
+    expect(o.filter(x => x.status === 'FAIL')).toEqual([]); expect(verdictOf(o)).toBe('FAIL');
+    expect(verdictOf(evaluate(opt(), { optimal: shard(gate({})) }, ac7(), true))).toBe('PASS');
+  });
+  it('R5: shards must be seeds 1-200 at T 4000 and agree on the CSV and balance hashes', () => {
+    expect(RC_SEEDS).toEqual([1, 200]); expect(RC_T).toBe(X1_RUN.T);
+    expect(shardProblems(all3())).toEqual([]);
+    expect(shardProblems({ ...all3(), casual: { ...all3().casual, seeds: [1, 2] } })).toEqual(['shard casual: seeds 1-2 != 1-200']);
+    expect(shardProblems({ ...all3(), optimal: { ...all3().optimal, T: 600 } })).toEqual(['shard optimal: T 600 != 4000']);
+    expect(shardProblems({ ...all3(), seller15: { ...all3().seller15, csvSha256: 'zz' } })).toEqual(['shards disagree on csvSha256: , zz']);
+  });
+  it('R6: pause rows 906-913 are EXCLUDED-not-judged citing D-HOE-20261029-05 (never PASS), and the summary line counts the 21 blocking ones', () => {
+    const o = evaluate(rows(), all3(), ac7(), true), p = o.filter(x => x.line >= 906);
+    expect(p.length).toBe(24); expect(p.every(x => x.status === 'EXCLUDED' && x.why === PAUSE_WHY)).toBe(true); expect(PAUSE_WHY).toMatch(/^EXCLUDED-not-judged: .*D-HOE-20261029-05/);
+    expect(notJudgedLine(o)).toBe('21 blocking pause rows (906, 907, 909, 910, 911, 912, 913) EXCLUDED-not-judged (D-HOE-20261029-05); X1 does not cover G5-P');
+  });
+  it('R6: row 904 is judged as the AC7 2x gate per QA-D-1030-X1-TREE, not byte-identity vs c7bb783f (table and job)', () => {
+    const r904 = rows().filter(r => r.source_line === '904'); expect(r904.every(r => /QA-D-1030-X1-TREE/.test(r.note) && /2x active\/idle gate/.test(r.metric) && r.predicted === 'PASS')).toBe(true);
+    expect(AC7_RULING).toMatch(/^QA-D-1030-X1-TREE .*not byte-identity vs c7bb783f/);
+    expect(evaluate(r904, all3(), ac7()).every(x => x.status === 'PASS' && x.why.includes(AC7_RULING))).toBe(true);
   });
   it('static guard: a blocking row added to NOT_WIRED throws', () => {
     NOT_WIRED[890] = 'mutation'; try { expect(() => evaluate(rows(), all3())).toThrow(/blocking row\(s\) in NOT_WIRED: 890/); } finally { delete NOT_WIRED[890]; }

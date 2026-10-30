@@ -33,8 +33,11 @@ for (const k of Object.keys(NOT_APPLICABLE)) if (k !== '903') throw new Error(`p
 /** Row 904 (HoE 11:51: AC7's 2x active/idle gate PASSES on the tree's data/economy.csv, CSV-RECORD captured) result, written by scripts/pacing-x1-run.sh as ac7.json in the results folder. */
 export interface Ac7 { status: 'PASS' | 'FAIL'; why: string; source: string; script: string; scriptSha256: string; commit?: string; csv: string; csvSha256: string;
   csvNamed: boolean; csvRecord?: string; csvRecordOk?: boolean; exitCode: number | null; result?: string;
-  sim?: { path: string; sha256: string; source: string; commit?: string; commitSha256?: string; match: 'MATCH' | 'MISMATCH' | 'not-in-commit' | 'n/a' } }
-const AC7_NOT_RUN = 'AC7 runs only inside the recorded RC run (scripts/pacing-x1-run.sh writes ac7.json; verdict --require-ac7)';
+  sim?: { path: string; sha256: string; source: string; commit?: string | null; commitSha256?: string | null; match: 'MATCH' | 'MISMATCH' | 'not-in-commit' | 'n/a' };
+  inputs?: { path: string; sha256: string }[]; ruling?: string }
+const AC7_NOT_RUN = 'not run in CI (RC-only): AC7 runs only inside the recorded RC run (scripts/pacing-x1-run.sh writes ac7.json; verdict --require-ac7); blocking, so the verdict is FAIL here';
+export const AC7_RULING = 'QA-D-1030-X1-TREE (R6 of QA-D-1030-PR93-1): AC7 2x active/idle gate on the shipped CSV, CSV-RECORD captured; not byte-identity vs c7bb783f (#92 changed economy src)';
+export const PAUSE_WHY = 'EXCLUDED-not-judged: G5-P pause rows stay out until Features delivers the driver (D-HOE-20261029-05, engineering/decisions.md:230); never PASS, X1 does not cover G5-P';
 /** HoP-SIGNED re-prediction of the G4 dead-zone rows on the V5-HOP-1 CSV a8c4e268 (D-HOP-2026-10-30-08, 11:02;
  *  product/economy/reprediction-l894-896-a8c4e268.md sha1 1c7a39bdc9936ac25f4eff8060fdb59df102f01c, §5 Option A). It replaces
  *  the pinned table's predicted cells and gate clauses for L894-896: bands ±20% of these values; L894/895 absolute =
@@ -60,7 +63,7 @@ export function evaluate(rows: PredRow[], shards: Record<string, Shard>, ac7?: A
     const line = +r.source_line, Y = r.blocks_merge.trim().startsWith('Y'), sp0 = SIGNED_REPRED.rows[line]?.[r.profile],
       base = { line, profile: r.profile, flag: r.flag, metric: r.metric.slice(0, 90), blocks: Y, predicted: sp0 ? `${sp0.join(' / ')} (signed re-pred ${SIGNED_REPRED.decision}; table had ${r.predicted})` : r.predicted };
     const push = (status: Status, measured: string, why: string) => out.push({ ...base, status, measured, why });
-    if (isPauseRow(r)) { push('EXCLUDED', '', 'G5-P pause rows stay out until Features delivers the driver (X1 note, D-HOE-20261029-05)'); continue; }
+    if (isPauseRow(r)) { push('EXCLUDED', '', PAUSE_WHY); continue; }
     if (NOT_WIRED[line]) { push('NOT-WIRED', '', NOT_WIRED[line]); continue; }
     if (NOT_APPLICABLE[line]) { push('N/A', '', NOT_APPLICABLE[line]); continue; }
     if (line === 904) { // HoE 11:51: QA's ac7-active-idle-gate.py 2x gate PASS on the tree's shipped CSV via --csv, CSV-RECORD captured
@@ -68,7 +71,7 @@ export function evaluate(rows: PredRow[], shards: Record<string, Shard>, ac7?: A
       const sim = ac7.sim ? `; m4_active ${ac7.sim.source} sha256 ${ac7.sim.sha256}${ac7.sim.commit ? ` vs commit copy ${ac7.sim.commitSha256 ?? '-'}: ${ac7.sim.match}` : ''}` : '';
       const src = `${ac7.source}${ac7.commit ? ` @${ac7.commit}` : ''} ${ac7.script} sha256 ${ac7.scriptSha256}; ${ac7.csvRecord ?? 'NO CSV-RECORD'}${sim}`;
       const ok = ac7.status === 'PASS' && ac7.csvNamed && ac7.csvRecordOk === true && ac7.exitCode === 0 && ac7.sim?.match !== 'MISMATCH';
-      push(ok ? 'PASS' : 'FAIL', `${ac7.result ?? ''} | ${src}`, ok ? '' : ac7.why || 'AC7 failed'); continue; }
+      push(ok ? 'PASS' : 'FAIL', `${ac7.result ?? ''} | ${src}`, ok ? `judged per ${AC7_RULING}` : `${ac7.why || 'AC7 failed'} (judged per ${AC7_RULING})`); continue; }
     const sh = shards[r.profile]; if (!sh) { push(Y ? 'FAIL' : 'WARN', '', `no shard for profile ${r.profile}`); continue; }
     const sp = SIGNED_REPRED.rows[line]?.[r.profile], p = sp ?? nums(r.predicted), fails: string[] = [], caps: string[] = []; // caps: the 180 s dead-zone cap, which applies to every row even while re-predicted (D-HOP-07 amendment)
     const band = (v: number | null | undefined, pr: number | undefined, tag = '') => { if (pr == null) return; if (v == null || !Number.isFinite(v)) fails.push(`${tag}no value`); else if (!inBand(v, pr)) fails.push(`${tag}${f(v)} outside ×0.8–1.2 of ${pr} [${f(0.8 * pr)}, ${f(1.2 * pr)}]`); };
@@ -118,6 +121,22 @@ const exempt = (x: Out) => (BLOCKING_EXEMPT as Record<string, { ok: (x: Out) => 
 /** Why the verdict fails on blocking rows that were not judged PASS/FAIL, e.g. 'blocking row 904 optimal NOT-WIRED'. */
 export const blockingUnjudged = (o: Out[]) => o.filter(x => x.blocks && x.status !== 'PASS' && x.status !== 'FAIL' && !exempt(x))
   .map(x => `blocking row ${x.line} ${x.profile} ${x.status}`);
+/** R6: the explicit not-judged line for summary.md / the RC report (blocking pause rows, D-HOE-20261029-05). */
+export const notJudgedLine = (o: Out[]) => {
+  const p = o.filter(x => x.status === 'EXCLUDED' && x.blocks && BLOCKING_EXEMPT.EXCLUDED.ok(x));
+  return `${p.length} blocking pause rows (${[...new Set(p.map(x => x.line))].join(', ')}) EXCLUDED-not-judged (D-HOE-20261029-05); X1 does not cover G5-P`;
+};
+/** R5 (QA-D-1030-PR93-1): the run must be seeds 1-200 at T 4000 on every shard, and all shards must agree on the CSV/balance hashes. */
+export const RC_SEEDS = [1, 200] as const, RC_T = 4000;
+export function shardProblems(shards: Record<string, Pick<Shard, 'profile' | 'seeds' | 'T' | 'csvSha256' | 'balanceSha256'>>): string[] {
+  const ss = Object.values(shards), p: string[] = [];
+  for (const s of ss) {
+    if (s.seeds?.[0] !== RC_SEEDS[0] || s.seeds?.[1] !== RC_SEEDS[1]) p.push(`shard ${s.profile}: seeds ${s.seeds?.join('-')} != ${RC_SEEDS.join('-')}`);
+    if (s.T !== RC_T) p.push(`shard ${s.profile}: T ${s.T} != ${RC_T}`);
+  }
+  for (const k of ['csvSha256', 'balanceSha256'] as const) { const v = new Set(ss.map(s => s[k])); if (v.size > 1) p.push(`shards disagree on ${k}: ${[...v].join(', ')}`); }
+  return p;
+}
 export const verdictOf = (o: Out[]) => (o.some(x => x.status === 'FAIL') || blockingUnjudged(o).length ? 'FAIL' : 'PASS');
 /** Static guard: NOT_WIRED may only hold non-blocking rows of the pinned table. Throws otherwise (called by evaluate). */
 export function assertNotWiredNonBlocking(rows: PredRow[]) {

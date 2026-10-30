@@ -7,14 +7,14 @@
 //   tests/bot-m5.ts windowGate() (Econ's m5x.ts harness of record, ported byte-exact in #78) for none / N (AssZ) / H (AssZhold)
 //   on seeds 1-200, T 4000, window step 300 s, step ratio from L11, plus the stack with each modelled flag toggled off (N),
 //   plus the workers L10 P95 / L30 median from the N stack's own runs.
-// verdict: compares the shards with the pinned §13.2a table (tests/fixtures/x1/pred-13.2a-cf653963.csv (§13.2a e4369888 + HoE 11:51 row-904 cell)); exit 1 on any
+// verdict: compares the shards with the pinned §13.2a table (tests/fixtures/x1/pred-13.2a-7bbb5925.csv (§13.2a e4369888 + row-904 cell per QA-D-1030-X1-TREE / R6)); exit 1 on any
 //   blocks-merge=Y row that misses, else 0. G5-P pause rows are excluded (X1 note). Writes verdict.json and summary.md.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { loadTargets, quantile } from '../tests/pacing-guards';
 import { run, PROFS, windowGate } from '../tests/bot-m5';
 import { X1_DATA, X1_SOURCES, type X1SourceKey, type X1Toggle } from '../tests/pacing-x1/source';
-import { evaluate, verdictOf, blockingUnjudged, type Shard, type Gate, type Ac7 } from '../tests/pacing-x1/compare';
+import { evaluate, verdictOf, blockingUnjudged, shardProblems, notJudgedLine, type Shard, type Gate, type Ac7 } from '../tests/pacing-x1/compare';
 import { existsSync } from 'node:fs';
 import { X1_PRED, X1_RUN, pinned, parsePred, x1Balance, x1Stacks } from '../tests/pacing-x1/harness';
 
@@ -46,6 +46,7 @@ function verdict() {
   const ss = Object.values(shards), keys = new Set(ss.map(s => s.source)), heads = new Set(ss.map(s => s.head));
   const problems: string[] = []; if (keys.size > 1) problems.push(`shards ran different data sources: ${[...keys].join(', ')}`); if (heads.size > 1) problems.push(`shards ran different commits: ${[...heads].join(', ')}`);
   for (const p of ['optimal', 'seller15', 'casual']) if (!shards[p]) problems.push(`missing shard ${p}`);
+  problems.push(...shardProblems(shards));
   const ac7File = `${inDir}/ac7.json`, ac7: Ac7 | null = existsSync(ac7File) ? JSON.parse(readFileSync(ac7File, 'utf8')) : null;
   const o = evaluate(rows, shards, ac7, args.includes('--require-ac7')), v = problems.length ? 'FAIL' : verdictOf(o), key = [...keys][0] as X1SourceKey, src = X1_SOURCES[key];
   const drift: string[] = []; const s0 = ss[0];
@@ -55,6 +56,7 @@ function verdict() {
     `- table: ${X1_PRED.fixture} sha256 ${X1_PRED.sha256.slice(0, 8)} (§13.2a of record, economy.c0d9492b.md L879-913)`,
     `- rows: ${n('PASS')} PASS, ${n('FAIL')} FAIL, ${n('WARN')} WARN, ${n('INFO')} INFO, ${n('PENDING-REPRED')} PENDING-REPRED (not judged until HoP signs the re-prediction), ${n('N/A')} N/A (row 903, D-CEO-20261030-04), ${n('NOT-WIRED')} NOT-WIRED (${o.filter(x => x.status === 'NOT-WIRED' && x.blocks).length} blocking), ${n('EXCLUDED')} EXCLUDED (G5-P pause rows)`,
     ...blockingUnjudged(o).map(b => `- **FAIL: ${b}**`),
+    `- **not judged:** ${notJudgedLine(o)}`,
     ...problems.map(p => `- **problem:** ${p}`), ...drift.map(d => `- **drift (warning):** ${d}`), '',
     '| line | profile | policy | metric | Y/N | predicted | measured | status | why |', '|---|---|---|---|---|---|---|---|---|',
     ...o.map(x => `| ${x.line} | ${x.profile} | ${x.flag} | ${x.metric.replace(/\|/g, '/')} | ${x.blocks ? 'Y' : 'N'} | ${x.predicted.replace(/\|/g, '/')} | ${x.measured.replace(/\|/g, '/')} | ${x.status} | ${x.why.replace(/\|/g, '/')} |`)].join('\n') + '\n';
