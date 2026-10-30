@@ -7,10 +7,13 @@
 //   (one record per check, with the full per-keystroke focus trace) and screenshots of the focused state.
 // Cases per size: main view, Upgrades > Farm, Upgrades > Collection x refund line off / on (migrationRefundCents 0 / 123450):
 //   QA-PRERUN-1 harness      the csr-spot.mjs sequence: Tab x8 looking for focus in .tracks-exp; fallback Got it.focus() + Shift+Tab + Tab.
-//                            PASS = focus lands on Got it, card painted (visibility visible, opacity 1, data-place != none), and a
-//                            visible ring (outline solid >= 2px; the resting box-shadow does not count).
-//   QA-PRERUN-1 roundtrip    Tab x8 then Shift+Tab x8 returns to Got it, painted, with a ring.
-//   QA-PRERUN-1 never-hidden at every keystroke of both sequences: if document.activeElement is inside the card, the card is painted.
+//                            PASS = focus lands on Got it and the card is painted (visibility visible, opacity 1, data-place != none).
+//   QA-PRERUN-1 back-N       from Got it, Shift+Tab xN (focus goes back into the sheet; the engine scrolls the last Buy into view) then
+//                            Tab xN: focus is back on Got it, the card painted, :focus-visible with a visible ring (outline solid >= 2px;
+//                            the resting box-shadow does not count). N = 1, 3. (Forward Tab off the end of the document is engine-
+//                            specific in headless runs: Firefox keeps focus on Got it, Chromium/WebKit wrap to <body>.)
+//   QA-PRERUN-1 ring         whenever Got it has focus AND matches :focus-visible, the outline ring is visible.
+//   QA-PRERUN-1 never-hidden at every keystroke of every sequence: if document.activeElement is inside the card, the card is painted.
 //   QA-PRERUN-1 pointer      (Farm, refund on) card shown after mouse input, sheet scrolled to every 20 px: whenever the card is not
 //                            painted, focus is not inside it (no hidden focused element) and the card does not cover a Buy when painted.
 //   QA-PRERUN-1 autoclose    (Farm, refund on) the card is still up at 7.6 s and gone by 8.6 s after show, untouched and with keyboard
@@ -57,7 +60,7 @@ for (const [w, h] of SIZES) {
     if (view !== 'main') { await p.locator('[data-nav=upgrades]').click(); await p.waitForTimeout(350); await p.locator(`[data-tab=${view.split('-')[1]}]`).click(); await p.waitForTimeout(400); }
     return { ctx, p };
   };
-  const show = async (p, refund) => { await p.evaluate(r => { document.querySelectorAll('.tracks-exp,.tracks-exp-out,.exp-pop,.exp-coin').forEach(e => e.remove()); const g = window.eggfarm; g.migrationRefundCents = r; g.state = { ...g.state, seenTracksExplainer: false }; g.onTracksCommitted(); }, refund);
+  const show = async (p, refund) => { await p.evaluate(r => { const b = document.querySelector('#p-upgrades .body'); if (b) b.scrollTop = 0; document.querySelectorAll('.tracks-exp,.tracks-exp-out,.exp-pop,.exp-coin').forEach(e => e.remove()); const g = window.eggfarm; g.migrationRefundCents = r; g.state = { ...g.state, seenTracksExplainer: false }; g.onTracksCommitted(); }, refund);
     await p.waitForSelector('.tracks-exp', { state: 'attached', timeout: 3000 }); await p.waitForTimeout(400); };
   const press = async (p, key, trace) => { await p.keyboard.press(key); await p.waitForTimeout(120); const s = await p.evaluate(STATE); trace.push({ key, ...s }); return s; };
   for (const view of ['main', 'sheet-farm', 'sheet-collection']) for (const refund of [0, 123450]) {
@@ -72,17 +75,22 @@ for (const [w, h] of SIZES) {
       let via = hit ? 'Tab' : null;
       if (!hit) { await p.evaluate(() => document.querySelector('.tracks-exp-ok')?.focus()); trace.push({ key: 'focus()', ...(await p.evaluate(STATE)) }); await press(p, 'Shift+Tab', trace); const s = await press(p, 'Tab', trace); if (s.inCard) { hit = s; via = 'focus()+Shift+Tab/Tab'; } }
       await p.screenshot({ path: `${OUT}/shots/${eng}-${tag}-harness-focus-${size}.png` });
-      ok(!!hit && hit.onOk && hit.painted && hit.ring, 'QA-PRERUN-1', `${tag}: harness sequence puts keyboard focus on Got it, card painted, ring visible`, { via, hit, trace });
+      ok(!!hit && hit.onOk && hit.painted, 'QA-PRERUN-1', `${tag}: harness sequence puts keyboard focus on Got it, card painted`, { via, hit, trace });
       ok(trace.every(s => !s.inCard || s.painted), 'QA-PRERUN-1', `${tag}: never-hidden (harness sequence): card painted whenever focus is inside it`, trace.filter(s => s.inCard && !s.painted));
+      ok(trace.every(s => !(s.onOk && s.focusVisible) || s.ring), 'QA-PRERUN-1', `${tag}: ring (harness sequence): Got it :focus-visible always shows the outline ring`, trace.filter(s => s.onOk && s.focusVisible && !s.ring));
       rec({ kind: 'trace', id: 'QA-PRERUN-1', seq: 'harness', tag, via, trace });
-      // 2. round trip: Tab x8 then Shift+Tab x8 from Got it
-      await show(p, refund); const t2 = [{ key: 'show', ...(await p.evaluate(STATE)) }];
-      for (let i = 0; i < 8; i++) await press(p, 'Tab', t2);
-      let back = null; for (let i = 0; i < 8; i++) back = await press(p, 'Shift+Tab', t2);
-      await p.screenshot({ path: `${OUT}/shots/${eng}-${tag}-roundtrip-${size}.png` });
-      ok(back.onOk && back.painted && back.ring, 'QA-PRERUN-1', `${tag}: roundtrip Tab x8 + Shift+Tab x8 returns to Got it, painted, ring visible`, { back, trace: t2 });
-      ok(t2.every(s => !s.inCard || s.painted), 'QA-PRERUN-1', `${tag}: never-hidden (roundtrip): card painted whenever focus is inside it`, t2.filter(s => s.inCard && !s.painted));
-      rec({ kind: 'trace', id: 'QA-PRERUN-1', seq: 'roundtrip', tag, trace: t2 });
+      // 2. back-N: Shift+Tab xN into the sheet, Tab xN back to Got it
+      for (const n of [1, 3]) {
+        await show(p, refund); const t2 = [{ key: 'show', ...(await p.evaluate(STATE)) }];
+        if (!t2[0].onOk) { await p.evaluate(() => document.querySelector('.tracks-exp-ok')?.focus()); t2.push({ key: 'focus()', ...(await p.evaluate(STATE)) }); }
+        for (let i = 0; i < n; i++) await press(p, 'Shift+Tab', t2);
+        let back = null; for (let i = 0; i < n; i++) back = await press(p, 'Tab', t2);
+        await p.screenshot({ path: `${OUT}/shots/${eng}-${tag}-back${n}-${size}.png` });
+        ok(t2[0].onOk || t2[1]?.onOk, 'QA-PRERUN-1', `${tag}: back-${n} starts on Got it`, t2.slice(0, 2));
+        ok(back.onOk && back.painted && back.focusVisible && back.ring, 'QA-PRERUN-1', `${tag}: back-${n}: Shift+Tab x${n} then Tab x${n} returns keyboard focus to Got it, card painted, ring visible`, { back, trace: t2 });
+        ok(t2.every(s => !s.inCard || s.painted), 'QA-PRERUN-1', `${tag}: never-hidden (back-${n}): card painted whenever focus is inside it`, t2.filter(s => s.inCard && !s.painted));
+        rec({ kind: 'trace', id: 'QA-PRERUN-1', seq: `back-${n}`, tag, trace: t2 });
+      }
       await ctx.close(); ctx = null;
     } catch (e) { ok(false, 'QA-PRERUN-1', `${tag} threw ${e.message.slice(0, 200)}`); }
     await ctx?.close();
