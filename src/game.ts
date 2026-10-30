@@ -5,6 +5,7 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
+import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
@@ -31,6 +32,8 @@ export interface GameOpts {
 }
 export class Game {
   state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
+  /** M5.1 BR-R18: a hatch revealed by the offline settle; the UI shows it after welcome-back closes, then clears it. Not saved. */
+  pendingReveal: BreedId | null = null;
   /** Set during "Reset save" so pagehide doesn't write the old state back. */
   resetting = false;
   /** True when no save existed at load (drives onboarding). */
@@ -105,7 +108,7 @@ export class Game {
     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
   }
   private grantOffline(gapMs: number) {
-    const r = applyOffline(this.state, gapMs, this.b); this.state = r.state;
+    const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
     if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
     return r.eggs;
   }

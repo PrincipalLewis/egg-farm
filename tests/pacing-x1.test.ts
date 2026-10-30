@@ -1,0 +1,183 @@
+// pacing-x1-stack (v5 manifest row 1): pinned inputs, the data-source switch, table coverage and the verdict rules.
+// Fast: no 200-seed runs here (the CI job runs those). The §13.2a table is a pinned fixture (sha256 assert); the economy data
+// is the tree's shipped data/economy.csv (HoE 10:57), hashed. No balance values are asserted here.
+import { describe, it, expect } from 'vitest';
+import { X1_DATA, X1_SOURCES } from './pacing-x1/source';
+import { evaluate, verdictOf, nums, inBand, isPauseRow, HANDLED, NOT_WIRED, NOT_APPLICABLE, blockingUnjudged, shardProblems, notJudgedLine, watchListLine, RC_SEEDS, RC_T, PAUSE_WHY, AC7_RULING, PENDING_REPRED, SIGNED_REPRED, type Shard, type Gate, type Ac7 } from './pacing-x1/compare';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { X1_PRED, X1_RUN, pinned, parsePred, x1Balance, x1Stacks, balanceRecord, balanceLine } from './pacing-x1/harness';
+import { M5_FLAGS } from '../src/config/flags';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { M5X_STACKS, assertNoDoubleModel } from './bot-m5';
+
+const rows = () => parsePred(pinned(X1_PRED.fixture, X1_PRED.sha256).toString('utf8'));
+
+describe('pacing-x1-stack: data source and pinned table', () => {
+  it('the switch reads the shipped data/economy.csv + balance.json from the tree with the full stack, and hashes what it read', () => {
+    expect(X1_DATA).toBe('shipped-tree'); const src = X1_SOURCES[X1_DATA];
+    expect(src.csv).toBe('data/economy.csv'); expect(src.balanceJson).toBe('src/config/balance.json'); expect(src.stack).toEqual({});
+    const { b, csvSha256 } = x1Balance(X1_DATA);
+    expect(csvSha256).toBe(createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex'));
+    const st = x1Stacks(X1_DATA); expect(st.N).toEqual(M5X_STACKS.AssZ); expect({ ...st.H }).toEqual(M5X_STACKS.AssZhold);
+    expect(() => assertNoDoubleModel(b, st.N)).not.toThrow(); // bot models M5 itself; the shipped balance.json keeps src M5 flags off
+    expect(Object.keys(st.toggles).sort()).toEqual(['abilities', 'broody', 'golden', 'streak', 'tapCoins']);
+  });
+  it('the §13.2a table parses to 105 rows, 72 blocking, and every row is handled, NOT-WIRED, or a G5-P pause row', () => {
+    const r = rows(); expect(r.length).toBe(105); expect(r.filter(x => x.blocks_merge.startsWith('Y')).length).toBe(72);
+    for (const x of r) expect(isPauseRow(x) || HANDLED.has(+x.source_line) || +x.source_line in NOT_WIRED, `L${x.source_line} ${x.metric}`).toBe(true);
+    expect(r.filter(isPauseRow).length).toBe(24);
+  });
+});
+
+describe('pacing-x1-stack: verdict rules', () => {
+  it('parses predicted cells and applies the ×0.8–1.2 band inclusively', () => {
+    expect(nums('+61.3 / +64.8 / +64.9%')).toEqual([61.3, 64.8, 64.9]); expect(nums('2.407 (\u22120.58)')).toEqual([2.407]); expect(nums('84 / 160 / 234')).toEqual([84, 160, 234]);
+    expect(inBand(1.2, 1)).toBe(true); expect(inBand(0.8, 1)).toBe(true); expect(inBand(1.2001, 1)).toBe(false); expect(inBand(0.7999, 1)).toBe(false);
+  });
+  const gate = (o: Partial<Gate> & { p95?: number; worst?: number }): Gate => ({ G4_noAff_F10_to_max: [68, 114, 143], windows: 900, stepL30: [2.407, 2.608], reachedMax: 200,
+    win: { P95_allWindows: o.p95 ?? 1.755, P95_ofSeedMax: 1.791, worstSeed: o.worst ?? 1.917, median: 1.656 }, byBand: { 'F10-17': [1.6, 1.75, 1.8], 'F18-23': [1.6, 1.77, 1.8], 'F24-29': [1.6, 1.74, 1.8] },
+    premium: { 'F10-19': [61.3, 70], 'F20-29': [64.8, 70], 'F30+': [64.9, 70] }, ...o });
+  const shard = (N: Gate): Shard => ({ profile: 'optimal', source: 'v5hop1-8dc90e2b', seeds: [1, 200], T: 4000, csvSha256: 'c'.repeat(64), balanceSha256: 'b'.repeat(64), l10P95Min: 11.05, l30MedianMin: 34.4,
+    gate: { none: gate({ stepL30: [2.989, 3.453], G4_noAff_F10_to_max: [104, 161, 202], win: undefined }), N, H: gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }) },
+    toggles: { golden: gate({ p95: 1.6 }), streak: 'n/a' } });
+  const opt = () => rows().filter(r => r.profile === 'optimal');
+  it('the predicted optimal values pass every handled optimal row; pause rows are EXCLUDED, never PASS', () => {
+    const o = evaluate(opt(), { optimal: shard(gate({})) });
+    expect(o.filter(x => x.status === 'FAIL')).toEqual([]);
+    expect(o.filter(x => x.line >= 906).every(x => x.status === 'EXCLUDED')).toBe(true);
+    expect(o.filter(x => NOT_WIRED[x.line] != null).every(x => x.status === 'NOT-WIRED')).toBe(true);
+  });
+  it('L894-896 use the HoP-signed re-prediction (D-HOP-2026-10-30-08): signed bands, worst <= 1.2 x same-seed no-mech worst, P95 cap 180 s', () => {
+    expect(Object.keys(PENDING_REPRED)).toEqual([]); expect(SIGNED_REPRED.sha1).toBe('1c7a39bdc9936ac25f4eff8060fdb59df102f01c');
+    const sig = (N: Gate, H: Gate, none: Gate) => { const sh = shard(N); sh.gate.H = H; sh.gate.none = none; return evaluate(opt(), { optimal: sh }); };
+    const none = gate({ stepL30: [2.989, 3.453], G4_noAff_F10_to_max: [104, 161, 202], win: undefined });
+    const ok = sig(gate({ G4_noAff_F10_to_max: [68, 114, 143] }), gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }), none);
+    for (const l of [894, 895, 896]) expect(ok.find(x => x.line === l)!.status, `L${l}`).toBe('PASS');
+    expect(ok.find(x => x.line === 895)!.predicted).toMatch(/^70 \/ 107 \/ 191 \(signed re-pred D-HOP-2026-10-30-08; table had 84 \/ 166 \/ 272\)$/);
+    const old = sig(gate({ G4_noAff_F10_to_max: [84, 160, 234] }), gate({ G4_noAff_F10_to_max: [84, 166, 272], stepL30: [2.435, 2.634] }), none); // the 8dc90e2b values miss the signed bands
+    expect(old.find(x => x.line === 894)!.status).toBe('FAIL');
+    const worst = sig(gate({ G4_noAff_F10_to_max: [68, 114, 143] }), gate({ G4_noAff_F10_to_max: [70, 107, 191], stepL30: [2.435, 2.634] }), gate({ ...none, G4_noAff_F10_to_max: [104, 161, 150] }));
+    expect(worst.find(x => x.line === 895)!.why).toMatch(/1.2 × same-seed/); expect(worst.find(x => x.line === 895)!.status).toBe('FAIL'); // 191 > 1.2 x 150
+  });
+  it('row 903 is an explicit N/A (D-CEO-20261030-04), neither PASS nor FAIL; no other row may be N/A', () => {
+    expect(Object.keys(NOT_APPLICABLE)).toEqual(['903']); expect(NOT_APPLICABLE[903]).toMatch(/QA-D-1030-SS15-NA.*D-CEO-20261030-04/);
+    const all = evaluate(rows(), { optimal: shard(gate({})), seller15: { ...shard(gate({})), profile: 'seller15' }, casual: { ...shard(gate({})), profile: 'casual' } });
+    expect(all.filter(x => x.line === 903).map(x => x.status)).toEqual(['N/A', 'N/A', 'N/A']);
+    expect(all.filter(x => x.status === 'N/A').every(x => x.line === 903)).toBe(true);
+    const na = all.filter(x => x.line === 903); expect(verdictOf(na)).toBe('PASS'); expect(verdictOf([...na, { ...na[0], line: 1, status: 'FAIL' }])).toBe('FAIL');
+  });
+  const ac7 = (o: Partial<Ac7> = {}): Ac7 => ({ status: 'PASS', why: '', source: 'studio', script: 'qa/m3-scripts/ac7-active-idle-gate.py', scriptSha256: 'ab', csv: 'data/economy.csv',
+    csvSha256: 'cd', csvNamed: true, csvRecord: 'CSV-RECORD path=/wt/data/economy.csv sha256=cd', csvRecordOk: true, exitCode: 0, result: 'RESULT: PASS',
+    sim: { path: 'm4_active.py', sha256: 'ee', source: 'studio', match: 'n/a' }, ...o });
+  it('row 904 (AC7) is judged on ac7.json: PASS only if it ran, exited 0 and its header named the CSV passed in; missing in the RC run FAILS', () => {
+    const r904 = opt().filter(r => r.source_line === '904'), sh = { optimal: shard(gate({})) };
+    expect(evaluate(r904, sh, ac7())[0].status).toBe('PASS');
+    expect(evaluate(r904, sh, ac7({ commit: 'abc123', source: 'econ-pr' }))[0].measured).toMatch(/econ-pr @abc123 .* sha256 ab/);
+    expect(evaluate(r904, sh, ac7({ csvNamed: false }))[0].status).toBe('FAIL');                          // argv[1]-only: never passes
+    expect(evaluate(r904, sh, ac7({ status: 'FAIL', exitCode: null, why: '--csv NOT SUPPORTED' }))[0]).toMatchObject({ status: 'FAIL', why: expect.stringMatching(/^--csv NOT SUPPORTED \(judged per QA-D-1030-X1-TREE/) });
+    expect(evaluate(r904, sh, ac7({ exitCode: 1, status: 'FAIL' }))[0].status).toBe('FAIL');
+    expect(evaluate(r904, sh, null, true)[0].status).toBe('FAIL');
+    expect(evaluate(r904, sh, null, false)[0].status).toBe('NOT-WIRED');
+    expect(evaluate(r904, sh, ac7({ csvRecordOk: false, csvRecord: undefined }))[0].status).toBe('FAIL');   // HoE 11:51: CSV-RECORD must be captured
+    expect(evaluate(r904, sh, ac7({ sim: { path: 'm4_active.py', sha256: 'ee', source: 'studio', commit: 'abc', commitSha256: 'ff', match: 'MISMATCH' } }))[0].status).toBe('FAIL');
+    expect(evaluate(r904, sh, ac7({ commit: 'abc', sim: { path: 'm4_active.py', sha256: 'ee', source: 'studio', commit: 'abc', match: 'not-in-commit' } }))[0].status).toBe('PASS');
+    expect(r904[0].metric).toMatch(/2x active\/idle gate/); expect(r904.every(r => !/c7bb783f/.test(r.metric))).toBe(true);
+  });
+  const all3 = () => ({ optimal: shard(gate({})), seller15: { ...shard(gate({})), profile: 'seller15' }, casual: { ...shard(gate({})), profile: 'casual' } });
+  const one = (o: Partial<ReturnType<typeof evaluate>[number]>) => ({ line: 890, profile: 'optimal', flag: 'N', metric: 'm', blocks: true, predicted: '', measured: '', status: 'PASS' as const, why: '', ...o });
+  it('a blocking row that is NOT-WIRED (e.g. 904 in plain CI) makes the verdict FAIL, with the reason named', () => {
+    const o = evaluate(rows().filter(r => r.source_line === '904'), all3(), null, false);
+    expect(o.every(x => x.status === 'NOT-WIRED' && x.blocks)).toBe(true);
+    expect(verdictOf(o)).toBe('FAIL'); expect(blockingUnjudged(o)).toEqual(['blocking row 904 optimal NOT-WIRED', 'blocking row 904 seller15 NOT-WIRED', 'blocking row 904 casual NOT-WIRED']);
+  });
+  it('a blocking PENDING-REPRED (or WARN/INFO, or EXCLUDED outside the pause rows, or N/A outside 903) row FAILS the verdict', () => {
+    for (const status of ['PENDING-REPRED', 'WARN', 'INFO', 'EXCLUDED', 'N/A', 'NOT-WIRED'] as const) expect(verdictOf([one({}), one({ status })]), status).toBe('FAIL');
+    expect(verdictOf([one({ status: 'PENDING-REPRED', blocks: false })])).toBe('PASS');
+  });
+  it('non-blocking NOT-WIRED rows (898, 899, 902) still let the verdict PASS', () => {
+    const o = evaluate(rows().filter(r => ['898', '899', '902'].includes(r.source_line)), all3());
+    expect(o.length).toBe(9); expect(o.every(x => x.status === 'NOT-WIRED' && !x.blocks)).toBe(true); expect(verdictOf(o)).toBe('PASS');
+  });
+  it('blocking exemptions: row 903 N/A and the G5-P pause rows EXCLUDED (D-HOE-20261029-05) do not FAIL the verdict', () => {
+    const o = evaluate(rows().filter(r => r.source_line === '903' || +r.source_line >= 906), all3());
+    expect(o.filter(x => x.blocks).length).toBeGreaterThan(0); expect(blockingUnjudged(o)).toEqual([]); expect(verdictOf(o)).toBe('PASS');
+  });
+  it('R1: in plain CI (no ac7.json) row 904 is labelled not run in CI (RC-only) and the headline verdict is FAIL, never a bare PASS', () => {
+    const o = evaluate(opt(), { optimal: shard(gate({})) }, null, false);
+    expect(o.filter(x => x.line === 904).every(x => x.status === 'NOT-WIRED' && /^not run in CI \(RC-only\)/.test(x.why))).toBe(true);
+    expect(o.filter(x => x.status === 'FAIL')).toEqual([]); expect(verdictOf(o)).toBe('FAIL');
+    expect(verdictOf(evaluate(opt(), { optimal: shard(gate({})) }, ac7(), true))).toBe('PASS');
+  });
+  it('R5: shards must be seeds 1-200 at T 4000 and agree on the CSV and balance hashes', () => {
+    expect(RC_SEEDS).toEqual([1, 200]); expect(RC_T).toBe(X1_RUN.T);
+    expect(shardProblems(all3())).toEqual([]);
+    expect(shardProblems({ ...all3(), casual: { ...all3().casual, seeds: [1, 2] } })).toEqual(['shard casual: seeds 1-2 != 1-200']);
+    expect(shardProblems({ ...all3(), optimal: { ...all3().optimal, T: 600 } })).toEqual(['shard optimal: T 600 != 4000']);
+    expect(shardProblems({ ...all3(), seller15: { ...all3().seller15, csvSha256: 'zz' } })).toEqual(['shards disagree on csvSha256: ' + 'c'.repeat(64) + ', zz', 'shard seller15: csvSha256 missing or not a sha256 (zz)']);
+    expect(shardProblems({ ...all3(), casual: { ...all3().casual, balanceSha256: 'a'.repeat(64) } })).toEqual(['shards disagree on balanceSha256: ' + 'b'.repeat(64) + ', ' + 'a'.repeat(64)]);
+    expect(shardProblems({ ...all3(), optimal: { ...all3().optimal, balanceSha256: '' } })).toEqual(['shards disagree on balanceSha256: , ' + 'b'.repeat(64), 'shard optimal: balanceSha256 missing or not a sha256 (empty)']);
+  });
+  it('R6: pause rows 906-913 are EXCLUDED-not-judged citing D-HOE-20261029-05 (never PASS), and the summary line counts the 21 blocking ones', () => {
+    const o = evaluate(rows(), all3(), ac7(), true), p = o.filter(x => x.line >= 906);
+    expect(p.length).toBe(24); expect(p.every(x => x.status === 'EXCLUDED' && x.why === PAUSE_WHY)).toBe(true); expect(PAUSE_WHY).toMatch(/^EXCLUDED-not-judged: .*D-HOE-20261029-05/);
+    expect(notJudgedLine(o)).toBe('21 blocking pause rows (906, 907, 909, 910, 911, 912, 913) EXCLUDED-not-judged (D-HOE-20261029-05); X1 does not cover G5-P');
+  });
+  it('R6: row 904 is judged as the AC7 2x gate per QA-D-1030-X1-TREE, not byte-identity vs c7bb783f (table and job)', () => {
+    const r904 = rows().filter(r => r.source_line === '904'); expect(r904.every(r => /QA-D-1030-X1-TREE/.test(r.note) && /2x active\/idle gate/.test(r.metric) && r.predicted === 'PASS')).toBe(true);
+    expect(AC7_RULING).toMatch(/^QA-D-1030-X1-TREE .*not byte-identity vs c7bb783f/);
+    expect(evaluate(r904, all3(), ac7()).every(x => x.status === 'PASS' && x.why.includes(AC7_RULING))).toBe(true);
+  });
+  it('F9: the watch-list line names every G4 worst > 180 s and sends 898/899 to the signed re-prediction doc', () => {
+    expect(watchListLine({ optimal: shard(gate({})) })).toBe('G4 worst > 180 s: optimal none 202 s, optimal H 191 s; 898/899 not measured by X1 (NOT-WIRED): cite product/economy/reprediction-l894-896-a8c4e268.md (sha1 1c7a39bd) for them');
+    expect(watchListLine({})).toMatch(/^G4 worst > 180 s: none; /);
+  });
+  it('static guard: a blocking row added to NOT_WIRED throws', () => {
+    NOT_WIRED[890] = 'mutation'; try { expect(() => evaluate(rows(), all3())).toThrow(/blocking row\(s\) in NOT_WIRED: 890/); } finally { delete NOT_WIRED[890]; }
+    expect(() => evaluate(rows(), all3())).not.toThrow();
+  });
+  it('a blocking row outside the band FAILS even when its absolute gate holds; above the absolute gate FAILS too', () => {
+    const low = evaluate(opt(), { optimal: shard(gate({ p95: 1.3 })) }); // 1.3 < 0.8 x 1.755, still <= 2.00
+    expect(low.find(x => x.line === 879)!.status).toBe('FAIL'); expect(verdictOf(low)).toBe('FAIL');
+    const high = evaluate(opt(), { optimal: shard(gate({ worst: 2.3 })) }); // in band of 1.917 (<= 2.300) but > 2.25
+    expect(high.find(x => x.line === 883)!.status).toBe('FAIL');
+  });
+  it('a non-blocking row outside the band only WARNS; a missing profile shard fails its blocking rows', () => {
+    const o = evaluate(opt(), { optimal: shard(gate({ premium: { 'F10-19': [10, 0], 'F20-29': [10, 0], 'F30+': [10, 0] } })) }, ac7()); // 904 judged, else it is blocking NOT-WIRED
+    expect(o.find(x => x.line === 888)!.status).toBe('WARN'); expect(verdictOf(o)).toBe('PASS');
+    expect(verdictOf(evaluate(opt(), {}))).toBe('FAIL');
+  });
+});
+
+describe('QA-D-1030-SHIPFLAGS: the run records balance.json sha256 + m4 flags (results/ and SHA256SUMS)', () => {
+  const BJ = new URL('../src/config/balance.json', import.meta.url), raw = readFileSync(BJ), sha = createHash('sha256').update(raw).digest('hex');
+  it('x1Balance returns the tree balance.json record: sha256, m4.enabled, every M5 flag, flags ON and bot-modelled src M5 flags ON', () => {
+    const { b, balanceSha256, balance } = x1Balance(X1_DATA); const j = JSON.parse(raw.toString('utf8'));
+    expect(balanceSha256).toBe(sha); expect(balance.sha256).toBe(sha); expect(balance.path).toBe('src/config/balance.json');
+    expect(balance.m4Enabled).toBe(Number(j.m4.enabled)); expect(Object.keys(balance.flags)).toEqual([...M5_FLAGS]);
+    for (const k of M5_FLAGS) expect(balance.flags[k]).toBe(Number(j.m4.flags[k] ?? 0));
+    expect(balance.flagsOn).toEqual(M5_FLAGS.filter(k => j.m4.enabled && j.m4.flags[k] === 1));
+    expect(balanceRecord('x', raw, b)).toEqual({ ...balance, path: 'x' });
+  });
+  it('a bot-modelled src M5 flag ON is named (O-3 guard), a non-modelled one only in flags ON; m4.enabled 0 means nothing is on', () => {
+    const { b } = x1Balance(X1_DATA), on = (m4: object) => balanceRecord('p', raw, { ...b, m4: { ...(b as any).m4, ...m4 } } as any);
+    const r = on({ enabled: 1, flags: { ...(b as any).m4.flags, streak: 1, clockWage: 1 } });
+    expect(r.flagsOn).toEqual(['streak', 'clockWage']); expect(r.srcM5On).toEqual(['streak']); expect(balanceLine(r)).toMatch(/ON: streak \(bot-m5 O-3 guard throws/);
+    expect(on({ enabled: 0, flags: { ...(b as any).m4.flags, streak: 1 } })).toMatchObject({ m4Enabled: 0, flagsOn: [], srcM5On: [] });
+    expect(balanceLine(on({ enabled: 1, flags: {} }))).toMatch(/flags ON: none; .* ON: none \(bot model runs/);
+  });
+  it('`pacing-x1-stack.ts -- inputs` writes balance.txt (sha256 first, every m4 flag) and a byte copy whose sha256 is the tree file', () => {
+    const d = mkdtempSync(join(tmpdir(), 'x1-bal-')), root = new URL('..', import.meta.url).pathname;
+    const r = spawnSync('npx', ['vite-node', 'scripts/pacing-x1-stack.ts', '--', 'inputs', '--out', d], { cwd: root, encoding: 'utf8' });
+    const j = JSON.parse(raw.toString('utf8')), want = j.m4.enabled && M5_FLAGS.some(k => ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'].includes(k) && j.m4.flags[k] === 1) ? 1 : 0;
+    expect(r.status, r.stderr).toBe(want);
+    const txt = readFileSync(join(d, 'balance.txt'), 'utf8');
+    expect(txt.startsWith(`${sha}  src/config/balance.json`)).toBe(true); expect(txt).toContain(`m4.enabled=${j.m4.enabled}\n`);
+    for (const k of M5_FLAGS) expect(txt).toContain(`m4.flags.${k}=${Number(j.m4.flags[k] ?? 0)}\n`);
+    expect(createHash('sha256').update(readFileSync(join(d, 'inputs/src/config/balance.json'))).digest('hex')).toBe(sha);
+    expect(JSON.parse(readFileSync(join(d, 'balance.json.record.json'), 'utf8')).sha256).toBe(sha);
+  }, 60000);
+});
