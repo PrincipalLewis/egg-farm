@@ -110,7 +110,7 @@ describe('UX-M5: close fade and refund pop', () => {
     key('Escape');
     const pop = document.querySelector<HTMLElement>('.exp-pop')!; expect(pop.textContent).toBe('+$123.45'); expect(pop.getAttribute('aria-hidden')).toBe('true');
     expect(pop.querySelector('img')!.getAttribute('src')).toMatch(/icon-coin\.svg$/);
-    expect(pop.style.left).toBe('150px'); expect(pop.style.top).toBe(`${40 + 30}px`); // coin pill (100..200 x 8..40): centred, rises onto it
+    expect(pop.style.left).toBe('150px'); expect(pop.style.top).toBe(`${40 + 4 + 36 + 8}px`); // coin pill (100..200 x 8..40): centred; v5 p2 Art nit n1: starts below the pill/#rate, rises 8px, never covers #rate
     const coins = document.querySelectorAll<HTMLElement>('.exp-coin'); expect(coins.length).toBe(EXP_BURST); coins.forEach(c => { expect(c.getAttribute('aria-hidden')).toBe('true'); expect(c.style.left).toBe('150px'); });
     vi.advanceTimersByTime(EXP_POP_MS + 50); expect(document.querySelector('.exp-pop,.exp-coin')).toBeNull();
     pageHud(); showTracksExplainer(game(0) as any); key('Escape'); expect(document.querySelector('.exp-pop,.exp-coin')).toBeNull(); // M4-A: refund is 0

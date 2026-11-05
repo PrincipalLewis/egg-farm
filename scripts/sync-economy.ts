@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from 'node:url';
 import { tableRow, validateCostGrowthSegments, type EconomyParams, type CostGrowthSegment } from '../src/config/formulas';
+import { M5_FLAGS } from '../src/config/flags';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
@@ -148,8 +149,31 @@ function verifyGraderCosts(rows: Row[], w: any) {
 /** M4-A columns live in economy.csv (Economy's f1-m4cols merge, this branch only). */
 export const M4_COLS = ['hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'] as const;
 export const isM4Col = (c: string) => (M4_COLS as readonly string[]).includes(c) || /^(tc_|hens_ms\d|egg_grade\d|balanced\d|egg_value_base_step$|egg_value_level_bonus$)/.test(c);
+/** v5 F3: CSV columns that M5 specs read under a non-`tc_` name. Each is copied into m4.tc under its own name (constant on
+ *  every row), so `tc` stays the one home of scalar tunables. Economy may later rename them tc_*; then drop the entry here.
+ *  leave_attended_window_s: abilities spec rule 9 / §7 (HoE §9.5(1)); rest_recovery_mult: pause spec rule 3 / §6. */
+export const M5_MAPPED_COLS = ['leave_attended_window_s', 'rest_recovery_mult'] as const;
+/** v5 F3 (HoE D-C1): release flags live in balance.json m4.flags, never in the CSV. Kept whole from balance.json; every known
+ *  flag is present (absent = 0); an unknown name or a value other than 0/1 fails the sync (no silent typos). */
+export function keepFlags(prev: any): Record<string, number> {
+  const p = prev?.m4?.flags ?? {}, out: Record<string, number> = {};
+  if (typeof p !== 'object' || Array.isArray(p)) throw new Error('sync-economy: balance.json m4.flags must be an object');
+  for (const k of Object.keys(p)) if (!(M5_FLAGS as readonly string[]).includes(k)) throw new Error(`sync-economy: unknown flag m4.flags.${k} (known: ${M5_FLAGS.join(', ')})`);
+  for (const f of M5_FLAGS) { const v = p[f] ?? 0; if (v !== 0 && v !== 1) throw new Error(`sync-economy: m4.flags.${f} must be 0 or 1, got ${JSON.stringify(v)}`); out[f] = v; }
+  return out;
+}
+/** v5 F3 (QA seam Q8): balance.json-only tunables block m4.zeroGain (spec "m5.zeroGain.confirm", m4 namespace per manifest
+ *  row 28). Kept whole like the flags: `confirm` 0/1, absent = 0, unknown keys fail the sync. */
+export const ZERO_GAIN_KEYS = ['confirm'] as const;
+export function keepZeroGain(prev: any): { confirm: number } {
+  const p = prev?.m4?.zeroGain ?? {};
+  if (typeof p !== 'object' || Array.isArray(p)) throw new Error('sync-economy: balance.json m4.zeroGain must be an object');
+  for (const k of Object.keys(p)) if (!(ZERO_GAIN_KEYS as readonly string[]).includes(k)) throw new Error(`sync-economy: unknown key m4.zeroGain.${k} (known: ${ZERO_GAIN_KEYS.join(', ')})`);
+  const v = p.confirm ?? 0; if (v !== 0 && v !== 1) throw new Error(`sync-economy: m4.zeroGain.confirm must be 0 or 1, got ${JSON.stringify(v)}`);
+  return { confirm: v };
+}
 /** hens_cost / egg_value_cost are floor(base x growth^L) per row; caps, milestone/grade/Balanced/price-term and tc_* are constant.
- *  A CSV with no M4 columns at all produces no m4 block. Only the flag (`enabled`) is kept from balance.json. */
+ *  A CSV with no M4 columns at all produces no m4 block. From balance.json only `enabled`, the `flags` block and `zeroGain` are kept. */
 export function fitM4(rows: Row[], prev: any) {
   const R = rows, has = (c: string) => c in R[0];
   if (!M4_COLS.some(has)) return undefined;
@@ -159,12 +183,13 @@ export function fitM4(rows: Row[], prev: any) {
   const geo = (c: string) => { R.forEach((r, i) => { if (!Number.isInteger(r[c]) || r[c] <= 0 || (i > 0 && r[c] <= R[i - 1][c])) throw new Error(`sync-economy: economy.csv ${c} must be positive integers, strictly rising (L${r.level})`); }); return { costs: R.map(r => r[c]) }; };
   const tc: Record<string, number> = {};
   for (const c of Object.keys(R[0]).filter(c => c.startsWith('tc_')).sort()) tc[c.slice(3)] = one(c);
+  for (const c of M5_MAPPED_COLS) if (has(c)) { if (c in tc) throw new Error(`sync-economy: economy.csv has both ${c} and tc_${c}`); tc[c] = one(c); }
   const list = (pre: string, keys: Record<string, string>) => {
     const out: any[] = []; for (let i = 1; has(`${pre}${i}_level`); i++) { const o: any = {}; for (const [k, suf] of Object.entries(keys)) o[k] = one(`${pre}${i}_${suf}`); out.push(o); }
     if (!out.length) throw new Error(`sync-economy: economy.csv has no ${pre}1_level column`);
     return out;
   };
-  return { enabled: prev.m4?.enabled ?? 0,
+  return { enabled: prev.m4?.enabled ?? 0, flags: keepFlags(prev), zeroGain: keepZeroGain(prev),
     hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
     offline: { eggsPerSec: R.map(r => r.offline_eggs_per_sec), maxEggs2h: R.map(r => r.offline_max_eggs_2h) }, // spec v1.14 M4A-4
     eggValue: { ...geo('egg_value_cost'), capOverFarm: one('egg_value_cap_over_farm'), baseStep: one('egg_value_base_step'), levelBonus: one('egg_value_level_bonus') },

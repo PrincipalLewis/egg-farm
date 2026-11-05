@@ -68,6 +68,11 @@ export class Telemetry {
     if (!this.dirty) return; try { this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++; } catch { /* AC14c: quota/private mode; keep the buffer in memory */ }
   }
   events(): readonly TEvent[] { return this.buf; }
+  /** v5 zeroGainUi (spec §11, HoE 02:55): add fields to the newest event of `type` (the UI sets `upgrade.zero_gain` after dispatch).
+   *  Memory only (marks dirty; the next flush writes it). No-op when there is none. */
+  annotateLast(type: string, data: Record<string, unknown>) {
+    for (let i = this.buf.length - 1; i >= 0; i--) if (this.buf[i].type === type) { Object.assign(this.buf[i], data); this.dirty = true; return; }
+  }
   /** Fields never returned by the console export (window.eggfarmExportTelemetry): the per-install id. */
   static readonly REDACT = ['install_id'] as const;
   /** Read-only export for the window.eggfarmExportTelemetry console global: no side effects (open tap/worker windows are

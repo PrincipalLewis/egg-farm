@@ -5,9 +5,14 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
+import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
+import { focusFrameMs } from './sim/clock';
+import { streakOn, streakPeak } from './sim/streak';
+import { anyM5FlagOn } from './sim/timers';
+import { playerSaleCtx, type SaleCtx } from './sim/effects';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -27,6 +32,12 @@ export interface GameOpts {
 }
 export class Game {
   state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
+  /** M5.1 BR-R18: a hatch revealed by the offline settle; the UI shows it after welcome-back closes, then clears it. Not saved. */
+  pendingReveal: BreedId | null = null;
+  /** M5.1 Q4: Farm level at the end of the last visible frame (the next frame's start). */
+  private frameFarm?: number;
+  /** BR-AC31e debug hook override (eggfarmQa.breeds.hatchEstimate, dev/QA builds only); the Flock UI passes it to hatchEstimate. */
+  breedsEstimateOverride: { defaultPerS?: number; assumeWorkingPerS?: number } | null = null;
   /** Set during "Reset save" so pagehide doesn't write the old state back. */
   resetting = false;
   /** True when no save existed at load (drives onboarding). */
@@ -101,7 +112,7 @@ export class Game {
     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
   }
   private grantOffline(gapMs: number) {
-    const r = applyOffline(this.state, gapMs, this.b); this.state = r.state;
+    const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
     if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
     return r.eggs;
   }
@@ -296,10 +307,12 @@ export class Game {
     this.onNewerSave?.(v);
   }
   endSession() {
-    if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    if (this.resetting || this.inactive || this.held()) return;
+    const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
+    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
-    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();
+    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
   }
@@ -385,6 +398,18 @@ export class Game {
     const capS = this.b.offline.offlineCapSeconds;
     return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
   }
+  /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach open)? Set by the UI (F6 dialogOpen()).
+   *  Default false: no focus time accrues, so M5 timers stay frozen until the UI wires it. Visibility is handled by frame()
+   *  itself (hidden frames never pass focus). Only read while an M5 flag is on (frame() skips it with every flag off). */
+  private attendedProbe: () => boolean = () => false;
+  setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
+  /** The one attended read (frame focus + player-sale suspension, Q-F1c-1 D-HOP-2026-10-29-06): live game and the UI probe says attended. */
+  /** CCR N-1 #79: with every M5 flag off the probe is never read (no per-frame / per-dispatch DOM query); attended = false
+   *  then, which changes nothing: no timed effect is live, so suspension has nothing to suspend (goldens byte-identical). */
+  private attendedNow() { return !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(); }
+  /** CCR m1 #80: the sale context a player sell/sellAll dispatched now would be credited with. UI previews (order cards, Sell all)
+   *  pass it to saleValueCents / sellAllPreview so the preview equals the credit for the same attended read. */
+  playerSaleCtx(): SaleCtx { return playerSaleCtx(this.attendedNow()); }
   frame() {
     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
@@ -401,9 +426,11 @@ export class Game {
     }
     if (gap > 0) {
       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
+      // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
+      const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
-      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
-      this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t, slotsFarm: this.frameFarm });
+      this.state = r.state; this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
     }
     this.checkCoopFull(); this.telemetry.poll();
   }

@@ -20,6 +20,6 @@ describe('AC-R7: HUD, card and ETA share one value', () => {
     }
     // the worker's own contribution is gone (AC-R2); net may still rise when its wage stops and sales were not collection-bound
     if (off === 'market_hand') expect(grossSalesPerSec(s1, b)).toBeLessThan(grossSalesPerSec(s0, b)); else expect(collectPerSec(s1, b)).toBeLessThan(collectPerSec(s0, b));
-    expect(workerBanner(off, mood(s1.workers[off], b), s1, b)).not.toBeNull(); expect(workerBanner(off, mood(s0.workers[off], b), s0, b)).toBeNull(); // card
+    expect(workerBanner(off, mood(s1.workers[off], b), b)).not.toBeNull(); expect(workerBanner(off, mood(s0.workers[off], b), b)).toBeNull(); // card
   });
 });
