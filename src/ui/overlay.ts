@@ -7,21 +7,48 @@ export type AttendedDoc = Pick<Document, 'visibilityState' | 'hasFocus'>;
 export const attendedProbe = (doc: AttendedDoc = document): boolean =>
   doc.visibilityState === 'visible' && doc.hasFocus();
 
+/** D-HOE-27 / Q-AB-N16: docked = app matchMedia('(min-width:960px) and (orientation:landscape)'). */
+export const DOCKED_MQ = '(min-width:960px) and (orientation:landscape)';
+export const isDocked = (win: Pick<Window, 'matchMedia'> = window): boolean =>
+  !!win.matchMedia?.(DOCKED_MQ)?.matches;
+
+export const SHEET_OPENED = 'egg:sheetopened';
+export const SHEET_CLOSE_COMPLETE = 'egg:sheetclosecomplete';
+export type SheetEventDetail = { id: string; docked: boolean };
+
+const sheets = new Map<string, boolean>();
+
 export interface SheetHandle {
   readonly id: string;
   opened(): void;
   closeComplete(): void;
   readonly isOpen: boolean;
 }
-const sheets = new Map<string, boolean>();
-/** A closing sheet is still open. Call closeComplete only after its real lifecycle completes.
- * Layout-independent, including docked. Registering the same id shares one lifecycle entry. */
-export function registerSheet(id: string): SheetHandle {
+
+function dispatchSheet(name: typeof SHEET_OPENED | typeof SHEET_CLOSE_COMPLETE, id: string, doc: Document = document): void {
+  const detail: SheetEventDetail = { id, docked: isDocked() };
+  doc.dispatchEvent(new CustomEvent(name, { detail }));
+}
+
+/** A closing sheet is still open. Call closeComplete only after its real lifecycle completes
+ * (after the close animation). Layout-independent, including docked.
+ * Registering the same id shares one lifecycle entry.
+ * D-HOE-27: opened → egg:sheetopened once (false→true); closeComplete → egg:sheetclosecomplete
+ * once (true→false); detail exactly {id,docked}; repeat closeComplete is a no-op. */
+export function registerSheet(id: string, doc: Document = document): SheetHandle {
   if (!sheets.has(id)) sheets.set(id, false);
   return {
     id,
-    opened: () => { sheets.set(id, true); },
-    closeComplete: () => { sheets.set(id, false); },
+    opened: () => {
+      if (sheets.get(id) === true) return;
+      sheets.set(id, true);
+      dispatchSheet(SHEET_OPENED, id, doc);
+    },
+    closeComplete: () => {
+      if (sheets.get(id) !== true) return;
+      sheets.set(id, false);
+      dispatchSheet(SHEET_CLOSE_COMPLETE, id, doc);
+    },
     get isOpen() { return sheets.get(id) === true; },
   };
 }
