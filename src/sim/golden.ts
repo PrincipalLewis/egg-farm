@@ -139,8 +139,10 @@ export function tapGolden(s: GameState, b: Balance, ev?: Sink): GameState {
   if (r === 'frenzy') ev?.push({ type: 'frenzy_started', mult, duration_s: dur, farm_level: s.farmLevel, grader_tier: s.graderTier });
   return resolve(o, b);
 }
-/** R8/R10b/R10c: remove an on-screen egg with no reward (offline, reload at pagehide, takeover, save reset) and draw the fresh gap. */
-export function goldenUnload(s: GameState, b: Balance, reason: 'offline' | 'reload' | 'takeover' | 'reset', ev?: Sink): GameState {
+/** R8/R10b/R10c, Architect persist A (2026-11-05 21:29): remove an on-screen egg with no reward and make exactly ONE live drawGap.
+ *  Idempotent: no egg (or golden off) -> the same object, no event, no draw. The ONE helper for offline (m5Offline), reload
+ *  (Game.endSession, before save), takeover and save reset. m5Persist's own copy-draw (B) is Saves-owned. */
+export function goldenUnload(s: GameState, b: Balance, ev: Sink, reason: 'offline' | 'reload' | 'takeover' | 'reset'): GameState {
   if (!goldenOn(b) || !s.goldenEgg) return s;
   const { goldenEgg: _g, ...o } = s; ev?.push({ type: 'collectible_expired', skin: 'golden_egg', reason, farm_level: s.farmLevel });
   return resolve(o as GameState, b);

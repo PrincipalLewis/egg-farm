@@ -340,7 +340,7 @@ export class Game {
   /** v5 #1: remove an on-screen egg (no reward, fresh gap) and forward expired{reason}. Identity with golden off or no egg. */
   private goldenEnd(reason: 'reload' | 'takeover' | 'reset') {
     if (!goldenOn(this.b) || !this.state.goldenEgg) return;
-    const ev: SimEvent[] = []; this.state = goldenUnload(this.state, this.b, reason, ev); this.emit(ev);
+    const ev: SimEvent[] = []; this.state = goldenUnload(this.state, this.b, ev, reason); this.emit(ev);
   }
   /** v5 #1 R14 (sizing §12.2): the UI's live valid spot ids. Default none, so a build without the egg UI only defers (R15). */
   private spotProbe: () => readonly string[] = () => [];

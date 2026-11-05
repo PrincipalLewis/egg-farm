@@ -98,7 +98,7 @@ export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (!anyFlag(b)) return s;
   let o: any = { ...s };
   if (m5Flag(b, 'abilities') && o.abilities && typeof o.abilities === 'object') { o.abilities = { ...o.abilities }; endCalls(o, b, ev); }
-  if (m5Flag(b, 'golden')) o = goldenUnload(o, b, 'offline', ev); // #1 R8: expired{offline}, no reward, fresh R3 gap
+  if (m5Flag(b, 'golden')) o = goldenUnload(o, b, ev, 'offline'); // #1 R8: expired{offline}, no reward, fresh R3 gap
   if (m5Flag(b, 'streak') && 'streakS' in o) o = endStreak(o, 'offline', b, ev);
   if (incomeRefOn(b)) o = resetIncomeRef(o); // #3 §4.1a #3: an offline return clears the I_ref ring and starts a warm-up
   return o;

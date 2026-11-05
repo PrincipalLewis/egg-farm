@@ -175,9 +175,9 @@ describe('#1 slice 2: offline / reload / save (R8, R10a, R10c; Saves contract)',
     expect(o.nextSpawnRemainingS! >= 120 && o.nextSpawnRemainingS! < 300).toBe(true); expect(o.goldenPending!.intervalS).toBe(o.nextSpawnRemainingS);
   });
   it('goldenUnload(reload): the pagehide seam: expired{reload} + fresh gap; identity without an egg or with the flag off', () => {
-    const s = farm({ goldenEgg: { ageS: 9, slotId: 'S1', intervalS: 45 } }), ev: any[] = []; const o = goldenUnload(s, G, 'reload', ev);
+    const s = farm({ goldenEgg: { ageS: 9, slotId: 'S1', intervalS: 45 } }), ev: any[] = []; const o = goldenUnload(s, G, ev, 'reload');
     expect(ev).toEqual([{ type: 'collectible_expired', skin: 'golden_egg', reason: 'reload', farm_level: 10 }]); expect(o.nextSpawnRemainingS! >= 120).toBe(true);
-    const n = farm({ nextSpawnRemainingS: 87 }); expect(goldenUnload(n, G, 'reload', [])).toBe(n); expect(goldenUnload(s, OFF, 'reload', [])).toBe(s);
+    const n = farm({ nextSpawnRemainingS: 87 }); expect(goldenUnload(n, G, [], 'reload')).toBe(n); expect(goldenUnload(s, OFF, [], 'reload')).toBe(s);
   });
   it('R10a: the egg, the pending-spawn record and the Frenzy run are never saved; reload resumes the saved countdown (GE-AC14b)', () => {
     let s = grantGolden(spawned(run(farm({ farmLevel: 8 }), 1)), 'frenzy', G); s = run(s, PER_S);

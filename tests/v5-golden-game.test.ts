@@ -122,3 +122,40 @@ describe('golden UI helper: validSpotIds (R14 rect test; geometry from the calle
   });
   it('no zones -> every spot; no spots -> [] (R15 defer)', () => { expect(validSpotIds(spots, [], 56)).toEqual(['S1', 'S2', 'S3']); expect(validSpotIds([], [], 56)).toEqual([]); });
 });
+
+// Architect ADDENDUM "Golden persist A/B (REVISED)" 2026-11-05 21:29 CET: A = live goldenUnload(s, b, ev, reason) then save; B (m5Persist
+// draw on the copy) is Saves-owned and not here. T4-T6 are the Features assertions (T1-T3 are Saves').
+import { goldenUnload, drawGap } from '../src/sim/golden';
+import { m5Offline, m5Persist } from '../src/save/m5-fields';
+import { serialize } from '../src/save/save';
+describe('golden persist A (Architect T4-T6)', () => {
+  const egg = { ageS: 9, slotId: 'S3', intervalS: 150 };
+  const live = (): GameState => { const { g } = setup(G, { goldenEgg: egg, evRngState: 123456789, nextSpawnRemainingS: 0 }); return g.state; };
+  const stripEgg = (s: GameState) => { const { goldenEgg: _e, ...o } = s; return o as GameState; };
+  it('T4: goldenUnload once = one collectible_expired + exactly one draw; a second call is a no-op (same object, no event, no draw)', () => {
+    for (const reason of ['reload', 'offline'] as const) {
+      const s = live(), ev: any[] = [], o = goldenUnload(s, G, ev, reason), ref = drawGap(stripEgg(s), G);
+      expect(ev).toEqual([{ type: 'collectible_expired', skin: 'golden_egg', reason, farm_level: 10 }]);
+      expect([o.evRngState, o.nextSpawnRemainingS]).toEqual([ref.evRngState, ref.nextSpawnRemainingS]); expect(o.evRngState).toBe(nextRand(123456789)[0]);
+      expect(s.goldenEgg).toEqual(egg); expect(s.evRngState).toBe(123456789); // live input not mutated
+      const ev2: any[] = []; expect(goldenUnload(o, G, ev2, reason)).toBe(o); expect(ev2).toEqual([]);
+    }
+    const s = live(); expect(goldenUnload(s, OFF, [], 'reload')).toBe(s);
+  });
+  it('T5: endSession = one reload expire; live rng/gap = drawGap(stripEgg(pre)); serialize(post) == m5Persist(post) with the same gap/rng (B draws nothing); repeat pagehide is idempotent', () => {
+    const { g, kv } = setup(G, { goldenEgg: egg, evRngState: 123456789, nextSpawnRemainingS: 0 }, false); const pre = g.state, ref = drawGap(stripEgg(pre), G);
+    g.endSession();
+    expect(g.telemetry.events().filter((e: any) => e.type === 'collectible_expired').map((e: any) => e.reason)).toEqual(['reload']);
+    expect([g.state.evRngState, g.state.nextSpawnRemainingS, g.state.goldenEgg]).toEqual([ref.evRngState, ref.nextSpawnRemainingS, undefined]);
+    const saved = JSON.parse(kv.getItem(SAVE_KEY)!); expect(JSON.stringify(saved.state)).toBe(JSON.stringify(m5Persist(g.state)));
+    expect(JSON.parse(serialize(g.state, 0)).state).toEqual(saved.state);
+    expect([saved.state.evRngState, saved.state.nextSpawnRemainingS]).toEqual([g.state.evRngState, g.state.nextSpawnRemainingS]);
+    const rng = g.state.evRngState; g.endSession(); // bfcache / double pagehide
+    expect(g.telemetry.events().filter((e: any) => e.type === 'collectible_expired')).toHaveLength(1); expect(g.state.evRngState).toBe(rng);
+  });
+  it('T6: m5Offline egg arm == goldenUnload(..., offline): byte-same egg fields and events', () => {
+    const s = live(), a: any[] = [], b2: any[] = []; const o1 = m5Offline(s, G, a), o2 = goldenUnload(s, G, b2, 'offline');
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b2));
+    const pick = (x: GameState) => JSON.stringify([x.goldenEgg, x.evRngState, x.nextSpawnRemainingS, x.goldenPending]); expect(pick(o1)).toBe(pick(o2));
+  });
+});
