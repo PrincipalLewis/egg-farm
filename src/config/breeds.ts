@@ -33,3 +33,9 @@ export const unlockedSlots = (F: number, b: Balance) =>
 export const SLOT_IDX = [0, 1, 2] as const;
 /** BR-AC26 / E12: the existing save_migrated shape (game.ts:252); from/to = SAVE_VERSION 6, never bumped (§6 R5). */
 export const BREEDS_SANITISE_EVENT = { type: 'save_migrated', migration: 'breeds_sanitise', from: 6, to: 6 } as const;
+/** Unit constants for BR-R5 (not tunables): cents per dollar, basis points per 1, and the house half-up rounding term. */
+export const CENTS_PER_DOLLAR = 100; export const BP_ONE = 10000; export const BP_HALF = 5000;
+/** BR-R10 rarity -> its bc_w_* weight key, in roll order (Econ harness h/breeds.ts L39-45, confirmed against spec d43e2ce3). */
+export const RARITY_WEIGHT: Record<Rarity, BcKey> = { C: 'w_common', R: 'w_rare', E: 'w_epic', L: 'w_legendary' };
+/** BR-R7b: the note shows when the next Farm step is within 2 x bc_hatch_cost_s (spec writes the expression, not a column). */
+export const FARM_SOON_HATCH_MULT = 2;

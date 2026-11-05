@@ -11,6 +11,7 @@ import { tickFocusS, type StepClock } from './clock';
 import { ensureEvRng } from './rng';
 import { streakTick } from './streak';
 import { ensureBreeds } from './breeds';
+import { breedsTick } from './breeds-hatch';
 /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
 export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
 /** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
@@ -20,9 +21,9 @@ export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance,
 const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(s) : s);
 /** #2 streak (R6/R7/R12): hold, then decay on focus seconds; K18 cap clamp. Identity unless m4.flags.streak. */
 const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev);
-/** M5.1 breeds (tick-semantics note point 1): Q2 creates `breeds` at the end of the first flag-on tick. PR B adds the
- *  settle/incubator countdown to this same system. Identity unless m4.flags.breeds. */
-const breeds: TimerSystem = (s, _dt, _f, b) => ensureBreeds(s, b);
+/** M5.1 breeds (tick-semantics note point 1): settle -> incubator/reveal -> sinceUnlockMs on sim dt (breedsTick), then Q2
+ *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
+const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
 export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds];
 export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
 export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {

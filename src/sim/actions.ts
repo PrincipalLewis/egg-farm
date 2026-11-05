@@ -1,4 +1,5 @@
 import type { Balance } from '../config/balance';
+import { startHatch, placeBreed } from './breeds-hatch';
 import { GameState, eggsPerTap, collectionCost, farmCost } from './state';
 import { m4On } from '../config/formulas';
 import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
@@ -10,6 +11,7 @@ import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
+  | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] };
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
@@ -98,6 +100,8 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
+    case 'hatch': return startHatch(s, b);
+    case 'placeBreed': return placeBreed(s, b, a.slot, a.id);
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
     // Closing the welcome-back modal without tapping Collect still grants the eggs.
     // S2-3a / MK-22: closing the welcome-back modal brings the first customer on the next tick (deterministic: timer -> 0).

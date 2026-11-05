@@ -136,6 +136,7 @@ async function boot() {
     const q = new URLSearchParams(location.search);
     if (q.get('debug') === '1') import('./debug/panel').then(m => m.mountDebug(g, liveB));
     if (q.get('perf') === '1') import('./debug/frame-sampler').then(m => m.mountPerfOverlay(q));
+    import('./debug/breeds-qa').then(m => m.installBreedsQa(window, g)); // M5.1 BR-AC31e: eggfarmQa.breeds.hatchEstimate (dev/QA only)
   }
   // S2-4b: sim and UI always advance together; a timer fallback covers paused/throttled rAF (was sim-only, so the UI froze).
   // Tab guard: once frozen (older tab) neither the sim nor the UI advances.

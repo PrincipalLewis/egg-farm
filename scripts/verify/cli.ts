@@ -6,6 +6,8 @@ import { PROFILES, type Profile } from './sim';
 export const USAGE = 'usage: npm run verify -- --hours N [--seed S] [--profile idle|m5x-casual] [--flags k=v,...] [--out dir]';
 export interface Opts { hours: number; seed: number; profile: Profile; flags: Record<string, number>; out: string | null; skipBuild: boolean; noShot: boolean }
 export class UsageError extends Error {}
+/** Largest seed with 1000003*(seed+1)+17 <= 2^53-1 (tests/seller-variance.ts -> py-random.ts). */
+export const M5X_MAX_SEED = Math.floor((Number.MAX_SAFE_INTEGER - 17) / 1000003) - 1;
 /** S1 (CCR on #73): the --out value as written, read leniently so it is known even when parseArgs throws (last --out wins,
  *  like parseArgs). null when absent or when its value is missing / another option. */
 export function outArg(argv: string[]): string | null {
@@ -16,12 +18,13 @@ export function outArg(argv: string[]): string | null {
 
 export function parseArgs(argv: string[]): Opts {
   const a = argv.filter(x => x !== '--'), o: Opts = { hours: NaN, seed: 1, profile: 'idle', flags: {}, out: null, skipBuild: false, noShot: false };
-  let seenFlags = false;
+  let seenFlags = false, seenProfile = false;
   for (let i = 0; i < a.length; i++) {
     const k = a[i], v = () => { const x = a[++i]; if (x === undefined || x.startsWith('--')) throw new UsageError(`${k} needs a value`); return x; };
     if (k === '--hours') o.hours = Number(v());
     else if (k === '--seed') o.seed = Number(v());
-    else if (k === '--profile') o.profile = v() as Profile;
+    else if (k === '--profile') { // CCR N-3 on #78: a repeated --profile was silently last-wins; now a usage error (as --flags)
+      if (seenProfile) throw new UsageError('--profile given more than once'); seenProfile = true; o.profile = v() as Profile; }
     else if (k === '--flags') { // CCR N-b on #73: a repeated --flags was silently last-wins; now a usage error
       if (seenFlags) throw new UsageError('--flags given more than once (put every override in one --flags k=v,...)');
       seenFlags = true; o.flags = parseFlags(v());
@@ -34,6 +37,8 @@ export function parseArgs(argv: string[]): Opts {
   if (!(o.hours > 0 && o.hours <= 24 * 30)) throw new UsageError('--hours must be a number in (0, 720]');
   if (!Number.isSafeInteger(o.seed) || o.seed < 0) throw new UsageError('--seed must be a non-negative integer');
   if (!PROFILES.includes(o.profile)) throw new UsageError(`--profile must be one of ${PROFILES.join('|')}`);
+  // CCR N-2 on #78: m5x-casual seeds SellerVariance's PyRandom with 1000003*(seed+1)+17, which must stay a safe integer.
+  if (o.profile === 'm5x-casual' && o.seed > M5X_MAX_SEED) throw new UsageError(`--seed must be <= ${M5X_MAX_SEED} for --profile m5x-casual`);
   return o;
 }
 export function parseFlags(s: string): Record<string, number> {

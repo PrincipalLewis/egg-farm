@@ -10,9 +10,9 @@
 /** HoP ruling (sizing §13 GE-15): a code constant, not a CSV column. Allowlisted by the F3 no-literal-tunables test. */
 export const FOCUS_DT_MAX_S = 1.0;
 /** Per-tick clock input to step(). `focus` = this tick carries focus time; `nowMs` = injected wall clock (epoch ms). */
-export interface StepClock { focus: boolean; nowMs?: number; }
+export interface StepClock { focus: boolean; nowMs?: number; /** M5.1 breeds Q4: Farm level at the frame start. */ slotsFarm?: number; }
 /** Per-frame clock input to advance(). `focusMs` = attended ms of this frame (already clamped by focusFrameMs). */
-export interface FrameClock { focusMs: number; nowMs?: number; }
+export interface FrameClock { focusMs: number; nowMs?: number; slotsFarm?: number; }
 /** Focus seconds this tick contributes (0 when unfocused or no clock). */
 export const tickFocusS = (dt: number, c?: StepClock) => (c?.focus ? dt : 0);
 /** Focus ms for one frame: 0 if not attended, non-positive or >= the offline threshold (§9.1a); else min(gap, 1.0 s) (R5e). */
@@ -30,4 +30,5 @@ export function wallRemainingMs(atMs: number | undefined, nowMs: number, capMs: 
 }
 export const wallReady = (atMs: number | undefined, nowMs: number, capMs: number) => wallRemainingMs(atMs, nowMs, capMs) === 0;
 /** The StepClock advance() hands to tick i of a frame whose first nFocus ticks carry focus (D-C3). */
-export const tickClock = (i: number, nFocus: number, c: FrameClock): StepClock => ({ focus: i < nFocus, nowMs: c.nowMs });
+export const tickClock = (i: number, nFocus: number, c: FrameClock): StepClock =>
+  (c.slotsFarm === undefined ? { focus: i < nFocus, nowMs: c.nowMs } : { focus: i < nFocus, nowMs: c.nowMs, slotsFarm: c.slotsFarm });
