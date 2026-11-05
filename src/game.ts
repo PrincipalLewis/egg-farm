@@ -12,6 +12,7 @@ import type { SimEvent } from './sim/events';
 import { focusFrameMs } from './sim/clock';
 import { streakOn, streakPeak } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
+import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
@@ -430,7 +431,10 @@ export class Game {
       const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
       const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t, slotsFarm: this.frameFarm });
-      this.state = r.state; this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+      // The legacy capped catch-up above still settles sales/wages and all other systems. Its absent-time sales
+      // must not consume the NEW I_ref warm-up: start that window at the return boundary (§4.1a), like a hidden offline return.
+      this.state = gap >= maxMs && incomeRefOn(this.b) ? resetIncomeRef(r.state) : r.state;
+      this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
     }
     this.checkCoopFull(); this.telemetry.poll();
   }

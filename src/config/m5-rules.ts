@@ -38,7 +38,7 @@ export function validateM5(m4: any, workers: any): void {
   // #2 streak / #3 tap coins (streak spec §5: 0 < cap <= 1, tier_count >= 1, window >= 1)
   if (has(tc, 'streak_cap') && !(tc.streak_cap > 0 && tc.streak_cap <= 1)) fail('tc.streak_cap must be in (0, 1]');
   if (has(tc, 'streak_tier_count') && !(Number.isInteger(tc.streak_tier_count) && tc.streak_tier_count >= 1)) fail('tc.streak_tier_count must be an integer >= 1');
-  if (has(tc, 'tap_bonus_income_window_s') && !(tc.tap_bonus_income_window_s >= 1)) fail('tc.tap_bonus_income_window_s must be >= 1');
+  if (has(tc, 'tap_bonus_income_window_s') && !(Number.isInteger(tc.tap_bonus_income_window_s) && tc.tap_bonus_income_window_s >= 1)) fail('tc.tap_bonus_income_window_s must be an integer >= 1 (1 s I_ref buckets, sim/income-ref.ts)');
   if (has(tc, 'tap_income_share') && !(tc.tap_income_share <= 1)) fail('tc.tap_income_share must be <= 1');
   // #5 Broody (cap > 0; shares in (0, 1])
   if (has(tc, 'broody_cap_s') && !(tc.broody_cap_s > 0)) fail('tc.broody_cap_s must be > 0');
