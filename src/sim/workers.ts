@@ -4,6 +4,8 @@ import { farmCost } from '../config/formulas';
 export type WorkerId = 'market_hand' | 'coop_hand' | 'hawker' | 'grader';
 export const WORKERS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
 export type WorkerMood = 'working' | 'tired' | 'asleep' | 'unpaid';
+/** Every WorkerMood value; telemetry mood enums are built from this (D-HOE-20261030-32). */
+export const WORKER_MOODS: readonly WorkerMood[] = ['working', 'tired', 'asleep', 'unpaid'];
 /** energy 0..100; cdS = seconds until next auto action (Market/Coop Hand only). */
 /** unpaid (§8 item 2/15): wage couldn't be paid in full; acts as Asleep for output, no drain, no wage. */
 /** M5 Pause (m5-worker-pause-spec; absent while m4.flags.pause is off): `paused` is an orthogonal flag, not a 5th mood (sizing §9.2 G3);
