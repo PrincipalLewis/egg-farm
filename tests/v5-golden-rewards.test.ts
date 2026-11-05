@@ -2,7 +2,7 @@
 // §4 #2-#3; GE-AC7, GE-AC8, GE-AC9, GE-AC9b, GE-AC10, GE-AC10b sim part, R23 reset-not-stack). Pure sim only: no spawn/lifetime,
 // no tap action, no events/telemetry, no UI (those wait for the spawn-input ruling, see PR body).
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { balance as b } from '../src/config/balance';
+import { balance as b, validateBalance } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { saleValueCents, saleMultipliers } from '../src/sim/payout';
@@ -122,5 +122,15 @@ describe('#1 Frenzy (R22/R23/X7, GE-AC10, GE-AC10b sim part)', () => {
   it('flag off: a stray frenzyRemainingS never ticks or pays', () => {
     let s = farm({ frenzyRemainingS: 20 }); for (let i = 0; i < 5 * PER_S; i++) s = step(s, DT, OFF, undefined, { focus: true });
     expect(s.frenzyRemainingS).toBe(20);
+  });
+});
+
+describe('#1 golden rewards: validateBalance (GE-AC26 / D-HOP-2026-11-05-11)', () => {
+  it('tc_frenzy_all_sales must be 1 (0 is invalid, no alternate branch)', () => {
+    expect(() => validateBalance(withTc({ frenzy_all_sales: 0 }, G))).toThrow(/frenzy_all_sales/);
+    expect(() => validateBalance(withTc({ frenzy_all_sales: 0 }, OFF))).toThrow(/frenzy_all_sales/);
+    expect(() => validateBalance(withTc({ frenzy_all_sales: 2 }, G))).toThrow(/frenzy_all_sales/);
+    expect(() => validateBalance(G)).not.toThrow();
+    expect(() => validateBalance(withTc({ frenzy_all_sales: 1 }, G))).not.toThrow();
   });
 });
