@@ -7,6 +7,7 @@ import type { Sink } from './events';
 import { saleValueCents } from './payout';
 import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
 import { playerSaleCtx } from './effects';
+import { incomeRefOn, recordSale } from './income-ref';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
@@ -28,7 +29,9 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
-  const o = { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
+  const o0 = { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
+  // #3 I_ref (§4.1): the BASE value (price chain x Grader, every timed effect suspended) enters the ring; identity when off.
+  const o = incomeRefOn(b) ? recordSale(o0, saleValueCents(s, k, b, { by, suspended: true }), b) : o0;
   return streakSaleFactor(s, b, suspended) === 1 ? o : addStreakExtra(o, value - saleValueCents({ ...s, streakS: 0 }, k, b, ctx)); // #2 extra_coins
 }
 function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
