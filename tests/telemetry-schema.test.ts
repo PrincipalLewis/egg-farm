@@ -4,7 +4,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { balance as b } from '../src/config/balance';
+import { balance as b, validateBalance } from '../src/config/balance';
 import { WORKERS, WORKER_MOODS, type WorkerMood } from '../src/sim/workers';
 import { BUY_ORDER } from '../src/econ/best-buy';
 import { BREED_IDS } from '../src/config/breeds';
@@ -278,6 +278,31 @@ describe('[TEL-AC8 / BB-AC16] BBv2 rows #19-23 (errata rev. 10, D-HOE-29/-31/-32
     expect(BBV2).toEqual({ shown_min_gap_s: 5, zero_gain_eta_max_s: 60, dead_zone_min_s: 30, zero_gain_purchase_cap: 50 });
     expect((b as any).m4?.telemetry?.bbv2).toBeUndefined();
     expect(readFileSync(join(SRC, 'telemetry/schema.ts'), 'utf8')).not.toMatch(/\bs:\s*F\(\s*30\b/);
+  });
+  const withoutBbv2 = (bestBuy: 0 | 1 | 'absent') => {
+    const x = structuredClone(b) as any;
+    delete x.telemetry.bbv2;
+    if (bestBuy === 'absent') delete x.m4.flags.bestBuyV2; else x.m4.flags.bestBuyV2 = bestBuy;
+    return x;
+  };
+  it('[F-1][QA-D-1105-SCHEMA] missing telemetry.bbv2 still validates when bestBuyV2 is off or absent', () => {
+    expect(() => validateBalance(withoutBbv2(0), false)).not.toThrow();
+    expect(() => validateBalance(withoutBbv2('absent'), false)).not.toThrow();
+    expect(() => validateBalance(structuredClone(b), false)).not.toThrow(); // shipping block still validates
+  });
+  it('[F-1][QA-D-1105-SCHEMA] a present bbv2 value <= 0 is still rejected', () => {
+    for (const v of [0, -1]) {
+      const x = structuredClone(b) as any;
+      x.telemetry.bbv2.shown_min_gap_s = v;
+      expect(() => validateBalance(x, false)).toThrow(/balance\.telemetry\.bbv2\.shown_min_gap_s must be > 0/);
+    }
+  });
+  it('[F-1][QA-D-1105-SCHEMA] bestBuyV2 on requires the block, and a partial block still fails', () => {
+    expect(() => validateBalance(withoutBbv2(1), false)).toThrow(/balance\.telemetry\.bbv2\.shown_min_gap_s must be > 0/);
+    const partial = structuredClone(b) as any;
+    delete partial.telemetry.bbv2.dead_zone_min_s;
+    partial.m4.flags.bestBuyV2 = 0;
+    expect(() => validateBalance(partial, false)).toThrow(/balance\.telemetry\.bbv2\.dead_zone_min_s must be > 0/);
   });
 });
 
