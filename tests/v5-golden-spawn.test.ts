@@ -3,6 +3,7 @@
 // Product D-HOP-2026-11-05-11). Pure sim: UI passes valid spot ids into `spawnGolden`; evRng order gap -> slot -> reward.
 import { describe, it, expect } from 'vitest';
 import { balance as b, validateBalance } from '../src/config/balance';
+import { M5_TC_KEYS } from '../src/config/formulas';
 import { initialState, nextRand, type GameState } from '../src/sim/state';
 import { apply, sellTo } from '../src/sim/actions';
 import { step } from '../src/sim/tick';
@@ -139,7 +140,7 @@ describe('#1 slice 2: tap (R19/R20, GE-AC6, GE-AC18, GE-AC33, GE-AC35)', () => {
     const s = ready([0, 0.4], { streakS: 0.1, streakHoldS: 1, tapCreditCdS: 0, coop: 12 }); const o = apply(s, { type: 'tapGolden' }, G);
     expect([o.streakS, o.streakHoldS, o.tapCreditCdS, o.coop, o.basket]).toEqual([0.1, 1, 0, 12, s.basket]);
   });
-  it('GE-AC33: from initialState(b, 7) the draws follow xorshift32(evRng seed) in order slot -> reward -> gap', () => {
+  it('GE-AC33: from initialState(b, 7) the draws follow xorshift32(evRng seed) in order gap at resolve -> slot -> reward (first-spawn uses tc_first_spawn_s, so this cycle starts at slot)', () => {
     let s = { ...initialState(G, 7), farmLevel: 8 } as GameState; s = step(s, DT, G, undefined, { focus: true });
     let x = ensureEvRng({ ...initialState(G, 7) }).evRngState!; const us: number[] = []; for (let i = 0; i < 6; i++) { let u; [x, u] = nextRand(x); us.push(u); }
     let d: GameState; [d] = untilDue(s); d = apply(d, { type: 'spawnGolden', spots: SPOTS }, G);
@@ -199,4 +200,21 @@ describe('#1 slice 2: validateBalance (D-HOP-2026-11-05-11, golden tc keys)', ()
       const t = { ...G.m4!.tc! } as any; delete t[k]; expect(() => validateBalance({ ...G, m4: { ...G.m4!, tc: t } } as B)).toThrow(new RegExp(k));
     }
   });
+
+  it('M5_TC_KEYS.abilities stays a real entry (Architect M1 / cannot vanish into golden EOL comment)', () => {
+    expect([...M5_TC_KEYS.abilities]).toEqual(['ability_s', 'ability_cd_s']);
+    expect(M5_TC_KEYS.golden).toEqual([
+      'egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s', 'frenzy_price_mult', 'egg_cash_s', 'egg_eggs_s',
+      'egg_eggs_as_cash_from_farm', 'egg_w_cash', 'egg_w_frenzy', 'egg_w_eggs',
+      'first_spawn_s', 'egg_unlock_farm', 'egg_despawn_s', 'spawn_grace_ms', 'warn_at_s', 'frenzy_all_sales',
+    ]);
+    // abilities:1 requires ability_s / ability_cd_s via validateBalance
+    const A = flags({ abilities: 1, golden: 0 });
+    expect(() => validateBalance(A)).not.toThrow();
+    for (const k of ['ability_s', 'ability_cd_s'] as const) {
+      const t = { ...A.m4!.tc! } as any; delete t[k];
+      expect(() => validateBalance({ ...A, m4: { ...A.m4!, tc: t } } as B)).toThrow(new RegExp(k));
+    }
+  });
+
 });
