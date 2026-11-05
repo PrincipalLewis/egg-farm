@@ -35,6 +35,10 @@ export interface GameState extends M5Fields {
   /** M5.1 breeds E10 / PMC Q5 (session only, outside F1a M5Fields like streakRun): raw unknown slot ids from the save, written
    *  back by m5Persist (breedsSaveView) while that slot stays null; stripped by m5Persist SESSION_ONLY_KEYS. */
   breedsRawSlots?: (string | null)[];
+  /** v5 #1 golden (session only, outside F1a M5Fields like streakRun; Architect slice-2 ruling 2/5): the pending spawn's
+   *  interval/deferral/R15 retry and the live Frenzy's frenzy_ended stats. Stripped by m5Persist SESSION_ONLY_KEYS. */
+  goldenPending?: import('./golden').GoldenPending;
+  frenzyRun?: import('./golden').FrenzyRun;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

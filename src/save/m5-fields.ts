@@ -18,6 +18,7 @@ import { sanitizePausedOnLoad } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
 import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
 import { incomeRefOn, resetIncomeRef } from '../sim/income-ref';
+import { drawGap, goldenUnload } from '../sim/golden';
 export { streakAfter };
 export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
 /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
@@ -32,15 +33,12 @@ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
 /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
 export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
 /** Session keys outside F1a M5Fields: the #2 streak run stats (streak_peak, sim/streak.ts). Never saved either. */
-const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots']; // + M5.1 breeds E10 shadow (PMC Q5)
+const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'goldenPending', 'frenzyRun']; // + #1 golden session records // + M5.1 breeds E10 shadow (PMC Q5)
 const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
-/** Golden R3: a fresh gap U[tc_egg_gap_min_s, tc_egg_gap_max_s] from ONE evRng draw (never state.rng). #1 reuses it. */
-export function drawGap(s: GameState, b: Balance): GameState {
-  const e = ensureEvRng(s), [x, u] = nextRand(e.evRngState!), lo = tc(b, 'egg_gap_min_s'), hi = tc(b, 'egg_gap_max_s');
-  return { ...e, evRngState: x, nextSpawnRemainingS: lo + u * (hi - lo) };
-}
+/** Golden R3: a fresh gap U[tc_egg_gap_min_s, tc_egg_gap_max_s] from ONE evRng draw (never state.rng). Owned by sim/golden.ts. */
+export { drawGap };
 /** The save shape: session-only keys dropped. The same object (so the same bytes) when none is present. */
 export function m5Persist(s: GameState): GameState {
   if (!SESSION_ONLY_KEYS.some(k => k in s)) return s;
@@ -100,9 +98,7 @@ export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (!anyFlag(b)) return s;
   let o: any = { ...s };
   if (m5Flag(b, 'abilities') && o.abilities && typeof o.abilities === 'object') { o.abilities = { ...o.abilities }; endCalls(o, b, ev); }
-  if (m5Flag(b, 'golden') && o.goldenEgg) {
-    delete o.goldenEgg; ev.push({ type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: o.farmLevel }); o = drawGap(o, b);
-  }
+  if (m5Flag(b, 'golden')) o = goldenUnload(o, b, 'offline', ev); // #1 R8: expired{offline}, no reward, fresh R3 gap
   if (m5Flag(b, 'streak') && 'streakS' in o) o = endStreak(o, 'offline', b, ev);
   if (incomeRefOn(b)) o = resetIncomeRef(o); // #3 §4.1a #3: an offline return clears the I_ref ring and starts a warm-up
   return o;
