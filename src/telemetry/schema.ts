@@ -1,6 +1,6 @@
 /**
  * Telemetry v0.6.2 event allowlist (G-8 / TEL-2; manifest row 11, owner Saves). Source of record: telemetry-spec v0.6.2
- * d170eb09 §3/§3.1/§3.2 + errata v5 rev. 10 fd3416ec (V-0..V-6), with D-HOE-20261030-18/-19/-20/-22/-23/-24/-25/-29/-31/-32/-33.
+ * d170eb09 §3/§3.1/§3.2 + errata v5 rev. 13 a0e8f6d7 (TELERR7; supersedes rev. 10 fd3416ec / rev. 12 0cfe168a), with D-HOE-20261030-18/-19/-20/-22/-23/-24/-25/-29/-31/-32/-33.
  * Contract (D-HOE-20 + D-HOE-25 N-2): TELEMETRY_SCHEMA_VERSION, EVENT_SCHEMA, EVENT_TYPES, validateEvent(e), isPinned(e).
  * - Closed schema: an unknown event type or field fails validation. No free text: every string is an enum or an anchored pattern.
  * - Null rule (errata V-2): a field is required and non-null unless it carries optional?: true (may be absent) or nullable?: true.

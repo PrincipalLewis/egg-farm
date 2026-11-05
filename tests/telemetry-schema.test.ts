@@ -1,5 +1,5 @@
-// G-8 / TEL-2: src/telemetry/schema.ts, the v0.6.2 allowlist (telemetry-spec d170eb09 §3/§3.1/§3.2 + errata v5 rev. 10
-// fd3416ec; D-HOE-20261030-18/-19/-20/-22/-23/-24/-25/-29/-31/-32). Every test carries its AC id (QA-D-1029-V5SCAP):
+// G-8 / TEL-2: src/telemetry/schema.ts, the v0.6.2 allowlist (telemetry-spec d170eb09 §3/§3.1/§3.2 + errata v5 rev. 13
+// a0e8f6d7; D-HOE-20261030-18/-19/-20/-22/-23/-24/-25/-29/-31/-32/-33). Every test carries its AC id (QA-D-1029-V5SCAP):
 // TEL-AC1/6/8/11/12/15 (card #T, product/m5-gate-acs.md), T-AC9/T-AC10 (telemetry-spec L151-152), G-8 (errata V-8).
 import { describe, it, expect, vi } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -220,8 +220,8 @@ describe('[TEL-AC6] rc2 events (D-HOE-18/-19/-24/-32; rc2 v1.3.15)', () => {
     expect(ok('fatigue_cue_tapped', { ...t, surface: 'hud_icon' })).toEqual(['fatigue_cue_tapped.surface: not in enum']);
     expect(ok('fatigue_cue_tapped', { ...t, suppressed_by_stall: false })).toEqual(['fatigue_cue_tapped.suppressed_by_stall: unknown field']);
     expect(ok('fatigue_cue_tapped', { surface: 'hud_chip', loss_per_s: 3 })).toEqual(['fatigue_cue_tapped.loss_share: required', 'fatigue_cue_tapped.n_tired: required', 'fatigue_cue_tapped.n_asleep: required', 'fatigue_cue_tapped.n_paused: required']);
-    // sum <= 4: the Saves QA FAIL fixture at 5, and the boundary at 4
-    expect(ok('fatigue_cue_tapped', { ...t, n_paused: 2 })).toEqual(['fatigue_cue_tapped: n_tired + n_asleep + n_paused > 4']);
+    // sum <= 4: Saves QA FAIL fixture at exactly 5 (2+2+1), and the boundary at 4
+    expect(ok('fatigue_cue_tapped', { surface: 'hud_chip', loss_per_s: 120, loss_share: 0.333, n_tired: 2, n_asleep: 2, n_paused: 1 })).toEqual(['fatigue_cue_tapped: n_tired + n_asleep + n_paused > 4']);
     expect(ok('fatigue_cue_tapped', { ...t, n_tired: 4, n_asleep: 0, n_paused: 0 })).toEqual([]);
     expect(ok('fatigue_cue_tapped', { ...t, n_tired: 0, n_asleep: 0, n_paused: 4 })).toEqual([]);
     for (const k of ['n_tired', 'n_asleep', 'n_paused']) { expect(ok('fatigue_cue_tapped', { ...t, n_tired: 0, n_asleep: 0, n_paused: 0, [k]: 5 }).length).toBeGreaterThan(0); expect(ok('fatigue_cue_tapped', { ...t, [k]: -1 }).length).toBe(1); expect(ok('fatigue_cue_tapped', { ...t, [k]: 1.5 }).length).toBe(1); }
@@ -338,7 +338,9 @@ describe('[T-AC9] dev builds warn on unknown events; nothing is dropped', () => 
   it('[T-AC9] Telemetry.track of an unknown type console.warns once in dev and still records the event; known types do not warn', () => {
     const w = vi.spyOn(console, 'warn').mockImplementation(() => {}); const tl = new Telemetry(mem(), { ring_size: 50, flush_interval_s: 5, tap_batch_ms: 1000 });
     tl.track('goal_tap', { target: 'FARM', state: 'ready' }); expect(w).not.toHaveBeenCalled();
-    tl.track('not_an_event', { a: 1 }); expect(tl.events().map(e => e.type)).toContain('not_an_event'); expect(w).toHaveBeenCalledTimes(1); w.mockRestore();
+    tl.track('not_an_event', { a: 1 }); expect(tl.events().map(e => e.type)).toContain('not_an_event'); expect(w).toHaveBeenCalledTimes(1);
+    tl.track('not_an_event', { a: 2 }); expect(w).toHaveBeenCalledTimes(1); // warn-once (kills M30: drop of warned.add)
+    expect(tl.events().filter(e => e.type === 'not_an_event')).toHaveLength(2); w.mockRestore();
   });
 });
 
@@ -354,7 +356,7 @@ function worstCaseSession(buySpam: boolean): TEvent[] {
   const zg = buySpam ? BBV2.zero_gain_purchase_cap : 5;
   for (let i = 0; i < zg; i++) p('zero_gain_purchase', { key: 'HENS', farm: 30, level: 200 + i, meaningful_eta_s: 59.9 }); // over the cap: nothing emitted, no marker (rev. 13)
   // buy-spam: every reachable level bought in this one session (Farm/Collection to maxLevel, Hens/Value to the track cap
-  // min(F+3, max) <= maxLevel + 3), each a pinned upgrade, plus 50 zero-gain purchases and the cap marker.
+  // min(F+3, max) <= maxLevel + 3), each a pinned upgrade, plus 50 zero-gain purchases (rev. 13: NO capped marker).
   const ups = buySpam ? 2 * b.maxLevel + 2 * (b.maxLevel + 3) : 60;
   for (let i = 0; i < ups; i++) p('upgrade', { upgrade: 'hens', newLevel: 100 + i, cost: 123456789.12, coinsBefore: 99_999_999_999, track: 'hens', is_first_upgrade: i === 0, taps_before: 5000, zero_gain: true });
   for (let i = 0; i < 40; i++) { p('shift_sheet_opened', { entry: 'stall_chip', sheet_id: i + 1, stall_id: i + 1 });
