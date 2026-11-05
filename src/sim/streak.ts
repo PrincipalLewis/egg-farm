@@ -14,6 +14,8 @@ import type { SimEvent, Sink } from './events';
 export interface StreakRun { peak: number; durationS: number; creditedTaps: number; timeAtCapS: number; extraCents: number; frenzyOverlapS: number; }
 const EPS = 1e-9, r12 = (x: number) => Math.round(x * 1e12) / 1e12, r2 = (x: number) => Math.round(x * 100) / 100;
 export const streakOn = (b: Balance) => m4On(b) && b.m4?.flags?.streak === 1;
+/** R13a: credited-tap detection runs while the streak OR tap coins (#3 A1) is on; the 1.0 s window is shared. */
+const creditedTapsOn = (b: Balance) => streakOn(b) || (m4On(b) && b.m4?.flags?.tapCoins === 1);
 /** Streak hold, then decay, over `dtFocus` focus seconds in ONE step (spec §6 formula; dt < 0 counts as 0). */
 export function streakAfter(sv: number, holdS: number, dtFocus: number, b: Balance): { s: number; holdS: number } {
   const dt = Math.max(0, dtFocus); if (dt <= holdS) return { s: sv, holdS: holdS - dt };
@@ -29,10 +31,12 @@ export function streakTier(sv: number, b: Balance): number {
 export const streakSaleFactor = (s: GameState, b: Balance, suspended?: boolean) =>
   !suspended && (s.streakS ?? 0) > 0 && streakOn(b) ? 1 + s.streakS! : 1;
 const newRun = (peak: number): StreakRun => ({ peak, durationS: 0, creditedTaps: 0, timeAtCapS: 0, extraCents: 0, frenzyOverlapS: 0 });
-/** R2/R3/R5/R6: a player Collect (the 'collect' action only). credited = undefined while off (rc1 event shape). */
+/** R2/R3/R5/R6: a player Collect (the 'collect' action only). credited = undefined while streak and tapCoins are both off (rc1
+ *  event shape). With tapCoins alone the tap is credited (same unlock and window) but s, hold and the run are untouched (ST-AC29). */
 export function creditTap(s: GameState, b: Balance): { s: GameState; credited?: boolean; started?: boolean } {
-  if (!streakOn(b)) return { s };
+  if (!creditedTapsOn(b)) return { s };
   if (s.farmLevel < tc(b, 'streak_unlock_farm') || (s.tapCreditCdS ?? 0) > EPS) return { s, credited: false };
+  if (!streakOn(b)) return { s: { ...s, tapCreditCdS: tc(b, 'tap_credit_min_s') }, credited: true };
   const prev = s.streakS ?? 0, v = r12(Math.min(tc(b, 'streak_cap'), prev + tc(b, 'streak_per_tap'))), run = s.streakRun ?? newRun(v);
   const streakRun = { ...run, peak: Math.max(run.peak, v), creditedTaps: run.creditedTaps + 1 };
   return { s: { ...s, streakS: v, streakHoldS: tc(b, 'streak_hold_s'), tapCreditCdS: tc(b, 'tap_credit_min_s'), streakRun }, credited: true, started: !(prev > 0) };
@@ -54,7 +58,7 @@ export function endStreak(s: GameState, reason: 'decay' | 'offline', b: Balance,
 /** Per tick: the credit window counts down in sim time (R2, hidden ticks too); hold/decay and run stats use focus seconds
  *  only (frozen otherwise, R10/R12). K18: s clamps to a lowered cap. Reaching 0 ends the run (reason "decay"). */
 export function streakTick(s: GameState, dt: number, focusS: number, b: Balance, ev?: Sink): GameState {
-  if (!streakOn(b)) return s;
+  if (!streakOn(b)) { const cd = s.tapCreditCdS ?? 0; return creditedTapsOn(b) && cd > 0 ? { ...s, tapCreditCdS: Math.max(0, r12(cd - dt)) } : s; } // tapCoins alone: window only
   const cd = s.tapCreditCdS ?? 0, sv0 = s.streakS ?? 0; if (!(sv0 > 0) && !(cd > 0)) return s;
   const o: GameState = cd > 0 ? { ...s, tapCreditCdS: Math.max(0, r12(cd - dt)) } : s;
   if (!(sv0 > 0)) return o;

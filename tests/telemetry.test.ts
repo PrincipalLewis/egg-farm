@@ -42,7 +42,7 @@ describe('telemetry', () => {
     c.t += 50_000; g.frame(); // coop fills (50)
     g.dispatch({ type: 'collect' }); g.frame();
     g.endSession();
-    const ev = JSON.parse(kv.getItem(TELEMETRY_KEY)!) as any[]; const types = ev.map(e => e.type);
+    const ev = JSON.parse(kv.getItem(TELEMETRY_KEY)!).events as any[]; const types = ev.map(e => e.type);
     for (const t of ['session_start', 'offline_grant', 'upgrade', 'customer_arrive', 'sell', 'customer_served', 'coop_full', 'tap', 'session_end']) expect(types).toContain(t);
     expect(ev.find(e => e.type === 'upgrade')).toMatchObject({ upgrade: 'collection', newLevel: 1, cost: 1000, coinsBefore: 1000 });
     expect(ev.find(e => e.type === 'offline_grant')).toMatchObject({ secondsAway: 120, eggs: expOffline(120) });
