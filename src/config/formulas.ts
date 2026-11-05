@@ -145,6 +145,7 @@ export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
 export const M5_TC_KEYS: Record<string, readonly string[]> = {
   golden: ['egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s'], abilities: ['ability_s', 'ability_cd_s'],
   streak: ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'],
+  tapCoins: ['tap_bonus_income_window_s'], // #3 I_ref window (sim/income-ref.ts)
 };
 /** A tc_* tunable; throws when missing or non-finite (never a silent 0; F3's flags.ts helpers replace this on merge). */
 export function tcNum(p: EconomyParams, k: string): number {
