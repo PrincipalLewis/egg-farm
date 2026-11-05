@@ -15,6 +15,16 @@ const pos = (b: any, path: string) => { const v = path.split('.').reduce((o, k) 
 const int = (b: any, path: string) => { const v = pos(b, path); if (!Number.isInteger(v)) throw new Error(`balance.${path} must be an integer`); };
 export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Balance {
   if (b.sim_test && prod) throw new Error('balance.sim_test hooks are test-only and not allowed in production builds');
+  // D-HOE-20261030-31/-32: BBv2 thresholds live here, never as constants. The full block is required when it
+  // is present or when m4.flags.bestBuyV2 === 1. Absent and the flag off/absent skips these checks so
+  // sha-pinned rc/v5 fixtures stay valid. A partial block still fails. Before the generic leaf check so a
+  // value <= 0 keeps the "must be > 0" error (a negative leaf would otherwise fail as "invalid" first).
+  const bbv2 = (b.telemetry as { bbv2?: unknown } | undefined)?.bbv2;
+  const bestBuyV2 = (b.m4?.flags as { bestBuyV2?: number } | undefined)?.bestBuyV2;
+  if (bbv2 !== undefined || bestBuyV2 === 1) {
+    for (const p of ['telemetry.bbv2.shown_min_gap_s', 'telemetry.bbv2.zero_gain_eta_max_s', 'telemetry.bbv2.dead_zone_min_s']) pos(b, p);
+    int(b, 'telemetry.bbv2.zero_gain_purchase_cap');
+  }
   check(b, '');
   if (b.sim_test?.demand_scale !== undefined && !(b.sim_test.demand_scale > 0)) throw new Error('balance.sim_test.demand_scale must be > 0');
   for (const p of ['tickHz', 'maxLevel', 'feel.max_flying_eggs', 'telemetry.ring_size']) int(b, p);
