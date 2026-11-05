@@ -3,14 +3,15 @@
 // lockout tc_pause_call_lockout_s = 45 sim seconds (Market Hand). UI and the G5-P driver are out of scope.
 // AC-P1 flag-off has no behavioural effect. AC-P2 / rule 1: below tc_pause_unlock_farm the toggle does nothing.
 import { describe, it, expect } from 'vitest';
-import { balance as b } from '../src/config/balance';
-import { validateBalance } from '../src/config/balance';
+import { readFileSync } from 'node:fs';
+import { balance as b, validateBalance } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { graderMult, hawkerDemandMult } from '../src/sim/workers';
 import { pauseWorker, resumeWorker } from '../src/sim/pause';
 import { collectPerSec, demandPerSec, marketHandStalled, wagesPerSec } from '../src/econ/income';
-import { m5Offline } from '../src/save/m5-fields';
+import { m5Load, m5Offline } from '../src/save/m5-fields';
+import { checksum, SAVE_KEY, validate } from '../src/save/save';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import type { SimEvent } from '../src/sim/events';
@@ -180,5 +181,36 @@ describe('[CCR-F4] pause sim reads rest_recovery_mult while the flag is on', () 
     const { rest_recovery_mult: _r, ...tcNo } = b.m4!.tc as Record<string, number>;
     const on = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, pause: 1 }, tc: tcNo } } as typeof b;
     expect(() => validateBalance(on)).toThrow(/tc\.rest_recovery_mult is required while flags\.pause is on/);
+  });
+});
+
+describe('[AC-P13][§15] committed tracksV7 save with a hired worker', () => {
+  const env = JSON.parse(readFileSync(new URL('./fixtures/saves/m5-pause-committed-hired.json', import.meta.url), 'utf8'));
+  const raw = env.ls['eggfarm.save'] as string;
+  const hired = { energy: 100, cdS: 0 };
+  it('[AC-P13][§15] validate → m5Load keeps Market Hand and Coop Hand; a ≥60 s hide does not drop them', () => {
+    expect(env.idb.main).toBe(raw);
+    const file = JSON.parse(raw);
+    expect(file.version).toBe(6);
+    expect(file.sum).toBe(checksum(JSON.stringify(file.state)));
+    expect(file.state.tracksV7).toBe(1);
+    expect(file.state.v6BackupId).toBe('b42507d60308d615');
+    expect(file.state.farmLevel).toBeGreaterThanOrEqual(tc.pause_unlock_farm);
+    expect(file.state.workers).toEqual({ market_hand: hired, coop_hand: hired });
+    const v = validate(raw, P, file.savedAt);
+    if (!v.ok) throw new Error(v.reason);
+    expect(v.file.state.tracksV7).toBe(1);
+    const ev: SimEvent[] = [];
+    const loaded = m5Load(v.file.state, P, file.savedAt, ev);
+    expect(loaded.workers).toEqual({ market_hand: hired, coop_hand: hired });
+    expect(ev).toEqual([]);
+    const kv = mem(); kv.setItem(SAVE_KEY, raw);
+    const t0 = file.savedAt as number;
+    let t = t0;
+    const g = new Game(P, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
+    expect(g.state.workers).toEqual({ market_hand: hired, coop_hand: hired });
+    g.onHidden(t); t += 120_000; g.onShown(t);
+    expect(g.state.workers).toEqual({ market_hand: hired, coop_hand: hired });
+    expect(g.state.farmLevel).toBeGreaterThanOrEqual(tc.pause_unlock_farm);
   });
 });
