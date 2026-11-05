@@ -93,7 +93,7 @@ export function drawGap(s: GameState, b: Balance): GameState {
 /** An egg resolved (tap, timeout, offline, reload, takeover): the next gap is drawn now (draw order: gap at resolve). */
 const resolve = (s: GameState, b: Balance): GameState => { const o = drawGap(s, b); return { ...o, goldenPending: pending(o.nextSpawnRemainingS!) }; };
 /** The countdown is at 0, no egg is on screen and the R15 retry wait is over: Game measures the valid spots and dispatches spawnGolden. */
-export const spawnDue = (s: GameState, b: Balance) => goldenOn(b) && !s.goldenEgg && s.nextSpawnRemainingS === 0 && !((s.goldenPending?.recheckS ?? 0) > EPS);
+export const spawnDue = (s: GameState, b: Balance, layout = false) => goldenOn(b) && !s.goldenEgg && s.nextSpawnRemainingS === 0 && (layout || !((s.goldenPending?.recheckS ?? 0) > EPS)); // R15: a layout change re-checks at once
 /** One tick on focus seconds f (TimerSystem). R1/R2 start, countdown, R15 deferral, R18 lifetime + timeout expiry. */
 export function goldenTick(s: GameState, f: number, b: Balance, ev?: Sink): GameState {
   if (!goldenOn(b)) return s;
@@ -119,8 +119,8 @@ export function goldenTick(s: GameState, f: number, b: Balance, ev?: Sink): Game
   return { ...s, goldenPending: { ...p, deferS: r12(p.deferS + f), recheckS: Math.max(0, r12(p.recheckS - f)) } };
 }
 /** spawnGolden{spots}: the UI's live valid spot ids (R14). Identity unless spawnDue. Empty list -> R15 deferral. */
-export function spawnGolden(s: GameState, spots: readonly string[], b: Balance, ev?: Sink): GameState {
-  if (!spawnDue(s, b)) return s;
+export function spawnGolden(s: GameState, spots: readonly string[], b: Balance, ev?: Sink, layout = false): GameState {
+  if (!spawnDue(s, b, layout)) return s;
   const p = s.goldenPending ?? pending(0);
   if (!spots.length) return { ...s, goldenPending: { ...p, recheckS: GOLDEN_RECHECK_S } };
   const [e, u] = evDraw(ensureEvRng(s)), slotId = spots[pickIndex(u, spots.length)];
