@@ -665,3 +665,25 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 @keyframes zgIn{from{opacity:0;transform:scaleY(.9)}}
 .zg-confirm[hidden]{display:none}
 .rm .zg-confirm{animation:none}@media (prefers-reduced-motion:reduce){.zg-confirm{animation:none}}
+
+/* --- v5 abilities UI (#4b / Art Q8 AB-UI-7 / AC-M5A-8..10) --- */
+.lbl{white-space:nowrap}
+.sr-in{font-size:0;line-height:0;color:transparent}
+[data-cd]::after{content:attr(data-cd);white-space:pre}
+.btn.activate-all{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:48px;min-height:48px;padding:0 8px;border:2px solid var(--c-ink,#3b2a1a);border-radius:24px;background:var(--c-yolk,#f5c542);color:var(--c-ink,#3b2a1a);font-weight:600;box-sizing:border-box;flex:0 0 auto}
+.btn.activate-all .act-bolt{flex:0 0 20px;width:20px;height:20px}
+.btn.activate-all[aria-disabled=true]{opacity:.5;background:color-mix(in srgb, var(--c-yolk,#f5c542) 50%, #fff)}
+.btn.activate-all.is-compact{min-width:0;width:auto;padding:0 8px}
+.sheet header .btn.activate-all{margin-left:8px}
+.act-all-bar{display:flex;align-items:stretch;gap:8px;margin:0 12px 6px;position:sticky;top:0;z-index:2}
+.act-all-bar .refill-wrap{margin:0;flex:1 1 0;min-width:0}
+.act-all-bar .refill-wrap .btn.manage-all{width:100%;margin:0}
+.act-all-bar .btn.activate-all{flex:1 1 0;min-width:0;width:auto}
+.act-all-bar .slot-spacer{flex:1 1 0;min-width:0;visibility:hidden;height:48px;pointer-events:none}
+.wk-actions{display:flex;align-items:stretch;gap:8px;width:100%}
+.wk-actions .btn.manage{flex:1 1 0;min-width:0}
+.btn.call-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;min-height:44px;flex:1 1 0;min-width:0;padding:0 8px;border:2px solid var(--c-ink,#3b2a1a);border-radius:22px;background:var(--c-yolk,#f5c542);color:var(--c-ink,#3b2a1a);font-weight:600;box-sizing:border-box;overflow:hidden}
+.btn.call-btn .act-bolt,.btn.call-btn .act-ico{flex:0 0 20px;width:20px;height:20px}
+.btn.call-btn[aria-disabled=true]{opacity:.55}
+.btn.call-btn.call-active{background:linear-gradient(90deg,var(--c-yolk,#f5c542) var(--call-prog,0%),#fff var(--call-prog,0%));box-shadow:inset 0 -4px 0 var(--c-ink,#3b2a1a)}
+.btn.call-btn.call-asleep,.btn.call-btn.call-unpaid,.btn.call-btn.call-paused{background:#eee;border-color:#999}
