@@ -28,9 +28,18 @@ export class Audio {
   }
   /** Single-tab guard: silence everything until reload. */
   mute() { this.enabled = false; try { void this.ctx?.suspend(); } catch { /* ignore */ } }
-  play(name: SfxName, minGapMs = 60) {
-    if (!this.enabled || !this.ctx) return; const f = SFX[name], buf = this.buffers.get(f); if (!buf) return;
-    const t = performance.now(); if (t - (this.lastPlay.get(f) ?? -1e9) < minGapMs) return; this.lastPlay.set(f, t);
-    const src = this.ctx.createBufferSource(); src.buffer = buf; src.connect(this.ctx.destination); src.start();
+  /** build:qa only (window.eggfarmQa.audio.log, ui/qa-seam.ts): one {hook, file, tMs, semi} per source actually started; null in release. */
+  qaLog: { hook: string; file: string; tMs: number; semi: number }[] | null = null;
+  play(name: SfxName, minGapMs = 60) { return this.playFile(SFX[name], minGapMs, 0, name); }
+  /** v5 F6 (overlay audio hooks): play an asset by file name; true iff a source was actually started (the QA audio.log contract).
+   *  `semi` = pitch shift in semitones (playbackRate 2^(semi/12)); 0 (default) leaves the source untouched, as before F6. */
+  playFile(f: string, minGapMs = 60, semi = 0, hook: string = f): boolean {
+    if (!this.enabled || !this.ctx) return false; const buf = this.buffers.get(f); if (!buf) return false;
+    const t = performance.now(); if (t - (this.lastPlay.get(f) ?? -1e9) < minGapMs) return false; this.lastPlay.set(f, t);
+    const src = this.ctx.createBufferSource(); src.buffer = buf; if (semi) src.playbackRate.value = 2 ** (semi / 12);
+    src.connect(this.ctx.destination); src.start(); this.qaLog?.push({ hook, file: f, tMs: t, semi }); return true;
   }
+  /** v5 F6: load an extra asset registered by a feature's audio hook (no-op before unlock; unlock loads every SFX file). */
+  load(f: string) { if (!this.ctx || this.buffers.has(f)) return;
+    void (async () => { try { const r = await fetch(`${this.base}${f}.mp3`); this.buffers.set(f, await this.ctx!.decodeAudioData(await r.arrayBuffer())); } catch { /* missing sfx is non-fatal */ } })(); }
 }
