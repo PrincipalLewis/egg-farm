@@ -8,7 +8,7 @@ export type SimEvent =
   | { type: 'customer_lost'; reason: 'timeout' | 'full_queue'; id?: number; N?: number }
   | { type: 'sell'; id: number; k: number; N: number; price: number; value: number; by: 'player' | 'market_hand' }
   | { type: 'upgrade'; upgrade: 'collection' | 'farm' | 'hens' | 'eggValue'; newLevel: number; cost: number; coinsBefore: number; track?: 'farm' | 'hens' | 'egg_value' | 'collection' }
-  | { type: 'collect'; eggs: number; credited?: boolean; bonus_cents?: number } // M5: credited/bonus_cents only with m4.flags.streak/tapCoins
+  | { type: 'collect'; eggs: number; credited?: boolean; bonus_cents?: number } // M5: credited with m4.flags.streak or tapCoins; bonus_cents only on a credited tap with tapCoins (#3)
   | { type: 'worker_collect'; eggs: number }
   | { type: 'worker_hire'; worker: WorkerId; cost: number; farm: number }
   | { type: 'worker_manage'; worker: WorkerId; energyBefore: number }
