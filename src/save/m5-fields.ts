@@ -17,6 +17,7 @@ import { M5_SESSION_FIELDS } from '../sim/m5-state';
 import { sanitizePausedOnLoad } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
 import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
+import { incomeRefOn, resetIncomeRef } from '../sim/income-ref';
 export { streakAfter };
 export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
 /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
@@ -93,7 +94,8 @@ function pauseLoad(ws: any, farmLevel: number, b: Balance): any {
 /** A hidden-tab or visible frame gap of 60 s or more (§9.1/§9.1a), applied to the state AT THE START of the gap: calls end
  *  (`offline`), an on-screen egg expires (`collectible_expired{reason:"offline"}`, no reward, fresh R3 gap that runs on the
  *  focus clock, so it starts once welcome-back closes), streak s = 0, Frenzy frozen, Broody nest kept with no accrual.
- *  Cooldowns need nothing: readyAt is wall clock. The streak run ends with streak_peak{reason:"offline"} if s > 0 (#2, R11). */
+ *  Cooldowns need nothing: readyAt is wall clock. The streak run ends with streak_peak{reason:"offline"} if s > 0 (#2, R11).
+ *  The I_ref ring and refWarmS are dropped, so the next read is the I_ss warm-up (#3, streak spec §4.1a). */
 export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (!anyFlag(b)) return s;
   let o: any = { ...s };
@@ -102,6 +104,7 @@ export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
     delete o.goldenEgg; ev.push({ type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: o.farmLevel }); o = drawGap(o, b);
   }
   if (m5Flag(b, 'streak') && 'streakS' in o) o = endStreak(o, 'offline', b, ev);
+  if (incomeRefOn(b)) o = resetIncomeRef(o); // #3 §4.1a #3: an offline return clears the I_ref ring and starts a warm-up
   return o;
 }
 /** A hidden gap under 60 s: the streak grace/decay in one step over the gap's focus time, which is 0 while hidden
