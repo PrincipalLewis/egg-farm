@@ -1,11 +1,17 @@
 // QA seam Q4: the observe-only hook on the AC7 bots (tests/bot.ts runBot driving tests/bot-m4.ts pickBuy) does not change a single byte of
 // their results. AC7 digest = sha256 over seeds 1-200 of each run's firstUpgradeS, Farm reach map and upgrade counts.
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { balance } from '../src/config/balance';
+import { readFileSync } from 'node:fs';
+import { validateBalance } from '../src/config/balance';
 import { runBot, type Model } from './bot';
 import { VAR_DEFAULT } from './seller-variance';
 import type { Observe } from './bot-m4';
+
+// D-HOE-20261030-05: byte-copy fixture of rc/v5 518de304 balance; never tune inputs to satisfy digest pins.
+const balanceRaw = readFileSync(new URL('./fixtures/k10/balance-9a73bd8a.json', import.meta.url));
+const balance = validateBalance(JSON.parse(balanceRaw.toString('utf8')));
+beforeAll(() => { expect(createHash('sha256').update(balanceRaw).digest('hex')).toBe('9a73bd8a6ebb936792c9c5fc667f37d295ecb9f8b74149112d50b297d228bb89'); });
 
 const SEEDS = Array.from({ length: 200 }, (_, i) => i + 1);
 const digest = (model: Model, T: number, variance: typeof VAR_DEFAULT | undefined, hook?: Observe) => {
