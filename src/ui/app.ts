@@ -1,3 +1,4 @@
+import { makeDialogOpen, wireAttended } from './overlay';
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
 /**
@@ -85,7 +86,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <div class="queue" id="queue" role="group" aria-label="Customer queue"></div>
     <div class="scene" id="scene" aria-hidden="true">
       <img class="coop" id="coop" alt=""><span class="nest"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" id="nestEggs" src="${A('nest-eggs.svg')}" alt="" hidden></span>
-      <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" hidden></div>
+      <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" data-testid="hens-pill" hidden></div>
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
@@ -103,10 +104,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num"><span class="nav-txt">Refill</span><span class="nav-cd" aria-hidden="true"></span></span> <span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
-  const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
+  const panelLayer = h(`<div id="panel-layer" data-testid="docked-panel"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body order-list" id="mRows"></div><p class="sr" aria-live="polite" id="ordersLive"></p><div class="foot"><button class="btn" id="sellAll"></button></div></section>
-    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
+    <section class="sheet" id="p-upgrades" data-testid="upgrades-panel" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" aria-label="Collection" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
         <button role="tab" aria-label="Farm" data-tab="farm"><span class="tab-pill"><img src="${A('icon-coop.svg')}" alt="">Farm</span></button>
@@ -181,6 +182,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
 
   // ---------- Panels ----------
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
+  // Slim v5: one attended source; Market remains a play surface. Shift owns its registered lifecycle.
+  wireAttended(g, makeDialogOpen({ sheet: () => open, docked: () => docked.matches }));
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
