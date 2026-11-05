@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
-import { SAVE_KEY } from '../src/save/save';
+import { SAVE_KEY, SAVE_VERSION } from '../src/save/save';
 import { nextRand, type GameState } from '../src/sim/state';
 import { validSpotIds, type SpotCentre, type SpotZone } from '../src/ui/golden-spots';
 import { mem } from './helpers';
@@ -105,6 +105,24 @@ describe('golden Game: pagehide / takeover / reset seams (R10b, R10c, A24-1)', (
   });
   it('beginReset flag off: just resetting + save_reset (same as the old inline path)', () => {
     const { g } = setup(OFF); g.beginReset(); expect(g.resetting).toBe(true); expect(tel(g)).toEqual(['save_reset']);
+  });
+});
+
+describe('golden Game: refuseNewer is not a takeover (Architect FINAL 2026-11-05)', () => {
+  // A newer-build save shows up mid-session: no unload, no state mutation, no evRng advance, no write. Readonly + inactive
+  // early-out and the mirror drop are kept; lease takeover (deactivate) still goes through goldenUnload('takeover').
+  const newer = JSON.stringify({ version: SAVE_VERSION + 1, savedAt: 5, state: { coinsCents: 1 } });
+  const egg = { ageS: 9, slotId: 'S3', intervalS: 150 };
+  for (const hidden of [false, true]) it(`newer save found on write${hidden ? ' while hidden' : ''}: egg, evRng and gap untouched; no expire; nothing written`, () => {
+    const { g, kv, evs } = setup(G, { goldenEgg: egg, evRngState: 123456789, nextSpawnRemainingS: 0 });
+    if (hidden) g.onHidden();
+    kv.setItem(SAVE_KEY, newer); const pre = g.state, snap = JSON.stringify(pre);
+    g.save(); expect(g.newerSave).toBe(SAVE_VERSION + 1); expect(g.readOnly).toBe(true); expect(g.inactive).toBe(true);
+    expect(g.state).toBe(pre); expect(JSON.stringify(g.state)).toBe(snap);
+    expect([g.state.goldenEgg, g.state.evRngState, g.state.nextSpawnRemainingS]).toEqual([egg, 123456789, 0]);
+    g.endSession(); g.deactivate(); g.save(); g.frame(); // frozen: every later seam is an early-out
+    expect(g.state).toBe(pre); expect(gold(evs)).toEqual([]); expect(tel(g)).toEqual([]);
+    expect(kv.getItem(SAVE_KEY)).toBe(newer);
   });
 });
 
