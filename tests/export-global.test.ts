@@ -15,7 +15,7 @@ describe('eggfarmExportTelemetry snapshot', () => {
     expect(JSON.stringify(g.state)).toBe(state); expect(kv.getItem(SAVE_KEY)).toBe(save); expect(kv.getItem(TELEMETRY_KEY)).toBe(tel);
     expect(spy).not.toHaveBeenCalled(); expect(g.telemetry.events().length).toBe(n); expect(g.telemetry.writes).toBe(w);
     expect(again.events).toEqual(out.events); // idempotent
-    expect(Object.keys(out).sort()).toEqual(['events', 'exportedAt']);
+    expect(Object.keys(out).sort()).toEqual(['events', 'exportedAt', 'schema_version']);
     expect(JSON.stringify(out)).not.toContain(g.installId); expect(out.events.some((e: any) => 'install_id' in e)).toBe(false);
     expect(out.events.find((e: any) => e.type === 'session_start')).toMatchObject({ build: 'dev' });
     expect(out.events.filter((e: any) => e.open).map((e: any) => e.type).sort()).toEqual(['tap', 'worker_summary']);
