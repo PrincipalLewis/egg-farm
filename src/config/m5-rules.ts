@@ -40,6 +40,7 @@ export function validateM5(m4: any, workers: any): void {
   if (has(tc, 'streak_tier_count') && !(Number.isInteger(tc.streak_tier_count) && tc.streak_tier_count >= 1)) fail('tc.streak_tier_count must be an integer >= 1');
   if (has(tc, 'tap_bonus_income_window_s') && !(Number.isInteger(tc.tap_bonus_income_window_s) && tc.tap_bonus_income_window_s >= 1)) fail('tc.tap_bonus_income_window_s must be an integer >= 1 (1 s I_ref buckets, sim/income-ref.ts)');
   if (has(tc, 'tap_income_share') && !(tc.tap_income_share <= 1)) fail('tc.tap_income_share must be <= 1');
+  if (has(tc, 'tap_income_share') && !(Math.abs(tc.tap_income_share * 10000 - Math.round(tc.tap_income_share * 10000)) < 1e-6)) fail('tc.tap_income_share must have at most 4 decimals (basis points, streak spec §4.1b)');
   // #5 Broody (cap > 0; shares in (0, 1])
   if (has(tc, 'broody_cap_s') && !(tc.broody_cap_s > 0)) fail('tc.broody_cap_s must be > 0');
   for (const k of ['broody_income_share', 'broody_ready_share']) if (has(tc, k) && !(tc[k] > 0 && tc[k] <= 1)) fail(`tc.${k} must be in (0, 1]`);
