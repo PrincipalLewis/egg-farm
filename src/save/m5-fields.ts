@@ -46,12 +46,21 @@ export function m5Persist(s: GameState): GameState {
   const o: any = { ...s, ...(s.breedsRawSlots && s.breeds && { breeds: breedsSaveView(s) }) }; // E10 / PMC Q5: raw unknown slot ids kept
   for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
 }
-/** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
+/** End every running call with cause `offline`. Never resume mid-call: activeS and durS are both cleared (readyAt stays).
+ *  Granted focus seconds (D-HOE-41 / abilities v1.3.12): finite durS > 0, else tc_ability_s (missing or invalid durS is today's
+ *  path). When balance has tc combo_boost_duration_s, granted is capped at max(tc_ability_s, that value). activeS clamps to
+ *  [0, granted]; effect_s = granted - activeS (the focus seconds the call ran). */
 function endCalls(o: any, b: Balance, ev: SimEvent[]) {
-  const dur = tc(b, 'ability_s');
-  for (const id of WORKERS) { const a = o.abilities[id]; if (!a || typeof a !== 'object' || !('activeS' in a)) continue;
-    const { activeS, ...rest } = a; o.abilities[id] = rest;
-    if (fin(activeS) && activeS > 0) ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: dur - Math.min(activeS, dur) }); }
+  const base = tc(b, 'ability_s'), combo = b.m4?.tc?.combo_boost_duration_s;
+  const cap = typeof combo === 'number' && Number.isFinite(combo) ? Math.max(base, combo) : undefined;
+  for (const id of WORKERS) {
+    const a = o.abilities[id]; if (!a || typeof a !== 'object' || (!('activeS' in a) && !('durS' in a))) continue;
+    const { activeS, durS, ...rest } = a; o.abilities[id] = rest;
+    if (!(fin(activeS) && activeS > 0)) continue;
+    let granted = fin(durS) && durS > 0 ? durS : base;
+    if (cap !== undefined) granted = Math.min(granted, cap);
+    ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: granted - clamp(activeS, 0, granted) });
+  }
 }
 /** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
  *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
