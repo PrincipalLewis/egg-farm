@@ -31,7 +31,7 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): 
   if (!w) return tap;
   if (opts.assumeWorking) return tap * 1.5;
   const m = mood(w, b);
-  if (!m || isOff(m)) return tap; // asleep / unpaid / paused → no auto collect
+  if (!m || isOff(m) || isPaused(w, b)) return tap; // asleep / unpaid / paused → no auto collect
   if (m === 'working') return tap * 1.5;
   const { every_s, tired_every_s } = b.workers.coop_hand;
   return tap * (1 + (every_s / tired_every_s) * 0.5);
@@ -62,7 +62,7 @@ export function wagesPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): nu
     if (!worker) continue;
     if (!opts.assumeWorking) {
       const m = mood(worker, b);
-      if (!m || isOff(m)) continue;
+      if (!m || isOff(m) || isPaused(worker, b)) continue;
     }
     w += b.workers[id].wage_per_farm_per_min * s.farmLevel / 60;
   }

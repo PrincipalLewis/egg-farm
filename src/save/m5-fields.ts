@@ -46,11 +46,19 @@ export function m5Persist(s: GameState): GameState {
   const o: any = { ...s, ...(s.breedsRawSlots && s.breeds && { breeds: breedsSaveView(s) }) }; // E10 / PMC Q5: raw unknown slot ids kept
   for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
 }
-/** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
+/** Granted focus duration of a running call: AbilityState.durS when that is a positive finite number, else tc_ability_s.
+ *  A combo's durS (combo_boost_duration_s) must not be scored as tc_ability_s: effect_s = duration − remaining,
+ *  remaining capped at the duration so a longer leftover cannot go negative. */
+function callDuration(b: Balance, named: unknown): number {
+  const base = tc(b, 'ability_s');
+  return typeof named === 'number' && Number.isFinite(named) && named > 0 ? named : base;
+}
+/** End every running call with cause `offline` (AB-1: effect_s = duration − activeS, the focus seconds it ran).
+ *  durS is cleared with activeS (Architect #112 / abilities v1.3.12); readyAt stays. */
 function endCalls(o: any, b: Balance, ev: SimEvent[]) {
-  const dur = tc(b, 'ability_s');
   for (const id of WORKERS) { const a = o.abilities[id]; if (!a || typeof a !== 'object' || !('activeS' in a)) continue;
-    const { activeS, ...rest } = a; o.abilities[id] = rest;
+    const { activeS, durS, ...rest } = a; o.abilities[id] = rest;
+    const dur = callDuration(b, durS);
     if (fin(activeS) && activeS > 0) ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: dur - Math.min(activeS, dur) }); }
 }
 /** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
