@@ -378,7 +378,7 @@ export class Game {
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
   /** Dev only. Goes through the same load-time backup gate as any save (review n2): the v6 backup is written (or the
    *  migration aborted) in the constructor, before any save, so a backdated write can never skip it. */
-  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.persisted(), this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
+  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.persisted(), this.now() - ms, this.b); this.mirror?.write(raw); this.resetting = true; }
   /** Reset save: drop the IndexedDB copy too (resolves when committed, or after 1 s), then the caller reloads. */
   clearMirror(): Promise<void> { return this.mirror ? Promise.race([this.mirror.clear(), new Promise<void>(r => setTimeout(r, 1000))]) : Promise.resolve(); }
   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */

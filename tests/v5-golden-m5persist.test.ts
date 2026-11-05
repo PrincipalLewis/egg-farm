@@ -7,6 +7,7 @@ import { initialState, nextRand, type GameState } from '../src/sim/state';
 import { ensureEvRng } from '../src/sim/rng';
 import { m5Load, m5Persist } from '../src/save/m5-fields';
 import { SAVE_VERSION, serialize, save, SAVE_KEY } from '../src/save/save';
+import { Game } from '../src/game';
 import { mem } from './helpers';
 import { ON } from './v5-f2-helpers';
 const NOW = Date.UTC(2026, 10, 5, 21, 29);
@@ -96,6 +97,18 @@ describe('Architect B m5Persist (golden egg on screen)', () => {
     expect(s.goldenEgg).toEqual(egg);
     const plain = live();
     expect(m5Persist(plain, ON)).toBe(plain);
+  });
+
+  it('M1: debugBackdateSave writes the backdated copy with the live balance, so an on-screen egg is drawn there too', () => {
+    const kv = mem(); const g = new Game(ON, kv, () => NOW);
+    g.state = live({ goldenEgg: egg }); const before = JSON.stringify(g.state);
+    g.debugBackdateSave(60_000);
+    const disk = JSON.parse(kv.getItem(SAVE_KEY)!), { x, gap } = gapOf(123456789);
+    expect(disk.savedAt).toBe(NOW - 60_000);
+    expect(disk.state.goldenEgg).toBeUndefined();
+    expect(disk.state.evRngState).toBe(x);
+    expect(disk.state.nextSpawnRemainingS).toBe(gap);
+    expect(JSON.stringify(g.state)).toBe(before);
   });
 
   it('load does not rewrite a stored spawn-due 0 (no egg on disk)', () => {
