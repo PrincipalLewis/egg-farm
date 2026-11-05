@@ -6,6 +6,7 @@ import { fmtMoney } from './format';
 import { WARN_SVG, MOON_SVG } from './icons';
 export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
+import { abilitiesUiOn, abilityEligibility, activateAllState, activateAllHtml } from './abilities-ui';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -120,8 +121,26 @@ export function fitBanners(root: ParentNode) {
     if (t.clientWidth && t.scrollWidth > t.clientWidth + 0.5) t.textContent = short;
   });
 }
-export function workersHtml(s: GameState, b: Balance): string {
-  return manageAllHtml(s, b) + WORKERS.map(id => {
+/** Sticky Workers-tab bar: Refill (left) + Activate-all (right) when abilities on (AC-M5A-8/9). */
+export function workersActionBarHtml(s: GameState, b: Balance, nowMs: number, _docked: boolean): string {
+  const refill = manageAllHtml(s, b);
+  if (!abilitiesUiOn(s, b)) return refill;
+  const elig = abilityEligibility(s, b, nowMs);
+  const refillVisible = !!refill;
+  const st = activateAllState({
+    readyCount: elig.ready,
+    nextCdS: elig.nextCdS,
+    docked: false, // Workers tab sheet bar always uses full labels; docked header owns compact
+    refillVisible: false,
+  });
+  const act = activateAllHtml(st, ASSET('icon-bolt.svg'));
+  if (refillVisible) return `<div class="act-all-bar">${refill}${act}</div>`;
+  // rc2Refill=1 / N=0: keep left spacer so Activate-all does not move (AC-M5A-9)
+  return `<div class="act-all-bar"><div class="slot-spacer" aria-hidden="true"></div>${act}</div>`;
+}
+
+export function workersHtml(s: GameState, b: Balance, nowMs = Date.now()): string {
+  return workersActionBarHtml(s, b, nowMs, false) + WORKERS.map(id => {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
     if (!w) {
       const locked = F < unlockFarm(id, b), cost = hireCostCents(id, b), can = !locked && s.coinsCents >= cost;

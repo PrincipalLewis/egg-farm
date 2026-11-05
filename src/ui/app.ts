@@ -1,4 +1,6 @@
 import { makeDialogOpen, wireAttended } from './overlay';
+import { createShiftSheet } from './shift-sheet';
+import { abilitiesUiOn, abilityEligibility, activateAllState, activateAllHtml, ACTIVATE_ALL_TESTID } from './abilities-ui';
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
 /**
@@ -199,6 +201,22 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
+  // Activate-all (abilities): docked header sits 8px right of Refill when visible (AB-UI-7 / AC-M5A-9b).
+  const actAllBtn = h(`<button type="button" class="btn activate-all" data-testid="${ACTIVATE_ALL_TESTID}" data-act="activateAll" hidden></button>`);
+  const placeActAll = () => {
+    if (docked.matches) {
+      if (farmMA.parentElement !== upHeader) placeFarmMA();
+      if (actAllBtn.parentElement !== upHeader) upHeader.insertBefore(actAllBtn, upHeader.querySelector('.close'));
+      // Keep 8px after Refill: ensure DOM order farmMA → actAll → close
+      if (farmMA.nextElementSibling !== actAllBtn && !farmMA.hidden) upHeader.insertBefore(actAllBtn, farmMA.nextSibling);
+    } else if (actAllBtn.parentElement === upHeader) actAllBtn.remove();
+  };
+  placeActAll(); docked.addEventListener?.('change', placeActAll);
+  // Shift sheet attendance lifecycle (Q-AB-N7/N8). Full Shift DOM is Features/rc2; this owns registerSheet + D-HOE-27.
+  const shiftSheet = createShiftSheet({ reducedMotion: () => rm() });
+  // Fatigue/Manage entry opens Shift later; destroy on teardown is N/A (app lifetime).
+  void shiftSheet.open; // retain controller (open/requestClose used when Shift UI mounts)
+
   let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate'), rateTri = $('#rate .tri'), rateTxt = $('#rate .rt'); // m6: ▼ in an aria-hidden .tri, money in .rt
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
@@ -209,6 +227,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** S2-10: every player action redraws synchronously, so the screen never waits for the next frame/timer to show it. */
   const act = (a: Parameters<typeof g.dispatch>[0]): boolean => { const ok: boolean = tryDispatch(g, a, b); if (ok) { dirty = true; render(); } return ok; };
   const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
+  // Activate-all: UI chrome only until Features ships fireAbility (no invented sim API).
+  const onActivateAll = (el: HTMLElement) => {
+    if (el.getAttribute('aria-disabled') === 'true') { cantAfford(el); return; }
+    cantAfford(el); // missing fireAbility — do not invent sim
+  };
+  actAllBtn.addEventListener('click', e => { e.stopPropagation(); onActivateAll(actAllBtn); });
+  uRow.addEventListener('click', e => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-act=activateAll]');
+    if (btn) { e.stopPropagation(); onActivateAll(btn); }
+  });
   const collect = () => {
     const before = g.state.coop; g.dispatch({ type: 'collect' });
     const k = Math.floor(before) - Math.floor(g.state.coop) + (g.state.basket ? 0 : 0);
@@ -715,6 +743,29 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
+    // Docked Activate-all (compact when Refill visible) — AC-M5A-8/9b/10, AB-UI-7
+    {
+      const on = abilitiesUiOn(s, b) && docked.matches;
+      setHidden(actAllBtn, !on);
+      if (on) {
+        placeActAll();
+        const elig = abilityEligibility(s, b, now());
+        const st = activateAllState({ readyCount: elig.ready, nextCdS: elig.nextCdS, docked: true, refillVisible: farmMAShown && !farmMA.hidden });
+        const next = activateAllHtml(st, A('icon-bolt.svg'));
+        const tmp = h(`<div>${next}</div>`);
+        const btn = tmp.querySelector('button')!;
+        const desc = tmp.querySelector('#actAllDesc');
+        actAllBtn.className = btn.className;
+        actAllBtn.innerHTML = btn.innerHTML;
+        for (const a of ['aria-disabled', 'aria-describedby', 'data-act', 'data-testid']) {
+          const v = btn.getAttribute(a); if (v === null) actAllBtn.removeAttribute(a); else actAllBtn.setAttribute(a, v);
+        }
+        let prev = actAllBtn.nextElementSibling;
+        if (prev?.id === 'actAllDesc') prev.remove();
+        if (desc) actAllBtn.after(desc);
+      }
+    }
+
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
@@ -731,11 +782,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     renderGoal();
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-      const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
+      const html = tab === 'workers' ? workersHtml(s, b, now()) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
       if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; if (ZGC) zgApply(); }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
         // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
-        { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+        { const rb = uRow.querySelector<HTMLElement>(':scope > .act-all-bar, :scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
           const pad = sc ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0; // sticky top:0 sits at the scroller's content edge, scroll-margin at its padding edge (p2 browser sweep)
           const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height + pad) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); }
         fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }

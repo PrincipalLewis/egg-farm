@@ -665,3 +665,21 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 @keyframes zgIn{from{opacity:0;transform:scaleY(.9)}}
 .zg-confirm[hidden]{display:none}
 .rm .zg-confirm{animation:none}@media (prefers-reduced-motion:reduce){.zg-confirm{animation:none}}
+
+/* --- v5 Activate-all (abilities v1.3.11 / Art Q8 AB-UI-7) --- */
+.lbl{white-space:nowrap}
+.sr-in{font-size:0;line-height:0;color:transparent}
+[data-cd]::after{content:attr(data-cd);white-space:pre}
+.btn.activate-all{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:48px;min-height:48px;padding:0 8px;border:2px solid var(--c-ink,#3b2a1a);border-radius:24px;background:var(--c-yolk,#f5c542);color:var(--c-ink,#3b2a1a);font-weight:600;box-sizing:border-box;flex:0 0 auto}
+.btn.activate-all .act-bolt{flex:0 0 20px;width:20px;height:20px}
+.btn.activate-all[aria-disabled=true]{opacity:.5;background:color-mix(in srgb, var(--c-yolk,#f5c542) 50%, #fff)}
+.btn.activate-all.is-compact{min-width:0;width:auto;padding:0 8px}
+/* Docked header: 8px right of Refill (farm-manage-all / desk-manage-all) when both visible */
+.sheet header .btn.activate-all{margin-left:8px}
+.sheet header .btn.activate-all.is-compact{margin-left:8px}
+/* Workers sticky two-slot bar: Activate-all right of Refill wrap */
+.act-all-bar{display:flex;align-items:stretch;gap:8px;margin:0 12px 6px;position:sticky;top:0;z-index:2}
+.act-all-bar .refill-wrap{margin:0;flex:1 1 0;min-width:0}
+.act-all-bar .refill-wrap .btn.manage-all{width:100%;margin:0}
+.act-all-bar .btn.activate-all{flex:1 1 0;min-width:0;width:auto}
+.act-all-bar .slot-spacer{flex:1 1 0;min-width:0;visibility:hidden;height:48px;pointer-events:none}
