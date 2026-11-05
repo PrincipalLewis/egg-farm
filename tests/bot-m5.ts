@@ -14,6 +14,7 @@ import type { Balance } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
+import type { StepClock } from '../src/sim/clock';
 import type { SimEvent } from '../src/sim/events';
 import { showManageAll, type WorkerId, mood, graderMult } from '../src/sim/workers';
 import { SellerVariance, VAR_DEFAULT } from './seller-variance';
@@ -32,7 +33,7 @@ export interface Stack { on: boolean; streakCap: number; tapShare: number; brood
 export interface RC2 { cost: number; manual: boolean; manAt: number; auto: null | { at: number; reserve: number; rest: boolean; waive0?: boolean }; regen?: number; cap?: number; autoRestore?: number; }
 /** m5p.ts per-second pressure series from F>=10 (st/ex/el) and the one-charge perturbation time. */
 export interface Series { start: number; st: number[]; ex: number[]; el: number[]; pertT: number | null }
-export interface Prof { tap: 'idle' | 'ac7' | number; checkBase: number; catchP: number; }
+export interface Prof { tap: 'never' | 'idle' | 'ac7' | number; checkBase: number; catchP: number; }
 export const PROFS: Record<string, Prof> = { slow: { tap: 0.25, checkBase: 60, catchP: 0.4 }, idle: { tap: 'idle', checkBase: 15, catchP: 0 }, optimal: { tap: 3, checkBase: 5, catchP: 1 }, seller15: { tap: 'ac7', checkBase: 15, catchP: 0.75 }, casual: { tap: 0.5, checkBase: 30, catchP: 0.6 } };
 const rng = (seed: number) => { let a = (seed * 2654435761 + 99) >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 const WIDS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
@@ -68,6 +69,7 @@ export function assertNoDoubleModel(b: B, K: Stack): void {
 }
 /** Read-only observers (port addition): they see events and states, never change them. */
 export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number;
+  /** F5 source-only runner injects focus; omitted for legacy model parity. */ clock?: (t: number) => StepClock;
   /** Every drained batch of sim events, with the run second it happened in. */ onEvents?: (t: number, evs: readonly SimEvent[]) => void;
   /** The state at the end of each run second (after taps, check-in and buys). */ onSecond?: (t: number, s: GameState) => void;
   /** m5p.ts: per-second pressure series (filled in place) and one-charge perturbation at F20 reach (+1 grant / -1 remove; 0 = play identical). */
@@ -82,7 +84,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
   const V = new SellerVariance(VAR_DEFAULT, seed), R = rng(seed);
   let s: GameState = opt.start ?? initialState(b, seed); const dt = 1 / b.tickHz, n = Math.round(T * b.tickHz);
   const reach = new Map<number, number>([[s.farmLevel, 0]]), snaps = new Map<number, GameState>(), buys: number[] = [];
-  const ev: SimEvent[] = []; const present = P.tap !== 'idle';
+  const ev: SimEvent[] = []; const present = P.tap !== 'idle' && P.tap !== 'never';
   // mechanic state
   let streak = 0, lastCred = -1e9, lastTap = -1e9, frenzyUntil = -1, nextEgg = Infinity, nest = 0;
   const readyAt: Record<string, number> = {}, until: Record<string, number> = {}; const paused = new Map<WorkerId, number>(); let lockUntil = -1;
@@ -138,7 +140,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
     if (opt.onSecond && i > 1 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s); prevT = t;
     // pause bookkeeping: paused workers held asleep (energy 0) by the runner; recover 0.25x drain into the stored energy
     for (const [id, e] of paused) { paused.set(id, Math.min(100, e + 0.25 * dt / b.workers.energy.drain_s_per_pct)); s = { ...s, workers: { ...s.workers, [id]: { ...s.workers[id]!, energy: 0 } } }; }
-    s = step(s, dt, b, ev); drain(t); t0.v = t; rm.tAll += dt;
+    s = step(s, dt, b, ev, opt.clock?.(t)); drain(t); t0.v = t; rm.tAll += dt;
     for (const id of ['market_hand', 'coop_hand'] as WorkerId[]) { const w = s.workers[id]; const m = w ? mood(w, b) : null; const p = prevMood[id];
       if (p != null && m != null && p !== m) { if ((p === 'asleep' && m === 'unpaid') || (p === 'unpaid' && m === 'asleep')) { rm.tog++; if (s.farmLevel >= 10) rm.tog10++; } if (m === 'unpaid') { rm.unpEnter++; if (s.farmLevel >= 10) rm.unpEnter10++; } }
       prevMood[id] = m; }
@@ -183,7 +185,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
     // taps
     let taps = 0;
     if (P.tap === 'ac7' || P.tap === 'idle') { if (t >= tapT) { tapT += V.tapInterval(); if (P.tap === 'ac7' || !s.workers.coop_hand) taps = 1; } }
-    else while (t >= fixT) { fixT += 1 / (P.tap as number); taps++; }
+    else if (P.tap !== 'never') while (t >= fixT) { fixT += 1 / (P.tap as number); taps++; }
     for (let k = 0; k < taps; k++) { s = apply(s, { type: 'collect' }, b, ev); drain(t); obs('collect', t);
       if (K.on && present && s.farmLevel >= 8 && t - lastCred >= 1.0 - 1e-9) { lastCred = t; lastTap = t; streak = Math.min(K.streakCap, streak + 0.01); credit('tapcoins', K.tapShare * refI()); } }
     // affordability (F10..max-1), and F30+ separately
@@ -388,4 +390,16 @@ export function pressureRuns(b: B, E: Record<string, string | undefined>, io: Pr
     if (E.TOG) io.tog?.(`${E.TOG}.${pf}.${ck}.p${PERT}.json`, JSON.stringify({ prof: pf, cfg: ck, pert: PERT, d6Bar: 12, def: 'Asleep<->Unpaid mood flips of market_hand + coop_hand per 1800 s of run time (m5s/m5lx rm.tog)', rows: togs }));
     io.log?.([pf, ck, 'p' + PERT, 'done'].join(' '));
   }
+}
+
+/** F5: real source systems only (NO Economy overlay / rc2 model). Idle retains the port's
+ * pre-Coop-Hand collection policy; never is strictly no Collect action, including F0.
+ * 10 Hz frames are fully attended; wall time is injected, deterministic and relative to run start.
+ * Golden catch / Broody pop / calls deliberately await their shipped APIs; do not fake them here. */
+export function runSource(b: B, seed: number, profile: string, T: number, opt: RunOpts = {}) {
+  const P = profile === 'never' ? { ...PROFS.idle, tap: 'never' as const } : own(PROFS, profile);
+  if (!P) throw new BotUsageError(`runSource: unknown profile ${profile}`);
+  checkEnv({ SEEDS: '1', S0: String(seed), T: String(T) });
+  return run(b, seed, P, { ...M5X_STACKS.none, on: false, rc2: undefined }, T,
+    { ...opt, clock: opt.clock ?? (t => ({ focus: true, nowMs: t * 1000 })) });
 }
