@@ -3,6 +3,20 @@ import { GameState, eggsPerSec } from './state';
 import { prodEggsPerSec, offlineMult } from './tracks';
 import { m4On, clampL } from '../config/formulas';
 import { breedsOffline } from './breeds';
+import { isPaused } from './pause';
+import { WORKERS } from './workers';
+/** §15 / AC-P13: a wall-clock jump accrues no offline eggs while every hired worker is paused.
+ *  Flag off, nobody hired, or any hired worker still active: the grant is unchanged. */
+function offlineAccrualFrozen(s: GameState, b: Balance): boolean {
+  let hired = 0;
+  for (const id of WORKERS) {
+    const w = s.workers[id];
+    if (!w) continue;
+    hired++;
+    if (!isPaused(w, b)) return false;
+  }
+  return hired > 0;
+}
 /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
 export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1): number {
@@ -19,7 +33,8 @@ export function offlineEggs(awayS: number, farmLevel: number, b: Balance, eps = 
 }
 /** Coop untouched; eggs parked in pendingOfflineEggs until the modal's Collect (bypasses coop cap). */
 export function applyOffline(s: GameState, awayMs: number, b: Balance) {
-  const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b))
+  const eggs = offlineAccrualFrozen(s, b) ? 0
+    : m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b))
     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
   const awayS = Math.max(0, Math.min(awayMs / 1000, b.offline.offlineCapSeconds));
   const br = breedsOffline(s, awayMs, b); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off

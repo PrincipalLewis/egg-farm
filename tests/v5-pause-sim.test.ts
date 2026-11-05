@@ -8,10 +8,11 @@ import { balance as b, validateBalance } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { graderMult, hawkerDemandMult } from '../src/sim/workers';
-import { pauseWorker, resumeWorker } from '../src/sim/pause';
+import { isPaused, pauseWorker, resumeWorker } from '../src/sim/pause';
 import { collectPerSec, demandPerSec, marketHandStalled, wagesPerSec } from '../src/econ/income';
+import { applyOffline } from '../src/sim/offline';
 import { m5Load, m5Offline } from '../src/save/m5-fields';
-import { checksum, SAVE_KEY, validate } from '../src/save/save';
+import { checksum, SAVE_KEY, serialize, validate } from '../src/save/save';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import type { SimEvent } from '../src/sim/events';
@@ -188,29 +189,128 @@ describe('[AC-P13][§15] committed tracksV7 save with a hired worker', () => {
   const env = JSON.parse(readFileSync(new URL('./fixtures/saves/m5-pause-committed-hired.json', import.meta.url), 'utf8'));
   const raw = env.ls['eggfarm.save'] as string;
   const hired = { energy: 100, cdS: 0 };
-  it('[AC-P13][§15] validate → m5Load keeps Market Hand and Coop Hand; a ≥60 s hide does not drop them', () => {
+  const file = JSON.parse(raw);
+  const t0 = file.savedAt as number;
+  const GAP = 120_000;
+  const boot = (save: string, now: number) => {
+    const kv = mem(); kv.setItem(SAVE_KEY, save);
+    const g = new Game(P, kv, () => now, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
+    return { kv, g };
+  };
+  const bothPaused = (s: GameState) => pauseWorker(pauseWorker(s, 'market_hand', P), 'coop_hand', P);
+  const bothResumed = (s: GameState) => resumeWorker(resumeWorker(s, 'market_hand', P), 'coop_hand', P);
+
+  it('[AC-P13][§15] the fixture is a committed tracksV7 save and validate → m5Load keeps both hires', () => {
     expect(env.idb.main).toBe(raw);
-    const file = JSON.parse(raw);
     expect(file.version).toBe(6);
     expect(file.sum).toBe(checksum(JSON.stringify(file.state)));
     expect(file.state.tracksV7).toBe(1);
     expect(file.state.v6BackupId).toBe('b42507d60308d615');
     expect(file.state.farmLevel).toBeGreaterThanOrEqual(tc.pause_unlock_farm);
     expect(file.state.workers).toEqual({ market_hand: hired, coop_hand: hired });
-    const v = validate(raw, P, file.savedAt);
+    const v = validate(raw, P, t0);
     if (!v.ok) throw new Error(v.reason);
-    expect(v.file.state.tracksV7).toBe(1);
     const ev: SimEvent[] = [];
-    const loaded = m5Load(v.file.state, P, file.savedAt, ev);
-    expect(loaded.workers).toEqual({ market_hand: hired, coop_hand: hired });
+    expect(m5Load(v.file.state, P, t0, ev).workers).toEqual({ market_hand: hired, coop_hand: hired });
     expect(ev).toEqual([]);
-    const kv = mem(); kv.setItem(SAVE_KEY, raw);
-    const t0 = file.savedAt as number;
-    let t = t0;
-    const g = new Game(P, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
+  });
+
+  it('[AC-P13][§15] loads the fixture, pauses, resumes, round-trips, and exports without throw', () => {
+    const { kv, g } = boot(raw, t0);
     expect(g.state.workers).toEqual({ market_hand: hired, coop_hand: hired });
-    g.onHidden(t); t += 120_000; g.onShown(t);
-    expect(g.state.workers).toEqual({ market_hand: hired, coop_hand: hired });
-    expect(g.state.farmLevel).toBeGreaterThanOrEqual(tc.pause_unlock_farm);
+    g.state = bothPaused(g.state);
+    expect(isPaused(g.state.workers.market_hand, P)).toBe(true);
+    expect(isPaused(g.state.workers.coop_hand, P)).toBe(true);
+    g.save();
+    expect(() => g.telemetry.exportJSON()).not.toThrow();
+    expect(JSON.parse(g.telemetry.exportJSON()).events).toBeInstanceOf(Array);
+    expect(() => serialize(g.state, t0)).not.toThrow();
+    const pausedRaw = kv.getItem(SAVE_KEY)!;
+    const pausedAt = JSON.parse(pausedRaw).savedAt as number;
+    const { kv: kv2, g: g2 } = boot(pausedRaw, pausedAt);
+    expect(g2.state.workers.market_hand!.paused).toBe(true);
+    expect(g2.state.workers.coop_hand!.paused).toBe(true);
+    g2.state = bothResumed(g2.state);
+    expect(isPaused(g2.state.workers.market_hand, P)).toBe(false);
+    expect(isPaused(g2.state.workers.coop_hand, P)).toBe(false);
+    g2.save();
+    expect(() => g2.telemetry.exportJSON()).not.toThrow();
+    const resumedRaw = kv2.getItem(SAVE_KEY)!;
+    const round = boot(resumedRaw, JSON.parse(resumedRaw).savedAt).g;
+    expect(isPaused(round.state.workers.market_hand, P)).toBe(false);
+    expect(round.state.workers.coop_hand!.paused).toBe(false);
+    expect(round.state.workers.market_hand!.callLockoutS).toBe(LOCK);
+  });
+
+  it('[AC-P13][§15] pause freezes income and offline accrual: a clock change while paused grants 0', () => {
+    const { g } = boot(raw, t0);
+    const open = g.state;
+    const ev: SimEvent[] = [];
+    const working = step(open, 5, P, ev);
+    expect(working.coinsCents).toBeLessThan(open.coinsCents);
+    expect(ev.some(e => e.type === 'wage')).toBe(true);
+    const paused = bothPaused(open);
+    expect(wagesPerSec(paused, P)).toBe(0);
+    const held: SimEvent[] = [];
+    const still = step(paused, 5, P, held);
+    expect(still.coinsCents).toBe(paused.coinsCents);
+    expect(still.basket).toBe(paused.basket);
+    expect(held.filter(e => e.type === 'wage' || e.type === 'worker_collect')).toEqual([]);
+    expect(still.workers.market_hand!.cdS).toBe(paused.workers.market_hand!.cdS);
+    g.state = paused;
+    const coins = g.state.coinsCents, pending = g.state.pendingOfflineEggs, basket = g.state.basket;
+    g.onHidden(t0);
+    expect(g.onShown(t0 + GAP)).toBe(0);
+    expect(g.state.pendingOfflineEggs).toBe(pending);
+    expect(g.state.coinsCents).toBe(coins);
+    expect(g.state.basket).toBe(basket);
+    expect(applyOffline(open, GAP, P).eggs).toBeGreaterThan(0);
+  });
+
+  it('[AC-P13][§15] resume does not double-credit the paused clock change', () => {
+    const { g } = boot(raw, t0);
+    const openGrant = applyOffline(g.state, GAP, P).eggs;
+    expect(openGrant).toBeGreaterThan(0);
+    g.state = bothPaused(g.state);
+    g.onHidden(t0);
+    const pausedGrant = g.onShown(t0 + GAP);
+    expect(pausedGrant).toBe(0);
+    g.state = bothResumed(g.state);
+    const t1 = t0 + GAP;
+    g.onHidden(t1);
+    const resumedGrant = g.onShown(t1 + GAP);
+    expect(resumedGrant).toBe(openGrant);
+    expect(pausedGrant + resumedGrant).toBe(openGrant);
+  });
+
+  it('[AC-P13][§15] paused survives save/load', () => {
+    const { kv, g } = boot(raw, t0);
+    g.state = bothPaused(g.state);
+    g.save();
+    const stored = kv.getItem(SAVE_KEY)!;
+    const body = JSON.parse(stored);
+    expect(body.state.workers.market_hand.paused).toBe(true);
+    expect(body.state.workers.coop_hand.paused).toBe(true);
+    expect(body.sum).toBe(checksum(JSON.stringify(body.state)));
+    const again = boot(stored, body.savedAt).g;
+    expect(isPaused(again.state.workers.market_hand, P)).toBe(true);
+    expect(isPaused(again.state.workers.coop_hand, P)).toBe(true);
+    expect(again.state.workers.market_hand).toMatchObject({ energy: 100, cdS: 0, paused: true });
+  });
+
+  it('[AC-P13][§15] legacy save without a pause field loads unpaused', () => {
+    expect('paused' in file.state.workers.market_hand).toBe(false);
+    expect('paused' in file.state.workers.coop_hand).toBe(false);
+    const v = validate(raw, P, t0);
+    if (!v.ok) throw new Error(v.reason);
+    expect(isPaused(v.file.state.workers.market_hand, P)).toBe(false);
+    expect(isPaused(v.file.state.workers.coop_hand, P)).toBe(false);
+    const ev: SimEvent[] = [];
+    const worked = step(v.file.state, 1, P, ev);
+    expect(ev.some(e => e.type === 'wage')).toBe(true);
+    expect(worked.coinsCents).toBeLessThan(v.file.state.coinsCents);
+    const { g } = boot(raw, t0);
+    expect(isPaused(g.state.workers.market_hand, P)).toBe(false);
+    expect(g.state.workers.market_hand!.paused).toBeUndefined();
   });
 });
