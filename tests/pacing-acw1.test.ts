@@ -9,7 +9,7 @@ import { median } from './bot';
 // BBv2 / BB-AC13 signed re-baseline: QA-D-1105-ACW1, Economy+HoQA, 2026-11-05.
 // REGRESSION BASELINE ONLY, not a design-gate change; Python has no M4 model.
 // Same code as the build, so this is not an independent check. pass10 = percentage reaching F10 within 900 s.
-// Evidence: investigation b563ae6c, seeds d1529197, countersign sha256456f94bc.
+// Evidence: investigation b563ae6c, seeds d1529197, countersign sha25666764c12cf07845b468ce7d54d8ea6d320ef081d55cc95cc9701904e4b5a4a04 (supersedes 456f94bc, same values).
 // Seeds 1-200: 200/200 F10 <=900 s, median F10 620 s, F18 1180 s; confirm 201-299: 99/99, 620 s / 1200 s.
 // Zero F10 regressions (no seed got slower flag-on); isolated F18 seed 208 +100 s, still within gates.
 const BBV2_BASELINE = { pass10: 100, medF10: 10.333333, medF18: 19.666667 };
