@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-// SG-12 qaPicker (stopgap v1.2.6 fdc1c199 SG-12) as reused by BBv2 (spec v1.0.3 27e753d8 §6, PMFU BB12; Card #12 4a154bb4):
+// SG-12 qaPicker (stopgap v1.2.6 fdc1c199 SG-12) as reused by BBv2 (spec v1.0.4 4ea3841a §6, PMFU BB12; Card #12 6cb27b3d):
 // BBV2-AC15 (fields, read-only), BBV2-AC2 (a)/(b) jsdom analog (the browser run on the RC dist is QA's), mark = the rendered ★,
-// suppressed rules (BBV2-AC14 support).
+// suppressed rules (BBV2-AC14: tested property is `suppressed && hint.affordable` = 0).
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { Game } from '../src/game';
@@ -31,8 +31,10 @@ async function mount(state: object, bal: Balance, tab = 'farm') {
 const FIELDS = ['v', 't', 'm4', 'hint', 'hintRaw', 'highlight', 'mark', 'suppressed', 'heldMs', 'evals', 'changes', 'history'];
 const chip = () => document.querySelector<HTMLElement>('[data-best-buy]')?.dataset.bestBuy ?? null;
 const stripStar = () => /★/.test(document.querySelector('#goal')!.textContent!);
-/** The strip ★ template exists only for the F4 targets HENS / VALUE / COLL (goalLabelParts); FARM / workers strips have none. */
+/** Strip ★ via goalLabelParts: F4 targets always; FARM too when bestBuyV2=1 (spec v1.0.4 §6). Workers still have none. */
 const F4 = (k?: string | null) => k === 'HENS' || k === 'VALUE' || k === 'COLL';
+const stripWantsStar = (q: any, bb2: boolean) =>
+  q.mark !== null && q.mark === q.hint?.key && (F4(q.hint?.key) || (bb2 && q.hint?.key === 'FARM'));
 
 describe('BBV2-AC15 [B] qaPicker v1 fields unchanged with the flag on; read-only', () => {
   it.each([['bestBuyV2 0', OFF], ['bestBuyV2 1', ON]])('%s: exactly the SG-12 field names and types (pick = key/affordable/costCents/payback)', async (_n, b) => {
@@ -69,7 +71,7 @@ describe('PMFU BB12: mark is the exact ★ the chip and the strip render; suppre
       const { ui } = await mount(s, b, tab); const q = ui.qaPicker();
       expect(chip() === null || chip() === q.mark, `${name} chip ${chip()} mark ${q.mark}`).toBe(true); // the visible row's chip names mark
       if (q.mark === null) expect(chip(), name).toBeNull();
-      expect(stripStar(), name).toBe(q.mark !== null && F4(q.hint?.key) && q.mark === q.hint?.key);
+      expect(stripStar(), name).toBe(stripWantsStar(q, b === ON));
       expect(q.suppressed, name).toBe(q.hint !== null && q.mark === null);
     }
   });
@@ -81,9 +83,8 @@ describe('PMFU BB12: mark is the exact ★ the chip and the strip render; suppre
     for (const [name, s, tab] of cases) { const { g, ui } = await mount(s, ON, tab); const q = ui.qaPicker();
       if (q.suppressed && q.hint?.affordable) expect(meaningfulKeys(g.state, ON).size, name).toBe(0); }
   });
-  // NOTE (open Q to PMFU/HoQA): the literal SG-12 formula is also true for an UNAFFORDABLE hint (single-arg bestBuyMark = null),
-  // e.g. FX-L17 $3,000 hint FARM affordable:false at either flag value. The ship-config assertion is therefore on the nulled state
-  // = an affordable hint whose ★ was nulled.
+  // v1.0.4 §6: literal `suppressed` is true for every unaffordable hint (★ affordable-only); the QA property is
+  // `suppressed && hint.affordable` = 0. Ship-config assertion below uses that property.
   it('ship config (bestBuyV2 1 + zeroGainUi 1), below Farm L30: never an affordable hint with a null ★ (fixtures + a 240 s FX-L17 run; post-L30 needs the #97 ZG filter)', async () => {
     const SHIP = bal(1, { zeroGainUi: 1 }), nulled = (q: any) => q.suppressed && q.hint?.affordable;
     for (const [name, s, tab] of cases.filter(c => c[0] !== 'post-L30')) { const { ui } = await mount(s, SHIP, tab); expect(nulled(ui.qaPicker()), name).toBeFalsy(); }
@@ -93,10 +94,24 @@ describe('PMFU BB12: mark is the exact ★ the chip and the strip render; suppre
 });
 
 describe('BBV2-AC2 (a)/(b) jsdom analog on FX-L17 (DOM/page.clock checks on the RC dist and build:qa are QA browser runs)', () => {
-  it('(a) $37,300: first frame hint = mark = FARM, chip [data-best-buy=FARM], strip ★ on Farm', async () => {
+  // v1.0.4 §6 Farm strip ★: FARM is an ordinary meaningful row — affordable FARM hint => mark==='FARM' and strip+row show ★;
+  // unaffordable FARM hint = countdown without ★. A missing ★ on an affordable FARM hint is a bug.
+  it('(a) $37,300 affordable FARM: hint = mark = FARM, chip [data-best-buy=FARM], strip ★ on Farm', async () => {
     const { ui } = await mount(L17(3.73e6), ON); const q = ui.qaPicker();
-    expect(q.hint.key).toBe('FARM'); expect(q.mark).toBe('FARM'); expect(chip()).toBe('FARM');
-    expect(stripStar()).toBe(false); // OPEN Q (PMFU): the FARM strip has no ★ template on rc/v5 (F4 targets only), so "strip ★ on Farm" can't render
+    expect(q.hint).toMatchObject({ key: 'FARM', affordable: true }); expect(q.mark).toBe('FARM'); expect(chip()).toBe('FARM');
+    expect(stripStar()).toBe(true);
+    expect(document.querySelector('#goal .goal-label .ng-star')?.textContent).toBe('★ ');
+  });
+  it('(a′) $3,000 unaffordable FARM: hint FARM, mark null, no chip, no strip ★', async () => {
+    const { ui } = await mount(L17(3e5), ON); const q = ui.qaPicker();
+    expect(q.hint).toMatchObject({ key: 'FARM', affordable: false }); expect(q.mark).toBeNull();
+    expect(chip()).toBeNull(); expect(stripStar()).toBe(false);
+    expect(document.querySelector('#goal .goal-label .ng-star')).toBeNull();
+  });
+  it('(a″) bestBuyV2=0 control: affordable FARM still has mark+chip but no strip ★ (flag-off template unchanged)', async () => {
+    const { ui } = await mount(L17(3.73e6), OFF); const q = ui.qaPicker();
+    expect(q.hint).toMatchObject({ key: 'FARM', affordable: true }); expect(q.mark).toBe('FARM'); expect(chip()).toBe('FARM');
+    expect(stripStar()).toBe(false); expect(document.querySelector('#goal .goal-label')!.classList.contains('ng')).toBe(false);
   });
   it('(b) $3,000 + 240 s sim, no buy input: no history entry with key or mark COLL; every non-null mark meaningful; hint starts FARM unaffordable/null; at >= $37,300 hint = mark = FARM', async () => {
     const { g, ui } = await mount(L17(3e5), ON); const q0 = ui.qaPicker();

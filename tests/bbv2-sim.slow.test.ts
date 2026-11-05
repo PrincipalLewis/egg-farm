@@ -1,4 +1,4 @@
-// BBV2-AC9 / AC14 [B] seeds 1–200 (Card #12 4a154bb4 N3/N6). Run with `npm run test:slow` (lane H; one heavy sim at a time).
+// BBV2-AC9 / AC14 [B] seeds 1–200 (Card #12 6cb27b3d N3/N6). Run with `npm run test:slow` (lane H; one heavy sim at a time).
 import { describe, it, expect } from 'vitest';
 import { ac9, ac14, AC14_CONFIGS, seeds } from './bbv2-sim';
 import { ON } from './bbv2-fixtures';

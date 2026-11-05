@@ -1,4 +1,4 @@
-// BBv2 sim-AC drivers (spec v1.0.3 27e753d8 §7; Card #12 4a154bb4 BBV2-AC8/9/14). Shared by the unit subset (bbv2-sim.test.ts)
+// BBv2 sim-AC drivers (spec v1.0.4 4ea3841a §7; Card #12 6cb27b3d BBV2-AC8/9/14). Shared by the unit subset (bbv2-sim.test.ts)
 // and the seeds 1–200 run (bbv2-sim.slow.test.ts). Pure functions of (balance, seeds): deterministic.
 import type { Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
@@ -13,7 +13,7 @@ import { runM2 } from './bot-m2';
 import { SellerVariance, VAR_DEFAULT } from './seller-variance';
 import { bal } from './bbv2-fixtures';
 
-/** BBV2-AC14 run configs (HoQA 14:38, spec v1.0.3 BB-AC14). */
+/** BBV2-AC14 run configs (HoQA 14:38, spec v1.0.4 BB-AC14). */
 export const AC14_CONFIGS = {
   'DECISIVE bestBuyV2=1 zeroGainUi=0': bal(1, { zeroGainUi: 0 }),
   'CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1': bal(1, { zeroGainUi: 1 }),
@@ -55,8 +55,8 @@ export function ac9(b: Balance, ss: number[]) {
 }
 
 /** BBV2-AC14: trace the hint (DualPicker, as app.ts renderGoal) every integer sim second of both bots. Violation = the hint is a
- *  zero-gain row while a meaningful row is offered. Also counts `suppressed` (hint !== null && mark === null, PMFU BB12) split by
- *  hint affordability, and the subset with an affordable hint below L30 (must be 0: suppression only in the post-L30 net). */
+ *  zero-gain row while a meaningful row is offered. Also counts literal `suppressed` (hint !== null && mark === null) split by
+ *  hint affordability; the v1.0.4 QA property is `suppressed && hint.affordable` = 0 (below L30 must be 0; post-L30 mark-null net only at zg0). */
 export function ac14(b: Balance, ss: number[]) {
   const out = { states: 0, violations: 0, suppressed: 0, suppressedAffordable: 0, suppressedAffordableBelow30: 0, examples: [] as string[] };
   try {
@@ -71,5 +71,5 @@ export function ac14(b: Balance, ss: number[]) {
       run(b, sd);
     }
   } finally { STATE_TRACE.fn = null; }
-  return out; // v5 has no SG-8 emitter (spec v1.0.3 §5, D-HOE-33): no event count is probed here
+  return out; // v5 has no SG-8 emitter (spec v1.0.4 §5, D-HOE-33): no event count is probed here
 }

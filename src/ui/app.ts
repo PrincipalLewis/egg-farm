@@ -494,7 +494,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
   // v5 zeroGainUi §5.6: with the flag on, ZG rows are dropped from both scorers BEFORE the pick (flag off: the stock DualPicker).
   const picker = ZG ? new DualPicker(zgFiltered(defaultScorer), zgFiltered(allScorer)) : new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
-  // BBv2 (spec v1.0.3 §6, PMFU BB12): `hintMark` is THE ★ key the chip and the strip render from (flag read once at boot):
+  // BBv2 (spec v1.0.4 §6, PMFU BB12): `hintMark` is THE ★ key the chip and the strip render from (flag read once at boot):
   // bestBuyV2 = 1 -> the Part A ★ (affordable AND meaningful, else null = the inert mark-null net); 0 -> today's single-arg bestBuyMark.
   const BB2 = bestBuyV2On(b); let hintMark: BuyKey | null = null;
   let bbMarkSinceT = 0; if (g.bbTel) g.bbCtx = () => { const t = now(); return { t, mark: hintMark, markSinceT: bbMarkSinceT, rateCentsPerS: income.centsPerSec(t) }; };
@@ -889,7 +889,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
   if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
-  /** SG-12 `qaPicker()` (v: 1, fields exactly as SG-12; v5 sources per BBv2 spec v1.0.3 §6): read-only, fresh JSON-safe object, no state,
+  /** SG-12 `qaPicker()` (v: 1, fields exactly as SG-12; v5 sources per BBv2 spec v1.0.4 §6): read-only, fresh JSON-safe object, no state,
    *  DOM, picker or telemetry change. hintRaw = picker.hint.shown (after the ZG filter and Part A, before the highlight merge). */
   const qaPick = (p: SharedPick | null) => p && { key: p.key, affordable: p.affordable, costCents: p.costCents, payback: p.payback === Infinity ? 'Infinity' : p.payback };
   return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; },

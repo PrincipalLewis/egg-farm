@@ -1,4 +1,4 @@
-// BBv2 Part A (spec v1.0.3 27e753d8 §2.1–2.4, §4; Card #12 4a154bb4 BBV2-AC1/2c/3/4/5/6/11). Flag m4.flags.bestBuyV2.
+// BBv2 Part A (spec v1.0.4 4ea3841a §2.1–2.4, §4; Card #12 6cb27b3d BBV2-AC1/2c/3/4/5/6/11). Flag m4.flags.bestBuyV2.
 import { describe, it, expect } from 'vitest';
 import { options, paybackOf, meaningfulKeys, bestPaybackAmong, rankable, bbv2Mark, BUY_ORDER, type BuyKey } from '../src/econ/best-buy';
 import { PickHysteresis, DualPicker, allScorer, type Scorer } from '../src/ui/pick-hysteresis';
