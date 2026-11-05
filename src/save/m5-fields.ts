@@ -39,11 +39,26 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
 /** Golden R3: a fresh gap U[tc_egg_gap_min_s, tc_egg_gap_max_s] from ONE evRng draw (never state.rng). Owned by sim/golden.ts. */
 export { drawGap };
-/** The save shape: session-only keys dropped. The same object (so the same bytes) when none is present. */
-export function m5Persist(s: GameState): GameState {
+/** Session-only keys dropped. The same object (so the same bytes) when none is present. */
+function stripSession(s: GameState): GameState {
   if (!SESSION_ONLY_KEYS.some(k => k in s)) return s;
   const o: any = { ...s, ...(s.breedsRawSlots && s.breeds && { breeds: breedsSaveView(s) }) }; // E10 / PMC Q5: raw unknown slot ids kept
   for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
+}
+/**
+ * Architect B (golden persist): live `s` is never mutated, and this emits no telemetry.
+ * Golden flag on and an on-screen egg: delete the egg on a detached copy, `drawGap` once (advanced `evRngState`
+ * and the new `nextSpawnRemainingS` land together), then the same session strip. Otherwise strip only, including
+ * the F2 same-object identity when no session key is present. A missing balance cannot see the flag, so it strips.
+ * Each call copies the live seed, so a fixed `s0` serialises identically every time. No egg → no draw (after a live
+ * resolve, the caller saves the post-draw state and this must not draw again).
+ */
+export function m5Persist(s: GameState, b?: Balance): GameState {
+  if (b && m5Flag(b, 'golden') && s.goldenEgg != null) {
+    const out: GameState = { ...s }; delete out.goldenEgg; // detached: live egg and live evRng stay
+    return stripSession(drawGap(out, b));
+  }
+  return stripSession(s);
 }
 /** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
 function endCalls(o: any, b: Balance, ev: SimEvent[]) {
@@ -56,7 +71,7 @@ function endCalls(o: any, b: Balance, ev: SimEvent[]) {
  *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
 export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): GameState {
   if (!anyFlag(b) && !m5Flag(b, 'breeds')) return s; // breeds: its own early-out so the six-flag paths stay as they were
-  const o: any = { ...m5Persist(s) }; // hand-edited session keys never load
+  const o: any = { ...m5Persist(s) }; // strip only: a stored countdown (including spawn-due 0) is not re-drawn on load
   const num = (k: string, hi: number) => { if (!(k in o)) return; if (!fin(o[k])) delete o[k]; else o[k] = clamp(o[k], 0, hi); };
   if (m5Flag(b, 'golden')) { num('nextSpawnRemainingS', tc(b, 'egg_gap_max_s')); num('frenzyRemainingS', tc(b, 'frenzy_s')); delete o.frenzyEndAt; } // v1.0 wall-clock name, replaced (R23)
   if ((m5Flag(b, 'golden') || m5Flag(b, 'broody')) && 'evRngState' in o && !isU32(o.evRngState)) delete o.evRngState; // re-derived per D-C2
