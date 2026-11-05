@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// SG-12 qaPicker (stopgap v1.2.6 fdc1c199 SG-12) as reused by BBv2 (spec v1.0.4 4ea3841a §6, PMFU BB12; Card #12 6cb27b3d):
+// SG-12 qaPicker (stopgap v1.2.6 fdc1c199 SG-12) as reused by BBv2 (spec v1.0.4 4ea3841a §6, PMFU BB12; Card #12 9f900304):
 // BBV2-AC15 (fields, read-only), BBV2-AC2 (a)/(b) jsdom analog (the browser run on the RC dist is QA's), mark = the rendered ★,
 // suppressed rules (BBV2-AC14: tested property is `suppressed && hint.affordable` = 0).
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
@@ -85,9 +85,12 @@ describe('PMFU BB12: mark is the exact ★ the chip and the strip render; suppre
   });
   // v1.0.4 §6: literal `suppressed` is true for every unaffordable hint (★ affordable-only); the QA property is
   // `suppressed && hint.affordable` = 0. Ship-config assertion below uses that property.
-  it('ship config (bestBuyV2 1 + zeroGainUi 1), below Farm L30: never an affordable hint with a null ★ (fixtures + a 240 s FX-L17 run; post-L30 needs the #97 ZG filter)', async () => {
+  it('ship config (bestBuyV2 1 + zeroGainUi 1): never an affordable hint with a null ★ at any Farm (D-HOP-14; post-L30 empty BBv2 → no-pick)', async () => {
     const SHIP = bal(1, { zeroGainUi: 1 }), nulled = (q: any) => q.suppressed && q.hint?.affordable;
-    for (const [name, s, tab] of cases.filter(c => c[0] !== 'post-L30')) { const { ui } = await mount(s, SHIP, tab); expect(nulled(ui.qaPicker()), name).toBeFalsy(); }
+    for (const [name, s, tab] of cases) { const { ui } = await mount(s, SHIP, tab); expect(nulled(ui.qaPicker()), name).toBeFalsy(); }
+    // post-L30 fixture: hint null (no-pick), not an affordable null-★
+    const { ui: uiL30 } = await mount(fx(30, 30, 30, 22, { ...ALLW, coinsCents: 1e12 }), SHIP, 'collection');
+    expect(uiL30.qaPicker().hint).toBeNull();
     const { g, ui } = await mount(L17(3e5), SHIP);
     for (let i = 0; i < 2400; i++) { t += 100; g.frame(); ui.render(); expect(nulled(ui.qaPicker())).toBeFalsy(); }
   });

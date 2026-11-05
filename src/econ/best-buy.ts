@@ -11,7 +11,7 @@ import { farmCost, collectionCost } from '../sim/state';
 import { hireCostCents, unlockFarm, graderTierCostCents, mood, isOff, type WorkerId } from '../sim/workers';
 import { incomePerSec } from './income';
 import { m4On } from '../config/formulas';
-import { bestBuyV2On } from '../config/flags';
+import { bestBuyV2On, flagOn } from '../config/flags';
 import { trackLock, trackCost } from '../sim/tracks';
 
 export type BuyKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
@@ -79,11 +79,13 @@ export function meaningfulKeys(s: GameState, b: Balance): Set<BuyKey> {
 }
 export const isMeaningful = (s: GameState, b: Balance, key: BuyKey): boolean => meaningfulKeys(s, b).has(key);
 /** BBv2-1: the keys a picker may rank. Flag off: `keys` unchanged. Flag on: only the meaningful ones while any meaningful row is
- *  offered; when none is offered (after Farm L30 = MAX) every key stays (zero-gain strip target allowed, never ★). */
+ *  offered; when none is offered (after Farm L30 = MAX): zeroGainUi = 0 keeps every key (mark-null net / DECISIVE); ship
+ *  (zeroGainUi = 1) returns empty → no-pick strip / BR-BB4 (v1.0.4 §2.7/§4.1; D-HOP-2026-11-05-14). */
 export function rankable<K extends BuyKey>(s: GameState, b: Balance, keys: readonly K[]): K[] {
   if (!bestBuyV2On(b)) return [...keys];
   const m = meaningfulKeys(s, b);
-  return m.size ? keys.filter(k => m.has(k)) : [...keys];
+  if (m.size) return keys.filter(k => m.has(k));
+  return flagOn(b, 'zeroGainUi') ? [] : [...keys];
 }
 /** BBv2 ★ key (PMFU BB12): the hint's key when it is affordable and meaningful, else null (the inert mark-null net). */
 export const bbv2Mark = (pick: { key: BuyKey; affordable: boolean } | null | undefined, s: GameState, b: Balance): BuyKey | null =>

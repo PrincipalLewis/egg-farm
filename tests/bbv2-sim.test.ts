@@ -1,4 +1,4 @@
-// BBV2-AC8 / AC9 / AC14 [B] unit subset (Card #12 6cb27b3d; spec v1.0.4 4ea3841a §7). Seeds 1–200: bbv2-sim.slow.test.ts.
+// BBV2-AC8 / AC9 / AC14 [B] unit subset (Card #12 9f900304; spec v1.0.4 4ea3841a §7; Card #12 9f900304 / D-HOP-2026-11-05-14). Seeds 1–200: bbv2-sim.slow.test.ts.
 import { describe, it, expect } from 'vitest';
 import { ac8, ac9, ac14, AC14_CONFIGS, seeds } from './bbv2-sim';
 import { ON } from './bbv2-fixtures';
@@ -28,6 +28,8 @@ describe('BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row i
   for (const [label, b] of Object.entries(AC14_CONFIGS)) it(`${label}: seeds 1–3 (1–200 in the slow test)`, () => {
     const r = ac14(b, seeds(1, 3)); console.log(`AC14 ${label} seeds 1-3: ${JSON.stringify(r)}`);
     expect(r.states).toBeGreaterThan(0); expect(r.violations).toBe(0); expect(r.examples).toEqual([]);
-    expect(r.suppressedAffordableBelow30).toBe(0); // v1.0.4: suppressed&&hint.affordable only allowed in post-L30 mark-null net (zg0 decisive)
+    expect(r.suppressedAffordableBelow30).toBe(0); // v1.0.4 / D-HOP-14: never below L30
+    // CONFIRMATORY ship (bb1+zg1): no exception at any Farm (empty BBv2 set → no-pick). DECISIVE zg-off: post-L30 net report-only.
+    if (label.startsWith('CONFIRMATORY')) expect(r.suppressedAffordable).toBe(0);
   }, 120_000);
 });

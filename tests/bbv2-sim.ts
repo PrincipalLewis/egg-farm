@@ -1,4 +1,4 @@
-// BBv2 sim-AC drivers (spec v1.0.4 4ea3841a §7; Card #12 6cb27b3d BBV2-AC8/9/14). Shared by the unit subset (bbv2-sim.test.ts)
+// BBv2 sim-AC drivers (spec v1.0.4 4ea3841a §7; Card #12 9f900304 BBV2-AC8/9/14). Shared by the unit subset (bbv2-sim.test.ts)
 // and the seeds 1–200 run (bbv2-sim.slow.test.ts). Pure functions of (balance, seeds): deterministic.
 import type { Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
@@ -56,7 +56,8 @@ export function ac9(b: Balance, ss: number[]) {
 
 /** BBV2-AC14: trace the hint (DualPicker, as app.ts renderGoal) every integer sim second of both bots. Violation = the hint is a
  *  zero-gain row while a meaningful row is offered. Also counts literal `suppressed` (hint !== null && mark === null) split by
- *  hint affordability; the v1.0.4 QA property is `suppressed && hint.affordable` = 0 (below L30 must be 0; post-L30 mark-null net only at zg0). */
+ *  hint affordability; v1.0.4 / D-HOP-2026-11-05-14: CONFIRMATORY ship `suppressed && hint.affordable` = 0 at ALL Farms (empty BBv2 → no-pick);
+ *  DECISIVE zg-off may count post-L30 mark-null net (report-only). */
 export function ac14(b: Balance, ss: number[]) {
   const out = { states: 0, violations: 0, suppressed: 0, suppressedAffordable: 0, suppressedAffordableBelow30: 0, examples: [] as string[] };
   try {
