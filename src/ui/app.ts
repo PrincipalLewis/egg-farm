@@ -182,7 +182,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- Panels ----------
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
   // Slim v5: one attended source; Market remains a play surface. Shift owns its registered lifecycle.
-  wireAttended(g, makeDialogOpen({ sheet: () => open }));
+  wireAttended(g, makeDialogOpen({ sheet: () => open, docked: () => docked.matches }));
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');

@@ -1,10 +1,38 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { readFileSync } from 'node:fs';
 import { Game } from '../src/game';
 import { balance } from '../src/config/balance';
 import { mem } from './helpers';
 import { attendedProbe, clearSheets, registerSheet, anySheetOpen, openSheets, makeDialogOpen, wireAttended } from '../src/ui/overlay';
+
+import { initialState } from '../src/sim/state';
+import { serialize, SAVE_KEY } from '../src/save/save';
+
+async function mountProbe() {
+  let docked = false; const listeners: Array<() => void> = [];
+  window.matchMedia = ((q: string) => ({
+    get matches() { return q.includes('min-width:960px') && docked; },
+    media: q,
+    addEventListener(_: string, f: () => void) { listeners.push(f); },
+    removeEventListener() {}, addListener() {}, removeListener() {},
+  })) as any;
+  Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+  vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+  globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => { cb(0); return 0; }) as any;
+  const kv = mem() as any; kv.removeItem = (k: string) => kv.m.delete(k);
+  kv.setItem(SAVE_KEY, serialize({ ...initialState(balance), tracksV7: 1, seenTracksExplainer: true }, 1760000000000));
+  kv.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false }));
+  const g = new Game(balance, kv, () => 1760000000500);
+  const spy = vi.spyOn(g, 'setAttendedProbe');
+  const { mountApp } = await import('../src/ui/app');
+  document.body.innerHTML = '<div id="app"></div>';
+  const ui = mountApp(document.getElementById('app')!, g, balance, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
+  const probe = spy.mock.calls[0][0] as () => boolean;
+  const setDocked = (v: boolean) => { docked = v; listeners.forEach(f => f()); window.dispatchEvent(new Event('resize')); };
+  return { probe, setDocked, ui, g };
+}
 
 beforeEach(() => { clearSheets(); document.body.innerHTML = ''; });
 afterEach(() => { clearSheets(); document.body.innerHTML = ''; });
@@ -65,6 +93,17 @@ describe('slim sheet attendance API (not real Shift integration)', () => {
     focused = true; dialog = true; expect(read()).toBe(false);
     dialog = false; doc.visibilityState = 'hidden'; expect(read()).toBe(false);
   });
+
+  it('[RF-AC16][HoQA-F1] docked layout does not treat Upgrades as a dialog; registered sheets still suspend', () => {
+    let docked = true, sheet: 'market' | 'upgrades' | null = 'upgrades';
+    let read = () => false;
+    wireAttended({ setAttendedProbe(fn) { read = fn; } }, makeDialogOpen({ sheet: () => sheet, docked: () => docked }), visibleFocused);
+    expect(read()).toBe(true);
+    const shift = registerSheet('shift'); shift.opened(); expect(read()).toBe(false);
+    shift.closeComplete(); expect(read()).toBe(true);
+    docked = false; expect(read()).toBe(false);
+    sheet = null; expect(read()).toBe(true);
+  });
   it('[RF-AC16][Q-AB-N8] Market stays a play surface; Upgrades remains a dialog', () => {
     expect(probe('market')()).toBe(true); expect(probe('upgrades')()).toBe(false);
     const shift = registerSheet('shift'); shift.opened(); expect(probe('market')()).toBe(false);
@@ -88,5 +127,35 @@ describe('slim sheet attendance API (not real Shift integration)', () => {
     expect(guard).toContain("'eggfarmQa'");
     const main = readFileSync(`${process.cwd()}/src/main.ts`, 'utf8');
     expect(main).toContain('if (IOS_FLAG_ENABLED) (window as any).eggfarm = g');
+  });
+});
+
+describe('slim attendance layout transitions (HoQA F1)', () => {
+  it('[RF-AC16][HoQA-F1] mobile Upgrades -> docked resumes attendance', async () => {
+    const { probe, setDocked, ui } = await mountProbe();
+    ui.openPanel('upgrades'); expect(probe()).toBe(false);
+    setDocked(true); expect(probe()).toBe(true);
+  });
+  it('[RF-AC16][HoQA-F1] docked -> mobile re-suspends when Upgrades was still open', async () => {
+    const { probe, setDocked, ui } = await mountProbe();
+    ui.openPanel('upgrades'); expect(probe()).toBe(false);
+    setDocked(true); expect(probe()).toBe(true);
+    setDocked(false); expect(probe()).toBe(false);
+  });
+  it('[RF-AC16][HoQA-F1] closing Upgrades during resize leaves attendance resumed', async () => {
+    const { probe, setDocked, ui } = await mountProbe();
+    ui.openPanel('upgrades'); expect(probe()).toBe(false);
+    setDocked(true); expect(probe()).toBe(true);
+    ui.openPanel(null); expect(probe()).toBe(true);
+    setDocked(false); expect(probe()).toBe(true);
+  });
+  it('[RF-AC16][HoQA-F1][Q-AB-N7] registered sheet stays suspended at every width through closeComplete', async () => {
+    const { probe, setDocked } = await mountProbe();
+    const { registerSheet } = await import('../src/ui/overlay');
+    const shift = registerSheet('shift');
+    shift.opened(); expect(probe()).toBe(false);
+    setDocked(true); expect(probe()).toBe(false);
+    setDocked(false); expect(probe()).toBe(false);
+    shift.closeComplete(); expect(probe()).toBe(true);
   });
 });

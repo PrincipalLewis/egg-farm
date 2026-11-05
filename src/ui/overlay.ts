@@ -35,13 +35,16 @@ export const clearSheets = (): void => { sheets.clear(); };
 
 export interface DialogSources {
   sheet(): 'market' | 'upgrades' | null;
+  /** Current docked landscape layout. Permanently docked Upgrades is a play surface, not a dialog. */
+  docked?: () => boolean;
   doc?: Pick<Document, 'querySelector'>;
 }
 /** Existing dialogs/explainer and mobile Upgrades suspend attendance. Market remains a play surface.
- * The permanently docked Upgrades panel is not an open modal; registered sheets still suspend at every width. */
+ * Permanently docked Upgrades is not an open modal; registered sheets still suspend at every width. */
 export const makeDialogOpen = (src: DialogSources) => (): boolean => {
   const doc = src.doc ?? document;
-  return !!doc.querySelector(DIALOG_SEL) || explainerOpen(doc as Document) || src.sheet() === 'upgrades' || anySheetOpen();
+  const upgradesDialog = src.sheet() === 'upgrades' && !(src.docked?.() ?? false);
+  return !!doc.querySelector(DIALOG_SEL) || explainerOpen(doc as Document) || upgradesDialog || anySheetOpen();
 };
 /** One Game probe shared by frame focus and player-sale suspension; always reads current state. */
 export const wireAttended = (g: Pick<Game, 'setAttendedProbe'>, dialogOpen: () => boolean, doc: AttendedDoc = document): void =>
