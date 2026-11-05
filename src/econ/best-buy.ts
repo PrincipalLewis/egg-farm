@@ -11,7 +11,7 @@ import { farmCost, collectionCost } from '../sim/state';
 import { hireCostCents, unlockFarm, graderTierCostCents, mood, isOff, type WorkerId } from '../sim/workers';
 import { incomePerSec } from './income';
 import { m4On } from '../config/formulas';
-import { bestBuyV2On, flagOn } from '../config/flags';
+import { bestBuyV2On, zeroGainUiOn } from '../config/flags';
 import { trackLock, trackCost } from '../sim/tracks';
 
 export type BuyKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
@@ -85,7 +85,7 @@ export function rankable<K extends BuyKey>(s: GameState, b: Balance, keys: reado
   if (!bestBuyV2On(b)) return [...keys];
   const m = meaningfulKeys(s, b);
   if (m.size) return keys.filter(k => m.has(k));
-  return flagOn(b, 'zeroGainUi') ? [] : [...keys];
+  return zeroGainUiOn(b) ? [] : [...keys];
 }
 /** BBv2 ★ key (PMFU BB12): the hint's key when it is affordable and meaningful, else null (the inert mark-null net). */
 export const bbv2Mark = (pick: { key: BuyKey; affordable: boolean } | null | undefined, s: GameState, b: Balance): BuyKey | null =>

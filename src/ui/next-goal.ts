@@ -9,7 +9,7 @@ import { m4On } from '../config/formulas';
 import { trackLock, trackCost, trackLevel } from '../sim/tracks';
 import { trackGoalLabel } from './tracks-ui';
 import { bestPaybackAmong, rankable, meaningfulKeys } from '../econ/best-buy';
-import { bestBuyV2On, flagOn } from '../config/flags';
+import { bestBuyV2On, zeroGainUiOn } from '../config/flags';
 import { goalLabelParts, goalLabelSpec, type GoalLabelParts } from './goal-label';
 export type GoalKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
 export type GoalState = 'ready' | 'waiting' | 'noincome' | 'done';
@@ -57,7 +57,7 @@ export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shar
   const c0 = candidates(s, b), rk = rankable(s, b, c0.map(x => x.key)); // BBv2-1/-4 (flag on): rank meaningful rows only, before affordable-first
   const cf = rk.length === c0.length ? c0 : c0.filter(x => rk.includes(x.key));
   // Ship (bb1+zg1): empty BBv2 set → no-pick strip (v1.0.4 §4.1 / D-HOP-14); do not fall back to income-zero capacity rows.
-  const shipEmpty = bestBuyV2On(b) && flagOn(b, 'zeroGainUi') && meaningfulKeys(s, b).size === 0;
+  const shipEmpty = bestBuyV2On(b) && zeroGainUiOn(b) && meaningfulKeys(s, b).size === 0;
   const c = cf.length ? cf : (shipEmpty ? [] : c0);
   if (!c0.length || (shipEmpty && !c.length)) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
   const coins = Math.round(s.coinsCents); // coins at 2 dp vs integer cost; equal = affordable
