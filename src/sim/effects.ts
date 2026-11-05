@@ -10,6 +10,8 @@
 import type { Balance } from '../config/balance';
 import { flagOn, type M5Flag } from '../config/flags';
 import type { GameState } from './state';
+import { abilityActive } from './abilities';
+import { tcNum } from '../config/formulas';
 /** Who made the sale (SimEvent sell.by). Rush keys on 'market_hand'. */
 export type SaleBy = 'player' | 'market_hand';
 /** suspended = this sale/tick has no focus time: every timed effect counts as 1 (D-C3, R23). */
@@ -21,8 +23,12 @@ export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: B
  *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
 export const SALE_EFFECTS: readonly SaleEffect[] = [
   { id: 'streak', flag: 'streak', factor: s => 1 + (s.streakS ?? 0) }, // #2 Collect Streak R8: (1 + s) on every sale while live
+  { id: 'rush', flag: 'abilities', factor: (s, b, c) => (c.by === 'market_hand' && abilityActive(s, b, 'market_hand') ? tcNum(b, 'ability_w1_price_mult') : 1) }, // #4 Rush: Market Hand sales only
+  { id: 'shout', flag: 'abilities', factor: (s, b) => (abilityActive(s, b, 'hawker') ? tcNum(b, 'ability_w3_price_mult') : 1) }, // #4 Shout: all sales
 ];
-export const LAY_EFFECTS: readonly LayEffect[] = [];
+export const LAY_EFFECTS: readonly LayEffect[] = [
+  { id: 'sweep', flag: 'abilities', factor: (s, b) => (abilityActive(s, b, 'coop_hand') ? tcNum(b, 'ability_w2_lay_mult') : 1) }, // #4 Sweep A (D-HOP-16)
+];
 export const PLAYER_SALE: SaleCtx = { by: 'player' };
 /** CCR m1 #80: the ONE player-sale context for a given attended value (Q-F1c-1). sellTo credits with it; every preview uses it. */
 export const playerSaleCtx = (attended: boolean): SaleCtx => attended ? PLAYER_SALE : { by: 'player', suspended: true };

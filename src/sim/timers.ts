@@ -12,6 +12,7 @@ import { ensureEvRng } from './rng';
 import { streakTick } from './streak';
 import { ensureBreeds } from './breeds';
 import { breedsTick } from './breeds-hatch';
+import { abilitiesTick } from './abilities';
 /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
 export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
 /** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
@@ -24,7 +25,9 @@ const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev)
 /** M5.1 breeds (tick-semantics note point 1): settle -> incubator/reveal -> sinceUnlockMs on sim dt (breedsTick), then Q2
  *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
 const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds];
+/** #4 abilities (rules 6, 10): early end, then focus countdown / expiry of running calls. Identity unless m4.flags.abilities. */
+const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
+export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, abilities];
 export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
 export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
   const f = tickFocusS(dt, clock);

@@ -36,7 +36,7 @@ export type M5SimEvent =
   | { type: 'streak_started'; farm_level: number; collection_level: number }
   | { type: 'streak_peak'; value: number; duration_s: number; credited_taps: number; time_at_cap_s: number; extra_coins: number; frenzy_overlap_s: number; reason: string; max_tier: number }
   | { type: 'abilities_unlocked'; farm: number; hired: WorkerId[] }
-  | { type: 'ability_used'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; via_all: boolean; t_since_ready_s: number; in_sheet: boolean }
+  | { type: 'ability_used'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; via_all: boolean; t_since_ready_s: number; in_sheet: boolean; combo: boolean }
   | { type: 'ability_blocked'; worker: WorkerId; reason: AbilityBlockReason; count: number }
   | { type: 'ability_ended'; worker: WorkerId; cause: AbilityEndCause; effect_s: number };
 export type Sink = SimEvent[] | undefined;
