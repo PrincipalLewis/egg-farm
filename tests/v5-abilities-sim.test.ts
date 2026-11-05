@@ -11,6 +11,7 @@ import { prodEggsPerSec } from '../src/sim/tracks';
 import { graderMult, WORKERS, type WorkerId } from '../src/sim/workers';
 import { fireAbility, activateAll, abilityEligibility, abilityActive, comboQualifies } from '../src/sim/abilities';
 import { readFileSync } from 'node:fs';
+import { m5Persist } from '../src/save/m5-fields';
 
 const B = (flags: Partial<Record<M5Flag, number>> = { abilities: 1 }, tcx: Record<string, number> = {}) =>
   ({ ...balance, m4: { ...balance.m4!, enabled: 1, flags: { ...(balance.m4 as any).flags, ...flags }, tc: { ...balance.m4!.tc!, ...tcx } } }) as typeof balance;
@@ -60,7 +61,7 @@ describe('fireAbility', () => {
     const s = farm({ abilities: { hawker: { readyAt: NOW - 7000 } } });
     const r = fireAbility(s, 'hawker', b, opts());
     expect(r.ok).toBe(true);
-    expect(r.state.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS, activeS: DUR });
+    expect(r.state.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS, activeS: DUR, durS: DUR }); // #112 contract: granted duration on the entry
     expect(r.events).toEqual([{ type: 'ability_used', worker: 'hawker', farm: 18, energy_pct: 100, mood: 'working', via_all: false, t_since_ready_s: 7, in_sheet: false, combo: false }]);
     expect(r.ok && r.closeSheet).toBe(false);
     const r2 = fireAbility(s, 'hawker', b, opts({ inSheet: true }));
@@ -98,19 +99,57 @@ describe('combo (rule 11): direct sheet Boost within the manual-refill window', 
   it('sheet Boost in window -> activeS = combo_boost_duration_s, combo:true; card / Activate-all / out of window -> 30 s, combo:false', () => {
     const s = farm();
     const yes = fireAbility(s, 'coop_hand', CB, opts({ inSheet: true, refillAgoSimMs: ctc.combo_window_s * 1000 }));
-    expect(yes.state.abilities!.coop_hand!.activeS).toBe(ctc.combo_boost_duration_s); expect((yes.events[0] as any).combo).toBe(true);
+    expect(yes.state.abilities!.coop_hand).toEqual({ readyAt: NOW + CD_MS, activeS: ctc.combo_boost_duration_s, durS: ctc.combo_boost_duration_s });
+    expect((yes.events[0] as any).combo).toBe(true);
+    expect('abilityDurS' in yes.state).toBe(false); // Architect #112: no top-level duration map
     expect(yes.state.abilities!.coop_hand!.readyAt).toBe(NOW + CD_MS); // cooldown unchanged
     for (const o of [{ inSheet: false, refillAgoSimMs: 0 }, { inSheet: true, viaAll: true, refillAgoSimMs: 0 }, { inSheet: true, refillAgoSimMs: ctc.combo_window_s * 1000 + 1 }]) {
-      const r = fireAbility(s, 'coop_hand', CB, opts(o)); expect(r.state.abilities!.coop_hand!.activeS).toBe(DUR); expect((r.events[0] as any).combo).toBe(false);
+      const r = fireAbility(s, 'coop_hand', CB, opts(o)); expect(r.state.abilities!.coop_hand).toMatchObject({ activeS: DUR, durS: DUR }); expect((r.events[0] as any).combo).toBe(false);
     }
     const all = activateAll(s, CB, { inSheet: true, nowMs: NOW });
     expect(all.events.every((e: any) => e.combo === false && e.via_all === true)).toBe(true);
+    for (const id of all.fired) expect(all.state.abilities![id]!.durS).toBe(DUR);
+  });
+  it('refillAgoSimMs guards (Architect #112 §2): non-finite / negative / absent -> no combo; ignored unless abilities && rc2Refill && inSheet && !viaAll', () => {
+    const s = farm();
+    for (const v of [NaN, Infinity, -Infinity, -1, -0.001, undefined]) {
+      const r = fireAbility(s, 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: v }));
+      expect(r.ok && r.combo).toBe(false); expect(r.state.abilities!.hawker!.durS).toBe(DUR);
+    }
+    const noRefill = B({ abilities: 1, rc2Refill: 0 }, { combo_window_s: 10, combo_boost_duration_s: 45 });
+    const r0 = fireAbility(s, 'hawker', noRefill, opts({ inSheet: true, refillAgoSimMs: 0 }));
+    expect(r0.ok && r0.combo).toBe(false); expect(r0.state.abilities!.hawker!.durS).toBe(DUR);
+    expect(comboQualifies(B({ abilities: 0, rc2Refill: 1 }, { combo_window_s: 10, combo_boost_duration_s: 45 }), 0)).toBe(false);
+    // Activate-all never combos and never forwards a window
+    const all = activateAll(s, CB, { inSheet: true, nowMs: NOW, refillAgoSimMs: 0 } as any);
+    expect(all.events.every((e: any) => e.combo === false)).toBe(true);
+  });
+  it('combo window reads tc_combo_window_s from balance (no literal): widening the tc key widens the window', () => {
+    const wide = B({ abilities: 1, rc2Refill: 1 }, { combo_window_s: 20, combo_boost_duration_s: 50 });
+    const r = fireAbility(farm(), 'hawker', wide, opts({ inSheet: true, refillAgoSimMs: 15000 }));
+    expect(r.ok && r.combo).toBe(true); expect(r.state.abilities!.hawker).toMatchObject({ activeS: 50, durS: 50 });
   });
   it('combo call ends expired with effect_s = combo duration', () => {
     let s = fireAbility(farm(), 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: 0 })).state; const ev: any[] = [];
     s = run(s, Math.round(ctc.combo_boost_duration_s * b.tickHz) + 1, true, CB, ev);
     expect(ev.filter(e => e.type === 'ability_ended')).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'expired', effect_s: ctc.combo_boost_duration_s }]);
+    expect(s.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS }); // durS cleared with activeS
+    expect('abilityDurS' in s).toBe(false);
+  });
+  it('combo early end: effect_s = durS - activeS (focus seconds run), durS cleared with activeS', () => {
+    let s = fireAbility(farm(), 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: 0 })).state;
+    s = run(s, 40 * b.tickHz, true, CB);
+    expect(s.abilities!.hawker!.durS).toBe(ctc.combo_boost_duration_s);
+    s = { ...s, workers: { ...s.workers, hawker: { ...s.workers.hawker!, energy: 0 } } };
+    const ev: any[] = []; s = run(s, 1, true, CB, ev);
+    const end = ev.filter(e => e.type === 'ability_ended'); expect(end).toHaveLength(1);
+    expect(end[0]).toMatchObject({ worker: 'hawker', cause: 'asleep' }); expect(end[0].effect_s).toBeCloseTo(40, 6);
     expect(s.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS });
+  });
+  it('a running entry with no durS (older tip / save) falls back to tc_ability_s for effect_s', () => {
+    const s = farm({ abilities: { hawker: { readyAt: NOW + CD_MS, activeS: 5 } } }); const ev: any[] = [];
+    run(s, 5 * b.tickHz + 1, true, CB, ev);
+    expect(ev.filter(e => e.type === 'ability_ended')).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'expired', effect_s: DUR }]);
   });
 });
 
@@ -128,7 +167,7 @@ describe('activateAll (rule 7, E14 c, AC-M5A-7)', () => {
     expect(r.events.map((e: any) => e.worker)).toEqual(r.fired);
     expect(r.events.every((e: any) => e.in_sheet === true && e.via_all === true)).toBe(true);
     expect(r.closeSheet).toBe(true);
-    for (const id of WORKERS) expect(r.state.abilities![id]).toEqual({ readyAt: NOW + CD_MS, activeS: DUR });
+    for (const id of WORKERS) expect(r.state.abilities![id]).toEqual({ readyAt: NOW + CD_MS, activeS: DUR, durS: DUR });
   });
   it('0 eligible: fires nothing, no events, no close, same state', () => {
     const s = farm({ workers: { market_hand: W(0), hawker: W(0) } });
@@ -198,6 +237,21 @@ describe('flags off: byte-identical step (AC-M5A-16)', () => {
     const OFF = B({ abilities: 0 }), s = farm({ abilities: { hawker: { readyAt: NOW, activeS: 12 } } }), ev: any[] = [];
     const out = run(s, 20, true, OFF, ev);
     expect(out.abilities).toEqual(s.abilities); expect(ev.filter(e => String(e.type).startsWith('ability'))).toEqual([]);
+  });
+  it('no top-level abilityDurS anywhere in src (Architect #112: rejected persisted shape; durS lives on AbilityState)', () => {
+    for (const f of ['../src/sim/abilities.ts', '../src/sim/state.ts', '../src/sim/m5-state.ts'])
+      expect(readFileSync(new URL(f, import.meta.url), 'utf8')).not.toMatch(/abilityDurS/);
+  });
+  it('m5Persist save view of a running combo call carries durS on the entry and no top-level duration map', () => {
+    const CB = B({ abilities: 1, rc2Refill: 1 }, { combo_window_s: 10, combo_boost_duration_s: 45 });
+    const s = fireAbility(farm(), 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: 0 })).state;
+    const saved = JSON.parse(JSON.stringify(m5Persist(s)));
+    expect(saved.abilityDurS).toBeUndefined(); expect(saved.abilities.hawker).toEqual({ readyAt: NOW + CD_MS, activeS: 45, durS: 45 });
+  });
+  it('no prod 10 / 45 literals in abilities.ts (combo values via tcNum only)', () => {
+    const code = readFileSync(new URL('../src/sim/abilities.ts', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    expect(code).not.toMatch(/(?<![\w.])(10|45)(?![\w.])/);
+    expect(code).toMatch(/tcNum\(b, 'combo_window_s'\)/); expect(code).toMatch(/tcNum\(b, 'combo_boost_duration_s'\)/);
   });
   it('no Date.now in the abilities sim', () => {
     const code = readFileSync(new URL('../src/sim/abilities.ts', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');

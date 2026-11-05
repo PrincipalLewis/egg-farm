@@ -32,10 +32,6 @@ export interface GameState extends M5Fields {
   celebratedMilestones: string[];
   /** v5 #2 (session only, outside F1a M5Fields): the current run's streak_peak stats. */
   streakRun?: StreakRun;
-  /** v5 #4 abilities (outside F1a M5Fields like streakRun): focus-second duration of a running call when it is NOT tc_ability_s
-   *  (rule 11 combo Boost); absent = tc_ability_s. Feeds ability_ended.effect_s. Exists only with abilities && rc2Refill and a
-   *  caller-supplied refill window; Saves to add it to SESSION_ONLY_KEYS when rc2 Refill lands (not done here: m5Persist untouched). */
-  abilityDurS?: Partial<Record<import('./workers').WorkerId, number>>;
   /** M5.1 breeds E10 / PMC Q5 (session only, outside F1a M5Fields like streakRun): raw unknown slot ids from the save, written
    *  back by m5Persist (breedsSaveView) while that slot stays null; stripped by m5Persist SESSION_ONLY_KEYS. */
   breedsRawSlots?: (string | null)[];

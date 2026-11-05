@@ -25,8 +25,10 @@ export type AbilityUnavailable = 'flag_off' | 'locked' | 'not_hired' | 'no_clock
 export type AbilityEligibility = { eligible: true } | { eligible: false; reason: AbilityBlockReason | AbilityUnavailable };
 export interface FireOpts {
   inSheet: boolean; viaAll: boolean; nowMs: number;
-  /** Rule 11: SIM ms since this worker's MANUAL refill tap (refill_used{by:manual}); absent = no window open. Supplied by the
-   *  rc2 Refill system / Game (not on rc/v5 yet). Only read with m4.flags.abilities && rc2Refill, inSheet and !viaAll. */
+  /** Rule 11 / Architect #112 §2 (APPROVED WITH GUARDS): SIM ms since this worker's MANUAL refill tap (refill_used{by:manual}),
+   *  measured and injected by the caller (rc2 Refill / Game). Read ONLY when abilities && rc2Refill && inSheet && !viaAll; absent,
+   *  non-finite or < 0 => no combo (never throws); inclusive <= combo_window_s * 1000. Activate-all never passes or reads it.
+   *  This module never invents, stores or persists a refill clock. Not the wall `nowMs`. */
   refillAgoSimMs?: number;
 }
 export type FireResult =
@@ -53,7 +55,8 @@ export function abilityEligibility(s: GameState, id: WorkerId, b: Balance, nowMs
   return { eligible: true };
 }
 
-/** Rule 11 window: abilities && rc2Refill, 0 <= sim ms since the manual refill <= combo_window_s * 1000 (inclusive, SG-3). */
+/** Rule 11 window (Architect #112 §2 guards 1-3): abilities && rc2Refill, finite 0 <= sim ms since the manual refill
+ *  <= tc combo_window_s * 1000 (inclusive, SG-3). The window value comes from balance via tcNum only (no prod literal). */
 export function comboQualifies(b: Balance, refillAgoSimMs: number | undefined): boolean {
   if (!on(b) || !flagOn(b, 'rc2Refill') || typeof refillAgoSimMs !== 'number' || !Number.isFinite(refillAgoSimMs) || refillAgoSimMs < 0) return false;
   return refillAgoSimMs <= tcNum(b, 'combo_window_s') * 1000;
@@ -68,14 +71,14 @@ export function fireAbility(s: GameState, id: WorkerId, b: Balance, o: FireOpts)
     const events: SimEvent[] = !o.viaAll && isBlockReason(el.reason) ? [{ type: 'ability_blocked', worker: id, reason: el.reason, count: 1 }] : [];
     return { ok: false, reason: el.reason, state: s, events, closeSheet: false };
   }
+  // Guards 1 + 4: only a direct sheet Boost may combo; viaAll forces non-combo and the window is not even read.
   const w = s.workers[id]!, prev = s.abilities?.[id], combo = o.inSheet && !o.viaAll && comboQualifies(b, o.refillAgoSimMs);
+  // Granted focus duration of this call (v1.3.12 AbilityState.durS): tc_ability_s, or tc combo_boost_duration_s for a combo.
   const durS = combo ? tcNum(b, 'combo_boost_duration_s') : tcNum(b, 'ability_s');
   const r = prev?.readyAt, sinceReady = typeof r === 'number' && Number.isFinite(r) ? Math.max(0, o.nowMs - r) / 1000 : 0;
-  const { activeS: _a, ...keep } = prev ?? {};
-  const abilities = { ...s.abilities, [id]: { ...keep, readyAt: o.nowMs + tcNum(b, 'ability_cd_s') * 1000, activeS: durS } };
-  let state: GameState = { ...s, abilities };
-  if (combo) state = { ...state, abilityDurS: { ...s.abilityDurS, [id]: durS } };
-  else if (s.abilityDurS?.[id] !== undefined) { const { [id]: _d, ...rest } = s.abilityDurS; state = { ...state, abilityDurS: rest }; }
+  const { activeS: _a, durS: _d, ...keep } = prev ?? {};
+  const abilities = { ...s.abilities, [id]: { ...keep, readyAt: o.nowMs + tcNum(b, 'ability_cd_s') * 1000, activeS: durS, durS } };
+  const state: GameState = { ...s, abilities };
   const ev: SimEvent = { type: 'ability_used', worker: id, farm: s.farmLevel, energy_pct: w.energy, mood: mood(w, b)!,
     via_all: o.viaAll, t_since_ready_s: sinceReady, in_sheet: o.inSheet, combo };
   return { ok: true, state, events: [ev], closeSheet: o.inSheet && !o.viaAll, combo };
@@ -86,32 +89,29 @@ export function fireAbility(s: GameState, id: WorkerId, b: Balance, o: FireOpts)
 export function activateAll(s: GameState, b: Balance, o: { inSheet: boolean; nowMs: number }): ActivateAllResult {
   const events: SimEvent[] = [], fired: WorkerId[] = [];
   for (const id of WORKERS) {
-    const r = fireAbility(s, id, b, { inSheet: o.inSheet, viaAll: true, nowMs: o.nowMs });
+    const r = fireAbility(s, id, b, { inSheet: o.inSheet, viaAll: true, nowMs: o.nowMs }); // no refillAgoSimMs: never a combo
     if (r.ok) { s = r.state; events.push(...r.events); fired.push(id); }
   }
   return { state: s, events, fired, closeSheet: o.inSheet && fired.length > 0 };
 }
 
 /** TimerSystem body (sim/timers.ts): early end (rule 6), then focus countdown and expiry. Identity unless the flag is on and a
- *  call is running. effect_s = focus seconds run (duration - activeS). */
+ *  call is running. effect_s = focus seconds run (durS - activeS; durS absent => tc_ability_s). Ending a call clears activeS and
+ *  durS together, never readyAt. (Load / offline end of a saved call is Saves-owned: m5-fields endCalls.) */
 export function abilitiesTick(s: GameState, focusS: number, b: Balance, ev?: Sink): GameState {
   if (!on(b) || !s.abilities) return s;
-  let abilities: GameState['abilities'] | undefined, durs = s.abilityDurS;
+  let abilities: GameState['abilities'] | undefined;
   for (const id of WORKERS) {
     const a = s.abilities[id]; if (!a || !((a.activeS ?? 0) > EPS)) continue;
-    const dur = durs?.[id] ?? tcNum(b, 'ability_s'), w = s.workers[id], m = mood(w, b);
+    const dur = typeof a.durS === 'number' && Number.isFinite(a.durS) && a.durS > 0 ? a.durS : tcNum(b, 'ability_s'), w = s.workers[id], m = mood(w, b);
     const early = !w ? null : m === 'asleep' || m === 'unpaid' ? m : isPaused(w, b) ? 'paused' : null;
     const left = early ? a.activeS! : a.activeS! - focusS;
     if (early || left <= EPS) {
       ev?.push({ type: 'ability_ended', worker: id, cause: early ?? 'expired', effect_s: early ? dur - a.activeS! : dur });
-      const { activeS: _x, ...rest } = a; abilities = { ...(abilities ?? s.abilities), [id]: rest };
-      if (durs?.[id] !== undefined) { const { [id]: _d, ...r2 } = durs; durs = r2; }
+      const { activeS: _x, durS: _y, ...rest } = a; abilities = { ...(abilities ?? s.abilities), [id]: rest };
     } else if (left !== a.activeS) abilities = { ...(abilities ?? s.abilities), [id]: { ...a, activeS: left } };
   }
-  if (!abilities) return s;
-  const out: GameState = { ...s, abilities };
-  if (durs !== s.abilityDurS) { if (durs && Object.keys(durs).length) out.abilityDurS = durs; else delete out.abilityDurS; }
-  return out;
+  return abilities ? { ...s, abilities } : s;
 }
 
 /** Inspect (rule 2): tier add for graderMult while the Grader's call runs on a focus tick; 0 otherwise. */

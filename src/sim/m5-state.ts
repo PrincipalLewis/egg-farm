@@ -11,8 +11,10 @@
  */
 import type { WorkerId } from './workers';
 
-/** Per-worker call state (abilities spec E2). `readyAt` = epoch ms in the SAVE form; `activeS` = focus seconds left on a running call. */
-export interface AbilityState { readyAt?: number; activeS?: number; }
+/** Per-worker call state (abilities spec v1.3.12 E2/E7, PMW errata 9d521aa). `readyAt` = epoch ms in the SAVE form; `activeS` =
+ *  focus seconds left on a running call; `durS` = granted focus duration of that call (tc_ability_s, or tc combo_boost_duration_s
+ *  for a rule-11 combo), set at fire and cleared with activeS. Saves honors durS on load/offline end (clamp, effect_s). */
+export interface AbilityState { readyAt?: number; activeS?: number; durS?: number; }
 
 /** The one on-screen golden egg (spec R4: at most one). Never saved (R10a): a reload removes it (R8). */
 export interface GoldenEggOnScreen {
