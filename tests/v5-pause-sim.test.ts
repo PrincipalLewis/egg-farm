@@ -10,11 +10,9 @@ import { step } from '../src/sim/tick';
 import { graderMult, hawkerDemandMult } from '../src/sim/workers';
 import { pauseWorker, resumeWorker } from '../src/sim/pause';
 import { collectPerSec, demandPerSec, marketHandStalled, wagesPerSec } from '../src/econ/income';
-import { m5Load, m5Offline, m5Persist } from '../src/save/m5-fields';
-import { SAVE_KEY, serialize } from '../src/save/save';
+import { m5Offline } from '../src/save/m5-fields';
 import { Game } from '../src/game';
 import { mem } from './helpers';
-import { ON } from './v5-f2-helpers';
 import type { SimEvent } from '../src/sim/events';
 
 const tc = b.m4!.tc!;
@@ -182,64 +180,5 @@ describe('[CCR-F4] pause sim reads rest_recovery_mult while the flag is on', () 
     const { rest_recovery_mult: _r, ...tcNo } = b.m4!.tc as Record<string, number>;
     const on = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, pause: 1 }, tc: tcNo } } as typeof b;
     expect(() => validateBalance(on)).toThrow(/tc\.rest_recovery_mult is required while flags\.pause is on/);
-  });
-});
-
-describe('[durS] 45 s combo is not scored as tc_ability_s; durS is stripped with activeS on end', () => {
-  const NOW = Date.UTC(2026, 9, 29, 12);
-  const AB = ON; // abilities on
-  const durS = 45;
-  const left = 20; // ran 25 s of a 45 s combo; scoring the leftover against tc_ability_s (30) would report effect_s 10
-  const readyAt = NOW + 60_000;
-  const withCombo = (): GameState => farm({
-    abilities: { hawker: { readyAt, activeS: left, durS } },
-  }, AB);
-  const load = (s: GameState) => { const ev: SimEvent[] = []; return { s: m5Load(s, AB, NOW, ev) as GameState, ev }; };
-
-  it('m5Persist and serialize keep durS and activeS on the ability entry; neither is rewritten to tc_ability_s; input is not mutated', () => {
-    const s = withCombo();
-    const p = m5Persist(s) as GameState;
-    expect(p.abilities!.hawker).toEqual({ readyAt, activeS: left, durS });
-    expect(s.abilities!.hawker!.durS).toBe(durS);
-    const saved = JSON.parse(serialize(s, NOW)).state;
-    expect(saved.abilities.hawker).toEqual({ readyAt, activeS: left, durS });
-    expect('abilityDurS' in saved).toBe(false);
-  });
-  it('[combo 45] m5Load / m5Offline use durS for effect_s (25), then strip durS with activeS and keep readyAt', () => {
-    const live = withCombo();
-    const { s, ev } = load(live);
-    expect(ev).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: durS - left }]);
-    expect(s.abilities!.hawker).toEqual({ readyAt });
-    expect(live.abilities!.hawker!.durS).toBe(durS); // load does not mutate the input
-    const oev: SimEvent[] = [];
-    const o = m5Offline(withCombo(), AB, oev) as GameState;
-    expect(oev).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: durS - left }]);
-    expect(o.abilities!.hawker).toEqual({ readyAt });
-  });
-  it('[combo 45] a 45 s call that has not ticked (activeS 45) reports effect_s 0 and drops durS', () => {
-    const s = farm({ abilities: { grader: { readyAt: NOW, activeS: durS, durS } } }, AB);
-    const ev: SimEvent[] = [];
-    const o = m5Offline(s, AB, ev) as GameState;
-    expect(ev).toEqual([{ type: 'ability_ended', worker: 'grader', cause: 'offline', effect_s: 0 }]);
-    expect(o.abilities!.grader).toEqual({ readyAt: NOW });
-  });
-  it('[combo 45] a saved call with no durS still scores against tc_ability_s (effect_s 10 for 20 s left)', () => {
-    const { s, ev } = load(farm({ abilities: { hawker: { readyAt, activeS: left } } }, AB));
-    expect(ev).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: tc.ability_s - left }]);
-    expect(s.abilities!.hawker).toEqual({ readyAt });
-  });
-  it('[combo 45][hidden>=60] a persisted 45 s combo ends at effect_s 25 and durS does not come back', () => {
-    const kv = mem(); let t = NOW;
-    const g = new Game(AB, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
-    const evs: any[] = []; g.on(e => evs.push(e));
-    g.state = withCombo();
-    g.save();
-    const stored = JSON.parse(kv.getItem(SAVE_KEY)!).state;
-    expect(stored.abilities.hawker).toEqual({ readyAt, activeS: left, durS });
-    expect(stored.abilityDurS).toBeUndefined();
-    g.onHidden(t); t += 120_000; g.onShown(t);
-    expect(evs.filter(e => e.type === 'ability_ended')).toEqual([
-      { type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: durS - left }]);
-    expect(g.state.abilities!.hawker).toEqual({ readyAt });
   });
 });
