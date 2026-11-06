@@ -11,10 +11,14 @@ import { eggsPerTap, demandRange, customerIntervalS } from '../sim/state';
 import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
 import { mood, isOff, graderMult, hawkerDemandMult, type Workers } from '../sim/workers';
 import { isPaused } from '../sim/pause';
+import { bestBuyV2On } from '../config/flags';
 
 export type IncomeOpts = {
   /** When true, treat every hired worker as Working (Economy best() scoring). */
   assumeWorking?: boolean;
+  /** When true with assumeWorking, skip BBv2 Q-E2 (keep pre-Q-E2 collect = tap × 1.5). Hatch/sim BR-R5 planRef only
+   *  (D-ECON-20261105-M1-QE2-HATCH (a); HoP). Default false: planner/best-buy paths still apply Q-E2 when bestBuyV2 on. */
+  ignoreQE2?: boolean;
 };
 
 /** Egg sale price in dollars (Python-compatible round to 2 dp × grader mult). */
@@ -29,7 +33,10 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): 
   const tap = eggsPerTap(s.collectionLevel, b);
   const w = s.workers.coop_hand;
   if (!w) return tap;
-  if (opts.assumeWorking) return tap * 1.5;
+  // BBv2 Q-E2 (spec v1.0.3 §2.5, Econ 14:05): planner path only, flag on, Coop Hand hired -> 0 player taps,
+  // collect = eggs_per_tap[C] / coop_hand.every_s. The live path (no assumeWorking) below is unchanged.
+  // ignoreQE2 (BR-R5 hatch): keep tap × 1.5 so hatchCostCents is bestBuyV2-invariant (D-ECON-20261105-M1-QE2-HATCH).
+  if (opts.assumeWorking) return bestBuyV2On(b) && !opts.ignoreQE2 ? tap / b.workers.coop_hand.every_s : tap * 1.5;
   const m = mood(w, b);
   if (!m || isOff(m) || isPaused(w, b)) return tap; // asleep / unpaid / paused → no auto collect
   if (m === 'working') return tap * 1.5;

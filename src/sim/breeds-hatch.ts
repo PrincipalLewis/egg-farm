@@ -46,9 +46,10 @@ export function rollBreed(x: BreedsSave, F: number, b: Balance, free: boolean): 
   const l = el.filter(id => ROSTER[id][0] === pick); [rng, u] = nextRand(rng); return { id: l[Math.floor(u * l.length)], rng };
 }
 /** BR-R5 cost in cents: max(min, min(planRef x cost_s, house-round(farmStep x share_bp))). planRef = planner income
- *  (assumeWorking) on the breed-neutral state, rounded once (no traits exist yet, so the state is neutral). */
+ *  (assumeWorking, ignoreQE2) on the breed-neutral state, rounded once (no traits exist yet, so the state is neutral).
+ *  ignoreQE2 keeps planRef bestBuyV2-invariant (D-ECON-20261105-M1-QE2-HATCH (a); HoP / PMC). */
 export function hatchCostCents(s: GameState, b: Balance): number {
-  return hatchCostFrom(Math.round(incomePerSec(s, b, { assumeWorking: true }) * CENTS_PER_DOLLAR), farmCost(s.farmLevel, b) * CENTS_PER_DOLLAR, b);
+  return hatchCostFrom(Math.round(incomePerSec(s, b, { assumeWorking: true, ignoreQE2: true }) * CENTS_PER_DOLLAR), farmCost(s.farmLevel, b) * CENTS_PER_DOLLAR, b);
 }
 /** BR-R5 on injected integer cents (BR-AC6 / BR-AC13). BR-R17 guard: planRef x cost_s is never formed when it would exceed the
  *  Farm branch, so it can't pass 2^53 - 1 (planRef > floor(farmBranch / cost_s) <=> planRef x cost_s > farmBranch). */
