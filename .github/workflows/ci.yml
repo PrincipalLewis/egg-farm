@@ -23,10 +23,10 @@ concurrency:
 jobs:
   gate:
     # Replaces unit + slow + release-globals (chromium) + release-html: same commands, one checkout, one `npm ci`.
-    # 45m: BBv2 slow suites need ~unit 7m + slow >23m (D-HOE HoE/100-gate-timeout; was cutting at 30).
+    # 60m: unit~9m + slow~36m left no headroom for release at 45 (HoE/100-gate-timeout; 21861ca cancel).
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
