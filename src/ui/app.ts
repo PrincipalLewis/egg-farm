@@ -1,4 +1,4 @@
-import { makeDialogOpen, wireAttended } from './overlay';
+import { makeDialogOpen, wireAttended, registerSheet } from './overlay';
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
 /**
@@ -184,7 +184,20 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
   // Slim v5: one attended source; Market remains a play surface. Shift owns its registered lifecycle.
   wireAttended(g, makeDialogOpen({ sheet: () => open, docked: () => docked.matches }));
+  /** AB-14 / AC-M5A-22: Upgrades sheet freeze handle; closeComplete only after real close (or harness step). */
+  const upgradesSheet = registerSheet('upgrades');
+  let upgradesClosePending = false;
+  let upgradesCloseOnEnd: ((e: TransitionEvent) => void) | null = null;
+  const sheetCloseComplete = () => {
+    if (!upgradesClosePending) { upgradesSheet.closeComplete(); return; }
+    upgradesClosePending = false;
+    const sheetEl = $('#p-upgrades');
+    if (upgradesCloseOnEnd) { sheetEl.removeEventListener('transitionend', upgradesCloseOnEnd); upgradesCloseOnEnd = null; }
+    if (!sheetEl.hidden) sheetEl.hidden = true;
+    upgradesSheet.closeComplete();
+  };
   const openPanel = (p: typeof open) => {
+    if (upgradesClosePending && p !== 'upgrades') sheetCloseComplete();
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
     if (open === 'market' && p !== 'market') ordersExpanded = false;
@@ -222,22 +235,43 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
   /** Portrait/sheet Upgrades counts as in_sheet; docked header/card does not (AC-M5A-22). */
   const abilityInSheet = () => !docked.matches && open === 'upgrades';
+  /** Close portrait Upgrades after a successful in-sheet fire/activateAll; attendance stays frozen until sheetCloseComplete. */
+  const closeUpgradesAfterAbility = () => {
+    if (!abilityInSheet()) return;
+    upgradesSheet.opened();
+    upgradesClosePending = true;
+    sfx('uiClose');
+    if (ZGC) zgHidden();
+    open = null;
+    panelLayer.classList.toggle('open', false);
+    $('#p-market').hidden = true;
+    // Keep #p-upgrades visible so transform close can run; hidden + closeComplete on sheetCloseComplete.
+    nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === 'farm'));
+    dirty = true;
+    const sheetEl = $('#p-upgrades');
+    if (upgradesCloseOnEnd) { sheetEl.removeEventListener('transitionend', upgradesCloseOnEnd); upgradesCloseOnEnd = null; }
+    if (rm()) { sheetCloseComplete(); return; }
+    upgradesCloseOnEnd = (e: TransitionEvent) => {
+      if (e.target !== sheetEl || e.propertyName !== 'transform') return;
+      sheetCloseComplete();
+    };
+    sheetEl.addEventListener('transitionend', upgradesCloseOnEnd);
+    // Do not auto-complete on 0-duration rAF: harness steps sheetCloseComplete (AC-M5A-22). transitionend / rm() cover production.
+  };
   const afterAbilityFire = (ok: boolean, el: HTMLElement, closeSheet: boolean) => {
     if (!ok) { cantAfford(el); return; }
     sfx('upgrade'); dirty = true;
-    if (closeSheet && abilityInSheet()) openPanel(null);
-    else render();
+    if (closeSheet && abilityInSheet()) closeUpgradesAfterAbility();
+    render();
   };
-  /** Always dispatch fireAbility so blocked taps still emit ability_blocked (tryDispatch would skip same-state). */
+  /** Always dispatch so blocked taps emit ability_blocked (tryDispatch would skip same-state). Do not gate on aria-disabled. */
   const onFireAbility = (el: HTMLElement, wid: WorkerId) => {
-    if (el.getAttribute('aria-disabled') === 'true') { cantAfford(el); return; }
     const before = g.state;
     const inSheet = abilityInSheet();
     g.dispatch({ type: 'fireAbility', worker: wid, inSheet, nowMs: now() });
     afterAbilityFire(g.state !== before, el, inSheet);
   };
   const onActivateAll = (el: HTMLElement) => {
-    if (el.getAttribute('aria-disabled') === 'true') { cantAfford(el); return; }
     const before = g.state;
     const inSheet = abilityInSheet();
     g.dispatch({ type: 'activateAll', inSheet, nowMs: now() });
@@ -947,5 +981,5 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
   if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort() };
+  return { render: renderAll, showWelcome, openPanel, sheetCloseComplete, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort() };
 }

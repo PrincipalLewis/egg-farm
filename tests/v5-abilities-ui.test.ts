@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   activateAllState, activateAllHtml, activateAllName, fmtCd, ACTIVATE_ALL_TESTID,
   abilitiesUiOn, activateAllEligibility, callButtonState, callButtonHtml, CALL_NAME,
@@ -9,6 +9,11 @@ import { balance } from '../src/config/balance';
 import type { Balance } from '../src/config/balance';
 import type { GameState } from '../src/sim/state';
 import { WORKERS } from '../src/sim/workers';
+import { Game } from '../src/game';
+import { mem } from './helpers';
+import { clearSheets, anySheetOpen } from '../src/ui/overlay';
+import { initialState } from '../src/sim/state';
+import { serialize, SAVE_KEY } from '../src/save/save';
 
 const NOW = 1_700_000_000_000;
 
@@ -148,5 +153,115 @@ describe('CALL_NAME map', () => {
     expect(CALL_NAME.hawker).toBe('Shout');
     expect(CALL_NAME.grader).toBe('Inspect');
     expect(WORKERS.every(id => !!CALL_NAME[id])).toBe(true);
+  });
+});
+
+// --- Architect CHANGES @ dc3c60f: sheetCloseComplete hold + ability_blocked from aria-disabled ---
+
+function balAbilities(): Balance {
+  return B({ abilities: 1 });
+}
+
+async function mountAbilitiesUi(over: Partial<GameState> = {}) {
+  let docked = false;
+  const listeners: Array<() => void> = [];
+  window.matchMedia = ((q: string) => ({
+    get matches() { return q.includes('min-width:960px') && docked; },
+    media: q,
+    addEventListener(_: string, f: () => void) { listeners.push(f); },
+    removeEventListener() {}, addListener() {}, removeListener() {},
+  })) as any;
+  Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+  vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+  // Keep rAF async-ish so sheetCloseComplete is not auto-stepped mid-assert.
+  globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0) as unknown as number) as any;
+  const b = balAbilities();
+  const kv = mem() as any; kv.removeItem = (k: string) => kv.m.delete(k);
+  const base = {
+    ...initialState(b),
+    tracksV7: 1,
+    seenTracksExplainer: true,
+    farmLevel: 10,
+    coinsCents: 1e9,
+    workers: {
+      market_hand: { energy: 100, cdS: 0 },
+      coop_hand: { energy: 100, cdS: 0 },
+      hawker: { energy: 100, cdS: 0 },
+    },
+    ...over,
+  } as GameState;
+  kv.setItem(SAVE_KEY, serialize(base, 1760000000000));
+  kv.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false, reducedMotion: false }));
+  const g = new Game(b, kv, () => 1760000000500);
+  g.state = { ...g.state, ...base } as GameState;
+  const spy = vi.spyOn(g, 'setAttendedProbe');
+  const tracked: Array<{ type: string; rest: Record<string, unknown> }> = [];
+  const origTrack = g.telemetry.track.bind(g.telemetry);
+  g.telemetry.track = ((type: string, rest: Record<string, unknown> = {}) => {
+    tracked.push({ type, rest });
+    return origTrack(type, rest);
+  }) as typeof g.telemetry.track;
+  const { mountApp } = await import('../src/ui/app');
+  document.body.innerHTML = '<div id="app"></div>';
+  document.getElementById('modal-layer')?.remove();
+  const ui = mountApp(document.getElementById('app')!, g, b, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
+  document.getElementById('modal-layer')?.classList.remove('open');
+  const probe = spy.mock.calls[0][0] as () => boolean;
+  ui.openPanel('upgrades');
+  (document.querySelector('.tabs button[data-tab="workers"]') as HTMLElement | null)?.click();
+  ui.render();
+  return { g, ui, b, probe, tracked, setDocked: (v: boolean) => { docked = v; listeners.forEach(f => f()); } };
+}
+
+beforeEach(() => { clearSheets(); document.body.innerHTML = ''; });
+afterEach(() => { clearSheets(); document.body.innerHTML = ''; vi.restoreAllMocks(); });
+
+describe('AB-14 / AC-M5A-22 sheetCloseComplete hold [Architect CHANGES]', () => {
+  it('fireAbility from portrait sheet keeps attendance frozen until sheetCloseComplete', async () => {
+    const { g, ui, probe } = await mountAbilitiesUi();
+    expect(probe()).toBe(false); // upgrades open
+    const btn = document.querySelector('[data-testid="call-market_hand"]') as HTMLButtonElement;
+    expect(btn).toBeTruthy();
+    expect(btn.getAttribute('aria-disabled')).not.toBe('true');
+    btn.click();
+    expect(g.state.abilities?.market_hand?.activeS).toBeGreaterThan(0);
+    expect(probe()).toBe(false); // still frozen while closing
+    expect(anySheetOpen()).toBe(true);
+    expect(document.getElementById('p-upgrades')?.hidden).toBe(false);
+    ui.sheetCloseComplete();
+    expect(anySheetOpen()).toBe(false);
+    expect(probe()).toBe(true);
+    expect(document.getElementById('p-upgrades')?.hidden).toBe(true);
+  });
+
+  it('activateAll from portrait sheet keeps freeze until sheetCloseComplete', async () => {
+    const { g, ui, probe } = await mountAbilitiesUi();
+    const btn = document.querySelector(`[data-testid="${ACTIVATE_ALL_TESTID}"]`) as HTMLButtonElement;
+    expect(btn).toBeTruthy();
+    btn.click();
+    expect(Object.values(g.state.abilities ?? {}).some(a => (a?.activeS ?? 0) > 0)).toBe(true);
+    expect(probe()).toBe(false);
+    expect(anySheetOpen()).toBe(true);
+    ui.sheetCloseComplete();
+    expect(probe()).toBe(true);
+    expect(anySheetOpen()).toBe(false);
+  });
+});
+
+describe('ability_blocked from aria-disabled chrome [Architect CHANGES]', () => {
+  it('asleep call button still dispatches and emits ability_blocked', async () => {
+    const { g, tracked } = await mountAbilitiesUi({
+      workers: {
+        market_hand: { energy: 0, cdS: 0 },
+        coop_hand: { energy: 100, cdS: 0 },
+        hawker: { energy: 100, cdS: 0 },
+      },
+    });
+    const btn = document.querySelector('[data-testid="call-market_hand"]') as HTMLButtonElement;
+    expect(btn.getAttribute('aria-disabled')).toBe('true');
+    const before = g.state;
+    btn.click();
+    expect(g.state).toBe(before);
+    expect(tracked.some(e => e.type === 'ability_blocked' && e.rest.worker === 'market_hand' && e.rest.reason === 'asleep')).toBe(true);
   });
 });
