@@ -109,6 +109,60 @@ describe('F2 settle: a gap of 60 s or more (§9.1 / §9.1a)', () => {
     const g = drawGap(s0, ON); expect(g.rng).toBe(s0.rng); expect(g.evRngState).toBe(nextRand(e.evRngState!)[0]);
   });
 });
+describe('[D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end)', () => {
+  const load = (s: any, bb = ON, now = NOW) => { const ev: SimEvent[] = []; return { s: m5Load(s, bb, now, ev) as any, ev }; };
+  const comboBal = (combo: number) => ({ ...ON, m4: { ...ON.m4!, tc: { ...ON.m4!.tc!, combo_boost_duration_s: combo } } }) as typeof ON;
+  const call = (activeS: number, durS?: number) => ({ readyAt: NOW + 8_000, activeS, ...(durS === undefined ? {} : { durS }) });
+
+  it('[D-HOE-41][AC] legacy save without durS: effect_s = tc_ability_s - activeS; no leftover durS', () => {
+    const raw = { ...base(), abilities: { hawker: call(12) } };
+    const { s, ev } = load(raw);
+    expect(ev).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: tc.ability_s - 12 }]);
+    expect(s.abilities.hawker).toEqual({ readyAt: NOW + 8_000 });
+    expect('durS' in s.abilities.hawker).toBe(false);
+    expect('activeS' in s.abilities.hawker).toBe(false);
+    expect(raw.abilities.hawker).toEqual({ readyAt: NOW + 8_000, activeS: 12 }); // input not mutated; call does not resume
+    // invalid durS (0, negative, non-finite, non-number) keeps today's tc_ability_s effect and is stripped
+    for (const durS of [0, -4, Number.NaN, '45']) {
+      const x = load({ ...base(), abilities: { grader: { readyAt: NOW, activeS: 12, durS } } });
+      expect(x.ev).toEqual([{ type: 'ability_ended', worker: 'grader', cause: 'offline', effect_s: tc.ability_s - 12 }]);
+      expect(x.s.abilities.grader).toEqual({ readyAt: NOW });
+    }
+    // a leftover durS with no running call is stripped too (no event, readyAt kept)
+    const idle = load({ ...base(), abilities: { hawker: { readyAt: NOW, durS: 45, activeS: 0 } } });
+    expect(idle.ev).toEqual([]); expect(idle.s.abilities.hawker).toEqual({ readyAt: NOW });
+  });
+
+  it('[D-HOE-41][AC] durS=45, activeS=40: effect_s≈5; both cleared (load and offline; with or without the combo key)', () => {
+    const ended = (worker: string) => [{ type: 'ability_ended', worker, cause: 'offline', effect_s: expect.closeTo(5) }];
+    for (const bb of [ON, comboBal(45)]) {
+      const { s, ev } = load({ ...base(), abilities: { coop_hand: call(40, 45) } }, bb);
+      expect(ev).toEqual(ended('coop_hand'));
+      expect(s.abilities.coop_hand).toEqual({ readyAt: NOW + 8_000 });
+      const oev: SimEvent[] = [];
+      const off: any = m5Offline({ ...base(), abilities: { coop_hand: call(40, 45) } }, bb, oev);
+      expect(oev).toEqual(ended('coop_hand'));
+      expect(off.abilities.coop_hand).toEqual({ readyAt: NOW + 8_000 });
+    }
+    expect(SAVE_VERSION).toBe(6);
+  });
+
+  it('[D-HOE-41][AC] durS present but activeS>granted: clamp then clear both', () => {
+    // stored durS is the grant (no combo key): activeS above it clamps, effect_s 0
+    const plain = load({ ...base(), abilities: { market_hand: call(99, 45) } });
+    expect(plain.ev).toEqual([{ type: 'ability_ended', worker: 'market_hand', cause: 'offline', effect_s: 0 }]);
+    expect(plain.s.abilities.market_hand).toEqual({ readyAt: NOW + 8_000 });
+    // combo key present: grant capped at max(tc_ability_s, tc_combo_boost_duration_s)=45, then activeS clamps
+    const bb = comboBal(45);
+    const capped = load({ ...base(), abilities: { grader: { readyAt: NOW, activeS: 80, durS: 90 } } }, bb);
+    expect(capped.ev).toEqual([{ type: 'ability_ended', worker: 'grader', cause: 'offline', effect_s: 0 }]);
+    expect(capped.s.abilities.grader).toEqual({ readyAt: NOW });
+    // same cap, activeS still inside the capped grant: effect_s = 45 - 40, not 90 - 40 and not 0
+    const mid = load({ ...base(), abilities: { hawker: call(40, 90) } }, bb);
+    expect(mid.ev).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: expect.closeTo(5) }]);
+    expect(mid.s.abilities.hawker).toEqual({ readyAt: NOW + 8_000 });
+  });
+});
 describe('F2 settle: a hidden gap under 60 s', () => {
   it('streak grace/decay in one step over 0 focus seconds: 5 s hidden at 0.28 returns 0.28 (K8); same object, nothing else moves', () => {
     const s: any = { ...base(), streakS: 0.28, streakHoldS: 2, nextSpawnRemainingS: 50, goldenEgg: egg, abilities: { market_hand: { readyAt: NOW, activeS: 5 } } };
