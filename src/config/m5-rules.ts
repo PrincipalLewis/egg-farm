@@ -10,7 +10,7 @@ const fail = (m: string): never => { throw new Error(`balance.m4.${m}`); };
 const has = (tc: TC, ...k: string[]) => k.every(x => typeof tc[x] === 'number');
 /** tc keys that must exist while their flag is on (feature PRs append; empty until a reader lands). */
 export const M5_REQUIRED_TC: Partial<Record<(typeof M5_FLAGS)[number], readonly string[]>> = {
-  pause: ['pause_unlock_farm', 'pause_call_lockout_s'], // CCR-F4: read by save/m5-fields.ts m5Load (pause spec rule 1, B5)
+  pause: ['pause_unlock_farm', 'pause_call_lockout_s', 'rest_recovery_mult'], // rule 1 / B5 (m5Load) + rule 3 recovery (sim/pause.ts)
 };
 export function validateM5(m4: any, workers: any): void {
   if (!m4) return;
@@ -35,6 +35,8 @@ export function validateM5(m4: any, workers: any): void {
   if (has(tc, 'warn_at_s', 'urgent_at_s', 'egg_despawn_s') && !(tc.warn_at_s < tc.urgent_at_s && tc.urgent_at_s < tc.egg_despawn_s)) fail('tc: warn_at_s < urgent_at_s < egg_despawn_s');
   for (const k of ['egg_despawn_s', 'frenzy_s', 'first_spawn_s']) if (has(tc, k) && !(tc[k] > 0)) fail(`tc.${k} must be > 0`);
   if (has(tc, 'frenzy_price_mult') && !(tc.frenzy_price_mult >= 1)) fail('tc.frenzy_price_mult must be >= 1');
+  // D-HOP-2026-11-05-11: R22 all-sales scope is fixed in v5; 1 is the only valid value (0 has no defined semantics, no alternate branch)
+  if (has(tc, 'frenzy_all_sales') && tc.frenzy_all_sales !== 1) fail('tc.frenzy_all_sales must be 1 (R22 all-sales scope, D-HOP-2026-11-05-11)');
   // #2 streak / #3 tap coins (streak spec §5: 0 < cap <= 1, tier_count >= 1, window >= 1)
   if (has(tc, 'streak_cap') && !(tc.streak_cap > 0 && tc.streak_cap <= 1)) fail('tc.streak_cap must be in (0, 1]');
   if (has(tc, 'streak_tier_count') && !(Number.isInteger(tc.streak_tier_count) && tc.streak_tier_count >= 1)) fail('tc.streak_tier_count must be an integer >= 1');

@@ -1,5 +1,6 @@
 import type { Balance } from '../config/balance';
 import { farmCost } from '../config/formulas';
+import { isPaused } from './pause';
 /** M2 Workers (m2-proposal v1.0). All tunables in balance.workers. Pure helpers used by tick/actions. */
 export type WorkerId = 'market_hand' | 'coop_hand' | 'hawker' | 'grader';
 export const WORKERS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
@@ -41,11 +42,13 @@ export const graderTierCostCents = (i: number, b: Balance) => {
 /** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share.
  *  `tierAdd` = #4 Inspect (abilities rule 2: + tc_ability_w4_tier_add to the tier mult while the call runs; 0 otherwise). */
 export function graderMult(ws: Workers, tier: number, b: Balance, tierAdd = 0): number {
+  if (isPaused(ws.grader, b)) return 1; // paused: no price bonus (not even the asleep share)
   const m = mood(ws.grader, b); if (!m || tier <= 0) return 1;
   const g = b.workers.grader, bonus = g.tiers[tier - 1].mult + tierAdd - 1;
   return 1 + bonus * (m === 'working' ? 1 : m === 'tired' ? g.tired_bonus_share : g.asleep_bonus_share /* asleep or unpaid */);
 }
 export function hawkerDemandMult(ws: Workers, b: Balance): number {
+  if (isPaused(ws.hawker, b)) return 1;
   const m = mood(ws.hawker, b); return m === 'working' ? b.workers.hawker.demand_mult : m === 'tired' ? b.workers.hawker.tired_demand_mult : 1;
 }
 /** Full wage for one action interval, cents (rounded). Caller makes the worker Unpaid if coins < this. */
