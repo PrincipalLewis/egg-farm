@@ -58,7 +58,7 @@ export function commitWrite(kv: KV, state: GameState, now: number, b: Balance): 
   try {
     if (newerStoredVersion(kv) !== null) return null;
     const cur = kv.getItem(SAVE_KEY); if (cur && validate(cur, b).ok) kv.setItem(BAK_KEY, cur);
-    const raw = serialize(state, now, saveSeqOf(cur) + 1); kv.setItem(SAVE_KEY, raw); return kv.getItem(SAVE_KEY) === raw ? raw : null;
+    const raw = serialize(state, now, saveSeqOf(cur) + 1, b); kv.setItem(SAVE_KEY, raw); return kv.getItem(SAVE_KEY) === raw ? raw : null;
   } catch { return null; }
 }
 /** Telemetry `path` for the interim marker migration (vs. the S-4 v7 path later). */
@@ -141,9 +141,9 @@ export function checksum(text: string): string {
   for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193); }
   return (h >>> 0).toString(16).padStart(8, '0');
 }
-/** Serialise a save; `sum` covers the state JSON. */
-export function serialize(state: GameState, now: number, saveSeq?: number): string {
-  const st = JSON.stringify(m5Persist(state)); // v5 F2: session-only M5 keys never saved; same object (bytes) when none exist
+/** Serialise a save; `sum` covers the state JSON. `b` lets m5Persist draw the golden gap when an egg is on screen (Architect B). */
+export function serialize(state: GameState, now: number, saveSeq?: number, b?: Balance): string {
+  const st = JSON.stringify(m5Persist(state, b)); // v5 F2: session-only M5 keys never saved; same object (bytes) when none exist
   return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
 }
 /** Balances of an M4 build whose session runs with the switch off until the migration commits (game.ts tracksOff). */
@@ -172,7 +172,7 @@ export function flagOffShape(state: GameState, b: Balance): GameState {
 export function save(kv: KV, state: GameState, now = Date.now(), b?: Balance, rotate = false): string {
   if (b) state = flagOffShape(state, b);
   let prev: string | null = null; try { prev = kv.getItem(SAVE_KEY); } catch { /* blocked: the write below throws */ }
-  const raw = serialize(state, now, m4SaveSeq(state, b, prev)); // HoE correction: saveSeq on main (missing = 0)
+  const raw = serialize(state, now, m4SaveSeq(state, b, prev), b); // HoE correction: saveSeq on main (missing = 0)
   // BUG-2: never write over a newer-build save in main or .bak (callers check first; this is the last line of defence).
   const nv = newerStoredVersion(kv); if (nv !== null) throw new NewerSaveError(nv);
   if (rotate && b) {

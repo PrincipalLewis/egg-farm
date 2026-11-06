@@ -24,7 +24,8 @@ function play(b: ReturnType<typeof B>, seed: number, onTick?: (s: GameState) => 
   }
   return { s, ev };
 }
-const strip = (s: GameState) => { const { evRngState: _e, brRngState: _b, ...rest } = s; return rest; };
+// v5 #1 slice 2: golden on now also runs its own focus countdown (nextSpawnRemainingS + session goldenPending); not customer-facing.
+const strip = (s: GameState) => { const { evRngState: _e, brRngState: _b, nextSpawnRemainingS: _n, goldenPending: _p, ...rest } = s; return rest; };
 
 describe('F1b evRng / brRng', () => {
   it('[GE-AC33][D-C2] derivation matches D-C2 / GE-AC33 (initialState(b,7) at tick 0)', () => {
