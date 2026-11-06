@@ -35,6 +35,8 @@ export function validateM5(m4: any, workers: any): void {
   if (has(tc, 'warn_at_s', 'urgent_at_s', 'egg_despawn_s') && !(tc.warn_at_s < tc.urgent_at_s && tc.urgent_at_s < tc.egg_despawn_s)) fail('tc: warn_at_s < urgent_at_s < egg_despawn_s');
   for (const k of ['egg_despawn_s', 'frenzy_s', 'first_spawn_s']) if (has(tc, k) && !(tc[k] > 0)) fail(`tc.${k} must be > 0`);
   if (has(tc, 'frenzy_price_mult') && !(tc.frenzy_price_mult >= 1)) fail('tc.frenzy_price_mult must be >= 1');
+  // D-HOP-2026-11-05-11: R22 all-sales scope is fixed in v5; 1 is the only valid value (0 has no defined semantics, no alternate branch)
+  if (has(tc, 'frenzy_all_sales') && tc.frenzy_all_sales !== 1) fail('tc.frenzy_all_sales must be 1 (R22 all-sales scope, D-HOP-2026-11-05-11)');
   // #2 streak / #3 tap coins (streak spec §5: 0 < cap <= 1, tier_count >= 1, window >= 1)
   if (has(tc, 'streak_cap') && !(tc.streak_cap > 0 && tc.streak_cap <= 1)) fail('tc.streak_cap must be in (0, 1]');
   if (has(tc, 'streak_tier_count') && !(Number.isInteger(tc.streak_tier_count) && tc.streak_tier_count >= 1)) fail('tc.streak_tier_count must be an integer >= 1');
