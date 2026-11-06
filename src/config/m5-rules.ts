@@ -10,7 +10,7 @@ const fail = (m: string): never => { throw new Error(`balance.m4.${m}`); };
 const has = (tc: TC, ...k: string[]) => k.every(x => typeof tc[x] === 'number');
 /** tc keys that must exist while their flag is on (feature PRs append; empty until a reader lands). */
 export const M5_REQUIRED_TC: Partial<Record<(typeof M5_FLAGS)[number], readonly string[]>> = {
-  pause: ['pause_unlock_farm', 'pause_call_lockout_s'], // CCR-F4: read by save/m5-fields.ts m5Load (pause spec rule 1, B5)
+  pause: ['pause_unlock_farm', 'pause_call_lockout_s', 'rest_recovery_mult'], // rule 1 / B5 (m5Load) + rule 3 recovery (sim/pause.ts)
 };
 export function validateM5(m4: any, workers: any): void {
   if (!m4) return;

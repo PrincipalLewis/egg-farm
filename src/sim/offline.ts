@@ -18,6 +18,8 @@ export function offlineEggs(awayS: number, farmLevel: number, b: Balance, eps = 
   return Math.floor(Math.min(awayS, o.offlineCapSeconds) * o.offlineRateMultiplier * eps * mult);
 }
 /** Coop untouched; eggs parked in pendingOfflineEggs until the modal's Collect (bypasses coop cap). */
+/** D-HOP-2026-11-06-01 (a) / Pause v1.3.15: the egg grant depends on hen state, the eligible gap, and the cap.
+ *  Pause, hire, and m4.flags.pause do not change it. */
 export function applyOffline(s: GameState, awayMs: number, b: Balance) {
   const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b))
     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
