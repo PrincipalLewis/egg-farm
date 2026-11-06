@@ -4,6 +4,8 @@ import { farmCost } from '../config/formulas';
 export type WorkerId = 'market_hand' | 'coop_hand' | 'hawker' | 'grader';
 export const WORKERS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
 export type WorkerMood = 'working' | 'tired' | 'asleep' | 'unpaid';
+/** Every WorkerMood value; telemetry mood enums are built from this (D-HOE-20261030-32). */
+export const WORKER_MOODS: readonly WorkerMood[] = ['working', 'tired', 'asleep', 'unpaid'];
 /** energy 0..100; cdS = seconds until next auto action (Market/Coop Hand only). */
 /** unpaid (§8 item 2/15): wage couldn't be paid in full; acts as Asleep for output, no drain, no wage. */
 /** M5 Pause (m5-worker-pause-spec; absent while m4.flags.pause is off): `paused` is an orthogonal flag, not a 5th mood (sizing §9.2 G3);
@@ -36,10 +38,11 @@ export const graderTierCostCents = (i: number, b: Balance) => {
   const t = b.workers.grader.tiers[i] as { farm: number; mult: number; cost?: number };
   return (t.cost ?? Math.floor(b.workers.grader.tier_cost_share_of_farm_cost * farmCost(t.farm, b))) * 100;
 };
-/** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share. */
-export function graderMult(ws: Workers, tier: number, b: Balance): number {
+/** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share.
+ *  `tierAdd` = #4 Inspect (abilities rule 2: + tc_ability_w4_tier_add to the tier mult while the call runs; 0 otherwise). */
+export function graderMult(ws: Workers, tier: number, b: Balance, tierAdd = 0): number {
   const m = mood(ws.grader, b); if (!m || tier <= 0) return 1;
-  const g = b.workers.grader, bonus = g.tiers[tier - 1].mult - 1;
+  const g = b.workers.grader, bonus = g.tiers[tier - 1].mult + tierAdd - 1;
   return 1 + bonus * (m === 'working' ? 1 : m === 'tired' ? g.tired_bonus_share : g.asleep_bonus_share /* asleep or unpaid */);
 }
 export function hawkerDemandMult(ws: Workers, b: Balance): number {
