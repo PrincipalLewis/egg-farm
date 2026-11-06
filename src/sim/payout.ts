@@ -4,11 +4,12 @@ import type { Balance } from '../config/balance';
 import type { GameState } from './state';
 import { salePriceCents } from './tracks';
 import { graderMult } from './workers';
+import { inspectTierAdd } from './abilities';
 import { PLAYER_SALE, saleEffectFactors, type SaleCtx } from './effects';
 /** Price multipliers applied to a sale: the Grader, then every live timed effect from the F1c registry (sim/effects.ts).
  *  ctx defaults to a player sale with focus (UI previews and player credits); worker sales pass by/suspended. */
 export function saleMultipliers(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE): number[] {
-  const g = graderMult(s.workers, s.graderTier, b), fx = saleEffectFactors(s, b, ctx);
+  const g = graderMult(s.workers, s.graderTier, b, inspectTierAdd(s, b, ctx.suspended)), fx = saleEffectFactors(s, b, ctx);
   return fx.length ? [g, ...fx.map(e => e.factor)] : [g];
 }
 /** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult) (rounded once, X7). */

@@ -14,6 +14,7 @@ import { incomeRefTick } from './income-ref';
 import { frenzyTick } from './golden';
 import { ensureBreeds } from './breeds';
 import { breedsTick } from './breeds-hatch';
+import { abilitiesTick } from './abilities';
 /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
 export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
 /** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
@@ -30,7 +31,9 @@ const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, 
 const incomeRef: TimerSystem = (s, dt, _f, b) => incomeRefTick(s, dt, b);
 /** #1 golden R23: frenzyRemainingS counts down on focus seconds (frozen under menus / hidden). Identity unless m4.flags.golden. */
 const frenzy: TimerSystem = (s, _dt, f, b) => frenzyTick(s, f, b);
-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy];
+/** #4 abilities (rules 6, 10): early end, then focus countdown / expiry of running calls. Identity unless m4.flags.abilities. */
+const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
+export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy, abilities];
 export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
 export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
   const f = tickFocusS(dt, clock);

@@ -1,4 +1,5 @@
 import type { KV } from '../save/save';
+import { EVENT_SCHEMA, TELEMETRY_SCHEMA_VERSION } from './schema';
 export const TELEMETRY_KEY = 'eggfarm.telemetry';
 /** M3-AC7: random per-install id under its OWN key (never in the save), so it survives a save reset and the corrupt-save fallback. */
 export const INSTALL_ID_KEY = 'eggfarm.install_id';
@@ -15,18 +16,35 @@ export const isPinned = (type: string) => type === 'session_start' || type === '
   || type === 'save_migrated' || type === 'save_migration_aborted'; // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
 export interface TEvent { type: string; ts: number; sessionMs: number; [k: string]: unknown; }
 export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; }
+/** Pre-0.6.2 rings are a bare array, or {events} with no v. Tag those events; never drop them (G8-13). */
+function tagLegacy(events: unknown[]): TEvent[] {
+  return events.map(e => (e !== null && typeof e === 'object' && !Array.isArray(e) ? { ...(e as TEvent), legacy: true } : e)) as TEvent[];
+}
+function readRing(raw: string | null): TEvent[] {
+  if (!raw) return [];
+  let parsed: unknown;
+  try { parsed = JSON.parse(raw); } catch { return []; }
+  if (Array.isArray(parsed)) return tagLegacy(parsed);
+  if (!parsed || typeof parsed !== 'object') return [];
+  const ring = parsed as { v?: unknown; events?: unknown };
+  if (!Array.isArray(ring.events)) return [];
+  return ring.v == null ? tagLegacy(ring.events) : ring.events as TEvent[];
+}
+const exportDoc = (exportedAt: number, events: readonly object[]) => JSON.stringify({ schema_version: TELEMETRY_SCHEMA_VERSION, exportedAt, events }, null, 2);
 /**
  * Ring buffer (cap ring_size) persisted in batches: track() only touches memory; flush() writes storage.
  * Taps are aggregated into one `tap` event per tap_batch_ms window ({count, eggs}).
+ * Stored ring is {v: TELEMETRY_SCHEMA_VERSION, events} (errata rev 13 V-0, G8-12). A ring with no v keeps its
+ * events and tags them legacy:true (G8-13); T-AC9 still applies to untagged events (validateEvent skips legacy:true).
  */
 export class Telemetry {
-  private buf: TEvent[]; private dirty = false; private sessionStart: number;
+  private buf: TEvent[]; private dirty = false; private warned = new Set<string>(); private sessionStart: number;
   private tapWin: { start: number; count: number; eggs: number } | null = null;
   private sumWin: { start: number; v: Record<string, number> } | null = null;
   writes = 0;
   constructor(private kv: KV, private cfg: TelemetryConfig, private now = () => Date.now()) {
     this.sessionStart = now();
-    try { const raw = kv.getItem(TELEMETRY_KEY); this.buf = raw ? JSON.parse(raw) : []; if (!Array.isArray(this.buf)) this.buf = []; } catch { this.buf = []; }
+    try { this.buf = readRing(kv.getItem(TELEMETRY_KEY)); } catch { this.buf = []; }
     this.trim();
   }
   /** Evict the oldest NON-pinned events until the trimmable part fits ring_size. Pinned events are never dropped. */
@@ -36,6 +54,8 @@ export class Telemetry {
     let drop = free - cap; this.buf = this.buf.filter(e => { if (drop > 0 && !isPinned(e.type)) { drop--; return false; } return true; });
   }
   track(type: string, data: Record<string, unknown> = {}) {
+    // T-AC9: unknown types warn once in dev and are still recorded; release builds never drop or check (tree-shaken).
+    if (import.meta.env.DEV && !Object.prototype.hasOwnProperty.call(EVENT_SCHEMA, type) && !this.warned.has(type)) { this.warned.add(type); console.warn(`[telemetry] unknown event type: ${type}`); }
     if (type !== 'tap') this.closeTapWindow();
     const t = this.now(); this.buf.push({ ...data, type, ts: t, sessionMs: t - this.sessionStart }); this.trim(); this.dirty = true;
   }
@@ -65,7 +85,7 @@ export class Telemetry {
   poll() { if (this.sumWin && this.now() - this.sumWin.start >= (this.cfg.worker_summary_s ?? 60) * 1000) this.closeSumWindow(); if (this.tapWin && this.now() - this.tapWin.start >= this.cfg.tap_batch_ms) this.closeTapWindow(); }
   flush(force = false) {
     if (force) { this.closeTapWindow(); this.closeSumWindow(); } else this.poll();
-    if (!this.dirty) return; try { this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++; } catch { /* AC14c: quota/private mode; keep the buffer in memory */ }
+    if (!this.dirty) return; try { this.kv.setItem(TELEMETRY_KEY, JSON.stringify({ v: TELEMETRY_SCHEMA_VERSION, events: this.buf })); this.dirty = false; this.writes++; } catch { /* AC14c: quota/private mode; keep the buffer in memory */ }
   }
   events(): readonly TEvent[] { return this.buf; }
   /** v5 zeroGainUi (spec §11, HoE 02:55): add fields to the newest event of `type` (the UI sets `upgrade.zero_gain` after dispatch).
@@ -83,9 +103,9 @@ export class Telemetry {
     if (this.tapWin) extra.push({ type: 'tap', ts: this.tapWin.start, sessionMs: this.tapWin.start - this.sessionStart, count: this.tapWin.count, eggs: this.tapWin.eggs, open: true });
     if (this.sumWin) extra.push({ ...this.sumWin.v, type: 'worker_summary', ts: this.sumWin.start, sessionMs: this.sumWin.start - this.sessionStart, windowMs: t - this.sumWin.start, open: true });
     const events = [...this.buf, ...extra].map(e => { const o: Record<string, unknown> = { ...e }; for (const k of Telemetry.REDACT) delete o[k]; return o; });
-    return JSON.stringify({ exportedAt: t, events }, null, 2);
+    return exportDoc(t, events);
   }
-  exportJSON(): string { this.closeTapWindow(); this.closeSumWindow(); return JSON.stringify({ exportedAt: this.now(), events: this.buf }, null, 2); }
+  exportJSON(): string { this.closeTapWindow(); this.closeSumWindow(); return exportDoc(this.now(), this.buf); }
   // Onboarding hooks: wired now, called by the onboarding overlay when it lands.
   onboardingStep(step: number, name: string, extra: Record<string, unknown> = {}) { this.track('onboarding_step', { step, name, ...extra }); }
   onboardingSkip(atStep: number) { this.track('onboarding_skip', { atStep }); }
