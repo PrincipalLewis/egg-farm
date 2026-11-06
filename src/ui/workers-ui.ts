@@ -166,12 +166,19 @@ export function workersHtml(s: GameState, b: Balance, nowMs = Date.now()): strin
     const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}`;
-    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}`;
+    // Manage button + optional caption/sr. When a call sits beside Manage, wrap them in
+    // .wk-manage (column) so the nowrap .wk-cap cannot inflate the action-row min-content
+    // width (QA-D-1106-PR116-OVF / Art §6: side-by-side Manage|call at 360 ≈ 124+8+124).
+    const manageBtn = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>`;
+    const capHtml = `${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}`;
     const cst = callButtonState(s, id, b, nowMs);
     const call = cst ? callButtonHtml(cst, id) : '';
+    const refill = call
+      ? `<div class="wk-actions"><div class="wk-manage">${manageBtn}${capHtml}</div><div class="wk-call">${call}</div></div>`
+      : `${manageBtn}${capHtml}`;
     const prog = cst?.kind === 'active' ? callProgressPct(s, id, b) : 0;
     const progAttr = cst?.kind === 'active' ? ` style="--call-prog:${prog}%"` : '';
-    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}${cst ? ' has-call' : ''}" data-w="${id}"${progAttr}>${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${call ? `<div class="wk-actions">${refill}${call}</div>` : refill}</div></div>`;
+    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}${cst ? ' has-call' : ''}" data-w="${id}"${progAttr}>${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */

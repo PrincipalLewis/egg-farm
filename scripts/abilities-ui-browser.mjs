@@ -69,9 +69,32 @@ const closeBtn = p => p.locator('#p-upgrades .close').click();
   // O1: dock while pending
   await openWorkers(); const callN = await p.locator('[data-testid^="call-"]').count(); await shot(p, 'flag1-workers.png');
   ok('F1-1 Workers tab shows call buttons (flag on)', callN >= 1, { callN });
-  // INFO (not gated; reported to UI QA): Workers tab horizontal overflow at 360 with call buttons (scrollWidth vs clientWidth).
-  const ovf = await p.evaluate(() => { const b = document.querySelector('#p-upgrades .body'); return { scrollWidth: b.scrollWidth, clientWidth: b.clientWidth }; });
-  console.log(`INFO [chromium] F1-1i Workers tab @360 horizontal overflow (flag on): ${ovf.scrollWidth > ovf.clientWidth ? 'YES' : 'no'} — ${JSON.stringify(ovf)}`);
+  // QA-D-1106-PR116-OVF: hard-fail if Workers @360 flag-on overflows or clips call buttons (was INFO).
+  const ovf = await p.evaluate(() => {
+    const se = document.scrollingElement || document.documentElement;
+    const de = document.documentElement;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const calls = [...document.querySelectorAll('[data-testid^="call-"]')].filter(el => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }).map(el => {
+      const r = el.getBoundingClientRect();
+      return { id: el.getAttribute('data-testid'), left: r.left, right: r.right, top: r.top, bottom: r.bottom,
+        inView: r.left >= -0.5 && r.right <= vw + 0.5 };
+    });
+    return {
+      innerWidth: vw, innerHeight: vh,
+      seScrollWidth: se.scrollWidth, seClientWidth: se.clientWidth,
+      deScrollWidth: de.scrollWidth, deClientWidth: de.clientWidth,
+      bodyScrollWidth: document.querySelector('#p-upgrades .body')?.scrollWidth ?? null,
+      bodyClientWidth: document.querySelector('#p-upgrades .body')?.clientWidth ?? null,
+      calls,
+    };
+  });
+  const noPageHScroll = ovf.seScrollWidth <= ovf.innerWidth && ovf.deScrollWidth <= ovf.innerWidth;
+  const allCallsIn = ovf.calls.length > 0 && ovf.calls.every(c => c.inView);
+  ok('F1-1a Workers @360 flag-on: no horizontal page scroll (scrollingElement/documentElement scrollWidth <= innerWidth)', noPageHScroll, ovf);
+  ok('F1-1b Workers @360 flag-on: every visible call button fully inside the viewport', allCallsIn, { calls: ovf.calls, innerWidth: ovf.innerWidth });
   const actS = id => p.evaluate(i => window.eggfarm.state.abilities?.[i]?.activeS ?? null, id);
   await fire('market_hand'); await p.waitForTimeout(40); const pend = await st(p); 
   ok('F1-2 call fired from sheet -> pending close (layer closed, sheet still in DOM for transform close)', !pend.layerOpen && !pend.upHidden, pend);
