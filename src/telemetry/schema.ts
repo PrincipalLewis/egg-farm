@@ -1,7 +1,8 @@
 /**
  * Telemetry v0.6.2 event allowlist (G-8 / TEL-2; manifest row 11, owner Saves). Source of record: telemetry-spec v0.6.2
  * d170eb09 §3/§3.1/§3.2 + errata v5 rev. 13 a0e8f6d7 (TELERR7; supersedes rev. 10 fd3416ec / rev. 12 0cfe168a), with D-HOE-20261030-18/-19/-20/-22/-23/-24/-25/-29/-31/-32/-33.
- * Contract (D-HOE-20 + D-HOE-25 N-2): TELEMETRY_SCHEMA_VERSION, EVENT_SCHEMA, EVENT_TYPES, validateEvent(e), isPinned(e).
+ * Contract (D-HOE-20 + D-HOE-25 N-2 + D-HOE-39 F-3): TELEMETRY_SCHEMA_VERSION, EVENT_SCHEMA, EVENT_TYPES, validateEvent(e), isPinned(e).
+ * Nested wire records (session_summary.*, session_end.breed_family_s) use EventSpec.records — not FieldSpec kind obj.
  * - Closed schema: an unknown event type or field fails validation. No free text: every string is an enum or an anchored pattern.
  * - Null rule (errata V-2): a field is required and non-null unless it carries optional?: true (may be absent) or nullable?: true.
  * - Flag-gated fields are optional here; "absent with the flag off" (TEL-AC10) is checked on the emitter, not by this module.
@@ -25,12 +26,18 @@ export type FieldSpec = Mods & (
   | { kind: 'float'; min?: number; max?: number; step?: number }
   | { kind: 'str'; pattern: RegExp } // anchored pattern, never free text
   | { kind: 'arr'; of: FieldSpec; maxLen: number }
-  | { kind: 'obj'; fields: Readonly<Record<string, FieldSpec>>; dynamicFields?: readonly DynamicField[] } // nested record (session_summary, breed_family_s)
-);
+); // F-3 / D-HOE-39: no FieldSpec kind 'obj' (outside D-HOE-25 N-2). Nested wire records use EventSpec.records.
 export interface DynamicField { keyPattern: RegExp; spec: FieldSpec }
+/** One-level nested wire record (F-3): not a FieldSpec kind. optional/nullable apply to the whole record. */
+export type RecordSpec = Mods & {
+  fields: Readonly<Record<string, FieldSpec>>;
+  dynamicFields?: readonly DynamicField[];
+};
 export interface EventSpec {
   pinned: boolean | ((e: TEvent) => boolean);
   fields: Readonly<Record<string, FieldSpec>>;
+  /** Nested wire objects validated one level deep without FieldSpec kind 'obj' (F-3 / D-HOE-39). */
+  records?: Readonly<Record<string, RecordSpec>>;
   dynamicFields?: readonly DynamicField[];
   /** Capped-marker variant (D-HOE-25 N-2): when e.capped === true the event is exactly {capped: true, <counterKey>: count}. */
   capped?: { counterKey: 'events' | 'episodes' };
@@ -44,9 +51,11 @@ const BOOL: FieldSpec = { kind: 'bool' };
 const F = (min?: number, max?: number, step?: number): FieldSpec => ({ kind: 'float', ...(min !== undefined && { min }), ...(max !== undefined && { max }), ...(step !== undefined && { step }) });
 const S = (pattern: RegExp): FieldSpec => ({ kind: 'str', pattern });
 const A = (of: FieldSpec, maxLen: number): FieldSpec => ({ kind: 'arr', of, maxLen });
-const O = (fields: Record<string, FieldSpec>, dynamicFields?: DynamicField[]): FieldSpec => ({ kind: 'obj', fields, ...(dynamicFields && { dynamicFields }) });
 const opt = (f: FieldSpec): FieldSpec => ({ ...f, optional: true });
 const nul = (f: FieldSpec): FieldSpec => ({ ...f, nullable: true });
+const R = (fields: Record<string, FieldSpec>, dynamicFields?: DynamicField[]): RecordSpec => ({ fields, ...(dynamicFields && { dynamicFields }) });
+const optR = (r: RecordSpec): RecordSpec => ({ ...r, optional: true });
+const nulR = (r: RecordSpec): RecordSpec => ({ ...r, nullable: true });
 const alt = (xs: readonly string[]) => xs.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
 
 // ---- shared field types --------------------------------------------------------------------------------------------
@@ -89,17 +98,21 @@ const SCHEMA: Record<string, EventSpec> = {
     golden_spawned: opt(C), golden_collected: opt(C), golden_cents: opt(C), frenzy_extra_cents: opt(C), broody_cents: opt(C), broody_collects: opt(C),
     credited_taps: opt(C), tap_bonus_cents: opt(C), streak_extra_cents: opt(C),
     breed_hatches: opt(C), breed_spend_cents: opt(C), breed_present_eggs: opt(C), breed_away_eggs: opt(C), breed_broody_cents: opt(C), breeds_owned: opt(C),
-    breed_slots_used: opt(I(0, 3)), breed_loadout_end: opt(LOADOUT), breed_family_s: opt(O({ P: F(0), A: F(0), B: F(0) })), present_active_s: opt(S1), present_lost_count: opt(C),
+    breed_slots_used: opt(I(0, 3)), breed_loadout_end: opt(LOADOUT), present_active_s: opt(S1), present_lost_count: opt(C),
     ability_uses: opt(C), calls_ready_unused_s: opt(F(0)), ability_blocked_taps: opt(C), // D-HOE-23 (b): all blocked taps incl. post-cap
     wage_paid_asleep_cents: opt(C), asleep_s: opt(S1), refills_manual: opt(C), refills_auto: opt(C), charge_starved_s: opt(S1),
     shortage_s: opt(C), // D-HOE-18 13:16: whole seconds
     paused_worker_s: opt(F(0)), all_paused_s: opt(F(0)), // rc2Refill = 0 only (V-6)
     zero_gain_purchase_dropped: opt(C), // D-HOE-32 M-2
-  } },
+  }, records: { breed_family_s: optR(R({ P: F(0), A: F(0), B: F(0) })) } },
   session_summary: { pinned: true, fields: { // §3.3; ts = session_start.ts, no fgMs
-    fgMs: opt(C), start: O(START_FIELDS), end: nul(O({ reason: E('unload', 'hidden'), fg_ms: C, taps_total: C, taps_moved_eggs: C, eggs_collected_manual: C })),
-    counts: O({}, [{ keyPattern: /^[a-z][a-z0-9_]{0,39}$/, spec: C }]), coop_full_ms: C, eggs_lost_while_full: F(0), coop_full_episodes: C, coop_full_flapping: BOOL,
-    first_upgrade: nul(O({ fgMs: C, upgrade: E('collection', 'farm', 'hens', 'eggValue'), newLevel: C, cost: MONEY, taps_before: C })), upgrades: C } },
+    fgMs: opt(C), coop_full_ms: C, eggs_lost_while_full: F(0), coop_full_episodes: C, coop_full_flapping: BOOL, upgrades: C },
+    records: { // F-3: nested wire shape unchanged; no FieldSpec kind 'obj'
+      start: R(START_FIELDS),
+      end: nulR(R({ reason: E('unload', 'hidden'), fg_ms: C, taps_total: C, taps_moved_eggs: C, eggs_collected_manual: C })),
+      counts: R({}, [{ keyPattern: /^[a-z][a-z0-9_]{0,39}$/, spec: C }]),
+      first_upgrade: nulR(R({ fgMs: C, upgrade: E('collection', 'farm', 'hens', 'eggValue'), newLevel: C, cost: MONEY, taps_before: C })),
+    } },
   tap: { pinned: false, fields: { count: I(1), eggs: C, empty: C, full_at_start: BOOL, credited: opt(C), empty_credited: opt(C), bonus_cents: opt(C), open: opt(E(true)) } },
   upgrade: { pinned: true, fields: { upgrade: E('collection', 'farm', 'hens', 'eggValue'), newLevel: C, cost: MONEY, coinsBefore: C, track: opt(E('farm', 'hens', 'egg_value', 'collection')),
     is_first_upgrade: BOOL, taps_before: C, zero_gain: opt(BOOL) } },
@@ -222,9 +235,13 @@ function checkField(path: string, v: unknown, f: FieldSpec, out: string[]): void
     case 'str': if (typeof v !== 'string' || !f.pattern.test(v)) bad('pattern'); return;
     case 'arr': if (!Array.isArray(v)) { bad('not array'); return; } if (v.length > f.maxLen) { bad('too long'); return; }
       v.forEach((x, i) => checkField(`${path}[${i}]`, x, f.of, out)); return;
-    case 'obj': if (typeof v !== 'object' || Array.isArray(v)) { bad('not object'); return; }
-      checkRecord(path, v as Record<string, unknown>, f.fields, f.dynamicFields, out); return;
   }
+}
+function checkRecordSpec(path: string, v: unknown, r: RecordSpec, out: string[]): void {
+  if (v === undefined) { if (!r.optional) out.push(`${path}: required`); return; }
+  if (v === null) { if (!r.nullable) out.push(`${path}: null`); return; }
+  if (typeof v !== 'object' || Array.isArray(v)) { out.push(`${path}: not object`); return; }
+  checkRecord(path, v as Record<string, unknown>, r.fields, r.dynamicFields, out);
 }
 function checkRecord(path: string, o: Record<string, unknown>, fields: Readonly<Record<string, FieldSpec>>, dyn: readonly DynamicField[] | undefined, out: string[], skip: readonly string[] = []) {
   for (const [k, f] of Object.entries(fields)) checkField(`${path}.${k}`, o[k], f, out);
@@ -263,10 +280,15 @@ export function validateEvent(e: TEvent): string[] {
   const t = e.type; if (typeof t !== 'string') return ['type: required'];
   const spec = EVENT_SCHEMA[t]; if (!spec) return [`${t}: unknown event`];
   const out: string[] = [];
-  for (const [k, f] of Object.entries(ENVELOPE)) if (!(k in spec.fields)) checkField(`${t}.${k}`, e[k], f, out);
-  const env = ['type', ...Object.keys(ENVELOPE)];
+  const recordKeys = Object.keys(spec.records ?? {});
+  for (const [k, f] of Object.entries(ENVELOPE)) if (!(k in spec.fields) && !recordKeys.includes(k)) checkField(`${t}.${k}`, e[k], f, out);
+  const env = ['type', ...Object.keys(ENVELOPE), ...recordKeys];
   if (spec.capped && e.capped === true) checkRecord(t, e, { capped: E(true), [spec.capped.counterKey]: C }, undefined, out, env);
-  else { checkRecord(t, e, spec.fields, spec.dynamicFields, out, env); RULES[t]?.(e, out); }
+  else {
+    checkRecord(t, e, spec.fields, spec.dynamicFields, out, env);
+    if (spec.records) for (const [k, r] of Object.entries(spec.records)) checkRecordSpec(`${t}.${k}`, e[k], r, out);
+    RULES[t]?.(e, out);
+  }
   return out;
 }
 /** §3.2 + errata V-3, event-based (D-HOE-19 F-10): tip_shown{id:'clock_wage'} and coop_full end/capped pin; unknown types don't. */
