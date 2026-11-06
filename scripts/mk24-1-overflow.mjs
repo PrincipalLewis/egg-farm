@@ -1,13 +1,13 @@
 /** MK-24-1 v4 (delivered eggs) + v3 layout: always two-line Sell, shared width, money never truncates; shots + checks at 360/375/390/430/1280. */
 import { chromium } from 'playwright-core';
-import { spawn } from 'node:child_process';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
 import { mkdirSync, readFileSync } from 'node:fs';
 const OUT = new URL('../../engineering/screenshots/', import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 const port = 4190, base = `http://127.0.0.1:${port}/`;
-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
-const kill = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch {} };
-setTimeout(() => { kill(); process.exit(2); }, 180_000).unref();
+const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+const stopSrv = () => stopOrReport(srv, srvRec, 'mk24-1-overflow');
+setTimeout(() => { stopSrv(); process.exit(2); }, 180_000).unref();
 await new Promise(r => setTimeout(r, 2500));
 const html = readFileSync('dist/index.html', 'utf8');
 const jsName = (html.match(/assets\/(index-[^"]+\.js)/) || [])[1];
@@ -149,6 +149,6 @@ for (const w of widths) {
   }
   await ctx.close();
 }
-await browser.close(); kill();
+await browser.close(); stopSrv();
 console.log(ok ? 'MK-24-1-v4 PASS' : 'MK-24-1-v4 FAIL', buildId);
 process.exit(ok ? 0 : 1);

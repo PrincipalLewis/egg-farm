@@ -1,0 +1,1 @@
+const { kill } = process; kill(pid)

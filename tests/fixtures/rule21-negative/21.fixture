@@ -1,0 +1,1 @@
+for f in /proc/[0-9]*/stat; do :; done

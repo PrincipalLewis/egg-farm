@@ -1,9 +1,10 @@
 // PT1-13: WebKit narrow phones: farm column, Collect bar and next-goal chip right edges <= viewport width (no clipped UI).
 // Usage: [SHOTS=dir] node scripts/pt1-13-webkit.mjs [gameDir=.]  (expects <gameDir>/dist-qa). Exit 1 on overflow.
 import { webkit, devices } from 'playwright-core';
-import { spawn } from 'node:child_process'; import { mkdirSync } from 'node:fs';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+import { mkdirSync } from 'node:fs';
 const dir = process.argv[2] || '.'; const port = 4600 + Math.floor(Math.random() * 300);
-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true, cwd: dir });
+const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', cwd: dir });
 await new Promise(r => setTimeout(r, 2500));
 const br = await webkit.launch(); let bad = 0; const shots = process.env.SHOTS; if (shots) mkdirSync(shots, { recursive: true });
 const ph = (w, h) => ({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, userAgent: devices['iPhone SE (3rd gen)'].userAgent });
@@ -22,4 +23,4 @@ for (const [name, prof] of Object.entries(profiles)) for (const F of [0, 25]) {
   if (!ok) bad++; console.log(name, 'F' + F, JSON.stringify(r), ok ? 'ok' : 'OVERFLOW');
   await ctx.close();
 }
-await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
+await br.close(); const stopped = stopOrReport(srv, srvRec, 'pt1-13-webkit'); process.exit(bad ? 1 : stopped ? 0 : 3);

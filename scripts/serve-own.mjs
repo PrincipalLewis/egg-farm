@@ -3,20 +3,34 @@
 // from another worktree on the same port once made a run test the wrong build.)
 // port 0 / undefined (the default for callers without PORT set): probe a free port from the OS, so parallel worktrees don't
 // collide on a fixed default; the chosen port is printed to stderr and returned. An explicit port is used as-is.
-import { spawn, execSync } from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import net from 'node:net';
+import { execSync } from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import net from 'node:net';
+import { spawnRecorded, stopGroup, groupMembers } from './recorded-pid.mjs';
 export const freePort = () => new Promise((res, rej) => { const s = net.createServer(); s.unref(); s.on('error', rej);
   s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => res(port)); }); });
 const FETCH_MS = 10000; // CCR n4: no fetch may hang a run
 /** CCR delta m1: every vite child this process spawned, recorded right after spawn, so a signal during startup (before
- *  serveOwn resolves) still kills it. Only these process groups are ever killed. */
-const children = new Set();
+ *  serveOwn resolves) still kills it. Only these process groups are ever killed.
+ *  D-HOE-20261030-04 M1: each is recorded with its start time, parent and boot id (recorded-pid.mjs), and its group is
+ *  signalled only while it is still that unexited child of ours and leads its own group; anything else is refused. */
+const children = new Map(); // ChildProcess -> { rec (null if it exited before it was recorded: never signalled), members }
 export const liveChildren = () => children.size;
-export function stopAllChildren() { for (const c of children) { try { process.kill(-c.pid); } catch {} } children.clear(); }
+/** UI QA #89 F2: one loud line for a stop that did not verifiably empty the group (null when it did). */
+export function stopReport(res, pid) {
+  if (res.ok) return null;
+  return `serveOwn: SURVIVORS vite group ${pid ?? '?'}: ${res.reason}; surviving pids: ${res.survivors.length ? res.survivors.join(' ') : 'none in the snapshot'} (group probe ${res.probe}); not signalled again - stop them through a stop list`;
+}
+function stopOne(c) {
+  const e = children.get(c); children.delete(c);
+  const res = stopGroup(c, e.rec, { members: e.members }), line = stopReport(res, e.rec?.pid ?? c.pid);
+  if (line) { console.error(line); if (!process.exitCode) process.exitCode = 3; } // never dropped silently, never exit 0
+  return res;
+}
+export function stopAllChildren() { for (const c of [...children.keys()]) stopOne(c); }
 async function serveOnce(outDir, port, cwd) {
-  const srv = spawn('npx', ['vite', 'preview', '--outDir', outDir, '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true, cwd });
+  const { child: srv, rec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', outDir, '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', cwd });
   let spawnErr = null; srv.on('error', e => { spawnErr = e; }); // CCR delta n5: e.g. npx missing -> one-line error, not a crash
-  if (srv.pid) children.add(srv);
-  const stop = () => { try { if (srv.pid) process.kill(-srv.pid); } catch {} children.delete(srv); };
+  const entry = { rec, members: [] }; if (srv.pid) children.set(srv, entry);
+  const stop = () => { if (children.has(srv)) stopOne(srv); };
   try { // CCR n4: vite is stopped on ANY failure here, not only on a mismatch
     let html = '';
     for (let i = 0; i < 80 && srv.exitCode === null && !spawnErr; i++) { try { html = await (await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(FETCH_MS) })).text(); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
@@ -26,6 +40,7 @@ async function serveOnce(outDir, port, cwd) {
     if (srv.exitCode !== null || !own.length || !own.every(f => html.includes(f)))
       throw new Error(`serveOwn: port ${port} is not serving ${outDir} from ${cwd} (vite exit ${srv.exitCode}; expected ${own.join(',')}). Pick another PORT.`);
   } catch (e) { stop(); throw e; }
+  entry.members = groupMembers(rec); // F2: vite (npx's child) and anything else in the group, by pid + start time
   return { port, cwd, outDir, url: `http://127.0.0.1:${port}/`, stop };
 }
 export async function serveOwn(outDir, port = 0, cwd = process.cwd()) {

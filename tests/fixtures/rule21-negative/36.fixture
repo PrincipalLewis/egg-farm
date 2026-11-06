@@ -1,0 +1,1 @@
+for d in /proc/[0-9]*; do cat $d/cmdline; done

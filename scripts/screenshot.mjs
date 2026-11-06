@@ -1,9 +1,9 @@
 // Portrait-phone screenshots of the built game (npm run build && npm run screenshot). Uses system Chrome, headless.
 import { chromium } from 'playwright-core';
-import { spawn } from 'node:child_process';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
 const OUT = new URL('../../engineering/screenshots/', import.meta.url).pathname;
 const port = 4173, url = `http://127.0.0.1:${port}/?marketSeed=7`;
-const srv = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 await new Promise(r => setTimeout(r, 1500));
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
 const errors = [];
@@ -25,5 +25,5 @@ await shot('m1-welcome-back-portrait-390x844', t => base(t - 4_320_000), async p
 { const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); await page.goto(url); await page.getByText('Tap to start').click(); await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}m1-onboarding-portrait-390x844.png` }); console.log('saved onboarding'); await ctx.close(); }
-await browser.close(); srv.kill();
+await browser.close(); stopOrReport(srv, srvRec, 'screenshot');
 if (errors.length) { console.error('page errors:\n' + errors.join('\n')); process.exit(1); }
