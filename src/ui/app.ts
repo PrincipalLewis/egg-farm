@@ -197,7 +197,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     upgradesSheet.closeComplete();
   };
   const openPanel = (p: typeof open) => {
-    if (upgradesClosePending && p !== 'upgrades') sheetCloseComplete();
+    // O2: cancel pending close (listener + handle) before any reopen/navigation — including reopen Upgrades.
+    if (upgradesClosePending) sheetCloseComplete();
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
     if (open === 'market' && p !== 'market') ordersExpanded = false;
@@ -223,6 +224,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     } else if (actAllBtn.parentElement === upHeader) actAllBtn.remove();
   };
   placeActAll(); docked.addEventListener?.('change', placeActAll);
+  // O1: docked CSS nullifies .sheet transform — complete pending close so attendance cannot freeze forever.
+  docked.addEventListener?.('change', () => { if (upgradesClosePending) sheetCloseComplete(); });
   let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate'), rateTri = $('#rate .tri'), rateTxt = $('#rate .rt'); // m6: ▼ in an aria-hidden .tri, money in .rt
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
