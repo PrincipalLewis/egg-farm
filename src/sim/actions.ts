@@ -10,12 +10,15 @@ import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { fireAbility, activateAll } from './abilities';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
   | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
-  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] };
+  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
+  | { type: 'fireAbility'; worker: WorkerId; inSheet: boolean; nowMs: number; refillAgoSimMs?: number }
+  | { type: 'activateAll'; inSheet: boolean; nowMs: number };
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -106,6 +109,16 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
       for (const id of need) workers[id] = { ...workers[id]!, energy: 100 };
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
+    }
+    case 'fireAbility': {
+      const r = fireAbility(s, a.worker, b, { inSheet: a.inSheet, viaAll: false, nowMs: a.nowMs, refillAgoSimMs: a.refillAgoSimMs });
+      if (ev) for (const e of r.events) ev.push(e);
+      return r.state;
+    }
+    case 'activateAll': {
+      const r = activateAll(s, b, { inSheet: a.inSheet, nowMs: a.nowMs });
+      if (ev) for (const e of r.events) ev.push(e);
+      return r.state;
     }
     case 'hatch': return startHatch(s, b);
     case 'placeBreed': return placeBreed(s, b, a.slot, a.id);
