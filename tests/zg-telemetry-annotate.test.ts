@@ -14,7 +14,7 @@ describe('Minor 1: Telemetry.annotateLast tags the newest matching event only', 
     const ups = tel.events().filter(e => e.type === 'upgrade');
     expect(ups[0]).not.toHaveProperty('zero_gain'); expect(ups[1]).toMatchObject({ newLevel: 3, zero_gain: true });
     tel.flush(); expect(tel.writes).toBe(w + 1); // dirty -> one write
-    const stored = JSON.parse(kv.getItem('eggfarm.telemetry')).filter((e: any) => e.type === 'upgrade');
+    const stored = JSON.parse(kv.getItem('eggfarm.telemetry')).events.filter((e: any) => e.type === 'upgrade');
     expect(stored.map((e: any) => e.zero_gain)).toEqual([undefined, true]);
   });
   it('no match: nothing changes and nothing is written', () => {

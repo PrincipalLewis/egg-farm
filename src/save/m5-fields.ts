@@ -17,6 +17,7 @@ import { M5_SESSION_FIELDS } from '../sim/m5-state';
 import { sanitizePausedOnLoad } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
 import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
+import { incomeRefOn, resetIncomeRef } from '../sim/income-ref';
 export { streakAfter };
 export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
 /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
@@ -46,12 +47,21 @@ export function m5Persist(s: GameState): GameState {
   const o: any = { ...s, ...(s.breedsRawSlots && s.breeds && { breeds: breedsSaveView(s) }) }; // E10 / PMC Q5: raw unknown slot ids kept
   for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
 }
-/** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
+/** End every running call with cause `offline`. Never resume mid-call: activeS and durS are both cleared (readyAt stays).
+ *  Granted focus seconds (D-HOE-41 / abilities v1.3.12): finite durS > 0, else tc_ability_s (missing or invalid durS is today's
+ *  path). When balance has tc combo_boost_duration_s, granted is capped at max(tc_ability_s, that value). activeS clamps to
+ *  [0, granted]; effect_s = granted - activeS (the focus seconds the call ran). */
 function endCalls(o: any, b: Balance, ev: SimEvent[]) {
-  const dur = tc(b, 'ability_s');
-  for (const id of WORKERS) { const a = o.abilities[id]; if (!a || typeof a !== 'object' || !('activeS' in a)) continue;
-    const { activeS, ...rest } = a; o.abilities[id] = rest;
-    if (fin(activeS) && activeS > 0) ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: dur - Math.min(activeS, dur) }); }
+  const base = tc(b, 'ability_s'), combo = b.m4?.tc?.combo_boost_duration_s;
+  const cap = typeof combo === 'number' && Number.isFinite(combo) ? Math.max(base, combo) : undefined;
+  for (const id of WORKERS) {
+    const a = o.abilities[id]; if (!a || typeof a !== 'object' || (!('activeS' in a) && !('durS' in a))) continue;
+    const { activeS, durS, ...rest } = a; o.abilities[id] = rest;
+    if (!(fin(activeS) && activeS > 0)) continue;
+    let granted = fin(durS) && durS > 0 ? durS : base;
+    if (cap !== undefined) granted = Math.min(granted, cap);
+    ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: granted - clamp(activeS, 0, granted) });
+  }
 }
 /** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
  *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
@@ -93,7 +103,8 @@ function pauseLoad(ws: any, farmLevel: number, b: Balance): any {
 /** A hidden-tab or visible frame gap of 60 s or more (§9.1/§9.1a), applied to the state AT THE START of the gap: calls end
  *  (`offline`), an on-screen egg expires (`collectible_expired{reason:"offline"}`, no reward, fresh R3 gap that runs on the
  *  focus clock, so it starts once welcome-back closes), streak s = 0, Frenzy frozen, Broody nest kept with no accrual.
- *  Cooldowns need nothing: readyAt is wall clock. The streak run ends with streak_peak{reason:"offline"} if s > 0 (#2, R11). */
+ *  Cooldowns need nothing: readyAt is wall clock. The streak run ends with streak_peak{reason:"offline"} if s > 0 (#2, R11).
+ *  The I_ref ring and refWarmS are dropped, so the next read is the I_ss warm-up (#3, streak spec §4.1a). */
 export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (!anyFlag(b)) return s;
   let o: any = { ...s };
@@ -102,6 +113,7 @@ export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
     delete o.goldenEgg; ev.push({ type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: o.farmLevel }); o = drawGap(o, b);
   }
   if (m5Flag(b, 'streak') && 'streakS' in o) o = endStreak(o, 'offline', b, ev);
+  if (incomeRefOn(b)) o = resetIncomeRef(o); // #3 §4.1a #3: an offline return clears the I_ref ring and starts a warm-up
   return o;
 }
 /** A hidden gap under 60 s: the streak grace/decay in one step over the gap's focus time, which is 0 while hidden

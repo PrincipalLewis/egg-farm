@@ -7,6 +7,8 @@ import type { Sink } from './events';
 import { saleValueCents } from './payout';
 import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
 import { playerSaleCtx } from './effects';
+import { incomeRefOn, recordSale } from './income-ref';
+import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 import { fireAbility, activateAll } from './abilities';
 export type Action =
@@ -31,7 +33,9 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
-  const o = { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
+  const o0 = { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
+  // #3 I_ref (§4.1): the BASE value (price chain x Grader, every timed effect suspended) enters the ring; identity when off.
+  const o = incomeRefOn(b) ? recordSale(o0, saleValueCents(s, k, b, { by, suspended: true }), b) : o0;
   return streakSaleFactor(s, b, suspended) === 1 ? o : addStreakExtra(o, value - saleValueCents({ ...s, streakS: 0 }, k, b, ctx)); // #2 extra_coins
 }
 function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
@@ -65,11 +69,14 @@ function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Si
  *  passes suspended for the sheet. Default true keeps every existing caller (tests, bots, verify) unchanged. */
 export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
   switch (a.type) {
-    case 'collect': { // v5 #2: the only credited-tap source (R3); `credited` only while the streak is on
+    case 'collect': { // v5 #2/#3: the only credited-tap source (R3); `credited` only while streak or tapCoins is on
       const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)), c = creditTap(s, b);
-      ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : { type: 'collect', eggs: n, credited: c.credited });
+      // #3 A1 (R14/R15): a credited tap under tapCoins pays floor((refCents x tapBp + 5000) / 10000) to coins (0 allowed, R15)
+      const bonus = c.credited && tapCoinsOn(b) ? tapCoinsFor(s, b) : undefined;
+      ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : bonus === undefined ? { type: 'collect', eggs: n, credited: c.credited }
+        : { type: 'collect', eggs: n, credited: c.credited, bonus_cents: bonus });
       if (c.started) ev?.push({ type: 'streak_started', farm_level: s.farmLevel, collection_level: s.collectionLevel });
-      return { ...c.s, coop: s.coop - n, basket: s.basket + n };
+      return { ...c.s, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: c.s.coinsCents + bonus } : {}) };
     }
     case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
