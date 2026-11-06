@@ -5,6 +5,7 @@ import { sellTo } from './actions';
 import { prodEggsPerSec, coopCap } from './tracks';
 import { anyM5FlagOn, stepTimers } from './timers';
 import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
+import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
@@ -13,17 +14,20 @@ import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge,
  *  the M5 stepTimers() sub-calls, which run only while an m4.flags.* flag is on. */
 export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: StepClock): GameState {
   const L = s.farmLevel, E = b.workers.energy;
-  // Energy: Working and Tired workers drain 1% per drain_s_per_pct; Asleep stays at 0 until managed; Unpaid doesn't drain (ruling 1).
+  // Energy: Working and Tired drain 1% per drain_s_per_pct; Asleep stays at 0; Unpaid doesn't drain (ruling 1).
+  // Paused (m4.flags.pause, isPaused): no drain, recover at rest_recovery_mult of that rate, cap 100 (pause spec rule 3).
   let workers: Workers = s.workers;
   if (Object.keys(workers).length) {
     workers = {};
     for (const id of WORKERS) {
       const w0 = s.workers[id]; if (!w0) continue;
-      const before = mood(w0, b), w = { ...w0, energy: before === 'asleep' ? 0 : before === 'unpaid' ? w0.energy : Math.max(0, w0.energy - dt / E.drain_s_per_pct) };
+      const before = mood(w0, b), paused = isPaused(w0, b);
+      const w = { ...w0, energy: paused ? pausedRecoveredEnergy(w0, dt, b) : before === 'asleep' ? 0 : before === 'unpaid' ? w0.energy : Math.max(0, w0.energy - dt / E.drain_s_per_pct) };
       const after = mood(w, b); if (after !== before) ev?.push({ type: 'worker_state', worker: id, state: after! });
       if (!isYawning(w0, b) && isYawning(w, b)) ev?.push({ type: 'worker_yawn', worker_id: id, energy_pct: Math.round(w.energy * 10) / 10, farm_level: L });
       workers[id] = w;
     }
+    workers = tickCallLockout(workers, dt, b); // B5: sim seconds, frozen when this tick does not run (offline / hidden ≥ 60 s)
   }
   const live = anyM5FlagOn(b), fx = live ? { suspended: !clock?.focus } : undefined; // F1c: timed effects only on focus ticks
   const cap = coopCap(s, b), coop = Math.min(cap, s.coop + prodEggsPerSec(s, b, fx) * dt);
@@ -67,7 +71,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
   let reserved = 0;
   for (const id of ['market_hand', 'coop_hand'] as const) { const w = ws[id]; if (w && !w.unpaid && w.energy > 0) reserved += resumeNeedCents(id, s.farmLevel, b); }
   for (const id of ['market_hand', 'coop_hand'] as const) {
-    const w = ws[id]; if (!w?.unpaid) continue;
+    const w = ws[id]; if (!w?.unpaid || isPaused(w, b)) continue; // paused: no wage resume
     const need = resumeNeedCents(id, s.farmLevel, b);
     if (s.coinsCents < reserved + need) break;
     reserved += need; ws[id] = { ...w, unpaid: false, cdS: 0 };
@@ -76,7 +80,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
   s = { ...s, workers: ws };
   for (const id of ['coop_hand', 'market_hand'] as const) {
     const w = ws[id]; if (!w) continue;
-    const m = mood(w, b); if (isOff(m)) continue;
+    const m = mood(w, b); if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
     let cdS = w.cdS - dt;
     if (cdS <= 1e-9) {
       const cfg = b.workers[id], interval = m === 'working' ? cfg.every_s : cfg.tired_every_s;
