@@ -126,3 +126,8 @@
 - 900 s run-cap check: no cap. runM2 T=7200 s (tests/bot-m2.ts:25). Buys only at 20 s sell check-ins, so reach times are on a 20 s grid; 900 s = check-in #45. Seeds at exactly 900 s: 16 (1-200), 7 (201-299).
 - CCR M1: tests/zz-t3.test.ts deleted. m2: stale "F1 6dca24cd only" titles fixed. n1: headers cite product/decisions.md:232/241.
 - tsc OK; vitest 862/864 (only the 2 acw1 gate tests fail); sync-economy --check OK.
+
+## 2026-11-05 ~20:45 CET · Senior Engineer, Saves & Persistence · JOB 2 schema.ts resume (D-CEO-20261105-01 / HoE TASK HoE/v5-resume)
+- done: merged origin/rc/v5 518de304 into feat/saves-v5-telemetry-schema (merge 2f4794c, no conflicts). Schema contract verified against errata rev 13 a0e8f6d7: six FATIGUE_CUE_TAPPED_FIELDS; n_* sum <=4 with FAIL fixture at 5; zero_gain_purchase has no capped marker (overflow only session_end.zero_gain_purchase_dropped); dead_zone.reason only none_affordable; tapped rejects suppressed_by_stall. Follow-up a1f81a9 adds generalist slice, rev13 headers, explicit sum=5 fixture, warn-once assertion (kills prior M30 survivor). Gates: telemetry-schema 47/47; telemetry+m3 16/16; tsc --noEmit 0; G-8 base 155374 / buy-spam 175905 bytes (<=200KB). Bundles under egg-farm-studio/scratch/bundles/. Artifacts under egg-farm-studio/artifacts/saves-v5-telemetry-schema-a1f81a9/. No push / no PR opened.
+- next: Saves QA (33ec1b55) verifies against rev13 before HoE merges. Then breeds RC blockers queue (PR C telemetry, BR-AC2b, #95 M1/M2) then F-9.
+- blocked: none on JOB 2. Note: merge commit 2f4794c inherited Architect author from box git config at merge time (cannot amend); follow-up commit is Saves.

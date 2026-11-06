@@ -47,7 +47,7 @@ const M5_EVENT_SPEC = {
   streak_started: ['farm_level', 'collection_level'],
   streak_peak: ['value', 'duration_s', 'credited_taps', 'time_at_cap_s', 'extra_coins', 'frenzy_overlap_s', 'reason', 'max_tier'],
   abilities_unlocked: ['farm', 'hired'],
-  ability_used: ['worker', 'farm', 'energy_pct', 'mood', 'via_all', 't_since_ready_s', 'in_sheet'],
+  ability_used: ['worker', 'farm', 'energy_pct', 'mood', 'via_all', 't_since_ready_s', 'in_sheet', 'combo'], // combo: spec v1.3.8 D-HOP-42; Architect fireAbility addendum 2026-11-05 21:29 CET (amend on land)
   ability_blocked: ['worker', 'reason', 'count'],
   ability_ended: ['worker', 'cause', 'effect_s'],
 } as const;
