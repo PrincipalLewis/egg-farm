@@ -69,7 +69,8 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
   // plus 1 min for every worker already being paid (Working/Tired) and every worker resumed earlier in this check.
   // Stops at the first that can't resume (strict order).
   let reserved = 0;
-  for (const id of ['market_hand', 'coop_hand'] as const) { const w = ws[id]; if (w && !w.unpaid && w.energy > 0) reserved += resumeNeedCents(id, s.farmLevel, b); }
+  // Pause rule 10 (audit D2): a paused worker pays no wage, so it is not counted in this reserve (isPaused: false with the flag off).
+  for (const id of ['market_hand', 'coop_hand'] as const) { const w = ws[id]; if (w && !w.unpaid && w.energy > 0 && !isPaused(w, b)) reserved += resumeNeedCents(id, s.farmLevel, b); }
   for (const id of ['market_hand', 'coop_hand'] as const) {
     const w = ws[id]; if (!w?.unpaid || isPaused(w, b)) continue; // paused: no wage resume
     const need = resumeNeedCents(id, s.farmLevel, b);
