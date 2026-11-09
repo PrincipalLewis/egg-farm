@@ -1,5 +1,4 @@
 import { m4On } from './config/formulas';
-import { flagOn } from './config/flags';
 import type { Balance } from './config/balance';
 import { GameState, initialState } from './sim/state';
 import { coopCap } from './sim/tracks';
@@ -17,7 +16,8 @@ import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
-import { TELEMETRY_KEY, AWAY_BP_NONE } from './telemetry/telemetry';
+import { TELEMETRY_KEY } from './telemetry/telemetry';
+import { offlineGrantV5 } from './telemetry/v5-fields';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
@@ -117,7 +117,7 @@ export class Game {
   }
   private grantOffline(gapMs: number) {
     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
-    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...(flagOn(this.b, 'breeds') ? { away_bp: AWAY_BP_NONE } : {}) }); }
+    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...offlineGrantV5(this.b) }); }
     return r.eggs;
   }
   private emit(evs: SimEvent[]) {

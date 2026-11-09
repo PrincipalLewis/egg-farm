@@ -23,9 +23,6 @@ export const ringPinned = (e: TEvent): boolean => pinnedEvent(e) || (e.legacy ==
 export interface TapCredit { credited: boolean; bonus_cents?: number; coopHand: boolean; }
 /** Game state read at session_end (streak §8.1): Farm level at emit, Coop Hand hired now, and whether credited taps are on. */
 export interface SessionEndContext { farm_level: number; coop_hand: boolean; credit: boolean; }
-/** errata rev. 15 V-2b offline_grant.away_bp (breeds §8 L697, "0 if none"): the BR-R13 Away bp applied to the grant. applyOffline has
- *  no Away term at this tip (BR-R13 is not built), so the grant applies none. */
-export const AWAY_BP_NONE = 0;
 type TapWin = { start: number; count: number; eggs: number; credit?: { credited: number; empty_credited: number; bonus_cents: number } };
 /** The tap fields of one window: {count, eggs} plus, with the credit system on, {credited, empty_credited, bonus_cents}. */
 const tapFields = (w: TapWin) => ({ count: w.count, eggs: w.eggs, ...(w.credit ?? {}) });

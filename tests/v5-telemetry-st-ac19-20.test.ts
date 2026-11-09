@@ -3,7 +3,8 @@
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
-import { Telemetry, TELEMETRY_KEY, AWAY_BP_NONE, ringPinned, type TEvent as RingEvent } from '../src/telemetry/telemetry';
+import { Telemetry, TELEMETRY_KEY, ringPinned, type TEvent as RingEvent } from '../src/telemetry/telemetry';
+import { AWAY_BP_NONE } from '../src/telemetry/v5-fields';
 import { validateEvent, type TEvent } from '../src/telemetry/schema';
 import { mem } from './helpers';
 import { ON } from './v5-f2-helpers';
