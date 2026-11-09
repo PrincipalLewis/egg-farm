@@ -30,12 +30,12 @@ export function pauseWorker(s: GameState, id: WorkerId, b: Balance): GameState {
 }
 /** paused_duration_s (D-PMW-2026-11-10-02, QA-D-1110-PAUDUR): integer floor >= 0 of the sim seconds `id` has been paused, from the
  *  never-saved pausedForS tracker. Always a number (never null, NaN or negative); a missing entry (reload, or a pause set without
- *  pauseWorker) reads 0, i.e. the count starts at load time. +1e-6 absorbs float drift from summing 0.1 s ticks.
+ *  pauseWorker) reads 0, i.e. the count starts at load time. +EPS (1e-9) absorbs float drift from summing 0.1 s ticks.
  *  Known limits: a reload resets the count to load time; offline time and hidden gaps >= 60 s are not counted (sim seconds only).
  *  The one tracker for worker_resumed / rest_toggled{on:false}.paused_duration_s and session_end paused_worker_s / all_paused_s. */
 export function pausedDurationS(s: GameState, id: WorkerId): number {
   const v = s.pausedForS?.[id];
-  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v + 1e-6) : 0;
+  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v + EPS) : 0;
 }
 /** tick.ts: add `dt` sim seconds for every paused worker. Flag off or nobody paused: the same object (no M5 field is created). */
 export function tickPausedFor(s: GameState, ws: Workers, dt: number, b: Balance): GameState['pausedForS'] {

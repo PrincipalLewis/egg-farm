@@ -1,6 +1,6 @@
 // HoE/workers-drift-d1d2: Workers spec ↔ rc/v5 drift audit (product/workers/drift-audit-rc-v5-eed62687-20261109.md, sha1 09c2663c).
 // Spec: product/workers/m5-worker-pause-spec.md v1.3.16 (sha1 471fb534) rule 8 / AC-P12, rule 10, AC-P4, AC-P11, AC-P13, §12;
-// gate card product/m5-gate-acs.md da3de91c (D-HOP-2026-11-10-05) PAU-AC8. paused_duration_s: D-PMW-2026-11-10-02, QA-D-1110-PAUDUR.
+// gate card product/m5-gate-acs.md e485f762 (D-HOP-2026-11-10-09, QA-D-1110-BG4REPIN) PAU-AC8. paused_duration_s: D-PMW-2026-11-10-02, QA-D-1110-PAUDUR.
 // D1 (Major): Manage on a paused worker ends the pause; Manage all / needManage skip paused workers.
 // D2 (Minor): a paused worker is not in the R9 Unpaid-resume coin reserve.
 // Folded test gaps (audit N4): AC-P4 exact tier-2 values, AC-P11 pair-spam bound, AC-P13 59.9 s hidden boundary.
@@ -115,7 +115,8 @@ describe('[PAU-AC8][D1] worker_resumed{cause} and paused_duration_s (pause §12 
   it('[PAU-AC8][D1] known limit: a reload mid-pause restarts the count at load time (paused_duration_s counts from load)', () => {
     let t = 1_700_000_000_000; const kv = mem();
     const g = new Game(P, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
-    g.state = pauseWorker(farm({ workers: { market_hand: W(50) } }), 'market_hand', P);
+    // tracksV7: a committed (migrated) farm, so the reloaded Game runs with m4 on (an unmigrated save boots with the M4 switch off).
+    g.state = pauseWorker(farm({ workers: { market_hand: W(50) }, tracksV7: 1 } as Partial<GameState>), 'market_hand', P);
     g.debugAdvance(30_000);
     expect(pausedDurationS(g.state, 'market_hand')).toBe(30);
     g.save();
@@ -124,6 +125,8 @@ describe('[PAU-AC8][D1] worker_resumed{cause} and paused_duration_s (pause §12 
     expect(isPaused(g2.state.workers.market_hand, P)).toBe(true);
     expect(pausedDurationS(g2.state, 'market_hand')).toBe(0);
     g2.debugAdvance(12_000);
+    expect(g2.state.workers.market_hand!.energy).toBeGreaterThan(50.83); // still paused and recovering after the reload
+    expect(pausedDurationS(g2.state, 'market_hand')).toBe(12);
     const ev: SimEvent[] = []; resumeWorker(g2.state, 'market_hand', P, ev);
     expect(resumed(ev)).toEqual([expect.objectContaining({ paused_duration_s: 12, cause: 'manual' })]);
   });
@@ -262,7 +265,7 @@ describe('[PAU-AC8][AC-P11][G4] no free action from 20 Pause/Resume pairs, 1.5 s
   });
 });
 
-describe('[PAU-AC8][AC-P11] gate card da3de91c (D-HOP-2026-11-10-05): 15 pairs, one toggle every 2.0 s over 60 s', () => {
+describe('[PAU-AC8][AC-P11] gate card e485f762 (D-HOP-2026-11-10-09): 15 pairs, one toggle every 2.0 s over 60 s', () => {
   const DT = 1 / b.tickHz;
   const base = () => farm({ basket: 1e6, customers: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, demand: 1e6, filled: 0, waitedS: 0 })),
     workers: { market_hand: W(100, { cdS: 0.7 }) } });
