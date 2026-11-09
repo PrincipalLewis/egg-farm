@@ -235,7 +235,7 @@ export class Game {
     if (lsMain !== (this.lastMainRaw ?? p.raw)) return this.deferTracks('ls', 'ls_main_changed');
     const id = (this.opts.newId ?? newMigrationId)(), rec = encodeBackup({ migrationId: id, raw: p.raw });
     const live = { ...migrateStoredTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
-    const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1).length, rec.length, p.on.save); // spec v1.10 + HoE
+    const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1, p.on).length, rec.length, p.on.save); // spec v1.10 + HoE
     if (!probeHeadroom(this.kv, need)) return this.deferTracks('ls', 'quota_headroom');
     try { this.kv.setItem(V6_BACKUP_KEY, rec); } catch (e) { return this.abortTracks('ls', (e as Error)?.name === 'QuotaExceededError' ? 'quota' : 'error', rec); }
     const back = decodeBackup(this.kv.getItem(V6_BACKUP_KEY));
@@ -286,7 +286,7 @@ export class Game {
     try { const raw = this.saveWithQuotaRetry(t, base); this.lastMainRaw = raw; this.mirror?.write(raw); }
     catch (e) {
       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
-      if (this.mirror && mirrorFallback) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (this.mirror && mirrorFallback) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q), this.b)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
     this.telemetry.flush();
   }
@@ -335,7 +335,7 @@ export class Game {
   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
   /** Dev only. Goes through the same load-time backup gate as any save (review n2): the v6 backup is written (or the
    *  migration aborted) in the constructor, before any save, so a backdated write can never skip it. */
-  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.persisted(), this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
+  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.persisted(), this.now() - ms, this.b); this.mirror?.write(raw); this.resetting = true; }
   /** Reset save: drop the IndexedDB copy too (resolves when committed, or after 1 s), then the caller reloads. */
   clearMirror(): Promise<void> { return this.mirror ? Promise.race([this.mirror.clear(), new Promise<void>(r => setTimeout(r, 1000))]) : Promise.resolve(); }
   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */

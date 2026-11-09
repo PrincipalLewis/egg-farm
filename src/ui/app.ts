@@ -875,7 +875,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     renderAll();
     // M41-7 (CSR v0.2.3): M5 = restored + storage blocked; G1 Export takes the CURRENT restored farm via recovery.live().
     const rec = opts.recovery as CsrRecovery, blocked = !!opts.storageBlocked?.(); let noticeId: NoticeId | undefined;
-    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now());
+    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now(), undefined, g.balance);
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case }), undefined,
       { storageBlocked: blocked, track: (t, d) => g.telemetry.track(t, d), onNotice: n => { noticeId = n?.id; } }).then(() => {
       if (noticeId === 'M4' && rec.case === 'D') { location.reload(); return; } // CSR-13 defer: "Try again" reloads
