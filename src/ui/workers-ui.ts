@@ -5,7 +5,8 @@ import type { GameState } from '../sim/state';
 import { fmtMoney } from './format';
 import { WARN_SVG, MOON_SVG } from './icons';
 export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
-import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
+import { WORKERS, WorkerId, Worker, canManageWorker, needManage, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
+import { isPaused } from '../sim/pause';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -22,19 +23,25 @@ const manageIcon = (s: GameState, b: Balance, icon: string, px = 22) =>
   `<span class="manage-ico"><img src="${ASSET(icon)}" width="${px}" height="${px}" alt="">${ringHtml(s, b)}</span>`;
 /** B5 (Product, Oct 15): a worker "needs" Manage only at energy <= manage_prompt_threshold (balance). */
 export const needsPrompt = (w: Worker | undefined, b: Balance) => canManageWorker(w, b);
-/** Workers counted by "Manage all (N need it)". P2b (rc1-asleep v1.0.8 rule 4, AC-R15): an Unpaid worker is never counted, since Refill
- *  doesn't fix Unpaid. UI only: the sim's needManage (what Manage all refills) is unchanged, so traces and saves stay byte-identical. */
-export const promptManage = (s: GameState, b: Balance) => WORKERS.filter(id => needsPrompt(s.workers[id], b) && !s.workers[id]?.unpaid);
+/** Workers counted by "Manage all (N need it)": the sim's needManage (what Manage all refills) minus Unpaid workers.
+ *  P2b (rc1-asleep v1.0.8 rule 4, AC-R15): an Unpaid worker is never counted, since Refill doesn't fix Unpaid (UI only; the sim still
+ *  refills its energy, so traces and saves stay byte-identical). Pause rule 8 / AC-P12 (audit D1): needManage already skips paused
+ *  workers, so a paused worker is neither refilled nor counted in N. isPaused is false with m4.flags.pause off, so flag-off N is unchanged. */
+export const promptManage = (s: GameState, b: Balance) => needManage(s.workers, b).filter(id => !s.workers[id]?.unpaid);
 /** P2b (rc1-asleep v1.0.8 rule 1, AC-R10/R14): the coins at which the tick resumes an Unpaid worker, X = reserved + need, mirroring
- *  sim/tick.ts workerActions: reserved = 1 min of wage for every paid MH/CH (not Unpaid, energy > 0) plus every Unpaid one resumed
- *  earlier in the same check (Market Hand first, then Coop Hand). null when the worker isn't Unpaid or pays no wage. */
+ *  sim/tick.ts workerActions: reserved = 1 min of wage for every paid MH/CH (not Unpaid, energy > 0, not paused) plus every Unpaid one
+ *  resumed earlier in the same check (Market Hand first, then Coop Hand). null when the worker isn't Unpaid or pays no wage.
+ *  Pause rule 10 (audit D2, Saves 8ee3db1 tick.ts): a paused worker is not in the reserve and not in the Unpaid-resume queue, so a paused
+ *  Unpaid worker has no coin resume point (null) until it is resumed. isPaused is false with m4.flags.pause off (flag-off unchanged).
+ *  LOCAL MIRROR: sim/tick.ts keeps this reserve inline (no exported helper at 8ee3db1); proposed to Saves: export one sim helper from
+ *  sim/workers.ts that tick.ts and this function both call. tests/v5-workers-ui-drift-d1d2.test.ts pins UI X == the sim's resume point. */
 export function resumeAtCents(s: GameState, b: Balance, id: WorkerId): number | null {
-  if (id !== 'market_hand' && id !== 'coop_hand' || !s.workers[id]?.unpaid) return null;
+  if (id !== 'market_hand' && id !== 'coop_hand' || !s.workers[id]?.unpaid || isPaused(s.workers[id], b)) return null;
   const order = ['market_hand', 'coop_hand'] as const;
   let reserved = 0;
-  for (const k of order) { const w = s.workers[k]; if (w && !w.unpaid && w.energy > 0) reserved += resumeNeedCents(k, s.farmLevel, b); }
+  for (const k of order) { const w = s.workers[k]; if (w && !w.unpaid && w.energy > 0 && !isPaused(w, b)) reserved += resumeNeedCents(k, s.farmLevel, b); }
   for (const k of order) {
-    if (!s.workers[k]?.unpaid) continue;
+    if (!s.workers[k]?.unpaid || isPaused(s.workers[k], b)) continue;
     const need = resumeNeedCents(k, s.farmLevel, b);
     if (k === id) return reserved + need;
     reserved += need;
