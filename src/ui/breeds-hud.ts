@@ -160,3 +160,27 @@ export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
     get state() { return shown; },
   };
 }
+
+// ---- PR-B registration through PR-A's registry (seams 95f45895 §1; zero app.ts edits) ---------------------------------------
+import { registerBreedsExt, type BreedsExt } from './breeds-mount';
+import { mountBbStrip, type BbStripMount } from './breeds-strip';
+import { mountYard, type YardMount } from './breeds-yard';
+
+let hud: PresentChipMount | null = null, strip: BbStripMount | null = null, yard: YardMount | null = null, registered = false;
+/** Opens the Flock sheet from the strip's Hatch target. TODO(PR-A seam): expose `open()` in the ext ctx; until then this
+ *  activates PR-A's own Flock entry button (same handler a player tap uses). */
+const openFlockViaEntry = () => document.querySelector<HTMLElement>('[data-testid="breeds-entry"], #breeds-entry')?.click();
+/** The single PR-B extender: chip + strip + yard, mounted lazily on PR-A's first onSync (flag-off: PR-A never calls it). */
+export const PRB_EXT: BreedsExt = {
+  onSync(ctx) {
+    if (!hud && !strip && !yard) {
+      hud = mountPresentChip({ doc: document, b: ctx.b });
+      strip = mountBbStrip({ doc: document, b: ctx.b, onOpenFlock: openFlockViaEntry });
+      yard = mountYard({ doc: document, b: ctx.b });
+    }
+    hud?.sync(ctx.s); strip?.sync(ctx.s); yard?.sync(ctx.s);
+  },
+  onDispose() { hud?.dispose(); strip?.dispose(); yard?.dispose(); hud = strip = yard = null; },
+};
+/** Register PR-B once (idempotent). Must run before PR-A's first sync; see seams §1 for the load trigger. */
+export function registerBreedsPrB(): BreedsExt { if (!registered) { registerBreedsExt(PRB_EXT); registered = true; } return PRB_EXT; }

@@ -14,6 +14,8 @@ import {
 } from '../sim/breeds-hatch';
 import { isFlockComplete, on as breedsFlagAndKey, type BreedsSave } from '../sim/breeds';
 import type { GameState } from '../sim/state';
+import { incomePerSec } from '../econ/income'; // PR-B: strip countdown rate (sim income, ¢/s)
+import { CENTS_PER_DOLLAR } from '../config/breeds'; // PR-B
 
 export type { BreedId, BreedsSave, Family, HatchEstimate, Rarity };
 export { BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, hatchEstimate, hatchCostCents, eligible, slotTraitBp, isFlockComplete };
@@ -162,3 +164,7 @@ export function slottedBreeds(s: GameState, b: Balance): BreedId[] {
   for (let i = 0; i < unlockedSlots(s.farmLevel, b); i++) { const id = br.slots[i]; if (isBreedId(id)) out.push(id); }
   return out;
 }
+
+/** Strip countdown rate in ¢/s from the sim (the registry ctx has no UI rate tracker). BB-5's own strip uses the app's
+ *  measured income; the two agree in steady state. TODO(PR-A seam): pass the app's `income.centsPerSec(t)` in the ext ctx. */
+export const incomeCentsPerSec = (s: GameState, b: Balance): number => Math.round(incomePerSec(s, b) * CENTS_PER_DOLLAR);

@@ -718,3 +718,15 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 
 .slot-remove { margin-top: 4px; font: 700 11px/14px Nunito, system-ui, sans-serif; padding: 4px 8px; min-height: 28px; }
 .album-cell.picked { outline: 2px solid var(--c-yolk, #F5C542); outline-offset: 2px; }
+
+/* ---- M5.1 Breeds PR-B: Present HUD chip + tooltip + slot mirror (Art v0.2.7 §7a, UI-BR-16..21; seams: breeds-hud-*) ---- */
+.breeds-hud-row{display:flex;align-items:center;gap:4px}
+.breeds-hud-chip{position:relative;display:inline-flex;align-items:center;flex:none;height:14px;box-sizing:border-box;padding:0 4px;border:1px solid var(--c-meadow-strong);border-radius:999px;background:var(--c-white,#fff);color:var(--c-meadow-strong);font:700 11px/12px var(--f-body);font-variant-numeric:tabular-nums;white-space:nowrap;cursor:default;-webkit-tap-highlight-color:transparent}
+.breeds-hud-chip::before{content:"";position:absolute;left:50%;top:50%;width:max(44px,100%);height:44px;transform:translate(-50%,-50%)} /* 44 × max(44, w) hit area */
+.breeds-hud-chip.paused{border-style:dashed;border-color:var(--c-muted);color:var(--c-muted)}
+.breeds-hud-chip.paused .breeds-hud-pt,.breeds-hud-mirror.paused{text-decoration:line-through 1px}
+.breeds-hud-chip:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
+.breeds-hud-tip{position:fixed;z-index:31;background:var(--c-text);color:#fff;font:700 12px/16px var(--f-body);padding:6px 10px;border-radius:8px;pointer-events:none;white-space:nowrap}
+.breeds-hud-tip[hidden]{display:none}
+.hud.has-pchip #settings{flex:none}
+.hud.has-pchip .spacer{margin-left:calc(-1*var(--s-2))}
