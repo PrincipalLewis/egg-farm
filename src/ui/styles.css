@@ -665,3 +665,53 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 @keyframes zgIn{from{opacity:0;transform:scaleY(.9)}}
 .zg-confirm[hidden]{display:none}
 .rm .zg-confirm{animation:none}@media (prefers-reduced-motion:reduce){.zg-confirm{animation:none}}
+
+/* ---- M5.1 Breeds PR-A: Flock entry + sheet (Art v0.2.7) ---- */
+.breeds-entry { height: 44px; min-height: 44px; padding: 0 16px 0 12px; gap: 8px; margin-right: 8px; display: inline-flex; align-items: center; flex: none; }
+.breeds-entry.icon-only { width: 44px; padding: 0; margin-right: 0; justify-content: center; }
+.breeds-entry.breeds-dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c-yolk, #F5C542); margin-left: 4px; }
+.breeds-entry.icon-only.breeds-dot::after { position: absolute; top: 6px; right: 6px; margin: 0; }
+.breeds-entry.breeds-glow { animation: breedsGlow 0.6s ease-in-out 2; }
+@keyframes breedsGlow { 50% { box-shadow: 0 0 0 3px rgba(245, 197, 66, 0.55); } }
+#panel-layer.breeds-open #p-upgrades { visibility: hidden; } /* phone: flock replaces upgrades visually */
+#panel-layer.breeds-open #breeds-sheet { display: flex; }
+#breeds-sheet { display: none; flex-direction: column; }
+#breeds-sheet:not([hidden]) { display: flex; }
+@media (min-width: 960px) and (orientation: landscape) {
+  #panel-layer.breeds-open #p-upgrades { visibility: visible; } /* docked: upgrades stay under overlay */
+  #panel-layer.breeds-open #breeds-sheet {
+    position: absolute; inset: 0; z-index: 5; background: var(--c-cream, #F3EDE4);
+  }
+  #panel-layer.breeds-open #p-market { visibility: hidden; }
+}
+.breeds-body { padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+.incu-card { background: var(--c-white, #fff); border-radius: var(--r-md, 12px); padding: 12px; display: grid; grid-template-columns: 56px 1fr; gap: 8px 12px; align-items: center; }
+.incu-disc { width: 56px; height: 56px; border-radius: 50%; background: #F7F1E8; display: grid; place-items: center; position: relative; grid-row: span 2; }
+.incu-disc img { width: 40px; height: 40px; }
+.incu-meter { position: absolute; left: 6px; right: 6px; bottom: 6px; height: 12px; background: #CFC6BA; border-radius: 6px; overflow: hidden; }
+.incu-meter > i { display: block; height: 100%; background: var(--c-yolk, #F5C542); }
+.incu-title { font: 700 18px/1.2 Fredoka, system-ui, sans-serif; }
+.incu-status { font: 400 14px/1.3 Nunito, system-ui, sans-serif; color: var(--c-muted, #6B5D52); }
+.hatch-btn { grid-column: 1 / -1; height: 48px; width: 100%; white-space: nowrap; font: 700 18px/1 Fredoka, system-ui, sans-serif; }
+.hatch-btn[aria-disabled="true"] { opacity: 0.55; }
+.hatch-sub, .breeds-farmsoon { grid-column: 1 / -1; margin: 0; font: 700 12px/16px Nunito, system-ui, sans-serif; color: var(--c-wood-text, #3E2C23); }
+.breeds-farmsoon { color: var(--c-wood-text, #3E2C23); }
+.breeds-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.slot { min-height: 88px; border-radius: 12px; border: 1px solid var(--c-outline, #3E2C23); background: var(--c-white, #fff); padding: 8px; text-align: left; position: relative; }
+.slot.empty, .slot.locked { display: grid; place-items: center; color: var(--c-muted, #6B5D52); }
+.slot .breed-spr { width: 40px; height: 40px; }
+.settle-ring { position: absolute; right: 8px; top: 8px; width: 28px; height: 28px; border-radius: 50%; border: 3px solid #CFC6BA; border-top-color: #6BBF59; /* static — no infinite animation */ }
+.settle-lab { display: block; font: 700 12px/1.2 Nunito, system-ui, sans-serif; margin-top: 4px; }
+.breeds-album { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.album-cell { border-radius: 10px; border: 1px solid var(--c-outline, #3E2C23); background: var(--c-white, #fff); padding: 8px 4px; text-align: center; min-height: 72px; }
+.album-cell.locked { opacity: 0.9; }
+.album-cell .breed-sil, .album-cell .breed-spr { width: 36px; height: 36px; }
+.album-cell.picked { outline: 3px solid var(--c-focus, #4C8BF5); }
+.album-name { display: block; font: 700 11px/1.2 Nunito, system-ui, sans-serif; }
+.album-stars .star { opacity: 0.25; } .album-stars .star.on { opacity: 1; color: var(--c-yolk, #F5C542); }
+.breeds-reveal { position: fixed; inset: 0; z-index: 80; display: grid; place-content: center; gap: 12px; background: rgba(62, 44, 35, 0.45); animation: breedsReveal 400ms ease; }
+.breeds-reveal.rm { animation: breedsRevealRm 200ms ease; }
+.breeds-reveal .reveal-spr { width: 96px; height: 96px; margin: 0 auto; }
+.breeds-reveal .reveal-name { text-align: center; font: 700 24px/1.2 Fredoka, system-ui, sans-serif; color: #fff; }
+@keyframes breedsReveal { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+@keyframes breedsRevealRm { from { opacity: 0; } to { opacity: 1; } }
