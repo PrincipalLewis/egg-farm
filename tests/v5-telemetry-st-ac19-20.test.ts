@@ -44,6 +44,36 @@ describe('[ST-AC19] tap {count, credited, empty_credited, bonus_cents} (streak �
     expect((e.credited_taps as number) - ses0.credited_taps).toBe(sum(taps, 'credited')); expect((e.tap_bonus_cents as number) - ses0.tap_bonus_cents).toBe(sum(taps, 'bonus_cents'));
     expect(e).toMatchObject({ taps_total: 51, taps_moved_eggs: 0, empty_credited: 2, coop_hand: true, farm_level: 10 });
   });
+  // QA-D-1110-PR123-RULINGS + HoE: ST-AC19 also covers a FRESH streak. streak s goes 0→0.01 on the first credited
+  // tap of the burst; streak_started is emitted after that collect and closes the open tap window (telemetry-spec.md
+  // L29: tap window "closed by any other event, poll() or flush"), splitting the batch. Keep the already-going case above.
+  it('[ST-AC19] fresh streak: s 0→0.01 mid-burst — streak_started splits the tap batch (telemetry-spec L29); Σ tap.count == session_end.taps_total; credited_taps unaffected by the split', () => {
+    const { g } = game(CREDIT, { workers: { coop_hand: { ...working } }, coop: 0 });
+    expect(g.state.streakS ?? 0).toBe(0); // fresh: no prime
+    const coins0 = g.state.coinsCents;
+    for (let i = 0; i < 50; i++) g.dispatch({ type: 'collect' });
+    expect(g.state.streakS).toBeCloseTo(0.01, 8); // first credited tap: 0 → tc_streak_per_tap
+    const bonus = g.state.coinsCents - coins0;
+    const e = end(g);
+    const taps = evs(g, 'tap');
+    const started = evs(g, 'streak_started');
+    expect(started).toHaveLength(1);
+    // Two tap events around streak_started: credited opener (count 1) then the rest of the burst (count 49).
+    expect(taps).toHaveLength(2);
+    expect(taps[0]).toMatchObject({ count: 1, eggs: 0, credited: 1, empty_credited: 1, bonus_cents: bonus });
+    expect(taps[1]).toMatchObject({ count: 49, eggs: 0, credited: 0, empty_credited: 0, bonus_cents: 0 });
+    const around = g.telemetry.events().filter(x => x.type === 'tap' || x.type === 'streak_started').map(x => x.type);
+    expect(around).toEqual(['tap', 'streak_started', 'tap']);
+    // (1) Σ tap.count over the split batches == session_end.taps_total
+    expect(sum(taps, 'count')).toBe(e.taps_total as number);
+    expect(e.taps_total).toBe(50);
+    // (2) credited_taps is unaffected by the split (same as the 50-tap burst on a running streak: 1 credited)
+    expect(e.credited_taps).toBe(1);
+    expect(sum(taps, 'credited')).toBe(e.credited_taps as number);
+    expect(sum(taps, 'empty_credited')).toBe(e.empty_credited as number);
+    expect(sum(taps, 'bonus_cents')).toBe(e.tap_bonus_cents as number);
+    expect(e).toMatchObject({ taps_moved_eggs: 0, empty_credited: 1, coop_hand: true, farm_level: 10, tap_bonus_cents: bonus });
+  });
   it('[ST-AC19] empty_credited needs all three: credited, 0 eggs moved, Coop Hand hired at tap time (m5.0-sizing L382)', () => {
     const t = new Telemetry(mem(), { ...b.telemetry, tap_batch_ms: 1000 }, () => 0);
     t.tap(0, { credited: true, coopHand: false }); // no Coop Hand
