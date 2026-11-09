@@ -3,8 +3,8 @@
 import { STREAMS } from './record';
 
 export const CONTRACT_SHA256 = 'fc6a938214c8914dde5fed7b6b51fb770b93e66c3472f10e1836b30a0c4b6c99';
-/** R04 Card #4 version of record (QA-D-1110-TRACE10-G0 R-3, D-HOP-2026-11-10-02): sha1 of product/m5-gate-acs.md. */
-export const CARD_OF_RECORD_SHA1 = '6269b1261d6599ffe7286870b29791172949c3a2';
+/** R04 Card #4 version of record (D-HOP-2026-11-10-05, replaces 6269b126 of D-HOP-2026-11-10-02): sha1 of product/m5-gate-acs.md. */
+export const CARD_OF_RECORD_SHA1 = 'da3de91cd1dec39c4e1fc290671acabd9a3f720d';
 export const PROFILES = ['optimal', 'seller15', 'casual'] as const;
 export type Profile = typeof PROFILES[number];
 export interface StreamInfo { file: string; sha256: string; records: number; seeds: number[] }
