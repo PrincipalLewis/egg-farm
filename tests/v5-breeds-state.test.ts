@@ -8,7 +8,8 @@ import { step } from '../src/sim/tick';
 import { applyOffline } from '../src/sim/offline';
 import { serialize, SAVE_KEY, BAK_KEY, SAVE_VERSION } from '../src/save/save';
 import { IdbMirror, IDB_KEY } from '../src/save/idb-mirror';
-import { BREEDS_RNG_SALT, BREEDS_SANITISE_EVENT } from '../src/config/breeds';
+import { BREEDS_RNG_SALT, breedsSanitiseEvent } from '../src/config/breeds';
+import { validateEvent } from '../src/telemetry/schema';
 import { ensureBreeds, sanitizeBreedsOnLoad, type BreedsSave } from '../src/sim/breeds';
 import { fakeIdb } from './fake-idb';
 import { mem } from './helpers';
@@ -145,7 +146,7 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
   });
   it.each([['NaN', NaN], ['Infinity', Infinity], ['-Infinity', -Infinity], ['null', null], ['a string', 'x']])('[BR-AC26 E12 / PMC Q6] non-finite remainingMs (%s) becomes 60,000, one save_migrated', (_n, v) => {
     const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ incubator: { breed: 'brahma', remainingMs: v as any, costCents: 1 } }), BR, ev);
-    expect(r.breeds!.incubator!.remainingMs).toBe(60_000); expect(ev).toEqual([BREEDS_SANITISE_EVENT]);
+    expect(r.breeds!.incubator!.remainingMs).toBe(60_000); expect(ev).toEqual([breedsSanitiseEvent('invalid_values', 0, 12)]);
   });
   it.each([
     ['freeHatchUsed 5 -> 1 (never a second free hatch)', { freeHatchUsed: 5, hatches: 0 }, { freeHatchUsed: 1 }],
@@ -165,7 +166,7 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
   });
   it.each([['undefined', undefined], ['object', { x: 1 }]])('[BR-AC26 Q6] remainingMs %s -> 60,000 (non-number), one save_migrated', (_n, v) => {
     const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ incubator: { breed: 'brahma', remainingMs: v as any, costCents: 1 } }), BR, ev);
-    expect(r.breeds!.incubator!.remainingMs).toBe(60_000); expect(ev).toEqual([BREEDS_SANITISE_EVENT]);
+    expect(r.breeds!.incubator!.remainingMs).toBe(60_000); expect(ev).toEqual([breedsSanitiseEvent('invalid_values', 0, 12)]);
   });
   it('[BR-AC26 Q6] finite fractional remainingMs is rounded then clamped', () => {
     const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ incubator: { breed: 'brahma', remainingMs: 100.6, costCents: 1 } }), BR, ev);
@@ -178,6 +179,30 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
   it('[BR-AC1 / E11] flag off: the same corrupt save is left untouched (no sanitise, no event)', () => {
     const s = st({ owned: { leghorn: { stars: 5 } }, slots: ['leghorn', 'leghorn', null] }), kv = saved(s, T0); const { g } = boot(b, kv, T0 + 30_000);
     expect(g.state.breeds).toEqual(s.breeds); expect(stored(kv).breeds).toEqual(s.breeds); expect(migrated(kv)).toEqual([]);
+  });
+});
+
+
+describe('D1 / BR-AC26 save_migrated full shape (schema-validated)', () => {
+  const envelope = (e: object) => ({ type: 'save_migrated', ts: 1_761_830_000_000, sid: 'a1b2c3', fgMs: 100, ...e });
+  it('[D1 / BR-AC26] invalid_values event carries reason/refund_cents/farm_level/backup_stores:[] and passes validateEvent', () => {
+    const ev: any[] = [];
+    sanitizeBreedsOnLoad(st({ owned: { leghorn: { stars: 5 } }, slots: ['leghorn', 'leghorn', null] }), BR, ev);
+    expect(ev).toHaveLength(1);
+    expect(ev[0]).toEqual(breedsSanitiseEvent('invalid_values', 0, 12));
+    expect(validateEvent(envelope(ev[0]) as any)).toEqual([]);
+  });
+  it('[D1 / BR-AC26] invalid_root event (null breeds) schema-validates with reason invalid_root', () => {
+    const ev: any[] = [];
+    sanitizeBreedsOnLoad({ ...base(12), breeds: null as any }, BR, ev);
+    expect(ev).toEqual([breedsSanitiseEvent('invalid_root', 0, 12)]);
+    expect(validateEvent(envelope(ev[0]) as any)).toEqual([]);
+  });
+  it('[D1 / BR-AC26] unknown incubator refund_cents matches the refunded cost', () => {
+    const ev: any[] = [];
+    sanitizeBreedsOnLoad(st({ incubator: { breed: 'silkie', remainingMs: 5, costCents: 12_345 } }), BR, ev);
+    expect(ev).toEqual([breedsSanitiseEvent('invalid_values', 12_345, 12)]);
+    expect(validateEvent(envelope(ev[0]) as any)).toEqual([]);
   });
 });
 
@@ -197,7 +222,7 @@ describe('D2 / BR-AC26 E12 invalid_root: bad breeds root re-created, no throw on
     const ev: any[] = [];
     const s1 = sanitizeBreedsOnLoad(s0, BR, ev);
     expect(s1.breeds).toEqual(defaults(12));
-    expect(ev).toEqual([BREEDS_SANITISE_EVENT]); // D1 full shape blocked on events.ts
+    expect(ev).toEqual([breedsSanitiseEvent('invalid_root', 0, 12)]);
     expect(() => step(s1, 0.1, BR)).not.toThrow();
     const s2 = step(s1, 0.1, BR);
     expect(s2.breeds).toMatchObject({ owned: {}, slots: [null, null, null], settleMs: [0, 0, 0] });

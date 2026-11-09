@@ -7,7 +7,7 @@
  */
 import type { Balance } from '../config/balance';
 import { flagOn } from '../config/flags';
-import { BREED_IDS, BREEDS_RNG_SALT, BREEDS_SANITISE_EVENT, SLOT_IDX, bc, isBreedId, unlockedSlots, type BreedId } from '../config/breeds';
+import { BREED_IDS, BREEDS_RNG_SALT, breedsSanitiseEvent, SLOT_IDX, bc, isBreedId, unlockedSlots, type BreedId } from '../config/breeds';
 import { mixSeed, type GameState } from './state';
 import { isRngState } from './rng';
 import type { SimEvent } from './events';
@@ -61,12 +61,12 @@ export function breedsOffline(s: GameState, awayMs: number, b: Balance): { state
   return br === br0 ? { state: s, reveal } : { state: { ...s, breeds: br }, reveal };
 }
 /** §4.8 E10-E12 on load (flag on only). Unknown owned ids are kept and ignored (E10); one save_migrated if anything changed.
- *  D2: null/array/primitive root → defaults + one event (short shape; D1 full reason/refund fields need events.ts — STOP). */
+ *  D2: null/array/primitive root → defaults + one event (reason invalid_root). D1: full save_migrated shape. */
 export function sanitizeBreedsOnLoad(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (!flagOn(b, 'breeds') || !('breeds' in s)) return s; // absent key: ensureBreeds at end of first flag-on tick (not load)
   const br0: any = s.breeds, cap = bc(b, 'star_cap'), maxMs = bc(b, 'hatch_time_s') * 1000, open = unlockedSlots(s.farmLevel, b);
   if (!isPlainObject(br0)) { // D2 / E12 invalid_root: re-create, skip value inspection
-    ev.push({ ...BREEDS_SANITISE_EVENT });
+    ev.push(breedsSanitiseEvent('invalid_root', 0, s.farmLevel));
     return { ...s, breeds: defaultBreeds(s, b) };
   }
   const ownedSrc: any = isPlainObject(br0.owned) ? br0.owned : {}; // D3 / OQ-4
@@ -95,7 +95,7 @@ export function sanitizeBreedsOnLoad(s: GameState, b: Balance, ev: SimEvent[]): 
   const raw = SLOT_IDX.map(i => { const x = slotsSrc[i]; return i < open && typeof x === 'string' && !isBreedId(x) ? x : null; });
   const out: GameState = { ...s, breeds: br, coinsCents, ...(raw.some(x => x !== null) && { breedsRawSlots: raw }) };
   if (JSON.stringify(breedsSaveView(out)) === JSON.stringify(br0) && coinsCents === s.coinsCents) return out; // E10 alone is not a sanitise
-  ev.push({ ...BREEDS_SANITISE_EVENT });
+  ev.push(breedsSanitiseEvent('invalid_values', coinsCents - s.coinsCents, s.farmLevel));
   return out;
 }
 /** E10 / PMC Q5: drop the raw-id shadow at every slot index whose runtime value changed (auto-slot, a placement's target and
