@@ -87,7 +87,7 @@ const SCHEMA: Record<string, EventSpec> = {
     reason: E('unload', 'hidden'), fg_ms: C, taps_total: C, taps_moved_eggs: C, eggs_collected_manual: C, coop_full_ms: C, eggs_lost_while_full: F(0), managed: BOOL,
     farm_level: C, collection_level: C, coop_full_flapping: opt(BOOL), golden_frozen_s: opt(S1),
     golden_spawned: opt(C), golden_collected: opt(C), golden_cents: opt(C), frenzy_extra_cents: opt(C), broody_cents: opt(C), broody_collects: opt(C),
-    credited_taps: opt(C), tap_bonus_cents: opt(C), streak_extra_cents: opt(C),
+    credited_taps: opt(C), tap_bonus_cents: opt(C), streak_extra_cents: opt(C), empty_credited: opt(C), coop_hand: opt(BOOL), // errata rev. 15 V-2b "+ §8.1" (streak §8.1, ST-AC20)
     breed_hatches: opt(C), breed_spend_cents: opt(C), breed_present_eggs: opt(C), breed_away_eggs: opt(C), breed_broody_cents: opt(C), breeds_owned: opt(C),
     breed_slots_used: opt(I(0, 3)), breed_loadout_end: opt(LOADOUT), breed_family_s: opt(O({ P: F(0), A: F(0), B: F(0) })), present_active_s: opt(S1), present_lost_count: opt(C),
     ability_uses: opt(C), calls_ready_unused_s: opt(F(0)), ability_blocked_taps: opt(C), // D-HOE-23 (b): all blocked taps incl. post-cap

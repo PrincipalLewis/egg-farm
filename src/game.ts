@@ -1,4 +1,5 @@
 import { m4On } from './config/formulas';
+import { flagOn } from './config/flags';
 import type { Balance } from './config/balance';
 import { GameState, initialState } from './sim/state';
 import { coopCap } from './sim/tracks';
@@ -10,13 +11,13 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent } from './sim/events';
 import { focusFrameMs } from './sim/clock';
-import { streakOn, streakPeak } from './sim/streak';
+import { streakOn, streakPeak, creditedTapsOn } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
-import { TELEMETRY_KEY } from './telemetry/telemetry';
+import { TELEMETRY_KEY, AWAY_BP_NONE } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
@@ -61,6 +62,8 @@ export class Game {
   constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: unknown = null, private opts: GameOpts = {}) {
     this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
+    // ST-AC20 (streak §8.1): session_end reads Farm level, Coop Hand and the credited-tap flag from the live state at emit.
+    this.telemetry.sessionEndContext = () => ({ farm_level: this.state.farmLevel, coop_hand: !!this.state.workers.coop_hand, credit: creditedTapsOn(this.b) });
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -114,13 +117,13 @@ export class Game {
   }
   private grantOffline(gapMs: number) {
     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
-    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
+    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...(flagOn(this.b, 'breeds') ? { away_bp: AWAY_BP_NONE } : {}) }); }
     return r.eggs;
   }
   private emit(evs: SimEvent[]) {
     for (const e of evs) {
       this.notify(e);
-      if (e.type === 'collect') this.telemetry.tap(e.eggs);
+      if (e.type === 'collect') this.telemetry.tap(e.eggs, e.credited === undefined ? undefined : { credited: e.credited, bonus_cents: e.bonus_cents, coopHand: !!this.state.workers.coop_hand }); // ST-AC19
       else if (e.type === 'wage') this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
       else if (e.type === 'worker_collect') this.telemetry.sum('coop_hand_eggs', e.eggs);
       else if (e.type === 'sell' && e.by === 'market_hand') { this.telemetry.sum('market_hand_eggs', e.k); this.telemetry.sum('market_hand_cents', e.value); }
