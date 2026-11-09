@@ -74,12 +74,18 @@ export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]
   series?: Series; pert?: number;
   /** QA seam Q4 (observe-only): called with a deep clone of the state after every action the bot applies (`action` = the action type)
    *  and at every buy check (`buyCheck`, before the buy loop). The clone means the callback cannot alias or mutate the run's state. */
-  onObserve?: (kind: 'action' | 'buyCheck', action: string, t: number, s: GameState) => void; }
+  onObserve?: (kind: 'action' | 'buyCheck', action: string, t: number, s: GameState) => void;
+  /** trace10 (observe-only, D-HOE-54): 'step' = clone right after step()+drain of tick i; 'end' = clone at the end of tick i (sent at the top of tick i+1, and once after the loop). */
+  onTick?: (phase: 'step' | 'end', i: number, t: number, s: GameState) => void;
+  /** trace10 (observe-only): n-th draw (1-based) of the runner stream R and its value. */ onRunnerDraw?: (n: number, u: number) => void;
+  /** trace10 (observe-only): the run's SellerVariance, once, right after construction (before any method call). */ onVariance?: (V: SellerVariance) => void; }
 export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: RunOpts = {}) {
   assertNoDoubleModel(bal, K);
   const tsnaps: [number, number, GameState][] = [];
   const b = { ...bal, sim_test: { ...bal.sim_test, poisson_arrivals: true } } as B;
-  const V = new SellerVariance(VAR_DEFAULT, seed), R = rng(seed);
+  const V = new SellerVariance(VAR_DEFAULT, seed), R0 = rng(seed); let rN = 0;
+  const R = opt.onRunnerDraw ? () => { const u = R0(); opt.onRunnerDraw!(++rN, u); return u; } : R0;
+  opt.onVariance?.(V);
   let s: GameState = opt.start ?? initialState(b, seed); const dt = 1 / b.tickHz, n = Math.round(T * b.tickHz);
   const reach = new Map<number, number>([[s.farmLevel, 0]]), snaps = new Map<number, GameState>(), buys: number[] = [];
   const ev: SimEvent[] = []; const present = P.tap !== 'idle';
@@ -135,10 +141,12 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
   let prevT = 0;
   for (let i = 1; i <= n; i++) {
     const t = Math.round(i * dt * 10) / 10; curT = t;
+    if (opt.onTick && i > 1) opt.onTick('end', i - 1, prevT, structuredClone(s));
     if (opt.onSecond && i > 1 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s); prevT = t;
     // pause bookkeeping: paused workers held asleep (energy 0) by the runner; recover 0.25x drain into the stored energy
     for (const [id, e] of paused) { paused.set(id, Math.min(100, e + 0.25 * dt / b.workers.energy.drain_s_per_pct)); s = { ...s, workers: { ...s.workers, [id]: { ...s.workers[id]!, energy: 0 } } }; }
     s = step(s, dt, b, ev); drain(t); t0.v = t; rm.tAll += dt;
+    if (opt.onTick) opt.onTick('step', i, t, structuredClone(s));
     for (const id of ['market_hand', 'coop_hand'] as WorkerId[]) { const w = s.workers[id]; const m = w ? mood(w, b) : null; const p = prevMood[id];
       if (p != null && m != null && p !== m) { if ((p === 'asleep' && m === 'unpaid') || (p === 'unpaid' && m === 'asleep')) { rm.tog++; if (s.farmLevel >= 10) rm.tog10++; } if (m === 'unpaid') { rm.unpEnter++; if (s.farmLevel >= 10) rm.unpEnter10++; } }
       prevMood[id] = m; }
@@ -230,6 +238,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
       if (kind === 'f') { reach.set(s.farmLevel, t); if (opt.snapAt?.includes(s.farmLevel)) snaps.set(s.farmLevel, s); } }
   }
   if (bStart !== null && T - bStart > longestB) { longestB = T - bStart; worst = { ...cur, len: longestB, endKey: 'END' }; } if (mStart !== null && T - mStart > longestM) { longestM = T - mStart; worstM = { ...curM, len: longestM, endKey: 'END' }; }
+  if (opt.onTick && n > 0) opt.onTick('end', n, prevT, structuredClone(s));
   if (opt.onSecond && n > 0 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s);
   if (noAffStart !== null) longestNoAff = Math.max(longestNoAff, T - noAffStart); if (noAff30Start !== null) longestNoAff30 = Math.max(longestNoAff30, T - noAff30Start);
   const mech = Object.values(src).reduce((a, x) => a + x, 0);
