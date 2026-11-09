@@ -4,7 +4,8 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { STREAMS, STREAM_FILE, S_FARM, type StreamId } from './record';
 import { canon, sha256 } from './encode';
-import { validateManifest, CARD_OF_RECORD_SHA1, type Manifest } from './manifest';
+import { validateManifest, type Manifest } from './manifest';
+import { expectedCardSha1 } from './pins';
 
 export const SYNTH_LABEL = 'SYNTHETIC/SELFTEST — not PL-AC5(iii) evidence';
 export interface SideData { manifest: unknown; streams: Partial<Record<StreamId, string>>; manifestShaErrors?: string[] }
@@ -52,7 +53,8 @@ const sameRun = (a: Manifest, b: Manifest): string[] => {
 const isFullSet = (m: Manifest) => m.run.seeds.length === 200 && m.run.seeds.every((s, k) => s === k + 1);
 
 /** Compare one profile: before vs after. Pure function of the two sides' bytes. */
-export function compareSides(before: SideData, after: SideData): Verdict {
+export function compareSides(before: SideData, after: SideData, opt: { cardSha1?: string | null } = {}): Verdict {
+  const CARD = expectedCardSha1(opt.cardSha1);
   const invalid: string[] = [];
   for (const [side, d] of [['before', before], ['after', after]] as const) {
     for (const x of validateManifest(d.manifest)) invalid.push(`${side}: ${x}`);
@@ -68,7 +70,7 @@ export function compareSides(before: SideData, after: SideData): Verdict {
   if (mb.side !== 'before') invalid.push('before: side != before'); if (ma.side !== 'after') invalid.push('after: side != after');
   invalid.push(...sameRun(mb, ma));
   for (const [side, m] of [['before', mb], ['after', ma]] as const) {
-    if (m.inputs.card_sha1 !== CARD_OF_RECORD_SHA1) invalid.push(`${side}: card is not the version of record (sha1 ${m.inputs.card_sha1 ?? 'absent'} != ${CARD_OF_RECORD_SHA1})`);
+    if (m.inputs.card_sha1 !== CARD) invalid.push(`${side}: card is not the version of record (sha1 ${m.inputs.card_sha1 ?? 'absent'} != expected ${CARD})`);
     if (m.cfg.src_flags_on.length) invalid.push(`${side}: src flags on`);
   }
   const P: Partial<Record<'before' | 'after', Record<StreamId, ParsedStream>>> = {};

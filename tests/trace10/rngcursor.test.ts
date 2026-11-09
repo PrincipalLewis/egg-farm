@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { nextRand, mixSeed } from '../../src/sim/state';
 import { PyRandom } from '../py-random';
 import { SellerVariance, VAR_DEFAULT } from '../seller-variance';
-import { engineDraws, pyCursor, varianceCursor, RngCursorError } from './rngcursor';
+import { engineDraws, pyCursor, varianceCursor, pyLayoutProblem, RngCursorError } from './rngcursor';
 
 describe('trace10 rngcursor (§7)', () => {
   it('engine: exact draw counts by replay', () => {
@@ -19,8 +19,20 @@ describe('trace10 rngcursor (§7)', () => {
     r.random(); const b = pyCursor(r); expect(b.mti).toBe(2); expect(b.mtSha).not.toBe(a.mtSha);
     r.random(); const c = pyCursor(r); expect(c.mti).toBe(4); expect(c.mtSha).toBe(b.mtSha);
   });
-  it('fails closed when the PyRandom layout changes', () => {
-    expect(() => pyCursor({ mt: [], mti: 1 } as any)).toThrow(RngCursorError);
+  it('R-2 guard (HoE: runtime read, no getter): the live PyRandom has the expected private layout', () => {
+    expect(pyLayoutProblem(new PyRandom(1) as any)).toBeNull();
+  });
+  it.each([
+    ['mt missing', { mti: 1 }, /field 'mt' missing/],
+    ['mt not Uint32Array', { mt: new Array(624).fill(0), mti: 1 }, /not a Uint32Array/],
+    ['mt wrong length', { mt: new Uint32Array(10), mti: 1 }, /length 10, expected 624/],
+    ['mti missing', { mt: new Uint32Array(624) }, /field 'mti' missing/],
+    ['mti not integer', { mt: new Uint32Array(624), mti: 1.5 }, /'mti' is not an integer/],
+    ['mti out of range', { mt: new Uint32Array(624), mti: 9999 }, /outside 0\.\.625/],
+  ])('R-2 guard fails LOUDLY when %s', (_n, o, re) => {
+    expect(() => pyCursor(o as any)).toThrow(RngCursorError);
+    expect(() => pyCursor(o as any)).toThrow(re);
+    expect(() => pyCursor(o as any)).toThrow(/trace10 R-2 guard: PyRandom layout changed/);
   });
   it('variance cursor is identical for the same seed and call sequence', () => {
     const v1 = new SellerVariance(VAR_DEFAULT, 3), v2 = new SellerVariance(VAR_DEFAULT, 3);

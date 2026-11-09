@@ -18,10 +18,21 @@ export function engineDraws(prev: number, cur: number, cap = ENGINE_REPLAY_CAP):
 export interface PyCursor { mti: number; mtSha: string }
 /** Fails closed if py-random.ts changes the private field layout (§7, R-2). */
 export function pyCursor(r: PyRandom): PyCursor {
-  const o = r as unknown as { mt?: unknown; mti?: unknown };
-  if (!(o.mt instanceof Uint32Array) || o.mt.length !== 624 || typeof o.mti !== 'number' || !Number.isInteger(o.mti))
-    throw new RngCursorError('PyRandom private fields mt (Uint32Array[624]) / mti (int) not found: py-random.ts changed');
+  const o = r as unknown as { mt?: unknown; mti?: unknown }, why = pyLayoutProblem(o);
+  if (why) throw new RngCursorError(`trace10 R-2 guard: PyRandom layout changed (tests/py-random.ts): ${why}. The V cursor (mti + sha256(mt)) cannot be read; fix rngcursor.ts before any trace run.`);
+  if (!(o.mt instanceof Uint32Array) || typeof o.mti !== 'number') throw new RngCursorError('unreachable');
   return { mti: o.mti, mtSha: sha256(new Uint8Array(o.mt.buffer, o.mt.byteOffset, o.mt.byteLength)) };
+}
+/** R-2 = HoE: runtime read of the TS-private mt/mti (no getter). Returns the first layout problem, or null if the layout is as expected. */
+export function pyLayoutProblem(o: { mt?: unknown; mti?: unknown } | null | undefined): string | null {
+  if (!o || typeof o !== 'object') return 'not an object';
+  if (!('mt' in o)) return "field 'mt' missing (renamed or #private?)";
+  if (!(o.mt instanceof Uint32Array)) return `field 'mt' is not a Uint32Array (got ${Object.prototype.toString.call(o.mt)})`;
+  if (o.mt.length !== 624) return `field 'mt' has length ${o.mt.length}, expected 624 (MT19937 N)`;
+  if (!('mti' in o)) return "field 'mti' missing (renamed or #private?)";
+  if (typeof o.mti !== 'number' || !Number.isInteger(o.mti)) return `field 'mti' is not an integer (got ${String(o.mti)})`;
+  if (o.mti < 0 || o.mti > 625) return `field 'mti' = ${o.mti} outside 0..625`;
+  return null;
 }
 export const varianceCursor = (V: SellerVariance): PyCursor => pyCursor(V.r);
 /** Runner R measurement status. 'measured' only when the hook was wired and reported (even 0 draws). */

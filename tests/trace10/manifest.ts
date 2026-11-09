@@ -2,9 +2,8 @@
 // Wall-clock appears only in produced_at, which is never hashed into traces.
 import { STREAMS } from './record';
 
-export const CONTRACT_SHA256 = 'fc6a938214c8914dde5fed7b6b51fb770b93e66c3472f10e1836b30a0c4b6c99';
-/** R04 Card #4 version of record (D-HOP-2026-11-10-05, replaces 6269b126 of D-HOP-2026-11-10-02): sha1 of product/m5-gate-acs.md. */
-export const CARD_OF_RECORD_SHA1 = 'da3de91cd1dec39c4e1fc290671acabd9a3f720d';
+import { PINS } from './pins';
+export const CONTRACT_SHA256 = PINS.contract_sha256;
 export const PROFILES = ['optimal', 'seller15', 'casual'] as const;
 export type Profile = typeof PROFILES[number];
 export interface StreamInfo { file: string; sha256: string; records: number; seeds: number[] }
@@ -14,7 +13,7 @@ export interface Manifest {
   producer: { id: 'trace10-producer'; version?: string; git_commit: string; tree_dirty?: false; files: Record<string, string> };
   side: 'before' | 'after';
   run: { cmd: string; argv: string[]; env: Record<string, string>; seeds: number[]; profile: Profile; T: number; tickHz: number; synthetic: boolean; selftest_id?: string | null };
-  inputs: { csv_path: string; csv_sha256: string; balance_base_sha256: string; economy_config_sha256: string; card_sha256: string; card_sha1?: string; card_of_record_match?: boolean; contract_sha256: string; balance_built_sha256?: string };
+  inputs: { csv_path: string; csv_sha256: string; balance_base_sha256: string; economy_config_sha256: string; card_sha256: string; card_sha1?: string; card_sha1_expected?: string; card_of_record_match?: boolean; contract_sha256: string; balance_built_sha256?: string };
   harness: { commit: string; files: Record<string, string> };
   runtime: { node: string; vite_node: string; vitest: string; platform: string };
   cfg: { name: 'none'; stack: unknown; runtime_streakCap: number; runtime_streakCap_inert: boolean; ship_tc_streak_cap: number | null; src_flags_on: string[]; [k: string]: unknown };

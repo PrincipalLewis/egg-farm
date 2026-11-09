@@ -3,7 +3,8 @@
 import { initialState, nextRand, type GameState } from '../../src/sim/state';
 import { balance } from '../../src/config/balance';
 import { TraceWriter } from './writer';
-import { CONTRACT_SHA256, CARD_OF_RECORD_SHA1, type Manifest } from './manifest';
+import { CONTRACT_SHA256, type Manifest } from './manifest';
+import { PINS } from './pins';
 import type { SideData } from './compare';
 import { sha256 } from './encode';
 
@@ -37,7 +38,7 @@ export function synthSide(o: SynthOpts = {}): SideData {
     producer: { id: 'trace10-producer', version: 'synthetic', git_commit: 'f20b91839fdf09ba0ed45a890281ccbf7bf2909d', tree_dirty: false, files: { 'tests/trace10/synth.ts': H('synth') } },
     side: o.side ?? 'before',
     run: { cmd: 'synthetic', argv: [], env: {}, seeds, profile: o.profile ?? 'optimal', T: 4000, tickHz: 10, synthetic: true, selftest_id: 'EC-2-synthetic' },
-    inputs: { csv_path: 'synthetic', csv_sha256: H('csv'), balance_base_sha256: H('bal'), economy_config_sha256: H('cfg'), card_sha256: H('card'), card_sha1: CARD_OF_RECORD_SHA1, card_of_record_match: true, contract_sha256: CONTRACT_SHA256 },
+    inputs: { csv_path: 'synthetic', csv_sha256: H('csv'), balance_base_sha256: H('bal'), economy_config_sha256: H('cfg'), card_sha256: H('card'), card_sha1: PINS.card_sha1, card_sha1_expected: PINS.card_sha1, card_of_record_match: true, contract_sha256: CONTRACT_SHA256 },
     harness: { commit: 'f20b91839fdf09ba0ed45a890281ccbf7bf2909d', files: { 'tests/bot-m5.ts': H('bot') } },
     runtime: { node: 'v20.19.2', vite_node: 'synthetic', vitest: 'synthetic', platform: 'linux-x64' },
     cfg: { name: 'none', stack: { on: false }, runtime_streakCap: 0.28, runtime_streakCap_inert: true, ship_tc_streak_cap: 0.28, src_flags_on: [] },
