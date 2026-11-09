@@ -1,7 +1,7 @@
 // M5.1 breeds PR A (state, save/load, migration, offline). Every test carries its BR-AC id (QA-D-1029-V5SCAP).
 // Spec rev 3.8.9 ea922eb8; tick semantics engineering/reviews/v5-breeds-tick-semantics.md.
 import { describe, it, expect } from 'vitest';
-import { balance as b } from '../src/config/balance';
+import { balance as b, validateBalance } from '../src/config/balance';
 import { Game } from '../src/game';
 import { initialState, mixSeed, type GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
@@ -178,5 +178,66 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
   it('[BR-AC1 / E11] flag off: the same corrupt save is left untouched (no sanitise, no event)', () => {
     const s = st({ owned: { leghorn: { stars: 5 } }, slots: ['leghorn', 'leghorn', null] }), kv = saved(s, T0); const { g } = boot(b, kv, T0 + 30_000);
     expect(g.state.breeds).toEqual(s.breeds); expect(stored(kv).breeds).toEqual(s.breeds); expect(migrated(kv)).toEqual([]);
+  });
+});
+
+describe('D2 / BR-AC26 E12 invalid_root: bad breeds root re-created, no throw on tick', () => {
+  const defaults = (F = 12) => {
+    const s0 = { ...initialState(b, 7), farmLevel: F };
+    return { owned: {}, slots: [null, null, null], incubator: null, settleMs: [0, 0, 0], flockCompleteLogged: 0 as const,
+      hatches: 0, pity: 0, rng: mixSeed((s0.rng ^ BREEDS_RNG_SALT) >>> 0), freeHatchUsed: 0 as const, sinceUnlockBackfilled: 1 as const };
+  };
+  it.each([
+    ['null', null],
+    ['array', []],
+    ['number', 5],
+    ['string', 'x'],
+  ] as const)('[D2 / BR-AC26 E12] root %s → defaults + one save_migrated; one step does not throw', (_n, root) => {
+    const s0 = { ...base(12), breeds: root as any };
+    const ev: any[] = [];
+    const s1 = sanitizeBreedsOnLoad(s0, BR, ev);
+    expect(s1.breeds).toEqual(defaults(12));
+    expect(ev).toEqual([BREEDS_SANITISE_EVENT]); // D1 full shape blocked on events.ts
+    expect(() => step(s1, 0.1, BR)).not.toThrow();
+    const s2 = step(s1, 0.1, BR);
+    expect(s2.breeds).toMatchObject({ owned: {}, slots: [null, null, null], settleMs: [0, 0, 0] });
+  });
+});
+
+describe('D3 / BR-AC26 E12 OQ-2/4/8 shape repairs', () => {
+  it('[D3 / Q7] freeHatchUsed missing → 0 (not 1), one save_migrated', () => {
+    const { freeHatchUsed: _f, ...rest } = br();
+    const ev: any[] = [], r = sanitizeBreedsOnLoad({ ...base(), breeds: rest as any }, BR, ev);
+    expect(r.breeds!.freeHatchUsed).toBe(0); expect(ev).toHaveLength(1);
+  });
+  it('[D3 / OQ-4] owned array → {}, one save_migrated', () => {
+    const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ owned: [{ stars: 1 }] as any }), BR, ev);
+    expect(r.breeds!.owned).toEqual({}); expect(ev).toHaveLength(1);
+  });
+  it('[D3 / OQ-4] slots length 4 → [null,null,null], one save_migrated', () => {
+    const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ slots: ['leghorn', null, null, 'sussex'] as any }), BR, ev);
+    expect(r.breeds!.slots).toEqual([null, null, null]); expect(ev).toHaveLength(1);
+  });
+  it('[D3 / OQ-8] valid incubator costCents -5 → 0, one save_migrated', () => {
+    const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ incubator: { breed: 'brahma', remainingMs: 40_000, costCents: -5 } }), BR, ev);
+    expect(r.breeds!.incubator).toEqual({ breed: 'brahma', remainingMs: 40_000, costCents: 0 }); expect(ev).toHaveLength(1);
+  });
+});
+
+describe('D4 / BR-AC26 E10 OQ-6 locked-slot unknown not kept raw', () => {
+  it('[D4 / E10 OQ-6] F12 slots[1]=silkie (locked): runtime null, save drops raw, one save_migrated', () => {
+    const kv = saved(st({ owned: { leghorn: { stars: 0 }, silkie: { stars: 1 } } as any, slots: ['leghorn', 'silkie', null], incubator: null }, 12), T0);
+    const { g } = boot(BR, kv, T0 + 30_000);
+    expect(g.state.breeds!.slots).toEqual(['leghorn', null, null]);
+    g.save();
+    expect(stored(kv).breeds.slots).toEqual(['leghorn', null, null]); // not kept raw
+    expect(migrated(kv)).toHaveLength(1);
+  });
+});
+
+describe('D5 / BR-R8 balance tickHz divides 1000', () => {
+  it('[D5 / BR-R8] validateBalance throws when 1000 % tickHz !== 0; tickHz 10 passes', () => {
+    expect(() => validateBalance(b, false)).not.toThrow();
+    expect(() => validateBalance({ ...b, tickHz: 3 } as typeof b, false)).toThrow(/tickHz must divide 1000/);
   });
 });
