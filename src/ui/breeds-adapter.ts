@@ -80,3 +80,85 @@ export const fmtRemainMs = (ms: number) => {
 
 /** Re-export breedsFlagAndKey for tests that need the sim `on()` (flag + key). */
 export const breedsOn = breedsFlagAndKey;
+
+// ============================================================================================================================
+// PR-B ADDITIONS (Features, feat/v5-breeds-ui-prB). Additive getters only (seams doc §2): nothing above this line is renamed,
+// moved or re-signed. Stacked on PR-A v5/breeds-ui-a @ 4501009; everything above is PR-A's file unchanged
+// (seams doc 95f45895 §2: PR-B adds getters only).
+// ============================================================================================================================
+
+/**
+ * Spec §5 tunables the UI needs that `bc()` / BC_SPEC_DEFAULTS don't carry yet (L648-654; checklist §3).
+ * TODO(Saves): move these to `BC_SPEC_DEFAULTS` as `present_calm_w_s`, `present_calm_k`, `lay_cap_bp_lt18`, `lay_cap_bp`
+ * (and the lay-cap Farm boundary) and read them through `bc()`; then delete this object. Values are the spec's of record.
+ */
+export const PRB_STUB_TUNABLES = {
+  /** bc_present_calm_w_s: trailing focus-seconds window of the Present rate gate (BR-R12b). */
+  present_calm_w_s: 10,
+  /** bc_present_calm_k: counted taps in the window that close the gate; 0 = never pending (BR-R12c). */
+  present_calm_k: 6,
+  /** bc_lay_cap_bp_lt18: Present family clamp below the lay-cap Farm level (L366, D-HOP-31 (a)). */
+  lay_cap_bp_lt18: 700,
+  /** bc_lay_cap_bp: Present family clamp from the lay-cap Farm level (L366). */
+  lay_cap_bp: 1500,
+  /** Farm level where the Present clamp steps from lay_cap_bp_lt18 to lay_cap_bp (E9 L566, "lt18"). */
+  lay_cap_farm: 18,
+} as const;
+
+/** BR-R12 Present family clamp at Farm F (E9: 700 → 1500 at F18 on the next frame). */
+export const presentCapBp = (F: number) =>
+  F >= PRB_STUB_TUNABLES.lay_cap_farm ? PRB_STUB_TUNABLES.lay_cap_bp : PRB_STUB_TUNABLES.lay_cap_bp_lt18;
+
+/**
+ * Present family active bp: sum of the settled Present breeds in UNLOCKED slots (sim `slotTraitBp`: 0 while settling or for
+ * an unknown id, E10), clamped by `presentCapBp`. 0 = no settled Present breed → no chip (BR-R12c).
+ * TODO(Saves): replace with the income-trait wiring's own figure (`familyActiveBp(s, b, 'present')`) once it exists, so the
+ * chip shows exactly what income pays.
+ */
+export function presentActiveBp(s: GameState, b: Balance): number {
+  const br = breedsOf(s, b); if (!br || !Array.isArray(br.slots) || !Array.isArray(br.settleMs)) return 0;
+  let sum = 0;
+  for (let i = 0; i < unlockedSlots(s.farmLevel, b); i++) {
+    const id = br.slots[i]; if (!isBreedId(id) || ROSTER[id][1] !== 'present') continue;
+    sum += slotTraitBp(br, i, b);
+  }
+  return Math.min(sum, presentCapBp(s.farmLevel));
+}
+
+/** The Present rate gate as the UI reads it, once per tick. `nowMs` = performance.now() of the tick (presentation clock). */
+export interface PresentGateSource { open(s: GameState, b: Balance, nowMs: number): boolean; }
+
+/**
+ * TODO(Saves): the sim has no Present calm-gate yet (readiness §2, "Gap — PR-B / Saves"). Until Saves exposes
+ * `presentGateOpen(s, b)`, the stub reports the gate OPEN on every tick (the chip is never pending in production builds,
+ * which is the spec-safe state: k = 0 / boot behaviour). Tests and the browser harness inject a reference gate instead.
+ */
+export const STUB_PRESENT_GATE: PresentGateSource = { open: () => true };
+
+/**
+ * BB-5 / BBv2 fallback branch: no meaningful row is offered (BR-BB4 (b), BR-AC23b). TODO(#100): with BBv2 merged this is
+ * `bestBuyV2On(b) && meaningfulKeys(s, b).size === 0` (`src/econ/best-buy.ts` on v5-m51-bbv2 2e76d0c5). Until #100 is on
+ * rc/v5 the M5.0 stopgap has no fallback branch, so the strip keeps its target (BR-BB4 (d)): the stub returns false.
+ */
+export const bbFallbackActive = (_s: GameState, _b: Balance): boolean => false;
+
+/** BR-BB4 (c): incubator idle, flock incomplete, Flock unlocked, something eligible (E5). The strip may offer a Hatch. */
+export function hatchTargetEligible(s: GameState, b: Balance): boolean {
+  const br = breedsOf(s, b);
+  if (!br || !flockUnlocked(s, b) || br.incubator || isFlockComplete(br, b)) return false;
+  const pool = eligible(br, s.farmLevel, b);
+  return freeHatchAvailable(br) ? pool.some(id => ROSTER[id][0] === 'C') : pool.length > 0;
+}
+
+/** This frame's hatch price, as the sim's `startHatch` charges it (free hatch = 0). Never computed in the UI (checklist §3). */
+export const hatchPriceNowCents = (s: GameState, b: Balance): number => {
+  const br = breedsOf(s, b); return br && freeHatchAvailable(br) ? 0 : hatchCostCents(s, b);
+};
+
+/** Slotted breed ids in UNLOCKED slots in slot order; an unknown id renders empty (E10) and is skipped. */
+export function slottedBreeds(s: GameState, b: Balance): BreedId[] {
+  const br = breedsOf(s, b); if (!br || !Array.isArray(br.slots)) return [];
+  const out: BreedId[] = [];
+  for (let i = 0; i < unlockedSlots(s.farmLevel, b); i++) { const id = br.slots[i]; if (isBreedId(id)) out.push(id); }
+  return out;
+}
