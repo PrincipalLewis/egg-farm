@@ -29,6 +29,21 @@ export const needManage = (ws: Workers, b: Balance) => WORKERS.filter(id => canM
 /** 1 minute (x unpaid_resume_wage_min) of a wage-paying worker's wage at Farm F, cents. */
 export const resumeNeedCents = (id: 'market_hand' | 'coop_hand', farm: number, b: Balance) =>
   Math.round(b.workers[id].wage_per_farm_per_min * farm * b.workers.energy.unpaid_resume_wage_min * 100);
+/** §8 items 15.5 + 16 (R9), pause rule 10 (audit D2): the coins (cents) at which the tick resumes Unpaid worker `id`, or null when it
+ *  is not an Unpaid Market/Coop Hand or is paused (no wage resume while paused). Need = 1 min of its own wage, plus 1 min for every
+ *  paid MH/CH (not Unpaid, energy > 0, NOT paused) and for every Unpaid, unpaused one ahead of it in the strict MH → CH order.
+ *  THE one reserve rule: sim/tick.ts resumes through this (HoE 00:22); UI resume-at copies switch to it (Features #121). */
+export function unpaidResumeAtCents(ws: Workers, farm: number, b: Balance, id: WorkerId): number | null {
+  if (id !== 'market_hand' && id !== 'coop_hand') return null;
+  const me = ws[id]; if (!me?.unpaid || isPaused(me, b)) return null;
+  let at = 0;
+  for (const k of ['market_hand', 'coop_hand'] as const) { const w = ws[k]; if (w && !w.unpaid && w.energy > 0 && !isPaused(w, b)) at += resumeNeedCents(k, farm, b); }
+  for (const k of ['market_hand', 'coop_hand'] as const) {
+    const w = ws[k]; if (!w?.unpaid || isPaused(w, b)) continue;
+    at += resumeNeedCents(k, farm, b); if (k === id) return at;
+  }
+  return null; // unreachable: `id` is Unpaid and unpaused
+}
 /** Hire cost in cents; grader = its first tier. */
 export function hireCostCents(id: WorkerId, b: Balance): number {
   return id === 'grader' ? graderTierCostCents(0, b) : b.workers[id].hire_cost * 100;

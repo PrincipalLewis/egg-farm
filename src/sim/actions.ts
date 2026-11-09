@@ -106,7 +106,7 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
       const r = { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
       // Pause rule 8 / AC-P12 (PAU-AC8, audit D1): Manage on a paused worker also ends the pause, through the one Resume path
       // (Market Hand B5 lockout included). isPaused is false with m4.flags.pause off, so flag-off stays byte-identical (E13).
-      return isPaused(w, b) ? resumeWorker(r, a.worker, b) : r;
+      return isPaused(w, b) ? resumeWorker(r, a.worker, b, ev, 'manage') : r; // emits worker_resumed{cause:"manage"}
     }
     case 'manageAll': { // v1.1 + P4: 3+ hired; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
       // Pause rule 8 (D1): needManage skips paused workers, so Manage all never refills or resumes them.
