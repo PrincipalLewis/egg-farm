@@ -715,3 +715,6 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .breeds-reveal .reveal-name { text-align: center; font: 700 24px/1.2 Fredoka, system-ui, sans-serif; color: #fff; }
 @keyframes breedsReveal { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 @keyframes breedsRevealRm { from { opacity: 0; } to { opacity: 1; } }
+
+.slot-remove { margin-top: 4px; font: 700 11px/14px Nunito, system-ui, sans-serif; padding: 4px 8px; min-height: 28px; }
+.album-cell.picked { outline: 2px solid var(--c-yolk, #F5C542); outline-offset: 2px; }

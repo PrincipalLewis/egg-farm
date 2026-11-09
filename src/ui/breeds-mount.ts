@@ -109,6 +109,9 @@ export function mountFlock(opts: {
     opts.closeOtherPanels();
     setOpen(true);
     renderBody();
+    // OQ-5: pendingReveal while sheet was closed → show on next open (welcome path also calls showReveal).
+    const rid = g.pendingReveal;
+    if (rid && !revealEl) showReveal(rid);
   };
   const closeFlock = () => setOpen(false);
 
@@ -222,19 +225,27 @@ export function mountFlock(opts: {
       opts.dirty();
       renderBody();
     });
-    // Slot place / clear
-    body.querySelectorAll('.slot').forEach(el => {
+    // OQ-6: album select → tap open/empty/settling/filled slot to place; Remove clears.
+    body.querySelectorAll('.slot-remove').forEach(el => {
       el.addEventListener('click', e => {
         e.stopPropagation();
         const slot = Number((el as HTMLElement).dataset.slot);
         if (!Number.isInteger(slot) || slot < 0 || slot >= openN) return;
-        if (pickBreed) {
-          g.dispatch({ type: 'placeBreed', slot, id: pickBreed });
-          pickBreed = null;
-        } else if ((el as HTMLElement).dataset.breed) {
-          // tap filled slot with no pick → empty it (remove)
-          g.dispatch({ type: 'placeBreed', slot, id: null });
-        }
+        g.dispatch({ type: 'placeBreed', slot, id: null });
+        pickBreed = null;
+        opts.dirty();
+        renderBody();
+      });
+    });
+    body.querySelectorAll('.slot').forEach(el => {
+      el.addEventListener('click', e => {
+        if ((e.target as HTMLElement).closest('.slot-remove')) return;
+        e.stopPropagation();
+        const slot = Number((el as HTMLElement).dataset.slot);
+        if (!Number.isInteger(slot) || slot < 0 || slot >= openN) return;
+        if (!pickBreed) return;
+        g.dispatch({ type: 'placeBreed', slot, id: pickBreed });
+        pickBreed = null;
         opts.dirty();
         renderBody();
       });

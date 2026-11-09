@@ -71,9 +71,9 @@ export const traitPctFloor = (bp: number) => `+${Math.floor(bp / 100)}%`;
 export const starBp = (id: BreedId, stars: number, b: Balance) =>
   Math.floor(ROSTER[id][2] * (10000 + stars * bc(b, 'star_bonus_bp')) / 10000);
 
-/** Settling / hatch countdown m:ss from remaining ms (floor seconds; OQ-3 PMC default until ruled). */
+/** Settling / hatch countdown m:ss from remaining ms (ceil seconds; PMC OQ-3). Never 0:00 while ms>0. */
 export const fmtRemainMs = (ms: number) => {
-  const s = Math.max(0, Math.floor(ms / 1000));
+  const s = ms <= 0 ? 0 : Math.max(1, Math.ceil(ms / 1000));
   const m = Math.floor(s / 60);
   return `${m}:${String(s % 60).padStart(2, '0')}`;
 };

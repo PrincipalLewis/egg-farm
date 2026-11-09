@@ -109,5 +109,6 @@ export function slotCardHtml(br: BreedsSave, b: Balance, slot: number, open: num
   }
   const bp = slotTraitBp(br, slot, b);
   const pct = traitPctExact(bp);
-  return `<button type="button" class="slot filled" data-slot="${slot}" data-breed="${id}">${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${pct} ${familyTraitWord(fam)} ${familyWord(fam)}</span></button>`;
+  // OQ-6: select album → tap slot to place; Remove clears (not tap-on-filled).
+  return `<div class="slot filled" data-slot="${slot}" data-breed="${id}" role="group" aria-label="Slot ${slot + 1}, ${rosterName(id)}">${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${pct} ${familyTraitWord(fam)} ${familyWord(fam)}</span><button type="button" class="slot-remove" data-testid="breeds-slot-remove" data-slot="${slot}" aria-label="Remove ${rosterName(id)} from slot ${slot + 1}">Remove</button></div>`;
 }

@@ -7,7 +7,7 @@ import { serialize, SAVE_KEY } from '../src/save/save';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import { hatchUi, farmSoonVisible, FARM_SOON_TEXT, settleLabel } from '../src/ui/breeds-ui';
-import { hatchEstimate, type BreedsSave } from '../src/ui/breeds-adapter';
+import { hatchEstimate, fmtRemainMs, type BreedsSave } from '../src/ui/breeds-adapter';
 
 const breedsOn = (): Balance => ({
   ...balance,
@@ -77,6 +77,12 @@ describe('breeds-ui hatchUi helpers (checklist §2 Hatch states)', () => {
   it('BR-AC32 settling label m:ss', () => {
     expect(settleLabel(252_000)).toBe('Settling 4:12');
     expect(settleLabel(0)).toBe('Settling 0:00');
+  });
+  it('OQ-3 ceil remainingMs (never 0:00 while ms>0)', () => {
+    expect(fmtRemainMs(1)).toBe('0:01');
+    expect(fmtRemainMs(1000)).toBe('0:01');
+    expect(fmtRemainMs(1001)).toBe('0:02');
+    expect(fmtRemainMs(0)).toBe('0:00');
   });
 });
 
