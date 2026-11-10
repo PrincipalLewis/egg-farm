@@ -93,7 +93,7 @@ export function drawGap(s: GameState, b: Balance): GameState {
 /** An egg resolved (tap, timeout, offline, reload, takeover): the next gap is drawn now (draw order: gap at resolve). */
 const resolve = (s: GameState, b: Balance): GameState => { const o = drawGap(s, b); return { ...o, goldenPending: pending(o.nextSpawnRemainingS!) }; };
 /** The countdown is at 0, no egg is on screen and the R15 retry wait is over: Game measures the valid spots and dispatches spawnGolden. */
-export const spawnDue = (s: GameState, b: Balance) => goldenOn(b) && !s.goldenEgg && s.nextSpawnRemainingS === 0 && !((s.goldenPending?.recheckS ?? 0) > EPS);
+export const spawnDue = (s: GameState, b: Balance, layout = false) => goldenOn(b) && !s.goldenEgg && s.nextSpawnRemainingS === 0 && (layout || !((s.goldenPending?.recheckS ?? 0) > EPS)); // R15: a layout change re-checks at once
 /** One tick on focus seconds f (TimerSystem). R1/R2 start, countdown, R15 deferral, R18 lifetime + timeout expiry. */
 export function goldenTick(s: GameState, f: number, b: Balance, ev?: Sink): GameState {
   if (!goldenOn(b)) return s;
@@ -119,8 +119,8 @@ export function goldenTick(s: GameState, f: number, b: Balance, ev?: Sink): Game
   return { ...s, goldenPending: { ...p, deferS: r12(p.deferS + f), recheckS: Math.max(0, r12(p.recheckS - f)) } };
 }
 /** spawnGolden{spots}: the UI's live valid spot ids (R14). Identity unless spawnDue. Empty list -> R15 deferral. */
-export function spawnGolden(s: GameState, spots: readonly string[], b: Balance, ev?: Sink): GameState {
-  if (!spawnDue(s, b)) return s;
+export function spawnGolden(s: GameState, spots: readonly string[], b: Balance, ev?: Sink, layout = false): GameState {
+  if (!spawnDue(s, b, layout)) return s;
   const p = s.goldenPending ?? pending(0);
   if (!spots.length) return { ...s, goldenPending: { ...p, recheckS: GOLDEN_RECHECK_S } };
   const [e, u] = evDraw(ensureEvRng(s)), slotId = spots[pickIndex(u, spots.length)];
@@ -139,8 +139,10 @@ export function tapGolden(s: GameState, b: Balance, ev?: Sink): GameState {
   if (r === 'frenzy') ev?.push({ type: 'frenzy_started', mult, duration_s: dur, farm_level: s.farmLevel, grader_tier: s.graderTier });
   return resolve(o, b);
 }
-/** R8/R10b/R10c: remove an on-screen egg with no reward (offline, reload at pagehide, takeover, save reset) and draw the fresh gap. */
-export function goldenUnload(s: GameState, b: Balance, reason: 'offline' | 'reload' | 'takeover' | 'reset', ev?: Sink): GameState {
+/** R8/R10b/R10c, Architect persist A (2026-11-05 21:29): remove an on-screen egg with no reward and make exactly ONE live drawGap.
+ *  Idempotent: no egg (or golden off) -> the same object, no event, no draw. The ONE helper for offline (m5Offline), reload
+ *  (Game.endSession, before save), takeover and save reset. m5Persist's own copy-draw (B) is Saves-owned. */
+export function goldenUnload(s: GameState, b: Balance, ev: Sink, reason: 'offline' | 'reload' | 'takeover' | 'reset'): GameState {
   if (!goldenOn(b) || !s.goldenEgg) return s;
   const { goldenEgg: _g, ...o } = s; ev?.push({ type: 'collectible_expired', skin: 'golden_egg', reason, farm_level: s.farmLevel });
   return resolve(o as GameState, b);
