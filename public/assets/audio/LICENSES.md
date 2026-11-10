@@ -16,3 +16,14 @@ License: original work of Egg Farm Studio; dedicated **CC0 1.0** (public domain)
 | sfx-ui-close.mp3 | gen_sfx.py (down swoosh) | CC0 1.0, in-house |
 | sfx-welcome-back.mp3 | gen_sfx.py (D-F#-A chime) | CC0 1.0, in-house |
 | sfx-worker-yawn.mp3 | gen_sfx.py (rise-fall glide + vibrato + breath noise), added 2026-10-15 | CC0 1.0, in-house |
+
+## v5 streak stings (copied 2026-11-10 from studio `art-ux/assets/sfx/`, HoE ruling; byte-identical)
+Procedurally synthesized in-house with `art-ux/tools/gen_juice_sfx.py` (Art & UX, 2026-10-24); **CC0 1.0**, proof `art-ux/licenses/CC0-sfx-juice-v1.md`; measurements in studio `art-ux/assets/audio/LICENSES.md` § M5.0.
+
+| File | Source | License |
+|---|---|---|
+| sfx-streak-tier-01.mp3 | gen_juice_sfx.py (streak tier 1 sting) | CC0 1.0, in-house |
+| sfx-streak-tier-02.mp3 | gen_juice_sfx.py (streak tier 2 sting) | CC0 1.0, in-house |
+| sfx-streak-tier-03.mp3 | gen_juice_sfx.py (streak tier 3 sting) | CC0 1.0, in-house |
+| sfx-streak-max-01.mp3 | gen_juice_sfx.py (streak MAX chime) | CC0 1.0, in-house |
+| sfx-streak-cool-01.mp3 | gen_juice_sfx.py (streak cool-down) | CC0 1.0, in-house |
