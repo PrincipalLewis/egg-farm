@@ -1,6 +1,6 @@
 # Breeds UI PR-A — AC → test trace (Ready-candidate)
 
-**Head:** tip of `v5/breeds-ui-a` (see `git rev-parse`) · Ready-candidate (stub familyClamp; HoE B)
+**Head:** `d5327077bf99b0e467b5b9da15fb992406e8bb2c` · Ready (final gates green @ 0ae9d907)
 **Files:** `tests/v5-breeds-ui.test.ts`, `tests/helpers/breeds-on.test.ts`, `tests/v5-breeds-qa-seam.test.ts`  
 **Fixture:** `tests/helpers/breeds-on.ts` — `balance.json` stays `breeds=0`.
 
