@@ -191,9 +191,9 @@ describe('real Game (sim on rc/v5) drives the UI with no glue', () => {
 describe('static checks', () => {
   const css = readFileSync(resolve(process.cwd(), 'src/ui/streak.css'), 'utf8');
   it('CT-AC3: no looping animation in the streak CSS', () => { expect(css).not.toMatch(/infinite/); expect(css).not.toMatch(/animation-iteration-count/); });
-  it('every rule is scoped to streak nodes or .m5-streak (flag-off pages unaffected)', () => {
+  it("every rule is scoped to nodes only this feature adds (.streak-*, .coin-pop, .price-chip*) or .m5-streak (flag-off pages unaffected)", () => {
     const sels = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@keyframes[^{]+\{(?:[^{}]*\{[^}]*\})*\s*\}/g, '').match(/[^{}@]+(?=\{)/g)!.map(s => s.trim()).filter(s => s && !s.startsWith('media') && !/^\(/.test(s));
-    for (const s of sels) for (const part of s.split(',')) expect(part.trim()).toMatch(/streak|coin-pop|m5-streak/);
+    for (const s of sels) for (const part of s.split(',')) expect(part.trim()).toMatch(/streak|coin-pop|m5-streak|price-chip/);
   });
   it('sound hooks map 1:1 to the Art files (combo-tiers §11)', () => {
     expect(Object.values(STREAK_SFX)).toEqual(['sfx-streak-tier-01', 'sfx-streak-tier-02', 'sfx-streak-tier-03', 'sfx-streak-max-01', 'sfx-streak-cool-01']);

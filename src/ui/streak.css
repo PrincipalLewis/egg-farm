@@ -80,3 +80,9 @@
 .reduced-motion .streak-fill{transition:none}.reduced-motion .streak-spark{display:none}
 .streak-row.rm .streak-tick.lit.up{animation:streakFadeIn 150ms linear}
 @keyframes streakFadeIn{from{opacity:0}}
+
+/* Price chips (m4-collect-streak v0.3 §4.5 / S-AC19-20): 14 px tall, 4 px apart, gold 2x first then meadow +N%; collapsed 2x+ gold.
+   Text --c-text on meadow 5.80:1 / gold 6.71:1 (combo-tiers §6). 12 px text floor. */
+.price-chips{display:inline-flex;gap:4px;margin-left:4px;vertical-align:middle}
+.price-chip{display:inline-flex;align-items:center;height:14px;padding:0 4px;border-radius:var(--r-pill);font:700 12px/14px var(--f-display);color:var(--c-text);white-space:nowrap}
+.price-chip.streak{background:var(--c-meadow)}.price-chip.frenzy,.price-chip.combined{background:var(--c-gold)}
