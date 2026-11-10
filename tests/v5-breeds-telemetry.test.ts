@@ -1,7 +1,7 @@
 // M5.1 breeds §8 telemetry emitters (HoE/breeds-telemetry-emitters, drift-audit row 34). Spec rev 3.8.9 ea922eb8 §8 L689-698;
 // telemetry errata rev 15 5e12a591 #15-18 (L74-77); schema rows src/telemetry/schema.ts hatch_started / breed_revealed /
 // breed_slotted / flock_complete + session_end breed_*. Every emitted event is checked with validateEvent (schema of record).
-// Excluded (Saves, saves/breeds-sim-prB-traits): session_end present_active_s / present_lost_count, offline_grant.away_bp.
+// Owned by Saves (#125, breeds-sim-prB-traits): session_end present_active_s / present_lost_count, offline_grant.away_bp (merged in beside these).
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
@@ -175,7 +175,7 @@ describe('§8 flock_complete (errata #18): once per save via breeds.flockComplet
   });
 });
 
-describe('§8 session_end breeds fields (L698): flag on all present, flag off all absent; Saves-owned fields excluded', () => {
+describe('§8 session_end breeds fields (L698): flag on all present, flag off all absent; beside Saves-owned present_*', () => {
   const OWN = ['breed_hatches', 'breed_spend_cents', 'breed_present_eggs', 'breed_away_eggs', 'breed_broody_cents', 'breeds_owned', 'breed_slots_used', 'breed_loadout_end', 'breed_family_s'];
   it('Game session: hatches / spend (= Σ hatch_started.cost), owned, slots used, settled-only loadout, family seconds; schema-valid', () => {
     const g = boot(BR, mem(), T0); let t = T0; (g as any).now = () => t;
@@ -188,8 +188,8 @@ describe('§8 session_end breeds fields (L698): flag on all present, flag off al
       breeds_owned: 3, breed_slots_used: 2, breed_loadout_end: 'P0A1B0', breed_family_s: { P: 0, A: 2.5, B: 0 } });
     const { type: _t, ts: _ts, sessionMs: _m, ...rest } = e as any;
     expect(validateEvent({ ...ENV, type: 'session_end', ...END, ...rest })).toEqual([]);
-    for (const k of ['present_active_s', 'present_lost_count']) expect(k in e).toBe(false);
-    for (const x of only(g.telemetry.events(), 'offline_grant')) expect('away_bp' in x).toBe(false);
+    // After the #125 merge (restack): Saves' present_* sit beside the breed_* fields in the same session_end (schema-valid above).
+    for (const k of ['present_active_s', 'present_lost_count']) expect(k in e).toBe(true);
   });
   it('flag on, no breeds blob yet: zeros and P0A0B0 (present, not absent); every value matches its schema FieldSpec', () => {
     const f = sessionEndBreedsFields(initialState(b, 7), BR); expect(Object.keys(f).sort()).toEqual([...OWN].sort());
