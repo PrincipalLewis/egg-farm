@@ -15,7 +15,8 @@ import { initialState, type GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { graderMult, needManage, resumeNeedCents, unpaidResumeAtCents, type Worker } from '../src/sim/workers';
-import { isPaused, pauseWorker, resumeWorker, pausedDurationS } from '../src/sim/pause';
+import { isPaused, pauseWorker, resumeWorker, pausedDurationS, pauseSessionEnd } from '../src/sim/pause';
+import { validateEvent } from '../src/telemetry/schema';
 import { serialize, SAVE_KEY } from '../src/save/save';
 import { Game } from '../src/game';
 import { mem } from './helpers';
@@ -79,7 +80,7 @@ describe('[PAU-AC8][D1] worker_resumed{cause} and paused_duration_s (pause §12 
     const ev: SimEvent[] = []; const n = apply(s, { type: 'manage', worker: 'coop_hand' }, P, ev);
     expect(ev.map(e => e.type)).toEqual(['worker_manage', 'worker_resumed']);
     expect(ev[1]).toEqual({ type: 'worker_resumed', worker: 'coop_hand', farm: 12, energy_pct: 100, paused_duration_s: 10, cause: 'manage' });
-    expect(n.pausedForS).toEqual({ hawker: expect.any(Number) }); // only the still-paused Hawker is tracked
+    expect(n.pausedForS).toEqual({ hawker: expect.any(Number), sumS: expect.any(Number), allS: expect.any(Number) }); // only the still-paused Hawker + session totals
   });
   it('[PAU-AC8][D1] manual Resume after 37.25 s emits worker_resumed{cause:"manual"} with the floor 37 and the integer energy', () => {
     let s = pauseWorker(farm({ workers: { market_hand: W(40) } }), 'market_hand', P);
@@ -90,7 +91,7 @@ describe('[PAU-AC8][D1] worker_resumed{cause} and paused_duration_s (pause §12 
     expect(e.energy_pct).toBe(Math.round(s.workers.market_hand!.energy));
     expect(Number.isInteger(e.energy_pct)).toBe(true);
     expect(n.workers.market_hand!.callLockoutS).toBe(LOCK);
-    expect('pausedForS' in n).toBe(false); // last paused worker resumed: no M5 field left
+    expect(n.pausedForS).toEqual({ sumS: expect.any(Number), allS: expect.any(Number) }); // last paused worker resumed: only the session totals stay
   });
   it('[PAU-AC8][D1][QA-D-1110-PAUDUR] integer floor, never negative / NaN / null, float drift absorbed', () => {
     const base = pauseWorker(farm({ workers: { hawker: W(50) } }), 'hawker', P);
@@ -133,7 +134,7 @@ describe('[PAU-AC8][D1] worker_resumed{cause} and paused_duration_s (pause §12 
   it('[PAU-AC8][D1] save JSON shape unchanged: pausedForS is never serialized and the bytes equal the tracker-free state', () => {
     const NOW = 1_700_000_000_000;
     const s = ticks(pauseWorker(farm({ workers: { market_hand: W(50), coop_hand: W(60) } }), 'market_hand', P), 5);
-    expect(s.pausedForS).toEqual({ market_hand: expect.any(Number) });
+    expect(s.pausedForS).toEqual({ market_hand: expect.any(Number), sumS: expect.any(Number) });
     const { pausedForS: _p, ...noTracker } = s;
     const raw = serialize(s, NOW, undefined, P);
     expect(raw).toBe(serialize(noTracker as GameState, NOW, undefined, P));
@@ -331,3 +332,61 @@ describe('[QA-D-1109-TELAC-FILL A-2] best_buy_suppressed_zero_gain is must-be-0 
     let n = 0; for (let seed = 1; seed <= 3; seed++) n += session(cfg, seed, 60); expect(n).toBe(0);
   });
 });
+
+describe('[PAU-AC8][QA-D-1110-PAUDUR][TEL-AC8][TEL-AC14] session_end.paused_worker_s / all_paused_s (pause §12 L299; gate e485f762 card #T)', () => {
+  const DT = 1 / b.tickHz;
+  const ticks = (s: GameState, sec: number, bb = P) => { for (let i = 0; i < Math.round(sec / DT); i++) s = step(s, DT, bb); return s; };
+  const RC2 = withFlags({ pause: 1, rc2Refill: 1 });
+  const three = (bb = P) => farm({ workers: { market_hand: W(60), coop_hand: W(60), hawker: W(60) } }, bb);
+  const boot = (bb: Balance, kv = mem(), t = 1_700_000_000_000) => new Game(bb, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
+  const lastEnd = (g: Game) => { const e = g.telemetry.events().filter(x => x.type === 'session_end'); return e[e.length - 1] as Record<string, unknown>; };
+  it('[PAU-AC8][QA-D-1110-PAUDUR] multi-worker overlap: one paused 10 s, then all three 5 s → paused_worker_s 25, all_paused_s 5', () => {
+    let s = pauseWorker(three(), 'market_hand', P); s = ticks(s, 10);
+    s = pauseWorker(pauseWorker(s, 'coop_hand', P), 'hawker', P); s = ticks(s, 5);
+    s = resumeWorker(s, 'coop_hand', P); s = ticks(s, 3); // 2 of 3 paused: sum +6, all +0
+    expect(pauseSessionEnd(s, P)).toEqual({ paused_worker_s: 31, all_paused_s: 5 });
+    s = resumeWorker(resumeWorker(s, 'market_hand', P), 'hawker', P); s = ticks(s, 4); // nobody paused: totals kept, unchanged
+    expect(pauseSessionEnd(s, P)).toEqual({ paused_worker_s: 31, all_paused_s: 5 });
+  });
+  it('[PAU-AC8][QA-D-1110-PAUDUR] integer floor >= 0, deterministic; no hire → all_paused_s 0; bad values read 0', () => {
+    let s = pauseWorker(farm({ workers: { hawker: W(60) } }), 'hawker', P);
+    expect(pauseSessionEnd(s, P)).toEqual({ paused_worker_s: 0, all_paused_s: 0 });
+    s = ticks(s, 1.0); expect(pauseSessionEnd(s, P)).toEqual({ paused_worker_s: 1, all_paused_s: 1 }); // 10 x 0.1 float drift
+    s = ticks(s, 0.9); expect(pauseSessionEnd(s, P)).toEqual({ paused_worker_s: 1, all_paused_s: 1 });
+    expect(pauseSessionEnd(ticks(pauseWorker(farm({ workers: { hawker: W(60) } }), 'hawker', P), 1.9), P)).toEqual(pauseSessionEnd(s, P));
+    expect(pauseSessionEnd(ticks(farm({ workers: {} }), 10), P)).toEqual({ paused_worker_s: 0, all_paused_s: 0 }); // nobody hired: nothing counted
+    for (const v of [NaN, -3, Infinity, '7', null]) {
+      const r = pauseSessionEnd({ ...s, pausedForS: { sumS: v as number, allS: v as number } }, P);
+      expect(r).toEqual({ paused_worker_s: 0, all_paused_s: 0 }); expect(Object.values(r).every(Number.isInteger)).toBe(true);
+    }
+  });
+  it('[PAU-AC8][TEL-AC14] flag off: both fields absent from session_end', () => {
+    const g = boot(OFF); g.state = farm({ workers: { hawker: W(60, { paused: true }) } }, OFF); g.debugAdvance(5_000); g.endSession();
+    const e = lastEnd(g); expect('paused_worker_s' in e).toBe(false); expect('all_paused_s' in e).toBe(false);
+    expect(pauseSessionEnd(g.state, OFF)).toEqual({});
+  });
+  it('[PAU-AC8][TEL-AC8] rc2Refill = 1 (pause = 1): both fields absent (paused time comes from rest_toggled pairs)', () => {
+    const g = boot(RC2); g.state = pauseWorker(farm({ workers: { hawker: W(60) }, tracksV7: 1 } as Partial<GameState>, RC2), 'hawker', RC2);
+    g.debugAdvance(5_000); g.endSession();
+    const e = lastEnd(g); expect('paused_worker_s' in e).toBe(false); expect('all_paused_s' in e).toBe(false);
+  });
+  it('[PAU-AC8][QA-D-1110-PAUDUR] session_end carries both fields and they pass the session_end schema (F(0) fields)', () => {
+    const g = boot(P); g.state = pauseWorker(farm({ workers: { hawker: W(60), grader: W(60) }, tracksV7: 1 } as Partial<GameState>), 'hawker', P);
+    g.debugAdvance(7_000); g.endSession();
+    const e = lastEnd(g);
+    expect(e).toMatchObject({ paused_worker_s: 7, all_paused_s: 0 });
+    // session_end's other required fields are not assembled at this tip (pre-existing, out of scope): judge only the pause fields.
+    expect(validateEvent(e as never).filter(m => /paused_worker_s|all_paused_s/.test(m))).toEqual([]);
+    for (const bad of [-1, NaN, 'x']) expect(validateEvent({ ...e, paused_worker_s: bad } as never).some(m => m.startsWith('session_end.paused_worker_s'))).toBe(true);
+  });
+  it('[PAU-AC8][QA-D-1110-PAUDUR] known limit: a reload resets both totals to load time; the save shape is unchanged', () => {
+    const kv = mem(); const g = boot(P, kv);
+    g.state = pauseWorker(farm({ workers: { hawker: W(60) }, tracksV7: 1 } as Partial<GameState>), 'hawker', P);
+    g.debugAdvance(20_000); expect(pauseSessionEnd(g.state, P)).toEqual({ paused_worker_s: 20, all_paused_s: 20 });
+    g.save(); expect('pausedForS' in JSON.parse(kv.getItem(SAVE_KEY)!).state).toBe(false);
+    const g2 = boot(P, kv); expect(pauseSessionEnd(g2.state, P)).toEqual({ paused_worker_s: 0, all_paused_s: 0 });
+    g2.debugAdvance(6_000); g2.endSession();
+    expect(lastEnd(g2)).toMatchObject({ paused_worker_s: 6, all_paused_s: 6 });
+  });
+});
+

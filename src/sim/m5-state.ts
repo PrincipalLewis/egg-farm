@@ -26,6 +26,8 @@ export interface GoldenEggOnScreen {
   intervalS: number;
 }
 
+/** Pause tracker (never saved): per-worker current-pause sim seconds + session totals sumS / allS (no WorkerId collision). */
+export type PauseTracker = Partial<Record<WorkerId, number>> & { sumS?: number; allS?: number };
 export interface M5Fields {
   // ---- #1 golden egg (saved, R10a) ----
   /** evRng position (uint32, non-zero). Seeded once per D-C2 (sim/rng.ts deriveEvRngState); never re-reads state.rng. */
@@ -61,7 +63,9 @@ export interface M5Fields {
   /** Sim seconds each currently paused worker has been paused (sim/pause.ts pausedDurationS; tick.ts accumulates while paused).
    *  Known limits: (1) never saved, so a reload restarts the count at load time; (2) only simulated time counts, so offline time
    *  and hidden gaps >= 60 s (the provisional hidden sim is discarded) are not counted. */
-  pausedForS?: Partial<Record<WorkerId, number>>;
+  /** + whole-session totals for session_end (pause §12 L299; HoE/saves-119-session-end): `sumS` = paused seconds summed over workers
+   *  (paused_worker_s), `allS` = seconds while every hired worker was paused (all_paused_s). Same never-saved key, same limits. */
+  pausedForS?: PauseTracker;
   // ---- #4 abilities (saved, abilities spec rule 1/3, E2) ----
   abilities?: Partial<Record<WorkerId, AbilityState>>;
   abilitiesUnlocked?: boolean;

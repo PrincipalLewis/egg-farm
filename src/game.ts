@@ -14,6 +14,7 @@ import { streakOn, streakPeak } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
+import { pauseSessionEnd } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -310,7 +311,11 @@ export class Game {
   endSession() {
     if (this.resetting || this.inactive || this.held()) return;
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    const pauseEnd = pauseSessionEnd(this.state, this.b); // pause §12 L299: paused_worker_s / all_paused_s; pause = 1 and rc2Refill = 0 only (Saves #119)
+    this.telemetry.track('session_end', {
+      ...pauseEnd,
+    });
+    this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)

@@ -33,16 +33,28 @@ export function pauseWorker(s: GameState, id: WorkerId, b: Balance): GameState {
  *  pauseWorker) reads 0, i.e. the count starts at load time. +EPS (1e-9) absorbs float drift from summing 0.1 s ticks.
  *  Known limits: a reload resets the count to load time; offline time and hidden gaps >= 60 s are not counted (sim seconds only).
  *  The one tracker for worker_resumed / rest_toggled{on:false}.paused_duration_s and session_end paused_worker_s / all_paused_s. */
-export function pausedDurationS(s: GameState, id: WorkerId): number {
-  const v = s.pausedForS?.[id];
-  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v + EPS) : 0;
-}
-/** tick.ts: add `dt` sim seconds for every paused worker. Flag off or nobody paused: the same object (no M5 field is created). */
+export function pausedDurationS(s: GameState, id: WorkerId): number { return floorS(s.pausedForS?.[id]); }
+/** Integer floor >= 0 of a tracker value; anything not a finite positive number reads 0 (QA-D-1110-PAUDUR). */
+const floorS = (v: unknown): number => typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v + EPS) : 0;
+/** tick.ts: add `dt` sim seconds for every paused worker, `dt` x (paused count) to sumS, and `dt` to allS while every hired worker
+ *  is paused (at least one hired). Flag off or nobody paused: the same object (no M5 field is created). */
 export function tickPausedFor(s: GameState, ws: Workers, dt: number, b: Balance): GameState['pausedForS'] {
   if (!flagOn(b, 'pause')) return s.pausedForS;
-  let out: GameState['pausedForS'];
-  for (const id of Object.keys(ws) as WorkerId[]) if (isPaused(ws[id], b)) { out ??= { ...s.pausedForS }; out[id] = (s.pausedForS?.[id] ?? 0) + dt; }
-  return out ?? s.pausedForS;
+  let out: GameState['pausedForS'], hired = 0, paused = 0;
+  for (const id of Object.keys(ws) as WorkerId[]) { if (!ws[id]) continue; hired++;
+    if (isPaused(ws[id], b)) { paused++; out ??= { ...s.pausedForS }; out[id] = (s.pausedForS?.[id] ?? 0) + dt; } }
+  if (!out) return s.pausedForS;
+  out.sumS = (s.pausedForS?.sumS ?? 0) + dt * paused;
+  if (paused === hired) out.allS = (s.pausedForS?.allS ?? 0) + dt;
+  return out;
+}
+/** session_end additions (pause §12 L299; gate e485f762 card #T TEL-AC8/TEL-AC14): `paused_worker_s` (sum of paused seconds over
+ *  workers) and `all_paused_s` (seconds while all hired workers were paused), integer floor >= 0, from the same never-saved tracker.
+ *  Present only with pause = 1 and rc2Refill = 0; otherwise {} (absent). Known limits: a reload resets both to load time; offline
+ *  time and hidden gaps >= 60 s are not counted (sim seconds only). Game.endSession spreads this into session_end. */
+export function pauseSessionEnd(s: GameState, b: Balance): { paused_worker_s?: number; all_paused_s?: number } {
+  if (!flagOn(b, 'pause') || flagOn(b, 'rc2Refill')) return {};
+  return { paused_worker_s: floorS(s.pausedForS?.sumS), all_paused_s: floorS(s.pausedForS?.allS) };
 }
 /** Resume. Market Hand (B5) starts callLockoutS at tc_pause_call_lockout_s (45 sim seconds), on a Manage resume too (HoE 00:16).
  *  Other workers get no lockout. THE one worker_resumed emitter (pause §12, rule 8): cause 'manual' (Resume) or 'manage'
