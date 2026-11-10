@@ -143,3 +143,8 @@
 - Commit 2: Away (BR-R13) in m4OfflineEggs + Broody bp_eff / broody_cap_bp=2000.
 - Commit 3: telemetry/v5-fields offlineGrantV5 real away_bp; grantOffline emits when breeds on incl. eggs=0.
 - Draft PR #125. Focused 138 pass + tsc. Row 32 only (not row 34 / not #119 paused_*).
+
+## 2026-11-10 01:11 CET · Saves · HoE/breeds-sim-prB-traits #125 Ready
+- Merged #126 c0 (`d4b5fdc`) into tip via ordinary merge `f97be20` (no rebase/force). Harden non-WIP: Present `683b5ef`, Away `c908227`, away_bp `e6bd1da`. Head `e6bd1da`.
+- Row 32 only; sessionEndPresentFields separate from gen/breeds-telemetry. Gates (flock+lane-run saves): tsc 0, sync-economy --check 0, focused 146 pass.
+- #126 body patched (trace/API/stack); #125 marked Ready once.
