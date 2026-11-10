@@ -11,7 +11,7 @@ API: `engineering/tasks/v5-f6-rebuild/API.md`, **DRAFT v0.2**. Consumers: Genera
   - `src/ui/features.ts`: empty list.
   - `src/ui/app.ts`: `import './features'`; FxBudget replaces the local `live[]` (same 30 cap, same recycling); `attDialogOpen` is shared by wireAttended and mountOverlay; one `mountOverlay(...)`; `overlay.render(t)` in renderAll.
 - Tests: new `tests/v5-f6-overlay.test.ts` (25), covering AC1/2/3/8/11/AC-SHEET via ctx, and AC12 flag-off/no-feature #app hash identity in mountApp.
-  - Updated guards: `tests/v5-p8-slim.test.ts` [RF-AC16] now allows exactly one mountOverlay fed by the same dialogOpen as wireAttended, and still forbids AudioHooks/registerFeature in app.ts. `tests/qa-rc1-bugs.test.ts` BUG-4/5 accepts the `fx.release(el); }, 1500)` form. **HoQA/Architect: please ack these two guard edits.**
+  - Updated guards: `tests/v5-p8-slim.test.ts` [RF-AC16] now allows exactly one mountOverlay fed by the same dialogOpen as wireAttended, and still forbids AudioHooks/registerFeature in app.ts. `tests/qa-rc1-bugs.test.ts` BUG-4/5 accepts the `fx.release(el); }, 1500)` form. **QA-D-1110-F6-GUARDS: HoQA SIGNED OFF (03:25 CET) with both tightenings applied:** (1) RF-AC16 also asserts `new FxBudget(` appears exactly once in app.ts (one shared budget); (2) BUG-4/5 fx branch tightened to `el\.remove\(\); fx\.release\(el\); \}, 1500\)`. Both files 72/72. The F6 QA bar can start once these are in; no separate QA re-look. Architect sign-off on the guard edits is still to be recorded.
 - Focused vitest (36 files that touch overlay/app/attended/golden-spots): 569/569. tsc 0.
 
 ## Next (phase 2, ~5 h)

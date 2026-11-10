@@ -119,6 +119,7 @@ describe('slim sheet attendance API (not real Shift integration)', () => {
     expect(app.match(/wireAttended\(g,/g)).toHaveLength(1);
     // HoE/v5-f6-rebuild: app.ts gains exactly one mountOverlay(...) fed by the SAME dialogOpen closure as wireAttended, and the shared FxBudget.
     expect(app.match(/mountOverlay\(\{/g)).toHaveLength(1); expect(app).toMatch(/wireAttended\(g, attDialogOpen\)/); expect(app).toMatch(/dialogOpen: attDialogOpen/);
+    expect(app.match(/new FxBudget\(/g)).toHaveLength(1); // QA-D-1110-F6-GUARDS (1): one FX budget, shared with overlay features
     expect(app).not.toMatch(/AudioHooks|registerFeature/);
     expect(app).toContain('data-testid="hens-pill"');
     expect(app).toContain('data-testid="docked-panel"');
