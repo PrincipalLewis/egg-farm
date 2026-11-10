@@ -76,7 +76,7 @@ export class ResortGate {
   sorted(t: number) { this.lastSort = t; }
 }
 
-/** Sheet CSS, injected only when the sheet mounts (rc2Refill = 1), so styles.css and the flag-0 build are untouched.
+/** Sheet CSS, injected on the first flag-on open (rc2Refill = 1), so styles.css and the flag-0 build are untouched.
  *  Sizes are Art's (§4, §8.3, §9, §16): 75% portrait sheet, 328/368 px content (16 px side padding), docked 400 px right column,
  *  Refill flex:1 1 0 / min-width 253 / 48 tall, Rest + ✕ 44×44, gap 8, Boost 44×44 in grid column 2 (column-gap 4). */
 export const SHIFT_CSS = `
@@ -132,7 +132,6 @@ interface RowEls { row: HTMLElement; head: HTMLElement; pill: HTMLElement; risk:
 export function mountShiftSheet(o: ShiftMountOpts): ShiftSheetHandle {
   const { doc, b, sim } = o, sheet = o.sheet ?? registerSheet('shift'), later = o.setTimeout ?? ((f, ms) => setTimeout(f, ms));
   const gate = new ResortGate();
-  if (!doc.getElementById('shift-sheet-css')) { const st = doc.createElement('style'); st.id = 'shift-sheet-css'; st.textContent = SHIFT_CSS; doc.head.append(st); }
   let el: HTMLElement | null = null, list: HTMLElement | null = null, opener: HTMLElement | null = null, ctx: RefillCtx | null = null;
   let closing = false, rows = new Map<WorkerId, RowEls>();
   const flag = (f: 'rc2Refill' | 'autoRefill' | 'abilities') => flagOn(b, f);
@@ -235,6 +234,7 @@ export function mountShiftSheet(o: ShiftMountOpts): ShiftSheetHandle {
       if (el && !closing) { opener = op; focusTarget(id); return; }
       if (closing) finishClose();
       opener = op;
+      if (!doc.getElementById('shift-sheet-css')) { const st = doc.createElement('style'); st.id = 'shift-sheet-css'; st.textContent = SHIFT_CSS; doc.head.append(st); } // first flag-on open only
       const stallId = entry === 'stall_chip' ? sim.stallId() ?? undefined : undefined; // §12 Q3: read StallView; never noteStallChipTap here
       const sheetId = sim.open(entry, stallId);
       ctx = stallId !== undefined ? { sheetId, entryPoint: entry, stallId } : { sheetId, entryPoint: entry }; // §12 Q2: one ctx until closeComplete

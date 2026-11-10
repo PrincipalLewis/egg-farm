@@ -235,8 +235,10 @@ describe('module hygiene', () => {
     for (const f of ['src/ui/shift-sheet.ts', 'src/ui/shift-adapter.ts']) {
       const src = fs.readFileSync(f, 'utf8'); expect(src).not.toMatch(/\bemit\(|telemetry\.[a-z]|logEvent|aria-label=/); }
   });
-  it('the CSS is injected once per document, only on mount', () => {
-    expect(document.getElementById('shift-sheet-css')).toBeNull(); mount(); mount(); expect(document.querySelectorAll('#shift-sheet-css')).toHaveLength(1);
+  it('the CSS is injected once per document, only on the first flag-on open (never at flag 0)', () => {
+    const off = mount(balance).h; off.open('market_hand', opener(), 'nav'); expect(document.getElementById('shift-sheet-css')).toBeNull();
+    const { h } = mount(); expect(document.getElementById('shift-sheet-css')).toBeNull();
+    rm = true; h.open(null, opener(), 'nav'); h.close(); h.open(null, opener(), 'nav'); expect(document.querySelectorAll('#shift-sheet-css')).toHaveLength(1);
   });
 });
 void vi; void ({} as ShiftSheetHandle);
