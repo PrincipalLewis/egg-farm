@@ -2,7 +2,9 @@
 // Builds the test-only harness page tests/fixtures/breeds-prB/harness (the REAL Game + mountApp → PR-A mountBreeds → PR-B
 // registry extender) with vite, serves it, and checks BR-AC52 / 52b / 52c (computed AX names via CDP), BR-AC23b DOM, BR-AC33/34
 // yard, and flag-off byte identity. The flag-on balance is an in-page overlay (tests/fixtures/breeds-prB-flag-on.json); this
-// script never writes src/config/balance.json. Usage: node scripts/breeds-ui-prB-browser.mjs  (SHOTS=dir, CHROME=path)
+// script never writes src/config/balance.json. Usage: node scripts/breeds-ui-prB-browser.mjs [chromium|firefox|webkit]  (SHOTS=dir, CHROME=path,
+// VW/VH viewport, default 360x640). AX names: Chromium = engine AX tree via CDP; Firefox/WebKit = Playwright accname (ariaSnapshot) +
+// aria-describedby text, because those engines expose no AX tree to Playwright.
 import pw from 'playwright-core'; import fs from 'node:fs'; import path from 'node:path'; import http from 'node:http'; import crypto from 'node:crypto';
 import { build } from 'vite';
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname), HARNESS = path.join(ROOT, 'tests/fixtures/breeds-prB/harness');
@@ -15,21 +17,27 @@ const srv = http.createServer((rq, rs) => { const u = decodeURIComponent(new URL
   rs.writeHead(200, { 'content-type': MIME[path.extname(f)] ?? 'application/octet-stream' }); fs.createReadStream(f).pipe(rs); });
 await new Promise(r => srv.listen(0, '127.0.0.1', r)); const BASE = `http://127.0.0.1:${srv.address().port}/`;
 fs.mkdirSync(SHOTS, { recursive: true });
-const br = await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
-let bad = 0; const ok = (n, p, i = {}) => { if (!p) bad++; console.log(`${p ? 'PASS' : 'FAIL'} [chromium] ${n} — ${JSON.stringify(i)}`); };
-const shots = []; const shot = async (p, f) => { const fp = path.join(SHOTS, f); await p.screenshot({ path: fp }); shots.push([f, crypto.createHash('sha256').update(fs.readFileSync(fp)).digest('hex')]); return f; };
+const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', VW = +(process.env.VW ?? 360), VH = +(process.env.VH ?? 640), VP = `${VW}x${VH}`;
+if (!['chromium', 'firefox', 'webkit'].includes(ENGINE)) { console.error(`unknown engine ${ENGINE}`); process.exit(2); }
+const br = ENGINE === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[ENGINE].launch();
+let bad = 0; const ok = (n, p, i = {}) => { if (!p) bad++; console.log(`${p ? 'PASS' : 'FAIL'} [${ENGINE} ${VP}] ${n} — ${JSON.stringify(i)}`); };
+const shots = []; const shot = async (p, f) => { f = f.replace('360x640', `${ENGINE}-${VP}`); const fp = path.join(SHOTS, f); await p.screenshot({ path: fp }); shots.push([f, crypto.createHash('sha256').update(fs.readFileSync(fp)).digest('hex')]); return f; };
 const errors = [];
 const leghorn312 = { owned: { leghorn: { stars: 1 } }, slots: ['leghorn', null, null], incubator: null, settleMs: [0, 0, 0], hatches: 1, pity: 0, rng: 1, freeHatchUsed: 1, flockCompleteLogged: 0 };
 const url = o => BASE + '?' + new URLSearchParams(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'object' ? JSON.stringify(v) : String(v)])));
 async function open(o, rm = false) {
-  const ctx = await br.newContext({ viewport: { width: 360, height: 640 }, reducedMotion: rm ? 'reduce' : 'no-preference' });
+  const ctx = await br.newContext({ viewport: { width: VW, height: VH }, reducedMotion: rm ? 'reduce' : 'no-preference' });
   const p = await ctx.newPage(); p.on('pageerror', e => errors.push(e.message));
   await p.clock.install({ time: new Date('2026-11-10T08:00:00Z') }); await p.clock.pauseAt(new Date('2026-11-10T08:00:01Z')); // no natural time flow: wall time = focus time (BR-AC52b)
   await p.goto(url(o)); await p.waitForFunction(() => window.__prB?.ready); await p.clock.runFor(200);
-  const cdp = await ctx.newCDPSession(p); return { ctx, p, cdp };
+  const cdp = ENGINE === 'chromium' ? await ctx.newCDPSession(p) : p; return { ctx, p, cdp };
 }
 /** Engine-computed name + description of the first node matching sel (Chromium AX tree via CDP). */
 async function ax(cdp, sel) {
+  if (ENGINE !== 'chromium') { const p = cdp, loc = p.locator(sel).first(); if (!(await loc.count())) return null;
+    const snap = (await loc.ariaSnapshot()).split('\n')[0]; const m = /^- (\w+)(?: "((?:[^"\\]|\\.)*)")?/.exec(snap) ?? [];
+    const desc = await loc.evaluate(e => (e.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).map(id => document.getElementById(id)?.textContent ?? '').join(' ').replace(/\s+/g, ' ').trim());
+    return { role: m[1], name: (m[2] ?? '').replace(/\\(.)/g, '$1'), desc, via: 'pw-accname' }; }
   const { root } = await cdp.send('DOM.getDocument', { depth: -1 }); const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: sel });
   if (!nodeId) return null; const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false });
   const n = nodes.find(x => !x.ignored) ?? nodes[0]; return { role: n.role?.value, name: n.name?.value, desc: n.description?.value ?? '' };
@@ -59,7 +67,7 @@ const CHIP = '[data-testid="breeds-hud-chip"]';
   await p.locator(CHIP).click(); await p.clock.runFor(50);
   const tip = await p.evaluate(() => { const t = document.querySelector('[data-testid="breeds-hud-tip"]'), h = document.querySelector('.hud').getBoundingClientRect(), r = t.getBoundingClientRect();
     return { shown: !t.hidden, text: t.textContent, top: r.top, hudBottom: h.bottom, right: r.right, pe: getComputedStyle(t).pointerEvents, ariaHidden: t.getAttribute('aria-hidden') }; });
-  ok('F1-4 tap shows tooltip at HUD bottom + 8, 1 line, inside 360 − 8, pointer-events none, aria-hidden', tip.shown && tip.text === 'Bonus returns when you tap slower' && Math.abs(tip.top - tip.hudBottom - 8) <= 1 && tip.right <= 352 && tip.pe === 'none' && tip.ariaHidden === 'true', tip);
+  ok('F1-4 tap shows tooltip at HUD bottom + 8, 1 line, inside viewport − 8, pointer-events none, aria-hidden', tip.shown && tip.text === 'Bonus returns when you tap slower' && Math.abs(tip.top - tip.hudBottom - 8) <= 1 && tip.right <= VW - 8 && tip.pe === 'none' && tip.ariaHidden === 'true', tip);
   await shot(p, 'flag1-chip-tooltip-360x640.png');
   await p.clock.runFor(1600); ok('F1-5 tooltip hides after 1.6 s', await p.evaluate(() => document.querySelector('[data-testid="breeds-hud-tip"]').hidden));
   await p.evaluate(() => window.__prB.force(false)); await p.clock.runFor(100);
