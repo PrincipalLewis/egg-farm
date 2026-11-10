@@ -1,6 +1,6 @@
 # Breeds UI PR-A — AC → test trace (Ready-candidate)
 
-**Head:** `9816b3ea8633b39b30bbd562b3635414c41f14e3` (9816b3e) · Ready-candidate
+**Head:** tip of `v5/breeds-ui-a` (see `git rev-parse`) · Ready-candidate (stub familyClamp; HoE B)
 **Files:** `tests/v5-breeds-ui.test.ts`, `tests/helpers/breeds-on.test.ts`, `tests/v5-breeds-qa-seam.test.ts`  
 **Fixture:** `tests/helpers/breeds-on.ts` — `balance.json` stays `breeds=0`.
 
@@ -34,7 +34,7 @@
 | BR-AC33–35 | `<img src>` sprites vendored | greyscale = Art review |
 | BR-AC52 / strip | **PR-B** | |
 | BR-AC23b/c | **PR-B** (#100) | |
-| E8 familyClamp | stub `undefined` (no label) | **Dep:** Saves `saves/breeds-sim-prB-traits` |
+| E8 familyClamp | stub `undefined` (no label) on Ready head | **Dep:** `#126` d4b5fdcd; bind on `v5/breeds-ui-a-clamp-bind` (not this head) |
 | D1–D6 drift | adapter null-safe | **Rebase** when drift lands on `rc/v5` |
 
 ## Deferred (not PR-A blockers)
