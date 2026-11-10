@@ -153,9 +153,9 @@ describe('session_end present_* (row 32 only)', () => {
     g.endSession();
     const end = tracks.find(t => t.type === 'session_end');
     expect(end?.fields).toMatchObject({ present_active_s: 1, present_lost_count: 2 });
-    // Must NOT invent other breeds session_end keys here (gen/breeds-telemetry owns those)
-    expect(end?.fields).not.toHaveProperty('breed_hatches');
-    expect(end?.fields).not.toHaveProperty('breed_present_eggs');
+    // After the #127 restack merge: gen/breeds-telemetry's breed_* keys sit beside present_* in the same session_end.
+    expect(end?.fields).toHaveProperty('breed_hatches');
+    expect(end?.fields).toHaveProperty('breed_present_eggs');
   });
 });
 
