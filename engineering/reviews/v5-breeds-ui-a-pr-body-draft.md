@@ -1,37 +1,32 @@
-# M5.1 Breeds UI PR-A (Flock entry / sheet / hatch / album / reveal) — DRAFT
+# M5.1 Breeds UI PR-A — Ready-candidate DRAFT
 
-**Branch:** `v5/breeds-ui-a` · **Base:** `rc/v5` @ `f20b9183`  
+**Branch:** `v5/breeds-ui-a` · **Base:** `rc/v5` @ `f20b9183` (rebase when breeds-drift lands)  
 **Worktree:** `worktrees/v5-breeds-ui-a`  
-**Spec:** `product/m5.1-breeds-spec.md` rev 3.8.9 `ea922eb8` · Checklist `product/collection/breeds-ui-build-checklist.md` `c9d8b631` · Art UI v0.2.7  
-**Seams:** `engineering/design/breeds-ui-seams.md` (sha256 `95f4589569f643c62e53bba3d15a54a7794df9a89364540ef2a148dede6a8539`)
+**Spec:** `product/m5.1-breeds-spec.md` rev 3.8.9 · Checklist `c9d8b631` · Art UI v0.2.7  
+**Seams:** `engineering/design/breeds-ui-seams.md`  
+**AC trace:** `engineering/reviews/v5-breeds-ui-a-ac-trace.md`
 
-## PR-B seam (HoE 2026-11-10)
+## Flag / QA (HoQA)
 
-- **No `app.ts` edit for PR-B.** `mountBreeds` (flag-on only) eager-loads `import.meta.glob('./breeds-ext-*.ts', { eager: true })` from `src/ui/`. Naming rule: `breeds-ext-*.ts`. Zero matches in PR-A — build stays green.
-- Ext ctx adds `openFlock()`, `incomeRate()` (¢/s), `reducedMotion`.
-- `presentMirror(bp, gateOpen)` lives in `breeds-adapter.ts` (used on Present slot cards).
-- **`familyClamp` stub:** `undefined` ⇒ no label. Real getter: Saves `saves/breeds-sim-prB-traits` (commit 0; ETA TBD) — named dependency.
-- Seams doc sha: see `engineering/design/breeds-ui-seams.md`.
+- Committed **`balance.json` stays `m4.flags.breeds = 0`**.
+- Vitest: `tests/helpers/breeds-on.ts` → `breedsOnBalance()` (only breeds=1; isolation assert).
+- QA boot: `?qaBreeds=1` under `IOS_FLAG_ENABLED` (DCE in release); `check-release-build` rejects `get("qaBreeds")`.
+- `eggfarmQa.breeds.hatchEstimate` unchanged (BR-AC31e).
 
-## Flag / QA boot (HoQA)
+## PR-B seam (HoE)
 
-- **Committed `balance.json` stays at `m4.flags.breeds = 0`.** No PR-A commit changes that file.
-- **Vitest:** `tests/helpers/breeds-on.ts` → `breedsOnBalance()` deep-clones the loaded balance and sets **only** `m4.flags.breeds = 1`, asserting the rest is deep-equal to the original. Breeds UI tests use this fixture (not a mutated singleton).
-- **QA web boot:** `?qaBreeds=1` (read inside `IOS_FLAG_ENABLED` / `__IOS_FLAG__` in `src/main.ts`) clones balance at boot and sets `m4.flags.breeds = 1` for that session. Dead-code-eliminated in production. `scripts/check-release-build.mjs` rejects the marker `get("qaBreeds")` (same family as `?debug` / `?perf` / `?ios`). Covered by `tests/v5-breeds-qa-seam.test.ts` (synthetic) and `tests/release-bundle.test.ts` (full vite qa vs production — run at Ready gates).
-- Existing **`eggfarmQa.breeds.hatchEstimate`** (`src/debug/breeds-qa.ts`) remains the BR-AC31e income override hook (also QA-only).
+- **No `app.ts` edit for PR-B.** Flag-on `mountBreeds` runs `import.meta.glob('./breeds-ext-*.ts', { eager: true })`.
+- Ext ctx: `openFlock()`, `incomeRate()` (¢/s), `reducedMotion`.
+- `presentMirror` in `breeds-adapter.ts` (Present slot cards).
+- **`familyClamp` stub:** `undefined` ⇒ no label. **Dependency:** Saves `saves/breeds-sim-prB-traits` (commit 0; ETA TBD).
 
-## Scope (PR-A)
+## Scope
 
-Flock entry + BR-AC3b highlight, sheet (phone menu / docked overlay), slots + settle, Hatch AC31/a/b, Farm-soon AC31c/e, album/incubator, reveal + RM + `pendingReveal`, adapter, 9 sprites, `mountBreeds` + `registerBreedsExt` for PR-B.
-
-**Out (PR-B Features):** Present chip, BB strip, yard, a11y polish beyond PR-A minimum.
-
-## AC → test trace
-
-See `engineering/reviews/v5-breeds-ui-a-ac-trace.md` (living table).
+PR-A: Flock entry + highlight, sheet, slots/settle, Hatch, Farm-soon, album, reveal+RM, adapter, 9 sprites, glob host.  
+Out → PR-B: Present chip, BB strip, yard.
 
 ## Gates
 
-Focused vitest while iterating. Full gate set once at Ready (D-CEO-20261110-02 / burn cut D-CEO-20261110-04).
+Focused vitest green while iterating. **Final gate set not run** — awaiting HoE Ready authorization (D-CEO-20261110-02 / burn cut).
 
-## Not pushed / no Ready until HoE says so
+## Not pushed

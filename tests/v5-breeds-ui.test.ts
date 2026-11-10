@@ -617,3 +617,113 @@ describe('PR-B seams: ext ctx + presentMirror + flag-0', () => {
     clearBreedsExtForTests();
   });
 });
+
+describe('BR-AC4 move + settle carry', () => {
+  it('placing an already-slotted breed moves it and keeps settleMs', async () => {
+    const b = breedsOn();
+    const br: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      owned: { leghorn: { stars: 0 }, sussex: { stars: 0 } },
+      slots: ['leghorn', null, null],
+      settleMs: [120_000, 0, 0],
+    };
+    const { g, ui } = await mount({ farmLevel: 14, coinsCents: 1e9, abilitiesCoachSeen: true, breeds: br }, b);
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    (document.querySelector('.album-cell.owned[data-breed="leghorn"]') as HTMLElement).click();
+    const empties = [...document.querySelectorAll('.slot.empty')] as HTMLElement[];
+    // slot 1 empty at F14
+    empties[0].click();
+    expect(g.state.breeds!.slots[0]).toBeNull();
+    expect(g.state.breeds!.slots[1]).toBe('leghorn');
+    expect(g.state.breeds!.settleMs[1]).toBe(120_000); // carry (E7)
+    expect(g.state.breeds!.settleMs[0]).toBe(0);
+  });
+});
+
+describe('BR-AC31 aria + incubating DOM', () => {
+  it('affordable Hatch aria-label uses fmtMoneyAria shape', async () => {
+    const { fmtMoneyAria } = await import('../src/ui/format');
+    const { hatchCostCents } = await import('../src/ui/breeds-adapter');
+    const b = breedsOn();
+    const br: BreedsSave = { ...emptyBr(), freeHatchUsed: 1 };
+    const { g, ui } = await mount({ farmLevel: 10, coinsCents: 1e12, abilitiesCoachSeen: true, breeds: br }, b);
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    const btn = document.querySelector('[data-testid="breeds-hatch"]') as HTMLButtonElement;
+    const cost = hatchCostCents(g.state, b);
+    expect(btn.getAttribute('aria-label')).toContain(fmtMoneyAria(cost));
+  });
+
+  it('incubating: silhouette + progressbar; Hatch aria-disabled', async () => {
+    const br: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      incubator: { breed: 'leghorn', remainingMs: 30_000, costCents: 0 },
+    };
+    const { ui } = await mount({ farmLevel: 10, coinsCents: 1e12, abilitiesCoachSeen: true, breeds: br }, breedsOn());
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    expect(document.querySelector('.incu-disc .breed-sil')).toBeTruthy();
+    expect(document.querySelector('.incu-meter[role="progressbar"]')).toBeTruthy();
+    expect(document.querySelector('[data-testid="breeds-hatch"]')!.getAttribute('aria-disabled')).toBe('true');
+  });
+});
+
+describe('Q7 / breedAsset / BR-AC49 docked attendance', () => {
+  it('Q7: missing freeHatchUsed → Hatch · Free (adapter !== 1)', () => {
+    const b = breedsOn();
+    const br = { ...emptyBr() }; delete (br as any).freeHatchUsed;
+    const s = { ...initialState(b), farmLevel: 10, coinsCents: 0, breeds: br as BreedsSave };
+    // freeHatchAvailable uses !== 1 so undefined counts as free
+    const u = hatchUi(s as any, b, br as BreedsSave);
+    expect(u.kind).toBe('free');
+  });
+
+  it('breedAsset maps id underscores to hyphens', async () => {
+    const { breedAsset } = await import('../src/ui/breeds-adapter');
+    expect(breedAsset('rhode_island_red')).toBe('char-breed-rhode-island-red.svg');
+    expect(breedAsset('ayam_cemani')).toBe('char-breed-ayam-cemani.svg');
+  });
+
+  it('BR-AC49: docked open does not throw; sheet visible; phone path opens too', async () => {
+    const { mountBreeds, clearBreedsExtForTests } = await import('../src/ui/breeds-mount');
+    clearBreedsExtForTests();
+    const b = breedsOn();
+    const kv = kvOf();
+    kv.setItem(SAVE_KEY, serialize({
+      ...initialState(b), farmLevel: 10, coinsCents: 1e9, abilitiesCoachSeen: true,
+      tracksV7: 1, seenTracksExplainer: true,
+    } as any, 1760000000000));
+    const g = new Game(b, kv, () => 1760000000500, undefined, 'dev', null, null, { idbBoot: 'absent', newId: id });
+    if (!('breeds' in g.state)) {
+      const { ensureBreeds } = await import('../src/sim/breeds');
+      g.state = ensureBreeds(g.state, b);
+    }
+    document.body.innerHTML = '<div id="uh"></div><div id="pl"></div>';
+    const h = mountBreeds({
+      g, b,
+      upHeader: document.getElementById('uh')!,
+      panelLayer: document.getElementById('pl')!,
+      docked: { matches: true },
+      closeOtherPanels() {}, openUpgrades() {}, sfx() {},
+      rm: () => false,
+      saveFlags() {}, getFlags: () => ({}), dirty() {},
+    })!;
+    h.syncEntry(g.state, {}, 1);
+    h.open();
+    expect(h.isOpen).toBe(true);
+    expect(document.getElementById('breeds-sheet')!.hidden).toBe(false);
+    h.close();
+    expect(h.isOpen).toBe(false);
+  });
+});
+
+describe('import.meta.glob breeds-ext (PR-A has zero matches)', () => {
+  it('eager glob for breeds-ext-*.ts yields empty module map in PR-A', () => {
+    const mods = import.meta.glob('../src/ui/breeds-ext-*.ts', { eager: true });
+    expect(Object.keys(mods).length).toBe(0);
+  });
+});
