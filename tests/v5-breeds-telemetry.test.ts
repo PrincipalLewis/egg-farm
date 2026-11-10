@@ -31,7 +31,7 @@ const ENV = { ts: 1_762_772_400_000, sid: 'a1b2c3', fgMs: 0 };
 const valid = (e: object) => validateEvent({ ...ENV, ...(e as { type: string }) });
 const ticks = (s: GameState, n: number, ev?: SimEvent[], bb = BR) => { for (let i = 0; i < n; i++) s = step(s, 0.1, bb, ev); return s; };
 const BREEDS_TYPES = ['hatch_started', 'breed_revealed', 'breed_slotted', 'flock_complete'];
-const only = (ev: readonly { type: string }[], t: string) => ev.filter(e => e.type === t);
+const only = (ev: readonly { type: string }[], t: string) => ev.filter(e => e.type === t) as any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 const boot = (bb: typeof b, kv: ReturnType<typeof mem>, t: number) => new Game(bb, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
 const saved = (s: GameState, at: number) => { const kv = mem(); kv.setItem(SAVE_KEY, serialize(s, at, 5)); return kv; };
 const END = { reason: 'unload', fg_ms: 600_000, taps_total: 300, taps_moved_eggs: 280, eggs_collected_manual: 900, coop_full_ms: 12_000, eggs_lost_while_full: 33.5, managed: true, farm_level: 12, collection_level: 5 };
