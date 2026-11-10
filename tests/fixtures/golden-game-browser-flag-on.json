@@ -1,0 +1,4 @@
+{
+  "_comment": "TEST-ONLY runtime overlay for scripts/golden-game-browser.mjs (#111 QA-D-1106-PR111-QUEUE / GOLDBAR). Applied in-page onto window.eggfarm.balance on the QA build. NEVER copy into src/config/balance.json (shipped golden stays 0).",
+  "m4": { "flags": { "golden": 1 } }
+}

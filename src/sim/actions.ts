@@ -18,7 +18,7 @@ export type Action =
   | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
-  | { type: 'spawnGolden'; spots: readonly string[] } | { type: 'tapGolden' }; // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' }; // v5 #1 golden (no-op unless m4.flags.golden)
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -84,7 +84,7 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
     case 'buyCollection': return buy(s, 'collection', b, ev);
     case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
-    case 'spawnGolden': return spawnGolden(s, a.spots, b, ev); // #1 R14/R15: the UI's live valid spot ids
+    case 'spawnGolden': return spawnGolden(s, a.spots, b, ev, a.layout === true); // #1 R14/R15: the UI's live valid spot ids
     case 'tapGolden': return tapGolden(s, b, ev); // #1 R19/R20 (not a credited tap, R25b)
     case 'markMilestones': { const add = a.ids.filter(id => !s.celebratedMilestones.includes(id)); return add.length ? { ...s, celebratedMilestones: [...s.celebratedMilestones, ...add] } : s; }
     case 'hire': {
