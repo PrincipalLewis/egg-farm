@@ -122,7 +122,7 @@ export function slotCardHtml(s: GameState, br: BreedsSave, b: Balance, slot: num
   const pct = mir ? mir.html : traitPctTrim(bp);
   const descAttr = mir ? ` aria-describedby="slot-desc-${slot}"` : '';
   const descNode = mir ? `<span id="slot-desc-${slot}" class="sr">${mir.description}</span>` : '';
-  // E8: familyClampState stub → undefined (no label). Bind follow-up delegates to sim familyClamp.
+  // E8: familyClampState delegates to the sim familyClamp (#126); "max" iff rawBp > clampedBp.
   const clamp = familyClampState(fam, s, b);
   const maxLab = clamp && clamp.rawBp > clamp.clampedBp ? 'max' : '';
   const maxSpan = maxLab ? `<span class="slot-max" data-testid="breeds-slot-max">${maxLab}</span>` : '';
@@ -137,14 +137,14 @@ export function slotCardHtml(s: GameState, br: BreedsSave, b: Balance, slot: num
 /** Trait % per Art §6: bp/100, ≤ 2 decimals, trailing zeros trimmed (312 → "+3.12%", 1500 → "+15%", 0 → "+0%"). */
 export const traitPctTrim = (bp: number) => `+${Number((bp / 100).toFixed(2))}%`;
 
-type ClampFn = (f: Family, br: BreedsSave, b: Balance, farmLevel: number) => FamilyClampState | undefined;
+type ClampFn = (f: Family, s: GameState, b: Balance) => FamilyClampState | undefined;
 const FAMS: readonly Family[] = ['present', 'away', 'broody'];
 const TOTAL_LABEL: Record<Family, string> = { present: 'Lay', away: 'Away', broody: 'Nest' };
 
 /**
  * Art §2 "Active totals" line (BR-UI-06/16): applied (clamped, settled-only) values per family, " (max)" when clamped (E8).
  * Nothing settled → "Active: none yet · a breed works once it has settled (5:00)".
- * `clamp` defaults to the adapter's familyClampState (stub → undefined ⇒ raw sum, no "(max)"; clamp-bind gives the real view).
+ * `clamp` defaults to the adapter's familyClampState (sim familyClamp view; undefined ⇒ raw sum, no "(max)").
  */
 export function activeTotalsText(s: GameState, b: Balance, br: BreedsSave, clamp: ClampFn = familyClampState): string {
   const open = openSlotCount(s, b);
@@ -157,8 +157,9 @@ export function activeTotalsText(s: GameState, b: Balance, br: BreedsSave, clamp
     raw[ROSTER[id][1]] += slotTraitBp(br, i, b);
   }
   if (settled === 0) return `Active: none yet · a breed works once it has settled (${fmtRemainMs(bc(b, 'settle_s') * 1000)})`;
+  const sv = s.breeds === br ? s : ({ ...s, breeds: br } as GameState);
   return 'Active: ' + FAMS.map(f => {
-    const c = clamp(f, br, b, s.farmLevel);
+    const c = clamp(f, sv, b);
     const v = c ? c.clampedBp : raw[f];
     const max = c && c.rawBp > c.clampedBp ? ' (max)' : '';
     return `${TOTAL_LABEL[f]} ${traitPctTrim(v)}${max}`;
