@@ -19,6 +19,7 @@ import { streakAfter, endStreak } from '../sim/streak';
 import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
 import { incomeRefOn, resetIncomeRef } from '../sim/income-ref';
 import { drawGap, goldenUnload } from '../sim/golden';
+import { clockWageLoad } from '../sim/clock-wage';
 export { streakAfter };
 export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
 /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
@@ -79,7 +80,7 @@ function endCalls(o: any, b: Balance, ev: SimEvent[]) {
 /** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
  *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
 export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): GameState {
-  if (!anyFlag(b) && !m5Flag(b, 'breeds')) return s; // breeds: its own early-out so the six-flag paths stay as they were
+  if (!anyFlag(b) && !m5Flag(b, 'breeds')) return clockWageLoad(s, b); // breeds: its own early-out so the six-flag paths stay as they were; clockWage S5 sanitiser (identity when off)
   const o: any = { ...m5Persist(s) }; // strip only: a stored countdown (including spawn-due 0) is not re-drawn on load
   const num = (k: string, hi: number) => { if (!(k in o)) return; if (!fin(o[k])) delete o[k]; else o[k] = clamp(o[k], 0, hi); };
   if (m5Flag(b, 'golden')) { num('nextSpawnRemainingS', tc(b, 'egg_gap_max_s')); num('frenzyRemainingS', tc(b, 'frenzy_s')); delete o.frenzyEndAt; } // v1.0 wall-clock name, replaced (R23)
@@ -97,7 +98,7 @@ export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): G
       endCalls(o, b, ev); }
   }
   if (m5Flag(b, 'pause') && o.workers && typeof o.workers === 'object') o.workers = pauseLoad(o.workers, o.farmLevel, b);
-  return sanitizeBreedsOnLoad(o, b, ev); // M5.1 breeds E10-E12 (identity unless m4.flags.breeds and `breeds` present)
+  return sanitizeBreedsOnLoad(clockWageLoad(o, b), b, ev); // S5: clockWageTipShown sanitiser (identity unless clockWage on). M5.1 breeds E10-E12 (identity unless m4.flags.breeds and `breeds` present)
 }
 /** CCR-F4, Pause spec v1.3.6 rule 1 / rule 7 (B5) / E9 / E12: a non-boolean `paused` is false (absent); below
  *  tc_pause_unlock_farm nothing is paused or locked; `callLockoutS` (Market Hand only, sim seconds, not a timestamp) is

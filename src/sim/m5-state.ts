@@ -63,10 +63,12 @@ export interface M5Fields {
   abilitiesCoachSeen?: boolean;
   // ---- M5.1 breeds (saved, breeds spec §6; sim/breeds.ts) ----
   breeds?: import('./breeds').BreedsSave;
+  // ---- v5 clockWage (saved, failure-cost v0.3.24 AC-FC11; S5, Saves-approved): the one-time yawn tip was shown in this save. Absent = not shown.
+  clockWageTipShown?: boolean;
 }
 
 /** Fields F2 persists (optional, absent = default). */
-export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'clockWageTipShown'] as const satisfies readonly (keyof M5Fields)[];
 /** Fields that live only for a page session: F2 strips them before serialize (specs: never saved). */
 export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const satisfies readonly (keyof M5Fields)[];
 export const M5_FIELDS: readonly (keyof M5Fields)[] = [...M5_SAVED_FIELDS, ...M5_SESSION_FIELDS];
