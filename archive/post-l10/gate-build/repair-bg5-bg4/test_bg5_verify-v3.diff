@@ -1,0 +1,157 @@
+--- v2/tests/test_bg5_verify.py
++++ v3/tests/test_bg5_verify.py
+@@ -14,6 +14,8 @@
+ sys.path[:0] = [T, os.path.join(T, 'tests')]
+ from fixtures import base_rows, to_csv, write, write_json, tmpdir
+ import csvcheck
++sys.path.insert(0, HERE)
++from decfix import Layout
+ 
+ HEX = '0123456789abcdef'
+ 
+@@ -30,11 +32,11 @@
+     def setUp(self):
+         self.d = tmpdir()
+         self.before = write(self.d, 'before.csv', to_csv(base_rows()))
+-        self.decisions = os.path.join(self.d, 'decisions.md')  # TEMP fixture only
++        self.lay = Layout(self.d)  # TEMP mirrored layout only (D-HOP-2026-11-10-06)
++        self.decisions = self.lay.list()
+ 
+     def write_decisions(self, text):
+-        open(self.decisions, 'w').write(text)
+-        return self.decisions
++        return self.lay.route(text)
+ 
+     def after_csv(self, rows):
+         return write(self.d, 'after.csv', to_csv(rows))
+@@ -44,7 +46,7 @@
+         for k in ('bc_listing', 'allow_families'):
+             if isinstance(kw.get(k), dict):
+                 kw[k] = write_json(self.d, k + '.json', kw[k])
+-        kw.setdefault('decisions_paths', [self.decisions])
++        kw.setdefault('decisions_paths', self.decisions)
+         return csvcheck.check(self.before, after, breeds=0, synthetic=True, **kw)
+ 
+     def bc_rows(self):
+@@ -69,11 +71,13 @@
+         after = self.after_csv(rows)
+         csv_sha = sha256_file(after)
+         # B4 run manifest artifact
++        harness = write(self.d, 'bot-m5.ts', '// synthetic harness\n')
+         manifest = {
+             'csv_sha256': csv_sha,
+             'seeds': [1, 200],
+             'config': 'CFG none',
+-            'harness_sha': 'a' * 64,
++            'harness_sha': sha256_file(harness),
++            'harness_path': harness,
+         }
+         man_path = write_json(self.d, 'b4-run-manifest.json', manifest)
+         man_sha = sha256_file(man_path)
+@@ -99,7 +103,7 @@
+         csv_sha = sha256_file(after)
+         self.write_decisions(f'## D-HOP-2099-01-01-01\n- sha256 `{csv_sha}`\n')
+         # cite only an 8-hex prefix of an id that does not fully match a heading? use free text that looks like prefix
+-        r = self.chk(rows, bc_listing=self.listing('D-HOP-2099', 'QA-D-2099'), decisions_paths=[self.decisions])
++        r = self.chk(rows, bc_listing=self.listing('D-HOP-2099', 'QA-D-2099'), decisions_paths=self.decisions)
+         self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+         self.assertIn('NOT VERIFIED', r['checks']['P5IB']['detail']['ref_verification'])
+ 
+@@ -117,7 +121,7 @@
+         )
+         r = csvcheck.check(self.before, after, breeds=0, synthetic=True,
+                            bc_listing=self.listing(qa_id, hop_id),  # wrong: approval=QA, b4=D-HOP
+-                           decisions_paths=[self.decisions])
++                           decisions_paths=self.decisions)
+         self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+ 
+     def test_hash_mismatch_not_verified(self):
+@@ -127,7 +131,7 @@
+         self.write_decisions(f'## D-HOP-2099-01-01-02\n- sha256 `{wrong}`\n## QA-D-2099-X\n- sha256 `{wrong}`\n')
+         r = csvcheck.check(self.before, after, breeds=0, synthetic=True,
+                            bc_listing=self.listing('D-HOP-2099-01-01-02', 'QA-D-2099-X'),
+-                           decisions_paths=[self.decisions])
++                           decisions_paths=self.decisions)
+         self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+ 
+     def test_entry_for_different_csv_not_verified(self):
+@@ -157,8 +161,10 @@
+         after = self.after_csv(rows)
+         csv_sha = sha256_file(after)
+         # manifest points at a different csv sha
++        harness = write(self.d, 'bot-m5.ts', '// synthetic harness\n')
+         man = write_json(self.d, 'man.json', {
+-            'csv_sha256': 'c' * 64, 'seeds': [1, 200], 'config': 'CFG none', 'harness_sha': 'd' * 64
++            'csv_sha256': 'c' * 64, 'seeds': [1, 200], 'config': 'CFG none', 'harness_sha': sha256_file(harness),
++            'harness_path': harness,
+         })
+         man_sha = sha256_file(man)
+         self.write_decisions(
+@@ -166,7 +172,7 @@
+         )
+         r = csvcheck.check(self.before, after, breeds=0, synthetic=True,
+                            bc_listing=self.listing('D-HOP-2099-01-01-06', f'QA-D-2099-Z path={man}'),
+-                           decisions_paths=[self.decisions])
++                           decisions_paths=self.decisions)
+         self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+ 
+ 
+@@ -178,7 +184,7 @@
+         after, hop_id, qa_id, man_path, csv_sha, man_sha = self.make_verified_pair(rows)
+         listing = self.listing(hop_id, f'{qa_id} path={man_path}')
+         r = csvcheck.check(self.before, after, breeds=0, synthetic=True,
+-                           bc_listing=listing, decisions_paths=[self.decisions])
++                           bc_listing=listing, decisions_paths=self.decisions)
+         self.assertEqual(r['checks']['P5IB']['verdict'], 'PASS', r['checks']['P5IB'])
+         self.assertIn('VERIFIED', r['checks']['P5IB']['detail']['ref_verification'])
+         self.assertNotIn('NOT VERIFIED', r['checks']['P5IB']['detail']['ref_verification'])
+@@ -187,25 +193,26 @@
+         rows = self.hens_rows()
+         after, hop_id, qa_id, man_path, csv_sha, man_sha = self.make_verified_pair(rows)
+         r = csvcheck.check(self.before, after, breeds=0, synthetic=True,
+-                           allow_families=self.allow(hop_id), decisions_paths=[self.decisions])
++                           allow_families=self.allow(hop_id), decisions_paths=self.decisions)
+         self.assertEqual(r['checks']['FAM']['verdict'], 'PASS', r['checks']['FAM'])
+         self.assertIn('VERIFIED', r['checks']['FAM']['detail']['ref_verification'])
+ 
+-    def test_real_decisions_paths_not_written_by_tests(self):
+-        """Guard: synthetic tests must not touch the real decisions files."""
+-        real = [
+-            '/workspace/egg-farm-studio/product/decisions.md',
+-            '/workspace/egg-farm-studio/decisions.md',
+-        ]
+-        before = {p: (os.path.getmtime(p), sha256_file(p)) for p in real if os.path.isfile(p)}
++    def test_synthetic_default_reads_no_live_decisions(self):
++        """D-3: synthetic mode with no decisions_paths must not read the default (live) decisions files. The defaults are
++        patched to a TEMP layout that WOULD verify; the result must still be NOT VERIFIED."""
+         rows = self.bc_rows()
+         after, hop_id, qa_id, man_path, csv_sha, man_sha = self.make_verified_pair(rows)
+-        csvcheck.check(self.before, after, breeds=0, synthetic=True,
+-                       bc_listing=self.listing(hop_id, f'{qa_id} path={man_path}'),
+-                       decisions_paths=[self.decisions])
+-        for p, (mt, h) in before.items():
+-            self.assertEqual(os.path.getmtime(p), mt)
+-            self.assertEqual(sha256_file(p), h)
++        saved = csvcheck._DEFAULT_DECISIONS
++        csvcheck._DEFAULT_DECISIONS = dict(self.lay.paths)
++        try:
++            r = csvcheck.check(self.before, after, breeds=0, synthetic=True,
++                               bc_listing=self.listing(hop_id, f'{qa_id} path={man_path}'))
++            r2 = csvcheck.check(self.before, after, breeds=0, synthetic=True,
++                                bc_listing=self.listing(hop_id, f'{qa_id} path={man_path}'), decisions_paths=self.decisions)
++        finally:
++            csvcheck._DEFAULT_DECISIONS = saved
++        self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET', r['checks']['P5IB'])
++        self.assertEqual(r2['checks']['P5IB']['verdict'], 'PASS', r2['checks']['P5IB'])
+ 
+ 
+ class TestVerifyUnit(VerifyBase):
+@@ -214,7 +221,7 @@
+     def test_verify_ref_helper_exists_and_rejects_empty(self):
+         self.assertTrue(hasattr(csvcheck, 'verify_ref'), 'csvcheck.verify_ref missing (v1)')
+         v, reason = csvcheck.verify_ref('', kind='bc_approval', artifact_path='/dev/null',
+-                                        decisions_paths=[self.write_decisions('')], candidate_sha='a'*64)
++                                        decisions_paths=self.write_decisions(''), candidate_sha='a'*64)
+         self.assertFalse(v)
+ 
+ 

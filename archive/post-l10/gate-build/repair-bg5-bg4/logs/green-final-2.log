@@ -1,0 +1,628 @@
+test_absent_and_measured_zero_get_different_verdicts (test_bg1.TestBG1.test_absent_and_measured_zero_get_different_verdicts) ... ok
+test_after_all_empty_maps_unassessed (test_bg1.TestBG1.test_after_all_empty_maps_unassessed) ... ok
+test_after_last_band_level_missing_unassessed (test_bg1.TestBG1.test_after_last_band_level_missing_unassessed) ... ok
+test_after_missing_in_one_profile_only_still_not_pass (test_bg1.TestBG1.test_after_missing_in_one_profile_only_still_not_pass) ... ok
+test_after_null_gap_is_not_a_measurement_fails (test_bg1.TestBG1.test_after_null_gap_is_not_a_measurement_fails) ... ok
+test_after_one_seed_empty_map_unassessed (test_bg1.TestBG1.test_after_one_seed_empty_map_unassessed) ... ok
+test_after_single_missing_cell_unassessed (test_bg1.TestBG1.test_after_single_missing_cell_unassessed) ... ok
+test_all_measured_zero_both_sides_passes_with_zero_gp95 (test_bg1.TestBG1.test_all_measured_zero_both_sides_passes_with_zero_gp95) ... ok
+test_before_absent_does_not_skip_after_cap_check (test_bg1.TestBG1.test_before_absent_does_not_skip_after_cap_check) ... ok
+test_before_all_empty_b_unassessed_a_measured (test_bg1.TestBG1.test_before_all_empty_b_unassessed_a_measured) ... ok
+test_before_single_missing_cell_b_unassessed (test_bg1.TestBG1.test_before_single_missing_cell_b_unassessed) ... ok
+test_both_sides_empty_and_both_partial (test_bg1.TestBG1.test_both_sides_empty_and_both_partial) ... ok
+test_explicit_measured_zero_cell_passes (test_bg1.TestBG1.test_explicit_measured_zero_cell_passes) ... ok
+test_missing_does_not_mask_measured_violation_into_pass (test_bg1.TestBG1.test_missing_does_not_mask_measured_violation_into_pass) ... ok
+test_no_substituted_zero_in_report (test_bg1.TestBG1.test_no_substituted_zero_in_report) ... ok
+test_partial_absence_reports_no_band_statistic_from_remaining_seeds (test_bg1.TestBG1.test_partial_absence_reports_no_band_statistic_from_remaining_seeds) ... ok
+test_any_ref_string_stays_conditional_unmet_and_not_pass (test_bg2.TestBG2.test_any_ref_string_stays_conditional_unmet_and_not_pass) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-09p53oo4/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-09p53oo4/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-09p53oo4/map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_breeds0_literal_unaffected_by_ref (test_bg2.TestBG2.test_breeds0_literal_unaffected_by_ref) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-3gl3u7kr/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_cli_with_ref_exits_1 (test_bg2.TestBG2.test_cli_with_ref_exits_1) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/tests/test_bg2.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_381o3uz/r.json' mode='r' encoding='UTF-8'>
+  self.assertEqual(json.load(open(os.path.join(self.d, 'r.json')))['checks']['CAP']['verdict'], 'CONDITIONAL-UNMET')
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_no_ref_conditional_unmet (test_bg2.TestBG2.test_no_ref_conditional_unmet) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-u7ldrn2k/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-u7ldrn2k/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-u7ldrn2k/map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_overall_aggregation_cannot_upgrade_conditional (test_bg2.TestBG2.test_overall_aggregation_cannot_upgrade_conditional) ... ok
+test_ref_recorded_only_as_documentary_metadata (test_bg2.TestBG2.test_ref_recorded_only_as_documentary_metadata) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1v76hy6d/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1v76hy6d/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1v76hy6d/map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_bad_allowlist_is_input_error (test_cli.TestCli.test_bad_allowlist_is_input_error) ... ok
+test_identical_synthetic_exit0_and_real_mode_exit1 (test_cli.TestCli.test_identical_synthetic_exit0_and_real_mode_exit1) ... ok
+test_missing_breeds_is_usage_error (test_cli.TestCli.test_missing_breeds_is_usage_error) ... ok
+test_breeds_mode_required (test_csvcheck.TestBaseline.test_breeds_mode_required) ... ok
+test_identical_breeds0_all_pass_but_no_ac_claim (test_csvcheck.TestBaseline.test_identical_breeds0_all_pass_but_no_ac_claim) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-gkbdzb66/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-gkbdzb66/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_non_synthetic_requires_a8c4_pinned_before (test_csvcheck.TestBaseline.test_non_synthetic_requires_a8c4_pinned_before) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-p1xy4b5d/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-p1xy4b5d/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_bc_listing_requires_approval_and_b4_refs (test_csvcheck.TestBc.test_bc_listing_requires_approval_and_b4_refs) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_5p4mea8/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_5p4mea8/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_5p4mea8/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_bc_value_mismatch_or_nonconstant_fails (test_csvcheck.TestBc.test_bc_value_mismatch_or_nonconstant_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-qij5n2wc/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-qij5n2wc/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-qij5n2wc/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_bc_without_listing_fails (test_csvcheck.TestBc.test_bc_without_listing_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-rviz04kg/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-rviz04kg/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_new_non_bc_column_late_only_is_unapproved_family (test_csvcheck.TestBc.test_new_non_bc_column_late_only_is_unapproved_family) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-cah_w6af/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-cah_w6af/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_new_non_bc_column_with_rows_0_10_values_fails (test_csvcheck.TestBc.test_new_non_bc_column_with_rows_0_10_values_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-6saf0vek/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-6saf0vek/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_eg9_hens_flat_fails (test_csvcheck.TestFarmAndEG9.test_eg9_hens_flat_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1kuo4ec1/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1kuo4ec1/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1kuo4ec1/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_p6c_is_report_only (test_csvcheck.TestFarmAndEG9.test_p6c_is_report_only) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-b5eeg74j/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-b5eeg74j/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_row30_changed_fails (test_csvcheck.TestFarmAndEG9.test_row30_changed_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-uimp5w5f/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-uimp5w5f/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_step_equal_100_fails_p6b_and_eg9 (test_csvcheck.TestFarmAndEG9.test_step_equal_100_fails_p6b_and_eg9) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-wf0zehp4/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-wf0zehp4/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_step_exactly_130_passes_and_above_fails (test_csvcheck.TestFarmAndEG9.test_step_exactly_130_passes_and_above_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-a_a4150w/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-a_a4150w/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_approved_rename_with_map_passes (test_csvcheck.TestRename.test_approved_rename_with_map_passes) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-a09_zmt9/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-a09_zmt9/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-a09_zmt9/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_missing_hoe_ref_fails (test_csvcheck.TestRename.test_missing_hoe_ref_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-v5i39wao/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-v5i39wao/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-v5i39wao/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_new_tc_combo_columns_without_map_fail_even_if_before_lacks_old (test_csvcheck.TestRename.test_new_tc_combo_columns_without_map_fail_even_if_before_lacks_old) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-a3d4rd8q/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-a3d4rd8q/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_no_rename_empty_map_passes (test_csvcheck.TestRename.test_no_rename_empty_map_passes) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-0625wvib/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-0625wvib/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-0625wvib/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_rename_without_map_fails (test_csvcheck.TestRename.test_rename_without_map_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-t_eev7mv/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-t_eev7mv/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_renamed_column_moved_fails (test_csvcheck.TestRename.test_renamed_column_moved_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jjtdc3lr/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jjtdc3lr/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jjtdc3lr/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_renamed_value_change_any_row_fails (test_csvcheck.TestRename.test_renamed_value_change_any_row_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-e1jx7rdz/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-e1jx7rdz/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-e1jx7rdz/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_stale_alias_alongside_new_fails (test_csvcheck.TestRename.test_stale_alias_alongside_new_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-x3l8krzh/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-x3l8krzh/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-x3l8krzh/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unapproved_extra_rename_fails (test_csvcheck.TestRename.test_unapproved_extra_rename_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-l26ef0qr/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-l26ef0qr/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-l26ef0qr/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_wrong_semantics_in_map_fails (test_csvcheck.TestRename.test_wrong_semantics_in_map_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-pykgp17g/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-pykgp17g/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-pykgp17g/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_missing_preexisting_column_fails (test_csvcheck.TestRows0to10.test_missing_preexisting_column_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-reyjm4w1/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-reyjm4w1/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_other_cell_change_rows_0_10_fails (test_csvcheck.TestRows0to10.test_other_cell_change_rows_0_10_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-csutgimc/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-csutgimc/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_breeds0_cap_027_on_rows_0_10_fails (test_csvcheck.TestStreakCap.test_breeds0_cap_027_on_rows_0_10_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-dm5ir_cs/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-dm5ir_cs/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-dm5ir_cs/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_breeds1_cap_027_with_b4_ref_stays_conditional (test_csvcheck.TestStreakCap.test_breeds1_cap_027_with_b4_ref_stays_conditional) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_d68ydvh/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_d68ydvh/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_d68ydvh/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_breeds1_cap_027_without_b4_is_conditional_unmet (test_csvcheck.TestStreakCap.test_breeds1_cap_027_without_b4_is_conditional_unmet) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-tohl_xnq/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-tohl_xnq/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-tohl_xnq/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_breeds1_cap_028_fails (test_csvcheck.TestStreakCap.test_breeds1_cap_028_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jyrggl97/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jyrggl97/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jyrggl97/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_breeds1_cap_string_variant_is_ambiguous_not_pass (test_csvcheck.TestStreakCap.test_breeds1_cap_string_variant_is_ambiguous_not_pass) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-65axugu5/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-65axugu5/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-65axugu5/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_cap_not_constant_on_rows_11_30_fails (test_csvcheck.TestStreakCap.test_cap_not_constant_on_rows_11_30_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-pjyodulo/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-pjyodulo/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-pjyodulo/rename_map.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_runtime_note_present (test_csvcheck.TestStreakCap.test_runtime_note_present) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-3i08d3l0/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-3i08d3l0/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_crlf_fails (test_csvcheck.TestStructural.test_crlf_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jxi7v_lr/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-jxi7v_lr/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_duplicate_header_fails (test_csvcheck.TestStructural.test_duplicate_header_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-olhi801f/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-olhi801f/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_missing_level_row_fails (test_csvcheck.TestStructural.test_missing_level_row_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-97npuwpo/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-97npuwpo/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_missing_trailing_newline_fails (test_csvcheck.TestStructural.test_missing_trailing_newline_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-fi6xp6pf/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-fi6xp6pf/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_nonfinite_and_malformed_cells_fail (test_csvcheck.TestStructural.test_nonfinite_and_malformed_cells_fail) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-0r6wt4as/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-0r6wt4as/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_row_l31_fails_p6d (test_csvcheck.TestStructural.test_row_l31_fails_p6d) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-4kkv4qzy/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-4kkv4qzy/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_allowlist_cannot_open_rows_0_10_or_w4 (test_csvcheck.TestW4AndFamilies.test_allowlist_cannot_open_rows_0_10_or_w4) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1x1es7zu/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_allowlist_needs_authority_ref (test_csvcheck.TestW4AndFamilies.test_allowlist_needs_authority_ref) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-gaoz0my4/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-gaoz0my4/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-gaoz0my4/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_farm_change_rows_11_29_in_envelope_is_in_scope (test_csvcheck.TestW4AndFamilies.test_farm_change_rows_11_29_in_envelope_is_in_scope) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-muma2kuy/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-muma2kuy/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_hens_change_without_allowlist_fails_closed (test_csvcheck.TestW4AndFamilies.test_hens_change_without_allowlist_fails_closed) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-ivfr3s6m/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-ivfr3s6m/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_w4_late_change_fails (test_csvcheck.TestW4AndFamilies.test_w4_late_change_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_dvjamof/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-_dvjamof/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_w4_mid_change_fails_closed (test_csvcheck.TestW4AndFamilies.test_w4_mid_change_fails_closed) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1hu792qb/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-1hu792qb/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_180_boundary (test_raws.TestBandguard.test_180_boundary) ... ok
+test_any_increase_fails_b (test_raws.TestBandguard.test_any_increase_fails_b) ... ok
+test_identical_passes_a_b_and_reports_c (test_raws.TestBandguard.test_identical_passes_a_b_and_reports_c) ... ok
+test_missing_gap_key_is_unassessed_not_zero (test_raws.TestBandguard.test_missing_gap_key_is_unassessed_not_zero) ... ok
+test_negative_or_nonfinite_gap_fails (test_raws.TestBandguard.test_negative_or_nonfinite_gap_fails) ... ok
+test_non_synthetic_cross_checks_card_before (test_raws.TestBandguard.test_non_synthetic_cross_checks_card_before) ... ok
+test_json_nan_rejected (test_raws.TestCommon.test_json_nan_rejected) ... ok
+test_nearest_rank (test_raws.TestCommon.test_nearest_rank) ... ok
+test_bad_provenance_fails (test_raws.TestReachdiff.test_bad_provenance_fails) ... ok
+test_diff_at_l11_is_out_of_scope (test_raws.TestReachdiff.test_diff_at_l11_is_out_of_scope) ... ok
+test_duplicate_seed_fails (test_raws.TestReachdiff.test_duplicate_seed_fails) ... ok
+test_identical_pass_but_not_run_of_record (test_raws.TestReachdiff.test_identical_pass_but_not_run_of_record) ... ok
+test_missing_profile_fails (test_raws.TestReachdiff.test_missing_profile_fails) ... ok
+test_missing_reach10_fails (test_raws.TestReachdiff.test_missing_reach10_fails) ... ok
+test_missing_seed_fails (test_raws.TestReachdiff.test_missing_seed_fails) ... ok
+test_nan_in_reach_fails (test_raws.TestReachdiff.test_nan_in_reach_fails) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/tests/test_raws.py:100: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-rdhang75/a-optimal.json' mode='r' encoding='UTF-8'>
+  a = make(self.d, 'a'); txt = open(a[0]).read().replace('"5": ', '"5": NaN, "x5": ', 1)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/tests/test_raws.py:101: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-rdhang75/a-optimal.json' mode='w' encoding='UTF-8'>
+  open(a[0], 'w').write(txt)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_non_synthetic_requires_pinned_before_sha (test_raws.TestReachdiff.test_non_synthetic_requires_pinned_before_sha) ... ok
+test_profile_in_two_files_fails (test_raws.TestReachdiff.test_profile_in_two_files_fails) ... ok
+test_reach_diff_at_l7_fails_with_identity (test_raws.TestReachdiff.test_reach_diff_at_l7_fails_with_identity) ... ok
+test_missing_reach30_fails (test_raws.TestTailstats.test_missing_reach30_fails) ... ok
+test_pl_ac3_boundary_exact_minus_10_passes (test_raws.TestTailstats.test_pl_ac3_boundary_exact_minus_10_passes) ... ok
+test_pl_ac3_reports_p10_p50_p90 (test_raws.TestTailstats.test_pl_ac3_reports_p10_p50_p90) ... ok
+test_pl_ac7_rounding_disagreement_is_ambiguous (test_raws.TestTailstats.test_pl_ac7_rounding_disagreement_is_ambiguous) ... ok
+test_pl_ac7_without_before_raws_is_unassessed (test_raws.TestTailstats.test_pl_ac7_without_before_raws_is_unassessed) ... ok
+test_refs_override_forbidden_outside_synthetic (test_raws.TestTailstats.test_refs_override_forbidden_outside_synthetic) ... ok
+test_tail_ratio_report_only (test_raws.TestTailstats.test_tail_ratio_report_only) ... ok
+test_after_truncated_before_cut_fails (test_trace10cmp.T.test_after_truncated_before_cut_fails) ... ok
+test_balance_diff_only_allowed_keys (test_trace10cmp.T.test_balance_diff_only_allowed_keys) ... ok
+test_buy_divergence_reports_stream_buy_and_identity (test_trace10cmp.T.test_buy_divergence_reports_stream_buy_and_identity) ... ok
+test_divergence_after_reach10_tick_ignored (test_trace10cmp.T.test_divergence_after_reach10_tick_ignored) ... ok
+test_divergence_on_reach10_tick_same_tick_later_event_fails_inclusive (test_trace10cmp.T.test_divergence_on_reach10_tick_same_tick_later_event_fails_inclusive) ... ok
+test_events_without_manifest_fail (test_trace10cmp.T.test_events_without_manifest_fail) ... ok
+test_extra_event_in_after_before_cut_fails (test_trace10cmp.T.test_extra_event_in_after_before_cut_fails) ... ok
+test_identical_pass_comparator_only (test_trace10cmp.T.test_identical_pass_comparator_only) ... ok
+test_malformed_nonfinite_and_decreasing_tick_fail (test_trace10cmp.T.test_malformed_nonfinite_and_decreasing_tick_fail) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/tests/test_trace10cmp.py:125: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-57cic0pv/am' mode='a' encoding='UTF-8'>
+  a = build(self.d, 'am'); open(a, 'a').write(bad + '\n')
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_manifest_flags_off_and_runtime_stack_equal (test_trace10cmp.T.test_manifest_flags_off_and_runtime_stack_equal) ... ok
+test_missing_and_duplicate_identity_fail (test_trace10cmp.T.test_missing_and_duplicate_identity_fail) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/tests/test_trace10cmp.py:114: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-hl3ht2es/a2' mode='r' encoding='UTF-8'>
+  a = build(self.d, 'a2'); txt = open(a).read(); first = txt.splitlines()[0]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/tests/test_trace10cmp.py:115: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-hl3ht2es/a2' mode='w' encoding='UTF-8'>
+  open(a, 'w').write(txt + first + '\n')
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_no_reach10_in_before_fails (test_trace10cmp.T.test_no_reach10_in_before_fails) ... ok
+test_state_and_rng_streams (test_trace10cmp.T.test_state_and_rng_streams) ... ok
+test_synthetic_producer_rejected_in_non_synthetic_mode (test_trace10cmp.T.test_synthetic_producer_rejected_in_non_synthetic_mode) ... ok
+test_tick_divergence (test_trace10cmp.T.test_tick_divergence) ... ok
+
+----------------------------------------------------------------------
+Ran 110 tests in 0.687s
+
+OK
+test_cli_allowlisted_change_exits_1 (test_bg5.TestBG5_CLI.test_cli_allowlisted_change_exits_1) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-8fh37s1k/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:128: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-8fh37s1k/r.json' mode='r' encoding='UTF-8'>
+  self.assertEqual(json.load(open(out))['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-igllso9q/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-igllso9q/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-igllso9q/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-igllso9q/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_hash_matching_existing_file_ref_still_conditional (test_bg5.TestBG5_P5IB.test_hash_matching_existing_file_ref_still_conditional) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-t_r7afo9/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-t_r7afo9/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-t_r7afo9/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-t_r7afo9/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_no_bc_columns_unaffected (test_bg5.TestBG5_P5IB.test_no_bc_columns_unaffected) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-v4e3w855/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-v4e3w855/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-v4e3w855/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_refs_recorded_as_unverified_metadata (test_bg5.TestBG5_P5IB.test_refs_recorded_as_unverified_metadata) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-ybuc0p09/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-ybuc0p09/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-ybuc0p09/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-ybuc0p09/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_structural_errors_still_fail (test_bg5.TestBG5_P5IB.test_structural_errors_still_fail) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-qs5kr3kc/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-qs5kr3kc/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-qs5kr3kc/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-qs5kr3kc/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_authority_recorded_as_unverified_metadata (test_bg5.TestBG5b_FAM.test_authority_recorded_as_unverified_metadata) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o0ouvb0_/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o0ouvb0_/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o0ouvb0_/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o0ouvb0_/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_farm_envelope_change_needs_no_allowlist (test_bg5.TestBG5b_FAM.test_farm_envelope_change_needs_no_allowlist) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-q2mzucha/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-q2mzucha/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-q2mzucha/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_hash_matching_existing_file_authority_still_conditional (test_bg5.TestBG5b_FAM.test_hash_matching_existing_file_authority_still_conditional) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o24yo6nn/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o24yo6nn/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o24yo6nn/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-o24yo6nn/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_invalid_allowlist_still_input_error (test_bg5.TestBG5b_FAM.test_invalid_allowlist_still_input_error) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-gag7ma01/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-gag7ma01/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-kmd7et4z/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-kmd7et4z/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-kmd7et4z/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-kmd7et4z/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unapproved_change_still_fails_even_with_allowlist (test_bg5.TestBG5b_FAM.test_unapproved_change_still_fails_even_with_allowlist) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-2v196gxe/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-2v196gxe/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-2v196gxe/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-2v196gxe/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unused_allowlist_does_not_change_verdict (test_bg5.TestBG5b_FAM.test_unused_allowlist_does_not_change_verdict) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-dy6i2dfk/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:61: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-dy6i2dfk/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-dy6i2dfk/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py:23: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/.tmp/synth-dy6i2dfk/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.069s
+
+OK

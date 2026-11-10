@@ -1,0 +1,2 @@
+{"name": "option (a) D-HOP-2026-11-09-05", "lo_exclusive": "1.00", "cap": "1.30", "steps": [11, 29],
+ "anchors": {"10": "1368", "30": "624316"}, "sawtooth_range": [11, 29], "sawtooth_threshold": "0.05"}

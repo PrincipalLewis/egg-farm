@@ -1,0 +1,383 @@
+--- v3/tests/test_bg5_v3.py
++++ v3.1/tests/test_bg5_v3.py
+@@ -1,8 +1,9 @@
+ """BG5/BG5b v3 regression: HoQA review QA-D-1110-BG54CERT (D-1/D-2/D-3, probes P01-P23, F01-F04) and the file-authority rule
+-D-HOP-2026-11-10-06. SYNTHETIC TEMP fixtures only, laid out to mirror the live decisions paths (see decfix.py); no live reads.
++D-HOP-2026-11-10-06 as amended by D-HOP-2026-11-10-10 (v3.1). SYNTHETIC TEMP fixtures only, laid out to mirror the live
++decisions paths EXACTLY (see decfix.py); no live reads. Ref failures read FAIL; B4 without an R-1 harness pin reads UNPINNED.
+ Rule: a ref verifies only if its ID is the exact leading token of exactly one level-2 `##` heading outside code fences, in its
+ own authority file (D-HOP -> product/decisions.md, QA-D -> qa/decisions.md, D-CEO -> root, D-HOE -> engineering,
+-D-PMW -> product/workers); the entry body holds the full 64-hex sha256 of the on-disk artifact; the B4 manifest has csv sha ==
++D-PMW/D-COL/D-ECON/D-PMFU/D-PMM -> product/decisions.md); the entry body holds the full 64-hex sha256 of the on-disk artifact; the B4 manifest has csv sha ==
+ candidate, non-empty seeds, config, and a harness sha that matches the harness file on disk. Anything else -> NOT PASS."""
+ import hashlib, json, os, sys, unittest
+ HERE = os.path.dirname(os.path.abspath(__file__))
+@@ -43,26 +44,31 @@
+                 m[k] = v
+         return write_json(self.d, name, m)
+ 
+-    def files(self, product='', qa='', root='', engineering='', workers=''):
+-        for role, text in (('product', product), ('qa', qa), ('root', root), ('engineering', engineering), ('workers', workers)):
++    def files(self, product='', qa='', root='', engineering=''):
++        for role, text in (('product', product), ('qa', qa), ('root', root), ('engineering', engineering)):
+             self.lay.put(role, text)
+-        return self.lay.list()
++        return self.lay.root
+ 
+     def good(self, man_sha=None):
+         return self.files(product=f'## {H} · HoP approval\n- candidate `{self.C}`\n',
+                           qa=f'## {Q} · QA B4 run\n- manifest `{man_sha or self.M}`\n')
+ 
+-    def p5(self, a=H, b=None, paths=None):
++    def _src(self, root, legacy):
++        return {'decisions_paths': legacy} if legacy is not None else {'decisions_root': self.lay.root if root is None else root}
++
++    def p5(self, a=H, b=None, root=None, legacy=None, pin=True, full=False):
++        """pin=True -> harness_pin = the synthetic harness sha (pinned match); pin=None -> unpinned; else the given pin."""
+         b = f'{Q} path={self.man}' if b is None else b
+         lst = write_json(self.d, 'l.json', {'columns': {'bc_broody_cap_bp': {'value': '700', 'approval_ref': a, 'b4_run_ref': b}}})
+         r = csvcheck.check(self.before, self.after, breeds=0, synthetic=True, bc_listing=lst,
+-                           decisions_paths=self.lay.list() if paths is None else paths)
++                           harness_pin=self.HS if pin is True else pin, **self._src(root, legacy))
++        if full:
++            return r
+         return r['checks']['P5IB']['verdict'], r['checks']['P5IB']['detail'].get('verify_reasons')
+ 
+-    def fam(self, auth=H, paths=None):
++    def fam(self, auth=H, root=None, legacy=None):
+         al = write_json(self.d, 'al.json', {'families': [{'column': 'hens_cost', 'rows': [14, 29], 'authority': auth}]})
+-        r = csvcheck.check(self.before, self.hafter, breeds=0, synthetic=True, allow_families=al,
+-                           decisions_paths=self.lay.list() if paths is None else paths)
++        r = csvcheck.check(self.before, self.hafter, breeds=0, synthetic=True, allow_families=al, **self._src(root, legacy))
+         return r['checks']['FAM']['verdict'], r['checks']['FAM']['detail'].get('verify_reasons')
+ 
+     def assertPass(self, res):
+@@ -70,7 +76,7 @@
+ 
+     def assertNotPass(self, res):
+         self.assertNotEqual(res[0], 'PASS', res)
+-        self.assertEqual(res[0], 'CONDITIONAL-UNMET', res)
++        self.assertEqual(res[0], 'FAIL', res)  # D-HOP-2026-11-10-10 (1): ref failures read FAIL
+ 
+ 
+ class TestQAProbes(Base):
+@@ -191,8 +197,9 @@
+     def test_dhop_defined_in_engineering_file_not_verified(self):
+         self.files(engineering=f'## {H}\n- `{self.HC}`\n'); self.assertNotPass(self.fam())
+ 
+-    def test_dhop_defined_in_workers_file_not_verified(self):
+-        self.files(workers=f'## {H}\n- `{self.HC}`\n'); self.assertNotPass(self.fam())
++    def test_dhop_defined_in_product_workers_file_not_verified(self):
++        """-10 (2) removes -06's product/workers mapping: that path never counts."""
++        self.files(); self.lay.put_rel('product/workers/decisions.md', f'## {H}\n- `{self.HC}`\n'); self.assertNotPass(self.fam())
+ 
+     def test_qad_defined_in_root_file_not_verified(self):
+         self.files(product=f'## {H}\n- `{self.C}`\n', root=f'## {Q}\n- `{self.M}`\n'); self.assertNotPass(self.p5())
+@@ -207,23 +214,34 @@
+         self.files(product=f'## {Q}\n- candidate `{self.C}`\n', qa=f'## QA-D-2099-B4RUN2\n- `{self.M}`\n')
+         self.assertNotPass(self.p5(Q, f'QA-D-2099-B4RUN2 path={self.man}'))
+ 
++    def test_qad_in_qa_file_as_approval_ref(self):
++        """approval_ref citing a genuine QA-D entry (own file, candidate sha in body) is still not a D-HOP approval."""
++        self.files(qa=f'## {Q}\n- candidate `{self.C}`; manifest `{self.M}`\n')
++        self.assertNotPass(self.p5(Q))
++
++    def test_dhop_in_product_file_as_b4_ref(self):
++        """b4_run_ref citing a genuine D-HOP entry (own file, manifest sha in body) is still not a QA-D B4 run."""
++        self.files(product=f'## {H}\n- candidate `{self.C}`; manifest `{self.M}`\n')
++        self.assertNotPass(self.p5(H, f'{H} path={self.man}'))
++
+     def test_dhop_id_as_b4_defined_in_qa_file(self):
+         """Family check: b4_run_ref must cite a QA-D ID even if a `## D-HOP-…` heading sits in qa/decisions.md."""
+         self.files(product=f'## {H}\n- candidate `{self.C}`\n', qa=f'## D-HOP-2099-01-01-88\n- manifest `{self.M}`\n')
+         self.assertNotPass(self.p5(H, f'D-HOP-2099-01-01-88 path={self.man}'))
+ 
+-    def test_single_unclassified_file_fails_closed(self):
+-        """A bare <tmp>/decisions.md (HoQA probe layout) is the ROOT file: D-HOP/QA-D defined there never verify."""
++    def test_legacy_file_list_fails_closed(self):
++        """-10 (2): no path-classification leniency. A list of files (HoQA probe layout) is not an exact-path layout -> FAIL."""
+         single = write(self.d, 'decisions.md', f'## {H}\n- `{self.C}`\n\n## {Q}\n- `{self.M}`\n')
+-        self.assertNotPass(self.p5(paths=[single]))
++        self.assertNotPass(self.p5(legacy=[single]))
++        self.good()
++        self.assertNotPass(self.p5(legacy=[self.lay.paths['product'], self.lay.paths['qa']]))
+ 
+-    def test_dict_paths_by_role_pass(self):
+-        self.good(); self.assertPass(self.p5(paths=dict(self.lay.paths)))
++    def test_legacy_role_dict_fails_closed(self):
++        self.good(); self.assertNotPass(self.p5(legacy=dict(self.lay.paths)))
+ 
+-    def test_dict_paths_wrong_role_mapping_not_verified(self):
+-        self.good()
+-        swapped = dict(self.lay.paths); swapped['product'], swapped['qa'] = swapped['qa'], swapped['product']
+-        self.assertNotPass(self.p5(paths=swapped))
++    def test_root_pointing_at_product_dir_fails(self):
++        """decisions_root must be the studio root: pointing it at product/ makes product/decisions.md the ROOT file."""
++        self.good(); self.assertNotPass(self.p5(root=os.path.join(self.lay.root, 'product')))
+ 
+     def test_duplicate_heading_same_file_not_verified(self):
+         self.files(product=f'## {H} · first\n- `{self.C}`\n\n## {H} · second\n- `{self.C}`\n', qa=f'## {Q}\n- `{self.M}`\n')
+@@ -377,24 +395,250 @@
+ 
+     def test_synthetic_default_is_empty(self):
+         self.good()
+-        saved = csvcheck._DEFAULT_DECISIONS
+-        csvcheck._DEFAULT_DECISIONS = dict(self.lay.paths)  # TEMP layout that would verify
++        saved = csvcheck._DEFAULT_DECISIONS_ROOT
++        csvcheck._DEFAULT_DECISIONS_ROOT = self.lay.root  # TEMP layout that would verify
+         try:
+             lst = write_json(self.d, 'l.json', {'columns': {'bc_broody_cap_bp': {'value': '700', 'approval_ref': H,
+                                                                                  'b4_run_ref': f'{Q} path={self.man}'}}})
+-            r = csvcheck.check(self.before, self.after, breeds=0, synthetic=True, bc_listing=lst)
++            r = csvcheck.check(self.before, self.after, breeds=0, synthetic=True, bc_listing=lst, harness_pin=self.HS)
++        finally:
++            csvcheck._DEFAULT_DECISIONS_ROOT = saved
++        self.assertEqual(r['checks']['P5IB']['verdict'], 'FAIL')
++
++    def test_default_layout_is_exact_authority_table(self):
++        """D-HOP-2026-11-10-10 (2): exact relative paths under the studio root."""
++        self.assertEqual(csvcheck._DEFAULT_DECISIONS_ROOT, '/workspace/egg-farm-studio')
++        self.assertEqual(csvcheck._AUTHORITY_FILE, {
++            'D-CEO': 'decisions.md', 'D-HOE': 'engineering/decisions.md', 'QA-D': 'qa/decisions.md',
++            'D-HOP': 'product/decisions.md', 'D-PMW': 'product/decisions.md', 'D-COL': 'product/decisions.md',
++            'D-ECON': 'product/decisions.md', 'D-PMFU': 'product/decisions.md', 'D-PMM': 'product/decisions.md'})
++        self.assertIsNone(csvcheck.R1_HARNESS_PIN)
++
++
++class TestV31Authority(Base):
++    """D-HOP-2026-11-10-10 (2): authority table by EXACT path; resolve_entry is the shared resolver behind verify_ref."""
++
++    def res(self, eid):
++        return csvcheck.resolve_entry(eid, self.lay.root)
++
++    def test_evidence_copy_spoof_dhoe_fails(self):
++        self.files()
++        self.lay.put_rel('qa/m3-recheck/x/engineering__decisions.md', '## D-HOE-20991231-01 · copied\n- `' + 'a' * 64 + '`\n')
++        ok, rel, body, why = self.res('D-HOE-20991231-01')
++        self.assertFalse(ok, why)
++
++    def test_dhoe_other_engineering_paths_fail(self):
++        for rel in ('engineering/sub/decisions.md', 'eng/decisions.md', 'engineering/decisions.md.bak', 'qa/engineering/decisions.md'):
++            self.files(); self.lay.put_rel(rel, '## D-HOE-20991231-02\n- x\n')
++            self.assertFalse(self.res('D-HOE-20991231-02')[0], rel)
++
++    def test_dhoe_in_engineering_resolves(self):
++        self.files(engineering='## D-HOE-20991231-03\n- x\n')
++        ok, rel, body, why = self.res('D-HOE-20991231-03')
++        self.assertTrue(ok, why); self.assertEqual(rel, 'engineering/decisions.md')
++
++    def test_dhoe_evidence_copy_plus_real_entry_is_one_definition(self):
++        """Evidence copies are never read, so they cannot create a duplicate either."""
++        self.files(engineering='## D-HOE-20991231-04\n- x\n')
++        self.lay.put_rel('qa/m3-recheck/x/engineering__decisions.md', '## D-HOE-20991231-04\n- x\n')
++        self.assertTrue(self.res('D-HOE-20991231-04')[0])
++
++    def test_all_product_prefixes_resolve_in_product(self):
++        for eid in ('D-HOP-2099-01-01-01', 'D-PMW-2099-01-01-01', 'D-COL-2099-01-01-01', 'D-ECON-2099-01-01-01',
++                    'D-PMFU-2099-01-01-01', 'D-PMM-2099-01-01-01'):
++            self.files(product=f'## {eid} · x\n- y\n')
++            ok, rel, body, why = self.res(eid)
++            self.assertTrue(ok, (eid, why)); self.assertEqual(rel, 'product/decisions.md')
++
++    def test_product_prefixes_elsewhere_fail(self):
++        for eid in ('D-PMW-2099-01-01-02', 'D-COL-2099-01-01-02', 'D-ECON-2099-01-01-02', 'D-PMFU-2099-01-01-02', 'D-PMM-2099-01-01-02'):
++            for role in ('qa', 'root', 'engineering'):
++                self.files(**{role: f'## {eid}\n- y\n'})
++                self.assertFalse(self.res(eid)[0], (eid, role))
++
++    def test_dpmw_in_product_workers_fails(self):
++        self.files(); self.lay.put_rel('product/workers/decisions.md', '## D-PMW-2099-01-01-03\n- y\n')
++        self.assertFalse(self.res('D-PMW-2099-01-01-03')[0])
++
++    def test_dceo_root_only(self):
++        self.files(root='## D-CEO-20991231-01\n- y\n'); self.assertTrue(self.res('D-CEO-20991231-01')[0])
++        self.files(product='## D-CEO-20991231-01\n- y\n'); self.assertFalse(self.res('D-CEO-20991231-01')[0])
++
++    def test_qad_qa_only(self):
++        self.files(qa='## QA-D-2099-X1\n- y\n'); self.assertTrue(self.res('QA-D-2099-X1')[0])
++        self.files(engineering='## QA-D-2099-X1\n- y\n'); self.assertFalse(self.res('QA-D-2099-X1')[0])
++
++    def test_unknown_prefix_fails_everywhere(self):
++        for role in ('product', 'qa', 'root', 'engineering'):
++            self.files(**{role: '## D-XYZ-2099-01-01-01 · x\n- y\n'})
++            ok, rel, body, why = self.res('D-XYZ-2099-01-01-01')
++            self.assertFalse(ok, role); self.assertIn('unknown', why)
++
++    def test_unknown_prefix_duplicate_of_known_heading_does_not_matter(self):
++        self.files(product='## D-HOP-2099-01-01-05\n- y\n\n## D-HOPX-2099-01-01-05\n- y\n')
++        self.assertTrue(self.res('D-HOP-2099-01-01-05')[0])
++
++    def test_duplicate_across_authority_files_fails(self):
++        self.files(product='## D-PMW-2099-01-01-06\n- y\n', qa='## D-PMW-2099-01-01-06\n- y\n')
++        self.assertFalse(self.res('D-PMW-2099-01-01-06')[0])
++
++    def test_dpmw_in_product_is_not_a_bc_approval(self):
++        """Resolving is necessary, not sufficient: bc_/FAM still need a D-HOP ID (D-HOP-2026-11-09-05)."""
++        self.files(product=f'## D-PMW-2099-01-01-07\n- `{self.C}`\n\n## D-COL-2099-01-01-07\n- `{self.HC}`\n',
++                   qa=f'## {Q}\n- `{self.M}`\n')
++        self.assertNotPass(self.p5('D-PMW-2099-01-01-07'))
++        self.assertNotPass(self.fam('D-COL-2099-01-01-07'))
++
++    def test_resolve_without_root_fails(self):
++        self.files(product='## D-HOP-2099-01-01-08\n- y\n')
++        self.assertFalse(csvcheck.resolve_entry('D-HOP-2099-01-01-08', None)[0])
++
++
++class TestV31FailWording(Base):
++    """D-HOP-2026-11-10-10 (1): every unresolved / wrong-file / fenced / body-only / duplicate / free-text ref = FAIL."""
++
++    def assertFail(self, res):
++        self.assertEqual(res[0], 'FAIL', res)
++
++    def test_unresolved(self):
++        self.files(); self.assertFail(self.p5()); self.assertFail(self.fam())
++
++    def test_wrong_file(self):
++        self.files(qa=f'## {H}\n- `{self.HC}`\n'); self.assertFail(self.fam())
++
++    def test_fenced(self):
++        self.files(product=f'## D-HOP-2099-01-01-01\n~~~\n## {H}\n- `{self.HC}`\n~~~\n'); self.assertFail(self.fam())
++
++    def test_body_only(self):
++        self.files(product=f'## D-HOP-2099-01-01-01\n{H} `{self.HC}`\n'); self.assertFail(self.fam())
++
++    def test_duplicate(self):
++        self.files(product=f'## {H}\n- `{self.HC}`\n## {H}\n- `{self.HC}`\n'); self.assertFail(self.fam())
++
++    def test_free_text(self):
++        self.good(); self.assertFail(self.p5('approved by HoP', 'b4 ok')); self.assertFail(self.fam('SYN-A'))
++
++    def test_hash_missing(self):
++        self.files(product=f'## {H}\n- no sha\n', qa=f'## {Q}\n- `{self.M}`\n'); self.assertFail(self.p5())
++
++    def test_missing_ref_is_structural_error_not_just_unverified(self):
++        """Now that unverified refs also read FAIL, a missing/blank ref must still be reported as a STRUCTURAL error."""
++        self.good()
++        for listing in ({'value': '700', 'b4_run_ref': f'{Q} path={self.man}'}, {'value': '700', 'approval_ref': '  ', 'b4_run_ref': Q}):
++            lst = write_json(self.d, 'ls.json', {'columns': {'bc_broody_cap_bp': listing}})
++            r = csvcheck.check(self.before, self.after, breeds=0, synthetic=True, bc_listing=lst, decisions_root=self.lay.root,
++                               harness_pin=self.HS)
++            self.assertEqual(r['checks']['P5IB']['verdict'], 'FAIL')
++            self.assertTrue(any('missing approval_ref' in x for x in r['checks']['P5IB']['detail']['errors']), r['checks']['P5IB'])
++
++    def test_fail_makes_overall_not_pass_and_no_conditional_for_refs(self):
++        self.files()
++        r = self.p5(full=True)
++        self.assertEqual(r['checks']['P5IB']['verdict'], 'FAIL'); self.assertEqual(r['overall'], 'NOT-PASS')
++        self.assertNotIn('CONDITIONAL-UNMET', json.dumps(r['checks']['P5IB']))
++
++
++class TestV31Harness(Base):
++    """D-HOP-2026-11-10-10 (3): R-1 harness pin. Unpinned -> UNPINNED (never PASS); pinned mismatch -> FAIL; match -> PASS."""
++
++    def test_unpinned_never_pass(self):
++        self.good()
++        r = self.p5(pin=None, full=True)
++        self.assertEqual(r['checks']['P5IB']['verdict'], 'UNPINNED', r['checks']['P5IB'])
++        self.assertEqual(r['checks']['P5IB']['detail']['harness_status'], 'UNPINNED')
++        self.assertEqual(r['overall'], 'NOT-PASS')
++
++    def test_unpinned_but_harness_file_mismatch_is_fail(self):
++        m = self.manifest('mh.json', harness_sha='a' * 64); self.good(sha(m))
++        self.assertEqual(self.p5(b=f'{Q} path={m}', pin=None)[0], 'FAIL')
++
++    def test_unpinned_with_other_ref_failure_is_fail(self):
++        self.files(qa=f'## {Q}\n- `{self.M}`\n')
++        self.assertEqual(self.p5(pin=None)[0], 'FAIL')
++
++    def test_pinned_mismatch_fail(self):
++        self.good(); self.assertEqual(self.p5(pin='e' * 64)[0], 'FAIL')
++
++    def test_pinned_mismatch_even_if_file_matches_manifest(self):
++        h2 = write(self.d, 'other-harness.ts', '// not the harness of record\n')
++        m = self.manifest('m-other.json', harness_sha=sha(h2), harness_path=h2); self.good(sha(m))
++        self.assertEqual(self.p5(b=f'{Q} path={m}', pin=self.HS)[0], 'FAIL')
++
++    def test_pinned_match_pass(self):
++        self.good()
++        r = self.p5(full=True)
++        self.assertEqual(r['checks']['P5IB']['verdict'], 'PASS', r['checks']['P5IB'])
++        self.assertEqual(r['checks']['P5IB']['detail']['harness_status'], 'PINNED')
++
++    def test_pinned_match_but_disk_file_differs_fail(self):
++        m = self.manifest('m-tamper.json'); self.good(sha(m))
++        open(self.harness, 'a').write('// tampered after pin\n')
++        self.assertEqual(self.p5(b=f'{Q} path={m}', pin=self.HS)[0], 'FAIL')
++
++    def test_invalid_pin_is_input_error(self):
++        self.good()
++        with self.assertRaises(ValueError):
++            self.p5(pin='XYZ')
++
++    def test_module_constant_pin_used_when_no_argument(self):
++        self.good()
++        saved = csvcheck.R1_HARNESS_PIN
++        csvcheck.R1_HARNESS_PIN = self.HS
++        try:
++            self.assertEqual(self.p5(pin=None)[0], 'PASS')
++            csvcheck.R1_HARNESS_PIN = 'e' * 64
++            self.assertEqual(self.p5(pin=None)[0], 'FAIL')
+         finally:
+-            csvcheck._DEFAULT_DECISIONS = saved
+-        self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
++            csvcheck.R1_HARNESS_PIN = saved
+ 
+-    def test_default_layout_covers_all_authorities(self):
+-        dd = csvcheck._DEFAULT_DECISIONS
+-        root = '/workspace/egg-farm-studio/'
+-        self.assertEqual(dd['product'], root + 'product/decisions.md')
+-        self.assertEqual(dd['qa'], root + 'qa/decisions.md')
+-        self.assertEqual(dd['root'], root + 'decisions.md')
+-        self.assertEqual(dd['engineering'], root + 'engineering/decisions.md')
+-        self.assertEqual(dd['workers'], root + 'product/workers/decisions.md')
++    def test_fam_needs_no_harness(self):
++        self.files(product=f'## {H}\n- `{self.HC}`\n'); self.assertEqual(self.fam()[0], 'PASS')
++
++    def test_cli_decisions_root_and_harness_pin(self):
++        self.good()
++        lst = write_json(self.d, 'lc.json', {'columns': {'bc_broody_cap_bp': {'value': '700', 'approval_ref': H,
++                                                                              'b4_run_ref': f'{Q} path={self.man}'}}})
++        out1, out2 = os.path.join(self.d, 'o1.json'), os.path.join(self.d, 'o2.json')
++        base = ['--before', self.before, '--after', self.after, '--breeds', '0', '--synthetic', '--bc-listing', lst,
++                '--decisions-root', self.lay.root]
++        csvcheck.main(base + ['--out', out1])
++        csvcheck.main(base + ['--harness-pin', self.HS, '--out', out2])
++        self.assertEqual(json.load(open(out1))['checks']['P5IB']['verdict'], 'UNPINNED')
++        self.assertEqual(json.load(open(out2))['checks']['P5IB']['verdict'], 'PASS')
++
++
++class TestHoQAGates(Base):
++    """HoQA v3.1 interim notes: one named test per gate (D-HOP-2026-11-10-10 (1)-(3))."""
++
++    def test_G1_failed_ref_is_FAIL_never_conditional_unmet(self):
++        for setup in (lambda: self.files(),                                                     # unresolved
++                      lambda: self.files(qa=f'## {H}\n- `{self.C}`\n', product=f'## {Q}\n- `{self.M}`\n'),  # wrong file
++                      lambda: self.files(product=f'## D-HOP-2099-01-01-01\n```\n## {H}\n- `{self.C}`\n```\n'),  # fenced
++                      lambda: self.files(product=f'## D-HOP-2099-01-01-01\n{H} `{self.C}`\n'),  # body only
++                      lambda: self.files(product=f'## {H}\n- `{self.C}`\n## {H}\n- `{self.C}`\n', qa=f'## {Q}\n- `{self.M}`\n')):  # dup
++            setup()
++            r = self.p5(full=True)
++            self.assertEqual(r['checks']['P5IB']['verdict'], 'FAIL', r['checks']['P5IB'])
++            self.assertNotEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
++
++    def test_G2_exact_path_authority_table(self):
++        ok = lambda eid: csvcheck.resolve_entry(eid, self.lay.root)[0]
++        for pre in ('D-HOP', 'D-PMW', 'D-COL', 'D-ECON', 'D-PMFU', 'D-PMM'):
++            eid = f'{pre}-2099-01-01-09'
++            self.files(product=f'## {eid}\n- x\n'); self.assertTrue(ok(eid), eid)
++            self.files(qa=f'## {eid}\n- x\n'); self.assertFalse(ok(eid), eid)
++        self.files(engineering='## D-HOE-20991231-09\n- x\n'); self.assertTrue(ok('D-HOE-20991231-09'))
++        self.files(); self.lay.put_rel('qa/m3-recheck/x/engineering__decisions.md', '## D-HOE-20991231-09\n- x\n')
++        self.assertFalse(ok('D-HOE-20991231-09'))
++        self.files(product='## D-XYZ-2099-01-01-09\n- x\n'); self.assertFalse(ok('D-XYZ-2099-01-01-09'))
++
++    def test_G3_no_r1_pin_is_UNPINNED_never_PASS(self):
++        self.good()
++        self.assertIsNone(csvcheck.R1_HARNESS_PIN)
++        r = self.p5(pin=None, full=True)
++        self.assertEqual(r['checks']['P5IB']['verdict'], 'UNPINNED')
++        self.assertNotEqual(r['checks']['P5IB']['verdict'], 'PASS')
++        self.assertEqual(r['overall'], 'NOT-PASS')
+ 
+ 
+ if __name__ == '__main__':

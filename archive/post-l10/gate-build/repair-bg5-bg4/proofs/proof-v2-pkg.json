@@ -1,0 +1,44 @@
+{
+ "target": "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg",
+ "synthetic": true,
+ "ac_claim": "NONE",
+ "defect_count": 0,
+ "cases": [
+  {
+   "case": "P5IB bc_broody_cap_bp=700 refs='SYN-A'",
+   "P5IB": "CONDITIONAL-UNMET",
+   "overall": "NOT-PASS",
+   "defect": false
+  },
+  {
+   "case": "FAM hens_cost L20 +1 authority='SYN-A'",
+   "FAM": "CONDITIONAL-UNMET",
+   "overall": "NOT-PASS",
+   "defect": false
+  },
+  {
+   "case": "P5IB bc_broody_cap_bp=700 refs='I-am-not-an-approval'",
+   "P5IB": "CONDITIONAL-UNMET",
+   "overall": "NOT-PASS",
+   "defect": false
+  },
+  {
+   "case": "FAM hens_cost L20 +1 authority='I-am-not-an-approval'",
+   "FAM": "CONDITIONAL-UNMET",
+   "overall": "NOT-PASS",
+   "defect": false
+  },
+  {
+   "case": "P5IB bc_broody_cap_bp=700 refs='path=/workspace/egg-farm-studio/scratch/post-l10/g'",
+   "P5IB": "CONDITIONAL-UNMET",
+   "overall": "NOT-PASS",
+   "defect": false
+  },
+  {
+   "case": "FAM hens_cost L20 +1 authority='path=/workspace/egg-farm-studio/scratch/post-l10/g'",
+   "FAM": "CONDITIONAL-UNMET",
+   "overall": "NOT-PASS",
+   "defect": false
+  }
+ ]
+}

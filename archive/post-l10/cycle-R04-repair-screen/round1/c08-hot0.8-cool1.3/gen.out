@@ -1,0 +1,1 @@
+{"out": "round1/c08-hot0.8-cool1.3/candidate.csv", "sha256": "f12c6cbba108171a49808f16ef8e13fba9d7bc6bde3fb570daa37b84bfd6b68d", "o1a_left": ["F27 farm_cost 118224 != o1a 160000", "F28 farm_cost 153691 != o1a 175000", "F29 farm_cost 199798 != o1a 190000"]}

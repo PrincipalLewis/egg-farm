@@ -1,0 +1,18 @@
+== baseline
+DEFECT P5IB bc_broody_cap_bp=700 refs='SYN-A': PASS overall=PASS
+DEFECT FAM hens_cost L20 +1 authority='SYN-A': PASS overall=PASS
+DEFECT P5IB bc_broody_cap_bp=700 refs='I-am-not-an-approval': PASS overall=PASS
+DEFECT FAM hens_cost L20 +1 authority='I-am-not-an-approval': PASS overall=PASS
+DEFECT P5IB bc_broody_cap_bp=700 refs='path=/workspace/egg-farm-studio/scratch/post-l10/g': PASS overall=PASS
+DEFECT FAM hens_cost L20 +1 authority='path=/workspace/egg-farm-studio/scratch/post-l10/g': PASS overall=PASS
+--- defects=6
+exit=1
+== pkg
+OK     P5IB bc_broody_cap_bp=700 refs='SYN-A': CONDITIONAL-UNMET overall=NOT-PASS
+OK     FAM hens_cost L20 +1 authority='SYN-A': CONDITIONAL-UNMET overall=NOT-PASS
+OK     P5IB bc_broody_cap_bp=700 refs='I-am-not-an-approval': CONDITIONAL-UNMET overall=NOT-PASS
+OK     FAM hens_cost L20 +1 authority='I-am-not-an-approval': CONDITIONAL-UNMET overall=NOT-PASS
+OK     P5IB bc_broody_cap_bp=700 refs='path=/workspace/egg-farm-studio/scratch/post-l10/g': CONDITIONAL-UNMET overall=NOT-PASS
+OK     FAM hens_cost L20 +1 authority='path=/workspace/egg-farm-studio/scratch/post-l10/g': CONDITIONAL-UNMET overall=NOT-PASS
+--- defects=0
+exit=0

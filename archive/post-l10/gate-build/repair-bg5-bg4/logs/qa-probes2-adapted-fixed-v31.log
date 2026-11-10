@@ -1,0 +1,65 @@
+51ebf5e728eeac1f0455f22ed7e78acb30fe575008277eabc899c73a1865792c  /workspace/egg-farm-studio/qa/reviews/bg5-v3-rereview-20261110/probes/probe_verify_ref.py
+15e74876d5016024221ab30787bae735e91db3570a17fd762fe50da45ba39300  proofs/probe_adapter.py
+TARGET /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/.probe-tmp/pkg
+csvcheck sha256=bc464c981f08dc82542a7cc3331fa91934eb8e703bce43788cbf1a57a66efd92
+OK?  CHK   GOT                    EXPECT       NAME
+----------------------------------------------------------------------------------------------------
+OK   P5IB  PASS                   PASS         P01 control: genuine HoP+QA-D in authority files
+OK   FAM   PASS                   PASS         F01 control: genuine HoP FAM
+OK   P5IB  FAIL                   NOT PASS     P02 PMW heading co-mentions both IDs; no HoP/QA entry
+OK   P5IB  FAIL                   NOT PASS     P03 HoP heading mentions QA-D; no QA-D entry
+OK   P5IB  FAIL                   NOT PASS     P04 spoof precedes genuine without sha (dup/first-wins)
+OK   P5IB  FAIL                   NOT PASS     P05 headings inside ``` fence
+OK   FAM   FAIL                   NOT PASS     F02 FAM credited to PMW co-mention
+OK   P5IB  FAIL                   NOT PASS     P06 IDs only in body/blockquote
+OK   P5IB  FAIL                   NOT PASS     P07 8-hex prefix sha
+OK   P5IB  FAIL                   NOT PASS     P08 uppercase sha in entry
+OK   P5IB  FAIL                   NOT PASS     P09 sha in 65-hex run
+OK   P5IB  FAIL                   NOT PASS     P10 sha split by whitespace
+OK   P5IB  FAIL                   NOT PASS     P11 63-hex truncated sha
+OK   P5IB  FAIL                   NOT PASS     P12 lowercase ids in ref
+OK   P5IB  FAIL                   NOT PASS     P13 id prefix of real id
+OK   P5IB  FAIL                   NOT PASS     P14 authorities swapped
+OK   P5IB  FAIL                   NOT PASS     P15 QA-D as approval + D-HOP as b4
+OK   P5IB  PASS                   PASS         P16 whitespace + extra text around genuine ids
+OK   P5IB  FAIL                   NOT PASS     P17 level-4 heading
+OK   P5IB  FAIL                   NOT PASS     P18 B4 manifest path missing
+OK   P5IB  FAIL                   NOT PASS     P19 B4 ref without path=
+OK   P5IB  PASS                   PASS         P20 B4 manifest via symlink (content hash)
+OK   P5IB  FAIL                   NOT PASS     P21 B4 manifest csv sha uppercase
+OK   P5IB  FAIL                   NOT PASS     P22 B4 empty seeds list
+OK   P5IB  PASS                   PASS         P23 REJECTED text but sha present (text-presence only)
+OK   FAM   EXC ValueError         INPUT_ERROR  F03 FAM authority is a list
+OK   FAM   EXC ValueError         NOT PASS     F04 FAM authority empty string
+OK   P5IB  FAIL                   NOT PASS     D2 seeds=None missing
+OK   P5IB  FAIL                   NOT PASS     D2 seeds=[] empty
+OK   P5IB  FAIL                   NOT PASS     D2 seeds=[True] bool
+OK   P5IB  FAIL                   NOT PASS     D2 seeds=[1.5] float
+OK   P5IB  FAIL                   NOT PASS     D2 seeds=["1"] string
+OK   P5IB  FAIL                   NOT PASS     D2 seeds=123 not list
+OK   P5IB  FAIL                   NOT PASS     D2 harness file missing
+OK   P5IB  FAIL                   NOT PASS     D2 harness sha mismatch vs disk
+OK   P5IB  FAIL                   NOT PASS     X01 indented heading (2 spaces)
+OK   P5IB  FAIL                   NOT PASS     X02 ### heading (level 3)
+OK   P5IB  PASS                   PASS         X03 CRLF line endings (should still PASS if parser splitslines)
+OK   P5IB  PASS                   PASS         X04 tab after ##
+OK   P5IB  FAIL                   NOT PASS     X05 trailing colon after ID token
+OK   P5IB  FAIL                   NOT PASS     X06 trailing punctuation after ID
+OK   P5IB  FAIL                   NOT PASS     X07 unclosed fence swallows rest of file
+OK   P5IB  FAIL                   NOT PASS     X08 fence opened ~~~ closed ``` (mismatched)
+OK   P5IB  PASS                   PASS         X09 symlinked authority file (content read)
+OK   P5IB  FAIL                   NOT PASS     X10 path-traversal role path (product -> ../qa)
+OK   P5IB  FAIL                   NOT PASS     X11 lowercase heading ID
+OK   P5IB  FAIL                   NOT PASS     X12 unicode lookalike ID (Cyrillic О)
+OK   P5IB  FAIL                   NOT PASS     X13 D-HOP defined in qa file; QA-D in product
+OK   P5IB  FAIL                   NOT PASS     X14 D-HOP defined in engineering file
+OK   P5IB  FAIL                   NOT PASS     X15 D-HOP defined only in product/workers ( -06 path )
+OK   FAM   FAIL                   NOT PASS     X16 D-PMW heading in product used as FAM authority
+OK   P5IB  FAIL                   NOT PASS     X17 duplicate ## heading same file
+OK   P5IB  FAIL                   FAIL         T10-1 failed ref reports FAIL (not CONDITIONAL-UNMET)
+OK   P5IB  FAIL                   NOT PASS     T10-2 unknown prefix D-ZZZ never verifies
+GAP  P5IB  PASS                   UNPINNED     T10-3 valid refs but no R-1 pin => UNPINNED (never PASS)
+OK   P5IB  FAIL                   NOT PASS     D3 synthetic decisions_paths=None never PASS
+----------------------------------------------------------------------------------------------------
+probes=56 hard_fails=0 expected_gaps_vs_-10=1
+  GAP T10-3 valid refs but no R-1 pin => UNPINNED (never PASS): got=PASS expect=UNPINNED (-10 (3); v3 gap if PASS)

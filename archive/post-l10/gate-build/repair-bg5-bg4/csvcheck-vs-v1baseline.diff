@@ -1,0 +1,261 @@
+--- /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py	2026-11-09 23:45:05.905230028 +0100
++++ /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/csvcheck.py	2026-11-10 00:01:18.842299174 +0100
+@@ -7,11 +7,139 @@
+ Exit: 0 overall PASS, 1 NOT-PASS, 2 usage/input error.
+ BG2 repair (repair-bg12): with --breeds 1 the 0.27 cap exception is ALWAYS CONDITIONAL-UNMET (overall NOT-PASS) because this tool
+ cannot independently verify the ACTUAL final combined B4 re-run (D-HOP-2026-10-29-08 addendum; D-HOP-2026-11-05-15 (1)).
+---b4-ref is recorded only as documentary metadata inside the CAP check; it is never evidence and never changes any verdict."""
+-import argparse, csv, io, json, sys
++--b4-ref is recorded only as documentary metadata inside the CAP check; it is never evidence and never changes any verdict.
++BG5/BG5b repair (repair-bg5-bg4, evidence-contract.md EC-4 + D-HOP-2026-11-09-05): bc_ listing approval_ref/b4_run_ref and
++--allow-families `authority` PASS only when independently VERIFIED: (i) cite an entry ID in decisions files; (ii) owning authority
++(D-HOP for bc_/FAM, QA-D for B4); (iii) entry contains full 64-hex sha256 of the artifact and on-disk file matches. Otherwise
++CONDITIONAL-UNMET (structural errors still FAIL). Synthetic tests pass TEMP decisions files via decisions_paths; never write real decisions.md."""
++REF_UNVERIFIED = 'NOT VERIFIED: reference failed D-HOP-2026-11-09-05 checks (entry/authority/artifact sha256)'
++REF_VERIFIED = 'VERIFIED: entry ID + owning authority + artifact sha256 match on disk (D-HOP-2026-11-09-05)'
++import argparse, csv, io, json, os, re, sys
+ from decimal import Decimal
+ import gatecommon as G
+ 
++_HEX64 = re.compile(r'\b[a-f0-9]{64}\b')
++_DHOP = re.compile(r'D-HOP-\d{4}-\d{2}-\d{2}-\d+')
++_QAD = re.compile(r'QA-D-[A-Z0-9-]+')
++_PATH = re.compile(r'path=(\S+)')
++_DEFAULT_DECISIONS = (
++    '/workspace/egg-farm-studio/product/decisions.md',
++    '/workspace/egg-farm-studio/decisions.md',
++)
++
++
++def _read_entries(paths):
++    """Parse ##/### headings that look like D-HOP-/QA-D- IDs -> {id: body text}."""
++    out = {}
++    for path in paths or []:
++        if not path or not os.path.isfile(path):
++            continue
++        text = open(path, encoding='utf-8', errors='replace').read()
++        # split on markdown headings
++        parts = re.split(r'(?m)^(#{1,3}[ \t]+.+)$', text)
++        # parts: [preamble, heading, body, heading, body, ...]
++        i = 1
++        while i < len(parts) - 1:
++            heading, body = parts[i], parts[i + 1]
++            i += 2
++            ids = _DHOP.findall(heading) + _QAD.findall(heading)
++            for eid in ids:
++                out.setdefault(eid, body)
++    return out
++
++
++def _artifact_sha(path):
++    if not path or not os.path.isfile(path):
++        return None
++    return G.sha256(path)
++
++
++def _b4_manifest_ok(path, candidate_sha):
++    """B4 artifact: JSON run manifest listing csv sha256, seeds, config, harness sha; csv sha == candidate."""
++    if not path or not os.path.isfile(path):
++        return False, 'b4 manifest missing'
++    try:
++        m = json.load(open(path))
++    except Exception as e:
++        return False, f'b4 manifest not JSON: {e}'
++    if not isinstance(m, dict):
++        return False, 'b4 manifest not an object'
++
++    def _get(*keys):
++        for k in keys:
++            if k in m and m[k] not in (None, ''):
++                return m[k]
++        return None
++
++    csv_sha = _get('csv_sha256', 'csvSha256', 'sha256_csv', 'candidate_sha256')
++    if csv_sha is None and isinstance(m.get('csv'), dict):
++        csv_sha = m['csv'].get('sha256')
++    seeds = _get('seeds')
++    config = _get('config', 'cfg')
++    harness = _get('harness_sha', 'harnessSha', 'harness_sha256')
++    if harness is None and isinstance(m.get('harness'), dict):
++        harness = m['harness'].get('sha256')
++    missing = [n for n, v in (('csv_sha256', csv_sha), ('seeds', seeds), ('config', config), ('harness_sha', harness)) if v in (None, '')]
++    if missing:
++        return False, f'b4 manifest missing fields: {missing}'
++    if not (isinstance(csv_sha, str) and _HEX64.fullmatch(csv_sha)):
++        return False, 'b4 manifest csv_sha256 not 64-hex'
++    if csv_sha != candidate_sha:
++        return False, 'b4 manifest csv_sha256 != candidate'
++    if not (isinstance(harness, str) and _HEX64.fullmatch(harness)):
++        return False, 'b4 manifest harness_sha not 64-hex'
++    return True, 'ok'
++
++
++
++def verify_ref(ref, *, kind, artifact_path, decisions_paths, candidate_sha):
++    """Return (verified: bool, reason: str).
++    kind: 'bc_approval' | 'fam_authority' | 'b4_run'
++    artifact_path: candidate CSV (bc_/FAM) or B4 run manifest path (b4_run; may also be parsed from ref via path=)
++    """
++    if not (isinstance(ref, str) and ref.strip()):
++        return False, 'empty ref'
++    entries = _read_entries(decisions_paths)
++    if kind in ('bc_approval', 'fam_authority'):
++        ids = _DHOP.findall(ref)
++        want_prefix = 'D-HOP-'
++    elif kind == 'b4_run':
++        ids = _QAD.findall(ref)
++        want_prefix = 'QA-D-'
++        m = _PATH.search(ref)
++        if m:
++            artifact_path = m.group(1)
++    else:
++        return False, f'unknown kind {kind}'
++    if not ids:
++        return False, f'no {want_prefix} entry ID cited'
++    # use the first cited id of the right family
++    eid = ids[0]
++    if eid not in entries:
++        return False, f'entry {eid} not found in decisions files'
++    body = entries[eid]
++    # authority already enforced by which regex we used + heading must contain that id
++    if kind in ('bc_approval', 'fam_authority') and not eid.startswith('D-HOP-'):
++        return False, 'approval/FAM requires D-HOP entry'
++    if kind == 'b4_run' and not eid.startswith('QA-D-'):
++        return False, 'b4_run_ref requires QA-D entry'
++    art_sha = _artifact_sha(artifact_path)
++    if art_sha is None:
++        return False, f'artifact missing: {artifact_path!r}'
++    if art_sha not in _HEX64.findall(body):
++        return False, f'entry {eid} does not contain artifact sha256'
++    # on-disk match is art_sha by construction of _artifact_sha
++    if kind == 'b4_run':
++        ok, why = _b4_manifest_ok(artifact_path, candidate_sha)
++        if not ok:
++            return False, why
++    else:
++        # bc_/FAM: artifact is the candidate CSV
++        if art_sha != candidate_sha:
++            return False, 'artifact sha != candidate csv sha'
++    return True, f'{eid} ok'
++
++
+ 
+ def parse(path):
+     """Return (header, rows[list[dict]], errors[]) with strict structural checks."""
+@@ -82,14 +210,19 @@
+     return {'verdict': verdict, 'detail': detail}
+ 
+ 
+-def check(before, after, breeds, rename_map=None, bc_listing=None, allow_families=None, b4_ref=None, synthetic=False, authority_path=None):
++def check(before, after, breeds, rename_map=None, bc_listing=None, allow_families=None, b4_ref=None, synthetic=False, authority_path=None, decisions_paths=None):
+     if breeds not in (0, 1):
+         raise ValueError('--breeds must be given explicitly as 0 or 1 (no default: the cap rule depends on it)')
+     A = G.authority(authority_path)
+     approved = A['rename_map']['approved']
+     fams = _allow(allow_families, A, set(approved.values()))
++    if decisions_paths is None:
++        decisions_paths = list(_DEFAULT_DECISIONS)
++    elif isinstance(decisions_paths, str):
++        decisions_paths = [decisions_paths]
+     C = {}
+     bsha = G.sha256(before)
++    asha = G.sha256(after)
+     if bsha == A['before_csv']['sha256']:
+         C['BEFORE_PIN'] = chk('PASS', sha256=bsha)
+     elif synthetic:
+@@ -243,8 +376,36 @@
+             for h in cols:
+                 if h not in bc:
+                     be2.append(f'{h}: listed but not in CSV')
+-    C['P5IB'] = chk('FAIL' if be2 else 'PASS', bc_columns=bc, errors=be2,
+-                    note='D-HOP-2026-11-05-15 (3): bc_broody_cap_bp 700 unapproved, 2000 not endorsed — approval_ref must cite an explicit approval')
++    docs = {h: {k: (lst.get('columns') or {}).get(h, {}).get(k) for k in ('approval_ref', 'b4_run_ref')} for h in bc} if (bc and lst) else {}
++    p5_reasons = []
++    p5_verified = True
++    if bc and not be2 and lst:
++        for h in bc:
++            e = (lst.get('columns') or {}).get(h) or {}
++            ok_a, why_a = verify_ref(e.get('approval_ref'), kind='bc_approval', artifact_path=after,
++                                    decisions_paths=decisions_paths, candidate_sha=asha)
++            ok_b, why_b = verify_ref(e.get('b4_run_ref'), kind='b4_run', artifact_path=None,
++                                    decisions_paths=decisions_paths, candidate_sha=asha)
++            p5_reasons.append(f'{h}: approval_ref={why_a}; b4_run_ref={why_b}')
++            if not (ok_a and ok_b):
++                p5_verified = False
++    elif bc:
++        p5_verified = False
++    if be2:
++        p5_verdict = 'FAIL'
++        p5_refv = REF_UNVERIFIED
++    elif not bc:
++        p5_verdict = 'PASS'
++        p5_refv = 'n/a (no bc_ columns)'
++    elif p5_verified:
++        p5_verdict = 'PASS'
++        p5_refv = REF_VERIFIED
++    else:
++        p5_verdict = 'CONDITIONAL-UNMET'
++        p5_refv = REF_UNVERIFIED + (('; ' + ' | '.join(p5_reasons)) if p5_reasons else '')
++    C['P5IB'] = chk(p5_verdict, bc_columns=bc, errors=be2,
++                    documentary_refs=docs, ref_verification=p5_refv, verify_reasons=p5_reasons,
++                    note='D-HOP-2026-11-05-15 (3) + D-HOP-2026-11-09-05: approval_ref=D-HOP+CSV sha; b4_run_ref=QA-D+manifest sha')
+     # ---- W4 baseline ----
+     we = []
+     for c in A['w4_baseline']['columns']:
+@@ -279,8 +440,41 @@
+             if ok:
+                 allowed.append(f'{orig} L{L} ({ok[0]["authority"]})'); continue
+             fe.append(f'{orig} L{L}: {bv!r} -> {av!r} (unapproved family/row)')
+-    C['FAM'] = chk('FAIL' if fe else 'PASS', fails=fe[:30], n_fails=len(fe), farm_rows_changed=inscope, allowlisted=allowed[:30],
+-                   rule='fail-closed: rows 11-30 may differ only in farm_cost L11-29 (Card PL-AC6) or allowlisted families with an authority ref')
++    fam_reasons = []
++    fam_verified = True
++    if allowed and not fe:
++        # verify each distinct authority cited by allowlisted rows
++        seen = []
++        for f in fams:
++            auth = f.get('authority')
++            if auth in seen:
++                continue
++            seen.append(auth)
++            # only those actually relied on
++            if not any(auth in a for a in allowed):
++                continue
++            ok, why = verify_ref(auth, kind='fam_authority', artifact_path=after,
++                                 decisions_paths=decisions_paths, candidate_sha=asha)
++            fam_reasons.append(f'{auth}: {why}')
++            if not ok:
++                fam_verified = False
++    elif allowed:
++        fam_verified = False
++    if fe:
++        fam_verdict = 'FAIL'
++        fam_refv = REF_UNVERIFIED
++    elif not allowed:
++        fam_verdict = 'PASS'
++        fam_refv = 'n/a (no allowlisted changes)'
++    elif fam_verified:
++        fam_verdict = 'PASS'
++        fam_refv = REF_VERIFIED
++    else:
++        fam_verdict = 'CONDITIONAL-UNMET'
++        fam_refv = REF_UNVERIFIED + (('; ' + ' | '.join(fam_reasons)) if fam_reasons else '')
++    C['FAM'] = chk(fam_verdict, fails=fe[:30], n_fails=len(fe), farm_rows_changed=inscope,
++                   allowlisted=allowed[:30], ref_verification=fam_refv, verify_reasons=fam_reasons,
++                   rule='fail-closed: rows 11-30 may differ only in farm_cost L11-29 (Card PL-AC6) or allowlisted families with a VERIFIED D-HOP authority ref')
+     # ---- PL-AC6 / E-G9 ----
+     fc = {L: Af[L].get('farm_cost') for L in Af}
+     C['P6A'] = chk('PASS' if fc.get(30) == A['pl_ac6']['row30_farm_cost'] else 'FAIL', row30=fc.get(30))
+@@ -325,9 +519,11 @@
+     ap.add_argument('--breeds', type=int, required=True, choices=(0, 1))
+     ap.add_argument('--rename-map'); ap.add_argument('--bc-listing'); ap.add_argument('--allow-families')
+     ap.add_argument('--b4-ref'); ap.add_argument('--synthetic', action='store_true'); ap.add_argument('--out')
++    ap.add_argument('--decisions', action='append', default=None, help='decisions.md path (repeatable; TEMP fixtures for tests)')
+     a = ap.parse_args(argv)
+     try:
+-        rep = check(a.before, a.after, a.breeds, a.rename_map, a.bc_listing, a.allow_families, a.b4_ref, a.synthetic)
++        rep = check(a.before, a.after, a.breeds, a.rename_map, a.bc_listing, a.allow_families, a.b4_ref, a.synthetic,
++                    decisions_paths=a.decisions)
+     except (ValueError, OSError) as e:
+         print(f'input error: {e}', file=sys.stderr); return 2
+     s = json.dumps(rep, indent=1, default=str)

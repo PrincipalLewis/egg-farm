@@ -1,0 +1,17 @@
+start 2026-11-09T23:47:05+01:00
+end 2026-11-09T23:47:15+01:00
+   250 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/fs-candidates.txt
+    45 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/fs-content-candidates.txt
+    90 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/git-commondirs.txt
+   473 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/git-dotgit.txt
+     6 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/run-meta.txt
+   829 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/text-mentions.txt
+     0 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/fs-MATCHES.tsv
+     0 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/fs-content-MATCHES.tsv
+    45 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/fs-content-hashes.tsv
+   250 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/fs-hashes.tsv
+     0 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/git-abbrev-MATCHES.tsv
+   180 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/git-abbrev.tsv
+     0 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/git-history-MATCHES.tsv
+    67 /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/bg4/search/git-history.tsv
+  2235 total

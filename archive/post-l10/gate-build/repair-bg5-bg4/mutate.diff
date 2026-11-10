@@ -1,0 +1,31 @@
+--- /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg12/pkg/mutate.py	2026-11-09 23:45:05.897229750 +0100
++++ /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/pkg/mutate.py	2026-11-10 00:02:04.389845135 +0100
+@@ -29,6 +29,15 @@
+     ('bandguard.py', "errs.append(f'{side} seed {s} L{L}: gap null is not a measurement'); continue", "v = 0", 'BG1 variant: null gap becomes measured 0'),
+     ('bandguard.py', "if per and b not in unassessed:", "if per:", 'BG1 variant: band stats from remaining seeds reported'),
+     ('bandguard.py', "                if k in ab and ab[k]['gP95'] > cap:", "                if False:", 'BG1 variant: before absence skips after (a) cap check'),
++    # --- repair-bg5-bg4: BG5 (P5IB) / BG5b (FAM) guards (v2 verification) ---
++    ('csvcheck.py', "elif p5_verified:\n        p5_verdict = 'PASS'\n        p5_refv = REF_VERIFIED\n    else:\n        p5_verdict = 'CONDITIONAL-UNMET'", "elif True:\n        p5_verdict = 'PASS'\n        p5_refv = REF_VERIFIED\n    else:\n        p5_verdict = 'CONDITIONAL-UNMET'", 'BG5 original: skip verify -> P5IB PASS whenever structurally ok'),
++    ('csvcheck.py', "elif fam_verified:\n        fam_verdict = 'PASS'\n        fam_refv = REF_VERIFIED\n    else:\n        fam_verdict = 'CONDITIONAL-UNMET'", "elif True:\n        fam_verdict = 'PASS'\n        fam_refv = REF_VERIFIED\n    else:\n        fam_verdict = 'CONDITIONAL-UNMET'", 'BG5b original: skip verify -> FAM PASS whenever allowlisted'),
++    ('csvcheck.py', "if eid not in entries:\n        return False, f'entry {eid} not found in decisions files'", "if eid not in entries:\n        return True, f'entry {eid} forged'", 'BG5 variant: missing decisions entry still verifies'),
++    ('csvcheck.py', "if kind in ('bc_approval', 'fam_authority'):\n        ids = _DHOP.findall(ref)\n        want_prefix = 'D-HOP-'\n    elif kind == 'b4_run':\n        ids = _QAD.findall(ref)\n        want_prefix = 'QA-D-'", "if True:\n        ids = _DHOP.findall(ref) or _QAD.findall(ref) or ['D-HOP-0000-00-00-0']\n        want_prefix = 'ANY'\n    elif False:\n        ids = _QAD.findall(ref)\n        want_prefix = 'QA-D-'", 'BG5 variant: authority family check dropped'),
++    ('csvcheck.py', "if art_sha not in _HEX64.findall(body):\n        return False, f'entry {eid} does not contain artifact sha256'", "if False:\n        return False, f'entry {eid} does not contain artifact sha256'", 'BG5 variant: entry hash presence not required'),
++    ('csvcheck.py', "if csv_sha != candidate_sha:\n        return False, 'b4 manifest csv_sha256 != candidate'", "if False:\n        return False, 'b4 manifest csv_sha256 != candidate'", 'BG5 variant: B4 manifest csv sha need not match candidate'),
++    ('csvcheck.py', "if not (isinstance(e.get(k), str) and e[k].strip()):", "if False:", 'BG5 variant: missing/invalid ref no longer structural FAIL'),
++    ('csvcheck.py', "allowed.append(f'{orig} L{L} ({ok[0][\"authority\"]})'); continue", "continue", 'BG5b variant: allowlisted change not recorded (silently accepted)'),
+ ]
+ fails = 0
+ for n, (f, old, new, why) in enumerate(M):
+@@ -41,7 +50,11 @@
+         print(f'mutant {n} [{why}]: PATTERN NOT FOUND -> mutation harness error'); fails += 1; continue
+     open(os.path.join(d, f), 'w').write(src.replace(old, new))
+     r = subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_*.py'], cwd=d, capture_output=True, text=True)
+-    killed = r.returncode != 0
++    # repair-bg5-bg4: also run the top-level BG5 tests (../tests) against the mutant copy
++    r2 = subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', os.path.join(os.path.dirname(D), 'tests'), '-p', 'test_*.py'],
++                        cwd=d, capture_output=True, text=True, env=dict(os.environ, GB_TARGET=d))
++    killed = r.returncode != 0 or r2.returncode != 0
++    if r.returncode == 0: r = r2
+     last = [l for l in r.stderr.splitlines() if l.startswith(('FAILED', 'OK'))]
+     print(f'mutant {n} [{why}] in {f}: {"KILLED" if killed else "SURVIVED"} ({last[-1] if last else "?"})')
+     fails += 0 if killed else 1

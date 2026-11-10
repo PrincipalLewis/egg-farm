@@ -1,0 +1,34 @@
+a12ac3f8db5cf3c6d7d41bcf1c26f584ae66d49d1b5478432f59b96b1bf7b4a7  /workspace/egg-farm-studio/qa/reviews/bg5-bg4-cert-20261110/probes/probe_verify_ref.py
+BYPASS P01 control: genuine HoP + QA-D entries [P5IB] got=FAIL expect=PASS
+        reasons=['bc_broody_cap_bp: approval_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root; b4_run_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root']
+OK   P02 one PMW-authored heading co-mentions both IDs; no HoP or QA-D entry exists [P5IB] got=FAIL expect=NOT PASS
+OK   P03 HoP-authored heading mentions the QA-D id; no QA-D entry exists (HoP body credited as QA-D) [P5IB] got=FAIL expect=NOT PASS
+OK   P04 spoof heading precedes genuine entry; genuine entry lacks sha (first-wins) [P5IB] got=FAIL expect=NOT PASS
+OK   P05 heading inside a fenced code block in another entry [P5IB] got=FAIL expect=NOT PASS
+BYPASS F01 control: genuine HoP entry for FAM [FAM] got=FAIL expect=PASS
+        reasons=['D-HOP-2099-01-01-77: decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root']
+OK   F02 FAM authority credited to PMW heading co-mention [FAM] got=FAIL expect=NOT PASS
+OK   P06 IDs only in body text / blockquote of another entry [P5IB] got=FAIL expect=NOT PASS
+OK   P07 8-hex prefix of the sha [P5IB] got=FAIL expect=NOT PASS
+OK   P08 uppercase sha in entry [P5IB] got=FAIL expect=NOT PASS
+OK   P09 sha embedded in 65-hex run [P5IB] got=FAIL expect=NOT PASS
+OK   P10 sha split by whitespace [P5IB] got=FAIL expect=NOT PASS
+OK   P11 63-hex truncated sha [P5IB] got=FAIL expect=NOT PASS
+OK   P12 lowercase id in ref [P5IB] got=FAIL expect=NOT PASS
+OK   P13 id prefix of real id [P5IB] got=FAIL expect=NOT PASS
+OK   P14 authorities swapped [P5IB] got=FAIL expect=NOT PASS
+OK   P15 QA-D id as approval_ref + D-HOP as b4 [P5IB] got=FAIL expect=NOT PASS
+BYPASS P16 ref with leading/trailing whitespace + extra text [P5IB] got=FAIL expect=PASS (benign: genuine entries)
+        reasons=['bc_broody_cap_bp: approval_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root; b4_run_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root']
+OK   P17 heading with level-4 #### [P5IB] got=FAIL expect=NOT PASS (fail-closed ok)
+OK   P18 B4 manifest path missing [P5IB] got=FAIL expect=NOT PASS
+OK   P19 B4 ref without path= [P5IB] got=FAIL expect=NOT PASS
+BYPASS P20 B4 manifest via symlink (content hashed) [P5IB] got=FAIL expect=PASS (acceptable: content-hashed)
+        reasons=['bc_broody_cap_bp: approval_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root; b4_run_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root']
+OK   P21 B4 manifest csv sha uppercase [P5IB] got=FAIL expect=NOT PASS
+OK   P22 B4 manifest with empty seeds list [P5IB] got=FAIL expect=NOT PASS
+BYPASS P23 entry body says REJECTED but contains sha [P5IB] got=FAIL expect=PASS (rule (iii) is text-presence only; semantic, advisory)
+        reasons=['bc_broody_cap_bp: approval_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root; b4_run_ref=decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root']
+OK   F03 FAM authority is a list (type trick) [FAM] got=EXC ValueError expect=NOT PASS / input error
+OK   F04 FAM authority empty string [FAM] got=EXC ValueError expect=NOT PASS
+--- bypasses=5 of 27 probes

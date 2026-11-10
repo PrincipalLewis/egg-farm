@@ -1,0 +1,20 @@
+--- ../repair-bg12/pkg/tests/test_csvcheck.py	2026-11-09 23:45:05.985232804 +0100
++++ pkg/tests/test_csvcheck.py	2026-11-09 23:48:44.353579033 +0100
+@@ -206,7 +206,7 @@
+         with self.assertRaises(ValueError):
+             self.run_check(rows, allow_families={'families': [{'column': 'hens_cost', 'rows': [14, 29]}]})
+         rep = self.run_check(rows, allow_families={'families': [{'column': 'hens_cost', 'rows': [14, 29], 'authority': 'SYNTHETIC-GO-REF'}]})
+-        self.assertEqual(self.v(rep, 'FAM'), 'PASS')
++        self.assertEqual(self.v(rep, 'FAM'), 'CONDITIONAL-UNMET')  # BG5b repair: was PASS (encoded the bypass)
+ 
+     def test_allowlist_cannot_open_rows_0_10_or_w4(self):
+         for fam in ({'column': 'hens_cost', 'rows': [5, 29], 'authority': 'x'}, {'column': 'w4_price_mult', 'rows': [21, 30], 'authority': 'x'}):
+@@ -263,7 +263,7 @@
+     def test_bc_listing_requires_approval_and_b4_refs(self):
+         ok = {'columns': {'bc_broody_cap_bp': {'value': '700', 'approval_ref': 'SYN-A', 'b4_run_ref': 'SYN-B4'}}}
+         rep = self.run_check(self._with_bc(), bc_listing=ok)
+-        self.assertEqual(self.v(rep, 'P5IB'), 'PASS', rep['checks']['P5IB'])
++        self.assertEqual(self.v(rep, 'P5IB'), 'CONDITIONAL-UNMET', rep['checks']['P5IB'])  # BG5 repair: was PASS (encoded the bypass)
+         for drop in ('approval_ref', 'b4_run_ref'):
+             bad = copy.deepcopy(ok); del bad['columns']['bc_broody_cap_bp'][drop]
+             rep = self.run_check(self._with_bc(), bc_listing=bad)

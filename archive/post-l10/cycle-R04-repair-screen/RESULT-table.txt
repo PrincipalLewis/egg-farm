@@ -1,0 +1,44 @@
+## control  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 PASS-INFORMAL
+  optimal: AC1 [] AC2 ['L17 202.0s', 'L20 204.1s', 'L21 180.5s', 'L27 184.8s'] tot 2116.0 ['0.0000', True]
+  seller15: AC1 [] AC2 ['L17 226.8s', 'L18 193.3s', 'L20 214.1s', 'L21 228.4s', 'L22 208.1s', 'L26 195.1s', 'L27 197.1s'] tot 2100.2 ['0.0000', True]
+  casual: AC1 ['L15 x2.454', 'L17 x2.004'] AC2 ['L17 214.5s', 'L18 218.9s', 'L20 203.2s', 'L21 223.3s', 'L22 220.2s', 'L23 188.3s', 'L24 227.8s', 'L26 189.8s', 'L27 238.8s'] tot 2041.5 ['0.0000', True]
+## c01-envelope-only  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 PASS-INFORMAL
+  optimal: AC1 [] AC2 ['L17 194.0s', 'L24 220.1s'] tot 2020.0 ['-0.0454', True]
+  seller15: AC1 ['L24 x2.747'] AC2 ['L17 184.3s', 'L18 204.5s', 'L24 273.5s', 'L27 200.5s'] tot 1989.9 ['-0.0525', True]
+  casual: AC1 ['L15 x2.431', 'L18 x2.408', 'L21 x2.197', 'L24 x3.888'] AC2 ['L18 241.5s', 'L24 298.9s', 'L27 204.8s'] tot 1935.0 ['-0.0522', True]
+## c02-sur-B12  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 FAIL
+  optimal: AC1 ['L15 x2.669', 'L24 x2.052'] AC2 ['L15 218.5s', 'L24 192.3s', 'L27 184.7s'] tot 1880.6 ['-0.1112', False]
+  seller15: AC1 ['L15 x2.008', 'L17 x2.043', 'L24 x3.543'] AC2 ['L15 215.6s', 'L24 246.8s', 'L26 196.6s', 'L27 188.2s'] tot 1852.2 ['-0.1181', False]
+  casual: AC1 ['L15 x2.110', 'L17 x2.016', 'L24 x4.950'] AC2 ['L15 202.8s', 'L24 279.6s', 'L26 200.7s', 'L27 205.9s'] tot 1803.7 ['-0.1165', False]
+## c03-sur-C12  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 FAIL
+  optimal: AC1 ['L15 x2.050', 'L28 x2.257'] AC2 ['L15 221.0s', 'L28 255.7s'] tot 1892.1 ['-0.1058', False]
+  seller15: AC1 ['L21 x2.507', 'L24 x2.221', 'L27 x2.200'] AC2 ['L15 216.9s', 'L17 180.4s', 'L21 186.4s', 'L24 193.9s', 'L27 191.6s', 'L28 259.0s'] tot 1866.8 ['-0.1111', False]
+  casual: AC1 ['L17 x2.066', 'L21 x3.150', 'L24 x3.677', 'L27 x2.377'] AC2 ['L15 182.6s', 'L21 180.3s', 'L24 234.5s', 'L25 193.5s', 'L26 185.3s', 'L27 278.3s', 'L28 227.2s'] tot 1816.5 ['-0.1102', False]
+## c04-sur-A11  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 FAIL
+  optimal: AC1 ['L15 x2.555', 'L24 x2.229', 'L26 x2.348'] AC2 ['L15 219.2s', 'L24 210.5s', 'L27 195.3s'] tot 1890.8 ['-0.1064', False]
+  seller15: AC1 ['L17 x2.145', 'L24 x3.670'] AC2 ['L15 217.4s', 'L24 245.5s', 'L26 194.1s', 'L27 196.6s'] tot 1868.8 ['-0.1102', False]
+  casual: AC1 ['L17 x2.271', 'L24 x4.711'] AC2 ['L15 194.4s', 'L24 285.7s', 'L26 195.9s', 'L27 212.8s'] tot 1819.6 ['-0.1087', False]
+## c05-sur-nomargin-ev27jump  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 FAIL
+  optimal: AC1 ['L14 x2.747', 'L29 x2.349'] AC2 ['L14 227.5s', 'L21 193.2s', 'L29 248.6s'] tot 1887.6 ['-0.1079', False]
+  seller15: AC1 ['L21 x2.553', 'L24 x2.379'] AC2 ['L14 181.1s', 'L21 193.0s', 'L24 214.5s', 'L28 279.4s', 'L29 254.4s'] tot 1856.1 ['-0.1162', False]
+  casual: AC1 ['L17 x2.296', 'L21 x3.259', 'L24 x4.339', 'L27 x2.614'] AC2 ['L21 183.9s', 'L24 238.3s', 'L27 291.8s', 'L28 297.4s', 'L29 197.2s'] tot 1807.2 ['-0.1148', False]
+## c06-stair-1.0-1.0-1.6  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 PASS-INFORMAL
+  optimal: AC1 ['L21 x3.174', 'L27 x2.071'] AC2 ['L17 218.2s', 'L27 220.8s', 'L28 195.4s'] tot 1915.4 ['-0.0948', True]
+  seller15: AC1 [] AC2 ['L17 189.8s', 'L18 199.1s', 'L26 204.5s', 'L27 232.7s'] tot 1893.7 ['-0.0983', True]
+  casual: AC1 ['L15 x2.431', 'L18 x2.129', 'L24 x2.169'] AC2 ['L18 198.7s', 'L22 190.0s', 'L26 236.5s', 'L27 247.2s'] tot 1847.9 ['-0.0948', True]
+## c07-stair-1.0-1.5-1.6  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 PASS-INFORMAL
+  optimal: AC1 ['L27 x2.094'] AC2 ['L17 218.2s', 'L23 189.3s', 'L24 209.3s', 'L27 220.6s', 'L28 194.2s'] tot 1999.8 ['-0.0549', True]
+  seller15: AC1 ['L24 x2.554'] AC2 ['L17 189.8s', 'L18 199.1s', 'L24 238.7s', 'L26 208.2s', 'L27 234.7s', 'L28 187.7s'] tot 1978.4 ['-0.0580', True]
+  casual: AC1 ['L15 x2.431', 'L18 x2.129', 'L21 x2.538', 'L24 x3.046'] AC2 ['L18 198.7s', 'L24 248.0s', 'L26 234.7s', 'L27 239.1s'] tot 1926.4 ['-0.0564', True]
+## c08-hot0.8-cool1.3  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 PASS-INFORMAL
+  optimal: AC1 ['L26 x2.206'] AC2 ['L17 203.4s', 'L18 206.3s', 'L22 193.3s', 'L27 189.8s'] tot 2056.8 ['-0.0280', True]
+  seller15: AC1 [] AC2 ['L17 209.2s', 'L18 241.8s', 'L19 191.4s', 'L24 244.0s', 'L26 199.0s', 'L27 192.6s'] tot 2036.2 ['-0.0305', True]
+  casual: AC1 ['L18 x2.203', 'L21 x2.037', 'L24 x4.034'] AC2 ['L15 200.2s', 'L18 271.3s', 'L19 231.0s', 'L24 280.7s', 'L26 205.5s', 'L27 199.6s'] tot 1992.8 ['-0.0239', True]
+## c09-hot0.7-cool1.5  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 PASS-INFORMAL
+  optimal: AC1 ['L17 x2.180', 'L27 x2.023'] AC2 ['L17 214.5s', 'L19 196.6s', 'L23 191.8s', 'L24 211.5s', 'L27 209.2s'] tot 2155.8 ['0.0188', True]
+  seller15: AC1 ['L21 x2.315', 'L24 x2.817'] AC2 ['L15 183.7s', 'L17 211.7s', 'L18 220.7s', 'L19 246.3s', 'L24 262.1s', 'L26 204.1s', 'L27 220.6s'] tot 2127.5 ['0.0130', True]
+  casual: AC1 ['L21 x3.060', 'L24 x4.031'] AC2 ['L15 211.1s', 'L18 183.0s', 'L19 262.0s', 'L24 277.1s', 'L26 222.5s', 'L27 223.6s'] tot 2076.8 ['0.0173', True]
+## c10-all1.1  PL-AC1 FAIL PL-AC2 FAIL PL-AC3 PASS-INFORMAL
+  optimal: AC1 ['L17 x2.264'] AC2 ['L18 180.3s', 'L24 239.2s'] tot 2107.2 ['-0.0042', True]
+  seller15: AC1 ['L21 x2.167', 'L24 x2.802'] AC2 ['L17 188.4s', 'L18 235.3s', 'L24 283.9s', 'L26 189.3s', 'L27 215.4s'] tot 2072.5 ['-0.0132', True]
+  casual: AC1 ['L15 x2.320', 'L18 x2.035', 'L21 x3.065', 'L24 x4.411'] AC2 ['L15 191.4s', 'L18 241.1s', 'L19 208.3s', 'L24 315.4s', 'L26 195.6s', 'L27 231.1s', 'L28 184.3s'] tot 2024.8 ['-0.0082', True]

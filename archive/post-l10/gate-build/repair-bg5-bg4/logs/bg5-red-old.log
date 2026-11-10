@@ -1,0 +1,361 @@
+test_cli_allowlisted_change_exits_1 (test_bg5.TestBG5_CLI.test_cli_allowlisted_change_exits_1) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-3ql4i0uc/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+FAIL
+test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-py4ofvsx/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-py4ofvsx/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-py4ofvsx/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-py4ofvsx/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+
+  test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='SYN-A') ... FAIL
+  test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='D-HOP-2026-11-05-15') ... FAIL
+  test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='approved') ... FAIL
+  test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='PASS') ... FAIL
+  test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') ... FAIL
+  test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='{"decision": "D-HOP-2026-11-06-02", "sha') ... FAIL
+test_hash_matching_existing_file_ref_still_conditional (test_bg5.TestBG5_P5IB.test_hash_matching_existing_file_ref_still_conditional) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qfcouwu9/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qfcouwu9/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qfcouwu9/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qfcouwu9/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+FAIL
+test_no_bc_columns_unaffected (test_bg5.TestBG5_P5IB.test_no_bc_columns_unaffected) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-f68p5uof/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-f68p5uof/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-f68p5uof/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_refs_recorded_as_unverified_metadata (test_bg5.TestBG5_P5IB.test_refs_recorded_as_unverified_metadata) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qoc9ujt7/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qoc9ujt7/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qoc9ujt7/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-qoc9ujt7/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ERROR
+test_structural_errors_still_fail (test_bg5.TestBG5_P5IB.test_structural_errors_still_fail) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-2721uc50/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-2721uc50/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-2721uc50/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-2721uc50/bc_listing.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_authority_recorded_as_unverified_metadata (test_bg5.TestBG5b_FAM.test_authority_recorded_as_unverified_metadata) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-kt3m3rfc/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-kt3m3rfc/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-kt3m3rfc/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-kt3m3rfc/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ERROR
+test_farm_envelope_change_needs_no_allowlist (test_bg5.TestBG5b_FAM.test_farm_envelope_change_needs_no_allowlist) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-h8un23bh/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-h8un23bh/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-h8un23bh/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_hash_matching_existing_file_authority_still_conditional (test_bg5.TestBG5b_FAM.test_hash_matching_existing_file_authority_still_conditional) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ak8bsnfm/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ak8bsnfm/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ak8bsnfm/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ak8bsnfm/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+FAIL
+test_invalid_allowlist_still_input_error (test_bg5.TestBG5b_FAM.test_invalid_allowlist_still_input_error) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-eeit59gd/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-eeit59gd/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-0d4abkks/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-0d4abkks/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-0d4abkks/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-0d4abkks/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+
+  test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='SYN-A') ... FAIL
+  test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='D-HOP-2026-11-05-15') ... FAIL
+  test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='approved') ... FAIL
+  test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='PASS') ... FAIL
+  test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') ... FAIL
+  test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='{"decision": "D-HOP-2026-11-06-02", "sha') ... FAIL
+test_unapproved_change_still_fails_even_with_allowlist (test_bg5.TestBG5b_FAM.test_unapproved_change_still_fails_even_with_allowlist) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ja2ylp0f/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ja2ylp0f/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ja2ylp0f/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-ja2ylp0f/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_unused_allowlist_does_not_change_verdict (test_bg5.TestBG5b_FAM.test_unused_allowlist_does_not_change_verdict) ... /workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py:22: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-hyaoqe38/approval.md'>
+  self.art_ref = f'path={self.art} sha256={hashlib.sha256(open(self.art, "rb").read()).hexdigest()}'
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-hyaoqe38/allow_families.json' mode='r' encoding='UTF-8'>
+  return None if p is None else (json.load(open(p)) if isinstance(p, str) else p)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-hyaoqe38/before.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/csvcheck.py:19: ResourceWarning: unclosed file <_io.BufferedReader name='/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/baseline/.tmp/synth-hyaoqe38/after.csv'>
+  raw = open(path, 'rb').read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+======================================================================
+ERROR: test_refs_recorded_as_unverified_metadata (test_bg5.TestBG5_P5IB.test_refs_recorded_as_unverified_metadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 57, in test_refs_recorded_as_unverified_metadata
+    self.assertEqual(d['documentary_refs']['bc_broody_cap_bp'], {'approval_ref': 'SYN-A', 'b4_run_ref': 'SYN-B4'})
+                     ~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'documentary_refs'
+
+======================================================================
+ERROR: test_authority_recorded_as_unverified_metadata (test_bg5.TestBG5b_FAM.test_authority_recorded_as_unverified_metadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 94, in test_authority_recorded_as_unverified_metadata
+    self.assertTrue(d['allowlisted']); self.assertIn('NOT VERIFIED', d['ref_verification'])
+                                                                     ~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'ref_verification'
+
+======================================================================
+FAIL: test_cli_allowlisted_change_exits_1 (test_bg5.TestBG5_CLI.test_cli_allowlisted_change_exits_1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 127, in test_cli_allowlisted_change_exits_1
+    self.assertEqual(p.returncode, 1, p.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : csvcheck overall=PASS (PROVISIONAL, ac_claim NONE)
+
+
+======================================================================
+FAIL: test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='SYN-A')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 47, in test_free_text_refs_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='D-HOP-2026-11-05-15')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 47, in test_free_text_refs_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='approved')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 47, in test_free_text_refs_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='PASS')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 47, in test_free_text_refs_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 47, in test_free_text_refs_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_free_text_refs_conditional_unmet_never_pass (test_bg5.TestBG5_P5IB.test_free_text_refs_conditional_unmet_never_pass) (ref='{"decision": "D-HOP-2026-11-06-02", "sha')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 47, in test_free_text_refs_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_hash_matching_existing_file_ref_still_conditional (test_bg5.TestBG5_P5IB.test_hash_matching_existing_file_ref_still_conditional)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 52, in test_hash_matching_existing_file_ref_still_conditional
+    self.assertEqual(r['checks']['P5IB']['verdict'], 'CONDITIONAL-UNMET'); self.assertEqual(r['overall'], 'NOT-PASS')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_hash_matching_existing_file_authority_still_conditional (test_bg5.TestBG5b_FAM.test_hash_matching_existing_file_authority_still_conditional)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 89, in test_hash_matching_existing_file_authority_still_conditional
+    self.assertEqual(r['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='SYN-A')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 84, in test_relied_on_allowlist_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='D-HOP-2026-11-05-15')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 84, in test_relied_on_allowlist_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='approved')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 84, in test_relied_on_allowlist_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='PASS')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 84, in test_relied_on_allowlist_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 84, in test_relied_on_allowlist_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+======================================================================
+FAIL: test_relied_on_allowlist_conditional_unmet_never_pass (test_bg5.TestBG5b_FAM.test_relied_on_allowlist_conditional_unmet_never_pass) (ref='{"decision": "D-HOP-2026-11-06-02", "sha')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/egg-farm-studio/scratch/post-l10/gate-build/repair-bg5-bg4/tests/test_bg5.py", line 84, in test_relied_on_allowlist_conditional_unmet_never_pass
+    self.assertEqual(r['checks']['FAM']['verdict'], 'CONDITIONAL-UNMET')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PASS' != 'CONDITIONAL-UNMET'
+- PASS
++ CONDITIONAL-UNMET
+
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.068s
+
+FAILED (failures=15, errors=2)

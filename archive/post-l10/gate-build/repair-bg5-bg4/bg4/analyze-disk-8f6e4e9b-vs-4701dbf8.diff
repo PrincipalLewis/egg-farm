@@ -1,0 +1,116 @@
+--- cand/tools/analyze.py	2026-11-09 23:44:43.248524317 +0100
++++ cycle-R04-MR14-off/analyze.py	2026-11-09 23:45:04.097167516 +0100
+@@ -1,50 +1,63 @@
+-#!/usr/bin/env python3
+-"""Post-L10 candidate metrics. Same conventions as baseline/analyze.py (pacing-guards.ts: time on L = reach(L+1)-reach(L);
+-nearest-rank quantiles; gap(L) = longest nothing-affordable stretch starting at Farm L). Usage: analyze.py <rawdir> <csv> [label]
+-reads <rawdir>/raw-<prof>*.json (seed chunks merged), writes <rawdir>/metrics.json and prints a summary."""
+-import json, math, csv, sys, glob, hashlib
+-D, CSV = sys.argv[1], sys.argv[2]; LABEL = sys.argv[3] if len(sys.argv) > 3 else D
+-SHA = hashlib.sha256(open(CSV, 'rb').read()).hexdigest()
+-FC = [float(r['farm_cost']) for r in csv.DictReader(open(CSV, newline=''))]
+-q = lambda a, p: sorted(a)[min(len(a) - 1, max(0, math.ceil(p * len(a)) - 1))]
+-PROFS = ('optimal', 'seller15', 'casual'); BANDS = {'F11-15': range(11, 16), 'F16-20': range(16, 21), 'F21-25': range(21, 26), 'F26-30': range(26, 31)}
+-out = {'csv': CSV, 'sha256': SHA, 'prof': {}}
+-for pf in PROFS:
+-  rows = []
+-  for fn in sorted(glob.glob(f'{D}/raw-{pf}*.json')):
+-    d = json.load(open(fn)); assert d['sha256'] == SHA, fn; assert d['T'] == 4000; rows += d['prof'][pf]['rows']
+-  rows.sort(key=lambda r: r['seed']); assert [r['seed'] for r in rows] == list(range(1, 201)), pf
+-  reach = [{int(k): v for k, v in r['reach'].items()} for r in rows]; gapF = [{int(k): v for k, v in r['noAffByF'].items()} for r in rows]
+-  miss = sum(1 for r in reach if 30 not in r); assert miss == 0, f'{pf}: {miss} seeds do not reach L30'
+-  g4 = [r['longestNoAff'] for r in rows]
+-  tot = [r[30] - r[10] for r in reach]
+-  o = {'G4': [q(g4, .5), q(g4, .95), max(g4)], 'tot10_30_P50_s': q(tot, .5), 'tot10_30_P95_s': q(tot, .95), 'level': {}, 'band': {}, 'gap_seeds_over_180': []}
+-  for L in range(10, 30):
+-    tl = [r[L + 1] - r[L] for r in reach]; g = [x.get(L, 0) for x in gapF]
+-    e = {'arrive_P50_min': round(q([r[L] for r in reach], .5) / 60, 2), 'fc': FC[L], 'tP50': q(tl, .5), 'tP95': q(tl, .95), 'tW': max(tl), 'gP50': q(g, .5), 'gP95': q(g, .95), 'gW': max(g)}
+-    if L > 10:
+-      e['cstep'] = round(FC[L] / FC[L - 1], 3); p = o['level'][L - 1]['tP50']; e['tstep'] = round(e['tP50'] / p, 3) if p else None
+-      rs = [(r[L + 1] - r[L]) / (r[L] - r[L - 1]) for r in reach if r[L] - r[L - 1] > 0]; e['seeds_over_2x'] = sum(1 for x in rs if x > 2)
+-    o['level'][L] = e
+-    for sd, x in zip(rows, gapF):
+-      if x.get(L, 0) > 180: o['gap_seeds_over_180'].append({'seed': sd['seed'], 'L': L, 'gap_s': x[L]})
+-  for bn, rg in BANDS.items():
+-    lv = [L for L in rg if L < 30]; bg = [max(x.get(L, 0) for L in lv) for x in gapF]; bt = [r[min(rg.stop, 30)] - r[rg.start] for r in reach]
+-    o['band'][bn] = {'gP50': q(bg, .5), 'gP95': q(bg, .95), 'gW': max(bg), 'tP50_min': round(q(bt, .5) / 60, 2), 'tP95_min': round(q(bt, .95) / 60, 2)}
+-  L = range(11, 30)
+-  o['bar_2x'] = [(l, o['level'][l]['tstep']) for l in L if (o['level'][l]['tstep'] or 0) > 2]
+-  o['bar_p95_180'] = [(l, o['level'][l]['tP95']) for l in L if o['level'][l]['tP95'] > 180]
+-  o['guard_band_gap'] = [(b, v['gP95']) for b, v in o['band'].items() if v['gP95'] > 180]
+-  o['maxstep_L11_29'] = [(l, o['level'][l]['tstep']) for l in range(11, 30) if (o['level'][l]['tstep'] or 0) > 2]  # 2x bar range L11-29 per D-HOP-15 (was L18-29)
+-  if 'mrLongest' in rows[0]:  # MEANINGFUL-ROW G4 (D-HOP-2026-10-30-49), flags-off approximation, range F10..max-1
+-    mr = [r['mrLongest'] for r in rows]; o['G4mr'] = [q(mr, .5), q(mr, .95), max(mr)]
+-    o['G4mr_worst_seeds'] = sorted(({'seed': r['seed'], 'L': int(max(r['mrByF'], key=lambda k: r['mrByF'][k])), 'gap_s': r['mrLongest']} for r in rows if r['mrByF']), key=lambda x: -x['gap_s'])[:10]
+-  o['G4_worst_seeds'] = sorted(({'seed': sd['seed'], 'L': max(x, key=x.get), 'gap_s': max(x.values())} for sd, x in zip(rows, gapF) if x), key=lambda x: -x['gap_s'])[:10]
+-  out['prof'][pf] = o
+-json.dump(out, open(f'{D}/metrics.json', 'w'), indent=1)
+-print(f'== {LABEL} sha {SHA[:8]}')
+-for pf in PROFS:
+-  o = out['prof'][pf]
+-  print(f'{pf:8s} G4 {o["G4"]} G4mr {o.get("G4mr")} tot10-30 P50 {o["tot10_30_P50_s"]:.0f}s  max tstep {max(o["level"][l]["tstep"] or 0 for l in range(11,30)):.2f}  >2x {o["bar_2x"]}  P95>180 {o["bar_p95_180"]}  bandgapP95 {[v["gP95"] for v in o["band"].values()]}')
+-  print('   tP50 ' + ' '.join(f'{l}:{o["level"][l]["tP50"]:.0f}' for l in range(11, 30)))
+-  print('   tP95 ' + ' '.join(f'{l}:{o["level"][l]["tP95"]:.0f}' for l in range(11, 30)))
++# Economy/R04-MR14-off analysis (diagnostic tables from OFFICIAL raw-<pf>.json; parity/nest from diag-out.json).
++import json, math, hashlib
++from pathlib import Path
++D=Path(__file__).parent; OLD=D.parent/'cycle-2320'/'R04'
++REF={'optimal':2116.0,'seller15':2100.2,'casual':2041.5}  # s00-base/metrics.json d6ac395c, PL-AC3
++q=lambda xs,p: sorted(xs)[math.ceil(len(xs)*p)-1]
++diag=json.load(open(D/'diag-out.json'))
++res={'csvSha256':None,'profiles':{},'parity':{},'nest':{}}
++allnest=[]
++for pf in ['optimal','seller15','casual']:
++  off=json.load(open(D/f'raw-{pf}.json')); res['csvSha256']=off['sha256']
++  assert off['sha256']=='d1cff5ac76e6015f6127d859a9b9c94d5c15da2ac64aad1314f8e7adfd173b65' and off['T']==4000 and off['seeds']==[1,200]
++  rows=off['prof'][pf]['rows']; assert [r['seed'] for r in rows]==list(range(1,201))
++  drows=diag['profiles'][pf]; assert [r['seed'] for r in drows]==list(range(1,201))
++  old=json.load(open(OLD/f'raw-{pf}.json'))['prof'][pf]['rows']
++  # parity
++  offEqDiag=sum(json.dumps(r,sort_keys=True)==json.dumps(d['row'],sort_keys=True) for r,d in zip(rows,drows))
++  nonMr=lambda r:{k:v for k,v in r.items() if k not in('mrByF','mrLongest')}
++  offEqOldNonMr=sum(json.dumps(nonMr(r),sort_keys=True)==json.dumps(nonMr(o),sort_keys=True) for r,o in zip(rows,old))
++  oldMrMatchB2=sum(o['mrLongest']==d['b2deab63MrLongest'] for o,d in zip(old,drows))
++  res['parity'][pf]={'officialRowEqualsDiagReviewedRow':offEqDiag,'instrumentedFullOutputIdentical':200,  # asserted per run in diag-driver (would abort otherwise)
++    'buyLogIdenticalToB2deab63':sum(d['buyLogIdenticalToB2deab63'] for d in drows),'allNonMrOutputsIdenticalToB2deab63':sum(d['nonMrOutputsIdenticalToB2deab63'] for d in drows),
++    'officialNonMrRowFieldsEqualCycle2320R04':offEqOldNonMr,'cycle2320MrLongestEqualsB2deab63Rerun':oldMrMatchB2,
++    'buyCounts':sorted(set(d['buyCount'] for d in drows)),'aggBuyLogSha256':hashlib.sha256(json.dumps([[d['seed'],d['buyLogSha256']] for d in drows],separators=(',',':')).encode()).hexdigest()}
++  # MR
++  mr=[r['mrLongest'] for r in rows]
++  over=[]
++  for r in rows:
++    if r['mrLongest']>180:
++      by={int(k):v for k,v in r['mrByF'].items()}; over.append({'seed':r['seed'],'mrLongest':r['mrLongest'],'level':max(by,key=lambda L:by[L])})
++  worst=sorted(({'seed':r['seed'],'mrLongest':r['mrLongest']} for r in rows),key=lambda x:(-x['mrLongest'],x['seed']))[:10]
++  oldmr=[o['mrLongest'] for o in old]
++  # pacing
++  tot=[r['reach']['30']-r['reach']['10'] for r in rows if '30' in r['reach'] and '10' in r['reach']]
++  P50=q(tot,.5); ratio=P50/REF[pf]-1
++  perL={}
++  for L in range(11,30):
++    ts=[r['reach'][str(L+1)]-r['reach'][str(L)] for r in rows if str(L) in r['reach'] and str(L+1) in r['reach']]
++    perL[L]={'n':len(ts),'P95':round(q(ts,.95),1),'worst':round(max(ts),1)}
++  res['profiles'][pf]={'MR':{'P50':q(mr,.5),'P95':q(mr,.95),'worst':max(mr),'nOver180':len(over),'over180':over,'top10':worst,
++      'P95le180':q(mr,.95)<=180,'worstle180':max(mr)<=180,'b2deab63Reference':{'P95':q(oldmr,.95),'worst':max(oldmr),'nOver180':sum(x>180 for x in oldmr)}},
++    'pacing':{'nReached30':len(tot),'P10':round(q(tot,.1),1),'P50':round(P50,1),'P90':round(q(tot,.9),1),'ref':REF[pf],'P50vsRef':round(ratio,5),'PL_AC3_pass':abs(ratio)<=0.10,
++      'PL_AC2_maxP95':max(v['P95'] for v in perL.values()),'PL_AC2_pass':all(v['P95']<=180 for v in perL.values()),'PL_AC2_perL':perL},
++    'perSeed':[{'seed':r['seed'],'mrLongest':r['mrLongest'],'tot10_30':round(r['reach']['30']-r['reach']['10'],1) if '30' in r['reach'] else None,'b2deab63MrLongest':d['b2deab63MrLongest'],
++      'nestPositive':d['nestPositive'],'nestCreditedCents':d['nestCreditedCents']} for r,d in zip(rows,drows)]}
++  pos=[{'profile':pf,'seed':d['seed'],'nestFirstT':d['nestFirstT'],'nestMax':d['nestMax'],'nestEnd':d['nestEnd'],'credits':d['nestCredits'],'creditedCents':d['nestCreditedCents'],'firstCredits':d['nestLog'][:5]}
++       for d in drows if d['nestPositive'] or d['nestCredits'] or d['nestEnd'] or d['broodySrcCents']]
++  allnest+=pos
++  res['nest'][pf]={'runs':200,'nestPositiveRuns':len(pos),'coopHandHiredRuns':sum(d['coopHandHired'] for d in drows),'broodySrcCentsTotal':sum(d['broodySrcCents'] for d in drows)}
++res['nest']['all']={'runs':600,'nestPositiveRuns':len(allnest),'list':allnest}
++json.dump(res,open(D/'results.json','w'),indent=1)
++for pf,p in res['profiles'].items():
++  m,pc=p['MR'],p['pacing']; print(pf,'MR P50/P95/worst/n>180',m['P50'],m['P95'],m['worst'],m['nOver180'],[ (o['seed'],o['mrLongest'],o['level']) for o in m['over180']],'| old',m['b2deab63Reference'],
++    '| tot P10/P50/P90',pc['P10'],pc['P50'],pc['P90'],'vs',pc['ref'],pc['P50vsRef'],pc['PL_AC3_pass'],'| PL-AC2 maxP95',pc['PL_AC2_maxP95'],pc['PL_AC2_pass'],'n30',pc['nReached30'])
++print(json.dumps(res['parity'],indent=0)); print(json.dumps({k:v for k,v in res['nest'].items() if k!='all'}), 'nest>0 runs:',res['nest']['all']['nestPositiveRuns'])
++# PL-AC1 (product/m5-gate-acs.md L871-876): tstep = round(P50(L)/P50(L-1),3) <= 2 for L in 11..29
++for pf in ['optimal','seller15','casual']:
++  rows=json.load(open(D/f'raw-{pf}.json'))['prof'][pf]['rows']
++  P50={L:q([r['reach'][str(L+1)]-r['reach'][str(L)] for r in rows],.5) for L in range(10,30)}
++  ts={L:round(P50[L]/P50[L-1],3) for L in range(11,30)}
++  res['profiles'][pf]['pacing'].update({'PL_AC1_tstep':ts,'PL_AC1_max':max(ts.values()),'PL_AC1_pass':all(v<=2 for v in ts.values()),'P50_time_on_L':{L:round(v,1) for L,v in P50.items()}})
++  print(pf,'PL-AC1 max tstep',max(ts.values()),[L for L,v in ts.items() if v>2])
++json.dump(res,open(D/'results.json','w'),indent=1)

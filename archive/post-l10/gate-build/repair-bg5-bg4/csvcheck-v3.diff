@@ -1,0 +1,273 @@
+--- v2/pkg/csvcheck.py
++++ v3/pkg/csvcheck.py
+@@ -11,7 +11,11 @@
+ BG5/BG5b repair (repair-bg5-bg4, evidence-contract.md EC-4 + D-HOP-2026-11-09-05): bc_ listing approval_ref/b4_run_ref and
+ --allow-families `authority` PASS only when independently VERIFIED: (i) cite an entry ID in decisions files; (ii) owning authority
+ (D-HOP for bc_/FAM, QA-D for B4); (iii) entry contains full 64-hex sha256 of the artifact and on-disk file matches. Otherwise
+-CONDITIONAL-UNMET (structural errors still FAIL). Synthetic tests pass TEMP decisions files via decisions_paths; never write real decisions.md."""
++CONDITIONAL-UNMET (structural errors still FAIL). Synthetic tests pass TEMP decisions files via decisions_paths; never write real decisions.md.
++v3 (QA-D-1110-BG54CERT D-1/D-2/D-3 + D-HOP-2026-11-10-06): authority = the FILE an ID is defined in (D-HOP product/decisions.md,
++QA-D qa/decisions.md, D-CEO root decisions.md, D-HOE engineering/decisions.md, D-PMW product/workers/decisions.md); an entry is
++the exact leading token of a `## ` heading outside ``` / ~~~ fences; duplicate definitions never verify; B4 manifest needs
++non-empty integer seeds and a harness sha matching the harness file on disk; synthetic mode reads no live decisions file."""
+ REF_UNVERIFIED = 'NOT VERIFIED: reference failed D-HOP-2026-11-09-05 checks (entry/authority/artifact sha256)'
+ REF_VERIFIED = 'VERIFIED: entry ID + owning authority + artifact sha256 match on disk (D-HOP-2026-11-09-05)'
+ import argparse, csv, io, json, os, re, sys
+@@ -19,32 +23,99 @@
+ import gatecommon as G
+ 
+ _HEX64 = re.compile(r'\b[a-f0-9]{64}\b')
+-_DHOP = re.compile(r'D-HOP-\d{4}-\d{2}-\d{2}-\d+')
+-_QAD = re.compile(r'QA-D-[A-Z0-9-]+')
++# ref-side IDs: exact tokens, not glued to other ID characters (QA-D-1110-BG54CERT D-1; D-HOP-2026-11-10-06)
++_DHOP = re.compile(r'(?<![A-Za-z0-9_-])D-HOP-\d{4}-\d{2}-\d{2}-\d+(?![A-Za-z0-9_-])')
++_QAD = re.compile(r'(?<![A-Za-z0-9_-])QA-D-[A-Z0-9]+(?:-[A-Z0-9]+)*(?![A-Za-z0-9_-])')
+ _PATH = re.compile(r'path=(\S+)')
+-_DEFAULT_DECISIONS = (
+-    '/workspace/egg-farm-studio/product/decisions.md',
+-    '/workspace/egg-farm-studio/decisions.md',
+-)
++# heading-side: the ENTIRE leading token of a level-2 `## ` heading must be the ID
++_ENTRY_ID = re.compile(r'(?:D-HOP|D-CEO|D-HOE|D-PMW|QA-D)-[A-Z0-9]+(?:-[A-Z0-9]+)*')
++_H2 = re.compile(r'##[ \t]+(\S+)')
++_ENTRY_END = re.compile(r'#{1,2}(?:[ \t]|$)')
++_FENCE_OPEN = re.compile(r' {0,3}(`{3,}|~{3,})')
++# D-HOP-2026-11-10-06: authority = the FILE an ID is defined in, never its prefix
++_ROLE_OF_PREFIX = {'D-HOP': 'product', 'QA-D': 'qa', 'D-CEO': 'root', 'D-HOE': 'engineering', 'D-PMW': 'workers'}
++_ROLES = ('root', 'product', 'qa', 'engineering', 'workers')
++_DEFAULT_DECISIONS = {
++    'root': '/workspace/egg-farm-studio/decisions.md',
++    'product': '/workspace/egg-farm-studio/product/decisions.md',
++    'qa': '/workspace/egg-farm-studio/qa/decisions.md',
++    'engineering': '/workspace/egg-farm-studio/engineering/decisions.md',
++    'workers': '/workspace/egg-farm-studio/product/workers/decisions.md',
++}
++
++
++def _role_of_path(path):
++    """Classify a decisions file by its position in the (mirrored) layout. Unknown names -> None (ignored)."""
++    parts = os.path.normpath(str(path)).split(os.sep)
++    if not parts or parts[-1] != 'decisions.md':
++        return None
++    parent = parts[-2] if len(parts) >= 2 else ''
++    grand = parts[-3] if len(parts) >= 3 else ''
++    if parent == 'workers' and grand == 'product':
++        return 'workers'
++    if parent in ('product', 'qa', 'engineering'):
++        return parent
++    return 'root'
++
++
++def _decision_files(decisions_paths):
++    """-> [(role, path)]. dict = explicit {role: path}; str/list = classified by path layout."""
++    if not decisions_paths:
++        return []
++    if isinstance(decisions_paths, dict):
++        return [(r, p) for r, p in decisions_paths.items() if r in _ROLES and p]
++    if isinstance(decisions_paths, str):
++        decisions_paths = [decisions_paths]
++    out = []
++    for p in decisions_paths:
++        r = _role_of_path(p) if p else None
++        if r:
++            out.append((r, p))
++    return out
++
++
++def _entries_in_text(text):
++    """Yield (entry_id, body) for each `## <ID>` heading outside code fences whose leading token IS a known ID.
++    Body runs to the next level-1/2 heading outside fences (### subheadings stay in the body)."""
++    fence = None  # (char, length) while inside a fenced block
++    cur = None    # [id, body_lines]
++    for line in text.splitlines():
++        if fence is not None:
++            m = re.match(r' {0,3}(`{3,}|~{3,})[ \t]*$', line)
++            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
++                fence = None
++            if cur is not None:
++                cur[1].append(line)
++            continue
++        fm = _FENCE_OPEN.match(line)
++        if fm and not (fm.group(1)[0] == '`' and '`' in line[fm.end():]):
++            fence = (fm.group(1)[0], len(fm.group(1)))
++            if cur is not None:
++                cur[1].append(line)
++            continue
++        if _ENTRY_END.match(line):
++            if cur is not None:
++                yield cur[0], '\n'.join(cur[1])
++                cur = None
++            hm = _H2.match(line)
++            if hm and _ENTRY_ID.fullmatch(hm.group(1)):
++                cur = [hm.group(1), []]
++            continue
++        if cur is not None:
++            cur[1].append(line)
++    if cur is not None:
++        yield cur[0], '\n'.join(cur[1])
+ 
+ 
+-def _read_entries(paths):
+-    """Parse ##/### headings that look like D-HOP-/QA-D- IDs -> {id: body text}."""
++def _read_entries(decisions_paths):
++    """-> {id: [(role, body), ...]} over all decisions files (every definition kept; duplicates detected by caller)."""
+     out = {}
+-    for path in paths or []:
+-        if not path or not os.path.isfile(path):
++    for role, path in _decision_files(decisions_paths):
++        if not os.path.isfile(path):
+             continue
+         text = open(path, encoding='utf-8', errors='replace').read()
+-        # split on markdown headings
+-        parts = re.split(r'(?m)^(#{1,3}[ \t]+.+)$', text)
+-        # parts: [preamble, heading, body, heading, body, ...]
+-        i = 1
+-        while i < len(parts) - 1:
+-            heading, body = parts[i], parts[i + 1]
+-            i += 2
+-            ids = _DHOP.findall(heading) + _QAD.findall(heading)
+-            for eid in ids:
+-                out.setdefault(eid, body)
++        for eid, body in _entries_in_text(text):
++            out.setdefault(eid, []).append((role, body))
+     return out
+ 
+ 
+@@ -55,7 +126,8 @@
+ 
+ 
+ def _b4_manifest_ok(path, candidate_sha):
+-    """B4 artifact: JSON run manifest listing csv sha256, seeds, config, harness sha; csv sha == candidate."""
++    """B4 artifact: JSON run manifest listing csv sha256, non-empty seeds, config, harness sha + harness path; csv sha ==
++    candidate; harness file on disk hashes to the listed harness sha (QA-D-1110-BG54CERT D-2)."""
+     if not path or not os.path.isfile(path):
+         return False, 'b4 manifest missing'
+     try:
+@@ -77,66 +149,77 @@
+     seeds = _get('seeds')
+     config = _get('config', 'cfg')
+     harness = _get('harness_sha', 'harnessSha', 'harness_sha256')
+-    if harness is None and isinstance(m.get('harness'), dict):
+-        harness = m['harness'].get('sha256')
+-    missing = [n for n, v in (('csv_sha256', csv_sha), ('seeds', seeds), ('config', config), ('harness_sha', harness)) if v in (None, '')]
++    hpath = _get('harness_path', 'harnessPath')
++    if isinstance(m.get('harness'), dict):
++        harness = harness if harness is not None else m['harness'].get('sha256')
++        hpath = hpath if hpath is not None else m['harness'].get('path')
++    missing = [n for n, v in (('csv_sha256', csv_sha), ('seeds', seeds), ('config', config), ('harness_sha', harness),
++                              ('harness_path', hpath)) if v in (None, '')]
+     if missing:
+         return False, f'b4 manifest missing fields: {missing}'
+     if not (isinstance(csv_sha, str) and _HEX64.fullmatch(csv_sha)):
+         return False, 'b4 manifest csv_sha256 not 64-hex'
+     if csv_sha != candidate_sha:
+         return False, 'b4 manifest csv_sha256 != candidate'
++    if not (isinstance(seeds, list) and seeds and all(isinstance(x, int) and not isinstance(x, bool) for x in seeds)):
++        return False, 'b4 manifest seeds must be a non-empty list of integers'
+     if not (isinstance(harness, str) and _HEX64.fullmatch(harness)):
+         return False, 'b4 manifest harness_sha not 64-hex'
++    if not isinstance(hpath, str):
++        return False, 'b4 manifest harness_path not a string'
++    hp = hpath if os.path.isabs(hpath) else os.path.join(os.path.dirname(os.path.abspath(path)), hpath)
++    hs = _artifact_sha(hp)
++    if hs is None:
++        return False, f'b4 harness file missing: {hpath!r}'
++    if hs != harness:
++        return False, 'b4 manifest harness_sha != sha256 of harness file on disk'
+     return True, 'ok'
+ 
+ 
+-
+ def verify_ref(ref, *, kind, artifact_path, decisions_paths, candidate_sha):
+     """Return (verified: bool, reason: str).
+-    kind: 'bc_approval' | 'fam_authority' | 'b4_run'
+-    artifact_path: candidate CSV (bc_/FAM) or B4 run manifest path (b4_run; may also be parsed from ref via path=)
+-    """
++    kind: 'bc_approval' | 'fam_authority' (D-HOP, product/decisions.md) | 'b4_run' (QA-D, qa/decisions.md)
++    artifact_path: candidate CSV (bc_/FAM) or B4 run manifest path (b4_run; taken from ref via path=)
++    D-HOP-2026-11-10-06: the ID must be the exact leading token of exactly ONE `##` heading outside code fences, in its own
++    authority file. Anything else -> NOT VERIFIED."""
+     if not (isinstance(ref, str) and ref.strip()):
+         return False, 'empty ref'
+-    entries = _read_entries(decisions_paths)
+     if kind in ('bc_approval', 'fam_authority'):
+-        ids = _DHOP.findall(ref)
+-        want_prefix = 'D-HOP-'
++        ids_src, rx, want_prefix = ref, _DHOP, 'D-HOP'
+     elif kind == 'b4_run':
+-        ids = _QAD.findall(ref)
+-        want_prefix = 'QA-D-'
+         m = _PATH.search(ref)
+-        if m:
+-            artifact_path = m.group(1)
++        artifact_path = m.group(1) if m else None
++        ids_src, rx, want_prefix = _PATH.sub(' ', ref), _QAD, 'QA-D'
+     else:
+         return False, f'unknown kind {kind}'
++    ids = sorted(set(rx.findall(ids_src)))
+     if not ids:
+-        return False, f'no {want_prefix} entry ID cited'
+-    # use the first cited id of the right family
++        return False, f'no {want_prefix}- entry ID cited'
++    if len(ids) > 1:
++        return False, f'ambiguous ref: cites {len(ids)} distinct {want_prefix}- IDs'
+     eid = ids[0]
+-    if eid not in entries:
+-        return False, f'entry {eid} not found in decisions files'
+-    body = entries[eid]
+-    # authority already enforced by which regex we used + heading must contain that id
+-    if kind in ('bc_approval', 'fam_authority') and not eid.startswith('D-HOP-'):
+-        return False, 'approval/FAM requires D-HOP entry'
+-    if kind == 'b4_run' and not eid.startswith('QA-D-'):
+-        return False, 'b4_run_ref requires QA-D entry'
++    want_role = _ROLE_OF_PREFIX[want_prefix]
++    defs = _read_entries(decisions_paths).get(eid, [])
++    if not defs:
++        return False, f'entry {eid} not defined as a ## heading in any decisions file'
++    if len(defs) > 1:
++        return False, f'entry {eid} defined by {len(defs)} headings (duplicate -> not verified)'
++    role, body = defs[0]
++    if role != want_role:
++        return False, f'entry {eid} defined in the {role} decisions file; {want_prefix} authority file is {want_role}'
++    if kind == 'b4_run' and artifact_path is None:
++        return False, 'b4_run_ref has no path= to the run manifest'
+     art_sha = _artifact_sha(artifact_path)
+     if art_sha is None:
+         return False, f'artifact missing: {artifact_path!r}'
+     if art_sha not in _HEX64.findall(body):
+         return False, f'entry {eid} does not contain artifact sha256'
+-    # on-disk match is art_sha by construction of _artifact_sha
+     if kind == 'b4_run':
+         ok, why = _b4_manifest_ok(artifact_path, candidate_sha)
+         if not ok:
+             return False, why
+-    else:
+-        # bc_/FAM: artifact is the candidate CSV
+-        if art_sha != candidate_sha:
+-            return False, 'artifact sha != candidate csv sha'
++    elif art_sha != candidate_sha:
++        return False, 'artifact sha != candidate csv sha'
+     return True, f'{eid} ok'
+ 
+ 
+@@ -217,9 +300,8 @@
+     approved = A['rename_map']['approved']
+     fams = _allow(allow_families, A, set(approved.values()))
+     if decisions_paths is None:
+-        decisions_paths = list(_DEFAULT_DECISIONS)
+-    elif isinstance(decisions_paths, str):
+-        decisions_paths = [decisions_paths]
++        # D-3: synthetic (self-test) mode never reads the live decisions files; real mode uses the authority layout
++        decisions_paths = {} if synthetic else dict(_DEFAULT_DECISIONS)
+     C = {}
+     bsha = G.sha256(before)
+     asha = G.sha256(after)
+@@ -519,7 +601,7 @@
+     ap.add_argument('--breeds', type=int, required=True, choices=(0, 1))
+     ap.add_argument('--rename-map'); ap.add_argument('--bc-listing'); ap.add_argument('--allow-families')
+     ap.add_argument('--b4-ref'); ap.add_argument('--synthetic', action='store_true'); ap.add_argument('--out')
+-    ap.add_argument('--decisions', action='append', default=None, help='decisions.md path (repeatable; TEMP fixtures for tests)')
++    ap.add_argument('--decisions', action='append', default=None, help='decisions.md path (repeatable; authority role from its layout position: <root>/decisions.md, product/, qa/, engineering/, product/workers/)')
+     a = ap.parse_args(argv)
+     try:
+         rep = check(a.before, a.after, a.breeds, a.rename_map, a.bc_listing, a.allow_families, a.b4_ref, a.synthetic,

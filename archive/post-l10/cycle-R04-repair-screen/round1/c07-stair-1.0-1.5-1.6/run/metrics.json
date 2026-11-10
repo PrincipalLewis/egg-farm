@@ -1,0 +1,620 @@
+{
+ "informal": true,
+ "ac_claim": "NONE",
+ "rundir": "round1/c07-stair-1.0-1.5-1.6/run",
+ "seeds": [
+  1,
+  200
+ ],
+ "errors": [],
+ "meta": [
+  {
+   "file": "round1/c07-stair-1.0-1.5-1.6/run/raw-optimal.json",
+   "sha256_file": "220a187dcb606a56db31dc6724a70fc49c1089f475f7b859ea9ae8dda84fc4ab",
+   "runner": "pl.ts (SCRATCH)",
+   "cfg": "none",
+   "T": 4000,
+   "csv_sha256": "a984ded43667d3e98a636488598ef80519b7b90cb48a97fdff96bce3f0b6f7c3"
+  },
+  {
+   "file": "round1/c07-stair-1.0-1.5-1.6/run/raw-seller15.json",
+   "sha256_file": "a7719c8f28a4a6a36625ad90c6f447a5e9a2b92bdef8a50d3a32d52e2fdcb329",
+   "runner": "pl.ts (SCRATCH)",
+   "cfg": "none",
+   "T": 4000,
+   "csv_sha256": "a984ded43667d3e98a636488598ef80519b7b90cb48a97fdff96bce3f0b6f7c3"
+  },
+  {
+   "file": "round1/c07-stair-1.0-1.5-1.6/run/raw-casual.json",
+   "sha256_file": "42cb9eed5bdafc306f3511637080217a1a6bd79ba035dbd42b7ec38f30a1e0d1",
+   "runner": "pl.ts (SCRATCH)",
+   "cfg": "none",
+   "T": 4000,
+   "csv_sha256": "a984ded43667d3e98a636488598ef80519b7b90cb48a97fdff96bce3f0b6f7c3"
+  }
+ ],
+ "prof": {
+  "optimal": {
+   "unreached_L30": [],
+   "level": {
+    "11": {
+     "P50": "46.3",
+     "P95": "80.9",
+     "tW": "104.4",
+     "tstep": "1.092",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 40
+    },
+    "12": {
+     "P50": "58.3",
+     "P95": "95.6",
+     "tW": "122.8",
+     "tstep": "1.259",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 43
+    },
+    "13": {
+     "P50": "64.6",
+     "P95": "111.0",
+     "tW": "142.8",
+     "tstep": "1.108",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 40
+    },
+    "14": {
+     "P50": "74.8",
+     "P95": "103.9",
+     "tW": "113.7",
+     "tstep": "1.158",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 47
+    },
+    "15": {
+     "P50": "107.6",
+     "P95": "148.5",
+     "tW": "165.7",
+     "tstep": "1.439",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 38
+    },
+    "16": {
+     "P50": "91.7",
+     "P95": "129.4",
+     "tW": "140.3",
+     "tstep": "0.852",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 2
+    },
+    "17": {
+     "P50": "142.4",
+     "P95": "218.2",
+     "tW": "224.4",
+     "tstep": "1.553",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 69
+    },
+    "18": {
+     "P50": "144.0",
+     "P95": "174.3",
+     "tW": "181.6",
+     "tstep": "1.011",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 12
+    },
+    "19": {
+     "P50": "68.7",
+     "P95": "100.1",
+     "tW": "112.1",
+     "tstep": "0.477",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 0
+    },
+    "20": {
+     "P50": "73.2",
+     "P95": "99.7",
+     "tW": "133.1",
+     "tstep": "1.066",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 25
+    },
+    "21": {
+     "P50": "104.7",
+     "P95": "127.5",
+     "tW": "175.1",
+     "tstep": "1.430",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 54
+    },
+    "22": {
+     "P50": "90.0",
+     "P95": "152.8",
+     "tW": "197.1",
+     "tstep": "0.860",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 3
+    },
+    "23": {
+     "P50": "155.6",
+     "P95": "189.3",
+     "tW": "196.3",
+     "tstep": "1.729",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 70
+    },
+    "24": {
+     "P50": "118.3",
+     "P95": "209.3",
+     "tW": "260.0",
+     "tstep": "0.760",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 23
+    },
+    "25": {
+     "P50": "64.7",
+     "P95": "89.8",
+     "tW": "96.2",
+     "tstep": "0.547",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 0
+    },
+    "26": {
+     "P50": "102.2",
+     "P95": "109.0",
+     "tW": "197.2",
+     "tstep": "1.580",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 5
+    },
+    "27": {
+     "P50": "214.0",
+     "P95": "220.6",
+     "tW": "230.4",
+     "tstep": "2.094",
+     "ac1_ok": false,
+     "ac2_ok": false,
+     "seeds_over_2x": 131
+    },
+    "28": {
+     "P50": "99.4",
+     "P95": "194.2",
+     "tW": "245.7",
+     "tstep": "0.464",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 6
+    },
+    "29": {
+     "P50": "142.0",
+     "P95": "148.1",
+     "tW": "161.4",
+     "tstep": "1.429",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 0
+    }
+   },
+   "P50_L10": "42.4",
+   "tot10_30_P50_s": "1999.8",
+   "total_pm10": [
+    "-0.0549",
+    true
+   ],
+   "ac1_fail": [
+    "L27 x2.094"
+   ],
+   "ac2_fail": [
+    "L17 218.2s",
+    "L23 189.3s",
+    "L24 209.3s",
+    "L27 220.6s",
+    "L28 194.2s"
+   ]
+  },
+  "seller15": {
+   "unreached_L30": [],
+   "level": {
+    "11": {
+     "P50": "50.6",
+     "P95": "87.8",
+     "tW": "131.1",
+     "tstep": "1.213",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 51
+    },
+    "12": {
+     "P50": "58.2",
+     "P95": "97.9",
+     "tW": "128.1",
+     "tstep": "1.150",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 39
+    },
+    "13": {
+     "P50": "70.8",
+     "P95": "113.3",
+     "tW": "157.4",
+     "tstep": "1.216",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 42
+    },
+    "14": {
+     "P50": "61.2",
+     "P95": "109.4",
+     "tW": "121.6",
+     "tstep": "0.864",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 36
+    },
+    "15": {
+     "P50": "118.7",
+     "P95": "166.5",
+     "tW": "181.5",
+     "tstep": "1.940",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 87
+    },
+    "16": {
+     "P50": "65.5",
+     "P95": "126",
+     "tW": "148.0",
+     "tstep": "0.552",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 1
+    },
+    "17": {
+     "P50": "97.4",
+     "P95": "189.8",
+     "tW": "226.1",
+     "tstep": "1.487",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 72
+    },
+    "18": {
+     "P50": "151.8",
+     "P95": "199.1",
+     "tW": "231.7",
+     "tstep": "1.559",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 70
+    },
+    "19": {
+     "P50": "69.8",
+     "P95": "109.2",
+     "tW": "164.4",
+     "tstep": "0.460",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 3
+    },
+    "20": {
+     "P50": "57.6",
+     "P95": "99.0",
+     "tW": "144.0",
+     "tstep": "0.825",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 9
+    },
+    "21": {
+     "P50": "109.2",
+     "P95": "162.9",
+     "tW": "180.6",
+     "tstep": "1.896",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 97
+    },
+    "22": {
+     "P50": "98.0",
+     "P95": "136.6",
+     "tW": "168.6",
+     "tstep": "0.897",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 7
+    },
+    "23": {
+     "P50": "74.0",
+     "P95": "142.8",
+     "tW": "213.1",
+     "tstep": "0.755",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 5
+    },
+    "24": {
+     "P50": "189.0",
+     "P95": "238.7",
+     "tW": "270.5",
+     "tstep": "2.554",
+     "ac1_ok": false,
+     "ac2_ok": false,
+     "seeds_over_2x": 129
+    },
+    "25": {
+     "P50": "81.0",
+     "P95": "122.8",
+     "tW": "158.1",
+     "tstep": "0.429",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 0
+    },
+    "26": {
+     "P50": "113.7",
+     "P95": "208.2",
+     "tW": "265.1",
+     "tstep": "1.404",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 51
+    },
+    "27": {
+     "P50": "206.4",
+     "P95": "234.7",
+     "tW": "257.8",
+     "tstep": "1.815",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 79
+    },
+    "28": {
+     "P50": "100.2",
+     "P95": "187.7",
+     "tW": "207.1",
+     "tstep": "0.485",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 5
+    },
+    "29": {
+     "P50": "140.5",
+     "P95": "156.4",
+     "tW": "175.6",
+     "tstep": "1.402",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 2
+    }
+   },
+   "P50_L10": "41.7",
+   "tot10_30_P50_s": "1978.4",
+   "total_pm10": [
+    "-0.0580",
+    true
+   ],
+   "ac1_fail": [
+    "L24 x2.554"
+   ],
+   "ac2_fail": [
+    "L17 189.8s",
+    "L18 199.1s",
+    "L24 238.7s",
+    "L26 208.2s",
+    "L27 234.7s",
+    "L28 187.7s"
+   ]
+  },
+  "casual": {
+   "unreached_L30": [],
+   "level": {
+    "11": {
+     "P50": "49.0",
+     "P95": "94.4",
+     "tW": "144.0",
+     "tstep": "1.116",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 39
+    },
+    "12": {
+     "P50": "54",
+     "P95": "98.5",
+     "tW": "121.5",
+     "tstep": "1.102",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 32
+    },
+    "13": {
+     "P50": "62.7",
+     "P95": "110.3",
+     "tW": "141.1",
+     "tstep": "1.161",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 39
+    },
+    "14": {
+     "P50": "49.9",
+     "P95": "92.9",
+     "tW": "159.4",
+     "tstep": "0.796",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 19
+    },
+    "15": {
+     "P50": "121.3",
+     "P95": "176.1",
+     "tW": "212.5",
+     "tstep": "2.431",
+     "ac1_ok": false,
+     "ac2_ok": true,
+     "seeds_over_2x": 114
+    },
+    "16": {
+     "P50": "56.4",
+     "P95": "97.1",
+     "tW": "136.4",
+     "tstep": "0.465",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 4
+    },
+    "17": {
+     "P50": "71.4",
+     "P95": "160.5",
+     "tW": "232.2",
+     "tstep": "1.266",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 54
+    },
+    "18": {
+     "P50": "152",
+     "P95": "198.7",
+     "tW": "318.6",
+     "tstep": "2.129",
+     "ac1_ok": false,
+     "ac2_ok": false,
+     "seeds_over_2x": 97
+    },
+    "19": {
+     "P50": "80.0",
+     "P95": "117.8",
+     "tW": "157.6",
+     "tstep": "0.526",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 3
+    },
+    "20": {
+     "P50": "43.1",
+     "P95": "83.9",
+     "tW": "163.0",
+     "tstep": "0.539",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 3
+    },
+    "21": {
+     "P50": "109.4",
+     "P95": "159.0",
+     "tW": "247.5",
+     "tstep": "2.538",
+     "ac1_ok": false,
+     "ac2_ok": true,
+     "seeds_over_2x": 103
+    },
+    "22": {
+     "P50": "105.3",
+     "P95": "145.5",
+     "tW": "181.4",
+     "tstep": "0.963",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 10
+    },
+    "23": {
+     "P50": "65.1",
+     "P95": "111.2",
+     "tW": "158.4",
+     "tstep": "0.618",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 3
+    },
+    "24": {
+     "P50": "198.3",
+     "P95": "248.0",
+     "tW": "295.1",
+     "tstep": "3.046",
+     "ac1_ok": false,
+     "ac2_ok": false,
+     "seeds_over_2x": 152
+    },
+    "25": {
+     "P50": "90.0",
+     "P95": "162.8",
+     "tW": "211.4",
+     "tstep": "0.454",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 0
+    },
+    "26": {
+     "P50": "142.1",
+     "P95": "234.7",
+     "tW": "257.7",
+     "tstep": "1.579",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 73
+    },
+    "27": {
+     "P50": "164.1",
+     "P95": "239.1",
+     "tW": "287.0",
+     "tstep": "1.155",
+     "ac1_ok": true,
+     "ac2_ok": false,
+     "seeds_over_2x": 52
+    },
+    "28": {
+     "P50": "99.1",
+     "P95": "148.2",
+     "tW": "168.5",
+     "tstep": "0.604",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 2
+    },
+    "29": {
+     "P50": "141.8",
+     "P95": "178.9",
+     "tW": "208.7",
+     "tstep": "1.431",
+     "ac1_ok": true,
+     "ac2_ok": true,
+     "seeds_over_2x": 36
+    }
+   },
+   "P50_L10": "43.9",
+   "tot10_30_P50_s": "1926.4",
+   "total_pm10": [
+    "-0.0564",
+    true
+   ],
+   "ac1_fail": [
+    "L15 x2.431",
+    "L18 x2.129",
+    "L21 x2.538",
+    "L24 x3.046"
+   ],
+   "ac2_fail": [
+    "L18 198.7s",
+    "L24 248.0s",
+    "L26 234.7s",
+    "L27 239.1s"
+   ]
+  }
+ },
+ "PL_AC1": "FAIL",
+ "PL_AC2": "FAIL",
+ "PL_AC3": "PASS-INFORMAL"
+}

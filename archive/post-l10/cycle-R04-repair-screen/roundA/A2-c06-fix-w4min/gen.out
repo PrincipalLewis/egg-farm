@@ -1,0 +1,1 @@
+{"out": "roundA/A2-c06-fix-w4min/candidate.csv", "sha256": "8a12c0006d37564a5b713ac342a5304833dda0073eea968f460717d79bdc2cd9", "w4_tier5": 33519, "o1a_left": ["F27 farm_cost 118224 != o1a 160000", "F28 farm_cost 153691 != o1a 175000", "F29 farm_cost 199798 != o1a 190000"]}

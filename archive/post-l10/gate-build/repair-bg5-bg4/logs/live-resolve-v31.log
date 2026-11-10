@@ -1,0 +1,22 @@
+READ-ONLY live check, v3.1 csvcheck bc464c981f08dc82542a7cc3331fa91934eb8e703bce43788cbf1a57a66efd92
+decisions.md 6b7660954812a6c0118ce1b804833161ba33d7be6af15af6dafeac0f23719980
+engineering/decisions.md 20d38ceedef26ee150095cdcc642324fed09904c6956b201e27a265dfd68c724
+product/decisions.md 8bef2deb8bbe4591e08378a88795bea7c19e8486cfd3676ef0311970478ed032
+qa/decisions.md 2429d6519b3e867c46400f0abcc7c22765343d729851a9ea6196b22836c09561
+D-CEO   resolved=  25 failed=  0
+D-COL   resolved=  31 failed=  0
+D-ECON  resolved=   2 failed=  0
+D-HOE   resolved=  60 failed=  0
+D-HOP   resolved=  86 failed=  1
+D-PMW   resolved=  43 failed=  0
+QA-D    resolved=  58 failed=  0
+  FAIL D-HOP-2026-10-24-11: entry D-HOP-2026-10-24-11 defined by 2 headings (duplicate)
+raw `## D-PMW-` heading lines in product/decisions.md: 43
+QA-D-1106-GATEBUILD-R2 True qa/decisions.md ok
+QA-D-1110-BG54CERT True qa/decisions.md ok
+D-HOP-2026-11-10-10 True product/decisions.md ok
+D-HOP-2026-11-06-02 True product/decisions.md ok
+D-HOP-2026-10-24-11 False None entry D-HOP-2026-10-24-11 defined by 2 headings (duplicate)
+QA-D-1030-FC0321 False None entry QA-D-1030-FC0321 not defined as a ## heading in any authority file
+D-HOP-2026-10-30-42 False None entry D-HOP-2026-10-30-42 not defined as a ## heading in any authority file
+evidence copy D-HOE headings: 53 (file never read by the tool)

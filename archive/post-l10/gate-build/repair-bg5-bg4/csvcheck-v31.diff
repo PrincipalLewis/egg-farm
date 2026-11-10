@@ -1,0 +1,381 @@
+--- v3/pkg/csvcheck.py
++++ v3.1/pkg/csvcheck.py
+@@ -15,9 +15,16 @@
+ v3 (QA-D-1110-BG54CERT D-1/D-2/D-3 + D-HOP-2026-11-10-06): authority = the FILE an ID is defined in (D-HOP product/decisions.md,
+ QA-D qa/decisions.md, D-CEO root decisions.md, D-HOE engineering/decisions.md, D-PMW product/workers/decisions.md); an entry is
+ the exact leading token of a `## ` heading outside ``` / ~~~ fences; duplicate definitions never verify; B4 manifest needs
+-non-empty integer seeds and a harness sha matching the harness file on disk; synthetic mode reads no live decisions file."""
++non-empty integer seeds and a harness sha matching the harness file on disk; synthetic mode reads no live decisions file.
++v3.1 (D-HOP-2026-11-10-10, amends -06): (1) every ref that is not VERIFIED makes P5IB / FAM **FAIL** (CONDITIONAL-UNMET is
++kept only for the non-ref breeds=1 CAP item). (2) Authority by EXACT path relative to the studio root (--decisions-root,
++default /workspace/egg-farm-studio; synthetic default none): D-CEO decisions.md; D-HOE engineering/decisions.md; QA-D
++qa/decisions.md; D-HOP/D-PMW/D-COL/D-ECON/D-PMFU/D-PMM product/decisions.md; any other prefix FAILS; no other path is ever
++read. (3) R-1 harness: with a pin (--harness-pin / R1_HARNESS_PIN) the manifest harness sha must equal it -> PINNED; without
++a pin the manifest-named file is still checked and P5IB reads UNPINNED, which is never PASS."""
+ REF_UNVERIFIED = 'NOT VERIFIED: reference failed D-HOP-2026-11-09-05 checks (entry/authority/artifact sha256)'
+ REF_VERIFIED = 'VERIFIED: entry ID + owning authority + artifact sha256 match on disk (D-HOP-2026-11-09-05)'
++REF_UNPINNED = 'UNPINNED: refs verified but no R-1 harness-of-record pin exists (D-HOP-2026-11-10-03/-10 (3)); never PASS'
+ import argparse, csv, io, json, os, re, sys
+ from decimal import Decimal
+ import gatecommon as G
+@@ -28,50 +35,21 @@
+ _QAD = re.compile(r'(?<![A-Za-z0-9_-])QA-D-[A-Z0-9]+(?:-[A-Z0-9]+)*(?![A-Za-z0-9_-])')
+ _PATH = re.compile(r'path=(\S+)')
+ # heading-side: the ENTIRE leading token of a level-2 `## ` heading must be the ID
+-_ENTRY_ID = re.compile(r'(?:D-HOP|D-CEO|D-HOE|D-PMW|QA-D)-[A-Z0-9]+(?:-[A-Z0-9]+)*')
++_ENTRY_ID = re.compile(r'(?:QA-D|D-[A-Z]+)-[A-Z0-9]+(?:-[A-Z0-9]+)*')  # any prefix is parsed; unknown prefixes FAIL in resolve_entry
+ _H2 = re.compile(r'##[ \t]+(\S+)')
+ _ENTRY_END = re.compile(r'#{1,2}(?:[ \t]|$)')
+ _FENCE_OPEN = re.compile(r' {0,3}(`{3,}|~{3,})')
+-# D-HOP-2026-11-10-06: authority = the FILE an ID is defined in, never its prefix
+-_ROLE_OF_PREFIX = {'D-HOP': 'product', 'QA-D': 'qa', 'D-CEO': 'root', 'D-HOE': 'engineering', 'D-PMW': 'workers'}
+-_ROLES = ('root', 'product', 'qa', 'engineering', 'workers')
+-_DEFAULT_DECISIONS = {
+-    'root': '/workspace/egg-farm-studio/decisions.md',
+-    'product': '/workspace/egg-farm-studio/product/decisions.md',
+-    'qa': '/workspace/egg-farm-studio/qa/decisions.md',
+-    'engineering': '/workspace/egg-farm-studio/engineering/decisions.md',
+-    'workers': '/workspace/egg-farm-studio/product/workers/decisions.md',
+-}
+-
+-
+-def _role_of_path(path):
+-    """Classify a decisions file by its position in the (mirrored) layout. Unknown names -> None (ignored)."""
+-    parts = os.path.normpath(str(path)).split(os.sep)
+-    if not parts or parts[-1] != 'decisions.md':
+-        return None
+-    parent = parts[-2] if len(parts) >= 2 else ''
+-    grand = parts[-3] if len(parts) >= 3 else ''
+-    if parent == 'workers' and grand == 'product':
+-        return 'workers'
+-    if parent in ('product', 'qa', 'engineering'):
+-        return parent
+-    return 'root'
++# D-HOP-2026-11-10-10 (2) (amends -06): authority = the EXACT file (relative to the studio root) an ID is defined in
++_PRODUCT_PREFIXES = ('D-HOP', 'D-PMW', 'D-COL', 'D-ECON', 'D-PMFU', 'D-PMM')
++_AUTHORITY_FILE = dict({p: 'product/decisions.md' for p in _PRODUCT_PREFIXES},
++                       **{'D-CEO': 'decisions.md', 'D-HOE': 'engineering/decisions.md', 'QA-D': 'qa/decisions.md'})
++_DEFAULT_DECISIONS_ROOT = '/workspace/egg-farm-studio'
++# D-HOP-2026-11-10-10 (3): R-1 harness-of-record sha (D-HOP-2026-11-10-03). None until HoP pins it.
++R1_HARNESS_PIN = None
+ 
+ 
+-def _decision_files(decisions_paths):
+-    """-> [(role, path)]. dict = explicit {role: path}; str/list = classified by path layout."""
+-    if not decisions_paths:
+-        return []
+-    if isinstance(decisions_paths, dict):
+-        return [(r, p) for r, p in decisions_paths.items() if r in _ROLES and p]
+-    if isinstance(decisions_paths, str):
+-        decisions_paths = [decisions_paths]
+-    out = []
+-    for p in decisions_paths:
+-        r = _role_of_path(p) if p else None
+-        if r:
+-            out.append((r, p))
+-    return out
++def _id_prefix(eid):
++    return 'QA-D' if eid.startswith('QA-D-') else '-'.join(eid.split('-')[:2])
+ 
+ 
+ def _entries_in_text(text):
+@@ -107,35 +85,59 @@
+         yield cur[0], '\n'.join(cur[1])
+ 
+ 
+-def _read_entries(decisions_paths):
+-    """-> {id: [(role, body), ...]} over all decisions files (every definition kept; duplicates detected by caller)."""
++def _read_entries(decisions_root):
++    """-> {id: [(relpath, body), ...]} over the exact authority files under decisions_root (every definition kept)."""
+     out = {}
+-    for role, path in _decision_files(decisions_paths):
++    if not decisions_root:
++        return out
++    for rel in sorted(set(_AUTHORITY_FILE.values())):
++        path = os.path.join(decisions_root, *rel.split('/'))
+         if not os.path.isfile(path):
+             continue
+         text = open(path, encoding='utf-8', errors='replace').read()
+         for eid, body in _entries_in_text(text):
+-            out.setdefault(eid, []).append((role, body))
++            out.setdefault(eid, []).append((rel, body))
+     return out
+ 
+ 
++def resolve_entry(eid, decisions_root):
++    """-> (ok, relpath, body, reason). ok only if the prefix is in the authority table and the ID is the leading token of
++    exactly ONE `##` heading (outside fences) across the authority files, and that file is the prefix's own file."""
++    if not decisions_root:
++        return False, None, None, 'no decisions root (synthetic mode reads no live decisions file)'
++    pre = _id_prefix(eid)
++    want = _AUTHORITY_FILE.get(pre)
++    if want is None:
++        return False, None, None, f'unknown prefix {pre} (not in the D-HOP-2026-11-10-10 authority table)'
++    defs = _read_entries(decisions_root).get(eid, [])
++    if not defs:
++        return False, None, None, f'entry {eid} not defined as a ## heading in any authority file'
++    if len(defs) > 1:
++        return False, None, None, f'entry {eid} defined by {len(defs)} headings (duplicate)'
++    rel, body = defs[0]
++    if rel != want:
++        return False, rel, None, f'entry {eid} defined in {rel}; {pre} authority file is {want}'
++    return True, rel, body, 'ok'
++
++
+ def _artifact_sha(path):
+     if not path or not os.path.isfile(path):
+         return None
+     return G.sha256(path)
+ 
+ 
+-def _b4_manifest_ok(path, candidate_sha):
++def _b4_manifest_ok(path, candidate_sha, harness_pin=None):
+     """B4 artifact: JSON run manifest listing csv sha256, non-empty seeds, config, harness sha + harness path; csv sha ==
+-    candidate; harness file on disk hashes to the listed harness sha (QA-D-1110-BG54CERT D-2)."""
++    candidate; harness file on disk hashes to the listed harness sha (QA-D-1110-BG54CERT D-2).
++    -> (status, reason, harness_status): status VERIFIED | UNPINNED | FAIL; harness_status PINNED | UNPINNED | None."""
+     if not path or not os.path.isfile(path):
+-        return False, 'b4 manifest missing'
++        return 'FAIL', 'b4 manifest missing', None
+     try:
+         m = json.load(open(path))
+     except Exception as e:
+-        return False, f'b4 manifest not JSON: {e}'
++        return 'FAIL', f'b4 manifest not JSON: {e}', None
+     if not isinstance(m, dict):
+-        return False, 'b4 manifest not an object'
++        return 'FAIL', 'b4 manifest not an object', None
+ 
+     def _get(*keys):
+         for k in keys:
+@@ -156,34 +158,35 @@
+     missing = [n for n, v in (('csv_sha256', csv_sha), ('seeds', seeds), ('config', config), ('harness_sha', harness),
+                               ('harness_path', hpath)) if v in (None, '')]
+     if missing:
+-        return False, f'b4 manifest missing fields: {missing}'
++        return 'FAIL', f'b4 manifest missing fields: {missing}', None
+     if not (isinstance(csv_sha, str) and _HEX64.fullmatch(csv_sha)):
+-        return False, 'b4 manifest csv_sha256 not 64-hex'
++        return 'FAIL', 'b4 manifest csv_sha256 not 64-hex', None
+     if csv_sha != candidate_sha:
+-        return False, 'b4 manifest csv_sha256 != candidate'
++        return 'FAIL', 'b4 manifest csv_sha256 != candidate', None
+     if not (isinstance(seeds, list) and seeds and all(isinstance(x, int) and not isinstance(x, bool) for x in seeds)):
+-        return False, 'b4 manifest seeds must be a non-empty list of integers'
++        return 'FAIL', 'b4 manifest seeds must be a non-empty list of integers', None
+     if not (isinstance(harness, str) and _HEX64.fullmatch(harness)):
+-        return False, 'b4 manifest harness_sha not 64-hex'
++        return 'FAIL', 'b4 manifest harness_sha not 64-hex', None
+     if not isinstance(hpath, str):
+-        return False, 'b4 manifest harness_path not a string'
++        return 'FAIL', 'b4 manifest harness_path not a string', None
+     hp = hpath if os.path.isabs(hpath) else os.path.join(os.path.dirname(os.path.abspath(path)), hpath)
+     hs = _artifact_sha(hp)
+     if hs is None:
+-        return False, f'b4 harness file missing: {hpath!r}'
++        return 'FAIL', f'b4 harness file missing: {hpath!r}', None
+     if hs != harness:
+-        return False, 'b4 manifest harness_sha != sha256 of harness file on disk'
+-    return True, 'ok'
++        return 'FAIL', 'b4 manifest harness_sha != sha256 of harness file on disk', None
++    if harness_pin is None:
++        return 'UNPINNED', 'harness UNPINNED: manifest-named file matches, no R-1 pin to check against', 'UNPINNED'
++    if harness != harness_pin:
++        return 'FAIL', 'b4 manifest harness_sha != R-1 harness-of-record pin', None
++    return 'VERIFIED', 'ok', 'PINNED'
+ 
+ 
+-def verify_ref(ref, *, kind, artifact_path, decisions_paths, candidate_sha):
+-    """Return (verified: bool, reason: str).
+-    kind: 'bc_approval' | 'fam_authority' (D-HOP, product/decisions.md) | 'b4_run' (QA-D, qa/decisions.md)
+-    artifact_path: candidate CSV (bc_/FAM) or B4 run manifest path (b4_run; taken from ref via path=)
+-    D-HOP-2026-11-10-06: the ID must be the exact leading token of exactly ONE `##` heading outside code fences, in its own
+-    authority file. Anything else -> NOT VERIFIED."""
++def _verify(ref, *, kind, artifact_path, decisions_root, candidate_sha, harness_pin=None):
++    """-> (status, reason, harness_status). status: VERIFIED | UNPINNED (b4_run only) | FAIL.
++    kind: 'bc_approval' | 'fam_authority' (D-HOP) | 'b4_run' (QA-D, manifest via path=)."""
+     if not (isinstance(ref, str) and ref.strip()):
+-        return False, 'empty ref'
++        return 'FAIL', 'empty ref', None
+     if kind in ('bc_approval', 'fam_authority'):
+         ids_src, rx, want_prefix = ref, _DHOP, 'D-HOP'
+     elif kind == 'b4_run':
+@@ -191,38 +194,42 @@
+         artifact_path = m.group(1) if m else None
+         ids_src, rx, want_prefix = _PATH.sub(' ', ref), _QAD, 'QA-D'
+     else:
+-        return False, f'unknown kind {kind}'
++        return 'FAIL', f'unknown kind {kind}', None
+     ids = sorted(set(rx.findall(ids_src)))
+     if not ids:
+-        return False, f'no {want_prefix}- entry ID cited'
++        return 'FAIL', f'no {want_prefix}- entry ID cited', None
+     if len(ids) > 1:
+-        return False, f'ambiguous ref: cites {len(ids)} distinct {want_prefix}- IDs'
++        return 'FAIL', f'ambiguous ref: cites {len(ids)} distinct {want_prefix}- IDs', None
+     eid = ids[0]
+-    want_role = _ROLE_OF_PREFIX[want_prefix]
+-    defs = _read_entries(decisions_paths).get(eid, [])
+-    if not defs:
+-        return False, f'entry {eid} not defined as a ## heading in any decisions file'
+-    if len(defs) > 1:
+-        return False, f'entry {eid} defined by {len(defs)} headings (duplicate -> not verified)'
+-    role, body = defs[0]
+-    if role != want_role:
+-        return False, f'entry {eid} defined in the {role} decisions file; {want_prefix} authority file is {want_role}'
++    if _id_prefix(eid) != want_prefix:
++        return 'FAIL', f'{eid} is not a {want_prefix} entry', None
++    ok, rel, body, why = resolve_entry(eid, decisions_root)
++    if not ok:
++        return 'FAIL', why, None
+     if kind == 'b4_run' and artifact_path is None:
+-        return False, 'b4_run_ref has no path= to the run manifest'
++        return 'FAIL', 'b4_run_ref has no path= to the run manifest', None
+     art_sha = _artifact_sha(artifact_path)
+     if art_sha is None:
+-        return False, f'artifact missing: {artifact_path!r}'
++        return 'FAIL', f'artifact missing: {artifact_path!r}', None
+     if art_sha not in _HEX64.findall(body):
+-        return False, f'entry {eid} does not contain artifact sha256'
++        return 'FAIL', f'entry {eid} does not contain artifact sha256', None
+     if kind == 'b4_run':
+-        ok, why = _b4_manifest_ok(artifact_path, candidate_sha)
+-        if not ok:
+-            return False, why
+-    elif art_sha != candidate_sha:
+-        return False, 'artifact sha != candidate csv sha'
+-    return True, f'{eid} ok'
++        st, why, hst = _b4_manifest_ok(artifact_path, candidate_sha, harness_pin)
++        return st, (f'{eid} ok; {why}' if st != 'FAIL' else why), hst
++    if art_sha != candidate_sha:
++        return 'FAIL', 'artifact sha != candidate csv sha', None
++    return 'VERIFIED', f'{eid} ok', None
+ 
+ 
++def verify_ref(ref, *, kind, artifact_path, candidate_sha, decisions_root=None, harness_pin=None, decisions_paths=None):
++    """Return (verified: bool, reason: str). verified only for status VERIFIED (UNPINNED is not verified).
++    decisions_paths (v2/v3 file-list API) is no longer accepted: any value FAILS (D-HOP-2026-11-10-10 (2), exact paths)."""
++    if decisions_paths is not None:
++        return False, 'decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root'
++    st, why, _ = _verify(ref, kind=kind, artifact_path=artifact_path, decisions_root=decisions_root,
++                         candidate_sha=candidate_sha, harness_pin=harness_pin)
++    return st == 'VERIFIED', why
++
+ 
+ def parse(path):
+     """Return (header, rows[list[dict]], errors[]) with strict structural checks."""
+@@ -293,15 +300,27 @@
+     return {'verdict': verdict, 'detail': detail}
+ 
+ 
+-def check(before, after, breeds, rename_map=None, bc_listing=None, allow_families=None, b4_ref=None, synthetic=False, authority_path=None, decisions_paths=None):
++def check(before, after, breeds, rename_map=None, bc_listing=None, allow_families=None, b4_ref=None, synthetic=False, authority_path=None, decisions_paths=None,
++          decisions_root=None, harness_pin=None):
+     if breeds not in (0, 1):
+         raise ValueError('--breeds must be given explicitly as 0 or 1 (no default: the cap rule depends on it)')
+     A = G.authority(authority_path)
+     approved = A['rename_map']['approved']
+     fams = _allow(allow_families, A, set(approved.values()))
+-    if decisions_paths is None:
+-        # D-3: synthetic (self-test) mode never reads the live decisions files; real mode uses the authority layout
+-        decisions_paths = {} if synthetic else dict(_DEFAULT_DECISIONS)
++    # D-3: synthetic (self-test) mode never reads the live decisions files; real mode uses the studio root.
++    # D-HOP-2026-11-10-10 (2): the legacy decisions_paths file list is not an exact-path layout -> every ref FAILS.
++    legacy_paths = decisions_paths is not None
++    if decisions_root is None and not synthetic:
++        decisions_root = _DEFAULT_DECISIONS_ROOT
++    hpin = harness_pin if harness_pin is not None else R1_HARNESS_PIN
++    if hpin is not None and not (isinstance(hpin, str) and _HEX64.fullmatch(hpin)):
++        raise ValueError('--harness-pin must be a full lowercase 64-hex sha256')
++
++    def vref(ref, kind, artifact_path):
++        if legacy_paths:
++            return 'FAIL', 'decisions_paths file list is not an exact-path layout (D-HOP-2026-11-10-10 (2)); use decisions_root', None
++        return _verify(ref, kind=kind, artifact_path=artifact_path, decisions_root=decisions_root, candidate_sha=asha,
++                       harness_pin=hpin)
+     C = {}
+     bsha = G.sha256(before)
+     asha = G.sha256(after)
+@@ -460,19 +479,21 @@
+                     be2.append(f'{h}: listed but not in CSV')
+     docs = {h: {k: (lst.get('columns') or {}).get(h, {}).get(k) for k in ('approval_ref', 'b4_run_ref')} for h in bc} if (bc and lst) else {}
+     p5_reasons = []
+-    p5_verified = True
++    p5_status = []    # per-ref status: VERIFIED | UNPINNED | FAIL
++    p5_harness = []
+     if bc and not be2 and lst:
+         for h in bc:
+             e = (lst.get('columns') or {}).get(h) or {}
+-            ok_a, why_a = verify_ref(e.get('approval_ref'), kind='bc_approval', artifact_path=after,
+-                                    decisions_paths=decisions_paths, candidate_sha=asha)
+-            ok_b, why_b = verify_ref(e.get('b4_run_ref'), kind='b4_run', artifact_path=None,
+-                                    decisions_paths=decisions_paths, candidate_sha=asha)
++            st_a, why_a, _ = vref(e.get('approval_ref'), 'bc_approval', after)
++            st_b, why_b, hst = vref(e.get('b4_run_ref'), 'b4_run', None)
+             p5_reasons.append(f'{h}: approval_ref={why_a}; b4_run_ref={why_b}')
+-            if not (ok_a and ok_b):
+-                p5_verified = False
++            p5_status += [st_a, st_b]
++            p5_harness.append(hst)
+     elif bc:
+-        p5_verified = False
++        p5_status.append('FAIL')
++    p5_verified = bool(p5_status) and all(x == 'VERIFIED' for x in p5_status)
++    p5_unpinned = bool(p5_status) and 'FAIL' not in p5_status and 'UNPINNED' in p5_status
++    p5_hstat = 'UNPINNED' if 'UNPINNED' in p5_harness else ('PINNED' if p5_harness and all(x == 'PINNED' for x in p5_harness) else None)
+     if be2:
+         p5_verdict = 'FAIL'
+         p5_refv = REF_UNVERIFIED
+@@ -482,10 +503,13 @@
+     elif p5_verified:
+         p5_verdict = 'PASS'
+         p5_refv = REF_VERIFIED
++    elif p5_unpinned:
++        p5_verdict = 'UNPINNED'
++        p5_refv = REF_UNPINNED
+     else:
+-        p5_verdict = 'CONDITIONAL-UNMET'
++        p5_verdict = 'FAIL'
+         p5_refv = REF_UNVERIFIED + (('; ' + ' | '.join(p5_reasons)) if p5_reasons else '')
+-    C['P5IB'] = chk(p5_verdict, bc_columns=bc, errors=be2,
++    C['P5IB'] = chk(p5_verdict, bc_columns=bc, errors=be2, harness_status=p5_hstat,
+                     documentary_refs=docs, ref_verification=p5_refv, verify_reasons=p5_reasons,
+                     note='D-HOP-2026-11-05-15 (3) + D-HOP-2026-11-09-05: approval_ref=D-HOP+CSV sha; b4_run_ref=QA-D+manifest sha')
+     # ---- W4 baseline ----
+@@ -535,10 +559,9 @@
+             # only those actually relied on
+             if not any(auth in a for a in allowed):
+                 continue
+-            ok, why = verify_ref(auth, kind='fam_authority', artifact_path=after,
+-                                 decisions_paths=decisions_paths, candidate_sha=asha)
++            st, why, _ = vref(auth, 'fam_authority', after)
+             fam_reasons.append(f'{auth}: {why}')
+-            if not ok:
++            if st != 'VERIFIED':
+                 fam_verified = False
+     elif allowed:
+         fam_verified = False
+@@ -552,7 +575,7 @@
+         fam_verdict = 'PASS'
+         fam_refv = REF_VERIFIED
+     else:
+-        fam_verdict = 'CONDITIONAL-UNMET'
++        fam_verdict = 'FAIL'
+         fam_refv = REF_UNVERIFIED + (('; ' + ' | '.join(fam_reasons)) if fam_reasons else '')
+     C['FAM'] = chk(fam_verdict, fails=fe[:30], n_fails=len(fe), farm_rows_changed=inscope,
+                    allowlisted=allowed[:30], ref_verification=fam_refv, verify_reasons=fam_reasons,
+@@ -601,11 +624,12 @@
+     ap.add_argument('--breeds', type=int, required=True, choices=(0, 1))
+     ap.add_argument('--rename-map'); ap.add_argument('--bc-listing'); ap.add_argument('--allow-families')
+     ap.add_argument('--b4-ref'); ap.add_argument('--synthetic', action='store_true'); ap.add_argument('--out')
+-    ap.add_argument('--decisions', action='append', default=None, help='decisions.md path (repeatable; authority role from its layout position: <root>/decisions.md, product/, qa/, engineering/, product/workers/)')
++    ap.add_argument('--decisions-root', default=None, help='studio root holding decisions.md, product/, qa/, engineering/ decisions files (exact paths, D-HOP-2026-11-10-10); default /workspace/egg-farm-studio in real mode, none in --synthetic')
++    ap.add_argument('--harness-pin', default=None, help='R-1 harness-of-record sha256 (D-HOP-2026-11-10-03); without it B4 refs read UNPINNED (never PASS)')
+     a = ap.parse_args(argv)
+     try:
+         rep = check(a.before, a.after, a.breeds, a.rename_map, a.bc_listing, a.allow_families, a.b4_ref, a.synthetic,
+-                    decisions_paths=a.decisions)
++                    decisions_root=a.decisions_root, harness_pin=a.harness_pin)
+     except (ValueError, OSError) as e:
+         print(f'input error: {e}', file=sys.stderr); return 2
+     s = json.dumps(rep, indent=1, default=str)

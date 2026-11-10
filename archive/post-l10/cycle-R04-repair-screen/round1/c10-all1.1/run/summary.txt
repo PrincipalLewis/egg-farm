@@ -1,0 +1,4 @@
+PL-AC1 FAIL  PL-AC2 FAIL  PL-AC3 PASS-INFORMAL
+optimal: AC1 fails ['L17 x2.264']  AC2 fails ['L18 180.3s', 'L24 239.2s']  tot 2107.2 ['-0.0042', True]  unreached 0
+seller15: AC1 fails ['L21 x2.167', 'L24 x2.802']  AC2 fails ['L17 188.4s', 'L18 235.3s', 'L24 283.9s', 'L26 189.3s', 'L27 215.4s']  tot 2072.5 ['-0.0132', True]  unreached 0
+casual: AC1 fails ['L15 x2.320', 'L18 x2.035', 'L21 x3.065', 'L24 x4.411']  AC2 fails ['L15 191.4s', 'L18 241.1s', 'L19 208.3s', 'L24 315.4s', 'L26 195.6s', 'L27 231.1s', 'L28 184.3s']  tot 2024.8 ['-0.0082', True]  unreached 0

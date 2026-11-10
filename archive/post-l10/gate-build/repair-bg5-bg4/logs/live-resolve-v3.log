@@ -1,0 +1,12 @@
+READ-ONLY live check, v3 csvcheck f3fab56e6e04c30ab70f06b2acddae8f3faf85a3137278f80bf07800ffece828
+root /workspace/egg-farm-studio/decisions.md cd52b9ec81141b60a710906c7a005d597ec06bcadc303633ec13df0e5f756e2f
+product /workspace/egg-farm-studio/product/decisions.md 9a2f097d20026e10311bfeff8aa39772cbefb9a81954f1a29992e98daf45db12
+qa /workspace/egg-farm-studio/qa/decisions.md 806219c4d31d4eceae5209e8eb14de1892eb6ca93f5838d9de132cb8af067435
+engineering /workspace/egg-farm-studio/engineering/decisions.md 9c4be3d562efa37b1ab746801e4cd79d10cd1d1a9eb10ec4f261df7d6c5ae63c
+workers /workspace/egg-farm-studio/product/workers/decisions.md ABSENT
+QA-D-1106-GATEBUILD-R2 definitions=1 [('qa', '- Report qa/m5/review-gate-build.md sha256 4ea16207… (Re-review 2 appended); proofs in rev')]
+QA-D-1030-FC0321 definitions=0 []
+D-HOP-2026-10-30-42 definitions=0 []
+D-HOP-2026-11-06-02 definitions=1 [('product', '- **Scope:** engineering/evidence-contract only (scratch). **Not** candidate acceptance, s')]
+D-HOP-2026-10-24-11 definitions=2 [('product', 'Ref: `product/research/v2-slices/market.md` §6 (D-CEO-20261024-05). Id assigned by HoP in '), ('product', "Assigns this id to PM Market's slice §6 rulings already logged. Stall cause: Market Hand a")]
+QA-D-1110-BG54CERT definitions=1 [('qa', 'Review: qa/reviews/bg5-bg4-cert-20261110/REVIEW.md sha256 bca888bd94fe440145fcc8bb09309813')]

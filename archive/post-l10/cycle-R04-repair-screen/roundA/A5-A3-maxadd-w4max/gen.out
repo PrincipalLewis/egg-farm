@@ -1,0 +1,1 @@
+{"out": "roundA/A5-A3-maxadd-w4max/candidate.csv", "sha256": "3b88cbac2be6765a7d3ce83abf679d26abcc7a80995b63a32e5ecfc106aee3c3", "w4_tier5": 56723, "o1a_left": ["F27 farm_cost 118224 != o1a 160000", "F28 farm_cost 153691 != o1a 175000", "F29 farm_cost 199798 != o1a 190000"]}
