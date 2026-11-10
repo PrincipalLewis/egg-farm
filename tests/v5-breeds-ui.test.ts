@@ -662,7 +662,9 @@ describe('BR-AC31 aria + incubating DOM', () => {
     const visible = `Hatch · ${fmtMoney(cost)}`;
     expect(btn.getAttribute('aria-label')).toBeNull();
     expect(btn.textContent).toBe(visible);
-    expect(btn.getAttribute('aria-describedby')).toBe('hatch-sub');
+    // BR-UI-14 (pre-bar fix): at F10 with coins ≥ the next Farm step the Farm-soon note shows → hatch-fs joins describedby.
+    const fsShown = !!document.getElementById('hatch-fs');
+    expect(btn.getAttribute('aria-describedby')).toBe(fsShown ? 'hatch-sub hatch-fs' : 'hatch-sub');
     expect(document.getElementById('hatch-sub')!.textContent).toBe('Ready in 1:00');
 
     // Hatching: name = "Hatching…"; describedby Ready in m:ss (ceil)
@@ -678,7 +680,7 @@ describe('BR-AC31 aria + incubating DOM', () => {
     const btn2 = document.querySelector('[data-testid="breeds-hatch"]') as HTMLButtonElement;
     expect(btn2.getAttribute('aria-label')).toBeNull();
     expect(btn2.textContent).toBe('Hatching…');
-    expect(btn2.getAttribute('aria-describedby')).toBe('hatch-sub');
+    expect(btn2.getAttribute('aria-describedby')).toBe(document.getElementById('hatch-fs') ? 'hatch-sub hatch-fs' : 'hatch-sub');
     expect(document.getElementById('hatch-sub')!.textContent).toBe(`Ready in ${fmtRemainMs(45_001)}`);
   });
 

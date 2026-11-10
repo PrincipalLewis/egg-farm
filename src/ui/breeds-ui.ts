@@ -8,7 +8,7 @@ import {
   type BreedsSave, type HatchEstimate, breedAsset, SILHOUETTE_ASSET, SILHOUETTE_OPACITY,
   freeHatchAvailable, flockComplete, eligible, hatchCostCents, openSlotCount, fmtRemainMs,
   ROSTER, BREED_IDS, bc, traitPctExact, familyWord, familyTraitWord, slotTraitBp, starBp, isBreedId,
-  familyClampState, presentMirror,
+  familyClampState, presentMirror, type FamilyClampState, type Family, type BreedId,
 } from './breeds-adapter';
 import type { GameState } from '../sim/state';
 
@@ -26,7 +26,7 @@ export type HatchUiState =
 export function hatchUi(s: GameState, b: Balance, br: BreedsSave): HatchUiState {
   const subReady = 'Ready in 1:00';
   if (flockComplete(br, b)) {
-    return { kind: 'complete', label: 'Flock complete', sub: 'Slots still work', disabled: true };
+    return { kind: 'complete', label: 'Flock complete', sub: 'All 8 breeds at 2★ · slots still work', disabled: true };
   }
   if (br.incubator && br.incubator.remainingMs > 0) {
     const rem = br.incubator.remainingMs;
@@ -41,7 +41,9 @@ export function hatchUi(s: GameState, b: Balance, br: BreedsSave): HatchUiState 
   if (elig.length === 0) {
     const need = s.farmLevel < bc(b, 'rare_farm') ? bc(b, 'rare_farm') : bc(b, 'legendary_farm');
     const label = `More breeds at Farm ${need}`;
-    return { kind: 'gate', label, sub: subReady, disabled: true };
+    // Art §2.1 E5 row: "All Commons at 2★" (F < rare_farm). The F14–23 Legendary gate has no Art sub-line → idle line kept.
+    const sub = need === bc(b, 'rare_farm') ? 'All Commons at 2★' : subReady;
+    return { kind: 'gate', label, sub, disabled: true };
   }
   const cost = hatchCostCents(s, b);
   const label = `Hatch · ${fmtMoney(cost)}`;
@@ -96,7 +98,8 @@ export { rosterName };
 export function slotCardHtml(br: BreedsSave, b: Balance, slot: number, open: number): string {
   if (slot >= open) {
     const need = slot === 1 ? bc(b, 'slot2_farm') : bc(b, 'slot3_farm');
-    return `<div class="slot locked" data-slot="${slot}"><span class="sr">Slot ${slot + 1} Farm ${need}</span><span aria-hidden="true">🔒︎</span><span class="slot-lock">Farm ${need}</span></div>`;
+    // Art §2 L53 / v0.2.7 DB-1: visible "Slot 2 · Farm 14", not a control; 🔒︎ aria-hidden (§7b).
+    return `<div class="slot locked" data-slot="${slot}"><span class="slot-lock-ico" aria-hidden="true">🔒︎</span><span class="slot-lock">Slot ${slot + 1} · Farm ${need}</span></div>`;
   }
   const id = br.slots[slot];
   const settle = br.settleMs[slot] ?? 0;
@@ -122,5 +125,68 @@ export function slotCardHtml(br: BreedsSave, b: Balance, slot: number, open: num
   // OQ-6: album select → tap slot to place; Remove clears (not tap-on-filled).
   const remDescId = `slot-remove-desc-${slot}`;
   const remDesc = `<span id="${remDescId}" class="sr">${rosterName(id)}, slot ${slot + 1}</span>`;
-  return `<div class="slot filled" data-slot="${slot}" data-breed="${id}" role="group" aria-label="Slot ${slot + 1}, ${rosterName(id)}"${descAttr}>${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${pct} ${familyTraitWord(fam)} ${familyWord(fam)}${maxSpan ? ` ${maxSpan}` : ''}</span>${descNode}<button type="button" class="slot-remove" data-testid="breeds-slot-remove" data-slot="${slot}" aria-describedby="${remDescId}">Remove</button>${remDesc}</div>`;
+  // §7b / BR-AC52c: the slot control is a button whose name IS its visible text ("Leghorn +3.12% lay Present");
+  // no aria-label. Remove is a sibling button (never nested → nested-interactive 0), 44px hit (§7).
+  return `<div class="slot filled" data-slot="${slot}" data-breed="${id}"><button type="button" class="slot-main" data-testid="breeds-slot-main" data-slot="${slot}"${descAttr}>${breedImg(id)}<span class="slot-name">${rosterName(id)}</span> <span class="slot-meta">${pct} ${familyTraitWord(fam)} ${familyWord(fam)}${maxSpan ? ` ${maxSpan}` : ''}</span></button>${descNode}<button type="button" class="slot-remove" data-testid="breeds-slot-remove" data-slot="${slot}" aria-describedby="${remDescId}">Remove</button>${remDesc}</div>`;
+}
+
+/** Trait % per Art §6: bp/100, ≤ 2 decimals, trailing zeros trimmed (312 → "+3.12%", 1500 → "+15%", 0 → "+0%"). */
+export const traitPctTrim = (bp: number) => `+${Number((bp / 100).toFixed(2))}%`;
+
+type ClampFn = (f: Family, br: BreedsSave, b: Balance, farmLevel: number) => FamilyClampState | undefined;
+const FAMS: readonly Family[] = ['present', 'away', 'broody'];
+const TOTAL_LABEL: Record<Family, string> = { present: 'Lay', away: 'Away', broody: 'Nest' };
+
+/**
+ * Art §2 "Active totals" line (BR-UI-06/16): applied (clamped, settled-only) values per family, " (max)" when clamped (E8).
+ * Nothing settled → "Active: none yet · a breed works once it has settled (5:00)".
+ * `clamp` defaults to the adapter's familyClampState (stub → undefined ⇒ raw sum, no "(max)"; clamp-bind gives the real view).
+ */
+export function activeTotalsText(s: GameState, b: Balance, br: BreedsSave, clamp: ClampFn = familyClampState): string {
+  const open = openSlotCount(s, b);
+  const raw: Record<Family, number> = { present: 0, away: 0, broody: 0 };
+  let settled = 0;
+  for (let i = 0; i < open; i++) {
+    const id = br.slots[i];
+    if (!isBreedId(id) || (br.settleMs[i] ?? 0) > 0) continue;
+    settled++;
+    raw[ROSTER[id][1]] += slotTraitBp(br, i, b);
+  }
+  if (settled === 0) return `Active: none yet · a breed works once it has settled (${fmtRemainMs(bc(b, 'settle_s') * 1000)})`;
+  return 'Active: ' + FAMS.map(f => {
+    const c = clamp(f, br, b, s.farmLevel);
+    const v = c ? c.clampedBp : raw[f];
+    const max = c && c.rawBp > c.clampedBp ? ' (max)' : '';
+    return `${TOTAL_LABEL[f]} ${traitPctTrim(v)}${max}`;
+  }).join(' · ');
+}
+
+const RARITY_WORD = { C: 'Common', R: 'Rare', E: 'Epic', L: 'Legendary' } as const;
+const REVEAL_TRAIT: Record<Family, string> = {
+  present: 'laying while the farm is open', away: 'eggs while you are away', broody: 'Broody nest fill',
+};
+
+/**
+ * Art §4 reveal-card copy (UI-BR-8 / BR-UI-21), read after the grant (stars/slot already applied by the sim).
+ * kicker: "New breed!" (stars 0) or "Star up! ★ +1" (duplicate). placement: "Added to slot n · settling m:ss" when the
+ * breed sits in a settling slot, "Not slotted · place it from the album" when in no slot; a duplicate already settled
+ * in a slot has no Art line → null (no placement line rendered).
+ */
+export function revealCopy(br: BreedsSave, id: BreedId, b: Balance): {
+  kicker: string; name: string; meta: string; stars: number; trait: string; placement: string | null;
+} {
+  const [rar, fam] = ROSTER[id];
+  const stars = br.owned[id]?.stars ?? 0;
+  const slot = br.slots.findIndex(x => x === id);
+  const settle = slot >= 0 ? (br.settleMs[slot] ?? 0) : 0;
+  const placement = slot < 0 ? 'Not slotted · place it from the album'
+    : settle > 0 ? `Added to slot ${slot + 1} · settling ${fmtRemainMs(settle)}` : null;
+  return {
+    kicker: stars > 0 ? 'Star up! ★ +1' : 'New breed!',
+    name: rosterName(id),
+    meta: `${RARITY_WORD[rar]} · ${familyWord(fam)}`,
+    stars,
+    trait: `${traitPctTrim(starBp(id, stars, b))} ${REVEAL_TRAIT[fam]}`,
+    placement,
+  };
 }
