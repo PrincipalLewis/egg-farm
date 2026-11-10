@@ -137,6 +137,21 @@ describe('BR-UI-17 / BR-UI-34 filled slot: accessible name starts with visible t
   });
 });
 
+describe('BR-UI-19 / BR-UI-34 album stars and settling slot name', () => {
+  it('owned album cell has exactly 2 aria-hidden star glyphs; settling slot name "Sussex +15% away · inactive Settling 2:00"', async () => {
+    const br = { ...emptyBr(), freeHatchUsed: 1, owned: { leghorn: { stars: 1 }, sussex: { stars: 0 } }, slots: ['leghorn', 'sussex', null], settleMs: [0, 120000, 0] };
+    const { ui } = await mount({ farmLevel: 20, coinsCents: 1e9, breeds: br });
+    openFlockPhone(ui);
+    const cell = document.querySelector('.album-cell[data-breed="leghorn"]')!;
+    expect(cell.querySelectorAll('.album-stars .star').length).toBe(2);
+    expect(cell.querySelector('.album-stars')!.getAttribute('aria-hidden')).toBe('true');
+    expect(visibleName(cell)).toBe('Leghorn Slot 1');
+    expect(document.getElementById(cell.getAttribute('aria-describedby')!)!.textContent).toBe('1 of 2 stars');
+    expect(cell.contains(document.getElementById(cell.getAttribute('aria-describedby')!))).toBe(false);
+    expect(visibleName(document.querySelector('.slot.settling')!)).toBe('Sussex +15% away · inactive Settling 2:00');
+  });
+});
+
 describe('BR-UI-13 E5 / Flock complete sub-lines', () => {
   const b = breedsOn();
   it('(a) F13 all Commons at 2★ → "More breeds at Farm 14" / "All Commons at 2★"', () => {

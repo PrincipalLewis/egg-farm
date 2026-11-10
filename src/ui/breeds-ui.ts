@@ -7,7 +7,7 @@ import { fmtMoney } from './format';
 import {
   type BreedsSave, type HatchEstimate, breedAsset, SILHOUETTE_ASSET, SILHOUETTE_OPACITY,
   freeHatchAvailable, flockComplete, eligible, hatchCostCents, openSlotCount, fmtRemainMs,
-  ROSTER, BREED_IDS, bc, traitPctExact, familyWord, familyTraitWord, slotTraitBp, starBp, isBreedId,
+  ROSTER, BREED_IDS, bc, familyWord, familyTraitWord, slotTraitBp, starBp, isBreedId,
   familyClampState, presentMirror, type FamilyClampState, type Family, type BreedId,
 } from './breeds-adapter';
 import type { GameState } from '../sim/state';
@@ -81,10 +81,13 @@ export function albumCellHtml(br: BreedsSave, id: (typeof BREED_IDS)[number]): s
   }
   const stars = owned.stars ?? 0;
   const slotted = br.slots.findIndex(x => x === id);
-  const slotNote = slotted >= 0 ? `<span class="sr">Slot ${slotted + 1}</span>` : '';
-  const starSvgs = [0, 1, 2].map(i =>
+  const slotNote = slotted >= 0 ? `<span class="sr"> Slot ${slotted + 1}</span>` : '';
+  // Art §2 / BR-UI-19: 2 star glyphs (star_cap 2), aria-hidden; "n of 2 stars" is the hidden text.
+  const starSvgs = [0, 1].map(i =>
     `<span class="star${i < stars ? ' on' : ''}" aria-hidden="true">★</span>`).join('');
-  return `<button type="button" class="album-cell owned" data-breed="${id}">${breedImg(id)}<span class="album-name">${rosterName(id)}</span><span class="album-stars" aria-hidden="true">${starSvgs}</span><span class="sr">${stars} of 2 stars</span>${slotNote}</button>`;
+  // §7b: name = "Leghorn" (+ " Slot n"); "n of 2 stars" is the description (node outside the button, absolutely positioned .sr).
+  const descId = `album-desc-${id}`;
+  return `<button type="button" class="album-cell owned" data-breed="${id}" aria-describedby="${descId}">${breedImg(id)}<span class="album-name">${rosterName(id)}</span>${slotNote}<span class="album-stars" aria-hidden="true">${starSvgs}</span></button><span id="${descId}" class="sr">${stars} of 2 stars</span>`;
 }
 
 function rosterName(id: string): string {
@@ -110,12 +113,13 @@ export function slotCardHtml(br: BreedsSave, b: Balance, slot: number, open: num
   const stars = br.owned[id]?.stars ?? 0;
   if (settle > 0) {
     const lab = settleLabel(settle);
-    return `<button type="button" class="slot settling" data-slot="${slot}" data-breed="${id}">${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${traitPctExact(starBp(id, stars, b))} ${familyTraitWord(fam)} · inactive</span><span class="settle-ring" aria-hidden="true"></span><span class="settle-lab">${lab}</span></button>`;
+    return `<button type="button" class="slot settling" data-slot="${slot}" data-breed="${id}">${breedImg(id)}<span class="slot-name">${rosterName(id)}</span> <span class="slot-meta">${traitPctTrim(starBp(id, stars, b))} ${familyTraitWord(fam)} · inactive</span><span class="settle-ring" aria-hidden="true"></span> <span class="settle-lab">${lab}</span></button>`;
   }
   const bp = slotTraitBp(br, slot, b);
   // Present mirror: gate stub OPEN until Saves calm-gate lands (same as PR-B STUB_PRESENT_GATE).
   const mir = fam === 'present' ? presentMirror(bp, true) : null;
-  const pct = mir ? mir.html : traitPctExact(bp);
+  // Art §6: trailing zeros trimmed ("+15% away"); the Present mirror keeps PR-B's presentMirror text.
+  const pct = mir ? mir.html : traitPctTrim(bp);
   const descAttr = mir ? ` aria-describedby="slot-desc-${slot}"` : '';
   const descNode = mir ? `<span id="slot-desc-${slot}" class="sr">${mir.description}</span>` : '';
   // E8: familyClampState stub → undefined (no label). Bind follow-up delegates to sim familyClamp.
