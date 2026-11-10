@@ -3,13 +3,16 @@ import { GameState, eggsPerSec } from './state';
 import { prodEggsPerSec, offlineMult } from './tracks';
 import { m4On, clampL } from '../config/formulas';
 import { breedsOffline } from './breeds';
-import { breedsCalmClearRing } from './breeds-traits';
+import { breedsCalmClearRing, awayBp } from './breeds-traits';
+import { BP_ONE } from '../config/breeds';
 /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
-export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1): number {
+/** BR-R13: optional awayBp (0 = unchanged). Order: min(min(away,cap)×rate×(10000+awayBp)/10000, maxEggs2h)×mult, then floor. */
+export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1, awayBpN = 0): number {
   const o = b.offline, t = b.m4!.offline!; if (!isFinite(awayS) || awayS < o.offlineMinSeconds) return 0;
   const L = clampL(hensLevel, b);
-  return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * t.eggsPerSec[L], t.maxEggs2h[L]) * mult);
+  const rate = t.eggsPerSec[L] * (BP_ONE + awayBpN) / BP_ONE;
+  return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * rate, t.maxEggs2h[L]) * mult);
 }
 /** AC11: eggs = floor(min(away,cap) * mult * eggs_per_sec(saved farm L)); <60s or negative => 0. */
 /** `eps` overrides the Farm curve (M4-A: the Hens track rate). */
@@ -22,7 +25,7 @@ export function offlineEggs(awayS: number, farmLevel: number, b: Balance, eps = 
 /** D-HOP-2026-11-06-01 (a) / Pause v1.3.15: the egg grant depends on hen state, the eligible gap, and the cap.
  *  Pause, hire, and m4.flags.pause do not change it. */
 export function applyOffline(s: GameState, awayMs: number, b: Balance) {
-  const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b))
+  const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b), awayBp(s, b))
     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
   const awayS = Math.max(0, Math.min(awayMs / 1000, b.offline.offlineCapSeconds));
   const br = breedsOffline(s, awayMs, b); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off

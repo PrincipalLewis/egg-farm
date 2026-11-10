@@ -24,6 +24,8 @@ export const BC_SPEC_DEFAULTS = {
   present_calm_w_s: 10, present_calm_k: 6,
   /** Present family clamp (E9 / BR-AC18): lt18 below F18, full from F18. */
   lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18,
+  /** BR-R14: Broody family trait clamp. */
+  broody_cap_bp: 2000,
 } as const;
 export type BcKey = keyof typeof BC_SPEC_DEFAULTS;
 export const bc = (_b: Balance, k: BcKey): number => BC_SPEC_DEFAULTS[k];

@@ -134,3 +134,8 @@
 
 ## 2026-11-10 01:00 CET · Senior Engineer, Saves & Persistence · HoE/breeds-sim-prB-traits (row 32)
 - WIP commit 1/3: Present calm-gate (BR-R12/R12b) + session_end present_active_s/present_lost_count; bc present_calm_* + lay_cap_*; breedsCalm session ring; E22b clear on offline ≥ 60 s. Scope: NOT hatch_started/breed_* session_end (gen/breeds-telemetry). Focused tests 128 pass + tsc. Next: Away+Broody (c2), away_bp (c3).
+
+## 2026-11-10 01:02 CET · Saves · HoE/breeds-sim-prB-traits commits 2–3
+- Commit 2: Away (BR-R13) in m4OfflineEggs + Broody bp_eff / broody_cap_bp=2000.
+- Commit 3: telemetry/v5-fields offlineGrantV5 real away_bp; grantOffline emits when breeds on incl. eggs=0.
+- Draft PR #125. Focused 138 pass + tsc. Row 32 only (not row 34 / not #119 paused_*).

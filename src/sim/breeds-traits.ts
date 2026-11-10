@@ -46,12 +46,19 @@ export function familyTraitBp(s: GameState, b: Balance, family: Family): number 
     sum += slotTraitBp(x, i, b);
   }
   if (family === 'present') return Math.min(sum, presentCapBp(s.farmLevel, b));
+  if (family === 'broody') return Math.min(sum, bc(b, 'broody_cap_bp'));
   return sum;
 }
 
 export const presentBp = (s: GameState, b: Balance) => familyTraitBp(s, b, 'present');
 export const awayBp = (s: GameState, b: Balance) => familyTraitBp(s, b, 'away');
 export const broodyBreedBp = (s: GameState, b: Balance) => familyTraitBp(s, b, 'broody');
+
+/** BR-R14: broodyBp_eff = floor(broodyBp × (10000 + broodyBreedBp) / 10000), broodyBp = round(tc_broody_income_share × 10000).
+ *  Broody hen nest accrual (when built) must use this in place of raw broodyBp. */
+export const broodyBaseBp = (b: Balance) => Math.round(tc(b, 'broody_income_share') * BP_ONE);
+export const broodyBpEff = (s: GameState, b: Balance) =>
+  Math.floor(broodyBaseBp(b) * (BP_ONE + broodyBreedBp(s, b)) / BP_ONE);
 
 /** BR-R12b: gate open iff count of stamps in (focusMs − W×1000, focusMs] < k (k=0 → always open). */
 export function presentGateOpen(s: GameState, b: Balance): boolean {
