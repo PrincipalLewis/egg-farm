@@ -7,7 +7,7 @@
  */
 import type { Balance } from '../config/balance';
 import { flagOn } from '../config/flags';
-import { BREED_IDS, BREEDS_RNG_SALT, BREEDS_SANITISE_EVENT, SLOT_IDX, bc, isBreedId, unlockedSlots, type BreedId } from '../config/breeds';
+import { BREED_IDS, BREEDS_RNG_SALT, breedsSanitiseEvent, SLOT_IDX, bc, isBreedId, unlockedSlots, type BreedId } from '../config/breeds';
 import { mixSeed, type GameState } from './state';
 import { isRngState } from './rng';
 import type { SimEvent } from './events';
@@ -19,14 +19,19 @@ export interface BreedsSave {
 }
 export const on = (s: GameState, b: Balance) => flagOn(b, 'breeds') && !!s.breeds;
 const int0 = (v: unknown) => (Number.isInteger(v) && (v as number) >= 0 ? (v as number) : 0);
+const isPlainObject = (v: unknown): boolean => !!v && typeof v === 'object' && !Array.isArray(v);
+/** §6 default breeds blob (ensureBreeds + D2 invalid_root re-create). */
+function defaultBreeds(s: GameState, b: Balance): BreedsSave {
+  const br: BreedsSave = { owned: {}, slots: [null, null, null], incubator: null, settleMs: [0, 0, 0], flockCompleteLogged: 0,
+    hatches: 0, pity: 0, rng: mixSeed((s.rng ^ BREEDS_RNG_SALT) >>> 0), freeHatchUsed: 0 };
+  if (s.farmLevel >= bc(b, 'unlock_farm')) br.sinceUnlockBackfilled = 1;
+  return br;
+}
 /** Q2 (tick-semantics note; HoE may re-rule): `breeds` is created at the END of the first flag-on tick (TIMER_SYSTEMS,
  *  like seedEvRng / Q-F1b-1), never at load. §6 migration shape; backfilled = 1 when created at F >= bc_unlock_farm (BR-AC2e). */
 export function ensureBreeds(s: GameState, b: Balance): GameState {
   if (!flagOn(b, 'breeds') || 'breeds' in s) return s;
-  const br: BreedsSave = { owned: {}, slots: [null, null, null], incubator: null, settleMs: [0, 0, 0], flockCompleteLogged: 0,
-    hatches: 0, pity: 0, rng: mixSeed((s.rng ^ BREEDS_RNG_SALT) >>> 0), freeHatchUsed: 0 };
-  if (s.farmLevel >= bc(b, 'unlock_farm')) br.sinceUnlockBackfilled = 1;
-  return { ...s, breeds: br };
+  return { ...s, breeds: defaultBreeds(s, b) };
 }
 export const isFlockComplete = (br: BreedsSave, b: Balance) => BREED_IDS.every(id => (br.owned[id]?.stars ?? -1) >= bc(b, 'star_cap'));
 /** BR-R11 reveal + auto-slot, ONE pure function for step (PR B) and applyOffline. New -> 0★, duplicate -> +1★; first empty
@@ -55,34 +60,42 @@ export function breedsOffline(s: GameState, awayMs: number, b: Balance): { state
   if (s.farmLevel >= bc(b, 'unlock_farm') && br.flockCompleteLogged !== 1) br = { ...br, sinceUnlockMs: int0(br.sinceUnlockMs) + ms };
   return br === br0 ? { state: s, reveal } : { state: { ...s, breeds: br }, reveal };
 }
-/** §4.8 E10-E12 on load (flag on only). Unknown owned ids are kept and ignored (E10); one save_migrated if anything changed. */
+/** §4.8 E10-E12 on load (flag on only). Unknown owned ids are kept and ignored (E10); one save_migrated if anything changed.
+ *  D2: null/array/primitive root → defaults + one event (reason invalid_root). D1: full save_migrated shape. */
 export function sanitizeBreedsOnLoad(s: GameState, b: Balance, ev: SimEvent[]): GameState {
-  if (!on(s, b)) return s;
+  if (!flagOn(b, 'breeds') || !('breeds' in s)) return s; // absent key: ensureBreeds at end of first flag-on tick (not load)
   const br0: any = s.breeds, cap = bc(b, 'star_cap'), maxMs = bc(b, 'hatch_time_s') * 1000, open = unlockedSlots(s.farmLevel, b);
-  if (typeof br0 !== 'object' || Array.isArray(br0)) return s; // not ours to repair: ignored like an unknown key
+  if (!isPlainObject(br0)) { // D2 / E12 invalid_root: re-create, skip value inspection
+    ev.push(breedsSanitiseEvent('invalid_root', 0, s.farmLevel));
+    return { ...s, breeds: defaultBreeds(s, b) };
+  }
+  const ownedSrc: any = isPlainObject(br0.owned) ? br0.owned : {}; // D3 / OQ-4
   const owned: any = {};
-  for (const [k, v] of Object.entries(br0.owned ?? {})) {
+  for (const [k, v] of Object.entries(ownedSrc)) {
     const st = (v as any)?.stars; owned[k] = isBreedId(k) ? { stars: Number.isFinite(st) ? Math.min(cap, Math.max(0, Math.floor(st))) : 0 } : v; }
-  const seen = new Set<string>(), slots = SLOT_IDX.map(i => { const x = br0.slots?.[i];
+  const slotsSrc: any[] = Array.isArray(br0.slots) && br0.slots.length === SLOT_IDX.length ? br0.slots : SLOT_IDX.map(() => null); // D3 / OQ-4
+  const seen = new Set<string>(), slots = SLOT_IDX.map(i => { const x = slotsSrc[i];
     if (!isBreedId(x) || i >= open || seen.has(x)) return null; seen.add(x); return x; });
   let incubator = br0.incubator ?? null, coinsCents = s.coinsCents;
   if (incubator && !isBreedId(incubator.breed)) { coinsCents += int0(incubator.costCents); incubator = null; }
   else if (incubator) { const r = incubator.remainingMs;
-    incubator = { ...incubator, remainingMs: Number.isFinite(r) ? Math.min(maxMs, Math.max(0, Math.round(r))) : maxMs }; }
+    incubator = { ...incubator, remainingMs: Number.isFinite(r) ? Math.min(maxMs, Math.max(0, Math.round(r))) : maxMs,
+      costCents: int0(incubator.costCents) }; } // D3 / OQ-8
   const settleMs = SLOT_IDX.map(i => Math.min(bc(b, 'settle_s') * 1000, int0(br0.settleMs?.[i]))) as BreedsSave['settleMs'];
   const br: any = { ...br0, owned, slots, incubator, settleMs };
   if ('sinceUnlockMs' in br0 && int0(br0.sinceUnlockMs) !== br0.sinceUnlockMs) br.sinceUnlockMs = 0; // under-reports, never over
   for (const k of ['hatches', 'pity'] as const) if (int0(br0[k]) !== br0[k]) br[k] = 0; // PMC Q7: invalid pity -> 0 (hatches likewise, telemetry count only)
-  if (br0.freeHatchUsed !== 0 && br0.freeHatchUsed !== 1) br.freeHatchUsed = 1; // PMC Q7: conservative, never a second free hatch
+  // D3 / Q7: missing → 0; present-invalid → 1 (rev 3.8.9; was conservative missing→1)
+  if (!('freeHatchUsed' in br0)) br.freeHatchUsed = 0;
+  else if (br0.freeHatchUsed !== 0 && br0.freeHatchUsed !== 1) br.freeHatchUsed = 1;
   if (!isRngState(br0.rng)) br.rng = mixSeed((s.rng ^ BREEDS_RNG_SALT) >>> 0); // only future rolls; a running hatch keeps its breed (BR-R9)
   if (br0.flockCompleteLogged !== 0 && br0.flockCompleteLogged !== 1) br.flockCompleteLogged = isFlockComplete(br, b) ? 1 : 0;
   if ('sinceUnlockBackfilled' in br0 && br0.sinceUnlockBackfilled !== 0 && br0.sinceUnlockBackfilled !== 1) br.sinceUnlockBackfilled = 1;
-  // E10 / PMC Q5 (spec-literal): an unknown slot id is null at runtime (no trait, never drawn, empty for auto-slot) but the raw
-  // id is KEPT in the save: a session-only shadow (breedsRawSlots, never saved) puts it back in m5Persist unless the slot changed.
-  const raw = SLOT_IDX.map(i => { const x = br0.slots?.[i]; return typeof x === 'string' && !isBreedId(x) ? x : null; });
+  // E10 / PMC Q5: unknown unlocked-slot id null at runtime, raw kept; D4 / OQ-6: locked slots never keep raw (E12 wins).
+  const raw = SLOT_IDX.map(i => { const x = slotsSrc[i]; return i < open && typeof x === 'string' && !isBreedId(x) ? x : null; });
   const out: GameState = { ...s, breeds: br, coinsCents, ...(raw.some(x => x !== null) && { breedsRawSlots: raw }) };
   if (JSON.stringify(breedsSaveView(out)) === JSON.stringify(br0) && coinsCents === s.coinsCents) return out; // E10 alone is not a sanitise
-  ev.push({ ...BREEDS_SANITISE_EVENT });
+  ev.push(breedsSanitiseEvent('invalid_values', coinsCents - s.coinsCents, s.farmLevel));
   return out;
 }
 /** E10 / PMC Q5: drop the raw-id shadow at every slot index whose runtime value changed (auto-slot, a placement's target and
