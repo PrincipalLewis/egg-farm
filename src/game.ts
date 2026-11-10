@@ -136,7 +136,8 @@ export class Game {
     for (const e0 of evs) { const e = this.withCollectibleId(e0);
       this.notify(e);
       if (e.type === 'collect') this.telemetry.tap(e.eggs);
-      else if (e.type === 'wage') this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
+      else if (e.type === 'wage') { this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
+        if (e.state === 'asleep') this.telemetry.sum(`wage_${e.worker}_asleep_cents`, e.cents); } // S3 (clockWage = 1 only: state is absent flag-off)
       else if (e.type === 'worker_collect') this.telemetry.sum('coop_hand_eggs', e.eggs);
       else if (e.type === 'sell' && e.by === 'market_hand') { this.telemetry.sum('market_hand_eggs', e.k); this.telemetry.sum('market_hand_cents', e.value); }
       else { const { type, ...rest } = e; this.telemetry.track(type, rest); }
