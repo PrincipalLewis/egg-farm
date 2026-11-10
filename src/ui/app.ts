@@ -1,4 +1,5 @@
-import { makeDialogOpen, wireAttended } from './overlay';
+import { FxBudget, makeDialogOpen, mountOverlay, wireAttended } from './overlay';
+import './features'; // v5 F6: overlay feature list (one import line per M5 scene feature; empty in F6)
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
 /**
@@ -127,10 +128,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let refillDirty = false; { const mark = () => { refillDirty = true; }; addEventListener('resize', mark); docked.addEventListener?.('change', mark); } // WCAG 2.4.11: --refill-bar-h follows wraps from resize/rotation/dock (7380b86 review 56513e7 #3)
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
-  const live: HTMLElement[] = [];
+  const fx = new FxBudget(); // v5 F6: shared with overlay features (OverlayCtx.fx)
   const spawn = (el: HTMLElement, ms: number) => {
-    if (live.length >= 30) live.shift()?.remove();
-    fxLayer.append(el); live.push(el);
+    fx.admit(el); fxLayer.append(el);
     expire(el, ms);
     return el;
   };
@@ -138,7 +138,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const timers = new WeakMap<HTMLElement, number>();
   function expire(el: HTMLElement, ms: number) {
     clearTimeout(timers.get(el));
-    timers.set(el, window.setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms));
+    timers.set(el, window.setTimeout(() => { el.remove(); fx.release(el); }, ms));
   }
   const center = (el: Element) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
   const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void) => {
@@ -182,7 +182,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // ---------- Panels ----------
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
   // Slim v5: one attended source; Market remains a play surface. Shift owns its registered lifecycle.
-  wireAttended(g, makeDialogOpen({ sheet: () => open, docked: () => docked.matches }));
+  const attDialogOpen = makeDialogOpen({ sheet: () => open, docked: () => docked.matches });
+  wireAttended(g, attDialogOpen);
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
@@ -395,8 +396,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const left = Math.max(0, Math.min(Math.round(r.left - q.left), Math.round(q.width - w))), top = Math.max(0, Math.round(r.top - q.top - 12));
     const el = h(`<div class="ghost ${cls}" style="left:${left}px;top:${top}px;width:${w}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
     if (rm() && bubble) el.querySelector('img')!.remove(); // reduced motion: bubble fade only
-    if (live.length >= 30) live.shift()?.remove();
-    ghostHost.append(el); live.push(el); setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, 1500);
+    fx.admit(el); ghostHost.append(el); setTimeout(() => { el.remove(); fx.release(el); }, 1500);
   };
   const renderQueue = () => {
     const s = g.state, slots = S.queueMax(s.farmLevel, b), patience = S.patienceS(s.farmLevel, b);
@@ -528,7 +528,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       // B3: announce the CURRENT goal (same text as the #goal description) on target or state change, then clear the
       // live region so a screen reader browsing later never reads a stale target/timer.
       setText(goalLive, goalAria(gl, M4)); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000);
-      if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (live.length <= 26) sparkle(goalSt, 4); }
+      if (gl.state === 'ready' && prev.state !== 'ready' && !rm()) { retrigger(goalSt, 'pop'); if (fx.count <= fx.max - 4) sparkle(goalSt, 4); }
       if (gl.state === 'done' && !rm()) sparkle(goalBtn, 4);
     }
   };
@@ -869,8 +869,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
+  // v5 F6: mount host for overlay features (API.md). None registered / flags off → no DOM, no listeners, render no-op.
+  const overlay = mountOverlay({ g, b, root, scene, docked, rm, dialogOpen: attDialogOpen, fx, asset: A });
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
-    render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
+    render(); overlay.render(t); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
