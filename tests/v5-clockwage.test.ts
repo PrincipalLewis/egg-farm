@@ -2,6 +2,8 @@
 // agreement, HANDOFF S1) + running-wage UI copy and card caption. AC ids cited per test; tick-level ACs re-run once S1 lands.
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
+import { fmtMoney } from '../src/ui/format';
+import { welcomeBackWageHtml } from '../src/ui/clock-wage-ui';
 import { initialState, type GameState } from '../src/sim/state';
 import { clockWageAsleepStep, clockWageOn, wageState, wagePerMinCents } from '../src/sim/clock-wage';
 import { stillPaidCaption, stillPaidDescription, asleepToast, sleptDuration, welcomeBackWageLine, CLOCK_WAGE_TIP } from '../src/ui/clock-wage-ui';
@@ -105,5 +107,15 @@ describe('[AC-FC9 / AC-FC11 / AC-FC12] copy', () => {
   it('welcome-back line only when Y > 0', () => {
     expect(welcomeBackWageLine('Coop Hand', 120, 1200)).toBe('Coop Hand slept 2:00 and was paid $12.00');
     expect(welcomeBackWageLine('Coop Hand', 120, 0)).toBeNull();
+  });
+});
+
+describe('[AC-FC12] welcome-back modal lines (in-session view)', () => {
+  const on = { ...b, m4: { ...b.m4!, enabled: 1, flags: { ...b.m4!.flags, clockWage: 1 } } } as typeof b;
+  const v = { market_hand: { asleepS: 0, cents: 0 }, coop_hand: { asleepS: 120.4, cents: 1200 } };
+  it('one line per paid role, none when Y = 0, nothing flag-off', () => {
+    expect(welcomeBackWageHtml(v, on)).toBe(`<div class="wb-wage">Coop Hand slept 2:00 and was paid ${fmtMoney(1200)}</div>`);
+    expect(welcomeBackWageHtml(v, b)).toBe('');
+    expect(welcomeBackWageHtml({ ...v, coop_hand: { asleepS: 50, cents: 0 } }, on)).toBe('');
   });
 });

@@ -36,7 +36,7 @@ import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
 import { clockWageOn } from '../sim/clock-wage';
-import { asleepToast } from './clock-wage-ui';
+import { asleepToast, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
@@ -167,6 +167,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const el = h(`<button class="cooptip" role="status">${COOP_TIP_TEXT}</button>`); document.body.append(el);
     el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
     window.setTimeout(() => el.remove(), 8000);
+  };
+  // v5 clockWage AC-FC11: the one-time yawn tip (same .cooptip box, B-3 font); tap dismisses. Shown once per save (Game marks it).
+  const showCwTip = () => {
+    const el = h(`<button class="cooptip cw-tip" role="status">${CLOCK_WAGE_TIP}</button>`); document.body.append(el);
+    el.addEventListener('click', () => el.remove()); window.setTimeout(() => el.remove(), 8000);
   };
   let toastTimer = 0;
   /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
@@ -338,10 +343,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
     modalKind = 'welcome';
+    const cwLines = welcomeBackWageHtml(g.clockWageSinceWelcome(), b); if (cwLines) g.resetClockWageSinceWelcome(); // AC-FC12 ('' flag-off: markup unchanged)
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
-      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
+      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>${cwLines}
       <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)}\u00a0eggs</div>
       <button class="btn" id="wbCollect">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
@@ -729,6 +735,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
+    if (clockWageTipNow(s, b) && g.markClockWageTip()) showCwTip(); // AC-FC11 (false with clockWage off: no DOM change)
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);

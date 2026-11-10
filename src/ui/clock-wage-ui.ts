@@ -1,9 +1,9 @@
 /** v5 Hire2/v5-clockwage: running-wage UI copy (failure-cost v0.3.24 §4 Art final; AC-FC8/9/10/11/12). Pure; every string is behind
  *  m4.flags.clockWage at its call site. Money = fmtMoney of balance-derived cents; {pct} from workers.grader.asleep_bonus_share (FZ-2). */
 import type { Balance } from '../config/balance';
-import { clockWageOn, wagePerMinCents, type WageWorker } from '../sim/clock-wage';
+import { clockWageOn, clockWageTipDue, wagePerMinCents, type WageWorker } from '../sim/clock-wage';
 import type { GameState } from '../sim/state';
-import { mood, type WorkerId } from '../sim/workers';
+import { mood, isYawning, type WorkerId } from '../sim/workers';
 import { isPaused } from '../sim/pause';
 import { fmtMoney } from './format';
 
@@ -25,7 +25,9 @@ export function asleepToast(id: WorkerId, b: Balance): string {
     case 'grader': return `Egg Grader fell asleep: bonus down to ${Math.round(b.workers.grader.asleep_bonus_share * 100)}%. Tap Refill.`;
   }
 }
-/** AC-FC11: one-time yawn tip copy (first yawn per save; the save flag is seam item S5). */
+/** AC-FC11 trigger: the first yawn of a wage-paying worker (MH/CH) while the tip is still due in this save. */
+export const clockWageTipNow = (s: GameState, b: Balance) => clockWageTipDue(s, b) && (isYawning(s.workers.market_hand, b) || isYawning(s.workers.coop_hand, b));
+/** AC-FC11: one-time yawn tip copy (first yawn per save; save flag clockWageTipShown, S5). */
 export const CLOCK_WAGE_TIP = 'Sleeping workers still get paid. Refill to wake them.';
 /** AC-FC12 duration: floor to whole seconds FIRST, then m:ss below one hour, h:mm:ss from one hour. Never "60:00". */
 export function sleptDuration(seconds: number): string {
@@ -36,3 +38,9 @@ export function sleptDuration(seconds: number): string {
 /** AC-FC12 / §4.3: welcome-back line "{Role} slept {t} and was paid $Y"; null when Y = 0 (no line). */
 export const welcomeBackWageLine = (role: string, asleepS: number, paidCents: number): string | null =>
   paidCents > 0 ? `${role} slept ${sleptDuration(asleepS)} and was paid ${fmtMoney(paidCents)}` : null;
+/** AC-FC12 modal markup: one line per wage role (MH then CH) with Y > 0, from Game.clockWageSinceWelcome(); '' with clockWage off or nothing paid. */
+export function welcomeBackWageHtml(v: Record<'market_hand' | 'coop_hand', { asleepS: number; cents: number }>, b: Balance): string {
+  if (!clockWageOn(b)) return '';
+  const rows = ([['market_hand', 'Market Hand'], ['coop_hand', 'Coop Hand']] as const).map(([id, n]) => welcomeBackWageLine(n, v[id].asleepS, v[id].cents)).filter((x): x is string => x !== null);
+  return rows.map(r => `<div class="wb-wage">${r}</div>`).join('');
+}
