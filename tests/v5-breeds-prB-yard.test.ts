@@ -13,7 +13,10 @@ const hens = () => YARD_FILL_ORDER.map(i => document.getElementById('yard')!.chi
 beforeEach(() => { document.body.innerHTML = YARD_HTML(6); });
 
 describe('BR-AC34 yard placement', () => {
-  it('fill order mirrors app.ts (keyed hen diff order)', () => expect(YARD_FILL_ORDER).toEqual([2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11]));
+  it('fill order mirrors app.ts (keyed hen diff order), read from the app source so drift is caught (Architect nit)', () => {
+    const app = fs.readFileSync(path.resolve(__dirname, '../src/ui/app.ts'), 'utf8'), m = /const order = \[([\d,\s]+)\];/.exec(app);
+    expect(m, 'app.ts yard order literal').toBeTruthy(); expect([...YARD_FILL_ORDER]).toEqual(m![1].split(',').map(Number));
+  });
   it('flag off → null, yard untouched', () => {
     const before = document.body.innerHTML; expect(mountYard({ doc: document, b: flagOffBalance() })).toBeNull(); expect(document.body.innerHTML).toBe(before);
   });

@@ -28,7 +28,8 @@ export type BreedsGoal = Goal & { breedsTarget?: 'hatch'; aria?: string };
 export function breedsStripGoal(goal: Goal, s: GameState, b: Balance, rateCentsPerS: number, fallback = bbFallbackActive(s, b)): Goal {
   if (!breedsFlagOn(b) || !fallback || !hatchTargetEligible(s, b)) return goal;
   const cost = hatchPriceNowCents(s, b), coins = Math.round(s.coinsCents);
-  const state: GoalState = coins >= cost ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
+  // Ready = the UNROUNDED compare startHatch makes (Architect m1). The countdown gap keeps BB-5's Math.round(coinsCents) (PMC ruling).
+  const state: GoalState = s.coinsCents >= cost ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
   const eta = state === 'waiting' ? fmtTimeToAfford((cost - coins) / rateCentsPerS) : fmtTimeToAfford(null);
   const label = state === 'ready' ? STRIP_HATCH_PREFIX + (cost === 0 ? STRIP_FREE_WORD : fmtMoney(cost)) : STRIP_HATCH_PREFIX + STRIP_IN_WORD + eta;
   const priceAria = cost === 0 ? STRIP_FREE_WORD : fmtMoneyAria(cost);
@@ -76,6 +77,8 @@ export function mountBbStrip(o: { doc: Document; b: Balance; fallback?: (s: Game
   return {
     sync(s) {
       const e = els(); if (!e) return;
+      // DRAFT-ONLY (Architect m5): this capture listener on #goal depends on target-phase order vs app.ts's #goal listener. It is
+      // kept only until #100's single app.ts goal hook replaces the #goal DOM rewrite; not shippable as is.
       if (!btn) { btn = e.goal; btn.addEventListener('click', onClick, true); }
       const g = breedsStripGoal(PLACEHOLDER_GOAL, s, o.b, rate(), fallback(s, o.b)) as BreedsGoal;
       if (g === PLACEHOLDER_GOAL) { deactivate(e); return; }

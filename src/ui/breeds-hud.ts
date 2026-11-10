@@ -146,7 +146,7 @@ export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
     sync(s, nowMs) {
       const t = nowMs ?? now();
       if (tip && !tip.hidden && toastVisible()) hideTip(); // a toast takes y = HUD + 8: the tooltip yields (UI-BR-21)
-      const m = presentChipModel(presentClampView(s, o.b), gate.open(s, o.b, t));
+      const m = presentChipModel(presentClampView(s, o.b), gate.open(s, o.b));
       if (!m) { if (chip) teardown(); return; }
       const appeared = !chip; if (appeared && !build()) return;
       setText(pt!, m.label); setText(sr!, SR_WORD[m.state]); setText(descEl!, m.description);

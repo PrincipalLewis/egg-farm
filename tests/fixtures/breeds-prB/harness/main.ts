@@ -10,7 +10,7 @@ import { mountApp } from '../../../../src/ui/app';
 import { initialState } from '../../../../src/sim/state';
 import { serialize, SAVE_KEY } from '../../../../src/save/save';
 import { registerBreedsPrB, prbMounts, PRB_EXT } from '../../../../src/ui/breeds-hud';
-import { PRB_STUB_TUNABLES } from '../../../../src/ui/breeds-adapter';
+import { PRB_STUB_TUNABLES } from '../setup';
 import overlay from '../../breeds-prB-flag-on.json';
 
 const q = new URLSearchParams(location.search), num = (k: string, d: number) => (q.has(k) ? Number(q.get(k)) : d);
@@ -20,7 +20,10 @@ if (q.get('flag') === '1') merge(b, overlay);
 
 const W = PRB_STUB_TUNABLES.present_calm_w_s * 1000, K: number = PRB_STUB_TUNABLES.present_calm_k;
 const taps: number[] = []; let forced: boolean | null = null;
-const gate = { open: (_s: unknown, _b: unknown, now: number) => forced ?? (K === 0 || taps.filter(t => t > now - W && t <= now).length < K) };
+// Reference gate on FOCUS time (PresentGateSource.open(s, b) has no clock, Architect m3). The harness pauses page.clock, so
+// performance.now() advances only through clock.runFor = attended focus time (BR-AC52b note in scripts/breeds-ui-prB-browser.mjs).
+const focusNow = () => performance.now();
+const gate = { open: (_s?: unknown, _b?: unknown) => { const now = focusNow(); return forced ?? (K === 0 || taps.filter(t => t > now - W && t <= now).length < K); } };
 // PR-A's glob registers PR-B (breeds-ext-b) on its own; the harness injects the reference gate / forced fallback (a later no-arg
 // registration keeps them). reg=0 = "PR-B absent": the extender stays in the registry but inert, for the flag-off byte-identity check.
 if (q.get('reg') !== '0') registerBreedsPrB({ gate, fallback: q.get('fb') === '1' ? () => true : undefined });
@@ -37,7 +40,7 @@ const ui = mountApp(document.getElementById('app')!, g, b, { enabled: false, pla
 const loop = () => { ui.render(); requestAnimationFrame(loop); }; ui.render(); requestAnimationFrame(loop);
 (window as any).__prB = {
   tap: () => taps.push(performance.now()), force: (v: boolean | null) => { forced = v; },
-  gateOpen: () => gate.open(null, null, performance.now()),
+  gateOpen: () => gate.open(),
   pops: () => prbMounts().hud?.pops ?? 0, state: () => prbMounts().hud?.state ?? null,
   render: () => ui.render(), ready: true,
 };

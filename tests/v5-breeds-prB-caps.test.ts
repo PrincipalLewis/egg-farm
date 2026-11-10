@@ -17,7 +17,7 @@ describe('bc() cap keys: exact Saves #126 names (lay_cap_farm replaces the Farm-
     expect(KEYS.map(k => capBc(b, k))).toEqual([700, 1500, 18, 3000, 2000]);
   });
   it('no lay-cap stand-ins left under the old PR-B tunables object or the old Present-only getters', () => {
-    expect(Object.keys(ad.PRB_STUB_TUNABLES).sort()).toEqual(['present_calm_k', 'present_calm_w_s']);
+    expect((ad as Record<string, unknown>).PRB_STUB_TUNABLES).toBeUndefined(); // moved to tests/fixtures (Architect nit)
     expect((ad as Record<string, unknown>).presentCapBp).toBeUndefined();
     expect((ad as Record<string, unknown>).presentActiveBp).toBeUndefined();
   });

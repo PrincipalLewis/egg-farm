@@ -8,6 +8,10 @@
 import pw from 'playwright-core'; import fs from 'node:fs'; import path from 'node:path'; import http from 'node:http'; import crypto from 'node:crypto';
 import { build } from 'vite';
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname), HARNESS = path.join(ROOT, 'tests/fixtures/breeds-prB/harness');
+// Provenance (Architect m4): every run log names the exact head and whether the tree was clean.
+{ const { execFileSync } = await import('node:child_process'); const git = (...a) => execFileSync('git', a, { cwd: ROOT, encoding: 'utf8' });
+  const dirty = git('status', '--porcelain').trimEnd();
+  console.log(`HEAD ${git('rev-parse', 'HEAD').trim()}`); console.log(`git status --porcelain: ${dirty ? '\n' + dirty : '(clean)'}`); }
 const OUT = fs.mkdtempSync(path.join((await import('node:os')).tmpdir(), 'breeds-prB-harness-')), SHOTS = path.resolve(process.env.SHOTS ?? 'artifacts/breeds-ui-prB-browser');
 await build({ configFile: path.join(ROOT, 'vite.config.ts'), root: HARNESS, base: './', publicDir: path.join(ROOT, 'public'), mode: 'qa', logLevel: 'warn',
   build: { outDir: OUT, emptyOutDir: true } });

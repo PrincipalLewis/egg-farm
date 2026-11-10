@@ -2,7 +2,8 @@
 import { describe, it, expect } from 'vitest';
 import { breedsStripGoal, type BreedsGoal } from '../src/ui/breeds-strip';
 import { selectGoal, type Goal } from '../src/ui/next-goal';
-import { hatchCostCents } from '../src/sim/breeds-hatch';
+import { hatchCostCents, startHatch } from '../src/sim/breeds-hatch';
+import { hatchPriceNowCents } from '../src/ui/breeds-adapter';
 import { fmtMoney, fmtTimeToAfford } from '../src/ui/format';
 import { bbFallbackActive, BREED_IDS } from '../src/ui/breeds-adapter';
 import { flagOnBalance, flagOffBalance, stateWith, breeds } from './fixtures/breeds-prB/setup';
@@ -108,5 +109,25 @@ describe('PMC ruling: strip countdown == BB-5 countdown formatter output', () =>
   it('fractional coins round like BB-5 (Math.round(coinsCents) before the gap)', () => {
     const s0 = stateWith(b, F, breeds()), cost = hatchCostCents(s0, b), s = { ...s0, coinsCents: cost - 700.4 };
     expect((breedsStripGoal(goal(s), s, b, RATE, true) as BreedsGoal).label).toBe('Hatch · in ' + fmtTimeToAfford((cost - Math.round(cost - 700.4)) / RATE));
+  });
+});
+
+describe('Architect m1/m2: strip price and affordability follow startHatch exactly', () => {
+  const free = breeds({ freeHatchUsed: 0 }), paid = breeds();
+  it('m2: hatchPriceNowCents == the coinsCents startHatch takes (free hatch and paid hatch)', () => {
+    for (const br of [free, paid]) {
+      const s = stateWith(b, F, br, { coinsCents: 1e15 }), after = startHatch(s, b);
+      expect(after).not.toBe(s); // the hatch started
+      expect(s.coinsCents - after.coinsCents).toBe(hatchPriceNowCents(s, b));
+    }
+    expect(hatchPriceNowCents(stateWith(b, F, free), b)).toBe(0);
+  });
+  it('m1: fractional coins just under the cost are NOT ready (startHatch refuses); exactly the cost is ready', () => {
+    const s0 = stateWith(b, F, paid), cost = hatchCostCents(s0, b);
+    const under = stateWith(b, F, paid, { coinsCents: cost - 0.4 }), at = stateWith(b, F, paid, { coinsCents: cost });
+    expect(startHatch(under, b)).toBe(under);
+    expect(breedsStripGoal(goal(under), under, b, RATE, true).state).toBe('waiting');
+    expect(startHatch(at, b)).not.toBe(at);
+    expect(breedsStripGoal(goal(at), at, b, RATE, true).state).toBe('ready');
   });
 });

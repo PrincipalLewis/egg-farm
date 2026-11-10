@@ -3,8 +3,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { presentMirror } from '../src/ui/breeds-adapter'; // PR-A hosts the mirror (seams 3d40e76e §2); PR-B's copy is deleted
 import { mountPresentChip, presentChipModel, POP_CAP_MS, TIP_MS, CHIP_TIP_TEXT, CHIP_PAUSED_DESC } from '../src/ui/breeds-hud';
-import { PRB_STUB_TUNABLES, STUB_PRESENT_GATE } from '../src/ui/breeds-adapter';
-import { flagOnBalance, flagOffBalance, stateWith, leghorn312, breeds, RefGate, HUD_HTML } from './fixtures/breeds-prB/setup';
+import { STUB_PRESENT_GATE } from '../src/ui/breeds-adapter';
+import { flagOnBalance, flagOffBalance, stateWith, leghorn312, breeds, RefGate, HUD_HTML, PRB_STUB_TUNABLES } from './fixtures/breeds-prB/setup';
 
 /** A FamilyClampState view below the cap (the chip reads clampedBp). */
 const view = (bp: number) => ({ rawBp: bp, clampedBp: bp, atCap: false });
@@ -49,14 +49,14 @@ describe('BR-AC52 / 52c chip DOM', () => {
     expect(document.querySelectorAll('[aria-live]').length).toBe(0);
   });
   it('pending: dashed + strike class, name "+3% paused", paused description, no ring/progress child', () => {
-    const g = new RefGate(W, K); for (let i = 0; i < K; i++) g.tap(i * 1000); clock = (K - 1) * 1000;
+    const g = new RefGate(W, K, now); for (let i = 0; i < K; i++) g.tap(i * 1000); clock = (K - 1) * 1000;
     const h = mountPresentChip({ doc: document, b, now, gate: g })!; h.sync(stateWith(b, 10, leghorn312()));
     const c = chip()!; expect(c.dataset.state).toBe('paused'); expect(c.classList.contains('paused')).toBe(true);
     expect(accName(c)).toBe('+3% paused'); expect(desc()).toBe(CHIP_PAUSED_DESC);
     expect(c.querySelector('[role=progressbar], .pr')).toBeNull(); expect(c.hasAttribute('aria-label')).toBe(false);
   });
   it('k = 0 never pending', () => {
-    const g = new RefGate(W, 0); for (let i = 0; i < 20; i++) g.tap(i * 100); clock = 1900;
+    const g = new RefGate(W, 0, now); for (let i = 0; i < 20; i++) g.tap(i * 100); clock = 1900;
     const h = mountPresentChip({ doc: document, b, now, gate: g })!; h.sync(stateWith(b, 10, leghorn312()));
     expect(chip()!.dataset.state).toBe('active');
   });
@@ -111,13 +111,13 @@ describe('BR-AC52 tap / tooltip', () => {
 describe('BR-AC52b pop cap + per-tick sync (reference gate, tick = 100 ms)', () => {
   const b = flagOnBalance(), s = stateWith(b, 10, leghorn312());
   const run = (rm = false) => {
-    const g = new RefGate(W, K); const taps = [0, 1, 2, 3, 4, 5, 10.5, 11.5, 12.5, 13.5, 14.5].flatMap(t => [t * 1000, (t + 30) * 1000]);
+    const g = new RefGate(W, K, now); const taps = [0, 1, 2, 3, 4, 5, 10.5, 11.5, 12.5, 13.5, 14.5].flatMap(t => [t * 1000, (t + 30) * 1000]);
     const h = mountPresentChip({ doc: document, b, now, gate: g, rm: () => rm })!; const pops: number[] = []; const mism: number[] = [];
     let prevPops = 0;
     for (clock = 0; clock <= 60000; clock += 100) {
       for (const t of taps) if (t === clock) g.tap(t);
       h.sync(s);
-      const want = g.open(null, null, clock) ? 'active' : 'paused', c = chip()!;
+      const want = g.open() ? 'active' : 'paused', c = chip()!;
       if (c.dataset.state !== want || accName(c) !== `+3% ${want}` || c.classList.contains('paused') !== (want === 'paused')) mism.push(clock);
       if (h.pops > prevPops) { pops.push(clock); prevPops = h.pops; }
     }

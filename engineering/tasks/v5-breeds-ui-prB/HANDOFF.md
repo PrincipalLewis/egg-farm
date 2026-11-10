@@ -1,7 +1,20 @@
 # Breeds UI PR-B — HANDOFF (Features)
 
-Updated 2026-11-10 ~03:35 CET (Europe/Belgrade). Branch `feat/v5-breeds-ui-prB` (ON ORIGIN), worktree `/workspace/wt-v5-breeds-ui-prB`.
+Updated 2026-11-10 ~03:50 CET (Europe/Belgrade). Branch `feat/v5-breeds-ui-prB` (ON ORIGIN), worktree `/workspace/wt-v5-breeds-ui-prB`.
 **Status: Draft-ready (PR NOT opened; base `v5/breeds-ui-a` @ bd5b068a not on origin yet).**
+
+## Architect PR-B review (v5-breeds-ui-prB-4c994a7-architect.md, sha256 97119b64): APPROVE w/ conditions. Minors closed (03:50 CET)
+- **m1** `breeds-strip.ts`: 'ready' = the UNROUNDED `s.coinsCents >= cost`, the same compare `startHatch` makes. The countdown gap keeps BB-5's `Math.round(coinsCents)` (PMC ruling, unchanged). Test: cost − 0.4¢ → `startHatch` refuses and the strip says `waiting`; exactly cost → both go.
+- **m2** `hatchPriceNowCents` is pinned to `startHatch` (no Saves price export on rc/v5): for the free and paid hatch, `coinsCents − startHatch(s).coinsCents === hatchPriceNowCents(s)` (strip.test).
+- **m3** `PresentGateSource.open(s, b)`: `nowMs` dropped (BR-R12b is sim focus seconds, the Saves gate owns its clock). The reference gates (tests `RefGate`, harness gate) take an injected FOCUS clock and expose only `open(s, b)`. Note: rc/v5 GameState has no focus accumulator, so the reference clock stays injected until Saves #126 commit 1 `presentGateOpen`; in the harness, page.clock is paused so performance.now() advances only by attended `runFor` time.
+- **m4** `scripts/breeds-ui-prB-browser.mjs` prints `HEAD <sha>` + `git status --porcelain` first; new versioned runner `scripts/breeds-ui-prB-browser-matrix.sh` writes both into browser-summary.txt. **No browser rerun now; rerun at the Ready head.**
+- **m5** the `#goal` capture-phase click listener is KEPT and marked **Draft-only** (comment in breeds-strip.ts): it goes when the #100 goal hook lands.
+- **Nits** yard.test reads the `const order = [...]` literal from `src/ui/app.ts` and compares it to `YARD_FILL_ORDER`; `PRB_STUB_TUNABLES` moved out of src into `tests/fixtures/breeds-prB/setup.ts` (caps.test now asserts the adapter no longer exports it).
+- Focused 222/222 (14 files), tsc 0. No full gate rerun (4c994a7 stays the gate of record; next full gate at the Ready head).
+
+## READY GATE (Architect M1): NOT now, must happen before Draft → Ready
+- Before Ready, Saves **#126** and **clamp-bind (29edfc8)** go into the stack. Then DELETE `PRB_CAP_STANDINS`, `capBc`, `familyCapBp`, `clampFamilyBp` and `familyActiveBp` (and the `presentClampView` fallback with its stub test).
+- **If #126 slips:** the fallback shows the RAW family bp with `atCap: false` (no stand-in cap shown). Then rerun the full gate + browser matrix at the Ready head.
 
 ## Architect ruling on the clamp fallback (03:2x CET), applied
 - The TODO(Saves #126) fallback in `presentClampView()` is KEPT. (a) It is reached ONLY when `familyClampState` returns `undefined`: the guard is now `bound !== undefined`. (b) The flag-0 path is untouched: `breedsOf()` returns null when the flag is off, so the function returns before `familyClampState` or the fallback runs. (c) The pin is `tests/v5-breeds-prB-clamp-stub.test.ts`, which mocks `familyClampState` to return undefined and checks for the stand-in `{1125, 700, atCap}` and the chip "+7%".

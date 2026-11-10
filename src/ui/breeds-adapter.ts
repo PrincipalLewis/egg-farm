@@ -142,17 +142,6 @@ export const breedsOn = breedsFlagAndKey;
 // (seams doc 3d40e76e §2: PR-B adds getters only).
 // ============================================================================================================================
 
-/**
- * Present calm-gate tunables (spec §5 L648-654; BR-R12b/c). TODO(Saves #126 commit 1): `presentGateOpen` + its bc() keys
- * land in Saves' commit 1; then read `bc(b, 'present_calm_w_s' | 'present_calm_k')` and delete this object.
- */
-export const PRB_STUB_TUNABLES = {
-  /** bc_present_calm_w_s: trailing focus-seconds window of the Present rate gate (BR-R12b). */
-  present_calm_w_s: 10,
-  /** bc_present_calm_k: counted taps in the window that close the gate; 0 = never pending (BR-R12c). */
-  present_calm_k: 6,
-} as const;
-
 // ---- Family clamps: names, signatures, bc() keys and shapes mirror Saves #126 commit 0 (d4b5fdc,
 // src/sim/breeds-family.ts + BC_SPEC_DEFAULTS). Spec-value stand-ins until Saves is in the stack. ---------------------------
 
@@ -194,8 +183,9 @@ export function familyRawBp(s: GameState, b: Balance, family: Family): number {
 export const familyActiveBp = (s: GameState, b: Balance, family: Family): number =>
   clampFamilyBp(familyRawBp(s, b, family), family, s.farmLevel, b);
 
-/** The Present rate gate as the UI reads it, once per tick. `nowMs` = performance.now() of the tick (presentation clock). */
-export interface PresentGateSource { open(s: GameState, b: Balance, nowMs: number): boolean; }
+/** The Present rate gate as the UI reads it, once per tick. BR-R12b defines it on sim focus seconds, so it reads sim state only
+ *  (no presentation clock): Saves' planned `presentGateOpen(s, b)` fits as is (Architect m3). */
+export interface PresentGateSource { open(s: GameState, b: Balance): boolean; }
 
 /**
  * TODO(Saves): the sim has no Present calm-gate yet (readiness §2, "Gap — PR-B / Saves"). Until Saves exposes

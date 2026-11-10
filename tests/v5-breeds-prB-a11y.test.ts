@@ -34,7 +34,7 @@ describe('helper semantics', () => {
 
 describe('PR-B controls pass the sweep', () => {
   it('HUD chip, active and paused', () => {
-    const g = new RefGate(10000, 6); let t = 0;
+    let t = 0; const g = new RefGate(10000, 6, () => t);
     const h = mountPresentChip({ doc: document, b, now: () => t, gate: g })!; h.sync(stateWith(b, 10, leghorn312()));
     expect(labelInNameIssues(document.body)).toEqual([]);
     for (let i = 0; i < 6; i++) g.tap(i); t = 5; h.sync(stateWith(b, 10, leghorn312())); expect(h.state).toBe('paused');

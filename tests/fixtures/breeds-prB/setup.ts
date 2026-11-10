@@ -22,10 +22,20 @@ export const leghorn312 = (settleMs = 0) => breeds({ owned: { leghorn: { stars: 
  *  trailing (now − W, now] window, k = 0 never closes. Spec BR-R12b / BR-AC52b. */
 export class RefGate {
   taps: number[] = [];
-  constructor(public wMs: number, public k: number) {}
+  /** `focusNow` = the reference's FOCUS clock (ms). PresentGateSource.open(s, b) carries no clock (Architect m3, BR-R12b is sim focus
+   *  seconds); rc/v5 GameState has no focus accumulator yet (Saves' presentGateOpen owns it), so the reference gets an injected one. */
+  constructor(public wMs: number, public k: number, private focusNow: () => number = () => 0) {}
   tap(t: number) { this.taps.push(t); }
-  open = (_s: unknown, _b: unknown, now: number) => this.k === 0 || this.taps.filter(t => t > now - this.wMs && t <= now).length < this.k;
+  open = (_s?: unknown, _b?: unknown) => { const now = this.focusNow(); return this.k === 0 || this.taps.filter(t => t > now - this.wMs && t <= now).length < this.k; };
 }
+/** Present calm-gate tunables for the reference gate (spec §5 L648-654; BR-R12b/c). Test fixtures only (Architect nit: moved out of
+ *  src). TODO(Saves #126 commit 1): read bc(b, 'present_calm_w_s' | 'present_calm_k') once presentGateOpen lands. */
+export const PRB_STUB_TUNABLES = {
+  /** bc_present_calm_w_s: trailing focus-seconds window of the Present rate gate (BR-R12b). */
+  present_calm_w_s: 10,
+  /** bc_present_calm_k: counted taps in the window that close the gate; 0 = never pending (BR-R12c). */
+  present_calm_k: 6,
+} as const;
 
 /** Minimal copy of the rc/v5 HUD + scene markup the PR-B mounts attach to (src/ui/app.ts:78, :88). */
 export const HUD_HTML = `<div class="hud"><div class="pill coins" aria-label="Coins"><img alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second"><span class="tri" aria-hidden="true"></span><span class="rt">$0/s</span></span></span></div><div class="pill basket"><span class="num" id="basket"></span></div><div class="spacer"></div><button id="settings" aria-label="Settings"></button></div><div class="toast" id="toast"></div>`;
