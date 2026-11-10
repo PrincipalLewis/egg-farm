@@ -159,3 +159,10 @@
 - F6 Broody nest accrual still out of scope.
 - Gates (flock+lane-run): tsc 0; focused present/away-bp/away-broody/family-caps 34/34; f1b+breeds-state+offline 88/88; sync-economy --check pending in same push.
 - One push; re-bar grades F1–F5 + merge-forward onto d65391b0.
+
+## 2026-11-10 03:24 CET · Saves · HoE/v5-125-fix F7 + F3-no-literal
+- F7: Game.frame was passing only this rAF's focusMs into advance(); leftover accMs carried, leftover focus did not. Σ fT << Σ F at 20–144 fps (60 s @ 60 fps → 9,600 ms). Carry unused focus across the acc window (`FrameClock.focusAccMs` / `advance().focusAccMs`); Σ fT = Σ F at any frame rate, consistent with F1 fT shares.
+- F3-no-literal: dropped bare `tickClock(..., tickMs = 100)` default; callers pass `dtMs`.
+- RED FIRST: `[F7]` Game.frame at 30/60/144 fps + uneven gaps, 60 s focused — verified red (focusMs 20004 / 10008 / 4171 / 14960) then fixed.
+- Gates (flock `.vitest-eng.lock` nice -n 10, maxWorkers=2): tsc 0; sync-economy --check 0; focused present+f3-config+f1b+away-* 89/89 (incl. F3-no-literal).
+- One ordinary push; bundle `scratch/bundles/saves-breeds-sim-prB-traits-<sha8>.bundle`.

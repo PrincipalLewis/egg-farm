@@ -14,6 +14,8 @@ import {
   presentBp, presentGateOpen, calmGateOpen, sessionEndPresentFields, breedsPresentTick,
 } from '../src/sim/breeds-traits';
 import { familyCapBp } from '../src/sim/breeds-family';
+import { prodEggsPerSec } from '../src/sim/tracks';
+import { BP_ONE } from '../src/config/breeds';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import { SAVE_KEY, serialize } from '../src/save/save';
@@ -212,5 +214,66 @@ describe('flag-off identity', () => {
     let s = st(settledLeghorn(), 12);
     const a = step(s, 0.1, b, undefined, focus);
     expect(a.breedsCalm).toBeUndefined();
+  });
+});
+
+/** Integer-ms rAF gaps that sum exactly to `seconds * 1000` and average 1000/fps. */
+function gapsForFps(fps: number, seconds: number): number[] {
+  const n = Math.round(seconds * fps), total = seconds * 1000, base = Math.floor(1000 / fps);
+  const extra = total - base * n;
+  return Array.from({ length: n }, (_, i) => (i < extra ? base + 1 : base));
+}
+/** Uneven integer gaps (10–41 ms, not a fixed fps) summing to exactly 60,000. */
+function unevenGaps60s(): number[] {
+  const pattern = [10, 16, 20, 7, 24, 33, 15, 8, 41, 12];
+  const gaps: number[] = [];
+  let s = 0, i = 0;
+  while (s < 60_000) {
+    const g = pattern[i % pattern.length];
+    const next = s + g > 60_000 ? 60_000 - s : g;
+    gaps.push(next); s += next; i++;
+  }
+  return gaps;
+}
+
+describe('F7 Game.frame focus carry (BR-R12b(b) Σ fT = Σ F at rAF rates)', () => {
+  // breeds-only so Present eggs are not mixed with Frenzy / streak timed effects
+  const BR_ONLY = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, breeds: 1, golden: 0, streak: 0, tapCoins: 0, abilities: 0, broody: 0 } } } as typeof b;
+  const quiet = (s: GameState): GameState => ({
+    ...s, hensLevel: 12, workers: {}, customers: [], nextCustomerInS: 1e9, coop: 0,
+  });
+  const runFrames = (gaps: number[]) => {
+    const c = { t: Date.UTC(2026, 10, 10, 12) };
+    const g = new Game(BR_ONLY, mem(), () => c.t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
+    g.setAttendedProbe(() => true);
+    g.state = quiet(st(settledLeghorn(), 12));
+    const startCoop = g.state.coop;
+    const prod = prodEggsPerSec(g.state, BR_ONLY);
+    const bp = presentBp(g.state, BR_ONLY);
+    const wallMs = gaps.reduce((a, x) => a + x, 0);
+    for (const gap of gaps) { c.t += gap; g.frame(); }
+    return {
+      focusMs: g.state.breedsCalm!.focusMs,
+      activeMs: g.state.breedsCalm!.activeMs,
+      present_active_s: sessionEndPresentFields(g.state, BR_ONLY).present_active_s,
+      presentEggs: g.state.coop - startCoop - prod * (wallMs / 1000),
+      wantEggs: prod * (wallMs / 1000) * bp / BP_ONE,
+      bp, prod, wallMs, coop: g.state.coop, capOk: g.state.coop < 800,
+    };
+  };
+
+  it.each([
+    { tag: '30fps', gaps: gapsForFps(30, 60) },
+    { tag: '60fps', gaps: gapsForFps(60, 60) },
+    { tag: '144fps', gaps: gapsForFps(144, 60) },
+    { tag: 'uneven', gaps: unevenGaps60s() },
+  ])('[F7] Game.frame $tag × 60 s focused: focusMs, present_active_s and Present eggs match 60 s', ({ gaps }) => {
+    const r = runFrames(gaps);
+    expect(r.wallMs).toBe(60_000);
+    expect(r.capOk).toBe(true);
+    expect(Math.abs(r.focusMs - 60_000)).toBeLessThanOrEqual(100);
+    expect(r.activeMs).toBe(r.focusMs);
+    expect(Math.abs(r.present_active_s! - 60)).toBeLessThanOrEqual(0.1);
+    expect(r.presentEggs).toBeCloseTo(r.wantEggs, 6);
   });
 });
