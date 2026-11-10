@@ -78,3 +78,17 @@ describe('BR-R14 Broody bp_eff', () => {
     expect(broodyBpEff(s, BR)).toBe(600);
   });
 });
+
+  it('[E8] Away raw 3500 clamps to 3000 before the offline rate term', () => {
+    const over = st({
+      owned: { sussex: { stars: 0 }, brahma: { stars: 0 } },
+      slots: ['sussex', 'brahma', null], settleMs: [0, 0, 0],
+    }, 14, 12);
+    expect(awayBp(over, BR)).toBe(3000);
+    expect(familyActiveBp(over, BR, 'away')).toBe(3000);
+    const mult = offlineMult(over, BR);
+    const uncapped = m4OfflineEggs(3600, 12, BR, mult, 3500);
+    const capped = m4OfflineEggs(3600, 12, BR, mult, 3000);
+    expect(applyOffline(over, 3600_000, BR).eggs).toBe(capped);
+    expect(capped).toBeLessThan(uncapped);
+  });

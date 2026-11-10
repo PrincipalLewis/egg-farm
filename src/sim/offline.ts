@@ -7,7 +7,8 @@ import { breedsCalmClearRing, awayBp } from './breeds-traits';
 import { BP_ONE } from '../config/breeds';
 /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
-/** BR-R13: optional awayBp (0 = unchanged). Order: min(min(away,cap)×rate×(10000+awayBp)/10000, maxEggs2h)×mult, then floor. */
+/** BR-R13: optional awayBpN (0 = unchanged). Callers pass awayBp(=familyActiveBp), already clamped to bc_away_cap_bp.
+ *  Order: min(min(away,cap)×rate×(10000+awayBp)/10000, maxEggs2h)×mult, then floor. */
 export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1, awayBpN = 0): number {
   const o = b.offline, t = b.m4!.offline!; if (!isFinite(awayS) || awayS < o.offlineMinSeconds) return 0;
   const L = clampL(hensLevel, b);
