@@ -9,7 +9,7 @@ import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { eggsPerTap, demandRange, customerIntervalS } from '../sim/state';
 import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
-import { mood, isOff, graderMult, hawkerDemandMult, type Workers } from '../sim/workers';
+import { mood, isOff, graderMult, hawkerDemandMult, WORKERS, type WorkerId, type Workers } from '../sim/workers';
 import { isPaused } from '../sim/pause';
 
 export type IncomeOpts = {
@@ -138,3 +138,41 @@ export class EtaHold {
     return raw;
   }
 }
+
+/** sales-stopped-spec §4.8: $/s lost while this hired Tired/Asleep worker is not Working at 100%.
+ *  Excludes Unpaid and paused (Pause flag). Manage-target ties use WORKERS order market_hand > coop_hand > hawker > grader. */
+export function workerAtRisk(id: WorkerId, s: GameState, b: Balance): number {
+  const w = s.workers[id];
+  if (!w || w.unpaid || isPaused(w, b)) return 0;
+  const m = mood(w, b);
+  if (m !== 'tired' && m !== 'asleep') return 0;
+  const healed: GameState = { ...s, workers: { ...s.workers, [id]: { ...w, energy: 100, unpaid: false } } };
+  return incomePerSec(healed, b) - incomePerSec(s, b);
+}
+
+/** Per-worker $/s at risk for every role (0 when not Tired/Asleep). */
+export function workersAtRisk(s: GameState, b: Balance): Record<WorkerId, number> {
+  const out = {} as Record<WorkerId, number>;
+  for (const id of WORKERS) out[id] = workerAtRisk(id, s, b);
+  return out;
+}
+
+/** Costliest Tired/Asleep worker by workerAtRisk; ties keep WORKERS code-id order. */
+export function costliestAtRisk(s: GameState, b: Balance): WorkerId | null {
+  let best: WorkerId | null = null, bestV = -Infinity;
+  for (const id of WORKERS) {
+    const v = workerAtRisk(id, s, b);
+    if (v > bestV) { bestV = v; best = id; }
+  }
+  return bestV > 0 ? best : null;
+}
+
+/** SIM-API (FC-AC3, FC-AC6): Rule 2 share = fatigueLoss / (incomePerSec + fatigueLoss), 0..1, base rates only (no Frenzy,
+ *  streak or call multipliers: incomePerSec reads no timed effect). Paused and Unpaid workers are not in the loss. */
+export function fatigueShare(s: GameState, b: Balance): number {
+  return fatigueShareOf(fatigueLossPerSec(s, b), incomePerSec(s, b));
+}
+import { fatigueShareOf, fatigueLossPerSec } from './stall';
+/** SIM-API: the stall + cue read shape, UI notifications and exported types live in econ/stall.ts; re-exported here. */
+export { stallView, fatigueCueView, resetStallTimers, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap } from './stall';
+export type { StallCause, StallResolvedBy, StallView, FatigueCueView, FatigueSurface } from './stall';

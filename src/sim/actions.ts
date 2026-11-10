@@ -10,6 +10,7 @@ import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { spawnGolden, tapGolden, frenzySale } from './golden';
+import { stallObserve } from '../econ/stall';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
@@ -67,7 +68,13 @@ function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Si
 /** v5 F1c, Q-F1c-1 ruled D-HOP-2026-10-29-06: the Market sheet is a play surface. A player sale is suspended (no Frenzy/streak)
  *  ONLY when the tick's attended probe is false; Game.dispatch passes `attended` from the same probe frame() uses. The UI never
  *  passes suspended for the sheet. Default true keeps every existing caller (tests, bots, verify) unchanged. */
+/** Risk-helpers: apply() lets the stall machine see this action's sells / collects (econ/stall.ts stallObserve). Identity
+ *  while there is no stall session (salesStopped off), so flag-off is byte-identical. */
 export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
+  const ev0 = ev ? ev.length : 0, r = apply0(s, a, b, ev, attended);
+  return r.stallSession ? stallObserve(r, ev, ev0) : r;
+}
+function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
   switch (a.type) {
     case 'collect': { // v5 #2/#3: the only credited-tap source (R3); `credited` only while streak or tapCoins is on
       const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)), c = creditTap(s, b);
