@@ -1,22 +1,18 @@
 // @vitest-environment jsdom
 // PR-A breeds UI: BR-AC3/3b/31/31a/31b/31c/32 (partial) — checklist c9d8b631
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
-import { balance, type Balance } from '../src/config/balance';
+import { type Balance } from '../src/config/balance';
 import { initialState } from '../src/sim/state';
 import { serialize, SAVE_KEY } from '../src/save/save';
 import { Game } from '../src/game';
 import { mem } from './helpers';
+import { breedsOnBalance, breedsOffBalance } from './helpers/breeds-on';
 import { hatchUi, farmSoonVisible, FARM_SOON_TEXT, settleLabel } from '../src/ui/breeds-ui';
 import { hatchEstimate, fmtRemainMs, type BreedsSave } from '../src/ui/breeds-adapter';
 
-const breedsOn = (): Balance => ({
-  ...balance,
-  m4: { ...balance.m4!, enabled: 1, flags: { ...balance.m4!.flags!, breeds: 1 } },
-});
-const breedsOff = (): Balance => ({
-  ...balance,
-  m4: { ...balance.m4!, enabled: 1, flags: { ...balance.m4!.flags!, breeds: 0 } },
-});
+/** HoQA fixture: deep-clone balance.json, ONLY m4.flags.breeds=1 (see tests/helpers/breeds-on.ts). */
+const breedsOn = (): Balance => breedsOnBalance();
+const breedsOff = (): Balance => breedsOffBalance();
 
 const kvOf = () => { const kv = mem() as any; kv.removeItem = (k: string) => kv.m.delete(k); return kv; };
 let n = 0; const id = () => (++n).toString(16).padStart(16, '0');
@@ -327,5 +323,50 @@ describe('PR-A checklist remaining rows (focused)', () => {
     document.getElementById('breeds-entry')!.click();
     const slots = [...document.querySelectorAll('#breeds-body .slot')];
     expect(slots[0].classList.contains('empty')).toBe(true);
+  });
+});
+
+describe('BR-AC4 / OQ-6 place + settle', () => {
+  it('album select → empty slot places; Remove clears', async () => {
+    const b = breedsOn();
+    const br: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      owned: { leghorn: { stars: 0 }, sussex: { stars: 0 } },
+      slots: [null, null, null],
+      settleMs: [0, 0, 0],
+    };
+    const { g, ui } = await mount({ farmLevel: 14, coinsCents: 1e9, abilitiesCoachSeen: true, breeds: br }, b);
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    const album = document.querySelector('.album-cell.owned[data-breed="leghorn"]') as HTMLElement;
+    album.click();
+    expect(album.classList.contains('picked')).toBe(true);
+    (document.querySelector('.slot.empty') as HTMLElement).click();
+    expect(g.state.breeds!.slots[0]).toBe('leghorn');
+    expect((g.state.breeds!.settleMs[0] ?? 0) > 0).toBe(true);
+    ui.render();
+    const remove = document.querySelector('[data-testid="breeds-slot-remove"]') as HTMLButtonElement | null;
+    // while settling, Remove may be absent (settling card); advance settle to 0 via dispatch place null on settling via re-render after manual state
+    g.state = { ...g.state, breeds: { ...g.state.breeds!, settleMs: [0, 0, 0] as any } };
+    ui.render();
+    const rmBtn = document.querySelector('[data-testid="breeds-slot-remove"]') as HTMLButtonElement;
+    expect(rmBtn).toBeTruthy();
+    rmBtn.click();
+    expect(g.state.breeds!.slots[0]).toBeNull();
+  });
+
+  it('incubating: Hatch disabled, Ready in m:ss (ceil)', () => {
+    const b = breedsOn();
+    const br: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      incubator: { breed: 'leghorn', remainingMs: 45_001, costCents: 0 },
+    };
+    const s = { ...initialState(b), farmLevel: 10, coinsCents: 1e12, breeds: br };
+    const u = hatchUi(s as any, b, br);
+    expect(u.kind).toBe('hatching');
+    expect(u.disabled).toBe(true);
+    expect(u.label).toBe('Hatching…');
+    expect(u.sub).toBe('Ready in 0:46'); // ceil 45001ms
   });
 });
