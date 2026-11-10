@@ -8,9 +8,9 @@ import { mem, expOffline } from './helpers';
 const T0 = 1.8e12; // QA BUG-1: savedAt 0 / pre-2020 is invalid now; offline tests use a real epoch
 const clock = () => { const c = { t: 1_000_000 }; return { c, now: () => c.t }; };
 describe('telemetry', () => {
-  it('events carry ts + sessionMs', () => {
+  it('[TEL-AC1] events carry ts + sid + fgMs, no sessionMs', () => {
     const { c, now } = clock(); const t = new Telemetry(mem(), b.telemetry, now); c.t += 1500; t.track('x');
-    expect(t.events()[0]).toMatchObject({ type: 'x', ts: 1_001_500, sessionMs: 1500 });
+    expect(t.events()[0]).toEqual({ type: 'x', ts: 1_001_500, sid: expect.stringMatching(/^[0-9a-z]{6}$/), fgMs: 1500 }); expect(t.events()[0]).not.toHaveProperty('sessionMs');
   });
   it('ring buffer capped at ring_size', () => {
     const t = new Telemetry(mem(), { ...b.telemetry, ring_size: 5000 }, () => 0);

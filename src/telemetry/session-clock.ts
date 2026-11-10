@@ -19,7 +19,8 @@ export interface SessionClockView {
 }
 export interface SessionClock extends SessionClockView {
   pause(at: number): void;
-  resume(at: number): Split | null;
+  /** `rotate: false` (R7 frozen tabs) resumes the same sid whatever the gap. */
+  resume(at: number, rotate?: boolean): Split | null;
   markEnded(): void;
   rotate(at: number, prevHiddenMs: number): Split;
 }
@@ -55,10 +56,10 @@ export function createSessionClock(o: SessionClockOpts): SessionClock {
       sid = newSid(); fgBase = 0; last = 0; runSince = at; hiddenAt = null; ended = false;
       return split;
     },
-    resume(at) {
+    resume(at, rotate = true) {
       if (hiddenAt === null) return null;
       const gap = at - hiddenAt;
-      if (ended || gap >= o.hiddenEndMs) return clock.rotate(at, Math.max(0, gap));
+      if (rotate && (ended || gap >= o.hiddenEndMs)) return clock.rotate(at, Math.max(0, gap));
       runSince = Math.max(at, hiddenAt); hiddenAt = null; // hidden time excluded; a clock that went back never adds negative time
       return null;
     },
