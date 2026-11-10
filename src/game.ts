@@ -15,6 +15,7 @@ import { streakOn, streakPeak } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
+import { pauseSessionEnd } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -327,7 +328,11 @@ export class Game {
     if (this.resetting || this.inactive || this.held()) return;
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    const pauseEnd = pauseSessionEnd(this.state, this.b); // pause §12 L299: paused_worker_s / all_paused_s; pause = 1 and rc2Refill = 0 only (Saves #119)
+    this.telemetry.track('session_end', {
+      ...pauseEnd,
+    });
+    this.save(); this.telemetry.flush(true); }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
     this.resetting = true; this.goldenEnd('reset');

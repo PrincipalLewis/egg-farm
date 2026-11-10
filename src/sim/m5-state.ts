@@ -26,6 +26,8 @@ export interface GoldenEggOnScreen {
   intervalS: number;
 }
 
+/** Pause tracker (never saved): per-worker current-pause sim seconds + session totals sumS / allS (no WorkerId collision). */
+export type PauseTracker = Partial<Record<WorkerId, number>> & { sumS?: number; allS?: number };
 export interface M5Fields {
   // ---- #1 golden egg (saved, R10a) ----
   /** evRng position (uint32, non-zero). Seeded once per D-C2 (sim/rng.ts deriveEvRngState); never re-reads state.rng. */
@@ -57,6 +59,13 @@ export interface M5Fields {
   broodyNestScaled?: number;
   /** brRng position (D-C4): derived from evRngState, never saved, only Broody draws from it. */
   brRngState?: number;
+  // ---- M5 Pause (session only, never saved; pause v1.3.16 471fb534, D-PMW-2026-11-10-02, QA-D-1110-PAUDUR) ----
+  /** Sim seconds each currently paused worker has been paused (sim/pause.ts pausedDurationS; tick.ts accumulates while paused).
+   *  Known limits: (1) never saved, so a reload restarts the count at load time; (2) only simulated time counts, so offline time
+   *  and hidden gaps >= 60 s (the provisional hidden sim is discarded) are not counted. */
+  /** + whole-session totals for session_end (pause §12 L299; HoE/saves-119-session-end): `sumS` = paused seconds summed over workers
+   *  (paused_worker_s), `allS` = seconds while every hired worker was paused (all_paused_s). Same never-saved key, same limits. */
+  pausedForS?: PauseTracker;
   // ---- #4 abilities (saved, abilities spec rule 1/3, E2) ----
   abilities?: Partial<Record<WorkerId, AbilityState>>;
   abilitiesUnlocked?: boolean;
@@ -68,5 +77,5 @@ export interface M5Fields {
 /** Fields F2 persists (optional, absent = default). */
 export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds'] as const satisfies readonly (keyof M5Fields)[];
 /** Fields that live only for a page session: F2 strips them before serialize (specs: never saved). */
-export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState', 'pausedForS'] as const satisfies readonly (keyof M5Fields)[];
 export const M5_FIELDS: readonly (keyof M5Fields)[] = [...M5_SAVED_FIELDS, ...M5_SESSION_FIELDS];

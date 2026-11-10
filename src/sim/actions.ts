@@ -11,6 +11,7 @@ import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { spawnGolden, tapGolden, frenzySale } from './golden';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { isPaused, resumeWorker } from './pause';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
@@ -102,9 +103,13 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
     case 'manage': {
       const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || !canManageWorker(w, b)) return s; // P4: only at <= 40%
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
-      return { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
+      const r = { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
+      // Pause rule 8 / AC-P12 (PAU-AC8, audit D1): Manage on a paused worker also ends the pause, through the one Resume path
+      // (Market Hand B5 lockout included). isPaused is false with m4.flags.pause off, so flag-off stays byte-identical (E13).
+      return isPaused(w, b) ? resumeWorker(r, a.worker, b, ev, 'manage') : r; // emits worker_resumed{cause:"manage"}
     }
     case 'manageAll': { // v1.1 + P4: 3+ hired; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+      // Pause rule 8 (D1): needManage skips paused workers, so Manage all never refills or resumes them.
       const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
       const workers = { ...s.workers };
