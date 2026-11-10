@@ -48,6 +48,9 @@ export const UI_KEY = 'eggfarm.ui';
 interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
+/** OC-A11Y-2 (D-HOP-2026-11-09-01): order-chip accessible name; starts with the visible `.tag .num` text (WCAG 2.5.3).
+ *  Plural from the RAW count, never the formatted string. Copy final per Art; swap wording here only. */
+export const orderChipLabel = (visible: string, raw: number) => `${visible} ${raw === 1 ? 'egg' : 'eggs'} wanted by customer`;
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
@@ -409,8 +412,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const kids: HTMLElement[] = [];
     for (const c of s.customers.slice(0, split.shown)) {
       let el = chips.get(c.id);
-      if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
-      setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
+      if (!el) { el = h(`<button class="chip arrive"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
+      const left = c.demand - c.filled, n = fmtCount(left); // OC-A11Y-1..3: name + visible digit from one value, same render
+      setText(el.querySelector('.tag .num')!, n);
+      const al = orderChipLabel(n, left); if (el.getAttribute('aria-label') !== al) el.setAttribute('aria-label', al);
       setP(el, c.waitedS / patience);
       kids.push(el);
     }
