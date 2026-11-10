@@ -1,0 +1,176 @@
+diff --git a/src/sim/actions.ts b/src/sim/actions.ts
+remerge CONFLICT (content): Merge conflict in src/sim/actions.ts
+index 80a5b65..98242cf 100644
+--- a/src/sim/actions.ts
++++ b/src/sim/actions.ts
+@@ -4,11 +4,8 @@ import { m4On } from '../config/formulas';
+ import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
+ import type { Sink } from './events';
+ import { saleValueCents } from './payout';
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+ import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
+-=======
+ import { playerSaleCtx } from './effects';
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+ import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+ export type Action =
+   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
+@@ -19,25 +16,18 @@ export type Action =
+ export { sellAllPreview } from './payout';
+ export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
+ /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+-/** v5: `suspended` = a sale on a tick without focus (worker sales under a menu or hidden): the streak counts as 1 (R12). */
+-=======
+ /** v5 F1c: `suspended` = the sale happens on a tick without focus (worker sales under a menu/hide): timed effects count as 1. */
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player', suspended = false): GameState {
+   const c = s.customers.find(c => c.id === id); if (!c) return s;
+   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
+   // One payout function (sim/payout.ts) for credit and every UI preview.
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+-  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, { by, suspended }), filled = c.filled + k, done = filled >= c.demand;
+-=======
+-  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, by === 'player' ? playerSaleCtx(!suspended) : suspended ? { by, suspended } : { by }), filled = c.filled + k, done = filled >= c.demand;
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
++  const ctx = by === 'player' ? playerSaleCtx(!suspended) : suspended ? { by, suspended } : { by };
++  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, ctx), filled = c.filled + k, done = filled >= c.demand;
+   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
+   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
+   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
+   const o = { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
+-  return streakSaleFactor(s, b, suspended) === 1 ? o : addStreakExtra(o, value - saleValueCents({ ...s, streakS: 0 }, k, b)); // #2 extra_coins
++  return streakSaleFactor(s, b, suspended) === 1 ? o : addStreakExtra(o, value - saleValueCents({ ...s, streakS: 0 }, k, b, ctx)); // #2 extra_coins
+ }
+ function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
+   const L = kind === 'collection' ? s.collectionLevel : s.farmLevel; if (L >= b.maxLevel) return s;
+@@ -70,20 +60,14 @@ function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Si
+  *  passes suspended for the sheet. Default true keeps every existing caller (tests, bots, verify) unchanged. */
+ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
+   switch (a.type) {
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+     case 'collect': { // v5 #2: the only credited-tap source (R3); `credited` only while the streak is on
+       const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)), c = creditTap(s, b);
+       ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : { type: 'collect', eggs: n, credited: c.credited });
+       if (c.started) ev?.push({ type: 'streak_started', farm_level: s.farmLevel, collection_level: s.collectionLevel });
+       return { ...c.s, coop: s.coop - n, basket: s.basket + n };
+     }
+-    case 'sell': return sellTo(s, a.customerId, b, ev);
+-    case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev); } return r; }
+-=======
+-    case 'collect': { const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)); ev?.push({ type: 'collect', eggs: n }); return { ...s, coop: s.coop - n, basket: s.basket + n }; }
+     case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
+     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+     case 'buyCollection': return buy(s, 'collection', b, ev);
+     case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
+     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
+diff --git a/src/sim/effects.ts b/src/sim/effects.ts
+index 87177ba..88d8753 100644
+--- a/src/sim/effects.ts
++++ b/src/sim/effects.ts
+@@ -19,7 +19,9 @@ export interface SaleEffect { id: string; flag: M5Flag; factor(s: GameState, b:
+ export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance): number; }
+ /** Feature PRs append their entry IN THIS FILE (one line each). Order is documentation only: factors multiply (golden X7).
+  *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
+-export const SALE_EFFECTS: readonly SaleEffect[] = [];
++export const SALE_EFFECTS: readonly SaleEffect[] = [
++  { id: 'streak', flag: 'streak', factor: s => 1 + (s.streakS ?? 0) }, // #2 Collect Streak R8: (1 + s) on every sale while live
++];
+ export const LAY_EFFECTS: readonly LayEffect[] = [];
+ export const PLAYER_SALE: SaleCtx = { by: 'player' };
+ /** CCR m1 #80: the ONE player-sale context for a given attended value (Q-F1c-1). sellTo credits with it; every preview uses it. */
+diff --git a/src/sim/payout.ts b/src/sim/payout.ts
+remerge CONFLICT (content): Merge conflict in src/sim/payout.ts
+index 9779a3a..0bc226b 100644
+--- a/src/sim/payout.ts
++++ b/src/sim/payout.ts
+@@ -4,19 +4,6 @@ import type { Balance } from '../config/balance';
+ import type { GameState } from './state';
+ import { salePriceCents } from './tracks';
+ import { graderMult } from './workers';
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+-import { streakSaleFactor } from './streak';
+-/** v5 (F1c sim/effects.ts SaleCtx shape): who sold, and whether the tick has no focus (timed effects count as 1, D-C3). */
+-export interface SaleCtx { by: 'player' | 'market_hand'; suspended?: boolean; }
+-/** Price multipliers applied to a sale, in order: the Grader, then the #2 streak (1 + s) while live (on merge with F1c this
+- *  becomes its SALE_EFFECTS entry). ctx absent = a player sale with focus (credits and every UI preview). */
+-export function saleMultipliers(s: GameState, b: Balance, ctx?: SaleCtx): number[] {
+-  const g = graderMult(s.workers, s.graderTier, b), k = streakSaleFactor(s, b, ctx?.suspended);
+-  return k === 1 ? [g] : [g, k];
+-}
+-/** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult). */
+-export function saleValueCents(s: GameState, k: number, b: Balance, ctx?: SaleCtx): number {
+-=======
+ import { PLAYER_SALE, saleEffectFactors, type SaleCtx } from './effects';
+ /** Price multipliers applied to a sale: the Grader, then every live timed effect from the F1c registry (sim/effects.ts).
+  *  ctx defaults to a player sale with focus (UI previews and player credits); worker sales pass by/suspended. */
+@@ -26,7 +13,6 @@ export function saleMultipliers(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_
+ }
+ /** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult) (rounded once, X7). */
+ export function saleValueCents(s: GameState, k: number, b: Balance, ctx: SaleCtx = PLAYER_SALE): number {
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+   const base = salePriceCents(s, b), m = saleMultipliers(s, b, ctx).reduce((a, x) => a * x, 1);
+   return m === 1 ? k * base : Math.round(k * base * m);
+ }
+diff --git a/src/sim/tick.ts b/src/sim/tick.ts
+remerge CONFLICT (content): Merge conflict in src/sim/tick.ts
+index 09a7884..c2fbcd9 100644
+--- a/src/sim/tick.ts
++++ b/src/sim/tick.ts
+@@ -53,22 +53,13 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
+     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
+   }
+   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !clock?.focus); // v5 #2: no focus = suspended sale (R12)
+-  if (anyM5FlagOn(b)) out = stepTimers(out, dt, b, clock, ev);
+-=======
+   if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
+   if (live) out = stepTimers(out, dt, b, clock, ev);
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+   return out;
+ }
+ /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
+  *  (front first, like Sell all) every every_s / tired_every_s. Wage is charged per action interval. Asleep = nothing, no wage. */
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+-function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, suspended = false): GameState {
+-=======
+ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspended = false): GameState {
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+   const ws = { ...s.workers };
+   // §8 items 15.5 + 16 (R9): Unpaid workers resume one at a time, W1 then W2. Each needs coins >= 1 min of its own wage
+   // plus 1 min for every worker already being paid (Working/Tired) and every worker resumed earlier in this check.
+@@ -99,11 +90,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
+       if (id === 'coop_hand') {
+         const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b));
+         if (n > 0) { s = { ...s, coop: s.coop - n, basket: s.basket + n }; ev?.push({ type: 'worker_collect', eggs: n }); }
+-<<<<<<< 14894bd (v5 #2 streak sim: Saves QA #87 findings (M1 ST-AC7 Market Hand/Sell all/Grader tests, M2 cap of record 0.28, m3-m5))
+-      } else for (const c of s.customers) { if (s.basket < 1) break; s = sellTo(s, c.id, b, ev, 'market_hand', suspended); }
+-=======
+       } else for (const c of s.customers) { if (s.basket < 1) break; s = sellTo(s, c.id, b, ev, 'market_hand', fxSuspended); }
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+     }
+     ws[id] = { ...w, cdS };
+   }
+diff --git a/tests/v5-f1c-effects.test.ts b/tests/v5-f1c-effects.test.ts
+index 8b89017..d7462f5 100644
+--- a/tests/v5-f1c-effects.test.ts
++++ b/tests/v5-f1c-effects.test.ts
+@@ -1,6 +1,6 @@
+ // v5 F1c (engineering/m5.0-sizing.md §1 F1(c)): timed-effects registry feeding saleMultipliers() and prodEggsPerSec(),
+ // with `by` attribution (Rush = Market Hand sales only) and suspension on ticks without focus (D-C3, golden R23).
+-import { describe, it, expect, afterEach } from 'vitest';
++import { describe, it, expect, afterEach, beforeEach } from 'vitest';
+ import { balance } from '../src/config/balance';
+ import type { M5Flag } from '../src/config/flags';
+ import { initialState, type GameState } from '../src/sim/state';
+@@ -21,7 +21,7 @@ const rush: SaleEffect = { id: 'rush', flag: 'abilities', factor: (_s, _b, c) =>
+ const streak: SaleEffect = { id: 'streak', flag: 'streak', factor: () => 1.28 };
+ const sweep: LayEffect = { id: 'sweep', flag: 'abilities', factor: () => 1.15 };
+ const SALE = SALE_EFFECTS as SaleEffect[], LAY = LAY_EFFECTS as LayEffect[]; // test-only fixture seam (registries are readonly in src)
+-afterEach(() => { SALE.length = 0; LAY.length = 0; });
++const reset = () => { SALE.length = 0; LAY.length = 0; }; beforeEach(reset); afterEach(reset); // #87: the registry now ships the streak entry; fixtures start empty
+ const farm = (b: any): GameState => ({ ...initialState(b, 3), farmLevel: 12, hensLevel: 12, eggValueLevel: 12, graderTier: 2, basket: 500, coinsCents: 0,
+   workers: { grader: { energy: 100, cdS: 0 }, market_hand: { energy: 100, cdS: 0 } }, customers: [{ id: 1, demand: 10, filled: 0, waitedS: 0 }] });
+ 

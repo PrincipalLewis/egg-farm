@@ -1,0 +1,1299 @@
+{
+  "title": "M2 18-state diagnostic (pre-fix ship picker)",
+  "generatedAt": "2026-11-05T22:09:30.271Z",
+  "method": "oldAppPicker=DualPicker(zgFiltered(scorer with rankable empty\u2192all)); seeds 1\u2013200; runBot seller15 3600s + runM2 7200s; VAR_DEFAULT; STATE_TRACE @ 1 Hz",
+  "cite": "Architect v5-m51-bbv2-b6dec409-architect.md \u00a7M2; D-HOP-2026-11-05-14; spec v1.0.4 4ea3841a; Card #12 9f900304",
+  "counts": {
+    "states": 2160000,
+    "suppressedAffordable": 960329,
+    "below30": 0,
+    "perBot": {
+      "runM2": 960329
+    },
+    "rowsDumped": 40
+  },
+  "note": "Pre-fix reconstruction: suppressedAffordable=960329 all F>=30, shape=capacity-only HENS. Architect b6dec409 reported 18 on live appPicker at that tip. Post-fix CONFIRMATORY \u2192 0. JSON rows = first 40 chronological hits.",
+  "states": [
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2441,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 7456982,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2442,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 7726080,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2443,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 7941395,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2444,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 8237409,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2445,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 8506556,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2446,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 8775654,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2447,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 9044801,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2448,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 9313899,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2449,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 9583046,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2450,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 9879060,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2451,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 10094375,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2452,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 10390389,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2453,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 10578788,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2454,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 10928634,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2455,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 11332361,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2456,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 11574543,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2457,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 11789858,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2458,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 12032040,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2459,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 12247355,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2460,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 12570285,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2461,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 12839432,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2462,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 13108530,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2463,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 13377677,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2464,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 13673691,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2465,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 13862090,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2466,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 14158104,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2467,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 14346503,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2468,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 14830929,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2469,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 15100076,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2470,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 15288426,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2471,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 15557573,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2472,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 15772839,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2473,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 16203482,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2474,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 16472580,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2475,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 16714811,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2476,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 16956993,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2477,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 17172308,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2478,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 17387574,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2479,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 17575973,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    },
+    {
+      "bot": "runM2",
+      "seed": 1,
+      "t": 2480,
+      "F": 30,
+      "H": 29,
+      "V": 30,
+      "C": 11,
+      "coinsCents": 18033483,
+      "selected": "HENS",
+      "affordable": true,
+      "mark": null,
+      "gains": {
+        "HENS": 0,
+        "COLL": 0
+      },
+      "dCap": {
+        "HENS": 775,
+        "VALUE": null,
+        "COLL": 0
+      },
+      "zg": {
+        "HENS": false,
+        "VALUE": null,
+        "COLL": true
+      },
+      "meaningful": [],
+      "offered": [
+        "HENS",
+        "COLL"
+      ]
+    }
+  ],
+  "architectReported": 18
+}

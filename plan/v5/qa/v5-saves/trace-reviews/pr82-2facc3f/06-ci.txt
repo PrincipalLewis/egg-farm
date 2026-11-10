@@ -1,0 +1,5 @@
+2026-10-30 08:41:13 CET
+{"c":"success","e":"pull_request","h":"2facc3ffefb74556263327c6be5014535a3cd22d","j":[{"c":"success","n":"gate"},{"c":"skipped","n":"release-globals"}],"run":41019019230,"s":"completed","t0":"2026-10-30T07:15:55Z","t1":"2026-10-30T07:32:13Z"}
+{"c":"success","h":"14894bd32fdb072f5f54369bce677853e6b53962","j":[{"c":"success","n":"gate","s":"completed","st":"2026-10-30T07:21:29Z"},{"c":"skipped","n":"release-globals","s":"completed","st":"2026-10-30T07:37:35Z"}],"run":41019583114,"s":"completed","t0":"2026-10-30T07:21:25Z","t1":"2026-10-30T07:37:36Z"}
+{"headRefOid":"48b6857993f0a08b24ed26924448b66a55743feb","isDraft":false,"mergeStateStatus":"UNSTABLE","mergeable":"MERGEABLE"}
+{"headRefOid":"14894bd32fdb072f5f54369bce677853e6b53962","mergeStateStatus":"DIRTY"}

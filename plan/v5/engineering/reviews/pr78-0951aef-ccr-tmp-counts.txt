@@ -1,0 +1,5 @@
+/tmp entries: before 3156 (20:47 CET), after 4367 (21:29 CET); +1222/-11 in that window, none attributable to CCR (every CCR run had TMPDIR=/workspace/.pr78-ev/...); 0 v5m5-/v1d- dirs appeared in /tmp.
+tmp: 204 entries:  12 playwright-artifacts; 12 playwright_chromiumdev_profile; 180 v;
+tmp-vitest: 89 entries:  1 bid; 1 eco; 4 ef-production; 4 ef-qa; 4 pins; 1 playwright-artifacts; 1 playwright_chromiumdev_profile; 24 prod; 14 rb; 5 rbd; 1 so-git; 1 so-nogit; 1 so-path; 15 v; 12 vend;
+tmp-new: 17 entries:  1 playwright-artifacts; 1 playwright_chromiumdev_profile; 15 v;
+tmp-base: 17 entries:  1 playwright-artifacts; 1 playwright_chromiumdev_profile; 15 v;

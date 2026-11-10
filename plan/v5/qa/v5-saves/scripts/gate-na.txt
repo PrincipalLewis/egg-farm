@@ -1,0 +1,4 @@
+# v5-saves-gate explicit NOT APPLICABLE registry (QA-D-1030-SAVES-RC-1 (2)). Format: <step-id> | <citation>. Pinned in SCRIPTS.sha256.
+# Only steps listed here may be N/A; any other required step that does not run is NOT RUN = hard fail. GATE_NO_NA=1 ignores this file.
+# HoQ still has to rule that this N/A is acceptable (flagged in the RC report).
+U-ss15-share-guard | QA-D-1030-SS15-NA / D-CEO-20261030-04: #5b not in RC (manifest row 23), HoE 11:08 Oct 30; salesStopped ships flag-off with no Rule 2 share code

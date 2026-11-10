@@ -1,0 +1,12927 @@
+{
+ "axe": "4.14.0",
+ "fixture": "fixture.html",
+ "engines": {
+  "chromium": {
+   "360": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": [
+     [
+      "Next charge in 0:01",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:02",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:03",
+      156.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:04",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:05",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:06",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:07",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:08",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:09",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:10",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:11",
+      149.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:12",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:13",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:14",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:15",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:16",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:17",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:18",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:19",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:20",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:21",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:22",
+      156.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:23",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:24",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:25",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:26",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:27",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:28",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:29",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:30",
+      156.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:31",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:32",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:33",
+      156.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:34",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:35",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:36",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:37",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:38",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:39",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:40",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:41",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:42",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:43",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:44",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:45",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:46",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:47",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:48",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:49",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:50",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:51",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:52",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:53",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:54",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:55",
+      154.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:56",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:57",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:58",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:59",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:00",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:01",
+      149.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:02",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:03",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:04",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:05",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:06",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:07",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:08",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:09",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:10",
+      149.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:11",
+      146.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:12",
+      149.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:13",
+      149.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:14",
+      149.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:15",
+      148.63,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:16",
+      149.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:17",
+      149.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:18",
+      149.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:19",
+      149.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:20",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:21",
+      149.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:22",
+      153.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:23",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:24",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:25",
+      151.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:26",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:27",
+      152.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:28",
+      152.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:29",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:30",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:31",
+      149.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:32",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:33",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:34",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:35",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:36",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:37",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:38",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:39",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:40",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:41",
+      149.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:42",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:43",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:44",
+      152.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:45",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:46",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:47",
+      152.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:48",
+      152.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:49",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:50",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:51",
+      148.63,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:52",
+      151.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:53",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:54",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:55",
+      150.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:56",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:57",
+      151.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:58",
+      151.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:59",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:00",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:01",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:02",
+      156.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:03",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:04",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:05",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:06",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:07",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:08",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:09",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:10",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:11",
+      149.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:12",
+      153.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:13",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:14",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:15",
+      151.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:16",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:17",
+      152.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:18",
+      152.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:19",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:20",
+      156.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:21",
+      153.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:22",
+      156.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:23",
+      156.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:24",
+      156.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:25",
+      155.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:26",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:27",
+      155.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:28",
+      156.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:29",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:30",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:31",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:32",
+      156.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:33",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:34",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:35",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:36",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:37",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:38",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:39",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:40",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:41",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:42",
+      156.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:43",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:44",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:45",
+      155.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:46",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:47",
+      155.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:48",
+      155.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:49",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:50",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:51",
+      151.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:52",
+      155.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:53",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:54",
+      155.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:55",
+      154.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:56",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:57",
+      154.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:58",
+      154.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:59",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:00",
+      156.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:01",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:02",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:03",
+      156.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:04",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:05",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:06",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:07",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:08",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:09",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:10",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:11",
+      149.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:12",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:13",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:14",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:15",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:16",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:17",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:18",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:19",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:20",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:21",
+      153.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:22",
+      156.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:23",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:24",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:25",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:26",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:27",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:28",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:29",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:30",
+      156.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:31",
+      153.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:32",
+      156.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:33",
+      156.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:34",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:35",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:36",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:37",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:38",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:39",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:40",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:41",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:42",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:43",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:44",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:45",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:46",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:47",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:48",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:49",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:50",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:51",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:52",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:53",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:54",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:55",
+      154.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:56",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:57",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:58",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:59",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:00",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:01",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:02",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:03",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:04",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:05",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:06",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:07",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:08",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:09",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:10",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:11",
+      149.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:12",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:13",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:14",
+      152.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:15",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:16",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:17",
+      152.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:18",
+      152.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:19",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:20",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:21",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:22",
+      156.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:23",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:24",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:25",
+      155.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:26",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:27",
+      155.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:28",
+      155.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:29",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:30",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:31",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:32",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:33",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:34",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:35",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:36",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:37",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:38",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:39",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:40",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:41",
+      152.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:42",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:43",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:44",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:45",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:46",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:47",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:48",
+      155.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:49",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:50",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:51",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:52",
+      155.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:53",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:54",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:55",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:56",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:57",
+      154.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:58",
+      154.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:59",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:00",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:01",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:02",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:03",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:04",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:05",
+      154.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:06",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:07",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:08",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:09",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:10",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:11",
+      148.63,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:12",
+      151.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:13",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:14",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:15",
+      150.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:16",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:17",
+      151.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:18",
+      151.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:19",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:20",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:21",
+      151.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:22",
+      155.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:23",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:24",
+      155.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:25",
+      154.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:26",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:27",
+      154.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:28",
+      154.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:29",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:30",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:31",
+      151.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:32",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:33",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:34",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:35",
+      154.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:36",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:37",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:38",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:39",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:40",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:41",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:42",
+      155.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:43",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:44",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:45",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:46",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:47",
+      154.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:48",
+      154.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:49",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:50",
+      154.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:51",
+      150.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:52",
+      154.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:53",
+      154.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:54",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:55",
+      152.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:56",
+      153.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:57",
+      153.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:58",
+      153.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:59",
+      153.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:00",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:01",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:02",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:03",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:04",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:05",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:06",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:07",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:08",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:09",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:10",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:11",
+      149.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:12",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:13",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:14",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:15",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:16",
+      151.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:17",
+      151.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:18",
+      152.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:19",
+      151.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:20",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:21",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:22",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:23",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:24",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:25",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:26",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:27",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:28",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:29",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:30",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:31",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:32",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:33",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:34",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:35",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:36",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:37",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:38",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:39",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:40",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:41",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:42",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:43",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:44",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:45",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:46",
+      154.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:47",
+      154.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:48",
+      155.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:49",
+      154.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:50",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:51",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:52",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:53",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:54",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:55",
+      153.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:56",
+      153.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:57",
+      153.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:58",
+      154.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:59",
+      153.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:00",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:01",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:02",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:03",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:04",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:05",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:06",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:07",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:08",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:09",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:10",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:11",
+      149.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:12",
+      152.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:13",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:14",
+      152.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:15",
+      151.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:16",
+      151.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:17",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:18",
+      152.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:19",
+      151.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:20",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:21",
+      152.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:22",
+      155.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:23",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:24",
+      155.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:25",
+      154.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:26",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:27",
+      155.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:28",
+      155.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:29",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:30",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:31",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:32",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:33",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:34",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:35",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:36",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:37",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:38",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:39",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:40",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:41",
+      152.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:42",
+      155.61,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:43",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:44",
+      155.34,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:45",
+      154.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:46",
+      154.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:47",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:48",
+      155.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:49",
+      154.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:50",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:51",
+      151.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:52",
+      154.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:53",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:54",
+      154.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:55",
+      153.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:56",
+      153.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:57",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:58",
+      154.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:59",
+      153.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:00",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:01",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:02",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:03",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:04",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:05",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:06",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:07",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:08",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:09",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:10",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:11",
+      149.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:12",
+      152.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:13",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:14",
+      152.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:15",
+      151.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:16",
+      152.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:17",
+      152.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:18",
+      152.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:19",
+      152.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:20",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:21",
+      152.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:22",
+      156.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:23",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:24",
+      155.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:25",
+      154.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:26",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:27",
+      155.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:28",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:29",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:30",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:31",
+      152.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:32",
+      156.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:33",
+      156.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:34",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:35",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:36",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:37",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:38",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:39",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:40",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:41",
+      152.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:42",
+      155.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:43",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:44",
+      155.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:45",
+      154.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:46",
+      155.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:47",
+      155.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:48",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:49",
+      155.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:50",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:51",
+      151.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:52",
+      154.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:53",
+      154.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:54",
+      154.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:55",
+      153.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:56",
+      154.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:57",
+      154.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:58",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:59",
+      154.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:00",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:01",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:02",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:03",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:04",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:05",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:06",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:07",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:08",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:09",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:10",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:11",
+      149.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:12",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:13",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:14",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:15",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:16",
+      151.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:17",
+      151.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:18",
+      152.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:19",
+      151.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:20",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:21",
+      152.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:22",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:23",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:24",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:25",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:26",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:27",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:28",
+      155.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:29",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:30",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:31",
+      152.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:32",
+      155.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:33",
+      155.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:34",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:35",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:36",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:37",
+      155.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:38",
+      155.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:39",
+      155.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:40",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:41",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:42",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:43",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:44",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:45",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:46",
+      154.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:47",
+      154.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:48",
+      155.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:49",
+      154.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:50",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:51",
+      151.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:52",
+      154.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:53",
+      154.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:54",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:55",
+      153.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:56",
+      153.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:57",
+      153.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:58",
+      154.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:59",
+      153.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Refill",
+      42.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Rested, refill below 50%",
+      192.91,
+      276,
+      224,
+      false
+     ]
+    ]
+   },
+   "390": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": null
+   },
+   "1280": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": null
+   },
+   "version": "156.0.8078.47"
+  },
+  "firefox": {
+   "360": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": [
+     [
+      "Next charge in 0:01",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:02",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:03",
+      156.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:04",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:05",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:06",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:07",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:08",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:09",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:10",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:11",
+      150.1,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:12",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:13",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:14",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:15",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:16",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:17",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:18",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:19",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:20",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:21",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:22",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:23",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:24",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:25",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:26",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:27",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:28",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:29",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:30",
+      156.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:31",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:32",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:33",
+      156.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:34",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:35",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:36",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:37",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:38",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:39",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:40",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:41",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:42",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:43",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:44",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:45",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:46",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:47",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:48",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:49",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:50",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:51",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:52",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:53",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:54",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:55",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:56",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:57",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:58",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:59",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:00",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:01",
+      150.1,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:02",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:03",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:04",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:05",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:06",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:07",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:08",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:09",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:10",
+      150.1,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:11",
+      146.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:12",
+      150.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:13",
+      150.1,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:14",
+      149.85,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:15",
+      148.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:16",
+      149.32,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:17",
+      149.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:18",
+      149.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:19",
+      149.32,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:20",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:21",
+      150.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:22",
+      153.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:23",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:24",
+      153.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:25",
+      152.17,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:26",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:27",
+      152.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:28",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:29",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:30",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:31",
+      150.1,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:32",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:33",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:34",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:35",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:36",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:37",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:38",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:39",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:40",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:41",
+      149.85,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:42",
+      153.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:43",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:44",
+      152.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:45",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:46",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:47",
+      152.43,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:48",
+      152.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:49",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:50",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:51",
+      148.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:52",
+      152.17,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:53",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:54",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:55",
+      150.85,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:56",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:57",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:58",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:59",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:00",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:01",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:02",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:03",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:04",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:05",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:06",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:07",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:08",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:09",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:10",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:11",
+      150.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:12",
+      153.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:13",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:14",
+      153.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:15",
+      152.17,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:16",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:17",
+      152.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:18",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:19",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:20",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:21",
+      153.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:22",
+      156.85,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:23",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:24",
+      156.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:25",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:26",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:27",
+      156.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:28",
+      156.4,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:29",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:30",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:31",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:32",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:33",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:34",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:35",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:36",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:37",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:38",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:39",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:40",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:41",
+      153.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:42",
+      156.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:43",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:44",
+      156.32,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:45",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:46",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:47",
+      155.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:48",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:49",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:50",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:51",
+      152.17,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:52",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:53",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:54",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:55",
+      154.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:56",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:57",
+      154.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:58",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:59",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:00",
+      156.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:01",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:02",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:03",
+      156.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:04",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:05",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:06",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:07",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:08",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:09",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:10",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:11",
+      150.1,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:12",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:13",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:14",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:15",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:16",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:17",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:18",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:19",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:20",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:21",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:22",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:23",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:24",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:25",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:26",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:27",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:28",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:29",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:30",
+      156.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:31",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:32",
+      156.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:33",
+      156.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:34",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:35",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:36",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:37",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:38",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:39",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:40",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:41",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:42",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:43",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:44",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:45",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:46",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:47",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:48",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:49",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:50",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:51",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:52",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:53",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:54",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:55",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:56",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:57",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:58",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:59",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:00",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:01",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:02",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:03",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:04",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:05",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:06",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:07",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:08",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:09",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:10",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:11",
+      149.85,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:12",
+      153.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:13",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:14",
+      152.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:15",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:16",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:17",
+      152.43,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:18",
+      152.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:19",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:20",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:21",
+      153.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:22",
+      156.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:23",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:24",
+      156.32,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:25",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:26",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:27",
+      155.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:28",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:29",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:30",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:31",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:32",
+      156.57,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:33",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:34",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:35",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:36",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:37",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:38",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:39",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:40",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:41",
+      152.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:42",
+      156.32,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:43",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:44",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:45",
+      155,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:46",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:47",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:48",
+      155.87,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:49",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:50",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:51",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:52",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:53",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:54",
+      155,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:55",
+      153.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:56",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:57",
+      154.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:58",
+      154.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:59",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:00",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:01",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:02",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:03",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:04",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:05",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:06",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:07",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:08",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:09",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:10",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:11",
+      148.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:12",
+      152.17,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:13",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:14",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:15",
+      150.85,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:16",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:17",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:18",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:19",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:20",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:21",
+      152.17,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:22",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:23",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:24",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:25",
+      154.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:26",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:27",
+      154.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:28",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:29",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:30",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:31",
+      152.15,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:32",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:33",
+      155.5,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:34",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:35",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:36",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:37",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:38",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:39",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:40",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:41",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:42",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:43",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:44",
+      155,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:45",
+      153.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:46",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:47",
+      154.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:48",
+      154.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:49",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:50",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:51",
+      150.85,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:52",
+      154.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:53",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:54",
+      153.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:55",
+      152.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:56",
+      153.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:57",
+      153.43,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:58",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:59",
+      153.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:00",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:01",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:02",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:03",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:04",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:05",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:06",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:07",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:08",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:09",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:10",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:11",
+      149.32,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:12",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:13",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:14",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:15",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:16",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:17",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:18",
+      152.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:19",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:20",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:21",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:22",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:23",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:24",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:25",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:26",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:27",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:28",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:29",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:30",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:31",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:32",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:33",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:34",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:35",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:36",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:37",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:38",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:39",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:40",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:41",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:42",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:43",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:44",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:45",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:46",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:47",
+      155,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:48",
+      155.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:49",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:50",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:51",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:52",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:53",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:54",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:55",
+      153.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:56",
+      153.93,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:57",
+      153.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:58",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:59",
+      153.93,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:00",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:01",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:02",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:03",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:04",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:05",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:06",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:07",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:08",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:09",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:10",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:11",
+      149.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:12",
+      152.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:13",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:14",
+      152.43,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:15",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:16",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:17",
+      151.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:18",
+      152.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:19",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:20",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:21",
+      152.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:22",
+      156.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:23",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:24",
+      155.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:25",
+      154.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:26",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:27",
+      155.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:28",
+      155.62,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:29",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:30",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:31",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:32",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:33",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:34",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:35",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:36",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:37",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:38",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:39",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:40",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:41",
+      152.43,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:42",
+      155.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:43",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:44",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:45",
+      154.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:46",
+      155,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:47",
+      155.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:48",
+      155.35,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:49",
+      155,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:50",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:51",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:52",
+      154.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:53",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:54",
+      154.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:55",
+      153.43,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:56",
+      153.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:57",
+      153.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:58",
+      154.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:59",
+      153.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:00",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:01",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:02",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:03",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:04",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:05",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:06",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:07",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:08",
+      155.93,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:09",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:10",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:11",
+      149.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:12",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:13",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:14",
+      152.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:15",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:16",
+      152.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:17",
+      152.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:18",
+      152.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:19",
+      152.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:20",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:21",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:22",
+      156.4,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:23",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:24",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:25",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:26",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:27",
+      155.62,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:28",
+      155.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:29",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:30",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:31",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:32",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:33",
+      156.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:34",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:35",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:36",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:37",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:38",
+      155.93,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:39",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:40",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:41",
+      152.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:42",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:43",
+      156.12,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:44",
+      155.87,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:45",
+      154.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:46",
+      155.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:47",
+      155.35,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:48",
+      155.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:49",
+      155.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:50",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:51",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:52",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:53",
+      155.07,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:54",
+      154.82,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:55",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:56",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:57",
+      154.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:58",
+      154.63,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:59",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:00",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:01",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:02",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:03",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:04",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:05",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:06",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:07",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:08",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:09",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:10",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:11",
+      149.32,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:12",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:13",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:14",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:15",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:16",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:17",
+      151.9,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:18",
+      152.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:19",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:20",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:21",
+      152.68,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:22",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:23",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:24",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:25",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:26",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:27",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:28",
+      155.6,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:29",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:30",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:31",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:32",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:33",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:34",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:35",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:36",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:37",
+      155.25,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:38",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:39",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:40",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:41",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:42",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:43",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:44",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:45",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:46",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:47",
+      155,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:48",
+      155.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:49",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:50",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:51",
+      151.37,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:52",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:53",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:54",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:55",
+      153.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:56",
+      153.93,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:57",
+      153.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:58",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:59",
+      153.93,
+      276,
+      224,
+      false
+     ],
+     [
+      "Refill",
+      42.87,
+      276,
+      224,
+      false
+     ],
+     [
+      "Rested, refill below 50%",
+      192.9,
+      276,
+      224,
+      false
+     ]
+    ]
+   },
+   "390": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": null
+   },
+   "1280": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": null
+   },
+   "version": "157.0"
+  },
+  "webkit": {
+   "360": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": [
+     [
+      "Next charge in 0:01",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:02",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:03",
+      156.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:04",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:05",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:06",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:07",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:08",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:09",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:10",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:11",
+      150.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:12",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:13",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:14",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:15",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:16",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:17",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:18",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:19",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:20",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:21",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:22",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:23",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:24",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:25",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:26",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:27",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:28",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:29",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:30",
+      156.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:31",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:32",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:33",
+      156.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:34",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:35",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:36",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:37",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:38",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:39",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:40",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:41",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:42",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:43",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:44",
+      156.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:45",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:46",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:47",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:48",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:49",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:50",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:51",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:52",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:53",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:54",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:55",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:56",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:57",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:58",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 0:59",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:00",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:01",
+      150.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:02",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:03",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:04",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:05",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:06",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:07",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:08",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:09",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:10",
+      150.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:11",
+      146.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:12",
+      150.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:13",
+      150.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:14",
+      149.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:15",
+      148.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:16",
+      149.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:17",
+      149.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:18",
+      149.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:19",
+      149.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:20",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:21",
+      150.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:22",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:23",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:24",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:25",
+      152.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:26",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:27",
+      152.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:28",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:29",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:30",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:31",
+      150.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:32",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:33",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:34",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:35",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:36",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:37",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:38",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:39",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:40",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:41",
+      149.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:42",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:43",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:44",
+      152.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:45",
+      151.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:46",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:47",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:48",
+      152.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:49",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:50",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:51",
+      148.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:52",
+      152.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:53",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:54",
+      151.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:55",
+      150.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:56",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:57",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:58",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 1:59",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:00",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:01",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:02",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:03",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:04",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:05",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:06",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:07",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:08",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:09",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:10",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:11",
+      150.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:12",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:13",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:14",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:15",
+      152.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:16",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:17",
+      152.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:18",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:19",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:20",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:21",
+      153.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:22",
+      156.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:23",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:24",
+      156.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:25",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:26",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:27",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:28",
+      156.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:29",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:30",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:31",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:32",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:33",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:34",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:35",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:36",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:37",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:38",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:39",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:40",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:41",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:42",
+      156.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:43",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:44",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:45",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:46",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:47",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:48",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:49",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:50",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:51",
+      152.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:52",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:53",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:54",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:55",
+      154.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:56",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:57",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:58",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 2:59",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:00",
+      156.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:01",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:02",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:03",
+      156.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:04",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:05",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:06",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:07",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:08",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:09",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:10",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:11",
+      150.09,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:12",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:13",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:14",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:15",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:16",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:17",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:18",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:19",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:20",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:21",
+      153.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:22",
+      156.83,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:23",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:24",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:25",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:26",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:27",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:28",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:29",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:30",
+      156.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:31",
+      153.44,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:32",
+      156.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:33",
+      156.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:34",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:35",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:36",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:37",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:38",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:39",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:40",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:41",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:42",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:43",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:44",
+      156.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:45",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:46",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:47",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:48",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:49",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:50",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:51",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:52",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:53",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:54",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:55",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:56",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:57",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:58",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 3:59",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:00",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:01",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:02",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:03",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:04",
+      156.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:05",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:06",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:07",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:08",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:09",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:10",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:11",
+      149.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:12",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:13",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:14",
+      152.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:15",
+      151.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:16",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:17",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:18",
+      152.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:19",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:20",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:21",
+      153.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:22",
+      156.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:23",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:24",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:25",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:26",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:27",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:28",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:29",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:30",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:31",
+      153.19,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:32",
+      156.55,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:33",
+      156.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:34",
+      156.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:35",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:36",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:37",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:38",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:39",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:40",
+      156.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:41",
+      152.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:42",
+      156.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:43",
+      156.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:44",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:45",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:46",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:47",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:48",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:49",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:50",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:51",
+      151.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:52",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:53",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:54",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:55",
+      153.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:56",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:57",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:58",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 4:59",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:00",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:01",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:02",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:03",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:04",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:05",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:06",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:07",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:08",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:09",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:10",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:11",
+      148.8,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:12",
+      152.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:13",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:14",
+      151.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:15",
+      150.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:16",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:17",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:18",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:19",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:20",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:21",
+      152.16,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:22",
+      155.53,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:23",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:24",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:25",
+      154.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:26",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:27",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:28",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:29",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:30",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:31",
+      152.14,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:32",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:33",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:34",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:35",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:36",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:37",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:38",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:39",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:40",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:41",
+      151.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:42",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:43",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:44",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:45",
+      153.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:46",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:47",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:48",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:49",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:50",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:51",
+      150.84,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:52",
+      154.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:53",
+      154.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:54",
+      153.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:55",
+      152.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:56",
+      153.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:57",
+      153.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:58",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 5:59",
+      153.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:00",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:01",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:02",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:03",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:04",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:05",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:06",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:07",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:08",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:09",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:10",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:11",
+      149.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:12",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:13",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:14",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:15",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:16",
+      151.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:17",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:18",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:19",
+      151.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:20",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:21",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:22",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:23",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:24",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:25",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:26",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:27",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:28",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:29",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:30",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:31",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:32",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:33",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:34",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:35",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:36",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:37",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:38",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:39",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:40",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:41",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:42",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:43",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:44",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:45",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:46",
+      154.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:47",
+      154.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:48",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:49",
+      154.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:50",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:51",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:52",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:53",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:54",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:55",
+      153.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:56",
+      153.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:57",
+      153.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:58",
+      154.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 6:59",
+      153.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:00",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:01",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:02",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:03",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:04",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:05",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:06",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:07",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:08",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:09",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:10",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:11",
+      149.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:12",
+      152.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:13",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:14",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:15",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:16",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:17",
+      151.89,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:18",
+      152.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:19",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:20",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:21",
+      152.69,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:22",
+      156.05,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:23",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:24",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:25",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:26",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:27",
+      155.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:28",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:29",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:30",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:31",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:32",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:33",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:34",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:35",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:36",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:37",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:38",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:39",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:40",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:41",
+      152.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:42",
+      155.78,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:43",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:44",
+      155.52,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:45",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:46",
+      154.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:47",
+      154.98,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:48",
+      155.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:49",
+      154.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:50",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:51",
+      151.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:52",
+      154.73,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:53",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:54",
+      154.47,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:55",
+      153.42,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:56",
+      153.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:57",
+      153.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:58",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 7:59",
+      153.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:00",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:01",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:02",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:03",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:04",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:05",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:06",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:07",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:08",
+      155.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:09",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:10",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:11",
+      149.66,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:12",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:13",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:14",
+      152.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:15",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:16",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:17",
+      152.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:18",
+      152.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:19",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:20",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:21",
+      153.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:22",
+      156.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:23",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:24",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:25",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:26",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:27",
+      155.59,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:28",
+      155.94,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:29",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:30",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:31",
+      153.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:32",
+      156.38,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:33",
+      156.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:34",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:35",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:36",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:37",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:38",
+      155.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:39",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:40",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:41",
+      152.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:42",
+      156.13,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:43",
+      156.11,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:44",
+      155.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:45",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:46",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:47",
+      155.33,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:48",
+      155.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:49",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:50",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:51",
+      151.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:52",
+      155.08,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:53",
+      155.06,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:54",
+      154.81,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:55",
+      153.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:56",
+      154.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:57",
+      154.28,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:58",
+      154.63,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 8:59",
+      154.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:00",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:01",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:02",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:03",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:04",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:05",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:06",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:07",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:08",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:09",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:10",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:11",
+      149.3,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:12",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:13",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:14",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:15",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:16",
+      151.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:17",
+      151.88,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:18",
+      152.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:19",
+      151.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:20",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:21",
+      152.67,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:22",
+      156.03,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:23",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:24",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:25",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:26",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:27",
+      155.23,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:28",
+      155.58,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:29",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:30",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:31",
+      152.64,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:32",
+      156.02,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:33",
+      156,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:34",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:35",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:36",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:37",
+      155.22,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:38",
+      155.56,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:39",
+      155.2,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:40",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:41",
+      152.39,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:42",
+      155.77,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:43",
+      155.75,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:44",
+      155.48,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:45",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:46",
+      154.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:47",
+      154.97,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:48",
+      155.31,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:49",
+      154.95,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:50",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:51",
+      151.36,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:52",
+      154.72,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:53",
+      154.7,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:54",
+      154.45,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:55",
+      153.41,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:56",
+      153.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:57",
+      153.92,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:58",
+      154.27,
+      276,
+      224,
+      false
+     ],
+     [
+      "Next charge in 9:59",
+      153.91,
+      276,
+      224,
+      false
+     ],
+     [
+      "Refill",
+      42.86,
+      276,
+      224,
+      false
+     ],
+     [
+      "Rested, refill below 50%",
+      192.91,
+      276,
+      224,
+      false
+     ]
+    ]
+   },
+   "390": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": null
+   },
+   "1280": {
+    "rule_violations": 0,
+    "rule_passes": 3,
+    "full_violations": [
+     {
+      "id": "heading-order",
+      "impact": "moderate",
+      "nodes": [
+       "#h-mh"
+      ]
+     }
+    ],
+    "full_incomplete": [],
+    "names": [
+     [
+      "b-ready",
+      "Refill, Market Hand",
+      "Refill"
+     ],
+     [
+      "b-wait",
+      "Next charge in progress, Coop Hand",
+      "Next charge in"
+     ],
+     [
+      "b-rest",
+      "Rested, refill below 50%, Egg Grader",
+      "Rested, refill below 50%"
+     ]
+    ],
+    "fit": null
+   },
+   "version": "27.2"
+  }
+ }
+}

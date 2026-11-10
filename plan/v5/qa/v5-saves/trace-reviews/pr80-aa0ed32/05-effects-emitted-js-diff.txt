@@ -1,0 +1,4 @@
+4a5
+> const playerSaleCtx = (attended) => attended ? PLAYER_SALE : { by: "player", suspended: true };
+24a26
+>   playerSaleCtx,

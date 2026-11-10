@@ -1,0 +1,30 @@
+**v5 F1a: M5 GameState fields, SimEvent members and `m4.flags.*` plumbing** (engineering/m5.0-sizing.md §1 F1(d)(e), §4 PR split; D-HOE-20261029-02). Draft into `rc/v5`. Manifest row 5.
+
+## What
+- `src/sim/m5-state.ts`: every new M5.0 `GameState` field declared once, optional, absent while its flag is off (§4 hotspot 3). Saved: `evRngState`, `nextSpawnRemainingS`, `frenzyRemainingS`, `broodyNestCents`, `broodyHenIdx`, `abilities.{id}.{readyAt,activeS}`, `abilitiesUnlocked`, `abilitiesCoachSeen`. Session only (F2 strips them): `goldenEgg`, `streakS`, `streakHoldS`, `tapCreditCdS`, `irefRingCents`, `refWarmS`, `broodyNestScaled`. Exported lists `M5_SAVED_FIELDS` / `M5_SESSION_FIELDS` for F2 (Saves).
+- `sim/workers.ts` `Worker`: optional `paused`, `callLockoutS` (Pause, sizing §9.2 G3 / B5).
+- `sim/events.ts`: `M5SimEvent` (`collectible_spawned/collected/expired`, `frenzy_started/ended`, `streak_started/peak`, `abilities_unlocked`, `ability_used/blocked/ended`), `collect.credited` / `bonus_cents`. Field names are the spec telemetry names; Game adds the UI-only `collectible_id`, `layout`, Broody `slot_id`/`restored`.
+- `src/config/flags.ts`: `M5_FLAGS`, `flagOn(b, f)` = `m4.enabled && m4.flags[f] === 1`, `evRngFlagOn`. `M4Params.flags?`.
+
+## Flags (HoE D-C1: one namespace `m4.flags.*`, default 0)
+`golden, streak, tapCoins, abilities, broody, salesStopped, pause, rc2Refill, autoRefill, clockWage, breeds, zeroGainUi, bestBuyV2`. These are the names the specs use. **Deviations:** HoE's examples `goldenEgg`/`tapIncome` aren't used, because the specs and sizing §12.1 D-C1 say `golden`/`tapCoins`. The M5.1 specs spell `m5.flags.zeroGainUi` / `m5.flags.bestBuyV2`; here they are `m4.flags.*`. The sizing §1 `m4.tc.*_enabled` names are replaced. `balance.json` gets the block in F3.
+
+## No behaviour change
+Types plus one pure helper. `balance.json` and `data/` are untouched. Flags off means byte-identical: flag-off golden `f90d1678`, M4-on `a54c9cf9`, 24 h trace `2c0d3ec3…` (all matched, below).
+
+## Gates (local, HEAD ea6b6db; gate id `v5-f1a-ea6b6db`)
+tsc 0 · vitest (--minWorkers=1 --maxWorkers=2) 1571 passed / 1 skipped · test:slow 16 passed / 1 skipped · sync-economy --check 0 · build 0 · check-globals chromium 0 · verify --hours 24 PASS (goldens f90d1678 / a54c9cf9 match; trace 2c0d3ec3… unchanged).
+Artifacts: `/workspace/egg-farm-studio/artifacts/v5-f1a-ea6b6db/results/` (SHA256SUMS verified) and `artifacts` branch `v5-f1a-ea6b6db/results/`. CI `gate` skips Drafts.
+
+## Tests
+`tests/v5-f1a-fields.test.ts`: lists are disjoint; `initialState` has no M5 field; 10 min of play with flags off creates none; `flagOn` truth table (needs `m4.enabled`, exactly 1).
+
+Self-review: engineering/reviews/pr77-ea6b6db.md (studio folder). Under D-CEO-20261028-02, Minor/Nit fixes ship on self-review.
+
+## Update 2026-10-29 21:4x CET: merged rc/v5 406e455 (#81 F2), head 008bcca
+Merged, not rebased (no force-push). Conflicts resolved per Saves' merge note (take F1a's declarations, drop F2's duplicates):
+- `src/sim/state.ts`: kept `GameState extends M5Fields`; dropped F2's inline M5 field copies (same names/shapes).
+- `src/sim/events.ts`: kept F1a's `M5SimEvent` union; dropped F2's duplicate `collectible_expired` / `ability_ended` members.
+- `src/config/formulas.ts`: kept `flags?: M5Flags` (superset of F2's 6-name record).
+F2's src (`save/m5-fields.ts`, `save.ts`, `game.ts`) and tests are unchanged; F2 tests pass against F1a's declarations.
+Gates at 008bcca: sync --check 0 · tsc 0 · vitest 1618 passed / 1 skipped · goldens f90d1678 / a54c9cf9 byte-identical (4/4) · build + check-release-build 0 · build:html 0 · check-globals chromium 0 (3× PASS, flock .browser-test-2.lock, load ≤ 12).

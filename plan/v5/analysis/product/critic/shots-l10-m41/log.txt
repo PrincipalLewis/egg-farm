@@ -1,0 +1,20 @@
+16:13:39 start. L10 loaded, 3 workers, coins ~$290 at start; passive ~$100-125/s.
+16:14-16:21 findings: income ~100-140$/s passive at L10-15; coins pile up faster than upgrades; stock eggs drained to 0 around L13 (supply-limited, customers queue to 10 "Queue full"); Hens/Egg value gated by Farm level (Needs Farm L11/L12/L13..). Manual Collect tap = takes all 'ready' eggs (~15-30 eggs=~$100-200) but Coop Hand already auto-collects; coins/s with taps ~ same as without. Manage button aria-disabled while workers Working (energy 53% at ~16:21 after 7min, ~-6%/min).
+16:22:29-16:23:25 DEAD ZONE (56s) at Farm L17: Farm L18 not affordable ($10.2K), hens/egg value capped; only Collection (+5/tap) buys available (chip said best buy Collection). Income ~$190/s.
+16:23:10-16:23:25 tap test: 20 taps in 14.6s => +$3000 = ~$205/s vs ~$189/s no-tap (about +8%, within noise).
+16:23:34 bought Farm L18 ($10.2K). Grader tier1 hire $5,538 unlocked at Farm L18 (x1.5 sells).
+16:23:50 workers energy 32%, 'Manage all (3 need it)' appears; Manage individually disabled until then. 16:24 Manage all -> all 100% instantly, 0:30 cooldown. No Tired/Asleep state seen yet (energy ~-7%/min from 100).
+16:27:30 Farm L20 reached (14 min in), income ~$570/s (coins K display). 16:29 Grade x2.5 hired/bought. 16:31:37 Manage all pressed (first time since 16:24).
+16:24-16:32 repeating cycle: buy hens/egg value/farm level -> 'Ready in ~Ns' strip 20-45s waits. Income $190/s (L17) -> $570/s (L20) -> ~$1.0-1.3K/s (L21).
+Collection upgrades ($7-18K for +5 eggs/tap) get 'best buy' chip often; they don't add passive income and delay Farm level.
+16:33 Farm L22, Grade x3. 16:34:15 Farm L23 ($56.6K) after ~20s wait with 60K banked and nothing buyable (hens/egg capped by farm level). 16:35 L23 income ~$1.7K/s. 16:37 Grade x4 ($51.6K). 16:38 L25. 16:40 L26. 16:41 L27, Hens L30 'bigger coop'. Income ~$2.5K/s. Each farm level cycle ~1.5-2 min; waiting 20-45s after each cluster of buys.
+Energy: 100% at 16:31:37 (manage all); 70% at 16:37; not touching since to see Tired/Asleep.
+16:42:30 workers Tired (<30% energy; ~11 min after Manage all). Grader tired first (26%). Income Tired ~$1.1-1.6K/s vs ~$2.6-3.7K/s managed (about -60%). While tired, Collect backlog built (535 ready of 2,800), Collect +90 tap = ~$2K and tap+Sell all gave ~$5.4K/s for 8s (backlog) vs 1.26K/s idle: manual play IS meaningful when workers tired.
+16:45 Manage all ->100%, income back to $3.7K/s. In steady state with fresh workers, tap+sell ~ idle ($2.6K vs $3.1K/s).
+16:44:41 Farm L28 ($177.6K); Hens L30 & Egg value L30 both MAX at Farm L27: after that only Farm level (nothing income related besides +1 demand/+coop), Collection (+5 eggs/tap, costs 29.5K->47K->75K...), Grader/hires.
+16:46:59 Farm L29 ($239.8K). Waiting for L30 (~$300K) ~100s with nothing to buy except Collection.
+16:48:52 Farm L30 (MAX) reached ~35 min in. Hens, Egg value, Farm, Grader x4 all MAX/complete; only Collection (L20 at 16:50: +5 eggs/tap) remains as sink; cost x1.6/level: 121K(L20) 193K 309K 495K(16:56, L24)... next ~793K ~5min50s away at income $3K/s.
+16:54:54 workers Tired (9.3 min after manage-all). Income tired ~$1.8K/s vs ~$3K/s managed. 16:59:33 all four ASLEEP (energy 0%, 14 min after manage-all): passive income 0 (6s sample). Manual: ready eggs keep accumulating (480/3100), tap +125 eggs (~$4K), 'Sell all' sells stock; 14s of tap+sell = +$28.6K (backlog drain).
+17:00:26 Manage on single worker -> that worker 100% instantly BUT all Manage buttons incl. Manage all get shared 0:30 cooldown.
+17:01 Manage all -> all ~100%; income $4.6K/s burst then ~3K/s. 17:02:58 Collection L25 bought ($792K); next L26 ($1.27M) ~7.5 min away (pure dead zone). Stopped at 17:03.
+DOM scan: zero occurrences of golden/streak/combo/ability/skill/prestige/boost/mission/achievement/daily.

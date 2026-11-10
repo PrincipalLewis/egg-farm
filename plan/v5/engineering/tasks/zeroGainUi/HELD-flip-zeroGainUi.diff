@@ -1,0 +1,13 @@
+diff --git a/src/config/balance.json b/src/config/balance.json
+index 766ee7f..7abb017 100644
+--- a/src/config/balance.json
++++ b/src/config/balance.json
+@@ -175,7 +175,7 @@
+       "autoRefill": 0,
+       "clockWage": 0,
+       "breeds": 0,
+-      "zeroGainUi": 0,
++      "zeroGainUi": 1,
+       "bestBuyV2": 0
+     },
+     "zeroGain": {

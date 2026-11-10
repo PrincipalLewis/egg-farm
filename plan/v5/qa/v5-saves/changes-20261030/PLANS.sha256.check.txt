@@ -1,0 +1,7 @@
+qa/m5/test-plan-abilities.md: OK
+qa/m5/test-plan-bb-stopgap.md: OK
+qa/m5/test-plan-broody-hen.md: OK
+qa/m5/test-plan-golden-egg.md: OK
+qa/m5/test-plan-pause-resume.md: OK
+qa/m5/test-plan-sales-stopped.md: OK
+qa/m5/test-plan-streak-tap-coins.md: OK

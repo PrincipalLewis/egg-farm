@@ -1,0 +1,30 @@
+--- /workspace/wt-hire2-clockwage/src/sim/tick.ts	2026-11-10 03:14:37.653263243 +0100
++++ src/sim/tick.ts	2026-11-10 03:17:38.243848535 +0100
+@@ -6,6 +6,7 @@
+ import { anyM5FlagOn, stepTimers } from './timers';
+ import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
+ import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
++import { clockWageOn, clockWageAsleepStep, wageState } from './clock-wage';
+ import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
+ /** Pure: advance sim by dt seconds. Optional `ev` collects events.
+  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
+@@ -80,7 +81,9 @@
+   s = { ...s, workers: ws };
+   for (const id of ['coop_hand', 'market_hand'] as const) {
+     const w = ws[id]; if (!w) continue;
+-    const m = mood(w, b); if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
++    const m = mood(w, b);
++    if (m === 'asleep' && !isPaused(w, b) && clockWageOn(b)) { s = clockWageAsleepStep({ ...s, workers: ws }, id, dt, b, ev); ws[id] = s.workers[id]!; continue; } // clockWage FC-R1/U1
++    if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
+     let cdS = w.cdS - dt;
+     if (cdS <= 1e-9) {
+       const cfg = b.workers[id], interval = m === 'working' ? cfg.every_s : cfg.tired_every_s;
+@@ -90,7 +93,7 @@
+         ws[id] = { ...w, cdS: 0, unpaid: true }; ev?.push({ type: 'worker_state', worker: id, state: 'unpaid' }); continue;
+       }
+       s = { ...s, coinsCents: s.coinsCents - wage, wageFracCents: { ...s.wageFracCents, [id]: frac } }; // not paid -> never charged (above), frac unchanged
+-      if (wage > 0) ev?.push({ type: 'wage', worker: id, cents: wage });
++      if (wage > 0) ev?.push({ type: 'wage', worker: id, cents: wage, ...wageState(m, b) });
+       if (id === 'coop_hand') {
+         const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b));
+         if (n > 0) { s = { ...s, coop: s.coop - n, basket: s.basket + n }; ev?.push({ type: 'worker_collect', eggs: n }); }

@@ -1,0 +1,47 @@
+{
+ "n": 60000,
+ "valid": 25583,
+ "invalid": 34417,
+ "setDiff": 0,
+ "orderOnlyDiff": 0,
+ "byType": {
+  "session_summary": 20286,
+  "session_end": 20302,
+  "otherTypesCovered": 75
+ },
+ "sampleDiff": [],
+ "headKinds": [
+  "arr",
+  "bool",
+  "bucket",
+  "count",
+  "enum",
+  "float",
+  "int",
+  "str"
+ ],
+ "recordOwners": [
+  [
+   "session_end",
+   [
+    "breed_family_s"
+   ]
+  ],
+  [
+   "session_summary",
+   [
+    "start",
+    "end",
+    "counts",
+    "first_upgrade"
+   ]
+  ]
+ ],
+ "recordFieldOverlap": [],
+ "versions": [
+  "0.6.2",
+  "0.6.2"
+ ],
+ "typesSame": true,
+ "pinnedSame": true
+}

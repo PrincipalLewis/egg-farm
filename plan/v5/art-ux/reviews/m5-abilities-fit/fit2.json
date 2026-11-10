@@ -1,0 +1,1503 @@
+{
+ "chromium": {
+  "version": "156.0.8078.47",
+  "fit": {
+   "360-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 124,
+      "room": 104,
+      "spare": 32.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.55,
+      "btn": 124,
+      "room": 104,
+      "spare": 6.45,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.88,
+      "btn": 124,
+      "room": 104,
+      "spare": 51.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 124,
+      "room": 104,
+      "spare": 51.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.27,
+      "btn": 124,
+      "room": 104,
+      "spare": 60.73,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.03,
+      "btn": 124,
+      "room": 104,
+      "spare": 59.97,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.73,
+      "btn": 124,
+      "room": 104,
+      "spare": 58.27,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 104
+    }
+   },
+   "360-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 150,
+      "room": 130,
+      "spare": 58.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.55,
+      "btn": 150,
+      "room": 130,
+      "spare": 32.45,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.88,
+      "btn": 150,
+      "room": 130,
+      "spare": 77.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 150,
+      "room": 130,
+      "spare": 77.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.27,
+      "btn": 150,
+      "room": 130,
+      "spare": 86.73,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.03,
+      "btn": 150,
+      "room": 130,
+      "spare": 85.97,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.73,
+      "btn": 150,
+      "room": 130,
+      "spare": 84.27,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 130
+    }
+   },
+   "390-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 139,
+      "room": 119,
+      "spare": 47.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.55,
+      "btn": 139,
+      "room": 119,
+      "spare": 21.45,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.88,
+      "btn": 139,
+      "room": 119,
+      "spare": 66.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 139,
+      "room": 119,
+      "spare": 66.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.27,
+      "btn": 139,
+      "room": 119,
+      "spare": 75.73,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.03,
+      "btn": 139,
+      "room": 119,
+      "spare": 74.97,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.73,
+      "btn": 139,
+      "room": 119,
+      "spare": 73.27,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 119
+    }
+   },
+   "390-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 165,
+      "room": 145,
+      "spare": 73.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.55,
+      "btn": 165,
+      "room": 145,
+      "spare": 47.45,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.88,
+      "btn": 165,
+      "room": 145,
+      "spare": 92.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 165,
+      "room": 145,
+      "spare": 92.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.27,
+      "btn": 165,
+      "room": 145,
+      "spare": 101.73,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.03,
+      "btn": 165,
+      "room": 145,
+      "spare": 100.97,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.73,
+      "btn": 165,
+      "room": 145,
+      "spare": 99.27,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 145
+    }
+   },
+   "1280-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 144,
+      "room": 124,
+      "spare": 52.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.55,
+      "btn": 144,
+      "room": 124,
+      "spare": 26.45,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.88,
+      "btn": 144,
+      "room": 124,
+      "spare": 71.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 144,
+      "room": 124,
+      "spare": 71.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.27,
+      "btn": 144,
+      "room": 124,
+      "spare": 80.73,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.03,
+      "btn": 144,
+      "room": 124,
+      "spare": 79.97,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.73,
+      "btn": 144,
+      "room": 124,
+      "spare": 78.27,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 124
+    }
+   },
+   "1280-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 170,
+      "room": 150,
+      "spare": 78.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.55,
+      "btn": 170,
+      "room": 150,
+      "spare": 52.45,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.88,
+      "btn": 170,
+      "room": 150,
+      "spare": 97.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 170,
+      "room": 150,
+      "spare": 97.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.27,
+      "btn": 170,
+      "room": 150,
+      "spare": 106.73,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.03,
+      "btn": 170,
+      "room": 150,
+      "spare": 105.97,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.73,
+      "btn": 170,
+      "room": 150,
+      "spare": 104.27,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 150
+    }
+   }
+  },
+  "cdp": {
+   "ready": [
+    "Refill (3)",
+    "Shift calls (4)",
+    "Pause Market Hand",
+    "Manage , Market Hand",
+    "Rush , Market Hand",
+    "Pause Coop Hand",
+    "Manage , Coop Hand",
+    "Sweep , Coop Hand",
+    "Pause Hawker",
+    "Manage , Hawker",
+    "Shout , Hawker",
+    "Pause Egg Grader",
+    "Manage , Egg Grader",
+    "Inspect , Egg Grader"
+   ],
+   "active": [
+    "Refill (3)",
+    "Shift calls (4)",
+    "Pause Market Hand",
+    "Manage , Market Hand",
+    "Active , Rush, Market Hand",
+    "Pause Coop Hand",
+    "Manage , Coop Hand",
+    "Active , Sweep, Coop Hand",
+    "Pause Hawker",
+    "Manage , Hawker",
+    "Active , Shout, Hawker",
+    "Pause Egg Grader",
+    "Manage , Egg Grader",
+    "Active , Inspect, Egg Grader"
+   ],
+   "cooldown": [
+    "Refill (3)",
+    "Next call",
+    "Pause Market Hand",
+    "Manage , Market Hand",
+    "Rush recharging, Market Hand",
+    "Pause Coop Hand",
+    "Manage , Coop Hand",
+    "Sweep recharging, Coop Hand",
+    "Pause Hawker",
+    "Manage , Hawker",
+    "Shout recharging, Hawker",
+    "Pause Egg Grader",
+    "Manage , Egg Grader",
+    "Inspect recharging, Egg Grader"
+   ],
+   "lockout": [
+    "Refill (3)",
+    "Shift calls (4)",
+    "Pause Market Hand",
+    "Manage , Market Hand",
+    "Rush after a break, Market Hand",
+    "Pause Coop Hand",
+    "Manage , Coop Hand",
+    "Sweep after a break, Coop Hand",
+    "Pause Hawker",
+    "Manage , Hawker",
+    "Shout after a break, Hawker",
+    "Pause Egg Grader",
+    "Manage , Egg Grader",
+    "Inspect after a break, Egg Grader"
+   ],
+   "Asleep": [
+    "Refill (3)",
+    "Shift calls (4)",
+    "Pause Market Hand",
+    "Manage , Market Hand",
+    "Asleep , Rush, Market Hand",
+    "Pause Coop Hand",
+    "Manage , Coop Hand",
+    "Asleep , Sweep, Coop Hand",
+    "Pause Hawker",
+    "Manage , Hawker",
+    "Asleep , Shout, Hawker",
+    "Pause Egg Grader",
+    "Manage , Egg Grader",
+    "Asleep , Inspect, Egg Grader"
+   ]
+  }
+ },
+ "firefox": {
+  "version": "157.0",
+  "fit": {
+   "360-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.62,
+      "btn": 124,
+      "room": 104,
+      "spare": 32.38,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 97.5,
+      "btn": 124,
+      "room": 104,
+      "spare": 6.5,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 124,
+      "room": 104,
+      "spare": 51.15,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 124,
+      "room": 104,
+      "spare": 51.15,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.23,
+      "btn": 124,
+      "room": 104,
+      "spare": 60.77,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44,
+      "btn": 124,
+      "room": 104,
+      "spare": 60,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 124,
+      "room": 104,
+      "spare": 58.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 104
+    }
+   },
+   "360-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.62,
+      "btn": 150,
+      "room": 130,
+      "spare": 58.38,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 97.5,
+      "btn": 150,
+      "room": 130,
+      "spare": 32.5,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 150,
+      "room": 130,
+      "spare": 77.15,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 150,
+      "room": 130,
+      "spare": 77.15,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.23,
+      "btn": 150,
+      "room": 130,
+      "spare": 86.77,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44,
+      "btn": 150,
+      "room": 130,
+      "spare": 86,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 150,
+      "room": 130,
+      "spare": 84.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 130
+    }
+   },
+   "390-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.62,
+      "btn": 139,
+      "room": 119,
+      "spare": 47.38,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 97.5,
+      "btn": 139,
+      "room": 119,
+      "spare": 21.5,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 139,
+      "room": 119,
+      "spare": 66.15,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 139,
+      "room": 119,
+      "spare": 66.15,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.23,
+      "btn": 139,
+      "room": 119,
+      "spare": 75.77,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44,
+      "btn": 139,
+      "room": 119,
+      "spare": 75,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 139,
+      "room": 119,
+      "spare": 73.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 119
+    }
+   },
+   "390-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.62,
+      "btn": 165,
+      "room": 145,
+      "spare": 73.38,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 97.5,
+      "btn": 165,
+      "room": 145,
+      "spare": 47.5,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 165,
+      "room": 145,
+      "spare": 92.15,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 165,
+      "room": 145,
+      "spare": 92.15,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.23,
+      "btn": 165,
+      "room": 145,
+      "spare": 101.77,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44,
+      "btn": 165,
+      "room": 145,
+      "spare": 101,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 165,
+      "room": 145,
+      "spare": 99.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 145
+    }
+   },
+   "1280-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.62,
+      "btn": 144,
+      "room": 124,
+      "spare": 52.38,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 97.5,
+      "btn": 144,
+      "room": 124,
+      "spare": 26.5,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 144,
+      "room": 124,
+      "spare": 71.15,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 144,
+      "room": 124,
+      "spare": 71.15,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.23,
+      "btn": 144,
+      "room": 124,
+      "spare": 80.77,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44,
+      "btn": 144,
+      "room": 124,
+      "spare": 80,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 144,
+      "room": 124,
+      "spare": 78.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 124
+    }
+   },
+   "1280-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.62,
+      "btn": 170,
+      "room": 150,
+      "spare": 78.38,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 97.5,
+      "btn": 170,
+      "room": 150,
+      "spare": 52.5,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 170,
+      "room": 150,
+      "spare": 97.15,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:02",
+      "content": 52.85,
+      "btn": 170,
+      "room": 150,
+      "spare": 97.15,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.23,
+      "btn": 170,
+      "room": 150,
+      "spare": 106.77,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44,
+      "btn": 170,
+      "room": 150,
+      "spare": 106,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 170,
+      "room": 150,
+      "spare": 104.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 150
+    }
+   }
+  }
+ },
+ "webkit": {
+  "version": "27.2",
+  "fit": {
+   "360-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 124,
+      "room": 104,
+      "spare": 32.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.53,
+      "btn": 124,
+      "room": 104,
+      "spare": 6.47,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.87,
+      "btn": 124,
+      "room": 104,
+      "spare": 51.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 124,
+      "room": 104,
+      "spare": 51.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.26,
+      "btn": 124,
+      "room": 104,
+      "spare": 60.74,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.02,
+      "btn": 124,
+      "room": 104,
+      "spare": 59.98,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 124,
+      "room": 104,
+      "spare": 58.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 104
+    }
+   },
+   "360-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 150,
+      "room": 130,
+      "spare": 58.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.53,
+      "btn": 150,
+      "room": 130,
+      "spare": 32.47,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.87,
+      "btn": 150,
+      "room": 130,
+      "spare": 77.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 150,
+      "room": 130,
+      "spare": 77.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.26,
+      "btn": 150,
+      "room": 130,
+      "spare": 86.74,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.02,
+      "btn": 150,
+      "room": 130,
+      "spare": 85.98,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 150,
+      "room": 130,
+      "spare": 84.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 130
+    }
+   },
+   "390-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 139,
+      "room": 119,
+      "spare": 47.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.53,
+      "btn": 139,
+      "room": 119,
+      "spare": 21.47,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.87,
+      "btn": 139,
+      "room": 119,
+      "spare": 66.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 139,
+      "room": 119,
+      "spare": 66.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.26,
+      "btn": 139,
+      "room": 119,
+      "spare": 75.74,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.02,
+      "btn": 139,
+      "room": 119,
+      "spare": 74.98,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 139,
+      "room": 119,
+      "spare": 73.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 119
+    }
+   },
+   "390-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 165,
+      "room": 145,
+      "spare": 73.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.53,
+      "btn": 165,
+      "room": 145,
+      "spare": 47.47,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.87,
+      "btn": 165,
+      "room": 145,
+      "spare": 92.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 165,
+      "room": 145,
+      "spare": 92.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.26,
+      "btn": 165,
+      "room": 145,
+      "spare": 101.74,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.02,
+      "btn": 165,
+      "room": 145,
+      "spare": 100.98,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 165,
+      "room": 145,
+      "spare": 99.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 145
+    }
+   },
+   "1280-pause1": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 144,
+      "room": 124,
+      "spare": 52.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.53,
+      "btn": 144,
+      "room": 124,
+      "spare": 26.47,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.87,
+      "btn": 144,
+      "room": 124,
+      "spare": 71.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 144,
+      "room": 124,
+      "spare": 71.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.26,
+      "btn": 144,
+      "room": 124,
+      "spare": 80.74,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.02,
+      "btn": 144,
+      "room": 124,
+      "spare": 79.98,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 144,
+      "room": 124,
+      "spare": 78.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 124
+    }
+   },
+   "1280-pause0": {
+    "worst": {
+     "ready": {
+      "worker": "Inspect",
+      "cd": null,
+      "content": 71.64,
+      "btn": 170,
+      "room": 150,
+      "spare": 78.36,
+      "clip": false,
+      "h": 44
+     },
+     "active": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 97.53,
+      "btn": 170,
+      "room": 150,
+      "spare": 52.47,
+      "clip": false,
+      "h": 44
+     },
+     "cooldown": {
+      "worker": "Rush",
+      "cd": "2:22",
+      "content": 52.87,
+      "btn": 170,
+      "room": 150,
+      "spare": 97.13,
+      "clip": false,
+      "h": 44
+     },
+     "lockout": {
+      "worker": "Rush",
+      "cd": "0:22",
+      "content": 52.86,
+      "btn": 170,
+      "room": 150,
+      "spare": 97.14,
+      "clip": false,
+      "h": 44
+     },
+     "Asleep": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 43.26,
+      "btn": 170,
+      "room": 150,
+      "spare": 106.74,
+      "clip": false,
+      "h": 44
+     },
+     "Unpaid": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 44.02,
+      "btn": 170,
+      "room": 150,
+      "spare": 105.98,
+      "clip": false,
+      "h": 44
+     },
+     "Paused": {
+      "worker": "Rush",
+      "cd": null,
+      "content": 45.72,
+      "btn": 170,
+      "room": 150,
+      "spare": 104.28,
+      "clip": false,
+      "h": 44
+     }
+    },
+    "manage": {
+     "content": 49.98,
+     "room": 150
+    }
+   }
+  }
+ }
+}

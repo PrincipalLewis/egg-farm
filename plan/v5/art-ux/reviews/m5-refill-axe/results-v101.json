@@ -1,0 +1,1880 @@
+{
+ "expected": {
+  "b-ready": "Refill, Market Hand",
+  "b-wait": "Next charge in progress, Coop Hand",
+  "b-rest": "Rested, refill below 50%, Egg Grader",
+  "b-unpaid": "Refill, Field Hand"
+ },
+ "axe": "4.14.0",
+ "fixture": "fixture.html",
+ "run": "run-v101.cjs",
+ "at": "2026-10-30T12:24:07.401Z",
+ "engines": {
+  "chromium": {
+   "360": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": [
+     {
+      "name": "Refill, Market Hand",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Next charge in progress, Coop Hand",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Rested, refill below 50%, Egg Grader",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Refill, Field Hand",
+      "children": [
+       "none:"
+      ]
+     }
+    ],
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.67,
+       "naturalW": 156.66,
+       "gapVsNatural": 0.02,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.67
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.91,
+       "naturalW": 192.91,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.91
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.67
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "390": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": [
+     {
+      "name": "Refill, Market Hand",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Next charge in progress, Coop Hand",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Rested, refill below 50%, Egg Grader",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Refill, Field Hand",
+      "children": [
+       "none:"
+      ]
+     }
+    ],
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.67,
+       "naturalW": 156.66,
+       "gapVsNatural": 0.02,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.67
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.91,
+       "naturalW": 192.91,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.91
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.67
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "1280": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": true,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": [
+     {
+      "name": "Refill, Market Hand",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Next charge in progress, Coop Hand",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Rested, refill below 50%, Egg Grader",
+      "children": [
+       "none:"
+      ]
+     },
+     {
+      "name": "Refill, Field Hand",
+      "children": [
+       "none:"
+      ]
+     }
+    ],
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.67,
+       "naturalW": 156.66,
+       "gapVsNatural": 0.02,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.67
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.91,
+       "naturalW": 192.91,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.91
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.67
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "version": "156.0.8078.47"
+  },
+  "firefox": {
+   "360": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": null,
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.87,
+       "naturalW": 42.87,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.87
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.85,
+       "naturalW": 156.85,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.85
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.9,
+       "naturalW": 192.9,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.9
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.87,
+       "naturalW": 42.87,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.87
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.85
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "390": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": null,
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.87,
+       "naturalW": 42.87,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.87
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.85,
+       "naturalW": 156.85,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.85
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.9,
+       "naturalW": 192.9,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.9
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.87,
+       "naturalW": 42.87,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.87
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.85
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "1280": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": null,
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.87,
+       "naturalW": 42.87,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.87
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.85,
+       "naturalW": 156.85,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.85
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.9,
+       "naturalW": 192.9,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.9
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.87,
+       "naturalW": 42.87,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.87
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.85
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "version": "157.0"
+  },
+  "webkit": {
+   "360": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": null,
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.83,
+       "naturalW": 156.84,
+       "gapVsNatural": -0.01,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.84
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.9,
+       "naturalW": 192.91,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.91
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.83
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "390": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": null,
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.83,
+       "naturalW": 156.84,
+       "gapVsNatural": -0.01,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.84
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.9,
+       "naturalW": 192.91,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.91
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.83
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "1280": {
+    "exact": {
+     "b-ready": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-wait": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-rest": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     },
+     "b-unpaid": {
+      "axe": true,
+      "ariaSnapshot": true,
+      "cdp": null,
+      "noDigit": true
+     }
+    },
+    "rule_violations": 0,
+    "rule_incomplete": 0,
+    "rule_passes": 0,
+    "full_violations": [],
+    "full_incomplete": [],
+    "dom": [
+     {
+      "id": "b-ready",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": null,
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Market Hand",
+      "innerText": "Refill, Market Hand"
+     },
+     {
+      "id": "b-wait",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Next charge in\"",
+       "span[aria-hidden][data-cd=\" 2:22\",text=\"\"]",
+       "span.sr-in"
+      ],
+      "axeName": "Next charge in progress, Coop Hand",
+      "innerText": "Next charge in progress, Coop Hand"
+     },
+     {
+      "id": "b-rest",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Rested, refill below 50%\"",
+       "span.sr-in"
+      ],
+      "axeName": "Rested, refill below 50%, Egg Grader",
+      "innerText": "Rested, refill below 50%, Egg Grader"
+     },
+     {
+      "id": "b-unpaid",
+      "ariaLabelAttr": null,
+      "hasDisabledAttr": false,
+      "ariaDisabled": "true",
+      "childOrder": [
+       "text:\"Refill\"",
+       "span.sr-in"
+      ],
+      "axeName": "Refill, Field Hand",
+      "innerText": "Refill, Field Hand"
+     }
+    ],
+    "ariaSnapshot": {
+     "b-ready": "- button \"Refill, Market Hand\"",
+     "b-wait": "- button \"Next charge in progress, Coop Hand\" [disabled]",
+     "b-rest": "- button \"Rested, refill below 50%, Egg Grader\" [disabled]",
+     "b-unpaid": "- button \"Refill, Field Hand\" [disabled]"
+    },
+    "cdpButtons": null,
+    "px": {
+     "buttons": [
+      {
+       "id": "b-ready",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      },
+      {
+       "id": "b-wait",
+       "visibleText": "Next charge in 2:22",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 156.83,
+       "naturalW": 156.84,
+       "gapVsNatural": -0.01,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 156.84
+      },
+      {
+       "id": "b-rest",
+       "visibleText": "Rested, refill below 50%",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 192.9,
+       "naturalW": 192.91,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": 0,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 192.91
+      },
+      {
+       "id": "b-unpaid",
+       "visibleText": "Refill",
+       "buttonW": 276,
+       "buttonH": 48,
+       "innerBox": 224,
+       "scrollW": 272,
+       "clientW": 272,
+       "overflow": false,
+       "renderedTextW": 42.86,
+       "naturalW": 42.86,
+       "gapVsNatural": 0,
+       "lines": 1,
+       "centreOffset": -0.01,
+       "sr": {
+        "position": "static",
+        "display": "inline",
+        "fontSize": "0px",
+        "w": 0,
+        "h": 0
+       },
+       "lblW": 42.86
+      }
+     ],
+     "sweep": {
+      "widest": [
+       "Next charge in 2:22",
+       156.83
+      ],
+      "overflowCount": 0,
+      "buttonWidths": [
+       "276.0"
+      ]
+     },
+     "constantWidthSpread": 0
+    }
+   },
+   "version": "27.2"
+  }
+ }
+}

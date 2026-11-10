@@ -1,0 +1,9 @@
+174286e Merge origin/rc/v5 (2fa7318, #79 F1b squash-merged) into feat/v5-f1c-effects
+5dd36d1 v5 F1c: test titles only (Saves QA nits N1/N2, D-CEO-20261028-02): add [X7] tag to the X7 composition test; rename the helper-only prodEggsPerSec test so it no longer claims callers
+aa0ed32 Merge feat/v5-f1b-clock-rng (02e7ede, incl. rc/v5 b563c75 #77) into feat/v5-f1c-effects
+736d04e v5 F1c: CCR m1 scope: revert the src/ui/app.ts wiring (UI-owned; pinned by qa-rc1-bugs / sellall-label-grader source tests); sim + Game.playerSaleCtx() API stays, UI #85/F6 wires it
+42d6274 v5 F1c: Saves QA D-C3 advance() test: small orders so Market Hand sells across the frame; 1-cent rounding bound; every-tick-focus bound
+deb3c9f v5 F1c: Saves QA trace gaps (V5SCAP): D-C3 59 s frame through advance() with a x2 fixture and Market Hand sales; §9.5 edge 3 / R24 caller-level test (applyOffline both paths, incomePerSec) with a live lay effect
+c2dbb98 v5 F1c: self-review of CCR m1 + nit (D-CEO-20261028-02): playerSaleCtx(attended) is the one player-sale ctx for credit and previews (Game.playerSaleCtx, sellAllPreview ctx, app.ts order cards/Sell all); registries typed readonly; attendedNow skips the probe with flags off (CCR N-1 #79); x2 preview==credit tests attended true/false; AC tags
+90c68ef Merge feat/v5-f1b-clock-rng (b041561, incl. F1a 172ca3f) into feat/v5-f1c-effects
+4b47158 Merge feat/v5-f1b-clock-rng (f5265b7, incl. F1a 2e18aba + rc/v5 d3b5a53 #78) into feat/v5-f1c-effects

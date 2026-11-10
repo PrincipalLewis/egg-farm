@@ -1,0 +1,6 @@
+start 10:51:23 CET
+probes done 10:51:28
+saves done 10:51:38
+mut done 10:52:12
+full done 10:53:44
+ALLDONE

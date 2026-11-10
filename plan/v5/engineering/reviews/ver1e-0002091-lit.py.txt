@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+# literal one-occurrence replacement mutant: lit.py name file old new
+import sys, subprocess
+name, f, old, new = sys.argv[1:5]
+p = '/workspace/.ver1e-mut/repo/' + f; s = open(p).read()
+n = s.count(old)
+if n != 1: print(f'{name}: MUTATION NOT APPLIED (matches={n})'); sys.exit(0)
+open(p, 'w').write(s.replace(old, new))
+M = '/workspace/.ver1e-mut/mut'; R = '/workspace/.ver1e-mut/repo'
+open(f'{M}/{name}.diff', 'w').write(subprocess.run(['git', 'diff'], cwd=R, capture_output=True, text=True).stdout)
+r = subprocess.run(['npx', 'vitest', 'run', 'tests/verify.test.ts', '--minWorkers=1', '--maxWorkers=2'], cwd=R, capture_output=True, text=True)
+open(f'{M}/{name}.tlog', 'w').write(r.stdout + r.stderr)
+tf = ' '.join([l for l in (r.stdout + r.stderr).splitlines() if 'Tests ' in l][-1:]).split()
+subprocess.run(['git', 'checkout', '-q', '--', '.'], cwd=R)
+print(f"{name}: tests exit={r.returncode} {' '.join(tf)}", flush=True)

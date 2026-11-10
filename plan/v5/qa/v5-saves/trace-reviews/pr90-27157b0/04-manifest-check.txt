@@ -1,0 +1,11 @@
+dbb0794ece8200a040be406a8638768791b576885dacb274ae89c9013c23a7ce  artifacts/f1-o3-guard/MANIFEST.md
+== files listed vs head blobs
+923aec835d00171fff72f7c8d3c400d75c27664103e1ff3389a1c39b1d262560  tests/bot-m5.test.ts
+c65b9e85261714d965aafda18ccc91d794992889b4ef8c4756355be6d924f6f1  tests/bot-m5.ts
+b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857  tests/fixtures/economy-b48be8a4.csv
+== artifacts SHA256SUMS
+dbb0794ece8200a040be406a8638768791b576885dacb274ae89c9013c23a7ce  MANIFEST.md
+MANIFEST.md: OK
+== bundle
+The bundle uses this hash algorithm: sha1
+27157b073b3c06dd6b46a427733e22b8b19c2b7c refs/heads/fix/v5-botm5-o3-guard

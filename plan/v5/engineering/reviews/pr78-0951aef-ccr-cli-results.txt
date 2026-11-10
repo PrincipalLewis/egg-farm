@@ -1,0 +1,56 @@
+# PR 0951aef:
+prof-nope                    exit=2  - false undefined usage usage: --profile must be one of idle|m5x-casual | verify: usage: --profile must be one of idle|m5x-casual
+prof-empty                   exit=2  - false undefined usage usage: --profile must be one of idle|m5x-casual | verify: usage: --profile must be one of idle|m5x-casual
+prof-novalue                 exit=2  - false undefined usage usage: --profile needs a value | verify: usage: --profile needs a value
+prof-upper                   exit=2  - false undefined usage usage: --profile must be one of idle|m5x-casual | verify: usage: --profile must be one of idle|m5x-casual
+prof-eq                      exit=2  - false undefined usage usage: unknown argument --profile=m5x-casual | verify: usage: unknown argument --profile=m5x-casual
+prof-proto                   exit=2  - false undefined usage usage: --profile must be one of idle|m5x-casual | verify: usage: --profile must be one of idle|m5x-casual
+prof-tostring                exit=2  - false undefined usage usage: --profile must be one of idle|m5x-casual | verify: usage: --profile must be one of idle|m5x-casual
+prof-repeat-m5-idle          exit=0  - true idle   | verify: run 0.25 h, seed 1, profile idle, flags {"m4.enabled":1}
+m5-hours0                    exit=2  - false undefined usage usage: --hours must be a number in (0, 720] | verify: usage: --hours must be a number in (0, 720]
+m5-flags-m4off               exit=4  - true m5x-casual   | verify: run 0.25 h, seed 1, profile m5x-casual, flags {"m4.enabled":0}
+m5-flags-m4on                exit=0  - true m5x-casual   | verify: run 0.25 h, seed 1, profile m5x-casual, flags {"m4.enabled":1}
+m5-flags-unknown             exit=2  - false undefined usage usage: unknown flag nope (known: m4.enabled) | verify: usage: unknown flag nope (known: m4.enabled)
+m5-flags-twice               exit=2  - false undefined usage usage: --flags given more than once (put every override in one --flags k=v,...) | verify: usage: --flags given more than once (put every override in one --flags k=v,...)
+idle-flags-m4off             exit=4  - true idle   | verify: run 0.25 h, seed 1, profile idle, flags {"m4.enabled":0}
+m5-tiny                      exit=0  - true m5x-casual   | verify: run 0.0001 h, seed 1, profile m5x-casual, flags {"m4.enabled":1}
+idle-tiny                    exit=0  - true idle   | verify: run 0.0001 h, seed 1, profile idle, flags {"m4.enabled":1}
+m5-frac                      exit=0  - true m5x-casual   | verify: run 0.0005 h, seed 1, profile m5x-casual, flags {"m4.enabled":1}
+idle-frac                    exit=0  - true idle   | verify: run 0.0005 h, seed 1, profile idle, flags {"m4.enabled":1}
+m5-seed0                     exit=0  - true m5x-casual   | verify: run 0.25 h, seed 0, profile m5x-casual, flags {"m4.enabled":1}
+m5-seedbig                   exit=1  - false undefined run uncaught error: PyRandom: non-negative safe-integer seed only | verify: run 0.25 h, seed 9007199254740991, profile m5x-casual, flags {"m4.enabled":1}
+m5-noshot                    exit=1  - true m5x-casual   | verify: run 0.25 h, seed 1, profile m5x-casual, flags {"m4.enabled":1}
+m5-1h                        exit=0  - true m5x-casual   | verify: run 1 h, seed 1, profile m5x-casual, flags {"m4.enabled":1}
+idle-1h                      exit=0  - true idle   | verify: run 1 h, seed 1, profile idle, flags {"m4.enabled":1}
+
+# base 22eac98:
+prof-nope                    exit=2  - false undefined usage usage: --profile must be one of idle|m5x-casual | verify: usage: --profile must be one of idle|m5x-casual
+prof-empty                   exit=2  - false undefined usage usage: --profile must be one of idle|m5x-casual | verify: usage: --profile must be one of idle|m5x-casual
+prof-novalue                 exit=2  - false undefined usage usage: --profile needs a value | verify: usage: --profile needs a value
+prof-m5                      exit=2  - false undefined usage profile m5x-casual needs tests/bot-m5.ts (M5.1, on Vadim go) | verify: profile m5x-casual needs tests/bot-m5.ts (M5.1, on Vadim go)
+prof-repeat-m5-idle          exit=0  - true idle   | verify: run 0.25 h, seed 1, profile idle, flags {"m4.enabled":1}
+idle-flags-m4off             exit=4  - true idle   | verify: run 0.25 h, seed 1, profile idle, flags {"m4.enabled":0}
+idle-tiny                    exit=0  - true idle   | verify: run 0.0001 h, seed 1, profile idle, flags {"m4.enabled":1}
+idle-frac                    exit=0  - true idle   | verify: run 0.0005 h, seed 1, profile idle, flags {"m4.enabled":1}
+idle-1h                      exit=0  - true idle   | verify: run 1 h, seed 1, profile idle, flags {"m4.enabled":1}
+idle-seedbig                 exit=0  - true idle   | verify: run 0.25 h, seed 9007199254740991, profile idle, flags {"m4.enabled":1}
+
+# 24 h runs (sha256 of verify.json / verify.png)
+5ed85a93f6e448e6bf7ca51a1a57bf9b2f5f2e42d904f830a9eb1761704443a4  /workspace/.pr78-ev/v-idle-24h/verify.json
+4b2c61fd76fd5279848262f057d14328a9dd2572581786e948c1e630ef4ceb16  /workspace/.pr78-ev/v-idle-24h/verify.png
+25eb6895b2c4a125cc5ba23698f98852376c363daa12723f0ef19a8a313ef187  /workspace/.pr78-ev/v-m5x-casual-24h-2/verify.json
+7dea0ef0693a485a171c90dc8b7c2fb1a4dccecf92d2f85a89feca312c99cb8a  /workspace/.pr78-ev/v-m5x-casual-24h-2/verify.png
+25eb6895b2c4a125cc5ba23698f98852376c363daa12723f0ef19a8a313ef187  /workspace/.pr78-ev/v-m5x-casual-24h/verify.json
+7dea0ef0693a485a171c90dc8b7c2fb1a4dccecf92d2f85a89feca312c99cb8a  /workspace/.pr78-ev/v-m5x-casual-24h/verify.png
+ceaeee6f1eac2a0799069baf7f4e234e28f6f246776e3c29cce10eaeb016e193  /workspace/.pr78-ev/base-idle-24h/verify.json
+7cf0218e083a178f0234d233d19471ef8d941202e1e1bbca77e23a0e9c1d844a  /workspace/.pr78-ev/base-idle-24h/verify.png
+e31c268f01a2f62e6ca06f6a3d18595d1931d37f9a7652f95b9f29febdaee507  /workspace/.pr78-ev/merge-idle-24h/verify.json
+6c64662ed8e9474d5fed542cfdaa618356971d41b30441c6270d71eba101362e  /workspace/.pr78-ev/merge-idle-24h/verify.png
+7887e6eb4486c742ce0912c054329684ded5924b653c50dd0feeb41b54370b82  /workspace/.pr78-ev/merge-m5x-casual-24h/verify.json
+3c49605d5aed90f0a1d8a7d27d0f4076c38eb8660459742a7e6ef1103fbdf2d9  /workspace/.pr78-ev/merge-m5x-casual-24h/verify.png
+
+# normalised idle 24 h verify.json diff, base vs PR (build id/sha masked):
+10c10
+<   "sha256": "8ff2bb42d34e77cc6a4890037fb4cf1ba2db509122396f1bd847049a045f54c5",
+---
+>   "sha256": "82bbfcb5cb852e1b2e5159d35bca1aae495e6264cc82074be58ba98f8fbe8477",

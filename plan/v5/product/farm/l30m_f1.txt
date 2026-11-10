@@ -1,0 +1,6 @@
+# table ../economy.f1.csv | level reached at 30:00, seeds 0-29 | pass band L18-L22, target L20
+standard seller15: median L20, min 20, max 20, dist {20: 30}, in band 30/30
+casual worst case (Poisson+20 s+-25%): median L19, min 18, max 19, dist {18: 5, 19: 25}, in band 30/30
+demand -25%: median L20, min 20, max 20, dist {20: 30}, in band 30/30
+sells every 20 s: median L20, min 20, max 20, dist {20: 30}, in band 30/30
+cheapest-first: median L19, min 19, max 19, dist {19: 30}, in band 30/30

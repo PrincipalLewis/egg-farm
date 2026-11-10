@@ -1,0 +1,4 @@
+2026-11-10 01:52 CET  threshold=25%  usage=38.7%
+2026-11-10 02:57 CET  threshold=40%  usage=41.9%
+2026-11-10 03:51 CET  threshold=55%  usage=59.4%
+2026-11-10 03:51 CET  mix eng=77.8% qa=14.8% prod=3.7% other=3.7%

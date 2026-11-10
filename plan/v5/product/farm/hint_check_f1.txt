@@ -1,0 +1,4 @@
+# table: ../economy.f1.csv
+seller15 (sell 15 s): n=78680 median |err| 9.7%  within ±10% 50.9%  within ±25% 72.9%  bias -2.3%  p90 |err| 37%
+active (sell 1 s): n=77440 median |err| 3.8%  within ±10% 61.8%  within ±25% 75.8%  bias +0.0%  p90 |err| 34%
+casual (20 s, Poisson): n=63260 median |err| 18.5%  within ±10% 30.5%  within ±25% 62.4%  bias -5.5%  p90 |err| 49%

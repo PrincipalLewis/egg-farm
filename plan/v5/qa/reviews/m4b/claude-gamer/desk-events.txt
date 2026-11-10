@@ -1,0 +1,31 @@
+# 2026-10-19T08:34:48.780Z desk file:///tmp/relchk/egg-farm.html profile=prof-desk 1280x800 150s aheadHours=0
+0:04 build {"meta":"m3-rc1-pre+246de09","data":"m3-rc1-pre+246de09"}
+0:04 shot desk-01-0m04-start.png
+0:04 state {"top":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Hens L1—›","collect":"Collect +5 · 2 ready","sellAll":"No eggs to sell","sinceBuy":0}
+0:04 tabs Collection|Farm|Workers
+0:05 shot desk-02-0m04-upgrades-tabs.png
+0:13 buy [Collection] gap=9s :: L0 Collect per tap Eggs per tap 5 → 10 Level 0 / 30 $10.00
+0:13 shot desk-03-0m13-buy.png
+0:19 state {"top":"Egg Farm $8.00 5 $8.00, 5 eggs","goal":"Hens L1 ~40 s ›","collect":"Collect +10 · 2 ready","sellAll":"No eggs to sell","sinceBuy":6}
+0:27 sell Sell all (8 eggs · $8.00)
+0:28 buy [Collection] gap=15s :: L1 Collect per tap Eggs per tap 10 → 15 Level 1 / 30 $16.00
+0:28 shot desk-04-0m28-buy.png
+0:34 state {"top":"Egg Farm $16.00 3 $16.00, 3 eggs","goal":"Hens L1 ~6 s ›","collect":"Collect +15 · 2 ready","sellAll":"No eggs to sell","sinceBuy":6}
+0:39 buy [Collection] gap=11s :: L2 Collect per tap Eggs per tap 15 → 20 Level 2 / 30 $25.00
+0:39 shot desk-05-0m39-buy.png
+0:42 sell Sell all (9 eggs · $9.00)
+0:50 state {"top":"Egg Farm $19.00 0 $19.00, 0 eggs","goal":"Hens L1 ~1 s ›","collect":"Collect +20 · 1 ready","sellAll":"No eggs to sell","sinceBuy":11}
+0:51 buy [Farm] gap=12s :: L0 Hens Eggs/s 1 → 2 Level 0 / 30 $20.00
+0:51 shot desk-06-0m51-buy.png
+1:05 state {"top":"Egg Farm $7.00 0 $7.00, 0 eggs","goal":"Egg value L1 ~10 s ›","collect":"Collect +20","sellAll":"No eggs to sell","sinceBuy":14}
+1:06 buy [Farm] gap=15s :: L1 Hens Eggs/s 2 → 3 Level 1 / 30 $21.00
+1:13 buy [Farm] gap=7s :: L0 Egg value Egg price $1.00 → $1.18 Next at L5: Grade A ×1.1 Level 0 / 30 $20.00
+1:21 state {"top":"Egg Farm $9.08 24 $9.08, 24 eggs","goal":"Egg value L2 ~8 s ›","collect":"Collect +20 · 4 ready","sellAll":"No eggs to sell","sinceBuy":8}
+1:28 buy [Farm] gap=16s :: L2 Hens Eggs/s 3 → 4 Level 2 / 30 $24.00
+1:34 buy [Farm] gap=5s :: L1 Egg value Egg price $1.18 → $1.36 Next at L5: Grade A ×1.1 Level 1 / 30 $22.00
+1:37 state {"top":"Egg Farm $0.84 46 $0.84, 46 eggs","goal":"Egg value L3 ~17 s ›","collect":"Collect +20 · 5 ready","sellAll":"No eggs to sell","sinceBuy":3}
+1:42 sell Sell all (12 eggs · $16.32)
+1:48 buy [Farm] gap=14s :: L2 Egg value Egg price $1.36 → $1.56 Next at L5: Grade A ×1.1 Level 2 / 30 $33.00
+2:02 state {"top":"Egg Farm $5.92 76 $5.92, 76 eggs","goal":"Farm L1 ~48 s ›","collect":"Collect +20","sellAll":"Sell all (26 eggs · $40.56)","sinceBuy":14}
+2:05 buy [Collection] gap=17s :: L3 Collect per tap Eggs per tap 20 → 25 Level 3 / 30 $40.00
+2:50 shot desk-07-2m50-end.png

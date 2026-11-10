@@ -1,0 +1,51 @@
+Approved rule (V<=min(F+3,30)): TR-4 price fails at 186/961 saves
+  F0: fails C>=5 (C-F>=5), worst C30 needs V12 vs cap 3; p6 $4.6 vs p7@cap $1.56
+  F1: fails C>=6 (C-F>=5), worst C30 needs V12 vs cap 4; p6 $4.83 vs p7@cap $1.78
+  F2: fails C>=9 (C-F>=7), worst C30 needs V13 vs cap 5; p6 $5.06 vs p7@cap $2.2
+  F3: fails C>=10 (C-F>=7), worst C30 needs V14 vs cap 6; p6 $5.29 vs p7@cap $2.46
+  F4: fails C>=11 (C-F>=7), worst C30 needs V14 vs cap 7; p6 $5.52 vs p7@cap $2.73
+  F5: fails C>=14 (C-F>=9), worst C30 needs V13 vs cap 8; p6 $5.75 vs p7@cap $3.32
+  F6: fails C>=16 (C-F>=10), worst C30 needs V14 vs cap 9; p6 $5.98 vs p7@cap $3.65
+  F7: fails C>=20 (C-F>=13), worst C30 needs V14 vs cap 10; p6 $6.21 vs p7@cap $4.54
+  F8: fails C>=22 (C-F>=14), worst C30 needs V15 vs cap 11; p6 $6.44 vs p7@cap $4.94
+  F9: fails C>=23 (C-F>=14), worst C30 needs V15 vs cap 12; p6 $6.67 vs p7@cap $5.37
+  F10: fails C>=26 (C-F>=16), worst C30 needs V15 vs cap 13; p6 $6.9 vs p7@cap $6.07
+  F11: fails C>=27 (C-F>=16), worst C30 needs V16 vs cap 14; p6 $7.13 vs p7@cap $6.55
+  F12: fails C>=29 (C-F>=17), worst C30 needs V16 vs cap 15; p6 $7.36 vs p7@cap $7.04
+  F13: fails C>=30 (C-F>=17), worst C30 needs V17 vs cap 16; p6 $7.59 vs p7@cap $7.56
+Fix A (V may exceed cap at migration, up to maxLevel 30): unsolvable saves = 0 []
+  max overshoot above cap (levels): 9 at (0, 30, 9)
+Fix A static first-minute ratio: max 1.352 at F12 C1 V5; >1.5x: 0/961; among B1 saves max 1.237
+Fix B (floor) worst floor/p7@cap: 2.95x
+Fix B dead Egg value levels (formula below floor) worst: (9, 0, 30)
+
+Fixtures (F,C,H=F) -> V0 (Fix A), v6 -> v7 price, static ratio, overcap?
+  F0/C0: V0  $1.00 -> $1.00  x1.00
+  F0/C5: V4 (cap 3, OVER)  $1.60 -> $1.78  x1.11
+  F0/C30: V12 (cap 3, OVER)  $4.60 -> $4.88  x1.06
+  F5/C0: V2  $1.25 -> $1.36  x1.09
+  F5/C2: V3  $1.55 -> $1.56  x1.01
+  F5/C10: V7  $2.75 -> $3.01  x1.09
+  F5/C30: V13 (cap 8, OVER)  $5.75 -> $5.81  x1.01
+  F10/C0: V3  $1.50 -> $1.56  x1.04
+  F10/C7: V7  $2.76 -> $3.01  x1.09
+  F10/C10: V8  $3.30 -> $3.32  x1.01
+  F10/C15: V10  $4.20 -> $4.74  x1.13
+  F10/C30: V15 (cap 13, OVER)  $6.90 -> $7.04  x1.02
+  F15/C0: V4  $1.75 -> $1.78  x1.02
+  F15/C12: V10  $4.27 -> $4.74  x1.11
+  F15/C15: V11  $4.90 -> $5.17  x1.06
+  F15/C20: V13  $5.95 -> $6.07  x1.02
+  F15/C30: V17  $8.05 -> $8.44  x1.05
+  F20/C0: V5  $2.00 -> $2.42  x1.21
+  F20/C17: V14  $6.08 -> $6.55  x1.08
+  F20/C20: V15  $6.80 -> $7.35  x1.08
+  F20/C25: V17  $8.00 -> $8.44  x1.05
+  F20/C30: V19  $9.20 -> $9.59  x1.04
+  F29/C30: V20  $11.27 -> $12.75  x1.13
+  F30/C0: V6  $2.50 -> $2.71  x1.08
+  F30/C27: V20  $10.60 -> $12.75  x1.20
+  F30/C30: V20  $11.50 -> $12.75  x1.11
+  F12/C1: V5  $1.79 -> $2.42  x1.35
+
+Reachability: collection_cost<farm_cost at L [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

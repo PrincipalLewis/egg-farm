@@ -1,0 +1,24 @@
+rows 21
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c registry composition > [F1(c)] empty registry: saleMultipliers is exactly [grader] (pre-F1c behaviour)
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c registry composition > [F1(c)][D-C1] an entry whose flag is off (or m4.enabled off) is never consulted
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c registry composition > [F1(c)][X7] factors multiply with the Grader and round once (golden X7 example shape)
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c registry composition > [F1(c)] by attribution: Rush applies to Market Hand sales only; Frenzy to both
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c registry composition > [F1(c)][D-C3] suspended (no focus): every timed effect counts as 1, Grader stays
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c laying (prodEggsPerSec) > [F1(c)][D-C3] tick: laying uplift only on focus ticks, still capped by the coop
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c laying (prodEggsPerSec) > [F1(c)][D-C3] tick: worker sales get effects on focus ticks and none on suspended ticks
+OK [D-C3] tests/v5-f1c-effects.test.ts::F1c D-C3 through advance(): a long frame buys at most 1.0 s of uplift > [D-C3][R23 partial] one 59 s frame (focusMs 1000
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c registry composition > [F1(c)][CCR-80-m1] preview == credit: Sell all preview equals the sellAll action with live ef
+OK [CCR-80-m1] tests/v5-f1c-effects.test.ts::Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended > [
+OK [CCR-80-m1] tests/v5-f1c-effects.test.ts::Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended > [
+OK [CCR-80-m1] tests/v5-f1c-effects.test.ts::Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended > [
+OK [CCR-80-m1] tests/v5-f1c-effects.test.ts::Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended > [
+OK [§9.5-e3] tests/v5-f1c-effects.test.ts::F1c §9.5 edge 3 / R24: offline grant and income preview never see a live lay effect (callers, not the helper) > [§9.5-e3
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c laying (prodEggsPerSec) > [F1(c)] helper: prodEggsPerSec applies a Sweep-like factor only with a live ctx; with no c
+OK [Q-F1c-1] tests/v5-f1c-effects.test.ts::Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended > [
+OK [Q-F1c-1] tests/v5-f1c-effects.test.ts::Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended > [
+OK [Q-F1c-1] tests/v5-f1c-effects.test.ts::Q-F1c-1 (D-HOP-2026-10-29-06): the Market sheet is a play surface; a player sale is suspended only when not attended > [
+OK [Q-F1c-2] tests/v5-f1c-effects.test.ts::Q-F1c-2 (D-HOP-2026-10-29-06): Sweep is excluded from golden E > [Q-F1c-2][GE-AC8] goldenEEggsPerSec is the base prodEgg
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c flags off = byte-identical > [F1(c)][AC-M5A-16] a registry entry whose flag is off changes nothing over 10 min of pl
+OK [F1(c)] tests/v5-f1c-effects.test.ts::F1c registries are readonly in src (CCR nit #80) > [F1(c)][CCR-80-N] no src file mutates or casts away SALE_EFFECTS / LA
+f1c tests 21 cited distinct 21 missing 0 uncited []
+total tests 103 passed 103

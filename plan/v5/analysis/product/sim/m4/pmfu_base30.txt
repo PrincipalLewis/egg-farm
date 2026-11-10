@@ -1,0 +1,1 @@
+# M4 track check, table ../../economy.f1.csv tuning {'hb': 30, 'hg': 1.3, 'vb': 40, 'vg': 1.33, 'hcap': 3, 'vcap': 3} | 30 seeds, no workers

@@ -1,0 +1,2 @@
+./tests/order-chip-a11y.test.ts:  it('no aria-label="Customer" remains in chip markup; no role / live region added', async () => {
+./tests/order-chip-a11y.test.ts:      expect(el.outerHTML).not.toContain('aria-label="Customer"');

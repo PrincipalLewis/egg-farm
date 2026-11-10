@@ -1,0 +1,27 @@
+# UI screenshot spec check · 2026-10-17 01:55 CEST · UI/Visual Designer
+Result: **FAIL** for M4-A @ 2625e5c: 1 Major regression (the next-goal strip lost its pill at 360 and 1280 docked). The S2-6 "Queue full" tag fix (01:17 item 2) **PASSES**. Save-recovery v4, Bug 9 at 375, Firefox/WebKit PR #12 shots and the Firefox B-2 shot: no new issues. M4-A still can't be signed off: the regression below needs fixing, and items 1, 3, 4 and the toasts from the 01:17 list still have no screenshots on this build.
+
+## 1. M4-A · 2625e5c · Engineering (engineering/screenshots/m4a-2625e5c/, 12 shots)
+Commits on top of e38cf76: 048f1ed (S2-6 qtag), 5ee6a7f (#1 MAX label), 6d0f39e (#3 turned-away tag), e6cbb8e (#4 CSS lock), d83e6bb (#5 5/5 text alternative), 2625e5c (#6 toast queue).
+
+PASS
+- **S2-6 "Queue full" tag (01:17 item 2) fixed.** rc1-s2-6-qtag-9of9-375.png reads `Full`, rc1-s2-6-qtag-9of9-390.png reads `Queue full`; both straddle the strip's amber top outline at the right end and stay clear of the "+5" tile (4 chips + "+5" for 9 waiting, N = 9 − 4 ✔). Matches layout-spec.md line 74 (`top:-9px;right:8px`, "Full" below 380px); #3E2C23 on #F29E1F = 6.3:1 ✔.
+- save-recovery-v4-{fresh,restored,storage,cantsave}-{360,1280}.png: dialogs unchanged from the 01:17 PASS (art-ux/save-recovery-dialog.md v2.1 lines 9–11, 55, 58); bodies fit in 2 lines at 360, buttons ≥ 44px ✔.
+- m3-rc0-bug9-375-market.png: 5 rows `113/113 eggs · $553.70`, `Sell all (200 eggs · $980.00)` fit at 375, Sell ≥ 44px ✔.
+
+Change list
+1. **Major (regression) · the next-goal strip has lost its pill on this build.** m3-rc0-desktop-1280.png: `Collection L1: +5/tap` sits bare on the grass with no white fill, outline or shadow, the flag icon touches the label, the `Ready!` chip runs into the end of `+5/tap`, and the `›` chevron floats on its own. save-recovery-v4-*-360.png (behind the dialog dim): same bare label, no 40px pill. At e38cf76 the same shots show the normal white pill with a meadow outline (engineering/screenshots/m4a-e38cf76/m3-rc0-desktop-1280.png).
+   Cause (verified in the source): 048f1ed appended the rc1 D5 block to game/src/ui/styles.css at lines 470–479 (`.goal{display:block;…;background:transparent;border:0;box-shadow:none}` plus `.goal-pill{display:grid;…;background:var(--c-white);border:2px solid var(--c-outline)…}`), but this branch's markup has no `span.goal-pill`: game/src/ui/app.ts line 80 is still `<button class="goal">` with the icon, label, status and chevron as direct children. So the button is stripped and nothing draws the pill. This breaks the "highlight the next goal" rule (m3-next-goal-spec, layout-spec §3.3 row 3 area) and the 40px strip that rc1-upgrade-value.md §4 line 75 depends on.
+   Fix: either bring over the D5 markup change too (wrap the four children in `<span class="goal-pill">` in app.ts:80 and any JS that queries `.goal` children), or drop lines 470–479 from this branch and keep only the S2-6 qtag rules. Then re-shoot m3-rc0-desktop-1280 and a 360 Farm view with the goal strip visible (Ready! and ~m:ss states).
+2. **Still missing evidence from the 01:17 list, now committed but not shot:** #1 MAX as a non-interactive label (5ee6a7f), #3 no tag on a turned-away customer (6d0f39e), #4 CSS lock glyph in Dust (e6cbb8e), #5 5/5 text alternative `Balanced farm 5 of 5. Top tier, +30% income.` (d83e6bb; DOM dump please), and the tier-reached + per-track milestone toasts at 360 and 1280 docked (2625e5c says the 00:56 `toastShown:false` came from the harness seeding a v6 save, so the re-shoot needs a v7 save or a live buy that crosses a tier). Same shot list as reviews/screenshot-check-2026-10-17-0117.md §1 items 1, 3, 4.
+
+## 2. PR #12 · Firefox and WebKit
+- engineering/screenshots/pr12-nudge/{workers-tab-dot,nudge-f25-0workers}-360x740-firefox.png (scratch of 282e7b2): the New dot sits right of "Workers" inside the control and doesn't touch the "s" ✔ (fix holds in Firefox). Nudge `Busy farm! · Hire a worker ›` with ×, as in the 00:44 Chromium PASS ✔. `Affordable in —` at $0/s is the spec'd no-income state (layout-spec.md line 157) ✔.
+- qa/m3-recheck/pr12-l30-0f2b785/{firefox,webkit}-{320,340,360,375,390,1280}-{F29,nudge,tap}.png: same render as Chromium. The New dot still sits on the top-right of the Workers pill against the "s" at 360/375/390 in all three engines, which is expected on 0f2b785; the 00:49 item 4 still needs QA to re-run on the PR head. FYI: {chromium,firefox,webkit}-results.json each fail `coop-full tip shown => nudge line hidden` at 4–5 widths (functional, QA's call, not a visual spec item).
+
+## 3. Also checked
+- qa/m3-recheck/b2-pr4-572864a/pr-firefox-tired-viaHireTip-1280x720.png: Firefox matches Chromium. Tip below the energy bar and clear of the tablist ✔, but it still covers the Manage (Refill) button, the same open 00:49 Minor 2.
+- Re-renders under already-logged names, no change: engineering/screenshots/m4a-e38cf76/save-recovery-v4-*.png (8), qa/m3-recheck/cuta-ux-extras/firefox-360-3{,a}-*.png (2), qa/m3-recheck/logs-4bf4a22/tg-chromium-*.png (4), qa/m3-recheck/pr12-l30-0f2b785/chromium-*.png.
+- Out of scope: qa/claude-gamer/rc1-qa-bugs-v4-7d52952/coop-0{3..6}-*.png (playtest re-renders).
+
+Still waiting on: M4-A goal-strip fix + items 1, 3, 4 and toast captures, B-1 Coop full SHA/screenshot (PM Workers), B-3 compact Farm card SHA (UI engineer), 'Limited by collecting' fix, v1.6.1 goal label, Refill nav fix (Market Hand only asleep), sticky Refill bar backing, B-2 tip over Manage, QA rerun of the New dot on the PR #12 head.

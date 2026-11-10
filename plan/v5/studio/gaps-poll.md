@@ -1,0 +1,2 @@
+- QA: Data/Analytics (telemetry spec), Monetization/Economy owner, Audio
+- Art&UX: Audio (sfx/music owner), Economy tuning to L30 (maybe Product), Data/Analytics; Monetization after M1

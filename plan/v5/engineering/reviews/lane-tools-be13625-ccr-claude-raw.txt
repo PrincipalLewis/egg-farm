@@ -1,0 +1,165 @@
+VERDICT: FAIL
+
+COUNTS: blocking/major/minor/nit = 0/1/7/4
+
+I read both scripts and did not execute either. `sha1sum` matches the PINS.txt pins for both files. I did not check the mawk or util-linux `setsid` versions because those commands were denied.
+
+Repros assume `T=<dir with the two scripts>` and this sandbox. `PIDDIR` is hardcoded, so the tmpfs keeps the real `.pids` out of it:
+
+`BW="bwrap --unshare-pid --die-with-parent --ro-bind / / --proc /proc --dev /dev --tmpfs /tmp --tmpfs /workspace/egg-farm-studio/.pids"`
+
+Run each as `$BW bash -c '...'`.
+
+## Answer to the core question
+
+- **Accident (PID reuse, stale lines, wrong lane, reboot):** I found no realistic path.
+  - `(pid, starttime)` is unique within a boot. A reused PID would need the same 10 ms jiffy, which requires a full PID wrap.
+  - The pidfiles show about 125 PIDs/s. At the default `pid_max` of 4194304 that is a wrap roughly every 9 hours, and the first wrap should land late this afternoon. I could not read `pid_max`; I only assumed the default. A recorded process that has exited would then fail `lane-kill.sh:36`.
+  - Linux does not reuse a PID while any process still has it as its pgid or sid. A leaderless group therefore keeps its number, and that is why the "GONE, members remain, not signalled" branch is safe.
+- **Deliberate forgery:** yes, a lane-kill call can signal a process the lane never started (finding 1). The pidfile is the only authorization, and everything in it is readable and writable by every agent.
+
+## Findings
+
+### 1. MAJOR: a forged pidfile line makes lane-kill signal any process, and its whole group
+- **Where:** `lane-kill.sh:19-22, 28, 36-39`
+- **Trace:**
+  1. The attacker reads `/proc/X/stat`, takes field 22 (`$20` after the sed strip), and reads the world-readable `boot_id`.
+  2. They append `X <st> <boot_id> 2026-10-30T09:00:00+01:00 x` to any `.pids/<lane>.pids`. The lane name is just a convention, so a fresh name works.
+  3. `lane-kill.sh <lane> X` passes the numeric check (line 15), finds the record (line 22), passes the boot check (line 28) and the start-time check (line 36).
+  4. Line 37 returns `pgid==X` when X leads a group, so line 38 sends `kill -TERM -- -X` to X's entire group. Pointing it at another lane's `setsid` leader kills that lane's whole tree.
+- **Is start time plus boot sufficient against forgery?** No. Both values are public. They only protect against accidents.
+- **Repro:**
+  ```
+  $BW bash -c 'setsid bash -c "sleep 300 & sleep 300" & sleep .3; V=$(pgrep -o -x sleep); P=$(ps -o ppid= -p $V|tr -d " "); st=$(sed "s/^.*) //" /proc/$P/stat|awk "{print \$20}"); echo "$P $st $(cat /proc/sys/kernel/random/boot_id) 2026-10-30T09:00:00+01:00 x" >> /workspace/egg-farm-studio/.pids/evil.pids; $T/lane-kill.sh evil $P; sleep .3; kill -0 $V && echo SURVIVED || echo KILLED-FOREIGN'
+  ```
+  Expected today: `TERM <pid> (group)` and `KILLED-FOREIGN`. After a fix it should print `REFUSED`.
+- **Fix:** bind the target to the lane with a tag the forger cannot change on someone else's process.
+  - In `lane-run.sh`, start the child with `LANE_RUN_TAG=<lane>:<nonce> setsid -- "$@"` and add the nonce as a record field.
+  - In `lane-kill.sh`, before any signal, require `tr '\0' '\n' < /proc/$p/environ | grep -qxF "LANE_RUN_TAG=$lane:$nonce"`.
+  - A process's initial environ cannot be rewritten by others, and an unreadable environ means refuse.
+  - This stops a forged record from reaching a victim's process, and it stops lane A's record from reaching lane B's process.
+  - If the threat model is accident-only, this drops to minor, and the verdict becomes PASS-with-minors.
+
+### 2. MINOR: legacy lines without a boot id are accepted on a timestamp alone (3 live ones exist)
+- **Where:** `lane-kill.sh:18, 20-21, 24-27`
+- **Live legacy lines:** `ui.pids:1`, `architect.pids:1,2` and `saves-qa.pids` (2 lines), all stamped 07:28–07:30.
+- **Trace:**
+  - The accepted-on-boot test is just `date -d TS +%s >= btime`.
+  - The regex checks only the prefix `YYYY-MM-DDT`, so `2099-01-01T00:00:00` always passes.
+  - A timestamp with no offset is parsed in the caller's TZ.
+  - `btime` is `now − uptime`, so it moves when the clock is stepped. A step backward lets a previous-boot line pass.
+  - A cross-boot false accept then needs the same PID and the same start jiffy. That is unlikely, but boot sequences are nearly deterministic.
+- **Repro:** `echo "$P $st 2099-01-01T00:00:00 x" >> .pids/evil.pids` (as in finding 1, minus the boot id), then `lane-kill.sh evil $P`.
+- **Fix:** delete legacy support. Every legacy process is from the old version and hours old, so rewrite or drop those 3 lines. As a stopgap, require the offset form `[+-]HH:MM` and an upper bound of now.
+
+### 3. MINOR: lane-run records whatever `$!` looks like and never checks it is the leader it created
+- **Where:** `lane-run.sh:15-18, 26-27`
+- **Trace:** nothing checks pgrp==sid==pid or ppid==`$$`.
+  - **(a) Job control on** (`bash -m lane-run.sh`, or `monitor` imported via SHELLOPTS): the `$!` child is a group leader, so `setsid` forks and the parent exits.
+    - The line records the dead setsid parent (or a zombie one).
+    - The real process is in another group.
+    - `lane-kill.sh:30-33` then prints a clean `GONE p` while the command keeps running.
+  - **(b) Exec failure** (`lane-run.sh t -- /nonexistent`):
+    - If the zombie is read before bash reaps it, a line is recorded and the script prints the PID and exits 0.
+    - Otherwise it takes the exit-1 path at line 19.
+    - Either way the outcome is racy.
+  - **(c) PID reuse within the poll window** after the child exits and is reaped. It needs a wrap inside a few ms, so it is not plausible here. If it happened, a foreign process would be recorded and then be killable.
+- **Repro (a):** `$BW bash -c 'bash -m $T/lane-run.sh jc -- sleep 100; $T/lane-kill.sh jc $(cut -d" " -f1 /workspace/egg-farm-studio/.pids/jc.pids); pgrep sleep'`.
+- **Repro (b):** loop `lane-run.sh t -- /nonexistent; echo $?` 50 times.
+- **Fix:** read `/proc/$pid/stat` once, retry up to 1 s, and record only if `ppid==$$ && pgrp==pid && session==pid`. Otherwise abort and print what happened.
+
+### 4. MINOR: TOCTOU and a different identity source for the group decision
+- **Where:** `lane-kill.sh:29` vs `37-39`
+- **Trace:**
+  - Start time is read from `/proc` at line 29. The pgid comes from a separate `ps` fork at line 37, so the window is roughly 5–20 ms.
+  - A foreign process would need to take PID p inside that window. Even at 125 PIDs/s, p is reallocated about once per wrap, so this is negligible.
+  - If the leader dies between lines 37 and 38 with members still alive, the group TERM still fires. That contradicts the "never signal orphans" policy at line 31 but is safe, because those members are in session p.
+  - If `ps` fails or is missing, `pgid=""` and it silently degrades to a single-PID kill.
+  - `pgid==p` does not prove p is a session leader. Nothing checks `sid==p`.
+- **Fix:** take `$3` (pgrp) and `$4` (sid) from the same `s` string as the start time. Require `pgrp==sid==p` for a group kill, and make the line-37 `ps` call unnecessary. Without pidfd there is no race-free kill, which I judge acceptable here.
+
+### 5. MINOR: lane-kill can signal its own caller (the `$$` check is too narrow)
+- **Where:** `lane-kill.sh:15, 38`
+- **Trace:** only `$$` is excluded. A script started via `lane-run` that runs `lane-kill` on its own lane sits inside group p, so `kill -- -p` kills the script, its parent shells and lane-kill itself, usually with no output. Self-test harnesses are the likely case.
+- **Repro:**
+  ```
+  $BW bash -c '$T/lane-run.sh sg -- bash -c "echo \$\$ >/tmp/p; sleep 1; $T/lane-kill.sh sg \$(cat /tmp/p); touch /tmp/after"; sleep 3; ls /tmp/after'
+  ```
+  Expected today: no `/tmp/after`.
+- **Fix:** refuse when `p`'s pgrp or sid equals lane-kill's own pgrp or sid, or when `p` is an ancestor of `$$`.
+
+### 6. MINOR: the `sed 's/^.*) //' | awk '{print $20}'` parsing breaks when comm contains a newline
+- **Where:** `lane-run.sh:18, 21`; `lane-kill.sh:13, 29`
+- **Trace:**
+  - The sed strip is correct for comm containing `") "` because the greedy match anchors on the last `") "`, and comm is at most 15 bytes so it cannot fake 20 fields.
+  - With `\n` in comm (the executable's basename), `/proc/pid/stat` spans two lines. sed leaves line 1 untouched and awk prints an empty line first, giving `st=$'\n123'`.
+  - **lane-run:** line 26 then writes a record split over two lines, which is malformed and ignored. lane-run still prints the PID and exits 0, so the process is unkillable.
+  - **lane-kill:** line 36 compares against `$'\n…'` and refuses. That is fail-closed.
+  - **`group_members`** (`lane-kill.sh:13`, `lane-run.sh:21`): `$(awk …)` becomes multi-line and never equals `$1`, so such members are under-reported and the report can say `GONE p` while members remain.
+  - Each scan also forks `sed` plus `awk` for every `/proc` entry, which means thousands of forks.
+- **Repro:** `d=/tmp/w; mkdir $d; cp /bin/sleep "$d/a"$'\n'b; $T/lane-run.sh nl -- "$d/a"$'\n'b 100; cat -A /workspace/egg-farm-studio/.pids/nl.pids`.
+- **Fix:** use pure bash. `s=$(</proc/$p/stat); r=${s##*) }; read -ra a <<<"$r"; st=${a[19]} pgrp=${a[2]} sid=${a[3]}`. `##*) ` matches across newlines. Reject non-numeric results.
+
+### 7. MINOR: orphan reporting only looks at pgid, and a leaderless group can never be stopped
+- **Where:** `lane-kill.sh:13, 32-33, 42-43`
+- **Trace:**
+  - `group_members` matches only `pgrp==p`. Children in session p but another pgid (job-control shells), and children that called `setsid`, are neither signalled nor reported, so `GONE p` can wrongly claim it is clean. README:22 mentions the `setsid` case, but the tool output does not.
+  - A `lane-run` command that daemonizes (leader exits, a child stays in group p) is, by design, never stoppable through the tooling.
+  - The scenario is safe, because PID p cannot be reused while the group exists. It is still a usability gap.
+- **Fix:** report by session (field 6) as well. Optionally allow a group TERM when the leader is gone, group p is non-empty, all members have sid==p, and the finding-1 tag matches.
+
+### 8. MINOR: pidfile writes can silently produce an unusable or corrupt record
+- **Where:** `lane-run.sh:25-27`
+- **Trace:**
+  - **Atomicity:** `printf >>` is a single `write()` only while the line fits bash's stdio buffer. A very long command line is written in chunks, and another lane-run append can land between them.
+    - That swallows the other writer's line into the first line, which is fail-closed.
+    - The tail chunk becomes an orphan line.
+  - **Failed `date`:** a failed `date` inside `$(…)` does not trip `set -e`. The line is written with a bad ISO field and silently rejected by lane-kill (`lane-kill.sh:20`), yet lane-run still prints the PID and exits 0.
+  - **No leading newline:** a stray write without a trailing newline merges with the next record and kills it.
+- **Repro (long lines):** `$BW bash -c 'for i in 1 2 3 4 5 6; do ( for j in $(seq 40); do $T/lane-run.sh big -- sleep 1 "$(head -c 60000 /dev/zero|tr "\0" x)"; done ) & done; wait; awk "NF<5" /workspace/egg-farm-studio/.pids/big.pids | wc -l'`. Expect more than 0 malformed or merged lines.
+- **Fix:**
+  - Truncate the recorded cmd to about 512 bytes.
+  - Build the whole line in a variable and write it with one `printf '\n%s\n'`.
+  - Validate the ISO string and `$st` before writing, and fail loudly if they are bad.
+
+## Nits
+
+- **N1 (`lane-kill.sh:20-21`):** `awk` is `/usr/bin/mawk`. Interval expressions like `{8}` are literal in some mawk builds (1.3.4-20200120), which would make every record unmatched. That is fail-closed, so every kill would be refused. Check with: `echo 12345678-aaaa | mawk '/^[0-9a-f]{8}-/{print "ok"}'`. Pure-bash parsing (finding 6) removes the dependency.
+- **N2 (`lane-kill.sh:15`; `lane-run.sh:9`):**
+  - The refusal echoes raw `$p`, so escape sequences in an argument reach the terminal. Use `%q`.
+  - `lane-run.sh -- cmd` takes `--` as the lane name and runs under it.
+  - The 10-step wait at `lane-run.sh:17` does nothing, because `/proc/$pid/stat` exists immediately after fork.
+- **N3 (`lane-kill.sh:11, 26`):** if `/proc/stat` were unreadable, `btime` is empty and `(( t >= btime ))` is true. This fails open for legacy lines only. `setsid --` also needs util-linux with option parsing, so test on the target host.
+- **N4:**
+  - Pidfiles are `0644` and contain full command lines (secrets warning in README:23).
+  - A pidfile symlink or FIFO makes `awk` hang. `.pids/<lane>.pids` is a symlink-following open in both scripts. This is no privilege gain, since it is the same user.
+
+## CHECKED, NO ISSUE
+
+- **Field indices:** `$20` is the correct post-strip start time and `$3` the correct pgrp. A comm containing `") "` still parses, because the greedy sed lands on the last `") "`.
+- **PID reuse:** `(pid, starttime, boot)` is sufficient against accidental reuse (line 36). The reuse repro below should print REFUSED. Run it inside `unshare -rpf --mount-proc`, then set `echo $((p-1)) > /proc/sys/kernel/ns_last_pid` and start a new `setsid sleep`. It gets PID p, and `lane-kill` should print `REFUSED p (start time differs: reused PID)`.
+- **Group membership:** a leader that exec'd from `setsid` stays leader of its own session, because `setpgid` and `setsid` fail for session leaders. So `pgid==p` really means "the group `lane-run` created".
+  - A foreign process can only join a group inside the same session, so it cannot join from outside.
+  - The foreign-joiner and re-parent scenarios cannot put non-descendants in a lane's group.
+  - Descendants that a shared daemon forks inside the lane's session are in scope by definition.
+- **setsid forking:** a non-interactive bash background job is not a group leader, so `setsid` does not fork and `$!` is the leader (finding 3 covers the job-control exception).
+- **Leader gone:** `GONE p (…not signalled…)` reports correctly for plain-pgid orphans and signals nothing (lines 30-34).
+- **Argument parsing in lane-kill:**
+  - `^[0-9]{1,7}$` rejects `-0`, `+5`, an empty string, and trailing `\n`, because `$` is an end anchor.
+  - `10#` handles leading zeros like `08`, and the 7-digit cap is above 4194304.
+  - After the `<=1` guard, `-$p` can never be `-1` or `-0`, so `kill -- -1` is unreachable.
+  - `kill -TERM -- -$p` is accepted by bash's builtin, since it handles `--` in its option loop.
+- **Argument parsing in lane-run:** `--` handling is correct.
+  - `lane-run.sh lane --` ends in usage.
+  - A command named `--` is the only unrunnable one.
+  - `-n`, `--foo` and similar are protected by `setsid --`.
+  - `[[ … ]] && shift` does not trip `set -e`.
+- **Pidfile record selection:** "last record wins" happens only among well-formed records.
+  - Non-matching or malformed later lines cannot override a good record.
+  - A forged later line can only make the lane's own kill refuse (a lane DoS).
+  - Numeric `$1==p` plus `^[0-9]+$` rejects values like `1e2` and `123\r`.
+  - `\n` is the only record separator, and the cmd field is the last field and is not parsed.
+  - `tr '\n\r\t'` on the cmd is sufficient. `\v`, `\f`, U+2028 and so on cannot start a new record.
+  - NUL cannot occur in a bash argument.
+- **Lane name:** `^[A-Za-z0-9._-]+$` has no `/`, so there is no path traversal. A trailing newline is rejected.
+- **Boot id:** `boot_id` correctly rejects cross-boot lines for current-format records. The `boot_id` is not namespaced, so a container restart on the same host boot is still caught by the start-time check.

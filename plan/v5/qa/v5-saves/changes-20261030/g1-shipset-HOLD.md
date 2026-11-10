@@ -1,0 +1,8 @@
+# G1 ship-set pin: STOPPED (hash mismatch), Saves QA 2026-10-30 13:08 CET
+- 13:05:24 CET: product/v5-ship-set.md sha256 4783577bcc4ae610fba19e1b9cc21dcf0a7be76f0e08e61416eea013128363be = HoQ-verified (4783577b…363be). Rev 1.
+- 13:06:14 CET (mtime): file rewritten to "rev 2 13:07 CET: exact keys, telemetry/post-L10 not flags"; sha256 now 0d53b45b401d9600aa3165f5a0f14ddf2b85b13b10bdb2f678452b5c244e7006 != HoQ-verified. Per brief: STOP, nothing pinned.
+- Finding: rev 2 keeps decision id D-HOP-2026-10-30-30 although the file says "Any change to this file needs a new HoP decision ID".
+- Copy of rev 2 kept: qa/scratch/draft-flagson/v5-ship-set.rev2-0d53b45b.md
+Key mapping vs balance.json @3f582db (9a73bd8a…), for info:
+- rev 1: 15 "flags": 13 map to m4.flags.*; "post-L10 progression (CSV L11-30)" and "telemetry v0.6.2" have no balance.json key (telemetry excluded per HoQ addendum #1). Held: m4.flags.bestBuyV2=0, m4.zeroGain.confirm=0. tc_streak_cap -> m4.tc.streak_cap. m4.enabled implicit (HoQ #2).
+- rev 2: 16 exact keys, all exist at 3f582db: m4.enabled=1 (3f582db: 1), m4.flags.{streak,tapCoins,golden,breeds,abilities,pause,rc2Refill,autoRefill,broody,zeroGainUi,clockWage,salesStopped,fatigueCue}=1 (3f582db: all 0), m4.flags.bestBuyV2=0 (0), m4.zeroGain.confirm=0 (0); tunable tc_streak_cap=0.27 -> m4.tc.streak_cap (3f582db: 0.28). Every balance.json m4.flags key (14) is listed; no extra/missing. telemetry + post-L10 moved to "Not flags". Economy CSV sha: placeholder (fail closed). CSV at run SHA: data/economy.csv (also data/economy.f1.csv exists: which one is "the" CSV needs naming).

@@ -1,0 +1,34 @@
+#!/bin/sh
+# runs INSIDE bwrap: / is a tmpfs; /repo is the disposable scratch clone at 75efc4f; /out collects evidence
+set -u
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0='*'
+ID=$(cd /repo && git log -1 --format=%h); BID="m4.1+$ID"; echo "BID=$BID"; (cd /repo && git status --porcelain | head -3)
+L(){ find / \( -path /proc -o -path /dev -o -path /usr -o -path /etc -o -path /opt -o -path /sys -o -path /out -o -path /tmp -o -path /home -o -path /repo/node_modules -o -path /repo/.git -o -path /repo/dist-html -o -path /repo/src -o -path /repo/tests -o -path /repo/scripts -o -path /repo/vendor -o -path /repo/public -o -path /repo/docs -o -path /repo/engineering -o -path /repo/data \) -prune -o -print 2>/dev/null | sort | while read f; do if [ -L "$f" ]; then echo "L $f -> $(readlink "$f")"; elif [ -d "$f" ]; then echo "D $f"; else echo "F $f $(sha256sum < "$f" | cut -c1-12)"; fi; done; }
+seed(){ d=$1; mkdir -p "$d"; echo STALE-JSON > "$d/verify.json"; echo STALE-PNG > "$d/verify.png"; echo decoy > "$d/decoy.json"; echo bak > "$d/verify.json.bak"; echo old > "$d/verify.png.old"; cp /repo/package.json "$d/package.json.copy"; }
+# decoys at every level the hooks could reach; /repo itself is NOT seeded (keeps HEAD id clean)
+seed /; seed /work; mkdir -p /work/sub
+mkdir -p /target; seed /target; seed "/target/$BID"; ln -s /target /linkroot
+mkdir -p /symroot/$BID; echo PRECIOUS-JSON > /target/precious.json; echo PRECIOUS-PNG > /target/precious.png
+ln -s /target/precious.json /symroot/$BID/verify.json; ln -s /target/precious.png /symroot/$BID/verify.png; echo decoy > /symroot/$BID/decoy.json
+mkdir -p /dirroot; seed /target/victimdir; ln -s /target/victimdir "/dirroot/$BID"
+mkdir -p /trav/a/b /victim; seed /victim
+printf '<!doctype html><meta name="build-id" content="../../victim">' > /work/trav.html
+V="node /repo/node_modules/vite-node/vite-node.mjs /repo/scripts/verify.ts --"
+run(){ name=$1; cwd=$2; envs=$3; shift 3; L > /out/$name.before; (cd "$cwd" && env $envs $V "$@" > /out/$name.log 2>&1); e=$?; L > /out/$name.after; echo "=== $name exit=$e [$envs $*]"; diff /out/$name.before /out/$name.after | grep '^[<>]'; }
+run V1-root-usage-nodir /work "VERIFY_OUT_ROOT=/" --hours 0
+seed "/$BID"
+run V2-root-usage-dir /work "VERIFY_OUT_ROOT=/" --hours 0
+run V3-root-full /work "VERIFY_OUT_ROOT=/" --hours 0.1 --skip-build --no-shot
+run V4-dotdot-usage /work/sub "VERIFY_OUT_ROOT=.." --hours 0
+run V5-dotdot-full /work/sub "VERIFY_OUT_ROOT=.." --hours 0.1 --skip-build --no-shot
+run V6-symlinked-root /work "VERIFY_OUT_ROOT=/linkroot" --hours 0
+run V7-symlinked-files /work "VERIFY_OUT_ROOT=/symroot" --hours 0
+run V8-iddir-is-symlink /work "VERIFY_OUT_ROOT=/dirroot" --hours 0
+run V9-empty /work "VERIFY_OUT_ROOT=" --hours 0
+run V10-after-shot-out-root /work "VERIFY_TEST_THROW=after-shot" --hours 0.1 --skip-build --no-shot --out /
+run V11-after-shot-default /work "VERIFY_OUT_ROOT=/ VERIFY_TEST_THROW=after-shot" --hours 0.1 --skip-build --no-shot
+run V12-throw-bogus /work "VERIFY_TEST_THROW=yes" --hours 0.1 --skip-build --no-shot --out /work
+run V13-traversal-buildid /trav/a/b "VERIFY_OUT_ROOT=/trav/a/b VERIFY_HTML=/work/trav.html" --hours 0.1 --skip-build --no-shot
+run V14-reporoot-full /work "VERIFY_OUT_ROOT=/repo" --hours 0.1 --skip-build --no-shot
+echo "--- precious:"; cat /target/precious.json /target/precious.png; ls -la /symroot/$BID
+for f in /verify.json "/$BID/verify.json" /work/verify.json "/work/$BID/verify.json" "/target/$BID/verify.json" /target/victimdir/verify.json /victim/verify.json; do echo "--- $f"; head -c 260 "$f" 2>/dev/null | tr '\n' ' '; echo; done

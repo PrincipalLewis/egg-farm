@@ -1,0 +1,17 @@
+G0-port-free | PASS | HARD | exit 0
+G0-tools | PASS | HARD | exit 0
+G0-pins | PASS | HARD | exit 0
+G1-build | PASS | HARD | exit 0
+G1-build-id | PASS | HARD | exit 0
+S-chromium | PASS | HARD | exit 0
+S-firefox | PASS | HARD | exit 0
+T-chromium | PASS | HARD | exit 0
+T2-firefox | PASS | HARD | exit 0
+V-oq2 | PASS | HARD | exit 0
+V-noreg-base | PASS | HARD | exit 0
+V-noreg-rc | PASS | HARD | exit 0
+V-noreg-compare | PASS | HARD | exit 0
+B-csr8-lease | PASS | HARD | exit 0
+B-resetat-AC1-3 | PASS | HARD | exit 0
+B-resetat-AC4-CLK | PASS | HARD | exit 0
+VERDICT: PASS (hard_fail=0) DRYRUN

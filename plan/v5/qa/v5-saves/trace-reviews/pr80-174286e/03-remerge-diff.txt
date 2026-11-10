@@ -1,0 +1,66 @@
+== 174286e
+
+diff --git a/src/game.ts b/src/game.ts
+remerge CONFLICT (content): Merge conflict in src/game.ts
+index 2e23ee4..79c4f89 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -10,10 +10,7 @@ import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
+ import type { SimEvent } from './sim/events';
+ import { focusFrameMs } from './sim/clock';
+ import { anyM5FlagOn } from './sim/timers';
+-<<<<<<< 5dd36d1 (v5 F1c: test titles only (Saves QA nits N1/N2, D-CEO-20261028-02): add [X7] tag to the X7 composition test; rename the helper-only prodEggsPerSec test so it no longer claims callers)
+ import { playerSaleCtx, type SaleCtx } from './sim/effects';
+-=======
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+ import type { IdbBoot } from './save/idb-mirror';
+ import { TELEMETRY_KEY } from './telemetry/telemetry';
+@@ -396,7 +393,6 @@ export class Game {
+    *  itself (hidden frames never pass focus). Only read while an M5 flag is on (frame() skips it with every flag off). */
+   private attendedProbe: () => boolean = () => false;
+   setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
+-<<<<<<< 5dd36d1 (v5 F1c: test titles only (Saves QA nits N1/N2, D-CEO-20261028-02): add [X7] tag to the X7 composition test; rename the helper-only prodEggsPerSec test so it no longer claims callers)
+   /** The one attended read (frame focus + player-sale suspension, Q-F1c-1 D-HOP-2026-10-29-06): live game and the UI probe says attended. */
+   /** CCR N-1 #79: with every M5 flag off the probe is never read (no per-frame / per-dispatch DOM query); attended = false
+    *  then, which changes nothing: no timed effect is live, so suspension has nothing to suspend (goldens byte-identical). */
+@@ -404,8 +400,6 @@ export class Game {
+   /** CCR m1 #80: the sale context a player sell/sellAll dispatched now would be credited with. UI previews (order cards, Sell all)
+    *  pass it to saleValueCents / sellAllPreview so the preview equals the credit for the same attended read. */
+   playerSaleCtx(): SaleCtx { return playerSaleCtx(this.attendedNow()); }
+-=======
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+   frame() {
+     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
+     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
+@@ -423,11 +417,7 @@ export class Game {
+     if (gap > 0) {
+       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
+       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
+-<<<<<<< 5dd36d1 (v5 F1c: test titles only (Saves QA nits N1/N2, D-CEO-20261028-02): add [X7] tag to the X7 composition test; rename the helper-only prodEggsPerSec test so it no longer claims callers)
+       const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
+-=======
+-      const focusMs = focusFrameMs(gap, !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(), this.b.offline.offlineMinSeconds); // CCR N-1 #79: no probe read with every flag off
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
+       const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
+       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+diff --git a/src/sim/tick.ts b/src/sim/tick.ts
+remerge CONFLICT (content): Merge conflict in src/sim/tick.ts
+index 06d242e..c2fbcd9 100644
+--- a/src/sim/tick.ts
++++ b/src/sim/tick.ts
+@@ -53,13 +53,8 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
+     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
+   }
+   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
+-<<<<<<< 5dd36d1 (v5 F1c: test titles only (Saves QA nits N1/N2, D-CEO-20261028-02): add [X7] tag to the X7 composition test; rename the helper-only prodEggsPerSec test so it no longer claims callers)
+   if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
+   if (live) out = stepTimers(out, dt, b, clock, ev);
+-=======
+-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev);
+-  if (anyM5FlagOn(b)) out = stepTimers(out, dt, b, clock, ev);
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+   return out;
+ }
+ /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue

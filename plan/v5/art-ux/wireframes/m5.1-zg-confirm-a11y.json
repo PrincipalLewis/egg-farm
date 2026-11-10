@@ -1,0 +1,187 @@
+{
+ "item": "M5.1 ZG confirm strip a11y snapshot, wireframe v1.1 (Q-ZG-A3 toggle)",
+ "build": "30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134",
+ "engine": "chromium (CDP getPartialAXTree + ariaSnapshot)",
+ "byViewport": {
+  "360x640": {
+   "axClosed": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "axOpen": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": true,
+    "disabled": false,
+    "controls": "zgc-coll"
+   },
+   "axGroup": {
+    "role": "group",
+    "name": "This won't raise income now.",
+    "description": null,
+    "expanded": null,
+    "disabled": false,
+    "controls": null
+   },
+   "axClosed2": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "snapClosed": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\"\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"",
+   "snapOpen": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\" [expanded]\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"\n- group \"This won't raise income now.\":\n  - paragraph: This won't raise income now.\n  - button \"Buy anyway\"\n  - button \"Cancel\""
+  },
+  "390x844": {
+   "axClosed": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "axOpen": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": true,
+    "disabled": false,
+    "controls": "zgc-coll"
+   },
+   "axGroup": {
+    "role": "group",
+    "name": "This won't raise income now.",
+    "description": null,
+    "expanded": null,
+    "disabled": false,
+    "controls": null
+   },
+   "axClosed2": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "snapClosed": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\"\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"",
+   "snapOpen": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\" [expanded]\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"\n- group \"This won't raise income now.\":\n  - paragraph: This won't raise income now.\n  - button \"Buy anyway\"\n  - button \"Cancel\""
+  },
+  "959x600": {
+   "axClosed": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "axOpen": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": true,
+    "disabled": false,
+    "controls": "zgc-coll"
+   },
+   "axGroup": {
+    "role": "group",
+    "name": "This won't raise income now.",
+    "description": null,
+    "expanded": null,
+    "disabled": false,
+    "controls": null
+   },
+   "axClosed2": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "snapClosed": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\"\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"",
+   "snapOpen": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\" [expanded]\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"\n- group \"This won't raise income now.\":\n  - paragraph: This won't raise income now.\n  - button \"Buy anyway\"\n  - button \"Cancel\""
+  },
+  "960x600": {
+   "axClosed": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "axOpen": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": true,
+    "disabled": false,
+    "controls": "zgc-coll"
+   },
+   "axGroup": {
+    "role": "group",
+    "name": "This won't raise income now.",
+    "description": null,
+    "expanded": null,
+    "disabled": false,
+    "controls": null
+   },
+   "axClosed2": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "snapClosed": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\"\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"",
+   "snapOpen": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\" [expanded]\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"\n- group \"This won't raise income now.\":\n  - paragraph: This won't raise income now.\n  - button \"Buy anyway\"\n  - button \"Cancel\""
+  },
+  "1280x800": {
+   "axClosed": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "axOpen": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": true,
+    "disabled": false,
+    "controls": "zgc-coll"
+   },
+   "axGroup": {
+    "role": "group",
+    "name": "This won't raise income now.",
+    "description": null,
+    "expanded": null,
+    "disabled": false,
+    "controls": null
+   },
+   "axClosed2": {
+    "role": "button",
+    "name": "$120.9K",
+    "description": "No income gain now. Buying won't raise income.",
+    "expanded": false,
+    "disabled": false,
+    "controls": null
+   },
+   "snapClosed": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\"\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"",
+   "snapOpen": "- text: L20\n- heading \"Collect per tap\" [level=3]\n- list:\n  - listitem: Eggs per tap 105 \u2192 110 No gain now\n- text: Level 20 / 30\n- button \"$120.9K\" [expanded]\n- text: Limited by coop \u00b7\n- button \"Upgrade Farm \u2192\"\n- group \"This won't raise income now.\":\n  - paragraph: This won't raise income now.\n  - button \"Buy anyway\"\n  - button \"Cancel\""
+  }
+ }
+}

@@ -1,0 +1,35 @@
+M1: verify exit=4 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+M2: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M3: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M4: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M5: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+M6: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M7: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+M8: verify exit=4 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+M9: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+M10: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M11: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M12: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+M13: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M14: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M15: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+M16: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+M17-clear-noop: verify exit=1 | tests exit=0  Tests 36 passed (36)
+M18-clear-json-only: verify exit=1 | tests exit=0  Tests 36 passed (36)
+M19-clear-png-only: verify exit=1 | tests exit=0  Tests 36 passed (36)
+M20-fail-writes-PASS: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+M21-no-writeEarly-normal: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+M22-no-writeEarly-catch: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M23-done-early: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+M24-outArg-null: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+M25-no-seenFlags: verify exit=1 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+M26-no-dupkey: verify exit=0 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+M27-writeEarly-keeps-png: verify exit=0 | tests exit=0  Tests 36 passed (36)
+M28-default-dir-not-cleared: verify exit=0 | tests exit=0  Tests 36 passed (36)
+M29-default-dir-no-write: verify exit=0 | tests exit=0  Tests 36 passed (36)
+M30-no-rethrow: verify exit=0 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+M31-build-exit-1: verify exit=0 | tests exit=0  Tests 36 passed (36)
+M32-html-exit-1: verify exit=0 | tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+M33-html-dir-not-claimed: verify exit=0 | tests exit=0  Tests 36 passed (36)
+M34-no-mkdir-out: verify exit=0 | tests exit=0  Tests 36 passed (36)
+ALLDONE

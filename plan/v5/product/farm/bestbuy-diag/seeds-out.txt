@@ -1,0 +1,14 @@
+# seeds.ts results, scratch copy of 5d9efa6 (/workspace/scratch/bb-5d9efa6), 2026-10-24 ~17:00-17:20 CEST. NOT a gate run.
+# tests/bot-m4.ts pickM4All got a 2-line hook in the SCRATCH copy only (globalThis.__BBFIX / __BBLOG); base = unhooked logic.
+# MODE base = current pick; a = Option A (zero-gain rows never ranked, Infinity tie -> FARM); fix = A + effective payback (bundle pb + time-to-afford) wait rule.
+## runM2 seller15, workers, VAR_DEFAULT variance, T=3600, seeds 1..200
+base: reached L30 200/200; t20 P50/P95 24:35/25:56; t30 P50/P95/worst 49:38/50:46/51:37; slowest level L10-30 P50/P95/worst 3:49/4:07/4:27; L28-30 worst 4:27; L18-25 slowest P95/worst 3:57/4:16; COLL bought via pick 25.0/seed, all zero-gain; level@30:00 min/P50/max 21/22/22; t18 P50 20:44
+a:    reached L30 200/200; t20 P50/P95 21:49/22:59; t30 P50/P95/worst 41:01/42:38/45:59; slowest level L10-30 P50/P95/worst 2:49/3:22/3:57; L28-30 worst 2:54; L18-25 slowest P95/worst 3:16/3:57; level@30:00 22/24/24; t18 P50 18:15
+fix:  reached L30 200/200; t20 P50/P95 21:24/22:27; t30 P50/P95/worst 40:34/41:50/45:24; slowest level L10-30 P50/P95/worst 2:52/3:19/4:00; L28-30 worst 2:53; L18-25 slowest P95/worst 3:14/4:00; level@30:00 23/24/24; t18 P50 17:22
+## runM2 fixed (no variance), seeds 1..200
+base: t20 24:30; t30 P50 49:30 worst 50:15; slowest level L10-30 worst 4:00; L18-25 worst 3:00; COLL 25.0/seed zero-gain
+fix:  t20 20:45; t30 39:45; slowest level L10-30 worst 3:00; L28-30 worst 2:00; L18-25 worst 2:30
+## runBot seller15 (the pacing.test.ts AC7 band bot, no workers), fixed, T=3600, seeds 1..200
+base: level@30:00 20 (band 18-22, all seeds); t18 P50 21:15; t20 P50 27:00; COLL 20.0/seed zero-gain
+a:    level@30:00 21 (in band); t18 P50 17:15 (sanity band 17.8-21.8 min, non-gating: OUT); t20 22:15
+fix:  level@30:00 21 (in band); t18 P50 16:30 (OUT); t20 22:30

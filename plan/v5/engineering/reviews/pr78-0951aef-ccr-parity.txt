@@ -1,0 +1,26 @@
+# parity reproduction script
+#!/bin/bash
+# CCR pr78 parity reproduction: original Economy harness vs port, rc/v5 data/economy.csv, SEEDS=200, CFG=none,AssZ, PROFS=casual
+E=/workspace/.pr78-ev/parity; W=/workspace/review-pr78-0951aef; H=/workspace/egg-farm-studio/scratch/v2-econ/h
+CSV=$W/data/economy.csv
+( cd $H && env TMPDIR=/workspace/.pr78-ev/tmp CSV=$CSV SEEDS=200 S0=1 CFG=none,AssZ PROFS=casual nice node node_modules/.bin/vite-node m5x.ts > $E/game.orig.json 2> $E/game.orig.log; echo "orig exit $?" >> $E/status ) &
+( cd $W && env TMPDIR=/workspace/.pr78-ev/tmp CSV=$CSV SEEDS=200 S0=1 CFG=none,AssZ PROFS=casual nice node node_modules/.bin/vite-node scripts/bot-m5x.ts > $E/game.port.json 2> $E/game.port.log; echo "port exit $?" >> $E/status ) &
+wait
+date >> $E/status
+
+port exit 0
+orig exit 0
+Thu Oct 29 21:07:29 CET 2026
+# hashes
+3c60507f9806e5270f67f4a90ec8a77874c6228db3a8f6d9ccbadc736920f408  game.orig.json
+11e0a7d05920744cc0cbddce940eb8f55543971d78322952ef94de6da3a37bf6  game.orig.log
+3c60507f9806e5270f67f4a90ec8a77874c6228db3a8f6d9ccbadc736920f408  game.port.json
+11e0a7d05920744cc0cbddce940eb8f55543971d78322952ef94de6da3a37bf6  game.port.log
+3ed8e09653a54da5339f369cc596e2490ea704af70f6cf05de18a797e47b6211  small.orig.json
+b485a427c77c9c9b22c73af2c06f9610ef6253c442fe50c358e9e92030d7628b  small.orig.log
+3ed8e09653a54da5339f369cc596e2490ea704af70f6cf05de18a797e47b6211  small.port1.json
+b485a427c77c9c9b22c73af2c06f9610ef6253c442fe50c358e9e92030d7628b  small.port1.log
+3ed8e09653a54da5339f369cc596e2490ea704af70f6cf05de18a797e47b6211  small.port2.json
+b485a427c77c9c9b22c73af2c06f9610ef6253c442fe50c358e9e92030d7628b  small.port2.log
+# Architect's game.orig.json: 5470dde8f546fcd105c448da4ff3e700f5677b73910b5ecc634ccaf4bc763aa7 (differs only in the csv path key; equal with csv masked: true)
+# pinned test hash from ORIGINAL small run (stdout minus csv/sha/seeds/T/STEP): 41324ef47af46e79255f22b72d9e982f198eed45da26ff031f4c4d188abea985

@@ -1,0 +1,6 @@
+greedy    s15: L@30 median L22 (min 22, max 22, in L18-22 30/30); F18 median 18.88 min; worst gap 1.75 min
+farmonly  s15: L@30 median L7 (min 7, max 7, in L18-22 0/30); F18 median inf min; worst gap 7.50 min
+highlight s15: L@30 median L21 (min 20, max 21, in L18-22 30/30); F18 median 21.25 min; worst gap 1.50 min
+greedy    casual: L@30 median L19 (min 19, max 20, in L18-22 30/30); F18 median 26.50 min; worst gap 2.00 min
+farmonly  casual: L@30 median L7 (min 7, max 7, in L18-22 0/30); F18 median inf min; worst gap 7.67 min
+highlight casual: L@30 median L17 (min 16, max 18, in L18-22 5/30); F18 median inf min; worst gap 1.33 min

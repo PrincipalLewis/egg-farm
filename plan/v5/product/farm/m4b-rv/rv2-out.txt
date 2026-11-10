@@ -1,0 +1,15 @@
+F14 C10 H17 V17: Farm $3340, Collection $1099, Hens $3114, Value $6119; model income $145.26/s
+  FARM  cost $  3340 gain $6.47/s payback 516 s bundle 433 s
+  COLL  cost $  1099 gain $0.00/s payback Infinity s bundle 507 s
+Farm 21s away (coins $289, Collection affordable=false): hint=FARM highlight=FARM(aff=false) bubble="Farm L15 | ~21 s"; best payback ignoring affordability=FARM
+Farm 13s away (coins $1452, Collection affordable=true): hint=COLL highlight=FARM(aff=false) bubble="Collection L11: +5/tap | Ready!"; best payback ignoring affordability=FARM
+   following it: Farm ETA 13s -> 21s
+Farm 7s away (coins $2323, Collection affordable=true): hint=COLL highlight=FARM(aff=false) bubble="Collection L11: +5/tap | Ready!"; best payback ignoring affordability=FARM
+   following it: Farm ETA 7s -> 15s
+F18 C14 H21 V21: Farm $11076, Collection $7205, Hens $8894, Value $19148; model income $285.56/s
+  FARM  cost $ 11076 gain $-0.01/s payback Infinity s bundle 90 s
+  COLL  cost $  7205 gain $0.00/s payback Infinity s bundle 89 s
+  W4    cost $  5538 gain $142.89/s payback 39 s bundle 39 s
+Farm 21s away (coins $5079, Collection affordable=false): hint=W4 highlight=FARM(aff=false) bubble="Grader tier 1: ×1.5 | ~2 s"; best payback ignoring affordability=W4
+Farm 13s away (coins $7364, Collection affordable=true): hint=W4 highlight=FARM(aff=false) bubble="Grader tier 1: ×1.5 | Ready!"; best payback ignoring affordability=W4
+Farm 7s away (coins $9077, Collection affordable=true): hint=W4 highlight=FARM(aff=false) bubble="Grader tier 1: ×1.5 | Ready!"; best payback ignoring affordability=W4

@@ -1,0 +1,6 @@
+2026-10-30 08:56:33 CET
+{"c":"success","h":"48b6857993f0a08b24ed26924448b66a55743feb","j":[{"c":"success","e":"2026-10-30T07:55:00Z","n":"gate","s":"2026-10-30T07:38:59Z"},{"c":"skipped","e":"2026-10-30T07:55:00Z","n":"release-globals","s":"2026-10-30T07:55:00Z"}],"run":41021364051,"s":"completed","t0":"2026-10-30T07:38:55Z","t1":"2026-10-30T07:55:01Z"}
+[{"conclusion":"success","createdAt":"2026-10-30T07:38:55Z","databaseId":41021364051,"status":"completed"},{"conclusion":"cancelled","createdAt":"2026-10-30T07:38:54Z","databaseId":41021362800,"status":"completed"}]
+release-globals	skipping	0	https://github.com/PrincipalLewis/egg-farm/actions/runs/41021364051/job/123954490652	
+gate	pass	16m1s	https://github.com/PrincipalLewis/egg-farm/actions/runs/41021364051/job/123949200504	
+{"headRefOid":"48b6857993f0a08b24ed26924448b66a55743feb","isDraft":false,"mergeStateStatus":"CLEAN","mergeable":"MERGEABLE"}

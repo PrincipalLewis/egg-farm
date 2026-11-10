@@ -1,0 +1,23 @@
+#!/bin/bash
+# runs INSIDE bwrap --unshare-pid; PIDDIR is a tmpfs
+cd /workspace/.ccr-tmp/lanebox; P=/workspace/egg-farm-studio/.pids
+echo "== T1 normal start/kill"; p=$(./lane-run.sh ccr -- sleep 100); echo "pid=$p"; cat $P/ccr.pids; ./lane-kill.sh ccr $p; sleep 0.2; [ -e /proc/$p ] && echo "T1 still alive" || echo "T1 gone"
+echo "== T2 forged line, wrong start time, for an unrelated process"; sleep 100 & v=$!; echo "$v 1 $(cat /proc/sys/kernel/random/boot_id) 2026-10-30T09:00:00+01:00 forged" >> $P/ccr.pids; ./lane-kill.sh ccr $v; echo rc=$?
+echo "== T3 forged line copying real start time (same-user forgery)"; st=$(sed 's/^.*) //' /proc/$v/stat | awk '{print $20}'); echo "$v $st $(cat /proc/sys/kernel/random/boot_id) 2026-10-30T09:00:00+01:00 forged" >> $P/ccr.pids; ./lane-kill.sh ccr $v; echo rc=$?; sleep 0.2; [ -e /proc/$v ] && echo "T3 alive" || echo "T3 victim killed"
+echo "== T4 other lane name"; sleep 100 & w=$!; p=$(./lane-run.sh ccr -- sleep 100); ./lane-kill.sh uiqa $p; echo rc=$?
+echo "== T5 args: leading zeros / 10# / 8 digits / -0 / self"; ./lane-kill.sh ccr 0$p 00000001 12345678 -0 $$ x; echo rc=$?
+echo "== T6 newline/vt/ff in command"; p2=$(./lane-run.sh ccr -- bash -c $'sleep 100\n#\v\f' $'x\n4242 1 b 2026-10-30T00:00:00 fake'); wc -l $P/ccr.pids; tail -2 $P/ccr.pids | cat -A | cut -c1-160
+echo "== T7 command starting with '-'"; ./lane-run.sh ccr -- -c true; echo rc=$?
+echo "== T8 '--' omitted"; p3=$(./lane-run.sh ccr sleep 100); echo "p3=$p3"; tail -1 $P/ccr.pids
+echo "== T9 comm with newline and ') '"; mkdir -p /workspace/.ccr-tmp/lanebox/x; printf '#!/bin/sh\nexec sleep 100\n' > "/workspace/.ccr-tmp/lanebox/x/a"$'\n'") 1 2"; chmod +x /workspace/.ccr-tmp/lanebox/x/a*; p4=$(./lane-run.sh ccr -- /workspace/.ccr-tmp/lanebox/x/a*); echo "p4=[$p4] rc=$?"; tail -2 $P/ccr.pids | cat -A | cut -c1-200; [ -n "$p4" ] && ./lane-kill.sh ccr $p4
+echo "== T10 orphaned group (leader exits, child stays)"; p5=$(./lane-run.sh ccr -- bash -c 'sleep 100 & sleep 0.5; exit 0'); sleep 1; ./lane-kill.sh ccr $p5; echo rc=$?
+echo "== T11 leader exits before record"; ./lane-run.sh ccr -- bash -c 'sleep 100 & exit 0'; echo rc=$?
+echo "== T12 child that setsid'd escapes group TERM"; p6=$(./lane-run.sh ccr -- bash -c 'setsid sleep 101 & sleep 100'); sleep 0.5; ./lane-kill.sh ccr $p6; sleep 0.3; ps -eo pid,pgid,cmd | grep -c "[s]leep 101"
+echo "== T13 legacy line, future timestamp, unrelated victim"; sleep 100 & u=$!; st=$(sed 's/^.*) //' /proc/$u/stat | awk '{print $20}'); echo "$u $st 2099-01-01T00:00:00 legacy" >> $P/ccr.pids; ./lane-kill.sh ccr $u; echo rc=$?
+echo "== T14 missing pidfile"; ./lane-kill.sh nolane 5; echo rc=$?
+echo "== T15 pgid==p but member forged group? setpgid join"; p7=$(./lane-run.sh ccr -- sleep 100); python3 -c "import os,sys,subprocess; pid=os.fork()
+if pid==0:
+  os.setpgid(0,int(sys.argv[1])) if False else None
+  os.execvp('sleep',['sleep','100'])
+" $p7 2>&1; echo "(setpgid into another session's group is EPERM by kernel; skipped)"
+ps -eo pid,pgid,sid,cmd

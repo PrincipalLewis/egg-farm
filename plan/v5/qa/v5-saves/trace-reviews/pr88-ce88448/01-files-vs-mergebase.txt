@@ -1,0 +1,2 @@
+M	tests/bot-m5.test.ts
+A	tests/fixtures/economy-b48be8a4.csv
