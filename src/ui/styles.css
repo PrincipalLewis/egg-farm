@@ -719,7 +719,7 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .fchip[data-tone=asleep] .fchip-pill{color:var(--c-danger)}
 .fc-ic{width:20px;height:20px}
 .fchip:focus-visible,.fsub:focus-visible,.fpop-m:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
-.fpop{position:fixed;z-index:9;display:flex;align-items:center;gap:8px;min-height:44px;max-height:52px;padding:4px 6px 4px 10px;box-sizing:border-box;border-radius:12px;
+.fpop{position:fixed;z-index:9;display:flex;align-items:center;gap:8px;min-height:44px;max-height:52px;padding:4px 4px 4px 10px;box-sizing:border-box;border-radius:12px;
   background:var(--c-cream);border:2px solid var(--c-outline);box-shadow:var(--shadow);animation:fpopIn 150ms ease}
 .fpop[hidden]{display:none}
 .fpop-t{display:flex;align-items:center;gap:4px;color:var(--c-wood-text);font:700 13px var(--f-display);white-space:nowrap}

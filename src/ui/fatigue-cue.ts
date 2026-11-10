@@ -82,7 +82,7 @@ export class FatigueCue {
   private place() {
     const gap = 6, edge = 8, c = this.chip.getBoundingClientRect(), hb = this.hud.getBoundingClientRect().bottom, w = this.pop.offsetWidth;
     const left = Math.max(edge, Math.min(c.right - w, innerWidth - edge - w));
-    this.pop.style.top = `${Math.round(hb + gap)}px`; this.pop.style.left = `${Math.round(left)}px`;
+    this.pop.style.top = `${hb + gap}px`; this.pop.style.left = `${left}px`; // unrounded: right edge = chip right exactly (Art §1: 260.4 at 360x640)
   }
   update(): void {
     const s = this.d.g.state, v = fatigueCueView(s, this.d.b), want = v.shown && !v.suppressedByStall;
