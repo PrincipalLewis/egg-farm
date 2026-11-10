@@ -39,11 +39,12 @@ export interface ChipModel { bp: number; atCap: boolean; label: string; exact: s
  * Present clamp view for the chip, in PR-A's `FamilyClampState` shape. Reads PR-A's `familyClampState('present', …)` first (the
  * clamp-bind follow-up delegates it to the sim). While PR-A's stub returns undefined, falls back to the PR-B stand-in built from
  * the kept getters (familyRawBp / familyCapBp / clampFamilyBp; Saves `atCap` = raw ≥ cap && cap > 0). TODO(Saves #126): drop the
- * fallback once familyClampState is bound. undefined = flag off / no breeds root.
+ * fallback once familyClampState is bound (clamp-bind 29edfc8, after Saves #126 commit 1). undefined = flag off / no breeds root (returns
+ * before familyClampState or the fallback run, so the flag-0 path is untouched).
  */
 export function presentClampView(s: GameState, b: Balance): FamilyClampState | undefined {
   const br = breedsOf(s, b); if (!br) return undefined;
-  const bound = familyClampState('present', br, b, s.farmLevel); if (bound) return bound;
+  const bound = familyClampState('present', br, b, s.farmLevel); if (bound !== undefined) return bound; // fallback ONLY on the undefined stub (Architect ruling 03:2x)
   const rawBp = familyRawBp(s, b, 'present'), cap = familyCapBp('present', s.farmLevel, b);
   return { rawBp, clampedBp: clampFamilyBp(rawBp, 'present', s.farmLevel, b), atCap: rawBp >= cap && cap > 0 };
 }
