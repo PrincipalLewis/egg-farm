@@ -189,21 +189,10 @@ export function familyRawBp(s: GameState, b: Balance, family: Family): number {
   return sum;
 }
 
-/** Saves' `FamilyClamp` (src/sim/breeds-family.ts), same fields. */
-export interface FamilyClamp { rawBp: number; clampedBp: number; atCap: boolean; }
-
-/**
- * Saves' `familyClamp(s, b, family): FamilyClamp`, under a PR-B name because PR-A's adapter already exports `familyClamp`
- * (the E8 label stub, different signature; seams §2 forbids re-signing it). TODO(Saves #126): delegate to the sim's
- * `familyClamp(s, b, family)`.
- */
-export function familyClampOf(s: GameState, b: Balance, family: Family): FamilyClamp {
-  const rawBp = familyRawBp(s, b, family), cap = familyCapBp(family, s.farmLevel, b);
-  return { rawBp, clampedBp: clampFamilyBp(rawBp, family, s.farmLevel, b), atCap: rawBp >= cap && cap > 0 };
-}
-
-/** Saves' `familyActiveBp(s, b, family)`: the clamped bp income pays, on the same clamp path. TODO(Saves #126): delegate to the sim. */
-export const familyActiveBp = (s: GameState, b: Balance, family: Family): number => familyClampOf(s, b, family).clampedBp;
+/** Saves' `familyActiveBp(s, b, family)`: the clamped bp income pays (min(familyRawBp, familyCapBp)). The {rawBp, clampedBp, atCap}
+ *  view is PR-A's `familyClampState` (seams §2); PR-B adds no second clamp-view name. TODO(Saves #126): delegate to the sim. */
+export const familyActiveBp = (s: GameState, b: Balance, family: Family): number =>
+  clampFamilyBp(familyRawBp(s, b, family), family, s.farmLevel, b);
 
 /** The Present rate gate as the UI reads it, once per tick. `nowMs` = performance.now() of the tick (presentation clock). */
 export interface PresentGateSource { open(s: GameState, b: Balance, nowMs: number): boolean; }

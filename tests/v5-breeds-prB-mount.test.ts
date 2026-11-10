@@ -94,18 +94,18 @@ describe('PR-B mounts follow the live app DOM (remount without dispose, as PR-A 
 });
 
 describe('PR-A ext ctx seams consumed by PR-B (seams 3d40e76e §1 ctx table)', () => {
-  it('strip: Hatch tap → ctx.openFlock() (no entry-button click); countdown rate = ctx.incomeRate(); real ctx opens the sheet', async () => {
+  it('strip: Hatch tap → ctx.openFlock() (no entry-button click); countdown rate = ctx.rollingIncomeRate() (BB-5 source, not incomeRate); real ctx opens the sheet', async () => {
     const { fmtTimeToAfford } = await import('../src/ui/format'); const { hatchCostCents } = await import('../src/sim/breeds-hatch');
-    const orig = PRB_EXT.onSync!; let opened = 0, entryClicks = 0, rateCalls = 0; const RATE = 250;
+    const orig = PRB_EXT.onSync!; let opened = 0, entryClicks = 0, rateCalls = 0, steadyCalls = 0; const RATE = 250, STEADY = RATE * 4;
     registerBreedsPrB({ fallback: () => true }); // #100 seam forced on
-    PRB_EXT.onSync = (c) => orig({ ...c, openFlock: () => { opened++; }, incomeRate: () => { rateCalls++; return RATE; } });
+    PRB_EXT.onSync = (c) => orig({ ...c, openFlock: () => { opened++; }, rollingIncomeRate: () => { rateCalls++; return RATE; }, incomeRate: () => { steadyCalls++; return STEADY; } });
     try {
       const b = flagOnBalance(); const { g, ui } = await mount({ farmLevel: 30, coinsCents: 0, breeds: breeds({ freeHatchUsed: 1 }) }, b);
       document.getElementById('breeds-entry')?.addEventListener('click', () => entryClicks++);
       ui.render();
       const cost = hatchCostCents(g.state, b);
       expect(document.querySelector('#goal .goal-label')!.textContent).toBe('Hatch · in ' + fmtTimeToAfford((cost - Math.round(g.state.coinsCents)) / RATE));
-      expect(rateCalls).toBeGreaterThan(0);
+      expect(rateCalls).toBeGreaterThan(0); expect(steadyCalls).toBe(0);
       document.getElementById('goal')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       expect(opened).toBe(1); expect(entryClicks).toBe(0);
       PRB_EXT.onSync = orig; ui.render(); // real PR-A ctx.openFlock

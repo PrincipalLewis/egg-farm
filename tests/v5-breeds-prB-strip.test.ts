@@ -82,6 +82,12 @@ describe('PMC ruling: strip countdown == BB-5 countdown formatter output', () =>
     expect(strip).toMatch(/fmtTimeToAfford\(\(cost - coins\) \/ rateCentsPerS\)/); // same expression shape: Math.round(coins), ceil in the formatter
     expect(strip).not.toMatch(/Math\.ceil|padStart|['"`]~|\bmin\b['"`]| s['"`]/);
   });
+  it('rate source: the strip countdown reads ctx.rollingIncomeRate() (app IncomeRate, same as BB-5), never ctx.incomeRate()', () => {
+    const hud = read('breeds-hud.ts');
+    expect(hud).toMatch(/mountBbStrip\(\{[^}]*rate: \(\) => cur\?\.rollingIncomeRate\(\) \?\? 0/);
+    expect(hud).not.toMatch(/cur\?\.incomeRate\(\)/);
+    expect(read('app.ts')).toMatch(/rollingIncomeRate: \(\) => income\.centsPerSec\(now\(\)\)/); // PR-A wiring = BB-5's IncomeRate
+  });
   // BB-5's own output for a gap of `secs` at its real target, vs the strip's label for the same gap in ¢ and the same rate.
   const bbLow = stateWith(b, 1, breeds(), { coinsCents: 0 });
   const bbAt = (secs: number) => { const c = selectGoal(bbLow, b, 1).costCents, rate = c / secs, g = selectGoal(bbLow, b, rate); return { gap: c, rate, g }; };

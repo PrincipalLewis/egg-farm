@@ -34,11 +34,11 @@ async function mount(o: Record<string, unknown>, b: Balance) {
   uis.push(ui); ui.render(); return ui;
 }
 
-/** Wait (macrotasks) until breeds-ext-b's cycle-safe registration landed in PR-A's registry. */
+/** PR-B extenders in PR-A's leaf registry right after importing breeds-mount (registration is synchronous: no wait, no retry). */
 async function registeredViaGlob(): Promise<number> {
-  const { breedsExtCountForTests } = await import('../src/ui/breeds-mount');
-  const t0 = Date.now(); while (breedsExtCountForTests() === 0 && Date.now() - t0 < 5000) await new Promise(r => setTimeout(r, 0));
-  return breedsExtCountForTests();
+  await import('../src/ui/breeds-mount');
+  const { breedsExtList } = await import('../src/ui/breeds-ext-registry');
+  return breedsExtList().filter(e => e === PRB_EXT).length;
 }
 
 describe('load trigger: breeds-ext-b via PR-A mountBreeds eager glob (real path)', () => {
@@ -46,10 +46,10 @@ describe('load trigger: breeds-ext-b via PR-A mountBreeds eager glob (real path)
     expect(src('app.ts')).not.toMatch(/breeds-(hud|strip|yard|ext)|registerBreedsPrB|PRB_EXT/);
     const m = src('breeds-mount.ts');
     expect(m).not.toMatch(/breeds-(hud|strip|yard|ext-b)|registerBreedsPrB|PRB_EXT/);
-    expect(m).toContain("import.meta.glob('./breeds-ext-*.ts', { eager: true })");
-    expect(fs.readdirSync(path.resolve(__dirname, '../src/ui')).filter(f => /^breeds-ext-.*\.ts$/.test(f))).toEqual(['breeds-ext-b.ts']);
+    expect(m).toContain("import.meta.glob(['./breeds-ext-*.ts', '!./breeds-ext-registry.ts'], { eager: true })");
+    expect(fs.readdirSync(path.resolve(__dirname, '../src/ui')).filter(f => /^breeds-ext-.*\.ts$/.test(f) && f !== 'breeds-ext-registry.ts')).toEqual(['breeds-ext-b.ts']);
   });
-  it('importing breeds-mount does not throw (cycle-safe: breeds-ext-b defers past the module graph) and PR-B registers once', async () => {
+  it('importing breeds-mount does not throw and PR-B registers once, synchronously, via the leaf registry', async () => {
     await expect(import('../src/ui/breeds-mount')).resolves.toBeTruthy();
     expect(await registeredViaGlob()).toBe(1);
   });
@@ -72,9 +72,14 @@ describe('load trigger: breeds-ext-b via PR-A mountBreeds eager glob (real path)
     };
     await hash(false); const off = await hash(false), on = await hash(true); expect(on).toBe(off); expect(fired).toBe(0);
   });
-  it('breeds-ext-b exposes prbRegistered and it resolved (module already loaded by the glob)', async () => {
-    const { prbRegistered } = await import('../src/ui/breeds-ext-b'); await expect(prbRegistered).resolves.toBeUndefined();
-    expect(await registeredViaGlob()).toBe(1); // still once: the import above is the cached glob module, no second register
+  it('breeds-ext-b imports only the leaf registry for registration (no breeds-mount / app / breeds-ui), no deferral', async () => {
+    const e = src('breeds-ext-b.ts'), imports = [...e.matchAll(/^import[^;]*from '([^']+)'/gm)].map(x => x[1]);
+    expect(imports.sort()).toEqual(['./breeds-ext-registry', './breeds-hud']);
+    expect(e).not.toMatch(/queueMicrotask|setTimeout|Promise|prbRegistered/);
+    // PR-B's own extender graph never reaches PR-A's mount / sheet / app (so the eager glob cannot cycle).
+    for (const f of ['breeds-hud.ts', 'breeds-strip.ts', 'breeds-yard.ts']) expect(src(f)).not.toMatch(/from '\.\/(breeds-mount|breeds-ui|app)'/);
+    await import('../src/ui/breeds-ext-b');
+    expect(await registeredViaGlob()).toBe(1); // still once: cached glob module, no second register
   });
 });
 
@@ -86,7 +91,7 @@ describe('registerBreedsPrB stable signature', () => {
     document.body.innerHTML = '<div class="hud"><span class="coins-col"><span id="rate"></span></span></div>';
     const b = flagOnBalance(); let opened = 0;
     PRB_EXT.onSync!({ g: {} as any, b, s: stateWith(b, 10, leghorn312()), flockOpen: false, docked: false,
-      openFlock: () => { opened++; }, incomeRate: () => 100, reducedMotion: true });
+      openFlock: () => { opened++; }, incomeRate: () => 100, rollingIncomeRate: () => 100, reducedMotion: true });
     expect(document.querySelector('[data-testid="breeds-hud-chip"]')?.getAttribute('data-state')).toBe('paused');
     expect(opened).toBe(0);
     PRB_EXT.onDispose!(); registerBreedsPrB({});

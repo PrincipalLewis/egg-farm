@@ -6,7 +6,7 @@ import { mountPresentChip, presentChipModel, POP_CAP_MS, TIP_MS, CHIP_TIP_TEXT, 
 import { PRB_STUB_TUNABLES, STUB_PRESENT_GATE } from '../src/ui/breeds-adapter';
 import { flagOnBalance, flagOffBalance, stateWith, leghorn312, breeds, RefGate, HUD_HTML } from './fixtures/breeds-prB/setup';
 
-/** A FamilyClamp view below the cap (the chip reads clampedBp). */
+/** A FamilyClampState view below the cap (the chip reads clampedBp). */
 const view = (bp: number) => ({ rawBp: bp, clampedBp: bp, atCap: false });
 const W = PRB_STUB_TUNABLES.present_calm_w_s * 1000, K = PRB_STUB_TUNABLES.present_calm_k;
 let clock = 0; const now = () => clock;

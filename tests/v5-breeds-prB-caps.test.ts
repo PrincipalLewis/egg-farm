@@ -3,8 +3,8 @@
 // the spec stand-ins (TODO(Saves #126)) until Saves is in the stack. TDD: written before the adapter change.
 import { describe, it, expect } from 'vitest';
 import * as ad from '../src/ui/breeds-adapter';
-import { familyClampOf, familyActiveBp, familyCapBp, familyRawBp, clampFamilyBp, capBc, PRB_CAP_STANDINS, type FamilyClamp, type BreedsCapKey } from '../src/ui/breeds-adapter';
-import { presentChipModel } from '../src/ui/breeds-hud';
+import { familyActiveBp, familyCapBp, familyRawBp, clampFamilyBp, capBc, PRB_CAP_STANDINS, familyClampState, type FamilyClampState, type BreedsCapKey } from '../src/ui/breeds-adapter';
+import { presentChipModel, presentClampView } from '../src/ui/breeds-hud';
 import { flagOnBalance, flagOffBalance, stateWith, breeds, leghorn312 } from './fixtures/breeds-prB/setup';
 
 const b = flagOnBalance();
@@ -34,35 +34,46 @@ describe('familyCapBp(family, farmLevel, b) — E9 boundary at lay_cap_farm', ()
   });
 });
 
-describe('familyClampOf(s, b, family): FamilyClamp {rawBp, clampedBp, atCap} (Saves familyClamp shape)', () => {
+describe('presentClampView(s, b): PR-A FamilyClampState {rawBp, clampedBp, atCap} (Saves familyClamp shape)', () => {
+  it('PR-B adds no second clamp-view name: familyClampOf / FamilyClamp are gone; PR-A familyClampState is the one view', () => {
+    expect((ad as Record<string, unknown>).familyClampOf).toBeUndefined();
+    expect(typeof familyClampState).toBe('function');
+  });
   it('shape is exactly {rawBp, clampedBp, atCap}', () => {
-    const v: FamilyClamp = familyClampOf(stateWith(b, 10, leghorn312()), b, 'present');
+    const v: FamilyClampState = presentClampView(stateWith(b, 10, leghorn312()), b)!;
     expect(Object.keys(v).sort()).toEqual(['atCap', 'clampedBp', 'rawBp']);
     expect(v).toEqual({ rawBp: 312, clampedBp: 312, atCap: false });
   });
+  it('uses PR-A familyClampState when it returns a view (clamp-bind); stand-in only while it is the undefined stub', () => {
+    const s = stateWith(b, 17, legCem);
+    const bound = familyClampState('present', (s as any).breeds, b, s.farmLevel);
+    if (bound) expect(presentClampView(s, b)).toEqual(bound); else expect(presentClampView(s, b)).toEqual({ rawBp: 1125, clampedBp: 700, atCap: true });
+  });
   it('raw over the cap: clamped to the cap, atCap true; F18 lifts the cap', () => {
-    expect(familyClampOf(stateWith(b, 17, legCem), b, 'present')).toEqual({ rawBp: 1125, clampedBp: 700, atCap: true });
-    expect(familyClampOf(stateWith(b, 18, legCem), b, 'present')).toEqual({ rawBp: 1125, clampedBp: 1125, atCap: false });
+    expect(presentClampView(stateWith(b, 17, legCem), b)).toEqual({ rawBp: 1125, clampedBp: 700, atCap: true });
+    expect(presentClampView(stateWith(b, 18, legCem), b)).toEqual({ rawBp: 1125, clampedBp: 1125, atCap: false });
   });
   it('raw == cap counts as atCap (Saves: raw ≥ cap && cap > 0)', () => {
     const s = stateWith(b, 17, legCem), raw = familyRawBp(s, b, 'present');
-    expect(raw).toBe(1125); expect(familyClampOf(s, b, 'present').atCap).toBe(raw >= familyCapBp('present', 17, b));
+    expect(raw).toBe(1125); expect(presentClampView(s, b)!.atCap).toBe(raw >= familyCapBp('present', 17, b));
   });
-  it('other families are independent; empty / flag off → 0 and not at cap', () => {
-    expect(familyClampOf(stateWith(b, 17, legCem), b, 'away')).toEqual({ rawBp: 0, clampedBp: 0, atCap: false });
-    expect(familyClampOf(stateWith(flagOffBalance(), 17, legCem), flagOffBalance(), 'present')).toEqual({ rawBp: 0, clampedBp: 0, atCap: false });
+  it('other families are independent; flag off → undefined (no chip)', () => {
+    expect(familyActiveBp(stateWith(b, 17, legCem), b, 'away')).toBe(0);
+    expect(presentClampView(stateWith(flagOffBalance(), 17, legCem), flagOffBalance())).toBeUndefined();
   });
-  it('familyActiveBp(s, b, family) === familyClampOf(...).clampedBp (one clamp path, as in Saves)', () => {
+  it('familyActiveBp(s, b, family) === clampFamilyBp(familyRawBp(...)) and matches the Present view (one clamp path)', () => {
     for (const F of [10, 17, 18, 30]) for (const fam of ['present', 'away', 'broody'] as const) {
-      const s = stateWith(b, F, legCem); expect(familyActiveBp(s, b, fam)).toBe(familyClampOf(s, b, fam).clampedBp);
+      const s = stateWith(b, F, legCem); expect(familyActiveBp(s, b, fam)).toBe(clampFamilyBp(familyRawBp(s, b, fam), fam, F, b));
+      if (fam === 'present') expect(familyActiveBp(s, b, fam)).toBe(presentClampView(s, b)!.clampedBp);
     }
   });
 });
 
-describe('chip reads clampedBp / atCap from the familyClamp-shaped getter', () => {
-  it('presentChipModel(view, gateOpen) uses clampedBp and carries atCap', () => {
-    const v = familyClampOf(stateWith(b, 17, legCem), b, 'present'), m = presentChipModel(v, true)!;
+describe('chip reads clampedBp / atCap from the FamilyClampState view', () => {
+  it('presentChipModel(view, gateOpen) uses clampedBp and carries atCap; undefined / 0 → no chip', () => {
+    const v = presentClampView(stateWith(b, 17, legCem), b), m = presentChipModel(v, true)!;
     expect(m.bp).toBe(700); expect(m.atCap).toBe(true); expect(m.label).toBe('+7%');
     expect(presentChipModel({ rawBp: 0, clampedBp: 0, atCap: false }, true)).toBeNull();
+    expect(presentChipModel(undefined, true)).toBeNull();
   });
 });

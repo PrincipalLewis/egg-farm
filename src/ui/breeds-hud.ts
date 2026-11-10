@@ -11,7 +11,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import {
-  breedsFlagOn, familyClampOf, traitPctExact, traitPctFloor, STUB_PRESENT_GATE, CHIP_PAUSED_DESC, chipActiveDesc, type FamilyClamp, type PresentGateSource,
+  breedsFlagOn, breedsOf, familyClampState, familyRawBp, familyCapBp, clampFamilyBp, traitPctExact, traitPctFloor, STUB_PRESENT_GATE, CHIP_PAUSED_DESC, chipActiveDesc, type FamilyClampState, type PresentGateSource,
 } from './breeds-adapter';
 
 // ---- Copy (FINAL, Head of Art & UX 23:31 / 23:40; spec L455-466). Describedby copy is PR-A's adapter export (shared with the mirror). ----
@@ -35,10 +35,23 @@ export const TIP_EDGE_PX = 8;
 export type ChipState = 'active' | 'paused';
 export interface ChipModel { bp: number; atCap: boolean; label: string; exact: string; state: ChipState; description: string; }
 
-/** Pure model from the Present family clamp view (`familyClampOf(s, b, 'present')`, Saves `familyClamp` shape): the chip shows
+/**
+ * Present clamp view for the chip, in PR-A's `FamilyClampState` shape. Reads PR-A's `familyClampState('present', …)` first (the
+ * clamp-bind follow-up delegates it to the sim). While PR-A's stub returns undefined, falls back to the PR-B stand-in built from
+ * the kept getters (familyRawBp / familyCapBp / clampFamilyBp; Saves `atCap` = raw ≥ cap && cap > 0). TODO(Saves #126): drop the
+ * fallback once familyClampState is bound. undefined = flag off / no breeds root.
+ */
+export function presentClampView(s: GameState, b: Balance): FamilyClampState | undefined {
+  const br = breedsOf(s, b); if (!br) return undefined;
+  const bound = familyClampState('present', br, b, s.farmLevel); if (bound) return bound;
+  const rawBp = familyRawBp(s, b, 'present'), cap = familyCapBp('present', s.farmLevel, b);
+  return { rawBp, clampedBp: clampFamilyBp(rawBp, 'present', s.farmLevel, b), atCap: rawBp >= cap && cap > 0 };
+}
+
+/** Pure model from PR-A's Present family clamp view (`familyClampState('present', …)`, Saves `familyClamp` shape): the chip shows
  *  `clampedBp` (what income pays) and carries `atCap`. null when there's no settled Present bp (no chip). */
-export function presentChipModel(v: FamilyClamp, gateOpen: boolean): ChipModel | null {
-  const bp = v.clampedBp; if (!(bp > 0)) return null;
+export function presentChipModel(v: FamilyClampState | undefined, gateOpen: boolean): ChipModel | null {
+  const bp = v?.clampedBp ?? 0; if (!v || !(bp > 0)) return null;
   const state: ChipState = gateOpen ? 'active' : 'paused', exact = traitPctExact(bp);
   return { bp, atCap: v.atCap, label: traitPctFloor(bp), exact, state, description: state === 'active' ? chipActiveDesc(exact) : CHIP_PAUSED_DESC };
 }
@@ -132,7 +145,7 @@ export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
     sync(s, nowMs) {
       const t = nowMs ?? now();
       if (tip && !tip.hidden && toastVisible()) hideTip(); // a toast takes y = HUD + 8: the tooltip yields (UI-BR-21)
-      const m = presentChipModel(familyClampOf(s, o.b, 'present'), gate.open(s, o.b, t));
+      const m = presentChipModel(presentClampView(s, o.b), gate.open(s, o.b, t));
       if (!m) { if (chip) teardown(); return; }
       const appeared = !chip; if (appeared && !build()) return;
       setText(pt!, m.label); setText(sr!, SR_WORD[m.state]); setText(descEl!, m.description);
@@ -149,13 +162,13 @@ export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
   };
 }
 
-// ---- PR-B registration through PR-A's registry (seams 3d40e76e §1; zero app.ts edits; loaded by breeds-ext-b.ts) -------------
-import { registerBreedsExt, type BreedsExt, type BreedsExtCtx } from './breeds-mount';
+// ---- PR-B registration through PR-A's leaf registry (seams §1; zero app.ts edits; loaded by breeds-ext-b.ts) ----------------
+import { registerBreedsExt, breedsExtList, type BreedsExt, type BreedsExtCtx } from './breeds-ext-registry';
 import { mountBbStrip, type BbStripMount } from './breeds-strip';
 import { mountYard, type YardMount } from './breeds-yard';
 
-let hud: PresentChipMount | null = null, strip: BbStripMount | null = null, yard: YardMount | null = null, registered = false;
-/** The ctx of the onSync in progress: chip/strip read reducedMotion, incomeRate() and openFlock() from it (PR-A seams). */
+let hud: PresentChipMount | null = null, strip: BbStripMount | null = null, yard: YardMount | null = null;
+/** The ctx of the onSync in progress: chip/strip read reducedMotion, rollingIncomeRate() and openFlock() from it (PR-A seams). */
 let cur: BreedsExtCtx | null = null;
 /** The `.hud` the mounts were built on. A new app DOM (remount without dispose) drops the old mounts unrun: their nodes are
  *  detached, and running their teardown would write stale snapshots into the new DOM. */
@@ -171,8 +184,9 @@ export const PRB_EXT: BreedsExt = {
     if (anchor !== live) { hud = strip = yard = null; anchor = live; }
     if (!hud && !strip && !yard) {
       hud = mountPresentChip({ doc: document, b: ctx.b, gate: prbOpts.gate, rm: () => cur?.reducedMotion ?? false });
-      // Hatch tap → ctx.openFlock() (same path as the Flock entry button); countdown rate → ctx.incomeRate() (¢/s).
-      strip = mountBbStrip({ doc: document, b: ctx.b, rate: () => cur?.incomeRate() ?? 0, onOpenFlock: () => cur?.openFlock(), fallback: prbOpts.fallback });
+      // Hatch tap → ctx.openFlock() (same path as the Flock entry button); countdown rate → ctx.rollingIncomeRate() (¢/s, the
+      // same app IncomeRate BB-5's time-to-afford uses; seams ctx table). Not ctx.incomeRate() (steady-state sim rate).
+      strip = mountBbStrip({ doc: document, b: ctx.b, rate: () => cur?.rollingIncomeRate() ?? 0, onOpenFlock: () => cur?.openFlock(), fallback: prbOpts.fallback });
       yard = mountYard({ doc: document, b: ctx.b });
     }
     hud?.sync(ctx.s); strip?.sync(ctx.s); yard?.sync(ctx.s);
@@ -183,7 +197,7 @@ export const PRB_EXT: BreedsExt = {
  *  breeds-ext-b.ts, which PR-A's mountBreeds eager-globs behind the m4.flags.breeds guard. No import-time side effect here. */
 export function registerBreedsPrB(opts?: PrBOptions): BreedsExt {
   if (opts) prbOpts = opts; // a later no-arg call (breeds-ext-b) keeps injected gate / fallback
-  if (!registered) { registerBreedsExt(PRB_EXT); registered = true; } return PRB_EXT;
+  if (!breedsExtList().includes(PRB_EXT)) registerBreedsExt(PRB_EXT); return PRB_EXT;
 }
 /** Live PR-B mounts (harness / QA observability; null until PR-A's first onSync). */
 export const prbMounts = () => ({ hud, strip, yard });

@@ -48,7 +48,7 @@ export interface BbStripMount { sync(s: GameState): void; dispose(): void; reado
 interface Snap { lbl: string; html: string | undefined; ng: boolean; st: string; chip: boolean; state: string | undefined; desc: string }
 
 export function mountBbStrip(o: { doc: Document; b: Balance; fallback?: (s: GameState, b: Balance) => boolean;
-  /** Sim income ¢/s: PR-A's ctx.incomeRate() (adapter incomeRate). */ rate: () => number;
+  /** Income ¢/s: PR-A's ctx.rollingIncomeRate() (app IncomeRate, same source as BB-5's countdown). */ rate: () => number;
   /** PR-A's ctx.openFlock() (same path as the Flock entry button). */ onOpenFlock?: () => void }): BbStripMount | null {
   if (!breedsFlagOn(o.b)) return null;
   const doc = o.doc, fallback = o.fallback ?? bbFallbackActive, rate = o.rate;
