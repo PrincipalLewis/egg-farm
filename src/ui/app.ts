@@ -28,7 +28,7 @@ import { rc2RefillOn } from './stall-chip';
 import { StallChip, stallChipOn } from './stall-chip';
 import { FarmBanner } from './stall-banner'; // #5b Rule 3 farm-screen Asleep banner (same flag)
 import { fatigueBubble } from './fatigue-bubble'; // #5b Rule 4 (same flag)
-import { noteFatigueCueShown, noteFatigueCueTap, costliestAtRisk } from './stall-api';
+import { noteFatigueCueShown, noteFatigueCueTap, costliestAtRisk, setUiGates } from './stall-api';
 import { openShiftSheet } from './shift-sheet'; // #5b V51-SS-1 (m4.flags.salesStopped); mounted only with the flag on
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, TRACK_FARM_MAX_TEXT, trackFarmMaxAria, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
@@ -901,7 +901,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
-  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
+  // SIM-API Changes (HoE 03:25): gates every frame, before render reads stallView. farmScreenActive = the farm is the visible view
+  // (no panel over it, or the docked desktop layout); onboardingDone = onboarding.ts `finished` (no flow running = finished). Flag on only.
+  const uiGates = () => { if (stallChip) setUiGates(g.state, b, { farmScreenActive: open === null || docked.matches, onboardingDone: !onbFlow || onbFlow.finished }); };
+  const renderAll = () => { uiGates(); const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.

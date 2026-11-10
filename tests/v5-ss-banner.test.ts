@@ -21,7 +21,7 @@ const ON = fl({ salesStopped: 1 }), RC2 = fl({ salesStopped: 1, rc2Refill: 1 }),
 const W = (energy: number, extra: object = {}) => ({ energy, cdS: 0, ...extra });
 const st = (extra: Partial<GameState>): GameState => ({ ...initialState(balance, 1), farmLevel: 12, collectionLevel: 3, hensLevel: 6, tracksV7: 1, coinsCents: 5000,
   basket: 30, coop: 12, customers: [{ id: 1, demand: 3, filled: 0, waitedS: 2 }], ...extra } as GameState);
-const view = (cause: StallView['cause']): StallView => ({ shown: true, trigger: 'sell', cause, stallId: 's', noSaleS: 9, noCollectS: 0 });
+const view = (cause: StallView['cause']): StallView => ({ shown: true, trigger: 'sell', cause, stallId: 1, noSaleS: 9, noCollectS: 0 });
 async function mount(bal: Balance, s: GameState) {
   localStorage.setItem('eggfarm.ui', JSON.stringify({ reducedMotion: true, onboardingDone: true }));
   const g = new Game(bal, mem() as any, () => 1760000000000, 1, 'test'); g.state = { ...g.state, ...s } as any;

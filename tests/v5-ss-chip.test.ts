@@ -25,7 +25,7 @@ const ON = fl({ salesStopped: 1 }), RC2 = fl({ salesStopped: 1, rc2Refill: 1 });
 const W = (energy: number, extra: object = {}) => ({ energy, cdS: 0, ...extra });
 const st = (extra: Partial<GameState>): GameState => ({ ...initialState(balance, 1), farmLevel: 6, collectionLevel: 3, hensLevel: 6, tracksV7: 1, coinsCents: 5000,
   basket: 30, coop: 12, customers: [{ id: 1, demand: 3, filled: 0, waitedS: 2 }], ...extra } as GameState);
-const view = (cause: StallCause, id = 'st1'): StallView => ({ shown: true, trigger: cause.startsWith('ch') ? 'collect' : 'sell', cause, stallId: id, noSaleS: 9, noCollectS: 0 });
+const view = (cause: StallCause, id = 1): StallView => ({ shown: true, trigger: cause.startsWith('ch') ? 'collect' : 'sell', cause, stallId: id, noSaleS: 9, noCollectS: 0 });
 async function mount(bal: Balance, s: GameState, rmOn = true) {
   if (rmOn) localStorage.setItem('eggfarm.ui', JSON.stringify({ reducedMotion: true, onboardingDone: true }));
   const g = new Game(bal, mem() as any, () => 1760000000000, 1, 'test'); g.state = { ...g.state, ...s } as any;
@@ -152,8 +152,8 @@ describe('#5b chip DOM (flag on)', () => {
   });
   it('a new stall_id after a hide announces again (once per show)', async () => {
     const m = await mount(ON, st({ workers: { market_hand: W(0) } }));
-    stallStub.stall = view('mh_asleep', 'a'); m.ui.render(); const live = document.getElementById('stallLive')!; live.textContent = '';
-    stallStub.stall = null; m.ui.render(); T += 1500; stallStub.stall = view('mh_asleep', 'b'); m.ui.render();
+    stallStub.stall = view('mh_asleep', 1); m.ui.render(); const live = document.getElementById('stallLive')!; live.textContent = '';
+    stallStub.stall = null; m.ui.render(); T += 1500; stallStub.stall = view('mh_asleep', 2); m.ui.render();
     expect(live.textContent).toBe('Market Hand is asleep. Auto-sales have stopped. Tap to refill.');
   });
   it('UI gates: hidden while a sheet covers the farm', async () => {
@@ -167,5 +167,30 @@ describe('#5b chip DOM (flag on)', () => {
     const spy = vi.spyOn(m.g.telemetry, 'track');
     stallStub.stall = view('mh_asleep'); m.ui.render(); m.chip()!.click(); stallStub.stall = null; m.ui.render();
     expect(spy.mock.calls.map(c => c[0]).filter(n => /stall|fatigue/.test(String(n)))).toEqual([]);
+  });
+});
+describe('setUiGates (SIM-API Changes, HoE 03:25)', () => {
+  it('stub: both gates false until the first call (no chip); no-op at salesStopped = 0; onboarding not done keeps the chip off', async () => {
+    const api = await import('../src/ui/stall-api'); const s = st({});
+    stallStub.stall = view('mh_asleep');
+    expect(api.stallView(s, ON).shown).toBe(false); // before the first call
+    api.setUiGates(s, balance, { farmScreenActive: true, onboardingDone: true }); expect(stallStub.gates).toEqual({ farmScreenActive: false, onboardingDone: false }); // flag off: no-op
+    api.setUiGates(s, ON, { farmScreenActive: true, onboardingDone: false }); expect(api.stallView(s, ON).shown).toBe(false); // timers stay 0
+    api.setUiGates(s, ON, { farmScreenActive: true, onboardingDone: true }); expect(api.stallView(s, ON).shown).toBe(true);
+    expect(api.fatigueCueView(s, ON).shown).toBe(false); stallStub.cue = { share: 0.3, shown: true, episodeId: 'e', suppressedByStall: false };
+    api.setUiGates(s, ON, { farmScreenActive: false, onboardingDone: true }); expect(api.fatigueCueView(s, ON).shown).toBe(true); // Rule 2 not gated
+  });
+  it('UI: no chip before the first setUiGates call; hides when the farm screen is inactive; reshows on return', async () => {
+    localStorage.setItem('eggfarm.ui', JSON.stringify({ reducedMotion: true, onboardingDone: true }));
+    stallStub.stall = view('mh_asleep', 3);
+    const g = new Game(ON, mem() as any, () => 1760000000000, 1, 'test'); g.state = { ...g.state, ...st({ workers: { market_hand: W(0) } }) } as any;
+    const { mountApp } = await import('../src/ui/app'); document.body.innerHTML = '<div id="app"></div>';
+    expect(stallStub.gates).toEqual({ farmScreenActive: false, onboardingDone: false }); expect(document.getElementById('stallChip')).toBeNull();
+    const ui = mountApp(document.getElementById('app')!, g, ON, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
+    document.getElementById('modal-layer')?.classList.remove('open'); (document.querySelector('#modal-layer .btn') as HTMLElement | null)?.click();
+    const chip = () => document.getElementById('stallChip') as HTMLButtonElement;
+    ui.render(); expect(stallStub.gates).toEqual({ farmScreenActive: true, onboardingDone: true }); expect(chip().hidden).toBe(false);
+    ui.openPanel('upgrades'); ui.render(); expect(stallStub.gates.farmScreenActive).toBe(false); expect(chip().hidden).toBe(true);
+    ui.openPanel(null); ui.render(); expect(stallStub.gates.farmScreenActive).toBe(true); expect(chip().hidden).toBe(false);
   });
 });
