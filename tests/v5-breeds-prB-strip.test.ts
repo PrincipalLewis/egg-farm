@@ -67,3 +67,40 @@ describe('BR-AC23b Hatch target in the fallback branch', () => {
     expect(out.aria).toMatch(/^Next goal: Hatch, /);
   });
 });
+
+// PMC ruling via HoE (2026-11-10, binding): the unaffordable countdown renders ONLY through BB-5's shared countdown formatter
+// (same function, rounding and sub-10 s behaviour as the best-buy strip). BB-5's strip (#goal, next-goal.ts selectGoal) formats
+// its "waiting" status with format.ts fmtTimeToAfford; its output carries '~' (e.g. "~7 s"), so the strip keeps it.
+describe('PMC ruling: strip countdown == BB-5 countdown formatter output', () => {
+  const fs = require('node:fs') as typeof import('node:fs'), path = require('node:path') as typeof import('node:path');
+  const read = (f: string) => fs.readFileSync(path.resolve(__dirname, '../src/ui', f), 'utf8');
+  it('source: BB-5 (selectGoal) and the strip both call format.ts fmtTimeToAfford; the strip hand-rolls no duration string', () => {
+    expect(read('next-goal.ts')).toMatch(/import \{ fmtTimeToAfford \} from '\.\/format'/);
+    expect(read('next-goal.ts')).toMatch(/: fmtTimeToAfford\(\(t\.costCents - coins\) \/ rateCentsPerS\)/);
+    const strip = read('breeds-strip.ts');
+    expect(strip).toMatch(/import \{[^}]*\bfmtTimeToAfford\b[^}]*\} from '\.\/format'/);
+    expect(strip).toMatch(/fmtTimeToAfford\(\(cost - coins\) \/ rateCentsPerS\)/); // same expression shape: Math.round(coins), ceil in the formatter
+    expect(strip).not.toMatch(/Math\.ceil|padStart|['"`]~|\bmin\b['"`]| s['"`]/);
+  });
+  // BB-5's own output for a gap of `secs` at its real target, vs the strip's label for the same gap in ¢ and the same rate.
+  const bbLow = stateWith(b, 1, breeds(), { coinsCents: 0 });
+  const bbAt = (secs: number) => { const c = selectGoal(bbLow, b, 1).costCents, rate = c / secs, g = selectGoal(bbLow, b, rate); return { gap: c, rate, g }; };
+  for (const secs of [0.4, 1, 7, 9.2, 9.999, 10, 10.01, 59.5, 61, 599, 601, 3599, 3700]) {
+    it(`${secs} s${secs < 10 ? ' (<10 s)' : ''}: label === "Hatch · in " + BB-5 status, byte for byte`, () => {
+      const { gap, rate, g } = bbAt(secs); expect(g.state).toBe('waiting');
+      const s0 = stateWith(b, F, breeds()), cost = hatchCostCents(s0, b); expect(cost).toBeGreaterThan(gap);
+      const s = { ...s0, coinsCents: cost - gap }, out = breedsStripGoal(goal(s), s, b, rate, true) as BreedsGoal;
+      expect(out.state).toBe('waiting');
+      expect(out.label).toBe('Hatch · in ' + g.status);
+      expect(out.label).toBe('Hatch · in ' + fmtTimeToAfford((cost - Math.round(s.coinsCents)) / rate));
+    });
+  }
+  it('<10 s concrete: 7 s → "Hatch · in ~7 s" (BB-5 has no separate sub-10 s wording; the "~" stays because BB-5 prints it)', () => {
+    const { gap, rate, g } = bbAt(7); const s0 = stateWith(b, F, breeds()), cost = hatchCostCents(s0, b), s = { ...s0, coinsCents: cost - gap };
+    expect(g.status).toBe('~7 s'); expect((breedsStripGoal(goal(s), s, b, rate, true) as BreedsGoal).label).toBe('Hatch · in ~7 s');
+  });
+  it('fractional coins round like BB-5 (Math.round(coinsCents) before the gap)', () => {
+    const s0 = stateWith(b, F, breeds()), cost = hatchCostCents(s0, b), s = { ...s0, coinsCents: cost - 700.4 };
+    expect((breedsStripGoal(goal(s), s, b, RATE, true) as BreedsGoal).label).toBe('Hatch · in ' + fmtTimeToAfford((cost - Math.round(cost - 700.4)) / RATE));
+  });
+});

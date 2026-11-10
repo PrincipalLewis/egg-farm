@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 // Breeds UI PR-B — Present HUD chip (BR-AC52 / 52b / 52c; UI doc v0.2.7 §7a/§7b, UI-BR-16..21). TDD: written before breeds-hud.ts.
 import { describe, it, expect, beforeEach } from 'vitest';
-import { mountPresentChip, presentChipModel, presentMirror, POP_CAP_MS, TIP_MS, CHIP_TIP_TEXT, CHIP_PAUSED_DESC } from '../src/ui/breeds-hud';
+import { presentMirror } from '../src/ui/breeds-adapter'; // PR-A hosts the mirror (seams 3d40e76e §2); PR-B's copy is deleted
+import { mountPresentChip, presentChipModel, POP_CAP_MS, TIP_MS, CHIP_TIP_TEXT, CHIP_PAUSED_DESC } from '../src/ui/breeds-hud';
 import { PRB_STUB_TUNABLES, STUB_PRESENT_GATE } from '../src/ui/breeds-adapter';
 import { flagOnBalance, flagOffBalance, stateWith, leghorn312, breeds, RefGate, HUD_HTML } from './fixtures/breeds-prB/setup';
 
@@ -146,7 +147,7 @@ describe('BR-AC52b pop cap + per-tick sync (reference gate, tick = 100 ms)', () 
   });
 });
 
-describe('Slot-card mirror helper for PR-A (BR-AC52c mirror)', () => {
+describe('Slot-card mirror (PR-A adapter presentMirror; same copy as the chip) (BR-AC52c mirror)', () => {
   const b = flagOnBalance();
   it('plain text, struck when paused; no role / tabindex / describedby; same description sentences', () => {
     const a = presentMirror(312, true)!, p = presentMirror(312, false)!;
@@ -156,5 +157,15 @@ describe('Slot-card mirror helper for PR-A (BR-AC52c mirror)', () => {
     for (const at of ['role', 'tabindex', 'aria-describedby', 'aria-label']) expect(m.hasAttribute(at)).toBe(false);
     expect(host.textContent).toContain('+3.12%'); expect(presentMirror(0, true)).toBeNull();
     void b;
+  });
+});
+
+describe('PR-A seam: presentMirror + copy come from breeds-adapter (seams 3d40e76e §2)', () => {
+  it('breeds-hud has no presentMirror of its own; chip copy is the adapter export (one source)', async () => {
+    const hudMod: Record<string, unknown> = await import('../src/ui/breeds-hud'), ad = await import('../src/ui/breeds-adapter');
+    expect(hudMod.presentMirror).toBeUndefined();
+    expect(hudMod.CHIP_PAUSED_DESC).toBe(ad.CHIP_PAUSED_DESC); expect(hudMod.chipActiveDesc).toBe(ad.chipActiveDesc);
+    const m = presentChipModel(312, true)!; expect(m.description).toBe(ad.presentMirror(312, true)!.description);
+    expect(presentChipModel(312, false)!.description).toBe(ad.presentMirror(312, false)!.description);
   });
 });

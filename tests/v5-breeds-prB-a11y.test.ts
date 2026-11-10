@@ -2,7 +2,8 @@
 // Breeds UI PR-B — label-in-name sweep (BR-AC52c; UI doc v0.2.7 §7b / UI-BR-23; WCAG 2.5.3). TDD: written before breeds-a11y.ts.
 import { describe, it, expect, beforeEach } from 'vitest';
 import { labelInNameIssues, accessibleName, visibleLabel } from './fixtures/breeds-prB/a11y';
-import { mountPresentChip, presentMirror } from '../src/ui/breeds-hud';
+import { mountPresentChip } from '../src/ui/breeds-hud';
+import { presentMirror } from '../src/ui/breeds-adapter';
 import { flagOnBalance, stateWith, leghorn312, RefGate, HUD_HTML } from './fixtures/breeds-prB/setup';
 
 beforeEach(() => { document.body.innerHTML = HUD_HTML; });

@@ -1,6 +1,6 @@
 /**
  * TEST-ONLY harness for scripts/breeds-ui-prB-browser.mjs (author evidence, not QA evidence). Boots the REAL app (Game +
- * mountApp, which calls PR-A's mountBreeds) with an in-page balance overlay, registers PR-B through the registry, and drives a
+ * mountApp, which calls PR-A's mountBreeds; its eager glob loads breeds-ext-b) with an in-page balance overlay, and drives a
  * reference Present gate (stand-in for the Saves sim gate). Query: ?flag=0|1&reg=0|1&F=&H=&coins=&breeds=<json>&fb=0|1&rm=0|1
  */
 import '../../../../src/ui/styles.css';
@@ -9,7 +9,7 @@ import { Game } from '../../../../src/game';
 import { mountApp } from '../../../../src/ui/app';
 import { initialState } from '../../../../src/sim/state';
 import { serialize, SAVE_KEY } from '../../../../src/save/save';
-import { registerBreedsPrB, prbMounts } from '../../../../src/ui/breeds-hud';
+import { registerBreedsPrB, prbMounts, PRB_EXT } from '../../../../src/ui/breeds-hud';
 import { PRB_STUB_TUNABLES } from '../../../../src/ui/breeds-adapter';
 import overlay from '../../breeds-prB-flag-on.json';
 
@@ -21,7 +21,10 @@ if (q.get('flag') === '1') merge(b, overlay);
 const W = PRB_STUB_TUNABLES.present_calm_w_s * 1000, K: number = PRB_STUB_TUNABLES.present_calm_k;
 const taps: number[] = []; let forced: boolean | null = null;
 const gate = { open: (_s: unknown, _b: unknown, now: number) => forced ?? (K === 0 || taps.filter(t => t > now - W && t <= now).length < K) };
+// PR-A's glob registers PR-B (breeds-ext-b) on its own; the harness injects the reference gate / forced fallback (a later no-arg
+// registration keeps them). reg=0 = "PR-B absent": the extender stays in the registry but inert, for the flag-off byte-identity check.
 if (q.get('reg') !== '0') registerBreedsPrB({ gate, fallback: q.get('fb') === '1' ? () => true : undefined });
+else { PRB_EXT.onSync = undefined; PRB_EXT.onDispose = undefined; }
 
 const kv = (() => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k) }; })();
 const st: any = { ...initialState(b), tracksV7: 1, seenTracksExplainer: true, farmLevel: num('F', 0), hensLevel: num('H', 0), coinsCents: num('coins', 0) };

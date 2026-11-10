@@ -15,7 +15,7 @@ import type { GameState } from '../sim/state';
 import type { Goal, GoalState } from './next-goal';
 import { spokenDuration } from './next-goal';
 import { fmtMoney, fmtMoneyAria, fmtTimeToAfford } from './format';
-import { bbFallbackActive, breedsFlagOn, hatchPriceNowCents, hatchTargetEligible, incomeCentsPerSec } from './breeds-adapter';
+import { bbFallbackActive, breedsFlagOn, hatchPriceNowCents, hatchTargetEligible } from './breeds-adapter';
 
 export const STRIP_HATCH_PREFIX = 'Hatch · ';
 /** Free-hatch word, same as the sheet's Hatch button (BR-R6, BR-AC31a). */
@@ -48,9 +48,10 @@ export interface BbStripMount { sync(s: GameState): void; dispose(): void; reado
 interface Snap { lbl: string; html: string | undefined; ng: boolean; st: string; chip: boolean; state: string | undefined; desc: string }
 
 export function mountBbStrip(o: { doc: Document; b: Balance; fallback?: (s: GameState, b: Balance) => boolean;
-  rate?: (s: GameState, b: Balance) => number; onOpenFlock?: () => void }): BbStripMount | null {
+  /** Sim income ¢/s: PR-A's ctx.incomeRate() (adapter incomeRate). */ rate: () => number;
+  /** PR-A's ctx.openFlock() (same path as the Flock entry button). */ onOpenFlock?: () => void }): BbStripMount | null {
   if (!breedsFlagOn(o.b)) return null;
-  const doc = o.doc, fallback = o.fallback ?? bbFallbackActive, rate = o.rate ?? incomeCentsPerSec;
+  const doc = o.doc, fallback = o.fallback ?? bbFallbackActive, rate = o.rate;
   let snap: Snap | null = null, wrote: Snap | null = null, btn: HTMLElement | null = null;
   const els = () => {
     const goal = doc.getElementById('goal'); if (!goal) return null;
@@ -76,7 +77,7 @@ export function mountBbStrip(o: { doc: Document; b: Balance; fallback?: (s: Game
     sync(s) {
       const e = els(); if (!e) return;
       if (!btn) { btn = e.goal; btn.addEventListener('click', onClick, true); }
-      const g = breedsStripGoal(PLACEHOLDER_GOAL, s, o.b, rate(s, o.b), fallback(s, o.b)) as BreedsGoal;
+      const g = breedsStripGoal(PLACEHOLDER_GOAL, s, o.b, rate(), fallback(s, o.b)) as BreedsGoal;
       if (g === PLACEHOLDER_GOAL) { deactivate(e); return; }
       const cur = read(e);
       if (!snap || !wrote || !same(cur, wrote)) snap = cur; // BB-5 (re)wrote the strip this frame: that's what we restore later

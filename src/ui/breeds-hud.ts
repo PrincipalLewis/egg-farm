@@ -1,5 +1,6 @@
 /**
- * M5.1 Breeds UI PR-B — Present HUD chip (BR-R12c; BR-AC52 / 52b / 52c) and the slot-card mirror helper for PR-A.
+ * M5.1 Breeds UI PR-B — Present HUD chip (BR-R12c; BR-AC52 / 52b / 52c). The slot-card mirror (`presentMirror`) and the shared
+ * chip/mirror copy live in PR-A's breeds-adapter.ts (seams 3d40e76e §2); this module imports them.
  * Spec of record: product/m5.1-breeds-spec.md rev 3.8.9 (ea922eb8) L445-473, L827-855; Art UI doc v0.2.7 (f349f29f) §7a/§7b,
  * UI-BR-16..21, UI-BR-23. Seams: engineering/design/breeds-ui-seams.md (PR-B owns the `breeds-hud-*` prefix).
  *
@@ -9,12 +10,13 @@
  */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
-import { breedsFlagOn, presentActiveBp, traitPctExact, traitPctFloor, STUB_PRESENT_GATE, type PresentGateSource } from './breeds-adapter';
+import {
+  breedsFlagOn, presentActiveBp, traitPctExact, traitPctFloor, STUB_PRESENT_GATE, CHIP_PAUSED_DESC, chipActiveDesc, type PresentGateSource,
+} from './breeds-adapter';
 
-// ---- Copy (FINAL, Head of Art & UX 23:31 / 23:40; spec L455-466) ----
+// ---- Copy (FINAL, Head of Art & UX 23:31 / 23:40; spec L455-466). Describedby copy is PR-A's adapter export (shared with the mirror). ----
+export { CHIP_PAUSED_DESC, chipActiveDesc };
 export const CHIP_TIP_TEXT = 'Bonus returns when you tap slower';
-export const CHIP_PAUSED_DESC = 'Breed bonus paused while you tap fast. Returns when you tap slower.';
-export const chipActiveDesc = (exact: string) => `Breed bonus ${exact} active`;
 /** Hidden state words (leading space: the name reads "+3% active" / "+3% paused"). */
 export const SR_WORD = { active: ' active', paused: ' paused' } as const;
 
@@ -40,18 +42,6 @@ export function presentChipModel(bp: number, gateOpen: boolean): ChipModel | nul
   return { bp, label: traitPctFloor(bp), exact, state, description: state === 'active' ? chipActiveDesc(exact) : CHIP_PAUSED_DESC };
 }
 
-/**
- * Slot-card mirror for PR-A's Present slot cards (spec L449; UI doc §7a/§7b): plain, non-interactive text INSIDE the slot-card
- * button (no role, tabindex, tooltip or describedby of its own), struck when paused. PR-A puts `html` where the slot's exact
- * `+X.XX%` goes and points the slot card's own `aria-describedby` at a node holding `description`.
- * `bp` = the slot's own settled bp (exact, 2 decimals); the gate state is the same read the HUD chip uses on that tick.
- */
-export function presentMirror(bp: number, gateOpen: boolean): { text: string; paused: boolean; html: string; description: string } | null {
-  if (!(bp > 0)) return null;
-  const text = traitPctExact(bp), paused = !gateOpen;
-  return { text, paused, html: `<span class="breeds-hud-mirror${paused ? ' paused' : ''}">${text}</span>`, description: paused ? CHIP_PAUSED_DESC : chipActiveDesc(text) };
-}
-
 export interface PresentChipMount {
   /** Per-tick sync (called from PR-A's mountBreeds onSync). `nowMs` defaults to the mount's clock (performance.now()). */
   sync(s: GameState, nowMs?: number): void;
@@ -66,6 +56,7 @@ export interface PresentChipMount {
 export interface PresentChipOpts {
   doc: Document; b: Balance;
   gate?: PresentGateSource;
+  /** Reduced motion: the registry passes PR-A's `ctx.reducedMotion` (same source as reveal / glow). Default: full motion. */
   rm?: () => boolean;
   /** Presentation clock; performance.now() by default (pop cap is wall time, not the focus clock: spec L468). */
   now?: () => number;
@@ -73,16 +64,12 @@ export interface PresentChipOpts {
   clearTimer?: (id: number) => void;
 }
 
-const sysReducedMotion = (doc: Document) =>
-  doc.documentElement.classList.contains('reduced-motion') || !!doc.querySelector('.rm') ||
-  !!doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
 /** Mount the Present chip. Flag off → null and nothing is touched. */
 export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
   if (!breedsFlagOn(o.b)) return null;
   const doc = o.doc, gate = o.gate ?? STUB_PRESENT_GATE;
   const now = o.now ?? (() => performance.now());
-  const rm = o.rm ?? (() => sysReducedMotion(doc));
+  const rm = o.rm ?? (() => false); // production: ctx.reducedMotion (PR-A's opts.rm(): settings + prefers-reduced-motion)
   const setTimer = o.setTimer ?? ((f, ms) => window.setTimeout(f, ms)), clearTimer = o.clearTimer ?? ((id) => window.clearTimeout(id));
   let row: HTMLElement | null = null, chip: HTMLElement | null = null, pt: HTMLElement | null = null, sr: HTMLElement | null = null,
     descEl: HTMLElement | null = null, tip: HTMLElement | null = null, tipTimer = 0;
@@ -129,7 +116,7 @@ export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
   const teardown = () => {
     hideTip();
     const rate = doc.getElementById('rate');
-    if (row && rate && row.parentElement) row.parentElement.insertBefore(rate, row);
+    if (row && rate && rate.parentElement === row && row.parentElement) row.parentElement.insertBefore(rate, row); // only our own wrap
     row?.remove(); tip?.remove(); doc.querySelector('.hud')?.classList.remove('has-pchip');
     row = chip = pt = sr = descEl = tip = null; shown = null;
   };
@@ -161,36 +148,41 @@ export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
   };
 }
 
-// ---- PR-B registration through PR-A's registry (seams 95f45895 §1; zero app.ts edits) ---------------------------------------
-import { registerBreedsExt, type BreedsExt } from './breeds-mount';
+// ---- PR-B registration through PR-A's registry (seams 3d40e76e §1; zero app.ts edits; loaded by breeds-ext-b.ts) -------------
+import { registerBreedsExt, type BreedsExt, type BreedsExtCtx } from './breeds-mount';
 import { mountBbStrip, type BbStripMount } from './breeds-strip';
 import { mountYard, type YardMount } from './breeds-yard';
 
 let hud: PresentChipMount | null = null, strip: BbStripMount | null = null, yard: YardMount | null = null, registered = false;
+/** The ctx of the onSync in progress: chip/strip read reducedMotion, incomeRate() and openFlock() from it (PR-A seams). */
+let cur: BreedsExtCtx | null = null;
+/** The `.hud` the mounts were built on. A new app DOM (remount without dispose) drops the old mounts unrun: their nodes are
+ *  detached, and running their teardown would write stale snapshots into the new DOM. */
+let anchor: Element | null = null;
 /** Injectables: the Saves sim gate and the #100 fallback predicate plug in here when they land (tests/harness use them now). */
 export interface PrBOptions { gate?: PresentGateSource; fallback?: (s: GameState, b: Balance) => boolean; }
 let prbOpts: PrBOptions = {};
-/** Opens the Flock sheet from the strip's Hatch target. TODO(PR-A seam): expose `open()` in the ext ctx; until then this
- *  activates PR-A's own Flock entry button (same handler a player tap uses). */
-const openFlockViaEntry = () => document.querySelector<HTMLElement>('[data-testid="breeds-entry"], #breeds-entry')?.click();
 /** The single PR-B extender: chip + strip + yard, mounted lazily on PR-A's first onSync (flag-off: PR-A never calls it). */
 export const PRB_EXT: BreedsExt = {
   onSync(ctx) {
+    cur = ctx;
+    const live = document.querySelector('.hud');
+    if (anchor !== live) { hud = strip = yard = null; anchor = live; }
     if (!hud && !strip && !yard) {
-      hud = mountPresentChip({ doc: document, b: ctx.b, gate: prbOpts.gate });
-      strip = mountBbStrip({ doc: document, b: ctx.b, onOpenFlock: openFlockViaEntry, fallback: prbOpts.fallback });
+      hud = mountPresentChip({ doc: document, b: ctx.b, gate: prbOpts.gate, rm: () => cur?.reducedMotion ?? false });
+      // Hatch tap → ctx.openFlock() (same path as the Flock entry button); countdown rate → ctx.incomeRate() (¢/s).
+      strip = mountBbStrip({ doc: document, b: ctx.b, rate: () => cur?.incomeRate() ?? 0, onOpenFlock: () => cur?.openFlock(), fallback: prbOpts.fallback });
       yard = mountYard({ doc: document, b: ctx.b });
     }
     hud?.sync(ctx.s); strip?.sync(ctx.s); yard?.sync(ctx.s);
   },
-  onDispose() { hud?.dispose(); strip?.dispose(); yard?.dispose(); hud = strip = yard = null; },
+  onDispose() { hud?.dispose(); strip?.dispose(); yard?.dispose(); hud = strip = yard = cur = anchor = null; },
 };
-/** Register PR-B once (idempotent). STABLE SIGNATURE: `registerBreedsPrB(opts?: PrBOptions): BreedsExt`. Load trigger (HoE ruling
- *  01:05 CET): PR-A's mountBreeds calls this behind the m4.flags.breeds guard; PR-B adds no app.ts line and no import-time side effect. */
+/** Register PR-B once (idempotent). STABLE SIGNATURE: `registerBreedsPrB(opts?: PrBOptions): BreedsExt`. Called by
+ *  breeds-ext-b.ts, which PR-A's mountBreeds eager-globs behind the m4.flags.breeds guard. No import-time side effect here. */
 export function registerBreedsPrB(opts?: PrBOptions): BreedsExt {
-  if (opts) prbOpts = opts; // a later no-arg call (PR-A's mountBreeds hook) keeps injected gate / fallback
+  if (opts) prbOpts = opts; // a later no-arg call (breeds-ext-b) keeps injected gate / fallback
   if (!registered) { registerBreedsExt(PRB_EXT); registered = true; } return PRB_EXT;
 }
 /** Live PR-B mounts (harness / QA observability; null until PR-A's first onSync). */
 export const prbMounts = () => ({ hud, strip, yard });
-

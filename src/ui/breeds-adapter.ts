@@ -215,6 +215,3 @@ export function slottedBreeds(s: GameState, b: Balance): BreedId[] {
   return out;
 }
 
-/** Strip countdown rate in ¢/s from the sim (the registry ctx has no UI rate tracker). BB-5's own strip uses the app's
- *  measured income; the two agree in steady state. TODO(PR-A seam): pass the app's `income.centsPerSec(t)` in the ext ctx. */
-export const incomeCentsPerSec = (s: GameState, b: Balance): number => Math.round(incomePerSec(s, b) * CENTS_PER_DOLLAR);
