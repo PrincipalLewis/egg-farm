@@ -74,7 +74,7 @@ describe('BUG-1/2: every money preview equals the amount credited, to the cent',
   it('app.ts previews only through the payout function (no k x price money anywhere)', () => {
     const src = readFileSync('src/ui/app.ts', 'utf8');
     expect(src).not.toMatch(/e\.k \* e\.price/); expect(src).not.toMatch(/cents \+= k \* price/);
-    expect(src).toMatch(/sellAllPreview\(s, b\)/); expect(src).toMatch(/fmtMoneyExact\(e\.value\)/);
+    expect(src).toMatch(/sellAllPreview\(s, b, saleCtx\)/); expect(src).toMatch(/fmtMoneyExact\(e\.value\)/);
   });
 });
 
