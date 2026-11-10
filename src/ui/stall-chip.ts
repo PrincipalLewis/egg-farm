@@ -8,7 +8,6 @@ import type { GameState } from '../sim/state';
 import type { WorkerId } from '../sim/workers';
 import { flagOn } from '../config/flags';
 import { tcNum } from '../config/formulas';
-import { fmtMoney } from './format';
 import { resumeAtCents } from './workers-ui';
 import { stallView, noteStallChipTap, type StallCause, type StallView } from './stall-api';
 import { openShiftSheet } from './shift-sheet';
@@ -29,16 +28,16 @@ export const CAUSE_WORKER: Record<StallCause, WorkerId | null> = {
 export interface CopyCtx { rc2Refill: boolean; cooldown: boolean; /** {Y} for mh_unpaid: dollars still needed, cents (>= 0) */ needCents: number }
 const VERB: Record<ChipAction, string> = { refill: 'Refill', sell_all: 'Sell all', collect: 'Collect', manage: 'Manage' };
 const TAP: Record<ChipAction, string> = { refill: 'Tap to refill.', sell_all: 'Tap to sell all.', collect: 'Tap to collect.', manage: 'Tap to manage.' };
-/** §4.4 table + §4.6 cooldown swap + SS-36 (rc2Refill = 1: asleep causes read "Manage" and never swap on cooldown). Pure. */
+/** §4.4 table + §4.6 cooldown swap + SS-36 (rc2Refill = 1: asleep causes read "Manage" and never swap on cooldown). Pure.
+ *  D-HOP-2026-11-10-22: §4.4 is canonical for text/icon/verb/action; describedby (SS-20) = rc2 §6 aria sentence + " Tap to {verb}." (no "Needs {Y}"). */
 export function chipCopy(cause: StallCause, c: CopyCtx): ChipCopy {
   const asleepAct = (alt: ChipAction): ChipAction => c.rc2Refill ? 'manage' : c.cooldown ? alt : 'refill';
   const mk = (lead: string, action: ChipAction, icon: ChipIcon, tone: 'tired' | 'danger', sentence: string): ChipCopy =>
     ({ text: `${lead}${DOT}${VERB[action]}`, verb: VERB[action], action, icon, tone, desc: `${sentence} ${TAP[action]}`, worker: CAUSE_WORKER[cause] });
-  const dollars = fmtMoney(Math.max(0, c.needCents)).replace(/^\$/, '');
   switch (cause) {
     case 'mh_asleep': return mk(`${ROLE.market_hand} asleep`, asleepAct('sell_all'), 'zzz', 'tired', 'Market Hand is asleep. Auto-sales have stopped.');
     case 'mh_paused': return mk(`${ROLE.market_hand} on break`, 'sell_all', 'pause', 'tired', 'Market Hand is on break. Auto-sales have stopped.');
-    case 'mh_unpaid': return mk(`${ROLE.market_hand} unpaid`, 'sell_all', 'warning', 'danger', `Market Hand is unpaid. Auto-sales have stopped. Needs ${dollars} dollars.`);
+    case 'mh_unpaid': return mk(`${ROLE.market_hand} unpaid`, 'sell_all', 'warning', 'danger', 'Market Hand is unpaid. Auto-sales have stopped.');
     case 'no_mh': return mk('Eggs waiting', 'sell_all', 'nest', 'danger', 'Customers are waiting and eggs are ready.');
     case 'ch_asleep': return mk(`${ROLE.coop_hand} asleep`, asleepAct('collect'), 'zzz', 'tired', 'Coop Hand is asleep. Auto-collecting has stopped.');
     case 'ch_unpaid': return mk(`${ROLE.coop_hand} unpaid`, 'collect', 'warning', 'danger', 'Coop Hand is unpaid. Auto-collecting has stopped.');
@@ -50,12 +49,10 @@ export function chipCopyFor(cause: StallCause, s: GameState, b: Balance): ChipCo
   const at = resumeAtCents(s, b, 'market_hand');
   return chipCopy(cause, { rc2Refill: flagOn(b, 'rc2Refill'), cooldown: s.manageCdS > 1e-9, needCents: at === null ? 0 : at - s.coinsCents });
 }
-/** Icons: icon-warning.svg / icon-nest.svg ship in public/assets. ico_fatigue_zzz and icon-pause.svg are NOT in public/assets yet
- *  (Art blocker, HANDOFF): a text/CSS placeholder stands in (aria-hidden, behind the flag); no art is invented here. */
+/** Icons: all four ship in public/assets (ico_fatigue_zzz d4709f93, icon-pause 97291783 copied verbatim from art-ux/assets). Decorative: alt="" + aria-hidden. */
+const CHIP_ICON: Record<ChipIcon, string> = { warning: 'icon-warning.svg', nest: 'icon-nest.svg', zzz: 'ico_fatigue_zzz.svg', pause: 'icon-pause.svg' };
 export const chipIconHtml = (icon: ChipIcon, A: (f: string) => string) =>
-  icon === 'warning' ? `<img class="ss-ic" src="${A('icon-warning.svg')}" width="16" height="16" alt="" aria-hidden="true">`
-  : icon === 'nest' ? `<img class="ss-ic" src="${A('icon-nest.svg')}" width="16" height="16" alt="" aria-hidden="true">`
-  : `<span class="ss-ic ss-ph" data-ph="${icon === 'zzz' ? 'ico_fatigue_zzz' : 'icon-pause'}" aria-hidden="true"></span>`; // glyph drawn by CSS only (no text node in the name)
+  `<img class="ss-ic" src="${A(CHIP_ICON[icon])}" width="16" height="16" alt="" aria-hidden="true">`;
 
 /** '0.15s' / '150ms' (first value) -> ms. */
 const cssMs = (v: string) => { const x = parseFloat(v) || 0; return /ms/.test(v.split(',')[0]) ? x : x * 1000; };

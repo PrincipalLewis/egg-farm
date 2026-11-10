@@ -57,4 +57,12 @@ describe('Rule 4 bubble (flag on)', () => {
     stallStub.reset(); m = await mount(RC2); stallStub.atRisk = { market_hand: 1, coop_hand: 2 }; stallStub.cue = cue(true); m.ui.render();
     m.goal().click(); expect(shift.calls).toEqual([['coop_hand', m.goal(), 'fatigue_bubble']]);
   });
+  it('copy per D-HOP-2026-11-10-22: rc2Refill = 0 `Refill workers · +$X/s`, rc2Refill = 1 `Manage workers · +$X/s` (NBSP both sides of ·)', async () => {
+    for (const [bal, verb] of [[ON, 'Refill'], [RC2, 'Manage']] as const) {
+      stallStub.reset(); const m = await mount(bal); stallStub.atRisk = { market_hand: 1.5, coop_hand: 0.75 }; stallStub.cue = cue(true); m.ui.render();
+      expect(m.lbl()).toBe(`${verb} workers\u00a0\u00b7\u00a0+$2.25/s`);
+      expect(document.getElementById('goalDesc')!.textContent).toBe(`Next goal: ${verb.toLowerCase()} workers, plus $2.25 per second.`);
+      stallStub.cue = cue(false); m.ui.render(); expect(m.lbl()).not.toMatch(/workers/);
+    }
+  });
 });
