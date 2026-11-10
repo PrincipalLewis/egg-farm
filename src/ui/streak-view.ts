@@ -59,6 +59,7 @@ export const COOLING_ARIA = 'Streak cooling';
 /** TUNABLE pending Economy (Architect ruling 2026-11-10, literals.md): the tier from which a cooling start plays sfx-streak-cool-01 and
  *  announces (combo-tiers §1 tier 2 row, §6). Moves to m4.tc.streak_cool_cue_min_tier once economy.csv (CSV of record) carries
  *  tc_streak_cool_cue_min_tier; then this line becomes tcNum(b, 'streak_cool_cue_min_tier'). */
+// TODO(tc_streak_cool_cue_min_tier): move to m4.tc/CSV at the restart (HoE routes to Econ/HoP/QA)
 const COOL_CUE_MIN_TIER = 2;
 
 /**
