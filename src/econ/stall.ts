@@ -34,7 +34,8 @@ export interface StallView {
   shown: boolean;
   trigger: 'sell' | 'collect' | null;
   cause: StallCause | null;
-  stallId: string | null;
+  /** = telemetry sales_stall.stall_id (int >= 1, per-session counter); HoE ruling 2026-11-10 03:25 (was string). */
+  stallId: number | null;
   noSaleS: number;
   noCollectS: number;
 }
@@ -45,6 +46,13 @@ export interface FatigueCueView {
   suppressedByStall: boolean;
 }
 
+/** UI gates (HoE ruling 2026-11-10 03:25, SIM-API "Changes"): §4.3 extra gates the sim cannot see. The UI passes them in. */
+export interface UiGates {
+  /** The farm screen is the active view (§4.3). Leaving it only hides the chip (C6 rule): timers keep running. */
+  farmScreenActive: boolean;
+  /** onboarding.ts `finished` (§4.3). Part of T-SELL / T-COLLECT state conditions: false keeps the timers at 0. */
+  onboardingDone: boolean;
+}
 /** Rule 2 hysteresis hold state (pure; cueStep). */
 export interface CueHold { on: boolean; aboveS: number; belowS: number; }
 /** The never-saved session record (M5_SESSION_FIELDS `stallSession`). Plain JSON data. */
@@ -77,6 +85,8 @@ export interface StallSession {
   fatigueCueFlag: boolean;
   /** Last tick's fatigue payload (§8 six fields, values at the emit moment = the latest tick). */
   snap: FatigueSnap;
+  /** Last setUiGates() values; both false until the UI first calls it (no chip before the UI wires the gates). */
+  ui: UiGates;
   /** Telemetry queued by note* hooks; drained into the sink on the next tick. */
   out: SimEvent[];
 }
@@ -125,7 +135,7 @@ function freshSession(s: GameState, b: Balance): StallSession {
     mhTag: workerTag(s, 'market_hand', b), chTag: workerTag(s, 'coop_hand', b),
     shown: false, trigger: null, cause: null, stallId: null, stallSeq: 0, shownAtS: 0, tapped: null, rearmFromS: null, c6PrevId: null,
     cue: { on: false, aboveS: 0, belowS: 0 }, episode: null, episodeSeq: 0, cueLogged: [], cueForceCleared: false,
-    fatigueCueFlag: flagOn(b, 'fatigueCue'), snap: { loss_per_s: 0, loss_share: 0, n_tired: 0, n_asleep: 0, n_paused: 0 }, out: [] };
+    fatigueCueFlag: flagOn(b, 'fatigueCue'), ui: { farmScreenActive: false, onboardingDone: false }, snap: { loss_per_s: 0, loss_share: 0, n_tired: 0, n_asleep: 0, n_paused: 0 }, out: [] };
 }
 
 /** THE single reset path (§4.5 re-arm note, §7.2 L246; HoE d): every stall timer to 0, and the Rule 2 holds that have not
@@ -171,10 +181,13 @@ export function stallTick(s: GameState, focusS: number, b: Balance, ev: Sink, ev
   const mhC4 = off(prev.mhTag) && !off(mh) && mh !== 'paused', chC4 = off(prev.chTag) && !off(ch) && ch !== 'paused';
   const mhResume = prev.mhTag === 'paused' && mh !== 'paused', chResume = prev.chTag === 'paused' && ch !== 'paused';
   const Q = s.customers.length, E = Math.floor(s.basket), coopE = Math.floor(s.coop);
-  const sellCond = Q >= 1 && E >= 1 && (mh !== 'none' || s.farmLevel >= b.workers.market_hand.unlock_farm);
-  const collectCond = Q >= 1 && E < 1 && coopE >= 1 && off(ch);
-  ss.noSaleS = ss.sold || !sellCond || mhC4 || mhResume ? 0 : ss.noSaleS + f;
-  ss.noCollectS = ss.collected || !collectCond || chC4 || chResume ? 0 : ss.noCollectS + f;
+  const onb = ss.ui.onboardingDone, farm = ss.ui.farmScreenActive;
+  const sellCond = onb && Q >= 1 && E >= 1 && (mh !== 'none' || s.farmLevel >= b.workers.market_hand.unlock_farm);
+  const collectCond = onb && Q >= 1 && E < 1 && coopE >= 1 && off(ch);
+  // A reset seen at this tick (sale / collect / C4 / Resume happened before or during it) restarts the count with this tick's
+  // focus time; a broken condition holds the timer at 0.
+  ss.noSaleS = !sellCond ? 0 : ss.sold || mhC4 || mhResume ? f : ss.noSaleS + f;
+  ss.noCollectS = !collectCond ? 0 : ss.collected || chC4 || chResume ? f : ss.noCollectS + f;
   ss.sinceSaleS = ss.sold ? 0 : ss.sinceSaleS + f;
   if (ss.sold || ss.collected || (!sellCond && !collectCond) || mhC4 || chC4) ss.c6PrevId = null;
   // candidate (E7: T-SELL first)
@@ -205,28 +218,31 @@ export function stallTick(s: GameState, focusS: number, b: Balance, ev: Sink, ev
   if (ss.shown) {
     const tap = ss.tapped, isMh = ss.cause!.startsWith('mh_'), wasPaused = ss.cause === 'mh_paused';
     let clear: StallResolvedBy | null = null;
+    // C7 and C4 first: a hired / woken MH may sell on the same tick, but the clear is the hire / wake (C4 "immediately").
     if (ss.trigger === 'sell') {
-      if (ss.sold) clear = tap === 'sell_all' ? 'chip_sell_all' : 'sell_elsewhere';
+      if (ss.cause === 'no_mh' && mh !== 'none') clear = 'none';
+      else if (isMh && !wasPaused && mhC4) { clear = tap === 'refill' ? 'chip_refill' : prev.mhTag === 'unpaid' ? 'auto_resume' : 'refill_elsewhere'; c4Refill = prev.mhTag === 'asleep'; }
+      else if (ss.sold) clear = tap === 'sell_all' ? 'chip_sell_all' : 'sell_elsewhere';
       else if (Q < 1) clear = 'queue_empty';
       else if (E < 1) clear = 'basket_empty';
-      else if (isMh && !wasPaused && mhC4) { clear = tap === 'refill' ? 'chip_refill' : prev.mhTag === 'unpaid' ? 'auto_resume' : 'refill_elsewhere'; c4Refill = prev.mhTag === 'asleep'; }
       else if (wasPaused && mhResume) clear = 'none';
-      else if (ss.cause === 'no_mh' && mh !== 'none') clear = 'none';
+      else if (!onb) clear = 'none';
     } else {
-      if (ss.collected || E >= 1) clear = tap === 'collect' ? 'chip_collect' : 'collect_elsewhere';
+      if (chC4) { clear = tap === 'refill' ? 'chip_refill' : prev.chTag === 'unpaid' ? 'auto_resume' : 'refill_elsewhere'; c4Refill = prev.chTag === 'asleep'; }
+      else if (ss.collected || E >= 1) clear = tap === 'collect' ? 'chip_collect' : 'collect_elsewhere';
       else if (Q < 1) clear = 'queue_empty';
       else if (coopE < 1) clear = 'basket_empty';
       else if (ch === 'paused') clear = 'paused';
-      else if (chC4) { clear = tap === 'refill' ? 'chip_refill' : prev.chTag === 'unpaid' ? 'auto_resume' : 'refill_elsewhere'; c4Refill = prev.chTag === 'asleep'; }
+      else if (!onb) clear = 'none';
     }
     if (clear) hide(clear, false);
-    else if (f === 0) hide(tap === 'manage' ? 'chip_manage' : 'focus_lost', true);
+    else if (f === 0 || !farm) hide(tap === 'manage' ? 'chip_manage' : 'focus_lost', true); // C6 (+ leaving the farm screen, HoE d)
     else if (cCause !== ss.cause) {
       if (cValid && cTrig && cCause) { const old = ss.stallId; emitResolved('cause_changed'); emitShown(cCause, cTrig, old); }
       else hide(cCause === 'mh_paused' ? 'paused' : 'none', false); // C5: re-evaluate, don't hold a chip the new cause has not earned
     }
   }
-  if (!ss.shown && cValid && cTrig && cCause && f > 0 && (ss.rearmFromS === null || ss.sessionS - ss.rearmFromS >= tcNum(b, 'stall_rearm_s') - EPS)) {
+  if (!ss.shown && cValid && cTrig && cCause && f > 0 && farm && (ss.rearmFromS === null || ss.sessionS - ss.rearmFromS >= tcNum(b, 'stall_rearm_s') - EPS)) {
     const p = ss.c6PrevId; ss.c6PrevId = null; emitShown(cCause, cTrig, p);
   }
   // ---- Rule 2 (§4.8) ----
@@ -251,7 +267,7 @@ const STALL_OFF: Readonly<StallView> = Object.freeze({ shown: false, trigger: nu
 /** SIM-API stallView: read-only; UI reads every frame. Flag off (or before the first flag-on tick): shown false, null ids. */
 export function stallView(s: GameState, b: Balance): Readonly<StallView> {
   const ss = s.stallSession; if (!on(b) || !ss) return STALL_OFF;
-  return { shown: ss.shown, trigger: ss.trigger, cause: ss.cause, stallId: ss.stallId === null ? null : String(ss.stallId), noSaleS: ss.noSaleS, noCollectS: ss.noCollectS };
+  return { shown: ss.shown, trigger: ss.trigger, cause: ss.cause, stallId: ss.stallId, noSaleS: ss.noSaleS, noCollectS: ss.noCollectS };
 }
 /** SIM-API fatigueCueView. `shown` = Rule 2 state (Rule 4 bubble reads the same thresholds), minus the §5 force-clear.
  *  fatigueCue = 0: the hud_chip slot does not exist (SS-23f) and no fatigue_cue_shown{hud_chip} is ever logged. */
@@ -259,6 +275,16 @@ export function fatigueCueView(s: GameState, b: Balance): Readonly<FatigueCueVie
   const ss = s.stallSession;
   if (!on(b) || !ss) return { share: on(b) ? fatigueShareOf(fatigueLossPerSec(s, b), incomePerSec(s, b)) : 0, shown: false, episodeId: null, suppressedByStall: false };
   return { share: fatigueShareOf(fatigueLossPerSec(s, b), incomePerSec(s, b)), shown: ss.cue.on && !ss.cueForceCleared, episodeId: ss.episode === null ? null : String(ss.episode), suppressedByStall: ss.shown };
+}
+
+/** SIM-API "Changes" (HoE 2026-11-10 03:25): the UI passes the §4.3 gates it owns, every frame or on change (sticky until the
+ *  next call). Creates the session record if needed; no-op with salesStopped off (flag-off byte-identical). Until the first
+ *  call both gates read false, so no chip shows and no sales_stall is sent. */
+export function setUiGates(s: GameState, b: Balance, gates: UiGates): void {
+  if (!on(b)) return;
+  const ss = s.stallSession ?? freshSession(s, b);
+  if (s.stallSession && ss.ui.farmScreenActive === gates.farmScreenActive && ss.ui.onboardingDone === gates.onboardingDone) return;
+  s.stallSession = { ...ss, ui: { farmScreenActive: gates.farmScreenActive === true, onboardingDone: gates.onboardingDone === true } };
 }
 
 // ---- UI -> sim notifications (SIM-API; the sim emits, the UI emits nothing) ----

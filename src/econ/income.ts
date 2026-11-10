@@ -140,14 +140,14 @@ export class EtaHold {
 }
 
 /** sales-stopped-spec §4.8: $/s lost while this hired Tired/Asleep worker is not Working at 100%.
- *  Excludes Unpaid and paused (Pause flag). Manage-target ties use WORKERS order market_hand > coop_hand > hawker > grader. */
+ *  Excludes Unpaid and paused (Pause flag); never negative (HoE ruling 2026-11-10 03:25). Manage-target ties use WORKERS order market_hand > coop_hand > hawker > grader. */
 export function workerAtRisk(id: WorkerId, s: GameState, b: Balance): number {
   const w = s.workers[id];
   if (!w || w.unpaid || isPaused(w, b)) return 0;
   const m = mood(w, b);
   if (m !== 'tired' && m !== 'asleep') return 0;
   const healed: GameState = { ...s, workers: { ...s.workers, [id]: { ...w, energy: 100, unpaid: false } } };
-  return incomePerSec(healed, b) - incomePerSec(s, b);
+  return Math.max(0, incomePerSec(healed, b) - incomePerSec(s, b)); // HoE ruling 03:25: clamped at 0 (a heal that costs more wage than it earns is no loss)
 }
 
 /** Per-worker $/s at risk for every role (0 when not Tired/Asleep). */
@@ -174,5 +174,5 @@ export function fatigueShare(s: GameState, b: Balance): number {
 }
 import { fatigueShareOf, fatigueLossPerSec } from './stall';
 /** SIM-API: the stall + cue read shape, UI notifications and exported types live in econ/stall.ts; re-exported here. */
-export { stallView, fatigueCueView, resetStallTimers, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap } from './stall';
-export type { StallCause, StallResolvedBy, StallView, FatigueCueView, FatigueSurface } from './stall';
+export { stallView, fatigueCueView, resetStallTimers, setUiGates, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap } from './stall';
+export type { StallCause, StallResolvedBy, StallView, FatigueCueView, FatigueSurface, UiGates } from './stall';

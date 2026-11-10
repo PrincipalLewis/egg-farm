@@ -15,7 +15,7 @@ import { serialize, SAVE_VERSION } from '../src/save/save';
 import { validateEvent } from '../src/telemetry/schema';
 import {
   incomePerSec, workerAtRisk, workersAtRisk, costliestAtRisk, fatigueShare,
-  stallView, fatigueCueView, resetStallTimers, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap,
+  stallView, fatigueCueView, resetStallTimers, setUiGates, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap,
   type StallCause, type StallResolvedBy, type StallView, type FatigueCueView, type FatigueSurface,
 } from '../src/econ/income';
 import { fatigueShareOf, cueStep, type CueHold } from '../src/econ/stall';
@@ -36,8 +36,10 @@ const fx = (b: B, o: Partial<GameState> = {}): GameState => ({
   workers: { market_hand: { energy: 0, cdS: 0 } }, ...o,
 } as GameState);
 /** n ticks of 0.1 s; focus on unless told otherwise. Returns the state; events go to ev. */
+/** The UI's per-frame gates (SIM-API Changes): farm screen active, onboarding done. */
+const G = { farmScreenActive: true, onboardingDone: true };
 function run(s: GameState, b: B, ticks: number, ev: SimEvent[], focus = true, each?: (s: GameState, i: number) => GameState): GameState {
-  for (let i = 0; i < ticks; i++) { s = step(s, 0.1, b, ev, { focus }); if (each) s = each(s, i); }
+  for (let i = 0; i < ticks; i++) { setUiGates(s, b, G); s = step(s, 0.1, b, ev, { focus }); if (each) s = each(s, i); }
   return s;
 }
 const stalls = (ev: SimEvent[]) => ev.filter(e => e.type === 'sales_stall') as any[];
@@ -45,7 +47,7 @@ const cues = (ev: SimEvent[], t = 'fatigue_cue_shown') => ev.filter(e => e.type 
 const valid = (e: any) => { const { type, ...rest } = e; return validateEvent({ type, ts: 1_761_830_000_000, sid: 'a1b2c3', fgMs: 1, ...rest } as any); };
 /** First tick index (1-based) at which stallView(s).shown is true; -1 if never within `ticks`. */
 function firstShown(s: GameState, b: B, ticks: number, ev: SimEvent[] = []): number {
-  for (let i = 1; i <= ticks; i++) { s = step(s, 0.1, b, ev, { focus: true }); if (stallView(s, b).shown) return i; }
+  for (let i = 1; i <= ticks; i++) { setUiGates(s, b, G); s = step(s, 0.1, b, ev, { focus: true }); if (stallView(s, b).shown) return i; }
   return -1;
 }
 
@@ -60,6 +62,12 @@ describe('risk helpers (income.ts, signatures from income-ts-out-of-scope.patch)
     const u = fx(ON, { workers: { market_hand: { energy: 0, cdS: 0, unpaid: true } } });
     expect(workerAtRisk('market_hand', u, ON)).toBe(0); // Unpaid excluded (§4.8)
     const r = workersAtRisk(s, ON); expect(Object.keys(r)).toEqual(WORKERS);
+  });
+  it('[§4.8 HoE ruling 03:25] workerAtRisk is never negative (clamped at 0), for every role and level', () => {
+    for (const F of [3, 4, 8, 17, 40]) for (const energy of [0, 10]) {
+      const s = fx(ON, { farmLevel: F, hensLevel: F, eggValueLevel: F, graderTier: 1, workers: Object.fromEntries(WORKERS.map(id => [id, { energy, cdS: 0 }])) as any });
+      for (const id of WORKERS) expect(workerAtRisk(id, s, ON)).toBeGreaterThanOrEqual(0);
+    }
   });
   it('[SS-48 / SS-G36] costliestAtRisk = max workerAtRisk, ties in code id order; null when nobody is at risk', () => {
     const s = fx(ON, { workers: { market_hand: { energy: 0, cdS: 0 }, hawker: { energy: 10, cdS: 0 } } });
@@ -92,9 +100,10 @@ describe('stall timers + chip state (§4.3-§4.6)', () => {
   it('[SS-1] mh_asleep shows at 8.0 s +/- 0.1 of focus time with no sale, not before 7.9 s; shown payload is schema-valid', () => {
     const ev: SimEvent[] = []; const i = firstShown(fx(ON), ON, 200, ev);
     expect(i).toBe(80);
-    const v = stallView(run(fx(ON), ON, 80, []), ON);
-    expect(v).toMatchObject({ shown: true, trigger: 'sell', cause: 'mh_asleep' }); expect(v.noSaleS).toBeCloseTo(8, 6); expect(typeof v.stallId).toBe('string');
-    const sh = stalls(ev); expect(sh).toHaveLength(1); expect(sh[0]).toMatchObject({ phase: 'shown', stall_id: 1, cause: 'mh_asleep', farm_level: 17, queue_len: 3, sellable_eggs: 100, coop_eggs: 0, mh_state: 'asleep', ch_state: 'none' });
+    const at = run(fx(ON), ON, 80, []), v = stallView(at, ON);
+    expect(v).toMatchObject({ shown: true, trigger: 'sell', cause: 'mh_asleep', stallId: 1 }); expect(v.noSaleS).toBeCloseTo(8, 6);
+    const sh = stalls(ev); expect(sh).toHaveLength(1);
+    expect(sh[0]).toMatchObject({ phase: 'shown', stall_id: 1, cause: 'mh_asleep', farm_level: 17, queue_len: at.customers.length, sellable_eggs: 100, coop_eggs: Math.floor(at.coop), mh_state: 'asleep', ch_state: 'none', session_s: 8, focus_s_since_last_sale: 8 });
     expect('prev_stall_id' in sh[0]).toBe(false); expect(valid(sh[0])).toEqual([]);
   });
   it('[SS-4][E12] mh_unpaid with coins $0', () => {
@@ -117,7 +126,7 @@ describe('stall timers + chip state (§4.3-§4.6)', () => {
     expect(firstShown(s, ON_P, 300)).toBe(200); expect(stallView(run(s, ON_P, 200, []), ON_P).cause).toBe('mh_paused');
     const ev: SimEvent[] = []; let t = run(s, ON_P, 150, ev);
     t = apply(t, { type: 'sell', customerId: t.customers[0].id }, ON_P, ev);
-    expect(firstShown(t, ON_P, 300)).toBe(200); // a full 20 s after the sale
+    expect(firstShown(t, ON_P, 300)).toBe(200); // a full 20 s of focus time after the sale (the next tick counts)
   });
   it('[SS-7] no false stall: MH Working or Tired (3 s cadence) never triggers over 60 s', () => {
     for (const energy of [100, 20]) { const ev: SimEvent[] = []; const s = fx(ON, { workers: { market_hand: { energy, cdS: 0 } } });
@@ -127,6 +136,19 @@ describe('stall timers + chip state (§4.3-§4.6)', () => {
     const s = { ...fx(ON, { customers: [] }), rushLane: [{ id: 99, demand: 5 }] } as unknown as GameState;
     expect(firstShown({ ...s, nextCustomerInS: 1e9 }, ON, 120)).toBe(-1);
     expect(stallView(run(fx(ON), ON, 80, []), ON).cause).toBe('mh_asleep');
+  });
+  it('[§4.3 gates][SIM-API Changes] onboardingDone false: no chip and timers held at 0; before the first setUiGates: no chip', () => {
+    let s = fx(ON); for (let i = 0; i < 200; i++) { setUiGates(s, ON, { farmScreenActive: true, onboardingDone: false }); s = step(s, 0.1, ON, [], { focus: true }); }
+    expect(stallView(s, ON)).toMatchObject({ shown: false, noSaleS: 0 });
+    const ev: SimEvent[] = []; let u = fx(ON); for (let i = 0; i < 200; i++) u = step(u, 0.1, ON, ev, { focus: true });
+    expect(stallView(u, ON).shown).toBe(false); expect(stalls(ev)).toHaveLength(0);
+  });
+  it('[§4.3 gates][§4.5 C6, HoE d] leaving the farm screen hides the chip (focus_lost), timers keep running; return re-shows with prev_stall_id', () => {
+    const ev: SimEvent[] = []; let s = run(fx(ON), ON, 80, ev); expect(stallView(s, ON).shown).toBe(true);
+    for (let i = 0; i < 20; i++) { setUiGates(s, ON, { farmScreenActive: false, onboardingDone: true }); s = step(s, 0.1, ON, ev, { focus: true }); }
+    expect(stallView(s, ON).shown).toBe(false); expect(stallView(s, ON).noSaleS).toBeCloseTo(10, 6);
+    expect(stalls(ev).at(-1)).toMatchObject({ phase: 'resolved', resolved_by: 'focus_lost' });
+    s = run(s, ON, 1, ev); expect(stalls(ev).at(-1)).toMatchObject({ phase: 'shown', stall_id: 2, prev_stall_id: 1 });
   });
   it('[SS-19] cause other only from an injected fault (MH Working that never sells)', () => {
     const s = fx(ON, { workers: { market_hand: { energy: 100, cdS: 1e9 } } });
@@ -162,7 +184,7 @@ describe('clears, re-arm, resolved_by (§4.5, §8)', () => {
   });
   it('[SS-8 C4] Unpaid MH auto-resume hides with auto_resume', () => {
     const ev: SimEvent[] = []; let s = run(fx(ON, { coinsCents: 0, workers: { market_hand: { energy: 60, cdS: 0, unpaid: true } } }), ON, 80, ev);
-    s = step({ ...s, workers: { market_hand: { energy: 60, cdS: 0 } } }, 0.1, ON, ev, { focus: true });
+    s = step({ ...s, coinsCents: 1_000_000, workers: { market_hand: { energy: 60, cdS: 0 } } }, 0.1, ON, ev, { focus: true });
     expect(stallView(s, ON).shown).toBe(false); expect(lastResolved(ev).resolved_by).toBe('auto_resume');
   });
   it('[SS-8 C5][SS-30] pausing the asleep MH under 20 s of no sale hides with paused; re-shows as mh_paused at 20 s', () => {
@@ -174,7 +196,7 @@ describe('clears, re-arm, resolved_by (§4.5, §8)', () => {
     const ev: SimEvent[] = []; let s = shown(ON, {}, ev);
     s = run(s, ON, 30, ev, false); const v = stallView(s, ON); expect(v.shown).toBe(false); expect(v.noSaleS).toBeCloseTo(8, 6);
     expect(lastResolved(ev)).toMatchObject({ resolved_by: 'focus_lost', chip_tapped: false, stall_id: 1 });
-    s = step(s, 0.1, ON, ev, { focus: true }); expect(stallView(s, ON)).toMatchObject({ shown: true, stallId: '2' });
+    s = step(s, 0.1, ON, ev, { focus: true }); expect(stallView(s, ON)).toMatchObject({ shown: true, stallId: 2 });
     expect(stalls(ev).at(-1)).toMatchObject({ phase: 'shown', stall_id: 2, prev_stall_id: 1 });
   });
   it('[SS-36] a manage chip tap followed by the sheet opening (C6) closes the pair with chip_manage, timers frozen', () => {
@@ -270,7 +292,8 @@ describe('Rule 2 hysteresis, fatigue cue, notes (§4.8, §5, §8 F-4c)', () => {
     const ev: SimEvent[] = []; let s = run(tiredFarm(ON), ON, 120, ev); expect(cues(ev)).toHaveLength(0);
     noteFatigueCueShown(s, 'hud_chip'); noteFatigueCueShown(s, 'banner'); s = run(s, ON, 1, ev);
     expect(cues(ev).map(e => e.surface)).toEqual(['banner']);
-    const off: SimEvent[] = []; let o = run(tiredFarm(OFF), OFF, 120, off); noteFatigueCueShown(o, 'bubble'); noteFatigueCueTap(o, 'hud_chip'); noteStallChipTap(o, 'sell_all'); resetStallTimers(o); o = run(o, OFF, 1, off);
+    const off: SimEvent[] = []; let o = run(tiredFarm(OFF), OFF, 120, off); noteFatigueCueShown(o, 'bubble'); noteFatigueCueTap(o, 'hud_chip'); noteStallChipTap(o, 'sell_all'); resetStallTimers(o); setUiGates(o, OFF, G); o = run(o, OFF, 1, off);
+    expect('stallSession' in o).toBe(false);
     expect(off.filter(e => /sales_stall|fatigue_cue/.test(e.type))).toHaveLength(0);
     expect(stallView(o, OFF)).toEqual({ shown: false, trigger: null, cause: null, stallId: null, noSaleS: 0, noCollectS: 0 });
     expect(fatigueCueView(o, OFF)).toMatchObject({ shown: false, episodeId: null, suppressedByStall: false });
@@ -300,7 +323,7 @@ describe('Rule 2 hysteresis, fatigue cue, notes (§4.8, §5, §8 F-4c)', () => {
 
 describe('flag-off byte identity and gate 2 (SS-21, SS-23, E14)', () => {
   const drive = (b: B, seed: number) => { const ev: SimEvent[] = []; let s = fx(b, { ...initialState(b, seed), farmLevel: 17, hensLevel: 17, eggValueLevel: 17 } as any);
-    for (let i = 0; i < 1200; i++) { s = step(s, 0.1, b, ev, { focus: i % 300 < 250 }); if (i % 7 === 0) s = apply(s, { type: 'collect' }, b, ev); if (i % 113 === 0) s = apply(s, { type: 'sellAll' }, b, ev); }
+    for (let i = 0; i < 1200; i++) { setUiGates(s, b, G); s = step(s, 0.1, b, ev, { focus: i % 300 < 250 }); if (i % 7 === 0) s = apply(s, { type: 'collect' }, b, ev); if (i % 113 === 0) s = apply(s, { type: 'sellAll' }, b, ev); }
     return { s, ev }; };
   const strip = (s: GameState) => { const { stallSession: _x, ...r } = s as any; return JSON.stringify(r); };
   it('[SS-21 gate 1][SS-23] flag off: no session record, no new events, views constant', () => {
@@ -320,7 +343,7 @@ describe('flag-off byte identity and gate 2 (SS-21, SS-23, E14)', () => {
     const c: StallCause[] = ['mh_asleep', 'mh_paused', 'mh_unpaid', 'no_mh', 'ch_asleep', 'ch_unpaid', 'other'];
     const r: StallResolvedBy[] = ['chip_refill', 'chip_sell_all', 'chip_collect', 'chip_manage', 'refill_elsewhere', 'sell_elsewhere', 'collect_elsewhere', 'auto_resume', 'queue_empty', 'basket_empty', 'paused', 'focus_lost', 'cause_changed', 'none'];
     const f: FatigueSurface[] = ['hud_chip', 'banner', 'bubble'];
-    const v: StallView = { shown: false, trigger: null, cause: null, stallId: null, noSaleS: 0, noCollectS: 0 };
+    const v: StallView = { shown: false, trigger: null, cause: null, stallId: 3, noSaleS: 0, noCollectS: 0 };
     const q: FatigueCueView = { share: 0, shown: false, episodeId: null, suppressedByStall: false };
     expect([c.length, r.length, f.length, Object.keys(v).length, Object.keys(q).length]).toEqual([7, 14, 3, 6, 4]);
   });
