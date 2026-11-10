@@ -19,6 +19,8 @@ import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
+import { flushBreedsTel } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
+import { sessionEndBreedsFields } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
 export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
@@ -113,7 +115,8 @@ export class Game {
     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
   }
   private grantOffline(gapMs: number) {
-    const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
+    const ev: SimEvent[] = []; const r = applyOffline(this.state, gapMs, this.b, ev); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
+    this.emit(ev); // M5.1 breeds §8: breed_revealed{offline:true} / flock_complete / breed_slotted from the grant step (none flag off)
     if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
     return r.eggs;
   }
@@ -310,7 +313,12 @@ export class Game {
   endSession() {
     if (this.resetting || this.inactive || this.held()) return;
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    // ---- M5.1 breeds session_end (HoE/breeds-telemetry-emitters, drift row 34; gen/breeds-telemetry). Flag off: {} (absent). ----
+    // present_active_s / present_lost_count belong to Saves (saves/breeds-sim-prB-traits): merge their fields in beside breedsEnd.
+    { const ev: SimEvent[] = []; this.state = flushBreedsTel(this.state, this.b, ev); this.emit(ev); } // open breed_slotted windows close
+    const breedsEnd = sessionEndBreedsFields(this.state, this.b);
+    // ---- end M5.1 breeds session_end block ----
+    this.telemetry.track('session_end', { ...breedsEnd }); this.save(); this.telemetry.flush(true); }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)

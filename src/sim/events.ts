@@ -1,4 +1,5 @@
 import type { WorkerId, WorkerMood } from './workers';
+import type { BreedId } from '../config/breeds';
 /** Events the pure sim reports to an optional sink (telemetry lives outside the sim). */
 export type SimEvent =
   | { type: 'save_migrated'; migration: 'breeds_sanitise'; from: 6; to: 6; reason: 'invalid_root' | 'invalid_values'; refund_cents: number; farm_level: number; backup_stores: [] } // M5.1 breeds E12 / D1 (BR-AC26)
@@ -19,7 +20,15 @@ export type SimEvent =
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
-  | M5SimEvent;
+  | M5SimEvent
+  | BreedsSimEvent;
+/** M5.1 breeds §8 telemetry (rev 3.8.9 ea922eb8 L692-695; errata rev 15 5e12a591 #15-18). Emitted only with m4.flags.breeds on. */
+export type BreedRarityName = 'Common' | 'Rare' | 'Epic' | 'Legendary';
+export type BreedsSimEvent =
+  | { type: 'hatch_started'; breed_id: BreedId; rarity: BreedRarityName; cost: number; coinsBefore: number; pity_before: number; free: boolean; farm_level: number }
+  | { type: 'breed_revealed'; breed_id: BreedId; rarity: BreedRarityName; dupe: boolean; stars_after: number; offline: boolean; wait_ms: number }
+  | { type: 'breed_slotted'; slot: number; prev_slot: number | null; breed_id: BreedId | null; prev_breed_id: BreedId | null; cause: 'manual' | 'auto_reveal' | 'move'; loadout: string; settling: number; count: number }
+  | { type: 'flock_complete'; hatches: number; farm_level: number; elapsed_since_unlock_s: number; backfilled: boolean };
 /** M5.0 sim events (F1(d)); emitted only with their m4.flags.* on. Field names follow telemetry-spec v0.6.2 as quoted in the
  *  feature specs. Game adds the UI-only fields when forwarding to telemetry: `collectible_id` (per-session counter shared by
  *  golden egg and Broody), `layout`, and for Broody `slot_id` Y0..Y11 / `restored`. */

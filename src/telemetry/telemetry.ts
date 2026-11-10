@@ -13,7 +13,8 @@ export function installId(kv: KV, rnd: () => string = () => (globalThis.crypto?.
 export const isPinned = (type: string) => type === 'session_start' || type === 'session_end' || type === 'upgrade' || type.startsWith('onboarding_')
   || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset'
   || type === 'milestone_reached' || type === 'balanced_tier'
-  || type === 'save_migrated' || type === 'save_migration_aborted'; // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'save_migrated' || type === 'save_migration_aborted' // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'hatch_started' || type === 'flock_complete'; // M5.1 breeds §8 L692/L695 (pinned; only emitted with m4.flags.breeds on)
 export interface TEvent { type: string; ts: number; sessionMs: number; [k: string]: unknown; }
 export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; }
 /** Pre-0.6.2 rings are a bare array, or {events} with no v. Tag those events; never drop them (G8-13). */
