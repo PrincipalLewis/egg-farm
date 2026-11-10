@@ -40,6 +40,7 @@ import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
 import { tapIgnored, collectRate } from './streak-tap'; // v5 streak / tapCoins (Hire 3)
+import { syncPriceChips } from './streak-chips-dom'; // v5 streak price chips (Hire 3)
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -743,6 +744,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
       const { eggs, cents } = sellAllPreview(s, b, saleCtx); // same per-order Grader math + rounding as the sellAll action
       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCountFloor, fmtMoneyFloor)); setDisabled(sellAllBtn, eggs === 0);
+      syncPriceChips(mRows, sellAllBtn, s, b, saleCtx); // v5 streak price chips (S-AC19/20, ST-AC22); flag off: no DOM touch
     }
     // M41-8: the shared pick is refreshed first so the row outline, the UX-M4 chip and the strip ★ use the same frame's pick.
     renderGoal();

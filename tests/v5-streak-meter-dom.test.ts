@@ -202,7 +202,7 @@ describe('real Game (sim on rc/v5) drives the UI with no glue', () => {
 });
 
 describe('static checks', () => {
-  const css = readFileSync(resolve(process.cwd(), 'src/ui/streak.css'), 'utf8');
+  const css = ['src/ui/streak.css', 'src/ui/streak-chips.css'].map(f => readFileSync(resolve(process.cwd(), f), 'utf8')).join('\n');
   it('CT-AC3: no looping animation in the streak CSS', () => { expect(css).not.toMatch(/infinite/); expect(css).not.toMatch(/animation-iteration-count/); });
   it("every rule is scoped to nodes only this feature adds (.streak-*, .coin-pop, .price-chip*) or .m5-streak (flag-off pages unaffected)", () => {
     const sels = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@keyframes[^{]+\{(?:[^{}]*\{[^}]*\})*\s*\}/g, '').match(/[^{}@]+(?=\{)/g)!.map(s => s.trim()).filter(s => s && !s.startsWith('media') && !/^\(/.test(s));

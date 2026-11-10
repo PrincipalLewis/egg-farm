@@ -9,6 +9,7 @@ beforeAll(() => {
   window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as any;
   (globalThis as any).requestAnimationFrame ??= (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0);
   (Element.prototype as any).scrollIntoView ??= function () {};
+  (Element.prototype as any).animate ??= function () { return { finished: Promise.resolve(), cancel() {} }; }; // jsdom: the sale coin flight
 });
 const B = { ...balance, m4: { ...balance.m4!, flags: { ...balance.m4!.flags, streak: 1 } } } as Balance;
 for (const focused of [false, true]) it(`Sell all label cents == credit (streak s = 0.2, document focused = ${focused})`, async () => {
