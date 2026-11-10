@@ -1,6 +1,6 @@
 # F6 rebuild: HANDOFF (Features)
 
-Updated 2026-11-10 ~03:25 CET (Europe/Belgrade). Task HoE/v5-f6-rebuild. Branch `feat/v5-f6-rebuild` (ON ORIGIN), worktree `/workspace/wt-v5-f6-rebuild` (node_modules symlinked from wt-v5-breeds-ui-prB; same package-lock). Base: `origin/rc/v5` @ d65391b (#111 merged).
+Updated 2026-11-10 ~03:55 CET (Europe/Belgrade). Task HoE/v5-f6-rebuild. Branch `feat/v5-f6-rebuild` (ON ORIGIN), worktree `/workspace/wt-v5-f6-rebuild` (node_modules symlinked from wt-v5-breeds-ui-prB; same package-lock). Base: `origin/rc/v5` @ d65391b (#111 merged).
 API: `engineering/tasks/v5-f6-rebuild/API.md`, **v1.0 (all [stable])**. Consumers: Generalist (golden, broody) and Hire 3 dec9a396 (streak).
 
 ## Done
@@ -20,10 +20,18 @@ API: `engineering/tasks/v5-f6-rebuild/API.md`, **v1.0 (all [stable])**. Consumer
 - `ctx.pops` (set / active), shared per host and cleared by destroy(). It feeds streak's CT-AC10.
 - tests/v5-f6-overlay.test.ts: 37. Focused set (36 files): 581/581. tsc 0.
 
-## Next (phase 2, ~5 h)
-1. Audio hooks (AudioHooks, registerAudioHook, Audio.playFile/qaLog) and the build:qa `eggfarmQa` seam (overlay.spots, fx.setMax, menu/sheet) + the check-release-build `eggfarmQa` guard. Port from 6307674 and finalise API.md v1.0.
-2. Flag-off release parity vs rc/v5: build:html on both, release-load #app hash (chromium), plus bundle check-release-build.
-3. Spot browser check at 360 / 390 / 1280×800 / 1024×474 (port scripts/v5-f6-browser.mjs). Author evidence only.
-4. One full gate at the final head, then HANDOFF + push. No PR (not in scope).
+## ⚠ GUARD EDITS (reviewers: these change existing QA guards, not just add tests)
+1. `tests/v5-p8-slim.test.ts` [RF-AC16]: was "no mountOverlay in app.ts"; now allows **exactly one** `mountOverlay(` call site, `attDialogOpen` used **exactly 3x** (declaration, `wireAttended(g, attDialogOpen)`, `dialogOpen: attDialogOpen`), exactly one `new FxBudget(`, and still forbids AudioHooks/registerFeature in app.ts.
+2. `tests/qa-rc1-bugs.test.ts` BUG-4/5: the FX cleanup regex now requires `el.remove(); fx.release(el); }, 1500)` (FxBudget replaced `live[]`).
+- Sign-off: **HoQA QA-D-1110-F6-GUARDS (d1f40d6)** for the FxBudget=1 and BUG-4/5 tightenings. mountOverlay=1 / attDialogOpen=3 tightening added at the commit after 6bca887 (mutation-checked: a 4th attDialogOpen use or a 2nd mountOverlay call fails). **Architect sign-off on the guard edits: still to be recorded.**
 
-Hours left: **~5 h** (of the 6–8 h budget, ~2 h used).
+## Phase 2 result (03:55 CET)
+- Full gate at **6bca887** (/workspace/artifacts/v5-f6-rebuild-6bca887/gate-summary.txt): steps 1–8 all rc=0 (test, slow, build, globals ×3 engines, build:qa, golden, F6 browser ×3 engines 122/122 each, build:html, release-load chromium).
+- Step 9 flag-0 parity vs rc/v5 d65391b: **rc=1 in the gate run**. The diff (step9-gate-diff.txt) is game state only: the f6 dump had laid 1 egg (`1 / 50`, Collect enabled) in the 3.5 s paused-clock window, the base dump had not; no markup/structure difference. Rerun idle right after (step9-rerun/hashes.txt): base, f6, f6 → **all 03a81bbf…** (build-id normalised), identical. So it is a load-timing nondeterminism in the release-load dump harness (something advances on wall time under load despite page.clock pause), NOT an F6 diff. Not root-caused; recorded as a harness flake to fix (open item), and the gate is reported as 13/14 + idle rerun of step 9 green, not as all-green.
+- Browser spot check (author evidence only): chromium/firefox/webkit 122/122 at 360 / 390 / 1280×800 / 1024×474. WebKit audio.log is informational (no GStreamer mp3 decoder, QA-D-1030-WKDEPS).
+- API.md v1.0, all [stable], sha256 82164ad8… (unchanged since a78c719).
+
+## Open
+- Architect sign-off on the guard edits.
+- Release-load dump flake (step 9): pin it, e.g. install the clock before any script/timer (addInitScript) or compare structure with sim fields masked.
+- No PR (not in scope).
