@@ -263,7 +263,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
     // P2b (AC-R11 / TP1-U2): a Refill tap on an Unpaid worker dispatches nothing (no worker_manage); the refused-tap feedback still plays.
-    if (kind === 'manage' && routeCardManage(wid, b)) return; // rc2Refill = 1: card Manage opens the Shift sheet, entry 'card' (stub until Features' opener)
+    if (kind === 'manage' && routeCardManage(wid, b)) return; // rc2Refill = 1: the card button opens the Shift sheet with entry card (stub until the Features opener)
     if (kind === 'manage' && g.state.workers[wid as keyof typeof g.state.workers]?.unpaid) return cantAfford(bt);
     if (kind === 'pause') return togglePause(bt, wid);
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
