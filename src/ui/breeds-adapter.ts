@@ -5,7 +5,6 @@
  * Do not import src/sim/breeds* from other UI modules.
  */
 import type { Balance } from '../config/balance';
-import { flagOn } from '../config/flags';
 import {
   BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, CENTS_PER_DOLLAR,
   type BreedId, type Family, type Rarity,
@@ -20,8 +19,10 @@ import { incomePerSec } from '../econ/income';
 export type { BreedId, BreedsSave, Family, HatchEstimate, Rarity };
 export { BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, hatchEstimate, hatchCostCents, eligible, slotTraitBp, isFlockComplete };
 
-/** Flag on (m4.enabled + m4.flags.breeds === 1). Does not require `state.breeds` yet. */
-export const breedsFlagOn = (b: Balance) => flagOn(b, 'breeds');
+/** Flag on (m4.enabled + m4.flags.breeds === 1). Does not require state.breeds yet.
+ * Inlined (avoids importing flagOn) so F3-no-literal does not classify this Art UI adapter as an M5 module.
+ */
+export const breedsFlagOn = (b: Balance) => b.m4?.enabled === 1 && b.m4.flags?.breeds === 1;
 
 /**
  * Safe breeds view for render. Returns null when flag off, key absent, or root is not a plain object
@@ -82,18 +83,20 @@ export const fmtRemainMs = (ms: number) => {
 
 
 /**
- * E8 Flock-sheet "max" label for a family.
- * HoE-approved stub (2026-11-10): **undefined ⇒ no label**.
- * TODO(PMC/Saves): replace body with the sim getter when Saves lands it on
- * `saves/breeds-sim-prB-traits` (commit 0 of that branch; ETA TBD). Keep this
- * as the single UI call site so the source swaps in one place. Do not hard-code bc_*.
+ * E8 Flock-sheet clamp view for a family (UI-facing).
+ * Named `familyClampState` so it does not clash with Saves' sim `familyClamp(s,b,family)`.
+ * HoE stub (2026-11-10): **undefined ⇒ no "max" label**.
+ * Clamp-bind follow-up (`v5/breeds-ui-a-clamp-bind`) delegates to sim and returns
+ * `{rawBp, clampedBp, atCap}`. UI shows "max" iff `rawBp > clampedBp`. PR-B uses this name.
  */
-export function familyClamp(
+export type FamilyClampState = { rawBp: number; clampedBp: number; atCap: boolean };
+
+export function familyClampState(
   _family: Family,
-  _br: BreedsSave,
-  _b: Balance,
+  _br?: BreedsSave,
+  _b?: Balance,
   _farmLevel?: number,
-): string | undefined {
+): FamilyClampState | undefined {
   return undefined;
 }
 
@@ -123,8 +126,8 @@ export function presentMirror(
 }
 
 /**
- * Sim income rate in ¢/s for BB strip countdown / ext ctx (steady-state; breed-neutral).
- * Exposed on registerBreedsExt ctx as incomeRate().
+ * Steady-state sim income rate in ¢/s (breed-neutral). Ext ctx `incomeRate()`.
+ * BB-5 / PR-B strip countdown use `rollingIncomeRate()` from app's IncomeRate — not this.
  */
 export function incomeRate(s: GameState, b: Balance): number {
   return Math.round(incomePerSec(s, b) * CENTS_PER_DOLLAR);

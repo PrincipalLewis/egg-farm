@@ -13,6 +13,10 @@ import {
 import {
   hatchUi, farmSoonVisible, FARM_SOON_TEXT, albumCellHtml, slotCardHtml, silhouetteImg, breedImg,
 } from './breeds-ui';
+import {
+  registerBreedsExt, clearBreedsExtForTests, breedsExtCountForTests, breedsExtList,
+  type BreedsExt, type BreedsExtCtx,
+} from './breeds-ext-registry';
 
 export type FlockUiFlags = {
   flockOpened?: boolean;       // sheet opened once → never highlight again
@@ -192,11 +196,8 @@ export function mountFlock(opts: {
     const note = farmSoonVisible(est) ? `<p class="breeds-farmsoon" data-farm-soon="1">${FARM_SOON_TEXT}</p>` : '';
     const hatchDisabled = hu.disabled ? 'true' : 'false';
     const hatchCls = hu.kind === 'affordable' || hu.kind === 'free' ? 'affordable' : '';
-    const hatchAriaDesc = hu.kind === 'unaffordable'
-      ? ` aria-describedby="hatch-sub"`
-      : hu.kind === 'affordable' || hu.kind === 'free'
-        ? ` aria-describedby="hatch-sub"`
-        : '';
+    // Label-in-name: accessible name = visible label (no aria-label). Time/hint via describedby.
+    const hatchAriaDesc = ` aria-describedby="hatch-sub"`;
     const disc = br.incubator
       ? `${silhouetteImg('incu-sil')}<div class="incu-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.max(0, Math.min(100, Math.round(100 * (1 - br.incubator.remainingMs / (bc(b, 'hatch_time_s') * 1000)))))}"><i style="width:${Math.max(0, Math.min(100, 100 * (1 - br.incubator.remainingMs / (bc(b, 'hatch_time_s') * 1000))))}%"></i></div>`
       : `${silhouetteImg('incu-sil')}`;
@@ -207,7 +208,7 @@ export function mountFlock(opts: {
         <div class="incu-disc">${disc}</div>
         <div class="incu-copy"><div class="incu-title">Incubator</div>
           <div class="incu-status">${br.incubator ? 'Hatching · a surprise breed' : 'Empty · 1 egg at a time'}</div></div>
-        <button type="button" class="btn hatch-btn ${hatchCls}" data-act="hatch" data-testid="breeds-hatch" aria-disabled="${hatchDisabled}" aria-label="${hu.aria}"${hatchAriaDesc}>${hu.label}</button>
+        <button type="button" class="btn hatch-btn ${hatchCls}" data-act="hatch" data-testid="breeds-hatch" aria-disabled="${hatchDisabled}"${hatchAriaDesc}>${hu.label}</button>
         <p class="hatch-sub" id="hatch-sub">${hu.sub}</p>
         ${note}
       </div>
@@ -305,52 +306,40 @@ export function mountFlock(opts: {
 }
 
 
-/** PR-B (and future) extension hooks. PR-A fires each after sheet/HUD sync.
- *  Modules named `src/ui/breeds-ext-*.ts` self-register via registerBreedsExt;
- *  mountBreeds eager-globs them behind the breeds flag (no app.ts edit for PR-B). */
-export type BreedsExtCtx = {
-  g: Game;
-  b: Balance;
-  s: Game['state'];
-  flockOpen: boolean;
-  docked: boolean;
-  /** Same path as the Flock entry button. */
-  openFlock: () => void;
-  /** Sim income in ¢/s (adapter `incomeRate`). */
-  incomeRate: () => number;
-  /** Same reduced-motion source PR-A uses for reveal / glow (`opts.rm()`). */
-  reducedMotion: boolean;
-};
-export type BreedsExt = {
-  onSync?(ctx: BreedsExtCtx): void;
-  onDispose?(): void;
-};
-const _ext: BreedsExt[] = [];
-export function registerBreedsExt(ext: BreedsExt): void { _ext.push(ext); }
-/** Test-only: wipe the registry between cases. */
-export function clearBreedsExtForTests(): void { _ext.length = 0; }
-export function breedsExtCountForTests(): number { return _ext.length; }
+/** Re-export registry API so existing `from './breeds-mount'` imports keep working.
+ *  Ext modules MUST import from `./breeds-ext-registry` only (leaf — no TDZ cycle). */
+export {
+  registerBreedsExt, clearBreedsExtForTests, breedsExtCountForTests, breedsExtList,
+  type BreedsExt, type BreedsExtCtx,
+} from './breeds-ext-registry';
 
 export type BreedsHandle = FlockMount & { registerExt: typeof registerBreedsExt };
 
+export type MountBreedsOpts = Parameters<typeof mountFlock>[0] & {
+  /** Rolling ¢/s from app's `IncomeRate` (BB-5). Required when flag on. */
+  rollingIncomeRate: () => number;
+};
+
 /**
  * PR-A single app.ts entry: flag-off → null (no ext glob). Flag-on → mountFlock, then
- * eager-load `./breeds-ext-*.ts` (zero matches in PR-A is fine). PR-B ships
- * `breeds-ext-prB.ts` (or similar) that calls registerBreedsExt — no app.ts edit.
+ * eager-load `./breeds-ext-*.ts` (zero matches in PR-A is fine). Ext modules register via
+ * the leaf `breeds-ext-registry` (not this file) so the eager glob cannot TDZ.
  */
-export function mountBreeds(app: Parameters<typeof mountFlock>[0]): BreedsHandle | null {
+export function mountBreeds(app: MountBreedsOpts): BreedsHandle | null {
   const flock = mountFlock(app);
   if (!flock) return null;
   // Naming rule: src/ui/breeds-ext-*.ts. Eager so modules can registerBreedsExt at import time.
-  import.meta.glob('./breeds-ext-*.ts', { eager: true });
+  // Modules import ONLY breeds-ext-registry (leaf).
+  import.meta.glob(['./breeds-ext-*.ts', '!./breeds-ext-registry.ts'], { eager: true });
   const fire = (s: Game['state'], flockOpen: boolean) => {
     const ctx: BreedsExtCtx = {
       g: app.g, b: app.b, s, flockOpen, docked: app.docked.matches,
       openFlock: () => flock.open(),
       incomeRate: () => incomeRate(app.g.state, app.b),
+      rollingIncomeRate: () => app.rollingIncomeRate(),
       reducedMotion: app.rm(),
     };
-    for (const e of _ext) e.onSync?.(ctx);
+    for (const e of breedsExtList()) e.onSync?.(ctx);
   };
   const handle: BreedsHandle = {
     syncEntry(s, flags, sessions) {
@@ -367,7 +356,7 @@ export function mountBreeds(app: Parameters<typeof mountFlock>[0]): BreedsHandle
     onWelcomeClosed: () => flock.onWelcomeClosed(),
     onEsc: () => flock.onEsc(),
     dispose() {
-      for (const e of _ext) e.onDispose?.();
+      for (const e of breedsExtList()) e.onDispose?.();
       flock.dispose();
     },
     registerExt: registerBreedsExt,
