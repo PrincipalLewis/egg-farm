@@ -67,6 +67,13 @@ export function tickSlotWindows(s: GameState, dtMs: number, ev?: Sink): GameStat
 }
 /** session_end / pagehide: close every open breed_slotted window now (flag on only; identity otherwise). */
 export const flushBreedsTel = (s: GameState, b: Balance, ev?: Sink): GameState => (breedsFlagOn(b) ? tickSlotWindows(s, Infinity, ev) : s);
+/** Architect m1 (#127): start fresh session counters after session_end is emitted and on a bfcache restore (pageshow persisted).
+ *  Drops breedsTel (absent == empty, so flag-on/no-hatch stays byte-identical); an open breed_slotted window survives. */
+export function resetBreedsTel(s: GameState): GameState {
+  const t = s.breedsTel; if (!t) return s;
+  if (t.win.some(w => w !== null)) return { ...s, breedsTel: { ...emptyTel(), win: t.win } };
+  const { breedsTel: _t, ...o } = s; return o as GameState;
+}
 /** §8 breed_family_s: one tick of sim dt for every slot that is settled at the start of the tick (the BR-R4 gate's view). */
 export function addFamilyMs(s: GameState, br: BreedsSave, dtMs: number): GameState {
   const add = { P: 0, A: 0, B: 0 }; let any = false;

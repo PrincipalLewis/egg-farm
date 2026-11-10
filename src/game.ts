@@ -22,7 +22,7 @@ import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
-import { flushBreedsTel } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
+import { flushBreedsTel, resetBreedsTel } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
 import { sessionEndBreedsFields } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
 /** v5 #1: collectible_* / frenzy_* events are forwarded with Game's per-session collectible_id (not a sim or save field). */
 export type GameEvent = (SimEvent & { collectible_id?: number }) | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
@@ -348,7 +348,12 @@ export class Game {
     // Row 32 (HoE/breeds-sim-prB-traits, Saves): present_active_s / present_lost_count, beside breedsEnd.
     const presentEnd = sessionEndPresentFields(this.state, this.b);
     // T-AC9: no comma-bearing calls inside the session_end literal — plain keys or ...spreads only.
-    this.telemetry.track('session_end', { ...presentEnd, ...breedsEnd }); this.save(); this.telemetry.flush(true); }
+    this.telemetry.track('session_end', { ...presentEnd, ...breedsEnd });
+    this.state = resetBreedsTel(this.state); // Architect m1: the next session_end (bfcache restore) counts only its own session
+    this.save(); this.telemetry.flush(true); }
+  /** pageshow (main.ts): a bfcache restore (persisted) resumes this Game object, so it starts fresh breeds session counters
+   *  (Architect m1 guard; pagehide's endSession normally already reset them). Non-persisted pageshow = a fresh load: no-op. */
+  onPageShow(persisted: boolean) { if (persisted) this.state = resetBreedsTel(this.state); }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
     this.resetting = true; this.goldenEnd('reset');

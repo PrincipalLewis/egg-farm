@@ -144,6 +144,7 @@ async function boot() {
   watchVisibility(document, () => Date.now(), { onHidden: at => g.onHidden(at), onShown: s => { const eggs = g.onShown(s.endAt); if (!frozen && eggs > 0) ui.showWelcome(); } });
   new RenderPump(() => { if (frozen) return; g.frame(); ui.render(); }, { raf: cb => requestAnimationFrame(cb), setInterval: (cb, ms) => setInterval(cb, ms), now: () => performance.now() }).start();
   window.addEventListener('pagehide', () => { g.endSession(); lease.release(); });
+  window.addEventListener('pageshow', e => { if (e.persisted) g.onPageShow(true); }); // Architect m1 (#127): bfcache restore = fresh breeds counters
   // §3c interim path: backup (LS + IndexedDB) then in-session commit; after the lease claim and newer checks (m1).
   if (g.tracksMigrationPending) void g.startTracksMigration().then(r => { if (r === 'committed') ui.render?.(); });
   stopAutosave = startAutosave(() => g.save(), balance.save.autosaveIntervalS * 1000, window, document);
