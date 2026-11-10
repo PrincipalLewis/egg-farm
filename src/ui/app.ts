@@ -39,6 +39,7 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
+import { tapIgnored, collectRate } from './streak-tap'; // v5 streak / tapCoins (Hire 3)
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
@@ -209,13 +210,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** S2-10: every player action redraws synchronously, so the screen never waits for the next frame/timer to show it. */
   const act = (a: Parameters<typeof g.dispatch>[0]): boolean => { const ok: boolean = tryDispatch(g, a, b); if (ok) { dirty = true; render(); } return ok; };
   const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
-  const collect = () => {
-    const before = g.state.coop; g.dispatch({ type: 'collect' });
+  let collectKeyRepeat = false; // v5 streak R2: a held Enter repeats clicks (ui/streak-tap.ts)
+  const collect = (e?: Event) => {
+    if (e && tapIgnored(b, e as MouseEvent, collectKeyRepeat)) return; // v5 streak R2/R3: synthetic / key-repeat click (flags off: never)
+    let credited: boolean | undefined; const offCredit = g.on(ev => { if (ev.type === 'collect') credited = ev.credited; });
+    const before = g.state.coop; g.dispatch({ type: 'collect' }); offCredit();
     const k = Math.floor(before) - Math.floor(g.state.coop) + (g.state.basket ? 0 : 0);
     const got = Math.min(Math.floor(before), S.eggsPerTap(g.state.collectionLevel, b));
     retrigger(collectBtn, 'squash');
     if (got <= 0) { retrigger(collectBtn, 'shake'); floatText('Empty', collectBtn); return; }
-    void k; sfx('collect');
+    void k; audio.play('collect', undefined, collectRate(g.state, b, credited)); // v5 streak R16: tier-pitched egg.collect (rate 1 = rc1)
     const d = tapFx.tap(got);
     if (!rm()) { let first = true; for (let i = 0; i < d.flyers; i++) fly(A('icon-egg.svg'), $('.nest'), basketEl.parentElement!, i, 24, () => { if (first) { first = false; pulse(basketEl.parentElement!); } }); }
     else pulse(basketEl.parentElement!);
@@ -223,6 +227,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     dirty = true; render(); // S2-10
   };
   collectBtn.addEventListener('click', collect);
+  collectBtn.addEventListener('keydown', e => { collectKeyRepeat = e.repeat; }); collectBtn.addEventListener('keyup', () => { collectKeyRepeat = false; }); // v5 streak R2
   scene.addEventListener('click', collect);
   // S2-9: the Market sheet opens only from a deliberate tap on a customer chip (or "+N") that was under the finger at
   // pointerdown and already on screen >= 250 ms; nothing else opens it (no auto-open when the queue fills).

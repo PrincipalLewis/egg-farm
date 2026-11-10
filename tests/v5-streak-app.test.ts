@@ -17,6 +17,7 @@ beforeAll(() => {
   (globalThis as any).requestAnimationFrame ??= (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0);
   (globalThis as any).cancelAnimationFrame ??= (i: number) => clearTimeout(i);
   (Element.prototype as any).scrollIntoView ??= function () { /* jsdom */ };
+  (Element.prototype as any).animate ??= function () { return { finished: Promise.resolve(), cancel() {} }; }; // jsdom: the egg flight
   vi.spyOn(performance, 'now').mockImplementation(() => t);
 });
 /** F6 API Q4 (Features): every mount is destroyed in afterEach before the next test remounts. */
@@ -28,8 +29,9 @@ async function app(b: Balance, state: object = {}) {
   const { mountApp } = await import('../src/ui/app');
   document.body.innerHTML = '<div id="app"></div>';
   const root = document.getElementById('app')!;
-  mountApp(root, g, b, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
-  return { g, root };
+  const play = vi.fn();
+  mountApp(root, g, b, { enabled: false, play, unlock() {} } as any, 'test', { newGame: false });
+  return { g, root, play };
 }
 
 describe('flag off: byte-identical app DOM', () => {
@@ -57,9 +59,24 @@ describe('flag on in the real app', () => {
     const row = document.getElementById('streak')!;
     expect(row.parentElement!.classList.contains('collectbar')).toBe(true); expect(row.previousElementSibling!.id).toBe('collect');
     expect(root.classList.contains('m5-streak')).toBe(true);
-    (document.getElementById('collect') as HTMLButtonElement).click(); o.render(t);
+    g.dispatch({ type: 'collect' }); o.render(t); // jsdom clicks are untrusted (R3 filters them); the credited Collect itself
     expect(row.classList.contains('on')).toBe(true); expect(row.querySelector('.streak-label')!.textContent).toBe('+1% price');
     expect(row.getAttribute('aria-valuetext')).toBe('Streak +1% price, tier 0 of 4');
     o.destroy(); expect(document.getElementById('streak')).toBeNull();
+  });
+});
+
+describe('app.ts collect path: R2/R3 filter and R16 pitch (ui/streak-tap.ts)', () => {
+  const coop = (g: Game) => g.state.coop;
+  it('flags off (shipped): a synthetic click still collects and plays collect at rate 1 (rc1)', async () => {
+    const { g, play } = await app(balance, { coop: 10 }); const c0 = coop(g);
+    (document.getElementById('collect') as HTMLButtonElement).click();
+    expect(coop(g)).toBeLessThan(c0); expect(play).toHaveBeenCalledWith('collect', undefined, 1);
+  });
+  it('streak/tapCoins on: a synthetic (isTrusted false) click on Collect or the scene is ignored: no collect, no credit, no sound', async () => {
+    const B = mk({ streak: 1, tapCoins: 1 }), F = balance.m4!.tc!.streak_unlock_farm as number;
+    const { g, play } = await app(B, { farmLevel: F, coop: 10 }); const c0 = coop(g), s0 = g.state.coinsCents;
+    (document.getElementById('collect') as HTMLButtonElement).click(); document.getElementById('scene')?.click();
+    expect(coop(g)).toBe(c0); expect(g.state.streakS ?? 0).toBe(0); expect(g.state.coinsCents).toBe(s0); expect(play).not.toHaveBeenCalledWith('collect', undefined, expect.anything());
   });
 });
