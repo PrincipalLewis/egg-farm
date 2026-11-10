@@ -1,10 +1,11 @@
-/** Slim v5 attendance API (unchanged) + the v5 F6 overlay mount layer below (feature registry, spots, FX budget; no audio engine). */
+/** Slim v5 attendance API (unchanged) + the v5 F6 overlay mount layer below (feature registry, spots, FX budget, audio hooks). */
 import type { Game } from '../game';
 import { DIALOG_SEL } from './onboarding';
 import { explainerOpen } from './tracks-explainer';
 import { flagOn, type M5Flag } from '../config/flags';
 import type { Balance } from '../config/balance';
-import { FX_MAX_LIVE, SPAWN_CLEAR_PX } from './overlay-spec';
+import { AUDIO_MIN_GAP_MS, FX_MAX_LIVE, SPAWN_CLEAR_PX } from './overlay-spec';
+import { SFX, type Audio, type SfxName } from './audio';
 import { domZones, layoutKey, spotCentres, toBox, validSpots, type Box, type LayoutKey, type Spot, type Zone } from './overlay-spots';
 export type { Box, LayoutKey, Spot, SpotId, Zone } from './overlay-spots';
 
@@ -66,6 +67,35 @@ export class FxBudget {
   release(el: HTMLElement) { const i = this.live.indexOf(el); if (i >= 0) this.live.splice(i, 1); }
   get count() { return this.live.length; }
 }
+// ---------------------------------------------------------------- audio hooks (decisions.md 2026-10-29 23:07, GE-AC24)
+export interface AudioLogEntry { hook: string; file: string; tMs: number; semi: number }
+/** hook → asset file (no extension). Built-in hooks are the SFX names; features add theirs with registerAudioHook. */
+export const AUDIO_HOOKS = new Map<string, string>(Object.entries(SFX));
+/** A feature's sound: hook name → asset file (e.g. registerAudioHook('goldenSpawn', 'sfx-golden-spawn-01', audio)). Loads it if unlocked. */
+export const registerAudioHook = (hook: string, file: string, audio?: Pick<Audio, 'load'>): void => { AUDIO_HOOKS.set(hook, file); audio?.load(file); };
+export class AudioHooks {
+  /** `audio` may be a test double with only play(name): built-in hooks still reach it. The QA log lives on Audio.qaLog. */
+  constructor(private audio: Partial<Pick<Audio, 'playFile' | 'play' | 'load'>>) {}
+  /** Plays a registered hook; true iff a sound actually started. semi defaults to 0. */
+  play(hook: string, opts: { semi?: number; minGapMs?: number } = {}): boolean {
+    const file = AUDIO_HOOKS.get(hook); if (!file) return false;
+    const semi = opts.semi ?? 0, gapMs = opts.minGapMs ?? AUDIO_MIN_GAP_MS;
+    if (this.audio.playFile) return this.audio.playFile(file, gapMs, semi, hook);
+    if (hook in SFX) this.audio.play?.(hook as SfxName, gapMs); return false;
+  }
+  /** Built-in SFX by name (#86 2b4abf93 shape). */
+  sfx = (n: SfxName) => { this.play(n); };
+  /** Additive to #86: registerAudioHook bound to this app's Audio (so the asset loads once unlocked). */
+  register(hook: string, file: string): void { registerAudioHook(hook, file, this.audio.load ? (this.audio as Pick<Audio, 'load'>) : undefined); }
+}
+
+/** Shared "a pop is showing" signal (golden egg pop, Frenzy pop): set(id, on) per pop id; active() while any is on. */
+export interface PopSignal { set(id: string, on: boolean): void; active(): boolean }
+export const makePopSignal = (): PopSignal & { clear(): void } => {
+  const on = new Set<string>();
+  return { set: (id, v) => { if (v) on.add(id); else on.delete(id); }, active: () => on.size > 0, clear: () => { on.clear(); } };
+};
+
 export interface OverlayCtx {
   g: Game; b: Balance; root: HTMLElement; scene: HTMLElement;
   /** div.overlay-layer inside #scene, created on the first call (absent while nothing mounts). */
@@ -81,6 +111,10 @@ export interface OverlayCtx {
   /** F6-AC-SHEET: open => not attended, at every width. */
   registerSheet(id: string): SheetHandle;
   fx: FxBudget; asset(f: string): string;
+  /** Feature sounds: ctx.audio.register(hook, file) once, then ctx.audio.play(hook, { semi }). */
+  audio: AudioHooks;
+  /** Golden / Frenzy call pops.set(id, on); streak's CT-AC10 pill suppression reads pops.active(). Cleared by destroy(). */
+  pops: PopSignal;
 }
 export interface OverlayFeature {
   id: string;
@@ -100,15 +134,18 @@ export const registeredFeatures = (): readonly OverlayFeature[] => FEATURES;
 export const clearFeatures = (): void => { FEATURES.length = 0; };
 
 export interface OverlayDeps { g: Game; b: Balance; root: HTMLElement; scene: HTMLElement; docked: Pick<MediaQueryList, 'matches'>;
-  rm(): boolean; dialogOpen(): boolean; fx: FxBudget; asset(f: string): string; doc?: Document }
+  rm(): boolean; dialogOpen(): boolean; fx: FxBudget; asset(f: string): string; doc?: Document;
+  /** The app's Audio (or a test double); mountOverlay wraps it in AudioHooks. */
+  audio?: Partial<Pick<Audio, 'playFile' | 'play' | 'load'>> }
 export interface OverlayHost { ctx: OverlayCtx; features: string[]; render(t: number): void; destroy(): void }
 /** Mounts every registered feature whose flag is on, in registration order. */
 export function mountOverlay(d: OverlayDeps): OverlayHost {
   const doc = d.doc ?? document; let layerEl: HTMLElement | null = null;
   const extra: { name: string; rect: () => Box | DOMRect | null; clear: number }[] = [];
+  const pops = makePopSignal();
   const vw = () => doc.documentElement.clientWidth || innerWidth, vh = () => doc.documentElement.clientHeight || innerHeight;
   const ctx: OverlayCtx = {
-    g: d.g, b: d.b, root: d.root, scene: d.scene, rm: d.rm, dialogOpen: d.dialogOpen, fx: d.fx, asset: d.asset,
+    g: d.g, b: d.b, root: d.root, scene: d.scene, rm: d.rm, dialogOpen: d.dialogOpen, fx: d.fx, asset: d.asset, audio: new AudioHooks(d.audio ?? {}), pops,
     attended: () => attendedProbe(doc) && !d.dialogOpen(),
     layer: () => { if (!layerEl) { layerEl = doc.createElement('div'); layerEl.className = 'overlay-layer'; d.scene.append(layerEl); } return layerEl; },
     layout: () => layoutKey(vw(), vh(), d.docked.matches),
@@ -127,5 +164,5 @@ export function mountOverlay(d: OverlayDeps): OverlayHost {
   for (const f of live) { const u = f.mount(ctx); if (u) unmounts.push(u); }
   const renderers = live.filter(f => f.render);
   return { ctx, features: live.map(f => f.id), render: t => { for (const f of renderers) f.render!(ctx, t); },
-    destroy: () => { while (unmounts.length) unmounts.pop()!(); layerEl?.remove(); layerEl = null; } };
+    destroy: () => { while (unmounts.length) unmounts.pop()!(); pops.clear(); layerEl?.remove(); layerEl = null; } };
 }

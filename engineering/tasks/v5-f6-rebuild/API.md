@@ -1,8 +1,8 @@
-# F6 overlay mount layer: spot registry API (DRAFT v0.1)
+# F6 overlay mount layer: spot registry API (v1.0)
 
 Owner: Features (Senior Engineer, Features & Economy Wiring). Branch `feat/v5-f6-rebuild` off `origin/rc/v5` @ d65391b (#111 golden merged).
-Status: **DRAFT v0.2 (implemented on the branch, focused tests green; ⚠ not final until the phase-2 audio/QA-seam port + Architect read)**, published early so golden (Generalist), broody (Generalist) and streak (Hire 3 dec9a396) can code against it.
-Signatures marked **[stable]** won't change without a note to all three consumers. Items marked **[draft]** may still change during the port.
+Status: **v1.0 (03:35 CET): every signature below is [stable]**. Any change gets a note to all three consumers first. Published early so golden (Generalist), broody (Generalist) and streak (Hire 3 dec9a396) can code against it.
+registerZone, registerFeature, mountOverlay, spots, audio, pops and the eggfarmQa seam are all [stable]. Nothing is [draft] any more.
 Source: a port of the UI layer from #86 (`feat/v5-ui-f6-overlay` @ 2b4abf93) and its sibling bundle-f6 @ 6307674, rebuilt against rc/v5's current APIs. It is not a rebase.
 
 ## Files
@@ -12,6 +12,8 @@ Source: a port of the UI layer from #86 (`feat/v5-ui-f6-overlay` @ 2b4abf93) and
 | `src/ui/overlay-spots.ts` | Pure spot geometry: `layoutKey`, `spotCentres`, `validSpots`, `domZones`, `DOM_ZONES`. No DOM writes. |
 | `src/ui/overlay-spec.ts` | Named Art & UX layout constants (m4-timed-collectible v1.1 §2.1–§2.3, layout-spec §6). The code has no bare literals. Not CSV tunables, so balance.json is untouched. |
 | `src/ui/features.ts` | THE feature list. Each consumer adds ONE import line here. No app.ts edit. |
+| `src/ui/qa-seam.ts` | build:qa-only `window.eggfarmQa` (compiled out of release; `check-release-build` rejects `eggfarmQa`). |
+| `src/ui/audio.ts` | `Audio.playFile(file, minGapMs, semi, hook)`, `Audio.load(file)`, `Audio.qaLog`. `Audio.play(name)` is unchanged for callers. |
 | `src/ui/golden-spots.ts` | Unchanged (rc/v5, #111). F6 `validSpots` delegates its zone test to `validSpotIds`, so the R14 rule exists in one place only. |
 
 app.ts changes once in F6, and only F6 changes it: `import './features'`, then one `mountOverlay(...)` after the DOM is built, then `overlay.render(t)` in `renderAll`. Consumers never edit app.ts.
@@ -56,11 +58,33 @@ export interface OverlayCtx {
   registerSheet(id: string): SheetHandle;   // = overlay.registerSheet; open → not attended at EVERY width
   fx: FxBudget;                  // shared ≤ FX_MAX_LIVE (30) live FX elements; the oldest is recycled
   asset(f: string): string;      // the app's asset URL resolver
+  audio: AudioHooks;             // feature sounds (below)
+  pops: PopSignal;               // shared "a pop is showing" signal (below)
 }
+// audio hooks: EXACT #86 2b4abf93 names and shapes
+export interface AudioLogEntry { hook: string; file: string; tMs: number; semi: number }
+export const AUDIO_HOOKS: Map<string, string>;                // hook → asset file (no extension); built-ins = SFX names
+export const registerAudioHook: (hook: string, file: string, audio?: Pick<Audio, 'load'>) => void;
+export class AudioHooks {
+  play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean; // true iff a sound actually started; semi default 0
+  sfx(n: SfxName): void;
+  register(hook: string, file: string): void;   // additive to #86: registerAudioHook bound to the app's Audio (loads the asset)
+}
+// pop signal
+export interface PopSignal { set(id: string, on: boolean): void; active(): boolean } // active() = any id on
+
 export function mountOverlay(d: OverlayDeps): { ctx: OverlayCtx; features: string[]; render(t: number): void; destroy(): void };
 export class FxBudget { max: number; admit(el: HTMLElement): void; release(el: HTMLElement): void; readonly count: number }
 ```
-**[draft]** audio hooks (`ctx.audio.play(hook, {semi})`, `registerAudioHook(hook, file)`, plus the build:qa `eggfarmQa.audio.log`) and the build:qa `window.eggfarmQa.overlay.spots()` seam. These are ported from #86 in phase 2, and the names may change. Until then, use the app's existing `Audio.play(SfxName)`.
+### Audio [stable]
+- `registerAudioHook(hook, file)` once (or `ctx.audio.register(hook, file)` so the asset also loads through the app's Audio), then `ctx.audio.play(hook, { semi })`. `semi` is a pitch shift in semitones (playbackRate 2^(semi/12)); the default is 0. `minGapMs` defaults to 60, which is the old `Audio.play` gap.
+- Every sound that actually starts appends ONE `{hook, file, tMs, semi}` to `Audio.qaLog`. A sound blocked by the min gap, mute, a missing buffer or an unknown hook logs nothing. In release builds `qaLog` is `null`.
+
+### Pops [stable]
+- `ctx.pops.set(id, on)`: golden calls `set('golden', true/false)` around its pop, and Frenzy calls `set('frenzy', …)`. `ctx.pops.active()` is true while any id is on; streak's CT-AC10 pill suppression reads it. There is one signal per mount host, shared by every feature. `destroy()` clears it.
+
+### build:qa seam `window.eggfarmQa` [stable]
+`audio.log` (AudioLogEntry[]), `fx.setMax(n)` / `fx.max` / `fx.count`, `menu.open()` / `menu.close()`, `sheet.stepClose()` (closes the open modal first, else the open sheet; returns `'modal'` / the sheet name / null), and `overlay.spots()` → `{layout, spots, valid, zones}`. All of it is read-only except the fx cap. Features extend the object in their own modules, never in app.ts.
 
 ## Spot ids per layout (Art v1.1 §2.1–§2.3)
 - `phone-360` (vw < 368) and `phone-375`: S1–S4 sit in the left column and S5–S8 in the right, at scene-edge ± 42 px and y = scene.top + {0.32, 0.50, 0.68, 0.86} × scene height.
@@ -99,8 +123,11 @@ registerFeature({ id: 'broody', flag: 'broody', mount(ctx) {
 // then in src/ui/features.ts, one line each:
 import './golden-egg'; import './streak-meter'; import './broody';
 ```
+**Feature tests must call `destroy()` on the host (e.g. in `afterEach`, together with `clearFeatures()`) before remounting.** The registry is module-level, but each host's unmounts, layer and pop signal are per host, and a leaked host keeps its probes (e.g. `setSpotProbe`) and its DOM alive.
+
 Rules: use `ctx.fx.admit(el)` / `release(el)` for every transient FX node. Don't add to `DOM_ZONES`; call `registerZone`. Don't import app.ts. Don't keep your own attended probe.
 
 ## Changelog
 - v0.1 (cd0d438, 03:05 CET): first publish.
+- v1.0 (03:35 CET): audio hooks with the exact #86 2b4abf93 names (`ctx.audio.play(hook, {semi})`, `registerAudioHook(hook, file)`, `AudioHooks.sfx`, plus additive `register`); `Audio.qaLog` entries `{hook, file, tMs, semi}`; the `eggfarmQa` seam; `ctx.pops` (`set` / `active`), cleared by `destroy()`; the destroy-before-remount rule for feature tests. Everything is now [stable].
 - v0.2 (03:25 CET): implemented on the branch. Adds the optional `inset` on `spotCentres` and the `DOCKED_1280x800` export. `destroy()` now removes the layer. No consumer-facing signature was removed. Tests: `tests/v5-f6-overlay.test.ts` (25).

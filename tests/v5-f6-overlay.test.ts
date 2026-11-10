@@ -2,7 +2,8 @@
 // v5 F6 rebuild: the overlay mount layer on rc/v5 (engineering/tasks/v5-f6-rebuild/API.md). Ported from #86 tests/v5-f6-overlay.test.ts
 // (2b4abf93 / bundle-f6 6307674): F6-AC1 layout keys, F6-AC2 spot tables, F6-AC3 live-rect validation, F6-AC8 registration API,
 // F6-AC11 FX budget, F6-AC-SHEET via the overlay ctx, plus F6-AC12 flag-off / no-feature #app identity in mountApp.
-// Not ported here (phase 2, API.md [draft]): audio hooks (AC6), reduced-motion helper (AC7), eggfarmQa seam (AC9), hens-pill testid (AC10).
+// F6-AC6 audio hooks and F6-AC9 eggfarmQa seam (phase 2). Not ported: the reduced-motion helper (AC7; app.ts keeps its own rm()) and
+// AC10 (hens-pill testid already on rc/v5, guarded by v5-p8-slim RF-AC16).
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import { createHash } from 'node:crypto';
 import { balance, type Balance } from '../src/config/balance';
@@ -10,7 +11,10 @@ import type { M5Flag } from '../src/config/flags';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import { layoutKey, spotCentres, validSpots, domZones, DOM_ZONES, DOCKED_1280x800, type Box, type Zone, type LayoutKey } from '../src/ui/overlay-spots';
-import { anySheetOpen, clearSheets, FxBudget, registerFeature, registeredFeatures, clearFeatures, mountOverlay } from '../src/ui/overlay';
+import { anySheetOpen, clearSheets, FxBudget, registerFeature, registeredFeatures, clearFeatures, mountOverlay, AudioHooks, AUDIO_HOOKS, registerAudioHook } from '../src/ui/overlay';
+import { installQaSeam } from '../src/ui/qa-seam';
+import { SFX, Audio } from '../src/ui/audio';
+import { readFileSync } from 'node:fs';
 
 const B = (flags?: Partial<Record<M5Flag, number>>) => ({ ...balance, m4: { ...balance.m4!, enabled: 1, ...(flags ? { flags: { ...(balance.m4 as any).flags, ...flags } } : {}) } }) as Balance;
 const bx = (l: number, t: number, r: number, b: number): Box => ({ left: l, top: t, right: r, bottom: b });
@@ -27,7 +31,7 @@ beforeAll(() => {
   (globalThis as any).cancelAnimationFrame ??= (i: number) => clearTimeout(i);
   (Element.prototype as any).animate ??= () => ({ finished: Promise.resolve(), cancel() {}, onfinish: null, addEventListener() {} });
 });
-afterEach(() => { clearFeatures(); clearSheets(); document.body.innerHTML = ''; document.documentElement.className = ''; vi.restoreAllMocks(); });
+afterEach(() => { delete (window as any).eggfarmQa; clearFeatures(); clearSheets(); document.body.innerHTML = ''; document.documentElement.className = ''; vi.restoreAllMocks(); });
 
 describe('F6 layout keys (Art v1.1 §2.1)', () => {
   it('F6-AC1: phone = not docked; phone-360 for vw < 368 else phone-375 (incl. portrait vw >= 960)', () => {
@@ -178,6 +182,94 @@ describe('F6 feature registration API', () => {
     expect(ctx.attended()).toBe(true); // Game.attendedNow() adds its own sim conditions; only the dialog half is asserted below
     const h = ctx.registerSheet('feature-sheet'); h.opened(); expect(ctx.attended()).toBe(false); expect((g as any).attendedNow()).toBe(false);
     h.closeComplete(); expect(ctx.attended()).toBe(true); expect(ctx.dialogOpen()).toBe(false); expect(anySheetOpen()).toBe(false);
+  });
+});
+
+describe('F6 audio hooks (decisions.md 2026-10-29 23:07)', () => {
+  const fakeAudio = () => {
+    const a = new Audio('/a/'); const started: { rate: number }[] = [];
+    (a as any).ctx = { destination: {}, createBufferSource: () => { const s = { buffer: null, playbackRate: { value: 1 }, connect() {}, start() { started.push({ rate: s.playbackRate.value }); } }; return s; } };
+    for (const f of Object.values(SFX)) (a as any).buffers.set(f, {});
+    return { a, started };
+  };
+  it('F6-AC6: one {hook, file, tMs, semi} per sound actually started; semi 0 default; sell stays sfx-sell-coin', () => {
+    const { a, started } = fakeAudio(); a.qaLog = []; const h = new AudioHooks(a);
+    expect(h.play('sell')).toBe(true); expect(h.play('sell')).toBe(false); // within minGap: not started, not logged
+    expect(a.qaLog).toHaveLength(1); expect(a.qaLog[0]).toMatchObject({ hook: 'sell', file: 'sfx-sell-coin', semi: 0 }); expect(typeof a.qaLog[0].tMs).toBe('number');
+    expect(started).toEqual([{ rate: 1 }]); expect(SFX.sell).toBe('sfx-sell-coin');
+  });
+  it('F6-AC6: semi=+2 sets playbackRate 2^(2/12) and logs semi 2; unknown hook / muted / missing buffer => nothing logged', () => {
+    const { a, started } = fakeAudio(); a.qaLog = []; const h = new AudioHooks(a);
+    expect(h.play('collect', { semi: 2 })).toBe(true); expect(started[0].rate).toBeCloseTo(2 ** (2 / 12), 10); expect(a.qaLog![0]).toMatchObject({ hook: 'collect', semi: 2 });
+    expect(h.play('nope')).toBe(false); a.enabled = false; expect(h.play('upgrade')).toBe(false); a.enabled = true;
+    registerAudioHook('golden-spawn', 'sfx-golden-spawn'); expect(h.play('golden-spawn')).toBe(false); // buffer not loaded => not started
+    expect(a.qaLog).toHaveLength(1); AUDIO_HOOKS.delete('golden-spawn');
+  });
+  it('F6-AC6: registered feature hook plays its file once loaded; release Audio keeps qaLog null', () => {
+    const { a } = fakeAudio(); expect(a.qaLog).toBeNull(); registerAudioHook('golden-collect', 'sfx-golden-collect'); (a as any).buffers.set('sfx-golden-collect', {});
+    a.qaLog = []; expect(new AudioHooks(a).play('golden-collect')).toBe(true); expect(a.qaLog[0]).toMatchObject({ hook: 'golden-collect', file: 'sfx-golden-collect', semi: 0 });
+    AUDIO_HOOKS.delete('golden-collect');
+  });
+  it('F6-AC6: test doubles without playFile still get built-in hooks via play(name); a feature hook never reaches play(name)', () => {
+    const calls: string[] = []; const h = new AudioHooks({ play: (n: any) => { calls.push(n); } }); h.play('upgrade'); registerAudioHook('x-hook', 'sfx-x'); h.play('x-hook');
+    expect(calls).toEqual(['upgrade']); AUDIO_HOOKS.delete('x-hook');
+  });
+  it('F6-AC6: Audio.play(name) is unchanged for callers (same file, same min gap) and logs hook = SFX name', () => {
+    const { a, started } = fakeAudio(); a.qaLog = []; a.play('upgrade'); a.play('upgrade'); expect(started).toHaveLength(1); expect(a.qaLog).toEqual([expect.objectContaining({ hook: 'upgrade', file: 'sfx-upgrade', semi: 0 })]);
+  });
+  it('F6-AC6: ctx.audio wraps the app Audio; ctx.audio.register loads the asset through Audio.load', () => {
+    document.body.innerHTML = '<div id="scene"></div>'; const loads: string[] = [];
+    let ctx: any; registerFeature({ id: 'snd', mount: c => { ctx = c; } });
+    mountOverlay({ g: {} as any, b: B(), root: document.body, scene: document.getElementById('scene')!, docked: { matches: false }, rm: () => false, fx: new FxBudget(), dialogOpen: () => false, asset: f => f, audio: { load: f => { loads.push(f); }, playFile: () => true } });
+    ctx.audio.register('golden-spawn', 'sfx-golden-spawn-01'); expect(loads).toEqual(['sfx-golden-spawn-01']); expect(ctx.audio.play('golden-spawn')).toBe(true); AUDIO_HOOKS.delete('golden-spawn');
+  });
+});
+
+describe('F6 eggfarmQa seam (build:qa only)', () => {
+  it('F6-AC9: installQaSeam exposes audio.log, fx.setMax, menu.open/close, sheet.stepClose under IOS_FLAG_ENABLED', () => {
+    const audio = { qaLog: null as any }, fx = new FxBudget(), calls: string[] = [];
+    const qa = installQaSeam({ audio, fx, menu: { open: () => calls.push('open'), close: () => calls.push('close') }, sheet: { stepClose: () => { calls.push('step'); return 'market'; } } }, window)!;
+    expect((window as any).eggfarmQa).toBe(qa); expect(qa.audio.log).toBe(audio.qaLog); expect(qa.audio.log).toEqual([]);
+    qa.fx.setMax(5.7); expect(fx.max).toBe(5); expect(qa.fx.max).toBe(5); qa.menu.open(); qa.menu.close(); expect(qa.sheet.stepClose()).toBe('market');
+    expect(calls).toEqual(['open', 'close', 'step']);
+  });
+  it('F6-AC9: mountApp installs window.eggfarmQa in a qa/test build; menu.open opens Settings, sheet.stepClose closes modal then sheet, overlay.spots read-only', async () => {
+    const { ui, settle } = await mountWith({}); const qa = (window as any).eggfarmQa; expect(qa).toBeTruthy();
+    ui.openPanel('market'); await settle(); qa.menu.open(); await settle();
+    expect(document.getElementById('modal-layer')!.classList.contains('open')).toBe(true);
+    expect(qa.sheet.stepClose()).toBe('modal'); expect(document.getElementById('modal-layer')!.classList.contains('open')).toBe(false);
+    expect(qa.sheet.stepClose()).toBe('market'); expect(document.getElementById('panel-layer')!.classList.contains('open')).toBe(false);
+    expect(qa.sheet.stepClose()).toBe(null);
+    const sp = qa.overlay.spots(); expect(['phone-360', 'phone-375', 'docked', 'docked-compact']).toContain(sp.layout);
+    expect(Array.isArray(sp.spots) && Array.isArray(sp.valid) && Array.isArray(sp.zones)).toBe(true);
+  });
+  it('F6-AC9: check-release-build.mjs hook list rejects eggfarmQa (Architect-owned test, list extended by F6)', () => {
+    const src = readFileSync('scripts/check-release-build.mjs', 'utf8'); const line = src.split('\n').find(l => l.startsWith('const hooks = ['))!;
+    expect(line).toContain("'eggfarmQa'");
+  });
+  it('F6-AC9: qa-seam is reachable only behind IOS_FLAG_ENABLED in app.ts', () => {
+    const app = readFileSync('src/ui/app.ts', 'utf8'); expect(app).toMatch(/if \(IOS_FLAG_ENABLED\) installQaSeam\(/);
+    expect(readFileSync('src/ui/qa-seam.ts', 'utf8')).toMatch(/if \(!IOS_FLAG_ENABLED\) return null/);
+  });
+});
+
+
+describe('F6 shared pop signal (ctx.pops; streak CT-AC10 reads active())', () => {
+  const host = () => { document.body.innerHTML = '<div id="scene"></div>'; let ctx: any;
+    registerFeature({ id: 'pops-probe', mount: c => { ctx = c; } });
+    const o = mountOverlay({ g: {} as any, b: B(), root: document.body, scene: document.getElementById('scene')!, docked: { matches: false }, rm: () => false, fx: new FxBudget(), dialogOpen: () => false, asset: f => f });
+    return { o, ctx }; };
+  it('active() is true while any registered pop is on (golden, frenzy), false when all are off; set is idempotent per id', () => {
+    const { ctx } = host(); expect(ctx.pops.active()).toBe(false);
+    ctx.pops.set('golden', true); expect(ctx.pops.active()).toBe(true);
+    ctx.pops.set('frenzy', true); ctx.pops.set('golden', false); expect(ctx.pops.active()).toBe(true);
+    ctx.pops.set('frenzy', true); ctx.pops.set('frenzy', false); expect(ctx.pops.active()).toBe(false);
+    ctx.pops.set('never-on', false); expect(ctx.pops.active()).toBe(false);
+  });
+  it('every feature sees the same signal (one per host); destroy() clears it', () => {
+    const seen: any[] = []; registerFeature({ id: 'a', mount: c => { seen.push(c); } }); registerFeature({ id: 'b', mount: c => { seen.push(c); } });
+    const { o } = host(); seen[0].pops.set('golden', true); expect(seen[1].pops.active()).toBe(true); expect(o.ctx.pops.active()).toBe(true);
+    o.destroy(); expect(o.ctx.pops.active()).toBe(false);
   });
 });
 

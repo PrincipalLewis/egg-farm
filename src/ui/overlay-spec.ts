@@ -29,5 +29,7 @@ export const DOCKED_SCENE_REF_PX = 744;
 export const COMPACT_LEFT_INSET_PX = 58;
 export const COMPACT_RIGHT_INSET_PX = 44;
 export const COMPACT_ROW_GAP_PX = 48;
+/** Audio hook default retrigger gap (the existing Audio.play default, unchanged). */
+export const AUDIO_MIN_GAP_MS = 60;
 /** layout-spec §6 FX budget: ≤ 30 live FX elements (app.ts FX budget, shared with overlay features via OverlayCtx.fx). */
 export const FX_MAX_LIVE = 30;

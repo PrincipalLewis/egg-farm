@@ -1,4 +1,5 @@
 import { FxBudget, makeDialogOpen, mountOverlay, wireAttended } from './overlay';
+import { installQaSeam } from './qa-seam';
 import './features'; // v5 F6: overlay feature list (one import line per M5 scene feature; empty in F6)
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
@@ -870,7 +871,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
   // v5 F6: mount host for overlay features (API.md). None registered / flags off → no DOM, no listeners, render no-op.
-  const overlay = mountOverlay({ g, b, root, scene, docked, rm, dialogOpen: attDialogOpen, fx, asset: A });
+  const overlay = mountOverlay({ g, b, root, scene, docked, rm, dialogOpen: attDialogOpen, fx, asset: A, audio });
+  // v5 F6: build:qa-only window.eggfarmQa seam (compiled out of release; check-release-build rejects 'eggfarmQa').
+  if (IOS_FLAG_ENABLED) installQaSeam({ audio, fx, menu: { open: showSettings, close: () => { if (modalKind) closeModal(); } },
+    sheet: { stepClose: () => { if (modalKind) { closeModal(); return 'modal'; } const was = open; if (was) openPanel(null); return was; } }, overlay: overlay.ctx });
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); overlay.render(t); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
