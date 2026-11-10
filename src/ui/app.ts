@@ -210,6 +210,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     saveFlags,
     getFlags: () => flags as FlockUiFlags,
     dirty: () => { dirty = true; },
+    // BB-5 / time-to-afford rolling window — PR-B strip countdown must match.
+    rollingIncomeRate: () => income.centsPerSec(now()),
   });
   flock?.syncEntry(g.state, flags as FlockUiFlags, flags.sessions ?? 0);
   let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate'), rateTri = $('#rate .tri'), rateTxt = $('#rate .rt'); // m6: ▼ in an aria-hidden .tri, money in .rt

@@ -123,8 +123,8 @@ export function presentMirror(
 }
 
 /**
- * Sim income rate in ¢/s for BB strip countdown / ext ctx (steady-state; breed-neutral).
- * Exposed on registerBreedsExt ctx as incomeRate().
+ * Steady-state sim income rate in ¢/s (breed-neutral). Ext ctx `incomeRate()`.
+ * BB-5 / PR-B strip countdown use `rollingIncomeRate()` from app's IncomeRate — not this.
  */
 export function incomeRate(s: GameState, b: Balance): number {
   return Math.round(incomePerSec(s, b) * CENTS_PER_DOLLAR);

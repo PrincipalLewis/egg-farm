@@ -557,7 +557,7 @@ describe('PR-B seams: ext ctx + presentMirror + flag-0', () => {
     expect(document.querySelector('.breeds-hud-mirror')!.textContent).toMatch(/^\+/);
   });
 
-  it('registerBreedsExt onSync receives openFlock, incomeRate, reducedMotion; flag-off skips', async () => {
+  it('registerBreedsExt onSync receives openFlock, incomeRate, rollingIncomeRate, reducedMotion; flag-off skips', async () => {
     const { mountBreeds, registerBreedsExt, clearBreedsExtForTests, breedsExtCountForTests } =
       await import('../src/ui/breeds-mount');
     clearBreedsExtForTests();
@@ -577,6 +577,7 @@ describe('PR-B seams: ext ctx + presentMirror + flag-0', () => {
       closeOtherPanels() {}, openUpgrades() {}, sfx() {},
       rm: () => true,
       saveFlags() {}, getFlags: () => ({}), dirty() {},
+      rollingIncomeRate: () => 0,
     });
     expect(off).toBeNull();
     expect(seen.length).toBe(0);
@@ -603,6 +604,7 @@ describe('PR-B seams: ext ctx + presentMirror + flag-0', () => {
       closeOtherPanels() {}, openUpgrades() {}, sfx() {},
       rm: () => true,
       saveFlags() {}, getFlags: () => ({}), dirty() {},
+      rollingIncomeRate: () => 0,
     });
     expect(h).toBeTruthy();
     h!.syncEntry(g.state, {}, 1);
@@ -611,6 +613,8 @@ describe('PR-B seams: ext ctx + presentMirror + flag-0', () => {
     expect(typeof ctx.openFlock).toBe('function');
     expect(typeof ctx.incomeRate).toBe('function');
     expect(ctx.incomeRate()).toBeTypeOf('number');
+    expect(typeof ctx.rollingIncomeRate).toBe('function');
+    expect(ctx.rollingIncomeRate()).toBeTypeOf('number');
     expect(ctx.reducedMotion).toBe(true);
     ctx.openFlock();
     expect(h!.isOpen).toBe(true);
@@ -711,6 +715,7 @@ describe('Q7 / breedAsset / BR-AC49 docked attendance', () => {
       closeOtherPanels() {}, openUpgrades() {}, sfx() {},
       rm: () => false,
       saveFlags() {}, getFlags: () => ({}), dirty() {},
+      rollingIncomeRate: () => 0,
     })!;
     h.syncEntry(g.state, {}, 1);
     h.open();
@@ -723,7 +728,27 @@ describe('Q7 / breedAsset / BR-AC49 docked attendance', () => {
 
 describe('import.meta.glob breeds-ext (PR-A has zero matches)', () => {
   it('eager glob for breeds-ext-*.ts yields empty module map in PR-A', () => {
-    const mods = import.meta.glob('../src/ui/breeds-ext-*.ts', { eager: true });
+    const mods = import.meta.glob(['../src/ui/breeds-ext-*.ts', '!../src/ui/breeds-ext-registry.ts'], { eager: true });
     expect(Object.keys(mods).length).toBe(0);
+  });
+});
+
+describe('breeds-ext-registry leaf (TDZ / registration order)', () => {
+  it('fake ext modules register via leaf only; order is push order', async () => {
+    const reg = await import('../src/ui/breeds-ext-registry');
+    reg.clearBreedsExtForTests();
+    const order: string[] = [];
+    // Simulate what breeds-ext-*.ts must do: import ONLY the registry leaf.
+    reg.registerBreedsExt({ onSync: () => { order.push('a'); } });
+    reg.registerBreedsExt({ onSync: () => { order.push('b'); } });
+    expect(reg.breedsExtCountForTests()).toBe(2);
+    const list = reg.breedsExtList();
+    for (const e of list) e.onSync?.({} as any);
+    expect(order).toEqual(['a', 'b']);
+    // Compatibility re-export from breeds-mount
+    const mount = await import('../src/ui/breeds-mount');
+    expect(mount.registerBreedsExt).toBe(reg.registerBreedsExt);
+    expect(mount.breedsExtCountForTests()).toBe(2);
+    reg.clearBreedsExtForTests();
   });
 });

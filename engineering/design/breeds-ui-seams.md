@@ -1,6 +1,6 @@
 # M5.1 Breeds UI — PR-A / PR-B seams
 
-**Status:** locked for Features (incl. HoE glob auto-load 2026-11-10).  
+**Status:** locked for Features (glob + registry leaf TDZ fix 2026-11-10; rollingIncomeRate).  
 **Base:** `rc/v5` @ `f20b9183`.  
 **PR-A branch / worktree:** `v5/breeds-ui-a` · `worktrees/v5-breeds-ui-a`.  
 **PR-B:** Features — Present chip, BB strip, yard (`feat/v5-breeds-ui-prB`).
@@ -13,15 +13,17 @@ This doc is the parallel-work contract. **PR-B makes no `app.ts` edit.**
 
 **PR-A owns** the single `app.ts` call site. Flag-off (`!m4.flags.breeds`) → `null` (**no** extension glob).
 
-**Flag-on:** `mountFlock` then eager-loads every module matching:
+**Leaf registry (TDZ fix):** `src/ui/breeds-ext-registry.ts` owns `registerBreedsExt`, the ext list, and `BreedsExtCtx` / `BreedsExt`. It has **no** imports from `breeds-mount`, `breeds-ui`, `breeds-adapter`, or `app` (type-only imports of `Game` / `Balance` only). **Ext modules import ONLY this leaf.** `breeds-mount` re-exports the registry API for compatibility.
+
+**Flag-on:** `mountFlock` then eager-loads every module matching (after importing the registry):
 
 ```ts
-import.meta.glob('./breeds-ext-*.ts', { eager: true })  // resolved from src/ui/
+import.meta.glob(['./breeds-ext-*.ts', '!./breeds-ext-registry.ts'], { eager: true })  // resolved from src/ui/
 ```
 
-**Naming rule:** extension modules live under `src/ui/` as **`breeds-ext-*.ts`** (e.g. `breeds-ext-prB.ts`). Each module calls `registerBreedsExt(...)` at import time. Zero matches in PR-A is fine — tsc/build stay green.
+**Naming rule:** extension modules live under `src/ui/` as **`breeds-ext-*.ts`** (e.g. `breeds-ext-prB.ts`). Each module calls `registerBreedsExt(...)` from `./breeds-ext-registry` at import time. Zero matches in PR-A is fine — tsc/build stay green. Eager glob must not create an import cycle (registry leaf).
 
-**PR-B mounts only via that glob + `registerBreedsExt`.** No `app.ts` side-effect import.
+**PR-B mounts only via that glob + leaf `registerBreedsExt`.** No `app.ts` side-effect import.
 
 ### Ext ctx (`BreedsExtCtx`) passed to `onSync`
 
@@ -30,7 +32,8 @@ import.meta.glob('./breeds-ext-*.ts', { eager: true })  // resolved from src/ui/
 | `g`, `b`, `s` | Game, Balance, state |
 | `flockOpen`, `docked` | sheet / layout |
 | `openFlock()` | same path as the Flock entry button |
-| `incomeRate()` | adapter `incomeRate(s,b)` → sim income ¢/s |
+| `incomeRate()` | adapter `incomeRate(s,b)` → **steady-state** sim income ¢/s |
+| `rollingIncomeRate()` | app `IncomeRate(60_000).centsPerSec(now)` — **same source as BB-5** countdown / time-to-afford. PR-B strip must use this. |
 | `reducedMotion` | boolean from PR-A's `opts.rm()` (settings + `prefers-reduced-motion`) |
 
 ### Exact `src/ui/app.ts` lines (PR-A)
