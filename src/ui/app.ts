@@ -116,7 +116,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
-  const toast = h(`<div class="toast" role="status"></div>`);
+  const toast = h(`<div class="toast${clockWageOn(b) ? ' cw-b1' : ''}" role="status"></div>`); // clockWage B-1 wrap rule, flag-on only (flag-off markup unchanged)
   root.append(hud, farm, nav, panelLayer); document.body.append(modal, fxLayer, toast);
   const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
