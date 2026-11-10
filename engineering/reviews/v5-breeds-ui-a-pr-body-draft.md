@@ -5,6 +5,14 @@
 **Spec:** `product/m5.1-breeds-spec.md` rev 3.8.9 `ea922eb8` · Checklist `product/collection/breeds-ui-build-checklist.md` `c9d8b631` · Art UI v0.2.7  
 **Seams:** `engineering/design/breeds-ui-seams.md` (sha256 `95f4589569f643c62e53bba3d15a54a7794df9a89364540ef2a148dede6a8539`)
 
+## PR-B seam (HoE 2026-11-10)
+
+- **No `app.ts` edit for PR-B.** `mountBreeds` (flag-on only) eager-loads `import.meta.glob('./breeds-ext-*.ts', { eager: true })` from `src/ui/`. Naming rule: `breeds-ext-*.ts`. Zero matches in PR-A — build stays green.
+- Ext ctx adds `openFlock()`, `incomeRate()` (¢/s), `reducedMotion`.
+- `presentMirror(bp, gateOpen)` lives in `breeds-adapter.ts` (used on Present slot cards).
+- **`familyClamp` stub:** `undefined` ⇒ no label. Real getter: Saves `saves/breeds-sim-prB-traits` (commit 0; ETA TBD) — named dependency.
+- Seams doc sha: see `engineering/design/breeds-ui-seams.md`.
+
 ## Flag / QA boot (HoQA)
 
 - **Committed `balance.json` stays at `m4.flags.breeds = 0`.** No PR-A commit changes that file.
@@ -20,7 +28,7 @@ Flock entry + BR-AC3b highlight, sheet (phone menu / docked overlay), slots + se
 
 ## AC → test trace
 
-*(table filled in a follow-up commit — see `engineering/reviews/v5-breeds-ui-a-ac-trace.md`)*
+See `engineering/reviews/v5-breeds-ui-a-ac-trace.md` (living table).
 
 ## Gates
 

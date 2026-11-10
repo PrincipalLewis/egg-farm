@@ -1,71 +1,50 @@
 # M5.1 Breeds UI — PR-A / PR-B seams
 
-**Status:** locked for Features (decisions below already relayed).  
+**Status:** locked for Features (incl. HoE glob auto-load 2026-11-10).  
 **Base:** `rc/v5` @ `f20b9183`.  
 **PR-A branch / worktree:** `v5/breeds-ui-a` · `worktrees/v5-breeds-ui-a`.  
-**PR-B:** Features — Present chip, BB strip, yard, a11y polish.
+**PR-B:** Features — Present chip, BB strip, yard (`feat/v5-breeds-ui-prB`).
 
-This doc is the parallel-work contract. PR-B must not edit `app.ts` beyond what is listed, and must not rename or move PR-A adapter symbols.
+This doc is the parallel-work contract. **PR-B makes no `app.ts` edit.**
 
 ---
 
-## 1. Mount ownership — `mountBreeds(app)`
+## 1. Mount ownership — `mountBreeds(app)` + `breeds-ext-*.ts`
 
-**PR-A owns** the single `app.ts` call site. Flag-off (`!m4.flags.breeds`) → `null`.
+**PR-A owns** the single `app.ts` call site. Flag-off (`!m4.flags.breeds`) → `null` (**no** extension glob).
 
-**PR-B mounts through the registration point** — `registerBreedsExt` / `handle.registerExt` exported from `src/ui/breeds-mount.ts`. After every PR-A `syncEntry` / `render`, registered extenders get `onSync`. On dispose, `onDispose`.
+**Flag-on:** `mountFlock` then eager-loads every module matching:
 
-**PR-B needs no `app.ts` edits.** If Features somehow cannot use the registry (should not happen), the *only* allowed extras are importing a PR-B mount and calling it once next to `mountBreeds` — do not duplicate Esc / welcome / render / dispose wiring.
+```ts
+import.meta.glob('./breeds-ext-*.ts', { eager: true })  // resolved from src/ui/
+```
 
-### Exact `src/ui/app.ts` lines (PR-A, current worktree)
+**Naming rule:** extension modules live under `src/ui/` as **`breeds-ext-*.ts`** (e.g. `breeds-ext-prB.ts`). Each module calls `registerBreedsExt(...)` at import time. Zero matches in PR-A is fine — tsc/build stay green.
+
+**PR-B mounts only via that glob + `registerBreedsExt`.** No `app.ts` side-effect import.
+
+### Ext ctx (`BreedsExtCtx`) passed to `onSync`
+
+| Field | Meaning |
+|-------|---------|
+| `g`, `b`, `s` | Game, Balance, state |
+| `flockOpen`, `docked` | sheet / layout |
+| `openFlock()` | same path as the Flock entry button |
+| `incomeRate()` | adapter `incomeRate(s,b)` → sim income ¢/s |
+| `reducedMotion` | boolean from PR-A's `opts.rm()` (settings + `prefers-reduced-motion`) |
+
+### Exact `src/ui/app.ts` lines (PR-A)
 
 ```ts
 // L39
 import { mountBreeds, type FlockUiFlags } from './breeds-mount';
 
-// L204–214 — sole breeds mount behind m4.flags.breeds (inside mountBreeds → mountFlock)
-  const flock = mountBreeds({
-    g, b, upHeader: upHeader as HTMLElement, panelLayer, docked,
-    closeOtherPanels: () => { if (!docked.matches) openPanel(null); },
-    openUpgrades: () => { if (!docked.matches) openPanel('upgrades'); },
-    sfx: (k) => sfx(k as any),
-    rm,
-    saveFlags,
-    getFlags: () => flags as FlockUiFlags,
-    dirty: () => { dirty = true; },
-  });
+// L204–214 — sole breeds mount
+  const flock = mountBreeds({ … });
   flock?.syncEntry(g.state, flags as FlockUiFlags, flags.sessions ?? 0);
 
-// L363 — after welcome-back dismiss → pendingReveal
-    … flock?.onWelcomeClosed();
-
-// L395 — Esc closes breeds sheet before other panels
-    … else if (flock?.onEsc()) { dirty = true; render(); } else openPanel(null);
-
-// L756–757 — every renderAll tick
-    flock?.syncEntry(s, flags as FlockUiFlags, flags.sessions ?? 0);
-    if (flock?.isOpen) flock.render();
-
-// L906 — dispose
-  return { … dispose: () => { flock?.dispose(); zgAC.abort(); } };
+// L363 onWelcomeClosed · L395 Esc onEsc · L756–757 sync/render · L906 dispose
 ```
-
-### PR-B registration sketch (no `app.ts`)
-
-```ts
-// e.g. src/ui/breeds-hud.ts (or a thin breeds-prB.ts that imports hud/strip/yard)
-import { registerBreedsExt } from './breeds-mount';
-import { mountPresentChip } from './breeds-hud';
-import { mountBbStrip } from './breeds-strip';
-import { mountYard } from './breeds-yard';
-
-registerBreedsExt({
-  onSync(ctx) { /* mount/update chip + strip + yard from ctx */ },
-  onDispose() { /* tear down */ },
-});
-```
-
-Importing that module from a PR-A-owned side-effect path is **not** required: Features can call `registerBreedsExt` from any module that loads when the game boots *as long as it does not add a second `app.ts` call*. Preferred: PR-B adds one file that self-registers, and either (a) dynamic-imports it from an extender already registered by a one-line PR-A follow-up if needed, or (b) Features uses the minimal `app.ts` import listed above only if the registry self-load is impossible. **Default: zero `app.ts` edits for PR-B.**
 
 ---
 
@@ -73,10 +52,12 @@ Importing that module from a PR-A-owned side-effect path is **not** required: Fe
 
 | Owner | Rule |
 |-------|------|
-| **PR-A** | Creates and owns `src/ui/breeds-adapter.ts`. Thin UI-facing surface over sim (`breedsFlagOn`, `breedsOf`, `flockUnlocked`, `hatchEstimate`, `breedAsset`, trait/family formatters, etc.). |
-| **PR-B** | **Adds getters only.** No renames, no moves, no signature changes to existing exports. Prefer new named exports over overloading. |
+| **PR-A** | Owns the file. Includes `presentMirror(bp, gateOpen)`, `incomeRate(s,b)`, `familyClamp` stub (`undefined` ⇒ no label). |
+| **PR-B** | **Adds getters only.** No renames / signature changes to existing exports. |
 
-Do **not** edit `src/sim|save|econ|data` from either PR for UI concerns.
+**`familyClamp`:** HoE stub — `undefined` means no "max" label. Real sim getter owned by Saves on `saves/breeds-sim-prB-traits` (commit 0; ETA TBD). Dependency — swap inside `familyClamp` only.
+
+**`presentMirror`:** PR-A uses it on Present settled slot cards (gate stub `true` until Saves calm-gate). PR-B HUD imports the same helper.
 
 ---
 
@@ -84,64 +65,35 @@ Do **not** edit `src/sim|save|econ|data` from either PR for UI concerns.
 
 | PR | Files |
 |----|--------|
-| **PR-A** | `src/ui/breeds-adapter.ts`, `src/ui/breeds-ui.ts`, `src/ui/breeds-mount.ts`, `src/ui/app.ts` (mount only), `src/ui/styles.css` (breeds block), `tests/v5-breeds-ui.test.ts`, `public/assets/char-breed-*.svg` (all 9) |
-| **PR-B** | `src/ui/breeds-hud.ts` (Present chip), `src/ui/breeds-strip.ts` (BB strip), `src/ui/breeds-yard.ts` (yard), plus PR-B tests; may append CSS under `breeds-hud-*` / `breeds-strip-*` / `breeds-yard-*` |
-
-PR-A may keep internal `mountFlock` as the sheet implementation; public entry for `app.ts` is **`mountBreeds`**.
+| **PR-A** | `breeds-adapter.ts`, `breeds-ui.ts`, `breeds-mount.ts`, `app.ts` (mount only), styles, tests, 9 sprites, this seams doc |
+| **PR-B** | `breeds-ext-prB.ts` (or `breeds-ext-*.ts` that registers), `breeds-hud.ts`, `breeds-strip.ts`, `breeds-yard.ts`, PR-B tests |
 
 ---
 
 ## 4. CSS / `data-testid` prefixes
 
-Global prefix: **`breeds-`** and `data-testid="breeds-*"`.
-
-| PR | Sub-prefixes (classes / testids) |
-|----|-----------------------------------|
-| **PR-A** | `sheet-`, `slot-`, `hatch-`, `album-`, `reveal-` (plus top-level `breeds-entry`, `breeds-sheet`, `breeds-body`, `breeds-back`, `breeds-close`, `breeds-slots`, `breeds-album`, `breeds-farmsoon`, `breeds-hatch`, `breeds-glow`, `breeds-dot`, `breeds-reveal`, …) |
-| **PR-B** | `hud-`, `strip-`, `yard-` (e.g. `breeds-hud-*`, `data-testid="breeds-hud-…"`, same for strip/yard) |
-
-Do not collide: PR-B must not introduce `slot-` / `hatch-` / `album-` / `reveal-` / `sheet-` class roots; PR-A must not take `hud-` / `strip-` / `yard-`.
-
-Attendance key stays `registerSheet('flock')` (overlay registry id; not a DOM class).
+Global: **`breeds-`** / `data-testid="breeds-*"`.  
+PR-A: `sheet-`, `slot-`, `hatch-`, `album-`, `reveal-` (+ `breeds-hud-mirror` from `presentMirror` html).  
+PR-B: `hud-`, `strip-`, `yard-`.
 
 ---
 
 ## 5. Sprites
 
-Sprite ids = **`char-breed-*.svg` filenames** (stem → asset). Mapping helper: `breedAsset(id)` → `char-breed-${id with _ → -}.svg`.
-
-**PR-A vendors all 9** into `public/assets/`:
-
-1. `char-breed-ayam-cemani.svg`
-2. `char-breed-brahma.svg`
-3. `char-breed-cochin.svg`
-4. `char-breed-cream-legbar.svg`
-5. `char-breed-leghorn.svg`
-6. `char-breed-orpington.svg`
-7. `char-breed-rhode-island-red.svg`
-8. `char-breed-sussex.svg`
-9. `char-breed-silhouette.svg`
-
-Source of truth for art: `art-ux/assets/char-breed-*.svg` (Art UI v0.2.7). PR-B consumes the same paths; do not re-vendor or rename.
+PR-A vendors all 9 `char-breed-*.svg`. PR-B consumes same paths.
 
 ---
 
 ## 6. Scope reminder
 
-| In PR-A | In PR-B |
-|---------|---------|
-| Flock entry + highlight (BR-AC3 / 3b) | Present chip |
-| Sheet + docked overlay + Esc | BB strip |
-| Slots + settle (AC32) | Yard |
-| Hatch + Farm-soon + hatchEstimate (AC31 / a / b / c / e) | A11y polish beyond PR-A minimum |
-| Album / incubator | |
-| Reveal + RM + pendingReveal | |
-| Adapter + 9 sprites + seams | |
+| In PR-A | In PR-B | Dependency |
+|---------|---------|------------|
+| Entry, highlight, sheet, slots, hatch, Farm-soon, album, reveal, adapter, glob host | Present chip, BB strip, yard | Saves `familyClamp` / Present calm-gate on `saves/breeds-sim-prB-traits` |
 
-Flag-off must stay byte-identical to base for non-breeds paths.
+Flag-off must stay byte-identical for non-breeds paths; ext glob must not run when flag off.
 
 ---
 
 ## 7. Contact
 
-Architect owns PR-A readiness + this seams doc. Features owns PR-B implementation against this contract. HoE escalations only if a seam must change (then update this file in the same change).
+Architect owns PR-A + this doc. Features owns PR-B against this contract. HoE escalations only if a seam must change (update this file in the same change).

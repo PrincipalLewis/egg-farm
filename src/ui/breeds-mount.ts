@@ -8,7 +8,7 @@ import type { Game } from '../game';
 import { registerSheet } from './overlay';
 import {
   breedsFlagOn, flockUnlocked, breedsOf, openSlotCount, freeHatchAvailable,
-  hatchEstimate, BREED_IDS, bc,
+  hatchEstimate, BREED_IDS, bc, incomeRate,
 } from './breeds-adapter';
 import {
   hatchUi, farmSoonVisible, FARM_SOON_TEXT, albumCellHtml, slotCardHtml, silhouetteImg, breedImg,
@@ -305,26 +305,52 @@ export function mountFlock(opts: {
 }
 
 
-/** PR-B extension hooks. PR-A calls each registered extender after sheet/HUD sync; PR-B registers from its own modules (no app.ts edit). */
+/** PR-B (and future) extension hooks. PR-A fires each after sheet/HUD sync.
+ *  Modules named `src/ui/breeds-ext-*.ts` self-register via registerBreedsExt;
+ *  mountBreeds eager-globs them behind the breeds flag (no app.ts edit for PR-B). */
+export type BreedsExtCtx = {
+  g: Game;
+  b: Balance;
+  s: Game['state'];
+  flockOpen: boolean;
+  docked: boolean;
+  /** Same path as the Flock entry button. */
+  openFlock: () => void;
+  /** Sim income in ¢/s (adapter `incomeRate`). */
+  incomeRate: () => number;
+  /** Same reduced-motion source PR-A uses for reveal / glow (`opts.rm()`). */
+  reducedMotion: boolean;
+};
 export type BreedsExt = {
-  /** After PR-A sync/render; mount Present chip, BB strip, yard. */
-  onSync?(ctx: { g: Game; b: Balance; s: Game['state']; flockOpen: boolean; docked: boolean }): void;
+  onSync?(ctx: BreedsExtCtx): void;
   onDispose?(): void;
 };
 const _ext: BreedsExt[] = [];
 export function registerBreedsExt(ext: BreedsExt): void { _ext.push(ext); }
+/** Test-only: wipe the registry between cases. */
+export function clearBreedsExtForTests(): void { _ext.length = 0; }
+export function breedsExtCountForTests(): number { return _ext.length; }
 
 export type BreedsHandle = FlockMount & { registerExt: typeof registerBreedsExt };
 
 /**
- * PR-A single app.ts entry: flag-off → null. PR-B mounts only via registerBreedsExt / handle.registerExt —
- * no further app.ts edits required for Present chip / BB strip / yard.
+ * PR-A single app.ts entry: flag-off → null (no ext glob). Flag-on → mountFlock, then
+ * eager-load `./breeds-ext-*.ts` (zero matches in PR-A is fine). PR-B ships
+ * `breeds-ext-prB.ts` (or similar) that calls registerBreedsExt — no app.ts edit.
  */
 export function mountBreeds(app: Parameters<typeof mountFlock>[0]): BreedsHandle | null {
   const flock = mountFlock(app);
   if (!flock) return null;
+  // Naming rule: src/ui/breeds-ext-*.ts. Eager so modules can registerBreedsExt at import time.
+  import.meta.glob('./breeds-ext-*.ts', { eager: true });
   const fire = (s: Game['state'], flockOpen: boolean) => {
-    for (const e of _ext) e.onSync?.({ g: app.g, b: app.b, s, flockOpen, docked: app.docked.matches });
+    const ctx: BreedsExtCtx = {
+      g: app.g, b: app.b, s, flockOpen, docked: app.docked.matches,
+      openFlock: () => flock.open(),
+      incomeRate: () => incomeRate(app.g.state, app.b),
+      reducedMotion: app.rm(),
+    };
+    for (const e of _ext) e.onSync?.(ctx);
   };
   const handle: BreedsHandle = {
     syncEntry(s, flags, sessions) {
