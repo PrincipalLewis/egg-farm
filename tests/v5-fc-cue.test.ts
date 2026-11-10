@@ -116,7 +116,7 @@ describe('#11 DOM (flag on)', () => {
     const m = await mount(FC, st({ market_hand: W(0) })); stallStub.cue = cue(true); m.ui.render();
     m.chip().click(); stallStub.cue = cue(false); m.ui.render(); expect(m.pop().hidden).toBe(true); expect(m.chip().hidden).toBe(true);
     stallStub.cue = cue(true); m.ui.render(); m.chip().focus(); m.chip().click();
-    stallStub.stall = { shown: true, trigger: 'sell', cause: 'mh_asleep', stallId: 's', noSaleS: 9, noCollectS: 0 }; m.ui.render(); m.ui.render();
+    stallStub.stall = { shown: true, trigger: 'sell', cause: 'mh_asleep', stallId: 1, noSaleS: 9, noCollectS: 0 }; m.ui.render(); m.ui.render();
     expect(m.pop().hidden).toBe(true); expect(m.chip().hidden).toBe(true); expect(document.activeElement).toBe(document.getElementById('stallChip'));
     stallStub.stall = null; m.ui.render(); m.ui.render(); m.chip().focus(); m.chip().click(); expect(m.pop().hidden).toBe(false);
     const q = mqs.find(x => x.q === '(max-height: 739px)')!; q.matches = false; q.fire();
