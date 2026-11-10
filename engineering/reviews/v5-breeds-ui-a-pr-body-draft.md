@@ -1,12 +1,12 @@
 # M5.1 Breeds UI PR-A — Ready
 
-**Branch:** `v5/breeds-ui-a` · **Head:** `b1d29eccd68f8e661252c20d2eed9a31110c8f78` · **Tree:** `a856032503939dac32bfcd41035c6bb5604428ee`  
+**Branch:** `v5/breeds-ui-a` · **Head:** `443b7ad0ccb962cc9637570b136c1cd13536d8d1` · **Tree:** `e6bde68408f3ce098d81b2bc3c90e330a1d9e339`  
 **Base:** `rc/v5` @ `d65391b` (#111 golden-game mergefwd; merge commit, not rebase)  
 **Worktree:** `worktrees/v5-breeds-ui-a`  
 **Spec:** `product/m5.1-breeds-spec.md` rev 3.8.9 · Checklist `c9d8b631` · Art UI v0.2.7  
 **Seams:** `engineering/design/breeds-ui-seams.md`  
 **AC trace:** `engineering/reviews/v5-breeds-ui-a-ac-trace.md`  
-**HoQA bundle:** `scratch/bundles/breeds-ui-pra-b1d29ecc.bundle` (verified)  
+**HoQA bundle:** `scratch/bundles/breeds-ui-pra-443b7ad0.bundle` (verified)  
 **Gate artifacts:** `artifacts/v5-breeds-ui-0ae9d907/` + SHA256SUMS
 
 ## Flag / QA (HoQA) — flag-on mechanism
