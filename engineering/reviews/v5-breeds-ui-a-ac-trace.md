@@ -1,6 +1,6 @@
 # Breeds UI PR-A — AC → test trace (Ready-candidate)
 
-**Head:** update with each commit (see git).  
+**Head:** `9816b3ea8633b39b30bbd562b3635414c41f14e3` (9816b3e) · Ready-candidate
 **Files:** `tests/v5-breeds-ui.test.ts`, `tests/helpers/breeds-on.test.ts`, `tests/v5-breeds-qa-seam.test.ts`  
 **Fixture:** `tests/helpers/breeds-on.ts` — `balance.json` stays `breeds=0`.
 
