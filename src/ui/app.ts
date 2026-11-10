@@ -24,7 +24,8 @@ import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMiles
 import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } from './pick-hysteresis';
 import { isZeroGain, zeroGainUiOn, zgFiltered, ZG_KEY_OF, ZG_DESC, ZG_CHIP } from './zero-gain'; // v5 zeroGainUi (m4.flags.zeroGainUi)
 import { zeroGainConfirmOn } from '../config/flags';
-import { rc2RefillOn } from './stall-chip';
+import { rc2RefillOn, fatigueCueOn } from './stall-chip';
+import { FatigueCue } from './fatigue-cue'; // #11 Rule 2 HUD cue (m4.flags.fatigueCue, paired with salesStopped)
 import { StallChip, stallChipOn } from './stall-chip';
 import { FarmBanner } from './stall-banner'; // #5b Rule 3 farm-screen Asleep banner (same flag)
 import { fatigueBubble } from './fatigue-bubble'; // #5b Rule 4 (same flag)
@@ -572,6 +573,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // #5b sales-stopped chip (spec cfff3817 §4.7): laid over the #goal slot; flag off = never constructed, markup unchanged.
   const stallChip = stallChipOn(b) ? new StallChip($('.collectbar'), goalBtn, { g, b, A, now, rm, act: a => act(a) }) : null;
   const farmBanner = stallChipOn(b) ? new FarmBanner(farm, { g, b, A, act: a => act(a), refused: el => cantAfford(el) }) : null;
+  const fatigueCue = fatigueCueOn(b) ? new FatigueCue(hud, farm, { g, b, A, openWorkers: () => { tab = 'workers'; dirty = true; openPanel('upgrades'); render(); }, stallChipEl: () => stallChip?.isShown ? stallChip.el : null }) : null;
 
   // ---------- Render ----------
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
@@ -772,6 +774,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (stallChip) { const vis = !goalHidden && (open === null || docked.matches) && !modalKind; stallChip.update(vis);
       // §5: the banner never names the chip's role; Rule 3 shows on the farm view only
       farmBanner!.update((open === null || docked.matches) && !modalKind, stallChip.isShown ? stallChip.coveredWorker : null); }
+    if (fatigueCue) fatigueCue.update(); // #11: display = fatigueCueView.shown && !suppressedByStall (the sim's state)
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);

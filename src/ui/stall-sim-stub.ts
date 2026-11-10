@@ -59,7 +59,7 @@ export function stallView(_s: GameState, b: Balance): Readonly<StallView> {
 export function fatigueCueView(s: GameState, b: Balance): Readonly<FatigueCueView> {
   if (!flagOn(b, 'salesStopped')) return NO_CUE;
   const v = stallStub.cue ?? NO_CUE;
-  return { ...v, suppressedByStall: stallView(s, b).shown };
+  return { ...v, suppressedByStall: v.suppressedByStall || stallView(s, b).shown };
 }
 export function resetStallTimers(_s: GameState): void { stallStub.notes.push({ fn: 'resetStallTimers', arg: '' }); }
 export function noteStallChipTap(_s: GameState, action: 'refill' | 'sell_all' | 'collect' | 'manage'): void { stallStub.notes.push({ fn: 'noteStallChipTap', arg: action }); }
