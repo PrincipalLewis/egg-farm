@@ -20,7 +20,7 @@ Flock entry + BR-AC3b highlight, sheet (phone menu / docked overlay), slots + se
 
 ## AC → test trace
 
-*(table filled in a follow-up commit — see `engineering/reviews/v5-breeds-ui-a-ac-trace.md`)*
+See `engineering/reviews/v5-breeds-ui-a-ac-trace.md` (living table).
 
 ## Gates
 
