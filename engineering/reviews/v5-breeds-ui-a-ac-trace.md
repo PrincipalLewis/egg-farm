@@ -1,7 +1,8 @@
 # Breeds UI PR-A — AC → test trace (Ready-candidate)
 
 **Head:** `d5327077bf99b0e467b5b9da15fb992406e8bb2c` · Ready (final gates green @ 0ae9d907)
-**Files:** `tests/v5-breeds-ui.test.ts`, `tests/helpers/breeds-on.test.ts`, `tests/v5-breeds-qa-seam.test.ts`  
+**Pre-bar fixes:** `engineering/reviews/v5-breeds-ui-a-prebar-fixes.md` (HoQA `breeds-pra-bd5b068a.md`)  
+**Files:** `tests/v5-breeds-prebar-fixes.test.ts`, `tests/v5-breeds-ui.test.ts`, `tests/helpers/breeds-on.test.ts`, `tests/v5-breeds-qa-seam.test.ts`  
 **Fixture:** `tests/helpers/breeds-on.ts` — `balance.json` stays `breeds=0`.
 
 | AC / row | Test(s) | Notes |
@@ -32,6 +33,17 @@
 | breeds-ext glob | zero matches in PR-A | |
 | HoQA breeds-on / qaBreeds | helper isolation; seam rejects marker | release-bundle at final gates |
 | BR-AC33–35 | `<img src>` sprites vendored | greyscale = Art review |
+| BR-UI-02 entry rect | probe (CSS) | pre-bar fix `8abcf165` |
+| BR-UI-03 | `BR-UI-03 locked slot placeholder copy` | `prebar-fixes.test.ts` |
+| BR-UI-06 | `BR-UI-06 Active totals row …` ×3; focus block; probe sheet rect | |
+| BR-UI-07 | `BR-UI-06 / BR-UI-07 focus returns …` ×5; probe Close rect + focus | phone focus → Upgrades nav (ruling) |
+| BR-UI-13 | `BR-UI-13 E5 / Flock complete sub-lines` ×3 | |
+| BR-UI-14 | `BR-UI-14 Hatch aria-describedby includes the Farm-soon note` | `hatch-sub hatch-fs` |
+| BR-UI-17 | `BR-UI-17 / BR-UI-34 filled slot …` ×2; probe Remove ≥44 | |
+| BR-UI-19 | `BR-UI-19 / BR-UI-34 album stars …`; probe cells/sprites | |
+| BR-UI-21 | `BR-UI-21 reveal card …` ×3; probe reveal | |
+| BR-UI-34 | 17/34 + 19/34 + `per-frame render keeps keyboard focus`; probe ariaSnapshot | |
+| BR-UI-35 | `BR-UI-35 axe landmark-no-duplicate-banner …` ×2; probe axe | |
 | BR-AC52 / strip | **PR-B** | |
 | BR-AC23b/c | **PR-B** (#100) | |
 | E8 familyClamp | stub `undefined` (no label) on Ready head | **Dep:** `#126` d4b5fdcd; bind on `v5/breeds-ui-a-clamp-bind` (not this head) |

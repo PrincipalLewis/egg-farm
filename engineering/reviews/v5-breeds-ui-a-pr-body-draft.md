@@ -5,6 +5,7 @@
 **Worktree:** `worktrees/v5-breeds-ui-a`  
 **Spec:** `product/m5.1-breeds-spec.md` rev 3.8.9 · Checklist `c9d8b631` · Art UI v0.2.7  
 **Seams:** `engineering/design/breeds-ui-seams.md`  
+**Pre-bar fixes (HoQA `breeds-pra-bd5b068a.md`):** BR-UI-02/03/06/07/13/14/17/19/21/34/35 — `engineering/reviews/v5-breeds-ui-a-prebar-fixes.md` (commits `fe01485`, `8abcf165`, `9b616704`)  
 **AC trace:** `engineering/reviews/v5-breeds-ui-a-ac-trace.md`  
 **HoQA bundle:** `scratch/bundles/breeds-ui-pra-<sha8>.bundle` matching tip SHA8 (verified)  
 **Gate artifacts:** `artifacts/v5-breeds-ui-0ae9d907/` + SHA256SUMS
@@ -51,6 +52,12 @@ Flag-on for tests and QA uses **two** mechanisms only:
 | flag-0 goldens | PASS |
 | check-globals chromium | PASS |
 | rc0 3 engines | Hosted CI (release-globals matrix + golden-game-browser) |
+
+## Pre-bar gates @ `9b616704` (tree `ba859431`)
+
+tsc 0 · sync-economy 0 · vitest 160/2362 · build + check-release ok · build:html · check-globals 3 engines PASS · probe (390/1280 + 360/1024×474/1280×720 Chromium; axe 4.14.0) 3 engines fails=0. Logs `scratch/logs/breeds-pra-prebar/gates-9b616704/`.
+
+New PR-A UI exports: `traitPctTrim`, `activeTotalsText`, `revealCopy`. No PR-B seam signature change (describedby now `hatch-sub[ hatch-fs]`).
 
 ## Merge conflicts
 
