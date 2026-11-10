@@ -35,7 +35,9 @@ import { tryDispatch, wouldApply } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, WORKER_NAMES, type NavAria } from './workers-ui';
+import { pauseUiOn, PauseDebounce, allWorkersPaused, pauseAnnouncement } from './pause-ui';
+import { isPaused } from '../sim/pause';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
@@ -209,6 +211,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** S2-10: every player action redraws synchronously, so the screen never waits for the next frame/timer to show it. */
   const act = (a: Parameters<typeof g.dispatch>[0]): boolean => { const ok: boolean = tryDispatch(g, a, b); if (ok) { dirty = true; render(); } return ok; };
   const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
+  // ---------- v5 pause toggle (pause spec v1.3.17 rule 2, §8; Hire2/v5-pause-ui). Nothing here runs unless pauseUiOn(). ----------
+  const pzDeb = new PauseDebounce();
+  /** Persistent polite live region for pause announcements (#uRow is re-rendered wholesale, so a region inside it would be recreated).
+   *  Created on first use only, so the flag-off DOM is unchanged. */
+  const pzLive = (): HTMLElement => { let el = document.getElementById('pzLive'); if (!el) { el = h('<div class="sr" role="status" aria-live="polite" id="pzLive"></div>'); document.body.append(el); } return el; };
+  const togglePause = (bt: HTMLElement, wid: keyof typeof g.state.workers) => {
+    const w = g.state.workers[wid]; if (!w || !pauseUiOn(g.state, b)) return;
+    if (!pzDeb.accept(wid, now(), b)) return cantAfford(bt); // AC-P7: a second tap inside tc_pause_toggle_debounce_s -> M1 disabled shake, no change
+    const wasPaused = isPaused(w, b);
+    if (!act({ type: wasPaused ? 'resume' : 'pause', worker: wid })) return cantAfford(bt);
+    setText(pzLive(), pauseAnnouncement(WORKER_NAMES[wid], !wasPaused, allWorkersPaused(g.state, b)));
+  };
   const collect = () => {
     const before = g.state.coop; g.dispatch({ type: 'collect' });
     const k = Math.floor(before) - Math.floor(g.state.coop) + (g.state.basket ? 0 : 0);
@@ -249,6 +263,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
     // P2b (AC-R11 / TP1-U2): a Refill tap on an Unpaid worker dispatches nothing (no worker_manage); the refused-tap feedback still plays.
     if (kind === 'manage' && g.state.workers[wid as keyof typeof g.state.workers]?.unpaid) return cantAfford(bt);
+    if (kind === 'pause') return togglePause(bt, wid);
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
     lastBuyBtn = bt; const bk = bt.dataset.kind;
     buyRow(bk, bt);
@@ -743,7 +758,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
-      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; const zf = ZGC ? zgFocusKey() : null; uRow.innerHTML = html; if (ZGC) zgApply(zf); }
+      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; const zf = ZGC ? zgFocusKey() : null;
+          // v5 pause: keep keyboard focus on the toggle across the wholesale re-render (Enter/Space toggles again from the same place).
+          const pzf = (document.activeElement as HTMLElement | null)?.closest?.('#uRow [data-act="pause"]') as HTMLElement | null, pzw = pzf?.dataset.w;
+          uRow.innerHTML = html; if (ZGC) zgApply(zf); if (pzw) uRow.querySelector<HTMLElement>(`[data-act="pause"][data-w="${pzw}"]`)?.focus({ preventScroll: true }); }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
         // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
         { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;

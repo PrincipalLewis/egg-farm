@@ -665,3 +665,16 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 @keyframes zgIn{from{opacity:0;transform:scaleY(.9)}}
 .zg-confirm[hidden]{display:none}
 .rm .zg-confirm{animation:none}@media (prefers-reduced-motion:reduce){.zg-confirm{animation:none}}
+/* v5 pause UI (Hire2/v5-pause-ui; pause spec v1.3.17 §8, AC-P15/P17). Only rendered with m4.flags.pause = 1 at/above tc_pause_unlock_farm.
+   Toggle: 44x44 icon-only, first item of the card action row, 8px to Refill; paused pill neutral grey (never red), text >= 4.5:1. */
+.wk-refill.has-pz{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px}
+.wk-refill.has-pz>.wk-cap{flex-basis:100%}
+.wk .btn.pz-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;flex:none;background:var(--c-white);box-shadow:none}
+.wk .btn.pz-toggle img{width:24px;height:24px}
+.wk .btn.pz-toggle[aria-pressed=true]{background:var(--c-yolk)}
+.wk .btn.pz-toggle.shake{animation:shake var(--t-med) linear}
+@media (prefers-reduced-motion:reduce){.wk .btn.pz-toggle.shake{animation:refusedFlash 300ms steps(1,end) 1}.wk .btn.pz-toggle:active{transform:none}}
+.reduced-motion .wk .btn.pz-toggle.shake,.rm .wk .btn.pz-toggle.shake{animation:refusedFlash 300ms steps(1,end) 1}
+.wk .pz-pill{display:inline-block;padding:0 8px;border-radius:var(--r-pill);background:var(--c-disabled);color:var(--c-text);font:700 12px/20px var(--f-body)} /* --c-text on --c-disabled >= 4.5:1, neutral grey */
+.wk .pz-sub{color:var(--c-muted-strong)} /* 7.0:1 on the card surface */
+.pz-all{font:400 12px/16px var(--f-body);color:var(--c-muted-strong);margin:4px 0} /* spec --c-ink-2 = the repo's --c-muted-strong (no --c-ink-2 token on rc/v5) */

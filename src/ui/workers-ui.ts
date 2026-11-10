@@ -6,6 +6,8 @@ import { fmtMoney } from './format';
 import { WARN_SVG, MOON_SVG } from './icons';
 export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
+import { isPaused } from '../sim/pause';
+import { pauseUiOn, pauseToggleHtml, pausedSubline, allPausedHtml, PAUSE_COPY } from './pause-ui';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -121,7 +123,8 @@ export function fitBanners(root: ParentNode) {
   });
 }
 export function workersHtml(s: GameState, b: Balance): string {
-  return manageAllHtml(s, b) + WORKERS.map(id => {
+  const pz = pauseUiOn(s, b); // v5 pause UI (m4.flags.pause + unlock); false -> markup byte-identical to the pre-pause card
+  return manageAllHtml(s, b) + allPausedHtml(s, b) + WORKERS.map(id => {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
     if (!w) {
       const locked = F < unlockFarm(id, b), cost = hireCostCents(id, b), can = !locked && s.coinsCents >= cost;
@@ -135,9 +138,11 @@ export function workersHtml(s: GameState, b: Balance): string {
     // Unpaid: the button's name stays "Refill {Role}" (WCAG 2.5.3); the full resume sentence is its description (never aria-label).
     const desc = unpaid ? `capd-${id}` : cap ? `cap-${id}` : '';
     const off = m === 'asleep' || m === 'unpaid';
+    const paused = pz && isPaused(w, b); // pause spec §8: shape + text carry the state (pill + sub-line); no overlay, no yawn cue
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid' : 'Asleep'; // m5: no emoji / text pictograph; the icon is the inline SVG after the word
-    const banner = workerBannerHtml(workerBanner(id, m, b));
-    const yawn = isYawning(w, b);
+    // Paused at 0% is "on break", not Asleep: no asleep banner. Unpaid survives Pause (guard G3), so its banner stays.
+    const banner = workerBannerHtml(paused && m === 'asleep' ? null : workerBanner(id, m, b));
+    const yawn = isYawning(w, b) && !paused; // §8 (Art v1.1.2): the yawn cue is for working workers only
     let extra = '';
     if (id === 'grader') {
       const tiers = b.workers.grader.tiers, i = s.graderTier;
@@ -145,11 +150,13 @@ export function workersHtml(s: GameState, b: Balance): string {
         ? F < tiers[i].farm ? `<div class="hint">Next grade ×${tiers[i].mult} at Farm L${tiers[i].farm}</div>`
           : `<button class="btn buy ${s.coinsCents >= graderTierCostCents(i, b) ? 'affordable' : ''}" data-act="tier" aria-disabled="${s.coinsCents < graderTierCostCents(i, b)}">Grade ×${tiers[i].mult} ${fmtMoney(graderTierCostCents(i, b))}</button>` : '');
     }
-    const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
+    const st = paused ? `<span class="pz-pill">${PAUSE_COPY.pill}</span>` : `${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}`;
+    const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${st}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
-      <div class="meta">Energy ${e}%</div>${extra}`;
+      <div class="meta">Energy ${e}%</div>${paused ? `<div class="meta pz-sub">${pausedSubline(w, b)}</div>` : ''}${extra}`;
     const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}`;
-    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
+    const row = pz ? `<div class="wk-refill has-pz">${pauseToggleHtml(id, WORKER_NAMES[id], paused)}${refill}</div>` : `<div class="wk-refill">${refill}</div>`;
+    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}${paused ? ' paused' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div>${row}</div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */
