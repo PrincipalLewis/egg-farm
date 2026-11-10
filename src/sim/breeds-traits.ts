@@ -4,9 +4,8 @@
  */
 import type { Balance } from '../config/balance';
 import { m4On, tcNum as tc } from '../config/formulas';
-import { BP_ONE, ROSTER, SLOT_IDX, bc, isBreedId, unlockedSlots, type Family } from '../config/breeds';
-import { on, type BreedsSave } from './breeds';
-import { slotTraitBp } from './breeds-hatch';
+import { BP_ONE, bc } from '../config/breeds';
+import { familyActiveBp } from './breeds-family';
 import { prodEggsPerSec, coopCap } from './tracks';
 import type { GameState } from './state';
 
@@ -29,30 +28,10 @@ const EPS = 1e-9;
 const breedsFlag = (b: Balance) => m4On(b) && b.m4?.flags?.breeds === 1;
 const emptyCalm = (): BreedsCalm => ({ focusMs: 0, stamps: [], activeMs: 0, lostCount: 0, open: true });
 
-/** Present family clamp at Farm F (E9 / BR-AC18). */
-export const presentCapBp = (F: number, b: Balance) =>
-  F >= bc(b, 'lay_cap_farm') ? bc(b, 'lay_cap_bp') : bc(b, 'lay_cap_bp_lt18');
-
-/** Sum of settled trait bp for `family` in unlocked slots, then family clamp where applicable. */
-export function familyTraitBp(s: GameState, b: Balance, family: Family): number {
-  if (!on(s, b)) return 0;
-  const x = s.breeds as BreedsSave;
-  const open = unlockedSlots(s.farmLevel, b);
-  let sum = 0;
-  for (const i of SLOT_IDX) {
-    if (i >= open) break;
-    const id = x.slots[i];
-    if (!isBreedId(id) || ROSTER[id][1] !== family) continue;
-    sum += slotTraitBp(x, i, b);
-  }
-  if (family === 'present') return Math.min(sum, presentCapBp(s.farmLevel, b));
-  if (family === 'broody') return Math.min(sum, bc(b, 'broody_cap_bp'));
-  return sum;
-}
-
-export const presentBp = (s: GameState, b: Balance) => familyTraitBp(s, b, 'present');
-export const awayBp = (s: GameState, b: Balance) => familyTraitBp(s, b, 'away');
-export const broodyBreedBp = (s: GameState, b: Balance) => familyTraitBp(s, b, 'broody');
+/** Clamped family bp via shared familyActiveBp (breeds-family / commit 0) — no duplicate clamp math. */
+export const presentBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'present');
+export const awayBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'away');
+export const broodyBreedBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'broody');
 
 /** BR-R14: broodyBp_eff = floor(broodyBp × (10000 + broodyBreedBp) / 10000), broodyBp = round(tc_broody_income_share × 10000).
  *  Broody hen nest accrual (when built) must use this in place of raw broodyBp. */

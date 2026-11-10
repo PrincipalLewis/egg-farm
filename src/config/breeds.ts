@@ -22,10 +22,14 @@ export const BC_SPEC_DEFAULTS = {
   pity_rare_after: 8, star_cap: 2, star_bonus_bp: 2500,
   /** BR-R12b / A8: calm-hands Present window (focus s) and counted-tap threshold. */
   present_calm_w_s: 10, present_calm_k: 6,
-  /** Present family clamp (E9 / BR-AC18): lt18 below F18, full from F18. */
+  /**
+   * Family clamps (spec §4.3 L365–368 / §5; E8/E9). Verified vs m5.1-breeds-spec.ea922eb8:
+   * lay_cap_bp_lt18=700, lay_cap_bp=1500, away_cap_bp=3000, broody_cap_bp=2000.
+   * TODO(Econ/RC-PIN): economy.csv (8dc90e2b) and live product CSV have no bc_* columns yet (manifest row 27);
+   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary (PR-B stub / E9).
+   */
   lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18,
-  /** BR-R14: Broody family trait clamp. */
-  broody_cap_bp: 2000,
+  away_cap_bp: 3000, broody_cap_bp: 2000,
 } as const;
 export type BcKey = keyof typeof BC_SPEC_DEFAULTS;
 export const bc = (_b: Balance, k: BcKey): number => BC_SPEC_DEFAULTS[k];

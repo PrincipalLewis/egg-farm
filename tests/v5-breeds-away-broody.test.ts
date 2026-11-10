@@ -7,7 +7,8 @@ import { balance as b } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
 import { m4OfflineEggs, applyOffline } from '../src/sim/offline';
 import { type BreedsSave } from '../src/sim/breeds';
-import { awayBp, broodyBreedBp, broodyBaseBp, broodyBpEff, familyTraitBp } from '../src/sim/breeds-traits';
+import { awayBp, broodyBreedBp, broodyBaseBp, broodyBpEff } from '../src/sim/breeds-traits';
+import { familyActiveBp } from '../src/sim/breeds-family';
 import { BP_ONE, bc } from '../src/config/breeds';
 import { offlineMult } from '../src/sim/tracks';
 
@@ -73,7 +74,7 @@ describe('BR-R14 Broody bp_eff', () => {
       owned: { cochin: { stars: 0 }, orpington: { stars: 0 } },
       slots: ['cochin', 'orpington', null], settleMs: [0, 0, 0],
     }, 20);
-    expect(familyTraitBp(s, BR, 'broody')).toBe(2000);
+    expect(familyActiveBp(s, BR, 'broody')).toBe(2000);
     expect(broodyBpEff(s, BR)).toBe(600);
   });
 });

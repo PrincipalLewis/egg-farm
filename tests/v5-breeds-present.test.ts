@@ -11,8 +11,9 @@ import { apply } from '../src/sim/actions';
 import { applyOffline } from '../src/sim/offline';
 import { type BreedsSave } from '../src/sim/breeds';
 import {
-  presentBp, presentGateOpen, presentCapBp, sessionEndPresentFields, breedsPresentTick,
+  presentBp, presentGateOpen, sessionEndPresentFields, breedsPresentTick,
 } from '../src/sim/breeds-traits';
+import { familyCapBp } from '../src/sim/breeds-family';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import { SAVE_KEY, serialize } from '../src/save/save';
@@ -58,8 +59,8 @@ describe('BR-R12 Present eggs (calm open)', () => {
   });
 
   it('[BR-AC18] Present bp clamps at lay_cap', () => {
-    expect(presentCapBp(17, BR)).toBe(700);
-    expect(presentCapBp(18, BR)).toBe(1500);
+    expect(familyCapBp('present', 17, BR)).toBe(700);
+    expect(familyCapBp('present', 18, BR)).toBe(1500);
     // 3× cream_legbar 2★ would exceed — use high-star presents at F17
     const s = st({
       owned: { ayam_cemani: { stars: 2 }, rhode_island_red: { stars: 2 }, leghorn: { stars: 2 } },

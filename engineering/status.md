@@ -132,6 +132,10 @@
 - next: Saves QA (33ec1b55) verifies against rev13 before HoE merges. Then breeds RC blockers queue (PR C telemetry, BR-AC2b, #95 M1/M2) then F-9.
 - blocked: none on JOB 2. Note: merge commit 2f4794c inherited Architect author from box git config at merge time (cannot amend); follow-up commit is Saves.
 
+## 2026-11-10 01:06 CET · Saves · HoE/breeds-sim-prB-traits COMMIT 0
+- familyClamp(s,b,family)→{rawBp,clampedBp,atCap}; familyActiveBp(s,b,family); bc keys lay_cap_bp_lt18/lay_cap_bp/lay_cap_farm/away_cap_bp/broody_cap_bp (match PR-B stubs + ea922eb8).
+- Branch saves/breeds-sim-prB-traits-c0 (ordinary push; no force). Commits 1–3 parked park/prB-traits-b381998.
+- tsc + sync-economy --check + focused 72 pass.
 ## 2026-11-10 01:00 CET · Senior Engineer, Saves & Persistence · HoE/breeds-sim-prB-traits (row 32)
 - WIP commit 1/3: Present calm-gate (BR-R12/R12b) + session_end present_active_s/present_lost_count; bc present_calm_* + lay_cap_*; breedsCalm session ring; E22b clear on offline ≥ 60 s. Scope: NOT hatch_started/breed_* session_end (gen/breeds-telemetry). Focused tests 128 pass + tsc. Next: Away+Broody (c2), away_bp (c3).
 
