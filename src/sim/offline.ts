@@ -3,6 +3,7 @@ import { GameState, eggsPerSec } from './state';
 import { prodEggsPerSec, offlineMult } from './tracks';
 import { m4On, clampL } from '../config/formulas';
 import { breedsOffline } from './breeds';
+import { breedsCalmClearRing } from './breeds-traits';
 /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
 export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1): number {
@@ -25,5 +26,8 @@ export function applyOffline(s: GameState, awayMs: number, b: Balance) {
     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
   const awayS = Math.max(0, Math.min(awayMs / 1000, b.offline.offlineCapSeconds));
   const br = breedsOffline(s, awayMs, b); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off
-  return { state: eggs > 0 ? { ...br.state, pendingOfflineEggs: br.state.pendingOfflineEggs + eggs } : br.state, eggs, awayS, reveal: br.reveal };
+  // E22b / BR-AC49: hide ≥ offlineMinSeconds empties the Present calm ring (gate open on return).
+  let state = br.state;
+  if (m4On(b) && b.m4?.flags?.breeds === 1 && awayMs >= b.offline.offlineMinSeconds * 1000) state = breedsCalmClearRing(state);
+  return { state: eggs > 0 ? { ...state, pendingOfflineEggs: state.pendingOfflineEggs + eggs } : state, eggs, awayS, reveal: br.reveal };
 }
