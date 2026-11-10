@@ -29,5 +29,7 @@ export default defineConfig(({ mode }) => ({
     __IOS_FLAG__: JSON.stringify(mode !== 'production'),
   },
   // *.slow.test.ts (e.g. the 100-seed seller-variance parity) is skipped by default `vitest run`; CI runs it via `npm run test:slow`.
-  test: { exclude: [...configDefaults.exclude, '**/*.slow.test.ts', '**/*.k10.test.ts'] }, // *.k10.test.ts: npm run test:k10
+  test: { exclude: [...configDefaults.exclude, '**/*.slow.test.ts', '**/*.k10.test.ts'], // *.k10.test.ts: npm run test:k10
+    // HoE/v5-vitest-teardown: drop each file's document/window listeners at file end (single-fork local runs share one jsdom).
+    setupFiles: ['./tests/setup/global-listeners.ts'] },
 }));
