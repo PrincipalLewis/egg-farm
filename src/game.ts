@@ -5,7 +5,8 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
-import { sessionEndPresentFields } from './sim/breeds-traits';
+import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
+import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
@@ -115,7 +116,12 @@ export class Game {
   }
   private grantOffline(gapMs: number) {
     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
-    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
+    // Row 32: away_bp on every offline_grant when breeds on (incl. eggs=0). Modal still only when eggs > 0.
+    const v5 = offlineGrantV5(this.b, awayBp(this.state, this.b));
+    if (r.eggs > 0 || v5.away_bp !== undefined) {
+      if (r.eggs > 0) this.offline = { eggs: r.eggs, awayS: r.awayS };
+      this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...v5 });
+    }
     return r.eggs;
   }
   private emit(evs: SimEvent[]) {
