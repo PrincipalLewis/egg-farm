@@ -83,17 +83,18 @@ export const fmtRemainMs = (ms: number) => {
 
 
 /**
- * E8 Flock-sheet "max" label for a family.
- * Binds to sim `familyClamp(s, b, family)` → {rawBp, clampedBp, atCap} (#126 / Saves c0).
- * Label shown iff rawBp > clampedBp. UI does no clamp math. presentGateOpen stays stubbed.
+ * E8 Flock-sheet clamp view for a family (UI-facing).
+ * Named `familyClampState` so it does not clash with Saves' sim `familyClamp(s,b,family)`.
+ * Delegates to sim (#126 / Saves c0). UI shows "max" iff rawBp > clampedBp. presentGateOpen stays stubbed.
  */
-export function familyClamp(
+export type FamilyClampState = { rawBp: number; clampedBp: number; atCap: boolean };
+
+export function familyClampState(
   family: Family,
   s: GameState,
   b: Balance,
-): string | undefined {
-  const v = simFamilyClamp(s, b, family);
-  return v.rawBp > v.clampedBp ? 'max' : undefined;
+): FamilyClampState | undefined {
+  return simFamilyClamp(s, b, family);
 }
 
 

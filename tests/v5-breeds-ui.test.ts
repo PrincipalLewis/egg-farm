@@ -465,9 +465,9 @@ describe('BR-AC25 / BR-R18 offline reveal after welcome-back', () => {
   });
 });
 
-describe('E8 familyClamp bind → sim (#126)', () => {
-  it('adapter calls sim familyClamp(s,b,family); label iff rawBp > clampedBp', async () => {
-    const { familyClamp } = await import('../src/ui/breeds-adapter');
+describe('E8 familyClampState bind → sim (#126)', () => {
+  it('adapter familyClampState delegates to sim familyClamp; UI max iff rawBp > clampedBp', async () => {
+    const { familyClampState } = await import('../src/ui/breeds-adapter');
     const { familyClamp: simClamp } = await import('../src/sim/breeds-family');
     const { initialState } = await import('../src/sim/state');
     const b = breedsOn();
@@ -481,9 +481,9 @@ describe('E8 familyClamp bind → sim (#126)', () => {
       ...initialState(b, 7), farmLevel: F, tracksV7: 1 as const, v6BackupId: '0123456789abcdef', breeds: br,
     });
     expect(simClamp(mk(17), b, 'present')).toEqual({ rawBp: 975, clampedBp: 700, atCap: true });
-    expect(familyClamp('present', mk(17), b)).toBe('max');
+    expect(familyClampState('present', mk(17), b)).toEqual({ rawBp: 975, clampedBp: 700, atCap: true });
     expect(simClamp(mk(18), b, 'present')).toEqual({ rawBp: 975, clampedBp: 975, atCap: false });
-    expect(familyClamp('present', mk(18), b)).toBeUndefined();
+    expect(familyClampState('present', mk(18), b)).toEqual({ rawBp: 975, clampedBp: 975, atCap: false });
   });
 
   it('Present F17→F18 700→1500 transition shows/hides slot-max in sheet', async () => {
@@ -672,10 +672,11 @@ describe('BR-AC4 move + settle carry', () => {
 });
 
 describe('BR-AC31 aria + incubating DOM', () => {
-  it('affordable Hatch aria-label uses fmtMoneyAria shape', async () => {
-    const { fmtMoneyAria } = await import('../src/ui/format');
-    const { hatchCostCents } = await import('../src/ui/breeds-adapter');
+  it('Hatch accessible name equals visible text; time via aria-describedby (label-in-name)', async () => {
+    const { fmtMoney } = await import('../src/ui/format');
+    const { hatchCostCents, fmtRemainMs } = await import('../src/ui/breeds-adapter');
     const b = breedsOn();
+    // Affordable
     const br: BreedsSave = { ...emptyBr(), freeHatchUsed: 1 };
     const { g, ui } = await mount({ farmLevel: 10, coinsCents: 1e12, abilitiesCoachSeen: true, breeds: br }, b);
     ui.openPanel('upgrades');
@@ -683,7 +684,27 @@ describe('BR-AC31 aria + incubating DOM', () => {
     document.getElementById('breeds-entry')!.click();
     const btn = document.querySelector('[data-testid="breeds-hatch"]') as HTMLButtonElement;
     const cost = hatchCostCents(g.state, b);
-    expect(btn.getAttribute('aria-label')).toContain(fmtMoneyAria(cost));
+    const visible = `Hatch · ${fmtMoney(cost)}`;
+    expect(btn.getAttribute('aria-label')).toBeNull();
+    expect(btn.textContent).toBe(visible);
+    expect(btn.getAttribute('aria-describedby')).toBe('hatch-sub');
+    expect(document.getElementById('hatch-sub')!.textContent).toBe('Ready in 1:00');
+
+    // Hatching: name = "Hatching…"; describedby Ready in m:ss (ceil)
+    document.body.innerHTML = '';
+    const br2: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      incubator: { breed: 'leghorn', remainingMs: 45_001, costCents: 0 },
+    };
+    const m2 = await mount({ farmLevel: 10, coinsCents: 1e12, abilitiesCoachSeen: true, breeds: br2 }, b);
+    m2.ui.openPanel('upgrades');
+    m2.ui.render();
+    document.getElementById('breeds-entry')!.click();
+    const btn2 = document.querySelector('[data-testid="breeds-hatch"]') as HTMLButtonElement;
+    expect(btn2.getAttribute('aria-label')).toBeNull();
+    expect(btn2.textContent).toBe('Hatching…');
+    expect(btn2.getAttribute('aria-describedby')).toBe('hatch-sub');
+    expect(document.getElementById('hatch-sub')!.textContent).toBe(`Ready in ${fmtRemainMs(45_001)}`);
   });
 
   it('incubating: silhouette + progressbar; Hatch aria-disabled', async () => {
@@ -751,10 +772,24 @@ describe('Q7 / breedAsset / BR-AC49 docked attendance', () => {
   });
 });
 
-describe('import.meta.glob breeds-ext (PR-A has zero matches)', () => {
-  it('eager glob for breeds-ext-*.ts yields empty module map in PR-A', () => {
+describe('import.meta.glob breeds-ext naming + registry leaf', () => {
+  it('every glob match is named src/ui/breeds-ext-*.ts; registry is a leaf (not a match)', async () => {
     const mods = import.meta.glob(['../src/ui/breeds-ext-*.ts', '!../src/ui/breeds-ext-registry.ts'], { eager: true });
-    expect(Object.keys(mods).length).toBe(0);
+    for (const key of Object.keys(mods)) {
+      expect(key.replace(/\\/g, '/')).toMatch(/\/breeds-ext-[^/]+\.ts$/);
+      expect(key).not.toMatch(/breeds-ext-registry/);
+    }
+    // Registry module must not import breeds-mount / app / breeds-adapter (leaf).
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const src = fs.readFileSync(path.join(process.cwd(), 'src/ui/breeds-ext-registry.ts'), 'utf8');
+    expect(src).not.toMatch(/from ['"]\.\/breeds-mount['"]/);
+    expect(src).not.toMatch(/from ['"]\.\/app['"]/);
+    expect(src).not.toMatch(/from ['"]\.\/breeds-adapter['"]/);
+    expect(src).not.toMatch(/from ['"]\.\/breeds-ui['"]/);
+    // Only type-only imports of Game/Balance allowed from outside
+    expect(src).toMatch(/import type \{ Balance \}/);
+    expect(src).toMatch(/import type \{ Game \}/);
   });
 });
 

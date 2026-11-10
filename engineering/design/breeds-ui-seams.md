@@ -55,10 +55,10 @@ import { mountBreeds, type FlockUiFlags } from './breeds-mount';
 
 | Owner | Rule |
 |-------|------|
-| **PR-A** | Owns the file. Includes `presentMirror(bp, gateOpen)`, `incomeRate(s,b)`, `familyClamp` stub (`undefined` ⇒ no label). |
+| **PR-A** | Owns the file. Includes `presentMirror(bp, gateOpen)`, `incomeRate(s,b)`, `familyClampState` stub (`undefined` ⇒ no label). |
 | **PR-B** | **Adds getters only.** No renames / signature changes to existing exports. |
 
-**`familyClamp`:** HoE stub — `undefined` means no "max" label. Real sim getter owned by Saves on `saves/breeds-sim-prB-traits` (commit 0; ETA TBD). Dependency — swap inside `familyClamp` only.
+**`familyClampState(family) → {rawBp,clampedBp,atCap} | undefined`:** UI-facing name (avoids clashing with Saves sim `familyClamp(s,b,family)`). HoE stub — `undefined` means no "max" label. Show "max" iff `rawBp > clampedBp`. Clamp-bind follow-up (`v5/breeds-ui-a-clamp-bind`) delegates to sim. **PR-B uses `familyClampState`.**
 
 **`presentMirror`:** PR-A uses it on Present settled slot cards (gate stub `true` until Saves calm-gate). PR-B HUD imports the same helper.
 
@@ -91,7 +91,7 @@ PR-A vendors all 9 `char-breed-*.svg`. PR-B consumes same paths.
 
 | In PR-A | In PR-B | Dependency |
 |---------|---------|------------|
-| Entry, highlight, sheet, slots, hatch, Farm-soon, album, reveal, adapter, glob host | Present chip, BB strip, yard | Saves `familyClamp` / Present calm-gate on `saves/breeds-sim-prB-traits` |
+| Entry, highlight, sheet, slots, hatch, Farm-soon, album, reveal, adapter, glob host, registry leaf | Present chip, BB strip, yard | Saves sim `familyClamp` via UI `familyClampState` / Present calm-gate on `saves/breeds-sim-prB-traits` |
 
 Flag-off must stay byte-identical for non-breeds paths; ext glob must not run when flag off.
 
