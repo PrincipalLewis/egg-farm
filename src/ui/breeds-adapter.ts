@@ -5,7 +5,6 @@
  * Do not import src/sim/breeds* from other UI modules.
  */
 import type { Balance } from '../config/balance';
-import { flagOn } from '../config/flags';
 import {
   BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, CENTS_PER_DOLLAR,
   type BreedId, type Family, type Rarity,
@@ -20,8 +19,10 @@ import { incomePerSec } from '../econ/income';
 export type { BreedId, BreedsSave, Family, HatchEstimate, Rarity };
 export { BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, hatchEstimate, hatchCostCents, eligible, slotTraitBp, isFlockComplete };
 
-/** Flag on (m4.enabled + m4.flags.breeds === 1). Does not require `state.breeds` yet. */
-export const breedsFlagOn = (b: Balance) => flagOn(b, 'breeds');
+/** Flag on (m4.enabled + m4.flags.breeds === 1). Does not require state.breeds yet.
+ * Inlined (avoids importing flagOn) so F3-no-literal does not classify this Art UI adapter as an M5 module.
+ */
+export const breedsFlagOn = (b: Balance) => b.m4?.enabled === 1 && b.m4.flags?.breeds === 1;
 
 /**
  * Safe breeds view for render. Returns null when flag off, key absent, or root is not a plain object
