@@ -35,6 +35,8 @@ import { tryDispatch, wouldApply } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
+import { clockWageOn } from '../sim/clock-wage';
+import { asleepToast } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
@@ -495,6 +497,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         pendingLvPop = true; goalNow = true; break;
       }
       case 'worker_hire': case 'grader_tier': goalNow = true; break;
+      case 'worker_state': if (e.state === 'asleep' && clockWageOn(b)) showToast(asleepToast(e.worker, b)); break; // v5 clockWage AC-FC9: one toast per fall-asleep (role=status, polite)
       case 'coop_full': if (e.phase === 'start') sfx('coopFull'); break;
     }
     dirty = true;
