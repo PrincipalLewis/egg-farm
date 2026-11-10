@@ -10,6 +10,7 @@ import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { spawnGolden, tapGolden, frenzySale } from './golden';
+import { pauseWorker, resumeWorker } from './pause';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
@@ -17,7 +18,8 @@ export type Action =
   | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
-  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' }; // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' } // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'pause'; worker: WorkerId } | { type: 'resume'; worker: WorkerId }; // v5 pause toggle (no-op unless m4.flags.pause; rule 1)
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -112,6 +114,10 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
+    // v5 pause (spec v1.3.17 rule 2: applies in the same tick). The sim functions own every guard (flag, unlock, hired, already paused).
+    // Telemetry: worker_paused (Saves) / worker_resumed (#119) emitters are sim-owned and not added here (UI emits nothing).
+    case 'pause': return pauseWorker(s, a.worker, b);
+    case 'resume': return resumeWorker(s, a.worker, b);
     case 'hatch': return startHatch(s, b);
     case 'placeBreed': return placeBreed(s, b, a.slot, a.id);
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
