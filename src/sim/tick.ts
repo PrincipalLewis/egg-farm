@@ -106,6 +106,6 @@ export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balan
   const dtMs = 1000 / b.tickHz;
   let acc = accMs + elapsedMs, ticks = 0;
   const nFocus = clock ? focusTicks(clock.focusMs, dtMs) : 0;
-  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, clock ? tickClock(ticks, nFocus, clock) : undefined); acc -= dtMs; ticks++; }
+  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, clock ? tickClock(ticks, nFocus, clock, dtMs) : undefined); acc -= dtMs; ticks++; }
   return { state: s, accMs: Math.max(0, acc), ticks };
 }

@@ -5,10 +5,13 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
+import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
+import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
-import type { SimEvent } from './sim/events';
+import type { SimEvent, CollectibleSkin } from './sim/events';
+import { goldenOn, goldenUnload, spawnDue } from './sim/golden';
 import { focusFrameMs } from './sim/clock';
 import { streakOn, streakPeak } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
@@ -21,7 +24,8 @@ import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
 import { flushBreedsTel } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
 import { sessionEndBreedsFields } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
-export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
+/** v5 #1: collectible_* / frenzy_* events are forwarded with Game's per-session collectible_id (not a sim or save field). */
+export type GameEvent = (SimEvent & { collectible_id?: number }) | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
 export const tracksOff = (b: Balance): Balance => (b.m4 ? markM4BuildOff({ ...b, m4: { ...b.m4, enabled: 0 } }) : b);
@@ -115,13 +119,35 @@ export class Game {
     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
   }
   private grantOffline(gapMs: number) {
+    // F3: capture Away bp applied to the grant BEFORE applyOffline (hatch reveal can star-up a slotted Away).
+    const appliedAwayBp = awayBp(this.state, this.b);
     const ev: SimEvent[] = []; const r = applyOffline(this.state, gapMs, this.b, ev); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
     this.emit(ev); // M5.1 breeds §8: breed_revealed{offline:true} / flock_complete / breed_slotted from the grant step (none flag off)
-    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
+    // F5 / BR-R18 / PMC: emit offline_grant ONLY when the offline rules apply (gap >= offlineMinSeconds).
+    // Same trigger as flag-off. Sub-60 s loads emit NOTHING. Eggs=0 still emits when breeds on (errata V-2b).
+    if (gapMs < this.b.offline.offlineMinSeconds * 1000) return r.eggs;
+    const v5 = offlineGrantV5(this.b, appliedAwayBp);
+    if (r.eggs > 0 || v5.away_bp !== undefined) {
+      if (r.eggs > 0) this.offline = { eggs: r.eggs, awayS: r.awayS };
+      this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...v5 });
+    }
     return r.eggs;
   }
+  /** v5 #1 §8 / Architect ruling 5: per-session collectible_id shared by golden egg and Broody; the Frenzy keeps its egg's id. */
+  private collectibleSeq = 0; private liveCollectible: Partial<Record<CollectibleSkin, number>> = {}; private lastGoldenId?: number; private frenzyId?: number;
+  private withCollectibleId(e: SimEvent): SimEvent {
+    let id: number | undefined;
+    switch (e.type) {
+      case 'collectible_spawned': id = ++this.collectibleSeq; this.liveCollectible[e.skin] = id; break;
+      case 'collectible_collected': case 'collectible_expired': id = this.liveCollectible[e.skin]; delete this.liveCollectible[e.skin]; if (e.skin === 'golden_egg') this.lastGoldenId = id; break;
+      case 'frenzy_started': id = this.frenzyId = this.lastGoldenId; break;
+      case 'frenzy_ended': id = this.frenzyId; this.frenzyId = undefined; break;
+      default: return e;
+    }
+    return id === undefined ? e : ({ ...e, collectible_id: id } as unknown as SimEvent); // Game-only field (events.ts note)
+  }
   private emit(evs: SimEvent[]) {
-    for (const e of evs) {
+    for (const e0 of evs) { const e = this.withCollectibleId(e0);
       this.notify(e);
       if (e.type === 'collect') this.telemetry.tap(e.eggs);
       else if (e.type === 'wage') this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
@@ -148,7 +174,8 @@ export class Game {
   /** Called once when the guard first blocks a write. */
   onInactive: (() => void) | null = null;
   /** Stop sim + saving (another tab took the save). */
-  deactivate() { if (this.inactive) return; this.inactive = true; this.endHiddenOnFreeze(); this.onInactive?.(); }
+  /** v5 #1 R10b: an on-screen egg is removed (expired{takeover}) before freezing; its Frenzy time is in the last save. */
+  deactivate() { if (this.inactive) return; this.goldenEnd('takeover'); this.inactive = true; this.endHiddenOnFreeze(); this.onInactive?.(); }
   /** CCR m1: a tab frozen (tab guard / newer save) while hidden ends its hidden period now (mode 'none'), so it can never stay open. */
   private endHiddenOnFreeze() { if (this.hidden) this.onShown(this.now()); }
   /** Hand-over hold (another tab asked us to flush): no sim, no saves until the claim arrives or the hold expires. */
@@ -313,12 +340,42 @@ export class Game {
   endSession() {
     if (this.resetting || this.inactive || this.held()) return;
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
+    this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
     // ---- M5.1 breeds session_end (HoE/breeds-telemetry-emitters, drift row 34; gen/breeds-telemetry). Flag off: {} (absent). ----
-    // present_active_s / present_lost_count belong to Saves (saves/breeds-sim-prB-traits): merge their fields in beside breedsEnd.
     { const ev: SimEvent[] = []; this.state = flushBreedsTel(this.state, this.b, ev); this.emit(ev); } // open breed_slotted windows close
     const breedsEnd = sessionEndBreedsFields(this.state, this.b);
     // ---- end M5.1 breeds session_end block ----
-    this.telemetry.track('session_end', { ...breedsEnd }); this.save(); this.telemetry.flush(true); }
+    // Row 32 (HoE/breeds-sim-prB-traits, Saves): present_active_s / present_lost_count, beside breedsEnd.
+    const presentEnd = sessionEndPresentFields(this.state, this.b);
+    // T-AC9: no comma-bearing calls inside the session_end literal — plain keys or ...spreads only.
+    this.telemetry.track('session_end', { ...presentEnd, ...breedsEnd }); this.save(); this.telemetry.flush(true); }
+  /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
+  beginReset() {
+    this.resetting = true; this.goldenEnd('reset');
+    if (goldenOn(this.b) && this.state.frenzyRemainingS !== undefined) { // Game owns frenzy_ended{reset} (Architect ruling 5)
+      const { frenzyRemainingS: _f, frenzyRun: r, ...o } = this.state; this.state = o as GameState;
+      this.emit([{ type: 'frenzy_ended', extra_coins: r?.extraCents ?? 0, eggs_sold: r?.eggsSold ?? 0, sold_by_player: r?.byPlayer ?? 0, sold_by_workers: r?.byWorkers ?? 0, reason: 'reset' }]);
+    }
+    this.telemetry.track('save_reset'); this.telemetry.flush(true);
+  }
+  /** v5 #1: remove an on-screen egg (no reward, fresh gap) and forward expired{reason}. Identity with golden off or no egg. */
+  private goldenEnd(reason: 'reload' | 'takeover' | 'reset') {
+    if (!goldenOn(this.b) || !this.state.goldenEgg) return;
+    const ev: SimEvent[] = []; this.state = goldenUnload(this.state, this.b, ev, reason); this.emit(ev);
+  }
+  /** v5 #1 R14 (sizing §12.2): the UI's live valid spot ids. Default none, so a build without the egg UI only defers (R15). */
+  private spotProbe: () => readonly string[] = () => [];
+  setSpotProbe(fn: () => readonly string[]) { this.spotProbe = fn; }
+  /** R15: re-check on every layout change (resize, rotate, dock, sheet open/close). */
+  layoutChanged() { this.driveGolden(true); }
+  /** The egg's tap handler (R25b stopPropagation is the UI's): only while the player can act (R6 menus freeze; R20 one grant in the sim). */
+  tapGolden() { if (goldenOn(this.b) && !this.inactive && !this.held() && this.attendedNow()) this.dispatch({ type: 'tapGolden' }); }
+  /** Spawn driver: when the sim says due (countdown 0, no egg, R15 500 ms retry over) on an attended frame, measure and dispatch. */
+  private driveGolden(layout: boolean) {
+    if (!goldenOn(this.b) || this.inactive || this.held() || this.hidden || !this.attendedNow() || !spawnDue(this.state, this.b, layout)) return;
+    this.dispatch(layout ? { type: 'spawnGolden', spots: this.spotProbe(), layout: true } : { type: 'spawnGolden', spots: this.spotProbe() });
+  }
+
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
@@ -443,6 +500,7 @@ export class Game {
       // must not consume the NEW I_ref warm-up: start that window at the return boundary (§4.1a), like a hidden offline return.
       this.state = gap >= maxMs && incomeRefOn(this.b) ? resetIncomeRef(r.state) : r.state;
       this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+      this.driveGolden(false); // v5 #1: identity unless golden is on and a spawn is due on an attended frame
     }
     this.checkCoopFull(); this.telemetry.poll();
   }

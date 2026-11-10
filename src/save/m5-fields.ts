@@ -33,7 +33,7 @@ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
 /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
 export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
 /** Session keys outside F1a M5Fields: the #2 streak run stats (streak_peak, sim/streak.ts). Never saved either. */
-const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'goldenPending', 'frenzyRun', 'breedsTel']; // + #1 golden session records // + M5.1 breeds E10 shadow (PMC Q5) // + breeds §8 telemetry
+const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'breedsCalm', 'goldenPending', 'frenzyRun', 'breedsTel']; // + #1 golden // + breeds E10 shadow + BR-R12b calm // + breeds §8 telemetry
 const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
@@ -122,7 +122,7 @@ export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
   if (!anyFlag(b)) return s;
   let o: any = { ...s };
   if (m5Flag(b, 'abilities') && o.abilities && typeof o.abilities === 'object') { o.abilities = { ...o.abilities }; endCalls(o, b, ev); }
-  if (m5Flag(b, 'golden')) o = goldenUnload(o, b, 'offline', ev); // #1 R8: expired{offline}, no reward, fresh R3 gap
+  if (m5Flag(b, 'golden')) o = goldenUnload(o, b, ev, 'offline'); // #1 R8: expired{offline}, no reward, fresh R3 gap
   if (m5Flag(b, 'streak') && 'streakS' in o) o = endStreak(o, 'offline', b, ev);
   if (incomeRefOn(b)) o = resetIncomeRef(o); // #3 §4.1a #3: an offline return clears the I_ref ring and starts a warm-up
   return o;
