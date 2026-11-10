@@ -48,7 +48,8 @@ export const stallStub = {
 if (IOS_FLAG_ENABLED && typeof window !== 'undefined') (window as unknown as { eggfarmQaStall?: typeof stallStub }).eggfarmQaStall = stallStub;
 
 // src/econ/income.ts signatures (Saves): stand-ins so the UI can read X and the Manage target before the real helpers land.
-export function workerAtRisk(id: WorkerId, _s: GameState, _b: Balance): number { return stallStub.atRisk[id] ?? 0; }
+/** Clamped at 0, never negative (SIM-API rev 3, sha256 38bfc0d1). */
+export function workerAtRisk(id: WorkerId, _s: GameState, _b: Balance): number { return Math.max(0, stallStub.atRisk[id] ?? 0); }
 export function workersAtRisk(s: GameState, b: Balance): Record<WorkerId, number> {
   return { market_hand: workerAtRisk('market_hand', s, b), coop_hand: workerAtRisk('coop_hand', s, b), hawker: workerAtRisk('hawker', s, b), grader: workerAtRisk('grader', s, b) };
 }
