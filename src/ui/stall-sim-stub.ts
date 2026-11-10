@@ -8,6 +8,7 @@ import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import type { WorkerId } from '../sim/workers';
 import { flagOn } from '../config/flags';
+import { IOS_FLAG_ENABLED } from './ios-tip';
 
 export type StallCause = 'mh_asleep' | 'mh_paused' | 'mh_unpaid' | 'no_mh' | 'ch_asleep' | 'ch_unpaid' | 'other';
 export type StallResolvedBy = 'chip_refill' | 'chip_sell_all' | 'chip_collect' | 'chip_manage' | 'refill_elsewhere' | 'sell_elsewhere' | 'collect_elsewhere'
@@ -39,6 +40,8 @@ export const stallStub = {
   shownKeys: new Set<string>(),
   reset() { this.stall = null; this.cue = null; this.atRisk = {}; this.notes = []; this.shownKeys.clear(); },
 };
+// QA-only handle (scripts/v5-ss-banner-rects.mjs, flag-on shots); compiled out of release (__IOS_FLAG__), like window.eggfarm.
+if (IOS_FLAG_ENABLED && typeof window !== 'undefined') (window as unknown as { eggfarmQaStall?: typeof stallStub }).eggfarmQaStall = stallStub;
 
 // src/econ/income.ts signatures (Saves): stand-ins so the UI can read X and the Manage target before the real helpers land.
 export function workerAtRisk(id: WorkerId, _s: GameState, _b: Balance): number { return stallStub.atRisk[id] ?? 0; }

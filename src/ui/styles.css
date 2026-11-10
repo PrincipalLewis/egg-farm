@@ -682,8 +682,6 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .stall-chip[data-tone=danger] .ss-pill{background:var(--c-danger);color:#fff}               /* 5.26:1 */
 .ss-ic{flex:none;width:16px;height:16px}
 /* Placeholder for ico_fatigue_zzz / icon-pause.svg until Art's files are in public/assets (HANDOFF blocker): text glyph, aria-hidden */
-.ss-ph{display:inline-grid;place-items:center;font:700 12px/16px var(--f-display);border:1.5px solid currentColor;border-radius:4px;box-sizing:border-box}
-.ss-ph[data-ph=ico_fatigue_zzz]::before{content:"z"}.ss-ph[data-ph=icon-pause]::before{content:"\2016"}
 .goal.ss-covered{opacity:0;pointer-events:none;transition:opacity 150ms ease}
 .ss-on .goal{transition:opacity 150ms ease}
 .goal.ss-swallow{pointer-events:none}
@@ -692,9 +690,11 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 @media (prefers-reduced-motion:reduce){.ss-pill{animation:none!important}.ss-on .goal{transition:none!important}}
 @media (min-width:960px) and (orientation:landscape){.stall-chip{min-height:var(--goal-h-lg);padding:0}.ss-pill{height:var(--goal-h-lg)}}
 /* #5b Rule 3 farm-screen Asleep banner (fatigue-ux ffb13c19 §2: band under the top bar, full width minus the farm gutters; rc2 §6 copy).
-   In flow as the farm's first row only while shown (.fb-on); flag off = no element, no rule matches. */
-.farm.fb-on{grid-template-rows:auto auto 1fr auto}
-.farm-banner{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 4px 0 10px;box-sizing:border-box;background:var(--c-danger);color:#fff;
+   Art ruling (art-ux/decisions.md): NOT in flow. Absolute over the queue band, x 8, width = farm - 16, 8 px under the HUD (or under .fslot
+   when shown: --fb-top = its bottom, set by FarmBanner), height 44-52; queue/scene/#collect rects stay equal to flag off (0 px shift).
+   .fb-host is added only when the banner mounts (flag on); flag off = no element, no rule matches. */
+.farm.fb-host{position:relative}
+.farm-banner{position:absolute;z-index:3;left:8px;right:8px;top:calc(var(--fb-top,0px) + 8px);max-height:52px;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 4px 0 10px;box-sizing:border-box;background:var(--c-danger);color:#fff;
   font:700 12px/16px var(--f-body);border-radius:12px;border:2px solid var(--c-outline);white-space:nowrap;min-width:0}
 .farm-banner[hidden]{display:none}
 .farm-banner .wb-ico{flex:none;width:14px;height:14px}

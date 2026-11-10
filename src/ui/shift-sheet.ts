@@ -5,5 +5,7 @@
  * Until Features' module lands this is a no-op at every flag value.
  */
 import type { WorkerId } from '../sim/workers';
-export type ShiftSheetEntry = 'stall_chip' | 'fatigue_chip' | (string & {});
+/** Not exported: the module exports ONLY openShiftSheet (agreed signature). 'asleep_banner' (Rule 3) and 'fatigue_bubble' (Rule 4) stay here
+ *  until Features adds them to the real union after HoE's allowlist approval. */
+type ShiftSheetEntry = 'stall_chip' | 'fatigue_chip' | 'asleep_banner' | 'fatigue_bubble';
 export function openShiftSheet(_id: WorkerId, _opener: HTMLElement, _entry: ShiftSheetEntry): void { /* no-op until Features merges */ }

@@ -78,3 +78,12 @@ describe('Rule 3 DOM (flag on)', () => {
     expect(m.el()!.textContent).not.toMatch(/refill/i);
   });
 });
+describe('Rule 3 banner placement (Art ruling: absolute, 0 px shift; browser gate scripts/v5-ss-banner-rects.mjs)', () => {
+  it('CSS: absolute over the queue band (x 8, farm - 16, 8 under the HUD/.fslot, 44-52 high); no grid row added', async () => {
+    const { readFileSync } = await import('node:fs'); const css = readFileSync('src/ui/styles.css', 'utf8');
+    const rule = css.match(/\n\.farm-banner\{([^}]*)\}/)![1];
+    expect(rule).toMatch(/position:absolute/); expect(rule).toMatch(/left:8px;right:8px/); expect(rule).toMatch(/top:calc\(var\(--fb-top,0px\) \+ 8px\)/);
+    expect(rule).toMatch(/min-height:44px/); expect(rule).toMatch(/max-height:52px/);
+    expect(css).not.toMatch(/\.fb-on\{grid-template-rows/); expect(css).toMatch(/\.farm\.fb-host\{position:relative\}/);
+  });
+});

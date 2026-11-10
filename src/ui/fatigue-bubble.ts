@@ -7,7 +7,7 @@ import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { fmtMoneyShort } from './format';
 import { fatigueCueView, workersAtRisk } from './stall-api';
-import { DOT } from './stall-chip';
+import { DOT, rc2RefillOn } from './stall-chip';
 
 /** fatigueLoss in cents/s (never negative). */
 export const fatigueLossCents = (s: GameState, b: Balance) => Math.max(0, Object.values(workersAtRisk(s, b)).reduce((a, x) => a + x, 0)) * 100;
@@ -15,6 +15,8 @@ export interface FatigueBubble { text: string; desc: string }
 export function fatigueBubble(s: GameState, b: Balance): FatigueBubble | null {
   const v = fatigueCueView(s, b); if (!v.shown || v.suppressedByStall) return null;
   const x = fmtMoneyShort(fatigueLossCents(s, b), { round: 'floor' });
-  // Visible copy is Art-approved (`Refill workers · +$X/s`); the description sentence is lane U's draft, pending Art sign-off.
-  return { text: `Refill workers${DOT}+${x}/s`, desc: `Next goal: refill workers, plus ${x} per second.` };
+  // D-HOP-2026-11-10-22: rc2Refill = 1 -> `Manage workers · +$X/s`, else `Refill workers · +$X/s` (NBSP both sides of ·).
+  // The description sentence is lane U's draft, pending Art sign-off.
+  const verb = rc2RefillOn(b) ? 'Manage' : 'Refill';
+  return { text: `${verb} workers${DOT}+${x}/s`, desc: `Next goal: ${verb.toLowerCase()} workers, plus ${x} per second.` };
 }

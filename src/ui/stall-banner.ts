@@ -35,7 +35,7 @@ export class FarmBanner {
   constructor(private farm: HTMLElement, private d: BannerDeps) {
     const t = document.createElement('template');
     t.innerHTML = `<div class="farm-banner" data-testid="farm-asleep-banner" hidden><img class="wb-ico" width="14" height="14" alt="" aria-hidden="true"><span class="fb-msg" role="status"><span class="bt" aria-hidden="true"></span><span class="sr"></span></span><span class="fb-more"></span><button class="fb-act" type="button"></button></div>`;
-    this.el = t.content.firstElementChild as HTMLElement; farm.prepend(this.el);
+    this.el = t.content.firstElementChild as HTMLElement; farm.prepend(this.el); farm.classList.add('fb-host'); // positioning context only (no layout change)
     this.bt = this.el.querySelector('.bt')!; this.sr = this.el.querySelector('.sr')!; this.more = this.el.querySelector('.fb-more')!;
     this.btn = this.el.querySelector('.fb-act')!; this.ico = this.el.querySelector('.wb-ico')!;
     this.btn.addEventListener('pointerdown', e => e.stopPropagation());
@@ -52,8 +52,11 @@ export class FarmBanner {
       this.ico.src = this.d.A(p.banner.icon); this.el.dataset.w = p.id;
       noteFatigueCueShown(this.d.g.state, 'banner'); // idempotent per (episodeId, surface) in the sim
     }
-    this.fit();
+    this.place(); this.fit();
   }
+  /** Art ruling: 8 px under the HUD, or under the #11 .fslot when it is laid out (>= 740 px high). */
+  private place() { const fs = this.farm.querySelector<HTMLElement>(':scope > .fslot'); const top = fs && fs.offsetHeight ? fs.offsetTop + fs.offsetHeight : 0;
+    const v = `${top}px`; if (this.el.style.getPropertyValue('--fb-top') !== v) this.el.style.setProperty('--fb-top', v); }
   /** bannerFit (SS-G22): full string unless it overflows at the current width; never by breakpoint. */
   private fit() { const t = this.bt, full = t.dataset.full ?? ''; if (t.textContent !== full) t.textContent = full; if (t.clientWidth && t.scrollWidth > t.clientWidth + Number.EPSILON) t.textContent = t.dataset.short ?? full; }
   private tap() {

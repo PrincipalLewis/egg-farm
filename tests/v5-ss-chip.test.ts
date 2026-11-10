@@ -67,7 +67,8 @@ describe('§4.4 chip copy (pure)', () => {
     expect(d('mh_asleep', { ...c0, cooldown: true })).toBe('Market Hand is asleep. Auto-sales have stopped. Tap to sell all.');
     expect(d('mh_asleep', { ...c0, rc2Refill: true })).toBe('Market Hand is asleep. Auto-sales have stopped. Tap to manage.');
     expect(d('mh_paused')).toBe('Market Hand is on break. Auto-sales have stopped. Tap to sell all.');
-    expect(d('mh_unpaid')).toBe('Market Hand is unpaid. Auto-sales have stopped. Needs 12.34 dollars. Tap to sell all.');
+    expect(d('mh_unpaid')).toBe('Market Hand is unpaid. Auto-sales have stopped. Tap to sell all.'); // D-HOP-2026-11-10-22: rc2 §6 aria + Tap, no Needs {Y}
+    expect(d('mh_unpaid', { ...c0, rc2Refill: true })).toBe('Market Hand is unpaid. Auto-sales have stopped. Tap to sell all.');
     expect(d('no_mh')).toBe('Customers are waiting and eggs are ready. Tap to sell all.');
     expect(d('ch_asleep', { ...c0, cooldown: true })).toBe('Coop Hand is asleep. Auto-collecting has stopped. Tap to collect.');
     expect(d('ch_unpaid')).toBe('Coop Hand is unpaid. Auto-collecting has stopped. Tap to collect.');
@@ -104,7 +105,7 @@ describe('#5b chip DOM (flag on)', () => {
     expect(m.goal().getAttribute('aria-hidden')).toBe('true'); expect(m.goal().tabIndex).toBe(-1); expect(m.goal().hidden).toBe(false); // laid out, 0 px shift
     expect(c.previousElementSibling).toBe(m.goal()); // same slot, DOM order right after the bubble
     live.textContent = ''; m.ui.render(); m.ui.render(); expect(live.textContent).toBe(''); // no re-announce for the same stall_id
-    expect(c.querySelector('.ss-ph')!.getAttribute('data-ph')).toBe('ico_fatigue_zzz'); // placeholder icon until Art's file lands
+    expect(c.querySelector('img.ss-ic')!.getAttribute('src')).toMatch(/ico_fatigue_zzz\.svg$/); // Art final (d4709f93)
   });
   it('tap = one Refill (manage on market_hand), noteStallChipTap first, repeats inside tc.stall_tap_guard_ms ignored, never reaches #scene', async () => {
     const m = await mount(ON, st({ workers: { market_hand: W(0), coop_hand: W(100) } }));
