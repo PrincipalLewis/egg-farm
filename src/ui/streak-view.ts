@@ -56,14 +56,16 @@ export function tierAria(k: number, b: Balance): string {
   return `${nameAt(ARIA_NAMES, k)}, +${pctFloor(tierThresholds(p)[k - 1])}% price`;
 }
 export const COOLING_ARIA = 'Streak cooling';
-/** Tier from which a cooling start plays sfx-streak-cool-01 and announces (combo-tiers §1 tier 2 row, §6). */
+/** TUNABLE pending Economy (Architect ruling 2026-11-10, literals.md): the tier from which a cooling start plays sfx-streak-cool-01 and
+ *  announces (combo-tiers §1 tier 2 row, §6). Moves to m4.tc.streak_cool_cue_min_tier once economy.csv (CSV of record) carries
+ *  tc_streak_cool_cue_min_tier; then this line becomes tcNum(b, 'streak_cool_cue_min_tier'). */
 const COOL_CUE_MIN_TIER = 2;
 
 /**
  * Eligible upward crossings with hysteresis (§3.3): tier k pops on s going from < T_k to >= T_k, and can pop again only after s
  * has fallen below T_(k-1) (T_0 = 0). Only the highest tier crossed in one step pops (a config edge; one pill at a time). A cap
  * change (K18 clamp, live config reload) re-syncs silently. Also reports the cooling start (once per decay start, only if the
- * run reached tier >= 2).
+ * run reached tier >= COOL_CUE_MIN_TIER).
  */
 export class StreakTiers {
   private prev = 0; private armed: boolean[] = []; private key = ''; private runMax = 0; private wasCooling = false;

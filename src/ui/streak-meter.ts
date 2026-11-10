@@ -13,6 +13,7 @@ import './streak.css';
 import { LiveThrottle, StreakTiers, COOLING_ARIA, meterView, pillCopy, streakParams, streakUiOn, tapCoinUiOn, tierAria, type MeterView } from './streak-view';
 import { coinPopAria, coinPopBox, coinPopText, pillBox } from './tap-coin-pop';
 import { tcNum } from '../config/formulas';
+import { FOCUS_DT_MAX_S } from '../sim/clock';
 import type { Game } from '../game';
 import type { Balance } from '../config/balance';
 import type { OverlayCtx, OverlayFeature } from './streak-f6-stub';
@@ -34,8 +35,6 @@ export const STREAK_SFX = { streakTier1: 'sfx-streak-tier-01', streakTier2: 'sfx
 export const STREAK_UI_MS = { streakLiveGap: 2000, coinLiveGap: 1000, pill: 900, coinPop: 800, tierUp: 400 } as const;
 /** Golden-egg no-spawn clearance around the meter box (golden R14 / ST-AC21: box + 16 px). */
 const METER_ZONE_PX = 16;
-/** Max focus seconds one frame can apply (golden R5e clamp, 1.0 s): a bigger drop in one frame is a reset, not decay. */
-const MAX_FRAME_FOCUS_S = 1;
 /** Spark dots per tier-up: k for tiers 1..3, 6 at MAX (combo-tiers §2). */
 const MAX_SPARKS = 6;
 /** app.ts floatText places the egg-collect pop's top at Collect's centre y - 40 (same-frame +20 px rule, R16). */
@@ -121,7 +120,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
     const s = g.state.streakS ?? 0, v: MeterView = meterView(s, g.state.streakHoldS ?? 0, b, { rm: ctx.rm() });
     const r = tiers.update(s, v.cooling, b, fromTap);
     if (r.coolStart) { ctx.audio?.play('streakCool'); const say = sLive.push(COOLING_ARIA, nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say; }
-    const reset = !v.shown && prevS > tcNum(b, 'streak_decay_per_s') * MAX_FRAME_FOCUS_S; prevS = s;
+    const reset = !v.shown && prevS > tcNum(b, 'streak_decay_per_s') * FOCUS_DT_MAX_S; prevS = s; // FOCUS_DT_MAX_S = max focus s one frame applies (sim/clock): a bigger drop in one frame is a reset, not decay
     const key = `${v.scale}|${v.label}|${v.cooling}|${v.max}|${v.lit.join()}|${ctx.rm()}`;
     if (r.tierUp) { const box = tierUp(r.tierUp); pendingPill = box ? box.top : undefined; }
     if (key === lastKey) return; lastKey = key;
