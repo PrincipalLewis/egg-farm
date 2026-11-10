@@ -7,14 +7,10 @@
  * (sim/streak.ts streakTier: T_k = round_to_step(cap x k / count)), so visual, sound and aria always agree with the sim.
  */
 import type { Balance } from '../config/balance';
-import { flagOn } from '../config/flags';
 import { tcNum } from '../config/formulas';
 import { streakTier } from '../sim/streak';
 
-/** Streak meter / A2 pops: m4.flags.streak (needs m4.enabled). */
-export const streakUiOn = (b: Balance) => flagOn(b, 'streak');
-/** Tap-coin +$ pop: m4.flags.tapCoins (needs m4.enabled). Either can be cut alone (R13a). */
-export const tapCoinUiOn = (b: Balance) => flagOn(b, 'tapCoins');
+export { streakUiOn, tapCoinUiOn } from './streak-flags';
 
 export interface StreakParams { cap: number; step: number; count: number }
 export const streakParams = (b: Balance): StreakParams =>

@@ -18,7 +18,7 @@ import type { Balance } from '../config/balance';
 import type { OverlayCtx, OverlayFeature } from './streak-f6-stub';
 
 /** What the streak UI reads from the F6 OverlayCtx (structural, so F6's real ctx and the stub both satisfy it). `audio` is F6's
- *  [draft] phase-2 hook player, absent in API v0.1: optional, the stings are silent until it exists. */
+ *  [draft] phase-2 hook player, absent in API v0.2: optional, the stings are silent until it exists. */
 export interface StreakCtx {
   g: Pick<Game, 'state' | 'on'>; b: Balance; root: HTMLElement;
   layer(): HTMLElement; rm(): boolean; dialogOpen(): boolean; asset(f: string): string;
@@ -153,7 +153,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
   };
 }
 
-/** The F6 feature. No `flag` (F6 API v0.1 example uses flag 'streak'): it must also mount for m4.flags.tapCoins alone (ST-AC29),
+/** The F6 feature. No `flag` (F6 API v0.2 example uses flag 'streak'): it must also mount for m4.flags.tapCoins alone (ST-AC29),
  *  and its mount adds NO DOM, class or listener when both flags are off, so the flag-off #app hash is unchanged. */
 let live: StreakUi | null = null;
 export const streakMeter: OverlayFeature = {
