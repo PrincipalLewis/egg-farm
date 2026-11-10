@@ -29,11 +29,12 @@
 | BR-AC49 docked focus | phone `registerSheet('flock')`; docked skips | browser QA |
 | BR-AC52 / strip / chip | **PR-B** | |
 | BR-AC23b/c BB strip | **PR-B** (#100) | |
-| Family "max" (E8) | **gap** | `bc_lay_cap_*` not in `BC_SPEC_DEFAULTS` yet — stop if needed |
+| Family "max" (E8) | `familyClamp` stub → undefined (no label) | **Dep:** Saves `saves/breeds-sim-prB-traits` commit 0 |
+| PR-B ext glob / ctx | `registerBreedsExt` + flag-0 null; presentMirror unit | `breeds-ext-*.ts` naming; no app.ts for PR-B |
 | D1–D6 Saves drift | await rebase on rc/v5 when drift PR lands | UI adapter null-safe |
 
 ## Gaps / deferred
 - UI-BR-2b next-session highlight fallback test
 - BR-AC25 full welcome-back → reveal browser path
-- Family clamp "max" copy (needs bc_* caps in defaults or CSV)
+- Family clamp "max": stub until Saves `saves/breeds-sim-prB-traits`
 - Full release-bundle vite qa/prod for qaBreeds (coded; run at Ready)

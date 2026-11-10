@@ -7,13 +7,15 @@
 import type { Balance } from '../config/balance';
 import { flagOn } from '../config/flags';
 import {
-  BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, type BreedId, type Family, type Rarity,
+  BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, CENTS_PER_DOLLAR,
+  type BreedId, type Family, type Rarity,
 } from '../config/breeds';
 import {
   eligible, hatchCostCents, hatchEstimate, slotTraitBp, type HatchEstimate,
 } from '../sim/breeds-hatch';
 import { isFlockComplete, on as breedsFlagAndKey, type BreedsSave } from '../sim/breeds';
 import type { GameState } from '../sim/state';
+import { incomePerSec } from '../econ/income';
 
 export type { BreedId, BreedsSave, Family, HatchEstimate, Rarity };
 export { BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, hatchEstimate, hatchCostCents, eligible, slotTraitBp, isFlockComplete };
@@ -77,6 +79,56 @@ export const fmtRemainMs = (ms: number) => {
   const m = Math.floor(s / 60);
   return `${m}:${String(s % 60).padStart(2, '0')}`;
 };
+
+
+/**
+ * E8 Flock-sheet "max" label for a family.
+ * HoE-approved stub (2026-11-10): **undefined ⇒ no label**.
+ * TODO(PMC/Saves): replace body with the sim getter when Saves lands it on
+ * `saves/breeds-sim-prB-traits` (commit 0 of that branch; ETA TBD). Keep this
+ * as the single UI call site so the source swaps in one place. Do not hard-code bc_*.
+ */
+export function familyClamp(
+  _family: Family,
+  _br: BreedsSave,
+  _b: Balance,
+  _farmLevel?: number,
+): string | undefined {
+  return undefined;
+}
+
+
+/** Present chip / slot-mirror copy (Art UI-BR-20 / BR-R12c). Shared with PR-B HUD. */
+export const CHIP_PAUSED_DESC = 'Breed bonus paused while you tap fast. Returns when you tap slower.';
+export const chipActiveDesc = (exact: string) => `Breed bonus ${exact} active`;
+
+/**
+ * Slot-card Present mirror (spec L449; UI doc §7a/§7b). Plain non-interactive text for the slot card.
+ * `bp` = slot settled bp; `gateOpen` = Present calm-gate (stub true until Saves lands the gate).
+ * Signature matches PR-B `breeds-hud` / adapter contract so PR-B imports from here.
+ */
+export function presentMirror(
+  bp: number,
+  gateOpen: boolean,
+): { text: string; paused: boolean; html: string; description: string } | null {
+  if (!(bp > 0)) return null;
+  const text = traitPctExact(bp);
+  const paused = !gateOpen;
+  return {
+    text,
+    paused,
+    html: `<span class="breeds-hud-mirror${paused ? ' paused' : ''}" data-testid="breeds-hud-mirror">${text}</span>`,
+    description: paused ? CHIP_PAUSED_DESC : chipActiveDesc(text),
+  };
+}
+
+/**
+ * Sim income rate in ¢/s for BB strip countdown / ext ctx (steady-state; breed-neutral).
+ * Exposed on registerBreedsExt ctx as incomeRate().
+ */
+export function incomeRate(s: GameState, b: Balance): number {
+  return Math.round(incomePerSec(s, b) * CENTS_PER_DOLLAR);
+}
 
 /** Re-export breedsFlagAndKey for tests that need the sim `on()` (flag + key). */
 export const breedsOn = breedsFlagAndKey;

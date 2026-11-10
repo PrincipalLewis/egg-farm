@@ -8,6 +8,7 @@ import {
   type BreedsSave, type HatchEstimate, breedAsset, SILHOUETTE_ASSET, SILHOUETTE_OPACITY,
   freeHatchAvailable, flockComplete, eligible, hatchCostCents, openSlotCount, fmtRemainMs,
   ROSTER, BREED_IDS, bc, traitPctExact, familyWord, familyTraitWord, slotTraitBp, starBp, isBreedId,
+  familyClamp, presentMirror,
 } from './breeds-adapter';
 import type { GameState } from '../sim/state';
 
@@ -108,7 +109,14 @@ export function slotCardHtml(br: BreedsSave, b: Balance, slot: number, open: num
     return `<button type="button" class="slot settling" data-slot="${slot}" data-breed="${id}">${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${traitPctExact(starBp(id, stars, b))} ${familyTraitWord(fam)} · inactive</span><span class="settle-ring" aria-hidden="true"></span><span class="settle-lab">${lab}</span></button>`;
   }
   const bp = slotTraitBp(br, slot, b);
-  const pct = traitPctExact(bp);
-  // OQ-6: select album → tap slot to place; Remove clears (not tap-on-filled).
-  return `<div class="slot filled" data-slot="${slot}" data-breed="${id}" role="group" aria-label="Slot ${slot + 1}, ${rosterName(id)}">${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${pct} ${familyTraitWord(fam)} ${familyWord(fam)}</span><button type="button" class="slot-remove" data-testid="breeds-slot-remove" data-slot="${slot}" aria-label="Remove ${rosterName(id)} from slot ${slot + 1}">Remove</button></div>`;
+  // Present mirror: gate stub OPEN until Saves calm-gate lands (same as PR-B STUB_PRESENT_GATE).
+  const mir = fam === 'present' ? presentMirror(bp, true) : null;
+  const pct = mir ? mir.html : traitPctExact(bp);
+  const descAttr = mir ? ` aria-describedby="slot-desc-${slot}"` : '';
+  const descNode = mir ? `<span id="slot-desc-${slot}" class="sr">${mir.description}</span>` : '';
+  // E8: familyClamp stub returns undefined ⇒ no "max" label (HoE; Saves owns real getter on saves/breeds-sim-prB-traits).
+  const maxLab = familyClamp(fam, br, b);
+  const maxSpan = maxLab ? `<span class="slot-max" data-testid="breeds-slot-max">${maxLab}</span>` : '';
+  // OQ-6: album select → tap slot to place; Remove clears (not tap-on-filled).
+  return `<div class="slot filled" data-slot="${slot}" data-breed="${id}" role="group" aria-label="Slot ${slot + 1}, ${rosterName(id)}"${descAttr}>${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${pct} ${familyTraitWord(fam)} ${familyWord(fam)}${maxSpan ? ` ${maxSpan}` : ''}</span>${descNode}<button type="button" class="slot-remove" data-testid="breeds-slot-remove" data-slot="${slot}" aria-label="Remove ${rosterName(id)} from slot ${slot + 1}">Remove</button></div>`;
 }

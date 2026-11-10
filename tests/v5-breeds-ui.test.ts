@@ -370,3 +370,250 @@ describe('BR-AC4 / OQ-6 place + settle', () => {
     expect(u.sub).toBe('Ready in 0:46'); // ceil 45001ms
   });
 });
+
+describe('UI-BR-2b next-session highlight fallback', () => {
+  it('session N+1 with coach unseen arms glow/dot; same session does not', async () => {
+    const b = breedsOn();
+    // Session N: F10, coach unseen → records flockHighlightSession, no arm
+    localStorage.setItem('eggfarm.ui', JSON.stringify({
+      onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false, sessions: 0,
+    }));
+    const kv1 = kvOf();
+    kv1.setItem(SAVE_KEY, serialize({
+      ...initialState(b), farmLevel: 10, coinsCents: 1e9, abilitiesCoachSeen: false,
+      tracksV7: 1, seenTracksExplainer: true,
+    } as any, 1760000000000));
+    const g1 = new Game(b, kv1, () => 1760000000500, undefined, 'dev', null, null, { idbBoot: 'absent', newId: id });
+    if (!('breeds' in g1.state)) {
+      const { ensureBreeds } = await import('../src/sim/breeds');
+      g1.state = ensureBreeds(g1.state, b);
+    }
+    document.body.innerHTML = '<div id="app"></div>';
+    const { mountApp } = await import('../src/ui/app');
+    const ui1 = mountApp(document.getElementById('app')!, g1, b, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
+    ui1.render();
+    ui1.openPanel('upgrades');
+    ui1.render();
+    const btn1 = document.getElementById('breeds-entry')!;
+    expect(btn1.classList.contains('breeds-dot')).toBe(false);
+    const flagsN = JSON.parse(localStorage.getItem('eggfarm.ui')!);
+    expect(flagsN.flockHighlightSession).toBeTypeOf('number');
+    expect(flagsN.flockHighlightArmed).not.toBe(true);
+    ui1.dispose();
+
+    // Session N+1: same flockHighlightSession, sessions bumped on boot → arm
+    localStorage.setItem('eggfarm.ui', JSON.stringify({
+      onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false,
+      sessions: flagsN.sessions, // will +1 on boot
+      flockHighlightSession: flagsN.flockHighlightSession,
+    }));
+    const kv2 = kvOf();
+    kv2.setItem(SAVE_KEY, serialize({
+      ...initialState(b), farmLevel: 10, coinsCents: 1e9, abilitiesCoachSeen: false,
+      tracksV7: 1, seenTracksExplainer: true,
+    } as any, 1760000001000));
+    const g2 = new Game(b, kv2, () => 1760000001500, undefined, 'dev', null, null, { idbBoot: 'absent', newId: id });
+    if (!('breeds' in g2.state)) {
+      const { ensureBreeds } = await import('../src/sim/breeds');
+      g2.state = ensureBreeds(g2.state, b);
+    }
+    document.body.innerHTML = '<div id="app"></div>';
+    const ui2 = mountApp(document.getElementById('app')!, g2, b, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
+    ui2.render();
+    ui2.openPanel('upgrades');
+    ui2.render();
+    const btn2 = document.getElementById('breeds-entry')!;
+    expect(btn2.classList.contains('breeds-dot')).toBe(true);
+    expect(g2.state.abilitiesCoachSeen).toBe(false); // calls card still pending
+  });
+});
+
+describe('BR-AC25 / BR-R18 offline reveal after welcome-back', () => {
+  it('pendingReveal shows only after welcome Collect/dismiss; not before', async () => {
+    const b = breedsOn();
+    localStorage.setItem('eggfarm.ui', JSON.stringify({
+      onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false, reducedMotion: true,
+    }));
+    const kv = kvOf();
+    kv.setItem(SAVE_KEY, serialize({
+      ...initialState(b), farmLevel: 10, coinsCents: 1e9, abilitiesCoachSeen: true,
+      tracksV7: 1, seenTracksExplainer: true, pendingOfflineEggs: 12,
+    } as any, 1760000000000));
+    const g = new Game(b, kv, () => 1760000000500, undefined, 'dev', null, null, { idbBoot: 'absent', newId: id });
+    if (!('breeds' in g.state)) {
+      const { ensureBreeds } = await import('../src/sim/breeds');
+      g.state = ensureBreeds(g.state, b);
+    }
+    // Ensure pending eggs survived load
+    if (g.state.pendingOfflineEggs <= 0) g.state = { ...g.state, pendingOfflineEggs: 12 };
+    g.pendingReveal = 'brahma' as any;
+    document.body.innerHTML = '<div id="app"></div>';
+    const { mountApp } = await import('../src/ui/app');
+    const ui = mountApp(document.getElementById('app')!, g, b, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
+    ui.render();
+    expect(document.querySelector('[data-testid="breeds-reveal"]')).toBeNull();
+    ui.showWelcome();
+    expect(document.querySelector('.card #wbCollect, #wbCollect')).toBeTruthy();
+    expect(document.querySelector('[data-testid="breeds-reveal"]')).toBeNull(); // not until welcome closes
+    (document.getElementById('wbCollect') as HTMLButtonElement).click();
+    const card = document.querySelector('[data-testid="breeds-reveal"]');
+    expect(card).toBeTruthy();
+    expect(card!.textContent).toMatch(/Brahma/);
+    (card!.querySelector('.reveal-ok') as HTMLButtonElement).click();
+    expect(g.pendingReveal).toBeNull();
+    expect(document.querySelector('[data-testid="breeds-reveal"]')).toBeNull();
+  });
+});
+
+describe('E8 familyClamp stub (HoE / Saves dependency)', () => {
+  it('familyClamp returns undefined ⇒ no breeds-slot-max label', async () => {
+    const { familyClamp } = await import('../src/ui/breeds-adapter');
+    const b = breedsOn();
+    const br: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      owned: { leghorn: { stars: 2 }, rhode_island_red: { stars: 2 }, ayam_cemani: { stars: 2 } },
+      slots: ['leghorn', 'rhode_island_red', 'ayam_cemani'],
+      settleMs: [0, 0, 0],
+    };
+    expect(familyClamp('present', br, b, 20)).toBeUndefined();
+    const { ui } = await mount({ farmLevel: 20, coinsCents: 1e9, abilitiesCoachSeen: true, breeds: br }, b);
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    expect(document.querySelectorAll('[data-testid="breeds-slot-max"]').length).toBe(0);
+  });
+});
+
+describe('PR-A checklist extras', () => {
+  it('album has 8 cells; unowned use silhouette; pity has no UI string', async () => {
+    const { ui } = await mount({ farmLevel: 10, coinsCents: 1e9, abilitiesCoachSeen: true }, breedsOn());
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    const cells = document.querySelectorAll('#breeds-body .album-cell');
+    expect(cells.length).toBe(8);
+    expect(document.querySelectorAll('#breeds-body .album-cell .breed-sil').length).toBe(8);
+    expect(document.getElementById('breeds-body')!.textContent).not.toMatch(/pity/i);
+  });
+
+  it('BR-AC31b unaffordable press charges nothing', async () => {
+    const b = breedsOn();
+    const br: BreedsSave = { ...emptyBr(), freeHatchUsed: 1 };
+    const { g, ui } = await mount({ farmLevel: 10, coinsCents: 0, abilitiesCoachSeen: true, breeds: br }, b);
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    const btn = document.querySelector('#breeds-body .hatch-btn') as HTMLButtonElement;
+    expect(btn.getAttribute('aria-disabled')).toBe('true');
+    expect(btn.textContent).not.toMatch(/lock/i);
+    const coins = g.state.coinsCents;
+    btn.click();
+    expect(g.state.coinsCents).toBe(coins);
+    expect(g.state.breeds?.incubator).toBeFalsy();
+  });
+
+  it('affordable Hatch · $ label + Ready in 1:00 only', async () => {
+    const b = breedsOn();
+    const br: BreedsSave = { ...emptyBr(), freeHatchUsed: 1 };
+    const { ui } = await mount({ farmLevel: 10, coinsCents: 1e12, abilitiesCoachSeen: true, breeds: br }, b);
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    const btn = document.querySelector('#breeds-body .hatch-btn')!;
+    expect(btn.textContent).toMatch(/^Hatch · \$/);
+    expect(document.getElementById('hatch-sub')!.textContent).toBe('Ready in 1:00');
+    expect(document.getElementById('breeds-body')!.textContent).not.toMatch(/of income|payback|★|best/i);
+  });
+});
+
+describe('PR-B seams: ext ctx + presentMirror + flag-0', () => {
+  it('presentMirror: null when bp=0; active html when gate open; paused when closed', async () => {
+    const { presentMirror, CHIP_PAUSED_DESC } = await import('../src/ui/breeds-adapter');
+    expect(presentMirror(0, true)).toBeNull();
+    const on = presentMirror(312, true)!;
+    expect(on.text).toBe('+3.12%');
+    expect(on.paused).toBe(false);
+    expect(on.html).toContain('breeds-hud-mirror');
+    expect(on.html).not.toContain('paused');
+    const off = presentMirror(312, false)!;
+    expect(off.paused).toBe(true);
+    expect(off.html).toContain('paused');
+    expect(off.description).toBe(CHIP_PAUSED_DESC);
+  });
+
+  it('Present settled slot uses presentMirror html (gate stub open)', async () => {
+    const b = breedsOn();
+    const br: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      owned: { leghorn: { stars: 0 } },
+      slots: ['leghorn', null, null],
+      settleMs: [0, 0, 0],
+    };
+    const { ui } = await mount({ farmLevel: 10, coinsCents: 1e9, abilitiesCoachSeen: true, breeds: br }, b);
+    ui.openPanel('upgrades');
+    ui.render();
+    document.getElementById('breeds-entry')!.click();
+    expect(document.querySelector('[data-testid="breeds-hud-mirror"]')).toBeTruthy();
+    expect(document.querySelector('.breeds-hud-mirror')!.textContent).toMatch(/^\+/);
+  });
+
+  it('registerBreedsExt onSync receives openFlock, incomeRate, reducedMotion; flag-off skips', async () => {
+    const { mountBreeds, registerBreedsExt, clearBreedsExtForTests, breedsExtCountForTests } =
+      await import('../src/ui/breeds-mount');
+    clearBreedsExtForTests();
+    const seen: any[] = [];
+    registerBreedsExt({
+      onSync(ctx) { seen.push(ctx); },
+    });
+    expect(breedsExtCountForTests()).toBe(1);
+
+    // flag off → null, no fire
+    const off = mountBreeds({
+      g: { state: initialState(breedsOff()) } as any,
+      b: breedsOff(),
+      upHeader: document.createElement('header'),
+      panelLayer: document.createElement('div'),
+      docked: { matches: false },
+      closeOtherPanels() {}, openUpgrades() {}, sfx() {},
+      rm: () => true,
+      saveFlags() {}, getFlags: () => ({}), dirty() {},
+    });
+    expect(off).toBeNull();
+    expect(seen.length).toBe(0);
+
+    // flag on → fire with enriched ctx
+    const b = breedsOn();
+    const kv = kvOf();
+    kv.setItem(SAVE_KEY, serialize({
+      ...initialState(b), farmLevel: 10, coinsCents: 1e9, abilitiesCoachSeen: true,
+      tracksV7: 1, seenTracksExplainer: true,
+    } as any, 1760000000000));
+    localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false, reducedMotion: true }));
+    const g = new Game(b, kv, () => 1760000000500, undefined, 'dev', null, null, { idbBoot: 'absent', newId: id });
+    if (!('breeds' in g.state)) {
+      const { ensureBreeds } = await import('../src/sim/breeds');
+      g.state = ensureBreeds(g.state, b);
+    }
+    document.body.innerHTML = '<div id="uh"></div><div id="pl"></div>';
+    const h = mountBreeds({
+      g, b,
+      upHeader: document.getElementById('uh')!,
+      panelLayer: document.getElementById('pl')!,
+      docked: { matches: false },
+      closeOtherPanels() {}, openUpgrades() {}, sfx() {},
+      rm: () => true,
+      saveFlags() {}, getFlags: () => ({}), dirty() {},
+    });
+    expect(h).toBeTruthy();
+    h!.syncEntry(g.state, {}, 1);
+    expect(seen.length).toBeGreaterThanOrEqual(1);
+    const ctx = seen[seen.length - 1];
+    expect(typeof ctx.openFlock).toBe('function');
+    expect(typeof ctx.incomeRate).toBe('function');
+    expect(ctx.incomeRate()).toBeTypeOf('number');
+    expect(ctx.reducedMotion).toBe(true);
+    ctx.openFlock();
+    expect(h!.isOpen).toBe(true);
+    clearBreedsExtForTests();
+  });
+});
