@@ -15,7 +15,7 @@ export type SimEvent =
   | { type: 'worker_manage_all'; workers: WorkerId[]; energyBefore: number[] } // one tap = one Manage action (AC-W5)
   | { type: 'worker_state'; worker: WorkerId; state: WorkerMood }
   | { type: 'worker_yawn'; worker_id: WorkerId; energy_pct: number; farm_level: number } // once per entry into Yawning (<= yawn_at_pct)
-  | { type: 'wage'; worker: WorkerId; cents: number }
+  | { type: 'wage'; worker: WorkerId; cents: number; state?: 'working' | 'tired' | 'asleep' } // state: m4.flags.clockWage = 1 only (failure-cost AC-FC15)
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
