@@ -6,7 +6,7 @@ import { prodEggsPerSec, coopCap } from './tracks';
 import { anyM5FlagOn, stepTimers } from './timers';
 import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
 import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
-import { clockWageOn, clockWageAsleepStep, wageState } from './clock-wage';
+import { clockWageOn, clockWageAsleepStep, wageState, tickAsleepClock } from './clock-wage';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
@@ -58,6 +58,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
   }
   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
+  out = tickAsleepClock(out, Math.round(dt * 1000), b); // v5 asleep clock (Architect ruling 4): mood asleep, unpaused MH/CH, integer ms; identity when off
   if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
   if (live) out = stepTimers(out, dt, b, clock, ev);
   return out;
@@ -84,7 +85,6 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
     const m = mood(w, b);
     // v5 clockWage (failure-cost v0.3.24 FC-R1/U1, seam S1 agreed with Saves): an Asleep, unpaused MH/CH keeps its cdS clock and is charged
     // its every_s wage, no action. ws is re-synced to the WHOLE returned workers object (Saves condition a).
-    if (w.energy <= 0 && !isPaused(w, b) && clockWageOn(b)) ev?.push({ type: 'asleep_time', worker: id, s: dt }); // S4: session_end.asleep_s (Unpaid-asleep counts)
     if (m === 'asleep' && !isPaused(w, b) && clockWageOn(b)) { s = clockWageAsleepStep({ ...s, workers: ws }, id, dt, b, ev); ws = { ...s.workers }; continue; }
     if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
     let cdS = w.cdS - dt;

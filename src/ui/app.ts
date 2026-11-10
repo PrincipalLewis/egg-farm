@@ -35,7 +35,7 @@ import { tryDispatch, wouldApply } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
-import { clockWageOn } from '../sim/clock-wage';
+import { clockWageOn, clockWageWindowView } from '../sim/clock-wage';
 import { asleepToast, FallAsleepToasts, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
@@ -343,7 +343,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
     modalKind = 'welcome';
-    const cwLines = welcomeBackWageHtml(g.clockWageSinceWelcome(), b); if (cwLines) g.resetClockWageSinceWelcome(); // AC-FC12 ('' flag-off: markup unchanged)
+    const cwLines = welcomeBackWageHtml(clockWageWindowView(g.state), b); // AC-FC12 ('' flag-off: markup unchanged); the window resets at close (collect/dismissOffline)
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">

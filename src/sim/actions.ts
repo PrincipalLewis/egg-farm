@@ -1,3 +1,4 @@
+import { resetClockWageWindow } from './clock-wage';
 import type { Balance } from '../config/balance';
 import { startHatch, placeBreed } from './breeds-hatch';
 import { GameState, eggsPerTap, collectionCost, farmCost } from './state';
@@ -117,7 +118,7 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
     // Closing the welcome-back modal without tapping Collect still grants the eggs.
     // S2-3a / MK-22: closing the welcome-back modal brings the first customer on the next tick (deterministic: timer -> 0).
-    case 'collectOffline': case 'dismissOffline': return { ...s, basket: s.basket + s.pendingOfflineEggs, pendingOfflineEggs: 0,
+    case 'collectOffline': case 'dismissOffline': return { ...resetClockWageWindow(s, b), basket: s.basket + s.pendingOfflineEggs, pendingOfflineEggs: 0, // AC-FC12: the welcome-back window restarts at modal close (identity with clockWage off)
       nextCustomerInS: s.pendingOfflineEggs > 0 ? Math.min(s.nextCustomerInS, 0) : s.nextCustomerInS };
   }
 }
