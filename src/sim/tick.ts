@@ -6,6 +6,7 @@ import { prodEggsPerSec, coopCap } from './tracks';
 import { anyM5FlagOn, stepTimers } from './timers';
 import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
 import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
+import { clockWageOn, clockWageAsleepStep, wageState } from './clock-wage';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
@@ -64,7 +65,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
 /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
  *  (front first, like Sell all) every every_s / tired_every_s. Wage is charged per action interval. Asleep = nothing, no wage. */
 function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspended = false): GameState {
-  const ws = { ...s.workers };
+  let ws = { ...s.workers };
   // §8 items 15.5 + 16 (R9): Unpaid workers resume one at a time, W1 then W2. Each needs coins >= 1 min of its own wage
   // plus 1 min for every worker already being paid (Working/Tired) and every worker resumed earlier in this check.
   // Stops at the first that can't resume (strict order).
@@ -80,7 +81,11 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
   s = { ...s, workers: ws };
   for (const id of ['coop_hand', 'market_hand'] as const) {
     const w = ws[id]; if (!w) continue;
-    const m = mood(w, b); if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
+    const m = mood(w, b);
+    // v5 clockWage (failure-cost v0.3.24 FC-R1/U1, seam S1 agreed with Saves): an Asleep, unpaused MH/CH keeps its cdS clock and is charged
+    // its every_s wage, no action. ws is re-synced to the WHOLE returned workers object (Saves condition a).
+    if (m === 'asleep' && !isPaused(w, b) && clockWageOn(b)) { s = clockWageAsleepStep({ ...s, workers: ws }, id, dt, b, ev); ws = { ...s.workers }; continue; }
+    if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
     let cdS = w.cdS - dt;
     if (cdS <= 1e-9) {
       const cfg = b.workers[id], interval = m === 'working' ? cfg.every_s : cfg.tired_every_s;
@@ -90,7 +95,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
         ws[id] = { ...w, cdS: 0, unpaid: true }; ev?.push({ type: 'worker_state', worker: id, state: 'unpaid' }); continue;
       }
       s = { ...s, coinsCents: s.coinsCents - wage, wageFracCents: { ...s.wageFracCents, [id]: frac } }; // not paid -> never charged (above), frac unchanged
-      if (wage > 0) ev?.push({ type: 'wage', worker: id, cents: wage });
+      if (wage > 0) ev?.push({ type: 'wage', worker: id, cents: wage, ...wageState(m, b) }); // S2: state only with clockWage = 1 ({} off)
       if (id === 'coop_hand') {
         const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b));
         if (n > 0) { s = { ...s, coop: s.coop - n, basket: s.basket + n }; ev?.push({ type: 'worker_collect', eggs: n }); }
