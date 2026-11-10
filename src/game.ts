@@ -9,6 +9,8 @@ import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent, CollectibleSkin } from './sim/events';
+import type { WorkerId } from './sim/workers';
+import { clockWageOn } from './sim/clock-wage';
 import { goldenOn, goldenUnload, spawnDue } from './sim/golden';
 import { focusFrameMs } from './sim/clock';
 import { streakOn, streakPeak } from './sim/streak';
@@ -134,10 +136,11 @@ export class Game {
   }
   private emit(evs: SimEvent[]) {
     for (const e0 of evs) { const e = this.withCollectibleId(e0);
-      this.notify(e);
+      if (e.type !== 'asleep_time') this.notify(e);
       if (e.type === 'collect') this.telemetry.tap(e.eggs);
+      else if (e.type === 'asleep_time') this.cwAdd(e.worker, e.s, 0); // S4: Game-only, never tracked (kept hidden sim arrives here; dropped never does)
       else if (e.type === 'wage') { this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
-        if (e.state === 'asleep') this.telemetry.sum(`wage_${e.worker}_asleep_cents`, e.cents); } // S3 (clockWage = 1 only: state is absent flag-off)
+        if (e.state === 'asleep') { this.telemetry.sum(`wage_${e.worker}_asleep_cents`, e.cents); this.cwAdd(e.worker, 0, e.cents); } } // S3 (clockWage = 1 only: state is absent flag-off)
       else if (e.type === 'worker_collect') this.telemetry.sum('coop_hand_eggs', e.eggs);
       else if (e.type === 'sell' && e.by === 'market_hand') { this.telemetry.sum('market_hand_eggs', e.k); this.telemetry.sum('market_hand_cents', e.value); }
       else { const { type, ...rest } = e; this.telemetry.track(type, rest); }
@@ -328,7 +331,28 @@ export class Game {
     if (this.resetting || this.inactive || this.held()) return;
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    const cw = this.clockWageEnd(); this.telemetry.track('session_end', cw); this.save(); this.telemetry.flush(true); } // S4: cw is {} with clockWage = 0
+  // ---- v5 clockWage S3/S4 (failure-cost v0.3.24 AC-FC12/15; D-HOE-57 amendment: Hire 2 owns session_end.asleep_s, gated on clockWage,
+  // independent of rc2Refill; Refill adds autoRefill time to the SAME counter later). Live sim only: offline grants never step(), and a
+  // dropped hidden sim's events are discarded before emit(), so neither reaches these totals. Paused workers emit no asleep_time.
+  private cwTotal = { asleepS: 0, cents: 0 };
+  private cwSince: Partial<Record<WorkerId, { asleepS: number; cents: number }>> = {};
+  private cwAdd(id: WorkerId, s: number, cents: number) {
+    this.cwTotal = { asleepS: this.cwTotal.asleepS + s, cents: this.cwTotal.cents + cents };
+    const r = this.cwSince[id] ?? { asleepS: 0, cents: 0 }; this.cwSince = { ...this.cwSince, [id]: { asleepS: r.asleepS + s, cents: r.cents + cents } };
+  }
+  /** Session totals (asleep worker-seconds, cents paid to Asleep workers). */
+  clockWageSession(): { asleepS: number; cents: number } { return { ...this.cwTotal }; }
+  /** AC-FC12 read view: per-role asleep seconds and cents since the last welcome-back (seconds rounded to 0.1 s). */
+  clockWageSinceWelcome(): Record<'market_hand' | 'coop_hand', { asleepS: number; cents: number }> {
+    const v = (id: 'market_hand' | 'coop_hand') => { const r = this.cwSince[id]; return { asleepS: r ? Math.round(r.asleepS * 10) / 10 : 0, cents: r?.cents ?? 0 }; };
+    return { market_hand: v('market_hand'), coop_hand: v('coop_hand') };
+  }
+  /** The welcome-back modal showed the line(s): start a new window. */
+  resetClockWageSinceWelcome() { this.cwSince = {}; }
+  private clockWageEnd(): Record<string, number> {
+    return clockWageOn(this.b) ? { asleep_s: Math.round(this.cwTotal.asleepS * 10) / 10, wage_paid_asleep_cents: this.cwTotal.cents } : {};
+  }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
     this.resetting = true; this.goldenEnd('reset');

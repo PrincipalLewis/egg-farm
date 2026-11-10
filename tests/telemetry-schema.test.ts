@@ -347,7 +347,7 @@ describe('[T-AC9] every emit site in src matches the schema', () => {
     expect(n).toBeGreaterThanOrEqual(25); expect(bad).toEqual([]);
   });
   it('[T-AC9] every SimEvent variant forwarded by Game is allowlisted (or a listed non-event) with every field on the schema', () => {
-    const evs = readFileSync(join(SRC, 'sim/events.ts'), 'utf8'), NOT = ['collect', 'worker_collect', 'wage'], bad: string[] = []; let n = 0;
+    const evs = readFileSync(join(SRC, 'sim/events.ts'), 'utf8'), NOT = ['collect', 'worker_collect', 'wage', 'asleep_time'] /* asleep_time: Game-only S4 accumulator, never tracked */, bad: string[] = []; let n = 0;
     for (const m of evs.matchAll(/\|\s*\{\s*type:\s*'([a-z0-9_]+)';([^}]*)\}/g)) { n++;
       if (NOT.includes(m[1])) continue; if (!EVENT_SCHEMA[m[1]]) { bad.push(m[1]); continue; }
       for (const k of m[2].split(';').map(x => x.trim().match(/^([A-Za-z_]\w*)\??:/)?.[1]).filter(Boolean) as string[]) if (!fieldsOf(m[1]).includes(k)) bad.push(`${m[1]}.${k}`); }

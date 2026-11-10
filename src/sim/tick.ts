@@ -84,6 +84,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
     const m = mood(w, b);
     // v5 clockWage (failure-cost v0.3.24 FC-R1/U1, seam S1 agreed with Saves): an Asleep, unpaused MH/CH keeps its cdS clock and is charged
     // its every_s wage, no action. ws is re-synced to the WHOLE returned workers object (Saves condition a).
+    if (w.energy <= 0 && !isPaused(w, b) && clockWageOn(b)) ev?.push({ type: 'asleep_time', worker: id, s: dt }); // S4: session_end.asleep_s (Unpaid-asleep counts)
     if (m === 'asleep' && !isPaused(w, b) && clockWageOn(b)) { s = clockWageAsleepStep({ ...s, workers: ws }, id, dt, b, ev); ws = { ...s.workers }; continue; }
     if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
     let cdS = w.cdS - dt;

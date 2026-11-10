@@ -16,6 +16,7 @@ export type SimEvent =
   | { type: 'worker_state'; worker: WorkerId; state: WorkerMood }
   | { type: 'worker_yawn'; worker_id: WorkerId; energy_pct: number; farm_level: number } // once per entry into Yawning (<= yawn_at_pct)
   | { type: 'wage'; worker: WorkerId; cents: number; state?: 'working' | 'tired' | 'asleep' } // state: m4.flags.clockWage = 1 only (failure-cost AC-FC15)
+  | { type: 'asleep_time'; worker: WorkerId; s: number } // m4.flags.clockWage = 1 only: live Asleep (energy 0), unpaused MH/CH sim seconds this step; Game-only accumulator (S4), never tracked
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
