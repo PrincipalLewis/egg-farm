@@ -34,22 +34,27 @@ export const awayBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'away')
 export const broodyBreedBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'broody');
 
 /** BR-R14: broodyBp_eff = floor(broodyBp × (10000 + broodyBreedBp) / 10000), broodyBp = round(tc_broody_income_share × 10000).
- *  Broody hen nest accrual (when built) must use this in place of raw broodyBp. */
+ *  broodyBreedBp is familyActiveBp(..., "broody") clamped to bc_broody_cap_bp (= 2000). Nest accrual (when built) must use broodyBpEff. */
 export const broodyBaseBp = (b: Balance) => Math.round(tc(b, 'broody_income_share') * BP_ONE);
 export const broodyBpEff = (s: GameState, b: Balance) =>
   Math.floor(broodyBaseBp(b) * (BP_ONE + broodyBreedBp(s, b)) / BP_ONE);
 
-/** BR-R12b: gate open iff count of stamps in (focusMs − W×1000, focusMs] < k (k=0 → always open). */
+/** Pure BR-R12b gate: open iff stamps in (focusMs − W×1000, focusMs] < k. k = 0 → always open (BR-AC48). */
+export function calmGateOpen(focusMs: number, stamps: readonly number[], wS: number, k: number): boolean {
+  if (k === 0) return true;
+  if (stamps.length === 0) return true;
+  const Wms = wS * 1000;
+  let n = 0;
+  for (const t of stamps) if (focusMs - t < Wms) n++;
+  return n < k;
+}
+
+/** PR-B stub API: presentGateOpen(s, b). Flag-off / empty ring → open; k from bc_present_calm_k. */
 export function presentGateOpen(s: GameState, b: Balance): boolean {
   if (!breedsFlag(b)) return true;
-  const k = bc(b, 'present_calm_k');
-  if (k === 0) return true;
   const calm = s.breedsCalm;
-  if (!calm || calm.stamps.length === 0) return true;
-  const Wms = bc(b, 'present_calm_w_s') * 1000;
-  let n = 0;
-  for (const t of calm.stamps) if (calm.focusMs - t < Wms) n++;
-  return n < k;
+  if (!calm) return true;
+  return calmGateOpen(calm.focusMs, calm.stamps, bc(b, 'present_calm_w_s'), bc(b, 'present_calm_k'));
 }
 
 /** session_end present_* (errata / Q-COL-9): required breeds-on; 0 if no Present slotted; absent flag-off. */
@@ -57,6 +62,7 @@ export function sessionEndPresentFields(s: GameState, b: Balance): { present_act
   if (!breedsFlag(b)) return {};
   const calm = s.breedsCalm;
   const activeMs = calm?.activeMs ?? 0;
+  // Q-COL-9 / BR-AC53: round(ΣfT/100)/10 half-up on integer ms (Math.round).
   return {
     present_active_s: Math.round(activeMs / 100) / 10,
     present_lost_count: calm?.lostCount ?? 0,
@@ -102,7 +108,7 @@ export function breedsPresentTick(s: GameState, dt: number, focusS: number, b: B
   let calm = out.breedsCalm ?? emptyCalm();
   if (fT > 0) {
     calm = { ...calm, focusMs: calm.focusMs + fT };
-    const open = gateFrom(calm, b);
+    const open = calmGateOpen(calm.focusMs, calm.stamps, bc(b, 'present_calm_w_s'), bc(b, 'present_calm_k'));
     const hasPresent = presentBp(out, b) > 0;
     let lost = calm.lostCount, active = calm.activeMs;
     if (hasPresent && calm.open && !open) lost++;
@@ -120,16 +126,6 @@ export function breedsPresentTick(s: GameState, dt: number, focusS: number, b: B
     }
   }
   return out;
-}
-
-function gateFrom(calm: BreedsCalm, b: Balance): boolean {
-  const k = bc(b, 'present_calm_k');
-  if (k === 0) return true;
-  if (calm.stamps.length === 0) return true;
-  const Wms = bc(b, 'present_calm_w_s') * 1000;
-  let n = 0;
-  for (const t of calm.stamps) if (calm.focusMs - t < Wms) n++;
-  return n < k;
 }
 
 /** E22b / BR-AC49: offline ≥ 60 s empties the ring (gate open); keeps activeMs / lostCount / focusMs. */

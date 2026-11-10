@@ -11,7 +11,7 @@ import { apply } from '../src/sim/actions';
 import { applyOffline } from '../src/sim/offline';
 import { type BreedsSave } from '../src/sim/breeds';
 import {
-  presentBp, presentGateOpen, sessionEndPresentFields, breedsPresentTick,
+  presentBp, presentGateOpen, calmGateOpen, sessionEndPresentFields, breedsPresentTick,
 } from '../src/sim/breeds-traits';
 import { familyCapBp } from '../src/sim/breeds-family';
 import { Game } from '../src/game';
@@ -71,11 +71,13 @@ describe('BR-R12 Present eggs (calm open)', () => {
 });
 
 describe('BR-R12b calm gate', () => {
-  it('empty ring / load: gate open; k=0 always open', () => {
+  it('[BR-AC48] empty ring / load: gate open; k=0 always open even with ≥6 stamps', () => {
     const s = st(settledLeghorn());
     expect(presentGateOpen(s, BR)).toBe(true);
-    const k0 = { ...BR, /* bc is from BC_SPEC_DEFAULTS — patch via presentGate with calm */ };
-    expect(presentGateOpen(s, BR)).toBe(true);
+    // k=0 regression switch (bc defaults stay at 6; pure helper proves the branch)
+    const stamps = [0, 1000, 2000, 3000, 4000, 5000];
+    expect(calmGateOpen(5000, stamps, 10, 6)).toBe(false);
+    expect(calmGateOpen(5000, stamps, 10, 0)).toBe(true);
   });
 
   it('[BR-AC46] 5 counted taps in 10 s keep Present; 6th closes on its tick', () => {
