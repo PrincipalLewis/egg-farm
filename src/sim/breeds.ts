@@ -1,6 +1,6 @@
 /**
  * M5.1 breeds state, load sanitising and the offline settle (PR A; tick, hatch and the QA hook are PR B).
- * Spec: product/m5.1-breeds-spec.md rev 3.8.6 (13d5255e) §4.2 BR-R8/R9/R11, §4.7 BR-R18, §4.8 E10-E12, §6.
+ * Spec: product/m5.1-breeds-spec.md rev 3.8.9 (ea922eb8) §4.2 BR-R8/R9/R11, §4.7 BR-R18, §4.8 E10-E12, §6.
  * Tick semantics: engineering/reviews/v5-breeds-tick-semantics.md (points 1-4, Q1/Q2/Q4 proposals).
  * Code isolation (§6): every function returns its input unchanged when m4.flags.breeds is off or `breeds` is absent,
  * so a flag-off build never writes, clears or changes breeds data (E11; D-HOE-20261030-10).

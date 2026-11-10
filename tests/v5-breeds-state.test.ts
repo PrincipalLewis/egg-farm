@@ -1,5 +1,5 @@
 // M5.1 breeds PR A (state, save/load, migration, offline). Every test carries its BR-AC id (QA-D-1029-V5SCAP).
-// Spec rev 3.8.6 13d5255e; tick semantics engineering/reviews/v5-breeds-tick-semantics.md.
+// Spec rev 3.8.9 ea922eb8; tick semantics engineering/reviews/v5-breeds-tick-semantics.md.
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
@@ -132,7 +132,7 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
     const x = boot(BR, kv, T0 + 30_000).g.state.breeds!;
     expect(x.slots).toEqual(['leghorn', null, null]); expect(x).toMatchObject({ flockCompleteLogged: 0, sinceUnlockBackfilled: 1, sinceUnlockMs: 0 });
   });
-  it('[BR-AC26 E10 / PMC Q5] unknown slot id: null at runtime, raw id written back on a save with no slot change', () => {
+  it('[BR-AC26 E10] F14 unknown slot id: null at runtime, save-roundtrip keeps raw "silkie", no save_migrated', () => {
     const kv = saved(st({ owned: { leghorn: { stars: 0 }, silkie: { stars: 1 } } as any, slots: ['leghorn', 'silkie', null], incubator: null }, 14), T0);
     const { g } = boot(BR, kv, T0 + 30_000); expect(g.state.breeds!.slots).toEqual(['leghorn', null, null]);
     g.save(); const x = stored(kv).breeds; expect(x.slots[1]).toBe('silkie'); expect(x.slots).toEqual(['leghorn', 'silkie', null]); expect(x.owned.silkie).toEqual({ stars: 1 });
@@ -155,6 +155,25 @@ describe('BR-AC26 / E10-E12 load sanitising (flag on only)', () => {
   ] as const)('[BR-AC26 E12 / PMC Q7] %s, one save_migrated', (_n, bad, want) => {
     const kv = saved(st(bad as any), T0); const { g } = boot(BR, kv, T0 + 30_000);
     expect(g.state.breeds).toMatchObject(want); expect(migrated(kv)).toHaveLength(1);
+  });
+  it('[BR-AC26 E10] owned-only unknown id (clean slots): kept ignored, no save_migrated', () => {
+    const kv = saved(st({ owned: { leghorn: { stars: 0 }, silkie: { stars: 1 } } as any, slots: ['leghorn', null, null], incubator: null }, 14), T0);
+    const { g } = boot(BR, kv, T0 + 30_000);
+    expect(g.state.breeds!.owned).toEqual({ leghorn: { stars: 0 }, silkie: { stars: 1 } });
+    expect(g.state.breeds!.slots).toEqual(['leghorn', null, null]);
+    expect(migrated(kv)).toEqual([]);
+  });
+  it.each([['undefined', undefined], ['object', { x: 1 }]])('[BR-AC26 Q6] remainingMs %s -> 60,000 (non-number), one save_migrated', (_n, v) => {
+    const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ incubator: { breed: 'brahma', remainingMs: v as any, costCents: 1 } }), BR, ev);
+    expect(r.breeds!.incubator!.remainingMs).toBe(60_000); expect(ev).toEqual([BREEDS_SANITISE_EVENT]);
+  });
+  it('[BR-AC26 Q6] finite fractional remainingMs is rounded then clamped', () => {
+    const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ incubator: { breed: 'brahma', remainingMs: 100.6, costCents: 1 } }), BR, ev);
+    expect(r.breeds!.incubator!.remainingMs).toBe(101); expect(ev).toHaveLength(1);
+  });
+  it('[BR-AC26 E12 OQ-4] non-string slot entry becomes null, one save_migrated', () => {
+    const ev: any[] = [], r = sanitizeBreedsOnLoad(st({ slots: ['leghorn', 7 as any, null] }), BR, ev);
+    expect(r.breeds!.slots).toEqual(['leghorn', null, null]); expect(ev).toHaveLength(1);
   });
   it('[BR-AC1 / E11] flag off: the same corrupt save is left untouched (no sanitise, no event)', () => {
     const s = st({ owned: { leghorn: { stars: 5 } }, slots: ['leghorn', 'leghorn', null] }), kv = saved(s, T0); const { g } = boot(b, kv, T0 + 30_000);

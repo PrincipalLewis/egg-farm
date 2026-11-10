@@ -1,5 +1,5 @@
 /**
- * M5.1 breeds (product/m5.1-breeds-spec.md rev 3.8.6 sha1 13d5255e; tick semantics engineering/reviews/v5-breeds-tick-semantics.md).
+ * M5.1 breeds (product/m5.1-breeds-spec.md rev 3.8.9 sha1 ea922eb8; tick semantics engineering/reviews/v5-breeds-tick-semantics.md).
  * Roster §4.3 and the bc_* tunables §5. Everything here is read only while m4.flags.breeds is on.
  */
 import type { Balance } from './balance';
@@ -31,7 +31,7 @@ export const unlockedSlots = (F: number, b: Balance) =>
   F >= bc(b, 'slot3_farm') ? 3 : F >= bc(b, 'slot2_farm') ? 2 : F >= bc(b, 'unlock_farm') ? 1 : 0;
 /** §6: `slots` and `settleMs` always have 3 entries (BR-R2 max). */
 export const SLOT_IDX = [0, 1, 2] as const;
-/** BR-AC26 / E12: the existing save_migrated shape (game.ts:252); from/to = SAVE_VERSION 6, never bumped (§6 R5). */
+/** BR-AC26 / E12: save_migrated core (game.ts:260 tracks shape; rev 3.8.9 also requires reason/refund_cents/farm_level/backup_stores:[] — see gap list). from/to = SAVE_VERSION 6, never bumped (§6 R5). */
 export const BREEDS_SANITISE_EVENT = { type: 'save_migrated', migration: 'breeds_sanitise', from: 6, to: 6 } as const;
 /** Unit constants for BR-R5 (not tunables): cents per dollar, basis points per 1, and the house half-up rounding term. */
 export const CENTS_PER_DOLLAR = 100; export const BP_ONE = 10000; export const BP_HALF = 5000;
