@@ -185,9 +185,12 @@ export const PRB_EXT: BreedsExt = {
   },
   onDispose() { hud?.dispose(); strip?.dispose(); yard?.dispose(); hud = strip = yard = null; },
 };
-/** Register PR-B once (idempotent). Must run before PR-A's first sync; see seams §1 for the load trigger. */
-export function registerBreedsPrB(opts: PrBOptions = {}): BreedsExt {
-  prbOpts = opts; if (!registered) { registerBreedsExt(PRB_EXT); registered = true; } return PRB_EXT;
+/** Register PR-B once (idempotent). STABLE SIGNATURE: `registerBreedsPrB(opts?: PrBOptions): BreedsExt`. Load trigger (HoE ruling
+ *  01:05 CET): PR-A's mountBreeds calls this behind the m4.flags.breeds guard; PR-B adds no app.ts line and no import-time side effect. */
+export function registerBreedsPrB(opts?: PrBOptions): BreedsExt {
+  if (opts) prbOpts = opts; // a later no-arg call (PR-A's mountBreeds hook) keeps injected gate / fallback
+  if (!registered) { registerBreedsExt(PRB_EXT); registered = true; } return PRB_EXT;
 }
 /** Live PR-B mounts (harness / QA observability; null until PR-A's first onSync). */
 export const prbMounts = () => ({ hud, strip, yard });
+
