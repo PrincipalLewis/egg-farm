@@ -28,6 +28,7 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
   check(b, '');
   if (b.sim_test?.demand_scale !== undefined && !(b.sim_test.demand_scale > 0)) throw new Error('balance.sim_test.demand_scale must be > 0');
   for (const p of ['tickHz', 'maxLevel', 'feel.max_flying_eggs', 'telemetry.ring_size']) int(b, p);
+  if (1000 % b.tickHz !== 0) throw new Error('balance.tickHz must divide 1000 (BR-R8 / D5)'); // breeds incubation dtMs
   for (const p of ['feel.tap_combine_window_ms', 'feel.queue_full_cue_min_gap_ms', 'feel.egg_flight_ms', 'feel.served_dwell_ms', 'save.autosaveIntervalS', 'offline.offlineCapSeconds', 'telemetry.flush_interval_s', 'telemetry.tap_batch_ms', 'customers.first_customer_s']) pos(b, p);
   if (b.offline.offlineRateMultiplier > 1) throw new Error('balance.offline.offlineRateMultiplier must be <= 1');
   if (b.save.autosaveIntervalS > 5) throw new Error('balance.save.autosaveIntervalS must be <= 5 (AC8)');
