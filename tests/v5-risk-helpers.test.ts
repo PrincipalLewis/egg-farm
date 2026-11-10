@@ -315,6 +315,18 @@ describe('Rule 2 hysteresis, fatigue cue, notes (§4.8, §5, §8 F-4c)', () => {
     expect(fatigueCueView(s, ON_FC)).toMatchObject({ shown: true, suppressedByStall: false });
     expect(cues(ev).filter(e => e.surface === 'hud_chip')).toHaveLength(1);
   });
+  it('[SS-12 (C4 exception)][SS-G39] rc2Refill = 0: a Refill C4 clear with share < 0.12 force-clears the cue display; the episode ends only by hysteresis', () => {
+    const ev: SimEvent[] = []; let s = run(fx(ON_FC), ON_FC, 120, ev); const ep = fatigueCueView(s, ON_FC).episodeId; expect(ep).not.toBeNull();
+    noteStallChipTap(s, 'refill'); s = apply(s, { type: 'manage', worker: 'market_hand' }, ON_FC, ev); s = run(s, ON_FC, 1, ev);
+    expect(fatigueCueView(s, ON_FC)).toMatchObject({ shown: false, episodeId: ep });
+    s = run(s, ON_FC, 25, ev); expect(fatigueCueView(s, ON_FC).episodeId).toBeNull(); // share < 0.12 held 2 s
+    expect(cues(ev).filter(e => e.surface === 'hud_chip')).toHaveLength(1);
+  });
+  it('[HoE ruling 3, 03:25] no open episode: noteFatigueCueShown(banner|bubble) logs nothing', () => {
+    const ev: SimEvent[] = []; let s = run(fx(ON_FC, { workers: { market_hand: { energy: 100, cdS: 0 } } }), ON_FC, 10, ev);
+    expect(fatigueCueView(s, ON_FC).episodeId).toBeNull(); noteFatigueCueShown(s, 'banner'); noteFatigueCueShown(s, 'bubble'); s = run(s, ON_FC, 2, ev);
+    expect(cues(ev)).toHaveLength(0);
+  });
   it('[SS-31] n_paused counts a Paused worker; it is not in the loss', () => {
     const b = ON_FC_P, ev: SimEvent[] = []; const s0 = { ...tiredFarm(b), workers: { market_hand: { energy: 100, cdS: 0 }, hawker: { energy: 0, cdS: 0 }, grader: { energy: 0, cdS: 0 }, coop_hand: { energy: 0, cdS: 0, paused: true } } } as GameState;
     run(s0, b, 120, ev); expect(cues(ev)[0]).toMatchObject({ n_paused: 1, n_asleep: 2 });
