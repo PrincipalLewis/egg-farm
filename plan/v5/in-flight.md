@@ -2,6 +2,8 @@
 
 Snapshot: **Tue 10 Nov 2026 ~11:00 CET** from `gh pr list -R PrincipalLewis/egg-farm --state open` and `git ls-remote origin`, plus a read-only scan of every checkout on the studio box. The studio is stopped (D-CEO-20261110-18); every lane was told to push WIP + HANDOFF.md before the stop (D-CEO-20261110-17). Times are CET (UTC+1). "Next step" comes from the PR's HANDOFF.md or the flag table; where neither says, it is marked TBD.
 
+Updated **Tue 10 Nov 2026 22:52 CET (Europe/Belgrade)**: Vadim approved saving the at-risk box-only work to GitHub while the studio remains stopped. The Architect's four feature branches and `wip/snapshot-p8-qa-hooks` are on origin (pushed by the Architect). `wip/snapshot-abilities-shift` was pushed from the abilities worktree HEAD. See the new origin rows and the updated box-only section below. Open PR heads were not re-scanned in this update.
+
 ## Open PRs (22)
 
 | PR | Branch → base | Head | Draft | Updated (CET) | Flag / item | What's left → next concrete step | Handoff |
@@ -35,22 +37,26 @@ Snapshot: **Tue 10 Nov 2026 ~11:00 CET** from `gh pr list -R PrincipalLewis/egg-
 |---|---|---|---|---|
 | `feat/v5-f6-rebuild` | `017b8bc8` | Features | Phase 2 (~5 h left of 6–8); open PR, then streak/golden/Broody mount on it | `handoffs/worktrees/rev-f6-7810680/engineering/tasks/v5-f6-rebuild/HANDOFF.md` (box copy is inside an Architect review worktree; the branch also carries one) |
 | `feat/v5-ui-shift-sheet` | `c85f6560` | Features | PARKED; at restart: G1 binding proof → axe 3 engines → D-HOE-60 → rev-16 → `app.ts` openers | `engineering/tasks/v5-ui-shift-sheet/HANDOFF.md` |
-| `feat/v5-breeds-ui-prB` | `cdbebb5a` | Features | Draft-ready; open Draft once `origin/v5/breeds-ui-a` exists (~7 h left incl. waits) | `handoffs/worktrees/rev-prB-d66a726/engineering/tasks/v5-breeds-ui-prB/HANDOFF.md` |
+| `feat/v5-breeds-ui-prB` | `cdbebb5a` | Features | Draft-ready; `origin/v5/breeds-ui-a` now exists (`4b9a8568`, pushed below); open Draft (~7 h left incl. waits) | `handoffs/worktrees/rev-prB-d66a726/engineering/tasks/v5-breeds-ui-prB/HANDOFF.md` |
 | `v5/ui-streak-tapcoins` | `f13d95a8` | Hire 3 | PARKED, clean; rebase onto F6 + apply `f6-swap.diff` when F6 merges | `engineering/tasks/v5-ui-streak-tapcoins/HANDOFF.md` |
 | `wip/hire2/v5-pause-ui` | `29d66915` | Hire 2 | PARKED; open Draft PR at restart with HoE's OK | `engineering/tasks/v5-pause-ui/HANDOFF.md` |
 | `wip/hire2/v5-clockwage` | `e8f42b08` | Hire 2 | Sim WIP vs refill G0; merges after refill | `engineering/tasks/v5-clockwage/HANDOFF.md` |
 
+### Saved to origin 10 Nov 2026 22:52 CET (Vadim approved box-only backup; studio still stopped)
+
+The six at-risk checkouts from the 11:00 CET snapshot are now on origin. The four Architect feature branches are **pushed**, not merely requested. `wip/snapshot-p8-qa-hooks` was already at this sha on origin (Architect); do not push to it unless the update is a fast-forward. `wip/snapshot-abilities-shift` is a snapshot of that worktree's committed HEAD (the worktrees themselves were not checked out, committed, stashed, reset, or cleaned).
+
+| Branch | Head | Owner | State → next step | Handoff |
+|---|---|---|---|---|
+| `v5/breeds-ui-a` | `4b9a85689bb9ad1ad8f9ee56e549d1d5ae90f341` | Architect | **Pushed** (was local-only `8ef9b4cd`). Open PR-A | `engineering/tasks/v5-breeds-ui-a/HANDOFF.md` |
+| `v5/breeds-ui-a-clamp-bind` | `22fa3c1ee7f21d3ae26f9d89671619515bc5a471` | Architect | **Pushed** (was local-only `d5742e63`). Binds Saves #126 `familyClamp` | same |
+| `v5/tel-envelope` | `a41effd4ce532e84755930cb373feb0cd67bb6e4` | Architect | **Pushed** (was local-only `4c440909`). Build continues after #123 | `engineering/tasks/v5-tel-envelope/HANDOFF.md` |
+| `v5/vitest-teardown-fix` | `21be8b7fb962ac99225c163c097bf3bec00a3171` | Architect | **Pushed** (was local-only `a7333048`) | `engineering/reviews/v5-vitest-teardown-cause.md` |
+| `wip/snapshot-p8-qa-hooks` | `50580240a94f18d0cbf8cc9bfb50d55f307db271` | Architect | Snapshot of `/workspace/wt-v5-p8-qa-hooks` (`feat/v5-p8-qa-hooks`). Architect committed the formerly uncommitted files into this sha — `src/ui/app.ts`, `src/ui/qa-seam.ts`, `src/ui/workers-ui.ts`, `tests/v5-p8-qa-hooks.test.ts` — and pushed; the worktree is clean, **no files remain for the owner to commit**. Disposition TBD (QA seam hooks; stacks on old #86). Further pushes only as a fast-forward | `engineering/tasks/p8-qa-hooks/HANDOFF.md` |
+| `wip/snapshot-abilities-shift` | `1ebcd7af59af8662101ffcb0da25e3a68049a3ca` | UI & rc1 Fixes | Snapshot of `/workspace/wt-v5-abilities-shift` (`feat/v5-abilities-shift` HEAD, same sha as the 11:00 CET checkout). Worktree is clean — **no uncommitted files for the owner to commit**. `e80556fd` is still unreachable (D-CEO-20261110-07). Bundles exist in the box `artifacts/`; whether Features' Shift sheet supersedes it is TBD | `engineering/tasks/v5-abilities-shift/HANDOFF.md` |
+
 ## WIP that exists ONLY on the box (not on origin)
 
-These are at risk if the box is lost. Do not edit another bot's worktree; see the recommendation in the PR description of this pack.
-
-| Worktree | Branch @ head | Owner | Local-only work | Why not pushed / next step | Handoff |
-|---|---|---|---|---|---|
-| `/workspace/egg-farm-studio/worktrees/v5-breeds-ui-a` | `v5/breeds-ui-a` @ `8ef9b4cd` | Architect | 6 commits (28 files, +2466/−7 vs rc/v5) | Architect waits for Vadim's direct yes to push (D-CEO-20261110-06); push + open PR-A | `engineering/tasks/v5-breeds-ui-a/HANDOFF.md` |
-| `…/worktrees/v5-breeds-ui-a-clamp-bind` | `v5/breeds-ui-a-clamp-bind` @ `d5742e63` | Architect | 15 commits (+2497/−7) | same; binds Saves #126 `familyClamp` | same |
-| `…/worktrees/v5-tel-envelope` | `v5/tel-envelope` @ `4c440909` | Architect | 4 commits (16 files, +638/−39) | "Push/PR only on Vadim's own go"; build continues after #123 | `engineering/tasks/v5-tel-envelope/HANDOFF.md` |
-| `…/worktrees/v5-vitest-teardown-fix` | `v5/vitest-teardown-fix` @ `a7333048` | Architect | 1 commit (3 files, +50/−1) | "Push and PR wait on Vadim" | `engineering/reviews/v5-vitest-teardown-cause.md` |
-| `/workspace/wt-v5-p8-qa-hooks` | `feat/v5-p8-qa-hooks` @ `afbe314a` | Architect | 4 commits + 3 modified files (+67/−17) + 1 untracked test, last commit 11-05 | Disposition TBD (QA seam hooks; stacks on old #86) | `engineering/tasks/p8-qa-hooks/HANDOFF.md` |
-| `/workspace/wt-v5-abilities-shift` | `feat/v5-abilities-shift` @ `1ebcd7af` | UI & rc1 Fixes `e80556fd` (unreachable, D-CEO-20261110-07) | 3 commits (+502/−14), 11-05 | Bundles exist in the box `artifacts/`; whether Features' Shift sheet supersedes it is TBD | `engineering/tasks/v5-abilities-shift/HANDOFF.md` |
+The six at-risk checkouts listed in the 11:00 CET snapshot are now on origin (table above). Do not edit another bot's worktree.
 
 Older local-only branches from Oct 16–30 (pre-re-plan, mostly rc1/m4/f1-era, plus `e80556fd`'s v5 F6/ccr-f2 work now superseded by the F6 rebuild) are counted in the PR description's inventory, not listed here.
