@@ -135,47 +135,72 @@ export const breedsOn = breedsFlagAndKey;
 
 // ============================================================================================================================
 // PR-B ADDITIONS (Features, feat/v5-breeds-ui-prB). Additive getters only (seams doc §2): nothing above this line is renamed,
-// moved or re-signed. Stacked on PR-A v5/breeds-ui-a @ 4501009; everything above is PR-A's file unchanged
-// (seams doc 95f45895 §2: PR-B adds getters only).
+// moved or re-signed. Stacked on PR-A v5/breeds-ui-a (merged forward); everything above is PR-A's file unchanged
+// (seams doc 3d40e76e §2: PR-B adds getters only).
 // ============================================================================================================================
 
 /**
- * Spec §5 tunables the UI needs that `bc()` / BC_SPEC_DEFAULTS don't carry yet (L648-654; checklist §3).
- * TODO(Saves): move these to `BC_SPEC_DEFAULTS` as `present_calm_w_s`, `present_calm_k`, `lay_cap_bp_lt18`, `lay_cap_bp`
- * (and the lay-cap Farm boundary) and read them through `bc()`; then delete this object. Values are the spec's of record.
+ * Present calm-gate tunables (spec §5 L648-654; BR-R12b/c). TODO(Saves #126 commit 1): `presentGateOpen` + its bc() keys
+ * land in Saves' commit 1; then read `bc(b, 'present_calm_w_s' | 'present_calm_k')` and delete this object.
  */
 export const PRB_STUB_TUNABLES = {
   /** bc_present_calm_w_s: trailing focus-seconds window of the Present rate gate (BR-R12b). */
   present_calm_w_s: 10,
   /** bc_present_calm_k: counted taps in the window that close the gate; 0 = never pending (BR-R12c). */
   present_calm_k: 6,
-  /** bc_lay_cap_bp_lt18: Present family clamp below the lay-cap Farm level (L366, D-HOP-31 (a)). */
-  lay_cap_bp_lt18: 700,
-  /** bc_lay_cap_bp: Present family clamp from the lay-cap Farm level (L366). */
-  lay_cap_bp: 1500,
-  /** Farm level where the Present clamp steps from lay_cap_bp_lt18 to lay_cap_bp (E9 L566, "lt18"). */
-  lay_cap_farm: 18,
 } as const;
 
-/** BR-R12 Present family clamp at Farm F (E9: 700 → 1500 at F18 on the next frame). */
-export const presentCapBp = (F: number) =>
-  F >= PRB_STUB_TUNABLES.lay_cap_farm ? PRB_STUB_TUNABLES.lay_cap_bp : PRB_STUB_TUNABLES.lay_cap_bp_lt18;
+// ---- Family clamps: names, signatures, bc() keys and shapes mirror Saves #126 commit 0 (d4b5fdc,
+// src/sim/breeds-family.ts + BC_SPEC_DEFAULTS). Spec-value stand-ins until Saves is in the stack. ---------------------------
 
+/** The five family-clamp bc() keys, exactly as Saves names them (no bc_ prefix). */
+export type BreedsCapKey = 'lay_cap_bp_lt18' | 'lay_cap_bp' | 'lay_cap_farm' | 'away_cap_bp' | 'broody_cap_bp';
 /**
- * Present family active bp: sum of the settled Present breeds in UNLOCKED slots (sim `slotTraitBp`: 0 while settling or for
- * an unknown id, E10), clamped by `presentCapBp`. 0 = no settled Present breed → no chip (BR-R12c).
- * TODO(Saves): replace with the income-trait wiring's own figure (`familyActiveBp(s, b, 'present')`) once it exists, so the
- * chip shows exactly what income pays.
+ * TODO(Saves #126): stand-ins for `BC_SPEC_DEFAULTS[k]` (spec ea922eb8 §4.3 L365-368, E9). When #126 is in the stack,
+ * `capBc` becomes `bc(b, k)` and this object is deleted.
  */
-export function presentActiveBp(s: GameState, b: Balance): number {
+export const PRB_CAP_STANDINS: Readonly<Record<BreedsCapKey, number>> = {
+  lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18, away_cap_bp: 3000, broody_cap_bp: 2000,
+};
+/** `bc()`-shaped read of a cap key. TODO(Saves #126): `=> bc(b, k)`. */
+export const capBc = (_b: Balance, k: BreedsCapKey): number => PRB_CAP_STANDINS[k];
+
+/** Family cap at Farm F (Present steps lay_cap_bp_lt18 → lay_cap_bp at lay_cap_farm, E9). Saves: `familyCapBp`. TODO(Saves #126). */
+export function familyCapBp(family: Family, farmLevel: number, b: Balance): number {
+  if (family === 'present') return farmLevel >= capBc(b, 'lay_cap_farm') ? capBc(b, 'lay_cap_bp') : capBc(b, 'lay_cap_bp_lt18');
+  return family === 'away' ? capBc(b, 'away_cap_bp') : capBc(b, 'broody_cap_bp');
+}
+
+/** Shared clamp min(raw, familyCap). Saves: `clampFamilyBp` (one math path for effects and the UI view). TODO(Saves #126). */
+export const clampFamilyBp = (rawBp: number, family: Family, farmLevel: number, b: Balance): number =>
+  Math.min(rawBp, familyCapBp(family, farmLevel, b));
+
+/** Unclamped settled trait bp of `family` in UNLOCKED slots (0 while settling / empty / unknown id / flag off). Saves: `familyRawBp`. TODO(Saves #126). */
+export function familyRawBp(s: GameState, b: Balance, family: Family): number {
   const br = breedsOf(s, b); if (!br || !Array.isArray(br.slots) || !Array.isArray(br.settleMs)) return 0;
   let sum = 0;
   for (let i = 0; i < unlockedSlots(s.farmLevel, b); i++) {
-    const id = br.slots[i]; if (!isBreedId(id) || ROSTER[id][1] !== 'present') continue;
+    const id = br.slots[i]; if (!isBreedId(id) || ROSTER[id][1] !== family) continue;
     sum += slotTraitBp(br, i, b);
   }
-  return Math.min(sum, presentCapBp(s.farmLevel));
+  return sum;
 }
+
+/** Saves' `FamilyClamp` (src/sim/breeds-family.ts), same fields. */
+export interface FamilyClamp { rawBp: number; clampedBp: number; atCap: boolean; }
+
+/**
+ * Saves' `familyClamp(s, b, family): FamilyClamp`, under a PR-B name because PR-A's adapter already exports `familyClamp`
+ * (the E8 label stub, different signature; seams §2 forbids re-signing it). TODO(Saves #126): delegate to the sim's
+ * `familyClamp(s, b, family)`.
+ */
+export function familyClampOf(s: GameState, b: Balance, family: Family): FamilyClamp {
+  const rawBp = familyRawBp(s, b, family), cap = familyCapBp(family, s.farmLevel, b);
+  return { rawBp, clampedBp: clampFamilyBp(rawBp, family, s.farmLevel, b), atCap: rawBp >= cap && cap > 0 };
+}
+
+/** Saves' `familyActiveBp(s, b, family)`: the clamped bp income pays, on the same clamp path. TODO(Saves #126): delegate to the sim. */
+export const familyActiveBp = (s: GameState, b: Balance, family: Family): number => familyClampOf(s, b, family).clampedBp;
 
 /** The Present rate gate as the UI reads it, once per tick. `nowMs` = performance.now() of the tick (presentation clock). */
 export interface PresentGateSource { open(s: GameState, b: Balance, nowMs: number): boolean; }

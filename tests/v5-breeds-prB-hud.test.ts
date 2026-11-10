@@ -6,6 +6,8 @@ import { mountPresentChip, presentChipModel, POP_CAP_MS, TIP_MS, CHIP_TIP_TEXT, 
 import { PRB_STUB_TUNABLES, STUB_PRESENT_GATE } from '../src/ui/breeds-adapter';
 import { flagOnBalance, flagOffBalance, stateWith, leghorn312, breeds, RefGate, HUD_HTML } from './fixtures/breeds-prB/setup';
 
+/** A FamilyClamp view below the cap (the chip reads clampedBp). */
+const view = (bp: number) => ({ rawBp: bp, clampedBp: bp, atCap: false });
 const W = PRB_STUB_TUNABLES.present_calm_w_s * 1000, K = PRB_STUB_TUNABLES.present_calm_k;
 let clock = 0; const now = () => clock;
 beforeEach(() => { document.body.innerHTML = HUD_HTML; clock = 0; });
@@ -17,9 +19,9 @@ const visibleText = (el: Element) => [...el.querySelectorAll('.breeds-hud-pt')].
 
 describe('BR-AC52 format', () => {
   it.each([[312, '+3%', '+3.12%'], [1312, '+13%', '+13.12%'], [1500, '+15%', '+15.00%']])('%i bp → %s (exact %s)', (bp, label, exact) => {
-    const m = presentChipModel(bp, true)!; expect(m.label).toBe(label); expect(m.exact).toBe(exact);
+    const m = presentChipModel(view(bp), true)!; expect(m.label).toBe(label); expect(m.exact).toBe(exact);
   });
-  it('0 bp → no model (no chip)', () => expect(presentChipModel(0, true)).toBeNull());
+  it('0 bp → no model (no chip)', () => expect(presentChipModel(view(0), true)).toBeNull());
 });
 
 describe('BR-AC52 / 52c chip DOM', () => {
@@ -165,7 +167,7 @@ describe('PR-A seam: presentMirror + copy come from breeds-adapter (seams 3d40e7
     const hudMod: Record<string, unknown> = await import('../src/ui/breeds-hud'), ad = await import('../src/ui/breeds-adapter');
     expect(hudMod.presentMirror).toBeUndefined();
     expect(hudMod.CHIP_PAUSED_DESC).toBe(ad.CHIP_PAUSED_DESC); expect(hudMod.chipActiveDesc).toBe(ad.chipActiveDesc);
-    const m = presentChipModel(312, true)!; expect(m.description).toBe(ad.presentMirror(312, true)!.description);
-    expect(presentChipModel(312, false)!.description).toBe(ad.presentMirror(312, false)!.description);
+    const m = presentChipModel(view(312), true)!; expect(m.description).toBe(ad.presentMirror(312, true)!.description);
+    expect(presentChipModel(view(312), false)!.description).toBe(ad.presentMirror(312, false)!.description);
   });
 });

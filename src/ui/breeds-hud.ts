@@ -11,7 +11,7 @@
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import {
-  breedsFlagOn, presentActiveBp, traitPctExact, traitPctFloor, STUB_PRESENT_GATE, CHIP_PAUSED_DESC, chipActiveDesc, type PresentGateSource,
+  breedsFlagOn, familyClampOf, traitPctExact, traitPctFloor, STUB_PRESENT_GATE, CHIP_PAUSED_DESC, chipActiveDesc, type FamilyClamp, type PresentGateSource,
 } from './breeds-adapter';
 
 // ---- Copy (FINAL, Head of Art & UX 23:31 / 23:40; spec L455-466). Describedby copy is PR-A's adapter export (shared with the mirror). ----
@@ -33,13 +33,14 @@ export const TIP_GAP_PX = 8;
 export const TIP_EDGE_PX = 8;
 
 export type ChipState = 'active' | 'paused';
-export interface ChipModel { bp: number; label: string; exact: string; state: ChipState; description: string; }
+export interface ChipModel { bp: number; atCap: boolean; label: string; exact: string; state: ChipState; description: string; }
 
-/** Pure model: null when there's no settled Present bp (no chip). */
-export function presentChipModel(bp: number, gateOpen: boolean): ChipModel | null {
-  if (!(bp > 0)) return null;
+/** Pure model from the Present family clamp view (`familyClampOf(s, b, 'present')`, Saves `familyClamp` shape): the chip shows
+ *  `clampedBp` (what income pays) and carries `atCap`. null when there's no settled Present bp (no chip). */
+export function presentChipModel(v: FamilyClamp, gateOpen: boolean): ChipModel | null {
+  const bp = v.clampedBp; if (!(bp > 0)) return null;
   const state: ChipState = gateOpen ? 'active' : 'paused', exact = traitPctExact(bp);
-  return { bp, label: traitPctFloor(bp), exact, state, description: state === 'active' ? chipActiveDesc(exact) : CHIP_PAUSED_DESC };
+  return { bp, atCap: v.atCap, label: traitPctFloor(bp), exact, state, description: state === 'active' ? chipActiveDesc(exact) : CHIP_PAUSED_DESC };
 }
 
 export interface PresentChipMount {
@@ -131,7 +132,7 @@ export function mountPresentChip(o: PresentChipOpts): PresentChipMount | null {
     sync(s, nowMs) {
       const t = nowMs ?? now();
       if (tip && !tip.hidden && toastVisible()) hideTip(); // a toast takes y = HUD + 8: the tooltip yields (UI-BR-21)
-      const m = presentChipModel(presentActiveBp(s, o.b), gate.open(s, o.b, t));
+      const m = presentChipModel(familyClampOf(s, o.b, 'present'), gate.open(s, o.b, t));
       if (!m) { if (chip) teardown(); return; }
       const appeared = !chip; if (appeared && !build()) return;
       setText(pt!, m.label); setText(sr!, SR_WORD[m.state]); setText(descEl!, m.description);
