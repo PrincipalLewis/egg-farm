@@ -131,3 +131,21 @@ describe('#11 stacking with the Rule 3 banner (CSS)', () => {
     expect(css).not.toMatch(/fb-on\{grid-template-rows/);
   });
 });
+describe('#11 appear pop + Workers sorted by costliest', () => {
+  it('appear: .fc-in on show (150 ms fade + 1.05 pop), removed on hide; reduced motion = fade only (CSS)', async () => {
+    const m = await mount(FC); stallStub.cue = cue(true); m.ui.render();
+    expect(m.chip().classList.contains('fc-in')).toBe(true); expect(m.sub().classList.contains('fc-in')).toBe(true);
+    stallStub.cue = cue(false); m.ui.render(); expect(m.chip().classList.contains('fc-in')).toBe(false);
+    const { readFileSync } = await import('node:fs'); const css = readFileSync('src/ui/styles.css', 'utf8');
+    expect(css).toMatch(/@keyframes fcIn\{from\{opacity:0;transform:scale\(1\.05\)\}\}/);
+    expect(css).toMatch(/\.rm \.fchip\.fc-in \.fchip-pill,\.rm \.fsub\.fc-in\{animation:fcFade 150ms ease\}@keyframes fcFade\{from\{opacity:0\}\}/);
+    expect(css).toMatch(/@media \(prefers-reduced-motion:reduce\)\{\.fchip\.fc-in \.fchip-pill,\.fsub\.fc-in\{animation:fcFade 150ms ease\}\}/);
+  });
+  it('sub-line tap opens Workers sorted by costliest ($/s at risk desc, ties code order); the order resets on leaving', async () => {
+    const m = await mount(FC); stallStub.atRisk = { market_hand: 1, coop_hand: 3 }; stallStub.cue = cue(true); m.ui.render();
+    const rows = () => [...document.querySelectorAll<HTMLElement>('#uRow .wk[data-w]')].map(e => e.dataset.w);
+    m.sub().click(); m.ui.render(); expect(rows().slice(0, 2)).toEqual(['coop_hand', 'market_hand']);
+    m.ui.openPanel(null); m.ui.render(); m.ui.openPanel('upgrades'); (document.querySelector('.tabs [data-tab=workers]') as HTMLElement).click(); m.ui.render();
+    expect(rows().slice(0, 2)).toEqual(['market_hand', 'coop_hand']); // plain Workers tab = code order
+  });
+});

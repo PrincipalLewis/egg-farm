@@ -727,3 +727,7 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 @keyframes fpopIn{from{opacity:0;transform:scale(.96)}}
 .rm .fpop{animation:fpopFade 150ms ease}@keyframes fpopFade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){.fpop{animation:fpopFade 150ms ease}}
+/* #11 appear (fatigue-ux §1 Motion): 150 ms fade + 1.05 scale pop, no loop; reduced motion = fade only. Replays on each show (display none -> shown). */
+.fchip.fc-in .fchip-pill,.fsub.fc-in{animation:fcIn 150ms var(--ease-pop)}@keyframes fcIn{from{opacity:0;transform:scale(1.05)}}
+.rm .fchip.fc-in .fchip-pill,.rm .fsub.fc-in{animation:fcFade 150ms ease}@keyframes fcFade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.fchip.fc-in .fchip-pill,.fsub.fc-in{animation:fcFade 150ms ease}}

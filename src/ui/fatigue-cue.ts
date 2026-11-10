@@ -10,7 +10,7 @@ import type { GameState } from '../sim/state';
 import { WORKERS, mood, type WorkerId } from '../sim/workers';
 import { isPaused } from '../sim/pause';
 import { fmtMoneyShort, spellShort } from './format';
-import { fatigueCueView, costliestAtRisk, noteFatigueCueShown, noteFatigueCueTap } from './stall-api';
+import { fatigueCueView, costliestAtRisk, workersAtRisk, noteFatigueCueShown, noteFatigueCueTap } from './stall-api';
 import { fatigueLossCents } from './fatigue-bubble';
 import { openShiftSheet } from './shift-sheet';
 
@@ -28,6 +28,10 @@ export function cueCopy(lossCents: number, asleep: boolean): CueCopy {
 /** Any hired, non-Paused worker Asleep (Paused > Unpaid > Asleep precedence, spec §4.1). */
 export const anyAsleep = (s: GameState, b: Balance) => WORKERS.some(id => { const w = s.workers[id]; return !!w && !isPaused(w, b) && mood(w, b) === 'asleep'; });
 
+/** Workers sorted by costliest ($/s at risk, descending; ties keep code order: Array.prototype.sort is stable). fatigue-ux §1 L50. */
+export function costliestOrder(s: GameState, b: Balance): WorkerId[] {
+  const r = workersAtRisk(s, b); return WORKERS.slice().sort((x, y) => r[y] - r[x]);
+}
 export interface CueDeps {
   g: { state: GameState }; b: Balance; A: (f: string) => string;
   openWorkers: () => void; stallChipEl: () => HTMLElement | null;
@@ -85,7 +89,7 @@ export class FatigueCue {
     if (!want) {
       if (this.shown) {
         const had = this.focusInCue(), stall = v.suppressedByStall ? this.d.stallChipEl() : null;
-        this.shown = false; this.ep = null; this.setOpen(false); this.chip.hidden = true; this.sub.hidden = true; this.key = '';
+        this.shown = false; this.ep = null; this.setOpen(false); this.chip.hidden = true; this.sub.hidden = true; this.key = ''; this.chip.classList.remove('fc-in'); this.sub.classList.remove('fc-in');
         if (had) (stall ?? this.d.stallChipEl() ?? document.getElementById('collect'))?.focus({ preventScroll: true }); // never to body
       }
       return;
@@ -99,7 +103,7 @@ export class FatigueCue {
       this.pop.querySelector('.fpop-x')!.textContent = c.short;
       this.sub.querySelector('.fsub-x')!.textContent = `${MINUS}${c.x}/s`; (this.slot.querySelector('#fsubDesc') as HTMLElement).textContent = c.subDesc;
     }
-    if (!this.shown) { this.shown = true; this.chip.hidden = false; this.sub.hidden = false; }
+    if (!this.shown) { this.shown = true; this.chip.hidden = false; this.sub.hidden = false; this.chip.classList.add('fc-in'); this.sub.classList.add('fc-in'); } // appear: 150 ms fade + 1.05 pop (fade only in reduced motion), CSS
     if (v.episodeId !== this.ep) { this.ep = v.episodeId; noteFatigueCueShown(s, 'hud_chip'); } // sim dedupes per (episodeId, surface) anyway (FC-SV11)
     if (this.isOpen) this.place();
   }

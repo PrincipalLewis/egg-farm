@@ -25,7 +25,7 @@ import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } fro
 import { isZeroGain, zeroGainUiOn, zgFiltered, ZG_KEY_OF, ZG_DESC, ZG_CHIP } from './zero-gain'; // v5 zeroGainUi (m4.flags.zeroGainUi)
 import { zeroGainConfirmOn } from '../config/flags';
 import { rc2RefillOn, fatigueCueOn } from './stall-chip';
-import { FatigueCue } from './fatigue-cue'; // #11 Rule 2 HUD cue (m4.flags.fatigueCue, paired with salesStopped)
+import { FatigueCue, costliestOrder } from './fatigue-cue'; // #11 Rule 2 HUD cue (m4.flags.fatigueCue, paired with salesStopped)
 import { StallChip, stallChipOn } from './stall-chip';
 import { FarmBanner } from './stall-banner'; // #5b Rule 3 farm-screen Asleep banner (same flag)
 import { fatigueBubble } from './fatigue-bubble'; // #5b Rule 4 (same flag)
@@ -188,6 +188,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
 
   // ---------- Panels ----------
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
+  let workersOrder: ReturnType<typeof costliestOrder> | null = null; // #11 (flag on only): set by the sub-line tap
   // Slim v5: one attended source; Market remains a play surface. Shift owns its registered lifecycle.
   wireAttended(g, makeDialogOpen({ sheet: () => open, docked: () => docked.matches }));
   const openPanel = (p: typeof open) => {
@@ -573,7 +574,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // #5b sales-stopped chip (spec cfff3817 §4.7): laid over the #goal slot; flag off = never constructed, markup unchanged.
   const stallChip = stallChipOn(b) ? new StallChip($('.collectbar'), goalBtn, { g, b, A, now, rm, act: a => act(a) }) : null;
   const farmBanner = stallChipOn(b) ? new FarmBanner(farm, { g, b, A, act: a => act(a), refused: el => cantAfford(el) }) : null;
-  const fatigueCue = fatigueCueOn(b) ? new FatigueCue(hud, farm, { g, b, A, openWorkers: () => { tab = 'workers'; dirty = true; openPanel('upgrades'); render(); }, stallChipEl: () => stallChip?.isShown ? stallChip.el : null }) : null;
+  const fatigueCue = fatigueCueOn(b) ? new FatigueCue(hud, farm, { g, b, A, openWorkers: () => { workersOrder = costliestOrder(g.state, b); tab = 'workers'; dirty = true; openPanel('upgrades'); render(); }, stallChipEl: () => stallChip?.isShown ? stallChip.el : null }) : null;
 
   // ---------- Render ----------
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
@@ -775,9 +776,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       // §5: the banner never names the chip's role; Rule 3 shows on the farm view only
       farmBanner!.update((open === null || docked.matches) && !modalKind, stallChip.isShown ? stallChip.coveredWorker : null); }
     if (fatigueCue) fatigueCue.update(); // #11: display = fatigueCueView.shown && !suppressedByStall (the sim's state)
+    if (workersOrder && (tab !== 'workers' || !(open === 'upgrades' || docked.matches))) workersOrder = null; // #11: the costliest sort lasts while that Workers view stays open
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-      const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
+      const html = tab === 'workers' ? workersHtml(s, b, workersOrder ?? undefined) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
       if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; const zf = ZGC ? zgFocusKey() : null; uRow.innerHTML = html; if (ZGC) zgApply(zf); }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
         // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
