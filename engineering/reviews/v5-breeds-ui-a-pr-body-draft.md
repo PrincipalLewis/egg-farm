@@ -27,7 +27,7 @@ Flag-on for tests and QA uses **two** mechanisms only:
 - **Leaf registry:** `src/ui/breeds-ext-registry.ts` owns `registerBreedsExt` / `BreedsExtCtx` (ext modules import ONLY this leaf — TDZ fix).
 - Ext ctx: `openFlock()`, `incomeRate()` (steady-state ¢/s), `rollingIncomeRate()` (BB-5 `IncomeRate` window), `reducedMotion`.
 - `presentMirror` in `breeds-adapter.ts`.
-- **`familyClampState(family) → {rawBp,clampedBp,atCap} | undefined`:** UI-facing name (no clash with Saves sim `familyClamp`). Stub returns `undefined` on this Ready head. **PR-B uses `familyClampState`.**
+- **`familyClampState(family, s, b) → {rawBp,clampedBp,atCap} | undefined`** (clamp-bind): delegates to sim `familyClamp(s,b,family)` from `src/sim/breeds-family.ts` (#126). Signature changed from PR-A's `(family, br?, b?, farmLevel?)`; `slotCardHtml(s, br, b, slot, open)` gains `s`; `activeTotalsText` clamp fn is `(f, s, b)`. UI "max" / "(max)" iff `rawBp > clampedBp`. **PR-B uses `familyClampState`** — rebind call sites to the 3-arg form.
 - **`presentGateOpen`:** stays stubbed `true` until Saves commit 1.
 - Hatch: label-in-name (accessible name = visible text; `Ready in m:ss` via `aria-describedby`).
 
@@ -36,7 +36,7 @@ Flag-on for tests and QA uses **two** mechanisms only:
 | Dep | Status | Notes |
 |---|---|---|
 | Saves `#126` / `saves/breeds-sim-prB-traits` c0 | **Merged** to `rc/v5` @ `68f58c0f`; merged into PR-A @ `4575966d` | sim `familyClamp(s,b,family)` now available; PR-A adapter still returns `undefined` (bind lives on clamp-bind). |
-| Follow-up **`v5/breeds-ui-a-clamp-bind`** | Separate | `familyClampState` delegates to sim; rebuilt on PR-A post-merge; bundle `scratch/bundles/breeds-ui-a-clamp-bind-<sha8>.bundle` (see final report). **Not** on this Ready head (HoE B). |
+| **`v5/breeds-ui-a-clamp-bind`** (this branch) | PR-A `8ef9b4cd` + bind | Real getter; PR-A stub removed. Bundle `scratch/bundles/breeds-ui-a-clamp-bind-<sha8>.bundle`. |
 | Saves Present calm-gate (`presentGateOpen`) | commit 1 of `#126` | Keep stubbed open in PR-A. |
 | breeds-drift (D1–D6) | **not** on `rc/v5` | Rebase/mergefwd when it lands. |
 
