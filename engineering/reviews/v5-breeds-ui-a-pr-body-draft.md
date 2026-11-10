@@ -35,8 +35,8 @@ Flag-on for tests and QA uses **two** mechanisms only:
 
 | Dep | Status | Notes |
 |---|---|---|
-| Saves `#126` / `saves/breeds-sim-prB-traits` c0 `d4b5fdcd` | Draft, **not** on `rc/v5` | sim `familyClamp(s,b,family)`. Stacked on `#124`. |
-| Follow-up **`v5/breeds-ui-a-clamp-bind`** | Separate | `familyClampState` delegates to sim; bundle `scratch/bundles/breeds-ui-a-clamp-bind-29edfc8b.bundle`. **Not** on this Ready head (HoE B). |
+| Saves `#126` / `saves/breeds-sim-prB-traits` c0 | **Merged** to `rc/v5` @ `68f58c0f`; merged into PR-A @ `4575966d` | sim `familyClamp(s,b,family)` now available; PR-A adapter still returns `undefined` (bind lives on clamp-bind). |
+| Follow-up **`v5/breeds-ui-a-clamp-bind`** | Separate | `familyClampState` delegates to sim; rebuilt on PR-A post-merge; bundle `scratch/bundles/breeds-ui-a-clamp-bind-<sha8>.bundle` (see final report). **Not** on this Ready head (HoE B). |
 | Saves Present calm-gate (`presentGateOpen`) | commit 1 of `#126` | Keep stubbed open in PR-A. |
 | breeds-drift (D1–D6) | **not** on `rc/v5` | Rebase/mergefwd when it lands. |
 
@@ -59,7 +59,14 @@ tsc 0 · sync-economy 0 · vitest 160/2362 · build + check-release ok · build:
 
 New PR-A UI exports: `traitPctTrim`, `activeTotalsText`, `revealCopy`. No PR-B seam signature change (describedby now `hatch-sub[ hatch-fs]`).
 
+## Post-merge gates @ `4575966d` (tree `b568a351`; PR-A + origin/rc/v5 `68f58c0f`)
+
+tsc 0 · sync-economy 0 · vitest 162 files / 2392 tests PASS · build + check-release `m4.1+4575966 ok` · build:html · check-globals chromium/firefox/webkit PASS · build:qa · probe 3 engines fails=0. Logs `scratch/logs/breeds-pra-prebar/gates-4575966d/`.
+
 ## Merge conflicts
+
+Mergefwd `origin/rc/v5` (`68f58c0f`, #118/#120/#124/#126) into PR-A @ `4575966d`: **no conflict hunks** (app.ts + status.md auto-merged; plain merge, no rebase).
+
 
 Mergefwd `origin/rc/v5` (`d65391b`) into PR-A: **no conflict hunks** (app.ts auto-merged: kept `mountBreeds` + added golden `layoutChanged`).
 

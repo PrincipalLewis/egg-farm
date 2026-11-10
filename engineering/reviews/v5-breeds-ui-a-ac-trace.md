@@ -46,7 +46,7 @@
 | BR-UI-35 | `BR-UI-35 axe landmark-no-duplicate-banner …` ×2; probe axe | |
 | BR-AC52 / strip | **PR-B** | |
 | BR-AC23b/c | **PR-B** (#100) | |
-| E8 familyClamp | stub `undefined` (no label) on Ready head | **Dep:** `#126` d4b5fdcd; bind on `v5/breeds-ui-a-clamp-bind` (not this head) |
+| E8 familyClamp | stub `undefined` (no label) on PR-A head | `#126` on rc/v5 (`68f58c0f`, merged @ `4575966d`); bind + tests on `v5/breeds-ui-a-clamp-bind` (not this head) |
 | D1–D6 drift | adapter null-safe | **Rebase** when drift lands on `rc/v5` |
 
 ## Deferred (not PR-A blockers)

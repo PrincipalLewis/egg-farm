@@ -38,4 +38,4 @@ PR-B seams unchanged: `mountBreeds` behind the flag, leaf `breeds-ext-registry`,
 
 ## Gates @ `9b616704` (tree `ba859431`), clean status — logs `scratch/logs/breeds-pra-prebar/gates-9b616704/`
 tsc 0 · sync-economy --check 0 · vitest 0 (160 files / 2362 tests) · build 0 · check-release `m4.1+9b61670 ok` (no QA hooks ok) · build:html 0 · check-globals chromium/firefox/webkit PASS · build:qa 0 · probe chromium/firefox/webkit fails=0 (axe 0 violations).
-Post-merge (origin/rc/v5 `68f58c0f`, #126) gates: see the PR body draft.
+Post-merge @ `4575966d` (tree `b568a351`, origin/rc/v5 `68f58c0f` merged, no conflicts): same gate set all 0 — vitest 162 files / 2392 tests, check-release `m4.1+4575966 ok`, check-globals 3 engines PASS, probe 3 engines fails=0. Logs `scratch/logs/breeds-pra-prebar/gates-4575966d/`.
