@@ -11,7 +11,7 @@
  */
 import './streak.css';
 import { LiveThrottle, StreakTiers, COOLING_ARIA, meterView, pillCopy, streakParams, streakUiOn, tapCoinUiOn, tierAria, type MeterView } from './streak-view';
-import { coinPopAria, coinPopBox, coinPopText, pillBox } from './tap-coin-pop';
+import { POP, coinPopAria, coinPopBox, coinPopText, pillBox } from './tap-coin-pop';
 import { tcNum } from '../config/formulas';
 import { FOCUS_DT_MAX_S } from '../sim/clock';
 import type { Game } from '../game';
@@ -109,7 +109,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
     pop.querySelector('span')!.textContent = text;
     spawn(pop, STREAK_UI_MS.coinPop);
     const a = anchor(), eggTop = eggs > 0 ? a.collectCy - EGG_POP_ABOVE_CENTRE_PX : undefined;
-    place(pop, coinPopBox(a, pop.offsetWidth, pop.offsetHeight, { drift: ctx.rm() ? 0 : (rnd() * 2 - 1) * 8, aboveTop, eggTop }));
+    place(pop, coinPopBox(a, pop.offsetWidth, pop.offsetHeight, { drift: ctx.rm() ? 0 : (rnd() * 2 - 1) * POP.driftPx, aboveTop, eggTop }));
     const say = cLive.push(coinPopAria(cents)!, nowMs(), frozen()); if (say && coinLive) coinLive.textContent = say;
   }
 
