@@ -38,7 +38,7 @@ export class FatigueCue {
   private shown = false; private key = ''; private ep: string | null = null; private mq: MediaQueryList;
   constructor(private hud: HTMLElement, private farm: HTMLElement, private d: CueDeps) {
     const t = document.createElement('template');
-    t.innerHTML = `<button class="fchip" id="fchip" type="button" aria-expanded="false" aria-controls="fpop" aria-describedby="fchipDesc" hidden><span class="fchip-pill"><span class="fc-ic ss-ph" aria-hidden="true"></span></span><span class="sr fchip-name"></span></button>`
+    t.innerHTML = `<button class="fchip" id="fchip" type="button" aria-expanded="false" aria-controls="fpop" aria-describedby="fchipDesc" hidden><span class="fchip-pill"><img class="fc-ic" width="20" height="20" alt="" aria-hidden="true"></span><span class="sr fchip-name"></span></button>`
       + `<div class="fpop" id="fpop" role="group" aria-labelledby="fpopT" hidden><span class="fpop-t" id="fpopT">${WARN(d.A)}<span class="fpop-x"></span></span><button class="fpop-m" type="button">Manage</button></div>`
       + `<span class="sr" id="fchipDesc"></span>`;
     const [chip, pop, desc] = [...t.content.children] as HTMLElement[];
@@ -48,7 +48,7 @@ export class FatigueCue {
     this.slot = t2.content.firstElementChild as HTMLElement; farm.prepend(this.slot); farm.classList.add('fc-on');
     this.chip = chip as HTMLButtonElement; this.pop = pop; this.sub = this.slot.querySelector('.fsub')!; this.manage = pop.querySelector('.fpop-m')!;
     const st = document.createElement('style'); st.id = 'fc-mq'; // the breakpoint, emitted from the single constant
-    st.textContent = `@media ${shortViewportQuery()}{.fslot{display:none}.farm.fc-on{grid-template-rows:auto 1fr auto}.farm.fc-on.fb-on{grid-template-rows:auto auto 1fr auto}}`
+    st.textContent = `@media ${shortViewportQuery()}{.fslot{display:none}.farm.fc-on{grid-template-rows:auto 1fr auto}}`
       + `@media (min-height: ${FATIGUE_SUBLINE_MIN_H}px){.hud .fchip,.hud .fpop{display:none!important}}`;
     document.head.append(st);
     for (const el of [this.chip, this.pop, this.sub]) el.addEventListener('pointerdown', e => e.stopPropagation());
@@ -94,7 +94,7 @@ export class FatigueCue {
     if (key !== this.key) {
       this.key = key;
       this.chip.querySelector('.fchip-name')!.textContent = c.chipName; (document.getElementById('fchipDesc') as HTMLElement).textContent = c.short;
-      const ic = this.chip.querySelector('.fc-ic') as HTMLElement; ic.dataset.ph = c.asleep ? 'ico_fatigue_zzz' : 'ico_fatigue_sweat';
+      const ic = this.chip.querySelector('.fc-ic') as HTMLImageElement, src = this.d.A(c.asleep ? 'ico_fatigue_zzz.svg' : 'ico_fatigue_sweat.svg'); if (ic.getAttribute('src') !== src) ic.src = src; // Art final d4709f93 / cbc1665d
       this.chip.dataset.tone = this.pop.dataset.tone = this.sub.dataset.tone = c.asleep ? 'asleep' : 'tired';
       this.pop.querySelector('.fpop-x')!.textContent = c.short;
       this.sub.querySelector('.fsub-x')!.textContent = `${MINUS}${c.x}/s`; (this.slot.querySelector('#fsubDesc') as HTMLElement).textContent = c.subDesc;

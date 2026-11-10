@@ -59,6 +59,8 @@ describe('#11 DOM (flag on)', () => {
     expect(m.chip().nextElementSibling).toBe(m.pop());
     expect(document.getElementById('fc-mq')!.textContent).toContain('@media (max-height: 739px)');
     expect(document.getElementById('fc-mq')!.textContent).toContain('@media (min-height: 740px)');
+    expect(document.getElementById('fc-mq')!.textContent).toContain('@media (max-height: 739px){.fslot{display:none}'); // FC-AC9 recount: no .fslot below 740
+    expect(document.getElementById('fc-mq')!.textContent).not.toMatch(/fb-on/); // the Rule 3 banner is out of flow (no grid row)
     expect(document.querySelectorAll('.pill.coins[tabindex], .pill.basket[tabindex], .pill.coins[role], .pill.basket[role]').length).toBe(0); // FC-SV16
   });
   it('shows only when shown && !suppressedByStall; noteFatigueCueShown(hud_chip) once per episode', async () => {
@@ -82,9 +84,9 @@ describe('#11 DOM (flag on)', () => {
   });
   it('Asleep state: zzz icon + asleep sentences; Tired: sweat icon (placeholders until Art assets land)', async () => {
     let m = await mount(FC); stallStub.cue = cue(true); m.ui.render();
-    expect(m.chip().querySelector('.fc-ic')!.getAttribute('data-ph')).toBe('ico_fatigue_sweat');
+    expect(m.chip().querySelector('.fc-ic')!.getAttribute('src')).toMatch(/ico_fatigue_sweat\.svg$/);
     stallStub.reset(); m = await mount(FC, st({ market_hand: W(0) })); stallStub.cue = cue(true); m.ui.render();
-    expect(m.chip().querySelector('.fc-ic')!.getAttribute('data-ph')).toBe('ico_fatigue_zzz'); expect(m.chip().dataset.tone).toBe('asleep');
+    expect(m.chip().querySelector('.fc-ic')!.getAttribute('src')).toMatch(/ico_fatigue_zzz\.svg$/); expect(m.chip().dataset.tone).toBe('asleep');
     expect(m.chip().textContent).toMatch(/^Asleep and tired workers are costing/);
   });
   it('chip tap toggles the non-modal popover (focus stays on the chip); every chip tap logs; Esc closes + refocuses; outside tap closes and passes through', async () => {
@@ -119,5 +121,13 @@ describe('#11 DOM (flag on)', () => {
     stallStub.stall = null; m.ui.render(); m.ui.render(); m.chip().focus(); m.chip().click(); expect(m.pop().hidden).toBe(false);
     const q = mqs.find(x => x.q === '(max-height: 739px)')!; q.matches = false; q.fire();
     expect(m.pop().hidden).toBe(true); expect(document.activeElement).toBe(m.sub()); // focus follows to the >= 740 counterpart
+  });
+});
+describe('#11 stacking with the Rule 3 banner (CSS)', () => {
+  it('popover stacks above the banner; no banner grid row', async () => {
+    const { readFileSync } = await import('node:fs'); const css = readFileSync('src/ui/styles.css', 'utf8');
+    const z = (sel: string) => Number(css.match(new RegExp(`\\n${sel.replace('.', '\\.')}\\{[^}]*z-index:(\\d+)`))![1]);
+    expect(z('.fpop')).toBeGreaterThan(z('.farm-banner'));
+    expect(css).not.toMatch(/fb-on\{grid-template-rows/);
   });
 });
