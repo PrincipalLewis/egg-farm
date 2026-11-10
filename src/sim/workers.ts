@@ -23,8 +23,9 @@ export const hiredCount = (ws: Workers) => WORKERS.filter(id => ws[id]).length;
 export const showManageAll = (ws: Workers, b: Balance) => hiredCount(ws) >= b.workers.energy.manage_all_min_workers;
 /** P4 / B5: Manage is allowed only at energy <= manage_prompt_threshold (0.4 = Yawning). */
 export const canManageWorker = (w: Worker | undefined, b: Balance) => !!w && w.energy <= b.workers.energy.manage_prompt_threshold * 100;
-/** P4: workers Manage all refills / "(n need it)" counts: hired and <= threshold. 0 -> no action, no cooldown (ruling 4). */
-export const needManage = (ws: Workers, b: Balance) => WORKERS.filter(id => canManageWorker(ws[id], b));
+/** P4: workers Manage all refills / "(n need it)" counts: hired and <= threshold. 0 -> no action, no cooldown (ruling 4).
+ *  Pause rule 8 / AC-P12 (audit D1): paused workers are skipped and not counted (isPaused: false with m4.flags.pause off). */
+export const needManage = (ws: Workers, b: Balance) => WORKERS.filter(id => canManageWorker(ws[id], b) && !isPaused(ws[id], b));
 /** 1 minute (x unpaid_resume_wage_min) of a wage-paying worker's wage at Farm F, cents. */
 export const resumeNeedCents = (id: 'market_hand' | 'coop_hand', farm: number, b: Balance) =>
   Math.round(b.workers[id].wage_per_farm_per_min * farm * b.workers.energy.unpaid_resume_wage_min * 100);
