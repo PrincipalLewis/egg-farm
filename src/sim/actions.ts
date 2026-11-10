@@ -119,8 +119,8 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
     // v5 pause (spec v1.3.17 rule 2: applies in the same tick). The sim functions own every guard (flag, unlock, hired, already paused).
-    // Telemetry is sim-owned (UI emits nothing): worker_resumed comes from #119 resumeWorker(ev, 'manual'); worker_paused from Saves' emitter PR.
-    case 'pause': return pauseWorker(s, a.worker, b); // worker_paused emitter: Saves' follow-up PR (no ev parameter yet)
+    // Telemetry is sim-owned (UI emits nothing): worker_paused from #132 pauseWorker(ev), worker_resumed from #119 resumeWorker(ev, 'manual').
+    case 'pause': return pauseWorker(s, a.worker, b, ev); // #132: THE worker_paused emitter (rc2Refill = 0 only)
     case 'resume': return resumeWorker(s, a.worker, b, ev, 'manual'); // #119: THE worker_resumed emitter, cause 'manual' (card Resume); B5 lockout inside
     case 'hatch': return startHatch(s, b);
     case 'placeBreed': return placeBreed(s, b, a.slot, a.id);

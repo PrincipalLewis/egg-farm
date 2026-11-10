@@ -225,3 +225,19 @@ describe('[#119 merge] card Resume goes through resumeWorker(ev, "manual")', () 
     expect(ev.some(e => e.type === 'worker_resumed')).toBe(false);
   });
 });
+
+describe('[#132 merge] card Pause goes through pauseWorker(ev)', () => {
+  const s0 = (): GameState => ({ ...initialState(b, 1), farmLevel: Math.max(12, P.m4!.tc!.pause_unlock_farm), workers: { market_hand: { energy: 60, cdS: 1 } } } as GameState);
+  const R = { ...P, m4: { ...P.m4!, flags: { ...P.m4!.flags, rc2Refill: 1 } } } as typeof b;
+  it('rc2Refill = 0: exactly one worker_paused per real pause; a repeat pause (already paused) emits none', () => {
+    const ev: SimEvent[] = []; const s1 = apply(s0(), { type: 'pause', worker: 'market_hand' }, P, ev);
+    expect(s1.workers.market_hand!.paused).toBe(true);
+    expect(ev.filter(e => e.type === 'worker_paused')).toEqual([expect.objectContaining({ type: 'worker_paused', worker: 'market_hand' })]);
+    const ev2: SimEvent[] = []; apply(s1, { type: 'pause', worker: 'market_hand' }, P, ev2);
+    expect(ev2.some(e => e.type === 'worker_paused')).toBe(false);
+  });
+  it('rc2Refill = 1: no worker_paused (exclusive emission, G0 §8)', () => {
+    const ev: SimEvent[] = []; apply(s0(), { type: 'pause', worker: 'market_hand' }, R, ev);
+    expect(ev.some(e => e.type === 'worker_paused')).toBe(false);
+  });
+});
