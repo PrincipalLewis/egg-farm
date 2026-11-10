@@ -83,6 +83,8 @@ export class StallChip {
     this.el.addEventListener('click', e => { e.stopPropagation(); this.tap(); });
   }
   get isShown() { return this.shown; }
+  /** The role the chip names while shown (§5 dedupe for the Rule 3 banner). */
+  get coveredWorker(): WorkerId | null { return this.shown && this.view?.cause ? CAUSE_WORKER[this.view.cause] : null; }
   /** Called every render frame. `visible` = UI gates (farm view active, onboarding done, no sheet over the farm). */
   update(visible: boolean): void {
     const s = this.d.g.state, v = stallView(s, this.d.b); this.view = v;
