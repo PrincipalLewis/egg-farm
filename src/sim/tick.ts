@@ -5,8 +5,8 @@ import { sellTo } from './actions';
 import { prodEggsPerSec, coopCap } from './tracks';
 import { anyM5FlagOn, stepTimers } from './timers';
 import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
-import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
-import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
+import { isPaused, pausedRecoveredEnergy, tickCallLockout, tickPausedFor } from './pause';
+import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, unpaidResumeAtCents } from './workers';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
@@ -57,6 +57,8 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
   }
   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
+  const pausedForS = tickPausedFor(s, workers, dt, b); // pause: sim seconds paused (never saved; see sim/pause.ts known limits)
+  if (pausedForS !== s.pausedForS) out.pausedForS = pausedForS;
   if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
   if (live) out = stepTimers(out, dt, b, clock, ev);
   return out;
@@ -68,13 +70,12 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
   // §8 items 15.5 + 16 (R9): Unpaid workers resume one at a time, W1 then W2. Each needs coins >= 1 min of its own wage
   // plus 1 min for every worker already being paid (Working/Tired) and every worker resumed earlier in this check.
   // Stops at the first that can't resume (strict order).
-  let reserved = 0;
-  for (const id of ['market_hand', 'coop_hand'] as const) { const w = ws[id]; if (w && !w.unpaid && w.energy > 0) reserved += resumeNeedCents(id, s.farmLevel, b); }
+  // Pause rule 10 (audit D2): paused workers are neither reserved for nor resumed. One rule: workers.ts unpaidResumeAtCents, read on the
+  // pre-resume workers; thresholds rise along the order, so `break` at the first short one is the strict R9 order.
   for (const id of ['market_hand', 'coop_hand'] as const) {
-    const w = ws[id]; if (!w?.unpaid || isPaused(w, b)) continue; // paused: no wage resume
-    const need = resumeNeedCents(id, s.farmLevel, b);
-    if (s.coinsCents < reserved + need) break;
-    reserved += need; ws[id] = { ...w, unpaid: false, cdS: 0 };
+    const at = unpaidResumeAtCents(s.workers, s.farmLevel, b, id); if (at === null) continue;
+    if (s.coinsCents < at) break;
+    const w = ws[id]!; ws[id] = { ...w, unpaid: false, cdS: 0 };
     ev?.push({ type: 'worker_state', worker: id, state: mood(ws[id], b)! });
   }
   s = { ...s, workers: ws };
