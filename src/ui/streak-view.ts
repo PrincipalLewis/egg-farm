@@ -70,16 +70,19 @@ const COOL_CUE_MIN_TIER = 2;
  */
 export class StreakTiers {
   private prev = 0; private armed: boolean[] = []; private key = ''; private runMax = 0; private wasCooling = false;
-  update(s: number, cooling: boolean, b: Balance): { tierUp?: number; coolStart?: true } {
+  /** `fromTap` = this change came from a credited tap: only then can a tier pop (s never rises otherwise; a remount, a resync or a
+   *  frame that skipped the tap event just disarms the crossed tiers silently). */
+  update(s: number, cooling: boolean, b: Balance, fromTap = true): { tierUp?: number; coolStart?: true } {
     const p = streakParams(b), T = tierThresholds(p), key = T.join(',');
     if (key !== this.key) { this.key = key; this.armed = T.map(t => !(s >= t - EPS)); this.prev = s; this.runMax = streakTier(Math.max(0, s), b); this.wasCooling = cooling; return {}; }
     for (let k = 1; k <= T.length; k++) if (s < (k === 1 ? 0 : T[k - 2]) - EPS || s <= EPS) this.armed[k - 1] = true;
     let up = 0;
     if (s > this.prev + EPS) for (let k = 1; k <= T.length; k++) { const t = T[k - 1]; if (this.prev < t - EPS && s >= t - EPS && this.armed[k - 1]) up = k; }
-    for (let k = 1; k <= up; k++) if (this.prev < T[k - 1] - EPS && s >= T[k - 1] - EPS) this.armed[k - 1] = false;
+    for (let k = 1; k <= T.length; k++) if (this.prev < T[k - 1] - EPS && s >= T[k - 1] - EPS) this.armed[k - 1] = false;
     if (s <= EPS) this.runMax = 0; else this.runMax = Math.max(this.runMax, streakTier(s, b));
     const coolStart = cooling && !this.wasCooling && s > EPS && this.runMax >= COOL_CUE_MIN_TIER;
     this.wasCooling = cooling && s > EPS; this.prev = s;
+    if (!fromTap) up = 0;
     return { ...(up ? { tierUp: up } : {}), ...(coolStart ? { coolStart: true as const } : {}) };
   }
 }

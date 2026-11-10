@@ -120,3 +120,11 @@ describe('LiveThrottle (combo-tiers §6: >= 2 s, latest wins; R16 coin region <=
     expect(l.poll(3000, true)).toBeNull(); l.clear(); expect(l.poll(4000)).toBeNull();
   });
 });
+
+describe('StreakTiers fromTap = false (resync / remount)', () => {
+  it('a rise seen outside a credited tap never pops, but still disarms the crossed tiers', () => {
+    const t = new StreakTiers(); t.update(0, false, B27);
+    expect(t.update(0.2, false, B27, false).tierUp).toBeUndefined();
+    expect(t.update(0.21, false, B27).tierUp).toBeUndefined();
+  });
+});
