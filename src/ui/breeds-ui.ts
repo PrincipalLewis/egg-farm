@@ -92,7 +92,7 @@ function rosterName(id: string): string {
 export { rosterName };
 
 /** Slot card body (PR-A; Present mirror chip is PR-B — show exact % text only). */
-export function slotCardHtml(br: BreedsSave, b: Balance, slot: number, open: number): string {
+export function slotCardHtml(s: GameState, br: BreedsSave, b: Balance, slot: number, open: number): string {
   if (slot >= open) {
     const need = slot === 1 ? bc(b, 'slot2_farm') : bc(b, 'slot3_farm');
     return `<div class="slot locked" data-slot="${slot}"><span class="sr">Slot ${slot + 1} Farm ${need}</span><span aria-hidden="true">🔒︎</span><span class="slot-lock">Farm ${need}</span></div>`;
@@ -114,8 +114,8 @@ export function slotCardHtml(br: BreedsSave, b: Balance, slot: number, open: num
   const pct = mir ? mir.html : traitPctExact(bp);
   const descAttr = mir ? ` aria-describedby="slot-desc-${slot}"` : '';
   const descNode = mir ? `<span id="slot-desc-${slot}" class="sr">${mir.description}</span>` : '';
-  // E8: familyClamp stub returns undefined ⇒ no "max" label (HoE; Saves owns real getter on saves/breeds-sim-prB-traits).
-  const maxLab = familyClamp(fam, br, b);
+  // E8: familyClamp → sim (#126); label iff rawBp > clampedBp.
+  const maxLab = familyClamp(fam, s, b);
   const maxSpan = maxLab ? `<span class="slot-max" data-testid="breeds-slot-max">${maxLab}</span>` : '';
   // OQ-6: album select → tap slot to place; Remove clears (not tap-on-filled).
   return `<div class="slot filled" data-slot="${slot}" data-breed="${id}" role="group" aria-label="Slot ${slot + 1}, ${rosterName(id)}"${descAttr}>${breedImg(id)}<span class="slot-name">${rosterName(id)}</span><span class="slot-meta">${pct} ${familyTraitWord(fam)} ${familyWord(fam)}${maxSpan ? ` ${maxSpan}` : ''}</span>${descNode}<button type="button" class="slot-remove" data-testid="breeds-slot-remove" data-slot="${slot}" aria-label="Remove ${rosterName(id)} from slot ${slot + 1}">Remove</button></div>`;

@@ -14,6 +14,7 @@ import {
   eligible, hatchCostCents, hatchEstimate, slotTraitBp, type HatchEstimate,
 } from '../sim/breeds-hatch';
 import { isFlockComplete, on as breedsFlagAndKey, type BreedsSave } from '../sim/breeds';
+import { familyClamp as simFamilyClamp } from '../sim/breeds-family';
 import type { GameState } from '../sim/state';
 import { incomePerSec } from '../econ/income';
 
@@ -83,18 +84,16 @@ export const fmtRemainMs = (ms: number) => {
 
 /**
  * E8 Flock-sheet "max" label for a family.
- * HoE-approved stub (2026-11-10): **undefined ⇒ no label**.
- * TODO(PMC/Saves): replace body with the sim getter when Saves lands it on
- * `saves/breeds-sim-prB-traits` (commit 0 of that branch; ETA TBD). Keep this
- * as the single UI call site so the source swaps in one place. Do not hard-code bc_*.
+ * Binds to sim `familyClamp(s, b, family)` → {rawBp, clampedBp, atCap} (#126 / Saves c0).
+ * Label shown iff rawBp > clampedBp. UI does no clamp math. presentGateOpen stays stubbed.
  */
 export function familyClamp(
-  _family: Family,
-  _br: BreedsSave,
-  _b: Balance,
-  _farmLevel?: number,
+  family: Family,
+  s: GameState,
+  b: Balance,
 ): string | undefined {
-  return undefined;
+  const v = simFamilyClamp(s, b, family);
+  return v.rawBp > v.clampedBp ? 'max' : undefined;
 }
 
 

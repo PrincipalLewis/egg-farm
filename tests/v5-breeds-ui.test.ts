@@ -465,20 +465,45 @@ describe('BR-AC25 / BR-R18 offline reveal after welcome-back', () => {
   });
 });
 
-describe('E8 familyClamp stub (HoE / Saves dependency)', () => {
-  it('familyClamp returns undefined ⇒ no breeds-slot-max label', async () => {
+describe('E8 familyClamp bind → sim (#126)', () => {
+  it('adapter calls sim familyClamp(s,b,family); label iff rawBp > clampedBp', async () => {
     const { familyClamp } = await import('../src/ui/breeds-adapter');
+    const { familyClamp: simClamp } = await import('../src/sim/breeds-family');
+    const { initialState } = await import('../src/sim/state');
     const b = breedsOn();
     const br: BreedsSave = {
       ...emptyBr(), freeHatchUsed: 1,
-      owned: { leghorn: { stars: 2 }, rhode_island_red: { stars: 2 }, ayam_cemani: { stars: 2 } },
-      slots: ['leghorn', 'rhode_island_red', 'ayam_cemani'],
+      owned: { ayam_cemani: { stars: 2 }, rhode_island_red: { stars: 2 } },
+      slots: ['ayam_cemani', 'rhode_island_red', null],
       settleMs: [0, 0, 0],
     };
-    expect(familyClamp('present', br, b, 20)).toBeUndefined();
-    const { ui } = await mount({ farmLevel: 20, coinsCents: 1e9, abilitiesCoachSeen: true, breeds: br }, b);
+    const mk = (F: number) => ({
+      ...initialState(b, 7), farmLevel: F, tracksV7: 1 as const, v6BackupId: '0123456789abcdef', breeds: br,
+    });
+    expect(simClamp(mk(17), b, 'present')).toEqual({ rawBp: 975, clampedBp: 700, atCap: true });
+    expect(familyClamp('present', mk(17), b)).toBe('max');
+    expect(simClamp(mk(18), b, 'present')).toEqual({ rawBp: 975, clampedBp: 975, atCap: false });
+    expect(familyClamp('present', mk(18), b)).toBeUndefined();
+  });
+
+  it('Present F17→F18 700→1500 transition shows/hides slot-max in sheet', async () => {
+    const b = breedsOn();
+    const br: BreedsSave = {
+      ...emptyBr(), freeHatchUsed: 1,
+      owned: { ayam_cemani: { stars: 2 }, rhode_island_red: { stars: 2 } },
+      slots: ['ayam_cemani', 'rhode_island_red', null],
+      settleMs: [0, 0, 0],
+    };
+    const { ui } = await mount({ farmLevel: 17, coinsCents: 1e9, abilitiesCoachSeen: true, breeds: br }, b);
     ui.openPanel('upgrades');
     ui.render();
+    document.getElementById('breeds-entry')!.click();
+    expect(document.querySelectorAll('[data-testid="breeds-slot-max"]').length).toBeGreaterThan(0);
+
+    document.body.innerHTML = '';
+    const m2 = await mount({ farmLevel: 18, coinsCents: 1e9, abilitiesCoachSeen: true, breeds: br }, b);
+    m2.ui.openPanel('upgrades');
+    m2.ui.render();
     document.getElementById('breeds-entry')!.click();
     expect(document.querySelectorAll('[data-testid="breeds-slot-max"]').length).toBe(0);
   });
