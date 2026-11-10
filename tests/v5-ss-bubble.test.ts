@@ -44,7 +44,7 @@ describe('Rule 4 bubble (flag on)', () => {
   });
   it('the stall chip wins: with the chip shown the bubble is not rendered (SS-26)', async () => {
     const m = await mount(ON); stallStub.cue = cue(true);
-    stallStub.stall = { shown: true, trigger: 'sell', cause: 'mh_asleep', stallId: 's', noSaleS: 9, noCollectS: 0 }; m.ui.render(); m.ui.render();
+    stallStub.stall = { shown: true, trigger: 'sell', cause: 'mh_asleep', stallId: 1, noSaleS: 9, noCollectS: 0 }; m.ui.render(); m.ui.render();
     expect(m.lbl()).not.toMatch(/Refill workers/);
     expect(stallStub.notes.some(n => n.arg === 'bubble')).toBe(false);
   });

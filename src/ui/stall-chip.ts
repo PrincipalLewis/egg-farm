@@ -66,7 +66,7 @@ export interface ChipDeps {
 /** Chip controller. One <button> laid over the #goal slot (absolute, 0 px layout shift), crossfading with the goal bubble. */
 export class StallChip {
   readonly el: HTMLButtonElement; private desc: HTMLElement; private live: HTMLElement; private txt: HTMLElement; private ic: HTMLElement;
-  private shown = false; private copyKey = ''; private announced: string | null = null; private liveAt = -Infinity; private liveT = 0;
+  private shown = false; private copyKey = ''; private announced: number | null = null; private liveAt = -Infinity; private liveT = 0;
   private guardUntil = -Infinity; private hideT = 0; private view: Readonly<StallView> | null = null; private copy: ChipCopy | null = null;
   private readonly guardMs: number;
   constructor(private bar: HTMLElement, private goal: HTMLElement, private d: ChipDeps) {

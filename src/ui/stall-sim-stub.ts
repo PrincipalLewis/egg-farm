@@ -18,10 +18,12 @@ export interface StallView {
   shown: boolean;
   trigger: 'sell' | 'collect' | null;
   cause: StallCause | null;
-  stallId: string | null;
+  stallId: number | null; // int >= 1, = sales_stall.stall_id (SIM-API Changes 03:25; was string)
   noSaleS: number;
   noCollectS: number;
 }
+/** SIM-API Changes (HoE 03:25, Saves #128): real home src/econ/stall.ts, re-exported from income.ts. */
+export interface UiGates { farmScreenActive: boolean; onboardingDone: boolean; }
 export interface FatigueCueView {
   share: number;
   shown: boolean;
@@ -38,7 +40,9 @@ export const stallStub = {
   atRisk: {} as Partial<Record<WorkerId, number>>,
   notes: [] as { fn: string; arg: string }[],
   shownKeys: new Set<string>(),
-  reset() { this.stall = null; this.cue = null; this.atRisk = {}; this.notes = []; this.shownKeys.clear(); },
+  /** Both gates read false until the first setUiGates call (mirrors the sim). */
+  gates: { farmScreenActive: false, onboardingDone: false } as UiGates,
+  reset() { this.stall = null; this.cue = null; this.atRisk = {}; this.notes = []; this.shownKeys.clear(); this.gates = { farmScreenActive: false, onboardingDone: false }; },
 };
 // QA-only handle (scripts/v5-ss-banner-rects.mjs, flag-on shots); compiled out of release (__IOS_FLAG__), like window.eggfarm.
 if (IOS_FLAG_ENABLED && typeof window !== 'undefined') (window as unknown as { eggfarmQaStall?: typeof stallStub }).eggfarmQaStall = stallStub;
@@ -57,12 +61,20 @@ export function fatigueShare(s: GameState, b: Balance): number { return fatigueC
 
 export function stallView(_s: GameState, b: Balance): Readonly<StallView> {
   if (!flagOn(b, 'salesStopped')) return NO_STALL;
+  // onboardingDone = false: stall timers stay 0 (no chip). farmScreenActive = false: the chip hides like a focus loss (C6); timers keep running.
+  // Rule 2 (fatigueCueView) is not gated.
+  const gt = stallStub.gates; if (!gt.onboardingDone || !gt.farmScreenActive) return NO_STALL;
   return stallStub.stall ?? NO_STALL;
 }
 export function fatigueCueView(s: GameState, b: Balance): Readonly<FatigueCueView> {
   if (!flagOn(b, 'salesStopped')) return NO_CUE;
   const v = stallStub.cue ?? NO_CUE;
   return { ...v, suppressedByStall: v.suppressedByStall || stallView(s, b).shown };
+}
+/** No-op at salesStopped = 0 (flag-off byte-identical). Values hold until the next call. */
+export function setUiGates(_s: GameState, b: Balance, gates: UiGates): void {
+  if (!flagOn(b, 'salesStopped')) return;
+  const gt = stallStub.gates; if (gt.farmScreenActive !== gates.farmScreenActive || gt.onboardingDone !== gates.onboardingDone) stallStub.gates = { ...gates };
 }
 export function resetStallTimers(_s: GameState): void { stallStub.notes.push({ fn: 'resetStallTimers', arg: '' }); }
 export function noteStallChipTap(_s: GameState, action: 'refill' | 'sell_all' | 'collect' | 'manage'): void { stallStub.notes.push({ fn: 'noteStallChipTap', arg: action }); }
