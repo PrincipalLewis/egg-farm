@@ -219,3 +219,20 @@ describe('static checks', () => {
   });
   it('thresholds used by the DOM are the config ones', () => { expect(tierThresholds(streakParams(STREAK))).toEqual([0.07, 0.14, 0.2, 0.27]); });
 });
+
+describe('no global styles.css rule hits a streak node (regression: rc/v5 .up = the upgrade card made a lit tick 36x36)', () => {
+  it('every app-wide selector that matches a streak/coin-pop/pill/spark/chip node is on the allowlist', () => {
+    const m = mount(BOTH); for (let i = 1; i <= 27; i++) { t += 1000; m.tap(i / 100); m.ui.render(t); } // MAX: every tick lit + .streak-up, pill, sparks, coin pop (fake timers keep them)
+    const nodes = [...document.querySelectorAll<HTMLElement>('#streak, #streak *, .streak-pill, .streak-pill *, .streak-spark, .coin-pop, #streak-live, #coin-live')];
+    expect(nodes.length).toBeGreaterThan(10);
+    const css = readFileSync(resolve(process.cwd(), 'src/ui/styles.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const sels = [...css.matchAll(/([^{}@;]+)\{/g)].map(x => x[1].trim()).filter(x => x && !/^(from|to|\d+%)/.test(x));
+    const ALLOW = new Set(['*', '.num', '.sr', 'button', 'body', 'html', '.collectbar>*']); // .collectbar>*: the row lives in .collectbar by design (ST-AC26)
+    const hits = new Set<string>();
+    for (const sel of sels) for (const part of sel.split(',').map(x => x.trim())) {
+      if (!part || ALLOW.has(part) || /::|:root|^\*/.test(part)) continue;
+      try { for (const n of nodes) if (n.matches(part)) hits.add(`${part} -> ${n.className || n.id}`); } catch { /* selector jsdom can't parse */ }
+    }
+    expect([...hits]).toEqual([]);
+  });
+});

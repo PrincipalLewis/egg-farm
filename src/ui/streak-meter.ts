@@ -93,7 +93,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
     ctx.audio.play(max ? 'streakMax' : (`streakTier${k}` as keyof typeof STREAK_SFX));
     const say = sLive.push(tierAria(k, b), nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say;
     if (row) { // meter part of §2: tab k, sheen, label pop, spark dots (motion <= 400 ms; reduced motion: opacity only)
-      retrigger(ticks[k - 1] ?? null, 'up'); retrigger(row.querySelector('.streak-sheen'), 'go'); retrigger(label, 'pop');
+      retrigger(ticks[k - 1] ?? null, 'streak-up'); retrigger(row.querySelector('.streak-sheen'), 'go'); retrigger(label, 'pop');
       if (!ctx.rm()) { const t = ticks[k - 1]?.getBoundingClientRect(); if (t) for (let i = 0; i < (max ? MAX_SPARKS : k); i++) {
         const a = (-150 + (120 * (i + 0.5)) / (max ? MAX_SPARKS : k)) * (Math.PI / 180), d = 12 + rnd() * 8;
         spawn(el(`<i class="streak-spark" style="left:${t.left + t.width / 2}px;top:${t.top}px;--dx:${(Math.cos(a) * d).toFixed(1)}px;--dy:${(Math.sin(a) * d).toFixed(1)}px"></i>`), STREAK_UI_MS.tierUp); } }

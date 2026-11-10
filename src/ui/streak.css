@@ -32,7 +32,7 @@
 /* Ticks at k/n of the track. Unlit: 2x8 --c-muted line. Lit: 4x16 --c-text tab, 1 px cream keyline, 2 px past the outer edge. */
 .streak-tick{position:absolute;top:50%;width:2px;height:8px;background:var(--c-muted);transform:translate(-100%,-50%)}
 .streak-tick.lit{width:4px;height:16px;background:var(--c-text);box-shadow:0 0 0 1px var(--c-cream);border-radius:1px}
-.streak-tick.lit.up{animation:streakTab 240ms cubic-bezier(.34,1.56,.64,1)}
+.streak-tick.lit.streak-up{animation:streakTab 240ms cubic-bezier(.34,1.56,.64,1)}
 @keyframes streakTab{0%{transform:translate(-100%,-50%) scaleY(.4)}60%{transform:translate(-100%,-50%) scaleY(1.25)}to{transform:translate(-100%,-50%) scaleY(1)}}
 .streak-label{flex:0 0 80px;width:80px;text-align:right;white-space:nowrap;font:700 14px var(--f-body);font-variant-numeric:tabular-nums;color:var(--c-text)}
 .streak-label.pop{animation:streakNum 120ms cubic-bezier(.34,1.56,.64,1)}
@@ -74,10 +74,10 @@
 
 /* Reduced motion (OS or in-game toggle): opacity only (§5). */
 @media (prefers-reduced-motion:reduce){
-  .streak-tick.lit.up,.streak-label.pop,.streak-sheen.go{animation:none}.streak-fill{transition:none}
+  .streak-tick.lit.streak-up,.streak-label.pop,.streak-sheen.go{animation:none}.streak-fill{transition:none}
   .streak-pill{animation-name:streakPillRm}.coin-pop{animation-name:coinPopRm}.streak-spark{display:none}}
-.reduced-motion .streak-tick.lit.up,.reduced-motion .streak-label.pop,.reduced-motion .streak-sheen.go{animation:none}
+.reduced-motion .streak-tick.lit.streak-up,.reduced-motion .streak-label.pop,.reduced-motion .streak-sheen.go{animation:none}
 .reduced-motion .streak-fill{transition:none}.reduced-motion .streak-spark{display:none}
-.streak-row.rm .streak-tick.lit.up{animation:streakFadeIn 150ms linear}
+.streak-row.rm .streak-tick.lit.streak-up{animation:streakFadeIn 150ms linear}
 @keyframes streakFadeIn{from{opacity:0}}
 
