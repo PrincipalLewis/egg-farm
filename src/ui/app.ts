@@ -219,9 +219,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const pzLive = (): HTMLElement => { let el = document.getElementById('pzLive'); if (!el) { el = h('<div class="sr" role="status" aria-live="polite" id="pzLive"></div>'); document.body.append(el); } return el; };
   const togglePause = (bt: HTMLElement, wid: keyof typeof g.state.workers) => {
     const w = g.state.workers[wid]; if (!w || !pauseUiOn(g.state, b)) return;
-    if (!pzDeb.accept(wid, now(), b)) return cantAfford(bt); // AC-P7: a second tap inside tc_pause_toggle_debounce_s -> M1 disabled shake, no change
+    const tNow = now();
+    if (!pzDeb.ready(wid, tNow, b)) return cantAfford(bt); // AC-P7: a second tap inside tc_pause_toggle_debounce_s -> M1 disabled shake, no change
     const wasPaused = isPaused(w, b);
     if (!act({ type: wasPaused ? 'resume' : 'pause', worker: wid })) return cantAfford(bt);
+    pzDeb.mark(wid, tNow); // the window starts only on a real state change
     setText(pzLive(), pauseAnnouncement(WORKER_NAMES[wid], !wasPaused, allWorkersPaused(g.state, b)));
   };
   const collect = () => {

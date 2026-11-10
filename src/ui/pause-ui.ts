@@ -42,16 +42,17 @@ export const allPausedHtml = (s: GameState, b: Balance) => pauseUiOn(s, b) && al
 /** Polite announcement after a toggle (live region): "Market Hand paused" / "Market Hand back to work", plus the all-paused line. */
 export const pauseAnnouncement = (role: string, paused: boolean, all: boolean) => `${role} ${paused ? 'paused' : 'back to work'}.${all ? ` ${PAUSE_COPY.all}.` : ''}`;
 /** Rule 2 / AC-P7: per-worker debounce of tc_pause_toggle_debounce_s (UI-only). A tap inside the window is refused (M1 disabled shake).
- *  `nowMs` is the UI clock (performance.now()); the window is measured from the last ACCEPTED tap. */
+ *  `nowMs` is the UI clock (performance.now()). The window runs from the last tap that CHANGED the state: `ready()` checks, `mark()` is
+ *  called only after a successful dispatch, so a refused dispatch (game held, below unlock) never starts a window. */
 export class PauseDebounce {
   private last = new Map<WorkerId, number>();
-  /** True = accept the tap (and start a new window). */
-  accept(id: WorkerId, nowMs: number, b: Balance): boolean {
-    const winMs = tcNum(b, 'pause_toggle_debounce_s') * 1000, prev = this.last.get(id);
-    if (prev !== undefined && nowMs - prev < winMs) return false;
-    this.last.set(id, nowMs);
-    return true;
+  ready(id: WorkerId, nowMs: number, b: Balance): boolean {
+    const prev = this.last.get(id);
+    return prev === undefined || nowMs - prev >= tcNum(b, 'pause_toggle_debounce_s') * 1000;
   }
+  mark(id: WorkerId, nowMs: number) { this.last.set(id, nowMs); }
+  /** ready() + mark() in one call (tests / callers that dispatch unconditionally). */
+  accept(id: WorkerId, nowMs: number, b: Balance): boolean { if (!this.ready(id, nowMs, b)) return false; this.mark(id, nowMs); return true; }
 }
 /** B5 / AC-P9 / G0 §7.5: Market Hand call lockout after ANY resume (toggle, manage, auto_full). The sim sets callLockoutS from
  *  tc_pause_call_lockout_s and counts it down in sim seconds; the UI only reads it. For the Rush/Shout buttons (abilities UI, #116):
