@@ -209,3 +209,19 @@ describe('[AC-P7] debounce window starts only on a real change', () => {
     d.mark('grader', 100); expect(d.ready('grader', 100 + DEB_MS - 1, P)).toBe(false); expect(d.ready('grader', 100 + DEB_MS, P)).toBe(true);
   });
 });
+
+import type { SimEvent } from '../src/sim/events';
+describe('[#119 merge] card Resume goes through resumeWorker(ev, "manual")', () => {
+  const s0 = (): GameState => ({ ...initialState(b, 1), farmLevel: Math.max(12, P.m4!.tc!.pause_unlock_farm), workers: { market_hand: { energy: 60, cdS: 1, paused: true } } } as GameState);
+  it('rc2Refill = 0: one worker_resumed{cause:"manual"}, MH gets the B5 call lockout from balance', () => {
+    const ev: SimEvent[] = []; const s = apply(s0(), { type: 'resume', worker: 'market_hand' }, P, ev);
+    expect(s.workers.market_hand!.paused).toBeFalsy();
+    expect(ev.filter(e => e.type === 'worker_resumed')).toEqual([expect.objectContaining({ type: 'worker_resumed', worker: 'market_hand', cause: 'manual' })]);
+    expect(s.workers.market_hand!.callLockoutS).toBe(P.m4!.tc!.pause_call_lockout_s);
+  });
+  it('rc2Refill = 1: no worker_resumed (exclusive emission, G0 §8)', () => {
+    const R = { ...P, m4: { ...P.m4!, flags: { ...P.m4!.flags, rc2Refill: 1 } } } as typeof b;
+    const ev: SimEvent[] = []; apply(s0(), { type: 'resume', worker: 'market_hand' }, R, ev);
+    expect(ev.some(e => e.type === 'worker_resumed')).toBe(false);
+  });
+});

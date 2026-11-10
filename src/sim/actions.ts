@@ -10,9 +10,8 @@ import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { spawnGolden, tapGolden, frenzySale } from './golden';
-import { pauseWorker, resumeWorker } from './pause';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
-import { isPaused, resumeWorker } from './pause';
+import { isPaused, pauseWorker, resumeWorker } from './pause';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
@@ -120,9 +119,9 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
     // v5 pause (spec v1.3.17 rule 2: applies in the same tick). The sim functions own every guard (flag, unlock, hired, already paused).
-    // Telemetry: worker_paused (Saves) / worker_resumed (#119) emitters are sim-owned and not added here (UI emits nothing).
-    case 'pause': return pauseWorker(s, a.worker, b);
-    case 'resume': return resumeWorker(s, a.worker, b);
+    // Telemetry is sim-owned (UI emits nothing): worker_resumed comes from #119 resumeWorker(ev, 'manual'); worker_paused from Saves' emitter PR.
+    case 'pause': return pauseWorker(s, a.worker, b); // worker_paused emitter: Saves' follow-up PR (no ev parameter yet)
+    case 'resume': return resumeWorker(s, a.worker, b, ev, 'manual'); // #119: THE worker_resumed emitter, cause 'manual' (card Resume); B5 lockout inside
     case 'hatch': return startHatch(s, b);
     case 'placeBreed': return placeBreed(s, b, a.slot, a.id);
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
