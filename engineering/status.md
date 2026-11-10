@@ -136,3 +136,8 @@
 - done: merged origin/rc/v5 518de304 into feat/saves-v5-telemetry-schema (merge 2f4794c, no conflicts). Schema contract verified against errata rev 13 a0e8f6d7: six FATIGUE_CUE_TAPPED_FIELDS; n_* sum <=4 with FAIL fixture at 5; zero_gain_purchase has no capped marker (overflow only session_end.zero_gain_purchase_dropped); dead_zone.reason only none_affordable; tapped rejects suppressed_by_stall. Follow-up a1f81a9 adds generalist slice, rev13 headers, explicit sum=5 fixture, warn-once assertion (kills prior M30 survivor). Gates: telemetry-schema 47/47; telemetry+m3 16/16; tsc --noEmit 0; G-8 base 155374 / buy-spam 175905 bytes (<=200KB). Bundles under egg-farm-studio/scratch/bundles/. Artifacts under egg-farm-studio/artifacts/saves-v5-telemetry-schema-a1f81a9/. No push / no PR opened.
 - next: Saves QA (33ec1b55) verifies against rev13 before HoE merges. Then breeds RC blockers queue (PR C telemetry, BR-AC2b, #95 M1/M2) then F-9.
 - blocked: none on JOB 2. Note: merge commit 2f4794c inherited Architect author from box git config at merge time (cannot amend); follow-up commit is Saves.
+
+## 2026-11-10 01:06 CET · Saves · HoE/breeds-sim-prB-traits COMMIT 0
+- familyClamp(s,b,family)→{rawBp,clampedBp,atCap}; familyActiveBp(s,b,family); bc keys lay_cap_bp_lt18/lay_cap_bp/lay_cap_farm/away_cap_bp/broody_cap_bp (match PR-B stubs + ea922eb8).
+- Branch saves/breeds-sim-prB-traits-c0 (ordinary push; no force). Commits 1–3 parked park/prB-traits-b381998.
+- tsc + sync-economy --check + focused 72 pass.
