@@ -29,23 +29,27 @@ const SHELL = '<div id="app"><div class="farm"><div class="collectbar"><div clas
 let t = 1000;
 beforeAll(() => { vi.spyOn(performance, 'now').mockImplementation(() => t); });
 beforeEach(() => { document.body.innerHTML = SHELL; t = 1000; vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] }); });
-afterEach(() => { vi.useRealTimers(); document.body.innerHTML = ''; });
+/** F6 API Q4 (Features): every mount is destroyed in afterEach before the next test remounts. */
+const teardown: (() => void)[] = [];
+const mountUi: typeof mountStreakUi = (...a) => { const u = mountStreakUi(...a); if (u) teardown.push(() => u.destroy()); return u; };
+const mountF6: typeof mountStub = (...a) => { const o = mountStub(...a); teardown.push(() => o.destroy()); return o; };
+afterEach(() => { teardown.splice(0).reverse().forEach(d => d()); vi.useRealTimers(); document.body.innerHTML = ''; });
 const root = () => document.getElementById('app')!;
 function mount(b: Balance, extra: Partial<Parameters<typeof stubCtx>[0]> = {}) {
   const f = fakeGame(), play = vi.fn(() => true), h = stubCtx({ g: f.g as any, b, root: root(), audio: { play }, ...extra });
-  const ui = mountStreakUi(h.ctx); return { ...f, play, ui: ui!, zones: h.zones, ctx: h.ctx };
+  const ui = mountUi(h.ctx); return { ...f, play, ui: ui!, zones: h.zones, ctx: h.ctx };
 }
 const $ = (s: string) => document.querySelector(s) as HTMLElement | null;
 
 describe('flag off: nothing is added (R13a, ST-AC29 both 0 / m4.enabled 0)', () => {
   for (const [name, b] of [['shipped balance', balance], ['m4.enabled 0', mk({ streak: 1, tapCoins: 1 }, {}, 0)]] as const) it(name, () => {
     const before = document.body.innerHTML, f = fakeGame();
-    expect(mountStreakUi(stubCtx({ g: f.g as any, b, root: root() }).ctx)).toBeNull();
+    expect(mountUi(stubCtx({ g: f.g as any, b, root: root() }).ctx)).toBeNull();
     expect(document.body.innerHTML).toBe(before); expect(root().classList.contains('m5-streak')).toBe(false); expect(f.listeners).toHaveLength(0);
   });
   it('the F6 feature mounts nothing and renders nothing with both flags off', () => {
     const before = document.body.innerHTML, f = fakeGame(), { ctx } = stubCtx({ g: f.g as any, b: balance, root: root() });
-    const o = mountStub([streakMeter], ctx, fl => flagOn(balance, fl)); o.render(t); f.tap(0.07);
+    const o = mountF6([streakMeter], ctx, fl => flagOn(balance, fl)); o.render(t); f.tap(0.07);
     expect(document.body.innerHTML).toBe(before); o.destroy(); expect(document.body.innerHTML).toBe(before);
   });
 });
@@ -136,8 +140,17 @@ describe('A2 tier-ups (§3.3, ST-AC9/10/27, CT-AC5/6/15)', () => {
   });
   it('CT-AC10 hook: a suppressed pill still plays the sting and the meter part', () => {
     const f = fakeGame(), play = vi.fn(() => true), { ctx } = stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play } });
-    const ui = mountStreakUi(ctx, { pillSuppressed: () => true })!; for (let i = 1; i <= 7; i++) { t += 1000; f.tap(i / 100); ui.render(t); }
+    const ui = mountUi(ctx, { pillSuppressed: () => true })!; for (let i = 1; i <= 7; i++) { t += 1000; f.tap(i / 100); ui.render(t); }
     expect($('.streak-pill')).toBeNull(); expect(play).toHaveBeenCalledWith('streakTier1'); expect($('#streak-live')!.textContent).toBe(tierAria(1, STREAK));
+  });
+  it('CT-AC10 default: the pill follows F6 v1.0 ctx.pops.active() (stubbed); destroy() clears pops', () => {
+    const f = fakeGame(), play = vi.fn(() => true), h = stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play } });
+    const o = mountF6([streakMeter], h.ctx, () => true); h.ctx.pops!.set('golden', true);
+    for (let i = 1; i <= 7; i++) { t += 1000; f.tap(i / 100); o.render(t); }
+    expect($('.streak-pill')).toBeNull(); expect(play).toHaveBeenCalledWith('streakTier1');
+    h.ctx.pops!.set('golden', false); for (let i = 8; i <= 14; i++) { t += 1000; f.tap(i / 100); o.render(t); }
+    expect($('.streak-pill')!.textContent).toBe(pillCopy(2, STREAK));
+    h.ctx.pops!.set('frenzy', true); expect(h.ctx.pops!.active()).toBe(true); o.destroy(); expect(h.ctx.pops!.active()).toBe(false);
   });
   it('reduced motion: no spark dots, pill has .rm (CT-AC14)', () => {
     const m = mount(STREAK, { rm: () => true }); climb(m, 7); expect($('.streak-spark')).toBeNull(); expect($('.streak-pill')!.classList.contains('rm')).toBe(true);
@@ -178,7 +191,7 @@ describe('real Game (sim on rc/v5) drives the UI with no glue', () => {
   it('a credited Collect at F >= unlock shows +1% and pops exactly the sim bonus', () => {
     const g = new Game(BOTH, mem() as any, () => 1760000000000, 1, 'test');
     g.state = { ...g.state, farmLevel: Math.max(g.state.farmLevel, balance.m4!.tc!.streak_unlock_farm as number) } as any;
-    const { ctx } = stubCtx({ g, b: BOTH, root: root() }); const ui = mountStreakUi(ctx)!;
+    const { ctx } = stubCtx({ g, b: BOTH, root: root() }); const ui = mountUi(ctx)!;
     let bonus: number | undefined; g.on(e => { if (e.type === 'collect') bonus = e.bonus_cents; });
     g.dispatch({ type: 'collect' }); ui.render(t);
     expect($('.streak-label')!.textContent).toBe(`+${Math.floor(balance.m4!.tc!.streak_per_tap as number * 100)}% price`);

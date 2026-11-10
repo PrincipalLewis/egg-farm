@@ -19,7 +19,10 @@ beforeAll(() => {
   (Element.prototype as any).scrollIntoView ??= function () { /* jsdom */ };
   vi.spyOn(performance, 'now').mockImplementation(() => t);
 });
-afterEach(() => { document.body.innerHTML = ''; localStorage.clear(); });
+/** F6 API Q4 (Features): every mount is destroyed in afterEach before the next test remounts. */
+const teardown: (() => void)[] = [];
+const mountF6: typeof mountStub = (...a) => { const o = mountStub(...a); teardown.push(() => o.destroy()); return o; };
+afterEach(() => { teardown.splice(0).reverse().forEach(d => d()); document.body.innerHTML = ''; localStorage.clear(); });
 async function app(b: Balance, state: object = {}) {
   const g = new Game(b, mem() as any, () => 1760000000000, 1, 'test'); g.state = { ...g.state, ...state } as any;
   const { mountApp } = await import('../src/ui/app');
@@ -32,7 +35,7 @@ async function app(b: Balance, state: object = {}) {
 describe('flag off: byte-identical app DOM', () => {
   it('shipped balance (streak 0, tapCoins 0): mounting + rendering the feature changes nothing', async () => {
     const { g, root } = await app(balance), before = document.body.innerHTML;
-    const { ctx } = stubCtx({ g, b: balance, root }), o = mountStub([streakMeter], ctx, f => flagOn(balance, f));
+    const { ctx } = stubCtx({ g, b: balance, root }), o = mountF6([streakMeter], ctx, f => flagOn(balance, f));
     o.render(t); g.dispatch({ type: 'collect' }); o.render(t);
     const after = document.body.innerHTML; o.destroy();
     // the collect itself may change app text on the next app render; compare the feature's footprint only
@@ -41,7 +44,7 @@ describe('flag off: byte-identical app DOM', () => {
   });
   it('the feature adds zero bytes to a static app snapshot', async () => {
     const { g, root } = await app(balance), before = document.body.innerHTML;
-    const { ctx } = stubCtx({ g, b: balance, root }); const o = mountStub([streakMeter], ctx, f => flagOn(balance, f)); o.render(t);
+    const { ctx } = stubCtx({ g, b: balance, root }); const o = mountF6([streakMeter], ctx, f => flagOn(balance, f)); o.render(t);
     expect(document.body.innerHTML).toBe(before); o.destroy(); expect(document.body.innerHTML).toBe(before);
   });
 });
@@ -50,7 +53,7 @@ describe('flag on in the real app', () => {
   it('row = next sibling of #collect inside .collectbar; Collect gets the 48 px class scope; a credited tap shows +1%', async () => {
     const B = mk({ streak: 1, tapCoins: 1 }), F = balance.m4!.tc!.streak_unlock_farm as number;
     const { g, root } = await app(B, { farmLevel: F });
-    const { ctx } = stubCtx({ g, b: B, root }); const o = mountStub([streakMeter], ctx, f => flagOn(B, f));
+    const { ctx } = stubCtx({ g, b: B, root }); const o = mountF6([streakMeter], ctx, f => flagOn(B, f));
     const row = document.getElementById('streak')!;
     expect(row.parentElement!.classList.contains('collectbar')).toBe(true); expect(row.previousElementSibling!.id).toBe('collect');
     expect(root.classList.contains('m5-streak')).toBe(true);

@@ -26,6 +26,8 @@ export interface StreakCtx {
   fx: { admit(el: HTMLElement): void; release(el: HTMLElement): void };
   registerZone(name: string, rect: () => { left: number; top: number; right: number; bottom: number } | DOMRect | null, clear?: number): void;
   audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean };
+  /** F6 v1.0 (Features, answer Q3): `pops.active()` = a golden collect / Frenzy pop-up is live (CT-AC10). Optional until v1.0. */
+  pops?: { set(id: string, on: boolean): void; active(): boolean };
 }
 
 /** Audio hooks -> files (art-ux/assets/sfx; m5-sound-spec §2, combo-tiers §11 1:1 mapping). Registered with F6 registerAudioHook. */
@@ -40,7 +42,7 @@ const MAX_SPARKS = 6;
 /** app.ts floatText places the egg-collect pop's top at Collect's centre y - 40 (same-frame +20 px rule, R16). */
 const EGG_POP_ABOVE_CENTRE_PX = 40;
 
-export interface StreakUiOpts { /** CT-AC10: true while a golden collect / Frenzy pop-up is live (pill dropped, rest plays). */ pillSuppressed?: () => boolean; random?: () => number; doc?: Document }
+export interface StreakUiOpts { /** CT-AC10: true while a golden collect / Frenzy pop-up is live (pill dropped, rest plays). Default: ctx.pops.active(). */ pillSuppressed?: () => boolean; random?: () => number; doc?: Document }
 
 export interface StreakUi { render(now: number): void; destroy(): void; readonly row: HTMLElement | null }
 export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | null {
@@ -95,7 +97,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
         const a = (-150 + (120 * (i + 0.5)) / (max ? MAX_SPARKS : k)) * (Math.PI / 180), d = 12 + rnd() * 8;
         spawn(el(`<i class="streak-spark" style="left:${t.left + t.width / 2}px;top:${t.top}px;--dx:${(Math.cos(a) * d).toFixed(1)}px;--dy:${(Math.sin(a) * d).toFixed(1)}px"></i>`), STREAK_UI_MS.tierUp); } }
     }
-    if (o.pillSuppressed?.()) return null;
+    if ((o.pillSuppressed ?? (() => ctx.pops?.active() ?? false))()) return null; // CT-AC10: F6 v1.0 ctx.pops.active()
     fxHost().querySelectorAll('.streak-pill').forEach(p => p.remove()); // at most one live pill; a new one replaces it
     const pips = Array.from({ length: n }, (_, i) => `<i class="${i < k ? 'on' : ''}"></i>`).join('');
     const pill = el(`<div class="streak-pill${max ? ' max' : ''}${rmClass()}" aria-hidden="true"><span class="pips">${pips}</span><span>${pillCopy(k, b)}</span></div>`);

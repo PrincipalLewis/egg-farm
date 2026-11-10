@@ -27,6 +27,8 @@ export interface OverlayCtx {
   /** No-spawn zone for golden eggs / Broody (meter box + 16 px, golden R14 / ST-AC21). */
   registerZone(name: string, rect: () => Box | DOMRect | null, clear?: number): void;
   asset(f: string): string;
+  /** [v1.0, Features answer Q3] pop-live registry: golden/Frenzy pops call set(id, true/false); active() = any on. destroy() clears it. */
+  pops?: { set(id: string, on: boolean): void; active(): boolean };
 }
 /** F6 API v0.2 `OverlayFeature` [stable]. */
 export interface OverlayFeature {
@@ -39,20 +41,21 @@ export interface OverlayFeature {
 /** Test / pre-F6 harness: a ctx with F6-like defaults (silent audio, a 30-element FX budget, zones collected in `zones`). */
 export function stubCtx(p: Pick<OverlayCtx, 'g' | 'b' | 'root'> & Partial<OverlayCtx> & { doc?: Document }) {
   const doc = p.doc ?? document, zones: { name: string; rect: () => Box | DOMRect | null; clear: number }[] = [], live: HTMLElement[] = [];
-  let layerEl: HTMLElement | null = null; const scene = p.scene ?? (doc.getElementById('scene') as HTMLElement | null) ?? p.root;
+  let layerEl: HTMLElement | null = null; const popsOn = new Set<string>(); const scene = p.scene ?? (doc.getElementById('scene') as HTMLElement | null) ?? p.root;
   const ctx: OverlayCtx = {
     scene, rm: () => false, dialogOpen: () => false, asset: f => `${import.meta.env.BASE_URL}assets/${f}`,
     audio: { play: () => false },
     fx: { admit: el => { while (live.length >= 30) live.shift()?.remove(); live.push(el); }, release: el => { const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); } },
     layer: () => { if (!layerEl) { layerEl = doc.createElement('div'); layerEl.className = 'overlay-layer'; scene.append(layerEl); } return layerEl; },
     registerZone: (name, rect, clear = 16) => { zones.push({ name, rect, clear }); },
+    pops: Object.assign({ set: (id: string, on: boolean) => { if (on) popsOn.add(id); else popsOn.delete(id); }, active: () => popsOn.size > 0 }, { clear: () => popsOn.clear() }),
     ...p,
   };
-  return { ctx, zones, live };
+  return { ctx, zones, live, popsOn };
 }
 /** F6 `mountOverlay` subset: mounts each feature (flag-gated like F6) and returns render/destroy. */
 export function mountStub(features: OverlayFeature[], ctx: OverlayCtx, isOn: (f: M5Flag) => boolean) {
   const live = features.filter(f => !f.flag || isOn(f.flag)), unmounts: (() => void)[] = [];
   for (const f of live) { const u = f.mount(ctx); if (u) unmounts.push(u); }
-  return { features: live.map(f => f.id), render: (t: number) => { for (const f of live) f.render?.(ctx, t); }, destroy: () => unmounts.forEach(u => u()) };
+  return { features: live.map(f => f.id), render: (t: number) => { for (const f of live) f.render?.(ctx, t); }, destroy: () => { unmounts.reverse().forEach(u => u()); unmounts.length = 0; (ctx.pops as { clear?: () => void } | undefined)?.clear?.(); /* F6 v1.0: destroy() clears pops */ } };
 }
