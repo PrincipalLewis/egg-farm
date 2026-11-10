@@ -136,3 +136,41 @@ describe('pause / resume actions (dispatch path the toggle uses)', () => {
     expect(c).toContain('aria-label="Resume Market Hand"'); expect(c).toContain(PAUSE_COPY.recovering);
   });
 });
+
+// HoP D-HOP-2026-11-10-20 (G0 §9) and G0 §7.5 (B5 lockout on every resume).
+import { callLockoutView } from '../src/ui/pause-ui';
+import { routeCardManage, setShiftSheetOpener } from '../src/ui/card-manage-route';
+const withRc2 = (pause: number, rc2: number) => ({ ...b, m4: { ...b.m4!, enabled: 1, flags: { ...b.m4!.flags, pause, rc2Refill: rc2 } } }) as typeof b;
+describe('[D-HOP-2026-11-10-20] card toggle only with rc2Refill = 0', () => {
+  it('pause = 1, rc2Refill = 1: no toggle, no all-paused line, markup equals pause = 0', () => {
+    const R = withRc2(1, 1), s = st({ workers: crew({ paused: true }) });
+    expect(pauseUiOn(s, R)).toBe(false); expect(toggles(workersHtml(s, R))).toHaveLength(0); expect(workersHtml(s, R)).not.toContain('pz-all');
+    expect(pauseUiOn(s, withRc2(1, 0))).toBe(true);
+  });
+  it('card Manage routes to the Shift sheet with entry "card" only at rc2Refill = 1 and only once an opener is registered', () => {
+    const calls: unknown[] = [];
+    expect(routeCardManage('market_hand', withRc2(1, 1))).toBe(false); // no opener yet (Features dependency)
+    setShiftSheetOpener((w, e) => calls.push([w, e]));
+    try {
+      expect(routeCardManage('market_hand', withRc2(1, 0))).toBe(false); expect(routeCardManage('coop_hand', b)).toBe(false);
+      expect(routeCardManage('coop_hand', withRc2(0, 1))).toBe(true); expect(calls).toEqual([['coop_hand', 'card']]);
+    } finally { setShiftSheetOpener(null); }
+  });
+});
+describe('[AC-P9 / B5] call lockout view (read from state set by tc_pause_call_lockout_s)', () => {
+  it('after a Market Hand resume the view counts from the tunable; null when none, flag off or Coop Hand', () => {
+    const s = apply(apply(st({ workers: crew() }), { type: 'pause', worker: 'market_hand' }, P), { type: 'resume', worker: 'market_hand' }, P);
+    const L = tc.pause_call_lockout_s, v = callLockoutView(s, P)!;
+    expect(v.left).toBe(L); expect(v.text).toBe(`${Math.floor(L / 60)}:${String(L % 60).padStart(2, '0')}`); expect(v.describedBy).toBe(`Ready in ${v.text} after a break`);
+    expect(callLockoutView(s, b)).toBeNull(); expect(callLockoutView(st({ workers: crew() }), P)).toBeNull();
+    const c = apply(apply(st({ workers: crew() }), { type: 'pause', worker: 'coop_hand' }, P), { type: 'resume', worker: 'coop_hand' }, P);
+    expect(callLockoutView(c, P)).toBeNull();
+  });
+  it('rounds up, never "0:00": 0.05 s left -> "0:01"; 10 s of sim -> L - 10', () => {
+    const one = st({ workers: { market_hand: W(80, { callLockoutS: 0.05 }) } });
+    expect(callLockoutView(one, P)!.text).toBe('0:01');
+    let s = apply(apply(st({ workers: { market_hand: W(80) } }), { type: 'pause', worker: 'market_hand' }, P), { type: 'resume', worker: 'market_hand' }, P);
+    for (let i = 0; i < 100; i++) s = step(s, 0.1, P);
+    expect(callLockoutView(s, P)!.left).toBe(tc.pause_call_lockout_s - 10);
+  });
+});
