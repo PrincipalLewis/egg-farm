@@ -59,7 +59,7 @@ export function mountStreakUi(ctx: OverlayCtx, o: StreakUiOpts = {}): StreakUi |
     const collect = $('#collect'); if (collect) collect.after(row); else root.append(row);
     row.after(streakLive); added.push(row, streakLive);
     root.classList.add('m5-streak');
-    ctx.registerZone('streak', () => { const r = row?.getBoundingClientRect(); return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null; }, METER_ZONE_PX);
+    ctx.registerZone('streak-meter', () => (row?.isConnected ? row.getBoundingClientRect() : null), METER_ZONE_PX);
   }
   let coinLive: HTMLElement | null = null;
   if (coins) { coinLive = el(`<div class="sr" id="coin-live" aria-live="polite" aria-atomic="true"></div>`); ($('.collectbar') ?? root).append(coinLive); added.push(coinLive); }
@@ -76,7 +76,7 @@ export function mountStreakUi(ctx: OverlayCtx, o: StreakUiOpts = {}): StreakUi |
 
   function tierUp(k: number) {
     const n = streakParams(b).count, max = k >= n;
-    ctx.audio.play(max ? 'streakMax' : (`streakTier${k}` as keyof typeof STREAK_SFX));
+    ctx.audio?.play(max ? 'streakMax' : (`streakTier${k}` as keyof typeof STREAK_SFX));
     const say = sLive.push(tierAria(k, b), nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say;
     if (row) { // meter part of §2: tab k, sheen, label pop, spark dots (motion <= 400 ms; reduced motion: opacity only)
       retrigger(ticks[k - 1] ?? null, 'up'); retrigger(row.querySelector('.streak-sheen'), 'go'); retrigger(label, 'pop');
@@ -108,7 +108,7 @@ export function mountStreakUi(ctx: OverlayCtx, o: StreakUiOpts = {}): StreakUi |
     if (!row) return;
     const s = g.state.streakS ?? 0, v: MeterView = meterView(s, g.state.streakHoldS ?? 0, b, { rm: ctx.rm() });
     const r = tiers.update(s, v.cooling, b, fromTap);
-    if (r.coolStart) { ctx.audio.play('streakCool'); const say = sLive.push(COOLING_ARIA, nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say; }
+    if (r.coolStart) { ctx.audio?.play('streakCool'); const say = sLive.push(COOLING_ARIA, nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say; }
     const reset = !v.shown && prevS > tcNum(b, 'streak_decay_per_s') * MAX_FRAME_FOCUS_S; prevS = s;
     const key = `${v.scale}|${v.label}|${v.cooling}|${v.max}|${v.lit.join()}|${ctx.rm()}`;
     if (r.tierUp) { const box = tierUp(r.tierUp); pendingPill = box ? box.top : undefined; }
@@ -141,11 +141,11 @@ export function mountStreakUi(ctx: OverlayCtx, o: StreakUiOpts = {}): StreakUi |
   };
 }
 
-/** The F6 feature (id per ui/features.ts "#2"). No `flag`: it mounts under either m4.flags.streak or m4.flags.tapCoins and adds
- *  nothing when both are off. */
+/** The F6 feature. No `flag` (F6 API v0.1 example uses flag 'streak'): it must also mount for m4.flags.tapCoins alone (ST-AC29),
+ *  and its mount adds NO DOM, class or listener when both flags are off, so the flag-off #app hash is unchanged. */
 let live: StreakUi | null = null;
 export const streakMeter: OverlayFeature = {
-  id: 'streakMeter',
+  id: 'streak',
   mount(ctx) { live = mountStreakUi(ctx); const ui = live; return () => { ui?.destroy(); if (live === ui) live = null; }; },
   render(_ctx, t) { live?.render(t); },
 };

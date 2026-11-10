@@ -1,11 +1,12 @@
 /**
- * v5 F6 STUB (temporary; the ONLY F6 seam of the streak / tapCoins UI). F6 (Features: spots / feature registry / mount host) is not
- * on rc/v5 yet and no F6 API note has been published, so this mirrors the subset of `src/ui/overlay.ts` on
- * origin/feat/v5-ui-f6-overlay @ 2b4abf93 (OverlayFeature / OverlayCtx / AudioHooks.play / FxBudget / registerZone) that
- * ui/streak-meter.ts uses. Names and signatures match that branch so the swap is mechanical:
- *   1. delete this file;
- *   2. in ui/streak-meter.ts import the types from './overlay' (OverlayFeature, OverlayCtx) instead of './streak-f6-stub';
- *   3. ui/features.ts: `registerFeature(streakMeter)` and `STREAK_SFX` entries via registerAudioHook (the line F6 reserves for #2).
+ * v5 F6 STUB (temporary; the ONLY F6 seam of the streak / tapCoins UI). F6 (Features: feature registry / mount host) is not on
+ * rc/v5 yet. This mirrors the subset of OverlayCtx / OverlayFeature that ui/streak-meter.ts uses, from Features' F6 API note
+ * DRAFT v0.1 (engineering/tasks/v5-f6-rebuild/API.md on origin/feat/v5-f6-rebuild @ cd0d438 / 89c2f07; the [stable] names) plus
+ * the [draft] `audio.play(hook)` (phase 2, ported from #86 2b4abf93), kept OPTIONAL here because v0.1 does not ship it yet.
+ * Swap when F6 merges (mechanical):
+ *   1. delete this file; in ui/streak-meter.ts import OverlayCtx / OverlayFeature from './overlay';
+ *   2. at the end of ui/streak-meter.ts: `registerFeature(streakMeter)`; ui/features.ts gets `import './streak-meter';`;
+ *   3. when F6 phase 2 lands audio hooks: registerAudioHook for each STREAK_SFX entry (files from art-ux/assets/sfx).
  * Nothing in the app imports this file, so it adds no DOM and no behaviour while unused.
  */
 import type { Balance } from '../config/balance';
@@ -13,20 +14,21 @@ import type { M5Flag } from '../config/flags';
 import type { Game } from '../game';
 
 export interface Box { left: number; top: number; right: number; bottom: number }
-/** The OverlayCtx members the streak feature reads (F6 2b4abf93 `OverlayCtx`, same names). */
+/** The OverlayCtx members the streak feature reads (F6 API v0.1 `OverlayCtx` [stable], same names and shapes). */
 export interface OverlayCtx {
   g: Pick<Game, 'state' | 'on'>; b: Balance; root: HTMLElement; scene: HTMLElement;
   /** F6's overlay layer; the pops go on the app's #fx-layer when present (fixed, full viewport), else here. */
   layer(): HTMLElement;
   rm(): boolean;
-  audio: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean };
+  /** [draft] F6 phase 2 audio hooks; absent in API v0.1, so the streak stings are silent until it lands. */
+  audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean };
   fx: { admit(el: HTMLElement): void; release(el: HTMLElement): void };
   dialogOpen(): boolean;
   /** No-spawn zone for golden eggs / Broody (meter box + 16 px, golden R14 / ST-AC21). */
-  registerZone(name: string, rect: () => Box | null, clear?: number): void;
+  registerZone(name: string, rect: () => Box | DOMRect | null, clear?: number): void;
   asset(f: string): string;
 }
-/** F6 2b4abf93 `OverlayFeature`. */
+/** F6 API v0.1 `OverlayFeature` [stable]. */
 export interface OverlayFeature {
   id: string;
   flag?: M5Flag;
@@ -36,7 +38,7 @@ export interface OverlayFeature {
 
 /** Test / pre-F6 harness: a ctx with F6-like defaults (silent audio, a 30-element FX budget, zones collected in `zones`). */
 export function stubCtx(p: Pick<OverlayCtx, 'g' | 'b' | 'root'> & Partial<OverlayCtx> & { doc?: Document }) {
-  const doc = p.doc ?? document, zones: { name: string; rect: () => Box | null; clear: number }[] = [], live: HTMLElement[] = [];
+  const doc = p.doc ?? document, zones: { name: string; rect: () => Box | DOMRect | null; clear: number }[] = [], live: HTMLElement[] = [];
   let layerEl: HTMLElement | null = null; const scene = p.scene ?? (doc.getElementById('scene') as HTMLElement | null) ?? p.root;
   const ctx: OverlayCtx = {
     scene, rm: () => false, dialogOpen: () => false, asset: f => `${import.meta.env.BASE_URL}assets/${f}`,

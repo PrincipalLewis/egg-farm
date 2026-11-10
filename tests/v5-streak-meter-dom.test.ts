@@ -65,7 +65,7 @@ describe('meter row (§0, ST-AC21/25/26, CT-AC1/2/11/13)', () => {
     const m = mount(STREAK), row = $('#streak')!;
     expect(row.previousElementSibling?.id).toBe('collect'); expect(row.getAttribute('role')).toBe('meter');
     expect(row.getAttribute('aria-hidden')).toBe('true'); expect(row.classList.contains('on')).toBe(false);
-    expect(root().classList.contains('m5-streak')).toBe(true); expect(m.zones.map(z => [z.name, z.clear])).toEqual([['streak', 16]]);
+    expect(root().classList.contains('m5-streak')).toBe(true); expect(m.zones.map(z => [z.name, z.clear])).toEqual([['streak-meter', 16]]);
     expect(row.querySelectorAll('.streak-tick')).toHaveLength(streakParams(STREAK).count);
   });
   it('ST-AC21: s = 0.187 -> 69.26 %, "+18% price", 2 lit ticks, valuetext', () => {
