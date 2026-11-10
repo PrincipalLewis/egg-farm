@@ -89,7 +89,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
-      <button class="goal" id="goal" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
+      <button class="goal" id="goal" data-testid="goal-strip" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
       <div class="sr" aria-live="polite" id="goalLive"></div><div class="sr" id="goalDesc" aria-hidden="true"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
@@ -100,13 +100,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const nav = h(`<nav class="actions" aria-label="Main">
     <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
     <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span> <span class="nav-lbl">Upgrades</span></button>
-    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num"><span class="nav-txt">Refill</span><span class="nav-cd" aria-hidden="true"></span></span> <span class="count-badge num" hidden></span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num"><span class="nav-txt">Refill</span><span class="nav-cd" data-testid="nav-countdown" aria-hidden="true"></span></span> <span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
-  const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
+  const panelLayer = h(`<div id="panel-layer" data-testid="docked-panel" data-docked><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body order-list" id="mRows"></div><p class="sr" aria-live="polite" id="ordersLive"></p><div class="foot"><button class="btn" id="sellAll"></button></div></section>
-    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
+    <section class="sheet" id="p-upgrades" data-testid="upgrades-panel" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" aria-label="Collection" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
         <button role="tab" aria-label="Farm" data-tab="farm"><span class="tab-pill"><img src="${A('icon-coop.svg')}" alt="">Farm</span></button>
@@ -729,6 +729,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     renderGoal();
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      { const up = $('#p-upgrades'); if (tab === 'workers') { up.setAttribute('data-sheet', 'workers'); up.setAttribute('data-testid', 'workers-sheet'); }
+        else { up.removeAttribute('data-sheet'); up.setAttribute('data-testid', 'upgrades-panel'); } }
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
       if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; uRow.innerHTML = html; if (ZGC) zgApply(); }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
@@ -856,7 +858,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // v5 F6: overlay features (none registered in F6) + the build:qa-only window.eggfarmQa seam (compiled out of release).
   const overlay = mountOverlay({ g, b, root, scene: $('#scene'), docked, rm, audio: hooks, fx, dialogOpen: overlayDialogOpen, asset: A });
   if (IOS_FLAG_ENABLED) installQaSeam({ audio, fx, menu: { open: showSettings, close: () => { if (modalKind) closeModal(); } },
-    sheet: { stepClose: () => { if (modalKind) { closeModal(); return 'modal'; } const was = open; if (was) openPanel(null); return was; } }, overlay: overlay.ctx });
+    sheet: { stepClose: () => { if (modalKind) { closeModal(); return 'modal'; } const was = open; if (was) openPanel(null); return was; } }, overlay: overlay.ctx,
+    game: g, balance: b, showZones: () => {
+      showToast('QA zone', true);
+      const full = $('#full'); if (full) full.hidden = false;
+      const hp = $('#henpill') as HTMLElement | null; if (hp) { hp.hidden = false; if (!hp.textContent) hp.textContent = '\u00d799\u00a0hens'; }
+    } });
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
   const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)

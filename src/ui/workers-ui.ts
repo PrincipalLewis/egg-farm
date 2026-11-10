@@ -6,6 +6,7 @@ import { fmtMoney } from './format';
 import { WARN_SVG, MOON_SVG } from './icons';
 export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
+import { workerAtRisk } from '../econ/income';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -148,8 +149,9 @@ export function workersHtml(s: GameState, b: Balance): string {
     const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%</div>${extra}`;
-    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}`;
-    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
+    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-testid="worker-manage" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}`;
+    const risk = (m === 'tired' || m === 'asleep') ? workerAtRisk(id, s, b) : 0;
+    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}"${risk > 0 ? ` data-risk="${risk}"` : ''}>${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */
