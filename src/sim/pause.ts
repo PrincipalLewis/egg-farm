@@ -10,6 +10,7 @@ import { tcNum } from '../config/formulas';
 import type { GameState } from './state';
 import type { Worker, WorkerId, Workers } from './workers';
 import type { Sink } from './events';
+import { pauseToggleFields } from './pause-events';
 export const isPaused = (w: Worker | undefined, b: Balance): boolean => !!w && w.paused === true && flagOn(b, 'pause');
 /** CCR-F4 load sanitiser (pause spec E9 "non-boolean = false", rule 1/E12 "below the unlock: not paused"): drops `paused` unless it is a
  *  boolean and the farm is at or above tc_pause_unlock_farm (`open`). The same object when nothing changes. Called by save/m5-fields.ts m5Load. */
@@ -21,11 +22,17 @@ export const ENERGY_FULL = 100;
 export function pausedRecoveredEnergy(w: Worker, dt: number, b: Balance): number {
   return Math.min(ENERGY_FULL, w.energy + tcNum(b, 'rest_recovery_mult') * dt / b.workers.energy.drain_s_per_pct);
 }
-/** Rule 1: pause a hired worker at or above tc_pause_unlock_farm. Flag off, below the unlock, missing or already paused: the same state. */
-export function pauseWorker(s: GameState, id: WorkerId, b: Balance): GameState {
+/** Rule 1: pause a hired worker at or above tc_pause_unlock_farm. Flag off, below the unlock, missing or already paused: the same state
+ *  and no event. THE one worker_paused emitter (pause §12 v1.3.18; Saves #132): one event per real transition, fields from the
+ *  pre-pause state (sim/pause-events.ts pauseToggleFields). Exclusive emission (v1.3.11): with rc2Refill = 1 the toggle belongs to
+ *  rest_toggled{on:true} (Refill), so nothing is emitted here; the state change is the same. */
+export function pauseWorker(s: GameState, id: WorkerId, b: Balance, ev?: Sink): GameState {
   if (!flagOn(b, 'pause')) return s;
   const w = s.workers[id];
   if (!w || isPaused(w, b) || s.farmLevel < tcNum(b, 'pause_unlock_farm')) return s;
+  if (ev && !flagOn(b, 'rc2Refill')) { const f = pauseToggleFields(s, id, b);
+    ev.push({ type: 'worker_paused', worker: id, farm: f.farm, energy_pct: Math.min(ENERGY_FULL, Math.max(0, Math.round(w.energy))), mood: f.mood,
+      unpaid: f.unpaid, ability_active: f.ability_active, golden_on_screen: f.golden_on_screen, frenzy_active: f.frenzy_active }); }
   return { ...s, workers: { ...s.workers, [id]: { ...w, paused: true } }, pausedForS: { ...s.pausedForS, [id]: 0 } }; // pause start: count from 0
 }
 /** paused_duration_s (D-PMW-2026-11-10-02, QA-D-1110-PAUDUR): integer floor >= 0 of the sim seconds `id` has been paused, from the
