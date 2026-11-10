@@ -36,7 +36,7 @@ import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
 import { clockWageOn } from '../sim/clock-wage';
-import { asleepToast, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
+import { asleepToast, FallAsleepToasts, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
@@ -479,6 +479,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
 
   // ---------- Game events ----------
+  const fallAsleep = new FallAsleepToasts(); if (clockWageOn(b)) fallAsleep.observe(g.state, b);
   g.on((e: GameEvent) => {
     switch (e.type) {
       case 'sell': {
@@ -503,7 +504,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         pendingLvPop = true; goalNow = true; break;
       }
       case 'worker_hire': case 'grader_tier': goalNow = true; break;
-      case 'worker_state': if (e.state === 'asleep' && clockWageOn(b)) showToast(asleepToast(e.worker, b)); break; // v5 clockWage AC-FC9: one toast per fall-asleep (role=status, polite)
+      case 'worker_state': if (clockWageOn(b) && fallAsleep.onState(e.worker, e.state)) queueToasts([asleepToast(e.worker, b)]); break; // v5 clockWage AC-FC9: Working/Tired -> Asleep only, queued (Architect M1)
       case 'coop_full': if (e.phase === 'start') sfx('coopFull'); break;
     }
     dirty = true;
@@ -879,7 +880,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
-  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
+  const renderAll = () => { const t = performance.now(); if (clockWageOn(b)) fallAsleep.observe(g.state, b); /* AC-FC9 onset baseline */ if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.

@@ -3,7 +3,7 @@
 import type { Balance } from '../config/balance';
 import { clockWageOn, clockWageTipDue, wagePerMinCents, type WageWorker } from '../sim/clock-wage';
 import type { GameState } from '../sim/state';
-import { mood, isYawning, type WorkerId } from '../sim/workers';
+import { mood, isYawning, WORKERS, type WorkerId, type WorkerMood } from '../sim/workers';
 import { isPaused } from '../sim/pause';
 import { fmtMoney } from './format';
 
@@ -24,6 +24,14 @@ export function asleepToast(id: WorkerId, b: Balance): string {
     case 'hawker': return 'Hawker fell asleep: sales slowed. Tap Refill.';
     case 'grader': return `Egg Grader fell asleep: bonus down to ${Math.round(b.workers.grader.asleep_bonus_share * 100)}%. Tap Refill.`;
   }
+}
+/** AC-FC9 onset (Architect M1): a fall-asleep toast only on a Working/Tired -> Asleep change. The Unpaid -> resume event
+ *  (worker_state asleep from the wage check) and Asleep <-> Unpaid flips never toast. `observe` runs once per rendered frame
+ *  (after g.frame()), so `last` is the mood at the previous frame; `onState` is called for each worker_state event. */
+export class FallAsleepToasts {
+  private last: Partial<Record<WorkerId, WorkerMood | null>> = {};
+  observe(s: GameState, b: Balance) { for (const id of WORKERS) this.last[id] = mood(s.workers[id], b); }
+  onState(id: WorkerId, state: WorkerMood): boolean { const p = this.last[id]; this.last[id] = state; return state === 'asleep' && (p === 'working' || p === 'tired'); }
 }
 /** AC-FC11 trigger: the first yawn of a wage-paying worker (MH/CH) while the tip is still due in this save. */
 export const clockWageTipNow = (s: GameState, b: Balance) => clockWageTipDue(s, b) && (isYawning(s.workers.market_hand, b) || isYawning(s.workers.coop_hand, b));
