@@ -24,8 +24,12 @@ import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMiles
 import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } from './pick-hysteresis';
 import { isZeroGain, zeroGainUiOn, zgFiltered, ZG_KEY_OF, ZG_DESC, ZG_CHIP } from './zero-gain'; // v5 zeroGainUi (m4.flags.zeroGainUi)
 import { zeroGainConfirmOn } from '../config/flags';
+import { rc2RefillOn } from './stall-chip';
 import { StallChip, stallChipOn } from './stall-chip';
-import { FarmBanner } from './stall-banner'; // #5b Rule 3 farm-screen Asleep banner (same flag) // #5b V51-SS-1 (m4.flags.salesStopped); mounted only with the flag on
+import { FarmBanner } from './stall-banner'; // #5b Rule 3 farm-screen Asleep banner (same flag)
+import { fatigueBubble } from './fatigue-bubble'; // #5b Rule 4 (same flag)
+import { noteFatigueCueShown, noteFatigueCueTap, costliestAtRisk } from './stall-api';
+import { openShiftSheet } from './shift-sheet'; // #5b V51-SS-1 (m4.flags.salesStopped); mounted only with the flag on
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, TRACK_FARM_MAX_TEXT, trackFarmMaxAria, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
@@ -509,10 +513,28 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // v5 zeroGainUi §5.6: with the flag on, ZG rows are dropped from both scorers BEFORE the pick (flag off: the stock DualPicker).
   const picker = ZG ? new DualPicker(zgFiltered(defaultScorer), zgFiltered(allScorer)) : new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+  // #5b Rule 4 (flag salesStopped only): while the sim's Rule 2 state is shown, the bubble reads `Refill workers · +$X/s` ahead of buy goals.
+  const RULE4 = stallChipOn(b); let fbActive = false;
+  const renderFatigueBubble = (): boolean => {
+    const fb = stallChip?.isShown ? null : fatigueBubble(g.state, b); // §4.7 / SS-26: the stall chip wins, the bubble isn't rendered
+    if (!fb) { if (fbActive) { fbActive = false; goalNow = true; delete goalBtn.dataset.fatigue; } return false; }
+    if (!fbActive) { fbActive = true; delete goalLbl.dataset.html; goalLbl.classList.remove('ng'); goalBtn.dataset.fatigue = '1'; noteFatigueCueShown(g.state, 'bubble');
+      setText(goalLive, fb.desc); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000); }
+    setText(goalLbl, fb.text); setText(goalSt, ''); goalSt.classList.remove('chip'); setText(goalDesc, fb.desc);
+    if (goalBtn.dataset.state !== 'fatigue') goalBtn.dataset.state = 'fatigue';
+    return true;
+  };
+  const fatigueBubbleTap = () => {
+    noteFatigueCueTap(g.state, 'bubble');
+    const id = costliestAtRisk(g.state, b);
+    if (rc2RefillOn(b)) { if (id) openShiftSheet(id, goalBtn, 'fatigue_bubble'); return; }
+    tab = 'workers'; dirty = true; openPanel('upgrades'); render();
+  };
   const renderGoal = () => {
     const t = now();
     const M4 = m4On(b), prevKey = hintPick?.key, prevMark = bestBuyMark(hintPick);
     if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
+    if (RULE4 && renderFatigueBubble()) return; // Rule 4 owns the slot (the shared pick still ticks for the Farm-tab highlight)
     // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
     // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
     if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || bestBuyMark(hintPick) !== prevMark))) return;
@@ -536,6 +558,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   /** Tap never buys: open the target's tab, scroll the row into view, highlight it, focus its Buy (spec §4). */
   const openGoal = () => {
+    if (fbActive) return fatigueBubbleTap();
     const gl = goalShown; if (!gl) return;
     g.telemetry.track('goal_tap', { target: gl.key ?? 'DONE', state: gl.state });
     tab = gl.tab; dirty = true; openPanel('upgrades'); render();
