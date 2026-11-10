@@ -84,6 +84,8 @@ export function mountFlock(opts: {
   let open = false;
   let pickBreed: string | null = null; // album tap → place into next empty / selected slot
   let revealEl: HTMLElement | null = null;
+  /** Last seen incubator breed id (online reveal when it clears). */
+  let lastIncuBreed: string | null = null;
 
   const setOpen = (v: boolean) => {
     if (open === v) return;
@@ -260,27 +262,42 @@ export function mountFlock(opts: {
   };
 
   const showReveal = (breedId: string) => {
-    if (revealEl) revealEl.remove();
+    if (revealEl) return; // one card (BR-R11)
     const card = document.createElement('div');
     card.className = 'breeds-reveal' + (opts.rm() ? ' rm' : '');
+    card.dataset.testid = 'breeds-reveal';
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-label', 'New breed');
     const name = breedId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    card.innerHTML = `${breedImg(breedId, 'reveal-spr')}<p class="reveal-name">${name}</p><button type="button" class="btn reveal-ok">Nice</button>`;
+    card.innerHTML = `${breedImg(breedId, 'reveal-spr')}<p class="reveal-name">${name}</p><button type="button" class="btn reveal-ok" data-testid="breeds-reveal-ok">Nice!</button>`;
     document.body.append(card);
     revealEl = card;
+    // Focus Nice! (UI-BR-8). Motion is CSS-only ≤400ms / RM crossfade ≤200ms; card stays until dismiss.
+    (card.querySelector('.reveal-ok') as HTMLButtonElement).focus();
     const done = () => { card.remove(); if (revealEl === card) revealEl = null; g.pendingReveal = null; };
     card.querySelector('.reveal-ok')!.addEventListener('click', done);
-    if (!opts.rm()) window.setTimeout(done, 400); // auto-dismiss after motion budget; button still works
-    else window.setTimeout(done, 200);
+  };
+
+  /** Online hatch complete (no pendingReveal): detect incubator clear → show card if sheet open or queue via pendingReveal. */
+  const watchOnlineReveal = () => {
+    const br = breedsOf(g.state, b);
+    const cur = br?.incubator && br.incubator.remainingMs > 0 ? (br.incubator.breed as string) : null;
+    if (lastIncuBreed && !cur) {
+      const id = lastIncuBreed;
+      lastIncuBreed = null;
+      if (open) showReveal(id);
+      else if (!g.pendingReveal) g.pendingReveal = id as any; // OQ-5 queue until next sheet open / welcome
+    } else if (cur) {
+      lastIncuBreed = cur;
+    }
   };
 
   return {
-    syncEntry,
+    syncEntry: (s, flags, sessions) => { syncEntry(s, flags, sessions); watchOnlineReveal(); },
     open: openFlock,
     close: closeFlock,
     get isOpen() { return open; },
-    render: () => { if (open) renderBody(); },
+    render: () => { watchOnlineReveal(); if (open) renderBody(); },
     onWelcomeClosed: () => { const id = g.pendingReveal; if (id) showReveal(id); },
     onEsc: () => { if (!open) return false; closeFlock(); return true; },
     dispose: () => { sheet.remove(); entry.remove(); if (revealEl) revealEl.remove(); if (flockSheet.isOpen) flockSheet.closeComplete(); },
