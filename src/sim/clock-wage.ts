@@ -44,18 +44,26 @@ export function clockWageAsleepStep(s: GameState, id: WageWorker, dt: number, b:
 export const asleepClockOn = (b: Balance): boolean => clockWageOn(b);
 const WAGE_WORKERS: readonly WageWorker[] = ['market_hand', 'coop_hand'];
 type Win = NonNullable<GameState['clockWageWindow']>;
+/** clockWageWindow seam: the ONLY read and the ONLY write of that saved key (everything else goes through these two). */
+export const readWindow = (s: GameState): unknown => s.clockWageWindow;
+/** Write (w) or remove (undefined) the key; same object when nothing changes. */
+export function writeWindow(s: GameState, w: Win | undefined): GameState {
+  if (w === undefined) { if (!('clockWageWindow' in s)) return s; const { clockWageWindow: _w, ...rest } = s; return rest as GameState; }
+  return { ...s, clockWageWindow: w };
+}
+const win = (s: GameState) => readWindow(s) as Win | undefined; // typed read for live state (sanitised on load)
 const bump = (win: Win | undefined, id: WageWorker, ms: number, cents: number): Win => {
   const r = win?.[id] ?? { asleepMs: 0, cents: 0 }; return { ...win, [id]: { asleepMs: r.asleepMs + ms, cents: r.cents + cents } };
 };
 function addAsleepCents(s: GameState, id: WageWorker, cents: number): GameState {
-  return { ...s, asleepPaidCents: (s.asleepPaidCents ?? 0) + cents, clockWageWindow: bump(s.clockWageWindow, id, 0, cents) };
+  return writeWindow({ ...s, asleepPaidCents: (s.asleepPaidCents ?? 0) + cents }, bump(win(s), id, 0, cents));
 }
 /** Called once per step() after the energy loop. Same object when the clock is off or no wage worker is Asleep. */
 export function tickAsleepClock(s: GameState, dtMs: number, b: Balance): GameState {
   if (!asleepClockOn(b)) return s;
   let out = s;
   for (const id of WAGE_WORKERS) { const w = s.workers[id]; if (!w || isPaused(w, b) || mood(w, b) !== 'asleep') continue;
-    out = { ...out, asleepSessionMs: (out.asleepSessionMs ?? 0) + dtMs, ...(clockWageOn(b) ? { clockWageWindow: bump(out.clockWageWindow, id, dtMs, 0) } : {}) }; }
+    out = { ...out, asleepSessionMs: (out.asleepSessionMs ?? 0) + dtMs }; if (clockWageOn(b)) out = writeWindow(out, bump(win(out), id, dtMs, 0)); }
   return out;
 }
 /** session_end fields, each under its own gate (FC §6 L168): asleep_s (0.1 s) with asleepClockOn, wage_paid_asleep_cents with clockWageOn. */
@@ -69,13 +77,12 @@ export function resetAsleepSession(s: GameState): GameState {
 }
 /** AC-FC12 read view: per role {asleepS, cents} since the last welcome-back close. */
 export function clockWageWindowView(s: GameState): Record<WageWorker, { asleepS: number; cents: number }> {
-  const v = (id: WageWorker) => { const r = s.clockWageWindow?.[id]; return { asleepS: r ? r.asleepMs / 1000 : 0, cents: r?.cents ?? 0 }; };
+  const v = (id: WageWorker) => { const r = win(s)?.[id]; return { asleepS: r ? r.asleepMs / 1000 : 0, cents: r?.cents ?? 0 }; };
   return { market_hand: v('market_hand'), coop_hand: v('coop_hand') };
 }
 /** Welcome-back close (collectOffline / dismissOffline reducer): a new window starts, also when Y = 0. Identity with clockWage off. */
 export function resetClockWageWindow(s: GameState, b: Balance): GameState {
-  if (!clockWageOn(b) || !('clockWageWindow' in s)) return s;
-  const { clockWageWindow: _w, ...rest } = s; return rest as GameState;
+  return clockWageOn(b) ? writeWindow(s, undefined) : s;
 }
 /** §4 caption $X: that worker's wage per minute at Farm F, cents (W1 0.25·F, W2 0.5·F $/min from balance). */
 export const wagePerMinCents = (id: WageWorker, farm: number, b: Balance) => Math.round(b.workers[id].wage_per_farm_per_min * farm * CENTS_PER_DOLLAR);
@@ -88,7 +95,7 @@ export function clockWageLoad(s: GameState, b: Balance): GameState {
   if (!clockWageOn(b)) return s;
   let out = s;
   if ('clockWageTipShown' in out && typeof out.clockWageTipShown !== 'boolean') { const { clockWageTipShown: _x, ...rest } = out; out = rest as GameState; }
-  if ('clockWageWindow' in out) { const w = sanitizeWindow(out.clockWageWindow); const { clockWageWindow: _w, ...rest } = out; out = (w ? { ...rest, clockWageWindow: w } : rest) as GameState; }
+  if (readWindow(out) !== undefined) out = writeWindow(out, sanitizeWindow(readWindow(out)));
   return out;
 }
 const okInt = (v: unknown): v is number => Number.isSafeInteger(v) && (v as number) >= 0;
