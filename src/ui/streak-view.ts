@@ -35,7 +35,8 @@ export interface MeterView {
  *  motion: the fill moves in whole-percent steps (ST-AC24). */
 export function meterView(s: number, holdS: number, b: Balance, opts: { rm?: boolean } = {}): MeterView {
   const p = streakParams(b), T = tierThresholds(p), sv = Math.max(0, s), shown = sv > EPS;
-  const max = shown && sv >= p.cap - EPS, cooling = shown && !(holdS > EPS), tier = shown ? streakTier(sv, b) : 0;
+  // MAX only while held: at the decay start (hold spent, s still = cap) gold -> stripes and the label returns to +N% (§1 MAX row).
+  const cooling = shown && !(holdS > EPS), max = shown && sv >= p.cap - EPS && !cooling, tier = shown ? streakTier(sv, b) : 0;
   const n = pctFloor(sv), capN = pctFloor(p.cap);
   const scale = !shown ? 0 : max ? 1 : Math.min(1, opts.rm ? n / (p.cap * 100) : sv / p.cap);
   const label = !shown ? '' : max ? `MAX +${capN}%` : `+${n}% price`;

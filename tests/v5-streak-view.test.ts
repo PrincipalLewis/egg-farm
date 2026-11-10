@@ -46,6 +46,9 @@ describe('meter view (§0, ST-AC21/24/25, CT-AC1/2)', () => {
     expect(v.max).toBe(true); expect(v.label).toBe('MAX +27%'); expect(v.lit).toEqual([true, true, true, true]); expect(v.scale).toBe(1);
     expect(v.valueText).toBe('Streak max, +27% price');
   });
+  it('decay start at the cap: not MAX any more, "+27% price, cooling"', () => {
+    const v = meterView(0.27, 0, B27); expect(v.max).toBe(false); expect(v.label).toBe('+27% price'); expect(v.valueText).toBe('Streak +27% price, tier 4 of 4, cooling');
+  });
   it('cap 0.40 (ST-AC11): MAX +40% and the bar maps 0..0.40', () => {
     expect(meterView(0.4, 3, B40).label).toBe('MAX +40%'); expect(meterView(0.2, 3, B40).scale).toBeCloseTo(0.5, 9);
   });
