@@ -174,3 +174,38 @@ describe('[AC-P9 / B5] call lockout view (read from state set by tc_pause_call_l
     expect(callLockoutView(s, P)!.left).toBe(tc.pause_call_lockout_s - 10);
   });
 });
+
+// QA-D-1030-ACP1-B: the committed tracksV7 fixture with hired workers (tests/fixtures/saves/m5-pause-committed-hired.json, Saves 8e7532e)
+// booted through the real Game path, then rendered: AC-P2 one toggle per hired worker; pause/resume round-trip through the UI actions.
+import { readFileSync } from 'node:fs';
+import { Game } from '../src/game';
+import { SAVE_KEY } from '../src/save/save';
+import { mem } from './helpers';
+describe('[AC-P2/P13 UI] committed fixture with hired workers', () => {
+  const fx = JSON.parse(readFileSync(new URL('./fixtures/saves/m5-pause-committed-hired.json', import.meta.url), 'utf8'));
+  const raw: string = fx.ls[SAVE_KEY], t0 = JSON.parse(raw).savedAt as number;
+  const boot = (bb: typeof b) => { const kv = mem(); kv.setItem(SAVE_KEY, raw); return Object.assign(new Game(bb, kv, () => t0 + 1000, 7, 'dev', null, null, { newId: () => '0123456789abcdef' }), { store: kv }); };
+  it('flag on: one toggle per hired worker (MH, CH), none for unhired; flag off: none and identical to shipped', () => {
+    const g = boot(P), h = workersHtml(g.state, P);
+    expect(toggles(h)).toHaveLength(2);
+    expect(h).toContain('aria-label="Pause Market Hand"'); expect(h).toContain('aria-label="Pause Coop Hand"');
+    const g0 = boot(b); expect(toggles(workersHtml(g0.state, b))).toHaveLength(0);
+  });
+  it('pause both via the UI actions → all-paused line; resume MH → lockout view from the tunable; save keeps paused', () => {
+    const g = boot(P);
+    g.dispatch({ type: 'pause', worker: 'market_hand' }); g.dispatch({ type: 'pause', worker: 'coop_hand' });
+    expect(workersHtml(g.state, P)).toContain(PAUSE_COPY.all);
+    g.dispatch({ type: 'resume', worker: 'market_hand' });
+    expect(callLockoutView(g.state, P)!.left).toBe(tc.pause_call_lockout_s);
+    expect(workersHtml(g.state, P)).not.toContain(PAUSE_COPY.all);
+    g.save(); const saved = JSON.parse(g.store.getItem(SAVE_KEY)!).state.workers;
+    expect(saved.coop_hand.paused).toBe(true); expect(saved.market_hand.paused).toBe(false); expect(saved.market_hand.callLockoutS).toBe(tc.pause_call_lockout_s);
+  });
+});
+describe('[AC-P7] debounce window starts only on a real change', () => {
+  it('ready() does not start a window; mark() does', () => {
+    const d = new PauseDebounce();
+    expect(d.ready('grader', 0, P)).toBe(true); expect(d.ready('grader', 100, P)).toBe(true);
+    d.mark('grader', 100); expect(d.ready('grader', 100 + DEB_MS - 1, P)).toBe(false); expect(d.ready('grader', 100 + DEB_MS, P)).toBe(true);
+  });
+});
