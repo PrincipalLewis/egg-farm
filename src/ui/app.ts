@@ -37,6 +37,7 @@ import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCen
 import { trackToastSafe } from './toast-safe';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, WORKER_NAMES, type NavAria } from './workers-ui';
 import { pauseUiOn, PauseDebounce, allWorkersPaused, pauseAnnouncement } from './pause-ui';
+import { routeCardManage } from './card-manage-route';
 import { isPaused } from '../sim/pause';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
@@ -262,6 +263,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
     // P2b (AC-R11 / TP1-U2): a Refill tap on an Unpaid worker dispatches nothing (no worker_manage); the refused-tap feedback still plays.
+    if (kind === 'manage' && routeCardManage(wid, b)) return; // rc2Refill = 1: card Manage opens the Shift sheet, entry 'card' (stub until Features' opener)
     if (kind === 'manage' && g.state.workers[wid as keyof typeof g.state.workers]?.unpaid) return cantAfford(bt);
     if (kind === 'pause') return togglePause(bt, wid);
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
