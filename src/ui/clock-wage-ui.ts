@@ -1,0 +1,38 @@
+/** v5 Hire2/v5-clockwage: running-wage UI copy (failure-cost v0.3.24 §4 Art final; AC-FC8/9/10/11/12). Pure; every string is behind
+ *  m4.flags.clockWage at its call site. Money = fmtMoney of balance-derived cents; {pct} from workers.grader.asleep_bonus_share (FZ-2). */
+import type { Balance } from '../config/balance';
+import { clockWageOn, wagePerMinCents, type WageWorker } from '../sim/clock-wage';
+import type { GameState } from '../sim/state';
+import { mood, type WorkerId } from '../sim/workers';
+import { isPaused } from '../sim/pause';
+import { fmtMoney } from './format';
+
+const isWageWorker = (id: WorkerId): id is WageWorker => id === 'market_hand' || id === 'coop_hand';
+/** AC-FC8: "Still paid $X/min" for a hired, Asleep (not Unpaid) MH/CH with the flag on; null otherwise (Unpaid keeps "Resumes at $X"). */
+export function stillPaidCaption(s: GameState, id: WorkerId, b: Balance): string | null {
+  if (!clockWageOn(b) || !isWageWorker(id) || mood(s.workers[id], b) !== 'asleep' || isPaused(s.workers[id], b)) return null; // FC-R2: Paused is wage-free
+  return `Still paid ${fmtMoney(wagePerMinCents(id, s.farmLevel, b))}/min`;
+}
+/** §4 / FC-G12: aria-describedby sentence of the Refill button while Asleep (never an aria-label). */
+export const stillPaidDescription = (role: string, perMinCents: number) =>
+  `${role} is asleep and still paid ${fmtMoney(perMinCents)} per minute. Refill to get them working.`;
+/** AC-FC9 (v0.3.23/24): one toast per fall-asleep onset, all four roles, exact Art strings; flag-gated by the caller. */
+export function asleepToast(id: WorkerId, b: Balance): string {
+  switch (id) {
+    case 'market_hand': return 'Market Hand fell asleep. Auto-selling stopped, wage still running.';
+    case 'coop_hand': return 'Coop Hand fell asleep. Collecting stopped, wage still running.';
+    case 'hawker': return 'Hawker fell asleep: sales slowed. Tap Refill.';
+    case 'grader': return `Egg Grader fell asleep: bonus down to ${Math.round(b.workers.grader.asleep_bonus_share * 100)}%. Tap Refill.`;
+  }
+}
+/** AC-FC11: one-time yawn tip copy (first yawn per save; the save flag is seam item S5). */
+export const CLOCK_WAGE_TIP = 'Sleeping workers still get paid. Refill to wake them.';
+/** AC-FC12 duration: floor to whole seconds FIRST, then m:ss below one hour, h:mm:ss from one hour. Never "60:00". */
+export function sleptDuration(seconds: number): string {
+  const t = Math.max(0, Math.floor(seconds)), p = (n: number) => String(n).padStart(2, '0');
+  if (t < 3600) return `${Math.floor(t / 60)}:${p(t % 60)}`;
+  return `${Math.floor(t / 3600)}:${p(Math.floor(t % 3600 / 60))}:${p(t % 60)}`;
+}
+/** AC-FC12 / §4.3: welcome-back line "{Role} slept {t} and was paid $Y"; null when Y = 0 (no line). */
+export const welcomeBackWageLine = (role: string, asleepS: number, paidCents: number): string | null =>
+  paidCents > 0 ? `${role} slept ${sleptDuration(asleepS)} and was paid ${fmtMoney(paidCents)}` : null;
