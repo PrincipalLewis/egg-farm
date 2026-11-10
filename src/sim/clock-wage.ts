@@ -6,6 +6,7 @@
  *  Everything here returns the same state object when the flag is off. */
 import type { Balance } from '../config/balance';
 import { flagOn } from '../config/flags';
+import { CENTS_PER_DOLLAR } from '../config/breeds';
 import type { Sink } from './events';
 import { isPaused } from './pause';
 import type { GameState } from './state';
@@ -36,4 +37,4 @@ export function clockWageAsleepStep(s: GameState, id: WageWorker, dt: number, b:
   return { ...s, coinsCents: s.coinsCents - cents, wageFracCents: { ...s.wageFracCents, [id]: frac }, workers: { ...s.workers, [id]: { ...w, cdS } } };
 }
 /** §4 caption $X: that worker's wage per minute at Farm F, cents (W1 0.25·F, W2 0.5·F $/min from balance). */
-export const wagePerMinCents = (id: WageWorker, farm: number, b: Balance) => Math.round(b.workers[id].wage_per_farm_per_min * farm * 100);
+export const wagePerMinCents = (id: WageWorker, farm: number, b: Balance) => Math.round(b.workers[id].wage_per_farm_per_min * farm * CENTS_PER_DOLLAR);
