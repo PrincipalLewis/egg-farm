@@ -1,40 +1,43 @@
-# Breeds UI PR-A — AC → test trace
+# Breeds UI PR-A — AC → test trace (Ready-candidate)
 
-**Head:** `56d4d46` (update on each milestone commit)  
+**Head:** tip of `v5/breeds-ui-a` (see `git rev-parse`) · Ready-candidate (stub familyClamp; HoE B)
 **Files:** `tests/v5-breeds-ui.test.ts`, `tests/helpers/breeds-on.test.ts`, `tests/v5-breeds-qa-seam.test.ts`  
-**Fixture:** `tests/helpers/breeds-on.ts` (`breedsOnBalance` / `breedsOffBalance`) — balance.json stays breeds=0.
+**Fixture:** `tests/helpers/breeds-on.ts` — `balance.json` stays `breeds=0`.
 
 | AC / row | Test(s) | Notes |
 |---|---|---|
-| BRD-AC1 / BR-AC1 flag off | `flag off: no #breeds-entry` | no `#breeds-entry` |
-| BR-AC3 F9 / F10 / F14 / F20 | `F9…`, `F10…`, `F14 shows 2…`, `F20: 3 unlocked…` | locked Farm N (OQ-2) |
+| BRD-AC1 / flag off | `flag off: no #breeds-entry` | |
+| BR-AC3 F9/F10/F14/F20 | F9 / F10 / F14 locked / F20×3 | OQ-2 locked Farm N |
 | BR-AC3 sheet + Esc | `opens #breeds-sheet… Esc closes` | |
-| BR-AC3b / UI-BR-2 | `coachSeen: glow+dot…`, `coach unseen same session…` | next-session fallback not yet covered |
-| BR-AC4 / OQ-6 place | `album select → empty slot places; Remove clears` | move/settle 300s sim = existing hatch tests |
-| BR-AC10 | `BR-AC10 gate copy More breeds at Farm 14` | hatchUi |
-| BR-AC11 | `BR-AC11 flock complete label` | hatchUi |
-| BR-AC31 / silhouette | `F20… silhouette opacity 0.55` | |
-| BR-AC31a | helpers + `after free hatch press…` | |
-| BR-AC31b | `unaffordable → dimmed, no lock…` | |
-| BR-AC31c | `ETA 90s → note; 91s → no note…`, free/complete no note | DOM + hatchEstimate |
-| BR-AC31e | `default 85 / aw 95 → note; 95 / 85 → no note` | via `breedsEstimateOverride` (= eggfarmQa hook shape) |
-| BR-AC32 reveal ≤400ms / RM | `reveal card has RM class… Nice! dismisses` | no auto-remove |
-| BR-AC32 settle ring | `settling ring has no infinite CSS animation` + settle label | |
-| OQ-3 ceil | `OQ-3 ceil remainingMs…` + incubating Ready in 0:46 | |
-| E10 empty render | `E10 unknown unlocked slot id renders empty` | |
-| HoQA breeds-on isolation | `tests/helpers/breeds-on.test.ts` | |
-| HoQA ?qaBreeds=1 DCE | `tests/v5-breeds-qa-seam.test.ts`; release-bundle (Ready gates) | marker `get("qaBreeds")` |
-| BR-AC25 / BR-R18 offline reveal | partial: `onWelcomeClosed` + pendingReveal on open | full offline gap = sim tests |
-| BR-AC33–35 sprites | vendored `<img src>` (AC33 N/A for inline) | greyscale review Art |
-| BR-AC49 docked focus | phone `registerSheet('flock')`; docked skips | browser QA |
-| BR-AC52 / strip / chip | **PR-B** | |
-| BR-AC23b/c BB strip | **PR-B** (#100) | |
-| Family "max" (E8) | `familyClamp` stub → undefined (no label) | **Dep:** Saves `saves/breeds-sim-prB-traits` commit 0 |
-| PR-B ext glob / ctx | `registerBreedsExt` + flag-0 null; presentMirror unit | `breeds-ext-*.ts` naming; no app.ts for PR-B |
-| D1–D6 Saves drift | await rebase on rc/v5 when drift PR lands | UI adapter null-safe |
+| BR-AC3b / UI-BR-2 | `coachSeen: glow+dot…`, `coach unseen…` | |
+| UI-BR-2b | `session N+1 with coach unseen arms…` | |
+| BR-AC4 move + settle | `placing an already-slotted breed moves…` | settle carry |
+| BR-AC4 / OQ-6 place+Remove | `album select → empty slot… Remove clears` | |
+| BR-AC10 | `More breeds at Farm 14` | |
+| BR-AC11 | `Flock complete` | |
+| BR-AC31 / silhouette | F20 silhouette 0.55; incubating sil + meter | |
+| BR-AC31 aria | `aria-label uses fmtMoneyAria` | |
+| BR-AC31a | Free hatch helpers + after press | |
+| BR-AC31b | unaffordable dimmed / press no-op | |
+| BR-AC31c / 31e | 90/91 note; 85/95 hook iff | |
+| BR-AC32 reveal RM | RM class; Nice! dismiss; no auto-remove | |
+| BR-AC32 settle ring | no infinite animation | |
+| OQ-3 ceil | fmtRemainMs + incubating 0:46 | |
+| E10 | unknown slot → empty | |
+| BR-AC25 / BR-R18 | welcome Collect → reveal | |
+| Q7 | missing freeHatchUsed → Free | |
+| breedAsset | `_` → `-` | |
+| BR-AC49 docked | docked open/close sheet | phone hold = registerSheet('flock') |
+| presentMirror / ext ctx | unit + Present slot DOM; openFlock/incomeRate/rm | |
+| breeds-ext glob | zero matches in PR-A | |
+| HoQA breeds-on / qaBreeds | helper isolation; seam rejects marker | release-bundle at final gates |
+| BR-AC33–35 | `<img src>` sprites vendored | greyscale = Art review |
+| BR-AC52 / strip | **PR-B** | |
+| BR-AC23b/c | **PR-B** (#100) | |
+| E8 familyClamp | stub `undefined` (no label) on Ready head | **Dep:** `#126` d4b5fdcd; bind on `v5/breeds-ui-a-clamp-bind` (not this head) |
+| D1–D6 drift | adapter null-safe | **Rebase** when drift lands on `rc/v5` |
 
-## Gaps / deferred
-- UI-BR-2b next-session highlight fallback test
-- BR-AC25 full welcome-back → reveal browser path
-- Family clamp "max": stub until Saves `saves/breeds-sim-prB-traits`
-- Full release-bundle vite qa/prod for qaBreeds (coded; run at Ready)
+## Deferred (not PR-A blockers)
+- Full vite `release-bundle` qaBreeds assert — coded; run in final gate set
+- Greyscale 9/9 (Art) · docked browser visual (UIQA)
+- Present calm-gate real `gateOpen` (Saves) — stub `true` in slot mirror

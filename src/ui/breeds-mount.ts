@@ -207,7 +207,7 @@ export function mountFlock(opts: {
         <div class="incu-disc">${disc}</div>
         <div class="incu-copy"><div class="incu-title">Incubator</div>
           <div class="incu-status">${br.incubator ? 'Hatching · a surprise breed' : 'Empty · 1 egg at a time'}</div></div>
-        <button type="button" class="btn hatch-btn ${hatchCls}" data-act="hatch" data-testid="breeds-hatch" aria-disabled="${hatchDisabled}"${hatchAriaDesc}>${hu.label}</button>
+        <button type="button" class="btn hatch-btn ${hatchCls}" data-act="hatch" data-testid="breeds-hatch" aria-disabled="${hatchDisabled}" aria-label="${hu.aria}"${hatchAriaDesc}>${hu.label}</button>
         <p class="hatch-sub" id="hatch-sub">${hu.sub}</p>
         ${note}
       </div>
