@@ -1,0 +1,4 @@
+{
+  "_comment": "TEST-ONLY runtime overlay for scripts/breeds-ui-prB-browser.mjs: merged into the in-memory balance inside the harness page. Never copy into src/config/balance.json (shipped breeds flag stays 0).",
+  "m4": { "enabled": 1, "flags": { "breeds": 1 } }
+}

@@ -167,6 +167,9 @@ import { mountBbStrip, type BbStripMount } from './breeds-strip';
 import { mountYard, type YardMount } from './breeds-yard';
 
 let hud: PresentChipMount | null = null, strip: BbStripMount | null = null, yard: YardMount | null = null, registered = false;
+/** Injectables: the Saves sim gate and the #100 fallback predicate plug in here when they land (tests/harness use them now). */
+export interface PrBOptions { gate?: PresentGateSource; fallback?: (s: GameState, b: Balance) => boolean; }
+let prbOpts: PrBOptions = {};
 /** Opens the Flock sheet from the strip's Hatch target. TODO(PR-A seam): expose `open()` in the ext ctx; until then this
  *  activates PR-A's own Flock entry button (same handler a player tap uses). */
 const openFlockViaEntry = () => document.querySelector<HTMLElement>('[data-testid="breeds-entry"], #breeds-entry')?.click();
@@ -174,8 +177,8 @@ const openFlockViaEntry = () => document.querySelector<HTMLElement>('[data-testi
 export const PRB_EXT: BreedsExt = {
   onSync(ctx) {
     if (!hud && !strip && !yard) {
-      hud = mountPresentChip({ doc: document, b: ctx.b });
-      strip = mountBbStrip({ doc: document, b: ctx.b, onOpenFlock: openFlockViaEntry });
+      hud = mountPresentChip({ doc: document, b: ctx.b, gate: prbOpts.gate });
+      strip = mountBbStrip({ doc: document, b: ctx.b, onOpenFlock: openFlockViaEntry, fallback: prbOpts.fallback });
       yard = mountYard({ doc: document, b: ctx.b });
     }
     hud?.sync(ctx.s); strip?.sync(ctx.s); yard?.sync(ctx.s);
@@ -183,4 +186,8 @@ export const PRB_EXT: BreedsExt = {
   onDispose() { hud?.dispose(); strip?.dispose(); yard?.dispose(); hud = strip = yard = null; },
 };
 /** Register PR-B once (idempotent). Must run before PR-A's first sync; see seams §1 for the load trigger. */
-export function registerBreedsPrB(): BreedsExt { if (!registered) { registerBreedsExt(PRB_EXT); registered = true; } return PRB_EXT; }
+export function registerBreedsPrB(opts: PrBOptions = {}): BreedsExt {
+  prbOpts = opts; if (!registered) { registerBreedsExt(PRB_EXT); registered = true; } return PRB_EXT;
+}
+/** Live PR-B mounts (harness / QA observability; null until PR-A's first onSync). */
+export const prbMounts = () => ({ hud, strip, yard });
