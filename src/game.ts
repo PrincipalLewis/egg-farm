@@ -22,8 +22,8 @@ import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
 import { Telemetry, installId } from './telemetry/telemetry';
-import { flushBreedsTel, resetBreedsTel } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
-import { sessionEndBreedsFields } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
+import { flushBreedsTel, resetBreedsTel, noteTraitEggs } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
+import { sessionEndBreedsFields, awayBonusEggs } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
 /** v5 #1: collectible_* / frenzy_* events are forwarded with Game's per-session collectible_id (not a sim or save field). */
 export type GameEvent = (SimEvent & { collectible_id?: number }) | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
@@ -121,11 +121,12 @@ export class Game {
   private grantOffline(gapMs: number) {
     // F3: capture Away bp applied to the grant BEFORE applyOffline (hatch reveal can star-up a slotted Away).
     const appliedAwayBp = awayBp(this.state, this.b);
-    const ev: SimEvent[] = []; const r = applyOffline(this.state, gapMs, this.b, ev); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
+    const pre = this.state, ev: SimEvent[] = []; const r = applyOffline(pre, gapMs, this.b, ev); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
     this.emit(ev); // M5.1 breeds §8: breed_revealed{offline:true} / flock_complete / breed_slotted from the grant step (none flag off)
     // F5 / BR-R18 / PMC: emit offline_grant ONLY when the offline rules apply (gap >= offlineMinSeconds).
     // Same trigger as flag-off. Sub-60 s loads emit NOTHING. Eggs=0 still emits when breeds on (errata V-2b).
     if (gapMs < this.b.offline.offlineMinSeconds * 1000) return r.eggs;
+    this.state = noteTraitEggs(this.state, 'awayEggs', awayBonusEggs(pre, gapMs, this.b, r.eggs, appliedAwayBp)); // §8 breed_away_eggs (grant session)
     const v5 = offlineGrantV5(this.b, appliedAwayBp);
     if (r.eggs > 0 || v5.away_bp !== undefined) {
       if (r.eggs > 0) this.offline = { eggs: r.eggs, awayS: r.awayS };

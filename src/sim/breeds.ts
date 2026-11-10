@@ -43,7 +43,7 @@ export interface SlotWindow { leftMs: number; ev: Slotted }
 /** Session-only telemetry accumulators (never saved: m5Persist SESSION_ONLY_KEYS). Absent until the first hatch, slot change
  *  or settled slotted tick, so flag-on/no-hatch states stay byte-identical (§7). */
 export interface BreedsTel { hatches: number; spendCents: number; familyMs: Record<FamKey, number>; win: (SlotWindow | null)[];
-  /** session_end breed_present_eggs / breed_away_eggs / breed_broody_cents: fed by the BR-R12/R13/R14 traits (not on this base). */
+  /** session_end breed_present_eggs / breed_away_eggs / breed_broody_cents: fed by BR-R12 / BR-R13 via noteTraitEggs (BR-R14 not built). */
   presentEggs?: number; awayEggs?: number; broodyCents?: number }
 const emptyTel = (): BreedsTel => ({ hatches: 0, spendCents: 0, familyMs: { P: 0, A: 0, B: 0 }, win: SLOT_IDX.map(() => null) });
 export const breedsTel = (s: GameState): BreedsTel => s.breedsTel ?? emptyTel();
@@ -67,6 +67,13 @@ export function tickSlotWindows(s: GameState, dtMs: number, ev?: Sink): GameStat
 }
 /** session_end / pagehide: close every open breed_slotted window now (flag on only; identity otherwise). */
 export const flushBreedsTel = (s: GameState, b: Balance, ev?: Sink): GameState => (breedsFlagOn(b) ? tickSlotWindows(s, Infinity, ev) : s);
+/** §8 trait counters for session_end breed_present_eggs / breed_away_eggs / breed_broody_cents (floored there).
+ *  Fed by the BR-R12 Present tick (timers.ts) and the BR-R13 grant step (game.ts); BR-R14 Broody accrual is not built, so
+ *  broodyCents has no producer yet. n <= 0 (incl. flag off) = same state object, so no breedsTel is created. */
+export function noteTraitEggs(s: GameState, key: 'presentEggs' | 'awayEggs' | 'broodyCents', n: number): GameState {
+  if (!(n > 0)) return s;
+  const t = breedsTel(s); return { ...s, breedsTel: { ...t, [key]: (t[key] ?? 0) + n } };
+}
 /** Architect m1 (#127): start fresh session counters after session_end is emitted and on a bfcache restore (pageshow persisted).
  *  Drops breedsTel (absent == empty, so flag-on/no-hatch stays byte-identical); an open breed_slotted window survives. */
 export function resetBreedsTel(s: GameState): GameState {
