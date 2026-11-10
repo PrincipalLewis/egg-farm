@@ -13,8 +13,11 @@ import { WORKERS, type Worker, type WorkerId } from '../sim/workers';
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 /** §8 Labels: icon-pause.svg while working, icon-resume.svg while paused (art-ux/assets, sha1 97291783 / 0b6a5faa). No emoji. */
 export const PAUSE_ICON = { pause: 'icon-pause.svg', resume: 'icon-resume.svg' } as const;
-/** Rule 1: the toggle (and banner, and every pause UI string) exists only with m4.enabled, m4.flags.pause and farm ≥ tc_pause_unlock_farm. */
-export const pauseUiOn = (s: GameState, b: Balance): boolean => flagOn(b, 'pause') && s.farmLevel >= tcNum(b, 'pause_unlock_farm');
+/** Rule 1: the toggle (and banner, and every pause UI string) exists only with m4.enabled, m4.flags.pause and farm ≥ tc_pause_unlock_farm.
+ *  HoP D-HOP-2026-11-10-20 (G0 §9): the direct card toggle exists ONLY with m4.flags.rc2Refill = 0 (it then emits worker_paused /
+ *  worker_resumed, sim-owned). With rc2Refill = 1 the card has no toggle; Rest lives in the Features Shift sheet (card Manage → sheet, entry 'card'). */
+export const pauseUiOn = (s: GameState, b: Balance): boolean =>
+  flagOn(b, 'pause') && !flagOn(b, 'rc2Refill') && s.farmLevel >= tcNum(b, 'pause_unlock_farm');
 /** §8 / AC-P15: icon-only button, so the accessible name is "Pause {role}" / "Resume {role}" (WCAG 2.5.3). */
 export const pauseToggleLabel = (role: string, paused: boolean) => `${paused ? 'Resume' : 'Pause'} ${role}`;
 /** The toggle: 44×44 (CSS), first item of the card's action row, aria-pressed = paused. */
@@ -49,4 +52,15 @@ export class PauseDebounce {
     this.last.set(id, nowMs);
     return true;
   }
+}
+/** B5 / AC-P9 / G0 §7.5: Market Hand call lockout after ANY resume (toggle, manage, auto_full). The sim sets callLockoutS from
+ *  tc_pause_call_lockout_s and counts it down in sim seconds; the UI only reads it. For the Rush/Shout buttons (abilities UI, #116):
+ *  null when no lockout; otherwise the button text "0:ss" (rounded up, never "0:00") and its describedby "Ready in 0:ss after a break". */
+export function callLockoutView(s: GameState, b: Balance): { left: number; text: string; describedBy: string } | null {
+  if (!flagOn(b, 'pause')) return null;
+  const v = s.workers.market_hand?.callLockoutS;
+  if (typeof v !== 'number' || !(v > 0)) return null;
+  const left = Math.ceil(v - 1e-9); if (left <= 0) return null;
+  const text = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+  return { left, text, describedBy: `Ready in ${text} after a break` };
 }
