@@ -11,6 +11,7 @@
  */
 import './streak.css';
 import { LiveThrottle, StreakTiers, COOLING_ARIA, meterView, pillCopy, streakParams, streakUiOn, tapCoinUiOn, tierAria, type MeterView } from './streak-view';
+import { noteTapSting } from './streak-tap';
 import { POP, coinPopAria, coinPopBox, coinPopText, pillBox } from './tap-coin-pop';
 import { tcNum } from '../config/formulas';
 import { FOCUS_DT_MAX_S } from '../sim/clock';
@@ -90,7 +91,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
 
   function tierUp(k: number) {
     const n = streakParams(b).count, max = k >= n;
-    ctx.audio.play(max ? 'streakMax' : (`streakTier${k}` as keyof typeof STREAK_SFX));
+    if (ctx.audio.play(max ? 'streakMax' : (`streakTier${k}` as keyof typeof STREAK_SFX))) noteTapSting(); // §1: sting replaces this tap's collect
     const say = sLive.push(tierAria(k, b), nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say;
     if (row) { // meter part of §2: tab k, sheen, label pop, spark dots (motion <= 400 ms; reduced motion: opacity only)
       retrigger(ticks[k - 1] ?? null, 'streak-up'); retrigger(row.querySelector('.streak-sheen'), 'go'); retrigger(label, 'pop');

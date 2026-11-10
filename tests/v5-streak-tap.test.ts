@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import { vi } from 'vitest';
-import { tapIgnored, collectSemi, playCollect } from '../src/ui/streak-tap';
+import { tapIgnored, collectSemi, playCollect, noteTapSting, takeTapSting } from '../src/ui/streak-tap';
 import { tierThresholds, streakParams } from '../src/ui/streak-view';
 
 const mk = (flags: Record<string, number>): Balance => ({ ...balance, m4: { ...balance.m4!, enabled: 1, flags: { ...balance.m4!.flags, ...flags } } }) as Balance;
@@ -39,5 +39,11 @@ describe('collectSemi + playCollect (R16 / CT-AC6, F6 v1.0 Audio.playFile)', () 
     const a = { play: vi.fn() }; playCollect(a as any, 0); playCollect(a as any, 3); expect(a.play.mock.calls).toEqual([['collect'], ['collect']]);
     const f = { play: vi.fn(), playFile: vi.fn(() => true) }; playCollect(f as any, 0); playCollect(f as any, 2);
     expect(f.play.mock.calls).toEqual([['collect']]); expect(f.playFile).toHaveBeenCalledWith('sfx-collect-pop', undefined, 2, 'collect');
+  });
+});
+
+describe('tap sting mark (combo-tiers §1: the sting replaces that tap\'s collect)', () => {
+  it('take returns true once after note, then false; clear by default', () => {
+    takeTapSting(); expect(takeTapSting()).toBe(false); noteTapSting(); expect(takeTapSting()).toBe(true); expect(takeTapSting()).toBe(false);
   });
 });

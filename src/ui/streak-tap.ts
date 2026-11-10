@@ -5,6 +5,9 @@
  * - R16 / CT-AC6 (combo-tiers v0.3 §1): the credited-tap `egg.collect` plays at +k semitones after tier k (k <= tier count, MAX = +4);
  *   uncounted taps and streak off = base pitch (semi 0). The pitch goes through F6 v1.0 `Audio.playFile(file, minGapMs, semi, hook)`
  *   (playbackRate 2^(semi/12), logged in eggfarmQa.audio.log). Until F6 merges, Audio has no playFile: the collect plays unpitched.
+ * - combo-tiers §1 (tiers 1-3, MAX rows): on a tier-up tap the tier sting REPLACES that tap's collect. The streak meter's collect
+ *   listener runs inside g.dispatch (sync emit) and calls noteTapSting() when a sting actually started; app.ts skips the collect
+ *   sound for that tap (takeTapSting()). Nothing marks it while the meter isn't mounted (rc/v5 before F6, or flags off).
  */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
@@ -26,3 +29,9 @@ type PitchAudio = Pick<Audio, 'play'> & { playFile?(f: string, minGapMs?: number
 export function playCollect(audio: PitchAudio, semi: number): void {
   if (semi && audio.playFile) audio.playFile(SFX.collect, undefined, semi, 'collect'); else audio.play('collect');
 }
+
+let tapSting = false;
+/** Streak meter: a tier sting actually started for the credited tap being dispatched now. */
+export const noteTapSting = (): void => { tapSting = true; };
+/** app.ts collect: true once if this tap's sound was a tier sting (skip the collect sound); always clears the mark. */
+export const takeTapSting = (): boolean => { const v = tapSting; tapSting = false; return v; };

@@ -7,6 +7,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { balance, type Balance } from '../src/config/balance';
 import { mountStreakUi, streakMeter, STREAK_SFX, STREAK_UI_MS } from '../src/ui/streak-meter';
+import { takeTapSting } from '../src/ui/streak-tap';
 import { stubCtx, mountStub } from '../src/ui/streak-f6-stub';
 import { flagOn } from '../src/config/flags';
 import { pillCopy, tierAria, streakParams, tierThresholds } from '../src/ui/streak-view';
@@ -157,6 +158,14 @@ describe('A2 tier-ups (§3.3, ST-AC9/10/27, CT-AC5/6/15)', () => {
     mountUi(stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play, register } }).ctx);
     expect(register.mock.calls).toEqual(Object.entries(STREAK_SFX));
     for (const file of Object.values(STREAK_SFX)) expect(existsSync(resolve(process.cwd(), `public/assets/audio/${file}.mp3`)), file).toBe(true);
+  });
+  it('combo-tiers §1: a tier sting that actually started marks the tap (app.ts skips its collect); a silent one does not', () => {
+    takeTapSting();
+    const f = fakeGame(), play = vi.fn(() => true); mountUi(stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play, register: () => {} } }).ctx)!;
+    for (let i = 1; i <= 6; i++) { t += 1000; f.tap(i / 100); expect(takeTapSting()).toBe(false); }
+    t += 1000; f.tap(0.07); expect(play).toHaveBeenCalledWith('streakTier1'); expect(takeTapSting()).toBe(true); expect(takeTapSting()).toBe(false);
+    const g2 = fakeGame(); mountUi(stubCtx({ g: g2.g as any, b: STREAK, root: root(), audio: { play: () => false, register: () => {} } }).ctx);
+    for (let i = 1; i <= 7; i++) { t += 1000; g2.tap(i / 100); } expect(takeTapSting()).toBe(false); // muted / no buffer: the collect still plays
   });
   it('reduced motion: no spark dots, pill has .rm (CT-AC14)', () => {
     const m = mount(STREAK, { rm: () => true }); climb(m, 7); expect($('.streak-spark')).toBeNull(); expect($('.streak-pill')!.classList.contains('rm')).toBe(true);
