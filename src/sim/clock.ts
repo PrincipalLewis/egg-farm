@@ -19,8 +19,9 @@ export interface StepClock {
   /** BR-R12b(b): integer-ms focus share for this tick (min(tickMs, F−given)); Present uses fT/1000. Absent → fall back to full dt. */
   focusFtMs?: number;
 }
-/** Per-frame clock input to advance(). `focusMs` = attended ms of this frame (already clamped by focusFrameMs). */
-export interface FrameClock { focusMs: number; nowMs?: number; slotsFarm?: number; }
+/** Per-frame clock input to advance(). `focusMs` = attended ms of this frame (already clamped by focusFrameMs).
+ *  `focusAccMs` = unused focus still inside the acc window (F7); Game.frame carries it across rAF calls. */
+export interface FrameClock { focusMs: number; nowMs?: number; slotsFarm?: number; focusAccMs?: number; }
 /** Focus seconds this tick contributes (0 when unfocused or no clock). Other M5 timers use full dt while focused. */
 export const tickFocusS = (dt: number, c?: StepClock) => (c?.focus ? dt : 0);
 /** Focus ms for one frame: 0 if not attended, non-positive or >= the offline threshold (§9.1a); else min(gap, 1.0 s) (R5e). */
@@ -40,6 +41,12 @@ export function focusFtMs(i: number, focusMs: number, tickMs: number): number {
   if (given >= focusMs) return 0;
   return Math.min(tickMs, focusMs - given);
 }
+/** Σ fT assigned to the first `ticks` ticks of a frame (F7 leftover = F − this). */
+export function focusAssignedMs(ticks: number, focusMs: number, tickMs: number): number {
+  let n = 0;
+  for (let i = 0; i < ticks; i++) n += focusFtMs(i, focusMs, tickMs);
+  return n;
+}
 /** Wall-clock timer: ms left until `atMs`, against injected `nowMs`, clamped to [0, capMs] on EVERY read
  *  (abilities E2b: clock rollback can't show more than one cooldown). Non-finite input = ready (D-C5 sanitising). */
 export function wallRemainingMs(atMs: number | undefined, nowMs: number, capMs: number): number {
@@ -48,7 +55,7 @@ export function wallRemainingMs(atMs: number | undefined, nowMs: number, capMs: 
 }
 export const wallReady = (atMs: number | undefined, nowMs: number, capMs: number) => wallRemainingMs(atMs, nowMs, capMs) === 0;
 /** The StepClock advance() hands to tick i of a frame whose first nFocus ticks carry focus (D-C3). */
-export const tickClock = (i: number, nFocus: number, c: FrameClock, tickMs = 100): StepClock => {
+export const tickClock = (i: number, nFocus: number, c: FrameClock, tickMs: number): StepClock => {
   const focused = i < nFocus;
   const base: StepClock = {
     focus: focused,
