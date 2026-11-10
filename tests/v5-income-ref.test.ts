@@ -18,7 +18,7 @@ import { ON } from './v5-f2-helpers';
 import { validateBalance } from '../src/config/balance';
 import { M5_TC_KEYS } from '../src/config/formulas';
 const TC = { ...ON, m4: { ...ON.m4!, flags: { ...ON.m4!.flags, tapCoins: 1 } } } as typeof b; // income-ref is live with tapCoins
-const NO_TC = { ...ON, m4: { ...ON.m4!, flags: { ...ON.m4!.flags, tapCoins: 0 } } } as typeof b;
+const NO_TC = { ...ON, m4: { ...ON.m4!, flags: { ...ON.m4!.flags, tapCoins: 0, broody: 0 } } } as typeof b; // v5 #5: broody also reads I_ref (R7), so 'off' = both 0
 const W = TC.m4!.tc!.tap_bonus_income_window_s, DT = 1 / TC.tickHz, PER_S = Math.round(1 / DT);
 const working = { energy: 100, cdS: 0 };
 /** An F10 farm with every worker hired and working (spec ST-AC16d). */
@@ -36,7 +36,7 @@ describe('#3 income-ref: flags and session state (R13a, §4.1 storage)', () => {
       const s = run(f10(), 30 * PER_S, bb);
       expect('irefRingCents' in s).toBe(false); expect('refWarmS' in s).toBe(false); expect(refCents(s, bb)).toBe(0);
     }
-    expect(incomeRefOn(TC)).toBe(true);
+    expect(incomeRefOn(TC)).toBe(true); expect(incomeRefOn({ ...NO_TC, m4: { ...NO_TC.m4!, flags: { ...NO_TC.m4!.flags, broody: 1 } } } as typeof b)).toBe(true); // v5 #5 R7
   });
   it('the window is tc_tap_bonus_income_window_s (60): W + 1 slots (60 complete seconds + the open one)', () => {
     expect(incomeWindowS(TC)).toBe(60);
@@ -169,7 +169,7 @@ describe('#3 income-ref: actual Game frame/visibility return boundary', () => {
     expect(g.state.refWarmS ?? 0).toBe(0);
     expect(g.state.irefRingCents?.reduce((a, x) => a + x, 0) ?? 0).toBe(0);
     expect(refCents(g.state, TC)).toBe(issCents(g.state));
-    const withoutRef = ({ irefRingCents: _r, refWarmS: _w, ...s }: GameState) => s;
+    const withoutRef = ({ irefRingCents: _r, refWarmS: _w, broodyRun: _br, broodyNestCents: _bn, broodyHenIdx: _bh, ...s }: GameState) => s; // v5 #5: TC (ON) runs broody, NO_TC does not
     expect(withoutRef(g.state)).toEqual(withoutRef(legacy.g.state)); // sales, wages, RNG, workers, all other timers unchanged
     advanceFrame(100); expect(g.state.refWarmS).toBe(0.1); expect(refCents(g.state, TC)).toBe(issCents(g.state));
     advanceFrame(59_800); expect(g.state.refWarmS).toBe(59.9); expect(refCents(g.state, TC)).toBe(issCents(g.state));

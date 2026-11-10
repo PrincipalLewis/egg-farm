@@ -39,7 +39,7 @@ describe('F1a M5 fields', () => {
 // (collectible_id, layout, Broody restored) are not sim fields (API sheet §4). The type-level Eq below makes tsc fail if a
 // member or field is renamed, added or dropped in src/sim/events.ts; the runtime test pins the member names.
 const M5_EVENT_SPEC = {
-  collectible_spawned: ['skin', 'farm_level', 'collection_level', 'slot_id', 'interval_s', 'deferred_ms'],
+  collectible_spawned: ['skin', 'farm_level', 'collection_level', 'slot_id', 'interval_s', 'deferred_ms', 'restored'], // restored: broody spec v1.3.3 §8 (ready at load), optional; golden never sets it
   collectible_collected: ['skin', 'reaction_ms', 'in_warning', 'reward_type', 'reward_value', 'reward_duration_s', 'farm_level', 'nest_fill_share'],
   collectible_expired: ['skin', 'reason', 'farm_level'],
   frenzy_started: ['mult', 'duration_s', 'farm_level', 'grader_tier'],

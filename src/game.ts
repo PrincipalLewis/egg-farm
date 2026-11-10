@@ -12,6 +12,7 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent, CollectibleSkin } from './sim/events';
 import { goldenOn, goldenUnload, spawnDue } from './sim/golden';
+import { broodyOn, broodyCheckDue, broodyReset, broodyView, type BroodyView } from './sim/broody';
 import { focusFrameMs } from './sim/clock';
 import { streakOn, streakPeak } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
@@ -136,7 +137,9 @@ export class Game {
     let id: number | undefined;
     switch (e.type) {
       case 'collectible_spawned': id = ++this.collectibleSeq; this.liveCollectible[e.skin] = id; break;
-      case 'collectible_collected': case 'collectible_expired': id = this.liveCollectible[e.skin]; delete this.liveCollectible[e.skin]; if (e.skin === 'golden_egg') this.lastGoldenId = id; break;
+      case 'collectible_collected': case 'collectible_expired': id = this.liveCollectible[e.skin]; delete this.liveCollectible[e.skin]; if (e.skin === 'golden_egg') this.lastGoldenId = id;
+        if (id === undefined && e.skin === 'broody_hen') id = ++this.collectibleSeq; // #5 R20a: expired{reset} with no ready episode open still carries an id
+        break;
       case 'frenzy_started': id = this.frenzyId = this.lastGoldenId; break;
       case 'frenzy_ended': id = this.frenzyId; this.frenzyId = undefined; break;
       default: return e;
@@ -149,6 +152,7 @@ export class Game {
       if (e.type === 'collect') this.telemetry.tap(e.eggs);
       else if (e.type === 'wage') this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
       else if (e.type === 'worker_collect') this.telemetry.sum('coop_hand_eggs', e.eggs);
+      else if (e.type === 'collectible_collected' && e.skin === 'broody_hen') { this.broodyCents += e.reward_value; this.broodyCollects++; const { type, ...rest } = e; this.telemetry.track(type, rest); }
       else if (e.type === 'sell' && e.by === 'market_hand') { this.telemetry.sum('market_hand_eggs', e.k); this.telemetry.sum('market_hand_cents', e.value); }
       else { const { type, ...rest } = e; this.telemetry.track(type, rest); }
     }
@@ -340,10 +344,16 @@ export class Game {
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
     // T-AC9: no comma-bearing calls inside the session_end literal — helper returns the fields object.
-    this.telemetry.track('session_end', sessionEndPresentFields(this.state, this.b)); this.save(); this.telemetry.flush(true); }
+    const se = sessionEndPresentFields(this.state, this.b);
+    this.telemetry.track('session_end', { ...se, ...this.broodyEnd() }); this.broodyCents = 0; this.broodyCollects = 0; this.save(); this.telemetry.flush(true); }
+  /** v5 #5 §8 / HoE F4: session_end.broody_cents (Σ broody reward_value) and broody_collects; absent while the flag is off.
+   *  Counters restart after each session_end (a bfcache restore never re-reports them). */
+  private broodyCents = 0; private broodyCollects = 0;
+  private broodyEnd() { return broodyOn(this.b) ? { broody_cents: this.broodyCents, broody_collects: this.broodyCollects } : {}; }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
     this.resetting = true; this.goldenEnd('reset');
+    { const ev: SimEvent[] = []; broodyReset(this.state, this.b, ev); this.emit(ev); } // #5 R20a: expired{broody_hen, reset} once if unlocked
     if (goldenOn(this.b) && this.state.frenzyRemainingS !== undefined) { // Game owns frenzy_ended{reset} (Architect ruling 5)
       const { frenzyRemainingS: _f, frenzyRun: r, ...o } = this.state; this.state = o as GameState;
       this.emit([{ type: 'frenzy_ended', extra_coins: r?.extraCents ?? 0, eggs_sold: r?.eggsSold ?? 0, sold_by_player: r?.byPlayer ?? 0, sold_by_workers: r?.byWorkers ?? 0, reason: 'reset' }]);
@@ -368,6 +378,20 @@ export class Game {
     this.dispatch(layout ? { type: 'spawnGolden', spots: this.spotProbe(), layout: true } : { type: 'spawnGolden', spots: this.spotProbe() });
   }
 
+  /** v5 #5 R4 (sizing §12.2): the UI's eligible DRAWN yard slot ids (0..11). Default none: no hen is marked until the yard UI wires it. */
+  private yardProbe: () => readonly number[] = () => [];
+  setYardProbe(fn: () => readonly number[]) { this.yardProbe = fn; }
+  /** R4/R19: re-check at once on a layout change (resize, rotate, yard rebuild, pill shown). */
+  broodyLayoutChanged() { this.driveBroody(true); }
+  /** R12 tap handler (stopPropagation is the UI's): only while attended (R11 frozen under menus); one payout in the sim. */
+  tapBroody() { if (broodyOn(this.b) && !this.inactive && !this.held() && this.attendedNow()) this.dispatch({ type: 'tapBroody', slots: this.yardProbe() }); }
+  /** Read-only Broody state for the yard UI (null while off / locked); `frozen` while not attended (a menu is open). */
+  broodyView(): BroodyView | null { return broodyOn(this.b) ? broodyView(this.state, this.b, !this.attendedNow()) : null; }
+  /** R4 driver: when a check is due on an attended frame, measure the eligible slots and dispatch broodySlots. */
+  private driveBroody(layout: boolean) {
+    if (!broodyOn(this.b) || this.inactive || this.held() || this.hidden || !this.attendedNow() || !broodyCheckDue(this.state, this.b, layout)) return;
+    this.dispatch({ type: 'broodySlots', slots: this.yardProbe() });
+  }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
@@ -498,6 +522,7 @@ export class Game {
       this.focusAccMs = gap >= maxMs ? 0 : r.focusAccMs;
       this.emit(ev);
       this.driveGolden(false); // v5 #1: identity unless golden is on and a spawn is due on an attended frame
+      this.driveBroody(false); // v5 #5: identity unless broody is on and an R4 check is due on an attended frame
     }
     this.checkCoopFull(); this.telemetry.poll();
   }
