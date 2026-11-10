@@ -38,3 +38,14 @@ export function clockWageAsleepStep(s: GameState, id: WageWorker, dt: number, b:
 }
 /** §4 caption $X: that worker's wage per minute at Farm F, cents (W1 0.25·F, W2 0.5·F $/min from balance). */
 export const wagePerMinCents = (id: WageWorker, farm: number, b: Balance) => Math.round(b.workers[id].wage_per_farm_per_min * farm * CENTS_PER_DOLLAR);
+
+// ---- S5 (Saves-agreed): clockWageTipShown, OPTIONAL save key, no SAVE_VERSION bump (AC-FC11 "save flag, optional field, no
+// version bump"). Declared here so the field stays local to clockWage; serialize keeps it as any other GameState key.
+declare module './state' { interface GameState { /** AC-FC11: the one-time yawn tip was shown in this save. Absent = not shown. */ clockWageTipShown?: boolean } }
+/** Load sanitiser (game.ts calls it right after m5Load): a non-boolean value is dropped (= default, not shown). Identity with clockWage off. */
+export function clockWageLoad(s: GameState, b: Balance): GameState {
+  if (!clockWageOn(b) || !('clockWageTipShown' in s) || typeof s.clockWageTipShown === 'boolean') return s;
+  const { clockWageTipShown: _x, ...rest } = s; return rest as GameState;
+}
+/** AC-FC11: the tip is due (on the first yawn) only with clockWage on and not yet shown in this save. */
+export const clockWageTipDue = (s: GameState, b: Balance) => clockWageOn(b) && s.clockWageTipShown !== true;

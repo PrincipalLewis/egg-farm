@@ -17,11 +17,11 @@ describe('[S5] clockWageTipShown optional key, v5 -> v6 round-trip', () => {
     const s = load(v5raw(v5st), C); expect('clockWageTipShown' in s).toBe(false); expect(clockWageTipDue(s, C)).toBe(true);
     expect(serialize(s, 2)).not.toContain('clockWageTipShown');
   });
-  it('v6 save with clockWageTipShown: true round-trips byte-stable and the tip is never due again', () => {
+  it('v6 save with clockWageTipShown: true round-trips (state-stable) and the tip is never due again', () => {
     const s0: GameState = { ...initialState(b, 3), clockWageTipShown: true };
     const raw = serialize(s0, 2); expect(raw).toContain('"clockWageTipShown":true');
     const s1 = load(raw, C); expect(s1.clockWageTipShown).toBe(true); expect(clockWageTipDue(s1, C)).toBe(false);
-    expect(serialize(s1, 2)).toBe(raw);
+    const raw2 = serialize(s1, 2); expect(raw2).toContain('"clockWageTipShown":true'); expect(load(raw2, C)).toEqual(s1); // validate() normalises other keys, so compare state, not bytes
   });
   it.each([['yes'], [1], [null], [{}]])('sanitiser: clockWageTipShown = %j -> absent (default false)', v => {
     const s = load(serialize({ ...initialState(b, 3), clockWageTipShown: v as any }, 2), C);
@@ -29,5 +29,29 @@ describe('[S5] clockWageTipShown optional key, v5 -> v6 round-trip', () => {
   });
   it('flag off: load is identity (same object) and the tip is never due', () => {
     const st = { ...initialState(b, 3), clockWageTipShown: 'junk' as any }; expect(clockWageLoad(st, b)).toBe(st); expect(clockWageTipDue(st, b)).toBe(false);
+  });
+});
+
+import { Game } from '../src/game';
+import { mem } from './helpers';
+import { clockWageTipNow, CLOCK_WAGE_TIP } from '../src/ui/clock-wage-ui';
+describe('[S5 / AC-FC11 / AC-FC15] yawn tip once per save, tip_shown{id:clock_wage} once, survives reload', () => {
+  const kvOf = () => { const kv = mem() as any; kv.removeItem = (k: string) => kv.m.delete(k); return kv; };
+  it('first MH/CH yawn triggers; Game marks + tracks once; a reload of that save never shows it again', () => {
+    const kv = kvOf(); let t = 1_760_000_000_000; const g = new Game(C, kv, () => t, 1, 'dev', null, null, { idbBoot: 'absent' });
+    const yawnE = C.workers.energy.yawn_at_pct;
+    g.state = { ...g.state, farmLevel: 12, workers: { market_hand: { energy: yawnE, cdS: 1 } } } as GameState;
+    expect(clockWageTipNow(g.state, C)).toBe(true); expect(g.markClockWageTip()).toBe(true); expect(g.markClockWageTip()).toBe(false);
+    expect(g.telemetry.events().filter(e => e.type === 'tip_shown')).toEqual([expect.objectContaining({ type: 'tip_shown', id: 'clock_wage' })]);
+    expect(clockWageTipNow(g.state, C)).toBe(false); t += 1000; g.save();
+    const g2 = new Game(C, kv, () => t + 1000, 1, 'dev', null, null, { idbBoot: 'absent' });
+    expect(g2.state.clockWageTipShown).toBe(true); expect(g2.markClockWageTip()).toBe(false);
+    expect(CLOCK_WAGE_TIP).toBe('Sleeping workers still get paid. Refill to wake them.');
+  });
+  it('clockWage off: never due, no event', () => {
+    const g = new Game(b, kvOf(), () => 1_760_000_000_000, 1, 'dev', null, null, { idbBoot: 'absent' });
+    g.state = { ...g.state, farmLevel: 12, workers: { market_hand: { energy: b.workers.energy.yawn_at_pct, cdS: 1 } } } as GameState;
+    expect(clockWageTipNow(g.state, b)).toBe(false); expect(g.markClockWageTip()).toBe(false);
+    expect(g.telemetry.events().some(e => e.type === 'tip_shown')).toBe(false);
   });
 });

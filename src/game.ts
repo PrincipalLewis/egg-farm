@@ -10,7 +10,7 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent, CollectibleSkin } from './sim/events';
 import type { WorkerId } from './sim/workers';
-import { clockWageOn } from './sim/clock-wage';
+import { clockWageOn, clockWageLoad, clockWageTipDue } from './sim/clock-wage';
 import { goldenOn, goldenUnload, spawnDue } from './sim/golden';
 import { focusFrameMs } from './sim/clock';
 import { streakOn, streakPeak } from './sim/streak';
@@ -104,6 +104,7 @@ export class Game {
     if (!f && m4On(b)) this.state = { ...this.state, tracksV7: 1, v6BackupId: (opts.newId ?? newMigrationId)() };
     this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
     if (f) { const ev: SimEvent[] = []; this.state = m5Load(this.state, b, now(), ev); this.emit(ev); } // v5 F2: a reload is a >= 60 s gap (AB-1)
+    if (f) this.state = clockWageLoad(this.state, b); // S5: clockWageTipShown sanitiser (identity with clockWage off)
     if (f) {
       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
       // so each load produces at most one new grant.
@@ -347,6 +348,11 @@ export class Game {
   clockWageSinceWelcome(): Record<'market_hand' | 'coop_hand', { asleepS: number; cents: number }> {
     const v = (id: 'market_hand' | 'coop_hand') => { const r = this.cwSince[id]; return { asleepS: r ? Math.round(r.asleepS * 10) / 10 : 0, cents: r?.cents ?? 0 }; };
     return { market_hand: v('market_hand'), coop_hand: v('coop_hand') };
+  }
+  /** AC-FC11 / S5: mark the one-time yawn tip shown (once per save), log tip_shown{id:clock_wage}, save. False when not due. */
+  markClockWageTip(): boolean {
+    if (!clockWageTipDue(this.state, this.b)) return false;
+    this.state = { ...this.state, clockWageTipShown: true }; this.telemetry.track('tip_shown', { id: 'clock_wage' }); this.save(); return true;
   }
   /** The welcome-back modal showed the line(s): start a new window. */
   resetClockWageSinceWelcome() { this.cwSince = {}; }
