@@ -80,7 +80,7 @@ export class FatigueCue {
   }
   /** position: fixed under the HUD (bottom + 6), right-aligned to the chip, clamped 8 px from the viewport edges. */
   private place() {
-    const gap = 6, edge = 8, c = this.chip.getBoundingClientRect(), hb = this.hud.getBoundingClientRect().bottom, w = this.pop.offsetWidth;
+    const gap = 6, edge = 8, c = this.chip.getBoundingClientRect(), hb = this.hud.getBoundingClientRect().bottom, w = this.pop.getBoundingClientRect().width; // fractional, so the right edge equals the chip's exactly
     const left = Math.max(edge, Math.min(c.right - w, innerWidth - edge - w));
     this.pop.style.top = `${hb + gap}px`; this.pop.style.left = `${left}px`; // unrounded: right edge = chip right exactly (Art §1: 260.4 at 360x640)
   }
