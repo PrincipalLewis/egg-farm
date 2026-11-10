@@ -15,6 +15,8 @@ export interface Spot { id: SpotId; x: number; y: number }
 /** clear = minimum gap in px from the spot's hit box (0 = must not overlap: the ×N hens pill). */
 export interface Zone { name: string; box: Box; clear: number }
 export const SPOT_IDS: readonly SpotId[] = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'];
+/** §2.2 1280×800 docked reference centres S1..S8 (the table every docked layout derives from). */
+export const DOCKED_1280x800 = DOCKED_REF_CENTRES;
 const COLS = PHONE_SPOT_FRACTIONS.length; // spots per column
 
 /** §2.1 layout key. `dockedMq` = the app's own matchMedia('(min-width:960px) and (orientation:landscape)').matches. */
@@ -22,8 +24,9 @@ export function layoutKey(vw: number, vh: number, dockedMq: boolean): LayoutKey 
   if (!dockedMq) return vw < PHONE_375_MIN_VW ? 'phone-360' : 'phone-375';
   return vw - DOCKED_COLUMN_PX < DOCKED_PLAY_REF_PX || vh < DOCKED_COMPACT_MAX_VH ? 'docked-compact' : 'docked';
 }
-/** §2.1 spot centres (whole px) for a layout from live rects (scene; docked-compact also queue + meter). docked-compact: no S4/S8. */
-export function spotCentres(key: LayoutKey, vw: number, vh: number, r: { scene: Box; queue?: Box; meter?: Box }): Spot[] {
+/** §2.1 spot centres (whole px) for a layout from live rects (scene; docked-compact also queue + meter), plus safe-area insets added
+ *  after rounding (§2.1 rule 1). docked-compact: no S4/S8. */
+export function spotCentres(key: LayoutKey, vw: number, vh: number, r: { scene: Box; queue?: Box; meter?: Box }, inset = { left: 0, top: 0 }): Spot[] {
   let pts: [number, number][];
   if (key === 'phone-360' || key === 'phone-375') {
     const s = r.scene, h = s.bottom - s.top;
@@ -37,7 +40,7 @@ export function spotCentres(key: LayoutKey, vw: number, vh: number, r: { scene: 
       yb = r.meter.top - COMPACT_ROW_GAP_PX, ym = Math.round((yt + yb) / HALF);
     pts = [[L, yt], [L, ym], [L, yb], [NaN, NaN], [R, yt], [R, ym], [R, yb], [NaN, NaN]];
   }
-  return pts.map(([x, y], i) => ({ id: SPOT_IDS[i], x: Math.round(x), y: Math.round(y) })).filter(p => Number.isFinite(p.x));
+  return pts.map(([x, y], i) => ({ id: SPOT_IDS[i], x: Math.round(x) + inset.left, y: Math.round(y) + inset.top })).filter(p => Number.isFinite(p.x));
 }
 /** §2 runtime rule 2: hit box (SPAWN_HIT_PX) ≥ zone.clear from every zone (0 = no overlap) and ≥ SPAWN_CLEAR_PX inside the viewport. */
 export function validSpots(spots: readonly Spot[], zones: readonly Zone[], vw: number, vh: number): Spot[] {

@@ -114,10 +114,12 @@ describe('slim sheet attendance API (not real Shift integration)', () => {
       document.body.innerHTML = html; expect(probe('market')()).toBe(false);
       document.body.innerHTML = ''; expect(probe('market')()).toBe(true);
     });
-  it('[RF-AC16] app installs exactly one shared attended probe without full F6 engine', () => {
+  it('[RF-AC16] app installs exactly one shared attended probe; F6 rebuild adds only the mount host (no audio engine, no feature registered in app.ts)', () => {
     const app = readFileSync(`${process.cwd()}/src/ui/app.ts`, 'utf8');
     expect(app.match(/wireAttended\(g,/g)).toHaveLength(1);
-    expect(app).not.toMatch(/mountOverlay|FxBudget|AudioHooks|registerFeature/);
+    // HoE/v5-f6-rebuild: app.ts gains exactly one mountOverlay(...) fed by the SAME dialogOpen closure as wireAttended, and the shared FxBudget.
+    expect(app.match(/mountOverlay\(\{/g)).toHaveLength(1); expect(app).toMatch(/wireAttended\(g, attDialogOpen\)/); expect(app).toMatch(/dialogOpen: attDialogOpen/);
+    expect(app).not.toMatch(/AudioHooks|registerFeature/);
     expect(app).toContain('data-testid="hens-pill"');
     expect(app).toContain('data-testid="docked-panel"');
     expect(app).toContain('data-testid="upgrades-panel"');

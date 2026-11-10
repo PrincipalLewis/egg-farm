@@ -116,7 +116,7 @@ describe('BUG-4/5: FX lifetimes', () => {
   it('leaving customer waves then slides out, and reduced motion cuts the slide', () => {
     expect(css).toMatch(/\.ghost\.leave\{animation:leave 240ms 300ms/); expect(css).toMatch(/@keyframes leave\{to\{transform:translateX\(-80px\);opacity:0\}/);
     expect(css).toMatch(/\.rm \.ghost\.walkoff,\.rm \.ghost\.leave\{animation:none\}/);
-    expect(app).toMatch(/ghost\(r, rm\(\) \? '' : 'wave leave'\)/); expect(app).toMatch(/spawn\(el, 1500\)|live\.splice\(i, 1\); \}, 1500\)/);  /* #31: ghostHost + setTimeout 1500 */  // lives past 300 + 240 ms
+    expect(app).toMatch(/ghost\(r, rm\(\) \? '' : 'wave leave'\)/); expect(app).toMatch(/spawn\(el, 1500\)|live\.splice\(i, 1\); \}, 1500\)|fx\.release\(el\); \}, 1500\)/);  /* #31: ghostHost + setTimeout 1500 */  // lives past 300 + 240 ms
     expect(app).not.toMatch(/addEventListener\('animationend', kill/);                                       // no bubbled child animationend kill
   });
   it('merged +N floater re-arms its removal timer', () => {

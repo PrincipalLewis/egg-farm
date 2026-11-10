@@ -1,7 +1,7 @@
 # F6 overlay mount layer: spot registry API (DRAFT v0.1)
 
 Owner: Features (Senior Engineer, Features & Economy Wiring). Branch `feat/v5-f6-rebuild` off `origin/rc/v5` @ d65391b (#111 golden merged).
-Status: **DRAFT v0.1, published early** so golden (Generalist), broody (Generalist) and streak (Hire 3 dec9a396) can code against it.
+Status: **DRAFT v0.2 (implemented on the branch, focused tests green; ⚠ not final until the phase-2 audio/QA-seam port + Architect read)**, published early so golden (Generalist), broody (Generalist) and streak (Hire 3 dec9a396) can code against it.
 Signatures marked **[stable]** won't change without a note to all three consumers. Items marked **[draft]** may still change during the port.
 Source: a port of the UI layer from #86 (`feat/v5-ui-f6-overlay` @ 2b4abf93) and its sibling bundle-f6 @ 6307674, rebuilt against rc/v5's current APIs. It is not a rebase.
 
@@ -26,7 +26,8 @@ export interface Box { left: number; top: number; right: number; bottom: number 
 export interface Spot { id: SpotId; x: number; y: number }            // hit-box centre, viewport px
 export interface Zone { name: string; box: Box; clear: number }        // clear = min gap px (0 = must not overlap)
 export function layoutKey(vw: number, vh: number, dockedMq: boolean): LayoutKey;
-export function spotCentres(key: LayoutKey, vw: number, vh: number, r: { scene: Box; queue?: Box; meter?: Box }): Spot[];
+export function spotCentres(key: LayoutKey, vw: number, vh: number, r: { scene: Box; queue?: Box; meter?: Box }, inset?: { left: number; top: number }): Spot[]; // safe-area inset added after rounding (§2.1 rule 1)
+export const DOCKED_1280x800: readonly (readonly [number, number])[];
 export function validSpots(spots: readonly Spot[], zones: readonly Zone[], vw: number, vh: number): Spot[];
 export function domZones(doc?: Document, docked?: boolean): Zone[];
 
@@ -69,7 +70,7 @@ export class FxBudget { max: number; admit(el: HTMLElement): void; release(el: H
 
 ## Lifecycle
 1. **Register:** a consumer module calls `registerFeature({...})` when it is evaluated, and `src/ui/features.ts` imports that module. Registration is synchronous and idempotent by id.
-2. **Mount:** `mountApp` calls `mountOverlay` once, after the app DOM and `wireAttended` are set up. Only features whose `flag` is on get mounted, in registration order. `mount()` may return an unmount function, and `destroy()` runs those (used by tests and remounts; production never unmounts).
+2. **Mount:** `mountApp` calls `mountOverlay` once, after the app DOM and `wireAttended` are set up. Only features whose `flag` is on get mounted, in registration order. `mount()` may return an unmount function. `destroy()` runs those in reverse order and removes the lazy layer (used by tests and remounts; production never unmounts).
 3. **Render:** `overlay.render(performance.now())` runs inside `renderAll` after the app render, and calls each live feature's `render`.
 4. **Flag off / no features:** `mountOverlay` adds NO DOM (the layer is lazy), adds no listeners, and `render` is a no-op. The #app outerHTML hash is identical to rc/v5. This is the F6 acceptance check: a jsdom test plus a browser check.
 5. **Attended interplay:** a feature sheet or menu calls `ctx.registerSheet(id)` and `.opened()` / `.closeComplete()`. While it is open, `makeDialogOpen` → `anySheetOpen()` is true, so Game's attended probe is false (golden R6 freeze, streak/sale suspension). Market stays a play surface, and docked Upgrades is not a dialog. Both rules are unchanged from rc/v5. `ctx.attended()` reads the same signal, so a feature never needs its own probe.
@@ -99,3 +100,7 @@ registerFeature({ id: 'broody', flag: 'broody', mount(ctx) {
 import './golden-egg'; import './streak-meter'; import './broody';
 ```
 Rules: use `ctx.fx.admit(el)` / `release(el)` for every transient FX node. Don't add to `DOM_ZONES`; call `registerZone`. Don't import app.ts. Don't keep your own attended probe.
+
+## Changelog
+- v0.1 (cd0d438, 03:05 CET): first publish.
+- v0.2 (03:25 CET): implemented on the branch. Adds the optional `inset` on `spotCentres` and the `DOCKED_1280x800` export. `destroy()` now removes the layer. No consumer-facing signature was removed. Tests: `tests/v5-f6-overlay.test.ts` (25).
