@@ -36,7 +36,7 @@ const mountF6: typeof mountStub = (...a) => { const o = mountStub(...a); teardow
 afterEach(() => { teardown.splice(0).reverse().forEach(d => d()); vi.useRealTimers(); document.body.innerHTML = ''; });
 const root = () => document.getElementById('app')!;
 function mount(b: Balance, extra: Partial<Parameters<typeof stubCtx>[0]> = {}) {
-  const f = fakeGame(), play = vi.fn(() => true), h = stubCtx({ g: f.g as any, b, root: root(), audio: { play }, ...extra });
+  const f = fakeGame(), play = vi.fn(() => true), h = stubCtx({ g: f.g as any, b, root: root(), audio: { play, register: () => {} }, ...extra });
   const ui = mountUi(h.ctx); return { ...f, play, ui: ui!, zones: h.zones, ctx: h.ctx };
 }
 const $ = (s: string) => document.querySelector(s) as HTMLElement | null;
@@ -139,12 +139,12 @@ describe('A2 tier-ups (§3.3, ST-AC9/10/27, CT-AC5/6/15)', () => {
     expect($('#streak-live')!.textContent).toBe('Streak cooling'); fz = false; m.ui.render(t); expect($('#streak-live')!.textContent).toBe('Streak cooling');
   });
   it('CT-AC10 hook: a suppressed pill still plays the sting and the meter part', () => {
-    const f = fakeGame(), play = vi.fn(() => true), { ctx } = stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play } });
+    const f = fakeGame(), play = vi.fn(() => true), { ctx } = stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play, register: () => {} } });
     const ui = mountUi(ctx, { pillSuppressed: () => true })!; for (let i = 1; i <= 7; i++) { t += 1000; f.tap(i / 100); ui.render(t); }
     expect($('.streak-pill')).toBeNull(); expect(play).toHaveBeenCalledWith('streakTier1'); expect($('#streak-live')!.textContent).toBe(tierAria(1, STREAK));
   });
   it('CT-AC10 default: the pill follows F6 v1.0 ctx.pops.active() (stubbed); destroy() clears pops', () => {
-    const f = fakeGame(), play = vi.fn(() => true), h = stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play } });
+    const f = fakeGame(), play = vi.fn(() => true), h = stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play, register: () => {} } });
     const o = mountF6([streakMeter], h.ctx, () => true); h.ctx.pops!.set('golden', true);
     for (let i = 1; i <= 7; i++) { t += 1000; f.tap(i / 100); o.render(t); }
     expect($('.streak-pill')).toBeNull(); expect(play).toHaveBeenCalledWith('streakTier1');

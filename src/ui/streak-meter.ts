@@ -18,16 +18,16 @@ import type { Game } from '../game';
 import type { Balance } from '../config/balance';
 import type { OverlayCtx, OverlayFeature } from './streak-f6-stub';
 
-/** What the streak UI reads from the F6 OverlayCtx (structural, so F6's real ctx and the stub both satisfy it). `audio` is F6's
- *  [draft] phase-2 hook player, absent in API v0.2: optional, the stings are silent until it exists. */
+/** What the streak UI reads from the F6 OverlayCtx (structural, so F6's real ctx and the stub both satisfy it). Matches F6
+ *  API v1.0 @ da38e3f (audio hooks + pops required). */
 export interface StreakCtx {
   g: Pick<Game, 'state' | 'on'>; b: Balance; root: HTMLElement;
   layer(): HTMLElement; rm(): boolean; dialogOpen(): boolean; asset(f: string): string;
   fx: { admit(el: HTMLElement): void; release(el: HTMLElement): void };
   registerZone(name: string, rect: () => { left: number; top: number; right: number; bottom: number } | DOMRect | null, clear?: number): void;
-  audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean; register?(hook: string, file: string): void };
-  /** F6 v1.0 (Features, answer Q3): `pops.active()` = a golden collect / Frenzy pop-up is live (CT-AC10). Optional until v1.0. */
-  pops?: { set(id: string, on: boolean): void; active(): boolean };
+  audio: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean; register(hook: string, file: string): void };
+  /** F6 v1.0 PopSignal: `pops.active()` = a golden collect / Frenzy pop-up is live (CT-AC10). */
+  pops: { set(id: string, on: boolean): void; active(): boolean };
 }
 
 /** Audio hooks -> files (art-ux/assets/sfx; m5-sound-spec §2, combo-tiers §11 1:1 mapping). Registered with F6 registerAudioHook. */
@@ -48,7 +48,7 @@ export interface StreakUi { render(now: number): void; destroy(): void; readonly
 export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | null {
   const { b, g, root } = ctx, streak = streakUiOn(b), coins = tapCoinUiOn(b);
   if (!streak && !coins) return null;
-  if (streak) for (const [hook, file] of Object.entries(STREAK_SFX)) ctx.audio?.register?.(hook, file); // F6 v1.0: hook -> file, loads via the app Audio
+  if (streak) for (const [hook, file] of Object.entries(STREAK_SFX)) ctx.audio.register(hook, file); // F6 v1.0: hook -> file, loads via the app Audio
   const doc = o.doc ?? root.ownerDocument ?? document, rnd = o.random ?? Math.random;
   const $ = <T extends HTMLElement>(sel: string) => doc.querySelector<T>(sel);
   const el = (html: string) => { const t = doc.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
@@ -90,7 +90,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
 
   function tierUp(k: number) {
     const n = streakParams(b).count, max = k >= n;
-    ctx.audio?.play(max ? 'streakMax' : (`streakTier${k}` as keyof typeof STREAK_SFX));
+    ctx.audio.play(max ? 'streakMax' : (`streakTier${k}` as keyof typeof STREAK_SFX));
     const say = sLive.push(tierAria(k, b), nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say;
     if (row) { // meter part of §2: tab k, sheen, label pop, spark dots (motion <= 400 ms; reduced motion: opacity only)
       retrigger(ticks[k - 1] ?? null, 'up'); retrigger(row.querySelector('.streak-sheen'), 'go'); retrigger(label, 'pop');
@@ -98,7 +98,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
         const a = (-150 + (120 * (i + 0.5)) / (max ? MAX_SPARKS : k)) * (Math.PI / 180), d = 12 + rnd() * 8;
         spawn(el(`<i class="streak-spark" style="left:${t.left + t.width / 2}px;top:${t.top}px;--dx:${(Math.cos(a) * d).toFixed(1)}px;--dy:${(Math.sin(a) * d).toFixed(1)}px"></i>`), STREAK_UI_MS.tierUp); } }
     }
-    if ((o.pillSuppressed ?? (() => ctx.pops?.active() ?? false))()) return null; // CT-AC10: F6 v1.0 ctx.pops.active()
+    if ((o.pillSuppressed ?? (() => ctx.pops.active()))()) return null; // CT-AC10: F6 v1.0 ctx.pops.active()
     fxHost().querySelectorAll('.streak-pill').forEach(p => p.remove()); // at most one live pill; a new one replaces it
     const pips = Array.from({ length: n }, (_, i) => `<i class="${i < k ? 'on' : ''}"></i>`).join('');
     const pill = el(`<div class="streak-pill${max ? ' max' : ''}${rmClass()}" aria-hidden="true"><span class="pips">${pips}</span><span>${pillCopy(k, b)}</span></div>`);
@@ -122,7 +122,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
     if (!row) return;
     const s = g.state.streakS ?? 0, v: MeterView = meterView(s, g.state.streakHoldS ?? 0, b, { rm: ctx.rm() });
     const r = tiers.update(s, v.cooling, b, fromTap);
-    if (r.coolStart) { ctx.audio?.play('streakCool'); const say = sLive.push(COOLING_ARIA, nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say; }
+    if (r.coolStart) { ctx.audio.play('streakCool'); const say = sLive.push(COOLING_ARIA, nowMs(), frozen()); if (say && streakLive) streakLive.textContent = say; }
     const reset = !v.shown && prevS > tcNum(b, 'streak_decay_per_s') * FOCUS_DT_MAX_S; prevS = s; // FOCUS_DT_MAX_S = max focus s one frame applies (sim/clock): a bigger drop in one frame is a reset, not decay
     const key = `${v.scale}|${v.label}|${v.cooling}|${v.max}|${v.lit.join()}|${ctx.rm()}`;
     if (r.tierUp) { const box = tierUp(r.tierUp); pendingPill = box ? box.top : undefined; }
@@ -155,7 +155,7 @@ export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | 
   };
 }
 
-/** The F6 feature. No `flag` (F6 API v0.2 example uses flag 'streak'): it must also mount for m4.flags.tapCoins alone (ST-AC29),
+/** The F6 feature. No `flag` (F6 API v1.0 example uses flag 'streak'): it must also mount for m4.flags.tapCoins alone (ST-AC29),
  *  and its mount adds NO DOM, class or listener when both flags are off, so the flag-off #app hash is unchanged. */
 let live: StreakUi | null = null;
 export const streakMeter: OverlayFeature = {
