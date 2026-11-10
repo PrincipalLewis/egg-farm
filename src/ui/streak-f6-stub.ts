@@ -2,7 +2,7 @@
  * v5 F6 STUB (temporary; the ONLY F6 seam of the streak / tapCoins UI). F6 (Features: feature registry / mount host) is not on
  * rc/v5 yet. This mirrors the subset of OverlayCtx / OverlayFeature that ui/streak-meter.ts uses, from Features' F6 API note
  * DRAFT v0.2 "core stable" (engineering/tasks/v5-f6-rebuild/API.md on origin/feat/v5-f6-rebuild @ 7810680; only [stable]
- * names are used) plus the [draft] `audio.play(hook)` (phase 2, ported from #86 2b4abf93), kept OPTIONAL because v0.2 has none.
+ * names are used) plus the [draft] `audio.play(hook)` (phase 2, ported from #86 2b4abf93), kept OPTIONAL until the swap (F6 v1.0 a78c719 ships `ctx.audio.play(hook, {semi})` + `register(hook, file)` and `ctx.pops`).
  * Swap when F6 merges (mechanical):
  *   1. delete this file; in ui/streak-meter.ts import OverlayCtx / OverlayFeature from './overlay';
  *   2. at the end of ui/streak-meter.ts: `registerFeature(streakMeter)`; ui/features.ts gets `import './streak-meter';`;
@@ -21,7 +21,7 @@ export interface OverlayCtx {
   layer(): HTMLElement;
   rm(): boolean;
   /** [draft] F6 phase 2 audio hooks; absent in API v0.2, so the streak stings are silent until it lands. */
-  audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean };
+  audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean; register?(hook: string, file: string): void };
   fx: { admit(el: HTMLElement): void; release(el: HTMLElement): void };
   dialogOpen(): boolean;
   /** No-spawn zone for golden eggs / Broody (meter box + 16 px, golden R14 / ST-AC21). */

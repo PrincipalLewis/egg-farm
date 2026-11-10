@@ -71,12 +71,12 @@ describe('app.ts collect path: R2/R3 filter and R16 pitch (ui/streak-tap.ts)', (
   it('flags off (shipped): a synthetic click still collects and plays collect at rate 1 (rc1)', async () => {
     const { g, play } = await app(balance, { coop: 10 }); const c0 = coop(g);
     (document.getElementById('collect') as HTMLButtonElement).click();
-    expect(coop(g)).toBeLessThan(c0); expect(play).toHaveBeenCalledWith('collect', undefined, 1);
+    expect(coop(g)).toBeLessThan(c0); expect(play).toHaveBeenCalledWith('collect');
   });
   it('streak/tapCoins on: a synthetic (isTrusted false) click on Collect or the scene is ignored: no collect, no credit, no sound', async () => {
     const B = mk({ streak: 1, tapCoins: 1 }), F = balance.m4!.tc!.streak_unlock_farm as number;
     const { g, play } = await app(B, { farmLevel: F, coop: 10 }); const c0 = coop(g), s0 = g.state.coinsCents;
     (document.getElementById('collect') as HTMLButtonElement).click(); document.getElementById('scene')?.click();
-    expect(coop(g)).toBe(c0); expect(g.state.streakS ?? 0).toBe(0); expect(g.state.coinsCents).toBe(s0); expect(play).not.toHaveBeenCalledWith('collect', undefined, expect.anything());
+    expect(coop(g)).toBe(c0); expect(g.state.streakS ?? 0).toBe(0); expect(g.state.coinsCents).toBe(s0); expect(play).not.toHaveBeenCalledWith('collect');
   });
 });

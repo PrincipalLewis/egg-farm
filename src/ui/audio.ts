@@ -28,10 +28,9 @@ export class Audio {
   }
   /** Single-tab guard: silence everything until reload. */
   mute() { this.enabled = false; try { void this.ctx?.suspend(); } catch { /* ignore */ } }
-  /** `rate` = playbackRate (v5 streak R16 tier-pitched collect, ui/streak-tap.ts collectRate); 1 = unchanged rc1 path. */
-  play(name: SfxName, minGapMs = 60, rate = 1) {
+  play(name: SfxName, minGapMs = 60) {
     if (!this.enabled || !this.ctx) return; const f = SFX[name], buf = this.buffers.get(f); if (!buf) return;
     const t = performance.now(); if (t - (this.lastPlay.get(f) ?? -1e9) < minGapMs) return; this.lastPlay.set(f, t);
-    const src = this.ctx.createBufferSource(); src.buffer = buf; if (rate !== 1) src.playbackRate.value = rate; src.connect(this.ctx.destination); src.start();
+    const src = this.ctx.createBufferSource(); src.buffer = buf; src.connect(this.ctx.destination); src.start();
   }
 }

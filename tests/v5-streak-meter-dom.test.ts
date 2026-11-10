@@ -3,7 +3,7 @@
 // product/collection/m5-streak-tap-coins-spec.md v1.3.3 b315dea1: ST-AC9/10/17/17b/21/24/25/27/29; art-ux/m5-combo-tiers.md v0.3
 // ed4ded1d: CT-AC1/3/5/6/11/13/14/15. Every expected number is read from config (ST-AC28).
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { balance, type Balance } from '../src/config/balance';
 import { mountStreakUi, streakMeter, STREAK_SFX, STREAK_UI_MS } from '../src/ui/streak-meter';
@@ -151,6 +151,12 @@ describe('A2 tier-ups (§3.3, ST-AC9/10/27, CT-AC5/6/15)', () => {
     h.ctx.pops!.set('golden', false); for (let i = 8; i <= 14; i++) { t += 1000; f.tap(i / 100); o.render(t); }
     expect($('.streak-pill')!.textContent).toBe(pillCopy(2, STREAK));
     h.ctx.pops!.set('frenzy', true); expect(h.ctx.pops!.active()).toBe(true); o.destroy(); expect(h.ctx.pops!.active()).toBe(false);
+  });
+  it('F6 v1.0 audio: mount registers the 5 streak hooks -> files (public/assets/audio) once; streak off registers none', () => {
+    const register = vi.fn(), play = vi.fn(() => true), f = fakeGame();
+    mountUi(stubCtx({ g: f.g as any, b: STREAK, root: root(), audio: { play, register } }).ctx);
+    expect(register.mock.calls).toEqual(Object.entries(STREAK_SFX));
+    for (const file of Object.values(STREAK_SFX)) expect(existsSync(resolve(process.cwd(), `public/assets/audio/${file}.mp3`)), file).toBe(true);
   });
   it('reduced motion: no spark dots, pill has .rm (CT-AC14)', () => {
     const m = mount(STREAK, { rm: () => true }); climb(m, 7); expect($('.streak-spark')).toBeNull(); expect($('.streak-pill')!.classList.contains('rm')).toBe(true);

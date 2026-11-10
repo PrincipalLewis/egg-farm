@@ -39,7 +39,7 @@ import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVi
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
-import { tapIgnored, collectRate } from './streak-tap'; // v5 streak / tapCoins (Hire 3)
+import { tapIgnored, collectSemi, playCollect } from './streak-tap'; // v5 streak / tapCoins (Hire 3)
 import { syncPriceChips } from './streak-chips-dom'; // v5 streak price chips (Hire 3)
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -220,7 +220,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const got = Math.min(Math.floor(before), S.eggsPerTap(g.state.collectionLevel, b));
     retrigger(collectBtn, 'squash');
     if (got <= 0) { retrigger(collectBtn, 'shake'); floatText('Empty', collectBtn); return; }
-    void k; audio.play('collect', undefined, collectRate(g.state, b, credited)); // v5 streak R16: tier-pitched egg.collect (rate 1 = rc1)
+    void k; playCollect(audio, collectSemi(g.state, b, credited)); // v5 streak R16: tier-pitched egg.collect (semi 0 = sfx('collect'))
     const d = tapFx.tap(got);
     if (!rm()) { let first = true; for (let i = 0; i < d.flyers; i++) fly(A('icon-egg.svg'), $('.nest'), basketEl.parentElement!, i, 24, () => { if (first) { first = false; pulse(basketEl.parentElement!); } }); }
     else pulse(basketEl.parentElement!);

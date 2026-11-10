@@ -25,7 +25,7 @@ export interface StreakCtx {
   layer(): HTMLElement; rm(): boolean; dialogOpen(): boolean; asset(f: string): string;
   fx: { admit(el: HTMLElement): void; release(el: HTMLElement): void };
   registerZone(name: string, rect: () => { left: number; top: number; right: number; bottom: number } | DOMRect | null, clear?: number): void;
-  audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean };
+  audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean; register?(hook: string, file: string): void };
   /** F6 v1.0 (Features, answer Q3): `pops.active()` = a golden collect / Frenzy pop-up is live (CT-AC10). Optional until v1.0. */
   pops?: { set(id: string, on: boolean): void; active(): boolean };
 }
@@ -48,6 +48,7 @@ export interface StreakUi { render(now: number): void; destroy(): void; readonly
 export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | null {
   const { b, g, root } = ctx, streak = streakUiOn(b), coins = tapCoinUiOn(b);
   if (!streak && !coins) return null;
+  if (streak) for (const [hook, file] of Object.entries(STREAK_SFX)) ctx.audio?.register?.(hook, file); // F6 v1.0: hook -> file, loads via the app Audio
   const doc = o.doc ?? root.ownerDocument ?? document, rnd = o.random ?? Math.random;
   const $ = <T extends HTMLElement>(sel: string) => doc.querySelector<T>(sel);
   const el = (html: string) => { const t = doc.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };

@@ -1,7 +1,8 @@
 // v5 streak R2/R3 tap filter + R16 tier-pitched collect (ui/streak-tap.ts), pure.
 import { describe, it, expect } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
-import { tapIgnored, collectRate } from '../src/ui/streak-tap';
+import { vi } from 'vitest';
+import { tapIgnored, collectSemi, playCollect } from '../src/ui/streak-tap';
 import { tierThresholds, streakParams } from '../src/ui/streak-view';
 
 const mk = (flags: Record<string, number>): Balance => ({ ...balance, m4: { ...balance.m4!, enabled: 1, flags: { ...balance.m4!.flags, ...flags } } }) as Balance;
@@ -23,17 +24,20 @@ describe('tapIgnored (R2/R3)', () => {
   });
 });
 
-describe('collectRate (R16 / CT-AC6)', () => {
+describe('collectSemi + playCollect (R16 / CT-AC6, F6 v1.0 Audio.playFile)', () => {
   const T = tierThresholds(streakParams(ON));
-  it('credited tap after tier k: 2^(k/12), +4 st at MAX; base pitch at tier 0', () => {
-    expect(collectRate({ streakS: 0.01 }, ON, true)).toBe(1);
-    T.forEach((t, i) => expect(collectRate({ streakS: t }, ON, true)).toBeCloseTo(2 ** ((i + 1) / 12), 12));
-    expect(collectRate({ streakS: T[T.length - 1] }, ON, true)).toBeCloseTo(2 ** (4 / 12), 12);
+  it('credited tap after tier k: +k st, +4 at MAX; 0 at tier 0', () => {
+    expect(collectSemi({ streakS: 0.01 }, ON, true)).toBe(0);
+    T.forEach((t, i) => expect(collectSemi({ streakS: t }, ON, true)).toBe(i + 1));
+    expect(collectSemi({ streakS: T[T.length - 1] }, ON, true)).toBe(4);
   });
-  it('uncounted tap, streak off (tapCoins only), or flags off: rate 1', () => {
-    expect(collectRate({ streakS: T[2] }, ON, false)).toBe(1);
-    expect(collectRate({ streakS: T[2] }, ON, undefined)).toBe(1);
-    expect(collectRate({ streakS: T[2] }, COINS, true)).toBe(1);
-    expect(collectRate({ streakS: T[2] }, OFF, true)).toBe(1);
+  it('uncounted tap, streak off (tapCoins only) or flags off: 0', () => {
+    expect(collectSemi({ streakS: T[2] }, ON, false)).toBe(0); expect(collectSemi({ streakS: T[2] }, ON, undefined)).toBe(0);
+    expect(collectSemi({ streakS: T[2] }, COINS, true)).toBe(0); expect(collectSemi({ streakS: T[2] }, OFF, true)).toBe(0);
+  });
+  it("semi 0, or rc/v5 Audio without playFile: exactly audio.play('collect'); with F6 playFile: the pitched collect file + hook", () => {
+    const a = { play: vi.fn() }; playCollect(a as any, 0); playCollect(a as any, 3); expect(a.play.mock.calls).toEqual([['collect'], ['collect']]);
+    const f = { play: vi.fn(), playFile: vi.fn(() => true) }; playCollect(f as any, 0); playCollect(f as any, 2);
+    expect(f.play.mock.calls).toEqual([['collect']]); expect(f.playFile).toHaveBeenCalledWith('sfx-collect-pop', undefined, 2, 'collect');
   });
 });
