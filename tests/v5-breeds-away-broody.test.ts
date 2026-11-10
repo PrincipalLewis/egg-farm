@@ -92,3 +92,16 @@ describe('BR-R14 Broody bp_eff', () => {
     expect(applyOffline(over, 3600_000, BR).eggs).toBe(capped);
     expect(capped).toBeLessThan(uncapped);
   });
+
+describe('F4 BR-R13 float order', () => {
+  it('[F4][BR-R13] m4OfflineEggs matches floor(min(min(a,cap)×rate×(1e4+bp)/1e4, max)×mult) over H×bp×a×mult', () => {
+    const o = BR.offline, tbl = BR.m4!.offline!; let n = 0, bad = 0; const ex: unknown[] = [];
+    for (let H = 0; H < tbl.eggsPerSec.length; H++) for (const mult of [1, 1.1, 1.25, 1.5, 2]) for (let bp = 0; bp <= 3000; bp += 25)
+      for (let a = 60; a <= 7300; a += 7) {
+        const spec = Math.floor(Math.min(Math.min(a, o.offlineCapSeconds) * tbl.eggsPerSec[H] * (10000 + bp) / 10000, tbl.maxEggs2h[H]) * mult);
+        const got = m4OfflineEggs(a, H, BR, mult, bp); n++;
+        if (got !== spec) { bad++; if (ex.length < 5) ex.push({ H, mult, bp, a, spec, got }); }
+      }
+    expect(bad, `mismatches ${bad}/${n} e.g. ${JSON.stringify(ex)}`).toBe(0);
+  });
+});

@@ -12,8 +12,8 @@ import { BP_ONE } from '../config/breeds';
 export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1, awayBpN = 0): number {
   const o = b.offline, t = b.m4!.offline!; if (!isFinite(awayS) || awayS < o.offlineMinSeconds) return 0;
   const L = clampL(hensLevel, b);
-  const rate = t.eggsPerSec[L] * (BP_ONE + awayBpN) / BP_ONE;
-  return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * rate, t.maxEggs2h[L]) * mult);
+  // BR-R13 exact float order: min(away,cap) × rate × (10000+awayBp)/10000, then min with maxEggs2h, × mult, floor.
+  return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * t.eggsPerSec[L] * (BP_ONE + awayBpN) / BP_ONE, t.maxEggs2h[L]) * mult);
 }
 /** AC11: eggs = floor(min(away,cap) * mult * eggs_per_sec(saved farm L)); <60s or negative => 0. */
 /** `eps` overrides the Farm curve (M4-A: the Hens track rate). */

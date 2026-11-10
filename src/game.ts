@@ -117,9 +117,13 @@ export class Game {
     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
   }
   private grantOffline(gapMs: number) {
+    // F3: capture Away bp applied to the grant BEFORE applyOffline (hatch reveal can star-up a slotted Away).
+    const appliedAwayBp = awayBp(this.state, this.b);
     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
-    // Row 32: away_bp on every offline_grant when breeds on (incl. eggs=0). Modal still only when eggs > 0.
-    const v5 = offlineGrantV5(this.b, awayBp(this.state, this.b));
+    // F5 / BR-R18 / PMC: emit offline_grant ONLY when the offline rules apply (gap >= offlineMinSeconds).
+    // Same trigger as flag-off. Sub-60 s loads emit NOTHING. Eggs=0 still emits when breeds on (errata V-2b).
+    if (gapMs < this.b.offline.offlineMinSeconds * 1000) return r.eggs;
+    const v5 = offlineGrantV5(this.b, appliedAwayBp);
     if (r.eggs > 0 || v5.away_bp !== undefined) {
       if (r.eggs > 0) this.offline = { eggs: r.eggs, awayS: r.awayS };
       this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...v5 });

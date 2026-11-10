@@ -148,3 +148,14 @@
 - Merged #126 c0 (`d4b5fdc`) into tip via ordinary merge `f97be20` (no rebase/force). Harden non-WIP: Present `683b5ef`, Away `c908227`, away_bp `e6bd1da`. Head `e6bd1da`.
 - Row 32 only; sessionEndPresentFields separate from gen/breeds-telemetry. Gates (flock+lane-run saves): tsc 0, sync-economy --check 0, focused 146 pass.
 - #126 body patched (trace/API/stack); #125 marked Ready once.
+
+## 2026-11-10 01:52 CET · Saves · HoE/breeds-sim-prB-traits #125 HoQA F1–F5 fix
+- Merged-forward `origin/rc/v5` `d65391b0` (#111) @ `8f47fd1` (ordinary merge; game.ts goldenEnd then sessionEndPresentFields / T-AC9).
+- F1: FrameClock→StepClock `focusFtMs` = min(100, F−given); Present uses fT/1000; Σ fT = F (BR-R12b(b)).
+- F2: pending counted-tap stamps flush after fT (order (0)→(3)→(4)→(5)); BR-AC53 → present_active_s 660.0.
+- F3: `grantOffline` captures `awayBp` before `applyOffline`.
+- F4: BR-R13 float order `min(away,cap)×rate×(1e4+bp)/1e4` then min/max/floor.
+- F5 / BR-R18 / PMC: emit `offline_grant` only when gap ≥ offlineMinSeconds (60 s); sub-60 emits nothing; eggs=0 + away_bp still at ≥60.
+- F6 Broody nest accrual still out of scope.
+- Gates (flock+lane-run): tsc 0; focused present/away-bp/away-broody/family-caps 34/34; f1b+breeds-state+offline 88/88; sync-economy --check pending in same push.
+- One push; re-bar grades F1–F5 + merge-forward onto d65391b0.

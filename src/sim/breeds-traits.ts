@@ -15,6 +15,8 @@ export interface BreedsCalm {
   focusMs: number;
   /** Counted-tap stamps (focusMs after that tick's fT), newest last; capacity ≥ k. */
   stamps: number[];
+  /** Credited taps waiting to stamp after the next focused tick's fT (BR-R12b order (0)→(3)). */
+  pendingCount: number;
   /** Σ fT (ms) while ≥1 settled Present slotted and gate open. */
   activeMs: number;
   /** open → closed transitions while Present was slotted. */
@@ -26,7 +28,7 @@ export interface BreedsCalm {
 const EPS = 1e-9;
 /** m4.flags.breeds without importing flagOn (keeps this file out of the F3 flagOn scan). */
 const breedsFlag = (b: Balance) => m4On(b) && b.m4?.flags?.breeds === 1;
-const emptyCalm = (): BreedsCalm => ({ focusMs: 0, stamps: [], activeMs: 0, lostCount: 0, open: true });
+const emptyCalm = (): BreedsCalm => ({ focusMs: 0, stamps: [], pendingCount: 0, activeMs: 0, lostCount: 0, open: true });
 
 /** Clamped family bp via shared familyActiveBp (breeds-family / commit 0) — no duplicate clamp math. */
 export const presentBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'present');
@@ -79,23 +81,25 @@ export function breedsNoteCreditedTap(s: GameState, b: Balance, credited: boolea
   return stamp(s, b, true);
 }
 
+/** Queue a counted-tap stamp; flushed after the next focused tick's fT (BR-R12b order (0) fT → (3) stamp). */
 function stamp(s: GameState, b: Balance, ownWindow: boolean): GameState {
   if (ownWindow) {
     if (s.farmLevel < tc(b, 'streak_unlock_farm') || (s.tapCreditCdS ?? 0) > EPS) return s;
   }
   const calm = s.breedsCalm ?? emptyCalm();
-  const k = bc(b, 'present_calm_k');
-  const cap = k > 0 ? k : 1;
-  const stamps = calm.stamps.length >= cap ? [...calm.stamps.slice(calm.stamps.length - cap + 1), calm.focusMs] : [...calm.stamps, calm.focusMs];
-  const out: GameState = { ...s, breedsCalm: { ...calm, stamps } };
+  const out: GameState = {
+    ...s,
+    breedsCalm: { ...calm, pendingCount: (calm.pendingCount ?? 0) + 1 },
+  };
   return ownWindow ? { ...out, tapCreditCdS: tc(b, 'tap_credit_min_s') } : out;
 }
 
 /**
- * Per focused tick (BR-R12b order (0)/(4)/(5)): advance focusMs, eval gate, accumulate activeMs / lostCount,
- * then add Present eggs: prodEggsPerSec × focusS × presentBp / 10000 (gate open). Also ages the breeds-only credit window.
+ * Per focused tick (BR-R12b order (0)/(3)/(4)/(5)): advance focusMs by fT, flush pending stamps at post-fT focusMs,
+ * eval gate, accumulate activeMs / lostCount, then Present eggs with fT/1000.
+ * `focusFtMs` = BR-R12b integer-ms share from FrameClock (absent → round(focusS×1000) for direct step() tests).
  */
-export function breedsPresentTick(s: GameState, dt: number, focusS: number, b: Balance): GameState {
+export function breedsPresentTick(s: GameState, dt: number, focusS: number, b: Balance, focusFtMs?: number): GameState {
   if (!breedsFlag(b) || !s.breeds) return s;
   let out = s;
   // breeds-only credit window (sim dt); streak/tapCoins own the countdown when either is on.
@@ -103,23 +107,38 @@ export function breedsPresentTick(s: GameState, dt: number, focusS: number, b: B
   if (!streakOrTap && (out.tapCreditCdS ?? 0) > EPS) {
     out = { ...out, tapCreditCdS: Math.max(0, out.tapCreditCdS! - dt) };
   }
-  const fT = focusS > 0 ? Math.round(focusS * 1000) : 0;
+  const fT = focusFtMs !== undefined ? Math.max(0, Math.floor(focusFtMs))
+    : (focusS > 0 ? Math.round(focusS * 1000) : 0);
   if (fT <= 0 && !out.breedsCalm) return out;
   let calm = out.breedsCalm ?? emptyCalm();
   if (fT > 0) {
-    calm = { ...calm, focusMs: calm.focusMs + fT };
-    const open = calmGateOpen(calm.focusMs, calm.stamps, bc(b, 'present_calm_w_s'), bc(b, 'present_calm_k'));
+    // (0) fT
+    let focusMs = calm.focusMs + fT;
+    let stamps = calm.stamps;
+    // (3) stamp at post-fT focusMs
+    const pending = calm.pendingCount ?? 0;
+    if (pending > 0) {
+      const k = bc(b, 'present_calm_k');
+      const cap = k > 0 ? k : 1;
+      stamps = stamps.slice();
+      for (let i = 0; i < pending; i++) {
+        stamps = stamps.length >= cap ? [...stamps.slice(stamps.length - cap + 1), focusMs] : [...stamps, focusMs];
+      }
+    }
+    // (4) gate
+    const open = calmGateOpen(focusMs, stamps, bc(b, 'present_calm_w_s'), bc(b, 'present_calm_k'));
     const hasPresent = presentBp(out, b) > 0;
     let lost = calm.lostCount, active = calm.activeMs;
     if (hasPresent && calm.open && !open) lost++;
     if (hasPresent && open) active += fT;
-    calm = { ...calm, open, lostCount: lost, activeMs: active };
+    calm = { ...calm, focusMs, stamps, pendingCount: 0, open, lostCount: lost, activeMs: active };
   }
   out = { ...out, breedsCalm: calm };
-  // Present eggs (BR-R12): only on focus, gate open, bp > 0. Base coop fill already ran on full dt.
+  // (5) Present eggs (BR-R12): prod × (fT/1000) × presentBp / 10000. Base coop fill already ran on full dt.
   const bp = calm.open ? presentBp(out, b) : 0;
-  if (bp > 0 && focusS > 0) {
-    const add = prodEggsPerSec(out, b, { suspended: false }) * focusS * bp / BP_ONE;
+  const focusTermS = fT / 1000;
+  if (bp > 0 && focusTermS > 0) {
+    const add = prodEggsPerSec(out, b, { suspended: false }) * focusTermS * bp / BP_ONE;
     if (add > 0) {
       const cap = coopCap(out, b);
       out = { ...out, coop: Math.min(cap, out.coop + add) };
@@ -131,5 +150,5 @@ export function breedsPresentTick(s: GameState, dt: number, focusS: number, b: B
 /** E22b / BR-AC49: offline ≥ 60 s empties the ring (gate open); keeps activeMs / lostCount / focusMs. */
 export function breedsCalmClearRing(s: GameState): GameState {
   if (!s.breedsCalm) return s;
-  return { ...s, breedsCalm: { ...s.breedsCalm, stamps: [], open: true } };
+  return { ...s, breedsCalm: { ...s.breedsCalm, stamps: [], pendingCount: 0, open: true } };
 }

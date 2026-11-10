@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { incomePerSec } from '../src/econ/income';
 import { initialState, type GameState } from '../src/sim/state';
-import { step } from '../src/sim/tick';
+import { step, advance } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { applyOffline } from '../src/sim/offline';
 import { type BreedsSave } from '../src/sim/breeds';
@@ -134,7 +134,7 @@ describe('session_end present_* (row 32 only)', () => {
     expect(sessionEndPresentFields(idle, BR)).toEqual({ present_active_s: 0, present_lost_count: 0 });
     // 12250 ms → 12.3; 12249 → 12.2
     let s = st(settledLeghorn());
-    s = { ...s, breedsCalm: { focusMs: 12250, stamps: [], activeMs: 12250, lostCount: 3, open: true } };
+    s = { ...s, breedsCalm: { focusMs: 12250, stamps: [], pendingCount: 0, activeMs: 12250, lostCount: 3, open: true } };
     expect(sessionEndPresentFields(s, BR)).toEqual({ present_active_s: 12.3, present_lost_count: 3 });
     s = { ...s, breedsCalm: { ...s.breedsCalm!, activeMs: 12249 } };
     expect(sessionEndPresentFields(s, BR).present_active_s).toBe(12.2);
@@ -145,7 +145,7 @@ describe('session_end present_* (row 32 only)', () => {
     const T0 = Date.UTC(2026, 10, 10, 0);
     const g = new Game(BR, kv, () => T0, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
     g.state = st(settledLeghorn());
-    g.state = { ...g.state, breedsCalm: { focusMs: 1000, stamps: [], activeMs: 1000, lostCount: 2, open: true } };
+    g.state = { ...g.state, breedsCalm: { focusMs: 1000, stamps: [], pendingCount: 0, activeMs: 1000, lostCount: 2, open: true } };
     const tracks: any[] = [];
     (g as any).telemetry.track = (type: string, fields?: object) => { tracks.push({ type, fields }); };
     (g as any).telemetry.flush = () => {};
@@ -156,6 +156,54 @@ describe('session_end present_* (row 32 only)', () => {
     // Must NOT invent other breeds session_end keys here (gen/breeds-telemetry owns those)
     expect(end?.fields).not.toHaveProperty('breed_hatches');
     expect(end?.fields).not.toHaveProperty('breed_present_eggs');
+  });
+});
+
+
+describe('F1 BR-R12b(b) fT share via advance()', () => {
+  it('[F1][BR-AC53 non-whole] frame focusMs 249 → focusMs/activeMs 12,249 → present_active_s 12.2; 250 → 12.3', () => {
+    const run = (lastF: number) => {
+      let s = st(settledLeghorn()), acc = 0;
+      for (let i = 0; i < 12; i++) { const r = advance(s, 1000, acc, BR, undefined, { focusMs: 1000 }); s = r.state; acc = r.accMs; }
+      const r = advance(s, 300, acc, BR, undefined, { focusMs: lastF });
+      return r.state;
+    };
+    const a = run(249), c = run(250);
+    expect(a.breedsCalm!.focusMs).toBe(12_249);
+    expect(a.breedsCalm!.activeMs).toBe(12_249);
+    expect(sessionEndPresentFields(a, BR).present_active_s).toBe(12.2);
+    expect(sessionEndPresentFields(c, BR).present_active_s).toBe(12.3);
+  });
+});
+
+/** BR-AC53 scripted session (QA P2a/P2b): 300 s idle; 3×30 taps 1 s apart with 120 s gaps; end 747 s. */
+function ac53(tapBeforeTick: boolean) {
+  let s = st(settledLeghorn());
+  const taps = new Set<number>();
+  let t = 300_000;
+  for (let burst = 0; burst < 3; burst++) { for (let k = 0; k < 30; k++) taps.add(t + k * 1000); t += 29_000 + 120_000; }
+  const end = t;
+  let fm = 0;
+  while (fm < end) {
+    const next = fm + 100;
+    if (tapBeforeTick && taps.has(next)) s = apply(s, { type: 'collect' }, BR);
+    s = step(s, 0.1, BR, undefined, focus); fm = next;
+    if (!tapBeforeTick && taps.has(fm)) s = apply(s, { type: 'collect' }, BR);
+  }
+  return { focusMs: s.breedsCalm!.focusMs, f: sessionEndPresentFields(s, BR) };
+}
+
+describe('F2 BR-R12b stamp/gate order / BR-AC53', () => {
+  it('[F2][BR-AC53] taps after the tick that reaches their focus second → present_active_s 660.0 / lost 3', () => {
+    const r = ac53(false);
+    expect(r.focusMs).toBe(747_000);
+    expect(r.f.present_lost_count).toBe(3);
+    expect(r.f.present_active_s).toBe(660);
+  });
+  it('[F2][BR-AC53] taps before that tick (counted on it) → present_active_s 660.0 / lost 3', () => {
+    const r = ac53(true);
+    expect(r.f.present_lost_count).toBe(3);
+    expect(r.f.present_active_s).toBe(660);
   });
 });
 
