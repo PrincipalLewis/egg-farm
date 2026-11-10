@@ -13,7 +13,19 @@ import './streak.css';
 import { LiveThrottle, StreakTiers, COOLING_ARIA, meterView, pillCopy, streakParams, streakUiOn, tapCoinUiOn, tierAria, type MeterView } from './streak-view';
 import { coinPopAria, coinPopBox, coinPopText, pillBox } from './tap-coin-pop';
 import { tcNum } from '../config/formulas';
+import type { Game } from '../game';
+import type { Balance } from '../config/balance';
 import type { OverlayCtx, OverlayFeature } from './streak-f6-stub';
+
+/** What the streak UI reads from the F6 OverlayCtx (structural, so F6's real ctx and the stub both satisfy it). `audio` is F6's
+ *  [draft] phase-2 hook player, absent in API v0.1: optional, the stings are silent until it exists. */
+export interface StreakCtx {
+  g: Pick<Game, 'state' | 'on'>; b: Balance; root: HTMLElement;
+  layer(): HTMLElement; rm(): boolean; dialogOpen(): boolean; asset(f: string): string;
+  fx: { admit(el: HTMLElement): void; release(el: HTMLElement): void };
+  registerZone(name: string, rect: () => { left: number; top: number; right: number; bottom: number } | DOMRect | null, clear?: number): void;
+  audio?: { play(hook: string, opts?: { semi?: number; minGapMs?: number }): boolean };
+}
 
 /** Audio hooks -> files (art-ux/assets/sfx; m5-sound-spec §2, combo-tiers §11 1:1 mapping). Registered with F6 registerAudioHook. */
 export const STREAK_SFX = { streakTier1: 'sfx-streak-tier-01', streakTier2: 'sfx-streak-tier-02', streakTier3: 'sfx-streak-tier-03',
@@ -32,7 +44,7 @@ const EGG_POP_ABOVE_CENTRE_PX = 40;
 export interface StreakUiOpts { /** CT-AC10: true while a golden collect / Frenzy pop-up is live (pill dropped, rest plays). */ pillSuppressed?: () => boolean; random?: () => number; doc?: Document }
 
 export interface StreakUi { render(now: number): void; destroy(): void; readonly row: HTMLElement | null }
-export function mountStreakUi(ctx: OverlayCtx, o: StreakUiOpts = {}): StreakUi | null {
+export function mountStreakUi(ctx: StreakCtx, o: StreakUiOpts = {}): StreakUi | null {
   const { b, g, root } = ctx, streak = streakUiOn(b), coins = tapCoinUiOn(b);
   if (!streak && !coins) return null;
   const doc = o.doc ?? root.ownerDocument ?? document, rnd = o.random ?? Math.random;
@@ -146,6 +158,6 @@ export function mountStreakUi(ctx: OverlayCtx, o: StreakUiOpts = {}): StreakUi |
 let live: StreakUi | null = null;
 export const streakMeter: OverlayFeature = {
   id: 'streak',
-  mount(ctx) { live = mountStreakUi(ctx); const ui = live; return () => { ui?.destroy(); if (live === ui) live = null; }; },
+  mount(ctx: OverlayCtx) { live = mountStreakUi(ctx); const ui = live; return () => { ui?.destroy(); if (live === ui) live = null; }; },
   render(_ctx, t) { live?.render(t); },
 };
