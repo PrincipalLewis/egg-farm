@@ -1,0 +1,193 @@
+{
+ "steps": [
+  {
+   "act": "pre-collect",
+   "coins": "$0.00",
+   "basket": "0",
+   "nest": "",
+   "collect": "Collect +5 · 1 ready",
+   "onb": "Your hens are laying eggs…"
+  },
+  {
+   "act": "collect",
+   "before": {
+    "coins": "$0.00",
+    "basket": "0",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "Your hens are laying eggs…"
+   },
+   "after": {
+    "coins": "$0.00",
+    "basket": "1",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 9 s"
+   }
+  },
+  {
+   "act": "collect",
+   "before": {
+    "coins": "$0.00",
+    "basket": "1",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 9 s"
+   },
+   "after": {
+    "coins": "$0.00",
+    "basket": "2",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 8 s"
+   }
+  },
+  {
+   "act": "collect",
+   "before": {
+    "coins": "$0.00",
+    "basket": "2",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 8 s"
+   },
+   "after": {
+    "coins": "$0.00",
+    "basket": "4",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 7 s"
+   }
+  },
+  {
+   "act": "collect",
+   "before": {
+    "coins": "$0.00",
+    "basket": "4",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 7 s"
+   },
+   "after": {
+    "coins": "$0.00",
+    "basket": "5",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 6 s"
+   }
+  },
+  {
+   "act": "collect",
+   "before": {
+    "coins": "$0.00",
+    "basket": "5",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 6 s"
+   },
+   "after": {
+    "coins": "$0.00",
+    "basket": "7",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 5 s"
+   }
+  },
+  {
+   "act": "collect",
+   "before": {
+    "coins": "$0.00",
+    "basket": "7",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "A customer is on the way… 5 s"
+   },
+   "after": {
+    "coins": "$0.00",
+    "basket": "8",
+    "nest": "",
+    "collect": "Collect +5 · 2 ready",
+    "onb": "A customer is on the way… 4 s"
+   }
+  }
+ ],
+ "globals": [
+  "eggfarmExportTelemetry"
+ ],
+ "sells": [
+  {
+   "btn": "Sell 8",
+   "card": "order partial enter :: 8/10 eggs · $10.00 Sell 8",
+   "before": {
+    "coins": "$0.00",
+    "basket": "8",
+    "nest": "",
+    "collect": "Collect +5",
+    "onb": "Tap Sell to earn coins."
+   },
+   "after": {
+    "coins": "$8.00",
+    "basket": "0",
+    "nest": "",
+    "collect": "Collect +5",
+    "onb": "Sell a few more eggs to afford it · $2 to go"
+   }
+  },
+  {
+   "btn": "Sell",
+   "card": "order ready :: 10/10 eggs · $10.00 Sell",
+   "before": {
+    "coins": "$8.00",
+    "basket": "13",
+    "nest": "",
+    "collect": "Collect +5 · 1 ready",
+    "onb": "Sell a few more eggs to afford it · $2 to go"
+   },
+   "after": {
+    "coins": "$10.00",
+    "basket": "11",
+    "nest": "",
+    "collect": "Collect +5 · 4 ready",
+    "onb": "Tap Buy."
+   }
+  }
+ ],
+ "buy": {
+  "btn": "$10.00",
+  "card": "col :: Collect per tap Eggs per tap 5 → 10 Egg price $1.00 → $1.12 Level 0 / 30 $10.00",
+  "before": {
+   "coins": "$10.00",
+   "basket": "11",
+   "nest": "",
+   "collect": "Collect +5 · 4 ready",
+   "onb": "Tap Buy."
+  },
+  "after": {
+   "coins": "$0.00",
+   "basket": "11",
+   "nest": "",
+   "collect": "Collect +10 · 7 ready"
+  },
+  "goalBefore": "Collection L1: +5/tap~15 s›",
+  "goalAfter": "Collection L2: +5/tap\n~1 min 36 s\n›",
+  "cardAfter": "tabs :: Collection Farm Workers"
+ },
+ "buildText": "Egg Farm m3-rc1-pre+a01faea",
+ "preReload": {
+  "coins": "$0.00",
+  "basket": "11",
+  "nest": "",
+  "collect": "Collect +10"
+ },
+ "preUp": "Collection L2: +5/tap\n~1 min 36 s\n›",
+ "postReload": {
+  "coins": "$0.00",
+  "basket": "11",
+  "nest": "",
+  "collect": "Collect +10"
+ },
+ "postUp": "Collection L2: +5/tap\n—\n›",
+ "globalsEnd": [
+  "eggfarmExportTelemetry"
+ ]
+}

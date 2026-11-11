@@ -1,0 +1,26 @@
+{
+ "id": "CSR1-version-TRIG-version-0",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "CSR-6",
+  "CSR-15"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-version-0.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "reason": "version",
+  "store": "ls",
+  "recovered_from": "none",
+  "notice": "M3",
+  "corruptLsMin": 1
+ }
+}

@@ -1,0 +1,51 @@
+# static checks @ abe9cc620421779bda2be1dc2ce0be94f6c7670c (git show abe9cc6:<path>; grep -n), 2026-10-30T11:49:05+01:00
+## F2 navManageView cooldown label/countdown (src/ui/workers-ui.ts)
+167:export const REFILL_COOLDOWN_ARIA = 'Refill, cooling down';
+169:export const fmtCooldown = (cd: number) => `${Math.floor(cd / 60)}:${String(cd % 60).padStart(2, '0')}`;
+176:    return { label: 'Refill', countdown: docked ? ` · ${fmtCooldown(cd)}` : ` ${fmtCooldown(cd)}`, badge: '', aria: prev.text === REFILL_COOLDOWN_ARIA ? prev : { text: REFILL_COOLDOWN_ARIA, at: nowMs } };
+## F2 app.ts render: label text + data-cd, no aria-hidden on .nav-lbl
+629:        { const nl = fb.querySelector('.nav-lbl') as HTMLElement; setText(nl, v.label); if (nl.dataset.cd !== v.countdown) nl.dataset.cd = v.countdown; } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.bad
+## F2 CSS generated countdown (src/ui/styles.css)
+600:.nav-lbl[data-cd]::after{content:attr(data-cd);white-space:pre;font-variant-numeric:tabular-nums}
+603:@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-lbl[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}
+## F3 non-empty visible text guards
+94:      const role = view === 'cards-ch-unpaid' ? 'Coop Hand' : 'Market Hand', X = view === 'cards-ch-unpaid' ? '$15.00' : '$7.50'; // F30: CH $0.50 x 30, MH $0.25 x 30
+150:        return { sel, shown: true, v, name, ok: v.length > 0 && (sel.includes('upgrades') ? words(name).startsWith(words(v)) && name.startsWith('Upgrades') : name.startsWith(v)) }; }); }); // F3: 
+207:      check('D-HOP-10-addendum / D-HOP-2026-10-30-02', w, `cooldown, count 0: ${phone ? 'nav' : 'header'} Refill visible, visible text "Refill" (non-empty, F3) + countdown "${phone ? ' ' : ' · '}
+100:  // QA pre-review F3: an empty visible text would make name.startsWith('') vacuously true, so the visible text must be non-empty.
+101:  const startsWithVisible = (el: Element) => { const v = norm(visible(el)), name = el.getAttribute('aria-label') ?? ''; return { v, name, ok: v.trim().length > 0 && name.startsWith(v) }; };
+102:  it('AC-R17 F3: the starts-with-visible-text check fails on empty visible text (all aria-hidden)', () => {
+## F6 nav-upgrades frame check
+169:    // QA pre-review F6: the nav-upgrades shots must frame the bottom nav, so close the Upgrades sheet first (Escape = openPanel(null));
+177:      check('Art-c1 shot frame (F6)', w, `${scene}: Upgrades sheet closed, bottom nav on top, badge ${want ? `"${want}" shown` : 'off'} before the nav-upgrades-n${n} shot`, !f.sheetOpen && f.navOn
+## Art-c2 CSS (all Refill surfaces)
+43:.shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
+46:.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:shake var(--t-med) linear}
+50:@keyframes refusedFlash{0%,100%{box-shadow:inset 0 0 0 2px var(--c-danger)}}
+51:@media (prefers-reduced-motion:reduce){.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}}
+53:.reduced-motion .btn.manage-all.shake[aria-disabled=true],.rm .btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}
+231:.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
+413:.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{color:var(--c-muted-strong);background:#CFC6BA}
+## Art-c2 Refill surfaces in markup
+98:    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="
+195:  for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
+242:    if (kind === 'manage' && g.state.workers[wid as keyof typeof g.state.workers]?.unpaid) return cantAfford(bt);
+81:  return `<div class="refill-wrap"><button class="btn manage manage-all${glow && cd === 0 ? ' glow' : ''}${cd > 0 ? ' is-cooldown' : ''}" data-act="manageAll" aria-disabled="${cd > 0}" aria-label="
+## Art-c2 browser checks (scripts/m41-p2-browser.mjs)
+30:  const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 600, reducedMotion: rm ? 'reduce' : 'no-preference' });
+259:    check('P2b-U / Art-c2', w, rm ? 'reduced motion: refused Unpaid Refill tap = refusedFlash (300ms), no transform' : 'full motion: refused Unpaid Refill tap = shake', /\bshake\b/.test(r.cls) && 
+267:    if (phone) { const r = await probe('nav.actions .nav-manage'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused nav Refill tap (cooldown) = ${rm ? 'refusedFlash (300ms), n
+269:    if (!phone) { const r = await probe('#p-upgrades header [data-act=manageAll]'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused docked-header Refill tap (cooldown) = ${rm
+270:    const r = await probe('#uRow > .refill-wrap button.manage-all'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused Workers-tab Refill bar tap (cooldown) = ${rm ? 'refusedFl
+## Art (b) focused Refill clears the bar: covering check
+287:    check('WCAG 2.4.11', w, `keyboard Tab / Shift+Tab through the Workers list: every focused control fully visible, none under the sticky Refill bar (${fwd.length}+${back.length} stops, bar ${hasBar ? 'shown' : 'abs
+293:    check('WCAG 2.4.11', w, `shot state: focus on the first card's Refill after Shift+Tab, fully below the bar (top ${at?.top} >= bar ${at?.barBottom})`, at && at.el === 'BUTTON[manage:market_hand]' && at.ok, at);
+294:    await shot(page, 'focus-under-refill-bar', w, "Keyboard focus on the first card's Refill after Shift+Tab, just below the stuck Refill bar (WCAG 2.4.11: scroll-margin-top = bar + scroller padding + 8px)", { shot: 
+614:#uRow .wk,#uRow .wk :is(button,[tabindex]){scroll-margin-top:var(--refill-bar-h,0px)} /* WCAG 2.4.11 (port of 7380b86): set from the measured sticky Refill bar (+8px), 0 when no bar; on the focusables too, since focus scrolling uses the focused element's o
+## Firefox focus ring source rules
+33:.btn:focus-visible,.icon-btn:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
+573:nav.actions button:focus-visible,[data-tab]:focus-visible,#collect:focus-visible,.kbd-focus{outline:3px solid var(--c-focus);outline-offset:2px}
+575:nav.actions button:focus-visible,nav.actions button.kbd-focus{outline-offset:-3px}
+## SIZES in dev browser script
+57:const SIZES = [[360, 800], [390, 844], [1280, 800]];
+## src delta f883dad..abe9cc6 (merge of rc/v5 458f74c), UI files

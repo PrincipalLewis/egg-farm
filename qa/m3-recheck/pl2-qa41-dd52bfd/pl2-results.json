@@ -1,0 +1,460 @@
+{
+ "sizes": {
+  "390": {
+   "bid": "m3-rc1-pre+dd52bfd",
+   "res": [
+    {
+     "try": 21,
+     "w": 390,
+     "variant": "single",
+     "before": 14000,
+     "hudNow": "$14K",
+     "hudLater": "$14K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 22,
+     "w": 390,
+     "variant": "rapid5",
+     "before": 14000,
+     "hudNow": "$14K",
+     "hudLater": "$14.3K",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 23,
+     "w": 390,
+     "variant": "rapid5_noDelay",
+     "before": 14300,
+     "hudNow": "$14.3K",
+     "hudLater": "$14.3K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 24,
+     "w": 390,
+     "variant": "tickOffset",
+     "before": 14300,
+     "hudNow": "$14.3K",
+     "hudLater": "$14.6K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 25,
+     "w": 390,
+     "variant": "afterSell",
+     "before": 14600,
+     "hudNow": "$15K",
+     "hudLater": "$15K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 26,
+     "w": 390,
+     "variant": "afterBuyColl",
+     "before": 15000,
+     "hudNow": "$12.2K",
+     "hudLater": "$12.2K",
+     "samples": 7,
+     "maxDropPct": 18.67,
+     "bad": false
+    },
+    {
+     "try": 27,
+     "w": 390,
+     "variant": "afterBuyFarm",
+     "before": 12200,
+     "hudNow": "$1,612.69",
+     "hudLater": "$1,612.69",
+     "samples": 6,
+     "maxDropPct": 87.3,
+     "bad": false
+    },
+    {
+     "try": 28,
+     "w": 390,
+     "variant": "afterSwitch",
+     "before": 1612.69,
+     "hudNow": "$1,612.69",
+     "hudLater": "$1,612.61",
+     "samples": 7,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 29,
+     "w": 390,
+     "variant": "afterEscape",
+     "before": 1612.61,
+     "hudNow": "$1,612.61",
+     "hudLater": "$1,986.47",
+     "samples": 5,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 30,
+     "w": 390,
+     "variant": "afterManageAll",
+     "before": 1986.47,
+     "hudNow": "$1,986.39",
+     "hudLater": "$2,465.03",
+     "samples": 8,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 31,
+     "w": 390,
+     "variant": "single",
+     "before": 2465.03,
+     "hudNow": "$2,465.03",
+     "hudLater": "$2,464.95",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 32,
+     "w": 390,
+     "variant": "rapid5",
+     "before": 2464.95,
+     "hudNow": "$2,464.95",
+     "hudLater": "$2,464.95",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 33,
+     "w": 390,
+     "variant": "rapid5_noDelay",
+     "before": 2464.95,
+     "hudNow": "$2,464.95",
+     "hudLater": "$2,838.80",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 34,
+     "w": 390,
+     "variant": "tickOffset",
+     "before": 2838.8,
+     "hudNow": "$2,838.73",
+     "hudLater": "$2,838.73",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 35,
+     "w": 390,
+     "variant": "afterSell",
+     "before": 2838.73,
+     "hudNow": "$3,287.44",
+     "hudLater": "$3,287.44",
+     "samples": 4,
+     "maxDropPct": 0.01,
+     "bad": false
+    },
+    {
+     "try": 36,
+     "w": 390,
+     "variant": "afterBuyColl",
+     "before": 3287.44,
+     "hudNow": "$3,810.91",
+     "hudLater": "$3,810.83",
+     "samples": 9,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 37,
+     "w": 390,
+     "variant": "afterBuyFarm",
+     "before": 3810.83,
+     "hudNow": "$4,319.33",
+     "hudLater": "$4,827.92",
+     "samples": 7,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 38,
+     "w": 390,
+     "variant": "afterSwitch",
+     "before": 4827.92,
+     "hudNow": "$4,827.92",
+     "hudLater": "$4,827.92",
+     "samples": 6,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 39,
+     "w": 390,
+     "variant": "afterEscape",
+     "before": 4827.92,
+     "hudNow": "$4,827.84",
+     "hudLater": "$4,827.84",
+     "samples": 5,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 40,
+     "w": 390,
+     "variant": "afterManageAll",
+     "before": 4827.84,
+     "hudNow": "$5,351.31",
+     "hudLater": "$5,351.31",
+     "samples": 8,
+     "maxDropPct": 0,
+     "bad": false
+    }
+   ],
+   "stateCoins": 482784,
+   "hud": "$5,351.31"
+  },
+  "1280": {
+   "bid": "m3-rc1-pre+dd52bfd",
+   "res": [
+    {
+     "try": 1,
+     "w": 1280,
+     "variant": "single",
+     "before": 14100,
+     "hudNow": "$14.1K",
+     "hudLater": "$14.1K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 2,
+     "w": 1280,
+     "variant": "rapid5",
+     "before": 14100,
+     "hudNow": "$14.1K",
+     "hudLater": "$14.5K",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 3,
+     "w": 1280,
+     "variant": "rapid5_noDelay",
+     "before": 14500,
+     "hudNow": "$14.5K",
+     "hudLater": "$14.5K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 4,
+     "w": 1280,
+     "variant": "tickOffset",
+     "before": 14500,
+     "hudNow": "$14.5K",
+     "hudLater": "$14.8K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 5,
+     "w": 1280,
+     "variant": "afterSell",
+     "before": 14800,
+     "hudNow": "$15.3K",
+     "hudLater": "$15.3K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 6,
+     "w": 1280,
+     "variant": "afterBuyColl",
+     "before": 15300,
+     "hudNow": "$12.5K",
+     "hudLater": "$12.5K",
+     "samples": 7,
+     "maxDropPct": 18.3,
+     "bad": false
+    },
+    {
+     "try": 7,
+     "w": 1280,
+     "variant": "afterBuyFarm",
+     "before": 12500,
+     "hudNow": "$1,896.40",
+     "hudLater": "$1,896.40",
+     "samples": 6,
+     "maxDropPct": 85.41,
+     "bad": false
+    },
+    {
+     "try": 8,
+     "w": 1280,
+     "variant": "afterSwitch",
+     "before": 1896.4,
+     "hudNow": "$1,896.40",
+     "hudLater": "$1,896.32",
+     "samples": 7,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 9,
+     "w": 1280,
+     "variant": "afterEscape",
+     "before": 1896.32,
+     "hudNow": "$1,896.32",
+     "hudLater": "$2,300.12",
+     "samples": 5,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 10,
+     "w": 1280,
+     "variant": "afterManageAll",
+     "before": 2300.12,
+     "hudNow": "$2,300.04",
+     "hudLater": "$2,606.53",
+     "samples": 8,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 11,
+     "w": 1280,
+     "variant": "single",
+     "before": 2606.53,
+     "hudNow": "$2,606.53",
+     "hudLater": "$2,606.45",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 12,
+     "w": 1280,
+     "variant": "rapid5",
+     "before": 2606.45,
+     "hudNow": "$2,606.45",
+     "hudLater": "$3,159.94",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 13,
+     "w": 1280,
+     "variant": "rapid5_noDelay",
+     "before": 3159.94,
+     "hudNow": "$3,159.94",
+     "hudLater": "$3,159.94",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 14,
+     "w": 1280,
+     "variant": "tickOffset",
+     "before": 3159.94,
+     "hudNow": "$3,159.87",
+     "hudLater": "$3,159.87",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 15,
+     "w": 1280,
+     "variant": "afterSell",
+     "before": 3159.87,
+     "hudNow": "$3,579.03",
+     "hudLater": "$3,578.64",
+     "samples": 4,
+     "maxDropPct": 0.01,
+     "bad": false
+    },
+    {
+     "try": 16,
+     "w": 1280,
+     "variant": "afterBuyColl",
+     "before": 3578.64,
+     "hudNow": "$3,997.32",
+     "hudLater": "$3,997.24",
+     "samples": 9,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 17,
+     "w": 1280,
+     "variant": "afterBuyFarm",
+     "before": 3997.24,
+     "hudNow": "$4,543.17",
+     "hudLater": "$4,543.17",
+     "samples": 6,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 18,
+     "w": 1280,
+     "variant": "afterSwitch",
+     "before": 4543.17,
+     "hudNow": "$4,543.17",
+     "hudLater": "$4,909.55",
+     "samples": 7,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 19,
+     "w": 1280,
+     "variant": "afterEscape",
+     "before": 4909.55,
+     "hudNow": "$4,909.55",
+     "hudLater": "$4,909.47",
+     "samples": 5,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 20,
+     "w": 1280,
+     "variant": "afterManageAll",
+     "before": 4909.47,
+     "hudNow": "$5,245.90",
+     "hudLater": "$5,245.82",
+     "samples": 8,
+     "maxDropPct": 0,
+     "bad": false
+    }
+   ],
+   "stateCoins": 490955,
+   "hud": "$5,245.82"
+  }
+ },
+ "tries": 40,
+ "fails": []
+}

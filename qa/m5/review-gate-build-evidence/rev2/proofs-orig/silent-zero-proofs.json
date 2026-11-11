@@ -1,0 +1,124 @@
+{
+  "status": "HoQA proof run (synthetic only)",
+  "blocking_count": 5,
+  "blocking_cases": [
+    "A_empty_noAffByF_dict_yields_PASS_via_zero",
+    "B_partial_missing_key_does_not_force_FAIL",
+    "D_one_seed_empty_map_still_PASS_with_zeros",
+    "F_b4_ref_accepts_any_documentary_string",
+    "G_measured_zero_and_absent_key_same_verdict"
+  ],
+  "results": [
+    {
+      "case": "A_empty_noAffByF_dict_yields_PASS_via_zero",
+      "proves_bug": true,
+      "finding": "BLOCKING",
+      "detail": {
+        "overall": "PASS",
+        "PL-AC4a": "PASS",
+        "PL-AC4b": "PASS",
+        "missing_gap_keys": {
+          "before": 0,
+          "after": 285
+        },
+        "sample_gP95": {
+          "F11-15": {
+            "gP95": "0",
+            "gW": "0"
+          },
+          "F16-20": {
+            "gP95": "0",
+            "gW": "0"
+          },
+          "F21-25": {
+            "gP95": "0",
+            "gW": "0"
+          },
+          "F26-30": {
+            "gP95": "0",
+            "gW": "0"
+          }
+        },
+        "note": "empty {} \u2192 every L treated as 0 \u2192 gP95=0 PASS; missing_gap_keys reported but does NOT gate"
+      }
+    },
+    {
+      "case": "B_partial_missing_key_does_not_force_FAIL",
+      "proves_bug": true,
+      "finding": "BLOCKING",
+      "detail": {
+        "overall": "PASS",
+        "missing_gap_keys": {
+          "before": 0,
+          "after": 3
+        },
+        "missing_gap_policy": "PROVISIONAL: absent noAffByF[L] counted as 0 (analyze.py x.get(L,0)); QA must confirm pl.ts omits zero-gap levels",
+        "note": "DESIGN provisional #7 + authority.json explicitly count missing as 0; counter is diagnostic only"
+      }
+    },
+    {
+      "case": "C_omit_noAffByF_field_fails",
+      "safe": true,
+      "finding": "OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "input_errors_sample": [
+          "after seed 1: noAffByF missing",
+          "after seed 2: noAffByF missing",
+          "after seed 3: noAffByF missing"
+        ],
+        "note": "field absent \u2192 errs \u2192 FAIL (correct fail-closed for whole-field absence)"
+      }
+    },
+    {
+      "case": "D_one_seed_empty_map_still_PASS_with_zeros",
+      "proves_bug": true,
+      "finding": "BLOCKING",
+      "detail": {
+        "overall": "PASS",
+        "missing_gap_keys": {
+          "before": 0,
+          "after": 57
+        },
+        "note": "one seed all-zeros from absent keys dilutes band stats; still PASS"
+      }
+    },
+    {
+      "case": "E_quantile_empty_raises",
+      "safe": true,
+      "finding": "OK",
+      "detail": {
+        "overall": "N/A",
+        "note": "quantile of empty list"
+      }
+    },
+    {
+      "case": "F_b4_ref_accepts_any_documentary_string",
+      "proves_bug": true,
+      "finding": "BLOCKING",
+      "detail": {
+        "CAP_without_ref": "CONDITIONAL-UNMET",
+        "CAP_with_junk_ref": "PASS",
+        "note": "D-HOP-29-08 requires Econ B4 re-run on seeds 1-200; a free-text --b4-ref is not that re-run"
+      }
+    },
+    {
+      "case": "G_measured_zero_and_absent_key_same_verdict",
+      "proves_bug": true,
+      "finding": "BLOCKING",
+      "detail": {
+        "explicit_zero_overall": "PASS",
+        "absent_overall": "PASS",
+        "explicit_miss": {
+          "before": 0,
+          "after": 0
+        },
+        "absent_miss": {
+          "before": 0,
+          "after": 3
+        },
+        "note": "counter differs but verdict does not; absent conflated with measured 0 for PASS/FAIL"
+      }
+    }
+  ]
+}

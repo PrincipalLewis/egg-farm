@@ -1,0 +1,20 @@
+--- a/qa/v5-saves/v5-saves-cases.md
++++ b/qa/v5-saves/v5-saves-cases.md
+@@ -20,7 +20,7 @@
+ Volatile, excluded from N2: `savedAt, sum, seq, lastTick*, session*, lease, telemetry`, plus the timers listed in `lib.mjs VOLATILE`.
+ Every case also requires: build-id = `<prefix>+<rc7>` with no `+dirty` (meta and `#app`), no recovery dialog unless the case expects one, and 0 page, console or HTTP errors.
+ 
+-## Fixtures (`fixtures/`, read-only; pins in `FIXTURES.sha256`, which itself has sha256 64562c33…86cf)
++## Fixtures (`fixtures/`, read-only; pins in `FIXTURES.sha256`, which itself has sha256 25e4e603…b6dc; fixed 2026-10-30, was a stale 64562c33…86cf cite)
+ | id | file | sha256 | state |
+ |---|---|---|---|
+ | l41-A | 5d9efa6/l41-A-fresh-F0-C1.save.json | 380e422d…84d8 | 5d9efa6 fresh |
+@@ -129,7 +129,7 @@
+ | FO-8 | tapCoins | map only | 0 | PASS | PASS | = / = | PASS |
+ | FO-9 | rc2Refill | HoE only (map: ambiguous) | 0 | PASS | PASS | = / = | PASS |
+ | FO-10 | autoRefill | HoE only (map: ambiguous; V5-HOP-1 doesn't unblock it) | 0 | PASS | PASS | = / = | PASS |
+-Probe: `probes/flagsoff-probe.test.ts` (dc2ab34c…), `probes/flagsoff-compare.mjs` (89cd26d4…), runner `probes/run-flagsoff.sh` (28888be8…; own worktrees + npm ci under qa/scratch, removed after, vitest 1 worker). Run: `/workspace/egg-farm-studio/ops/tools/lane-run.sh saves-qa -- qa/v5-saves/probes/run-flagsoff.sh <rc full sha> <outdir> <flag,list>`; exit of compare = 0 and `VERDICT PASS`. Prelim 10:41 on a923206: `probes/out-a923206-prelim/` (SHA256SUMS 472d9d09…), 10/10 PASS; exp1 fixed-path file 4c2f88a2… (= #91 base), state c0ad82c5… on both paths and both SHAs; all 5 info fixtures equal on both paths. Shipped `m4.flags` at both SHAs: all 0, `m4.enabled` 1. Limit: (iii) is set-level (one save on the whole flags-off set), so the rows share it; it does not isolate a single flag.
++Probe: `probes/flagsoff-probe.test.ts` (dc2ab34c…), `probes/flagsoff-compare.mjs` (89cd26d4…), runner `probes/run-flagsoff.sh` (28888be8…; own worktrees + npm ci under qa/scratch, removed after, vitest 1 worker). Run: `/workspace/egg-farm-studio/ops/tools/lane-run.sh saves-qa -- qa/v5-saves/probes/run-flagsoff.sh <rc full sha> <outdir> <flag,list>`; exit of compare = 0 and `VERDICT PASS`. Prelim 10:41 on a923206: `probes/out-a923206-prelim/` (SHA256SUMS 472d9d09…), 10/10 PASS; exp1 fixed-path file 4c2f88a2… (= #91 base), state c0ad82c5… on both paths and both SHAs; all 5 info fixtures equal on both paths. Shipped `m4.flags` at both SHAs: all 0, `m4.enabled` 1. **One-save limitation (QA-D-1030-SAVES-RC-1 (6)):** (iii) is set-level: ONE save on the whole flags-off set, so FO-1..FO-10 share it and it does not isolate a single flag's effect on `state`. Per-flag isolation is (i) + (ii) only. FO-4 salesStopped=0 is kept because (i) proves the flag ships off (D-CEO-20261030-04 (3)), even though #5b has no code. Re-run 11:15 on rc/v5 3f582db vs 458f74c: `probes/out-3f582db/` (SHA256SUMS 53020762…), 10/10 PASS, exp1 state c0ad82c5… on both paths, all 5 info fixtures equal.
+ 
+ ## How to run (at the RC)
+ Abort rule (QA-D-1030-KILLS addendum, HoQA 07:46 Oct 30): the csr scripts (B-csr8-lease, B-resetat) start vite preview detached and stay unchanged for the v5 RC; if the gate is ever lane-killed mid B-csr8-lease or B-resetat, record the abort in status.log, then stop and ask HoO before any re-run. G0-port-free stays HARD. Moving these servers under lane-run is 5.1 cleanup.

@@ -1,0 +1,65 @@
+[
+ {
+  "n": "in-game build hash (Settings) == SHA, not dirty",
+  "pass": true,
+  "i": {
+   "ver": "Egg Farm m3-rc1-pre+aa66bdb",
+   "sha": "aa66bdb177d8"
+  }
+ },
+ {
+  "n": "collect -> sell -> upgrade on a fresh release game",
+  "pass": true,
+  "i": {
+   "collected": 48,
+   "sold": true,
+   "upgraded": true,
+   "s0": {
+    "coins": 0,
+    "F": 0,
+    "C": 0,
+    "basket": 0
+   },
+   "s1": {
+    "coins": 0,
+    "F": 0,
+    "C": 1,
+    "basket": 5
+   },
+   "secs": 16.517
+  }
+ },
+ {
+  "n": "save/reload keeps levels and money",
+  "pass": true,
+  "i": {
+   "s1": {
+    "coins": 0,
+    "F": 0,
+    "C": 1,
+    "basket": 5
+   },
+   "s2": {
+    "coins": 0,
+    "F": 0,
+    "C": 1,
+    "basket": 5
+   },
+   "hdr": "$0.00"
+  }
+ },
+ {
+  "n": "release globals only eggfarmExportTelemetry",
+  "pass": false,
+  "i": [
+   "eggfarmExportTelemetry",
+   "eggfarm",
+   "eggfarmOrderList"
+  ]
+ },
+ {
+  "n": "no page errors",
+  "pass": true,
+  "i": []
+ }
+]

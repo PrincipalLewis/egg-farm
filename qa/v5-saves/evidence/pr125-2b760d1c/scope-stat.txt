@@ -1,0 +1,7 @@
+ engineering/status.md           |  7 +++++
+ src/game.ts                     | 13 ++++++---
+ src/sim/clock.ts                | 13 +++++++--
+ src/sim/tick.ts                 | 12 +++++---
+ tests/v5-breeds-present.test.ts | 63 +++++++++++++++++++++++++++++++++++++++++
+ tests/v5-f1b-clock-rng.test.ts  |  2 +-
+ 6 files changed, 98 insertions(+), 12 deletions(-)

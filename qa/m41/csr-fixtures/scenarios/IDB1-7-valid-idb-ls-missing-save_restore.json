@@ -1,0 +1,25 @@
+{
+ "id": "IDB1-7-valid-idb-ls-missing-save_restore",
+ "now": 1792378840000,
+ "csr": [
+  "IDB1-7",
+  "CSR-10"
+ ],
+ "ls": {},
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-valid-F17-seq4-T-10m.json"
+   }
+  ]
+ },
+ "expect": {
+  "recovery": false,
+  "saveRestoreIdbCount": 1,
+  "saveRestoredCount": 0,
+  "noSaveCorrupt": true,
+  "notice": null
+ }
+}

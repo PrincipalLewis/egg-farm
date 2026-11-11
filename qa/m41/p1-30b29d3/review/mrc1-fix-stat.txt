@@ -1,0 +1,5 @@
+d5fc62644369891e73115e8bdb9e51476af2b91f M4.1 patch 1: HoQA m-RC1-1 - explainer entry (expin) without scale overshoot (CSS only)
+
+ scripts/rc0-browser.mjs | 39 +++++++++++++++++++++++++++++++++++++++
+ src/ui/styles.css       |  2 +-
+ 2 files changed, 40 insertions(+), 1 deletion(-)

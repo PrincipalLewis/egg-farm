@@ -1,0 +1,11 @@
+raw line 123: 2026-11-06 00:39:43 CET (Europe/Belgrade) HEAD is now at 8e47eeb Merge 7a492e5fea47f9bb92ae2d07e82820c64471ec5a into f8036e8f0826ca76fcc0ee13092d575533d4969b
+raw line 143: 2026-11-06 00:39:47 CET (Europe/Belgrade) node: v20.20.2
+raw line 208: 2026-11-06 00:39:52 CET (Europe/Belgrade) ## pacing-x1-stack: **FAIL**
+raw line 210: 2026-11-06 00:39:52 CET (Europe/Belgrade) - data: `shipped-tree` (shipped data/economy.csv + src/config/balance.json from the tree, full M5.0 stack (pause rows out)); CSV data/economy.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f, src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a (read from the tree, sha256 recorded)
+raw line 212: 2026-11-06 00:39:52 CET (Europe/Belgrade) - **balance.json (QA-D-1030-SHIPFLAGS):** src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a; m4.enabled=1; m4.flags golden=0 streak=0 tapCoins=0 abilities=0 broody=0 salesStopped=0 fatigueCue=0 pause=0 rc2Refill=0 autoRefill=0 clockWage=0 breeds=0 zeroGainUi=0 bestBuyV2=0; flags ON: none; bot-modelled src M5 flags (golden/streak/tapCoins/broody/abilities/pause) ON: none (bot model runs; O-3 guard would throw if any were on)
+raw line 214: 2026-11-06 00:39:52 CET (Europe/Belgrade) - rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED (not judged until HoP signs the re-prediction), 3 N/A (row 903, D-CEO-20261030-04), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P pause rows)
+raw line 215: 2026-11-06 00:39:52 CET (Europe/Belgrade) - **FAIL: blocking row 904 optimal NOT-WIRED**
+raw line 216: 2026-11-06 00:39:52 CET (Europe/Belgrade) - **FAIL: blocking row 904 seller15 NOT-WIRED**
+raw line 218: 2026-11-06 00:39:52 CET (Europe/Belgrade) FAIL: blocking row 904 optimal NOT-WIRED
+raw line 219: 2026-11-06 00:39:52 CET (Europe/Belgrade) FAIL: blocking row 904 seller15 NOT-WIRED
+raw line 220: 2026-11-06 00:39:52 CET (Europe/Belgrade) FAIL: blocking row 904 casual NOT-WIRED

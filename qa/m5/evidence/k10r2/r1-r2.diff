@@ -1,0 +1,300 @@
+4c4
+< @@ -1,3 +1,4 @@
+---
+> @@ -1,3 +1,5 @@
+5a6
+> +import { mulberry32 as rng } from './mulberry32';
+9c10,19
+< @@ -285,7 +286,7 @@
+---
+> @@ -114,7 +116,7 @@
+>  export interface Stack { on: boolean; streakCap: number; tapShare: number; broody: boolean; golden: { gapMin: number; gapMax: number } | null; abil: boolean; sweep: 'A' | 'B'; sweepMult: number; pause: boolean; pat?: 'none' | 'yawn' | 'long' | 'fullcoop' | 'wages' | 'stock' | 'bench' | 'grader'; lockoutS?: number; hold?: boolean; ssZero?: boolean; warm?: boolean; breeds?: BCfg; roster?: Roster; }
+>  export interface Prof { tap: 'idle' | 'ac7' | 'burst' | number; checkBase: number; catchP: number; }
+>  export const PROFS: Record<string, Prof> = { slow: { tap: 0.25, checkBase: 60, catchP: 0.4 }, idle: { tap: 'idle', checkBase: 15, catchP: 0 }, optimal: { tap: 3, checkBase: 5, catchP: 1 }, seller15: { tap: 'ac7', checkBase: 15, catchP: 0.75 }, casual: { tap: 0.5, checkBase: 30, catchP: 0.6 }, burst: { tap: 'burst', checkBase: 5, catchP: 1 } };
+> -const rng = (seed: number) => { let a = (seed * 2654435761 + 99) >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+> +// rng: shared mulberry32 helper (tests/mulberry32.ts); was inlined here at L118 on 518de304.
+>  const WIDS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
+>  export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: { start?: GameState; bstart?: BS; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number } = {}, E: RunEnv = {}) {
+>    assertNoDoubleModel(bal, K);
+> @@ -285,7 +287,7 @@
+18c28
+< @@ -299,7 +300,7 @@
+---
+> @@ -299,7 +301,7 @@
+27c37
+< @@ -308,12 +309,30 @@
+---
+> @@ -308,12 +310,30 @@
+39d48
+< -}
+49,51c58,60
+< +/** D-HOP-52: margin > median paired-path noise AND > one paired-bootstrap SD.
+< + *  The >=2x noise target is reported separately, not silently substituted for the two-part pass bar.
+< + *  Reference is the SAME post-L10/bc_* data, except the CSV cap is 0.28, versus candidate 0.27. */
+---
+> +/** D-HOP-52: hard pass = margin > median paired-path noise AND margin > one paired-bootstrap SD (+ Present-only).
+> + *  >=2x noise is a recorded TARGET only (verdict may be 'PASS (below 2x target)'); decisionTargetPp=0.58 is recorded beside computed 2x.
+> + *  Canonical bootstrap = shared mulberry32 helper (hashed seed). Reference equals candidate except CSV cap 0.28 vs 0.27. */
+66c75
+< +}
+---
+>  }
+70c79
+< @@ -1,4 +1,5 @@
+---
+> @@ -1,8 +1,9 @@
+72,76c81,93
+< +// REVIEW DRAFT: D-HOP-52 replaces the legacy <= assertion; K10_REF_CSV is mandatory.
+<  // F20-29 median active premium (optimal, seeds 1-200, T 12000, windows every 300 s): breeds g1max at streak 0.27 must not exceed the
+<  // no-breeds premium nor the calm-gated Present-only premium at streak 0.28. Slow (~10-15 min on 2 cores); run by CI job k10-breeds-offset
+<  // only when scripts/k10-trigger.mjs says the diff can move it. Env: K10_CSV (default data/economy.csv), K10_SEEDS (200), K10_S0 (1),
+< @@ -13,14 +14,18 @@
+---
+> -// F20-29 median active premium (optimal, seeds 1-200, T 12000, windows every 300 s): breeds g1max at streak 0.27 must not exceed the
+> -// no-breeds premium nor the calm-gated Present-only premium at streak 0.28. Slow (~10-15 min on 2 cores); run by CI job k10-breeds-offset
+> -// only when scripts/k10-trigger.mjs says the diff can move it. Env: K10_CSV (default data/economy.csv), K10_SEEDS (200), K10_S0 (1),
+> -// K10_SETTLE=1 (forced loadout settles 300 s per slot; informational, not the parity variant), K10_OUT=<file> (write the result JSON).
+> +// REVIEW DRAFT r2 (QA-D-1105-K10ASSERT): D-HOP-52 replaces the legacy <= assertion; K10_REF_CSV is mandatory.
+> +// F20-29 median active premium (optimal, seeds 1-200, T 12000, windows every 300 s): hard pass = margin > same-CSV
+> +// median paired-path noise AND margin > 1 paired-bootstrap SD; Present-only legacy protection kept. >=2x noise is a
+> +// recorded TARGET (flag "PASS (below 2x target)" when hard bar clears but target misses). Slow (~10-15 min on 2 cores).
+> +// Env: K10_CSV, K10_REF_CSV (required), K10_SEEDS (200), K10_S0 (1), K10_OUT=<file>. Forced-settle is not a cut gate.
+>  import { describe, it, expect } from 'vitest';
+>  import { readFileSync, writeFileSync } from 'node:fs';
+>  import { createHash } from 'node:crypto';
+> @@ -13,14 +14,20 @@
+85,88c102
+< +    if (!E.K10_REF_CSV || E.K10_SETTLE === '1') throw new Error('K10 requires K10_REF_CSV; forced-settle is informational, not a cut gate');
+< +    const referenceRaw=readFileSync(E.K10_REF_CSV),referenceCsv=referenceRaw.toString('utf8'),referenceCsvSha256=createHash('sha256').update(referenceRaw).digest('hex');
+< +    const r = k10(b, csv, sha, { seeds: +(E.K10_SEEDS ?? 200), s0: +(E.K10_S0 ?? 1), T: 12000, step: 300, targets: loadTargets() }, {referenceCsv,referenceCsvSha256});
+<      const line = `K10 csv=${sha.slice(0, 8)} bc=${r.bcSource} seeds=${r.seeds.join('-')} settle=${E.K10_SETTLE === '1' ? 1 : 0} F20-29 median premium: g1max ${r.premium.g1max.toFixed(2)} | no-breeds ${r.premium.noBreeds.toFixed(2)} | Present-only ${r.premium.presentOnly.toFixed(2)} -> ${r.pass ? 'PASS' : 'FAIL'}`;
+---
+> -    const line = `K10 csv=${sha.slice(0, 8)} bc=${r.bcSource} seeds=${r.seeds.join('-')} settle=${E.K10_SETTLE === '1' ? 1 : 0} F20-29 median premium: g1max ${r.premium.g1max.toFixed(2)} | no-breeds ${r.premium.noBreeds.toFixed(2)} | Present-only ${r.premium.presentOnly.toFixed(2)} -> ${r.pass ? 'PASS' : 'FAIL'}`;
+90c104,109
+< +    console.log(line, JSON.stringify(r.evidence), `reference=${r.referenceCsvSha256}`);
+---
+> +    if (!E.K10_REF_CSV || E.K10_SETTLE === '1') throw new Error('K10 requires K10_REF_CSV; forced-settle is informational, not a cut gate');
+> +    const referenceRaw = readFileSync(E.K10_REF_CSV), referenceCsv = referenceRaw.toString('utf8'), referenceCsvSha256 = createHash('sha256').update(referenceRaw).digest('hex');
+> +    const r = k10(b, csv, sha, { seeds: +(E.K10_SEEDS ?? 200), s0: +(E.K10_S0 ?? 1), T: 12000, step: 300, targets: loadTargets() }, { referenceCsv, referenceCsvSha256 });
+> +    const e = r.evidence;
+> +    const line = `K10 csv=${sha.slice(0, 8)} bc=${r.bcSource} seeds=${r.seeds.join('-')} settle=${E.K10_SETTLE === '1' ? 1 : 0} F20-29 median premium: g1max ${r.premium.g1max.toFixed(2)} | no-breeds ${r.premium.noBreeds.toFixed(2)} | Present-only ${r.premium.presentOnly.toFixed(2)} -> ${e.verdict} (decisionTargetPp=${e.decisionTargetPp}, targetTwoNoisePp=${e.targetTwoNoisePp})`;
+> +    console.log(line, JSON.stringify(e), `reference=${r.referenceCsvSha256}`);
+93,94c112,113
+< +    expect(r.evidence.marginPp, line).toBeGreaterThan(r.evidence.medianNoisePp);
+< +    expect(r.evidence.marginPp, line).toBeGreaterThan(r.evidence.bootstrapSdPp);
+---
+> +    expect(e.marginPp, line).toBeGreaterThan(e.medianNoisePp);
+> +    expect(e.marginPp, line).toBeGreaterThan(e.bootstrapSdPp);
+95a115
+> +    expect(e.marginal, `${line} — MARGINAL requires HoQA review before counting`).toBe(false);
+103,104c123,126
+< @@ -0,0 +1,18 @@
+< +// D-HOP-52 review draft. All values are percentage points; do not round before judging.
+---
+> @@ -0,0 +1,76 @@
+> +// D-HOP-52 review draft r2 (QA-D-1105-K10ASSERT). All values are percentage points; do not round before judging.
+> +import { mulberry32 } from './mulberry32';
+> +
+106c128,134
+< +const median = (xs: number[]) => [...xs].sort((a,b) => a-b)[Math.ceil(xs.length / 2)-1];
+---
+> +
+> +/** Lower nearest-rank median: sort ascending, take index ceil(n/2)-1. */
+> +const median = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.ceil(xs.length / 2) - 1];
+> +
+> +/** Fixed D-HOP-52 decision-text target (0.58 pp); recorded beside computed 2× noise. */
+> +export const D_HOP_52_TARGET_PP = 0.58;
+> +
+109,120c137,198
+< +  if (candidate.some((r,i) => r.seed !== reference[i].seed) || new Set(candidate.map(r => r.seed)).size !== candidate.length) throw new Error('B4 seeds must be paired and unique');
+< +  if ([...candidate,...reference].some(r => !Number.isFinite(r.premiumPp))) throw new Error('B4 premium must be finite');
+< +  const a=candidate.map(r=>r.premiumPp), b=reference.map(r=>r.premiumPp);
+< +  const marginPp=median(b)-median(a), medianNoisePp=median(a.map((x,i)=>Math.abs(x-b[i])));
+< +  // Paired bootstrap, 4000 resamples, deterministic mulberry32 seed 1; same index vector for both arms.
+< +  let state=1; const random=()=>{state=(state+0x6D2B79F5)|0; let t=Math.imul(state^(state>>>15),1|state);t^=t+Math.imul(t^(t>>>7),61|t);return ((t^(t>>>14))>>>0)/4294967296;};
+< +  const boot:number[]=[];
+< +  for(let k=0;k<4000;k++){const ix=a.map(()=>Math.floor(random()*a.length));boot.push(median(ix.map(i=>b[i]))-median(ix.map(i=>a[i])));}
+< +  const mean=boot.reduce((s,x)=>s+x,0)/boot.length, bootstrapSdPp=Math.sqrt(boot.reduce((s,x)=>s+(x-mean)**2,0)/boot.length);
+< +  return { marginPp,medianNoisePp,bootstrapSdPp,marginAboveNoise:marginPp>medianNoisePp,aboveOneSd:marginPp>bootstrapSdPp,
+< +    targetTwoNoise:marginPp>=2*medianNoisePp,pass:marginPp>medianNoisePp && marginPp>bootstrapSdPp,
+< +    bootstrap:{resamples:4000,seed:1,rng:'mulberry32',paired:true},n:a.length };
+---
+> +  if (candidate.some((r, i) => r.seed !== reference[i].seed) || new Set(candidate.map(r => r.seed)).size !== candidate.length) {
+> +    throw new Error('B4 seeds must be paired and unique');
+> +  }
+> +  if ([...candidate, ...reference].some(r => !Number.isFinite(r.premiumPp))) throw new Error('B4 premium must be finite');
+> +
+> +  const a = candidate.map(r => r.premiumPp), b = reference.map(r => r.premiumPp);
+> +  const marginPp = median(b) - median(a);
+> +  const medianNoisePp = median(a.map((x, i) => Math.abs(x - b[i])));
+> +  const targetTwoNoisePp = 2 * medianNoisePp;
+> +
+> +  // Canonical paired bootstrap: shared mulberry32 helper, seed 1, 4000 resamples,
+> +  // one shared index vector per resample for both arms, lower nearest-rank median,
+> +  // population SD, no rounding before comparison.
+> +  const random = mulberry32(1);
+> +  const boot: number[] = [];
+> +  for (let k = 0; k < 4000; k++) {
+> +    const ix = a.map(() => Math.floor(random() * a.length));
+> +    boot.push(median(ix.map(i => b[i])) - median(ix.map(i => a[i])));
+> +  }
+> +  const mean = boot.reduce((s, x) => s + x, 0) / boot.length;
+> +  const bootstrapSdPp = Math.sqrt(boot.reduce((s, x) => s + (x - mean) ** 2, 0) / boot.length);
+> +
+> +  const marginAboveNoise = marginPp > medianNoisePp;
+> +  const aboveOneSd = marginPp > bootstrapSdPp;
+> +  // ≥2× noise is a recorded TARGET, not a hard gate (HoQA ruling A).
+> +  const targetTwoNoise = marginPp >= targetTwoNoisePp;
+> +  const pass = marginAboveNoise && aboveOneSd;
+> +  // Within 5% of the SD (either side) => MARGINAL, needs HoQA review regardless of pass/fail.
+> +  const marginal = bootstrapSdPp > 0 && Math.abs(marginPp - bootstrapSdPp) <= 0.05 * bootstrapSdPp;
+> +
+> +  let verdict: 'PASS' | 'PASS (below 2x target)' | 'FAIL' | 'MARGINAL';
+> +  if (marginal) verdict = 'MARGINAL';
+> +  else if (!pass) verdict = 'FAIL';
+> +  else if (!targetTwoNoise) verdict = 'PASS (below 2x target)';
+> +  else verdict = 'PASS';
+> +
+> +  return {
+> +    marginPp,
+> +    medianNoisePp,
+> +    bootstrapSdPp,
+> +    marginAboveNoise,
+> +    aboveOneSd,
+> +    targetTwoNoise,
+> +    targetTwoNoisePp,
+> +    decisionTargetPp: D_HOP_52_TARGET_PP,
+> +    pass,
+> +    marginal,
+> +    verdict,
+> +    bootstrap: {
+> +      algorithm: 'mulberry32',
+> +      helper: 'tests/mulberry32.ts',
+> +      helperIdentity: 'shared; hashed-seed formula identical to k10-breeds-offset.ts L118 / bot-m5.ts L37',
+> +      seed: 1,
+> +      resamples: 4000,
+> +      paired: true,
+> +      sharedIndexVector: true,
+> +      median: 'lower-nearest-rank',
+> +      sd: 'population',
+> +      roundBeforeCompare: false,
+> +    },
+> +    n: a.length,
+> +  };
+126c204
+< @@ -0,0 +1,21 @@
+---
+> @@ -0,0 +1,76 @@
+129,145c207,271
+< +import { b4Evidence } from './k10-b4-evidence';
+< +it('D-HOP-52 strict noise, signed margin, deterministic paired-bootstrap and validation boundaries',()=>{
+< +const row = (values: number[]) => values.map((premiumPp, i) => ({ seed: i + 1, premiumPp }));
+< +assert.equal(b4Evidence(row([1,1,1,1,1]), row([1,1,1,1,1])).pass, false);
+< +assert.equal(b4Evidence(row([1,1,1,1,1]), row([2,2,2,2,2])).pass, false); // strict margin > noise, equality fails
+< +assert.equal(b4Evidence(row([3,3,3,3,3]), row([2,2,2,2,2])).pass, false);
+< +assert.throws(() => b4Evidence(row([1]), row([2])), /at least 2/);
+< +assert.throws(() => b4Evidence(row([1,2]), row([2,Number.NaN])), /finite/);
+< +assert.throws(() => b4Evidence(row([1,2]), [{seed:2,premiumPp:1},{seed:1,premiumPp:2}]), /paired/);
+< +const a=row([0,0,8,8,8]), b=row([0,7,9,9,9]);
+< +assert.deepEqual(b4Evidence(a,b), b4Evidence(a,b));
+< +const passing=b4Evidence(row([0,1,2,100,100]),row([0,1,50,100,100]));
+< +assert.equal(passing.pass,true);assert.equal(passing.marginPp,48);assert.equal(passing.medianNoisePp,0);
+< +assert.equal(b4Evidence(row([0,1,50,100,100]),row([0,1,2,100,100])).pass,false);
+< +const sdFailure=b4Evidence(row([0,1,2,3,4,5,100]),row([-1000,1,2,4,4,5,10000]));
+< +assert.equal(sdFailure.marginAboveNoise,true);assert.equal(sdFailure.aboveOneSd,false);assert.equal(sdFailure.pass,false);
+< +console.log('stats boundary checks passed',JSON.stringify({passing,sdFailure}));
+---
+> +import { b4Evidence, D_HOP_52_TARGET_PP } from './k10-b4-evidence';
+> +
+> +it('D-HOP-52 strict noise, signed margin, deterministic paired-bootstrap and validation boundaries', () => {
+> +  const row = (values: number[]) => values.map((premiumPp, i) => ({ seed: i + 1, premiumPp }));
+> +  assert.equal(b4Evidence(row([1, 1, 1, 1, 1]), row([1, 1, 1, 1, 1])).pass, false);
+> +  assert.equal(b4Evidence(row([1, 1, 1, 1, 1]), row([2, 2, 2, 2, 2])).pass, false); // strict margin > noise
+> +  assert.equal(b4Evidence(row([3, 3, 3, 3, 3]), row([2, 2, 2, 2, 2])).pass, false);
+> +  assert.throws(() => b4Evidence(row([1]), row([2])), /at least 2/);
+> +  assert.throws(() => b4Evidence(row([1, 2]), row([2, Number.NaN])), /finite/);
+> +  assert.throws(() => b4Evidence(row([1, 2]), [{ seed: 2, premiumPp: 1 }, { seed: 1, premiumPp: 2 }]), /paired/);
+> +  const a = row([0, 0, 8, 8, 8]), b = row([0, 7, 9, 9, 9]);
+> +  assert.deepEqual(b4Evidence(a, b), b4Evidence(a, b));
+> +  const passing = b4Evidence(row([0, 1, 2, 100, 100]), row([0, 1, 50, 100, 100]));
+> +  assert.equal(passing.pass, true);
+> +  assert.equal(passing.marginPp, 48);
+> +  assert.equal(passing.medianNoisePp, 0);
+> +  assert.equal(passing.targetTwoNoise, true);
+> +  assert.equal(passing.verdict, 'PASS');
+> +  assert.equal(b4Evidence(row([0, 1, 50, 100, 100]), row([0, 1, 2, 100, 100])).pass, false);
+> +  const sdFailure = b4Evidence(row([0, 1, 2, 3, 4, 5, 100]), row([-1000, 1, 2, 4, 4, 5, 10000]));
+> +  assert.equal(sdFailure.marginAboveNoise, true);
+> +  assert.equal(sdFailure.aboveOneSd, false);
+> +  assert.equal(sdFailure.pass, false);
+> +  assert.equal(sdFailure.verdict, 'FAIL');
+> +  console.log('stats boundary checks passed', JSON.stringify({ passing, sdFailure }));
+> +});
+> +
+> +it('golden bootstrap SD + convention metadata on fixed small input (shared hashed mulberry32)', () => {
+> +  const row = (values: number[]) => values.map((premiumPp, i) => ({ seed: i + 1, premiumPp }));
+> +  const e = b4Evidence(row([0, 1, 2, 3, 4]), row([1, 2, 4, 4, 10]));
+> +  // Exact population SD from mulberry32(seed=1 hashed), 4000 paired resamples, lower nearest-rank median.
+> +  assert.equal(e.bootstrapSdPp, 1.130034042628836);
+> +  assert.equal(e.marginPp, 2);
+> +  assert.equal(e.medianNoisePp, 1);
+> +  assert.equal(e.targetTwoNoisePp, 2);
+> +  assert.equal(e.decisionTargetPp, D_HOP_52_TARGET_PP);
+> +  assert.equal(e.decisionTargetPp, 0.58);
+> +  assert.deepEqual(e.bootstrap, {
+> +    algorithm: 'mulberry32',
+> +    helper: 'tests/mulberry32.ts',
+> +    helperIdentity: 'shared; hashed-seed formula identical to k10-breeds-offset.ts L118 / bot-m5.ts L37',
+> +    seed: 1,
+> +    resamples: 4000,
+> +    paired: true,
+> +    sharedIndexVector: true,
+> +    median: 'lower-nearest-rank',
+> +    sd: 'population',
+> +    roundBeforeCompare: false,
+> +  });
+> +  // Re-compute must be bit-identical (determinism).
+> +  assert.equal(b4Evidence(row([0, 1, 2, 3, 4]), row([1, 2, 4, 4, 10])).bootstrapSdPp, e.bootstrapSdPp);
+> +});
+> +
+> +it('PASS (below 2x target) and MARGINAL verdict paths (exact strings)', () => {
+> +  const row = (values: number[]) => values.map((premiumPp, i) => ({ seed: i + 1, premiumPp }));
+> +  const below = b4Evidence(
+> +    row([19, 3, 16, 0, 13, 10, 1, 8]),
+> +    row([25, 7, 20, 5, 17, 14, 5, 14]),
+> +  );
+> +  assert.equal(below.pass, true);
+> +  assert.equal(below.targetTwoNoise, false);
+> +  assert.equal(below.marginal, false);
+> +  assert.equal(below.verdict, 'PASS (below 2x target)');
+> +  assert.equal(below.decisionTargetPp, 0.58);
+> +  assert.equal(below.targetTwoNoisePp, 2 * below.medianNoisePp);
+146a273,279
+> +  const marginal = b4Evidence(
+> +    row([0, 11, 13, 14, 19, 18, 22, 29]),
+> +    row([0, 11, 14, 19, 17, 16, 24, 28]),
+> +  );
+> +  assert.equal(marginal.marginal, true);
+> +  assert.equal(marginal.verdict, 'MARGINAL');
+> +  assert.ok(Math.abs(marginal.marginPp - marginal.bootstrapSdPp) <= 0.05 * marginal.bootstrapSdPp);
+147a281,300
+> diff --git a/tests/mulberry32.ts b/tests/mulberry32.ts
+> new file mode 100644
+> --- /dev/null
+> +++ b/tests/mulberry32.ts
+> @@ -0,0 +1,15 @@
+> +/** Shared mulberry32 with hashed seed init.
+> + *  Canonical copy of the helper formerly inlined at tests/k10-breeds-offset.ts L118
+> + *  and tests/bot-m5.ts L37: state0 = (seed * 2654435761 + 99) >>> 0.
+> + *  Do not replace with a direct state=seed seed; those streams are not interchangeable.
+> + */
+> +export function mulberry32(seed: number): () => number {
+> +  let a = (seed * 2654435761 + 99) >>> 0;
+> +  return () => {
+> +    a |= 0;
+> +    a = (a + 0x6D2B79F5) | 0;
+> +    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+> +    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+> +    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+> +  };
+> +}

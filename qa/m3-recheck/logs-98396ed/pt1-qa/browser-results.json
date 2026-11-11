@@ -1,0 +1,101 @@
+{
+ "chromium": {
+  "install_id": "709147bf-f330-40b6-80a0-8c28ca823905",
+  "session_start": [
+   {
+    "install_id": "709147bf-f330-40b6-80a0-8c28ca823905",
+    "build": "m3-rc1-pre+98396ed"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-709147bf-2026-10-16.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "709147bf-f330-40b6-80a0-8c28ca823905",
+   "tel": "[{\"install_id\":\"709147bf-f330-40b6-80a0-8c28ca823905\",\"build\":\"m3-rc1-pre+98396ed\",\"type\":\"session_start\",\"ts\":1792136813983,\"sessionMs\":1},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792136813987,\"sessionMs\":5},{\"type\":\"save_reset\",\"ts\":1792136814990,\"sessionMs\":1008}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "709147bf-f330-40b6-80a0-8c28ca823905",
+  "idStable": true,
+  "errors": []
+ },
+ "firefox": {
+  "install_id": "d97082a2-29c4-465f-8085-5bbe507cc548",
+  "session_start": [
+   {
+    "install_id": "d97082a2-29c4-465f-8085-5bbe507cc548",
+    "build": "m3-rc1-pre+98396ed"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-d97082a2-2026-10-16.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "d97082a2-29c4-465f-8085-5bbe507cc548",
+   "tel": "[{\"install_id\":\"d97082a2-29c4-465f-8085-5bbe507cc548\",\"build\":\"m3-rc1-pre+98396ed\",\"type\":\"session_start\",\"ts\":1792136819422,\"sessionMs\":1},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792136819424,\"sessionMs\":3},{\"type\":\"save_reset\",\"ts\":1792136820506,\"sessionMs\":1085}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "d97082a2-29c4-465f-8085-5bbe507cc548",
+  "idStable": true,
+  "errors": []
+ },
+ "webkit": {
+  "install_id": "01c91518-5768-45cc-9453-a0c48ffecdcc",
+  "session_start": [
+   {
+    "install_id": "01c91518-5768-45cc-9453-a0c48ffecdcc",
+    "build": "m3-rc1-pre+98396ed"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-01c91518-2026-10-16.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "01c91518-5768-45cc-9453-a0c48ffecdcc",
+   "tel": "[{\"install_id\":\"01c91518-5768-45cc-9453-a0c48ffecdcc\",\"build\":\"m3-rc1-pre+98396ed\",\"type\":\"session_start\",\"ts\":1792136823280,\"sessionMs\":1},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792136823288,\"sessionMs\":9},{\"type\":\"save_reset\",\"ts\":1792136824341,\"sessionMs\":1062}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "01c91518-5768-45cc-9453-a0c48ffecdcc",
+  "idStable": true,
+  "errors": []
+ },
+ "ios-webkit": {
+  "install_id": "6cce2df7-a120-40fa-bad8-015753f45c42",
+  "session_start": [
+   {
+    "install_id": "6cce2df7-a120-40fa-bad8-015753f45c42",
+    "build": "m3-rc1-pre+98396ed"
+   }
+  ],
+  "export": {
+   "via": "clipboard",
+   "ok": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "share": {
+   "file": "eggfarm-log-6cce2df7-2026-10-16.json",
+   "msg": "Log shared."
+  },
+  "shareCancel": {
+   "clip": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "afterReset": {
+   "id": "6cce2df7-a120-40fa-bad8-015753f45c42",
+   "tel": "[{\"install_id\":\"6cce2df7-a120-40fa-bad8-015753f45c42\",\"build\":\"m3-rc1-pre+98396ed\",\"type\":\"session_start\",\"ts\":1792136826761,\"sessionMs\":0},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792136826764,\"sessionMs\":3},{\"type\":\"save_reset\",\"ts\":1792136829687,\"sessionMs\":2926}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "6cce2df7-a120-40fa-bad8-015753f45c42",
+  "idStable": true,
+  "errors": []
+ }
+}

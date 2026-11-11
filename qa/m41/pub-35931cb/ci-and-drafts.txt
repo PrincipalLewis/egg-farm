@@ -1,0 +1,8 @@
+release-html	completed	success	2026-10-24T15:24:58Z
+release-globals (firefox)	completed	success	2026-10-24T15:25:41Z
+slow	in_progress	null	null
+release-globals (webkit)	completed	success	2026-10-24T15:26:06Z
+release-globals (chromium)	completed	success	2026-10-24T15:25:09Z
+unit	in_progress	null	null
+in_progress		Merge #67: M4.1 RC1 (5d9efa6) — CI green, Art PASS, HoQA PASS	ci	main	push	40106837662	2m22s	2026-10-24T15:24:36Z
+(drafts end)

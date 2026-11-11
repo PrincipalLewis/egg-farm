@@ -1,0 +1,77 @@
+[
+ {
+  "n": "Focus ring 3px solid, ≥3:1 vs card, on focused Play here",
+  "pass": true,
+  "i": {
+   "outline": "3px solid rgb(43, 121, 168)",
+   "card": "rgb(255, 255, 255)",
+   "focused": true,
+   "ratio": 4.77
+  }
+ },
+ {
+  "n": "TG-UI-9a no audio while notice up (no new sound starts; AudioContext not running)",
+  "pass": true,
+  "i": {
+   "beforeNotice": {
+    "starts": 6,
+    "states": [
+     "running"
+    ],
+    "last": "running"
+   },
+   "atNotice": {
+    "starts": 6,
+    "states": [
+     "suspended"
+    ],
+    "last": "running"
+   },
+   "after2sAndInput": {
+    "starts": 6,
+    "states": [
+     "suspended"
+    ],
+    "last": "running"
+   }
+  }
+ },
+ {
+  "n": "TG-UI-9b sound back after Play here (+Tap to start): context running and sfx start",
+  "pass": true,
+  "i": {
+   "starts": 3,
+   "states": [
+    "running"
+   ],
+   "last": "running"
+  }
+ },
+ {
+  "n": "320 px: Play here 48 px tall, title wraps not truncated",
+  "pass": true,
+  "i": {
+   "btnH": 48,
+   "wrapLines": null,
+   "trunc": false
+  }
+ },
+ {
+  "n": "save_restore exactly once per load and only when copies differ (fresh seed / identical / LS corrupt / identical / LS newer)",
+  "pass": true,
+  "i": {
+   "first": [],
+   "same": [],
+   "corrupt": [
+    "idb"
+   ],
+   "coinsRestored": 4242494168,
+   "next": [
+    "idb"
+   ],
+   "lsNewer": [
+    "idb"
+   ]
+  }
+ }
+]

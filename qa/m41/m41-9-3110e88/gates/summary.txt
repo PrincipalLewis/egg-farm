@@ -1,0 +1,18 @@
+HEAD 3110e88226a5ee7e01c46f7bab4bd9f0d96208d3 porcelain=0 2026-10-22 23:16:46 CEST
+npm-ci exit=0 1s
+sync-check exit=0 1s
+tsc exit=0 3s
+vitest exit=0 175s
+build exit=0 4s
+build-html exit=0 5s
+build-qa exit=0 5s
+porcelain-after-nonbrowser=
+check-release-qa exit=1 0s
+check-release-dist exit=0 0s
+check-release-html exit=0 0s
+dist/index.html name="build-id" content="m3-rc1-pre+3110e88" 842fb2736496508e
+dist-html/egg-farm.html name="build-id" content="m3-rc1-pre+3110e88" 306158a64f4315f9
+dist-qa/index.html name="build-id" content="m3-rc1-pre+3110e88" b146c364729f0e05
+rc0-chromium exit=0 783s
+check-globals exit=0 188s
+porcelain-after-all=

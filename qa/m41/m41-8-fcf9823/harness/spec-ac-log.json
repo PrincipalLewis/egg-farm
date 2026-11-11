@@ -1,0 +1,169 @@
+[
+ {
+  "ac": "F4-1",
+  "want": "★ Egg value L5 · +9% income",
+  "got": "★ Egg value L5 · +9% income",
+  "len": 27
+ },
+ {
+  "ac": "F4-2",
+  "want": "Egg value L9 · +12% income",
+  "got": "Egg value L9 · +12% income",
+  "len": 26
+ },
+ {
+  "ac": "F4-3",
+  "want": "Egg value L30 · +12% income",
+  "got": "Egg value L30 · +12% income",
+  "len": 27
+ },
+ {
+  "ac": "F4-4",
+  "want": "Value L30 · +100% income",
+  "got": "Value L30 · +100% income",
+  "len": 24
+ },
+ {
+  "ac": "F4-4b",
+  "want": "Value L55 · +100% income",
+  "got": "Value L55 · +100% income",
+  "len": 24
+ },
+ {
+  "ac": "F4-5",
+  "want": "★ Hens L55 · +999% income",
+  "got": "★ Hens L55 · +999% income",
+  "len": 25
+ },
+ {
+  "ac": "F4-6",
+  "want": "Supercal… L30 · +12% income",
+  "got": "Supercal… L30 · +12% income",
+  "len": 27
+ },
+ {
+  "ac": "F4-8a",
+  "want": "★ Hens L10: bigger coop",
+  "got": "★ Hens L10: bigger coop",
+  "len": 23
+ },
+ {
+  "ac": "F4-8b",
+  "want": "★ Egg value L5: Grade A",
+  "got": "★ Egg value L5: Grade A",
+  "len": 23
+ },
+ {
+  "ac": "F4-8c",
+  "want": "★ Egg value L10: Large",
+  "got": "★ Egg value L10: Large",
+  "len": 22
+ },
+ {
+  "ac": "F4-8d",
+  "want": "★ Egg value L20: Jumbo",
+  "got": "★ Egg value L20: Jumbo",
+  "len": 22
+ },
+ {
+  "ac": "F4-10",
+  "want": "Egg value L30 · +<1% income",
+  "got": "Egg value L30 · +<1% income",
+  "len": 27
+ },
+ {
+  "ac": "F4-11",
+  "want": "★ Hens L12",
+  "got": "★ Hens L12",
+  "len": 10
+ },
+ {
+  "ac": "F4-13 no★ 28→full name",
+  "want": "Egg value L9 · +12% income",
+  "got": "Egg value L9 · +12% income",
+  "len": 26
+ },
+ {
+  "ac": "F4-16a",
+  "want": "★ Collection L5: +5/tap",
+  "got": "★ Collection L5: +5/tap",
+  "len": 23
+ },
+ {
+  "ac": "F4-16b",
+  "want": "Collection L5: +5/tap",
+  "got": "Collection L5: +5/tap",
+  "len": 21
+ },
+ {
+  "ac": "F4-16c",
+  "want": "★ Collection L30: +5/tap",
+  "got": "★ Collection L30: +5/tap",
+  "len": 24
+ },
+ {
+  "ac": "F4-16d",
+  "want": "★ Collection L55: +1250/tap",
+  "got": "★ Collection L55: +1250/tap",
+  "len": 27
+ },
+ {
+  "ac": "F4-16e",
+  "want": "Collection L55: +12500/tap",
+  "got": "Collection L55: +12500/tap",
+  "len": 26
+ },
+ {
+  "ac": "F4-16f",
+  "want": "Coll. L55: +1234567/tap",
+  "got": "Coll. L55: +1234567/tap",
+  "len": 23
+ },
+ {
+  "ac": "F4-14",
+  "want": "Next goal: best buy, Egg value level 49, Jumbo. Ready now.",
+  "got": "Next goal: best buy, Egg value level 49, Jumbo. Ready now."
+ },
+ {
+  "ac": "F4-14",
+  "want": "Next goal: best buy, Egg value level 30, plus 12 percent income. Ready now.",
+  "got": "Next goal: best buy, Egg value level 30, plus 12 percent income. Ready now."
+ },
+ {
+  "ac": "F4-14",
+  "want": "Next goal: best buy, Egg value level 30, plus less than 1 percent income. Ready now.",
+  "got": "Next goal: best buy, Egg value level 30, plus less than 1 percent income. Ready now."
+ },
+ {
+  "ac": "F4-14",
+  "want": "Next goal: best buy, Hens level 12. Ready now.",
+  "got": "Next goal: best buy, Hens level 12. Ready now."
+ },
+ {
+  "ac": "F4-14",
+  "want": "Next goal: Hens level 12, plus 5 percent income. Ready now.",
+  "got": "Next goal: Hens level 12, plus 5 percent income. Ready now."
+ },
+ {
+  "ac": "F4-14",
+  "want": "Next goal: best buy, Collection level 5, plus 5 per tap. Ready now.",
+  "got": "Next goal: best buy, Collection level 5, plus 5 per tap. Ready now."
+ },
+ {
+  "ac": "F4-14",
+  "want": "Next goal: best buy, Egg value level 55, plus 100 percent income. Ready now.",
+  "got": "Next goal: best buy, Egg value level 55, plus 100 percent income. Ready now."
+ },
+ {
+  "ac": "F4-7",
+  "labels": 3300,
+  "over27": 0
+ },
+ {
+  "ac": "F4-12/F4-13 real states",
+  "checked": 890,
+  "xdiff": 0,
+  "starTargetMismatch": 0,
+  "xdiffSamples": []
+ }
+]

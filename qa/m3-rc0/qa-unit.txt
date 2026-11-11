@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /tmp/qarc0/game
+
+ ✓ qatmp/qa-recheck.test.ts (6 tests) 6ms
+stdout | qatmp/qa-pt1.test.ts > EN-2 4 h accelerated run keeps session 1 > two sessions (0 h and +22 h), 4 h of play total, real balance ring_size
+EN-2 {
+  total: 5134,
+  bytes: 444861,
+  ring: 5000,
+  s1_session_start: 1,
+  s1_session_end: 1,
+  s1_upgrades: 33,
+  s1_onb: 5,
+  s1_hire: 3,
+  s1_manage: 4,
+  s1_trimmable: 0,
+  sessions: 2,
+  first_ts_iso: '2026-10-19T08:00:00.000Z'
+}
+
+stdout | qatmp/qa-pt1.test.ts > EN-5 privacy > export keys are a fixed whitelist, no free text / UA / IP
+EN-5 keys N,build,by,coinsBefore,coop_hand_eggs,cost,count,eggs,energyBefore,energy_pct,farm,farm_level,id,install_id,k,market_hand_cents,market_hand_eggs,name,newLevel,partial,price,reason,sessionMs,step,ts,type,upgrade,value,wage_coop_hand_cents,wage_market_hand_cents,windowMs,worker,worker_id,workers
+
+ ✓ qatmp/qa-pt1.test.ts (6 tests) 30599ms
+   ✓ EN-2 4 h accelerated run keeps session 1 > two sessions (0 h and +22 h), 4 h of play total, real balance ring_size 30587ms
+ ✓ qatmp/qa-rc0-long.test.ts (2 tests) 68707ms
+   ✓ 8 h accelerated greedy session: no NaN/Infinity, monotone levels, formatted numbers clean; max dead zone reported 68697ms
+
+ Test Files  3 passed (3)
+      Tests  14 passed (14)
+   Start at  02:00:20
+   Duration  69.16s (transform 232ms, setup 0ms, collect 440ms, tests 99.31s, environment 1ms, prepare 172ms)
+

@@ -1,0 +1,1357 @@
+{
+ "port": "5961",
+ "N": 12000,
+ "cases": {
+  "M1-preM4--dismiss-then-reload": {
+   "mode": "r06",
+   "checks": [
+    {
+     "n": "M1 recovery dialog shown (precondition)",
+     "pass": true,
+     "x": "M1",
+     "hard": true
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 429
+     },
+     "hard": true
+    },
+    {
+     "n": "card shown after the dialog closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 6565
+     },
+     "hard": true
+    },
+    {
+     "n": "(2) card still visible 3 s after it appeared (< 8 s EXP_MS)",
+     "pass": true,
+     "x": {
+      "still": true,
+      "cardGone": null
+     },
+     "hard": true
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": true,
+     "x": {
+      "mem": null,
+      "ls": null,
+      "idb": null,
+      "seenTrueAt": {
+       "mem": null,
+       "ls": null,
+       "idb": null
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1,
+     "hard": true
+    },
+    {
+     "n": "card still present for the player to dismiss",
+     "pass": true,
+     "x": {
+      "present": 1
+     },
+     "hard": true
+    },
+    {
+     "n": "(3) seen=true written only AFTER the dismiss click (mem/LS timestamps >= click)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 10352,
+       "ls": 10351,
+       "idb": 10361
+      },
+      "dismissAt": 10311
+     },
+     "hard": true
+    },
+    {
+     "n": "after dismiss: seen=true in mem and LS",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "after dismiss + autosave: seen=true in IDB main",
+     "pass": true,
+     "x": true,
+     "hard": true
+    },
+    {
+     "n": "(5) after dismissal, a reload shows 0 cards",
+     "pass": true,
+     "x": {
+      "inserts": 0,
+      "load": 2
+     },
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "cardUnderDialog": false,
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": null,
+    "ls": null,
+    "idb": null,
+    "seenTrueAt": {
+     "mem": null,
+     "ls": null,
+     "idb": null
+    }
+   },
+   "seenAfterDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 10352,
+     "ls": 10351,
+     "idb": 10361
+    },
+    "dismissAt": 10311
+   }
+  },
+  "M1-preM4--reload-before-dismiss": {
+   "mode": "r06",
+   "checks": [
+    {
+     "n": "M1 recovery dialog shown (precondition)",
+     "pass": true,
+     "x": "M1",
+     "hard": true
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 426
+     },
+     "hard": true
+    },
+    {
+     "n": "card shown after the dialog closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 6476
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a): 8 s timer started when the card appeared (auto-hid at ~8 s after appear, not while under the dialog)",
+     "pass": true,
+     "x": {
+      "dt": 8002,
+      "firstVisible": 6476,
+      "cardGone": 14478
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) (3): after the 8 s auto-hide (no dismiss click), seen is STILL false in mem, LS and IDB (auto-hide does NOT count on M1/M2)",
+     "pass": true,
+     "x": {
+      "mem": null,
+      "ls": null,
+      "idb": null,
+      "seenTrueAt": {
+       "mem": null,
+       "ls": null,
+       "idb": null
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "exactly 1 card inserted this load (never re-shown in the same session)",
+     "pass": true,
+     "x": 1,
+     "hard": true
+    },
+    {
+     "n": "(4) reload after auto-hide (no player dismissal) shows the card again",
+     "pass": true,
+     "x": {
+      "again": true,
+      "inserts": 1,
+      "load": 2
+     },
+     "hard": true
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "cardUnderDialog": false,
+   "welcome": true,
+   "seenAfterAutoHide": {
+    "mem": null,
+    "ls": null,
+    "idb": null,
+    "seenTrueAt": {
+     "mem": null,
+     "ls": null,
+     "idb": null
+    }
+   }
+  },
+  "M2-preM4--dismiss-then-reload": {
+   "mode": "r06",
+   "checks": [
+    {
+     "n": "M2 recovery dialog shown (precondition)",
+     "pass": true,
+     "x": "M2",
+     "hard": true
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 431
+     },
+     "hard": true
+    },
+    {
+     "n": "card shown after the dialog closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 6502
+     },
+     "hard": true
+    },
+    {
+     "n": "(2) card still visible 3 s after it appeared (< 8 s EXP_MS)",
+     "pass": true,
+     "x": {
+      "still": true,
+      "cardGone": null
+     },
+     "hard": true
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": true,
+     "x": {
+      "mem": null,
+      "ls": null,
+      "idb": null,
+      "seenTrueAt": {
+       "mem": null,
+       "ls": null,
+       "idb": null
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1,
+     "hard": true
+    },
+    {
+     "n": "card still present for the player to dismiss",
+     "pass": true,
+     "x": {
+      "present": 1
+     },
+     "hard": true
+    },
+    {
+     "n": "(3) seen=true written only AFTER the dismiss click (mem/LS timestamps >= click)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 10302,
+       "ls": 10300,
+       "idb": 10308
+      },
+      "dismissAt": 10259
+     },
+     "hard": true
+    },
+    {
+     "n": "after dismiss: seen=true in mem and LS",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "after dismiss + autosave: seen=true in IDB main",
+     "pass": true,
+     "x": true,
+     "hard": true
+    },
+    {
+     "n": "(5) after dismissal, a reload shows 0 cards",
+     "pass": true,
+     "x": {
+      "inserts": 0,
+      "load": 2
+     },
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "cardUnderDialog": false,
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": null,
+    "ls": null,
+    "idb": null,
+    "seenTrueAt": {
+     "mem": null,
+     "ls": null,
+     "idb": null
+    }
+   },
+   "seenAfterDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 10302,
+     "ls": 10300,
+     "idb": 10308
+    },
+    "dismissAt": 10259
+   }
+  },
+  "M2-preM4--reload-before-dismiss": {
+   "mode": "r06",
+   "checks": [
+    {
+     "n": "M2 recovery dialog shown (precondition)",
+     "pass": true,
+     "x": "M2",
+     "hard": true
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 427
+     },
+     "hard": true
+    },
+    {
+     "n": "card shown after the dialog closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 6477
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a): 8 s timer started when the card appeared (auto-hid at ~8 s after appear, not while under the dialog)",
+     "pass": true,
+     "x": {
+      "dt": 8001,
+      "firstVisible": 6477,
+      "cardGone": 14478
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) (3): after the 8 s auto-hide (no dismiss click), seen is STILL false in mem, LS and IDB (auto-hide does NOT count on M1/M2)",
+     "pass": true,
+     "x": {
+      "mem": null,
+      "ls": null,
+      "idb": null,
+      "seenTrueAt": {
+       "mem": null,
+       "ls": null,
+       "idb": null
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "exactly 1 card inserted this load (never re-shown in the same session)",
+     "pass": true,
+     "x": 1,
+     "hard": true
+    },
+    {
+     "n": "(4) reload after auto-hide (no player dismissal) shows the card again",
+     "pass": true,
+     "x": {
+      "again": true,
+      "inserts": 1,
+      "load": 2
+     },
+     "hard": true
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "cardUnderDialog": false,
+   "welcome": true,
+   "seenAfterAutoHide": {
+    "mem": null,
+    "ls": null,
+    "idb": null,
+    "seenTrueAt": {
+     "mem": null,
+     "ls": null,
+     "idb": null
+    }
+   }
+  },
+  "WELCOME-preM4--single": {
+   "mode": "welcome",
+   "checks": [
+    {
+     "n": "'Welcome back!' modal appeared (precondition)",
+     "pass": true,
+     "x": true,
+     "hard": true
+    },
+    {
+     "n": "-07(a): seen not set while the Welcome back! modal is open (no card under it)",
+     "pass": true,
+     "x": {
+      "mem": null,
+      "ls": null
+     },
+     "hard": true
+    },
+    {
+     "n": "(b) §17 B2: no card while #modal-layer is open (every frame)",
+     "pass": true,
+     "x": {
+      "frames": 0
+     },
+     "hard": true
+    },
+    {
+     "n": "(b) card shown after the modal closed, exactly once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1
+     },
+     "hard": true
+    },
+    {
+     "n": "PROBE: at the seen=true write the tab was visible, no modal/recovery layer (as built, the card is built right after)",
+     "pass": true,
+     "x": {
+      "t": 3479,
+      "visibility": "visible",
+      "modalOpen": false,
+      "recoveryLayer": false,
+      "cardPresent": false,
+      "cardVisible": false,
+      "cardOnTop": null
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE: 2 frames after the seen=true write the card is present, visible and on top (elementFromPoint)",
+     "pass": true,
+     "x": {
+      "t": 3506,
+      "visibility": "visible",
+      "modalOpen": false,
+      "recoveryLayer": false,
+      "cardPresent": true,
+      "cardVisible": true,
+      "cardOnTop": true
+     },
+     "hard": false
+    },
+    {
+     "n": "-07(a) HARD (§17 B5): card auto-closed by the 8 s timer, no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 11482,
+      "firstVisible": 3481,
+      "dismissAt": null
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) HARD (§17 B10): seen set on show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 3481,
+       "ls": 3479,
+       "idb": 3481
+      },
+      "firstVisible": 3481
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) HARD: after auto-hide seen=true in mem and LS (auto-hide counts)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true
+     },
+     "hard": true
+    },
+    {
+     "n": "INFO: seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "-07(a) HARD: reload 1 shows 0 cards",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "-07(a) HARD: reload 2 shows 0 cards",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "-07(a) HARD: reload 3 shows 0 cards",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "seenWhileModal": {
+    "mem": null,
+    "ls": null
+   },
+   "seenCtx": {
+    "atWrite": {
+     "t": 3479,
+     "visibility": "visible",
+     "modalOpen": false,
+     "recoveryLayer": false,
+     "cardPresent": false,
+     "cardVisible": false,
+     "cardOnTop": null
+    },
+    "after2Frames": {
+     "t": 3506,
+     "visibility": "visible",
+     "modalOpen": false,
+     "recoveryLayer": false,
+     "cardPresent": true,
+     "cardVisible": true,
+     "cardOnTop": true
+    }
+   },
+   "welcomeSeen": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "PROBE-welcome-hidden-tab--single": {
+   "mode": "welcome",
+   "checks": [
+    {
+     "n": "'Welcome back!' modal appeared (precondition)",
+     "pass": true,
+     "x": true,
+     "hard": true
+    },
+    {
+     "n": "PROBE: seen not set while the Welcome back! modal is open (no card under it)",
+     "pass": true,
+     "x": {
+      "mem": null,
+      "ls": null
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE hidden tab: no card and seen not set while hidden",
+     "pass": true,
+     "x": {
+      "cards": 0,
+      "seenTrue": {
+       "mem": null,
+       "ls": null,
+       "idb": null
+      },
+      "seenCtx": null,
+      "mem": null,
+      "ls": null
+     },
+     "hard": false
+    },
+    {
+     "n": "(b) §17 B2: no card while #modal-layer is open (every frame)",
+     "pass": true,
+     "x": {
+      "frames": 0
+     },
+     "hard": false
+    },
+    {
+     "n": "(b) card shown after the modal closed, exactly once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE: at the seen=true write the tab was visible, no modal/recovery layer (as built, the card is built right after)",
+     "pass": true,
+     "x": {
+      "t": 6472,
+      "visibility": "visible",
+      "modalOpen": false,
+      "recoveryLayer": false,
+      "cardPresent": false,
+      "cardVisible": false,
+      "cardOnTop": null
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE: 2 frames after the seen=true write the card is present, visible and on top (elementFromPoint)",
+     "pass": true,
+     "x": {
+      "t": 6491,
+      "visibility": "visible",
+      "modalOpen": false,
+      "recoveryLayer": false,
+      "cardPresent": true,
+      "cardVisible": true,
+      "cardOnTop": true
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO (§17 B5): card auto-closed by the 8 s timer, no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 14478,
+      "firstVisible": 6474,
+      "dismissAt": null
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO (§17 B10): seen set on show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 6474,
+       "ls": 6472,
+       "idb": 6474
+      },
+      "firstVisible": 6474
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO: after auto-hide seen=true in mem and LS (auto-hide counts)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true
+     },
+     "hard": false
+    },
+    {
+     "n": "INFO: seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO: reload 1 shows 0 cards",
+     "pass": true,
+     "x": 0,
+     "hard": false
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "seenWhileModal": {
+    "mem": null,
+    "ls": null
+   },
+   "whileHidden": {
+    "cards": 0,
+    "seenTrue": {
+     "mem": null,
+     "ls": null,
+     "idb": null
+    },
+    "seenCtx": null,
+    "mem": null,
+    "ls": null
+   },
+   "seenCtx": {
+    "atWrite": {
+     "t": 6472,
+     "visibility": "visible",
+     "modalOpen": false,
+     "recoveryLayer": false,
+     "cardPresent": false,
+     "cardVisible": false,
+     "cardOnTop": null
+    },
+    "after2Frames": {
+     "t": 6491,
+     "visibility": "visible",
+     "modalOpen": false,
+     "recoveryLayer": false,
+     "cardPresent": true,
+     "cardVisible": true,
+     "cardOnTop": true
+    }
+   },
+   "welcomeSeen": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0
+   ]
+  },
+  "PROBE-welcome-settings-overlay--single": {
+   "mode": "welcome",
+   "checks": [
+    {
+     "n": "'Welcome back!' modal appeared (precondition)",
+     "pass": true,
+     "x": true,
+     "hard": true
+    },
+    {
+     "n": "PROBE: seen not set while the Welcome back! modal is open (no card under it)",
+     "pass": true,
+     "x": {
+      "mem": null,
+      "ls": null
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE settings overlay: no card and seen not set while Settings is open",
+     "pass": true,
+     "x": {
+      "settingsOpen": true,
+      "cards": 0,
+      "seenCtx": null,
+      "mem": null,
+      "ls": null
+     },
+     "hard": false
+    },
+    {
+     "n": "(b) §17 B2: no card while #modal-layer is open (every frame)",
+     "pass": true,
+     "x": {
+      "frames": 0
+     },
+     "hard": false
+    },
+    {
+     "n": "(b) card shown after the modal closed, exactly once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE: at the seen=true write the tab was visible, no modal/recovery layer (as built, the card is built right after)",
+     "pass": true,
+     "x": {
+      "t": 6481,
+      "visibility": "visible",
+      "modalOpen": false,
+      "recoveryLayer": false,
+      "cardPresent": false,
+      "cardVisible": false,
+      "cardOnTop": null
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE: 2 frames after the seen=true write the card is present, visible and on top (elementFromPoint)",
+     "pass": true,
+     "x": {
+      "t": 6507,
+      "visibility": "visible",
+      "modalOpen": false,
+      "recoveryLayer": false,
+      "cardPresent": true,
+      "cardVisible": true,
+      "cardOnTop": true
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO (§17 B5): card auto-closed by the 8 s timer, no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 14485,
+      "firstVisible": 6484,
+      "dismissAt": null
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO (§17 B10): seen set on show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 6484,
+       "ls": 6481,
+       "idb": 6484
+      },
+      "firstVisible": 6484
+     },
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO: after auto-hide seen=true in mem and LS (auto-hide counts)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true
+     },
+     "hard": false
+    },
+    {
+     "n": "INFO: seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "PROBE INFO: reload 1 shows 0 cards",
+     "pass": true,
+     "x": 0,
+     "hard": false
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "seenWhileModal": {
+    "mem": null,
+    "ls": null
+   },
+   "whileSettings": {
+    "settingsOpen": true,
+    "cards": 0,
+    "seenCtx": null,
+    "mem": null,
+    "ls": null
+   },
+   "seenCtx": {
+    "atWrite": {
+     "t": 6481,
+     "visibility": "visible",
+     "modalOpen": false,
+     "recoveryLayer": false,
+     "cardPresent": false,
+     "cardVisible": false,
+     "cardOnTop": null
+    },
+    "after2Frames": {
+     "t": 6507,
+     "visibility": "visible",
+     "modalOpen": false,
+     "recoveryLayer": false,
+     "cardPresent": true,
+     "cardVisible": true,
+     "cardOnTop": true
+    }
+   },
+   "welcomeSeen": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0
+   ]
+  },
+  "EXPB1-1-unmarked-v6-commit--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 precondition: no Welcome back! (clock pinned, normal show path)",
+     "pass": true,
+     "x": false,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): card appears at the in-session commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): auto-hide closed the card with no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 8530,
+      "firstVisible": 530
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen set at show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 530,
+       "ls": 528,
+       "idb": 541
+      },
+      "firstVisible": 530
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen=true in mem and LS after auto-hide (no dismiss)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "B1 AC(1): reload 1 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   },
+   "seenAfterAutoHide": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0
+   ]
+  },
+  "EXPB1-AH-commit-autohide-3-reloads--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 precondition: no Welcome back! (clock pinned, normal show path)",
+     "pass": true,
+     "x": false,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): card appears at the in-session commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): auto-hide closed the card with no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 8518,
+      "firstVisible": 520
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen set at show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 520,
+       "ls": 517,
+       "idb": 531
+      },
+      "firstVisible": 520
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen=true in mem and LS after auto-hide (no dismiss)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "B1 AC(1): reload 1 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): reload 2 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): reload 3 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   },
+   "seenAfterAutoHide": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "EXPB1-2-committed-unseen-reload--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(2): card shown on the load after an unshown commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(2): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(2): auto-hide closed the card with no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 11458,
+      "firstVisible": 3456
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(2): seen set at show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 3456,
+       "ls": 3454,
+       "idb": 3456
+      },
+      "firstVisible": 3456
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(2): seen=true in mem and LS after auto-hide (no dismiss)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(2): seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "B1 AC(2): reload 1 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": true,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   },
+   "seenAfterAutoHide": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0
+   ]
+  },
+  "EXPB1-3-new-m4-farm--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(3): new M4 farm -> never shown, on any load (2 loads)",
+     "pass": true,
+     "x": {
+      "load1": 0,
+      "load2": 0
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(3): seen not set on a new farm",
+     "pass": true,
+     "x": null,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false
+  },
+  "EXPB1-4-m4-off--single": {
+   "mode": "na",
+   "checks": [
+    {
+     "n": "N/A",
+     "pass": null,
+     "x": "M4 on/off is compile-time (balance m4.enabled); not reachable in a dist-qa browser build. Covered by unit: game tests/m4-exp1-explainer.test.ts:64 \"M4 off: never shown, and a stored seenTracksExplainer is kept on load and save\" (run by m41-7-delta.sh csr9c step)."
+    }
+   ]
+  },
+  "EXPB1-5-deferred-load--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(5) precondition: migration deferred (IDB unknown), tracksV7 not committed",
+     "pass": true,
+     "x": {
+      "tracksV7": null,
+      "pending": false
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(5): deferred load -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(5): seen not set",
+     "pass": true,
+     "x": null,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": null,
+    "pending": false
+   }
+  },
+  "M3-fresh--single": {
+   "mode": "m3",
+   "checks": [
+    {
+     "n": "M3 recovery dialog shown (precondition)",
+     "pass": true,
+     "x": "M3",
+     "hard": true
+    },
+    {
+     "n": "M3/fresh: no card under the dialog",
+     "pass": true,
+     "hard": false
+    },
+    {
+     "n": "M3/fresh: 0 cards (fresh M4 farm)",
+     "pass": true,
+     "x": 0,
+     "hard": false
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "cardUnderDialog": false,
+   "welcome": false
+  }
+ },
+ "buildId": "m4.1+5d9efa6",
+ "fails": 0
+}

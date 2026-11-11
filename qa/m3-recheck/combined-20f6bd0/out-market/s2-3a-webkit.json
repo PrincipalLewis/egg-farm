@@ -1,0 +1,148 @@
+[
+ {
+  "n": "MK-16 served card shows \"Thanks! +$X\" ~1.5 s then leaves",
+  "pass": false,
+  "i": {
+   "n": 25,
+   "min": 1027,
+   "max": 1570,
+   "early": [
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    },
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    },
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    },
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    }
+   ],
+   "served": 21,
+   "cards": 25,
+   "pops": 0,
+   "sqTr": [],
+   "txt": [
+    "Thanks!+$349.65",
+    "Thanks!+$382.95",
+    "Thanks!+$492.84",
+    "Thanks!+$329.67"
+   ]
+  }
+ },
+ {
+  "n": "MK-21 Market Hand, F12, 1500 stock: card on screen >= 40% over 60 s",
+  "pass": true,
+  "i": {
+   "share": 71.3,
+   "liveShare": 16.3,
+   "early": [
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    },
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    },
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    },
+    {
+     "L": 1027,
+     "pop": false,
+     "squeeze": null
+    }
+   ],
+   "txt": [
+    "Thanks!+$349.65",
+    "Thanks!+$382.95",
+    "Thanks!+$492.84",
+    "Thanks!+$329.67"
+   ],
+   "maxServed": 4,
+   "served": 21,
+   "cards": 25,
+   "pops": 0,
+   "squeezes": 0,
+   "sqTr": [],
+   "errs": []
+  }
+ },
+ {
+  "n": "MK-21b no workers: card on screen ~91.8% (>= 85%)",
+  "pass": true,
+  "i": {
+   "share": 100,
+   "liveShare": 100,
+   "early": [],
+   "txt": [],
+   "maxServed": 0,
+   "served": 0,
+   "cards": 0,
+   "pops": 0,
+   "squeezes": 0,
+   "sqTr": []
+  }
+ },
+ {
+  "n": "MK-18 served card: pointer-events none, aria-hidden, click does nothing",
+  "pass": true,
+  "i": {
+   "pe": "none",
+   "hitIsServed": false,
+   "aria": "true",
+   "coinsSame": true,
+   "opened": false,
+   "ids": 0
+  }
+ },
+ {
+  "n": "MK-19 reduced motion: static \"Thanks!\" card, same ~1.5 s dwell",
+  "pass": false,
+  "i": {
+   "rm": {
+    "rm": true,
+    "anim": "none"
+   },
+   "life": [
+    1226,
+    1564,
+    1568,
+    1464,
+    1461
+   ],
+   "early": [
+    {
+     "L": 1226,
+     "pop": false,
+     "squeeze": null
+    }
+   ],
+   "squeezes": 0,
+   "pops": 0
+  }
+ },
+ {
+  "n": "MK-22 first customer appears within 1 s of closing welcome-back",
+  "pass": true,
+  "i": {
+   "before": 0,
+   "ms": 87
+  }
+ }
+]

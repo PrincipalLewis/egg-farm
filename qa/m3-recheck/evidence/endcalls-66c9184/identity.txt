@@ -1,0 +1,14 @@
+TIP=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34
+SUBJECT=Merge origin/rc/v5 49ee46dd into fix/saves-endcalls-durs (HoE merge-forward for #114; #106+#113 landed)
+PARENTS=98e1af5b51d86a7e8b7bd0a6602d91332e3ee32f 49ee46ddce010f0087515c173d34c6076d47ea44
+CONTAINS_RC_49ee46dd=YES
+REMOTE_fix/saves-endcalls-durs=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34
+PR=https://github.com/PrincipalLewis/egg-farm/pull/114
+PR_HEAD=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34
+PR_BASE=feat/v5-abilities-sim @ 7a492e5fea47f9bb92ae2d07e82820c64471ec5a (historical; stack still on abilities)
+ARCHITECT_ADDENDUM_98e1af5=engineering/reviews/saves-endcalls-durs-98e1af5-architect-addendum.md
+ARCHITECT_ADDENDUM_98e1af5_sha256=794c621d957c816b7a3a0098d5694fe00210564391d6b0dd72f95083c67ba956
+ARCHITECT_ADDENDUM_86973e5_sha256=4622dd09d0e7c495d2bf0534275c48822b28f7f64336a6e74c7445cf09f80f00
+PACKAGE_LOCK_sha256=56569550486f3450a31b435e94b807a7dc95d1e7ee7d3e9d5e09606e0ff6f75e (match wt-v5-telemetry-schema)
+WORKTREE=qa/scratch/endcalls-66c9184/wt detached @ tip; node_modules symlink
+OBSERVED=2026-11-06T00:52:19+01:00

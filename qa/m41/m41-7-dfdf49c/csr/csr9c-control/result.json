@@ -1,0 +1,542 @@
+{
+ "port": "5961",
+ "N": 12000,
+ "cases": {
+  "M1-preM4--dismiss-then-reload": {
+   "checks": [
+    {
+     "n": "M1 recovery dialog shown",
+     "pass": true,
+     "x": "M1"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 386,
+      "first": {
+       "t": 782,
+       "layer": true,
+       "modal": false,
+       "notice": "M1"
+      },
+      "frames": 365
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3958
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8781
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 782,
+       "ls": 780,
+       "idb": 835
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "no exception",
+     "pass": false,
+     "x": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.tracks-exp')\n"
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 782,
+     "ls": 780,
+     "idb": 835
+    }
+   }
+  },
+  "M1-preM4--reload-before-dismiss": {
+   "checks": [
+    {
+     "n": "M1 recovery dialog shown",
+     "pass": true,
+     "x": "M1"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 381,
+      "first": {
+       "t": 630,
+       "layer": true,
+       "modal": false,
+       "notice": "M1"
+      },
+      "frames": 361
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3735
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8630
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 630,
+       "ls": 629,
+       "idb": 654
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "(4) reload BEFORE dismissal shows it again",
+     "pass": false,
+     "x": {
+      "again": false,
+      "inserts": 0,
+      "load": 2
+     }
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 630,
+     "ls": 629,
+     "idb": 654
+    }
+   }
+  },
+  "M2-preM4--dismiss-then-reload": {
+   "checks": [
+    {
+     "n": "M2 recovery dialog shown",
+     "pass": true,
+     "x": "M2"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 379,
+      "first": {
+       "t": 536,
+       "layer": true,
+       "modal": false,
+       "notice": "M2"
+      },
+      "frames": 353
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3644
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8532
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 536,
+       "ls": 531,
+       "idb": 564
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "no exception",
+     "pass": false,
+     "x": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.tracks-exp')\n"
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 536,
+     "ls": 531,
+     "idb": 564
+    }
+   }
+  },
+  "M2-preM4--reload-before-dismiss": {
+   "checks": [
+    {
+     "n": "M2 recovery dialog shown",
+     "pass": true,
+     "x": "M2"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 379,
+      "first": {
+       "t": 499,
+       "layer": true,
+       "modal": false,
+       "notice": "M2"
+      },
+      "frames": 351
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3602
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8499
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 499,
+       "ls": 498,
+       "idb": 522
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "(4) reload BEFORE dismissal shows it again",
+     "pass": false,
+     "x": {
+      "again": false,
+      "inserts": 0,
+      "load": 2
+     }
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 499,
+     "ls": 498,
+     "idb": 522
+    }
+   }
+  },
+  "WELCOME-preM4--dismiss-then-reload": {
+   "checks": [
+    {
+     "n": "'Welcome back!' modal appeared",
+     "pass": true,
+     "x": true
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 248
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3492
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 11492
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 3492,
+       "ls": 3491,
+       "idb": 3498
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "no exception",
+     "pass": false,
+     "x": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.tracks-exp')\n"
+    }
+   ],
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 3492,
+     "ls": 3491,
+     "idb": 3498
+    }
+   }
+  },
+  "WELCOME-preM4--reload-before-dismiss": {
+   "checks": [
+    {
+     "n": "'Welcome back!' modal appeared",
+     "pass": true,
+     "x": true
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 246
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3509
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 11508
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 3509,
+       "ls": 3505,
+       "idb": 3509
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "(4) reload BEFORE dismissal shows it again",
+     "pass": false,
+     "x": {
+      "again": false,
+      "inserts": 0,
+      "load": 2
+     }
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 3509,
+     "ls": 3505,
+     "idb": 3509
+    }
+   }
+  },
+  "M3-fresh--single": {
+   "checks": [
+    {
+     "n": "M3 recovery dialog shown",
+     "pass": true,
+     "x": "M3"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 615
+     }
+    },
+    {
+     "n": "M3/fresh: 0 cards (fresh M4 farm never shows it)",
+     "pass": true,
+     "x": 0
+    },
+    {
+     "n": "M3/fresh: seen not set",
+     "pass": true,
+     "x": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": false,
+   "seenWhileDialog": {
+    "mem": null,
+    "ls": null,
+    "idb": null
+   },
+   "welcome": false
+  }
+ },
+ "buildId": "m3-rc1-pre+dfdf49c",
+ "fails": 22
+}

@@ -1,0 +1,15 @@
+ src/config/balance.ts          |   4 +-
+ src/config/formulas.ts         |  10 +++
+ src/game.ts                    |   5 +-
+ src/save/m5-fields.ts          |  20 +++---
+ src/sim/actions.ts             |  16 +++--
+ src/sim/payout.ts              |  15 ++--
+ src/sim/state.ts               |   3 +
+ src/sim/streak.ts              |  68 ++++++++++++++++++
+ src/sim/tick.ts                |   6 +-
+ src/sim/timers.ts              |   5 +-
+ tests/v5-f1b-clock-rng.test.ts |   4 +-
+ tests/v5-f2-helpers.ts         |   8 ++-
+ tests/v5-f2-m5-fields.test.ts  |   4 +-
+ tests/v5-streak-sim.test.ts    | 156 +++++++++++++++++++++++++++++++++++++++++
+ 14 files changed, 295 insertions(+), 29 deletions(-)

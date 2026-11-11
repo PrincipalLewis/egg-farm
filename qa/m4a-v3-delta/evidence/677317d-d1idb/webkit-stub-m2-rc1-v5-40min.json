@@ -1,0 +1,52 @@
+{
+ "save": "{\"version\":5,\"savedAt\":1792087200000,\"state\":{\"coinsCents\":1291591,\"coop\":0.10000000000022169,\"basket\":0,\"collectionLevel\":17,\"farmLevel\":19,\"customers\":[{\"id\":328,\"demand\":151,\"filled\":46,\"waitedS\":18.9},{\"id\":329,\"demand\":115,\"filled\":0,\"waitedS\":11.299999999999976},{\"id\":330,\"demand\":148,\"filled\":0,\"waitedS\":3.800000000000002},{\"id\":331,\"demand\":99,\"filled\":0,\"waitedS\":0}],\"nextCustomerInS\":3.700000000000852,\"nextCustomerId\":332,\"rng\":1270709646,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":{\"energy\":100,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":100,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":100,\"cdS\":0},\"grader\":{\"energy\":100,\"cdS\":0}},\"graderTier\":2,\"manageCdS\":30,\"coopFullS\":0}}",
+ "telemetry": "{\n  \"exportedAt\": 1792180292992,\n  \"events\": [\n    {\n      \"build\": \"m3-rc1-pre+677317d+m4on\",\n      \"type\": \"session_start\",\n      \"ts\": 1792180283838,\n      \"sessionMs\": 0\n    },\n    {\n      \"reason\": \"backup_failed\",\n      \"type\": \"save_migration_aborted\",\n      \"ts\": 1792180283840,\n      \"sessionMs\": 2\n    },\n    {\n      \"secondsAway\": 7200,\n      \"eggs\": 45000,\n      \"type\": \"offline_grant\",\n      \"ts\": 1792180283840,\n      \"sessionMs\": 2\n    },\n    {\n      \"id\": 332,\n      \"N\": 54,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180285144,\n      \"sessionMs\": 1306\n    },\n    {\n      \"type\": \"session_end\",\n      \"ts\": 1792180285885,\n      \"sessionMs\": 2047\n    },\n    {\n      \"wage_market_hand_cents\": 15,\n      \"wage_coop_hand_cents\": 31,\n      \"coop_hand_eggs\": 22,\n      \"market_hand_eggs\": 22,\n      \"market_hand_cents\": 26708,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180283980,\n      \"sessionMs\": 142,\n      \"windowMs\": 1905\n    },\n    {\n      \"id\": 328,\n      \"N\": 151,\n      \"partial\": true,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180285964,\n      \"sessionMs\": 2126\n    },\n    {\n      \"id\": 329,\n      \"N\": 115,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180285967,\n      \"sessionMs\": 2129\n    },\n    {\n      \"id\": 330,\n      \"N\": 148,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180285977,\n      \"sessionMs\": 2139\n    },\n    {\n      \"id\": 331,\n      \"N\": 99,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180285981,\n      \"sessionMs\": 2143\n    },\n    {\n      \"id\": 332,\n      \"N\": 54,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180285985,\n      \"sessionMs\": 2147\n    },\n    {\n      \"id\": 333,\n      \"N\": 59,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180286950,\n      \"sessionMs\": 3112\n    },\n    {\n      \"id\": 333,\n      \"N\": 59,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180286957,\n      \"sessionMs\": 3119\n    },\n    {\n      \"id\": 334,\n      \"N\": 60,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180288850,\n      \"sessionMs\": 5012\n    },\n    {\n      \"id\": 334,\n      \"N\": 60,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180288952,\n      \"sessionMs\": 5114\n    },\n    {\n      \"id\": 335,\n      \"N\": 76,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180290749,\n      \"sessionMs\": 6911\n    },\n    {\n      \"id\": 335,\n      \"N\": 76,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180290949,\n      \"sessionMs\": 7111\n    },\n    {\n      \"type\": \"session_end\",\n      \"ts\": 1792180292188,\n      \"sessionMs\": 8350\n    },\n    {\n      \"wage_market_hand_cents\": 56,\n      \"market_hand_eggs\": 694,\n      \"market_hand_cents\": 842516,\n      \"wage_coop_hand_cents\": 95,\n      \"coop_hand_eggs\": 120,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180285958,\n      \"sessionMs\": 2120,\n      \"windowMs\": 6230\n    },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180292653,\n      \"sessionMs\": 8815\n    },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180292965,\n      \"sessionMs\": 9127\n    },\n    {\n      \"wage_coop_hand_cents\": 32,\n      \"coop_hand_eggs\": 40,\n      \"wage_market_hand_cents\": 8,\n      \"market_hand_eggs\": 50,\n      \"market_hand_cents\": 60700,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180292959,\n      \"sessionMs\": 9121,\n      \"windowMs\": 33,\n      \"open\": true\n    }\n  ]\n}",
+ "msgs": [],
+ "svW": [],
+ "bkW": [
+  {
+   "len": 723,
+   "t": 1792180283839
+  },
+  {
+   "len": 723,
+   "t": 1792180283840
+  },
+  {
+   "len": 723,
+   "t": 1792180283850
+  },
+  {
+   "len": 723,
+   "t": 1792180285060
+  },
+  {
+   "len": 723,
+   "t": 1792180285885
+  },
+  {
+   "len": 723,
+   "t": 1792180285885
+  },
+  {
+   "len": 723,
+   "t": 1792180285885
+  },
+  {
+   "len": 723,
+   "t": 1792180288878
+  },
+  {
+   "len": 723,
+   "t": 1792180292188
+  },
+  {
+   "len": 723,
+   "t": 1792180292188
+  },
+  {
+   "len": 723,
+   "t": 1792180292188
+  }
+ ]
+}

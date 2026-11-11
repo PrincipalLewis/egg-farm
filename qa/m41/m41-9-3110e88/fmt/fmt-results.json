@@ -1,0 +1,1026 @@
+{
+ "sha": "3110e88226a5ee7e01c46f7bab4bd9f0d96208d3",
+ "checks": {
+  "reach": {
+   "maxLevel": 30,
+   "maxUpgradeCostCents": 13292279,
+   "maxEggPriceCents": 2243,
+   "graderMultUpperBound": 4,
+   "maxEggsPerSec": 31,
+   "maxOrderDemandEggs": 75,
+   "maxOrderValueCents": 672900,
+   "maxIncomeCentsPerSec": 278132,
+   "coins10yCents": 87711707520000,
+   "eggs10y": 9776160000,
+   "note": "costs/prices/demand are bounded by balance.json (maxLevel, costTable/costs, price formula). Coins and basket are accumulators with no cap: bound = max income or lay rate x 10 years of play (upper bound; grader mult taken as the largest multiplier <100 found in balance.json)."
+  },
+  "reachTierCoins": "$877.1B",
+  "reachTierEggs": "9.78B",
+  "boundaries": [
+   [
+    "count 999",
+    "999",
+    "999"
+   ],
+   [
+    "count 1000",
+    "1,000",
+    "1,000"
+   ],
+   [
+    "count 9999",
+    "9,999",
+    "9,999"
+   ],
+   [
+    "count 10000",
+    "10K",
+    "10K"
+   ],
+   [
+    "count 999949",
+    "999.9K",
+    "999.9K"
+   ],
+   [
+    "count 999950",
+    "1M",
+    "1M"
+   ],
+   [
+    "count 999999",
+    "1M",
+    "1M"
+   ],
+   [
+    "money $999.99",
+    "$999.99",
+    "$999.99"
+   ],
+   [
+    "money $1,000.00",
+    "$1,000.00",
+    "$1,000.00"
+   ],
+   [
+    "money $9,999.99",
+    "$9,999.99",
+    "$9,999.99"
+   ],
+   [
+    "money $10K",
+    "$10K",
+    "$10K"
+   ],
+   [
+    "short $999.99",
+    "$999.99",
+    "$999.99"
+   ],
+   [
+    "short $1K",
+    "$1K",
+    "$1K"
+   ],
+   [
+    "short $999.9K",
+    "$999.9K",
+    "$999.9K"
+   ],
+   [
+    "short $1M",
+    "$1M",
+    "$1M"
+   ],
+   [
+    "count 999.94M",
+    "999.9M",
+    "999.9M"
+   ],
+   [
+    "count 999.95M",
+    "1B",
+    "1B"
+   ],
+   [
+    "count 999.995M",
+    "1B",
+    "1B"
+   ],
+   [
+    "count 9.994M",
+    "9.99M",
+    "9.99M"
+   ],
+   [
+    "count 9.995M",
+    "10M",
+    "10M"
+   ],
+   [
+    "count 1M",
+    "1M",
+    "1M"
+   ],
+   [
+    "short 999.94M",
+    "$999.9M",
+    "$999.9M"
+   ],
+   [
+    "short 999.95M",
+    "$1B",
+    "$1B"
+   ],
+   [
+    "short 999.995M",
+    "$1B",
+    "$1B"
+   ],
+   [
+    "floor 999.99M",
+    "999.9M",
+    "999.9M"
+   ],
+   [
+    "preview 999.99M",
+    "$999.9M",
+    "$999.9M"
+   ],
+   [
+    "count 999.94B",
+    "999.9B",
+    "999.9B"
+   ],
+   [
+    "count 999.95B",
+    "1T",
+    "1T"
+   ],
+   [
+    "count 999.995B",
+    "1T",
+    "1T"
+   ],
+   [
+    "count 9.994B",
+    "9.99B",
+    "9.99B"
+   ],
+   [
+    "count 9.995B",
+    "10B",
+    "10B"
+   ],
+   [
+    "count 1B",
+    "1B",
+    "1B"
+   ],
+   [
+    "short 999.94B",
+    "$999.9B",
+    "$999.9B"
+   ],
+   [
+    "short 999.95B",
+    "$1T",
+    "$1T"
+   ],
+   [
+    "short 999.995B",
+    "$1T",
+    "$1T"
+   ],
+   [
+    "floor 999.99B",
+    "999.9B",
+    "999.9B"
+   ],
+   [
+    "preview 999.99B",
+    "$999.9B",
+    "$999.9B"
+   ],
+   [
+    "count 999.94T",
+    "999.9T",
+    "999.9T"
+   ],
+   [
+    "count 999.95T",
+    "1Qa",
+    "1Qa"
+   ],
+   [
+    "count 999.995T",
+    "1Qa",
+    "1Qa"
+   ],
+   [
+    "count 9.994T",
+    "9.99T",
+    "9.99T"
+   ],
+   [
+    "count 9.995T",
+    "10T",
+    "10T"
+   ],
+   [
+    "count 1T",
+    "1T",
+    "1T"
+   ],
+   [
+    "short 999.94T",
+    "$999.9T",
+    "$999.9T"
+   ],
+   [
+    "short 999.95T",
+    "$1Qa",
+    "$1Qa"
+   ],
+   [
+    "short 999.995T",
+    "$1Qa",
+    "$1Qa"
+   ],
+   [
+    "floor 999.99T",
+    "999.9T",
+    "999.9T"
+   ],
+   [
+    "preview 999.99T",
+    "$999.9T",
+    "$999.9T"
+   ],
+   [
+    "count 999.94Qa",
+    "999.9Qa",
+    "999.9Qa"
+   ],
+   [
+    "count 999.95Qa",
+    "1Qi",
+    "1Qi"
+   ],
+   [
+    "count 999.995Qa",
+    "1Qi",
+    "1Qi"
+   ],
+   [
+    "count 9.994Qa",
+    "9.99Qa",
+    "9.99Qa"
+   ],
+   [
+    "count 9.995Qa",
+    "10Qa",
+    "10Qa"
+   ],
+   [
+    "count 1Qa",
+    "1Qa",
+    "1Qa"
+   ],
+   [
+    "short 999.94Qa",
+    "$999.9Qa",
+    "$999.9Qa"
+   ],
+   [
+    "short 999.95Qa",
+    "$1Qi",
+    "$1Qi"
+   ],
+   [
+    "short 999.995Qa",
+    "$1Qi",
+    "$1Qi"
+   ],
+   [
+    "floor 999.99Qa",
+    "999.9Qa",
+    "999.9Qa"
+   ],
+   [
+    "preview 999.99Qa",
+    "$999.9Qa",
+    "$999.9Qa"
+   ],
+   [
+    "count 999.94Qi",
+    "999.9Qi",
+    "999.9Qi"
+   ],
+   [
+    "count 999.95Qi",
+    "1Sx",
+    "1Sx"
+   ],
+   [
+    "count 999.995Qi",
+    "1Sx",
+    "1Sx"
+   ],
+   [
+    "count 9.994Qi",
+    "9.99Qi",
+    "9.99Qi"
+   ],
+   [
+    "count 9.995Qi",
+    "10Qi",
+    "10Qi"
+   ],
+   [
+    "count 1Qi",
+    "1Qi",
+    "1Qi"
+   ],
+   [
+    "short 999.94Qi",
+    "$999.9Qi",
+    "$999.9Qi"
+   ],
+   [
+    "short 999.95Qi",
+    "$1Sx",
+    "$1Sx"
+   ],
+   [
+    "short 999.995Qi",
+    "$1Sx",
+    "$1Sx"
+   ],
+   [
+    "floor 999.99Qi",
+    "999.9Qi",
+    "999.9Qi"
+   ],
+   [
+    "preview 999.99Qi",
+    "$999.9Qi",
+    "$999.9Qi"
+   ],
+   [
+    "count 999.94Sx",
+    "999.9Sx",
+    "999.9Sx"
+   ],
+   [
+    "count 999.95Sx",
+    "1Sp",
+    "1Sp"
+   ],
+   [
+    "count 999.995Sx",
+    "1Sp",
+    "1Sp"
+   ],
+   [
+    "count 9.994Sx",
+    "9.99Sx",
+    "9.99Sx"
+   ],
+   [
+    "count 9.995Sx",
+    "10Sx",
+    "10Sx"
+   ],
+   [
+    "count 1Sx",
+    "1Sx",
+    "1Sx"
+   ],
+   [
+    "short 999.94Sx",
+    "$999.9Sx",
+    "$999.9Sx"
+   ],
+   [
+    "short 999.95Sx",
+    "$1Sp",
+    "$1Sp"
+   ],
+   [
+    "short 999.995Sx",
+    "$1Sp",
+    "$1Sp"
+   ],
+   [
+    "floor 999.99Sx",
+    "999.9Sx",
+    "999.9Sx"
+   ],
+   [
+    "preview 999.99Sx",
+    "$999.9Sx",
+    "$999.9Sx"
+   ],
+   [
+    "count 999.94Sp",
+    "999.9Sp",
+    "999.9Sp"
+   ],
+   [
+    "count 999.95Sp",
+    "1Oc",
+    "1Oc"
+   ],
+   [
+    "count 999.995Sp",
+    "1Oc",
+    "1Oc"
+   ],
+   [
+    "count 9.994Sp",
+    "9.99Sp",
+    "9.99Sp"
+   ],
+   [
+    "count 9.995Sp",
+    "10Sp",
+    "10Sp"
+   ],
+   [
+    "count 1Sp",
+    "1Sp",
+    "1Sp"
+   ],
+   [
+    "short 999.94Sp",
+    "$999.9Sp",
+    "$999.9Sp"
+   ],
+   [
+    "short 999.95Sp",
+    "$1Oc",
+    "$1Oc"
+   ],
+   [
+    "short 999.995Sp",
+    "$1Oc",
+    "$1Oc"
+   ],
+   [
+    "floor 999.99Sp",
+    "999.9Sp",
+    "999.9Sp"
+   ],
+   [
+    "preview 999.99Sp",
+    "$999.9Sp",
+    "$999.9Sp"
+   ],
+   [
+    "count 999.94Oc",
+    "999.9Oc",
+    "999.9Oc"
+   ],
+   [
+    "count 999.95Oc",
+    "1No",
+    "1No"
+   ],
+   [
+    "count 999.995Oc",
+    "1No",
+    "1No"
+   ],
+   [
+    "count 9.994Oc",
+    "9.99Oc",
+    "9.99Oc"
+   ],
+   [
+    "count 9.995Oc",
+    "10Oc",
+    "10Oc"
+   ],
+   [
+    "count 1Oc",
+    "1Oc",
+    "1Oc"
+   ],
+   [
+    "short 999.94Oc",
+    "$999.9Oc",
+    "$999.9Oc"
+   ],
+   [
+    "short 999.95Oc",
+    "$1No",
+    "$1No"
+   ],
+   [
+    "short 999.995Oc",
+    "$1No",
+    "$1No"
+   ],
+   [
+    "floor 999.99Oc",
+    "999.9Oc",
+    "999.9Oc"
+   ],
+   [
+    "preview 999.99Oc",
+    "$999.9Oc",
+    "$999.9Oc"
+   ],
+   [
+    "count 999.94No",
+    "999.9No",
+    "999.9No"
+   ],
+   [
+    "count 999.95No",
+    "1Dc",
+    "1Dc"
+   ],
+   [
+    "count 999.995No",
+    "1Dc",
+    "1Dc"
+   ],
+   [
+    "count 9.994No",
+    "9.99No",
+    "9.99No"
+   ],
+   [
+    "count 9.995No",
+    "10No",
+    "10No"
+   ],
+   [
+    "count 1No",
+    "1No",
+    "1No"
+   ],
+   [
+    "short 999.94No",
+    "$999.9No",
+    "$999.9No"
+   ],
+   [
+    "short 999.95No",
+    "$1Dc",
+    "$1Dc"
+   ],
+   [
+    "short 999.995No",
+    "$1Dc",
+    "$1Dc"
+   ],
+   [
+    "floor 999.99No",
+    "999.9No",
+    "999.9No"
+   ],
+   [
+    "preview 999.99No",
+    "$999.9No",
+    "$999.9No"
+   ],
+   [
+    "count 999.94Dc",
+    "999.9Dc",
+    "999.9Dc"
+   ],
+   [
+    "count 999.95Dc",
+    "1.00e36",
+    "1.00e36"
+   ],
+   [
+    "count 999.995Dc",
+    "1.00e36",
+    "1.00e36"
+   ],
+   [
+    "count 9.994Dc",
+    "9.99Dc",
+    "9.99Dc"
+   ],
+   [
+    "count 9.995Dc",
+    "10Dc",
+    "10Dc"
+   ],
+   [
+    "count 1Dc",
+    "1Dc",
+    "1Dc"
+   ],
+   [
+    "short 999.94Dc",
+    "$999.9Dc",
+    "$999.9Dc"
+   ],
+   [
+    "short 999.95Dc",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "short 999.995Dc",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "floor 999.99Dc",
+    "999.9Dc",
+    "999.9Dc"
+   ],
+   [
+    "preview 999.99Dc",
+    "$999.9Dc",
+    "$999.9Dc"
+   ],
+   [
+    "count 1e33",
+    "1Dc",
+    "1Dc"
+   ],
+   [
+    "money 1e33",
+    "$1Dc",
+    "$1Dc"
+   ],
+   [
+    "count 1e36",
+    "1.00e36",
+    "1.00e36"
+   ],
+   [
+    "money 1e36",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "short 1e36",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "preview 1e36",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "exact 1e36",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "count 1.234e36",
+    "1.23e36",
+    "1.23e36"
+   ],
+   [
+    "count 9.995e36 (half-up)",
+    "1.00e37",
+    "1.00e37"
+   ],
+   [
+    "count 1.235e36 (half-up)",
+    "1.24e36",
+    "1.24e36"
+   ],
+   [
+    "count 1.005e36 (half-up)",
+    "1.01e36",
+    "1.01e36"
+   ],
+   [
+    "count 1.2345e36",
+    "1.23e36",
+    "1.23e36"
+   ],
+   [
+    "count max-safe",
+    "9.01Qa",
+    "9.01Qa"
+   ],
+   [
+    "money max-safe cents",
+    "$90.1T",
+    "$90.1T"
+   ],
+   [
+    "count NaN",
+    "—",
+    "—"
+   ],
+   [
+    "money Infinity",
+    "—",
+    "—"
+   ],
+   [
+    "short -Infinity",
+    "—",
+    "—"
+   ]
+  ],
+  "suffixesSeen": [
+   "K",
+   "M",
+   "B",
+   "T",
+   "Qa",
+   "Qi",
+   "Sx",
+   "Sp",
+   "Oc",
+   "No",
+   "Dc"
+  ],
+  "shapeSamples": 5607,
+  "monotonicSamples": 42385,
+  "intendedKTChanges": [
+   {
+    "x": 999950000000000,
+    "new": "1Qa",
+    "old": "1,000T"
+   },
+   {
+    "x": 999999999999999,
+    "new": "1Qa",
+    "old": "1,000T"
+   }
+  ],
+  "identityKT": {
+   "samples": 700,
+   "comparisonsPerSample": 8,
+   "diffs": [],
+   "diffCount": 0
+  },
+  "aria": [
+   {
+    "s": "Qa",
+    "c": "1.25 quadrillion",
+    "m": "$1.25 quadrillion",
+    "l": "$1.25 quadrillion, 1.25 quadrillion eggs"
+   },
+   {
+    "s": "Qi",
+    "c": "1.25 quintillion",
+    "m": "$1.25 quintillion",
+    "l": "$1.25 quintillion, 1.25 quintillion eggs"
+   },
+   {
+    "s": "Sx",
+    "c": "1.25 sextillion",
+    "m": "$1.25 sextillion",
+    "l": "$1.25 sextillion, 1.25 sextillion eggs"
+   },
+   {
+    "s": "Sp",
+    "c": "1.25 septillion",
+    "m": "$1.25 septillion",
+    "l": "$1.25 septillion, 1.25 septillion eggs"
+   },
+   {
+    "s": "Oc",
+    "c": "1.25 octillion",
+    "m": "$1.25 octillion",
+    "l": "$1.25 octillion, 1.25 octillion eggs"
+   },
+   {
+    "s": "No",
+    "c": "1.25 nonillion",
+    "m": "$1.25 nonillion",
+    "l": "$1.25 nonillion, 1.25 nonillion eggs"
+   },
+   {
+    "s": "Dc",
+    "c": "1.25 decillion",
+    "m": "$1.25 decillion",
+    "l": "$1.25 decillion, 1.25 decillion eggs"
+   },
+   {
+    "sc": "1.23 times 10 to the 36",
+    "sm": "$1.00 times 10 to the 36"
+   }
+  ],
+  "claims": [
+   [
+    "pop exact 1.2e17c",
+    "$1.2Qa",
+    "$1.2Qa"
+   ],
+   [
+    "pop exact 1.2345e17c",
+    "$1.2Qa",
+    "$1.2Qa"
+   ],
+   [
+    "pop exact 1.25e17c (half-up)",
+    "$1.3Qa",
+    "$1.3Qa"
+   ],
+   [
+    "count 1e36",
+    "1.00e36",
+    "1.00e36"
+   ],
+   [
+    "short 1e36$",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "exact 1e36$",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "short $999.9Dc",
+    "$999.9Dc",
+    "$999.9Dc"
+   ],
+   [
+    "money $999.9Dc",
+    "$999.9Dc",
+    "$999.9Dc"
+   ],
+   [
+    "preview $999.94Dc",
+    "$999.9Dc",
+    "$999.9Dc"
+   ],
+   [
+    "count 999.9Dc",
+    "999.9Dc",
+    "999.9Dc"
+   ],
+   [
+    "count 999.95Dc",
+    "1.00e36",
+    "1.00e36"
+   ],
+   [
+    "short 999.95Dc",
+    "$1.00e36",
+    "$1.00e36"
+   ],
+   [
+    "count 999.995K",
+    "1M",
+    "1M"
+   ],
+   [
+    "count 999.995M",
+    "1B",
+    "1B"
+   ],
+   [
+    "count 999.995B",
+    "1T",
+    "1T"
+   ],
+   [
+    "count 999.995T",
+    "1Qa",
+    "1Qa"
+   ],
+   [
+    "money 999.995K$",
+    "$1M",
+    "$1M"
+   ],
+   [
+    "money 999.995T$",
+    "$1Qa",
+    "$1Qa"
+   ],
+   [
+    "money 99.9995T$ (harness self-check)",
+    "$100T",
+    "$100T"
+   ],
+   [
+    "sci 9.995e36",
+    "1.00e37",
+    "1.00e37"
+   ],
+   [
+    "sci money 9.995e36$",
+    "$1.00e37",
+    "$1.00e37"
+   ],
+   [
+    "sci floor 9.995e36",
+    "9.99e36",
+    "9.99e36"
+   ],
+   [
+    "count max-safe",
+    "9.01Qa",
+    "9.01Qa"
+   ],
+   [
+    "floor max-safe",
+    "9Qa",
+    "9Qa"
+   ],
+   [
+    "aria 1.00e36",
+    "1.00 times 10 to the 36",
+    "1.00 times 10 to the 36"
+   ],
+   [
+    "aria $999.9Dc",
+    "$999.9 decillion",
+    "$999.9 decillion"
+   ]
+  ],
+  "halfUp": {
+   "samples": 88448,
+   "miss": {
+    "K": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 268,
+     "ex": []
+    },
+    "M": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "B": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "T": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "Qa": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "Qi": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "Sx": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "Sp": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "Oc": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "No": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    },
+    "Dc": {
+     "dp2": 0,
+     "dp1": 0,
+     "samples": 1168,
+     "ex": []
+    }
+   },
+   "sciMiss": 0,
+   "sciEx": [],
+   "floorUp": [],
+   "floorUpCount": 0,
+   "ktNewVsOldDiffsAtHalfway": {
+    "M": 0,
+    "B": 0,
+    "T": 0
+   }
+  }
+ },
+ "fails": []
+}

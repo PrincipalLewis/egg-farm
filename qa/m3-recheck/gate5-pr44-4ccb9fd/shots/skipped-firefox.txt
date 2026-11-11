@@ -1,0 +1,4 @@
+firefox 360x800 migrated explainer frames: explainer not present on this build
+firefox 375x800 migrated explainer frames: explainer not present on this build
+firefox 390x844 migrated explainer frames: explainer not present on this build
+firefox 1280x800 migrated explainer frames: explainer not present on this build

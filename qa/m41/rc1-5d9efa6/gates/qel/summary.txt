@@ -1,0 +1,10 @@
+2026-10-24 14:56:15 CEST === QE-LATE-e §7 unit on 5d9efa61c5e6ee31ca9ebdec20ee70167d31d463
+2026-10-24 14:56:15 CEST have gate4-explainer.qa.test.ts 20b12dc961146ba8
+2026-10-24 14:56:15 CEST have qel7-save-bytes.qa.test.ts 288c36a4764a992b
+2026-10-24 14:56:15 CEST have oq2-offline-grant-once.qa.test.ts 773705bf09038439
+2026-10-24 14:56:17 CEST gate4-explainer exit=0       Tests  17 passed (17) (want 17/17 as 1682a0c)
+2026-10-24 14:56:19 CEST qel7-save-bytes exit=0       Tests  19 passed (19)
+2026-10-24 14:56:20 CEST oq2-offline-grant-once exit=0       Tests  10 passed (10) (OQ-2 credited once)
+2026-10-24 14:56:20 CEST QEL-8 rg: 2 lines (see qel8-rg.txt; compare with m41-7-dfdf49c/gates/qel/qel8-rg.txt)
+2026-10-24 14:56:20 CEST porcelain after: 0 (want 0)
+2026-10-24 14:56:20 CEST QEL_UNIT_DONE

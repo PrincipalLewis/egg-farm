@@ -1,0 +1,12 @@
+ src/sim/abilities.ts           | 119 +++++++++++++++++++
+ src/sim/effects.ts             |   8 +-
+ src/sim/events.ts              |   2 +-
+ src/sim/m5-state.ts            |   6 +-
+ src/sim/payout.ts              |   3 +-
+ src/sim/timers.ts              |   5 +-
+ src/sim/workers.ts             |   7 +-
+ tests/v5-abilities-sim.test.ts | 260 +++++++++++++++++++++++++++++++++++++++++
+ tests/v5-f1a-fields.test.ts    |   2 +-
+ 9 files changed, 402 insertions(+), 10 deletions(-)
+
+exit_code=0

@@ -1,0 +1,42 @@
+
+== pacing aggregate job 129567295496 log (verdict step; grep 904/NOT-WIRED/FAIL/Y rows)
+22:pacing-x1-stack	Set up job	2026-11-10T01:33:31.1889738Z ##[group]GITHUB_TOKEN Permissions
+86:pacing-x1-stack	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-10T01:33:32.9043998Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+203:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	﻿2026-11-10T01:33:43.2416911Z ##[group]Run npx vite-node scripts/pacing-x1-stack.ts -- verdict --in x1-out --out x1-out
+204:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:43.2417646Z ^[[36;1mnpx vite-node scripts/pacing-x1-stack.ts -- verdict --in x1-out --out x1-out^[[0m
+205:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:43.2438805Z shell: /usr/bin/bash -e {0}
+206:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:43.2439094Z ##[endgroup]
+207:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2255208Z ## pacing-x1-stack: **FAIL**
+208:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2256145Z 
+209:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2258649Z - data: `shipped-tree` (shipped data/economy.csv + src/config/balance.json from the tree, full M5.0 stack (pause rows out)); CSV data/economy.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f, src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a (read from the tree, sha256 recorded)
+210:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2261229Z - run: seeds 1-200, T 4000 s, windows every 300 s (A1/A2), step ratio from L11; commit e3bd3096889b; shard runtimes casual 2507s, optimal 1979s, seller15 2278s
+211:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2269710Z - **balance.json (QA-D-1030-SHIPFLAGS):** src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a; m4.enabled=1; m4.flags golden=0 streak=0 tapCoins=0 abilities=0 broody=0 salesStopped=0 fatigueCue=0 pause=0 rc2Refill=0 autoRefill=0 clockWage=0 breeds=0 zeroGainUi=0 bestBuyV2=0; flags ON: none; bot-modelled src M5 flags (golden/streak/tapCoins/broody/abilities/pause) ON: none (bot model runs; O-3 guard would throw if any were on)
+212:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2274656Z - table: tests/fixtures/x1/pred-13.2a-7bbb5925.csv sha256 7bbb5925 (§13.2a of record, economy.c0d9492b.md L879-913)
+213:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2277563Z - rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED (not judged until HoP signs the re-prediction), 3 N/A (row 903, D-CEO-20261030-04), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P pause rows)
+214:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2279352Z - **FAIL: blocking row 904 optimal NOT-WIRED**
+215:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2280262Z - **FAIL: blocking row 904 seller15 NOT-WIRED**
+216:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2281891Z WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+217:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2282953Z FAIL: blocking row 904 optimal NOT-WIRED
+218:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2283739Z FAIL: blocking row 904 seller15 NOT-WIRED
+219:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2284882Z FAIL: blocking row 904 casual NOT-WIRED
+220:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-10T01:33:44.2456512Z ##[error]Process completed with exit code 1.
+254:pacing-x1-stack	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-10T01:33:45.9044049Z http.https://github.com/.extraheader
+
+== ci gate job 129550182489 unit-test failure excerpt
+208:gate	UNKNOWN STEP	2026-11-10T00:51:43.4978282Z  ^[[32m✓^[[39m tests/m41-9-big-number.test.ts ^[[2m(^[[22m^[[2m35 tests^[[22m^[[2m)^[[22m^[[33m 10509^[[2mms^[[22m^[[39m
+228:gate	UNKNOWN STEP	2026-11-10T00:51:53.2577591Z  ^[[31m❯^[[39m tests/v5-f3-config.test.ts ^[[2m(^[[22m^[[2m28 tests^[[22m^[[2m | ^[[22m^[[31m1 failed^[[39m^[[2m)^[[22m^[[90m 75^[[2mms^[[22m^[[39m
+229:gate	UNKNOWN STEP	2026-11-10T00:51:53.2582644Z ^[[31m   ^[[31m×^[[31m [F3-no-literal] F3 no literal tunables in src/^[[2m > ^[[22mM5 modules carry no bare numeric literal (only 0/1/1000/1e-9/uint32 and the ruled named constants)^[[90m 14^[[2mms^[[22m^[[31m^[[39m
+230:gate	UNKNOWN STEP	2026-11-10T00:51:53.2584452Z ^[[31m     → expected [ 'sim/clock.ts:38 100' ] to deeply equal []^[[39m
+271:gate	UNKNOWN STEP	2026-11-10T00:52:15.1842801Z  ^[[32m✓^[[39m tests/m41-9-art-rulings.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[90m 67^[[2mms^[[22m^[[39m
+379:gate	UNKNOWN STEP	2026-11-10T00:52:37.3029135Z    ^[[33m^[[2m✓^[[22m^[[39m verify: exit codes and the browser step (CCR n1/n3)^[[2m > ^[[22mexit 1 on a failed check (wrong build id, no screenshot); verify.json says FAIL and names no PNG ^[[33m2910^[[2mms^[[22m^[[39m
+504:gate	UNKNOWN STEP	2026-11-10T00:53:51.6022198Z  ^[[32m✓^[[39m tests/m41-9-ux-minors.test.ts ^[[2m(^[[22m^[[2m18 tests^[[22m^[[2m)^[[22m^[[90m 170^[[2mms^[[22m^[[39m
+506:gate	UNKNOWN STEP	2026-11-10T00:53:53.3644994Z  ^[[32m✓^[[39m tests/m41-9-ux-rulings.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[33m 327^[[2mms^[[22m^[[39m
+509:gate	UNKNOWN STEP	2026-11-10T00:53:56.4260920Z  ^[[32m✓^[[39m tests/m41-9-ux-ccr-m1.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[33m 5174^[[2mms^[[22m^[[39m
+525:gate	UNKNOWN STEP	2026-11-10T00:54:01.8410839Z  ^[[32m✓^[[39m tests/m41-9-card-wrap.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 79^[[2mms^[[22m^[[39m
+562:gate	UNKNOWN STEP	2026-11-10T00:54:55.4536980Z ^[[31m^[[1m^[[7m FAIL ^[[27m^[[22m^[[39m tests/v5-f3-config.test.ts^[[2m > ^[[22m[F3-no-literal] F3 no literal tunables in src/^[[2m > ^[[22mM5 modules carry no bare numeric literal (only 0/1/1000/1e-9/uint32 and the ruled named constants)
+563:gate	UNKNOWN STEP	2026-11-10T00:54:55.4549317Z ^[[31m^[[1mAssertionError^[[22m: expected [ 'sim/clock.ts:38 100' ] to deeply equal []^[[39m
+570:gate	UNKNOWN STEP	2026-11-10T00:54:55.4551468Z ^[[31m+   "sim/clock.ts:38 100",^[[39m
+583:gate	UNKNOWN STEP	2026-11-10T00:54:55.4686607Z ^[[2m Test Files ^[[22m ^[[1m^[[31m1 failed^[[39m^[[22m^[[2m | ^[[22m^[[1m^[[32m159 passed^[[39m^[[22m^[[90m (160)^[[39m
+584:gate	UNKNOWN STEP	2026-11-10T00:54:55.4702464Z ^[[2m      Tests ^[[22m ^[[1m^[[31m1 failed^[[39m^[[22m^[[2m | ^[[22m^[[1m^[[32m2345 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[90m (2347)^[[39m
+589:gate	UNKNOWN STEP	2026-11-10T00:54:55.4772109Z ##[error]AssertionError: expected [ 'sim/clock.ts:38 100' ] to deeply equal []
+596:gate	UNKNOWN STEP	+   "sim/clock.ts:38 100",

@@ -1,0 +1,4 @@
+# Offline-return fixture (TP1-C2 welcome-back; Saves QA S-OFF method)
+`tp1-c2-base.p1-B-mh-hired.save.json` is a byte copy of `../p1-30b29d3/p1-B-workers-F10.save.json`. It was generated from the published Latest m4.1-p1-30b29d3 asset (dd919d61…) in Chromium. State: SAVE_VERSION 6, 39,094¢, F10, with workers coop_hand, hawker and market_hand (so the Market Hand is hired).
+Do not edit it; it is read-only and pinned in `../FIXTURES.sha256`. Move savedAt back with `../../scripts/offline-seed.mjs` (`seedOffline(page, raw, { agoS: 7200 })`). The checksum `sum` covers `state` only, so savedAt can move without re-summing.
+TP1-C2 flow (UI QA): load the RC's build:qa → `eggfarmQa.worker.set('market_hand', {energy:0, unpaid})` → let the game save → `captureSave(page)` → new context → `seedOffline(page, captured, { agoS: 7200 })` → cold-load.

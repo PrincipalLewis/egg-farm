@@ -1,0 +1,7 @@
+vs baf410ff: 4 files +166
+src/config/breeds.ts: +BC_SPEC_DEFAULTS clamp keys (lay_cap_bp_lt18/lay_cap_bp/lay_cap_farm/away_cap_bp/broody_cap_bp)
+src/sim/breeds-family.ts: NEW familyClamp/familyActiveBp/familyCapBp/clampFamilyBp/familyRawBp
+tests/v5-breeds-family-caps.test.ts: NEW BR-AC18/E8/E9 coverage
+engineering/status.md: eng log note only (not product behaviour)
+VERDICT_SCOPE=PASS (familyClamp/familyActiveBp getters + bc() keys; status.md is eng diary only, not product change)
+NO unrelated product/sim/UI behaviour change vs baf410ff

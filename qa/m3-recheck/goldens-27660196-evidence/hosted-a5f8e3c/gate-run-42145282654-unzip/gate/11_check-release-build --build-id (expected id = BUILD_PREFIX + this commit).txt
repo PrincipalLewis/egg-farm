@@ -1,0 +1,16 @@
+﻿2026-11-06T01:51:28.3700904Z ##[group]Run prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
+2026-11-06T01:51:28.3701415Z [36;1mprefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)[0m
+2026-11-06T01:51:28.3701980Z [36;1mnode scripts/check-release-build.mjs dist-html/egg-farm.html --build-id "$prefix+$(git rev-parse --short HEAD)"[0m
+2026-11-06T01:51:28.3720212Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:51:28.3720432Z ##[endgroup]
+2026-11-06T01:51:28.4083975Z check-release-build: single-file dist-html/egg-farm.html (595828 bytes)
+2026-11-06T01:51:28.4126399Z check-release-build: m4.1+69f9c61 ok
+2026-11-06T01:51:28.4130072Z check-release-build: release prefix m4.1 ok
+2026-11-06T01:51:28.4130703Z check-release-build: build id m4.1+69f9c61 matches expected ok
+2026-11-06T01:51:28.4152611Z check-release-build: build-id meta + data-build-id = m4.1+69f9c61 ok
+2026-11-06T01:51:28.4160852Z check-release-build: no eggfarmUi in release ok
+2026-11-06T01:51:28.4174163Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+2026-11-06T01:51:28.4298742Z check-release-build: window global writes only eggfarmExportTelemetry ok
+2026-11-06T01:51:28.4316013Z check-release-build: every asset/font URL inlined (data:) ok
+2026-11-06T01:51:28.4386676Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+2026-11-06T01:51:28.4389888Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok

@@ -1,0 +1,18 @@
+=== pin constants at tip ===
+/workspace/egg-farm-studio/qa/scratch/income-ref-d9539a5/wt/engineering/golden/m4on-golden.90a9c84.test.ts:23:// Generated 2026-10-19 on 90a9c84 + this branch, two runs, identical. Re-pinned for the D-HOP-2026-10-19-02 bot (game pick over all purchasables): history 403ca889bb02121e764c402cb2c408b0aebf0bed43ca14d187ea62bbeafa7974 (no bot change) -> 9173492e41ac06cbe3c077bcbadc464ad5ce681646eb4b9619b640ff40a31f6b (-01 bot) -> 723b91ab311be9bf403e7bd5a8f7363bc85234287354c4dedf94a45613faa817 (-02 bot) -> a54c9cf9 (T3 data b48be8a4, D-CEO-20261019-04). Storage pins unchanged (no bot). A retune or any M4 sim change moves these: re-pin with HoE OK.
+/workspace/egg-farm-studio/qa/scratch/income-ref-d9539a5/wt/engineering/golden/m4on-golden.90a9c84.test.ts:24:const GOLDEN_M4ON = 'a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5';
+/workspace/egg-farm-studio/qa/scratch/income-ref-d9539a5/wt/engineering/golden/m4on-golden.90a9c84.test.ts:61:    expect(h).toBe(GOLDEN_M4ON);
+/workspace/egg-farm-studio/qa/scratch/income-ref-d9539a5/wt/engineering/golden/flagoff-golden.a01faea.test.ts:25:// (data/economy.csv = m4cols 86f0e80e) moves it to f90d1678. No code changes. Storage-bytes pins (PINS) unchanged.
+/workspace/egg-farm-studio/qa/scratch/income-ref-d9539a5/wt/engineering/golden/flagoff-golden.a01faea.test.ts:26:const GOLDEN_MAIN_A01FAEA = 'f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544';
+/workspace/egg-farm-studio/qa/scratch/income-ref-d9539a5/wt/engineering/golden/flagoff-golden.a01faea.test.ts:62:    expect(h).toBe(GOLDEN_MAIN_A01FAEA);
+=== same files vs origin/rc/v5 (should be empty = identical) ===
+DIFF_EXIT=0
+=== blob hashes tip vs rc/v5 ===
+engineering/golden/flagoff-golden.a01faea.test.ts tip=3584795c42b509f61799260323e46ee37c210bc2
+engineering/golden/flagoff-golden.a01faea.test.ts rc=3584795c42b509f61799260323e46ee37c210bc2
+engineering/golden/m4on-golden.90a9c84.test.ts tip=dd9c637fc3d28acc013bc72fce90889b9863175a
+engineering/golden/m4on-golden.90a9c84.test.ts rc=dd9c637fc3d28acc013bc72fce90889b9863175a
+tests/m4a-flag-off.test.ts tip=2c9130528d7b9ab5a770133df6b00b6c86d34b3c
+tests/m4a-flag-off.test.ts rc=2c9130528d7b9ab5a770133df6b00b6c86d34b3c
+tests/zg-flagoff-dom.test.ts tip=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6
+tests/zg-flagoff-dom.test.ts rc=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6

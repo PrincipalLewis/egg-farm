@@ -1,0 +1,410 @@
+--- a/qa/v5-saves/m5-save-cases-DRAFT.md
++++ b/qa/v5-saves/m5-save-cases-DRAFT.md
+@@ -1,4 +1,8 @@
+ # M5 save cases — DRAFT (Saves QA, 2026-10-30 ~13:25 CET)
++**HoE-25 update (2026-10-30 ~13:5x CET, TASK saves-qa/hoe25-cases-g8):** applies D-HOE-20261030-25 (`engineering/decisions.md` sha1 e0a359a8 / sha256 ed7661e1…, L443-462: N-5, OQ-13, F-4/F-5/F-8/F-9, N-1, N-8)
++and telemetry errata v5 rev 5 (frozen `telemetry-spec-errata-v5.cea3d717.md`, sha1 cea3d717), **now superseded: errata of record = rev 7** (`product/collection/telemetry-spec-errata-v5.md` sha1 fd7d5921 / sha256 168444c2…, 13:56 CET; pinned in the manifest per D-HOE-28 L491; rev 8 pending HoQ ~14:15+). Rev 7 vs rev 5 for these cases: same reason/backup_stores/stall_id rules, now written into rev 7 (N-1/N-5/OQ-13 closed there); `combo` added (row 10).
++**Step 2 (14:0x CET):** + D-HOE-20261030-28 (`engineering/decisions.md` now sha1 5cc13f2a / sha256 79b6e954…, L488-491; D-HOE-25 text L443-462 unchanged): breeds = 0 never reads/sanitises/writes `breeds`, no event; sanitise + its one event only on the first flag-on load or tick. +3 cases (M5S-BR-FLAG0-*, M5S-BR-FLAG-FLIP).
++162 (stated; recount = 161, G5 was 36 rows not 37) -> **170 cases**; expected FAIL 8 -> **19** (list in the totals line).
+ Scope: the M5 save fields ALREADY IN CODE at rc/v5 3f582db (D-CEO-20261030-09 flags-on v5; HoQ part B brief 13:05/13:16).
+ Fixtures only (no browser, no PR head, D-CEO-20261030-10). Probes: `qa/v5-saves/probes/m5/m5-save.probe.test.ts` run in a scratch
+ `git archive` copy of 3f582db (tests/qa-m5/), vitest forks max 2 (`vitest.probe.config.ts`). NOT pinned; not gate evidence.
+@@ -96,7 +100,7 @@
+   Expected (RULED intended, D-COL-2026-10-30-16 OQ-1, SHAPES L35): KEPT as unknown keys and never read: not in SESSION_ONLY_KEYS (m5-fields.ts:33), migrate spreads d.state (save.ts:102), serialize writes them back byte-identical. Src save.ts:102/146, m5-fields.ts:33/58.
+ - **M5S-STK-HAND-OFF** same fixture, streak+tapCoins flags OFF: load identical to the save without those keys except the keys themselves; nothing read. ST flag isolation; m5-fields.ts:23/57.
+ 
+-### G2. `breeds?`: one optional key in the v6 save (BR §6 L657-679, E10-E12 L565-567; SHAPES L9-40; code a452dd0). 61 cases (8 expected FAIL until code fix)
++### G2. `breeds?`: one optional key in the v6 save (BR §6 L657-679, E10-E12 L565-567; SHAPES L9-40; code a452dd0). 67 cases (11 expected FAIL until code fix; +3 for N-5, D-HOE-25; +3 for D-HOE-28)
+ Fixture base: F12 (1 slot unlocked), flags m4.enabled=1 + breeds=1 (+ rev 2 ship-set flags), bc_* = BC_SPEC_DEFAULTS (config/breeds.ts:19-23: star_cap 2, hatch_time_s 60,
+ settle_s 300, unlock_farm 10, slot2 14, slot3 20). "One event" = exactly one `save_migrated{migration:'breeds_sanitise', from:6, to:6}` in the m5Load sink
+ (game.ts:97 -> emit -> telemetry.track, game.ts:114-121); "no event" = zero. Load path = validate (save.ts:214) -> Game m5Load (m5-fields.ts:58 -> sanitizeBreedsOnLoad, :77; breeds.ts:58-86).
+@@ -117,6 +121,9 @@
+   (D-HOE-20261030-21 OQ-3: "a silent recreate isn't allowed"; D-COL-18; SHAPES L35). Flag off: left as stored, no event (E11). a452dd0 today: left alone, no event (breeds.ts:20 falsy -> off, :61 non-object -> return s).
+ - **M5S-BR-ROOT-RECREATE** **[expected FAIL until code fix: Saves #95 follow-up PR (OQ-6 + rule check; D-HOE-21 owner Saves for OQ-2/3/7), expected Sat 31 Oct 01:00-06:00 CET]** same fixtures, flag on: the root counts as absent and is replaced by the M5S-BR-KEY-CREATE defaults at the end of the first flag-on tick, and by the offline catch-up at F >= 10
+   (D-COL-16 OQ-3, D-HOE-21 "offline catch-up included (Q2)"); saved shape = table defaults. a452dd0 today: never re-created (breeds.ts:25 `'breeds' in s`), and breedsOffline spreads a truthy non-object into an object plus sinceUnlockMs (breeds.ts:49-55).
++- **M5S-BR-FLAG0-CORRUPT** (D-HOE-20261030-28 L489, HoQA M-2) m4.flags.breeds = 0 (other v5 flags on; and all flags 0): a CORRUPT `breeds` (stars 5, dup slot, NaN remainingMs, unknown-breed incubator with costCents 50000, freeHatchUsed "x"; and non-object roots null / [] / "x") through load -> N >= 100 ticks -> offline gap -> save, plus .bak rotate and the IDB mirror: ZERO breeds_sanitise and ZERO save_migrated of any kind for breeds; coinsCents not refunded; the `breeds` value is written back BYTE-IDENTICAL (same as pause E13). Code-read a452dd0: flag gate at breeds.ts:20/59 (expected PASS; run on final RC). Saves adds the matching flag-off test in the #95 follow-up.
++- **M5S-BR-FLAG0-VALID** (D-HOE-28) breeds = 0, a VALID full `breeds` (incl. E10 raw ids, an incubator mid-hatch): never read (no trait, no reveal, remainingMs not advanced offline), passed through untouched byte-identical across 2 load/save cycles; the flags-0 reference golden stays byte-identical. Expected PASS (code-read); run on final RC.
++- **M5S-BR-FLAG-FLIP** **[expected FAIL until code fix: Saves #95 follow-up PR (OQ-6 + rule check; D-HOE-21 owner Saves for OQ-2/3/7), expected Sat 31 Oct 01:00-06:00 CET]** (D-HOE-28 L490) the M5S-BR-FLAG0-CORRUPT save, then breeds 0 -> 1: exactly ONE save_migrated{migration:'breeds_sanitise', from:6, to:6, reason ('invalid_values'; 'invalid_root' for the root fixtures), backup_stores: [], refund_cents 50000, farm_level} on the FIRST flag-on load (or, if the flag turns on in a running session, the first flag-on tick; never both); none while the flag was 0; a second flag-on load emits none (M5S-BR-IDEMP); back to 0 -> no event, the repaired key kept verbatim. Expected FAIL only on the payload (reason/backup_stores/refund_cents, as M5S-BR-TEL-SHAPE); the count part is expected to pass at a452dd0 (code-read, m5Load sanitise at load).
+ - **M5S-BR-KEY-SESS** after a flag-on session with an E10 slot shadow and an offline reveal: stored state has no `breedsRawSlots`, `pendingReveal`, `focusMs` or counted-tap stamps.
+   Extends SESS-2 (does not repeat its 9 keys; asserts the F1a list is still exactly the 8 keys at m5-state.ts:69). BR §6 L675-676, SHAPES L25. Src m5-fields.ts:34/44-48, state.ts:35-37, game.ts:36.
+ 
+@@ -181,20 +188,24 @@
+ 
+ Telemetry (BR E12 L567, BR-AC26 L925; SHAPES L26)
+ - **M5S-BR-TEL-E10ONLY** E10 only (unknown owned id; unknown slot id; both) -> ZERO save_migrated. Src breeds.ts:83 ("E10 alone is not a sanitise").
+-- **M5S-BR-TEL-ONE-EACH** each non-E10 repair from the per-field -TYPE/-SAN/-DEF rows that changes a value, loaded alone -> exactly ONE save_migrated{migration:'breeds_sanitise', from:6, to:6, + the M5S-BR-TEL-SHAPE payload}. Src breeds.ts:84, config/breeds.ts:35, game.ts:97/121.
+-- **M5S-BR-TEL-ONE-MULTI** many repairs in one save (stars 5 + dup slot + NaN remainingMs + unknown incubator refund + pity -1 + freeHatchUsed 2) plus E10 ids -> still exactly ONE event. Src breeds.ts:83-85.
++- **M5S-BR-TEL-ONE-EACH** each non-E10 repair from the per-field -TYPE/-SAN/-DEF rows that changes a value, loaded alone -> exactly ONE save_migrated{migration:'breeds_sanitise', from:6, to:6, ...} (COUNT asserted here; payload in M5S-BR-TEL-SHAPE, `reason` in M5S-BR-TEL-REASON-*; D-HOE-25 N-5 "one event per load"). Src breeds.ts:84, config/breeds.ts:35, game.ts:97/121.
++- **M5S-BR-TEL-ONE-MULTI** many repairs in one save (stars 5 + dup slot + NaN remainingMs + unknown incubator refund + pity -1 + freeHatchUsed 2) plus E10 ids -> still exactly ONE event (D-HOE-25 N-5 one per load; its reason = 'invalid_values', asserted in M5S-BR-TEL-REASON-VALUES). Src breeds.ts:83-85.
+ - **M5S-BR-TEL-NONE** clean save, absent breeds, flag off with corrupt or non-object breeds -> zero events. (Flag on + non-object root now logs one event: M5S-BR-KEY-NONOBJ.) BR E11, SHAPES L26. Src breeds.ts:20/59.
+ - **M5S-BR-TEL-AC26** BR-AC26 fixture literally (F12, stars 5, slots ["leghorn","leghorn",null], unknown "silkie" in owned) -> stars 2, slots ["leghorn",null,null], silkie kept, one event. BR-AC26 L925.
+-- **M5S-BR-TEL-SHAPE** **[expected FAIL until code fix: Saves #95 follow-up PR (OQ-6 + rule check; D-HOE-21 owner Saves for OQ-2/3/7), expected Sat 31 Oct 01:00-06:00 CET]** OQ-7 RULED (D-HOE-20261030-21, D-COL-16/-18, SHAPES L35): the tracked event is save_migrated {migration:'breeds_sanitise', from:6, to:6, refund_cents, farm_level, backup_stores}, the game.ts:255 shape;
+-  refund_cents = the costCents refunded for an unknown-breed incubator (0 when none; 50000 in the INC-SAN fixture); farm_level = loaded farmLevel; reason:'invalid_root' only on the root case; ring-pinned (telemetry.ts:15).
+-  a452dd0 today: only migration/from/to (config/breeds.ts:35 -> game.ts:121). Value of backup_stores for a breeds repair not stated (OQ-13).
++- **M5S-BR-TEL-SHAPE** **[expected FAIL until code fix: Saves #95 follow-up PR (OQ-6 + rule check; D-HOE-21 owner Saves for OQ-2/3/7), expected Sat 31 Oct 01:00-06:00 CET]** OQ-7 RULED (D-HOE-20261030-21, D-COL-16/-18, SHAPES L35) + OQ-13/N-5 RULED (D-HOE-20261030-25): the tracked event is save_migrated {migration:'breeds_sanitise', from:6, to:6, refund_cents, farm_level, backup_stores: [], reason}, the game.ts:255 shape;
++  refund_cents = the costCents refunded for an unknown-breed incubator (0 when none; 50000 in the INC-SAN fixture); farm_level = loaded farmLevel; **backup_stores = [] exactly** (OQ-13: sanitising writes no backup; NOT ['ls'], which is the tracks marker at game.ts:255);
++  **reason present on EVERY breeds_sanitise** = 'invalid_root' | 'invalid_values' (N-5; no other value, never absent); ring-pinned (telemetry.ts:15).
++  a452dd0 today: only migration/from/to (config/breeds.ts:35 -> game.ts:121).
++- **M5S-BR-TEL-REASON-VALUES** **[expected FAIL until code fix: Saves #95 follow-up PR (OQ-6 + rule check; D-HOE-21 owner Saves for OQ-2/3/7), expected Sat 31 Oct 01:00-06:00 CET]** (N-5, D-HOE-25 L455) every non-root repair (each -TYPE/-SAN/-DEF row that changes a value, and the M5S-BR-TEL-ONE-MULTI fixture) -> its one event carries reason:'invalid_values'. a452dd0 today: no `reason` key (config/breeds.ts:35).
++- **M5S-BR-TEL-REASON-BOTH** **[expected FAIL until code fix: Saves #95 follow-up PR (OQ-6 + rule check; D-HOE-21 owner Saves for OQ-2/3/7), expected Sat 31 Oct 01:00-06:00 CET]** (N-5 priority) root invalid AND value repairs would also apply: `breeds` = `[{"stars":5}]`, `[null,"leghorn"]` and `{"0":...}`-walkable arrays that the a452dd0 value sanitiser would walk via Object.entries (breeds.ts:63), plus a .bak restore of the same -> exactly ONE event, reason:'invalid_root' (never 'invalid_values', never two events); root re-created per M5S-BR-ROOT-RECREATE. A JSON root can't be a valid object and a non-object at once, so "both" is fixtured this way (open question N5-Q1).
++- **M5S-BR-TEL-VBUMP-NOREASON** (N-5 "v-bump migrations have no reason key") every NON-breeds save_migrated has NO `reason` key: the tracksV7_marker migration {from:6,to:6,migration:'tracksV7_marker',refund_cents:0,farm_level,backup_stores:['ls']} (game.ts:255 at a452dd0, :252 at 3f582db) on a pre-tracks v6 save, also when the same load needs a breeds repair (then: the marker event without reason AND one breeds_sanitise with reason). Code-read: no reason key today (expected PASS; not run, breeds not in 3f582db). Treating tracksV7_marker as the "v-bump" family is my reading (N5-Q2).
+ 
+ ### G3. SAVE_VERSION stays 6, no M5 migration. 1 case
+ - **M5S-VER-6 (CONFIRMED: D-HOE-20261030-19, engineering/decisions.md L392-393 "SAVE_VERSION stays 6 with no M5 migration"; SHAPES L2/L28)** SAVE_VERSION === 6 at 3f582db and a452dd0 (save.ts:7); `migrations` has only keys 1..5 (save.ts:74-85), no M5/breeds entry; a flags-on v5 save
+   (with breeds and every M5 saved field) is written as "version":6; an M4.1 flag-off build loads it as not-newer (newerSaveVersion null, not read-only) and round-trips `breeds` byte-identical; a pre-M5 v6 save
+   loads as {...initialState, ...d.state} (save.ts:102) with no breeds key. BR §6 L657/L674 (R5), BR-AC1b L759, SHAPES L28-29. HoE confirmed 13:35. **PASS on 3f582db** fixture probes 5/5 (6a-6e), evidence `qa/v5-saves/evidence/stk-ver-3f582db-1338/` (SHA256SUMS sha256 5e37066b; probe stk-ver.probe.test.ts sha256 52ec2f53; 16/16 PASS, mutants 5/5 killed); the breeds parts (real sanitiser/round-trip) stay to run on the final RC.
+ 
+-Added: G1 4, G2 61, G3 1, G4 7 = 73 cases (+ 52 existing = 125). G5 Workers rebase (13:45): +37 = 162. G3 CONFIRMED (D-HOE-20261030-19). All probes: to run on the final RC.
++Added: G1 4, G2 67, G3 1, G4 7 = 79 cases (+ 52 existing = 131). G5 Workers rebase (13:45): +36 (stated +37: arithmetic slip, 6+13+5+6+1+5 = 36), HoE-25 (13:5x): +3 = 39. **Total 170** (52 + 79 + 39; was stated 162, recounted 161: +3 breeds N-5, +3 G5 F-9, +3 breeds D-HOE-28). G3 CONFIRMED (D-HOE-20261030-19). All probes: to run on the final RC.
+ 
+ ### G4. fatigueCue / salesStopped persist nothing (PM Market `product/market/sales-stopped-spec.md` v1.3.24 sha1 b95d5cf8 = "SS"; §7.5 L252-267, SS-43..46 L465-477; D-HOP-2026-10-30-38). 7 cases
+ UNBUILT at 3f582db and e77fc5c: no stall chip, `stall_id`, `sales_stall` or `fatigue_cue_shown` in src (git grep); only the flags (flags.ts:9) and the `salesStopped()` selector (income.ts:82 at 3f582db, :83 at e77fc5c). So every runtime row is **run on final RC**.
+@@ -203,7 +214,7 @@
+   `fatigue_cue_shown` in the new sid (a new episode); none re-sent until the cue clears and is eligible again. No seen-flag read or written. SS §7.5 L256-260, SS-44 L469-472.
+ - **M5S-FAT-BAK** (run on final RC) the same fixture reached by a .bak restore (restored_from_backup): identical outcome; nothing restored or reset. SS §7.5 L261, SS-46 L477.
+ - **M5S-SS-LOAD** (run on final RC) v6 save, salesStopped = 1, queue >= 1 and MH Asleep: every stall timer starts at 0 after welcome-back closes; chip at 8 s +/- 0.1 s focus (20 s for no_mh / mh_paused);
+-  a NEW stall_id from the per-session counter, no prev_stall_id. SS §7.5 L263-266, SS-45 L473-475.
++  a NEW stall_id from the per-session counter, no prev_stall_id; stall_id is an INT >= 1 (first stall of the new sid = 1; not saved, restarts each session; never a string/enum; D-HOE-20261030-24, D-HOE-25 N-1 supersedes the enum wording at eng. decisions L380; the errata rev 5 row 1 L55 already says int >= 1). SS §7.5 L263-266, SS-45 L473-475.
+ - **M5S-SS-NORESOLVED** (run on final RC) the new sid has no `sales_stall{resolved}` whose stall_id wasn't shown in that sid, including a save written while a stall was shown and a page killed before C6 focus_lost
+   (the old shown stays unpaired in the old sid). SS §7.5 L267, SS-45 L476.
+ - **M5S-SS-BAK** (run on final RC) M5S-SS-LOAD and -NORESOLVED via a .bak restore: same outcome. SS-46 L477, §7.5 L262.
+@@ -212,11 +223,11 @@
+   M5_SAVED_FIELDS (m5-state.ts:65) and UiFlags (app.ts:42 at 3f582db / :43 at e77fc5c) contain no fatigue/stall key; the final RC must match except for keys other specs add. SAVE_VERSION 6. SS-43 L465-468, §7.5 L258/L264.
+ - **M5S-FAT-NOFLAG-PROPOSED** (record only) `fatigueExplainerSeen?` / `fatigueAsleepToastSeen?` (SS §7.5 L262, PROPOSED only if HoP pulls Rule 5, not in v5) must be ABSENT on the final RC; if they appear, re-case them like abilitiesCoachSeen. SS §7.5 L262.
+ 
+-### G5. Workers rebase on PMW v1.0.1 `product/workers/v5-workers-save-shapes.md` sha1 5d1a8f85 (= "PMW") + D-HOE-20261030-20 (eng decisions L406-412, G-1 correction L420). 37 cases
++### G5. Workers rebase on PMW v1.0.1 `product/workers/v5-workers-save-shapes.md` sha1 5d1a8f85 (= "PMW") + D-HOE-20261030-20 (eng decisions L406-412, G-1 correction L420) + D-HOE-20261030-25 (L446-452). 39 cases (was stated 37, recount 36; +3)
+ Review: `qa/v5-saves/changes-20261030/pmw-workers-shapes-REVIEW.md` (findings F-1..F-13). Specs as read at 13:40: pause v1.3.14 74a0122a, abilities v1.3.7 314dc0e3, rc2 v1.3.8 acfb03e3,
+ lighter-refill fa074d29, failure-cost (FC) f961a734. Code e77fc5c (= 3f582db for src/save, src/sim, game.ts and main.ts).
+-Tags: **UNBUILT** = no code at e77fc5c, run on the final RC. **PENDING(G-n)** = PMW proposal not yet ruled (D-PMW-2026-10-30-16 "other G items stay PROPOSED"); expected value = the PMW v1.0 proposal.
+-RULED rows (G-1, G-3, G-5, G-6, G-8, G-9, G-10, M-3, M-5) carry no pending tag.
++Tags: **UNBUILT** = no code at e77fc5c, run on the final RC. **F-9** = **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]**: the m5-fields.ts sanitiser hooks for refill/autoRefill/clockWage (D-HOE-25 F-9, owner Saves; resolves review F-4, F-5, F-8). F-9 rows are ALSO UNBUILT. **PENDING(G-n)** = PMW proposal not yet ruled (D-PMW-2026-10-30-16 "other G items stay PROPOSED"); expected value = the PMW v1.0 proposal.
++RULED rows (G-1, G-3, G-5, G-6, G-8, G-9, G-10, M-3, M-5; D-HOE-25 F-4, F-5a/b, F-6, F-8a/b) carry no pending tag.
+ 
+ Pause / abilities: rows missing from the existing set (built; fixture-runnable on 3f582db)
+ - **M5S-PAUSE-NOREST** (M-3 CLOSED: D-HOE-20 L411, pause v1.3.14 L276 struck, PMW L74) a v6 worker with `rest: true` / `resting: true` and no `paused`, pause = 1, F >= unlock: NOT paused, `rest`/`resting` kept
+@@ -229,19 +240,22 @@
+ - **M5S-ABIL-STALL60** visible frame gap >= 60 s mid-call: the call ends at the stall start with one ability_ended{cause:'offline'} (m5Offline before advance); readyAt keeps ticking on the wall clock. Abilities E1 L371-376. Src game.ts:424, m5-fields.ts:98.
+ 
+ rc2Refill charges (all **UNBUILT**: `git grep` refillCharges/chargeNext at e77fc5c finds nothing). G-1 RULED: D-HOE-20 L408 + correction L420, PMW L80, quick check 2 L98
+-- **M5S-RF-CHG-MISSING** `refillCharges` key missing (new game, first hire, pre-refill v6 save with hired workers), rc2Refill = 1 -> 2 (start_charges; F-6). G-3 consistent (PMW L82). rc2 L160.
+-- **M5S-RF-CHG-INVALID** present but invalid: NaN-as-null, "2", -1, 1.5, true, cap+1 (3) -> 0 (clamped [0, max]); never more than the stored valid value. D-HOE-20 L420.
++- **M5S-RF-CHG-MISSING** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** `refillCharges` key missing (new game, first hire, pre-refill v6 save with hired workers), rc2Refill = 1 -> 2 = start_charges data column (D-HOE-25 F-5b/F-6). G-3 consistent (PMW L82). rc2 L160.
++- **M5S-RF-CHG-INVALID** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** present but invalid: NaN-as-null, -1, -Infinity-as-null, 1.5, 0.5, and non-numbers "2" / true / {} -> 0 (D-HOE-25 F-5b: NaN, negative, non-integer -> 0; G-1 present-invalid -> 0). CHANGED: cap+1 no longer -> 0 (see M5S-RF-CHG-OVERMAX). D-HOE-20 L420, D-HOE-25 L449.
++- **M5S-RF-CHG-OVERMAX** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** (new, D-HOE-25 F-5b) integer over the max: 3 (cap+1) and 1e9 -> 2 (= charge_cap, clamp to the max, not 0); never more than charge_cap. "max" read as charge_cap from the loaded balance (F5-Q, see review F-5).
+ - **M5S-RF-CHG-VALID** 0, 1, 2 (= charge_cap) kept unchanged; round-trip byte-identical. PMW L80.
+ - **M5S-RF-NEXT-MISSING** `chargeNextMs` missing while below the cap -> the full regen (charge_regen_s x 1000); no charge on the first tick. D-HOE-20 L420.
+-- **M5S-RF-NEXT-BAD** null / "500" / NaN-as-null / 0 / -5 / true -> full regen; 1.5 and 1234.5: record (round per v1.0, F-5). D-HOE-20 L420.
++- **M5S-RF-NEXT-BAD** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** null / "500" / NaN-as-null / 0 / -5 / true -> full regen; non-integer 1.5 and 1234.5 -> full regen (D-HOE-25 F-5a; was "record, round per v1.0", pending sub-case removed). D-HOE-20 L420, D-HOE-25 L448.
+ - **M5S-RF-NEXT-CLAMP** 1 kept, regen kept, regen+1 and 1e12 -> regen. D-HOE-20 L420.
+ - **M5S-RF-NOGRANT** any combination of the missing/invalid values above: the charge count after load + 1 tick is <= the stored valid count (or 2 when missing); never +1 from a bad timer. D-HOE-20 L420 "Never grants a charge".
+ - **M5S-RF-OFFLINE** 10-min close and hidden >= 60 s: charges and chargeNextMs unchanged (frozen, no catch-up); hidden < 60 s simulated live. rc2 L142, HoE L142 (clock part), PMW §1 L31, quick check 2 L98.
+ - **M5S-RF-STALL60** (G-5 RULED) visible stall of 10 min: regen advances by exactly 60 s of sim, then freezes. D-HOE-20 L409, PMW L84. Src game.ts:425.
+-- **M5S-RF-CAP** PENDING(G-2, F-4) at the cap: timer not running, `chargeNextMs` absent (dropped) in the save; spending from the cap starts a full interval. PMW L81.
++- **M5S-RF-CAP** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** (F-4 RULED, D-HOE-25 L447; PENDING(G-2, F-4) removed: F-4 settles the at-cap timer) at charges == cap: timer stopped, `chargeNextMs` absent in every save; the first spend below the cap starts the timer at the full regen (charge_regen_s x 1000); no charge granted at the cap. PMW L81.
++- **M5S-RF-NEXT-ATCAP** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** (new, F-4 load half) stored refillCharges 2 (= cap) with chargeNextMs 1 / 30000 / regen -> chargeNextMs DROPPED on load, charges stay 2, no extra charge, the next save has no chargeNextMs. Also after the CHG-OVERMAX clamp (3 -> 2): the timer is dropped.
+ - **M5S-RF-FLAGOFF** PENDING(G-4) rc2Refill = 0: refillCharges/chargeNextMs not read, ticked or cleared, written back unchanged; a flip back to 1 resumes the clamped values. PMW L83, FC AC-FC16 (b).
+ - **M5S-RF-MANAGECD** (M-5 build AC, D-HOE-20 L412) rc2Refill = 1: `manageCdS` is NOT decremented by step() (tick.ts:55 must skip it) and is preserved verbatim on write-back; rc2Refill = 0: decremented as today. eng decisions L148, FC L143. Test required in the rc2 PR.
+-- **M5S-RF-SESSION** PENDING(G-11) `refilledAtS` (combo window), `shortage_s` and `charges_capped_s` are never saved; a reload ends a combo window. PMW §1 L38, G-11 L90.
++- **M5S-RF-SESSION** PENDING(G-11) `refilledAtS` (combo window), `shortage_s` and `charges_capped_s` are never saved; a reload ends a combo window: the first `ability_used` after the reload carries `combo:false` (a BOOL, always present with abilities = 1; D-HOE-25 N-8, D-HOP-42, errata rev 6 L167), never true from a pre-reload refill. PMW §1 L38, G-11 L90.
++- **M5S-PAUSE-RESTAUTO** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** (new, G-6 + D-HOE-25 F-8a; UNBUILT, `restAuto` not in code at e77fc5c, PMW L85) rc2Refill = 1, pause = 1: `restAuto: true` with `paused: true` kept and round-trips; `restAuto: true` WITHOUT `paused: true` (paused absent / false / invalid-and-dropped) -> restAuto absent on load; "true" / 1 / null -> absent; no SAVE_VERSION bump.
+ 
+ autoRefill (all **UNBUILT**; `Worker` = {energy, cdS, unpaid?, paused?, callLockoutS?}, workers.ts:11)
+ - **M5S-AR-DEF** `workers.{id}.autoRefill` absent -> false for every worker. Lighter-refill L46 (edge 8), AC-LR16.
+@@ -253,8 +267,8 @@
+ clockWage (all **UNBUILT**)
+ - **M5S-CW-NOFIELD** the wage rule adds no save key: with clockWage = 1 vs 0 the saved key set differs only by clockWageTipSeen?/asleepWindow?; cdS/unpaid/wageFracCents reused. FC-R1 L11, PMW §2b L54. Src workers.ts:11, state.ts:22.
+ - **M5S-CW-TIP** (G-8 RULED, D-HOE-20 L410) `clockWageTipSeen?`: `true` kept and survives reload/.bak/IDB (tip not shown again); "true" / 1 / null / false -> absent (invalid -> absent); no version bump. AC-FC11 L108.
+-- **M5S-CW-WINDOW** (G-9 RULED, D-HOE-20 L410) `asleepWindow?` {market_hand?: {s, cents}, coop_hand?}: a valid window survives close + reload and drives the welcome-back line (AC-FC12 L109); non-finite or negative s/cents -> absent
+-  (per entry vs whole key: F-8, record which); cleared when welcome-back closes; never accrues offline or in dropped hidden sim.
++- **M5S-CW-WINDOW** (G-9 RULED, D-HOE-20 L410) `asleepWindow?` {market_hand?: {s, cents}, coop_hand?}: a valid window survives close + reload and drives the welcome-back line (AC-FC12 L109); **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** non-finite or negative s/cents
++  in ANY entry -> the WHOLE `asleepWindow` key absent (D-HOE-25 F-8b: sanitised as a whole key; a valid sibling entry is dropped too; non-object root / unknown worker key -> whole key absent); cleared when welcome-back closes; never accrues offline or in dropped hidden sim.
+ - **M5S-CW-FLAGOFF** clockWage = 0: clockWageTipSeen?/asleepWindow? preserved byte-identical, not read. PMW G-8/G-9 v1.0 record L87-88.
+ - **M5S-CW-SESSION** `session_end.asleep_s` and `wage_paid_asleep_cents` are never saved. FC L168, PMW §2b L57.
+ - **M5S-CW-WAGEVAL** PENDING(G-12) clockWage = 1: wageFracCents[id] clamped [0,1), non-finite -> 0; cdS clamped [0, w*_every_s], non-finite -> 0. Today unchecked (save.ts:214-235; wageCharge `|| 0`, workers.ts:56). PMW L91.
+@@ -270,8 +284,10 @@
+ - **M5S-W-TAB-NOBC** PENDING(G-13) no BroadcastChannel: the flush request times out after 300 ms and the new tab may load a save up to one autosave old; accepted, no special rule. PMW G-13 L92.
+ - **M5S-W-TAB-OLDTAB** after losing the lease the old tab never writes (every save checks owns()); no storage-event state sync. PMW §0 L20. Src tab-lease.ts (owns), game.ts save path.
+ 
+-G5 totals: 37 = 6 pause/abilities (built) + 13 refill + 5 autoRefill + 6 clockWage + 1 G-10 + 5 .bak/tab, plus 6 existing PAUSE/ABIL rows re-cited (not counted). UNBUILT: 25 rows (13 refill + 5 autoRefill
+-+ 6 clockWage + 1 G-10), plus 3 partly unbuilt (PAUSE-STALL60 lockout, W-BAK-RESTORE refill part, W-TAB-HANDOVER charges). PENDING: 7 rows (RF-CAP, RF-FLAGOFF, RF-SESSION, AR-SAN, CW-WAGEVAL, W-BAK-RESTORE, W-TAB-NOBC) + 1 sub-case (RF-NEXT-BAD non-integer, F-5).
++G5 totals: 39 = 6 pause/abilities (built) + 16 refill (incl. PAUSE-RESTAUTO, listed with rc2Refill) + 5 autoRefill + 6 clockWage + 1 G-10 + 5 .bak/tab, plus 6 existing PAUSE/ABIL rows re-cited (not counted). UNBUILT: 28 rows (16 refill + 5 autoRefill
+++ 6 clockWage + 1 G-10), plus 3 partly unbuilt (PAUSE-STALL60 lockout, W-BAK-RESTORE refill part, W-TAB-HANDOVER charges). PENDING: 6 rows (RF-FLAGOFF, RF-SESSION, AR-SAN, CW-WAGEVAL, W-BAK-RESTORE, W-TAB-NOBC); RF-CAP and the RF-NEXT-BAD non-integer sub-case settled by D-HOE-25 F-4/F-5a.
++F-9 expected FAIL (8, also UNBUILT): RF-CHG-MISSING, RF-CHG-INVALID, RF-CHG-OVERMAX, RF-NEXT-BAD, RF-CAP, RF-NEXT-ATCAP, PAUSE-RESTAUTO, CW-WINDOW.
++**All expected-FAIL rows (18 at step 1; 19 with BR-FLAG-FLIP, step 2):** #95 follow-up (Sat 31 Oct 01:00-06:00 CET), 10: BR-KEY-NONOBJ, BR-ROOT-RECREATE, BR-OWNED-ROOT (array/string sub-cases), BR-SLOTS-SHAPE, BR-SLOTS-LOCKED, BR-INC-COST, BR-FREE-DEF, BR-TEL-SHAPE, BR-TEL-REASON-VALUES, BR-TEL-REASON-BOTH; F-9 split PR (likely Sat 19:00 CET, Sun 02:00 at the latest), 8: as listed above. Step 2 (D-HOE-28): +1 on the #95 follow-up, BR-FLAG-FLIP (payload part) -> **19 total** (11 #95 follow-up + 8 F-9).
+ Existing m5 probes invalidated by the rebase: **none** (src identical at e77fc5c; every PAUSE/ABIL expectation matches pause v1.3.14 / abilities v1.3.7; N1 = E2 "removed").
+ 
+ ### Open questions (spec vs shapes vs code; not guessed)
+@@ -289,4 +305,6 @@
+ - OQ-10 **CLOSED** (D-COL-17, SHAPES L39). (PMC, wording) E12 says "sinceUnlockMs absent -> 0"; the code and SHAPES keep it absent (reads as 0). The two are equivalent, but the wording should say so.
+ - OQ-11 **DEFERRED to next breeds rev** (D-COL-17, SHAPES L40). (PMC) line drift in SHAPES L6: M5_SESSION_FIELDS is m5-state.ts:67 at 3f582db but :69 at a452dd0; SESSION_ONLY_KEYS is :33 at 3f582db but :34 at a452dd0. BR §6 cites save.ts:87-89/:101; the actual lines are :86-90/:101-102. The code header still cites rev 3.8.6 (queued).
+ - OQ-12 **DEFERRED to next breeds rev** (D-COL-17, SHAPES L40). (HoQ) the Q6/Q7 rules exist only in SHAPES and code comments, not in BR rev 3.8.8. The cases cite SHAPES until the spec catches up.
+-- OQ-13 (HoE) new: the value of `backup_stores` (and `farm_level` source) for a breeds_sanitise event isn't stated; game.ts:255 sends ['ls'] for the tracks marker. Needed for M5S-BR-TEL-SHAPE.
++- OQ-13 **CLOSED** (D-HOE-20261030-25 L454): breeds_sanitise carries backup_stores: [] (no backup written; ['ls'] is the tracks marker, game.ts:255). M5S-BR-TEL-SHAPE updated. farm_level = loaded farmLevel (game.ts:255 shape).
++- N5-Q1 (PMC/HoE, minor, new 13:5x) N-5 "invalid_root takes priority when both apply": with a JSON root, both can only arise when a non-object root is walkable as values (array roots, breeds.ts:63) or via .bak; M5S-BR-TEL-REASON-BOTH fixtures it that way. Confirm that is the intended reading.
++- N5-Q2 (HoE, minor, new 13:5x) "v-bump migrations have no reason key": save.ts migrations 1..5 emit no event, and the only other save_migrated is tracksV7_marker (from:6,to:6, game.ts:255). The cases treat every non-breeds_sanitise save_migrated as no-reason (M5S-BR-TEL-VBUMP-NOREASON). Confirm.
+--- a/qa/v5-saves/READINESS.md
++++ b/qa/v5-saves/READINESS.md
+@@ -134,6 +134,12 @@
+ 4. Something on the box deleted node_modules under qa/ at ~21:59. The driver now self-heals `tools/`, and the gate worktree runs its own npm ci.
+ 5. Export/import UI is still absent (S-RT detects it if added). The legacy suites may need small M5 adapting.
+ 
++### HoE-25 update (2026-10-30 13:5x-14:0x CET, TASK saves-qa/hoe25-cases-g8; D-HOE-20261030-25 + -28, telemetry errata of record rev 7)
++Sources: `engineering/decisions.md` sha1 e0a359a8 at step 1 (= forwarder; D-HOE-25 L443-462), now sha1 5cc13f2a / sha256 79b6e954… (adds D-HOE-26/-27/-28; D-HOE-28 L488-491). Errata: rev 5 frozen `telemetry-spec-errata-v5.cea3d717.md` sha1 cea3d717 verified, **superseded by rev 7** = live `product/collection/telemetry-spec-errata-v5.md` sha1 fd7d5921 / sha256 168444c2… (13:56 CET, pinned in the manifest per D-HOE-28 L491; rev 8 pending HoQ ~14:15+). schema.ts builds against whichever errata rev is pinned in the manifest when its PR starts.
++- **M5 save cases** `m5-save-cases-DRAFT.md` 921f28fd… -> **3f223251a3a83573def93f387f7c485c2a334925d1b2c29480c4a2d7d4500013**: N-5 reason rows (TEL-REASON-VALUES, -BOTH, VBUMP-NOREASON), OQ-13 closed (backup_stores []), F-4/F-5/F-8 ruled (RF-CHG-OVERMAX, RF-NEXT-ATCAP, PAUSE-RESTAUTO new; RF-CAP pending removed; CHG-INVALID cap+1 -> clamp to max), stall_id int >= 1, combo bool; D-HOE-28 BR-FLAG0-CORRUPT, BR-FLAG0-VALID, BR-FLAG-FLIP. **170 cases** (stated 162 was a miscount, recount 161; +9). **Expected FAIL 19**: 11 on the Saves #95 follow-up (Sat 01:00-06:00 CET), 8 on the F-9 split PR (likely Sat 19:00 CET, Sun 02:00 latest; also UNBUILT).
++- **G-8 probe** `probes/telemetry/g8-schema-ts.mjs` 1dcb106f… -> **83caed53f5114c29bdc3e931e157f1b8503f127d95e7f31635f80489c92cece3** (N-2 kinds float/str/arr + G8-7f/7s/7a, G8-14 optional?/nullable?, G8-15 capped variants, G8-16 dynamicFields worker ids, G8-17 combo bool, G8-18 stall_id int >= 1, G8-19 session_end.ability_blocked_taps; built against rev 7); self-test `g8-selftest.sh` bb2044c3… -> aa620af1…, **48/48 PASS** (was 16/16; out ac9194de…); 3f582db and e77fc5c **FAIL closed** (G8-1 schema.ts absent, 23 checks fail).
++- SCRIPTS.sha256 unchanged 724346bf… (covers scripts/ only; nothing there changed), `-c` 14/14 OK. telemetry-check C-2 NOT asserted (waits on HoQ). Follow-up, not done: rev 7 "marker events is always 50" is a runtime value check for telemetry-check/gate T (outside this write list). G1 pin untouched. Diff: changes-20261030/hoe25-cases-g8.diff.
++
+ ### Open telemetry questions (v5 re-target, 2026-10-30, Saves QA -> HoE / HoQ)
+ - **Answered 13:3x-13:4x:** Q-TEL-1 -> gate T steps --schema v062 --balance (gate-T-v062.diff); Q-TEL-2 -> D-HOE-20261030-20 contract (G-8 probe aligned); Q-TEL-3 intended (self-test); Q-TEL-4 TS7 HARD; F-6 CLOSED by D-HOP-41 (HoQ C-1); C-2 paused totals rc2Refill=0 only; C-3 refill_used only. Errata v5 rev 3 (sha1 ee707672) freeze HELD; differences in changes-20261030/errata-v5-vs-v062-INPUT.md.
+ - Q-TEL-1 (HoE): `src/telemetry/schema.ts` does not exist at rc/v5 3f582db or e77fc5c (nor on feat/saves-v5-telemetry-schema, = e77fc5c). "Cite schema.ts file:line" and "assert sid/fgMs presence per schema.ts" cannot be done; telemetry-check keeps sid/fgMs ABSENT under --schema shipped and REQUIRED under --schema v062 (frozen spec). Which commit lands row 11, and is the gate to run --schema v062 on the final RC?
+--- a/qa/v5-saves/probes/telemetry/g8-schema-ts.mjs
++++ b/qa/v5-saves/probes/telemetry/g8-schema-ts.mjs
+@@ -4,6 +4,18 @@
+ //   src/telemetry/schema.ts exports TELEMETRY_SCHEMA_VERSION = '0.6.2'; EVENT_SCHEMA (Record<type,{pinned: bool|(e)=>bool; fields: Record<name,FieldSpec>}>,
+ //   FieldSpec kind enum|int|count|bucket|bool, no free text); EVENT_TYPES = Object.keys(EVENT_SCHEMA); validateEvent(e): string[]; isPinned(e) event-based.
+ //   Envelope {type, ts, sid, fgMs}. Stored ring {v, events}; export header schema_version; pre-0.6.2 ring events tagged legacy:true.
++// D-HOE-20261030-25 (eng. decisions sha1 e0a359a8 L443-462) N-2 FieldSpec additions: float{min?,max?,step?}; str{pattern} (pattern required, no free text);
++//   arr{of: FieldSpec, maxLen}; per-field optional?/nullable? (both off by default: absent and null fail); capped marker as its own variant
++//   {capped: bool, <counterKey>: count} with counterKey events (ability_blocked) / episodes (coop_full) (D-HOE-23 (a)); dynamicFields [{keyPattern: RegExp
++//   built from the code worker ids market_hand|coop_hand|hawker|grader, spec}], unknown keys fail. N-8 ability_used.combo bool (always present with
++//   abilities=1, D-HOP-42). N-1 / D-HOE-24: stall_id + prev_stall_id int >= 1 (supersedes the enum wording at eng. decisions L380, D-HOE-18; errata rev 5
++//   row 1 already says int >= 1). session_end.ability_blocked_taps int count, min 0, all blocked taps (D-HOE-23 (b)).
++// Errata of record: rev 7 (product/collection/telemetry-spec-errata-v5.md sha1 fd7d5921, 13:56 CET, pinned per D-HOE-28; rev 5 cea3d717 superseded; rev 8 pending HoQ).
++//   The rev-5 items checked here hold unchanged in rev 7 (ability_blocked_taps L119 "int >= 0, all blocked taps incl. post-cap"; marker key events / episodes;
++//   stall_id int >= 1, now cited to D-HOE-24 in rev 7 row 4); rev 7 adds combo (row 10, N-8), the N-2 kinds in its G-8 row, and "events is always 50"
++//   (a marker VALUE, runtime: not statically checkable here, belongs to the gate T marker check). schema.ts is built against whichever errata rev is pinned
++//   in engineering/v5-rc-manifest.md when its PR starts; re-pin this probe if that rev changes a checked item.
++//   The runtime meaning of optional/nullable (absent/null rejected by validateEvent) is the gate T half; this probe checks the declarations statically.
+ // Static and read-only (`git show` / `git grep` at the RC SHA; no checkout, no browser). TEL-AC11 static half: every `.track('<type>'` call site in src/
+ // is in EVENT_SCHEMA; with --events <exported json> also every exported type. The runtime half (each emitted event passes validateEvent) is the gate
+ // T step under --schema v062. usage: node g8-schema-ts.mjs --git <repo> --rc <sha> [--events export.json]. exit 0 = PASS, 1 = FAIL (expected until row 11 lands).
+@@ -12,7 +24,9 @@
+ const HERE = path.dirname(new URL(import.meta.url).pathname);
+ const SPEC = A.spec || path.join(HERE, '../../spec/telemetry-v062.schema.json');
+ const RESOLVED_BY_L249 = ['chip_refill', 'chip_sell_all', 'chip_collect', 'chip_manage', 'refill_elsewhere', 'sell_elsewhere', 'collect_elsewhere', 'auto_resume', 'queue_empty', 'basket_empty', 'paused', 'focus_lost', 'cause_changed', 'none']; // sales-stopped-spec L249
+-const KINDS = ['enum', 'int', 'count', 'bucket', 'bool'];
++const KINDS = ['enum', 'int', 'count', 'bucket', 'bool', 'float', 'str', 'arr']; // + float/str/arr per D-HOE-25 N-2
++const WORKER_IDS = ['market_hand', 'coop_hand', 'hawker', 'grader']; // code worker ids (income.ts:86 at e77fc5c; D-HOE-19 wire ids = code ids)
++const FLOAT_KEYS = ['kind', 'min', 'max', 'step', 'optional', 'nullable'];
+ if (!A.git || !A.rc) { console.error('need --git --rc'); process.exit(2); }
+ const show = f => { try { return execFileSync('git', ['-C', A.git, 'show', `${A.rc}:${f}`], { stdio: ['ignore', 'pipe', 'ignore'] }).toString('utf8'); } catch { return null; } };
+ const sch = JSON.parse(readFileSync(SPEC, 'utf8')), names = Object.keys(sch.events || {}).sort();
+@@ -29,7 +43,64 @@
+ const ip = s.match(/export\s+(?:function\s+isPinned\s*\(\s*(\w+)\s*(?::\s*([\w<>\[\]]+))?|const\s+isPinned\s*=\s*\(\s*(\w+)\s*(?::\s*([\w<>\[\]]+))?)/);
+ out('G8-6 export isPinned(e) event-based (not isPinned(type: string), F-10)', !!ip && (ip[2] || ip[4] || '') !== 'string' && (ip[1] || ip[3]) !== 'type', ip ? ip[0] : 'not exported');
+ const kinds = [...s.matchAll(/kind\s*:\s*['"](\w+)['"]/g)].map(m => m[1]), badK = [...new Set(kinds.filter(k => !KINDS.includes(k)))];
+-out('G8-7 FieldSpec kinds only enum|int|count|bucket|bool (no free text)', !!src && kinds.length > 0 && badK.length === 0, src ? (kinds.length ? (badK.length ? 'bad: ' + badK.join(',') : '') : 'no kind: entries') : 'no file');
++out('G8-7 FieldSpec kinds only enum|int|count|bucket|bool|float|str|arr (no free text; D-HOE-25 N-2)', !!src && kinds.length > 0 && badK.length === 0, src ? (kinds.length ? (badK.length ? 'bad: ' + badK.join(',') : '') : 'no kind: entries') : 'no file');
++// ---- helpers for the N-2 structure checks (comments stripped; braces balanced, quoted strings skipped) ----
++const sc = s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:\\])\/\/.*$/gm, '$1');
++const skipStr = (t, i) => { const q = t[i]; for (i++; i < t.length && t[i] !== q; i++) if (t[i] === '\\') i++; return i; };
++const closeOf = (t, i) => { let d = 0; for (; i < t.length; i++) { const c = t[i]; if (c === "'" || c === '"' || c === '`') { i = skipStr(t, i); continue; } if (c === '{' || c === '[') d++; else if (c === '}' || c === ']') { d--; if (d === 0) return i; } } return -1; };
++const openOf = (t, i) => { let d = 0; for (; i >= 0; i--) { const c = t[i]; if (c === '}' || c === ']') d++; else if (c === '{' || c === '[') { if (d === 0) return c === '{' ? i : -1; d--; } } return -1; };
++const enclosing = (t, i) => { const o = openOf(t, i); if (o < 0) return ''; const c = closeOf(t, o); return c < 0 ? '' : t.slice(o, c + 1); };
++const topKeys = obj => { const ks = []; let d = 0; for (let i = 0; i < obj.length; i++) { const c = obj[i]; if (c === "'" || c === '"' || c === '`') { i = skipStr(obj, i); continue; } if (c === '{' || c === '[' || c === '(') { d++; continue; } if (c === '}' || c === ']' || c === ')') { d--; continue; }
++  if (d === 1) { const m = obj.slice(i).match(/^['"]?([A-Za-z_$][\w$]*)['"]?\s*\??\s*:/); if (m && /[{,\s]/.test(obj[i - 1] || '')) { ks.push(m[1]); i += m[0].length - 1; } } } return ks; };
++const esIdx = sc.search(/export\s+const\s+EVENT_SCHEMA\b/), esOpen = esIdx < 0 ? -1 : sc.indexOf('{', sc.indexOf('=', esIdx)), esText = esOpen < 0 ? '' : sc.slice(esOpen, closeOf(sc, esOpen) + 1);
++const eventBlock = name => { const re = new RegExp(`(?:^|[{,\\s])['"]?${name}['"]?\\s*:\\s*\\{`, 'g'); let m; while ((m = re.exec(esText))) { const o = esText.indexOf('{', m.index + m[0].length - 1); if (openOf(esText, m.index + 1) === 0) return esText.slice(o, closeOf(esText, o) + 1); } return ''; };
++const fieldSpecs = (t, name) => [...t.matchAll(new RegExp(`(?:^|[{,\\s])['"]?${name}['"]?\\s*\\??\\s*:\\s*\\{`, 'g'))].map(m => { const o = t.indexOf('{', m.index + m[0].length - 1); return t.slice(o, closeOf(t, o) + 1); });
++const kindOf = o => (o.match(/^\{[^{}]*?kind\s*:\s*['"](\w+)['"]/) || o.match(/kind\s*:\s*['"](\w+)['"]/) || [])[1];
++const numKey = (o, k) => { const m = o.match(new RegExp(`(?:[{,\\s])${k}\\s*:\\s*(-?[\\d.]+(?:e-?\\d+)?)`)); return m ? Number(m[1]) : undefined; };
++const specsOfKind = k => [...sc.matchAll(new RegExp(`kind\\s*:\\s*['"]${k}['"]`, 'g'))].map(m => enclosing(sc, m.index));
++// G8-7f float {min?, max?, step?}: no other keys; numeric step > 0
++const fl = specsOfKind('float'), flBad = fl.filter(o => { const ks = topKeys(o).filter(k => !FLOAT_KEYS.includes(k)); const st = numKey(o, 'step'); return ks.length || (st !== undefined && !(st > 0)) || (/(?:[{,\s])step\s*:/.test(o) && st === undefined && !/step\s*:\s*[A-Za-z_$]/.test(o)); });
++out('G8-7f float FieldSpec keys only {kind,min?,max?,step?,optional?,nullable?}, step > 0 (N-2)', !!src && flBad.length === 0, src ? (flBad.length ? 'bad: ' + flBad.map(o => o.replace(/\s+/g, ' ')).join(' | ') : `${fl.length} float spec(s)`) : 'no file');
++// G8-7s str {pattern}: pattern required (regex literal or string), no free text
++const st = specsOfKind('str'), stBad = st.filter(o => !/(?:[{,\s])pattern\s*:\s*(?:\/.+\/[a-z]*|['"`][^'"`]+['"`]|new\s+RegExp\(|[A-Za-z_$][\w$]*)/.test(o));
++out('G8-7s str FieldSpec carries a pattern (no free-text str; N-2)', !!src && stBad.length === 0, src ? (stBad.length ? 'no pattern: ' + stBad.map(o => o.replace(/\s+/g, ' ')).join(' | ') : `${st.length} str spec(s)`) : 'no file');
++// G8-7a arr {of: FieldSpec, maxLen}: both required, maxLen int >= 1
++const ar = specsOfKind('arr'), arBad = ar.filter(o => { const ml = numKey(o, 'maxLen'); return !/(?:[{,\s])of\s*:\s*\{[^]*kind\s*:/.test(o) || !(Number.isInteger(ml) && ml >= 1 || /maxLen\s*:\s*[A-Z_][A-Z0-9_]*\b/.test(o)); });
++out('G8-7a arr FieldSpec has of: FieldSpec and maxLen int >= 1 (N-2)', !!src && arBad.length === 0, src ? (arBad.length ? 'bad: ' + arBad.map(o => o.replace(/\s+/g, ' ')).join(' | ') : `${ar.length} arr spec(s)`) : 'no file');
++// G8-14 optional?/nullable?: declared on the FieldSpec type, boolean literals only, read by the validator (off by default => absent/null fail)
++const optVals = [...esText.matchAll(/(?:[{,\s])(optional|nullable)\s*:\s*([^,}\s]+)/g)].filter(m => !/^(true|false)$/.test(m[2]));
++const optType = /optional\?\s*:/.test(s) && /nullable\?\s*:/.test(s), optRead = /\.optional\b|\[\s*['"]optional['"]\s*\]/.test(sc) && /\.nullable\b|\[\s*['"]nullable['"]\s*\]/.test(sc);
++out('G8-14 FieldSpec optional?/nullable? declared, boolean literals only, read by validateEvent (default off: absent + null fail; N-2)', !!src && optType && optRead && optVals.length === 0,
++  src ? [optType ? '' : 'FieldSpec type lacks optional?:/nullable?:', optRead ? '' : 'validator never reads .optional/.nullable', optVals.length ? 'non-boolean: ' + optVals.map(m => m[1] + ':' + m[2]).join(',') : ''].filter(Boolean).join('; ') : 'no file');
++// G8-15 capped marker variant per family: ability_blocked {capped: bool, events: count}; coop_full {capped: bool, episodes: count}; never the other key
++const capOk = (ev, key, other) => { const b = eventBlock(ev); const cb = fieldSpecs(b, 'capped').some(o => kindOf(o) === 'bool'), kc = fieldSpecs(b, key).some(o => kindOf(o) === 'count'), wrong = fieldSpecs(b, other).length > 0; return { ok: !!b && cb && kc && !wrong, why: !b ? `${ev} not declared` : [cb ? '' : `${ev} capped not bool`, kc ? '' : `${ev} ${key} not count`, wrong ? `${ev} uses ${other}` : ''].filter(Boolean).join(', ') }; };
++const cA = capOk('ability_blocked', 'events', 'episodes'), cC = capOk('coop_full', 'episodes', 'events');
++out('G8-15 capped marker variants: ability_blocked {capped:bool, events:count}, coop_full {capped:bool, episodes:count} (N-2, D-HOE-23 (a))', !!src && cA.ok && cC.ok, src ? [cA.why, cC.why].filter(Boolean).join('; ') : 'no file');
++// G8-16 dynamicFields [{keyPattern, spec}]: keyPattern anchored and built from the code worker ids, no wildcard; validator reads dynamicFields (unknown keys fail)
++const dyn = [...sc.matchAll(/dynamicFields\s*:\s*\[/g)].map(m => { const o = sc.indexOf('[', m.index); return sc.slice(o, closeOf(sc, o) + 1); });
++const kps = dyn.flatMap(d => [...d.matchAll(/keyPattern\s*:\s*/g)].map(m => { const r = d.slice(m.index + m[0].length); let dd = 0, i = 0; for (; i < r.length; i++) { const c = r[i]; if (c === "'" || c === '"' || c === '`') { i = skipStr(r, i); continue; } if ('([{'.includes(c)) dd++; else if (')]}'.includes(c)) { if (dd === 0) break; dd--; } else if (c === ',' && dd === 0) break; } return r.slice(0, i).trim(); }));
++const idList = name => { const m = s.match(new RegExp(`const\\s+${name}\\b[^=]*=\\s*\\[([^\\]]*)\\]`)); if (m) return [...m[1].matchAll(/['"](\w+)['"]/g)].map(x => x[1]);
++  const im = s.match(new RegExp(`import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*['"]([^'"]+)['"]`)); if (!im) return null; const f = path.posix.normalize(path.posix.join('src/telemetry', im[1])); const t = show(f + '.ts') || show(f + '/index.ts') || '';
++  const em = t.match(new RegExp(`export\\s+const\\s+${name}\\b[^=]*=\\s*\\[([^\\]]*)\\]`)); return em ? [...em[1].matchAll(/['"](\w+)['"]/g)].map(x => x[1]) : null; };
++const sameIds = l => !!l && l.length === WORKER_IDS.length && WORKER_IDS.every(w => l.includes(w));
++const kpBad = kps.map(k => { const wild = /\\w|\.\*|\.\+|\[a-z|\[\^|\\S/.test(k), anch = /\^/.test(k) && /\$/.test(k);
++  const lit = k.match(/^\/(.+)\/[a-z]*$/); let ids = null; if (lit) { const alts = (lit[1].match(/\(\??:?([\w|]+)\)/) || [])[1]; ids = alts ? alts.split('|') : null; }
++  else { const refs = [...k.matchAll(/\b([A-Z][A-Z0-9_]*)\b/g)].map(m => m[1]); for (const r of refs) { const l = idList(r); if (l) { ids = l; break; } } }
++  const why = [anch ? '' : 'not anchored ^...$', wild ? 'wildcard' : '', sameIds(ids) ? '' : `ids ${ids ? ids.join('|') : 'not resolved'} != ${WORKER_IDS.join('|')}`].filter(Boolean).join(', '); return why ? `${k}: ${why}` : ''; }).filter(Boolean);
++const dynRead = /\.dynamicFields\b/.test(sc);
++out('G8-16 dynamicFields keyPattern from the code worker ids (market_hand|coop_hand|hawker|grader), anchored, no wildcard; validator reads dynamicFields (unknown keys fail; N-2)', !!src && kps.length > 0 && kpBad.length === 0 && dynRead,
++  src ? (kps.length ? [kpBad.join(' | '), dynRead ? '' : 'validator never reads .dynamicFields'].filter(Boolean).join('; ') : 'no dynamicFields keyPattern') : 'no file');
++// G8-17 ability_used.combo bool, always present (not optional/nullable) (N-8, D-HOP-42)
++const cmb = fieldSpecs(eventBlock('ability_used'), 'combo');
++out('G8-17 ability_used.combo is kind bool, not optional/nullable (N-8)', !!src && cmb.length > 0 && cmb.every(o => kindOf(o) === 'bool' && !/(optional|nullable)\s*:\s*true/.test(o)), src ? (cmb.length ? cmb.map(o => o.replace(/\s+/g, ' ')).join(' | ') : 'ability_used.combo not declared') : 'no file');
++// G8-18 stall_id / prev_stall_id int >= 1 everywhere (N-1, D-HOE-24; replaces the D-HOE-18 L380 enum wording)
++const sids = [...fieldSpecs(esText, 'stall_id'), ...fieldSpecs(esText, 'prev_stall_id')], sidBad = sids.filter(o => kindOf(o) !== 'int' || numKey(o, 'min') !== 1);
++out('G8-18 stall_id/prev_stall_id kind int, min 1, on every event (incl. sales_stall; N-1 / D-HOE-24, not an enum)', !!src && fieldSpecs(eventBlock('sales_stall'), 'stall_id').length > 0 && sidBad.length === 0,
++  src ? (sidBad.length ? 'bad: ' + sidBad.map(o => o.replace(/\s+/g, ' ')).join(' | ') : (fieldSpecs(eventBlock('sales_stall'), 'stall_id').length ? `${sids.length} spec(s)` : 'sales_stall.stall_id not declared')) : 'no file');
++// G8-19 session_end.ability_blocked_taps int count, min 0 (errata rev 5 L119, D-HOE-23 (b))
++const abt = fieldSpecs(eventBlock('session_end'), 'ability_blocked_taps');
++out('G8-19 session_end.ability_blocked_taps int|count, min 0 if stated (all blocked taps incl. post-cap; errata rev 5 = rev 7 L119)', !!src && abt.length === 1 && ['int', 'count'].includes(kindOf(abt[0])) && [undefined, 0].includes(numKey(abt[0], 'min')),
++  src ? (abt.length ? abt[0].replace(/\s+/g, ' ') : 'not declared in session_end') : 'no file');
+ const miss = names.filter(n => !declared.has(n));
+ out(`G8-8 EVENT_SCHEMA declares every type of the frozen v0.6.2 spec (${names.length})`, !!src && miss.length === 0, src ? (miss.length ? 'missing: ' + miss.join(',') : '') : 'no file');
+ out('G8-9 envelope sid + fgMs named in schema.ts', !!src && ['sid', 'fgMs'].every(f => lits.has(f) || declared.has(f) || new RegExp('\\b' + f + '\\b').test(s)));
+--- a/qa/v5-saves/probes/telemetry/g8-selftest.sh
++++ b/qa/v5-saves/probes/telemetry/g8-selftest.sh
+@@ -1,29 +1,73 @@
+ #!/usr/bin/env bash
+-# Self-test of g8-schema-ts.mjs (D-HOE-20 contract, FINAL per HoQ C-1) on throw-away git fixtures in /tmp + the real rc/v5 SHAs (read-only git show).
++# Self-test of g8-schema-ts.mjs (D-HOE-20 contract, FINAL per HoQ C-1; + D-HOE-20261030-25 N-2/N-8/N-1 and errata rev 5 ability_blocked_taps)
++# on throw-away git fixtures in /tmp + the real rc/v5 SHAs (read-only git show).
+ set -u; D=$(cd "$(dirname "$0")" && pwd); G=/workspace/egg-farm-studio/game; T=$(mktemp -d /tmp/g8.XXXX); P=0; F=0
+ ck(){ local n=$1 want=$2 re=$3; shift 3; out=$(node $D/g8-schema-ts.mjs "$@" 2>&1); rc=$?; if [ $rc = $want ] && { [ -z "$re" ] || echo "$out" | grep -q -- "$re"; }; then P=$((P+1)); echo "ok   $n (rc=$rc) $(echo "$out" | tail -1)"; else F=$((F+1)); echo "FAIL $n (rc=$rc want $want, expect '$re') $out"; fi; }
+-git -C $T init -q r; mkdir -p $T/r/src/telemetry $T/r/src/ui
++git -C $T init -q r; mkdir -p $T/r/src/telemetry $T/r/src/ui $T/r/src/sim
+ names=$(node -e 'console.log(Object.keys(require(process.argv[1]).events).join(" "))' $D/../../spec/telemetry-v062.schema.json)
++# entry <event> <variant>: EVENT_SCHEMA entry; special events carry the D-HOE-25 N-2 shapes, each negative variant breaks exactly one rule
++entry(){ local n=$1 v=$2; case $n in
++  ability_blocked) local ck=events cb=bool; [ $v = capswap ] && ck=episodes; [ $v = capnobool ] && cb=count
++    echo "  ability_blocked: { pinned: true, fields: { worker: { kind: 'enum', values: WORKER_IDS }, count: { kind: 'count' } }, marker: { capped: { kind: '$cb' }, $ck: { kind: 'count' } } },";;
++  coop_full) local ck=episodes; [ $v = coopevents ] && ck=events
++    echo "  coop_full: { pinned: true, fields: { phase: { kind: 'enum', values: ['start','end'] } }, marker: { capped: { kind: 'bool' }, $ck: { kind: 'count' } } },";;
++  session_end) local fl="asleep_s: { kind: 'float', min: 0, step: 0.1 }," ab="ability_blocked_taps: { kind: 'int', min: 0 },"
++    [ $v = floatbad ] && fl="asleep_s: { kind: 'float', min: 0, step: 0.1, len: 3 },"; [ $v = floatstep0 ] && fl="asleep_s: { kind: 'float', step: 0 },"
++    [ $v = floatfull ] && fl="asleep_s: { kind: 'float', min: 0, max: 86400, step: 0.1, optional: true },"
++    [ $v = abtmiss ] && ab=""; [ $v = abtfloat ] && ab="ability_blocked_taps: { kind: 'float', min: 0 },"; [ $v = abtmin1 ] && ab="ability_blocked_taps: { kind: 'int', min: 1 },"
++    echo "  session_end: { pinned: true, fields: { farm_level: { kind: 'int' }, $fl $ab } },";;
++  worker_summary) local kp="new RegExp('^wage_(' + WORKER_IDS.join('|') + ')_asleep_cents\$')"
++    [ $v = dynlit ] && kp="/^wage_(market_hand|coop_hand|hawker|grader)_asleep_cents\$/"; [ $v = dynwild ] && kp="/^wage_\\\\w+_asleep_cents\$/"
++    [ $v = dynmiss ] && kp="/^wage_(market_hand|coop_hand|hawker)_asleep_cents\$/"; [ $v = dynunanch ] && kp="/wage_(market_hand|coop_hand|hawker|grader)_asleep_cents/"
++    [ $v = dynextra ] && kp="/^wage_(market_hand|coop_hand|hawker|grader|bogus)_asleep_cents\$/"
++    if [ $v = nodyn ]; then echo "  worker_summary: { pinned: false, fields: { farm_level: { kind: 'int' } } },"
++    else echo "  worker_summary: { pinned: false, fields: { farm_level: { kind: 'int' } }, dynamicFields: [{ keyPattern: $kp, spec: { kind: 'count' } }] },"; fi;;
++  breed_slotted) local lo="loadout: { kind: 'str', pattern: /^P\\dA\\dB\\d\$/ },"; [ $v = strnopat ] && lo="loadout: { kind: 'str' },"; [ $v = strstr ] && lo="loadout: { kind: 'str', pattern: '^P\\\\dA\\\\dB\\\\d\$' },"
++    local ps="prev_slot: { kind: 'int', min: 0, max: 2, nullable: true },"; [ $v = optbad ] && ps="prev_slot: { kind: 'int', min: 0, max: 2, nullable: 'yes' },"
++    echo "  breed_slotted: { pinned: false, fields: { $lo $ps } },";;
++  save_migrated) local bs="backup_stores: { kind: 'arr', of: { kind: 'enum', values: ['ls','idb'] }, maxLen: 2 },"
++    [ $v = arrnomax ] && bs="backup_stores: { kind: 'arr', of: { kind: 'enum', values: ['ls','idb'] } },"; [ $v = arrnoof ] && bs="backup_stores: { kind: 'arr', maxLen: 2 },"
++    [ $v = arrmax0 ] && bs="backup_stores: { kind: 'arr', of: { kind: 'enum', values: ['ls'] }, maxLen: 0 },"
++    echo "  save_migrated: { pinned: true, fields: { farm_level: { kind: 'int' }, $bs reason: { kind: 'enum', values: ['invalid_root','invalid_values'], optional: true } } },";;
++  sales_stall) local si="stall_id: { kind: 'int', min: 1 }," pv="prev_stall_id: { kind: 'int', min: 1, optional: true },"
++    [ $v = stallenum ] && si="stall_id: { kind: 'enum', values: ['s1','s2'] },"; [ $v = stallmin0 ] && si="stall_id: { kind: 'int', min: 0 },"; [ $v = prevcount ] && pv="prev_stall_id: { kind: 'count', optional: true },"
++    [ $v = stallmiss ] && si=""
++    echo "  sales_stall: { pinned: true, fields: { farm_level: { kind: 'int' }, $si $pv } },";;
++  refill_used) local rs="stall_id: { kind: 'int', min: 1, optional: true },"; [ $v = rustallenum ] && rs="stall_id: { kind: 'enum', values: ['a'] },"
++    echo "  refill_used: { pinned: true, fields: { farm_level: { kind: 'int' }, $rs } },";;
++  ability_used) local cb="combo: { kind: 'bool' },"; [ $v = combonum ] && cb="combo: { kind: 'int' },"; [ $v = comboopt ] && cb="combo: { kind: 'bool', optional: true },"; [ $v = combomiss ] && cb=""
++    echo "  ability_used: { pinned: true, fields: { farm_level: { kind: 'int' }, $cb } },";;
++  *) echo "  $n: { pinned: false, fields: { farm_level: { kind: 'int' } } },";; esac; }
+ gen(){ # $1 = variant
+   { echo "// fixture schema.ts ($1)"; [ "$1" = ver061 ] && echo "export const TELEMETRY_SCHEMA_VERSION = '0.6.1';" || echo "export const TELEMETRY_SCHEMA_VERSION = '0.6.2';"
+-    echo "export const EVENT_SCHEMA = {"; for n in $names sales_stall refill_used; do [ "$1" = noev ] && [ "$n" = session_start ] && continue; echo "  $n: { pinned: false, fields: { farm_level: { kind: 'int' } } },"; done
++    if [ "$1" = wimport ]; then echo "import { WORKER_IDS } from '../sim/workers';"; else echo "const WORKER_IDS = ['market_hand', 'coop_hand', 'hawker', 'grader'] as const;"; fi
++    [ "$1" = nooptype ] && echo "export type FieldSpec = { kind: string; values?: readonly string[] };" || echo "export type FieldSpec = { kind: string; values?: readonly string[]; optional?: true; nullable?: true };"
++    echo "export const EVENT_SCHEMA = {"; for n in $names sales_stall refill_used ability_used; do [ "$1" = noev ] && [ "$n" = session_start ] && continue; entry $n "$1"; done
+     [ "$1" = alias ] && echo "  manage_used: { pinned: false, fields: {} },"
+     [ "$1" = text ] && echo "  x_text: { pinned: false, fields: { note: { kind: 'text' } } },"
+     echo "  // resolved_by: { kind: 'enum', values: ['chip_refill','chip_sell_all','chip_collect',$( [ "$1" = nocm ] || echo "'chip_manage',")'refill_elsewhere','sell_elsewhere','collect_elsewhere','auto_resume','queue_empty','basket_empty','paused','focus_lost','cause_changed','none'] }"
+     echo "};"; echo "// envelope: type, ts, 'sid', 'fgMs'"
+     [ "$1" = notypes ] || echo "export const EVENT_TYPES = Object.keys(EVENT_SCHEMA);"
+-    echo "export function validateEvent(e: TEvent): string[] { return []; }"
++    [ "$1" = nooptread ] && echo "export function validateEvent(e: TEvent): string[] { const sp = EVENT_SCHEMA[e.type]; return sp && sp.dynamicFields ? [] : []; }" \
++      || echo "export function validateEvent(e: TEvent): string[] { const sp = EVENT_SCHEMA[e.type]; const errs: string[] = []; for (const [k, f] of Object.entries(sp?.fields ?? {})) { if (!(k in e) && !f.optional) errs.push(k); if (e[k] === null && !f.nullable) errs.push(k); } for (const k of Object.keys(e)) if (!(k in (sp?.fields ?? {})) && !(sp?.dynamicFields ?? []).some(d => d.keyPattern.test(k))) errs.push(k); return errs; }"
+     [ "$1" = pintype ] && echo "export function isPinned(type: string): boolean { return false; }" || echo "export function isPinned(e: TEvent): boolean { return !!EVENT_SCHEMA[e.type]?.pinned; }"
+   } > $T/r/src/telemetry/schema.ts
++  echo "export const WORKER_IDS = ['market_hand', 'coop_hand', 'hawker', 'grader'] as const;" > $T/r/src/sim/workers.ts
+   { echo "import { TELEMETRY_SCHEMA_VERSION } from './schema';"; [ "$1" = noring ] || echo "const ring = { v: TELEMETRY_SCHEMA_VERSION, events: buf }; const old = (arr) => arr.map(e => ({ ...e, legacy: true }));"
+     [ "$1" = nohdr ] || echo "export const exp = () => ({ exportedAt: 1, schema_version: TELEMETRY_SCHEMA_VERSION, events: [] });"; } > $T/r/src/telemetry/telemetry.ts
+   { echo "t.track('session_start', {});"; [ "$1" = strayev ] && echo "t.track('stray_event', {});"; } > $T/r/src/ui/x.ts
+   git -C $T/r add -A; git -C $T/r -c user.email=q@x -c user.name=q commit -qm $1 --allow-empty; git -C $T/r rev-parse HEAD; }
+-OK=$(gen ok); ck "positive: contract-conformant fixture" 0 "G8: PASS" --git $T/r --rc $OK
++OK=$(gen ok); ck "positive: contract-conformant fixture (all 8 kinds, optional/nullable, capped variants, dynamicFields, combo, stall_id, ability_blocked_taps)" 0 "G8: PASS" --git $T/r --rc $OK
+ echo '[{"type":"session_start"},{"type":"refill_used"}]' > $T/ev.json; ck "positive: TEL-AC11b exported types all in schema" 0 "G8: PASS" --git $T/r --rc $OK --events $T/ev.json
+ echo '{"schema_version":"0.6.2","events":[{"type":"manage_used"}]}' > $T/ev2.json; ck "negative: TEL-AC11b exported manage_used FAILS" 1 "TEL-AC11b" --git $T/r --rc $OK --events $T/ev2.json
+-for v in "ver061:G8-2" "notypes:G8-4" "pintype:G8-6" "text:G8-7" "noev:G8-8" "nocm:G8-10" "alias:G8-11" "noring:G8-12" "nohdr:G8-13" "strayev:TEL-AC11a"; do n=${v%%:*}; id=${v#*:}; R=$(gen $n); ck "negative: $n FAILS on $id" 1 "FAIL $id" --git $T/r --rc $R; done
++for v in floatfull strstr dynlit wimport; do R=$(gen $v); ck "positive: $v PASSES" 0 "G8: PASS" --git $T/r --rc $R; done
++for v in "ver061:G8-2" "notypes:G8-4" "pintype:G8-6" "text:G8-7" "noev:G8-8" "nocm:G8-10" "alias:G8-11" "noring:G8-12" "nohdr:G8-13" "strayev:TEL-AC11a" \
++  "floatbad:G8-7f" "floatstep0:G8-7f" "strnopat:G8-7s" "arrnomax:G8-7a" "arrnoof:G8-7a" "arrmax0:G8-7a" \
++  "optbad:G8-14" "nooptype:G8-14" "nooptread:G8-14" "capswap:G8-15" "capnobool:G8-15" "coopevents:G8-15" \
++  "nodyn:G8-16" "dynwild:G8-16" "dynmiss:G8-16" "dynunanch:G8-16" "dynextra:G8-16" "combonum:G8-17" "comboopt:G8-17" "combomiss:G8-17" \
++  "stallenum:G8-18" "stallmin0:G8-18" "prevcount:G8-18" "stallmiss:G8-18" "rustallenum:G8-18" "abtmiss:G8-19" "abtfloat:G8-19" "abtmin1:G8-19"; do
++  n=${v%%:*}; id=${v#*:}; R=$(gen $n); want="FAIL (1) $id\$"; [ $n = noev ] && want="FAIL (2) G8-8 TEL-AC11a\$"; ck "negative: $n FAILS on $id (only)" 1 "$want" --git $T/r --rc $R; done
+ git -C $T/r rm -q src/telemetry/schema.ts; git -C $T/r -c user.email=q@x -c user.name=q commit -qm rm; RM=$(git -C $T/r rev-parse HEAD); ck "negative: schema.ts absent FAILS" 1 "FAIL G8-1" --git $T/r --rc $RM
+-ck "real rc/v5 3f582db: FAIL expected (row 11 not landed)" 1 "FAIL G8-1" --git $G --rc 3f582dbfe31a9d309e6b1d0e96a4f77711b333ec
+-ck "real rc/v5 e77fc5c (tip): FAIL closed (HoQ: correct)" 1 "FAIL G8-1" --git $G --rc e77fc5c
++ck "real rc/v5 3f582db: FAIL closed expected (row 11 / schema.ts not landed)" 1 "FAIL G8-1" --git $G --rc 3f582dbfe31a9d309e6b1d0e96a4f77711b333ec
++ck "real rc/v5 e77fc5c: FAIL closed (HoQ: correct)" 1 "FAIL G8-1" --git $G --rc e77fc5c
+ echo "RESULT pass=$P fail=$F"; rm -rf $T; [ $F = 0 ]
+--- a/qa/v5-saves/probes/telemetry/g8-selftest.out.txt
++++ b/qa/v5-saves/probes/telemetry/g8-selftest.out.txt
+@@ -1,17 +1,50 @@
+-ok   positive: contract-conformant fixture (rc=0) G8: PASS
++# g8-selftest.sh 2026-10-30 14:01 CET | probe g8-schema-ts.mjs sha256 83caed53f5114c29bdc3e931e157f1b8503f127d95e7f31635f80489c92cece3 | selftest sha256 aa620af19f3082dd1c546a304531af6fb241dae71370228259d11648ce839827 | node v24.22.1 | errata of record rev 7 fd7d5921
++ok   positive: contract-conformant fixture (all 8 kinds, optional/nullable, capped variants, dynamicFields, combo, stall_id, ability_blocked_taps) (rc=0) G8: PASS
+ ok   positive: TEL-AC11b exported types all in schema (rc=0) G8: PASS
+ ok   negative: TEL-AC11b exported manage_used FAILS (rc=1) G8: FAIL (1) TEL-AC11b
+-ok   negative: ver061 FAILS on G8-2 (rc=1) G8: FAIL (1) G8-2
+-ok   negative: notypes FAILS on G8-4 (rc=1) G8: FAIL (1) G8-4
+-ok   negative: pintype FAILS on G8-6 (rc=1) G8: FAIL (1) G8-6
+-ok   negative: text FAILS on G8-7 (rc=1) G8: FAIL (1) G8-7
+-ok   negative: noev FAILS on G8-8 (rc=1) G8: FAIL (2) G8-8 TEL-AC11a
+-ok   negative: nocm FAILS on G8-10 (rc=1) G8: FAIL (1) G8-10
+-ok   negative: alias FAILS on G8-11 (rc=1) G8: FAIL (1) G8-11
+-ok   negative: noring FAILS on G8-12 (rc=1) G8: FAIL (1) G8-12
+-ok   negative: nohdr FAILS on G8-13 (rc=1) G8: FAIL (1) G8-13
+-ok   negative: strayev FAILS on TEL-AC11a (rc=1) G8: FAIL (1) TEL-AC11a
+-ok   negative: schema.ts absent FAILS (rc=1) G8: FAIL (12) G8-1 G8-2 G8-3 G8-4 G8-5 G8-6 G8-7 G8-8 G8-9 G8-10 G8-11 TEL-AC11a
+-ok   real rc/v5 3f582db: FAIL expected (row 11 not landed) (rc=1) G8: FAIL (14) G8-1 G8-2 G8-3 G8-4 G8-5 G8-6 G8-7 G8-8 G8-9 G8-10 G8-11 G8-12 G8-13 TEL-AC11a
+-ok   real rc/v5 e77fc5c (tip): FAIL closed (HoQ: correct) (rc=1) G8: FAIL (14) G8-1 G8-2 G8-3 G8-4 G8-5 G8-6 G8-7 G8-8 G8-9 G8-10 G8-11 G8-12 G8-13 TEL-AC11a
+-RESULT pass=16 fail=0
++ok   positive: floatfull PASSES (rc=0) G8: PASS
++ok   positive: strstr PASSES (rc=0) G8: PASS
++ok   positive: dynlit PASSES (rc=0) G8: PASS
++ok   positive: wimport PASSES (rc=0) G8: PASS
++ok   negative: ver061 FAILS on G8-2 (only) (rc=1) G8: FAIL (1) G8-2
++ok   negative: notypes FAILS on G8-4 (only) (rc=1) G8: FAIL (1) G8-4
++ok   negative: pintype FAILS on G8-6 (only) (rc=1) G8: FAIL (1) G8-6
++ok   negative: text FAILS on G8-7 (only) (rc=1) G8: FAIL (1) G8-7
++ok   negative: noev FAILS on G8-8 (only) (rc=1) G8: FAIL (2) G8-8 TEL-AC11a
++ok   negative: nocm FAILS on G8-10 (only) (rc=1) G8: FAIL (1) G8-10
++ok   negative: alias FAILS on G8-11 (only) (rc=1) G8: FAIL (1) G8-11
++ok   negative: noring FAILS on G8-12 (only) (rc=1) G8: FAIL (1) G8-12
++ok   negative: nohdr FAILS on G8-13 (only) (rc=1) G8: FAIL (1) G8-13
++ok   negative: strayev FAILS on TEL-AC11a (only) (rc=1) G8: FAIL (1) TEL-AC11a
++ok   negative: floatbad FAILS on G8-7f (only) (rc=1) G8: FAIL (1) G8-7f
++ok   negative: floatstep0 FAILS on G8-7f (only) (rc=1) G8: FAIL (1) G8-7f
++ok   negative: strnopat FAILS on G8-7s (only) (rc=1) G8: FAIL (1) G8-7s
++ok   negative: arrnomax FAILS on G8-7a (only) (rc=1) G8: FAIL (1) G8-7a
++ok   negative: arrnoof FAILS on G8-7a (only) (rc=1) G8: FAIL (1) G8-7a
++ok   negative: arrmax0 FAILS on G8-7a (only) (rc=1) G8: FAIL (1) G8-7a
++ok   negative: optbad FAILS on G8-14 (only) (rc=1) G8: FAIL (1) G8-14
++ok   negative: nooptype FAILS on G8-14 (only) (rc=1) G8: FAIL (1) G8-14
++ok   negative: nooptread FAILS on G8-14 (only) (rc=1) G8: FAIL (1) G8-14
++ok   negative: capswap FAILS on G8-15 (only) (rc=1) G8: FAIL (1) G8-15
++ok   negative: capnobool FAILS on G8-15 (only) (rc=1) G8: FAIL (1) G8-15
++ok   negative: coopevents FAILS on G8-15 (only) (rc=1) G8: FAIL (1) G8-15
++ok   negative: nodyn FAILS on G8-16 (only) (rc=1) G8: FAIL (1) G8-16
++ok   negative: dynwild FAILS on G8-16 (only) (rc=1) G8: FAIL (1) G8-16
++ok   negative: dynmiss FAILS on G8-16 (only) (rc=1) G8: FAIL (1) G8-16
++ok   negative: dynunanch FAILS on G8-16 (only) (rc=1) G8: FAIL (1) G8-16
++ok   negative: dynextra FAILS on G8-16 (only) (rc=1) G8: FAIL (1) G8-16
++ok   negative: combonum FAILS on G8-17 (only) (rc=1) G8: FAIL (1) G8-17
++ok   negative: comboopt FAILS on G8-17 (only) (rc=1) G8: FAIL (1) G8-17
++ok   negative: combomiss FAILS on G8-17 (only) (rc=1) G8: FAIL (1) G8-17
++ok   negative: stallenum FAILS on G8-18 (only) (rc=1) G8: FAIL (1) G8-18
++ok   negative: stallmin0 FAILS on G8-18 (only) (rc=1) G8: FAIL (1) G8-18
++ok   negative: prevcount FAILS on G8-18 (only) (rc=1) G8: FAIL (1) G8-18
++ok   negative: stallmiss FAILS on G8-18 (only) (rc=1) G8: FAIL (1) G8-18
++ok   negative: rustallenum FAILS on G8-18 (only) (rc=1) G8: FAIL (1) G8-18
++ok   negative: abtmiss FAILS on G8-19 (only) (rc=1) G8: FAIL (1) G8-19
++ok   negative: abtfloat FAILS on G8-19 (only) (rc=1) G8: FAIL (1) G8-19
++ok   negative: abtmin1 FAILS on G8-19 (only) (rc=1) G8: FAIL (1) G8-19
++ok   negative: schema.ts absent FAILS (rc=1) G8: FAIL (21) G8-1 G8-2 G8-3 G8-4 G8-5 G8-6 G8-7 G8-7f G8-7s G8-7a G8-14 G8-15 G8-16 G8-17 G8-18 G8-19 G8-8 G8-9 G8-10 G8-11 TEL-AC11a
++ok   real rc/v5 3f582db: FAIL closed expected (row 11 / schema.ts not landed) (rc=1) G8: FAIL (23) G8-1 G8-2 G8-3 G8-4 G8-5 G8-6 G8-7 G8-7f G8-7s G8-7a G8-14 G8-15 G8-16 G8-17 G8-18 G8-19 G8-8 G8-9 G8-10 G8-11 G8-12 G8-13 TEL-AC11a
++ok   real rc/v5 e77fc5c: FAIL closed (HoQ: correct) (rc=1) G8: FAIL (23) G8-1 G8-2 G8-3 G8-4 G8-5 G8-6 G8-7 G8-7f G8-7s G8-7a G8-14 G8-15 G8-16 G8-17 G8-18 G8-19 G8-8 G8-9 G8-10 G8-11 G8-12 G8-13 TEL-AC11a
++RESULT pass=48 fail=0

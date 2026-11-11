@@ -1,0 +1,248 @@
+{
+ "bid": "m3-rc1-pre+c11e3a0",
+ "a": {
+  "live": {
+   "coinsCents": 50000000,
+   "coop": 101.19999999999993,
+   "basket": 321,
+   "collectionLevel": 9,
+   "farmLevel": 12,
+   "nextCustomerInS": 8.800000000000004,
+   "nextCustomerId": 1,
+   "rng": 1478832577,
+   "pendingOfflineEggs": 24750,
+   "celebratedTier": 2,
+   "workers": {
+    "market_hand": {
+     "energy": 0
+    },
+    "coop_hand": {
+     "energy": 0
+    }
+   },
+   "graderTier": 2,
+   "manageCdS": 0,
+   "coopFullS": 0,
+   "wageFracCents": {},
+   "hensLevel": 10,
+   "eggValueLevel": 10,
+   "celebratedMilestones": [
+    "hens:10",
+    "grade:5",
+    "grade:10",
+    "balanced:1",
+    "balanced:2"
+   ],
+   "tracksV7": 1,
+   "v6BackupId": "df9518fb2899179a"
+  },
+  "recovery": null,
+  "pending": false,
+  "saved": {
+   "coinsCents": 50000000,
+   "coop": 88,
+   "basket": 321,
+   "collectionLevel": 9,
+   "farmLevel": 12,
+   "customers": [],
+   "nextCustomerInS": 10,
+   "nextCustomerId": 1,
+   "rng": 1478832577,
+   "pendingOfflineEggs": 24750,
+   "celebratedTier": 2,
+   "workers": {
+    "market_hand": 1,
+    "coop_hand": 1
+   },
+   "graderTier": 2,
+   "manageCdS": 0,
+   "coopFullS": 0,
+   "wageFracCents": {},
+   "hensLevel": 10,
+   "eggValueLevel": 10,
+   "celebratedMilestones": [
+    "hens:10",
+    "grade:5",
+    "grade:10",
+    "balanced:1",
+    "balanced:2"
+   ],
+   "tracksV7": 1,
+   "v6BackupId": "df9518fb2899179a"
+  },
+  "seq": 4,
+  "savedAt": 1792387095645,
+  "dialog": "Welcome back!\nYou were away 2h+\n+24.8K eggs\nCollect"
+ },
+ "b1": {
+  "live": {
+   "coinsCents": 50000000,
+   "coop": 104.49999999999991,
+   "basket": 25071,
+   "collectionLevel": 9,
+   "farmLevel": 12,
+   "nextCustomerInS": 2.4,
+   "nextCustomerId": 2,
+   "rng": 1034991407,
+   "pendingOfflineEggs": 0,
+   "celebratedTier": 2,
+   "workers": {
+    "market_hand": {
+     "energy": 0
+    },
+    "coop_hand": {
+     "energy": 0
+    }
+   },
+   "graderTier": 2,
+   "manageCdS": 0,
+   "coopFullS": 0,
+   "wageFracCents": {},
+   "hensLevel": 10,
+   "eggValueLevel": 10,
+   "celebratedMilestones": [
+    "hens:10",
+    "grade:5",
+    "grade:10",
+    "balanced:1",
+    "balanced:2"
+   ],
+   "tracksV7": 1,
+   "v6BackupId": "df9518fb2899179a"
+  },
+  "recovery": null,
+  "pending": false,
+  "saved": {
+   "coinsCents": 50000000,
+   "coop": 104.49999999999991,
+   "basket": 25071,
+   "collectionLevel": 9,
+   "farmLevel": 12,
+   "customers": [
+    {
+     "id": 1,
+     "demand": 35,
+     "filled": 0,
+     "waitedS": 0.2
+    }
+   ],
+   "nextCustomerInS": 2.4,
+   "nextCustomerId": 2,
+   "rng": 1034991407,
+   "pendingOfflineEggs": 0,
+   "celebratedTier": 2,
+   "workers": {
+    "market_hand": {
+     "energy": 0
+    },
+    "coop_hand": {
+     "energy": 0
+    }
+   },
+   "graderTier": 2,
+   "manageCdS": 0,
+   "coopFullS": 0,
+   "wageFracCents": {},
+   "hensLevel": 10,
+   "eggValueLevel": 10,
+   "celebratedMilestones": [
+    "hens:10",
+    "grade:5",
+    "grade:10",
+    "balanced:1",
+    "balanced:2"
+   ],
+   "tracksV7": 1,
+   "v6BackupId": "df9518fb2899179a"
+  },
+  "seq": 6,
+  "savedAt": 1792387097235,
+  "dialog": null
+ },
+ "c": {
+  "live": {
+   "coinsCents": 50000000,
+   "coop": 118.79999999999984,
+   "basket": 25071,
+   "collectionLevel": 9,
+   "farmLevel": 12,
+   "nextCustomerInS": 1.0999999999999988,
+   "nextCustomerId": 2,
+   "rng": 1034991407,
+   "pendingOfflineEggs": 0,
+   "celebratedTier": 2,
+   "workers": {
+    "market_hand": {
+     "energy": 0
+    },
+    "coop_hand": {
+     "energy": 0
+    }
+   },
+   "graderTier": 2,
+   "manageCdS": 0,
+   "coopFullS": 0,
+   "wageFracCents": {},
+   "hensLevel": 10,
+   "eggValueLevel": 10,
+   "celebratedMilestones": [
+    "hens:10",
+    "grade:5",
+    "grade:10",
+    "balanced:1",
+    "balanced:2"
+   ],
+   "tracksV7": 1,
+   "v6BackupId": "df9518fb2899179a"
+  },
+  "recovery": null,
+  "pending": false,
+  "saved": {
+   "coinsCents": 50000000,
+   "coop": 105.59999999999991,
+   "basket": 25071,
+   "collectionLevel": 9,
+   "farmLevel": 12,
+   "customers": [
+    {
+     "id": 1,
+     "demand": 35,
+     "filled": 0,
+     "waitedS": 0.30000000000000004
+    }
+   ],
+   "nextCustomerInS": 2.3,
+   "nextCustomerId": 2,
+   "rng": 1034991407,
+   "pendingOfflineEggs": 0,
+   "celebratedTier": 2,
+   "workers": {
+    "market_hand": {
+     "energy": 0
+    },
+    "coop_hand": {
+     "energy": 0
+    }
+   },
+   "graderTier": 2,
+   "manageCdS": 0,
+   "coopFullS": 0,
+   "wageFracCents": {},
+   "hensLevel": 10,
+   "eggValueLevel": 10,
+   "celebratedMilestones": [
+    "hens:10",
+    "grade:5",
+    "grade:10",
+    "balanced:1",
+    "balanced:2"
+   ],
+   "tracksV7": 1,
+   "v6BackupId": "df9518fb2899179a"
+  },
+  "seq": 11,
+  "savedAt": 1792387098487,
+  "dialog": null
+ },
+ "errs": []
+}

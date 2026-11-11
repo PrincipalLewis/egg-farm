@@ -1,0 +1,24 @@
+=== FINAL 2026-11-05T23:35:31+01:00 Europe/Belgrade ===
+tip: d9539a54e3f0beb36168d4dc247e337d1bd878b4
+
+ci/gate 42114562185: SUCCESS (gate job SUCCESS; release-globals job skipped on PR ≠ pass — noted, not treated as pass)
+pacing-x1-stack 42114562232: FAILURE — shards casual/optimal/seller15 all SUCCESS; aggregate FAIL attributed to RC-only row 904 NOT-WIRED ×3 (optimal/seller15/casual). See pacing-aggregate.txt + row904.txt
+k10 42114562165: FAILURE — known-red non-required monitor; does not block PASS
+
+=== PR checks rollup ===
+k10-breeds-offset (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53)	fail	11m38s	https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562165/job/127550630185	
+pacing-x1-stack	fail	14s	https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127572997956	
+release-globals	skipping	0	https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562185/job/127558472578	
+gate	pass	15m4s	https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562185/job/127550629944	
+pacing-x1-stack shard (casual)	pass	31m39s	https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127550630561	
+pacing-x1-stack shard (optimal)	pass	43m43s	https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127550630688	
+pacing-x1-stack shard (seller15)	pass	22m11s	https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127550630198	
+
+=== pacing run json ===
+{"conclusion":"failure","databaseId":42114562232,"headSha":"d9539a54e3f0beb36168d4dc247e337d1bd878b4","jobs":[{"conclusion":"success","databaseId":127550630198,"name":"pacing-x1-stack shard (seller15)","status":"completed","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127550630198"},{"conclusion":"success","databaseId":127550630561,"name":"pacing-x1-stack shard (casual)","status":"completed","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127550630561"},{"conclusion":"success","databaseId":127550630688,"name":"pacing-x1-stack shard (optimal)","status":"completed","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127550630688"},{"conclusion":"failure","databaseId":127572997956,"name":"pacing-x1-stack","status":"completed","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232/job/127572997956"}],"status":"completed","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562232"}
+
+=== gate run json ===
+{"conclusion":"success","databaseId":42114562185,"headSha":"d9539a54e3f0beb36168d4dc247e337d1bd878b4","jobs":[{"conclusion":"success","databaseId":127550629944,"name":"gate","status":"completed"},{"conclusion":"skipped","databaseId":127558472578,"name":"release-globals","status":"completed"}],"status":"completed","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562185"}
+
+=== k10 run json ===
+{"conclusion":"failure","databaseId":42114562165,"headSha":"d9539a54e3f0beb36168d4dc247e337d1bd878b4","status":"completed","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/42114562165"}

@@ -1,0 +1,39 @@
+{
+  "_status": "PROVISIONAL-UNCERTIFIED scratch constants transcribed from authority; QA must verify each source line before use as evidence",
+  "_sources": {
+    "card": "product/m5-gate-acs.md Card #4 (sha256 7e698b6d5906883f0134dd6183b842c9b0ea6d7af2efa18ab3982475b5331b32 at read time 2026-11-06 00:0x CET)",
+    "hop15": "product/decisions.md L2327-2335 D-HOP-2026-11-05-15 (file sha256 5ee3372e876b389c7e74c0e494e336e298eef9bb175efef6e22c855995546e92)",
+    "hop27": "product/decisions.md L1699, L1727-1728 D-HOP-2026-10-30-27 (v5 ships breeds=1; 0.27 cap of record; 0.28 only with breeds off)",
+    "hop2908": "product/decisions.md L1364 D-HOP-2026-10-29-08 22:58 addendum (breeds=0 -> 0.28; breeds=1 -> 0.27 + Econ B4 re-run)",
+    "hoe30_31": "engineering/decisions.md L499-510 D-HOE-20261030-30/-31 (combo rename, values unchanged, same positions, HoE confirms build reads new names)",
+    "gates_eg9": "product/economy/gates.md L22 E-G9 'Costs strictly rising, every track'"
+  },
+  "before_csv": {"path": "/workspace/scratch-econ-m51pr/data/economy.csv", "sha256": "a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f", "columns": 152, "rows": 31, "src": "card L848; hop15 (1)"},
+  "levels": {"min": 0, "max": 30, "frozen_rows": [0, 10], "src": "card PL-AC5(i) L916; PL-AC6(d)"},
+  "streak_cap": {
+    "column": "tc_streak_cap",
+    "breeds_1": {"value": "0.27", "rows_0_10_src": "hop15 (1) sole numeric exception", "rows_11_30_src": "hop27 / hop2908 (global column; PROVISIONAL: rows 11-30 not under PL-AC5(i))", "condition": "final combined B4 re-run (hop15 (1); hop2908) — must be evidenced by --b4-ref, else CONDITIONAL-UNMET"},
+    "breeds_0": {"value": "LITERAL_BEFORE", "src": "hop2908 breeds=0 -> 0.28 (= a8c4 literal); card PL-AC5(i) literal compare"},
+    "runtime_note": "pl.ts Stack hardcodes streakCap 0.28 with K.on=false flags-off (baseline/h/pl.ts L12-13): runtime value is inert flags-off and independent of the CSV cell; never treat runtime 0.28 as CSV evidence or vice versa"
+  },
+  "rename_map": {
+    "approved": {"combo_window_s": "tc_combo_window_s", "combo_boost_s": "tc_combo_boost_duration_s"},
+    "hoe_confirmation_ref": "D-HOE-20261030-31",
+    "same_positions": true,
+    "semantics": {
+      "tc_combo_window_s": {"value": "10", "unit": "s", "clock": "sim", "comparison": "sim_ms_inclusive_le_10000", "trigger": "refill_used{by:manual} same worker only; auto refill never", "boost_source": "shift_sheet_only", "flags": "abilities&&rc2Refill"},
+      "tc_combo_boost_duration_s": {"value": "45", "unit": "s", "clock": "focus_from_sheetCloseComplete", "changes": "duration_only", "unchanged": ["tc_ability_cd_s cooldown", "multipliers", "eligibility", "early_end", "menu_suspension"], "flags": "abilities&&rc2Refill"}
+    },
+    "src": "hoe30_31; hop15 (1); rc2-refill-proposal v1.3.16 L21/L46/L145; abilities spec v1.3.12 rule 11 L163-168"
+  },
+  "w4_baseline": {"columns": ["w4_price_mult", "w4_tier"], "required_values_price_mult": {"21": "2.5", "22": "3.0", "23": "3.0", "24": "4.0", "25": "4.0", "26": "4.0", "27": "4.0", "28": "4.0", "29": "4.0", "30": "4.0"}, "src": "hop15 (2); card L935 (a)", "policy_rows_11_20": "PROVISIONAL fail-closed: no approval located for any W4 change"},
+  "bc": {"prefix": "bc_", "src": "card PL-AC5(i-b) L921-925; hop15 (3): bc_broody_cap_bp 700 unapproved, 2000 not endorsed; listing must carry approval_ref + b4_run_ref"},
+  "pl_ac6": {"row30_farm_cost": "624316", "step_levels": [11, 29], "step_min_exclusive": "1.00", "step_max_inclusive": "1.30", "milestones": [15, 20, 25], "src": "card L940-955"},
+  "eg9_tracks": {"columns": ["farm_cost", "hens_cost", "egg_value_cost", "collection_cost"], "src": "gates_eg9; card L953 (sync-economy throws for farm/hens/EV). PROVISIONAL: collection_cost included as a cost track (strict on a8c4); w*_cost hire constants excluded (not per-level tracks)"},
+  "quantile": {"method": "nearest_rank", "formula": "sorted(a)[ceil(p*n)-1]", "src": "card L867"},
+  "seeds": [1, 200], "profiles": ["optimal", "seller15", "casual"], "T": 4000, "cfg": "none", "runner": "pl.ts (SCRATCH)",
+  "pl_ac3": {"refs_s": {"optimal": "2116.0", "seller15": "2100.2", "casual": "2041.5"}, "tol": "0.10", "report": [0.10, 0.50, 0.90, 0.95], "src": "card L882-886"},
+  "pl_ac4": {"bands": {"F11-15": [11, 15], "F16-20": [16, 20], "F21-25": [21, 25], "F26-30": [26, 29]}, "cap_s": "180", "before_gP95": {"optimal": [81, 125, 121, 157], "seller15": [53, 79, 77, 115], "casual": [35, 59, 58, 93]}, "src": "card L887-914; gap(L) missing key = 0 per analyze.py convention (PROVISIONAL)"},
+  "pl_ac7": {"bands_reach": {"F11-15": [11, 16], "F16-20": [16, 21], "F21-25": [21, 26], "F26-30": [26, 30]}, "tol": "0.20", "before_min": {"optimal": ["5.53", "11.22", "10.75", "7.15"], "seller15": ["5.69", "10.31", "10.79", "7.44"], "casual": ["5.48", "9.02", "11.13", "7.65"]}, "src": "card L956-964"},
+  "trace10": {"cut": "INCLUSIVE reach10 tick (all events with tick index <= the before run's reach(10) tick) — PROVISIONAL awaiting QA agreement", "allowed_balance_diff_keys": ["tc.streak_cap", "tc.combo_window_s", "tc.combo_boost_duration_s"], "event_exclusions": [], "src": "card L936-938; hop15 (1); TRACE10-PLAN.md"}
+}

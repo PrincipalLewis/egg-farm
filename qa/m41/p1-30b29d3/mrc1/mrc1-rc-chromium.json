@@ -1,0 +1,323 @@
+{
+ "frames": [
+  {
+   "t": 5.4,
+   "place": "band",
+   "top": 74.3,
+   "bottom": 259.7,
+   "h": 185.4,
+   "hensTop": 270.75,
+   "overlapPx": -11.05,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 17.5,
+   "place": "band",
+   "top": 74.3,
+   "bottom": 259.7,
+   "h": 185.4,
+   "hensTop": 270.75,
+   "overlapPx": -11.05,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 34.8,
+   "place": "band",
+   "top": 74.3,
+   "bottom": 259.7,
+   "h": 185.4,
+   "hensTop": 270.75,
+   "overlapPx": -11.05,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 50.7,
+   "place": "band",
+   "top": 71.951,
+   "bottom": 262.049,
+   "h": 190.097,
+   "hensTop": 270.75,
+   "overlapPx": -8.701,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 68.2,
+   "place": "band",
+   "top": 69.973,
+   "bottom": 264.027,
+   "h": 194.053,
+   "hensTop": 270.75,
+   "overlapPx": -6.723,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 84.1,
+   "place": "band",
+   "top": 68.328,
+   "bottom": 265.672,
+   "h": 197.344,
+   "hensTop": 270.75,
+   "overlapPx": -5.078,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 100.8,
+   "place": "band",
+   "top": 67.014,
+   "bottom": 266.986,
+   "h": 199.971,
+   "hensTop": 270.75,
+   "overlapPx": -3.764,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 117.2,
+   "place": "band",
+   "top": 65.989,
+   "bottom": 268.011,
+   "h": 202.021,
+   "hensTop": 270.75,
+   "overlapPx": -2.739,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 134,
+   "place": "band",
+   "top": 65.229,
+   "bottom": 268.771,
+   "h": 203.543,
+   "hensTop": 270.75,
+   "overlapPx": -1.979,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 152.9,
+   "place": "band",
+   "top": 64.697,
+   "bottom": 269.303,
+   "h": 204.606,
+   "hensTop": 270.75,
+   "overlapPx": -1.447,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 167.3,
+   "place": "band",
+   "top": 64.347,
+   "bottom": 269.653,
+   "h": 205.306,
+   "hensTop": 270.75,
+   "overlapPx": -1.097,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 184,
+   "place": "band",
+   "top": 64.142,
+   "bottom": 269.858,
+   "h": 205.716,
+   "hensTop": 270.75,
+   "overlapPx": -0.892,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 203.4,
+   "place": "band",
+   "top": 64.041,
+   "bottom": 269.959,
+   "h": 205.918,
+   "hensTop": 270.75,
+   "overlapPx": -0.791,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 217.8,
+   "place": "band",
+   "top": 64.005,
+   "bottom": 269.995,
+   "h": 205.99,
+   "hensTop": 270.75,
+   "overlapPx": -0.755,
+   "efpAtOverlap": null,
+   "anim": "expin:running"
+  },
+  {
+   "t": 237.8,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 250.6,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 267.3,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 283.9,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 300.9,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 317.3,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 334.1,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 350.7,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 369.2,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 383.9,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  },
+  {
+   "t": 401,
+   "place": "band",
+   "top": 64,
+   "bottom": 270,
+   "h": 206,
+   "hensTop": 270.75,
+   "overlapPx": -0.75,
+   "efpAtOverlap": null,
+   "anim": ""
+  }
+ ],
+ "engine": "chromium",
+ "target": "rc",
+ "build_id": "m4.1+30b29d3",
+ "at200": {
+  "scrollTop": 200,
+  "tab": [
+   "farm"
+  ],
+  "place": "band",
+  "vis": "visible",
+  "styleTop": "64px",
+  "offsetHeight": 206,
+  "card": {
+   "t": 69.96759033203125,
+   "b": 264.03240966796875,
+   "l": 48.07478332519531,
+   "r": 326.9252471923828,
+   "h": 194.0648193359375
+  },
+  "buys": [
+   {
+    "row": "Hens",
+    "t": 270.75,
+    "b": 318.75,
+    "l": 102,
+    "r": 341,
+    "ct": 270.75,
+    "cb": 318.75
+   },
+   {
+    "row": "Egg value",
+    "t": 473.75,
+    "b": 521.75,
+    "l": 102,
+    "r": 341,
+    "ct": 473.75,
+    "cb": 521.75
+   }
+  ],
+  "ov": []
+ },
+ "efpInOverlap": null,
+ "tapAtButtonCentre": null,
+ "sweepOverlaps": []
+}

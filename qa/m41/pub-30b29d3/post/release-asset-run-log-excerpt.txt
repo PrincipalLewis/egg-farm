@@ -1,0 +1,31 @@
+ * [new branch]      arch/check-release-build -> origin/arch/check-release-build
+##[group]Run mkdir -p rel && gh release download "$TAG" --pattern '*.html' --dir rel && ls -la rel
+^[[36;1mmkdir -p rel && gh release download "$TAG" --pattern '*.html' --dir rel && ls -la rel^[[0m
+shell: /usr/bin/bash -e {0}
+env:
+  TAG: m4.1-p1-30b29d3
+  GH_TOKEN: ***
+##[endgroup]
+total 544
+drwxr-xr-x  2 runner runner   4096 Oct 24 19:11 .
+drwxr-xr-x 13 runner runner   4096 Oct 24 19:11 ..
+-rw-r--r--  1 runner runner 547466 Oct 24 19:11 egg-farm.html
+##[group]Run prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
+^[[36;1mprefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)^[[0m
+^[[36;1msha=$(git rev-parse --short "$TAG^{commit}")^[[0m
+^[[36;1mfor f in rel/*.html; do HEAD_COMMIT=$(git rev-parse "$TAG^{commit}") node scripts/check-release-build.mjs "$f" --build-id "$prefix+$sha"; done^[[0m
+shell: /usr/bin/bash -e {0}
+env:
+  TAG: m4.1-p1-30b29d3
+  GH_TOKEN: ***
+check-release-build: single-file rel/egg-farm.html (547324 bytes)
+check-release-build: m4.1+30b29d3 ok
+check-release-build: release prefix m4.1 ok
+check-release-build: build id m4.1+30b29d3 matches expected ok
+check-release-build: build-id meta + data-build-id = m4.1+30b29d3 ok
+check-release-build: no eggfarmUi in release ok
+check-release-build: no ?debug/?perf/?ios/QA hooks ok
+check-release-build: window global writes only eggfarmExportTelemetry ok
+check-release-build: every asset/font URL inlined (data:) ok
+check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok

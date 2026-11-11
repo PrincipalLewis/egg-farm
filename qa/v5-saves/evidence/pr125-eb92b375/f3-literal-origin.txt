@@ -1,0 +1,15 @@
+F3-no-literal bare "100" origin (tests/v5-f3-config.test.ts)
+WIP partial run (halted 01:57 CET) failed:
+  expected [ 'sim/clock.ts:38 100' ] to deeply equal []
+
+At tip eb92b375, after comment-stripping, the hit is the default arg on tickClock:
+  src/sim/clock.ts:51  export const tickClock = (..., tickMs = 100): StepClock => {
+
+git blame: eb92b375 (the F1–F5 fix, 2026-11-10 01:50:53 +0100).
+At 8f47fd1 / a8a1ae8a, tickClock had no 4th argument and no bare 100:
+  export const tickClock = (i: number, nFocus: number, c: FrameClock): StepClock =>
+
+INTRODUCED_BY_FIX=YES (eb92b375). Not present on the merge-forward parent.
+advance() always passes dtMs = 1000/tickHz as the 4th arg, so the default is only a fallback.
+100 is the 100 ms tick length, not a CSV tunable, but it is a bare numeric literal in an M5 module
+and is not in the test's NEUTRAL set (0, 1, 1000, 1e-9, 0xffffffff, 1.0) or NAMED_OK allowlist.

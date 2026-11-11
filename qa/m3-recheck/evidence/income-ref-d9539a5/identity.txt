@@ -1,0 +1,36 @@
+=== HEAD ===
+d9539a54e3f0beb36168d4dc247e337d1bd878b4
+=== parents ===
+91a01445362ada4aeaf7215d93f8cf7f79f90312
+844f8e15774daeb1c0a855cb69b1fabd2f0ab820
+=== contains 844f8e15? ===
+YES
+=== remote feat/v5-income-ref ===
+d9539a54e3f0beb36168d4dc247e337d1bd878b4
+=== remote rc/v5 ===
+844f8e15774daeb1c0a855cb69b1fabd2f0ab820
+=== status ===
+0
+=== diff files vs origin/rc/v5 ===
+src/config/formulas.ts
+src/config/m5-rules.ts
+src/game.ts
+src/save/m5-fields.ts
+src/sim/actions.ts
+src/sim/income-ref.ts
+src/sim/timers.ts
+tests/v5-income-ref.test.ts
+=== diff --stat ===
+ src/config/formulas.ts      |   1 +
+ src/config/m5-rules.ts      |   2 +-
+ src/game.ts                 |   6 +-
+ src/save/m5-fields.ts       |   5 +-
+ src/sim/actions.ts          |   5 +-
+ src/sim/income-ref.ts       |  74 +++++++++++++++++
+ src/sim/timers.ts           |   5 +-
+ tests/v5-income-ref.test.ts | 193 ++++++++++++++++++++++++++++++++++++++++++++
+ 8 files changed, 286 insertions(+), 5 deletions(-)
+=== log -1 ===
+d9539a54e3f0beb36168d4dc247e337d1bd878b4
+91a01445362ada4aeaf7215d93f8cf7f79f90312 844f8e15774daeb1c0a855cb69b1fabd2f0ab820
+Merge rc/v5 into feat/v5-income-ref (HoQA merge-forward for #105)

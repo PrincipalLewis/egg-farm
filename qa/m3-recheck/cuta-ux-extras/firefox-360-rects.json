@@ -1,0 +1,490 @@
+{
+  "viewport": {
+    "width": 360,
+    "height": 800
+  },
+  "buildId": "m3-rc1-pre+d56033f",
+  "navVisible": {
+    "display": "flex",
+    "rect": {
+      "x": 0,
+      "y": 736,
+      "w": 360,
+      "h": 64
+    }
+  },
+  "banners": {
+    "unpaidCount": 2,
+    "unpaidText": "⚠ Unpaid, production stopped",
+    "graderText": "💤 Asleep, bonus down to 15%"
+  },
+  "pageErrors": [],
+  "tappable": {
+    "sheetClosed": [
+      {
+        "selector": "button#settings",
+        "text": "",
+        "ariaLabel": "Settings",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 304,
+          "y": 5,
+          "width": 44,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > button.chip.arrive",
+        "text": "17",
+        "ariaLabel": "Customer",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 72,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 136,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 200,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 264,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#goal",
+        "text": "★ Collection L5 · +8% income Ready!",
+        "ariaLabel": "★ Collection L5 · +8% income Ready!. Next goal: ★ Collection L5 · +8% income. Ready now.",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 616,
+          "width": 320,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#goal > span.goal-pill > span.goal-status.num",
+        "text": "Ready!",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 250,
+          "y": 628,
+          "width": 64,
+          "height": 20
+        },
+        "under44": true
+      },
+      {
+        "selector": "button#collect",
+        "text": "Collect +25 · 24 ready",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 664,
+          "width": 320,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#app > nav.actions > button[data-nav=\"market\"]",
+        "text": "Market",
+        "ariaLabel": "Market",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 736,
+          "width": 120,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#app > nav.actions > button[data-nav=\"upgrades\"]",
+        "text": "Upgrades",
+        "ariaLabel": "Upgrades",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 120,
+          "y": 736,
+          "width": 120,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#app > nav.actions > button[data-nav=\"farm\"]",
+        "text": "Farm",
+        "ariaLabel": "Farm",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 240,
+          "y": 736,
+          "width": 120,
+          "height": 64
+        },
+        "under44": false
+      }
+    ],
+    "upgradesWorkersOpen": [
+      {
+        "selector": "button#settings",
+        "text": "",
+        "ariaLabel": "Settings",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 304,
+          "y": 5,
+          "width": 44,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 72,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 136,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 200,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 264,
+          "y": 79,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#goal",
+        "text": "★ Collection L11 · +6% income ~0:13",
+        "ariaLabel": "★ Collection L11 · +6% income ~0:13. Next goal: ★ Collection L11 · +6% income. Affordable in about 0:13.",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 616,
+          "width": 320,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#collect",
+        "text": "Collect +55 · 52 ready",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 664,
+          "width": 320,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#app > nav.actions > button[data-nav=\"market\"]",
+        "text": "Market",
+        "ariaLabel": "Market",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 736,
+          "width": 92,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#app > nav.actions > button.on[data-nav=\"upgrades\"]",
+        "text": "3 Upgrades",
+        "ariaLabel": "Upgrades, 3 workers asleep or unpaid",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 92,
+          "y": 736,
+          "width": 92,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#app > nav.actions > button.manage.nav-manage[data-act=\"manageAll\"]",
+        "text": "Refill 1",
+        "ariaLabel": "Refill 1 tired worker",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 184,
+          "y": 736,
+          "width": 84,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#app > nav.actions > button[data-nav=\"farm\"]",
+        "text": "Farm",
+        "ariaLabel": "Farm",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 268,
+          "y": 736,
+          "width": 92,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "section#p-upgrades > header > button.icon-btn.close",
+        "text": "",
+        "ariaLabel": "Close",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 308,
+          "y": 208,
+          "width": 44,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "section#p-upgrades > div.body > div.tabs > button[data-tab=\"collection\"]",
+        "text": "Collection",
+        "ariaLabel": "Collection",
+        "role": "tab",
+        "disabled": false,
+        "rect": {
+          "x": 20,
+          "y": -2,
+          "width": 106.67,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "section#p-upgrades > div.body > div.tabs > button[data-tab=\"farm\"]",
+        "text": "Farm",
+        "ariaLabel": "Farm",
+        "role": "tab",
+        "disabled": false,
+        "rect": {
+          "x": 126.67,
+          "y": -2,
+          "width": 106.67,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "section#p-upgrades > div.body > div.tabs > button.active[data-tab=\"workers\"]",
+        "text": "Workers 3",
+        "ariaLabel": "Workers",
+        "role": "tab",
+        "disabled": false,
+        "rect": {
+          "x": 233.33,
+          "y": -2,
+          "width": 106.67,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#uRow > div.refill-wrap > button.btn.manage[data-act=\"manageAll\"]",
+        "text": "Refill 1 tired worker",
+        "ariaLabel": "Refill 1 tired worker",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 28,
+          "y": 274,
+          "width": 304,
+          "height": 48
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#uRow > div.wk.unpaid[data-w=\"market_hand\"] > div.wk-refill > button.btn.secondary[data-act=\"manage\"][data-w=\"market_hand\"]",
+        "text": "Refill",
+        "ariaLabel": "Refill Market Hand",
+        "role": null,
+        "disabled": true,
+        "rect": {
+          "x": 26,
+          "y": 214,
+          "width": 144.87,
+          "height": 48
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#uRow > div.wk.unpaid[data-w=\"coop_hand\"] > div.wk-refill > button.btn.secondary[data-act=\"manage\"][data-w=\"coop_hand\"]",
+        "text": "Refill",
+        "ariaLabel": "Refill Coop Hand",
+        "role": null,
+        "disabled": true,
+        "rect": {
+          "x": 26,
+          "y": 400,
+          "width": 144.87,
+          "height": 48
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#uRow > div.wk[data-w=\"hawker\"] > button.btn.buy[data-act=\"hire\"][data-w=\"hawker\"]",
+        "text": "Hire $800.00",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": true,
+        "rect": {
+          "x": 26,
+          "y": 534,
+          "width": 308,
+          "height": 48
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#uRow > div.wk.asleep[data-w=\"grader\"] > div.wk-refill > button.btn.secondary[data-act=\"manage\"][data-w=\"grader\"]",
+        "text": "Refill",
+        "ariaLabel": "Refill Egg Grader",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 26,
+          "y": 720,
+          "width": 144.87,
+          "height": 48
+        },
+        "under44": false
+      }
+    ]
+  }
+}

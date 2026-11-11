@@ -1,0 +1,31 @@
+--- ../scratch/v5-saves-gate.sh.orig-20261030-073448	2026-10-30 07:25:52.656662276 +0100
++++ scripts/v5-saves-gate.sh	2026-10-30 07:35:06.049706721 +0100
+@@ -10,6 +10,13 @@
+ # prints a WARNING at 1h45 and an OVERRUN line at 2h (status.log + summary.txt + stderr); GATE_WINDOW_S / GATE_WARN_S override (dry runs).
+ # vitest: --maxWorkers=2. Kills only its own PIDs (each child script stops its own server). Exit 0 = every HARD step PASS.
+ set -u -o pipefail; set +x
++say(){ echo "$(date '+%F %T %Z') $*" | tee -a "$ST"; }
++# Results signing (fix 2026-10-30, HoQ OK): status.log keeps getting lines AFTER the manifest is built (the -c result + du), so it is
++# EXCLUDED from SHA256SUMS and signed LAST, in its own STATUS.sha256, once nothing else writes to it. Called by the gate and by
++# --selftest-sign (scripts/selftest-gate-sums.sh), so both use this exact code path. Verify: sha256sum -c SHA256SUMS && sha256sum -c STATUS.sha256
++sign_results(){ (cd "$R" && find . -type f ! -name SHA256SUMS ! -name SHA256SUMS.check.txt ! -name STATUS.sha256 ! -path ./status.log ! -path '*/.serve/*' | sort | xargs sha256sum > SHA256SUMS); (cd "$R" && sha256sum -c SHA256SUMS > "$R/SHA256SUMS.check.txt" 2>&1) && say "SHA256SUMS -c OK $(sha256sum $R/SHA256SUMS | cut -c1-64) (status.log excluded; signed last in STATUS.sha256)" || say "SHA256SUMS -c FAILED (see SHA256SUMS.check.txt)"; du -sh "$R" | tee -a "$ST"
++  (cd "$R" && sha256sum status.log > STATUS.sha256 && sha256sum -c STATUS.sha256 >> "$R/SHA256SUMS.check.txt" 2>&1) && echo "STATUS.sha256 $(cut -c1-64 "$R/STATUS.sha256") (status.log final, signed last)" || echo "STATUS.sha256 -c FAILED (see SHA256SUMS.check.txt)"; }   # stdout only: status.log is closed
++if [ "${1:-}" = --selftest-sign ]; then R=${2:?usage: --selftest-sign <mock-results-dir>}; ST=$R/status.log; [ -f "$ST" ] || { echo "no $ST"; exit 2; }; sign_results; exit 0; fi
+ STUDIO=/workspace/egg-farm-studio; GIT=$STUDIO/game; Q=$STUDIO/qa; V=$Q/v5-saves; SC=$V/scripts; FX=$V/fixtures; M3=$Q/m3-scripts; LOCK=$STUDIO/.browser-test.lock; PORT=5961
+ RC=${1:-}; shift || true; GID=v5-rc-saves; ENGINES=chromium,firefox,webkit; FLAGS=; BASE=30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134; HH=; DRY=0
+ while [ $# -gt 0 ]; do case $1 in --gate-id) GID=$2; shift;; --engines) ENGINES=$2; shift;; --flags) FLAGS=$2; shift;; --base) BASE=$2; shift;; --dry-run) DRY=1;; *) echo "unknown $1"; exit 2;; esac; shift; done
+@@ -19,7 +26,6 @@
+ case "$R" in */scratch/*|*/out/*|/tmp/*|*/tmp/*) echo "refusing results dir $R (rule 19)"; exit 2;; esac
+ [ $DRY = 0 ] && [ -e "$R/SHA256SUMS" ] && { echo "$R already has a MANIFEST (gate runs once); move it aside with HoQ's OK first"; exit 2; }
+ mkdir -p "$R"; ST=$R/status.log; SUM=$R/summary.txt; : > "$SUM"; HF=0
+-say(){ echo "$(date '+%F %T %Z') $*" | tee -a "$ST"; }
+ step(){ local id=$1 hard=$2; shift 2; if [ -n "${NEEDBUILD:-}" ] && [ "$id" != G1-build ] && ! grep -q "^G1-build | PASS" "$SUM"; then echo "$id | NOT RUN | $hard | build failed" | tee -a "$SUM"; [ $hard = HARD ] && HF=$((HF+1)); return 0; fi; say "START $id"; "$@" > "$R/$id.log" 2>&1; local rc=$?; local res=$([ $rc = 0 ] && echo PASS || echo FAIL)
+   [ $res = FAIL ] && [ $hard = HARD ] && HF=$((HF+1)); echo "$id | $res | $hard | exit $rc" | tee -a "$SUM"; say "END $id $res"; return 0; }
+ T0=$(date +%s); GATE_WINDOW_S=${GATE_WINDOW_S:-7200}; GATE_WARN_S=${GATE_WARN_S:-6300}
+@@ -69,5 +75,5 @@
+ for w in "$WT" "$WB"; do [ -d "$w" ] && { rm -f "$w"/tests/*.qa.test.ts; git -C "$w" status --porcelain | grep -q . && say "KEEP dirty $w" || git -C "$GIT" worktree remove --force "$w"; }; done
+ stopwin; say "lock window used: $(( ($(date +%s)-T0)/60 )) min of $((GATE_WINDOW_S/60))$([ $(( $(date +%s)-T0 )) -gt $GATE_WINDOW_S ] && echo ' OVERRUN: HoQ + UI QA must already have been told')"
+ NR=$(grep -c '| FAIL | HARD' "$SUM"); VERD=$([ $HF = 0 ] && echo PASS || echo FAIL); echo "VERDICT: $VERD (hard_fail=$HF) $([ $DRY = 1 ] && echo DRYRUN)" | tee -a "$SUM"; say "DONE $VERD"
+-(cd "$R" && find . -type f ! -name SHA256SUMS ! -path '*/.serve/*' | sort | xargs sha256sum > SHA256SUMS); (cd "$R" && sha256sum -c SHA256SUMS > "$R/SHA256SUMS.check.txt" 2>&1) && say "SHA256SUMS -c OK $(sha256sum $R/SHA256SUMS | cut -c1-64)" || say "SHA256SUMS -c FAILED (see SHA256SUMS.check.txt)"; du -sh "$R" | tee -a "$ST"
++sign_results   # LAST writer of status.log, then signs it (see sign_results above)
+ exit $([ $HF = 0 ] && echo 0 || echo 1)

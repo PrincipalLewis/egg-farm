@@ -1,0 +1,7 @@
+{
+  "ahead_by": 1,
+  "behind_by": 0,
+  "status": "ahead",
+  "files": [],
+  "note": "If files non-empty, CI synthetic merge is NOT content-identical to frozen tip; grade carefully."
+}

@@ -1,0 +1,12 @@
+0.5 | Sell 1 · +$0.50 | Sell 1 · +$0.50 | card undefined
+999.99 | Sell 1 · +$999.99 | Sell 1 · +$999.99 | card undefined
+1000 | Sell 1 · +$1K | Sell 1 · +$1,000.00 | card undefined
+9999 | Sell 1 · +$9.9K | Sell 1 · +$9,999.00 | card undefined
+9990000 | Sell 1 · +$9.9M | Sell 1 · +$9.99M | card undefined
+9999000 | Sell 1 · +$9.9M | Sell 1 · +$10M | card undefined
+1000000000000 | Sell 1 · +$1T | Sell 1 · +$1T | card undefined
+1000000000000000 | Sell 1 · +$1000T | Sell 1 · +$1000T | card undefined
+1000000000000000000 | Sell 1 · +$1000000T | Sell 1 · +$1000000T | card undefined
+Infinity | Sell 1 · +— | Sell 1 · +— | card undefined
+NaN | Sell 1 · +— | Sell 1 · +— | card undefined
+wait | Need 10 | Need 10

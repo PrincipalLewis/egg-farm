@@ -1,0 +1,26 @@
+{
+ "id": "CSR14-restored-storageBlocked-M5",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-14",
+  "CSR-9"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "leaseBlocked": true,
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "notice": "M5",
+  "exportsCurrentFarm": true,
+  "noStorageToastAfterClose": true
+ }
+}

@@ -1,0 +1,5 @@
+# rc/v5 trace-table reviews (Saves QA 33ec1b55)
+Rule: engineering/decisions.md L247-249 (sha1 afefc28c): every M5.0/M5.1 PR into rc/v5 ships unit tests named or tagged by AC id plus a **trace table in the PR body (AC id → test file::name)**; HoE merges only after Saves QA has checked it. Foundations #77 → #79 → #80 → #82 merge in that order once trace tables are added.
+Method (read-only): `gh pr view` (body, head SHA) + `git fetch`; tests and src read with `git show <head>:<path>`; requirements from the governing spec named in the PR header. Where a test name claims more than it asserts, a throwaway local mutant was run in a temporary worktree (`vitest --maxWorkers=2`, single files, no gate, no browser) and reverted; worktrees removed. Nothing was posted to GitHub.
+Verdicts: TRACE OK | RETURN TO AUTHOR. Each review is pinned to the head SHA in its file name; a new head needs a re-check of the delta only.
+Source snapshots of the PR bodies: src/pr<N>.json (fetched 2026-10-29 ~22:4x CET).

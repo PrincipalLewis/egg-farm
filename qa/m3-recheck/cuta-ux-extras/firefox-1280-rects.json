@@ -1,0 +1,266 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "buildId": "m3-rc1-pre+d56033f",
+  "navVisible": {
+    "display": "none",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    }
+  },
+  "banners": {
+    "unpaidCount": 2,
+    "unpaidText": "⚠ Unpaid, production stopped",
+    "graderText": "💤 Asleep, bonus down to 15%"
+  },
+  "pageErrors": [],
+  "tappable": {
+    "sheetClosed": [
+      {
+        "selector": "button#settings",
+        "text": "",
+        "ariaLabel": "Settings",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 1224,
+          "y": 5,
+          "width": 44,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > button.chip.arrive",
+        "text": "17",
+        "ariaLabel": "Customer",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 12,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 76,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 140,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 204,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 268,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#goal",
+        "text": "★ Collection L5 · +8% income Ready! ›",
+        "ariaLabel": "★ Collection L5 · +8% income Ready!. Next goal: ★ Collection L5 · +8% income. Ready now.",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 160,
+          "y": 592,
+          "width": 560,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#goal > span.goal-pill > span.goal-status.num",
+        "text": "Ready!",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 618,
+          "y": 604,
+          "width": 64,
+          "height": 20
+        },
+        "under44": true
+      },
+      {
+        "selector": "button#collect",
+        "text": "Collect +25 · 24 ready",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 160,
+          "y": 644,
+          "width": 560,
+          "height": 64
+        },
+        "under44": false
+      }
+    ],
+    "upgradesWorkersOpen": [
+      {
+        "selector": "button#settings",
+        "text": "",
+        "ariaLabel": "Settings",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 1224,
+          "y": 5,
+          "width": 44,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 12,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 76,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 140,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 204,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "div#queue > div.chip.empty",
+        "text": "",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 268,
+          "y": 81,
+          "width": 56,
+          "height": 64
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#goal",
+        "text": "★ Collection L11 · +6% income ~0:13 ›",
+        "ariaLabel": "★ Collection L11 · +6% income ~0:13. Next goal: ★ Collection L11 · +6% income. Affordable in about 0:13.",
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 160,
+          "y": 592,
+          "width": 560,
+          "height": 44
+        },
+        "under44": false
+      },
+      {
+        "selector": "button#collect",
+        "text": "Collect +55 · 50 ready",
+        "ariaLabel": null,
+        "role": null,
+        "disabled": false,
+        "rect": {
+          "x": 160,
+          "y": 644,
+          "width": 560,
+          "height": 64
+        },
+        "under44": false
+      }
+    ]
+  }
+}

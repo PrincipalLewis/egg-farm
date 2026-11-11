@@ -1,0 +1,12 @@
+[
+ {
+  "n": "release: app globals = only eggfarmExportTelemetry",
+  "pass": false,
+  "i": [
+   "0",
+   "eggfarmExportTelemetry",
+   "eggfarm",
+   "eggfarmOrderList"
+  ]
+ }
+]

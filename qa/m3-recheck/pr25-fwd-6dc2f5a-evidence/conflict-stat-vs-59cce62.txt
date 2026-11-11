@@ -1,0 +1,10 @@
+ src/config/balance.json   | 291 ++++++++++++++++++++++++++++++++++++++++++++--
+ src/config/formulas.ts    |  96 ++++++++++++++-
+ src/game.ts               | 155 ++++++++++++++++++++++--
+ src/sim/actions.ts        |  39 ++++++-
+ src/sim/payout.ts         |   5 +-
+ src/ui/app.ts             |  94 +++++++++++----
+ src/ui/format.ts          |  49 +++++---
+ src/ui/styles.css         |  63 +++++++++-
+ tests/qa-rc1-bugs.test.ts |   4 +-
+ 9 files changed, 720 insertions(+), 76 deletions(-)

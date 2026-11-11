@@ -1,0 +1,123 @@
+[
+ {
+  "n": "14f buy upgrade (100*C+F) 1719->1819, SIGKILL 7 procs after 3000 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog",
+  "pass": true,
+  "i": {
+   "F0": 1719,
+   "F1": 1819,
+   "after": {
+    "F": 1819,
+    "modals": 0,
+    "recovery": 0
+   },
+   "killed": 7
+  }
+ },
+ {
+  "n": "14f buy upgrade (100*C+F) 1719->1819, SIGKILL 7 procs after 5000 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog",
+  "pass": true,
+  "i": {
+   "F0": 1719,
+   "F1": 1819,
+   "after": {
+    "F": 1819,
+    "modals": 0,
+    "recovery": 0
+   },
+   "killed": 7
+  }
+ },
+ {
+  "n": "14f buy upgrade (100*C+F) 1719->1819, SIGKILL 7 procs after 10000 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog",
+  "pass": true,
+  "i": {
+   "F0": 1719,
+   "F1": 1819,
+   "after": {
+    "F": 1819,
+    "modals": 0,
+    "recovery": 0
+   },
+   "killed": 7
+  }
+ },
+ {
+  "n": "14f buy upgrade (100*C+F) 1719->1819, SIGKILL 7 procs after 20000 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog",
+  "pass": true,
+  "i": {
+   "F0": 1719,
+   "F1": 1819,
+   "after": {
+    "F": 1819,
+    "modals": 0,
+    "recovery": 0
+   },
+   "killed": 7
+  }
+ },
+ {
+  "n": "14e -1 h (clock back) (key savedAt)",
+  "pass": true,
+  "i": {
+   "pending": 0,
+   "cd": 29.19999999999999,
+   "energies": [
+    99.91111111111115,
+    99.91111111111115,
+    99.91111111111115,
+    99.91111111111115
+   ],
+   "neg": null,
+   "fixtureEnergies": [
+    100,
+    100,
+    100,
+    100
+   ]
+  }
+ },
+ {
+  "n": "14e +10 h (key savedAt)",
+  "pass": true,
+  "i": {
+   "pending": 36000,
+   "cd": 29.19999999999999,
+   "energies": [
+    99.91111111111115,
+    99.91111111111115,
+    99.91111111111115,
+    99.91111111111115
+   ],
+   "neg": null,
+   "modal": "Welcome back!\nYou were away 2h+\n+36K eggs\nCollect",
+   "fixtureEnergies": [
+    100,
+    100,
+    100,
+    100
+   ]
+  }
+ },
+ {
+  "n": "14e +2 h exactly (key savedAt)",
+  "pass": true,
+  "i": {
+   "pending": 36000,
+   "cd": 29.19999999999999,
+   "energies": [
+    99.91111111111115,
+    99.91111111111115,
+    99.91111111111115,
+    99.91111111111115
+   ],
+   "neg": null,
+   "modal": "Welcome back!\nYou were away 2h+\n+36K eggs\nCollect",
+   "fixtureEnergies": [
+    100,
+    100,
+    100,
+    100
+   ]
+  }
+ }
+]

@@ -1,0 +1,8 @@
+oneshot_at_CET=2026-11-10T01:12:53+01:00
+pacing_run=42726279381 status=in_progress conclusion=null head_sha=d4b5fdcd
+shards: casual=in_progress optimal=in_progress seller15=in_progress aggregate=NOT_STARTED
+NOTE: TASK expected settle (shards SUCCESS + aggregate FAIL only 904). At one-shot all shards still in_progress → OPEN
+ci_run=42726279282 status=in_progress conclusion=null
+k10_run=42726279060 status=in_progress conclusion=null (KNOWN-RED non-blocking)
+verify-smoke=42726278976 completed success
+pacing_prior_skipped=42725749766 skipped (ignore)

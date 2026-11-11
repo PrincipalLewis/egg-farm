@@ -1,0 +1,29 @@
+2026-10-19 06:57:10 CEST === GATE4 c11e3a0a2ffd42707e1d6c976082d84baa5c5b4d profile=capped steps=[pre marker release browser] engines=[firefox chromium webkit]
+2026-10-19 06:57:10 CEST pushed on: origin/fix/m4-gate5-v115-on-capped origin/rc/m4-t3-capped   origin/main=dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b
+2026-10-19 06:57:10 CEST m4.enabled at SHA: 1 (want 1)
+2026-10-19 06:57:26 CEST build exit=0
+2026-10-19 06:57:26 CEST static build-id: dist-html/egg-farm.html:m3-rc1-pre+c11e3a0 dist-qa/index.html:m3-rc1-pre+c11e3a0 dist/index.html:m3-rc1-pre+c11e3a0  (want m3-rc1-pre+c11e3a0, no +dirty)
+2026-10-19 06:57:28 CEST marker/migrate-once/rollback/F50/flag-off + explainer profile=capped exit=0       Tests  30 passed | 2 skipped (32) 
+2026-10-19 06:57:28 CEST loader fix a399d27 in history: YES  explainer e43bc00 in history: NO  maxLevel=30  csv=b48be8a4
+2026-10-19 06:57:29 CEST check-release-build exit=0
+2026-10-19 06:57:29 CEST --- firefox
+2026-10-19 06:57:37 CEST runtime build-id firefox exit=0 runtime build ids [firefox]: ["m3-rc1-pre+c11e3a0"]
+2026-10-19 06:58:02 CEST check-globals firefox exit=0 PASS [firefox] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; 
+2026-10-19 07:03:27 CEST rc0 firefox exit=0 297/297 passed
+2026-10-19 07:03:48 CEST dist-html file:// firefox exit=0
+2026-10-19 07:05:09 CEST hidden-tab M4 firefox exit=0 33/33 (
+2026-10-19 07:06:07 CEST offline/clock/reload M4 firefox exit=0 17/17 (
+2026-10-19 07:08:04 CEST browser v6 load F1-F5+M1 firefox exit=0 154/154
+2026-10-19 07:08:04 CEST --- chromium
+2026-10-19 07:09:25 CEST runtime build-id chromium exit=0 runtime build ids [chromium]: ["m3-rc1-pre+c11e3a0"]
+2026-10-19 07:09:46 CEST check-globals chromium exit=0 PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false;
+2026-10-19 07:11:43 CEST === GATE4 c11e3a0a2ffd42707e1d6c976082d84baa5c5b4d profile=capped steps=[browser] engines=[webkit]
+2026-10-19 07:11:43 CEST --- webkit
+2026-10-19 07:11:54 CEST runtime build-id webkit exit=0 runtime build ids [webkit]: ["m3-rc1-pre+c11e3a0"]
+2026-10-19 07:12:03 CEST check-globals webkit exit=0 PASS [webkit] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; e
+2026-10-19 07:16:32 CEST rc0 webkit exit=0 297/297 passed
+2026-10-19 07:16:38 CEST dist-html file:// webkit exit=0
+2026-10-19 07:17:35 CEST hidden-tab M4 webkit exit=0 33/33 (
+2026-10-19 07:18:08 CEST offline/clock/reload M4 webkit exit=0 17/17 (
+2026-10-19 07:18:40 CEST browser v6 load F1-F5+M1 webkit exit=0 154/154
+2026-10-19 07:18:40 CEST ALL_DONE 417s

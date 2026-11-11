@@ -1,0 +1,34 @@
+NOREGATE / exact-head note evidence for tip 147e116ca79db38f270189efbb978c7013e7936b (2026-11-06T01:27:56+01:00 Europe/Belgrade)
+QA-D-1106-NOREGATE / QA-D-1106-RETARGET append
+
+PRIOR_BAR_TIP=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34
+PRIOR_TREE=86508e121bdefa561d7ccb28db80425f84199103
+NEW_TIP=147e116ca79db38f270189efbb978c7013e7936b
+NEW_TREE=86508e121bdefa561d7ccb28db80425f84199103
+TREE_IDENTICAL=YES
+NEW_SUBJECT=Merge origin/rc/v5 8253da50 into fix/saves-endcalls-durs (HoE merge-forward for #114 after #112 landed)
+NEW_PARENTS=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34 8253da505a74e2bfd0650f2380506d11836666db
+NEW_PARENT1=66c9184 (prior bar tip)
+NEW_PARENT2=8253da505a74e2bfd0650f2380506d11836666db (origin/rc/v5 after #112 Merge pull request #112)
+CONTAINS_PRIOR_TIP=YES
+REMOTE_fix/saves-endcalls-durs=147e116ca79db38f270189efbb978c7013e7936b
+
+PATCH_ID_new_vs_rc8253da50=cfd535db029f2c2e121966828d6222b83bffd4c0
+  (endCalls-only vs post-#112 rc; abilities already on rc — expected narrower than f07b8396 stack-vs-pre-#112-rc)
+PATCH_ID_66c9184_vs_rc49ee46dd=f07b8396e501ee3902e0a7555b46956293e1d6c4 (stack vs then-rc; equals 98e1af5 vs f8036e8)
+
+DIFF_STAT_new_vs_rc8253da50:
+ src/save/m5-fields.ts         | 19 +++++++++++----
+ tests/v5-f2-m5-fields.test.ts | 54 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 68 insertions(+), 5 deletions(-)
+
+DIFF_NAMESTATUS_new_vs_rc:
+M	src/save/m5-fields.ts
+M	tests/v5-f2-m5-fields.test.ts
+FILE_COUNT=2
+
+git diff 66c918442d4eab6c6d064d7a59bd1a9ecf29ce34 147e116ca79db38f270189efbb978c7013e7936b --stat (must be empty for tree-identical):
+EMPTY_DIFF_TIP_TO_NEW=YES (git diff tip..new = 0 bytes)
+
+NO_CODE_EDITS_IN_MERGEFWD=YES (merge commit only; tree == 66c9184)
+PR_BASE_NOW=rc/v5 @ 8253da50; PR_HEAD=147e116ca79db38f270189efbb978c7013e7936b; changed_files vs base = 2 (m5-fields + m5-fields tests)

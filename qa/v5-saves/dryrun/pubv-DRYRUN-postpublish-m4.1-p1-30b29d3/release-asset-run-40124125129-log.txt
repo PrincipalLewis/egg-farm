@@ -1,0 +1,11 @@
+check-release-build: single-file rel/egg-farm.html (547324 bytes)
+check-release-build: m4.1+30b29d3 ok
+check-release-build: release prefix m4.1 ok
+check-release-build: build id m4.1+30b29d3 matches expected ok
+check-release-build: build-id meta + data-build-id = m4.1+30b29d3 ok
+check-release-build: no eggfarmUi in release ok
+check-release-build: no ?debug/?perf/?ios/QA hooks ok
+check-release-build: window global writes only eggfarmExportTelemetry ok
+check-release-build: every asset/font URL inlined (data:) ok
+check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok

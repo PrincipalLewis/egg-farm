@@ -1,0 +1,1307 @@
+{
+ "res": {
+  "engine": "chromium",
+  "build": "m3-rc1-pre+5248dd9",
+  "layout": {
+   "360x640": {
+    "m": {
+     "card": {
+      "x": 20,
+      "y": 118.5,
+      "w": 320,
+      "h": 403,
+      "b": 521.5,
+      "r": 340
+     },
+     "vw": 360,
+     "vh": 640,
+     "sh": 399,
+     "ch": 399,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 290,
+       "y": 124.5,
+       "w": 44,
+       "h": 44,
+       "b": 168.5,
+       "r": 334,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 46,
+       "y": 447.5,
+       "w": 268,
+       "h": 48,
+       "b": 495.5,
+       "r": 314,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 60.9,
+      "y": 210.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 234.5,
+      "r": 299.1
+     },
+     "hero": {
+      "x": 50.4,
+      "y": 242.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 281.5,
+      "r": 309.6
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": false,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": ""
+    },
+    "errs": []
+   },
+   "375x700": {
+    "m": {
+     "card": {
+      "x": 27.5,
+      "y": 148.5,
+      "w": 320,
+      "h": 403,
+      "b": 551.5,
+      "r": 347.5
+     },
+     "vw": 375,
+     "vh": 700,
+     "sh": 399,
+     "ch": 399,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 297.5,
+       "y": 154.5,
+       "w": 44,
+       "h": 44,
+       "b": 198.5,
+       "r": 341.5,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 53.5,
+       "y": 477.5,
+       "w": 268,
+       "h": 48,
+       "b": 525.5,
+       "r": 321.5,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 68.4,
+      "y": 240.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 264.5,
+      "r": 306.6
+     },
+     "hero": {
+      "x": 57.9,
+      "y": 272.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 311.5,
+      "r": 317.1
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": false,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": ""
+    },
+    "errs": []
+   },
+   "390x844": {
+    "m": {
+     "card": {
+      "x": 35,
+      "y": 220.5,
+      "w": 320,
+      "h": 403,
+      "b": 623.5,
+      "r": 355
+     },
+     "vw": 390,
+     "vh": 844,
+     "sh": 399,
+     "ch": 399,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 305,
+       "y": 226.5,
+       "w": 44,
+       "h": 44,
+       "b": 270.5,
+       "r": 349,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 61,
+       "y": 549.5,
+       "w": 268,
+       "h": 48,
+       "b": 597.5,
+       "r": 329,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 75.9,
+      "y": 312.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 336.5,
+      "r": 314.1
+     },
+     "hero": {
+      "x": 65.4,
+      "y": 344.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 383.5,
+      "r": 324.6
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": false,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": ""
+    },
+    "errs": []
+   },
+   "430x932": {
+    "m": {
+     "card": {
+      "x": 55,
+      "y": 264.5,
+      "w": 320,
+      "h": 403,
+      "b": 667.5,
+      "r": 375
+     },
+     "vw": 430,
+     "vh": 932,
+     "sh": 399,
+     "ch": 399,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 325,
+       "y": 270.5,
+       "w": 44,
+       "h": 44,
+       "b": 314.5,
+       "r": 369,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 81,
+       "y": 593.5,
+       "w": 268,
+       "h": 48,
+       "b": 641.5,
+       "r": 349,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 95.9,
+      "y": 356.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 380.5,
+      "r": 334.1
+     },
+     "hero": {
+      "x": 85.4,
+      "y": 388.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 427.5,
+      "r": 344.6
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": false,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": ""
+    },
+    "errs": []
+   },
+   "1280x800": {
+    "m": {
+     "card": {
+      "x": 480,
+      "y": 198.5,
+      "w": 320,
+      "h": 403,
+      "b": 601.5,
+      "r": 800
+     },
+     "vw": 1280,
+     "vh": 800,
+     "sh": 399,
+     "ch": 399,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 750,
+       "y": 204.5,
+       "w": 44,
+       "h": 44,
+       "b": 248.5,
+       "r": 794,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 506,
+       "y": 527.5,
+       "w": 268,
+       "h": 48,
+       "b": 575.5,
+       "r": 774,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 520.9,
+      "y": 290.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 314.5,
+      "r": 759.1
+     },
+     "hero": {
+      "x": 510.4,
+      "y": 322.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 361.5,
+      "r": 769.6
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": false,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": "active"
+    },
+    "errs": []
+   },
+   "1024x474": {
+    "m": {
+     "card": {
+      "x": 352,
+      "y": 47.5,
+      "w": 320,
+      "h": 379,
+      "b": 426.5,
+      "r": 672
+     },
+     "vw": 1024,
+     "vh": 474,
+     "sh": 375,
+     "ch": 375,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 622,
+       "y": 53.5,
+       "w": 44,
+       "h": 44,
+       "b": 97.5,
+       "r": 666,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 378,
+       "y": 352.5,
+       "w": 268,
+       "h": 48,
+       "b": 400.5,
+       "r": 646,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 392.9,
+      "y": 139.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 163.5,
+      "r": 631.1
+     },
+     "hero": {
+      "x": 382.4,
+      "y": 171.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 210.5,
+      "r": 641.6
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": true,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": "sellAll"
+    },
+    "errs": []
+   },
+   "1280x720": {
+    "m": {
+     "card": {
+      "x": 480,
+      "y": 158.5,
+      "w": 320,
+      "h": 403,
+      "b": 561.5,
+      "r": 800
+     },
+     "vw": 1280,
+     "vh": 720,
+     "sh": 399,
+     "ch": 399,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 750,
+       "y": 164.5,
+       "w": 44,
+       "h": 44,
+       "b": 208.5,
+       "r": 794,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 506,
+       "y": 487.5,
+       "w": 268,
+       "h": 48,
+       "b": 535.5,
+       "r": 774,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 520.9,
+      "y": 250.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 274.5,
+      "r": 759.1
+     },
+     "hero": {
+      "x": 510.4,
+      "y": 282.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 321.5,
+      "r": 769.6
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": false,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": "sellAll"
+    },
+    "errs": []
+   },
+   "1366x768": {
+    "m": {
+     "card": {
+      "x": 523,
+      "y": 182.5,
+      "w": 320,
+      "h": 403,
+      "b": 585.5,
+      "r": 843
+     },
+     "vw": 1366,
+     "vh": 768,
+     "sh": 399,
+     "ch": 399,
+     "cw": 268,
+     "clip": [],
+     "ell": [],
+     "ov": [],
+     "closeOv": [
+      "wb-head"
+     ],
+     "btns": [
+      {
+       "id": "icon-btn close",
+       "x": 793,
+       "y": 188.5,
+       "w": 44,
+       "h": 44,
+       "b": 232.5,
+       "r": 837,
+       "u44": false
+      },
+      {
+       "id": "wbCollect",
+       "x": 549,
+       "y": 511.5,
+       "w": 268,
+       "h": 48,
+       "b": 559.5,
+       "r": 817,
+       "u44": false
+      }
+     ],
+     "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+     "a": {
+      "x": 563.9,
+      "y": 274.5,
+      "w": 238.3,
+      "h": 24,
+      "b": 298.5,
+      "r": 802.1
+     },
+     "hero": {
+      "x": 553.4,
+      "y": 306.5,
+      "w": 259.3,
+      "h": 39,
+      "b": 345.5,
+      "r": 812.6
+     },
+     "heroText": "+1,234,567 eggs",
+     "heroAnim": "wbpop",
+     "rateHidden": false,
+     "capColor": "rgb(138, 85, 40)",
+     "role": "dialog",
+     "modal": "true",
+     "label": "Welcome back!",
+     "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours.",
+     "btnName": "Collect 1,234,567 eggs",
+     "focus": "BODY",
+     "coins": "$0.00"
+    },
+    "focusOpen": "BODY",
+    "trap": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "pend0": 1234567,
+    "after": {
+     "open": false,
+     "pend": 0,
+     "basket": 1234567,
+     "focus": "sellAll"
+    },
+    "errs": []
+   }
+  },
+  "func": {}
+ },
+ "R": [
+  {
+   "ac": "C-AC33/layout",
+   "name": "360x640 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "360x640 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "360x640 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "360x640 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":290,\"y\":124.5,\"w\":44,\"h\":44,\"b\":168.5,\"r\":334,\"u44\":false},{\"id\":\"wbCollect\",\"x\":46,\"y\":447.5,\"w\":268,\"h\":48,\"b\":495.5,\"r\":314,\"u44\":false}],\"cw\":268,\"card\":{\"x\":20,\"y\":118.5,\"w\":320,\"h\":403,\"b\":521.5,\"r\":340},\"vh\":640,\"sh\":399,\"ch\":399}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "360x640 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":60.9,\"y\":210.5,\"w\":238.3,\"h\":24,\"b\":234.5,\"r\":299.1},{\"x\":50.4,\"y\":242.5,\"w\":259.3,\"h\":39,\"b\":281.5,\"r\":309.6}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "360x640 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "360x640 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "360x640 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "360x640 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "360x640 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "360x640 focus return to a meaningful control",
+   "pass": true,
+   "info": ""
+  },
+  {
+   "ac": "errors",
+   "name": "360x640 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33/layout",
+   "name": "375x700 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "375x700 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "375x700 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "375x700 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":297.5,\"y\":154.5,\"w\":44,\"h\":44,\"b\":198.5,\"r\":341.5,\"u44\":false},{\"id\":\"wbCollect\",\"x\":53.5,\"y\":477.5,\"w\":268,\"h\":48,\"b\":525.5,\"r\":321.5,\"u44\":false}],\"cw\":268,\"card\":{\"x\":27.5,\"y\":148.5,\"w\":320,\"h\":403,\"b\":551.5,\"r\":347.5},\"vh\":700,\"sh\":399,\"ch\":399}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "375x700 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":68.4,\"y\":240.5,\"w\":238.3,\"h\":24,\"b\":264.5,\"r\":306.6},{\"x\":57.9,\"y\":272.5,\"w\":259.3,\"h\":39,\"b\":311.5,\"r\":317.1}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "375x700 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "375x700 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "375x700 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "375x700 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "375x700 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "375x700 focus return to a meaningful control",
+   "pass": true,
+   "info": ""
+  },
+  {
+   "ac": "errors",
+   "name": "375x700 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33/layout",
+   "name": "390x844 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "390x844 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "390x844 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "390x844 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":305,\"y\":226.5,\"w\":44,\"h\":44,\"b\":270.5,\"r\":349,\"u44\":false},{\"id\":\"wbCollect\",\"x\":61,\"y\":549.5,\"w\":268,\"h\":48,\"b\":597.5,\"r\":329,\"u44\":false}],\"cw\":268,\"card\":{\"x\":35,\"y\":220.5,\"w\":320,\"h\":403,\"b\":623.5,\"r\":355},\"vh\":844,\"sh\":399,\"ch\":399}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "390x844 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":75.9,\"y\":312.5,\"w\":238.3,\"h\":24,\"b\":336.5,\"r\":314.1},{\"x\":65.4,\"y\":344.5,\"w\":259.3,\"h\":39,\"b\":383.5,\"r\":324.6}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "390x844 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "390x844 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "390x844 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "390x844 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "390x844 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "390x844 focus return to a meaningful control",
+   "pass": true,
+   "info": ""
+  },
+  {
+   "ac": "errors",
+   "name": "390x844 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33/layout",
+   "name": "430x932 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "430x932 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "430x932 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "430x932 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":325,\"y\":270.5,\"w\":44,\"h\":44,\"b\":314.5,\"r\":369,\"u44\":false},{\"id\":\"wbCollect\",\"x\":81,\"y\":593.5,\"w\":268,\"h\":48,\"b\":641.5,\"r\":349,\"u44\":false}],\"cw\":268,\"card\":{\"x\":55,\"y\":264.5,\"w\":320,\"h\":403,\"b\":667.5,\"r\":375},\"vh\":932,\"sh\":399,\"ch\":399}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "430x932 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":95.9,\"y\":356.5,\"w\":238.3,\"h\":24,\"b\":380.5,\"r\":334.1},{\"x\":85.4,\"y\":388.5,\"w\":259.3,\"h\":39,\"b\":427.5,\"r\":344.6}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "430x932 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "430x932 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "430x932 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "430x932 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "430x932 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "430x932 focus return to a meaningful control",
+   "pass": true,
+   "info": ""
+  },
+  {
+   "ac": "errors",
+   "name": "430x932 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33/layout",
+   "name": "1280x800 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "1280x800 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "1280x800 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1280x800 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":750,\"y\":204.5,\"w\":44,\"h\":44,\"b\":248.5,\"r\":794,\"u44\":false},{\"id\":\"wbCollect\",\"x\":506,\"y\":527.5,\"w\":268,\"h\":48,\"b\":575.5,\"r\":774,\"u44\":false}],\"cw\":268,\"card\":{\"x\":480,\"y\":198.5,\"w\":320,\"h\":403,\"b\":601.5,\"r\":800},\"vh\":800,\"sh\":399,\"ch\":399}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1280x800 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":520.9,\"y\":290.5,\"w\":238.3,\"h\":24,\"b\":314.5,\"r\":759.1},{\"x\":510.4,\"y\":322.5,\"w\":259.3,\"h\":39,\"b\":361.5,\"r\":769.6}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "1280x800 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x800 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x800 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x800 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x800 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"active\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x800 focus return to a meaningful control",
+   "pass": true,
+   "info": "active"
+  },
+  {
+   "ac": "errors",
+   "name": "1280x800 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33/layout",
+   "name": "1024x474 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "1024x474 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "1024x474 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1024x474 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":622,\"y\":53.5,\"w\":44,\"h\":44,\"b\":97.5,\"r\":666,\"u44\":false},{\"id\":\"wbCollect\",\"x\":378,\"y\":352.5,\"w\":268,\"h\":48,\"b\":400.5,\"r\":646,\"u44\":false}],\"cw\":268,\"card\":{\"x\":352,\"y\":47.5,\"w\":320,\"h\":379,\"b\":426.5,\"r\":672},\"vh\":474,\"sh\":375,\"ch\":375}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1024x474 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":392.9,\"y\":139.5,\"w\":238.3,\"h\":24,\"b\":163.5,\"r\":631.1},{\"x\":382.4,\"y\":171.5,\"w\":259.3,\"h\":39,\"b\":210.5,\"r\":641.6}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "1024x474 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "1024x474 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "1024x474 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "1024x474 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "1024x474 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"sellAll\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "1024x474 focus return to a meaningful control",
+   "pass": true,
+   "info": "sellAll"
+  },
+  {
+   "ac": "errors",
+   "name": "1024x474 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33/layout",
+   "name": "1280x720 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "1280x720 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "1280x720 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1280x720 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":750,\"y\":164.5,\"w\":44,\"h\":44,\"b\":208.5,\"r\":794,\"u44\":false},{\"id\":\"wbCollect\",\"x\":506,\"y\":487.5,\"w\":268,\"h\":48,\"b\":535.5,\"r\":774,\"u44\":false}],\"cw\":268,\"card\":{\"x\":480,\"y\":158.5,\"w\":320,\"h\":403,\"b\":561.5,\"r\":800},\"vh\":720,\"sh\":399,\"ch\":399}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1280x720 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":520.9,\"y\":250.5,\"w\":238.3,\"h\":24,\"b\":274.5,\"r\":759.1},{\"x\":510.4,\"y\":282.5,\"w\":259.3,\"h\":39,\"b\":321.5,\"r\":769.6}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "1280x720 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x720 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x720 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x720 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x720 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"sellAll\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "1280x720 focus return to a meaningful control",
+   "pass": true,
+   "info": "sellAll"
+  },
+  {
+   "ac": "errors",
+   "name": "1280x720 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33/layout",
+   "name": "1366x768 no clip/ellipsis",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "layout",
+   "name": "1366x768 no overlap (lines, close×)",
+   "pass": false,
+   "info": "[\"wb-head\"]"
+  },
+  {
+   "ac": "layout",
+   "name": "1366x768 targets >=44",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1366x768 Collect full width >=48 visible no scroll, card<=80%",
+   "pass": true,
+   "info": "{\"btn\":[{\"id\":\"icon-btn close\",\"x\":793,\"y\":188.5,\"w\":44,\"h\":44,\"b\":232.5,\"r\":837,\"u44\":false},{\"id\":\"wbCollect\",\"x\":549,\"y\":511.5,\"w\":268,\"h\":48,\"b\":559.5,\"r\":817,\"u44\":false}],\"cw\":268,\"card\":{\"x\":523,\"y\":182.5,\"w\":320,\"h\":403,\"b\":585.5,\"r\":843},\"vh\":768,\"sh\":399,\"ch\":399}"
+  },
+  {
+   "ac": "C-AC33",
+   "name": "1366x768 line A / hero separate lines",
+   "pass": true,
+   "info": "[{\"x\":563.9,\"y\":274.5,\"w\":238.3,\"h\":24,\"b\":298.5,\"r\":802.1},{\"x\":553.4,\"y\":306.5,\"w\":259.3,\"h\":39,\"b\":345.5,\"r\":812.6}]"
+  },
+  {
+   "ac": "C-AC29",
+   "name": "1366x768 full digits, no K/M/B/no limit",
+   "pass": true,
+   "info": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 1,234,567 eggs added to your basket. Worth up to 3,197,528 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +1,234,567 eggs | added to your basket | Worth up to $3,197,528 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "aria",
+   "name": "1366x768 role=dialog aria-modal, labelled \"Welcome back!\"",
+   "pass": true,
+   "info": "[\"dialog\",\"true\",\"Welcome back!\"]"
+  },
+  {
+   "ac": "aria",
+   "name": "1366x768 focus on open in dialog",
+   "pass": false,
+   "info": "BODY"
+  },
+  {
+   "ac": "aria",
+   "name": "1366x768 focus trap (Tab x6 stays in dialog)",
+   "pass": false,
+   "info": "[false,false,false,false,false,false]"
+  },
+  {
+   "ac": "aria",
+   "name": "1366x768 Esc closes (grant kept, no flyers)",
+   "pass": true,
+   "info": "{\"open\":false,\"pend\":0,\"basket\":1234567,\"focus\":\"sellAll\"}"
+  },
+  {
+   "ac": "aria",
+   "name": "1366x768 focus return to a meaningful control",
+   "pass": true,
+   "info": "sellAll"
+  },
+  {
+   "ac": "errors",
+   "name": "1366x768 no page errors",
+   "pass": true,
+   "info": "[]"
+  }
+ ]
+}

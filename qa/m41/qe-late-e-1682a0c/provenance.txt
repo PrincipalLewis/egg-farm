@@ -1,0 +1,6 @@
+HEAD 1682a0c0f25f5793d104b11ea391ee28b4c4a719
+porcelain lines: 0
+1682a0c0f25f5793d104b11ea391ee28b4c4a719 95b5a5c4287b38919ebb4c20975ff34f0d2decbd Senior Engineer, Saves & Persistence Mon Oct 19 10:32:00 2026 +0200
+2:export const BUILD_PREFIX = 'm3-rc1-pre';
+m3-rc1-pre+1682a0c [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@1682a0c; no suffix allowed]
+  origin/fix/saves-mirror-on-fail

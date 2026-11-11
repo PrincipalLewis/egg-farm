@@ -1,0 +1,28 @@
+{
+  "head": "16d91de7345dd0ab6b92bdb2740a50037e86aadc",
+  "base": "f8036e8f0826ca76fcc0ee13092d575533d4969b",
+  "overlap": [],
+  "harness_files": [
+    "engineering/f5-active-pacing.md",
+    "tests/bot-m5-active.slow.test.ts",
+    "tests/bot-m5-active.test.ts",
+    "tests/bot-m5-active.ts",
+    "tests/bot-m5.ts"
+  ],
+  "actual_income_ref_files": [
+    "src/config/formulas.ts",
+    "src/config/m5-rules.ts",
+    "src/game.ts",
+    "src/save/m5-fields.ts",
+    "src/sim/actions.ts",
+    "src/sim/income-ref.ts",
+    "src/sim/timers.ts",
+    "tests/v5-income-ref.test.ts"
+  ],
+  "patch_preserved": true,
+  "no_runtime_delta": true,
+  "local_suites": "NOT RUN; no path overlap, required only upon overlap",
+  "expected_tree": "1765971f12085ea5a254d26547b5c34576547284",
+  "computed_merge_tree": "1765971f12085ea5a254d26547b5c34576547284",
+  "clean_merge_tree_matches": true
+}

@@ -1,0 +1,14 @@
+{
+ "total": 5134,
+ "bytes": 444861,
+ "ring": 5000,
+ "s1_session_start": 1,
+ "s1_session_end": 1,
+ "s1_upgrades": 33,
+ "s1_onb": 5,
+ "s1_hire": 3,
+ "s1_manage": 4,
+ "s1_trimmable": 0,
+ "sessions": 2,
+ "first_ts_iso": "2026-10-19T08:00:00.000Z"
+}

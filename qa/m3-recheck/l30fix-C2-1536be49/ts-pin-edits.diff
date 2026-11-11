@@ -1,0 +1,26 @@
+diff --git a/tests/ac7-worst-seed.slow.test.ts b/tests/ac7-worst-seed.slow.test.ts
+index 25fd110..7420aee 100644
+--- a/tests/ac7-worst-seed.slow.test.ts
++++ b/tests/ac7-worst-seed.slow.test.ts
+@@ -17,7 +17,7 @@ import { balance as b } from '../src/config/balance';
+ import { runM2 } from './bot-m2';
+ import { VAR_DEFAULT } from './seller-variance';
+ import { loadTargets, l18to25Guard, l18to25FixedGuard, t20P95Warning, quantile } from './pacing-guards';
+-const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
++const F1_CSV = '0d3fd009', MAIN_PRE_F1_CSV = '57d964d5';
+ // Same seeds as the AC7 band suite (tests/fixtures/seller_variance.json, 1..100; CCR m2).
+ const fx = JSON.parse(readFileSync(new URL('./fixtures/seller_variance.json', import.meta.url), 'utf8')) as { seeds: number[] };
+ const SEEDS = fx.seeds, HORIZON_S = 2 * 3600;
+diff --git a/tests/seller-variance.slow.test.ts b/tests/seller-variance.slow.test.ts
+index b547855..8dcc07b 100644
+--- a/tests/seller-variance.slow.test.ts
++++ b/tests/seller-variance.slow.test.ts
+@@ -116,7 +116,7 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python,
+ //           so any drift (or a crash) fails. Needs #17 economy.f1-m4cols 86f0e80e for the real band.
+ //  any other sha: fails with 'unknown economy CSV <sha>: update AC7 band test'.
+ // After the CSV changes, regenerate the fixture first: scripts/gen-seller-variance-fixtures.py.
+-export const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
++export const F1_CSV = '0d3fd009', MAIN_PRE_F1_CSV = '57d964d5';
+ const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
+ const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const;
+ export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): void {

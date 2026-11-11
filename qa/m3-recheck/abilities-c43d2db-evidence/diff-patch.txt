@@ -1,0 +1,523 @@
+diff --git a/src/sim/abilities.ts b/src/sim/abilities.ts
+new file mode 100644
+index 0000000..fef61d3
+--- /dev/null
++++ b/src/sim/abilities.ts
+@@ -0,0 +1,119 @@
++/**
++ * v5 #4 worker abilities ("Shift calls") sim: eligibility, fireAbility, activateAll and the call timer
++ * (product/workers/m5-worker-abilities-spec.md v1.3.11 rules 2-7, 10, 11, E14; contract of record:
++ * engineering/reviews/arch-golden-slice2-contracts-20261105.md ADDENDUM `fireAbility` API 2026-11-05 21:29 CET).
++ *  - Clock: `nowMs` is the INJECTED wall epoch (Game: this.now(); tests: deterministic). On success
++ *    readyAt = nowMs + tc_ability_cd_s * 1000; eligibility reads wallReady() (F1b sim/clock.ts, E2/E2b). Never Date.now.
++ *  - Duration: activeS (focus seconds) counts down only on focus ticks (F1b). A call fired from the sheet is therefore
++ *    suspended until sheetCloseComplete as long as Game keeps the closing sheet counted as a menu (rule 10, AB-14 (ii)):
++ *    the sim stores no "pending close" state. Early end (asleep / unpaid / paused) clears activeS, never readyAt (rule 6).
++ *  - Effects enter through sim/effects.ts (Rush, Shout, Sweep) and graderMult's tier add (Inspect); all are 1 when suspended.
++ *  - Telemetry: direct blocked taps emit ability_blocked{count:1}; TEL-9 coalescing and the 50-event session cap belong to
++ *    the telemetry layer. Activate-all skips ineligible workers silently.
++ */
++import type { Balance } from '../config/balance';
++import { flagOn } from '../config/flags';
++import { tcNum } from '../config/formulas';
++import { wallReady } from './clock';
++import type { AbilityBlockReason, SimEvent, Sink } from './events';
++import { isPaused } from './pause';
++import type { GameState } from './state';
++import { WORKERS, mood, type WorkerId } from './workers';
++
++/** Not-available reasons: no call UI exists, so no telemetry (rule 1, E8, E13). `no_clock` = non-finite nowMs. */
++export type AbilityUnavailable = 'flag_off' | 'locked' | 'not_hired' | 'no_clock';
++export type AbilityEligibility = { eligible: true } | { eligible: false; reason: AbilityBlockReason | AbilityUnavailable };
++export interface FireOpts {
++  inSheet: boolean; viaAll: boolean; nowMs: number;
++  /** Rule 11 / Architect #112 §2 (APPROVED WITH GUARDS): SIM ms since this worker's MANUAL refill tap (refill_used{by:manual}),
++   *  measured and injected by the caller (rc2 Refill / Game). Read ONLY when abilities && rc2Refill && inSheet && !viaAll; absent,
++   *  non-finite or < 0 => no combo (never throws); inclusive <= combo_window_s * 1000. Activate-all never passes or reads it.
++   *  This module never invents, stores or persists a refill clock. Not the wall `nowMs`. */
++  refillAgoSimMs?: number;
++}
++export type FireResult =
++  | { ok: true; state: GameState; events: SimEvent[]; closeSheet: boolean; combo: boolean }
++  | { ok: false; reason: AbilityBlockReason | AbilityUnavailable; state: GameState; events: SimEvent[]; closeSheet: false };
++export interface ActivateAllResult { state: GameState; events: SimEvent[]; fired: WorkerId[]; closeSheet: boolean }
++
++const on = (b: Balance) => flagOn(b, 'abilities');
++const EPS = 1e-9;
++/** A call is running (and its effect is live when the tick has focus). */
++export const abilityActive = (s: GameState, b: Balance, id: WorkerId) => on(b) && (s.abilities?.[id]?.activeS ?? 0) > EPS;
++
++/** Rule 4, first reason in the rule-4 order: Asleep, Unpaid, Paused, lockout (Pause G2), cooldown. */
++export function abilityEligibility(s: GameState, id: WorkerId, b: Balance, nowMs: number): AbilityEligibility {
++  if (!on(b)) return { eligible: false, reason: 'flag_off' };
++  if (!Number.isFinite(nowMs)) return { eligible: false, reason: 'no_clock' };
++  const w = s.workers[id]; if (!w) return { eligible: false, reason: 'not_hired' };
++  if (s.farmLevel < tcNum(b, 'ability_unlock_farm')) return { eligible: false, reason: 'locked' };
++  const m = mood(w, b);
++  if (m === 'asleep' || m === 'unpaid') return { eligible: false, reason: m };
++  if (isPaused(w, b)) return { eligible: false, reason: 'paused' };
++  if (flagOn(b, 'pause') && (w.callLockoutS ?? 0) > EPS) return { eligible: false, reason: 'lockout' };
++  if (!wallReady(s.abilities?.[id]?.readyAt, nowMs, tcNum(b, 'ability_cd_s') * 1000)) return { eligible: false, reason: 'cooldown' };
++  return { eligible: true };
++}
++
++/** Rule 11 window (Architect #112 §2 guards 1-3): abilities && rc2Refill, finite 0 <= sim ms since the manual refill
++ *  <= tc combo_window_s * 1000 (inclusive, SG-3). The window value comes from balance via tcNum only (no prod literal). */
++export function comboQualifies(b: Balance, refillAgoSimMs: number | undefined): boolean {
++  if (!on(b) || !flagOn(b, 'rc2Refill') || typeof refillAgoSimMs !== 'number' || !Number.isFinite(refillAgoSimMs) || refillAgoSimMs < 0) return false;
++  return refillAgoSimMs <= tcNum(b, 'combo_window_s') * 1000;
++}
++
++const isBlockReason = (r: string): r is AbilityBlockReason => r === 'cooldown' || r === 'asleep' || r === 'unpaid' || r === 'paused' || r === 'lockout';
++
++/** One call. ok -> readyAt/activeS set, one ability_used; blocked -> state unchanged, one ability_blocked unless viaAll or unavailable. */
++export function fireAbility(s: GameState, id: WorkerId, b: Balance, o: FireOpts): FireResult {
++  const el = abilityEligibility(s, id, b, o.nowMs);
++  if (!el.eligible) {
++    const events: SimEvent[] = !o.viaAll && isBlockReason(el.reason) ? [{ type: 'ability_blocked', worker: id, reason: el.reason, count: 1 }] : [];
++    return { ok: false, reason: el.reason, state: s, events, closeSheet: false };
++  }
++  // Guards 1 + 4: only a direct sheet Boost may combo; viaAll forces non-combo and the window is not even read.
++  const w = s.workers[id]!, prev = s.abilities?.[id], combo = o.inSheet && !o.viaAll && comboQualifies(b, o.refillAgoSimMs);
++  // Granted focus duration of this call (v1.3.12 AbilityState.durS): tc_ability_s, or tc combo_boost_duration_s for a combo.
++  const durS = combo ? tcNum(b, 'combo_boost_duration_s') : tcNum(b, 'ability_s');
++  const r = prev?.readyAt, sinceReady = typeof r === 'number' && Number.isFinite(r) ? Math.max(0, o.nowMs - r) / 1000 : 0;
++  const { activeS: _a, durS: _d, ...keep } = prev ?? {};
++  const abilities = { ...s.abilities, [id]: { ...keep, readyAt: o.nowMs + tcNum(b, 'ability_cd_s') * 1000, activeS: durS, durS } };
++  const state: GameState = { ...s, abilities };
++  const ev: SimEvent = { type: 'ability_used', worker: id, farm: s.farmLevel, energy_pct: w.energy, mood: mood(w, b)!,
++    via_all: o.viaAll, t_since_ready_s: sinceReady, in_sheet: o.inSheet, combo };
++  return { ok: true, state, events: [ev], closeSheet: o.inSheet && !o.viaAll, combo };
++}
++
++/** Rule 7 / E14 (c): every eligible worker in WORKERS order (MH -> CH -> Hawker -> Grader) in one pass; skips are silent; one
++ *  close request when anything fired from the sheet. No combo (via_all:true). */
++export function activateAll(s: GameState, b: Balance, o: { inSheet: boolean; nowMs: number }): ActivateAllResult {
++  const events: SimEvent[] = [], fired: WorkerId[] = [];
++  for (const id of WORKERS) {
++    const r = fireAbility(s, id, b, { inSheet: o.inSheet, viaAll: true, nowMs: o.nowMs }); // no refillAgoSimMs: never a combo
++    if (r.ok) { s = r.state; events.push(...r.events); fired.push(id); }
++  }
++  return { state: s, events, fired, closeSheet: o.inSheet && fired.length > 0 };
++}
++
++/** TimerSystem body (sim/timers.ts): early end (rule 6), then focus countdown and expiry. Identity unless the flag is on and a
++ *  call is running. effect_s = focus seconds run (durS - activeS; durS absent => tc_ability_s). Ending a call clears activeS and
++ *  durS together, never readyAt. (Load / offline end of a saved call is Saves-owned: m5-fields endCalls.) */
++export function abilitiesTick(s: GameState, focusS: number, b: Balance, ev?: Sink): GameState {
++  if (!on(b) || !s.abilities) return s;
++  let abilities: GameState['abilities'] | undefined;
++  for (const id of WORKERS) {
++    const a = s.abilities[id]; if (!a || !((a.activeS ?? 0) > EPS)) continue;
++    const dur = typeof a.durS === 'number' && Number.isFinite(a.durS) && a.durS > 0 ? a.durS : tcNum(b, 'ability_s'), w = s.workers[id], m = mood(w, b);
++    const early = !w ? null : m === 'asleep' || m === 'unpaid' ? m : isPaused(w, b) ? 'paused' : null;
++    const left = early ? a.activeS! : a.activeS! - focusS;
++    if (early || left <= EPS) {
++      ev?.push({ type: 'ability_ended', worker: id, cause: early ?? 'expired', effect_s: early ? dur - a.activeS! : dur });
++      const { activeS: _x, durS: _y, ...rest } = a; abilities = { ...(abilities ?? s.abilities), [id]: rest };
++    } else if (left !== a.activeS) abilities = { ...(abilities ?? s.abilities), [id]: { ...a, activeS: left } };
++  }
++  return abilities ? { ...s, abilities } : s;
++}
++
++/** Inspect (rule 2): tier add for graderMult while the Grader's call runs on a focus tick; 0 otherwise. */
++export const inspectTierAdd = (s: GameState, b: Balance, suspended: boolean | undefined) =>
++  !suspended && abilityActive(s, b, 'grader') ? tcNum(b, 'ability_w4_tier_add') : 0;
+diff --git a/src/sim/effects.ts b/src/sim/effects.ts
+index 88d8753..17561e0 100644
+--- a/src/sim/effects.ts
++++ b/src/sim/effects.ts
+@@ -10,6 +10,8 @@
+ import type { Balance } from '../config/balance';
+ import { flagOn, type M5Flag } from '../config/flags';
+ import type { GameState } from './state';
++import { abilityActive } from './abilities';
++import { tcNum } from '../config/formulas';
+ /** Who made the sale (SimEvent sell.by). Rush keys on 'market_hand'. */
+ export type SaleBy = 'player' | 'market_hand';
+ /** suspended = this sale/tick has no focus time: every timed effect counts as 1 (D-C3, R23). */
+@@ -21,8 +23,12 @@ export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: B
+  *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
+ export const SALE_EFFECTS: readonly SaleEffect[] = [
+   { id: 'streak', flag: 'streak', factor: s => 1 + (s.streakS ?? 0) }, // #2 Collect Streak R8: (1 + s) on every sale while live
++  { id: 'rush', flag: 'abilities', factor: (s, b, c) => (c.by === 'market_hand' && abilityActive(s, b, 'market_hand') ? tcNum(b, 'ability_w1_price_mult') : 1) }, // #4 Rush: Market Hand sales only
++  { id: 'shout', flag: 'abilities', factor: (s, b) => (abilityActive(s, b, 'hawker') ? tcNum(b, 'ability_w3_price_mult') : 1) }, // #4 Shout: all sales
++];
++export const LAY_EFFECTS: readonly LayEffect[] = [
++  { id: 'sweep', flag: 'abilities', factor: (s, b) => (abilityActive(s, b, 'coop_hand') ? tcNum(b, 'ability_w2_lay_mult') : 1) }, // #4 Sweep A (D-HOP-16)
+ ];
+-export const LAY_EFFECTS: readonly LayEffect[] = [];
+ export const PLAYER_SALE: SaleCtx = { by: 'player' };
+ /** CCR m1 #80: the ONE player-sale context for a given attended value (Q-F1c-1). sellTo credits with it; every preview uses it. */
+ export const playerSaleCtx = (attended: boolean): SaleCtx => attended ? PLAYER_SALE : { by: 'player', suspended: true };
+diff --git a/src/sim/events.ts b/src/sim/events.ts
+index f65a534..4ab5cfb 100644
+--- a/src/sim/events.ts
++++ b/src/sim/events.ts
+@@ -36,7 +36,7 @@ export type M5SimEvent =
+   | { type: 'streak_started'; farm_level: number; collection_level: number }
+   | { type: 'streak_peak'; value: number; duration_s: number; credited_taps: number; time_at_cap_s: number; extra_coins: number; frenzy_overlap_s: number; reason: string; max_tier: number }
+   | { type: 'abilities_unlocked'; farm: number; hired: WorkerId[] }
+-  | { type: 'ability_used'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; via_all: boolean; t_since_ready_s: number; in_sheet: boolean }
++  | { type: 'ability_used'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; via_all: boolean; t_since_ready_s: number; in_sheet: boolean; combo: boolean }
+   | { type: 'ability_blocked'; worker: WorkerId; reason: AbilityBlockReason; count: number }
+   | { type: 'ability_ended'; worker: WorkerId; cause: AbilityEndCause; effect_s: number };
+ export type Sink = SimEvent[] | undefined;
+diff --git a/src/sim/m5-state.ts b/src/sim/m5-state.ts
+index f1c6cfa..2c14642 100644
+--- a/src/sim/m5-state.ts
++++ b/src/sim/m5-state.ts
+@@ -11,8 +11,10 @@
+  */
+ import type { WorkerId } from './workers';
+ 
+-/** Per-worker call state (abilities spec E2). `readyAt` = epoch ms in the SAVE form; `activeS` = focus seconds left on a running call. */
+-export interface AbilityState { readyAt?: number; activeS?: number; }
++/** Per-worker call state (abilities spec v1.3.12 E2/E7, PMW errata 9d521aa). `readyAt` = epoch ms in the SAVE form; `activeS` =
++ *  focus seconds left on a running call; `durS` = granted focus duration of that call (tc_ability_s, or tc combo_boost_duration_s
++ *  for a rule-11 combo), set at fire and cleared with activeS. Saves honors durS on load/offline end (clamp, effect_s). */
++export interface AbilityState { readyAt?: number; activeS?: number; durS?: number; }
+ 
+ /** The one on-screen golden egg (spec R4: at most one). Never saved (R10a): a reload removes it (R8). */
+ export interface GoldenEggOnScreen {
+diff --git a/src/sim/payout.ts b/src/sim/payout.ts
+index 0bc226b..8fe0e4c 100644
+--- a/src/sim/payout.ts
++++ b/src/sim/payout.ts
+@@ -4,11 +4,12 @@ import type { Balance } from '../config/balance';
+ import type { GameState } from './state';
+ import { salePriceCents } from './tracks';
+ import { graderMult } from './workers';
++import { inspectTierAdd } from './abilities';
+ import { PLAYER_SALE, saleEffectFactors, type SaleCtx } from './effects';
+ /** Price multipliers applied to a sale: the Grader, then every live timed effect from the F1c registry (sim/effects.ts).
+  *  ctx defaults to a player sale with focus (UI previews and player credits); worker sales pass by/suspended. */
+ export function saleMultipliers(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE): number[] {
+-  const g = graderMult(s.workers, s.graderTier, b), fx = saleEffectFactors(s, b, ctx);
++  const g = graderMult(s.workers, s.graderTier, b, inspectTierAdd(s, b, ctx.suspended)), fx = saleEffectFactors(s, b, ctx);
+   return fx.length ? [g, ...fx.map(e => e.factor)] : [g];
+ }
+ /** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult) (rounded once, X7). */
+diff --git a/src/sim/timers.ts b/src/sim/timers.ts
+index 80dfd74..34cc3ab 100644
+--- a/src/sim/timers.ts
++++ b/src/sim/timers.ts
+@@ -12,6 +12,7 @@ import { ensureEvRng } from './rng';
+ import { streakTick } from './streak';
+ import { ensureBreeds } from './breeds';
+ import { breedsTick } from './breeds-hatch';
++import { abilitiesTick } from './abilities';
+ /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
+ export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
+ /** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
+@@ -24,7 +25,9 @@ const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev)
+ /** M5.1 breeds (tick-semantics note point 1): settle -> incubator/reveal -> sinceUnlockMs on sim dt (breedsTick), then Q2
+  *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
+ const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
+-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds];
++/** #4 abilities (rules 6, 10): early end, then focus countdown / expiry of running calls. Identity unless m4.flags.abilities. */
++const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
++export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, abilities];
+ export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+ export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
+   const f = tickFocusS(dt, clock);
+diff --git a/src/sim/workers.ts b/src/sim/workers.ts
+index 5209a49..fdabb2e 100644
+--- a/src/sim/workers.ts
++++ b/src/sim/workers.ts
+@@ -38,10 +38,11 @@ export const graderTierCostCents = (i: number, b: Balance) => {
+   const t = b.workers.grader.tiers[i] as { farm: number; mult: number; cost?: number };
+   return (t.cost ?? Math.floor(b.workers.grader.tier_cost_share_of_farm_cost * farmCost(t.farm, b))) * 100;
+ };
+-/** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share. */
+-export function graderMult(ws: Workers, tier: number, b: Balance): number {
++/** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share.
++ *  `tierAdd` = #4 Inspect (abilities rule 2: + tc_ability_w4_tier_add to the tier mult while the call runs; 0 otherwise). */
++export function graderMult(ws: Workers, tier: number, b: Balance, tierAdd = 0): number {
+   const m = mood(ws.grader, b); if (!m || tier <= 0) return 1;
+-  const g = b.workers.grader, bonus = g.tiers[tier - 1].mult - 1;
++  const g = b.workers.grader, bonus = g.tiers[tier - 1].mult + tierAdd - 1;
+   return 1 + bonus * (m === 'working' ? 1 : m === 'tired' ? g.tired_bonus_share : g.asleep_bonus_share /* asleep or unpaid */);
+ }
+ export function hawkerDemandMult(ws: Workers, b: Balance): number {
+diff --git a/tests/v5-abilities-sim.test.ts b/tests/v5-abilities-sim.test.ts
+new file mode 100644
+index 0000000..6a05702
+--- /dev/null
++++ b/tests/v5-abilities-sim.test.ts
+@@ -0,0 +1,260 @@
++// v5 #4 abilities sim + fireAbility/activateAll (product/workers/m5-worker-abilities-spec.md v1.3.11;
++// engineering/reviews/arch-golden-slice2-contracts-20261105.md ADDENDUM `fireAbility` API 21:29 CET).
++// nowMs is injected (epoch ms); nothing here reads Date.now. Economy values come from balance.m4.tc (never literals).
++import { describe, it, expect } from 'vitest';
++import { balance } from '../src/config/balance';
++import type { M5Flag } from '../src/config/flags';
++import { initialState, type GameState } from '../src/sim/state';
++import { step } from '../src/sim/tick';
++import { saleMultipliers } from '../src/sim/payout';
++import { prodEggsPerSec } from '../src/sim/tracks';
++import { graderMult, WORKERS, type WorkerId } from '../src/sim/workers';
++import { fireAbility, activateAll, abilityEligibility, abilityActive, comboQualifies } from '../src/sim/abilities';
++import { readFileSync } from 'node:fs';
++import { m5Persist } from '../src/save/m5-fields';
++
++const B = (flags: Partial<Record<M5Flag, number>> = { abilities: 1 }, tcx: Record<string, number> = {}) =>
++  ({ ...balance, m4: { ...balance.m4!, enabled: 1, flags: { ...(balance.m4 as any).flags, ...flags }, tc: { ...balance.m4!.tc!, ...tcx } } }) as typeof balance;
++const b = B();
++const tc = b.m4!.tc!, CD_MS = tc.ability_cd_s * 1000, DUR = tc.ability_s, DT = 1 / b.tickHz;
++const NOW = 1_800_000_000_000;
++const W = (energy = 100, extra = {}) => ({ energy, cdS: 1e9, ...extra }); // cdS huge: no wage/auto action noise
++const farm = (extra: Partial<GameState> = {}): GameState => ({ ...initialState(b, 3), farmLevel: 18, hensLevel: 18, eggValueLevel: 18, graderTier: 3,
++  coinsCents: 1e9, workers: { market_hand: W(), coop_hand: W(), hawker: W(), grader: W() }, ...extra });
++const opts = (o = {}) => ({ inSheet: false, viaAll: false, nowMs: NOW, ...o });
++const run = (s: GameState, n: number, focus: boolean, bb = b, ev: any[] = []) => { for (let i = 0; i < n; i++) s = step(s, DT, bb, ev, { focus, nowMs: NOW }); return s; };
++
++describe('eligibility (rule 4) and blocked results', () => {
++  it('ready by default (absent readyAt) at F >= unlock with the flag on', () => {
++    for (const id of WORKERS) expect(abilityEligibility(farm(), id, b, NOW)).toEqual({ eligible: true });
++  });
++  it('first-reason order: asleep, unpaid, paused, lockout, cooldown', () => {
++    const P = B({ abilities: 1, pause: 1 });
++    const s = farm({ workers: { market_hand: W(0, { paused: true }), coop_hand: W(50, { unpaid: true, paused: true }), hawker: W(50, { paused: true, callLockoutS: 5 }), grader: W(50, { callLockoutS: 5 }) },
++      abilities: { grader: { readyAt: NOW + 1000 } } });
++    expect(abilityEligibility(s, 'market_hand', P, NOW)).toEqual({ eligible: false, reason: 'asleep' });
++    expect(abilityEligibility(s, 'coop_hand', P, NOW)).toEqual({ eligible: false, reason: 'unpaid' });
++    expect(abilityEligibility(s, 'hawker', P, NOW)).toEqual({ eligible: false, reason: 'paused' });
++    expect(abilityEligibility(s, 'grader', P, NOW)).toEqual({ eligible: false, reason: 'lockout' });
++    // pause flag off: paused / lockout inert (F3 isPaused), cooldown shows
++    expect(abilityEligibility(s, 'hawker', b, NOW)).toEqual({ eligible: true });
++    expect(abilityEligibility(s, 'grader', b, NOW)).toEqual({ eligible: false, reason: 'cooldown' });
++  });
++  it('cooldown uses wallReady on injected nowMs, E2b cap; ready exactly at readyAt', () => {
++    const s = farm({ abilities: { hawker: { readyAt: NOW } } });
++    expect(abilityEligibility(s, 'hawker', b, NOW - 1)).toEqual({ eligible: false, reason: 'cooldown' });
++    expect(abilityEligibility(s, 'hawker', b, NOW)).toEqual({ eligible: true });
++  });
++  it('not hired / below unlock / flag off / bad clock: not available, no telemetry reason', () => {
++    expect(abilityEligibility(farm({ workers: {} }), 'grader', b, NOW)).toEqual({ eligible: false, reason: 'not_hired' });
++    expect(abilityEligibility(farm({ farmLevel: tc.ability_unlock_farm - 1 }), 'hawker', b, NOW)).toEqual({ eligible: false, reason: 'locked' });
++    expect(abilityEligibility(farm(), 'hawker', B({ abilities: 0 }), NOW)).toEqual({ eligible: false, reason: 'flag_off' });
++    expect(abilityEligibility(farm(), 'hawker', b, NaN)).toEqual({ eligible: false, reason: 'no_clock' });
++    for (const [s, bb] of [[farm({ workers: {} }), b], [farm(), B({ abilities: 0 })]] as const) {
++      const r = fireAbility(s, 'grader', bb, opts()); expect(r.ok).toBe(false); expect(r.events).toEqual([]); expect(r.state).toBe(s);
++    }
++  });
++});
++
++describe('fireAbility', () => {
++  it('success: readyAt = nowMs + cd*1000, activeS = tc_ability_s, ability_used with combo:false, closeSheet only inSheet', () => {
++    const s = farm({ abilities: { hawker: { readyAt: NOW - 7000 } } });
++    const r = fireAbility(s, 'hawker', b, opts());
++    expect(r.ok).toBe(true);
++    expect(r.state.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS, activeS: DUR, durS: DUR }); // #112 contract: granted duration on the entry
++    expect(r.events).toEqual([{ type: 'ability_used', worker: 'hawker', farm: 18, energy_pct: 100, mood: 'working', via_all: false, t_since_ready_s: 7, in_sheet: false, combo: false }]);
++    expect(r.ok && r.closeSheet).toBe(false);
++    const r2 = fireAbility(s, 'hawker', b, opts({ inSheet: true }));
++    expect(r2.ok && r2.closeSheet).toBe(true); expect((r2.events[0] as any).in_sheet).toBe(true);
++    expect(s.abilities!.hawker).toEqual({ readyAt: NOW - 7000 }); // pure
++  });
++  it('absent readyAt -> t_since_ready_s 0; Tired applies (rule 5), energy untouched (energy_cost 0)', () => {
++    const s = farm({ workers: { ...farm().workers, coop_hand: W(20) } });
++    const r = fireAbility(s, 'coop_hand', b, opts());
++    expect(r.ok).toBe(true); expect((r.events[0] as any)).toMatchObject({ t_since_ready_s: 0, mood: 'tired', energy_pct: 20 });
++    expect(r.state.workers.coop_hand!.energy).toBe(20);
++  });
++  it('blocked: emits exactly one ability_blocked{count:1}, state unchanged, no close (E14 d)', () => {
++    const s = farm({ workers: { ...farm().workers, market_hand: W(0) } });
++    const r = fireAbility(s, 'market_hand', b, opts({ inSheet: true }));
++    expect(r).toEqual({ ok: false, reason: 'asleep', state: s, events: [{ type: 'ability_blocked', worker: 'market_hand', reason: 'asleep', count: 1 }], closeSheet: false });
++    const c = fireAbility(fireAbility(s, 'hawker', b, opts()).state, 'hawker', b, opts({ nowMs: NOW + 1 }));
++    expect(c.ok).toBe(false); expect(c.events).toEqual([{ type: 'ability_blocked', worker: 'hawker', reason: 'cooldown', count: 1 }]);
++  });
++  it('viaAll fire never emits ability_blocked (Activate-all skips silently)', () => {
++    const s = farm({ workers: { ...farm().workers, market_hand: W(0) } });
++    const r = fireAbility(s, 'market_hand', b, opts({ viaAll: true }));
++    expect(r.ok).toBe(false); expect(r.events).toEqual([]);
++  });
++});
++
++describe('combo (rule 11): direct sheet Boost within the manual-refill window', () => {
++  const CB = B({ abilities: 1, rc2Refill: 1 }, { combo_window_s: 10, combo_boost_duration_s: 45 }); // test inputs; real values await Econ CSV (spec §7)
++  const ctc = CB.m4!.tc!;
++  it('comboQualifies: inclusive sim ms (10000 in, 10001 out), needs both flags', () => {
++    expect(comboQualifies(CB, 10000)).toBe(true); expect(comboQualifies(CB, 10001)).toBe(false); expect(comboQualifies(CB, 0)).toBe(true);
++    expect(comboQualifies(CB, undefined)).toBe(false); expect(comboQualifies(CB, -1)).toBe(false);
++    expect(comboQualifies(B({ abilities: 1, rc2Refill: 0 }), 0)).toBe(false);
++  });
++  it('sheet Boost in window -> activeS = combo_boost_duration_s, combo:true; card / Activate-all / out of window -> 30 s, combo:false', () => {
++    const s = farm();
++    const yes = fireAbility(s, 'coop_hand', CB, opts({ inSheet: true, refillAgoSimMs: ctc.combo_window_s * 1000 }));
++    expect(yes.state.abilities!.coop_hand).toEqual({ readyAt: NOW + CD_MS, activeS: ctc.combo_boost_duration_s, durS: ctc.combo_boost_duration_s });
++    expect((yes.events[0] as any).combo).toBe(true);
++    expect('abilityDurS' in yes.state).toBe(false); // Architect #112: no top-level duration map
++    expect(yes.state.abilities!.coop_hand!.readyAt).toBe(NOW + CD_MS); // cooldown unchanged
++    for (const o of [{ inSheet: false, refillAgoSimMs: 0 }, { inSheet: true, viaAll: true, refillAgoSimMs: 0 }, { inSheet: true, refillAgoSimMs: ctc.combo_window_s * 1000 + 1 }]) {
++      const r = fireAbility(s, 'coop_hand', CB, opts(o)); expect(r.state.abilities!.coop_hand).toMatchObject({ activeS: DUR, durS: DUR }); expect((r.events[0] as any).combo).toBe(false);
++    }
++    const all = activateAll(s, CB, { inSheet: true, nowMs: NOW });
++    expect(all.events.every((e: any) => e.combo === false && e.via_all === true)).toBe(true);
++    for (const id of all.fired) expect(all.state.abilities![id]!.durS).toBe(DUR);
++  });
++  it('refillAgoSimMs guards (Architect #112 §2): non-finite / negative / absent -> no combo; ignored unless abilities && rc2Refill && inSheet && !viaAll', () => {
++    const s = farm();
++    for (const v of [NaN, Infinity, -Infinity, -1, -0.001, undefined]) {
++      const r = fireAbility(s, 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: v }));
++      expect(r.ok && r.combo).toBe(false); expect(r.state.abilities!.hawker!.durS).toBe(DUR);
++    }
++    const noRefill = B({ abilities: 1, rc2Refill: 0 }, { combo_window_s: 10, combo_boost_duration_s: 45 });
++    const r0 = fireAbility(s, 'hawker', noRefill, opts({ inSheet: true, refillAgoSimMs: 0 }));
++    expect(r0.ok && r0.combo).toBe(false); expect(r0.state.abilities!.hawker!.durS).toBe(DUR);
++    expect(comboQualifies(B({ abilities: 0, rc2Refill: 1 }, { combo_window_s: 10, combo_boost_duration_s: 45 }), 0)).toBe(false);
++    // Activate-all never combos and never forwards a window
++    const all = activateAll(s, CB, { inSheet: true, nowMs: NOW, refillAgoSimMs: 0 } as any);
++    expect(all.events.every((e: any) => e.combo === false)).toBe(true);
++  });
++  it('combo window reads tc_combo_window_s from balance (no literal): widening the tc key widens the window', () => {
++    const wide = B({ abilities: 1, rc2Refill: 1 }, { combo_window_s: 20, combo_boost_duration_s: 50 });
++    const r = fireAbility(farm(), 'hawker', wide, opts({ inSheet: true, refillAgoSimMs: 15000 }));
++    expect(r.ok && r.combo).toBe(true); expect(r.state.abilities!.hawker).toMatchObject({ activeS: 50, durS: 50 });
++  });
++  it('combo call ends expired with effect_s = combo duration', () => {
++    let s = fireAbility(farm(), 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: 0 })).state; const ev: any[] = [];
++    s = run(s, Math.round(ctc.combo_boost_duration_s * b.tickHz) + 1, true, CB, ev);
++    expect(ev.filter(e => e.type === 'ability_ended')).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'expired', effect_s: ctc.combo_boost_duration_s }]);
++    expect(s.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS }); // durS cleared with activeS
++    expect('abilityDurS' in s).toBe(false);
++  });
++  it('combo early end: effect_s = durS - activeS (focus seconds run), durS cleared with activeS', () => {
++    let s = fireAbility(farm(), 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: 0 })).state;
++    s = run(s, 40 * b.tickHz, true, CB);
++    expect(s.abilities!.hawker!.durS).toBe(ctc.combo_boost_duration_s);
++    s = { ...s, workers: { ...s.workers, hawker: { ...s.workers.hawker!, energy: 0 } } };
++    const ev: any[] = []; s = run(s, 1, true, CB, ev);
++    const end = ev.filter(e => e.type === 'ability_ended'); expect(end).toHaveLength(1);
++    expect(end[0]).toMatchObject({ worker: 'hawker', cause: 'asleep' }); expect(end[0].effect_s).toBeCloseTo(40, 6);
++    expect(s.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS });
++  });
++  it('a running entry with no durS (older tip / save) falls back to tc_ability_s for effect_s', () => {
++    const s = farm({ abilities: { hawker: { readyAt: NOW + CD_MS, activeS: 5 } } }); const ev: any[] = [];
++    run(s, 5 * b.tickHz + 1, true, CB, ev);
++    expect(ev.filter(e => e.type === 'ability_ended')).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'expired', effect_s: DUR }]);
++  });
++});
++
++describe('activateAll (rule 7, E14 c, AC-M5A-7)', () => {
++  it('AC-M5A-7: W1 asleep, W2 cooldown, W3 ready, W4 unpaid -> exactly W3, one ability_used{via_all:true}, no ability_blocked', () => {
++    const s = farm({ workers: { market_hand: W(0), coop_hand: W(), hawker: W(), grader: W(50, { unpaid: true }) }, abilities: { coop_hand: { readyAt: NOW + 5000 } } });
++    const r = activateAll(s, b, { inSheet: false, nowMs: NOW });
++    expect(r.fired).toEqual(['hawker']);
++    expect(r.events).toEqual([expect.objectContaining({ type: 'ability_used', worker: 'hawker', via_all: true, in_sheet: false, combo: false })]);
++    expect(r.closeSheet).toBe(false);
++  });
++  it('order MH -> CH -> Hawker -> Grader, same tick; sheet success -> one close', () => {
++    const r = activateAll(farm(), b, { inSheet: true, nowMs: NOW });
++    expect(r.fired).toEqual(['market_hand', 'coop_hand', 'hawker', 'grader']);
++    expect(r.events.map((e: any) => e.worker)).toEqual(r.fired);
++    expect(r.events.every((e: any) => e.in_sheet === true && e.via_all === true)).toBe(true);
++    expect(r.closeSheet).toBe(true);
++    for (const id of WORKERS) expect(r.state.abilities![id]).toEqual({ readyAt: NOW + CD_MS, activeS: DUR, durS: DUR });
++  });
++  it('0 eligible: fires nothing, no events, no close, same state', () => {
++    const s = farm({ workers: { market_hand: W(0), hawker: W(0) } });
++    const r = activateAll(s, b, { inSheet: true, nowMs: NOW });
++    expect(r).toEqual({ state: s, events: [], fired: [], closeSheet: false });
++  });
++});
++
++describe('timer system: suspension, expiry, early end (rules 6, 10)', () => {
++  it('activeS counts down only on focus ticks (suspended under a closing sheet / menu); expires with effect_s = tc_ability_s', () => {
++    let s = fireAbility(farm(), 'hawker', b, opts({ inSheet: true })).state;
++    s = run(s, 50, false); expect(s.abilities!.hawker!.activeS).toBe(DUR); // before sheetCloseComplete: frozen
++    const ev: any[] = []; s = run(s, Math.round(DUR * b.tickHz) - 1, true, b, ev);
++    expect(abilityActive(s, b, 'hawker')).toBe(true); expect(ev.filter(e => e.type === 'ability_ended')).toEqual([]);
++    s = run(s, 1, true, b, ev);
++    expect(ev.filter(e => e.type === 'ability_ended')).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'expired', effect_s: DUR }]);
++    expect(s.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS }); expect(abilityActive(s, b, 'hawker')).toBe(false);
++  });
++  it('early end: asleep / unpaid / paused ends that tick, readyAt unchanged, effect_s = focus seconds run', () => {
++    for (const [patch, cause, bb] of [[{ energy: 0 }, 'asleep', b], [{ unpaid: true }, 'unpaid', b], [{ paused: true }, 'paused', B({ abilities: 1, pause: 1 })]] as const) {
++      let s = fireAbility(farm(), 'hawker', bb, opts()).state; s = run(s, 10 * b.tickHz, true, bb);
++      s = { ...s, workers: { ...s.workers, hawker: { ...s.workers.hawker!, ...patch } } };
++      const ev: any[] = []; s = run(s, 1, true, bb, ev);
++      const end = ev.filter(e => e.type === 'ability_ended'); expect(end).toHaveLength(1);
++      expect(end[0]).toMatchObject({ worker: 'hawker', cause }); expect(end[0].effect_s).toBeCloseTo(10, 6);
++      expect(s.abilities!.hawker).toEqual({ readyAt: NOW + CD_MS });
++    }
++  });
++  it('paused flag off: a stray paused:true does not end the call', () => {
++    let s = fireAbility(farm(), 'hawker', b, opts()).state;
++    s = { ...s, workers: { ...s.workers, hawker: { ...s.workers.hawker!, paused: true } } };
++    const ev: any[] = []; run(s, 1, true, b, ev); expect(ev.filter(e => e.type === 'ability_ended')).toEqual([]);
++  });
++});
++
++describe('effects (rule 2) through the F1c registry / graderMult; suspended = no multiplier', () => {
++  const act = (ids: WorkerId[], s = farm()) => { for (const id of ids) s = fireAbility(s, id, b, opts()).state; return s; };
++  const prod = (a: number[]) => a.reduce((x, y) => x * y, 1);
++  it('Rush: Market Hand sales only; Shout: all sales; stack x1.3225 (rule 8)', () => {
++    const s0 = farm(), base = { mh: prod(saleMultipliers(s0, b, { by: 'market_hand' })), pl: prod(saleMultipliers(s0, b, { by: 'player' })) };
++    const r = act(['market_hand']);
++    expect(prod(saleMultipliers(r, b, { by: 'market_hand' })) / base.mh).toBeCloseTo(tc.ability_w1_price_mult, 12);
++    expect(prod(saleMultipliers(r, b, { by: 'player' })) / base.pl).toBeCloseTo(1, 12);
++    const rs = act(['market_hand', 'hawker']);
++    expect(prod(saleMultipliers(rs, b, { by: 'market_hand' })) / base.mh).toBeCloseTo(tc.ability_w1_price_mult * tc.ability_w3_price_mult, 12);
++    expect(prod(saleMultipliers(rs, b, { by: 'player' })) / base.pl).toBeCloseTo(tc.ability_w3_price_mult, 12);
++    expect(prod(saleMultipliers(rs, b, { by: 'market_hand', suspended: true })) / base.mh).toBeCloseTo(1, 12);
++    expect(prod(saleMultipliers(rs, B({ abilities: 0 }), { by: 'market_hand' }))).toBeCloseTo(prod(saleMultipliers(s0, B({ abilities: 0 }), { by: 'market_hand' })), 12);
++  });
++  it('Sweep A: laying x tc_ability_w2_lay_mult (live ctx only), suspended = 1', () => {
++    const s0 = farm(), s = act(['coop_hand']);
++    expect(prodEggsPerSec(s, b, {}) / prodEggsPerSec(s0, b, {})).toBeCloseTo(tc.ability_w2_lay_mult, 12);
++    expect(prodEggsPerSec(s, b, { suspended: true })).toBe(prodEggsPerSec(s0, b, { suspended: true }));
++  });
++  it('Inspect: graderMult = 1 + (tier mult + tier_add - 1) x share(mood); tier 3 working -> x3.0 (AC-M5A-2)', () => {
++    const s = act(['grader']), g = b.workers.grader;
++    const exp = 1 + (g.tiers[2].mult + tc.ability_w4_tier_add - 1) * 1;
++    expect(saleMultipliers(s, b, { by: 'player' })[0]).toBeCloseTo(exp, 12);
++    expect(saleMultipliers(s, b, { by: 'player', suspended: true })[0]).toBe(graderMult(s.workers, 3, b));
++    const tired = { ...s, workers: { ...s.workers, grader: W(20) } };
++    expect(saleMultipliers(tired, b, { by: 'player' })[0]).toBeCloseTo(1 + (g.tiers[2].mult + tc.ability_w4_tier_add - 1) * g.tired_bonus_share, 12);
++  });
++});
++
++describe('flags off: byte-identical step (AC-M5A-16)', () => {
++  it('abilities flag 0: a stray abilities.activeS is inert (no events, no countdown, no multipliers)', () => {
++    const OFF = B({ abilities: 0 }), s = farm({ abilities: { hawker: { readyAt: NOW, activeS: 12 } } }), ev: any[] = [];
++    const out = run(s, 20, true, OFF, ev);
++    expect(out.abilities).toEqual(s.abilities); expect(ev.filter(e => String(e.type).startsWith('ability'))).toEqual([]);
++  });
++  it('no top-level abilityDurS anywhere in src (Architect #112: rejected persisted shape; durS lives on AbilityState)', () => {
++    for (const f of ['../src/sim/abilities.ts', '../src/sim/state.ts', '../src/sim/m5-state.ts'])
++      expect(readFileSync(new URL(f, import.meta.url), 'utf8')).not.toMatch(/abilityDurS/);
++  });
++  it('m5Persist save view of a running combo call carries durS on the entry and no top-level duration map', () => {
++    const CB = B({ abilities: 1, rc2Refill: 1 }, { combo_window_s: 10, combo_boost_duration_s: 45 });
++    const s = fireAbility(farm(), 'hawker', CB, opts({ inSheet: true, refillAgoSimMs: 0 })).state;
++    const saved = JSON.parse(JSON.stringify(m5Persist(s)));
++    expect(saved.abilityDurS).toBeUndefined(); expect(saved.abilities.hawker).toEqual({ readyAt: NOW + CD_MS, activeS: 45, durS: 45 });
++  });
++  it('no prod 10 / 45 literals in abilities.ts (combo values via tcNum only)', () => {
++    const code = readFileSync(new URL('../src/sim/abilities.ts', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
++    expect(code).not.toMatch(/(?<![\w.])(10|45)(?![\w.])/);
++    expect(code).toMatch(/tcNum\(b, 'combo_window_s'\)/); expect(code).toMatch(/tcNum\(b, 'combo_boost_duration_s'\)/);
++  });
++  it('no Date.now in the abilities sim', () => {
++    const code = readFileSync(new URL('../src/sim/abilities.ts', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
++    expect(code).not.toMatch(/Date\.now|performance\.now/);
++  });
++});
+diff --git a/tests/v5-f1a-fields.test.ts b/tests/v5-f1a-fields.test.ts
+index 32119ce..de56c30 100644
+--- a/tests/v5-f1a-fields.test.ts
++++ b/tests/v5-f1a-fields.test.ts
+@@ -47,7 +47,7 @@ const M5_EVENT_SPEC = {
+   streak_started: ['farm_level', 'collection_level'],
+   streak_peak: ['value', 'duration_s', 'credited_taps', 'time_at_cap_s', 'extra_coins', 'frenzy_overlap_s', 'reason', 'max_tier'],
+   abilities_unlocked: ['farm', 'hired'],
+-  ability_used: ['worker', 'farm', 'energy_pct', 'mood', 'via_all', 't_since_ready_s', 'in_sheet'],
++  ability_used: ['worker', 'farm', 'energy_pct', 'mood', 'via_all', 't_since_ready_s', 'in_sheet', 'combo'], // combo: spec v1.3.8 D-HOP-42; Architect fireAbility addendum 2026-11-05 21:29 CET (amend on land)
+   ability_blocked: ['worker', 'reason', 'count'],
+   ability_ended: ['worker', 'cause', 'effect_s'],
+ } as const;
+
+exit_code=0

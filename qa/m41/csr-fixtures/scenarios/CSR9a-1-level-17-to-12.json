@@ -1,0 +1,26 @@
+{
+ "id": "CSR9a-1-level-17-to-12",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-9a"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-L17-badsum.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F12-T-3h.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovered_from": "v6_backup",
+  "notice": "M2",
+  "variant": "level",
+  "prevLevel": 17,
+  "body": "We restored an earlier save, from Farm level 12."
+ }
+}

@@ -1,0 +1,1446 @@
+{
+ "shots": [
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (300px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (391px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=none (hidden)",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (300px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (391px), card place=band",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (300px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (371px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=band",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (300px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (371px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (238px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (238px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-plain-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (238px), card place=band",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (238px), card place=band",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-farm-refund-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-plain-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "chromium",
+   "file": "sweep/chromium-collection-refund-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (300px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (391px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=none (hidden)",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (300px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (391px), card place=band",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (300px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (371px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=band",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (300px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (371px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (238px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (238px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-plain-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (238px), card place=band",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (238px), card place=band",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-farm-refund-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-plain-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "firefox",
+   "file": "sweep/firefox-collection-refund-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (300px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (391px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=none (hidden)",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (300px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (391px), card place=band",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll0-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll100-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll200-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll300-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "360x640",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scrollend-360x640.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (300px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (371px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=band",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (300px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (371px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll0-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll100-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll200-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll300-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "375x667",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scrollend-375x667.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 0 (0px), card place=inside",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 100 (100px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 200 (200px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll 300 (238px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line off, scroll end (238px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-plain-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 100 (100px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 200 (200px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll 300 (238px), card place=band",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: farm sheet, refund line on, scroll end (238px), card place=band",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-farm-refund-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 100 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 200 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll 300 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line off, scroll end (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-plain-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 0 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll0-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 100 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll100-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 200 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll200-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll 300 (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scroll300-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  },
+  {
+   "state": "#65 scroll sweep: collection sheet, refund line on, scroll end (0px), card place=default",
+   "viewport": "390x844",
+   "engine": "webkit",
+   "file": "sweep/webkit-collection-refund-scrollend-390x844.png",
+   "sha": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+   "build": "\"m4.1+5d9efa6\""
+  }
+ ],
+ "sweepScript": "scripts/m41-9-scroll-sweep.mjs",
+ "head": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463"
+}

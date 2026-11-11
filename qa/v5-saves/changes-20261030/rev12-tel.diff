@@ -1,0 +1,539 @@
+--- ../scratch/rev12-1437/m5-save-cases-DRAFT.md.bak	2026-10-30 14:40:34.488048805 +0100
++++ m5-save-cases-DRAFT.md	2026-10-30 14:43:39.563640954 +0100
+@@ -1,7 +1,7 @@
+ # M5 save cases — DRAFT (Saves QA, 2026-10-30 ~13:25 CET)
+ **HoE-25 update (2026-10-30 ~13:5x CET, TASK saves-qa/hoe25-cases-g8):** applies D-HOE-20261030-25 (`engineering/decisions.md` sha1 e0a359a8 / sha256 ed7661e1…, L443-462: N-5, OQ-13, F-4/F-5/F-8/F-9, N-1, N-8)
+ and telemetry errata v5 rev 5 (frozen `telemetry-spec-errata-v5.cea3d717.md`, sha1 cea3d717), **now superseded: errata of record = rev 7** (`product/collection/telemetry-spec-errata-v5.md` sha1 fd7d5921 / sha256 168444c2…, 13:56 CET; pinned in the manifest per D-HOE-28 L491; rev 8 pending HoQ ~14:15+). Rev 7 vs rev 5 for these cases: same reason/backup_stores/stall_id rules, now written into rev 7 (N-1/N-5/OQ-13 closed there); `combo` added (row 10).
+-**wk104 (14:3x CET, TASK saves-qa/wk104-recite):** PMW workers save shapes **v1.0.4** `product/workers/v5-workers-save-shapes.md` sha1 **963a490b6f66431de23bc48c937d8574492e36e2** (14:27 CET, D-PMW-2026-10-30-25 (v1.0.3 fa768d7c, 14:20) + D-PMW-2026-10-30-27) is **FINAL**: D-PMW-2026-10-30-23 froze v1.0.2 34123ece (frozen copy `v5-workers-save-shapes.34123ece.md`); v1.0.3/v1.0.4 are post-freeze dated errata that change ONLY cites and wording (diff vs 34123ece: L2 header, L5 source shas, L64/L69 abilities refs, L85 G-6 PROPOSED record "without `paused: true`"; no shape, rule or expected value changed; 101 lines, edits in place, so every "PMW Lnn" cite holds). Source specs verified on disk: rc2 v1.3.16 e4d98651, pause v1.3.15 4c081f64, failure-cost v0.3.24 54b994bd, lighter-refill v0.8.13 13577395, abilities v1.3.10 8034ba7f (E2 block text identical to v1.3.7 L377-381, now at **L388-392**, clamp text L392; v1.0.4 says L387-391, off by one). Older spec cites in rows below (abilities v1.3.7 E2 L377-381, pause v1.3.14 74a0122a lines) name those versions and stay true for them; pause E9-E13 L273-286 and lockout L130-147 are byte-identical in v1.3.15.
++**wk104 (14:3x CET, TASK saves-qa/wk104-recite):** PMW workers save shapes **v1.0.4** `product/workers/v5-workers-save-shapes.md` sha1 **963a490b6f66431de23bc48c937d8574492e36e2** (14:27 CET, D-PMW-2026-10-30-25 (v1.0.3 fa768d7c, 14:20) + D-PMW-2026-10-30-27) is **FINAL**: D-PMW-2026-10-30-23 froze v1.0.2 34123ece (frozen copy `v5-workers-save-shapes.34123ece.md`); v1.0.3/v1.0.4 are post-freeze dated errata that change ONLY cites and wording (diff vs 34123ece: L2 header, L5 source shas, L64/L69 abilities refs, L85 G-6 PROPOSED record "without `paused: true`"; no shape, rule or expected value changed; 101 lines, edits in place, so every "PMW Lnn" cite holds). Source specs verified on disk: rc2 v1.3.16 e4d98651, pause v1.3.15 4c081f64, failure-cost v0.3.24 54b994bd, lighter-refill v0.8.13 13577395, abilities v1.3.10 8034ba7f (E2 block text identical to v1.3.7 L377-381, now at **L388-392**, clamp text L392; v1.0.4 says L387-391, off by one). Older spec cites in rows below (abilities v1.3.7 E2 L377-381, pause v1.3.14 74a0122a lines) name those versions and stay true for them; pause E9-E13 L273-286 and lockout L130-147 are byte-identical in v1.3.15. **rev12-tel (14:4x CET, TASK saves-qa/rev12-tel):** pause row cites M5S-PAUSE-PAUSED-SAN, -LOCKOUT-SAN, -NOREST, -STALL60 (L52/L53/L241/L244) re-cited to **pause v1.3.15 4c081f64** (sha1 4c081f6443a9ecfef4a622bf6018263e845a7bf1, live file = frozen copy). v1.3.15 vs 74a0122a differs only at L2 (header), L296 and L299 (§12 telemetry text), so every cited line (L133-146, L144, L264, L273-275, L276, L285) is unchanged; no case value changes. The L235 "Specs as read at 13:40" and L301 lines are historical records and keep v1.3.14 74a0122a. Same pass: PMW workers save shapes re-pinned **v1.0.4 963a490b -> v1.0.5 3b34c0be50d6cd0c5ad8d0e813983ffd5ac2669a** (D-PMW-2026-10-30-30, HoQ QA-D-1030-FREEZE-RR3; cite-only, FINAL; diff vs 963a490b = L2 header, L64, L69 only, 101 lines both, so every PMW Lnn cite holds) in rows L48-L53, L59 and the G5 heading L234; abilities line refs re-cited to **v1.3.10 8034ba7f** (E2 L388-392, rule 3 L111, E1 L382, clamp L392; E1/E2 text byte-identical to v1.3.7 L371-376/L377-381) in ABIL-READY-SAN L48, ABIL-ACTIVE-SAN L50, N1 L59, ABIL-BAK-RECLAMP L247, ABIL-STALL60 L248. The L25/L26 traceability rows (abilities v1.3.3) and the wk104 text above are historical.
+ **hoe29 (14:1x CET, TASK saves-qa/hoe29-rulings):** applies D-HOE-20261030-29 (engineering/decisions.md L493-497), file sha1 f14390a5 / sha256 e9f6f072… (HoQ quoted e57076d1: not the file on disk; D-HOE-30 was appended after). N5-Q1, N5-Q2 and F-5 CLOSED; all PENDING-RULING tags cleared (none left). +7 cases -> **177**; expected FAIL 19 -> **24**. PMW workers shapes v1.0.2 34123ece is **FINAL** (spec freeze D-PMW-2026-10-30-23, product/decisions.md L2080, 14:10 CET).
+ **wk102 (14:0x CET, TASK saves-qa/wk102-pending):** G5 re-cited to PMW workers shapes **v1.0.2** (`product/workers/v5-workers-save-shapes.md` sha1 34123ece, 13:53 CET, D-PMW-2026-10-30-19; v1.0.1 5d1a8f85 frozen at `v5-workers-save-shapes.5d1a8f85.md`). New tag **PENDING-RULING** = the expected value rests on my reading of an unruled point (N5-Q1, N5-Q2, F5-Q); it does NOT block the gate. Rows: M5S-BR-TEL-REASON-BOTH (N5-Q1), M5S-BR-TEL-VBUMP-NOREASON (N5-Q2), M5S-RF-CHG-OVERMAX and the at-cap/clamp sub-case of M5S-RF-NEXT-ATCAP (F5-Q). No case here relies on the untyped `stall_id` in errata rev 7 rows 5/6 (refill_used, rest_toggled).
+ **Step 2 (14:0x CET):** + D-HOE-20261030-28 (`engineering/decisions.md` now sha1 5cc13f2a / sha256 79b6e954…, L488-491; D-HOE-25 text L443-462 unchanged): breeds = 0 never reads/sanitises/writes `breeds`, no event; sanitise + its one event only on the first flag-on load or tick. +3 cases (M5S-BR-FLAG0-*, M5S-BR-FLAG-FLIP).
+@@ -45,18 +45,18 @@
+ - **M5S-GOLD-EVRNG-SAN** 0, negative, fraction, 2^32, NaN, string dropped; 0xffffffff kept. D-C2. m5-fields.ts:61, sim/rng.ts:11.
+ - **M5S-BROODY-NEST-SAN** 12.7 -> 12, 1e20 -> 1e15, negative/NaN/string dropped. D-C5. m5-fields.ts:62-64.
+ - **M5S-BROODY-HEN-SAN** 0 and 11 kept; -1, 12, 2.5, NaN, '3' dropped. broody R6. m5-fields.ts:64.
+-- **M5S-ABIL-READY-SAN** readyAt > now+cd -> now+cd; past -> now; negative/NaN/string/null -> readyAt removed, entry kept (absent = ready). abilities E2. m5-fields.ts:69-70. [Rebase 13:45: abilities v1.3.7 314dc0e3 E2 L381 "negative, non-finite or non-number removed" = this probe (N1 reconciled); PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.4 963a490b §3 L64 "Match".]
+-- **M5S-ABIL-MAP-SAN** abilities array/number/string/null dropped; a non-object entry dropped, others kept. m5-fields.ts:68-69. [Rebase: PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.4 963a490b §3 L67; code m5-fields.ts:68-70.]
+-- **M5S-ABIL-ACTIVE-SAN** activeS on load: removed + exactly one ability_ended{cause:'offline', effect_s = tc_ability_s - min(activeS, tc_ability_s)}. AB-1. m5-fields.ts:48/70. [Rebase: abilities v1.3.7 E2 L377-380; PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.4 963a490b §3 L65; quick check 3 L99 (activeS 12 -> effect_s 18).]
+-- **M5S-ABIL-BOOL-SAN** abilitiesUnlocked/CoachSeen 1, 'true', null dropped. m5-fields.ts:67. [Rebase: PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.4 963a490b §3 L66.]
+-- **M5S-PAUSE-PAUSED-SAN** paused 1/'true'/null dropped (E9); farmLevel < tc_pause_unlock_farm drops paused AND callLockoutS (E12). sim/pause.ts:13, m5-fields.ts:81. [Rebase: pause v1.3.14 74a0122a E9 L273-275, E12 L285, rule 1; PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.4 963a490b §3 L62; quick check 4 L100.]
+-- **M5S-PAUSE-LOCKOUT-SAN** 999 -> tc_pause_call_lockout_s, 10 kept, 0/-3/NaN/'10' dropped; callLockoutS on a non-market_hand worker dropped. B5. m5-fields.ts:81-88. [Rebase: pause v1.3.14 lockout L133-146 (cap, absent at 0, MH only); PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.4 963a490b §3 L63; quick check 4 L100.]
++- **M5S-ABIL-READY-SAN** readyAt > now+cd -> now+cd; past -> now; negative/NaN/string/null -> readyAt removed, entry kept (absent = ready). abilities E2. m5-fields.ts:69-70. [Rebase 13:45: abilities v1.3.10 8034ba7f E2 L388-392, clamp L392 "negative, non-finite or non-number removed" (text identical to v1.3.7 314dc0e3 L377-381) = this probe (N1 reconciled); PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.5 3b34c0be §3 L64 "Match".]
++- **M5S-ABIL-MAP-SAN** abilities array/number/string/null dropped; a non-object entry dropped, others kept. m5-fields.ts:68-69. [Rebase: PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.5 3b34c0be §3 L67; code m5-fields.ts:68-70.]
++- **M5S-ABIL-ACTIVE-SAN** activeS on load: removed + exactly one ability_ended{cause:'offline', effect_s = tc_ability_s - min(activeS, tc_ability_s)}. AB-1. m5-fields.ts:48/70. [Rebase: abilities v1.3.10 8034ba7f E2 L388-392; PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.5 3b34c0be §3 L65; quick check 3 L99 (activeS 12 -> effect_s 18).]
++- **M5S-ABIL-BOOL-SAN** abilitiesUnlocked/CoachSeen 1, 'true', null dropped. m5-fields.ts:67. [Rebase: PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.5 3b34c0be §3 L66.]
++- **M5S-PAUSE-PAUSED-SAN** paused 1/'true'/null dropped (E9); farmLevel < tc_pause_unlock_farm drops paused AND callLockoutS (E12). sim/pause.ts:13, m5-fields.ts:81. [Rebase: pause v1.3.15 4c081f64 E9 L273-275, E12 L285, rule 1; PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.5 3b34c0be §3 L62; quick check 4 L100.]
++- **M5S-PAUSE-LOCKOUT-SAN** 999 -> tc_pause_call_lockout_s, 10 kept, 0/-3/NaN/'10' dropped; callLockoutS on a non-market_hand worker dropped. B5. m5-fields.ts:81-88. [Rebase: pause v1.3.15 4c081f64 lockout L133-146 (cap, absent at 0, MH only); PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.5 3b34c0be §3 L63; quick check 4 L100.]
+ - **M5S-SESS-1** session list = the 8 F1a keys (m5-state.ts:67). **M5S-SESS-2** serialize and save() drop all 8 + streakRun, keep all saved fields.
+   **M5S-SESS-3** hand-edited session keys in a stored save are dropped by m5Load. **M5S-SESS-4** m5Persist returns the same object when no session key exists (byte-identical saves, AC-P1 basis).
+ Total: 52 probes (33 per-field + 19 others).
+ 
+ ## Findings / notes from the probes
+-- N1 **RECONCILED 13:45** (abilities E2 since v1.3.5 eb33aad0, unchanged to v1.3.7 314dc0e3 L381, says negative/non-finite/non-number readyAt is REMOVED, = ready; PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.4 963a490b §3 L64 "Match"; probe expectation stands, no change). Original note: a NEGATIVE readyAt is not clamped to now; `fin()` rejects it, so readyAt is removed (absent = ready). Same player outcome as clamping. Probe corrected; spec E2 says "clamp", so PM may want the text to say "invalid (non-finite or negative) = ready".
++- N1 **RECONCILED 13:45** (abilities E2 since v1.3.5 eb33aad0, unchanged to v1.3.10 8034ba7f E2 L388-392, clamp L392, says negative/non-finite/non-number readyAt is REMOVED, = ready; PMW 5d1a8f85 / v1.0.2 34123ece / v1.0.5 3b34c0be §3 L64 "Match"; probe expectation stands, no change). Original note: a NEGATIVE readyAt is not clamped to now; `fin()` rejects it, so readyAt is removed (absent = ready). Same player outcome as clamping. Probe corrected; spec E2 says "clamp", so PM may want the text to say "invalid (non-finite or negative) = ready".
+ - N2: the IDB case uses reconcile on raw strings (the mirror stores the raw save string); an IdbMirror write/read round-trip with tests/fake-idb.ts is not in this draft.
+ - N3: probes run at flags ON only; flags-off identity is already covered by tests/v5-f2-m5-fields.test.ts (in repo).
+ 
+@@ -231,21 +231,21 @@
+   M5_SAVED_FIELDS (m5-state.ts:65) and UiFlags (app.ts:42 at 3f582db / :43 at e77fc5c) contain no fatigue/stall key; the final RC must match except for keys other specs add. SAVE_VERSION 6. SS-43 L465-468, §7.5 L258/L264.
+ - **M5S-FAT-NOFLAG-PROPOSED** (record only) `fatigueExplainerSeen?` / `fatigueAsleepToastSeen?` (SS §7.5 L262, PROPOSED only if HoP pulls Rule 5, not in v5) must be ABSENT on the final RC; if they appear, re-case them like abilitiesCoachSeen. SS §7.5 L262.
+ 
+-### G5. Workers rebase on PMW **v1.0.4 FINAL** `product/workers/v5-workers-save-shapes.md` sha1 **963a490b** (= "PMW"; cites/wording-only errata D-PMW-25/-27 on v1.0.2 34123ece, which D-PMW-2026-10-30-23 froze; see the wk104 header note). v1.0.2: 13:53 CET, D-PMW-2026-10-30-19, folds D-HOE-25 + review F-1..F-9; was v1.0.1 sha1 5d1a8f85, now frozen at `v5-workers-save-shapes.5d1a8f85.md`. v1.0.2 edits lines in place (101 lines both), so every "PMW Lnn" cite below holds for both) + D-HOE-20261030-20 (eng decisions L406-412, G-1 correction L420) + D-HOE-20261030-25 (L446-452). 39 cases (was stated 37, recount 36; +3)
++### G5. Workers rebase on PMW **v1.0.5 FINAL** `product/workers/v5-workers-save-shapes.md` sha1 **3b34c0be** (= "PMW"; cites/wording-only errata D-PMW-25/-27/-30 on v1.0.2 34123ece, which D-PMW-2026-10-30-23 froze; see the wk104 header note). v1.0.2: 13:53 CET, D-PMW-2026-10-30-19, folds D-HOE-25 + review F-1..F-9; was v1.0.1 sha1 5d1a8f85, now frozen at `v5-workers-save-shapes.5d1a8f85.md`. v1.0.2 edits lines in place (101 lines both), so every "PMW Lnn" cite below holds for both) + D-HOE-20261030-20 (eng decisions L406-412, G-1 correction L420) + D-HOE-20261030-25 (L446-452). 39 cases (was stated 37, recount 36; +3)
+ Review: `qa/v5-saves/changes-20261030/pmw-workers-shapes-REVIEW.md` (findings F-1..F-13). Specs as read at 13:40: pause v1.3.14 74a0122a, abilities v1.3.7 314dc0e3, rc2 v1.3.8 acfb03e3,
+ lighter-refill fa074d29, failure-cost (FC) f961a734. Code e77fc5c (= 3f582db for src/save, src/sim, game.ts and main.ts).
+ Tags: **UNBUILT** = no code at e77fc5c, run on the final RC. **F-9** = **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]**: the m5-fields.ts sanitiser hooks for refill/autoRefill/clockWage (D-HOE-25 F-9, owner Saves; resolves review F-4, F-5, F-8). F-9 rows are ALSO UNBUILT. **PENDING(G-n)** = PMW proposal not yet ruled (D-PMW-2026-10-30-16 "other G items stay PROPOSED"); expected value = the PMW v1.0 proposal.
+ RULED rows (G-1, G-3, G-5, G-6, G-8, G-9, G-10, M-3, M-5; D-HOE-25 F-4, F-5a/b, F-6, F-8a/b) carry no pending tag.
+ 
+ Pause / abilities: rows missing from the existing set (built; fixture-runnable on 3f582db)
+-- **M5S-PAUSE-NOREST** (M-3 CLOSED: D-HOE-20 L411, pause v1.3.14 L276 struck, PMW L74) a v6 worker with `rest: true` / `resting: true` and no `paused`, pause = 1, F >= unlock: NOT paused, `rest`/`resting` kept
++- **M5S-PAUSE-NOREST** (M-3 CLOSED: D-HOE-20 L411, pause v1.3.15 4c081f64 L276 struck, PMW L74) a v6 worker with `rest: true` / `resting: true` and no `paused`, pause = 1, F >= unlock: NOT paused, `rest`/`resting` kept
+   as unknown keys and written back unchanged; no event. Src pause.ts:13, m5-fields.ts:81-90, save.ts:102.
+ - **M5S-PAUSE-E13-FLAGOFF** pause = 0: `paused: true` + `callLockoutS: 30` load untouched, worker works, written back byte-identical; flipping back to 1 restores the paused state (sanitised). Pause E13 L286, PMW §3 L62. Src m5-fields.ts:74.
+-- **M5S-PAUSE-STALL60** (G-5 RULED, D-HOE-20 L409; pause v1.3.14 L144/E1 L264) visible frame gap of 10 min with an MH paused: m5Offline then exactly 60 s of `advance` (drain/recovery/wages for 60 s,
++- **M5S-PAUSE-STALL60** (G-5 RULED, D-HOE-20 L409; pause v1.3.15 4c081f64 L144/E1 L264) visible frame gap of 10 min with an MH paused: m5Offline then exactly 60 s of `advance` (drain/recovery/wages for 60 s,
+   focusMs 0); `paused` kept. Lockout part: `callLockoutS` reduced by at most 60 then frozen; **UNBUILT** (no countdown in step() at e77fc5c). Src game.ts:409/424-425.
+ - **M5S-PAUSE-HIDDEN60** hidden gap >= 60 s: the provisional sim is dropped and the hide snapshot restored; `paused`/`callLockoutS` equal to the hide snapshot; < 60 s simulated live. Pause E1 L264, PMW §0 L17. Src game.ts:276/371-385.
+-- **M5S-ABIL-BAK-RECLAMP** .bak restore with `readyAt` = now - 10 s and now + 10 min: loads as ready (clamped to now) and now + tc_ability_cd_s x 1000; no cooldown extended past 300 s. PMW §3 L64, G-14 fixture L93. Src m5-fields.ts:71, clock.ts:27-30.
+-- **M5S-ABIL-STALL60** visible frame gap >= 60 s mid-call: the call ends at the stall start with one ability_ended{cause:'offline'} (m5Offline before advance); readyAt keeps ticking on the wall clock. Abilities E1 L371-376. Src game.ts:424, m5-fields.ts:98.
++- **M5S-ABIL-BAK-RECLAMP** .bak restore with `readyAt` = now - 10 s and now + 10 min: loads as ready (clamped to now) and now + tc_ability_cd_s x 1000; no cooldown extended past 300 s. abilities v1.3.10 8034ba7f rule 3 L111, E2 clamp L392; PMW §3 L64, G-14 fixture L93. Src m5-fields.ts:71, clock.ts:27-30.
++- **M5S-ABIL-STALL60** visible frame gap >= 60 s mid-call: the call ends at the stall start with one ability_ended{cause:'offline'} (m5Offline before advance); readyAt keeps ticking on the wall clock. Abilities v1.3.10 8034ba7f E1 L382 (block L382-387). Src game.ts:424, m5-fields.ts:98.
+ 
+ rc2Refill charges (all **UNBUILT**: `git grep` refillCharges/chargeNext at e77fc5c finds nothing). G-1 RULED: D-HOE-20 L408 + correction L420, PMW L80, quick check 2 L98
+ - **M5S-RF-CHG-MISSING** **[expected FAIL until the F-9 split PR, likely Sat 19:00 CET, Sun 02:00 at the latest]** `refillCharges` key missing (new game, first hire, pre-refill v6 save with hired workers), rc2Refill = 1 -> 2 = start_charges data column (D-HOE-25 F-5b/F-6). G-3 consistent (PMW L82). rc2 L160.
+--- ../scratch/rev12-1437/v5-saves-cases.md	2026-10-30 14:42:02.067853864 +0100
++++ v5-saves-cases.md	2026-10-30 14:53:36.490683946 +0100
+@@ -69,8 +69,20 @@
+ - **TEL-R24-2 (HARD):** the ring never blocks a progress save: with storage near quota, telemetry shrinks/yields first and `eggfarm.save` (+ .bak) is still written (v0.6.1 Saves rule, m5.0-sizing §10.2, T-AC15); quota_headroom uses telemetry's real bytes.
+ - **TEL-R24-3 (HARD):** SAVE_VERSION stays 6 (save.ts:7) with telemetry v0.6.2 on; the telemetry key is separate from the save, so no save migration (D-HOE-20261030-19).
+ - **TEL-R24-4 (HARD):** the export header carries `schema_version: '0.6.2'` (G8-13; self-test G-8 export header ±).
+-- **T-AC9 (HARD, owner Saves QA):** under --schema v062 only NON-legacy events are validated: an event with `legacy:true` is skipped; a non-legacy event (no tag, or `legacy:false`) that fails validation FAILS. telemetry-check `tAc9Problems`; self-tests T-AC9 ×3. C-3 (HoQ): `refill_used` only, any `manage_used` FAILS. C-2 (HoQ): `session_end.paused_worker_s/all_paused_s` only with rc2Refill = 0; with rc2Refill = 1 `rest_toggled` on/off pairs are used (not yet asserted by telemetry-check: errata freeze held).
+-- **TEL-G8 (row 11, FINAL hard, HoQ C-1):** probe `probes/telemetry/g8-schema-ts.mjs` (static `git show`/`git grep` at the RC SHA): G8-1 schema.ts exists; G8-2 `TELEMETRY_SCHEMA_VERSION = '0.6.2'`; G8-3 `EVENT_SCHEMA`; G8-4 `EVENT_TYPES = Object.keys(EVENT_SCHEMA)`; G8-5 `validateEvent(e): string[]`; G8-6 `isPinned(e)` event-based (F-10); G8-7 FieldSpec kinds only enum|int|count|bucket|bool; G8-8 every type of the frozen spec (61) declared; G8-9 sid + fgMs; G8-10 sales_stall resolved_by 14 (L249, incl. chip_manage); G8-11 no `manage_used`, `refill_used` present (C-3); G8-12 telemetry.ts ring `{v: TELEMETRY_SCHEMA_VERSION, events}` + `legacy: true`; G8-13 export `schema_version`. **TEL-AC11:** (a) every `.track('<type>')` call site in src is in EVENT_SCHEMA; (b) with `--events <export>` every exported type is; (c) runtime "each emitted event passes validateEvent" = the gate T steps under --schema v062. Self-test `g8-selftest.sh` 16/16 (2 positive, 11 negative fixtures, absent file, 3f582db and e77fc5c fail closed, which is correct until row 11 lands).
++- **T-AC9 (HARD, owner Saves QA):** under --schema v062 only NON-legacy events are validated: an event with `legacy:true` is skipped; a non-legacy event (no tag, or `legacy:false`) that fails validation FAILS. telemetry-check `tAc9Problems`; self-tests T-AC9 ×3. C-3 (HoQ): `refill_used` only, any `manage_used` FAILS. C-2 (HoQ): `session_end.paused_worker_s/all_paused_s` only with rc2Refill = 0; with rc2Refill = 1 `rest_toggled` on/off pairs are used: **now asserted** (TEL-C2-* below, errata rev 13 PINNED).
++- **TEL-G8 (row 11, FINAL hard, HoQ C-1):** probe `probes/telemetry/g8-schema-ts.mjs` (static `git show`/`git grep` at the RC SHA): G8-1 schema.ts exists; G8-2 `TELEMETRY_SCHEMA_VERSION = '0.6.2'`; G8-3 `EVENT_SCHEMA`; G8-4 `EVENT_TYPES = Object.keys(EVENT_SCHEMA)`; G8-5 `validateEvent(e): string[]`; G8-6 `isPinned(e)` event-based (F-10); G8-7 FieldSpec kinds only enum|int|count|bucket|bool; G8-8 every type of the frozen spec (61) declared; G8-9 sid + fgMs; G8-10 sales_stall resolved_by 14 (L249, incl. chip_manage); G8-11 no `manage_used`, `refill_used` present (C-3); G8-12 telemetry.ts ring `{v: TELEMETRY_SCHEMA_VERSION, events}` + `legacy: true`; G8-13 export `schema_version`. **TEL-AC11:** (a) every `.track('<type>')` call site in src is in EVENT_SCHEMA; (b) with `--events <export>` every exported type is; (c) runtime "each emitted event passes validateEvent" = the gate T steps under --schema v062. Self-test `g8-selftest.sh` **61/61** (rev12-tel: 7 positive, 50 negative fixtures, absent file, 3f582db / e77fc5c / rc/v5 tip 65a7443 fail closed, which is correct until row 11 lands; + G8-14..23).
++- **Errata rev 13 PINNED (TASK saves-qa/rev12-tel, re-pinned 2026-10-30 14:5x CET):** `product/collection/telemetry-spec-errata-v5.md` rev 13 sha1 **a0e8f6d7085939756021856c25429a55d8a8d847** (frozen `telemetry-spec-errata-v5.a0e8f6d7.md` = live; read-only), pinned by HoE in `engineering/v5-rc-manifest.md` **L131** (14:5x; HoQA PASS QA-D-1030-TELERR7, review `qa/m5/review-telemetry-errata-v5-rev13.md` sha256 fbd422bb…), replacing rev 12 0cfe168a (L127, CONDITIONAL PASS TELERR6). Rev 12 -> 13 (21 hunks, all in-place, so every line ref below holds; only L192-194 and the changelog end grow): row #3 `fatigue_cue_tapped` = the six SS §8 fields (C-1 closed); row #23 `best_buy_suppressed_zero_gain` not built in v5, any emission is a defect (new check TEL-SG8-NONE); B-2c closed; re-cites (SS -> c29c9285 in the errata; SS of record is now cfff3817, errata-only, note 3 at L868; rc2 e4d98651, pause 4c081f64, fatigue 7e120786, eng. 95b2e26c, gate 34373a10). No change to the V-3 pinned set, counts 23/18/5/21, the `telemetry.bbv2` block, V-2d `dead_zone`, the zero_gain cap, the ability_blocked marker or V-6 C-2. The checker reads the FROZEN copy (`--errata` overrides). Expectations below are HARD unless noted; flag-conditional rows follow the build balance.json (`--balance`).
++  - **TEL-REV13-PIN (HARD, every mode):** errata file sha1 = a0e8f6d7 (rev 12 0cfe168a now FAILS this self-test); checker pinned set == the V-3 L143-152 block (20 types incl. `dead_zone`, `zero_gain_purchase`, + `tip_shown{id:clock_wage}`); 5 ring types (L154) not pinned. Self-tests: sha1, set ==, block without dead_zone FAILS, block with an extra type FAILS.
++  - **TEL-C2-RC2ON (HARD, rc2Refill = 1, the ship config; V-6 L175-178):** `session_end` carries NO `paused_worker_s` / `all_paused_s`; NO `worker_paused` / `worker_resumed`; every `rest_toggled{on:false}` closes an open `{on:true}` of the same worker (an `on:true` still open at unload is OK); `on:true` carries the H-1 fields `farm, mood, unpaid, ability_active, golden_on_screen, frenzy_active` and no `paused_duration_s`; `on:false` carries `paused_duration_s` >= 0 and none of the H-1 fields. Self-tests: 2 positive, 7 negative.
++  - **TEL-C2-RC2OFF (HARD, rc2Refill = 0 kill-switch build):** no `rest_toggled`; with pause = 1 `session_end.paused_worker_s` and `all_paused_s` present, numbers >= 0 (absent with pause = 0); `worker_resumed.cause` never `auto_full`. Self-tests: 1 positive, 3 negative.
++  - **TEL-ZG-CAP (HARD, bestBuyV2 = 1; row #21 L80, L90, L155, D-HOE-32 M-2):** <= `telemetry.bbv2.zero_gain_purchase_cap` (50, read from the build balance) `zero_gain_purchase` per session; NO capped marker ("over the cap nothing is emitted, no marker"); `session_end.zero_gain_purchase_dropped` int >= 0 present, and 0 unless exactly cap events were emitted. bestBuyV2 = 0: no `zero_gain_purchase`, no `zero_gain_purchase_dropped`. Self-tests: 2 positive, 7 negative (incl. cap read from balance).
++  - **TEL-AB-EVENTS50 (HARD, abilities = 1; L156-157, D-HOE-23 (a)):** `ability_blocked` capped marker `{capped:true, events:50}`: `events` is always 50, exactly 50 events before it, no `worker`/`reason`/`count`/`episodes` on it, nothing after it; > 50 without a marker FAILS. Self-tests: 2 positive, 6 negative. (Rev 12 "`events` is always 50" is the ability_blocked marker; the zero_gain_purchase cap of 50 has NO marker: see READINESS, unclear-text note.)
++  - **TEL-DZ-SHAPE (HARD, bestBuyV2 = 1; row #22 L81, V-2d):** `dead_zone` closed `{farm int 10..29, s float 1 dp >= telemetry.bbv2.dead_zone_min_s (30), reason 'none_affordable', open?: true}`; registered as a v062 closed validator when bestBuyV2 = 1. Self-tests: 2 positive, 9 negative (reason cap/max, farm 30/9, s 29.9, s 2 dp, open:false, extra field, min read from balance).
++  - **TEL-DZ-PIN + G8-20/G8-21 (HARD static, G-8 probe):** schema.ts pins `dead_zone` and `zero_gain_purchase` and exactly the V-3 set; a worst-case pinned-size test in `src/**/*.test.ts` ("worst" + `dead_zone` + the 200 KB cap) includes `dead_zone` (V-3 L160). **G8-23:** `dead_zone.reason` only 'none_affordable'; `zero_gain_purchase` has no capped variant; `session_end.zero_gain_purchase_dropped` declared.
++  - **TEL-SG8-NONE (HARD, every flag config; rev 13 row #23 L82, D-HOE-20261030-33 eng. L522):** no `best_buy_suppressed_zero_gain` in any captured log (no SG-8 emitter in v5). Self-tests: 1 positive, 1 negative.
++  - **TEL-BBV2-KEYS (HARD iff bestBuyV2 = 1, else INFO; L86-92, G-17):** the build balance.json has a TOP-LEVEL `telemetry.bbv2` block with exactly `shown_min_gap_s 5, zero_gain_eta_max_s 60, dead_zone_min_s 30, zero_gain_purchase_cap 50`; none under `m4.telemetry`; none as an economy.csv column (`--economy-csv`). The runtime thresholds (cap, dead_zone min) come from that block. rc/v5 tip 65a7443 has no block (INFO-FAIL with bestBuyV2 = 0 there). Self-tests: 1 positive, 6 negative.
++  - **TEL-G8-C1 (G-8 / T-AC9, C-1 RULED D-PMM-2026-10-30-TAPFIELDS, closed in errata rev 13 row #3 L62; SS **cfff3817** note 3 **L868** (moved from c29c9285 L866, text unchanged; QA-D-1030-SS4), §8 L290-294). Expectation: FAIL closed on rc/v5 today (no schema.ts at 65a7443); EXPECTED PASS once the schema.ts PR lands on rc/v5** (no PR-head run, D-CEO-20261030-10). Asserts, against the RC's own `validateEvent` (`probes/telemetry/g8-validate-c1.mjs`, runtime) and declarations (G8-22, static): **(a)** `fatigue_cue_tapped` validates with all six SS §8 fields `surface, loss_per_s, loss_share, n_tired, n_asleep, n_paused`, and is rejected when any one is missing; **(b)** `n_tired + n_asleep + n_paused <= 4`: sum 4 accepted, **sum 5 REJECTED** on tapped and shown (new FAIL fixture `nosum`); **(c)** `suppressed_by_stall` is REJECTED on tapped (shown only; shown requires it). The same rules are in telemetry-check `fatigueCueProblems` for emitted events (self-tests 2 positive, 13 negative incl. sum 5 and the two-field `{surface, loss_per_s}` shape). Self-test `g8-validate-selftest.sh` 7/7.
++    - **Pre-merge check (Saves QA, paper):** before the schema.ts PR merges, read its updated tests at **L211 and L338** (HoQA TELERR7 i-1; rev 13 G-8 row says "test L336") and confirm they cover (a) six fields, (b) the sum <= 4 bar with a sum-5 rejection, (c) suppressed_by_stall rejected on tapped. Record the PR head sha and the two line quotes; this is a read of the diff, not a PR-head run.
+ - Superseded (kept for history): **v5 RC re-target (D-CEO-20261030-04; schema APPROVED QA-D-1030-SAVES-RC-2):** telemetry v0.6.2 (manifest rows 11/24) moved to 5.1. The gate runs `--schema shipped`: the shipped rc/v5 schema in `changes-20261030/rc1-DRAFT-SCHEMA-3f582db.md` (sha256 083fcc11…, every field with src file:line at 3f582db), same depth, HARD on all 3 engines. The v0.6.2 checks below stay in the script, reported `N/A-BY-SCOPE` (never counted, not a waiver). S-AC5 (RC-2 amendment): the number of `upgrade` events must EQUAL the purchases the harness made (>= 1), with 6 self-tests incl. 2 count-mismatch negatives.
+ - Spec frozen: `spec/telemetry-spec.v0.6.2.b7a85e53.md`, sha256 b7a85e533f8738598eb93dfab1d2361167b39deaf8cd6d8fc874abc2a0767f23.
+ - Machine schema: `spec/telemetry-v062.schema.json`, hand-transcribed (61 events).
+--- ../scratch/rev12-1437/READINESS.md.bak	2026-10-30 14:40:34.492048796 +0100
++++ READINESS.md	2026-10-30 14:54:18.918604529 +0100
+@@ -134,6 +134,17 @@
+ 4. Something on the box deleted node_modules under qa/ at ~21:59. The driver now self-heals `tools/`, and the gate worktree runs its own npm ci.
+ 5. Export/import UI is still absent (S-RT detects it if added). The legacy suites may need small M5 adapting.
+ 
++### rev12-tel (2026-10-30 ~14:4x-14:5x CET, TASK saves-qa/rev12-tel)
++- Part 1 (one pass, pause + PMW + abilities): cases `m5-save-cases-DRAFT.md` 955695d0… -> **59b8b70b4359aafd18120946188047ab723e75e2b7c3ac2030c2d1680ed39eab** (diff `changes-20261030/rev12-tel-part1.diff` fdac48bf…). (a) pause rows PAUSE-PAUSED-SAN L52, -LOCKOUT-SAN L53, -NOREST L241, -STALL60 L244 -> **pause v1.3.15 4c081f64** (sha1 4c081f6443a9…, live = frozen; diff vs 74a0122a = L2/L296/L299, all cited lines unchanged). (b) PMW workers save shapes **v1.0.4 963a490b -> v1.0.5 3b34c0be50d6cd0c5ad8d0e813983ffd5ac2669a** (D-PMW-2026-10-30-30, QA-D-1030-FREEZE-RR3; live = frozen; diff vs 963a490b = L2/L64/L69, 101 lines both) in L48-L53, L59, G5 heading L234. (c) abilities refs -> **v1.3.10 8034ba7f** E2 L388-392, rule 3 L111, E1 L382, clamp L392 (E1/E2 text byte-identical to v1.3.7) in L48, L50, L59, L247, L248. Still 177 cases / 24 expected FAIL; only cite tokens removed (word-diff checked). Historical lines L25/L26 (abilities v1.3.3), L235/L301 (pause 74a0122a as read 13:40) kept. Other 74a0122a refs in qa/v5-saves are dated diffs/review (not edited); errata rev 12 row #13 / L178 still cite pause v1.3.14 (PMC to re-cite).
++- Part 2 (telemetry, errata **rev 13 a0e8f6d7 PINNED**, manifest **L131**, HoQA PASS TELERR7 review fbd422bb; first built on rev 12 0cfe168a L127, re-pinned 14:5x per HoQ): rev 12 -> 13 = 21 in-place hunks (row #3 six tapped fields / C-1 closed; row #23 not built in v5, any emission = defect; B-2c; re-cites); V-3 pinned set, counts, telemetry.bbv2, V-2d dead_zone, ZG cap, ability_blocked marker and V-6 C-2 unchanged; every line ref used holds. SS spec **cfff3817** replaces c29c9285 (diff vs `scratch/sales-stopped-spec.c29c9285.bak` = note 3 moved L866 -> **L868** byte-identical + new note 4 L869; errata only, QA-D-1030-SS4); every c29c9285 / L866 cite in my files -> cfff3817 L868.
++  - `scripts/telemetry-check.mjs` 2d7c85e1… -> **76547b48aac9952a5edaa77d631891100cccf8b9b0fcaa4064f32ef04a1146a7**: TEL-REV13-PIN (frozen errata sha1 + V-3 pinned set; `--errata`), C-2 rc2Refill 1/0, zero_gain cap 50 (from balance) no marker + `zero_gain_purchase_dropped`, ability_blocked marker events==50, dead_zone closed shape, C-1 fatigue six fields / sum <= 4 / no suppressed_by_stall on tapped, row #23 none, telemetry.bbv2 keys (HARD iff bestBuyV2=1; `--economy-csv`). Runtime: over all captured logs under --schema v062 (N/A-by-scope under shipped). Self-test (selftest-only): shipped 124/124 (all-on + rc2off fixtures), 122 + 1 INFO (rc/v5 65a7443 balance: no telemetry.bbv2 block, bestBuyV2 0); v062 111/111, 110 + 1 INFO; 71 REV13 self-tests in each; --flags mismatch exit 2; rev 12 file via --errata FAILS the pin self-test (correct).
++  - `scripts/SCRIPTS.sha256` 724346bf… -> **fb663058fc1ee7e72bf1902212e41b8b259d0a0e8e54ddf8010d9a0e1e4bda7d** (only telemetry-check changed), `sha256sum -c` 14/14 OK.
++  - G-8 static `probes/telemetry/g8-schema-ts.mjs` 83caed53… -> **f7ed951950431748aa43c36237844856e9e431057870a0f0c92e06fb9dccfa5d** (+ G8-20 worst-case size test incl. dead_zone, G8-21 pinned set, G8-22 C-1 declarations, G8-23 dead_zone reason / ZG no marker / dropped declared); `g8-selftest.sh` -> **585fc266…**, **61/61** (out.txt 64a16f4b…); rc/v5 3f582db, e77fc5c and tip 65a7443 fail closed (no schema.ts).
++  - G-8 runtime NEW `probes/telemetry/g8-validate-c1.mjs` **6b00db761171b6a8312f5647934a0d8c8d952690fe70563f2b13e9795942773b** (RC's own validateEvent/isPinned via git archive + esbuild: C-1 (a) six fields, (b) sum <= 4 with sum-5 rejection, (c) suppressed_by_stall rejected on tapped; dead_zone pinned/reason) + `g8-validate-selftest.sh` **5d27b80d…** **7/7** (out.txt 22f48a11…; new FAIL fixture `nosum`). **schema.ts is NOT on rc/v5** (origin/rc/v5 = 65a7443, 13:48): G8V-0 / G8-1 fail closed, so the C-1 case reports FAIL today, EXPECTED PASS once the PR lands. Saves WIP (`/workspace/wt-v5-telemetry-schema`, uncommitted, not run) read only: six fields at schema.ts L71/L175 (comment still "ruling pending"), no sum check, `zero_gain_purchase` declares a capped marker (rev 13: no marker), `dead_zone.reason` allows cap/max and farm unbounded, would FAIL G8-23 / G8V-C1b / G8V-DZ.
++  - Cases `v5-saves-cases.md` 4c1305d8… -> **5c632c94ebee15eacec9367af8e74ab2ec86b92ae4aae23265b05a99c1e0f98b**: +11 telemetry cases (TEL-REV13-PIN, TEL-C2-RC2ON, TEL-C2-RC2OFF, TEL-ZG-CAP, TEL-AB-EVENTS50, TEL-DZ-SHAPE, TEL-DZ-PIN/G8-20..23, TEL-SG8-NONE, TEL-BBV2-KEYS, TEL-G8-C1 + its pre-merge check line: verify the schema.ts PR tests L211 and L338 cover (a)-(c)). No CONDITIONAL / PENDING-RULING tags.
++  - Unclear / conflicting (to HoQ): (1) "events==50": rev 13 L157 "`events` is always 50" is the **ability_blocked** marker; the zero_gain_purchase cap is 50 but has **no marker** (row #21) — both checked. (2) Rev 13 G-8 row L186 still says "schema.ts:171 and test L336"; HoQA/i-1 says tests L211/L338 (WIP file `tests/telemetry-schema.test.ts`); my pre-merge line uses L211/L338. (3) Manifest: HoQ cited 4e808322 / "L127"; on disk the manifest is sha1 8446ff40 and the rev 13 pin is L131 (L127 = the rev 12 pin). (4) C-2 under rc2Refill=0 + pause=1: I require both paused totals present (flag-field convention); errata only says "emitted only when rc2Refill = 0". (5) Ship-set is now sha256 d71ed8cf with bestBuyV2 = 1 REQUIRED; G1 pin is still 56090a61 (not touched): `g1-shipset-selftest.sh` now 39/45 (fixtures predate bestBuyV2=1 + pin drift), not caused by this task. (6) rc/v5 balance.json has no `telemetry.bbv2` block yet.
++  - Diff of the whole task: `changes-20261030/rev12-tel.diff`. Backups: `qa/scratch/rev12-1437/` (+ `pre-rev13/`).
++
+ ### wk104-f2close (2026-10-30 ~14:3x CET, TASK saves-qa/wk104-f2close)
+ - Review `changes-20261030/pmw-workers-shapes-REVIEW.md` -> **12add7ab009beee239c4fd63e4bf87e45ee31c45c254a15ac17ba1c970fe19cd**: **F-2 CLOSED** against rc2 v1.3.16 sha1 e4d98651 (L142 quote verified verbatim; D-PMW-2026-10-30-29, no spec edit). Wording absent in v1.3.8 acfb03e3 / v1.3.9, present since v1.3.10 c31d5cf7: the review's v1.3.8 cite was correct when written. **PMW workers review: 0 open findings** (F-13 INFO: G-4/7/11/12/13/14 still PROPOSED, case rows PENDING).
+ 
+--- ../scratch/rev12-1437/telemetry-check.mjs	2026-10-30 14:42:02.067853864 +0100
++++ scripts/telemetry-check.mjs	2026-10-30 14:53:15.498722871 +0100
+@@ -8,8 +8,8 @@
+ // usage: node telemetry-check.mjs --html <egg-farm.html> --port 5961 --out <dir> [--engine chromium] [--flags breeds,zeroGainUi,pause,abilities] [--expect-build m4.1+sha]
+ // Flags: conditional fields/events are required ONLY for flags named in --flags and must be ABSENT otherwise.
+ import { serve, serveDir, launch, watch, seedLS, ids, start, skipOnb, play, writeJSON, readText, sha256, dismissWelcome } from './lib.mjs';
+-import { parseArgs } from 'node:util'; import path from 'node:path'; import { readFileSync } from 'node:fs';
+-const { values: A } = parseArgs({ options: { html: { type: 'string' }, port: { type: 'string', default: '5961' }, out: { type: 'string' }, engine: { type: 'string', default: 'chromium' }, flags: { type: 'string', default: '' }, balance: { type: 'string' }, 'expect-build': { type: 'string' }, 'hidden-hard': { type: 'boolean', default: false }, only: { type: 'string' }, 'milestone-ids': { type: 'string' }, 'ring-size': { type: 'string', default: '5000' }, 'selftest-only': { type: 'boolean', default: false }, 'qa-dir': { type: 'string' }, schema: { type: 'string', default: 'shipped' } } });
++import { parseArgs } from 'node:util'; import path from 'node:path'; import { readFileSync } from 'node:fs'; import { createHash } from 'node:crypto';
++const { values: A } = parseArgs({ options: { html: { type: 'string' }, port: { type: 'string', default: '5961' }, out: { type: 'string' }, engine: { type: 'string', default: 'chromium' }, flags: { type: 'string', default: '' }, balance: { type: 'string' }, 'expect-build': { type: 'string' }, 'hidden-hard': { type: 'boolean', default: false }, only: { type: 'string' }, 'milestone-ids': { type: 'string' }, 'ring-size': { type: 'string', default: '5000' }, 'selftest-only': { type: 'boolean', default: false }, 'qa-dir': { type: 'string' }, schema: { type: 'string', default: 'shipped' }, errata: { type: 'string' }, 'economy-csv': { type: 'string' } } });
+ if (!['shipped', 'v062'].includes(A.schema)) { console.error('--schema shipped|v062'); process.exit(2); } const V062 = A.schema === 'v062';
+ // v5 RE-TARGET (2026-10-30 13:2x, HoQ): telemetry v0.6.2 ships in v5, always on, no flag (D-CEO-20261030-09; ship-set product/v5-ship-set.md c3aba321 "Not flags";
+ // manifest rows 11/24 = v5, D-HOE-20261030-18). src/telemetry/schema.ts is NOT in rc/v5 3f582db/e77fc5c (G-8, row 11 open), so --schema shipped
+@@ -21,11 +21,11 @@
+ const want = id => !A.only || A.only.split(',').includes(id);
+ // Flags: from the BUILD's committed balance.json when --balance is given (m4.enabled === 1 && m4.flags.<k> === 1, config/flags.ts flagOn);
+ // --flags, if also given, must name exactly that set (else exit 2). Ship-set c3aba321: 13 flags on, bestBuyV2 off.
+-let FL = A.flags.split(',').filter(Boolean), FLAGS_SRC = A.flags ? '--flags' : 'none (all off)';
++let FL = A.flags.split(',').filter(Boolean), FLAGS_SRC = A.flags ? '--flags' : 'none (all off)', BJ = null;
+ if (A.balance) { let bj; try { bj = JSON.parse(readFileSync(A.balance, 'utf8')); } catch (e) { console.error(`--balance ${A.balance} unreadable`); process.exit(2); }
+   const m = (bj && bj.m4) || {}, f = (m.flags && typeof m.flags === 'object') ? m.flags : {}, on = m.enabled === 1 ? Object.keys(f).filter(k => f[k] === 1).sort() : [];
+   if (A.flags && [...new Set(FL)].sort().join(',') !== on.join(',')) { console.error(`--flags '${A.flags}' != balance.json flags-on '${on.join(',')}'`); process.exit(2); }
+-  FL = on; FLAGS_SRC = `balance.json ${sha256(readFileSync(A.balance))}`; }
++  BJ = bj; FL = on; FLAGS_SRC = `balance.json ${sha256(readFileSync(A.balance))}`; }
+ const FLAGS = new Set(FL); const OUT = path.resolve(A.out);
+ const res = { html_sha256: sha256(readFileSync(A.html)), schema_sha256: sha256(readFileSync(path.join(HERE, '../spec/telemetry-v062.schema.json'))), flags: [...FLAGS], flags_source: FLAGS_SRC, checks: [], scenarios: {} };
+ // D-HOP-2026-10-29-04 (spec addendum 20:20, telemetry-spec.md sha256 6d504570): G-TEL-1/2 events are ALLOWED with CLOSED payloads, HARD in T-AC9.
+@@ -162,6 +162,84 @@
+   v: e => [!STALL.phase.includes(e.phase) && `phase ${e.phase}`, !STALL.cause.includes(e.cause) && `cause ${e.cause}`, !STALL.st.includes(e.mh_state) && `mh_state ${e.mh_state}`, !STALL.st.includes(e.ch_state) && `ch_state ${e.ch_state}`,
+     e.phase === 'resolved' && !(STALL.resolved_by.includes(e.resolved_by) && typeof e.time_to_resolve_s === 'number' && typeof e.chip_tapped === 'boolean') && 'resolved needs resolved_by enum + time_to_resolve_s + chip_tapped',
+     e.phase === 'shown' && ['resolved_by', 'time_to_resolve_s', 'chip_tapped'].some(f => f in e) && 'shown carries resolved-only fields'].filter(Boolean).join('; ') };
++// ==== Errata rev 13 PINNED (TASK saves-qa/rev12-tel, 2026-10-30): product/collection/telemetry-spec-errata-v5.md sha1 a0e8f6d7085939756021856c25429a55d8a8d847
++// (frozen telemetry-spec-errata-v5.a0e8f6d7.md), pinned by HoE in engineering/v5-rc-manifest.md L131 (replaces rev 12 0cfe168a, which replaced rev 7 fd7d5921). Pure checks; self-tested below in
++// every mode; applied at runtime to every captured log under --schema v062 (N/A-by-scope under shipped).
++const ERRATA_SHA1 = 'a0e8f6d7085939756021856c25429a55d8a8d847';
++// Pinned set, V-3 L143-152 (+ tip_shown{id:clock_wage}); ring types L154. dead_zone pinned since rev 9.
++const PINNED_SET_REV13 = ['sales_stall', 'fatigue_cue_shown', 'fatigue_cue_tapped', 'shift_sheet_opened', 'refill_used', 'rest_toggled', 'first_worker_hired', 'autorefill_toggled',
++  'abilities_unlocked', 'ability_used', 'ability_ended', 'ability_blocked', 'worker_paused', 'worker_resumed', 'hatch_started', 'flock_complete', 'milestone_reached', 'balanced_tier', 'zero_gain_purchase', 'dead_zone'];
++const RING_REV13 = ['breed_revealed', 'breed_slotted', 'best_buy_shown', 'best_buy_followed', 'best_buy_suppressed_zero_gain'];
++/** Pinned-set check against the errata text: the V-3 code block must list exactly PINNED_SET_REV13. */
++const pinnedSetProblems = txt => { const m = String(txt || '').match(/## V-3 §3\.2 pinned set[\s\S]*?```\n([\s\S]*?)```/); if (!m) return ['V-3 pinned-set block not found in errata text'];
++  const got = [...m[1].matchAll(/\b([a-z][a-z0-9_]+)\b/g)].map(x => x[1]).filter(n => !['e', 'type', 'id', 'tip_shown', 'clock_wage'].includes(n));
++  const P = []; for (const n of PINNED_SET_REV13) if (!got.includes(n)) P.push(`${n} not in errata V-3 pinned set`); for (const n of got) if (!PINNED_SET_REV13.includes(n)) P.push(`errata V-3 lists ${n}, checker does not`);
++  if (!/tip_shown[\s\S]*clock_wage/.test(m[1])) P.push('tip_shown clock_wage predicate missing'); return P; };
++// telemetry.bbv2.* (rev 13 L86-92, G-17): hand-set TOP-LEVEL balance.json `telemetry.bbv2` block, never economy.csv, never m4.telemetry. Exactly 4 keys.
++const BBV2_SPEC = { shown_min_gap_s: 5, zero_gain_eta_max_s: 60, dead_zone_min_s: 30, zero_gain_purchase_cap: 50 };
++const bbv2KeyProblems = (bj, csvHeader) => { const P = []; const b = bj && bj.telemetry && bj.telemetry.bbv2;
++  if (!b || typeof b !== 'object') P.push('top-level balance.json telemetry.bbv2 block missing');
++  else { for (const [k, v] of Object.entries(BBV2_SPEC)) if (b[k] !== v) P.push(`telemetry.bbv2.${k} = ${JSON.stringify(b[k])} != ${v}`); for (const k of Object.keys(b)) if (!(k in BBV2_SPEC)) P.push(`telemetry.bbv2.${k} not in errata rev 13`); }
++  const m4t = bj && bj.m4 && bj.m4.telemetry; if (m4t && typeof m4t === 'object' && ('bbv2' in m4t || Object.keys(BBV2_SPEC).some(k => k in m4t))) P.push('bbv2 keys under m4.telemetry (rev 13: top-level telemetry.bbv2 only)');
++  if (csvHeader != null) for (const k of Object.keys(BBV2_SPEC)) if (String(csvHeader).split(/[,\s]+/).some(c => c === k || c === `telemetry.bbv2.${k}` || c === `bbv2_${k}`)) P.push(`economy.csv has a ${k} column (rev 13: never from economy.csv)`);
++  return P; };
++const BBV = (BJ && BJ.telemetry && BJ.telemetry.bbv2) || BBV2_SPEC;   // thresholds of the build under test (spec values if absent)
++const bySid = evs => { const m = new Map(); for (const e of evs) { const k = e.sid ?? '?'; if (!m.has(k)) m.set(k, []); m.get(k).push(e); } return m; };
++const isInt = (v, lo = -Infinity, hi = Infinity) => Number.isInteger(v) && v >= lo && v <= hi;
++const dp = (v, n) => typeof v === 'number' && Number.isFinite(v) && Math.abs(v * 10 ** n - Math.round(v * 10 ** n)) < 1e-6;
++// C-2 (HoQ, = rev 13 V-6 L175-178): rc2Refill=1 -> only rest_toggled (on:true -> on:false pairs carry paused_duration_s; H-1 fields on on:true), NO worker_paused/
++// worker_resumed, session_end WITHOUT paused_worker_s/all_paused_s. rc2Refill=0 (+ pause=1) -> worker_paused/worker_resumed only, no rest_toggled, session_end carries
++// both paused totals (flag field present iff its flag config, line 9 rule), worker_resumed.cause never auto_full.
++const H1 = ['farm', 'mood', 'unpaid', 'ability_active', 'golden_on_screen', 'frenzy_active'], PT = ['paused_worker_s', 'all_paused_s'];
++const c2Problems = (evs, rc2, pause) => { const P = [];
++  for (const [sid, es] of bySid(evs)) { const se = es.filter(e => e.type === 'session_end');
++    if (rc2) { for (const e of se) { const has = PT.filter(f => f in e); if (has.length) P.push(`${sid}: session_end carries ${has.join(',')} with rc2Refill=1 (C-2: absent; derive from rest_toggled pairs)`); }
++      for (const e of es) if (e.type === 'worker_paused' || e.type === 'worker_resumed') P.push(`${sid}: ${e.type} with rc2Refill=1 (exclusive emission: rest_toggled only)`);
++      const open = new Map(); for (const e of es.filter(e => e.type === 'rest_toggled')) { const w = e.worker;
++        if (e.on === true) { if (open.has(w)) P.push(`${sid}: rest_toggled{on:true} ${w} while already paused (unpaired)`); open.set(w, e); const miss = H1.filter(f => !(f in e)); if (miss.length) P.push(`${sid}: rest_toggled{on:true} ${w} lacks ${miss.join(',')}`); if ('paused_duration_s' in e) P.push(`${sid}: rest_toggled{on:true} carries paused_duration_s`); }
++        else if (e.on === false) { if (!open.has(w)) P.push(`${sid}: rest_toggled{on:false} ${w} without a preceding on:true (unpaired)`); open.delete(w); if (!(typeof e.paused_duration_s === 'number' && e.paused_duration_s >= 0)) P.push(`${sid}: rest_toggled{on:false} ${w} paused_duration_s ${JSON.stringify(e.paused_duration_s)} not a number >= 0`); const xs = H1.filter(f => f in e); if (xs.length) P.push(`${sid}: rest_toggled{on:false} carries on:true-only ${xs.join(',')}`); }
++        else P.push(`${sid}: rest_toggled.on ${JSON.stringify(e.on)} not bool`); } }
++    else { for (const e of es) { if (e.type === 'rest_toggled') P.push(`${sid}: rest_toggled with rc2Refill=0 (exclusive emission: worker_paused/worker_resumed)`); if (e.type === 'worker_resumed' && e.cause === 'auto_full') P.push(`${sid}: worker_resumed cause auto_full with rc2Refill=0`); }
++      for (const e of se) for (const f of PT) { if (pause && !(typeof e[f] === 'number' && e[f] >= 0)) P.push(`${sid}: session_end.${f} ${JSON.stringify(e[f])} missing/not >= 0 with rc2Refill=0, pause=1 (C-2: paused totals only here)`); if (!pause && f in e) P.push(`${sid}: session_end.${f} with pause=0`); } } }
++  return P; };
++// zero_gain_purchase cap (rev 13 row #21 L80, L90, L155; D-HOE-32 M-2): <= telemetry.bbv2.zero_gain_purchase_cap (50) per session, NO marker,
++// session_end.zero_gain_purchase_dropped int >= 0 (bestBuyV2 field: present iff bestBuyV2=1) = events not emitted over the cap.
++const zgCapProblems = (evs, cap, bb) => { const P = [];
++  for (const [sid, es] of bySid(evs)) { const zg = es.filter(e => e.type === 'zero_gain_purchase'), se = es.filter(e => e.type === 'session_end');
++    if (!bb) { if (zg.length) P.push(`${sid}: ${zg.length} zero_gain_purchase with bestBuyV2=0`); if (se.some(e => 'zero_gain_purchase_dropped' in e)) P.push(`${sid}: session_end.zero_gain_purchase_dropped with bestBuyV2=0`); continue; }
++    if (zg.length > cap) P.push(`${sid}: ${zg.length} zero_gain_purchase > cap ${cap}`);
++    for (const e of zg) if ('capped' in e || 'events' in e || 'episodes' in e) P.push(`${sid}: zero_gain_purchase capped marker present (rev 13: over the cap nothing is emitted, no marker)`);
++    for (const e of se) { const d = e.zero_gain_purchase_dropped; if (!isInt(d, 0)) { P.push(`${sid}: session_end.zero_gain_purchase_dropped ${JSON.stringify(d)} not int >= 0 (bestBuyV2=1)`); continue; }
++      if (zg.length < cap && d !== 0) P.push(`${sid}: zero_gain_purchase_dropped ${d} > 0 but only ${zg.length} < cap ${cap} emitted`); } }
++  return P; };
++// ability_blocked marker (rev 13 L156-157, D-HOE-23 (a)): <= 50 events, then ONE marker {capped:true, events:50} (events is always 50), no worker/reason/count, nothing after.
++const abCapProblems = evs => { const P = [];
++  for (const [sid, es] of bySid(evs)) { const ab = es.filter(e => e.type === 'ability_blocked'), mi = ab.findIndex(e => e.capped === true);
++    if (mi < 0) { if (ab.length > 50) P.push(`${sid}: ${ab.length} ability_blocked > 50 and no capped marker`); continue; }
++    const m = ab[mi]; if (m.events !== 50) P.push(`${sid}: ability_blocked marker events ${JSON.stringify(m.events)} != 50`); if ('episodes' in m) P.push(`${sid}: ability_blocked marker uses episodes (coop_full key)`);
++    for (const f of ['worker', 'reason', 'count']) if (f in m) P.push(`${sid}: ability_blocked marker carries ${f}`); if (mi !== 50) P.push(`${sid}: ${mi} ability_blocked before the marker (must be 50)`);
++    if (ab.length > mi + 1) P.push(`${sid}: ${ab.length - mi - 1} ability_blocked after the capped marker`); }
++  return P; };
++// dead_zone (rev 13 row #22 L81, V-2d): closed {farm int 10..29, s float 1 dp >= dead_zone_min_s, reason 'none_affordable', open?: true}; pinned.
++const deadZoneProblems = (e, minS = BBV.dead_zone_min_s) => { const P = []; for (const f of Object.keys(e)) if (!['type', 'ts', 'sid', 'fgMs', 'farm', 's', 'reason', 'open'].includes(f)) P.push(`dead_zone: field ${f} outside the closed list`);
++  if (!isInt(e.farm, 10, 29)) P.push(`dead_zone.farm ${JSON.stringify(e.farm)} not int 10 <= farm < 30`); if (!(dp(e.s, 1) && e.s >= minS)) P.push(`dead_zone.s ${JSON.stringify(e.s)} not 1-dp >= ${minS}`);
++  if (e.reason !== 'none_affordable') P.push(`dead_zone.reason ${JSON.stringify(e.reason)} != none_affordable`); if ('open' in e && e.open !== true) P.push(`dead_zone.open ${JSON.stringify(e.open)} (only open:true or absent)`); return P; };
++// C-1 RULED (D-PMM-2026-10-30-TAPFIELDS; sales-stopped-spec cfff3817 note 3 L868, §8 L290-294): both fatigue_cue_* carry the 6 fields; suppressed_by_stall on shown ONLY.
++const FATIGUE6 = ['surface', 'loss_per_s', 'loss_share', 'n_tired', 'n_asleep', 'n_paused'];
++const fatigueCueProblems = e => { const P = [], t = e.type, allowed = ['type', 'ts', 'sid', 'fgMs', ...FATIGUE6, ...(t === 'fatigue_cue_shown' ? ['suppressed_by_stall'] : [])];
++  for (const f of FATIGUE6) if (!(f in e)) P.push(`${t}: required ${f} missing (C-1, SS note 3)`); for (const f of Object.keys(e)) if (!allowed.includes(f)) P.push(`${t}: field ${f} outside the closed list${f === 'suppressed_by_stall' ? ' (shown only, SS note 3)' : ''}`);
++  if ('surface' in e && !['hud_chip', 'banner', 'bubble'].includes(e.surface)) P.push(`${t}.surface ${JSON.stringify(e.surface)} not in enum`); if ('loss_per_s' in e && !isInt(e.loss_per_s, 0)) P.push(`${t}.loss_per_s not int cents >= 0`);
++  if ('loss_share' in e && !(dp(e.loss_share, 3) && e.loss_share >= 0 && e.loss_share <= 1)) P.push(`${t}.loss_share ${JSON.stringify(e.loss_share)} not 3-dp in [0,1]`);
++  for (const f of ['n_tired', 'n_asleep', 'n_paused']) if (f in e && !isInt(e[f], 0, 4)) P.push(`${t}.${f} ${JSON.stringify(e[f])} not int 0..4`); if ((e.n_tired ?? 0) + (e.n_asleep ?? 0) + (e.n_paused ?? 0) > 4) P.push(`${t}: n_tired + n_asleep + n_paused > 4`);
++  if (t === 'fatigue_cue_shown' && typeof e.suppressed_by_stall !== 'boolean') P.push('fatigue_cue_shown.suppressed_by_stall missing/not bool'); return P; };
++if (FLAGS.has('bestBuyV2')) CLOSED.dead_zone = { req: ['farm', 's', 'reason'], opt: ['open'], v: e => deadZoneProblems(e).join('; ') };
++if (FLAGS.has('fatigueCue')) for (const t of ['fatigue_cue_shown', 'fatigue_cue_tapped']) CLOSED[t] = { req: FATIGUE6, opt: t === 'fatigue_cue_shown' ? ['suppressed_by_stall'] : [], v: e => fatigueCueProblems(e).join('; ') };
++// Row #23 best_buy_suppressed_zero_gain (rev 13 L82, D-HOE-20261030-33 eng. L522): NOT built in v5; any emission is a defect (every mode, every flag config).
++const sg8Problems = evs => { const n = evs.filter(e => e.type === 'best_buy_suppressed_zero_gain').length; return n ? [`${n} best_buy_suppressed_zero_gain emitted (rev 13 row #23: not built in v5, any emission is a defect)`] : []; };
++/** All rev 13 runtime problems for one captured log (v062 only). */
++const rev12Problems = evs => [...c2Problems(evs, FLAGS.has('rc2Refill'), FLAGS.has('pause')), ...zgCapProblems(evs, BBV.zero_gain_purchase_cap, FLAGS.has('bestBuyV2')), ...abCapProblems(evs),
++  ...evs.filter(e => e.type === 'dead_zone').flatMap(e => deadZoneProblems(e)), ...evs.filter(e => /^fatigue_cue_(shown|tapped)$/.test(e.type)).flatMap(fatigueCueProblems), ...sg8Problems(evs)];
++const ALLEV = [];   // every captured v062 log (TS1-TS8), for the rev 13 runtime checks after the run
+ res.triage = {};
+ const flagT = (k, why) => { res.triage[k] = (res.triage[k] || { why, n: 0 }); res.triage[k].n++; };
+ let hard = 0; const ck = (id, pass, d = {}, isHard = true) => { if (!pass && isHard) hard++; res.checks.push({ id, pass: !!pass, hard: isHard, ...d }); console.log(`${pass ? 'PASS' : isHard ? 'FAIL' : 'INFO-FAIL'} ${id} ${JSON.stringify(d.short ?? '')}`); };
+@@ -171,7 +249,7 @@
+ /** Extract every event-like object from the stored telemetry value (array today; {ring,pinned,...} tolerated for v0.5 storage). */
+ function events(v) { const out = []; const walk = x => { if (Array.isArray(x)) x.forEach(walk); else if (x && typeof x === 'object') { if (typeof x.type === 'string' && 'ts' in x) out.push(x); else Object.values(x).forEach(walk); } }; walk(v); return out; }
+ const readLS = p => p.evaluate(() => { try { return JSON.parse(localStorage.getItem('eggfarm.telemetry') || 'null'); } catch { return null; } });
+-let LAST_RING; async function endAndRead(p, url) { await p.goto(url + 'blank.txt'); LAST_RING = await readLS(p); return events(LAST_RING); } // navigating away = pagehide -> session_end + flush
++let LAST_RING; async function endAndRead(p, url) { await p.goto(url + 'blank.txt'); LAST_RING = await readLS(p); const ev = events(LAST_RING); ALLEV.push(...ev); return ev; } // navigating away = pagehide -> session_end + flush
+ const typeOk = (t, v) => t === 'integer' ? Number.isInteger(v) : t === 'boolean' ? typeof v === 'boolean' : t === 'decimal1' ? typeof v === 'number' && Math.abs(v * 10 - Math.round(v * 10)) < 1e-9 : true;
+ /** Schema check of one event; returns list of problems. */
+ function schemaProblems(e) {
+@@ -291,7 +369,78 @@
+     ST('T-AC9 legacy:false invalid event FAILS (only true skips)', tAc9Problems({ type: 'not_a_real_event', ts: 1, legacy: false }), /not in allowlist/);
+     ST('C-3 manage_used FAILS (refill_used only, no alias)', schemaProblems({ ...good, type: 'manage_used' }), /C-3/);
+     if (!V062) ST('Q-TEL-3 sales_stall on a pre-v0.6.2 (shipped) build FAILS (HoQ: intended with salesStopped=1)', shippedProblems({ type: 'sales_stall', ts: 1000, sessionMs: 5, phase: 'shown', stall_id: 1 }), /not in shipped allowlist: sales_stall/); }
++  // errata rev 13 PINNED self-tests (TASK saves-qa/rev12-tel): one positive + negatives per rule, HARD in every mode
++  { const ST = (name, p, re) => { R[name] = p; ck(`SELFTEST REV13 ${name}`, re ? p.some(x => re.test(x)) : p.length === 0, { short: p }); };
++    const E = { ts: 1, sid: 'abc123', fgMs: 1 }, ev = o => ({ ...E, ...o });
++    const on = ev({ type: 'rest_toggled', worker: 'market_hand', on: true, energy_pct: 40, state: 'active', cause: 'manual', farm: 9, mood: 'tired', unpaid: false, ability_active: false, golden_on_screen: false, frenzy_active: false });
++    const off = ev({ type: 'rest_toggled', worker: 'market_hand', on: false, energy_pct: 60, state: 'paused', cause: 'manual', paused_duration_s: 12.5 });
++    const se = o => ev({ type: 'session_end', ...o }), wp = ev({ type: 'worker_paused', worker: 'market_hand' }), wr = ev({ type: 'worker_resumed', worker: 'market_hand', cause: 'manual' });
++    ST('C-2 positive: rc2Refill=1 on:true -> on:false pair, session_end without paused totals', c2Problems([on, off, se({})], true, true), null);
++    ST('C-2 positive: rc2Refill=1 worker still paused at unload (open on:true) is OK', c2Problems([on, se({})], true, true), null);
++    ST('C-2 negative: rc2Refill=1 session_end.paused_worker_s FAILS', c2Problems([on, off, se({ paused_worker_s: 12 })], true, true), /paused_worker_s with rc2Refill=1/);
++    ST('C-2 negative: rc2Refill=1 session_end.all_paused_s FAILS', c2Problems([se({ all_paused_s: 0 })], true, true), /all_paused_s with rc2Refill=1/);
++    ST('C-2 negative: rc2Refill=1 worker_paused FAILS (exclusive emission)', c2Problems([wp, se({})], true, true), /worker_paused with rc2Refill=1/);
++    ST('C-2 negative: rc2Refill=1 on:false without on:true FAILS (unpaired)', c2Problems([off, se({})], true, true), /without a preceding on:true/);
++    ST('C-2 negative: rc2Refill=1 two on:true for one worker FAILS (unpaired)', c2Problems([on, on, se({})], true, true), /already paused/);
++    ST('C-2 negative: rc2Refill=1 on:true without H-1 fields FAILS', c2Problems([{ ...on, golden_on_screen: undefined, frenzy_active: undefined, mood: undefined }].map(e => Object.fromEntries(Object.entries(e).filter(([, v]) => v !== undefined))), true, true), /lacks mood,golden_on_screen,frenzy_active/);
++    ST('C-2 negative: rc2Refill=1 on:false without paused_duration_s FAILS', c2Problems([on, { ...off, paused_duration_s: undefined }], true, true), /paused_duration_s undefined not a number/);
++    ST('C-2 positive: rc2Refill=0 pause=1 worker_paused/resumed + session_end paused totals', c2Problems([wp, wr, se({ paused_worker_s: 12, all_paused_s: 0 })], false, true), null);
++    ST('C-2 negative: rc2Refill=0 rest_toggled FAILS (exclusive emission)', c2Problems([on, off, se({ paused_worker_s: 1, all_paused_s: 0 })], false, true), /rest_toggled with rc2Refill=0/);
++    ST('C-2 negative: rc2Refill=0 pause=1 session_end without all_paused_s FAILS', c2Problems([se({ paused_worker_s: 1 })], false, true), /all_paused_s undefined missing/);
++    ST('C-2 negative: rc2Refill=0 worker_resumed cause auto_full FAILS', c2Problems([wp, { ...wr, cause: 'auto_full' }, se({ paused_worker_s: 1, all_paused_s: 0 })], false, true), /auto_full/);
++    const zg = n => Array.from({ length: n }, (_, i) => ev({ type: 'zero_gain_purchase', key: 'HENS', farm: 12, level: i, meaningful_eta_s: 20.5 }));
++    ST('ZG cap positive: 50 emitted + session_end.zero_gain_purchase_dropped 7', zgCapProblems([...zg(50), se({ zero_gain_purchase_dropped: 7 })], 50, true), null);
++    ST('ZG cap positive: 3 emitted + dropped 0', zgCapProblems([...zg(3), se({ zero_gain_purchase_dropped: 0 })], 50, true), null);
++    ST('ZG cap negative: 51 emitted FAILS (> cap 50)', zgCapProblems([...zg(51), se({ zero_gain_purchase_dropped: 0 })], 50, true), /51 zero_gain_purchase > cap 50/);
++    ST('ZG cap negative: capped marker FAILS (no marker)', zgCapProblems([...zg(50), ev({ type: 'zero_gain_purchase', capped: true, events: 50 }), se({ zero_gain_purchase_dropped: 1 })], 50, true), /no marker/);
++    ST('ZG cap negative: dropped missing with bestBuyV2=1 FAILS', zgCapProblems([...zg(2), se({})], 50, true), /zero_gain_purchase_dropped undefined not int/);
++    ST('ZG cap negative: dropped 2 while only 3 < 50 emitted FAILS', zgCapProblems([...zg(3), se({ zero_gain_purchase_dropped: 2 })], 50, true), /only 3 < cap 50/);
++    ST('ZG cap negative: dropped -1 FAILS', zgCapProblems([se({ zero_gain_purchase_dropped: -1 })], 50, true), /not int >= 0/);
++    ST('ZG cap negative: zero_gain_purchase with bestBuyV2=0 FAILS', zgCapProblems([...zg(1), se({})], 50, false), /bestBuyV2=0/);
++    ST('ZG cap: cap is read from the build balance telemetry.bbv2.zero_gain_purchase_cap (40 -> 41 FAILS)', zgCapProblems([...zg(41), se({ zero_gain_purchase_dropped: 0 })], 40, true), /41 zero_gain_purchase > cap 40/);
++    const ab = n => Array.from({ length: n }, () => ev({ type: 'ability_blocked', worker: 'hawker', reason: 'cooldown', count: 2 })), mk = o => ev({ type: 'ability_blocked', capped: true, events: 50, ...o });
++    ST('events==50 positive: 50 ability_blocked + marker {capped:true, events:50}', abCapProblems([...ab(50), mk({})]), null);
++    ST('events==50 positive: 10 ability_blocked, no marker', abCapProblems(ab(10)), null);
++    ST('events==50 negative: marker events 51 FAILS', abCapProblems([...ab(50), mk({ events: 51 })]), /events 51 != 50/);
++    ST('events==50 negative: marker carries worker FAILS', abCapProblems([...ab(50), mk({ worker: 'hawker' })]), /marker carries worker/);
++    ST('events==50 negative: marker uses episodes FAILS', abCapProblems([...ab(50), mk({ events: undefined, episodes: 50 })]), /episodes/);
++    ST('events==50 negative: 49 before the marker FAILS', abCapProblems([...ab(49), mk({})]), /49 ability_blocked before/);
++    ST('events==50 negative: ability_blocked after the marker FAILS', abCapProblems([...ab(50), mk({}), ...ab(1)]), /after the capped marker/);
++    ST('events==50 negative: 51 ability_blocked, no marker FAILS', abCapProblems(ab(51)), /51 ability_blocked > 50/);
++    const dz = o => ev({ type: 'dead_zone', farm: 12, s: 30, reason: 'none_affordable', ...o });
++    ST('dead_zone positive: farm 12, s 30.0, none_affordable', deadZoneProblems(dz({}), 30), null); ST('dead_zone positive: open:true flush, farm 29, s 181.4', deadZoneProblems(dz({ open: true, farm: 29, s: 181.4 }), 30), null);
++    for (const [n, o, re] of [['reason cap', { reason: 'cap' }, /none_affordable/], ['reason max', { reason: 'max' }, /none_affordable/], ['farm 30', { farm: 30 }, /farm 30/], ['farm 9', { farm: 9 }, /farm 9/],
++      ['s 29.9 < dead_zone_min_s', { s: 29.9 }, /s 29.9/], ['s 30.25 (2 dp)', { s: 30.25 }, /s 30.25/], ['open:false', { open: false }, /open false/], ['extra field cap', { cap: 1 }, /field cap outside/]]) ST(`dead_zone negative: ${n} FAILS`, deadZoneProblems(dz(o), 30), re);
++    ST('dead_zone: min s read from the build balance (min 60: s 45 FAILS)', deadZoneProblems(dz({ s: 45 }), 60), /not 1-dp >= 60/);
++    ST('dead_zone pinned-set: errata rev 13 V-3 lists dead_zone (checker set == errata)', PINNED_SET_REV13.includes('dead_zone') && !RING_REV13.includes('dead_zone') ? [] : ['dead_zone not pinned'], null);
++    const f6 = { surface: 'hud_chip', loss_per_s: 125, loss_share: 0.183, n_tired: 1, n_asleep: 1, n_paused: 0 }, ft = o => ev({ type: 'fatigue_cue_tapped', ...f6, ...o }), fs = o => ev({ type: 'fatigue_cue_shown', ...f6, suppressed_by_stall: false, ...o });
++    ST('C-1 positive: fatigue_cue_tapped with the 6 SS §8 fields', fatigueCueProblems(ft({})), null); ST('C-1 positive: fatigue_cue_shown 6 fields + suppressed_by_stall', fatigueCueProblems(fs({ suppressed_by_stall: true })), null);
++    ST('C-1 negative: fatigue_cue_tapped + suppressed_by_stall FAILS (shown only)', fatigueCueProblems(ft({ suppressed_by_stall: false })), /suppressed_by_stall outside the closed list/);
++    ST('C-1 negative: tapped {surface, loss_per_s} only (errata rev 1-12 row #3 / schema.ts:171 shape) FAILS', fatigueCueProblems(ev({ type: 'fatigue_cue_tapped', surface: 'banner', loss_per_s: 3 })), /loss_share missing/);
++    for (const f of FATIGUE6) ST(`C-1 negative: tapped without ${f} FAILS`, fatigueCueProblems(ft({ [f]: undefined })).length ? fatigueCueProblems(Object.fromEntries(Object.entries(ft({})).filter(([k]) => k !== f))) : ['?'], new RegExp(`required ${f} missing`));
++    ST('C-1 negative: shown without suppressed_by_stall FAILS', fatigueCueProblems(Object.fromEntries(Object.entries(fs({})).filter(([k]) => k !== 'suppressed_by_stall'))), /suppressed_by_stall missing/);
++    ST('C-1 negative: loss_share 1.5 FAILS', fatigueCueProblems(ft({ loss_share: 1.5 })), /loss_share 1.5/); ST('C-1 negative: loss_share 0.1834 (4 dp) FAILS', fatigueCueProblems(ft({ loss_share: 0.1834 })), /loss_share 0.1834/);
++    ST('C-1 negative: n_tired + n_asleep + n_paused = 5 FAILS', fatigueCueProblems(ft({ n_tired: 2, n_asleep: 2, n_paused: 1 })), /> 4/); ST('C-1 negative: surface sub_line FAILS', fatigueCueProblems(ft({ surface: 'sub_line' })), /surface/);
++    ST('row #23 positive: no best_buy_suppressed_zero_gain in the log', sg8Problems([ev({ type: 'zero_gain_purchase' }), se({})]), null);
++    ST('row #23 negative: one best_buy_suppressed_zero_gain FAILS (not built in v5, rev 13 L82)', sg8Problems([ev({ type: 'best_buy_suppressed_zero_gain', key: 'HENS', farm: 12, level: 3 })]), /any emission is a defect/);
++    const BB = { telemetry: { bbv2: { ...BBV2_SPEC } }, m4: { enabled: 1, flags: {} } };
++    ST('bbv2 keys positive: top-level telemetry.bbv2 {5, 60, 30, 50}', bbv2KeyProblems(BB, 'key,level,cost'), null);
++    ST('bbv2 keys negative: block missing FAILS', bbv2KeyProblems({ telemetry: { ring_size: 5000 } }), /block missing/);
++    ST('bbv2 keys negative: zero_gain_purchase_cap 40 FAILS', bbv2KeyProblems({ telemetry: { bbv2: { ...BBV2_SPEC, zero_gain_purchase_cap: 40 } } }), /zero_gain_purchase_cap = 40/);
++    ST('bbv2 keys negative: dead_zone_min_s missing FAILS', bbv2KeyProblems({ telemetry: { bbv2: { ...BBV2_SPEC, dead_zone_min_s: undefined } } }), /dead_zone_min_s = undefined/);
++    ST('bbv2 keys negative: unknown key FAILS', bbv2KeyProblems({ telemetry: { bbv2: { ...BBV2_SPEC, shown_max: 1 } } }), /shown_max not in errata/);
++    ST('bbv2 keys negative: under m4.telemetry FAILS', bbv2KeyProblems({ ...BB, m4: { telemetry: { bbv2: BBV2_SPEC } } }), /under m4.telemetry/);
++    ST('bbv2 keys negative: economy.csv column FAILS', bbv2KeyProblems(BB, 'key,level,zero_gain_purchase_cap'), /economy.csv has a zero_gain_purchase_cap column/);
++    const ETXT = (() => { try { return readFileSync(A.errata || path.join(HERE, '../../../product/collection/telemetry-spec-errata-v5.a0e8f6d7.md'), 'utf8'); } catch { return ''; } })();
++    const esha = createHash('sha1').update(ETXT).digest('hex'); res.errata = { sha1: esha, pinned: ERRATA_SHA1 };
++    ST(`errata file is rev 13 sha1 ${ERRATA_SHA1.slice(0, 8)} (manifest L131 pin)`, esha === ERRATA_SHA1 ? [] : [`errata sha1 ${esha} != ${ERRATA_SHA1}`], null);
++    ST('pinned-set positive: checker set == errata rev 13 V-3 block (20 + tip_shown clock_wage)', pinnedSetProblems(ETXT), null);
++    ST('pinned-set negative: errata block without dead_zone FAILS', pinnedSetProblems(ETXT.replace(/zero_gain_purchase, dead_zone/, 'zero_gain_purchase')), /dead_zone not in errata V-3/);
++    ST('pinned-set negative: errata block with an extra type FAILS', pinnedSetProblems(ETXT.replace(/zero_gain_purchase, dead_zone/, 'zero_gain_purchase, dead_zone, best_buy_shown')), /lists best_buy_shown/);
++    ST('rev12 v062 validator: dead_zone / fatigue_cue_tapped closed validators registered when bestBuyV2 / fatigueCue on', [FLAGS.has('bestBuyV2') && !CLOSED.dead_zone && 'dead_zone validator missing', FLAGS.has('fatigueCue') && !CLOSED.fatigue_cue_tapped && 'fatigue validator missing'].filter(Boolean), null); }
+   res.triage = {}; writeJSON(path.join(OUT, 'selftest.json'), R); }
++if (A.balance) { let hdr = null; if (A['economy-csv']) { try { hdr = readFileSync(A['economy-csv'], 'utf8').split('\n')[0]; } catch { hdr = ''; } }
++  const bp = bbv2KeyProblems(BJ, hdr); ck('REV13 telemetry.bbv2.* in the build balance.json top-level telemetry block = {5, 60, 30, 50}, not m4.telemetry, not economy.csv (errata rev 13 L86-92; HARD iff bestBuyV2=1)', bp.length === 0, { short: bp }, FLAGS.has('bestBuyV2')); }
+ if (A['selftest-only']) { writeJSON(path.join(OUT, `telemetry-selftest.json`), res); console.log(hard ? `SELFTEST: ${hard} FAIL` : 'SELFTEST: OK'); process.exit(hard ? 1 : 0); }
+ const srv = await serve(path.join(OUT, '.serve'), { 'g.html': A.html }, A.port); const br = await launch(A.engine); res.browser = br.version(); const G = srv.url + 'g.html';
+ const ctxNew = () => br.newContext({ viewport: { width: 390, height: 844 } });
+@@ -423,5 +572,7 @@
+         ck('TS7 0 page/console errors', errs.length === 0, { short: errs }, hardSS);
+       } finally { await ctx.close(); await qs.stop(); } } }
+ } finally { await br.close(); await srv.stop(); }
++{ const rp = rev12Problems(ALLEV); res.rev12 = { events: ALLEV.length, problems: rp };
++  ckV(`REV13 C-2 / zero_gain cap / events==50 / dead_zone / C-1 fatigue fields / row #23 none over all captured logs (${ALLEV.length} events; errata rev 13 a0e8f6d7)`, rp.length === 0, { short: [...new Set(rp)].slice(0, 8) }); }
+ for (const [k, v] of Object.entries(res.triage)) console.log(`TRIAGE-ON-RC ${k} x${v.n} (${v.why})`);
+ res.hardFail = hard; writeJSON(path.join(OUT, `telemetry-${A.engine}.json`), res); console.log(hard ? `TELEMETRY: ${hard} HARD FAIL` : 'TELEMETRY: OK'); process.exit(hard ? 1 : 0);
+--- ../scratch/rev12-1437/SCRIPTS.sha256	2026-10-30 14:42:02.067853864 +0100
++++ scripts/SCRIPTS.sha256	2026-10-30 14:53:48.578661419 +0100
+@@ -5,7 +5,7 @@
+ 968e2b9070a22fc5edc024893e52dbc10626b8654cc5919073f6a4bfce86b76a  runtime-smoke.mjs
+ c36c83d0c6b653f995f9b76e05e91aa9b57c0bda40f9250dbe6c56a0f25aa32a  saves-browser.mjs
+ c8565122bfde45afa7a784308c51cdeea7fe9f7ef1873b2070c5c682a2c77112  ss15-share-guard.mjs
+-2d7c85e1fd9cea339f4f4a89d1f57c33eee6ec70b025a29e831511b5b2783791  telemetry-check.mjs
++76547b48aac9952a5edaa77d631891100cccf8b9b0fcaa4064f32ef04a1146a7  telemetry-check.mjs
+ d634dfc847be6783d01432ba9e24a3fcef977394371f6b4a0470a36d23e793b4  publish-verify.sh
+ 53586d8ebd517c14a1def42d016a2b0c5a3af4905f20c7a09bc11598763e8c71  v5-saves-gate.sh
+ c1e2b05c1db046f3d1211db5b4ad1438a05a6aef61ae8fc75892ae591554725c  g1-ship-set.cjs
+--- ../scratch/rev12-1437/g8-schema-ts.mjs	2026-10-30 14:42:02.067853864 +0100
++++ probes/telemetry/g8-schema-ts.mjs	2026-10-30 14:53:15.486722893 +0100
+@@ -16,6 +16,15 @@
+ //   (a marker VALUE, runtime: not statically checkable here, belongs to the gate T marker check). schema.ts is built against whichever errata rev is pinned
+ //   in engineering/v5-rc-manifest.md when its PR starts; re-pin this probe if that rev changes a checked item.
+ //   The runtime meaning of optional/nullable (absent/null rejected by validateEvent) is the gate T half; this probe checks the declarations statically.
++// Errata rev 13 PINNED (product/collection/telemetry-spec-errata-v5.md sha1 a0e8f6d7085939756021856c25429a55d8a8d847, frozen copy
++//   telemetry-spec-errata-v5.a0e8f6d7.md; HoE pin engineering/v5-rc-manifest.md L131, replaces rev 12 0cfe168a / rev 7 fd7d5921). Added (TASK saves-qa/rev12-tel):
++//   G8-20 worst-case pinned-size test in src/telemetry/*.test.ts includes dead_zone (V-3 L160 'incl. dead_zone at its 1-per-30-s worst case', 200 KB).
++//   G8-21 pinned set = V-3 L143-151 (20 types incl. dead_zone + zero_gain_purchase pinned; the 5 ring types of L154 not pinned).
++//   G8-22 C-1 RULED (D-PMM-2026-10-30-TAPFIELDS; sales-stopped-spec cfff3817 errata note 3 L868 + §8 L290-294): fatigue_cue_tapped declares
++//         surface, loss_per_s, loss_share, n_tired, n_asleep, n_paused and NOT suppressed_by_stall; fatigue_cue_shown declares the 6 + suppressed_by_stall.
++//         Rev 13 row #3 (L62) lists all six (rev 1-12 listed only `surface, loss_per_s`).
++//   G8-23 dead_zone (row #22) pinned, reason only 'none_affordable' (no cap/max, PMFU BB10); zero_gain_purchase (row #21) pinned with NO capped
++//         marker variant ("over the cap nothing is emitted, no marker"; overflow = session_end.zero_gain_purchase_dropped, declared).
+ // Static and read-only (`git show` / `git grep` at the RC SHA; no checkout, no browser). TEL-AC11 static half: every `.track('<type>'` call site in src/
+ // is in EVENT_SCHEMA; with --events <exported json> also every exported type. The runtime half (each emitted event passes validateEvent) is the gate
+ // T step under --schema v062. usage: node g8-schema-ts.mjs --git <repo> --rc <sha> [--events export.json]. exit 0 = PASS, 1 = FAIL (expected until row 11 lands).
+@@ -101,6 +110,33 @@
+ const abt = fieldSpecs(eventBlock('session_end'), 'ability_blocked_taps');
+ out('G8-19 session_end.ability_blocked_taps int|count, min 0 if stated (all blocked taps incl. post-cap; errata rev 5 = rev 7 L119)', !!src && abt.length === 1 && ['int', 'count'].includes(kindOf(abt[0])) && [undefined, 0].includes(numKey(abt[0], 'min')),
+   src ? (abt.length ? abt[0].replace(/\s+/g, ' ') : 'not declared in session_end') : 'no file');
++// ---- errata rev 13 (G8-20..23) ----
++const PINNED_REV13 = ['sales_stall', 'fatigue_cue_shown', 'fatigue_cue_tapped', 'shift_sheet_opened', 'refill_used', 'rest_toggled', 'first_worker_hired', 'autorefill_toggled',
++  'abilities_unlocked', 'ability_used', 'ability_ended', 'ability_blocked', 'worker_paused', 'worker_resumed', 'hatch_started', 'flock_complete', 'milestone_reached', 'balanced_tier',
++  'zero_gain_purchase', 'dead_zone']; // V-3 L145-151 (+ tip_shown clock_wage predicate, L152)
++const RING_REV13 = ['breed_revealed', 'breed_slotted', 'best_buy_shown', 'best_buy_followed', 'best_buy_suppressed_zero_gain']; // V-3 L154
++const FATIGUE6 = ['surface', 'loss_per_s', 'loss_share', 'n_tired', 'n_asleep', 'n_paused']; // SS cfff3817 §8 L290-294, note 3 L868
++const constObj = name => { const m = sc.match(new RegExp(`const\\s+${name}\\b[^=]*=\\s*\\{`)); if (!m) return ''; const o = sc.indexOf('{', m.index + m[0].length - 1); return sc.slice(o, closeOf(sc, o) + 1); };
++const objKeys = obj => { const ks = topKeys(obj); for (const sp of obj.matchAll(/\.\.\.\s*([A-Za-z_$][\w$]*)/g)) ks.push(...objKeys(constObj(sp[1]))); return ks; };
++const fieldsOf = ev => { const b = eventBlock(ev); if (!b) return null; const m = b.match(/(?:[{,\s])fields\s*:\s*/); if (!m) return { b, keys: [] }; const r = b.slice(m.index + m[0].length);
++  let obj = ''; if (r[0] === '{') obj = r.slice(0, closeOf(r, 0) + 1); else { const id = (r.match(/^([A-Za-z_$][\w$]*)/) || [])[1]; obj = id ? constObj(id) : ''; } return { b, obj, keys: objKeys(obj) }; };
++const pinnedOf = ev => { const b = eventBlock(ev); if (!b) return undefined; const m = b.match(/(?:[{,\s])pinned\s*:\s*(true|false)\b/); return m ? m[1] === 'true' : (/(?:[{,\s])pinned\s*:/.test(b) ? 'fn' : false); };
++let tests = []; try { tests = execFileSync('git', ['-C', A.git, 'ls-tree', '-r', '--name-only', A.rc, '--', 'src'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().split('\n').filter(f => /\.test\.ts$/.test(f)); } catch {}
++const wc = tests.filter(f => { const t = show(f) || ''; return /worst/i.test(t) && /dead_zone/.test(t) && /(200\s*\*\s*1024|204800|200_?000|200\s*KB)/i.test(t); });
++out('G8-20 worst-case pinned-size test (src/**/*.test.ts: "worst" + dead_zone + the 200 KB cap) includes dead_zone (errata rev 13 V-3 L160)', !!src && wc.length > 0, src ? (wc.length ? wc.join(',') : `no such test among ${tests.length} test file(s)`) : 'no file');
++const pinBad = [...PINNED_REV13.filter(n => pinnedOf(n) !== true).map(n => `${n}:${pinnedOf(n) === undefined ? 'undeclared' : 'not pinned:true'}`), ...RING_REV13.filter(n => pinnedOf(n) === true).map(n => `${n}:pinned (ring per V-3 L154)`)];
++out('G8-21 pinned set == errata rev 13 V-3 (20 types incl. dead_zone, zero_gain_purchase; 5 ring types not pinned)', !!src && pinBad.length === 0, src ? pinBad.join(', ') : 'no file');
++const ft = fieldsOf('fatigue_cue_tapped'), fs = fieldsOf('fatigue_cue_shown');
++const c1why = [!ft ? 'fatigue_cue_tapped not declared' : FATIGUE6.filter(f => !ft.keys.includes(f)).map(f => `tapped lacks ${f}`).join(','), ft && ft.keys.includes('suppressed_by_stall') ? 'tapped declares suppressed_by_stall (shown only)' : '',
++  !fs ? 'fatigue_cue_shown not declared' : [...FATIGUE6, 'suppressed_by_stall'].filter(f => !fs.keys.includes(f)).map(f => `shown lacks ${f}`).join(',')].filter(Boolean).join('; ');
++out('G8-22 C-1: fatigue_cue_tapped declares surface, loss_per_s, loss_share, n_tired, n_asleep, n_paused, not suppressed_by_stall; shown = the 6 + suppressed_by_stall (SS cfff3817 note 3)', !!src && !c1why, src ? c1why : 'no file');
++const valOf = (obj, key) => { const m = obj.match(new RegExp(`(?:[{,\\s])${key}\\s*\\??\\s*:\\s*`)); if (!m) return ''; const r = obj.slice(m.index + m[0].length); let d = 0, i = 0;
++  for (; i < r.length; i++) { const c = r[i]; if (c === "'" || c === '"' || c === '`') { i = skipStr(r, i); continue; } if ('([{'.includes(c)) d++; else if (')]}'.includes(c)) { if (d === 0) break; d--; } else if (c === ',' && d === 0) break; } return r.slice(0, i); };
++const dz = fieldsOf('dead_zone'), dzr = dz ? valOf(dz.obj, 'reason') : '', zgb = eventBlock('zero_gain_purchase');
++const dzWhy = [!dz ? 'dead_zone not declared' : '', dz && !/['"]none_affordable['"]/.test(dzr) ? 'dead_zone.reason lacks none_affordable' : '', dz && /['"](cap|max)['"]/.test(dzr) ? `dead_zone.reason allows cap/max (${dzr.trim()})` : '',
++  !zgb ? 'zero_gain_purchase not declared' : '', zgb && /(?:[{,\s])(capped|marker)\s*:/.test(zgb) ? 'zero_gain_purchase has a capped marker variant (rev 13 row #21: no marker)' : '',
++  fieldSpecs(eventBlock('session_end'), 'zero_gain_purchase_dropped').length || /zero_gain_purchase_dropped\s*\??\s*:/.test(fieldsOf('session_end')?.obj || '') ? '' : 'session_end.zero_gain_purchase_dropped not declared'].filter(Boolean).join('; ');
++out("G8-23 dead_zone reason only 'none_affordable'; zero_gain_purchase no capped marker; session_end.zero_gain_purchase_dropped declared (rev 13 rows #21/#22)", !!src && !dzWhy, src ? dzWhy : 'no file');
+ const miss = names.filter(n => !declared.has(n));
+ out(`G8-8 EVENT_SCHEMA declares every type of the frozen v0.6.2 spec (${names.length})`, !!src && miss.length === 0, src ? (miss.length ? 'missing: ' + miss.join(',') : '') : 'no file');
+ out('G8-9 envelope sid + fgMs named in schema.ts', !!src && ['sid', 'fgMs'].every(f => lits.has(f) || declared.has(f) || new RegExp('\\b' + f + '\\b').test(s)));
+--- ../scratch/rev12-1437/g8-selftest.sh	2026-10-30 14:42:02.067853864 +0100
++++ probes/telemetry/g8-selftest.sh	2026-10-30 14:53:05.478741360 +0100
+@@ -1,9 +1,12 @@
+ #!/usr/bin/env bash
+-# Self-test of g8-schema-ts.mjs (D-HOE-20 contract, FINAL per HoQ C-1; + D-HOE-20261030-25 N-2/N-8/N-1 and errata rev 5 ability_blocked_taps)
++# Self-test of g8-schema-ts.mjs (D-HOE-20 contract, FINAL per HoQ C-1; + D-HOE-20261030-25 N-2/N-8/N-1 and errata rev 5 ability_blocked_taps;
++# + errata rev 13 a0e8f6d7 PINNED (manifest L131): G8-20 worst-case size test incl. dead_zone, G8-21 pinned set, G8-22 C-1 fatigue_cue_tapped 6 fields, G8-23 dead_zone/zero_gain_purchase)
+ # on throw-away git fixtures in /tmp + the real rc/v5 SHAs (read-only git show).
+ set -u; D=$(cd "$(dirname "$0")" && pwd); G=/workspace/egg-farm-studio/game; T=$(mktemp -d /tmp/g8.XXXX); P=0; F=0
+ ck(){ local n=$1 want=$2 re=$3; shift 3; out=$(node $D/g8-schema-ts.mjs "$@" 2>&1); rc=$?; if [ $rc = $want ] && { [ -z "$re" ] || echo "$out" | grep -q -- "$re"; }; then P=$((P+1)); echo "ok   $n (rc=$rc) $(echo "$out" | tail -1)"; else F=$((F+1)); echo "FAIL $n (rc=$rc want $want, expect '$re') $out"; fi; }
+ git -C $T init -q r; mkdir -p $T/r/src/telemetry $T/r/src/ui $T/r/src/sim
++PINS="sales_stall fatigue_cue_shown fatigue_cue_tapped shift_sheet_opened refill_used rest_toggled first_worker_hired autorefill_toggled abilities_unlocked ability_used ability_ended ability_blocked worker_paused worker_resumed hatch_started flock_complete milestone_reached balanced_tier zero_gain_purchase dead_zone"
++EXTRA="sales_stall refill_used ability_used fatigue_cue_shown fatigue_cue_tapped shift_sheet_opened rest_toggled first_worker_hired autorefill_toggled zero_gain_purchase dead_zone best_buy_shown best_buy_followed best_buy_suppressed_zero_gain"
+ names=$(node -e 'console.log(Object.keys(require(process.argv[1]).events).join(" "))' $D/../../spec/telemetry-v062.schema.json)
+ # entry <event> <variant>: EVENT_SCHEMA entry; special events carry the D-HOE-25 N-2 shapes, each negative variant breaks exactly one rule
+ entry(){ local n=$1 v=$2; case $n in
+@@ -15,7 +18,16 @@
+     [ $v = floatbad ] && fl="asleep_s: { kind: 'float', min: 0, step: 0.1, len: 3 },"; [ $v = floatstep0 ] && fl="asleep_s: { kind: 'float', step: 0 },"
+     [ $v = floatfull ] && fl="asleep_s: { kind: 'float', min: 0, max: 86400, step: 0.1, optional: true },"
+     [ $v = abtmiss ] && ab=""; [ $v = abtfloat ] && ab="ability_blocked_taps: { kind: 'float', min: 0 },"; [ $v = abtmin1 ] && ab="ability_blocked_taps: { kind: 'int', min: 1 },"
+-    echo "  session_end: { pinned: true, fields: { farm_level: { kind: 'int' }, $fl $ab } },";;
++    local zd="zero_gain_purchase_dropped: { kind: 'int', min: 0 },"; [ $v = zgdropmiss ] && zd=""
++    echo "  session_end: { pinned: true, fields: { farm_level: { kind: 'int' }, $fl $ab $zd } },";;
++  fatigue_cue_tapped) if [ $v = c1ident ]; then echo "  fatigue_cue_tapped: { pinned: true, fields: FCF },"; else local f6="$F6"; [ $v = c1two ] && f6="surface: { kind: 'enum', values: ['hud_chip','banner','bubble'] }, loss_per_s: { kind: 'count' },"
++    [ $v = c1sbs ] && f6="$F6 suppressed_by_stall: { kind: 'bool' },"; echo "  fatigue_cue_tapped: { pinned: true, fields: { $f6 } },"; fi;;
++  fatigue_cue_shown) if [ $v = c1ident ]; then echo "  fatigue_cue_shown: { pinned: true, fields: { ...FCF, suppressed_by_stall: { kind: 'bool' } } },"; else local sb="suppressed_by_stall: { kind: 'bool' },"; [ $v = c1shown ] && sb=""
++    echo "  fatigue_cue_shown: { pinned: true, fields: { $F6 $sb } },"; fi;;
++  dead_zone) local rs="['none_affordable']"; [ $v = dzcap ] && rs="['none_affordable','cap','max']"; local pn=true; [ $v = pindz ] && pn=false
++    echo "  dead_zone: { pinned: $pn, fields: { farm: { kind: 'int', min: 10, max: 29 }, s: { kind: 'float', min: 30, step: 0.1 }, reason: { kind: 'enum', values: $rs }, open: { kind: 'bool', optional: true } } },";;
++  zero_gain_purchase) local mk=""; [ $v = zgmarker ] && mk="marker: { capped: { kind: 'bool' }, events: { kind: 'count' } },"
++    echo "  zero_gain_purchase: { pinned: true, fields: { key: { kind: 'enum', values: ['HENS','VALUE','COLL'] }, farm: { kind: 'count' }, level: { kind: 'count' }, meaningful_eta_s: { kind: 'float', min: 0, step: 0.1 } }, $mk },";;
+   worker_summary) local kp="new RegExp('^wage_(' + WORKER_IDS.join('|') + ')_asleep_cents\$')"
+     [ $v = dynlit ] && kp="/^wage_(market_hand|coop_hand|hawker|grader)_asleep_cents\$/"; [ $v = dynwild ] && kp="/^wage_\\\\w+_asleep_cents\$/"
+     [ $v = dynmiss ] && kp="/^wage_(market_hand|coop_hand|hawker)_asleep_cents\$/"; [ $v = dynunanch ] && kp="/wage_(market_hand|coop_hand|hawker|grader)_asleep_cents/"
+@@ -37,12 +49,15 @@
+     echo "  refill_used: { pinned: true, fields: { farm_level: { kind: 'int' }, $rs } },";;
+   ability_used) local cb="combo: { kind: 'bool' },"; [ $v = combonum ] && cb="combo: { kind: 'int' },"; [ $v = comboopt ] && cb="combo: { kind: 'bool', optional: true },"; [ $v = combomiss ] && cb=""
+     echo "  ability_used: { pinned: true, fields: { farm_level: { kind: 'int' }, $cb } },";;
+-  *) echo "  $n: { pinned: false, fields: { farm_level: { kind: 'int' } } },";; esac; }
++  *) local pn=false; case " $PINS " in *" $n "*) pn=true;; esac; [ $v = pinring ] && [ $n = best_buy_shown ] && pn=true; [ $v = pinms ] && [ $n = milestone_reached ] && pn=false
++    echo "  $n: { pinned: $pn, fields: { farm_level: { kind: 'int' } } },";; esac; }
++F6="surface: { kind: 'enum', values: ['hud_chip','banner','bubble'] }, loss_per_s: { kind: 'count' }, loss_share: { kind: 'float', min: 0, max: 1, step: 0.001 }, n_tired: { kind: 'int', min: 0, max: 4 }, n_asleep: { kind: 'int', min: 0, max: 4 }, n_paused: { kind: 'int', min: 0, max: 4 },"
+ gen(){ # $1 = variant
+   { echo "// fixture schema.ts ($1)"; [ "$1" = ver061 ] && echo "export const TELEMETRY_SCHEMA_VERSION = '0.6.1';" || echo "export const TELEMETRY_SCHEMA_VERSION = '0.6.2';"
+     if [ "$1" = wimport ]; then echo "import { WORKER_IDS } from '../sim/workers';"; else echo "const WORKER_IDS = ['market_hand', 'coop_hand', 'hawker', 'grader'] as const;"; fi
+     [ "$1" = nooptype ] && echo "export type FieldSpec = { kind: string; values?: readonly string[] };" || echo "export type FieldSpec = { kind: string; values?: readonly string[]; optional?: true; nullable?: true };"
+-    echo "export const EVENT_SCHEMA = {"; for n in $names sales_stall refill_used ability_used; do [ "$1" = noev ] && [ "$n" = session_start ] && continue; entry $n "$1"; done
++    [ "$1" = c1ident ] && echo "const FCF: Readonly<Record<string, FieldSpec>> = { $F6 };"
++    echo "export const EVENT_SCHEMA = {"; for n in $(echo $names $EXTRA | tr ' ' '\n' | awk '!s[$0]++'); do [ "$1" = noev ] && [ "$n" = session_start ] && continue; entry $n "$1"; done
+     [ "$1" = alias ] && echo "  manage_used: { pinned: false, fields: {} },"
+     [ "$1" = text ] && echo "  x_text: { pinned: false, fields: { note: { kind: 'text' } } },"
+     echo "  // resolved_by: { kind: 'enum', values: ['chip_refill','chip_sell_all','chip_collect',$( [ "$1" = nocm ] || echo "'chip_manage',")'refill_elsewhere','sell_elsewhere','collect_elsewhere','auto_resume','queue_empty','basket_empty','paused','focus_lost','cause_changed','none'] }"
+@@ -55,19 +70,22 @@
+   echo "export const WORKER_IDS = ['market_hand', 'coop_hand', 'hawker', 'grader'] as const;" > $T/r/src/sim/workers.ts
+   { echo "import { TELEMETRY_SCHEMA_VERSION } from './schema';"; [ "$1" = noring ] || echo "const ring = { v: TELEMETRY_SCHEMA_VERSION, events: buf }; const old = (arr) => arr.map(e => ({ ...e, legacy: true }));"
+     [ "$1" = nohdr ] || echo "export const exp = () => ({ exportedAt: 1, schema_version: TELEMETRY_SCHEMA_VERSION, events: [] });"; } > $T/r/src/telemetry/telemetry.ts
++  rm -f $T/r/src/telemetry/schema.test.ts; if [ "$1" != wcnofile ]; then { echo "// worst-case pinned session (errata rev 13 V-3 L160): 200 * 1024 bytes cap"; echo "it('worst case pinned store <= 200 KB', () => { const ev = [$( [ "$1" = wcmiss ] || echo "{ type: 'dead_zone' }," ) { type: 'zero_gain_purchase' }]; expect(size(ev)).toBeLessThanOrEqual(200 * 1024); });"; } > $T/r/src/telemetry/schema.test.ts; fi
+   { echo "t.track('session_start', {});"; [ "$1" = strayev ] && echo "t.track('stray_event', {});"; } > $T/r/src/ui/x.ts
+   git -C $T/r add -A; git -C $T/r -c user.email=q@x -c user.name=q commit -qm $1 --allow-empty; git -C $T/r rev-parse HEAD; }
+ OK=$(gen ok); ck "positive: contract-conformant fixture (all 8 kinds, optional/nullable, capped variants, dynamicFields, combo, stall_id, ability_blocked_taps)" 0 "G8: PASS" --git $T/r --rc $OK
+ echo '[{"type":"session_start"},{"type":"refill_used"}]' > $T/ev.json; ck "positive: TEL-AC11b exported types all in schema" 0 "G8: PASS" --git $T/r --rc $OK --events $T/ev.json
+ echo '{"schema_version":"0.6.2","events":[{"type":"manage_used"}]}' > $T/ev2.json; ck "negative: TEL-AC11b exported manage_used FAILS" 1 "TEL-AC11b" --git $T/r --rc $OK --events $T/ev2.json
+-for v in floatfull strstr dynlit wimport; do R=$(gen $v); ck "positive: $v PASSES" 0 "G8: PASS" --git $T/r --rc $R; done
++for v in floatfull strstr dynlit wimport c1ident; do R=$(gen $v); ck "positive: $v PASSES" 0 "G8: PASS" --git $T/r --rc $R; done
+ for v in "ver061:G8-2" "notypes:G8-4" "pintype:G8-6" "text:G8-7" "noev:G8-8" "nocm:G8-10" "alias:G8-11" "noring:G8-12" "nohdr:G8-13" "strayev:TEL-AC11a" \
+   "floatbad:G8-7f" "floatstep0:G8-7f" "strnopat:G8-7s" "arrnomax:G8-7a" "arrnoof:G8-7a" "arrmax0:G8-7a" \
+   "optbad:G8-14" "nooptype:G8-14" "nooptread:G8-14" "capswap:G8-15" "capnobool:G8-15" "coopevents:G8-15" \
+   "nodyn:G8-16" "dynwild:G8-16" "dynmiss:G8-16" "dynunanch:G8-16" "dynextra:G8-16" "combonum:G8-17" "comboopt:G8-17" "combomiss:G8-17" \
+-  "stallenum:G8-18" "stallmin0:G8-18" "prevcount:G8-18" "stallmiss:G8-18" "rustallenum:G8-18" "abtmiss:G8-19" "abtfloat:G8-19" "abtmin1:G8-19"; do
++  "stallenum:G8-18" "stallmin0:G8-18" "prevcount:G8-18" "stallmiss:G8-18" "rustallenum:G8-18" "abtmiss:G8-19" "abtfloat:G8-19" "abtmin1:G8-19" \
++  "wcnofile:G8-20" "wcmiss:G8-20" "pinring:G8-21" "pindz:G8-21" "pinms:G8-21" "c1two:G8-22" "c1sbs:G8-22" "c1shown:G8-22" "dzcap:G8-23" "zgmarker:G8-23" "zgdropmiss:G8-23"; do
+   n=${v%%:*}; id=${v#*:}; R=$(gen $n); want="FAIL (1) $id\$"; [ $n = noev ] && want="FAIL (2) G8-8 TEL-AC11a\$"; ck "negative: $n FAILS on $id (only)" 1 "$want" --git $T/r --rc $R; done
+ git -C $T/r rm -q src/telemetry/schema.ts; git -C $T/r -c user.email=q@x -c user.name=q commit -qm rm; RM=$(git -C $T/r rev-parse HEAD); ck "negative: schema.ts absent FAILS" 1 "FAIL G8-1" --git $T/r --rc $RM
+ ck "real rc/v5 3f582db: FAIL closed expected (row 11 / schema.ts not landed)" 1 "FAIL G8-1" --git $G --rc 3f582dbfe31a9d309e6b1d0e96a4f77711b333ec
+ ck "real rc/v5 e77fc5c: FAIL closed (HoQ: correct)" 1 "FAIL G8-1" --git $G --rc e77fc5c
++ck "real rc/v5 tip 65a7443 (origin/rc/v5, #95): FAIL closed (schema.ts not on rc/v5)" 1 "FAIL G8-1" --git $G --rc 65a7443951b1967abb20cdd640a6b22ab1c7e1e3
+ echo "RESULT pass=$P fail=$F"; rm -rf $T; [ $F = 0 ]
+--- /dev/null	2026-10-28 06:56:38.645803072 +0100
++++ probes/telemetry/g8-validate-c1.mjs	2026-10-30 14:53:05.474741367 +0100
+@@ -0,0 +1,35 @@
++#!/usr/bin/env node
++// G-8 / T-AC9 C-1 RUNTIME probe (TASK saves-qa/rev12-tel; errata rev 13 a0e8f6d7 PINNED, manifest L131; C-1 RULED D-PMM-2026-10-30-TAPFIELDS,
++// sales-stopped-spec cfff3817 errata note 3 L868 + §8 L290-294). Runs the RC's own src/telemetry/schema.ts validateEvent/isPinned:
++//   (a) fatigue_cue_tapped with all six SS §8 fields {surface, loss_per_s, loss_share, n_tired, n_asleep, n_paused} -> []; each field missing -> rejected;
++//   (b) n_tired + n_asleep + n_paused <= 4: sum 4 accepted, sum 5 (each term <= 4) REJECTED;
++//   (c) suppressed_by_stall on tapped REJECTED (shown only); fatigue_cue_shown 6 + suppressed_by_stall accepted, shown without it rejected;
++//   plus dead_zone / zero_gain_purchase pinned (isPinned) and dead_zone reason 'cap' rejected (rev 13 row #22).
++// Read-only: `git archive <rc> src` into a temp dir, esbuild bundle, import. Never a PR head (D-CEO-20261030-10): pass an rc/v5 SHA.
++// usage: node g8-validate-c1.mjs --git <repo> --rc <sha> [--esbuild <bin>]. exit 0 PASS, 1 FAIL (expected until the schema.ts PR lands on rc/v5).
++import { execFileSync } from 'node:child_process'; import { mkdtempSync, rmSync, existsSync } from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { parseArgs } from 'node:util';
++const { values: A } = parseArgs({ options: { git: { type: 'string' }, rc: { type: 'string' }, esbuild: { type: 'string', default: '/workspace/wt-v5-telemetry-schema/node_modules/.bin/esbuild' } } });
++if (!A.git || !A.rc) { console.error('need --git --rc'); process.exit(2); }
++const P = [], out = (id, ok, why) => { console.log(`${ok ? 'PASS' : 'FAIL'} ${id}${why ? ': ' + why : ''}`); if (!ok) P.push(id.split(' ')[0]); };
++const T = mkdtempSync(path.join(os.tmpdir(), 'g8v-')); let m = null;
++try { execFileSync('sh', ['-c', `git -C "$0" archive "$1" src | tar -x -C "$2"`, A.git, A.rc, T], { stdio: ['ignore', 'ignore', 'pipe'] }); } catch (e) { console.log(`archive failed: ${String(e.stderr || e).slice(0, 200)}`); }
++const st = path.join(T, 'src/telemetry/schema.ts');
++out('G8V-0 src/telemetry/schema.ts exists at the RC SHA', existsSync(st), existsSync(st) ? '' : `absent at ${A.rc}`);
++if (existsSync(st)) { try { execFileSync(A.esbuild, [st, '--bundle', '--format=esm', '--platform=node', `--outfile=${path.join(T, 'schema.mjs')}`, '--log-level=error'], { stdio: ['ignore', 'ignore', 'pipe'] }); m = await import(path.join(T, 'schema.mjs')); }
++  catch (e) { out('G8V-0b schema.ts bundles and imports', false, String(e.stderr || e.message || e).slice(0, 300)); } }
++if (m) { const V = e => { try { const r = m.validateEvent(e); return Array.isArray(r) ? r : ['validateEvent did not return string[]']; } catch (x) { return ['threw: ' + x.message]; } };
++  const env = { ts: 1730000000000, sid: 'abc123', fgMs: 1000 }, f6 = { surface: 'hud_chip', loss_per_s: 125, loss_share: 0.183, n_tired: 1, n_asleep: 1, n_paused: 0 };
++  const tap = o => { const e = { type: 'fatigue_cue_tapped', ...env, ...f6, ...o }; for (const k of Object.keys(e)) if (e[k] === undefined) delete e[k]; return e; };
++  const shown = o => { const e = { type: 'fatigue_cue_shown', ...env, ...f6, suppressed_by_stall: false, ...o }; for (const k of Object.keys(e)) if (e[k] === undefined) delete e[k]; return e; };
++  const r0 = V(tap({})); const miss = Object.keys(f6).filter(k => V(tap({ [k]: undefined })).length === 0);
++  out('G8V-C1a fatigue_cue_tapped with the six SS §8 fields validates ([]), and each of the six missing is rejected', r0.length === 0 && miss.length === 0, [r0.length ? 'valid tapped rejected: ' + r0.join('; ') : '', miss.length ? 'accepted without: ' + miss.join(',') : ''].filter(Boolean).join(' | '));
++  const s4 = V(tap({ n_tired: 2, n_asleep: 1, n_paused: 1 })), s5 = V(tap({ n_tired: 2, n_asleep: 2, n_paused: 1 })), s5b = V(shown({ n_tired: 3, n_asleep: 1, n_paused: 1 }));
++  out('G8V-C1b n_tired + n_asleep + n_paused <= 4: sum 4 accepted, sum 5 REJECTED on tapped and shown (SS §8 L293)', s4.length === 0 && s5.length > 0 && s5b.length > 0, [s4.length ? 'sum 4 rejected: ' + s4.join('; ') : '', s5.length ? '' : 'tapped sum 5 accepted', s5b.length ? '' : 'shown sum 5 accepted'].filter(Boolean).join(' | '));
++  const sb = V(tap({ suppressed_by_stall: false })), shOk = V(shown({ suppressed_by_stall: true })), shNo = V(shown({ suppressed_by_stall: undefined }));
++  out('G8V-C1c suppressed_by_stall REJECTED on fatigue_cue_tapped; shown requires it (SS note 3: shown only)', sb.length > 0 && shOk.length === 0 && shNo.length > 0, [sb.length ? '' : 'tapped + suppressed_by_stall accepted', shOk.length ? 'valid shown rejected: ' + shOk.join('; ') : '', shNo.length ? '' : 'shown without suppressed_by_stall accepted'].filter(Boolean).join(' | '));
++  const pin = n => { try { return m.isPinned({ type: n, ...env }) === true; } catch { return false; } };
++  const dz = o => ({ type: 'dead_zone', ...env, farm: 12, s: 30, reason: 'none_affordable', ...o }), dzc = V(dz({ reason: 'cap' })), dzo = V(dz({}));
++  out("G8V-DZ dead_zone + zero_gain_purchase isPinned; dead_zone valid accepted, reason 'cap' rejected (rev 13 rows #21/#22, V-3)", pin('dead_zone') && pin('zero_gain_purchase') && dzo.length === 0 && dzc.length > 0,
++    [pin('dead_zone') ? '' : 'dead_zone not pinned', pin('zero_gain_purchase') ? '' : 'zero_gain_purchase not pinned', dzo.length ? 'valid dead_zone rejected: ' + dzo.join('; ') : '', dzc.length ? '' : "reason 'cap' accepted"].filter(Boolean).join(' | ')); }
++rmSync(T, { recursive: true, force: true });
++console.log(P.length ? `G8V: FAIL (${P.length}) ${P.join(' ')}` : 'G8V: PASS'); process.exit(P.length ? 1 : 0);
+--- /dev/null	2026-10-28 06:56:38.645803072 +0100
++++ probes/telemetry/g8-validate-selftest.sh	2026-10-30 14:53:05.478741360 +0100
+@@ -0,0 +1,41 @@
++#!/usr/bin/env bash
++# Self-test of g8-validate-c1.mjs (C-1 a/b/c + dead_zone; errata rev 13 a0e8f6d7 PINNED) on throw-away git fixtures in /tmp + the real rc/v5 tip (read-only git archive).
++set -u; D=$(cd "$(dirname "$0")" && pwd); G=/workspace/egg-farm-studio/game; T=$(mktemp -d /tmp/g8v.XXXX); P=0; F=0
++ck(){ local n=$1 want=$2 re=$3; shift 3; out=$(node $D/g8-validate-c1.mjs "$@" 2>&1); rc=$?; if [ $rc = $want ] && { [ -z "$re" ] || echo "$out" | grep -q -- "$re"; }; then P=$((P+1)); echo "ok   $n (rc=$rc) $(echo "$out" | tail -1)"; else F=$((F+1)); echo "FAIL $n (rc=$rc want $want, expect '$re') $out"; fi; }
++git -C $T init -q r; mkdir -p $T/r/src/telemetry $T/r/src/config
++gen(){ local v=$1 sum="if ((e.n_tired as number) + (e.n_asleep as number) + (e.n_paused as number) > 4) errs.push('n sum > 4');" tf="F6" dzr="['none_affordable']"
++  [ $v = nosum ] && sum=""; [ $v = two ] && tf="{ surface: F6.surface, loss_per_s: F6.loss_per_s }"; [ $v = sbs ] && tf="{ ...F6, suppressed_by_stall: { kind: 'bool', optional: true } }"; [ $v = dzcap ] && dzr="['none_affordable', 'cap', 'max']"
++  echo '{"telemetry":{"bbv2":{"dead_zone_min_s":30}}}' > $T/r/src/config/balance.json
++  cat > $T/r/src/telemetry/schema.ts <<TS
++// fixture schema.ts ($v)
++import balance from '../config/balance.json';
++export const TELEMETRY_SCHEMA_VERSION = '0.6.2';
++export interface TEvent { type: string; [k: string]: unknown }
++type FieldSpec = { kind: 'enum' | 'int' | 'count' | 'float' | 'bool'; values?: readonly unknown[]; min?: number; max?: number; step?: number; optional?: boolean };
++const F6: Record<string, FieldSpec> = { surface: { kind: 'enum', values: ['hud_chip', 'banner', 'bubble'] }, loss_per_s: { kind: 'count' }, loss_share: { kind: 'float', min: 0, max: 1, step: 0.001 },
++  n_tired: { kind: 'int', min: 0, max: 4 }, n_asleep: { kind: 'int', min: 0, max: 4 }, n_paused: { kind: 'int', min: 0, max: 4 } };
++const DZMIN = (balance as { telemetry: { bbv2: { dead_zone_min_s: number } } }).telemetry.bbv2.dead_zone_min_s;
++export const EVENT_SCHEMA: Record<string, { pinned: boolean; fields: Record<string, FieldSpec> }> = {
++  fatigue_cue_tapped: { pinned: true, fields: $tf },
++  fatigue_cue_shown: { pinned: true, fields: { ...F6, suppressed_by_stall: { kind: 'bool' } } },
++  dead_zone: { pinned: true, fields: { farm: { kind: 'int', min: 10, max: 29 }, s: { kind: 'float', min: DZMIN, step: 0.1 }, reason: { kind: 'enum', values: $dzr }, open: { kind: 'enum', values: [true], optional: true } } },
++  zero_gain_purchase: { pinned: true, fields: { key: { kind: 'enum', values: ['HENS', 'VALUE', 'COLL'] } } } };
++export const EVENT_TYPES = Object.keys(EVENT_SCHEMA);
++const ok = (f: FieldSpec, v: unknown): boolean => f.kind === 'enum' ? (f.values ?? []).includes(v) : f.kind === 'bool' ? typeof v === 'boolean'
++  : typeof v === 'number' && Number.isFinite(v) && (f.kind === 'float' || Number.isInteger(v)) && (f.min === undefined || v >= f.min) && (f.max === undefined || v <= f.max) && (f.kind !== 'count' || v >= 0);
++export function validateEvent(e: TEvent): string[] { const sp = EVENT_SCHEMA[e.type]; if (!sp) return ['unknown type']; const errs: string[] = [];
++  for (const [k, f] of Object.entries(sp.fields)) { if (!(k in e)) { if (!f.optional) errs.push(k + ' missing'); continue; } if (!ok(f, e[k])) errs.push(k + ' bad'); }
++  for (const k of Object.keys(e)) if (!['type', 'ts', 'sid', 'fgMs'].includes(k) && !(k in sp.fields)) errs.push(k + ' unknown');
++  if (e.type === 'fatigue_cue_tapped' || e.type === 'fatigue_cue_shown') { $sum }
++  return errs; }
++export function isPinned(e: TEvent): boolean { return !!EVENT_SCHEMA[e.type]?.pinned; }
++TS
++  git -C $T/r add -A; git -C $T/r -c user.email=q@x -c user.name=q commit -qm $v --allow-empty; git -C $T/r rev-parse HEAD; }
++OK=$(gen ok); ck "positive: six fields, sum <= 4, no suppressed_by_stall on tapped, dead_zone pinned none_affordable" 0 "G8V: PASS" --git $T/r --rc $OK
++R=$(gen nosum); ck "negative (new FAIL fixture): no n_tired+n_asleep+n_paused <= 4 check -> sum 5 accepted FAILS G8V-C1b only" 1 "G8V: FAIL (1) G8V-C1b\$" --git $T/r --rc $R
++R=$(gen two); ck "negative: tapped = {surface, loss_per_s} (schema.ts:171 shape) FAILS G8V-C1a" 1 "FAIL G8V-C1a" --git $T/r --rc $R
++R=$(gen sbs); ck "negative: tapped accepts suppressed_by_stall FAILS G8V-C1c only" 1 "G8V: FAIL (1) G8V-C1c\$" --git $T/r --rc $R
++R=$(gen dzcap); ck "negative: dead_zone reason cap/max accepted FAILS G8V-DZ only" 1 "G8V: FAIL (1) G8V-DZ\$" --git $T/r --rc $R
++git -C $T/r rm -q src/telemetry/schema.ts; git -C $T/r -c user.email=q@x -c user.name=q commit -qm rm; RM=$(git -C $T/r rev-parse HEAD); ck "negative: schema.ts absent FAILS G8V-0" 1 "G8V: FAIL (1) G8V-0\$" --git $T/r --rc $RM
++ck "real rc/v5 tip 65a7443: FAIL closed (schema.ts not on rc/v5; expected until the schema.ts PR lands)" 1 "FAIL G8V-0" --git $G --rc 65a7443951b1967abb20cdd640a6b22ab1c7e1e3
++echo "RESULT pass=$P fail=$F"; rm -rf $T; [ $F = 0 ]

@@ -1,0 +1,24 @@
+QA-D-1106-PR116-GUI handoff — GUI BLOCKED (not FAIL). 2026-11-06 02:56 CET (Europe/Belgrade).
+
+computerUse sand-subagent-708da0bb-6291-5299-8ea4-44d47d9fc775:
+- setViewportSize blocked (no sanctioned sizing). Actual viewport 1920×1072; 360×640 not achievable.
+- Loaded http://127.0.0.1:5216/?marketSeed=3; Tap to start only. No flows, no screenshots, build-id UI not verified.
+- Browser lock .browser-test.lock NOT held (would require Shell browser drive).
+- Notes: abilities-ui-9ee76a0-evidence/NOTES.md
+- No workaround around blocked setViewport (HoQA forbid).
+
+All GUI checks NOTRUN (not FAIL):
+- open / close / reopen Upgrades sheet
+- closing mid-animation
+- switch panels while open
+- reload while open
+- O1 dock mid-close
+- O2 reopen during pending close
+- Chromium 360×640 screenshots
+- runtime build-id UI probe
+
+Additional content blocker (unchanged): release m4.flags.abilities=0 → Architect O1/O2 upgradesClosePending path unreachable without authorized flag-on path.
+
+Prior local exact-head bar (identity, flag0 goldens, tsc, full vitest, build, O1/O2 vitest) remains PASS — kept separate; not re-run.
+
+Cleanup: lane-kill uiqa-pr116 1746941 → rc0 TERM 1746941 (group); own-tag survivors []. Server stopped. No new tests/browsers/processes. #107 hosted not read.

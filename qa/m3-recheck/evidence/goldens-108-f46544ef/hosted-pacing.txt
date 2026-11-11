@@ -1,0 +1,11 @@
+# pacing-x1-stack 42152085267 jobs (snapshot 1 at 03:58 CET during local bar; final read at 2026-11-06 04:08:13 CET )
+127677462563 pacing-x1-stack shard (seller15) completed success f46544ef 2026-11-06T02:43:08Z 2026-11-06T03:05:37Z
+127677462812 pacing-x1-stack shard (optimal) in_progress None f46544ef 2026-11-06T02:43:08Z None
+127677462855 pacing-x1-stack shard (casual) in_progress None f46544ef 2026-11-06T02:43:09Z None
+# check runs on f46544ef
+127680353901 release-globals completed skipped https://github.com/PrincipalLewis/egg-farm/actions/runs/42152085295/job/127680353901
+127677462855 pacing-x1-stack shard (casual) in_progress None https://github.com/PrincipalLewis/egg-farm/actions/runs/42152085267/job/127677462855
+127677462812 pacing-x1-stack shard (optimal) in_progress None https://github.com/PrincipalLewis/egg-farm/actions/runs/42152085267/job/127677462812
+127677462601 gate completed success https://github.com/PrincipalLewis/egg-farm/actions/runs/42152085295/job/127677462601
+127677462563 pacing-x1-stack shard (seller15) completed success https://github.com/PrincipalLewis/egg-farm/actions/runs/42152085267/job/127677462563
+127677462484 k10-breeds-offset (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53) completed failure https://github.com/PrincipalLewis/egg-farm/actions/runs/42152085247/job/127677462484

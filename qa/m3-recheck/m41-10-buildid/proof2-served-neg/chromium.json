@@ -1,0 +1,46 @@
+{
+ "engine": "chromium",
+ "cases": {
+  "fresh-coreloop": {
+   "errors": [],
+   "modal": [
+    null
+   ],
+   "buildIdSurfaces": {
+    "meta": [
+     "m3-rc1-pre+246de09"
+    ],
+    "dataBuildId": "m3-rc1-pre+246de09",
+    "telemetrySessionStart": [
+     "m3-rc1-pre+246de09"
+    ],
+    "scanned": [
+     "m3-rc1-pre+246de09"
+    ]
+   },
+   "buildIds": [
+    "m3-rc1-pre+246de09"
+   ],
+   "buildIdSurfacesEnd": {
+    "meta": [
+     "m3-rc1-pre+246de09"
+    ],
+    "dataBuildId": "m3-rc1-pre+246de09",
+    "telemetrySessionStart": [
+     "m3-rc1-pre+246de09"
+    ],
+    "scanned": [
+     "m3-rc1-pre+246de09"
+    ]
+   }
+  }
+ },
+ "buildIdCheck": {
+  "ok": false,
+  "want": "m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed]",
+  "ids": [
+   "m3-rc1-pre+246de09"
+  ],
+  "reason": "m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d; m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d; m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d; m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d; m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d; m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d; m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d; m3-rc1-pre+246de09: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d"
+ }
+}

@@ -1,0 +1,179 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr125-a8a1ae8a/probes
+
+stdout | qa-pr125-probe.test.ts > P1 (a) present_active_s half-up > P1a pure rounding: round(ms/100)/10 equals integer half-up for every integer ms 0..2,000,000
+QA-PROBE P1a mismatches 0 first null
+
+stdout | qa-pr125-probe.test.ts > P1 (a) present_active_s half-up > P1b sim reachability (BR-AC53 non-whole, BR-R12b(b) fT=min(100,F-given)): 12,249 focus-ms -> 12.2, 12,250 -> 12.3
+QA-PROBE P1b lastF=249 {"focusMs":12300,"activeMs":12300,"f":{"present_active_s":12.3,"present_lost_count":0}} lastF=250 {"focusMs":12300,"activeMs":12300,"f":{"present_active_s":12.3,"present_lost_count":0}}
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2a BR-AC53 (taps applied after the tick that reaches their focus second) -> 660.0 / 3
+QA-PROBE P2a {"focusMs":747000,"activeMs":660300,"f":{"present_active_s":660.3,"present_lost_count":3}}
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2b BR-AC53 (taps applied before that tick, i.e. counted on it) -> 660.0 / 3
+QA-PROBE P2b {"focusMs":747000,"activeMs":660300,"f":{"present_active_s":660.3,"present_lost_count":3}}
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2c no settled Present: both fields present and 0 even after 30 fast taps
+QA-PROBE P2c {"present_active_s":0,"present_lost_count":0} stamps 6
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2d BR-AC47 steady 1/s taps 0..59 s: lost_count = 1
+QA-PROBE P2d {"present_active_s":22.1,"present_lost_count":1}
+
+stdout | qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3a eggs=0 grant with gap >= 60 s (hens track rate forced to 0) still carries away_bp
+QA-PROBE P3a eggs 0 [{"type":"offline_grant","fields":{"secondsAway":3600,"eggs":0,"away_bp":1500}}]
+
+stdout | qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3b away_bp reported equals the bp applied to the grant (dupe Sussex hatch completes during the absence)
+QA-PROBE P3b applied bp 1500 eggs 16818 expEggs@applied 13455 reported {"secondsAway":3600,"eggs":16818,"away_bp":1875} awayBp after 1875
+
+stdout | qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3c sub-60 s reload gap: is an offline_grant emitted? (diagnostic: records behaviour)
+QA-PROBE P3c 2 s gap offline_grant events [{"type":"offline_grant","fields":{"secondsAway":2,"eggs":0,"away_bp":0}}]
+
+stdout | qa-pr125-probe.test.ts > P4 BR-R13 float order > P4a impl equals spec order floor(min(min(a,cap)*rate*(1e4+bp)/1e4, max)*mult) over H x bp x a x mult
+QA-PROBE P4a cases 19411425 mismatches 10941 [{"H":0,"mult":1,"bp":2500,"a":2720,"spec":1291,"got":1292},{"H":0,"mult":1.25,"bp":750,"a":1600,"spec":817,"got":816},{"H":0,"mult":1.25,"bp":2500,"a":1152,"spec":684,"got":683},{"H":0,"mult":1.25,"bp":2500,"a":2720,"spec":1614,"got":1615},{"H":0,"mult":1.25,"bp":2500,"a":2944,"spec":1748,"got":1747}]
+
+stdout | qa-pr125-probe.test.ts > P4 BR-R13 float order > P4b BR-AC17 Away 3000 @ H=30, 60 min and 3 h
+QA-PROBE P4b bp 3000 g60 72540 g3h 111600 flagOffCap 111600 spec60(mult1) 36270
+
+stdout | qa-pr125-probe.test.ts > P5 BR-AC50 reload: calm ring not saved > saves with 0 and 6 stamps are byte-identical
+QA-PROBE P5 identical true has breedsCalm false
+
+stdout | qa-pr125-probe.test.ts > P6 BR-R12 Present bp only while settled (BR-AC4b) > settling Present slot: presentBp 0 and no activeMs
+QA-PROBE P6 activeMs while settling 0
+
+ ❯ qa-pr125-probe.test.ts (13 tests | 6 failed) 1126ms
+   ✓ P1 (a) present_active_s half-up > P1a pure rounding: round(ms/100)/10 equals integer half-up for every integer ms 0..2,000,000 303ms
+   × P1 (a) present_active_s half-up > P1b sim reachability (BR-AC53 non-whole, BR-R12b(b) fT=min(100,F-given)): 12,249 focus-ms -> 12.2, 12,250 -> 12.3 10ms
+     → expected 12300 to be 12249 // Object.is equality
+   × P2 (b) present_lost_count / BR-AC53 > P2a BR-AC53 (taps applied after the tick that reaches their focus second) -> 660.0 / 3 34ms
+     → expected 660.3 to be 660 // Object.is equality
+   × P2 (b) present_lost_count / BR-AC53 > P2b BR-AC53 (taps applied before that tick, i.e. counted on it) -> 660.0 / 3 25ms
+     → expected 660.3 to be 660 // Object.is equality
+   × P3 (c) offline_grant.away_bp > P3b away_bp reported equals the bp applied to the grant (dupe Sussex hatch completes during the absence) 1ms
+     → expected 1875 to be 1500 // Object.is equality
+   × P3 (c) offline_grant.away_bp > P3c sub-60 s reload gap: is an offline_grant emitted? (diagnostic: records behaviour) 1ms
+     → expected 1 to be +0 // Object.is equality
+   × P4 BR-R13 float order > P4a impl equals spec order floor(min(min(a,cap)*rate*(1e4+bp)/1e4, max)*mult) over H x bp x a x mult 743ms
+     → expected 10941 to be +0 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  qa-pr125-probe.test.ts > P1 (a) present_active_s half-up > P1b sim reachability (BR-AC53 non-whole, BR-R12b(b) fT=min(100,F-given)): 12,249 focus-ms -> 12.2, 12,250 -> 12.3
+AssertionError: expected 12300 to be 12249 // Object.is equality
+
+- Expected
++ Received
+
+- 12249
++ 12300
+
+ ❯ qa-pr125-probe.test.ts:51:23
+     49|     const a = run(249), c = run(250);
+     50|     log('P1b lastF=249', JSON.stringify(a), 'lastF=250', JSON.stringif…
+     51|     expect(a.focusMs).toBe(12249);
+       |                       ^
+     52|     expect(a.f.present_active_s).toBe(12.2);
+     53|     expect(c.f.present_active_s).toBe(12.3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2a BR-AC53 (taps applied after the tick that reaches their focus second) -> 660.0 / 3
+AssertionError: expected 660.3 to be 660 // Object.is equality
+
+- Expected
++ Received
+
+- 660
++ 660.3
+
+ ❯ qa-pr125-probe.test.ts:79:34
+     77|     expect(r.focusMs).toBe(747_000);
+     78|     expect(r.f.present_lost_count).toBe(3);
+     79|     expect(r.f.present_active_s).toBe(660);
+       |                                  ^
+     80|   });
+     81|   it('P2b BR-AC53 (taps applied before that tick, i.e. counted on it) …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2b BR-AC53 (taps applied before that tick, i.e. counted on it) -> 660.0 / 3
+AssertionError: expected 660.3 to be 660 // Object.is equality
+
+- Expected
++ Received
+
+- 660
++ 660.3
+
+ ❯ qa-pr125-probe.test.ts:84:34
+     82|     const r = ac53(true); log('P2b', JSON.stringify(r));
+     83|     expect(r.f.present_lost_count).toBe(3);
+     84|     expect(r.f.present_active_s).toBe(660);
+       |                                  ^
+     85|   });
+     86|   it('P2c no settled Present: both fields present and 0 even after 30 …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3b away_bp reported equals the bp applied to the grant (dupe Sussex hatch completes during the absence)
+AssertionError: expected 1875 to be 1500 // Object.is equality
+
+- Expected
++ Received
+
+- 1500
++ 1875
+
+ ❯ qa-pr125-probe.test.ts:123:31
+    121|     const expEggs = m4OfflineEggs(3600, s0.hensLevel, BR, 1, applied);
+    122|     log('P3b applied bp', applied, 'eggs', eggs, 'expEggs@applied', ex…
+    123|     expect(og.fields.away_bp).toBe(applied);
+       |                               ^
+    124|   });
+    125|   it('P3c sub-60 s reload gap: is an offline_grant emitted? (diagnosti…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3c sub-60 s reload gap: is an offline_grant emitted? (diagnostic: records behaviour)
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ qa-pr125-probe.test.ts:130:23
+    128|     (g as any).grantOffline(2_000);
+    129|     const og = tracks.filter(t => t.type === 'offline_grant'); log('P3…
+    130|     expect(og.length).toBe(0); // offline needs >= offlineMinSeconds (…
+       |                       ^
+    131|   });
+    132| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  qa-pr125-probe.test.ts > P4 BR-R13 float order > P4a impl equals spec order floor(min(min(a,cap)*rate*(1e4+bp)/1e4, max)*mult) over H x bp x a x mult
+AssertionError: expected 10941 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 10941
+
+ ❯ qa-pr125-probe.test.ts:144:17
+    142|       }
+    143|     log('P4a cases', n, 'mismatches', bad, JSON.stringify(ex));
+    144|     expect(bad).toBe(0);
+       |                 ^
+    145|   });
+    146|   it('P4b BR-AC17 Away 3000 @ H=30, 60 min and 3 h', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 7 passed (13)
+   Start at  01:32:05
+   Duration  1.64s (transform 263ms, setup 0ms, collect 326ms, tests 1.13s, environment 0ms, prepare 50ms)
+
+PROBE_EXIT=1

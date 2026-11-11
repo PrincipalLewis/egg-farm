@@ -1,0 +1,22 @@
+--- a/qa/m3-scripts/rc1-guard-save-qa.mjs
++++ b/qa/m3-scripts/rc1-guard-save-qa.mjs
+@@ -38,11 +38,18 @@
+ { const c = await ctxNew(); await seed(c); const A = await start(await c.newPage());
+   await A.evaluate(() => { window.eggfarm.state.coinsCents = 1e12; }); const bought = await buy(A, 5); const aBefore = await st(A); // unsaved purchases (< autosave)
+   const lsBefore = await lsSave(A);
++  // SD5-2 (HoQA): record every save A itself persists (LS setItem + IDB put of the save key) so A's FINAL persisted state after release can be read back.
++  await A.evaluate(() => { window.__aWrites = []; const rec = (src, v) => { try { const d = JSON.parse(v); window.__aWrites.push({ src, savedAt: d.savedAt, coins: d.state.coinsCents, F: d.state.farmLevel, C: d.state.collectionLevel }); } catch {} };
++    const S = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { const r = S.call(this, k, v); if (k === 'eggfarm.save') rec('ls', v); return r; };
++    const P = IDBObjectStore.prototype.put; IDBObjectStore.prototype.put = function (v, k) { const r = P.call(this, v, k); if (k === 'main' && typeof v === 'string') r.addEventListener('success', () => rec('idb', v)); return r; }; });
++  const q0 = await st(A), tq = Date.now(); await sleep(500); const q1 = await st(A), tick = Math.max(0, Math.ceil((q1.coins - q0.coins) / (Date.now() - tq) * 100)); // one 100 ms tick of income (info / secondary only)
+   const B = await c.newPage(); const tOpen = Date.now(); await start(B);
+   await A.waitForSelector('.recovery-layer.tab-guard', { timeout: 5000 }).catch(() => {}); const tNotice = Date.now() - tOpen;
+   const bLoaded = await B.evaluate(() => window.eggfarm.loaded); const bc = await A.evaluate(() => window.__bc.map(x => x.out.t));
+   const bFlush = await B.evaluate(() => { const f = window.__bc.find(x => x.out.t === 'flush'), c = window.__bc.find(x => x.out.t === 'claim'); return f && c ? Math.round(c.t - f.t) : null; });
+-  ok('Handover: old tab flushes first, new tab loads its exact unsaved state (no play lost), flush→claim ≤300 ms', bLoaded.coinsCents === aBefore.coins && bLoaded.farmLevel === aBefore.F && bLoaded.collectionLevel === aBefore.C && bFlush !== null && bFlush <= 350, { bought, aBefore, lsBefore, bLoaded, flushToClaimMs: bFlush, aSent: bc });
++  await sleep(300); const aW = await A.evaluate(() => window.__aWrites); const aFinal = aW.filter(w => w.savedAt > 0).sort((x, y) => y.savedAt - x.savedAt)[0] ?? null; // A's newest persisted copy after release
++  ok('Handover PRIMARY: new tab loads EXACTLY the old tab\'s final persisted state (coins + levels), flush→claim ≤350 ms', aFinal !== null && bLoaded.coinsCents === aFinal.coins && bLoaded.farmLevel === aFinal.F && bLoaded.collectionLevel === aFinal.C && bFlush !== null && bFlush <= 350, { aFinal, aWrites: aW.length, bLoaded, diffVsPersisted: aFinal ? aFinal.coins - bLoaded.coinsCents : null, flushToClaimMs: bFlush, aSent: bc, bought });
++  ok('Handover SECONDARY (live): new tab >= old tab live state just before open - one 100 ms tick', bLoaded.coinsCents >= q1.coins - tick && bLoaded.farmLevel === aBefore.F && bLoaded.collectionLevel === aBefore.C, { aBefore, liveAtOpen: q1.coins, lsBefore, tick, diffVsLive: q1.coins - bLoaded.coinsCents });
+   // TG-1 / AC14d (re-baselined): newest tab owns; older shows notice; older money + save frozen
+   const a0 = await st(A), m0 = await A.locator('body').innerText().then(t => t.match(/\$[\d.,]+[KMBTkmb]?/)?.[0]); await sleep(5000); const a1 = await st(A);
+   const lease = await A.evaluate(() => JSON.parse(localStorage.getItem('eggfarm.lease'))); const blocked = evCount(await telem(A), 'tab_guard_blocked_write');

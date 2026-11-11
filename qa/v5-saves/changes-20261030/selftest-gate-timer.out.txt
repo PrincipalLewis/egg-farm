@@ -1,0 +1,11 @@
+PASS T1 lane-run recorded PID 138548 in .pids/saves-qa.pids (138548 122385 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T07:40:40+01:00 bash /workspa…)
+PASS T2 own session+group (pgid=sid=138548); group = 2 process(es): timer bash + its sleep only
+PASS T3 WARNING line in status.log, summary.txt and gate stderr (2026-10-30 07:40:42 CET WARNING lock window: 0 min elapsed o…)
+PASS T4 stopwin via lane-kill: gate exit 0, STOPPED 138548, no ERROR
+PASS T5 PID 138548 and its process group gone; lane-kill: 'GONE 138548'
+PASS T6 past the 6 s OVERRUN threshold: no OVERRUN line, status.log/summary.txt unchanged since stop, = STATUS.sha256
+PASS T7 signing: -c SHA256SUMS + -c STATUS.sha256 (2 OK, 0 FAILED)
+PASS N1 leader 145106 gone, member(s) 145110  survive -> gate exit 3, 'ask HoO', member(s) NOT signalled (still alive)
+PASS N2 unrecorded PID 138530 -> lane-kill REFUSED -> gate exit 3, 'ask HoO' (stderr + status.log)
+PASS G1 gate code: no pkill/killall/pgrep/kill (only lane-run.sh / lane-kill.sh)
+SELFTEST gate-timer: 10 passed, 0 failed

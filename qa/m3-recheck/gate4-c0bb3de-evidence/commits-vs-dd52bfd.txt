@@ -1,0 +1,59 @@
+c0bb3de M4 gate5: focus return treats the docked Upgrades tab as visible ([hidden] overridden by CSS at >=900)
+ae24de8 M4 gate5: P46-M1 focus return fix (CCR major)
+aa59600 M4 gate5 B: dismissing outside tap is swallowed (CEO D-07 amendment)
+65cbf3e M4 gate5 A: hold toasts while the explainer is open; queue it behind modals; focus (P46-M1)
+24e3674 rc0 g5: scroll the Upgrades tabs into view before the tabs shot
+f328d91 rc0: g5 section (EXP1 explainer on a migrated save, tap pass-through, buy, no re-show; F2 tab sizes; G5SHOTS shots)
+f68c799 M4 gate5 §11 gaps: refund line (migrationRefundCents > 0) + reduced-motion test
+fc4b100 M4 gate5 Saves m1: show the explainer only when seenTracksExplainer can be persisted
+3dfa0de M4 gate5 F2: Upgrades tabs 36px visual / 44px tap on phones (CSS only)
+e43bc00 M4 gate5 F1: tracks explainer (M4-AC-EXP1 / M4A-33)
+b29e0e9 Merge origin/rc/m4-retune-t3 1d10311 (acw1 gate 960 s) into rc/m4-t3-l30plus (merge, no rebase)
+1d10311 test: acw1 design gate 16 min (960 s, inclusive) on seeds 1-200 and 201-299 per D-CEO-20261019-06 (in force 04:04)
+8c5ac71 Merge origin/rc/m4-retune-t3 7240833 (#44 CCR fixes) into rc/m4-t3-l30plus (merge, no rebase); status.md: both entries kept
+7240833 test: M4-on p4/acw1 targets (D-HOP-2026-10-19-09); acw1 seeds 1-200 + 201-299, 15-min gate unchanged; delete zz-t3 scratch (CCR M1); fix stale F1-only titles (CCR m2)
+bd3e527 D-HOP-10 per-level coop capacity (HoE pre-approved): sync-economy copies a non-linear coop_capacity column (rows 0..farmMaxLevel) into farm.coopCapacityTable, not fitted; coopCapacity reads it, formula only when absent (linear b48be8a4 unchanged, test:flagoff + f90d1678 pass). Tests: 625452d4 coop column fixture, strictly rising track costs L0..L55 fail loudly
+a99f4e3 status: rc/m4-t3-l30plus done/next/blocked
+0efda7d sync-economy (Economy 03:50): demand_min/demand_max fitted and verified on rows 0..30 only (formula cannot reproduce L31-50 demand); collection costGrowth and the rest fitted on rows 0..farmMaxLevel. No output change on the current CSV (sync --check clean)
+408a589 Saves M1 (HoE-approved, Leadership ruling: Farm max 50, Hens/Egg value to 55): drop the trackMaxLevel Farm-max cap from 63d2c51; trackEggsPerSec, trackPriceCents and m4OfflineEggs clamp at the track's own max, not the Farm max. Tests: Farm stops at 50, 55 buyable at F50 and stops, L51-55 raise eggs/s/price/offline, finite at L55; migrated saves <= track 55 / Farm 50
+2275c54 CI: flag-off byte-identical check vs rc/m4-default-on 7fdb273 (f90d1678 + balance-minus-m4 a3bc9f45 + flag-off trace fefad60f), npm run test:flagoff, documented in m4-design.md
+4442841 UI M1 big-number tests: T tier already in lineage (#22 f035594); B/T edges, 999.95 rollover at K/M/B/T, NaN/Infinity; L55 max price $1.68T within T
+732e70e migrate-v7 sample save fixture (v6 F30/C30) + load test; migrated H/V <= Farm max (30 live, 50 on a 56-row L30+ table). SAVE_VERSION stays 6
+63d2c51 L30+ truncation (HoE): sync-economy fits/verifies Farm, Collection, workers on rows 0..farmMaxLevel; per-Farm arrays 51 entries, Hens/Egg value costs keep all rows; trackMaxLevel capped at Farm max (Saves M1: no L51+ purchases). Test
+af04736 Balance type (type-only, HoE-approved): optional m4.hens/eggValue.capOverFarmByFarm, tc as generated tc_* map; no runtime change
+c27fdfb L30+ pack tooling+config+tests (from 6809f8e): sync-economy farmMaxLevel/per-row caps/extra surcharge merged with #44 farmCostFromCsv; economy-config keeps #44 F1 fields + farmMaxLevel 50, hvExtraSecondLevelMult 1.1; no CSV rows
+20bf1d3 L30+ pack src (econ/l30plus e38cf76..6809f8e patch, HoE-approved): data-driven track max, per-row caps, extra-level surcharge; balance.ts kept as #44 (no m4 validation block on this line)
+4ccb9fd status: PR #44 HoE rulings, D-CEO-20261019-04 gate numbers, acw1/p4 diagnosis
+6e133f2 test(AC7): encode D-CEO-20261019-04 final-SHA gate (decisions.md:51)
+a93e66a test: cost-segments allows T3 b48be8a4 (keeps 6dca24cd); m4a-tracks TR-1 reads track prices from config (HoE #44)
+1a1192e vendor: economy.f1-m4cols.csv = T3 b48be8a4 (byte-identical to the pack; SOURCE/SHA256SUMS updated; economy.f1.csv untouched)
+4e7a4ed status: T3 retune branch results
+3044977 test(golden): M4-on sim trace re-pinned a54c9cf9 for T3 data (2 runs identical; storage pins and flag-off golden unchanged)
+32e7ec6 test: allowlist T3 CSV b48be8a4 in AC7 band, worst-seed guards and economy-sim parity (same rules as F1)
+5727b7b test(fixture): seller_variance.json from the T3 pack (4ea66e5c, Economy regenerated)
+0808fa6 data: M4-on retune T3 economy.csv b48be8a4 (hens_cost/egg_value_cost L0-L11 only; D-CEO-20261019-04) + balance.json via sync-economy
+cb57f17 docs(triage): #43 merge, bot Farm-log fix, AC7 1-200 re-run; status
+91c5c13 test(bot): record Farm level after the buy (2 Farm buys in one check-in were logged as one level; HoQA ac7-twobot-528f1a7) + regression test
+130366c Merge remote-tracking branch 'origin/rc/m4-default-on' into rc/m4-on-tests-2
+7fdb273 Merge #43 PL-1 keyboard guard into rc/m4-default-on (QA PASS, CCR 0 Major)
+f9baba1 nits: label variance first-purchase case report-only (n2); triage remaining failures 3 unit / slow 14/14 (n3)
+528f1a7 docs(triage): D-HOP-02 bot results, seeds 1-200 AC7, CCR minors; status
+969d7a9 test: AC7 new save first purchase <= 30 s, seeds 1-200, M4 on (deterministic gating; variance reported)
+32ebe43 test(seller-variance): Python-parity cases forced flag-off (fixtures model the pre-M4 bot); AC7 band stays on shipped M4-on. Revertable (HoE)
+beb7a8a test: CCR n1 offline-modal g2 expects the unmarked-v6 grant
+5889947 test: CCR m3 M4-on N2 refusal case (fails when the game.ts:232 tracksV7 guard is removed; verified locally, src untouched)
+427573a test: CCR m2 MK-12 tests price at sale time after a Farm upgrade with M4 on (Balanced tier 220 -> 242 c)
+1a24902 test: CCR m1 pin literal 100 c M4-on price in tick/workers/sellall (not from salePriceCents)
+8308417 test(bot): D-HOP-2026-10-19-02 seller15 (M4 on) = game payback pick over ALL purchasables incl. Collection + workers, wait rule; M4-on golden trace re-pinned 723b91ab
+e79d50d docs(triage): D-HOP-2026-10-19-01 bot change results, AC7 L10/L30 vs Economy, Art & UX hint handoff; status
+48bdb09 PL-1: inline guard, jsdom test on real app.ts wiring (Escape 0 buys; held Enter/Space 1 buy); jsdom devDep
+d9de058 PL-1 (QA-D-1019-1): keyboard guard - Escape only closes, never activates; no held-key repeat buys
+c163fb9 test(bot): D-HOP-2026-10-19-01 HENS/VALUE in AC7/pacing bots' best-buy (payback pick, tests/bot-m4.ts); M4-on golden trace re-pinned 9173492e (flag-off unchanged)
+99ad822 docs(triage): list of every changed test/golden in #42 with reasons (D-CEO-20261019-03)
+06171c7 docs(triage): M4-on test triage FINAL + status
+67a3810 test(m4-on): unmarked-v6 seeds get the flag-off offline grant (ADR M4-14..17): expOfflineV6 helper
+1000137 test(m4-on): M4-on expectations; flag-off cases forced explicit; M4-on golden (403ca889) + flag-off golden kept forced-off
+eb7495c docs(triage): Saves c3811f7 per-test section + IDB-mirror pause design note; revived baseline
+e1b5806 test(saves): M4-on triage - 5 save failures are test artifacts (flag-off/unmarked-v6 assumptions)
+5259834 WIP rc/m4-on-tests: rc0 script selector/regex fixes + partial M4-on triage (stopped, release parked)
+90a9c84 rc: M4 default ON (balance.m4.enabled 0->1), flag only - D-CEO-20261017-03

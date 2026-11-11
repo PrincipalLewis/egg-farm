@@ -1,0 +1,12 @@
+LOCK+START 2026-11-05T23:49:13+01:00 loadavg=0.63 1.11 1.52 1/2082 1436569
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/tapcoins-dc58705/wt
+
+ ✓ tests/v5-income-ref.test.ts (27 tests) 103ms
+
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+   Start at  23:49:13
+   Duration  507ms (transform 207ms, setup 0ms, collect 261ms, tests 103ms, environment 0ms, prepare 42ms)
+
+EXIT=0 END 2026-11-05T23:49:14+01:00 loadavg=0.63 1.11 1.52 1/2088 1436669

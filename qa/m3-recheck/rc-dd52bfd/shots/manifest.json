@@ -1,0 +1,1898 @@
+{
+ "pr": null,
+ "branch": "main",
+ "sha": "dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b",
+ "pushed": true,
+ "pushed_check": "git ls-remote origin refs/heads/main == dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b (13:00 CEST)",
+ "build_label_checked": true,
+ "build_label": "m3-rc1-pre+dd52bfd (runtime html in every page of every engine; visible label 'Egg Farm m3-rc1-pre+dd52bfd' in settings-* shots)",
+ "rev": 1,
+ "author": "QA Engineer, UI/Layout & Gameplay Verification",
+ "created": "2026-10-17T13:45:00+02:00",
+ "shots": [
+  {
+   "file": "farm-market-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "market-market-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-collection-capped-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-farm-capped-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-workers-rich-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "settings-normal-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "farm-market-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "market-market-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-collection-capped-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-farm-capped-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-workers-rich-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "settings-normal-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "farm-market-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "market-market-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-collection-capped-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-farm-capped-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-workers-rich-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "settings-normal-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "farm-market-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "market-market-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-collection-capped-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-farm-capped-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "upgrades-workers-rich-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "settings-normal-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/farm-market-360x800.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/market-market-360x800.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-collection-capped-360x800.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-farm-capped-360x800.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-workers-rich-360x800.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/settings-normal-360x800.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/farm-market-375x800.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/market-market-375x800.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-collection-capped-375x800.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-farm-capped-375x800.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-workers-rich-375x800.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/settings-normal-375x800.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/farm-market-390x844.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/market-market-390x844.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-collection-capped-390x844.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-farm-capped-390x844.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-workers-rich-390x844.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/settings-normal-390x844.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/farm-market-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/market-market-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-collection-capped-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-farm-capped-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/upgrades-workers-rich-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "firefox/settings-normal-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/farm-market-360x800.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/market-market-360x800.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-collection-capped-360x800.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-farm-capped-360x800.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-workers-rich-360x800.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/settings-normal-360x800.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "360x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/farm-market-375x800.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/market-market-375x800.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-collection-capped-375x800.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-farm-capped-375x800.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-workers-rich-375x800.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/settings-normal-375x800.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "375x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/farm-market-390x844.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/market-market-390x844.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": false
+    },
+    "activeTab": "collection",
+    "card": null,
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-collection-capped-390x844.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-farm-capped-390x844.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-workers-rich-390x844.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": false,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/settings-normal-390x844.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "390x844",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/farm-market-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "farm main view, 3 customers in queue",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/market-market-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline market (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Market sheet, 3 orders (6,8 Need-state; 4 sellable), Sell all",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-collection-capped-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection, coop-capped F3/C19 $20 (PM4-P3 state)",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "collection",
+    "card": "Collect per tap",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-farm-capped-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline capped (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm, F3/C19 $20",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "farm",
+    "card": "Farm level",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/upgrades-workers-rich-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline rich (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Workers, F4 $5000",
+   "asserted": {
+    "navOpen": {
+     "market": true,
+     "upgrades": true
+    },
+    "activeTab": "workers",
+    "card": "Market Hand",
+    "collect": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  },
+  {
+   "file": "webkit/settings-normal-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline normal (see rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Settings open, build label Egg Farm m3-rc1-pre+dd52bfd visible (HUD label check)",
+   "asserted": {
+    "label": "Egg Farm m3-rc1-pre+dd52bfd",
+    "labelVisible": true,
+    "ok": true
+   },
+   "bid": "m3-rc1-pre+dd52bfd",
+   "checked": {
+    "opened": true,
+    "pixel_size": "1280x800",
+    "size_match": true,
+    "tab_state_match": true,
+    "method": "runtime DOM assertion before shot + visual check of every file via check-sheets/<engine>-<size>.png"
+   }
+  }
+ ]
+}

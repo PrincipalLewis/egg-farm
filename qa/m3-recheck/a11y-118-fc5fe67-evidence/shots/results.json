@@ -1,0 +1,2290 @@
+{
+ "head": "fc5fe67f18085784661b10bc292c67d90a24f8f0",
+ "buildId": "m4.1+fc5fe67",
+ "port": 47118,
+ "axe": "/workspace/egg-farm-studio/artifacts/v5-ui/tools/axe-core-4.14.0/axe.min.js",
+ "axeSha256": "20c09fe157a8a34a30e241aaa1fcdade657734f08ab379ecfbeb7d45cc46e878",
+ "sizes": [
+  {
+   "w": 360,
+   "h": 640,
+   "errors": [],
+   "guard": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "queueVisible": true,
+    "state": [
+     {
+      "id": 1,
+      "demand": 4,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 2,
+      "demand": 1,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 3,
+      "demand": 3,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 4,
+      "demand": 1500,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 5,
+      "demand": 12345,
+      "filled": 0,
+      "waitedS": 0
+     }
+    ]
+   },
+   "before": {
+    "dom": [
+     {
+      "num": "4",
+      "aria": "4 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>",
+      "rect": {
+       "x": 8,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1",
+      "aria": "1 egg wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+      "rect": {
+       "x": 72,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "3",
+      "aria": "3 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+      "rect": {
+       "x": 136,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1,500",
+      "aria": "1,500 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+      "rect": {
+       "x": 200,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "12.3K",
+      "aria": "12.3K eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+      "rect": {
+       "x": 264,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     }
+    ],
+    "ax": [
+     {
+      "role": "button",
+      "name": "4 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1 egg wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "3 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1,500 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "12.3K eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     }
+    ],
+    "snap": "- group \"Customer queue\":\n  - button \"4 eggs wanted by customer\": \"4\"\n  - button \"1 egg wanted by customer\": \"1\"\n  - button \"3 eggs wanted by customer\": \"3\"\n  - button \"1,500 eggs wanted by customer\": 1,500\n  - button \"12.3K eggs wanted by customer\": 12.3K"
+   },
+   "beforeAxe": {
+    "version": "4.14.0",
+    "lcnm": {
+     "violations": [],
+     "passes": [
+      "button[aria-label=\"4 eggs wanted by customer\"]",
+      "button[aria-label=\"1 egg wanted by customer\"]",
+      "button[aria-label=\"3 eggs wanted by customer\"]",
+      "button[aria-label=\"1,500 eggs wanted by customer\"]",
+      ".unlock"
+     ],
+     "incomplete": [],
+     "inapplicable": []
+    },
+    "allOnChips": {
+     "violations": []
+    }
+   },
+   "beforeShot": {
+    "file": "chromium-360x640-chips-before.png",
+    "sha256": "e612eee1790be7db7fdfc81844ab047b7f9e30c97c04ee887e76e72414eb5266",
+    "measured": {
+     "names": [
+      "4 eggs wanted by customer",
+      "1 egg wanted by customer",
+      "3 eggs wanted by customer",
+      "1,500 eggs wanted by customer",
+      "12.3K eggs wanted by customer"
+     ]
+    }
+   },
+   "marketOpenedByChipTap": true,
+   "sellBtnVisible": true,
+   "sale": {
+    "pre": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "btn": "Sell 1+$1.00"
+    },
+    "sync": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "filled": 1,
+     "basket": 0
+    },
+    "next": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "sameEl": true,
+     "filled": 1
+    }
+   },
+   "afterGuard": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "chipInView": true
+   },
+   "after": {
+    "dom": [
+     {
+      "num": "3",
+      "aria": "3 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+      "rect": {
+       "x": 8,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1",
+      "aria": "1 egg wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+      "rect": {
+       "x": 72,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "3",
+      "aria": "3 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+      "rect": {
+       "x": 136,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1,500",
+      "aria": "1,500 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+      "rect": {
+       "x": 200,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "12.3K",
+      "aria": "12.3K eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+      "rect": {
+       "x": 264,
+       "y": 75,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     }
+    ],
+    "ax": [
+     {
+      "role": "button",
+      "name": "3 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1 egg wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "3 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1,500 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "12.3K eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     }
+    ],
+    "snap": "- group \"Customer queue\":\n  - button \"3 eggs wanted by customer\": \"3\"\n  - button \"1 egg wanted by customer\": \"1\"\n  - button \"3 eggs wanted by customer\": \"3\"\n  - button \"1,500 eggs wanted by customer\": 1,500\n  - button \"12.3K eggs wanted by customer\": 12.3K"
+   },
+   "afterAxe": {
+    "version": "4.14.0",
+    "lcnm": {
+     "violations": [],
+     "passes": [
+      ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(1)",
+      "button[aria-label=\"1 egg wanted by customer\"]",
+      ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(3)",
+      "button[aria-label=\"1,500 eggs wanted by customer\"]",
+      ".unlock"
+     ],
+     "incomplete": [],
+     "inapplicable": []
+    },
+    "allOnChips": {
+     "violations": []
+    }
+   },
+   "afterShot": {
+    "file": "chromium-360x640-chips-after-sale.png",
+    "sha256": "122d094663b2470818be8fbe277fc23f5c860c51612b619cd444b786ab3be96f",
+    "measured": {
+     "names": [
+      "3 eggs wanted by customer",
+      "1 egg wanted by customer",
+      "3 eggs wanted by customer",
+      "1,500 eggs wanted by customer",
+      "12.3K eggs wanted by customer"
+     ]
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "h": 720,
+   "errors": [],
+   "guard": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "queueVisible": true,
+    "state": [
+     {
+      "id": 1,
+      "demand": 4,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 2,
+      "demand": 1,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 3,
+      "demand": 3,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 4,
+      "demand": 1500,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 5,
+      "demand": 12345,
+      "filled": 0,
+      "waitedS": 0
+     }
+    ]
+   },
+   "before": {
+    "dom": [
+     {
+      "num": "4",
+      "aria": "4 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>",
+      "rect": {
+       "x": 12,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1",
+      "aria": "1 egg wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+      "rect": {
+       "x": 76,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "3",
+      "aria": "3 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+      "rect": {
+       "x": 140,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1,500",
+      "aria": "1,500 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+      "rect": {
+       "x": 204,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "12.3K",
+      "aria": "12.3K eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+      "rect": {
+       "x": 268,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     }
+    ],
+    "ax": [
+     {
+      "role": "button",
+      "name": "4 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1 egg wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "3 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1,500 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "12.3K eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     }
+    ],
+    "snap": "- group \"Customer queue\":\n  - button \"4 eggs wanted by customer\": \"4\"\n  - button \"1 egg wanted by customer\": \"1\"\n  - button \"3 eggs wanted by customer\": \"3\"\n  - button \"1,500 eggs wanted by customer\": 1,500\n  - button \"12.3K eggs wanted by customer\": 12.3K"
+   },
+   "beforeAxe": {
+    "version": "4.14.0",
+    "lcnm": {
+     "violations": [],
+     "passes": [
+      "button[aria-label=\"4 eggs wanted by customer\"]",
+      "button[aria-label=\"1 egg wanted by customer\"]",
+      "button[aria-label=\"3 eggs wanted by customer\"]",
+      "button[aria-label=\"1,500 eggs wanted by customer\"]",
+      ".unlock"
+     ],
+     "incomplete": [],
+     "inapplicable": []
+    },
+    "allOnChips": {
+     "violations": []
+    }
+   },
+   "beforeShot": {
+    "file": "chromium-1280x720-chips-before.png",
+    "sha256": "4588be23aca0ec82c56f85ce3c54c221cc00700e960c75036c85949c5d5985fa",
+    "measured": {
+     "names": [
+      "4 eggs wanted by customer",
+      "1 egg wanted by customer",
+      "3 eggs wanted by customer",
+      "1,500 eggs wanted by customer",
+      "12.3K eggs wanted by customer"
+     ]
+    }
+   },
+   "marketOpenedByChipTap": false,
+   "sellBtnVisible": true,
+   "sale": {
+    "pre": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "btn": "Sell 1+$1.00"
+    },
+    "sync": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "filled": 1,
+     "basket": 0
+    },
+    "next": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "sameEl": true,
+     "filled": 1
+    }
+   },
+   "afterGuard": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "chipInView": true
+   },
+   "after": {
+    "dom": [
+     {
+      "num": "3",
+      "aria": "3 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+      "rect": {
+       "x": 12,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1",
+      "aria": "1 egg wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+      "rect": {
+       "x": 76,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "3",
+      "aria": "3 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+      "rect": {
+       "x": 140,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "1,500",
+      "aria": "1,500 eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+      "rect": {
+       "x": 204,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     },
+     {
+      "num": "12.3K",
+      "aria": "12.3K eggs wanted by customer",
+      "role": null,
+      "live": null,
+      "liveDesc": false,
+      "tag": "BUTTON",
+      "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+      "rect": {
+       "x": 268,
+       "y": 81,
+       "w": 56,
+       "h": 64
+      },
+      "inView": true
+     }
+    ],
+    "ax": [
+     {
+      "role": "button",
+      "name": "3 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1 egg wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "3 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "1,500 eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     },
+     {
+      "role": "button",
+      "name": "12.3K eggs wanted by customer",
+      "from": [
+       "attribute:aria-label",
+       "contents"
+      ],
+      "ignored": false,
+      "live": []
+     }
+    ],
+    "snap": "- group \"Customer queue\":\n  - button \"3 eggs wanted by customer\": \"3\"\n  - button \"1 egg wanted by customer\": \"1\"\n  - button \"3 eggs wanted by customer\": \"3\"\n  - button \"1,500 eggs wanted by customer\": 1,500\n  - button \"12.3K eggs wanted by customer\": 12.3K"
+   },
+   "afterAxe": {
+    "version": "4.14.0",
+    "lcnm": {
+     "violations": [],
+     "passes": [
+      ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(1)",
+      "button[aria-label=\"1 egg wanted by customer\"]",
+      ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(3)",
+      "button[aria-label=\"1,500 eggs wanted by customer\"]",
+      ".unlock"
+     ],
+     "incomplete": [],
+     "inapplicable": []
+    },
+    "allOnChips": {
+     "violations": []
+    }
+   },
+   "afterShot": {
+    "file": "chromium-1280x720-chips-after-sale.png",
+    "sha256": "a3e7d0717c8684f7e85003c0e5adde1ff885b3e484caa13d16377b49ca5c6cbe",
+    "measured": {
+     "names": [
+      "3 eggs wanted by customer",
+      "1 egg wanted by customer",
+      "3 eggs wanted by customer",
+      "1,500 eggs wanted by customer",
+      "12.3K eggs wanted by customer"
+     ]
+    }
+   }
+  }
+ ],
+ "checks": [
+  {
+   "w": 360,
+   "id": "GUARD",
+   "name": "active tab=collection, no modal, #queue visible, >=1 chip in view",
+   "pass": true,
+   "data": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "queueVisible": true,
+    "state": [
+     {
+      "id": 1,
+      "demand": 4,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 2,
+      "demand": 1,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 3,
+      "demand": 3,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 4,
+      "demand": 1500,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 5,
+      "demand": 12345,
+      "filled": 0,
+      "waitedS": 0
+     }
+    ]
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": ">=3 chips rendered with distinct counts (4 | 1 | 3 | 1,500 | 12.3K)",
+   "pass": true,
+   "data": 5
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "a chip >= 1,000 rendered",
+   "pass": true,
+   "data": [
+    "4",
+    "1",
+    "3",
+    "1,500",
+    "12.3K"
+   ]
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 0 AX name \"4 eggs wanted by customer\" (trimmed) starts with visible \"4\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "4 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>",
+     "rect": {
+      "x": 8,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 0 AX name === \"4 eggs wanted by customer\" (raw 4)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "4 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 4
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 0 visible num \"4\" == fmtCount(4) expected \"4\"",
+   "pass": true,
+   "data": "4"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 0 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "chip 0 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "4 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>",
+     "rect": {
+      "x": 8,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 1 AX name \"1 egg wanted by customer\" (trimmed) starts with visible \"1\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1 egg wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1",
+     "aria": "1 egg wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+     "rect": {
+      "x": 72,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 1 AX name === \"1 egg wanted by customer\" (raw 1)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1 egg wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 1
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 1 visible num \"1\" == fmtCount(1) expected \"1\"",
+   "pass": true,
+   "data": "1"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 1 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "chip 1 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1 egg wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1",
+     "aria": "1 egg wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+     "rect": {
+      "x": 72,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 2 AX name \"3 eggs wanted by customer\" (trimmed) starts with visible \"3\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "3 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+     "rect": {
+      "x": 136,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 2 AX name === \"3 eggs wanted by customer\" (raw 3)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "3 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 3
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 2 visible num \"3\" == fmtCount(3) expected \"3\"",
+   "pass": true,
+   "data": "3"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 2 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "chip 2 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "3 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+     "rect": {
+      "x": 136,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 3 AX name \"1,500 eggs wanted by customer\" (trimmed) starts with visible \"1,500\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1,500 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1,500",
+     "aria": "1,500 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+     "rect": {
+      "x": 200,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 3 AX name === \"1,500 eggs wanted by customer\" (raw 1500)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1,500 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 1500
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 3 visible num \"1,500\" == fmtCount(1500) expected \"1,500\"",
+   "pass": true,
+   "data": "1,500"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 3 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "chip 3 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1,500 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1,500",
+     "aria": "1,500 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+     "rect": {
+      "x": 200,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "chip 4 AX name \"12.3K eggs wanted by customer\" (trimmed) starts with visible \"12.3K\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "12.3K eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "12.3K",
+     "aria": "12.3K eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+     "rect": {
+      "x": 264,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 4 AX name === \"12.3K eggs wanted by customer\" (raw 12345)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "12.3K eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 12345
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-2",
+   "name": "chip 4 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>"
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "chip 4 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "12.3K eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "12.3K",
+     "aria": "12.3K eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+     "rect": {
+      "x": 264,
+      "y": 75,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3/axe",
+   "name": "axe 4.14.0 label-content-name-mismatch violations = 0 (passes on 5 nodes)",
+   "pass": true,
+   "data": {
+    "violations": [],
+    "passes": [
+     "button[aria-label=\"4 eggs wanted by customer\"]",
+     "button[aria-label=\"1 egg wanted by customer\"]",
+     "button[aria-label=\"3 eggs wanted by customer\"]",
+     "button[aria-label=\"1,500 eggs wanted by customer\"]",
+     ".unlock"
+    ],
+    "incomplete": [],
+    "inapplicable": []
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "Market Sell button for customer 1 visible (opened by chip tap: true)",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 360,
+   "id": "GUARD",
+   "name": "after-sale shot: active tab=collection, modal open=false, chip in view=true",
+   "pass": true,
+   "data": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "chipInView": true
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "partial sale happened: filled 1 (want 1), pre \"4\"/\"4 eggs wanted by customer\"",
+   "pass": true,
+   "data": {
+    "pre": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "btn": "Sell 1+$1.00"
+    },
+    "sync": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "filled": 1,
+     "basket": 0
+    },
+    "next": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "sameEl": true,
+     "filled": 1
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "next frame: num \"3\" aria \"3 eggs wanted by customer\" (same element true)",
+   "pass": true,
+   "data": {
+    "pre": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "btn": "Sell 1+$1.00"
+    },
+    "sync": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "filled": 1,
+     "basket": 0
+    },
+    "next": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "sameEl": true,
+     "filled": 1
+    }
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "no stale name at sync read after click: num \"3\" aria \"3 eggs wanted by customer\"",
+   "pass": true,
+   "data": {
+    "num": "3",
+    "aria": "3 eggs wanted by customer",
+    "filled": 1,
+    "basket": 0
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3",
+   "name": "AX tree after sale chip 0 name \"3 eggs wanted by customer\"",
+   "pass": true,
+   "data": {
+    "role": "button",
+    "name": "3 eggs wanted by customer",
+    "from": [
+     "attribute:aria-label",
+     "contents"
+    ],
+    "ignored": false,
+    "live": []
+   }
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 0 \"3 eggs wanted by customer\" starts with \"3\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 1 \"1 egg wanted by customer\" starts with \"1\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 2 \"3 eggs wanted by customer\" starts with \"3\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 3 \"1,500 eggs wanted by customer\" starts with \"1,500\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 4 \"12.3K eggs wanted by customer\" starts with \"12.3K\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 360,
+   "id": "OC-A11Y-3/axe",
+   "name": "after sale axe label-content-name-mismatch violations = 0",
+   "pass": true,
+   "data": {
+    "violations": [],
+    "passes": [
+     ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(1)",
+     "button[aria-label=\"1 egg wanted by customer\"]",
+     ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(3)",
+     "button[aria-label=\"1,500 eggs wanted by customer\"]",
+     ".unlock"
+    ],
+    "incomplete": [],
+    "inapplicable": []
+   }
+  },
+  {
+   "w": 360,
+   "id": "ERR",
+   "name": "no page errors (0)",
+   "pass": true,
+   "data": []
+  },
+  {
+   "w": 1280,
+   "id": "GUARD",
+   "name": "active tab=collection, no modal, #queue visible, >=1 chip in view",
+   "pass": true,
+   "data": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "queueVisible": true,
+    "state": [
+     {
+      "id": 1,
+      "demand": 4,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 2,
+      "demand": 1,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 3,
+      "demand": 3,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 4,
+      "demand": 1500,
+      "filled": 0,
+      "waitedS": 0
+     },
+     {
+      "id": 5,
+      "demand": 12345,
+      "filled": 0,
+      "waitedS": 0
+     }
+    ]
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": ">=3 chips rendered with distinct counts (4 | 1 | 3 | 1,500 | 12.3K)",
+   "pass": true,
+   "data": 5
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "a chip >= 1,000 rendered",
+   "pass": true,
+   "data": [
+    "4",
+    "1",
+    "3",
+    "1,500",
+    "12.3K"
+   ]
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 0 AX name \"4 eggs wanted by customer\" (trimmed) starts with visible \"4\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "4 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>",
+     "rect": {
+      "x": 12,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 0 AX name === \"4 eggs wanted by customer\" (raw 4)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "4 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 4
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 0 visible num \"4\" == fmtCount(4) expected \"4\"",
+   "pass": true,
+   "data": "4"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 0 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "chip 0 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "4 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"4 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">4</span></span></button>",
+     "rect": {
+      "x": 12,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 1 AX name \"1 egg wanted by customer\" (trimmed) starts with visible \"1\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1 egg wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1",
+     "aria": "1 egg wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+     "rect": {
+      "x": 76,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 1 AX name === \"1 egg wanted by customer\" (raw 1)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1 egg wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 1
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 1 visible num \"1\" == fmtCount(1) expected \"1\"",
+   "pass": true,
+   "data": "1"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 1 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "chip 1 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1 egg wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1",
+     "aria": "1 egg wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1 egg wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1</span></span></button>",
+     "rect": {
+      "x": 76,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 2 AX name \"3 eggs wanted by customer\" (trimmed) starts with visible \"3\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "3 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+     "rect": {
+      "x": 140,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 2 AX name === \"3 eggs wanted by customer\" (raw 3)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "3 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 3
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 2 visible num \"3\" == fmtCount(3) expected \"3\"",
+   "pass": true,
+   "data": "3"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 2 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "chip 2 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "3 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"3 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">3</span></span></button>",
+     "rect": {
+      "x": 140,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 3 AX name \"1,500 eggs wanted by customer\" (trimmed) starts with visible \"1,500\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1,500 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1,500",
+     "aria": "1,500 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+     "rect": {
+      "x": 204,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 3 AX name === \"1,500 eggs wanted by customer\" (raw 1500)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1,500 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 1500
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 3 visible num \"1,500\" == fmtCount(1500) expected \"1,500\"",
+   "pass": true,
+   "data": "1,500"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 3 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "chip 3 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "1,500 eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "1,500",
+     "aria": "1,500 eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive\" aria-label=\"1,500 eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">1,500</span></span></button>",
+     "rect": {
+      "x": 204,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "chip 4 AX name \"12.3K eggs wanted by customer\" (trimmed) starts with visible \"12.3K\"",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "12.3K eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "12.3K",
+     "aria": "12.3K eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+     "rect": {
+      "x": 268,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 4 AX name === \"12.3K eggs wanted by customer\" (raw 12345)",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "12.3K eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "raw": 12345
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-2",
+   "name": "chip 4 no aria-label=\"Customer\" in markup",
+   "pass": true,
+   "data": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>"
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "chip 4 role button (button), no role attr, no aria-live, no live descendant",
+   "pass": true,
+   "data": {
+    "a": {
+     "role": "button",
+     "name": "12.3K eggs wanted by customer",
+     "from": [
+      "attribute:aria-label",
+      "contents"
+     ],
+     "ignored": false,
+     "live": []
+    },
+    "d": {
+     "num": "12.3K",
+     "aria": "12.3K eggs wanted by customer",
+     "role": null,
+     "live": null,
+     "liveDesc": false,
+     "tag": "BUTTON",
+     "outer": "<button class=\"chip arrive unlock\" aria-label=\"12.3K eggs wanted by customer\" style=\"--p: 0.0000;\"><img class=\"cust\" src=\"/assets/icon-customer.svg\" alt=\"\"><span class=\"tag\"><img src=\"/assets/icon-egg.svg\" alt=\"\"><span class=\"num\">12.3K</span></span></button>",
+     "rect": {
+      "x": 268,
+      "y": 81,
+      "w": 56,
+      "h": 64
+     },
+     "inView": true
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3/axe",
+   "name": "axe 4.14.0 label-content-name-mismatch violations = 0 (passes on 5 nodes)",
+   "pass": true,
+   "data": {
+    "violations": [],
+    "passes": [
+     "button[aria-label=\"4 eggs wanted by customer\"]",
+     "button[aria-label=\"1 egg wanted by customer\"]",
+     "button[aria-label=\"3 eggs wanted by customer\"]",
+     "button[aria-label=\"1,500 eggs wanted by customer\"]",
+     ".unlock"
+    ],
+    "incomplete": [],
+    "inapplicable": []
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "Market Sell button for customer 1 visible (opened by chip tap: false)",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 1280,
+   "id": "GUARD",
+   "name": "after-sale shot: active tab=collection, modal open=false, chip in view=true",
+   "pass": true,
+   "data": {
+    "activeTab": "collection",
+    "modalOpen": false,
+    "chipInView": true
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "partial sale happened: filled 1 (want 1), pre \"4\"/\"4 eggs wanted by customer\"",
+   "pass": true,
+   "data": {
+    "pre": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "btn": "Sell 1+$1.00"
+    },
+    "sync": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "filled": 1,
+     "basket": 0
+    },
+    "next": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "sameEl": true,
+     "filled": 1
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "next frame: num \"3\" aria \"3 eggs wanted by customer\" (same element true)",
+   "pass": true,
+   "data": {
+    "pre": {
+     "num": "4",
+     "aria": "4 eggs wanted by customer",
+     "btn": "Sell 1+$1.00"
+    },
+    "sync": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "filled": 1,
+     "basket": 0
+    },
+    "next": {
+     "num": "3",
+     "aria": "3 eggs wanted by customer",
+     "sameEl": true,
+     "filled": 1
+    }
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "no stale name at sync read after click: num \"3\" aria \"3 eggs wanted by customer\"",
+   "pass": true,
+   "data": {
+    "num": "3",
+    "aria": "3 eggs wanted by customer",
+    "filled": 1,
+    "basket": 0
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3",
+   "name": "AX tree after sale chip 0 name \"3 eggs wanted by customer\"",
+   "pass": true,
+   "data": {
+    "role": "button",
+    "name": "3 eggs wanted by customer",
+    "from": [
+     "attribute:aria-label",
+     "contents"
+    ],
+    "ignored": false,
+    "live": []
+   }
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 0 \"3 eggs wanted by customer\" starts with \"3\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 1 \"1 egg wanted by customer\" starts with \"1\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 2 \"3 eggs wanted by customer\" starts with \"3\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 3 \"1,500 eggs wanted by customer\" starts with \"1,500\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-1",
+   "name": "after sale chip 4 \"12.3K eggs wanted by customer\" starts with \"12.3K\"",
+   "pass": true,
+   "data": {}
+  },
+  {
+   "w": 1280,
+   "id": "OC-A11Y-3/axe",
+   "name": "after sale axe label-content-name-mismatch violations = 0",
+   "pass": true,
+   "data": {
+    "violations": [],
+    "passes": [
+     ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(1)",
+     "button[aria-label=\"1 egg wanted by customer\"]",
+     ".chip.arrive[aria-label=\"3 eggs wanted by customer\"]:nth-child(3)",
+     "button[aria-label=\"1,500 eggs wanted by customer\"]",
+     ".unlock"
+    ],
+    "incomplete": [],
+    "inapplicable": []
+   }
+  },
+  {
+   "w": 1280,
+   "id": "ERR",
+   "name": "no page errors (0)",
+   "pass": true,
+   "data": []
+  }
+ ],
+ "fails": 0
+}

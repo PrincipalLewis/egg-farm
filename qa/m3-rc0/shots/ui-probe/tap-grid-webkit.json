@@ -1,0 +1,789 @@
+[
+ {
+  "label": "360 farm",
+  "el": "#settings",
+  "w": 44,
+  "h": 44,
+  "effW": 44.5,
+  "effH": 44.5,
+  "ownPct": 82.6,
+  "stolen": {
+   "HEADER.hud": 168
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.chip arrive105",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "MAIN.farm": 28,
+   "#queue": 18
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.chip arrive115",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.chip arrive148",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.chip arrive99",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "#goal",
+  "w": 320,
+  "h": 40,
+  "effW": 320.5,
+  "effH": 40.5,
+  "ownPct": 97.9,
+  "stolen": {
+   "DIV.collectbar": 134
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "#collect",
+  "w": 320,
+  "h": 64,
+  "effW": 320.5,
+  "effH": 64.5,
+  "ownPct": 96.3,
+  "stolen": {
+   "DIV.collectbar": 382
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.Market",
+  "w": 102.7,
+  "h": 62,
+  "effW": 102,
+  "effH": 62.5,
+  "ownPct": 98.1,
+  "stolen": {
+   "BUTTON.": 62
+  }
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.Upgrades",
+  "w": 102.7,
+  "h": 62,
+  "effW": 103.5,
+  "effH": 62.5,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.btn manage farm-manage-all desk-manage-all is-cooldown",
+  "w": 44,
+  "h": 44,
+  "effW": 45,
+  "effH": 44.5,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "360 farm",
+  "el": "BUTTON.Farm",
+  "w": 102.7,
+  "h": 62,
+  "effW": 103.5,
+  "effH": 62.5,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "360 settings",
+  "el": "#settings",
+  "w": 44,
+  "h": 44,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 968
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "#goal",
+  "w": 320,
+  "h": 40,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 240,
+   "DIV.card": 3003,
+   "#sReset": 2321,
+   "DIV.version": 836
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "#collect",
+  "w": 320,
+  "h": 64,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 6569,
+   "DIV.card": 3671
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "BUTTON.Market",
+  "w": 102.7,
+  "h": 62,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 3224
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "BUTTON.Upgrades",
+  "w": 102.7,
+  "h": 62,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 3224
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "BUTTON.btn manage farm-manage-all desk-manage-all is-cooldown",
+  "w": 44,
+  "h": 44,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 968
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "BUTTON.Farm",
+  "w": 102.7,
+  "h": 62,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 3162
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "BUTTON.icon-btn close",
+  "w": 44,
+  "h": 44,
+  "effW": 44.5,
+  "effH": 45,
+  "ownPct": 82.1,
+  "stolen": {
+   "DIV.card": 173
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "#sSfx",
+  "w": 44,
+  "h": 24,
+  "effW": 44.5,
+  "effH": 25,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "360 settings",
+  "el": "#sRm",
+  "w": 44,
+  "h": 24,
+  "effW": 44.5,
+  "effH": 25,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "360 settings",
+  "el": "#sExport",
+  "w": 268,
+  "h": 44,
+  "effW": 268.5,
+  "effH": 45,
+  "ownPct": 97.1,
+  "stolen": {
+   "DIV.card": 173
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "A.SIL Open Font Licens",
+  "w": 140,
+  "h": 44,
+  "effW": 140,
+  "effH": 42.5,
+  "ownPct": 93.2,
+  "stolen": {
+   "#sReset": 210
+  }
+ },
+ {
+  "label": "360 settings",
+  "el": "#sReset",
+  "w": 268,
+  "h": 44,
+  "effW": 268.5,
+  "effH": 45,
+  "ownPct": 97.1,
+  "stolen": {
+   "DIV.card": 171
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "#settings",
+  "w": 44,
+  "h": 44,
+  "effW": 44.5,
+  "effH": 44.5,
+  "ownPct": 82.6,
+  "stolen": {
+   "HEADER.hud": 168
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.chip arrive105",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "MAIN.farm": 6,
+   "#queue": 40
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.chip arrive115",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.chip arrive148",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.chip arrive99",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "#goal",
+  "w": 350,
+  "h": 40,
+  "effW": 350.5,
+  "effH": 40.5,
+  "ownPct": 98.1,
+  "stolen": {
+   "DIV.collectbar": 134
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "#collect",
+  "w": 350,
+  "h": 64,
+  "effW": 350.5,
+  "effH": 64.5,
+  "ownPct": 96.6,
+  "stolen": {
+   "DIV.collectbar": 382
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.Market",
+  "w": 112.7,
+  "h": 62,
+  "effW": 112,
+  "effH": 62.5,
+  "ownPct": 98.2,
+  "stolen": {
+   "BUTTON.": 62
+  }
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.Upgrades",
+  "w": 112.7,
+  "h": 62,
+  "effW": 113.5,
+  "effH": 62.5,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.btn manage farm-manage-all desk-manage-all is-cooldown",
+  "w": 44,
+  "h": 44,
+  "effW": 45,
+  "effH": 44.5,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "390 farm",
+  "el": "BUTTON.Farm",
+  "w": 112.7,
+  "h": 62,
+  "effW": 113.5,
+  "effH": 62.5,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "390 settings",
+  "el": "#settings",
+  "w": 44,
+  "h": 44,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 968
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "#goal",
+  "w": 350,
+  "h": 40,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 7000
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "#collect",
+  "w": 350,
+  "h": 64,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 11200
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "BUTTON.Market",
+  "w": 112.7,
+  "h": 62,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 3534
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "BUTTON.Upgrades",
+  "w": 112.7,
+  "h": 62,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 3534
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "BUTTON.btn manage farm-manage-all desk-manage-all is-cooldown",
+  "w": 44,
+  "h": 44,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 968
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "BUTTON.Farm",
+  "w": 112.7,
+  "h": 62,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 3472
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "BUTTON.icon-btn close",
+  "w": 44,
+  "h": 44,
+  "effW": 44.5,
+  "effH": 45,
+  "ownPct": 82.1,
+  "stolen": {
+   "DIV.card": 173
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "#sSfx",
+  "w": 44,
+  "h": 24,
+  "effW": 44.5,
+  "effH": 25,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "390 settings",
+  "el": "#sRm",
+  "w": 44,
+  "h": 24,
+  "effW": 44.5,
+  "effH": 25,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "390 settings",
+  "el": "#sExport",
+  "w": 268,
+  "h": 44,
+  "effW": 268.5,
+  "effH": 45,
+  "ownPct": 97.1,
+  "stolen": {
+   "DIV.card": 173
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "A.SIL Open Font Licens",
+  "w": 140,
+  "h": 44,
+  "effW": 140,
+  "effH": 42.5,
+  "ownPct": 93.2,
+  "stolen": {
+   "#sReset": 210
+  }
+ },
+ {
+  "label": "390 settings",
+  "el": "#sReset",
+  "w": 268,
+  "h": 44,
+  "effW": 268.5,
+  "effH": 45,
+  "ownPct": 97.1,
+  "stolen": {
+   "DIV.card": 171
+  }
+ },
+ {
+  "label": "1280 farm",
+  "el": "#settings",
+  "w": 44,
+  "h": 44,
+  "effW": 44.5,
+  "effH": 44.5,
+  "ownPct": 82.6,
+  "stolen": {
+   "HEADER.hud": 168
+  }
+ },
+ {
+  "label": "1280 farm",
+  "el": "BUTTON.chip arrive105",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "MAIN.farm": 6,
+   "#queue": 40
+  }
+ },
+ {
+  "label": "1280 farm",
+  "el": "BUTTON.chip arrive115",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "1280 farm",
+  "el": "BUTTON.chip arrive148",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "1280 farm",
+  "el": "BUTTON.chip arrive99",
+  "w": 56,
+  "h": 64,
+  "effW": 56.5,
+  "effH": 64.5,
+  "ownPct": 97.4,
+  "stolen": {
+   "#queue": 46
+  }
+ },
+ {
+  "label": "1280 farm",
+  "el": "#goal",
+  "w": 560,
+  "h": 44,
+  "effW": 560.5,
+  "effH": 44.5,
+  "ownPct": 98.6,
+  "stolen": {
+   "DIV.collectbar": 168
+  }
+ },
+ {
+  "label": "1280 farm",
+  "el": "#collect",
+  "w": 560,
+  "h": 64,
+  "effW": 560.5,
+  "effH": 64.5,
+  "ownPct": 97.9,
+  "stolen": {
+   "DIV.collectbar": 382
+  }
+ },
+ {
+  "label": "1280 Workers",
+  "el": "#settings",
+  "w": 44,
+  "h": 44,
+  "effW": 44.5,
+  "effH": 44.5,
+  "ownPct": 82.6,
+  "stolen": {
+   "HEADER.hud": 168
+  }
+ },
+ {
+  "label": "1280 Workers",
+  "el": "#goal",
+  "w": 560,
+  "h": 44,
+  "effW": 560.5,
+  "effH": 44.5,
+  "ownPct": 98.6,
+  "stolen": {
+   "DIV.collectbar": 168
+  }
+ },
+ {
+  "label": "1280 Workers",
+  "el": "#collect",
+  "w": 560,
+  "h": 64,
+  "effW": 560.5,
+  "effH": 64.5,
+  "ownPct": 97.9,
+  "stolen": {
+   "DIV.collectbar": 382
+  }
+ },
+ {
+  "label": "1280 settings",
+  "el": "#settings",
+  "w": 44,
+  "h": 44,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 968
+  }
+ },
+ {
+  "label": "1280 settings",
+  "el": "#goal",
+  "w": 560,
+  "h": 44,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 12320
+  }
+ },
+ {
+  "label": "1280 settings",
+  "el": "#collect",
+  "w": 560,
+  "h": 64,
+  "effW": 0,
+  "effH": 0,
+  "ownPct": 0,
+  "stolen": {
+   "#modal-layer": 17920
+  }
+ },
+ {
+  "label": "1280 settings",
+  "el": "BUTTON.icon-btn close",
+  "w": 44,
+  "h": 44,
+  "effW": 44.5,
+  "effH": 45,
+  "ownPct": 82.1,
+  "stolen": {
+   "DIV.card": 173
+  }
+ },
+ {
+  "label": "1280 settings",
+  "el": "#sSfx",
+  "w": 44,
+  "h": 24,
+  "effW": 44.5,
+  "effH": 25,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "1280 settings",
+  "el": "#sRm",
+  "w": 44,
+  "h": 24,
+  "effW": 44.5,
+  "effH": 25,
+  "ownPct": 100,
+  "stolen": {}
+ },
+ {
+  "label": "1280 settings",
+  "el": "#sExport",
+  "w": 268,
+  "h": 44,
+  "effW": 268.5,
+  "effH": 45,
+  "ownPct": 97.1,
+  "stolen": {
+   "DIV.card": 173
+  }
+ },
+ {
+  "label": "1280 settings",
+  "el": "A.SIL Open Font Licens",
+  "w": 140,
+  "h": 44,
+  "effW": 140,
+  "effH": 42.5,
+  "ownPct": 93.2,
+  "stolen": {
+   "#sReset": 210
+  }
+ },
+ {
+  "label": "1280 settings",
+  "el": "#sReset",
+  "w": 268,
+  "h": 44,
+  "effW": 268.5,
+  "effH": 45,
+  "ownPct": 97.1,
+  "stolen": {
+   "DIV.card": 171
+  }
+ }
+]

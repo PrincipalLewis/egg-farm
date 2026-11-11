@@ -1,0 +1,121 @@
+{
+  "browser": "156.0.8078.47",
+  "build": "m4.1+30b29d3",
+  "before": [
+    {
+      "id": "market_hand",
+      "energy": "Energy 40%",
+      "state": "Working",
+      "caption": null,
+      "btnCooldown": false,
+      "ariaDisabled": "false",
+      "describedby": null
+    },
+    {
+      "id": "coop_hand",
+      "energy": "Energy 90%",
+      "state": "Working",
+      "caption": "Rested, refill below 50%",
+      "btnCooldown": false,
+      "ariaDisabled": "true",
+      "describedby": "cap-coop_hand"
+    },
+    {
+      "id": "hawker",
+      "energy": "Energy 20%",
+      "state": "Tired",
+      "caption": null,
+      "btnCooldown": false,
+      "ariaDisabled": "false",
+      "describedby": null
+    }
+  ],
+  "afterRefill": [
+    {
+      "id": "market_hand",
+      "energy": "Energy 100%",
+      "state": "Working",
+      "caption": "Rested, refill below 50%",
+      "btnCooldown": true,
+      "ariaDisabled": "true",
+      "describedby": "cap-market_hand"
+    },
+    {
+      "id": "coop_hand",
+      "energy": "Energy 90%",
+      "state": "Working",
+      "caption": "Rested, refill below 50%",
+      "btnCooldown": true,
+      "ariaDisabled": "true",
+      "describedby": "cap-coop_hand"
+    },
+    {
+      "id": "hawker",
+      "energy": "Energy 20%",
+      "state": "Tired",
+      "caption": "Ready in 30s",
+      "btnCooldown": true,
+      "ariaDisabled": "true",
+      "describedby": "cap-hawker"
+    }
+  ],
+  "after6s": [
+    {
+      "id": "market_hand",
+      "energy": "Energy 100%",
+      "state": "Working",
+      "caption": "Rested, refill below 50%",
+      "btnCooldown": true,
+      "ariaDisabled": "true",
+      "describedby": "cap-market_hand"
+    },
+    {
+      "id": "coop_hand",
+      "energy": "Energy 90%",
+      "state": "Working",
+      "caption": "Rested, refill below 50%",
+      "btnCooldown": true,
+      "ariaDisabled": "true",
+      "describedby": "cap-coop_hand"
+    },
+    {
+      "id": "hawker",
+      "energy": "Energy 20%",
+      "state": "Tired",
+      "caption": "Ready in 25s",
+      "btnCooldown": true,
+      "ariaDisabled": "true",
+      "describedby": "cap-hawker"
+    }
+  ],
+  "afterCooldown": [
+    {
+      "id": "market_hand",
+      "energy": "Energy 97%",
+      "state": "Working",
+      "caption": "Rested, refill below 50%",
+      "btnCooldown": false,
+      "ariaDisabled": "true",
+      "describedby": "cap-market_hand"
+    },
+    {
+      "id": "coop_hand",
+      "energy": "Energy 87%",
+      "state": "Working",
+      "caption": "Rested, refill below 50%",
+      "btnCooldown": false,
+      "ariaDisabled": "true",
+      "describedby": "cap-coop_hand"
+    },
+    {
+      "id": "hawker",
+      "energy": "Energy 17%",
+      "state": "Tired",
+      "caption": null,
+      "btnCooldown": false,
+      "ariaDisabled": "false",
+      "describedby": null
+    }
+  ],
+  "errors": []
+}

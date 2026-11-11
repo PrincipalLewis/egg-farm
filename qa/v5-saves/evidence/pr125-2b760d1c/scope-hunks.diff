@@ -1,0 +1,220 @@
+diff --git a/engineering/status.md b/engineering/status.md
+index d0f21fe..76e9c2d 100644
+--- a/engineering/status.md
++++ b/engineering/status.md
+@@ -159,3 +159,10 @@
+ - F6 Broody nest accrual still out of scope.
+ - Gates (flock+lane-run): tsc 0; focused present/away-bp/away-broody/family-caps 34/34; f1b+breeds-state+offline 88/88; sync-economy --check pending in same push.
+ - One push; re-bar grades F1–F5 + merge-forward onto d65391b0.
++
++## 2026-11-10 03:24 CET · Saves · HoE/v5-125-fix F7 + F3-no-literal
++- F7: Game.frame was passing only this rAF's focusMs into advance(); leftover accMs carried, leftover focus did not. Σ fT << Σ F at 20–144 fps (60 s @ 60 fps → 9,600 ms). Carry unused focus across the acc window (`FrameClock.focusAccMs` / `advance().focusAccMs`); Σ fT = Σ F at any frame rate, consistent with F1 fT shares.
++- F3-no-literal: dropped bare `tickClock(..., tickMs = 100)` default; callers pass `dtMs`.
++- RED FIRST: `[F7]` Game.frame at 30/60/144 fps + uneven gaps, 60 s focused — verified red (focusMs 20004 / 10008 / 4171 / 14960) then fixed.
++- Gates (flock `.vitest-eng.lock` nice -n 10, maxWorkers=2): tsc 0; sync-economy --check 0; focused present+f3-config+f1b+away-* 89/89 (incl. F3-no-literal).
++- One ordinary push; bundle `scratch/bundles/saves-breeds-sim-prB-traits-<sha8>.bundle`.
+diff --git a/src/game.ts b/src/game.ts
+index d4e59d1..fac568d 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -36,7 +36,7 @@ export interface GameOpts {
+   newId?: () => string;
+ }
+ export class Game {
+-  state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
++  state: GameState; accMs = 0; /** F7: unused attended focus still inside the acc window. */ focusAccMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
+   /** M5.1 BR-R18: a hatch revealed by the offline settle; the UI shows it after welcome-back closes, then clears it. Not saved. */
+   pendingReveal: BreedId | null = null;
+   /** M5.1 Q4: Farm level at the end of the last visible frame (the next frame's start). */
+@@ -408,6 +408,7 @@ export class Game {
+   onHidden(at = this.now()) {
+     if (this.hidden) return;
+     this.frame(); // bring the sim up to the hide
++    this.focusAccMs = 0; // hidden frames never pass focus (leftover acc is simulated unfocused)
+     this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
+   }
+   /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
+@@ -447,7 +448,7 @@ export class Game {
+       // n2: capped when the 60 s budget limited credit (gap > budget); false while budget == offlineMin and gap < offlineMin.
+       return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
+     }
+-    this.state = h.state; this.accMs = 0;
++    this.state = h.state; this.accMs = 0; this.focusAccMs = 0;
+     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
+     { const ev: SimEvent[] = []; this.state = m5Offline(this.state, this.b, ev); this.emit(ev); } // v5 F2, before grantOffline (§9.5 #3)
+     const eggs = this.grantOffline(gap);
+@@ -487,11 +488,15 @@ export class Game {
+       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
+       const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
+       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
+-      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t, slotsFarm: this.frameFarm });
++      if (gap >= maxMs) this.focusAccMs = 0;
++      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, focusAccMs: this.focusAccMs, nowMs: t, slotsFarm: this.frameFarm });
+       // The legacy capped catch-up above still settles sales/wages and all other systems. Its absent-time sales
+       // must not consume the NEW I_ref warm-up: start that window at the return boundary (§4.1a), like a hidden offline return.
+       this.state = gap >= maxMs && incomeRefOn(this.b) ? resetIncomeRef(r.state) : r.state;
+-      this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
++      this.frameFarm = r.state.farmLevel;
++      this.accMs = gap >= maxMs ? 0 : r.accMs;
++      this.focusAccMs = gap >= maxMs ? 0 : r.focusAccMs;
++      this.emit(ev);
+       this.driveGolden(false); // v5 #1: identity unless golden is on and a spawn is due on an attended frame
+     }
+     this.checkCoopFull(); this.telemetry.poll();
+diff --git a/src/sim/clock.ts b/src/sim/clock.ts
+index 6735159..230e153 100644
+--- a/src/sim/clock.ts
++++ b/src/sim/clock.ts
+@@ -19,8 +19,9 @@ export interface StepClock {
+   /** BR-R12b(b): integer-ms focus share for this tick (min(tickMs, F−given)); Present uses fT/1000. Absent → fall back to full dt. */
+   focusFtMs?: number;
+ }
+-/** Per-frame clock input to advance(). `focusMs` = attended ms of this frame (already clamped by focusFrameMs). */
+-export interface FrameClock { focusMs: number; nowMs?: number; slotsFarm?: number; }
++/** Per-frame clock input to advance(). `focusMs` = attended ms of this frame (already clamped by focusFrameMs).
++ *  `focusAccMs` = unused focus still inside the acc window (F7); Game.frame carries it across rAF calls. */
++export interface FrameClock { focusMs: number; nowMs?: number; slotsFarm?: number; focusAccMs?: number; }
+ /** Focus seconds this tick contributes (0 when unfocused or no clock). Other M5 timers use full dt while focused. */
+ export const tickFocusS = (dt: number, c?: StepClock) => (c?.focus ? dt : 0);
+ /** Focus ms for one frame: 0 if not attended, non-positive or >= the offline threshold (§9.1a); else min(gap, 1.0 s) (R5e). */
+@@ -40,6 +41,12 @@ export function focusFtMs(i: number, focusMs: number, tickMs: number): number {
+   if (given >= focusMs) return 0;
+   return Math.min(tickMs, focusMs - given);
+ }
++/** Σ fT assigned to the first `ticks` ticks of a frame (F7 leftover = F − this). */
++export function focusAssignedMs(ticks: number, focusMs: number, tickMs: number): number {
++  let n = 0;
++  for (let i = 0; i < ticks; i++) n += focusFtMs(i, focusMs, tickMs);
++  return n;
++}
+ /** Wall-clock timer: ms left until `atMs`, against injected `nowMs`, clamped to [0, capMs] on EVERY read
+  *  (abilities E2b: clock rollback can't show more than one cooldown). Non-finite input = ready (D-C5 sanitising). */
+ export function wallRemainingMs(atMs: number | undefined, nowMs: number, capMs: number): number {
+@@ -48,7 +55,7 @@ export function wallRemainingMs(atMs: number | undefined, nowMs: number, capMs:
+ }
+ export const wallReady = (atMs: number | undefined, nowMs: number, capMs: number) => wallRemainingMs(atMs, nowMs, capMs) === 0;
+ /** The StepClock advance() hands to tick i of a frame whose first nFocus ticks carry focus (D-C3). */
+-export const tickClock = (i: number, nFocus: number, c: FrameClock, tickMs = 100): StepClock => {
++export const tickClock = (i: number, nFocus: number, c: FrameClock, tickMs: number): StepClock => {
+   const focused = i < nFocus;
+   const base: StepClock = {
+     focus: focused,
+diff --git a/src/sim/tick.ts b/src/sim/tick.ts
+index 28da2b0..a8e5a84 100644
+--- a/src/sim/tick.ts
++++ b/src/sim/tick.ts
+@@ -4,7 +4,7 @@ import type { Sink } from './events';
+ import { sellTo } from './actions';
+ import { prodEggsPerSec, coopCap } from './tracks';
+ import { anyM5FlagOn, stepTimers } from './timers';
+-import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
++import { focusTicks, tickClock, focusAssignedMs, type FrameClock, type StepClock } from './clock';
+ import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
+ import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
+ /** Pure: advance sim by dt seconds. Optional `ev` collects events.
+@@ -105,7 +105,11 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
+ export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balance, ev?: Sink, clock?: FrameClock) {
+   const dtMs = 1000 / b.tickHz;
+   let acc = accMs + elapsedMs, ticks = 0;
+-  const nFocus = clock ? focusTicks(clock.focusMs, dtMs) : 0;
+-  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, clock ? tickClock(ticks, nFocus, clock, dtMs) : undefined); acc -= dtMs; ticks++; }
+-  return { state: s, accMs: Math.max(0, acc), ticks };
++  // F7: total focus for this call = leftover in the acc window + this chunk, so Σ fT = Σ F across rAF-sized frames.
++  const F = clock ? (clock.focusAccMs ?? 0) + clock.focusMs : 0;
++  const nFocus = clock ? focusTicks(F, dtMs) : 0;
++  const fc = clock ? { ...clock, focusMs: F } : undefined;
++  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, fc ? tickClock(ticks, nFocus, fc, dtMs) : undefined); acc -= dtMs; ticks++; }
++  const assigned = clock ? focusAssignedMs(ticks, F, dtMs) : 0;
++  return { state: s, accMs: Math.max(0, acc), ticks, focusAccMs: Math.max(0, F - assigned) };
+ }
+diff --git a/tests/v5-breeds-present.test.ts b/tests/v5-breeds-present.test.ts
+index e795406..680cdc6 100644
+--- a/tests/v5-breeds-present.test.ts
++++ b/tests/v5-breeds-present.test.ts
+@@ -14,6 +14,8 @@ import {
+   presentBp, presentGateOpen, calmGateOpen, sessionEndPresentFields, breedsPresentTick,
+ } from '../src/sim/breeds-traits';
+ import { familyCapBp } from '../src/sim/breeds-family';
++import { prodEggsPerSec } from '../src/sim/tracks';
++import { BP_ONE } from '../src/config/breeds';
+ import { Game } from '../src/game';
+ import { mem } from './helpers';
+ import { SAVE_KEY, serialize } from '../src/save/save';
+@@ -214,3 +216,64 @@ describe('flag-off identity', () => {
+     expect(a.breedsCalm).toBeUndefined();
+   });
+ });
++
++/** Integer-ms rAF gaps that sum exactly to `seconds * 1000` and average 1000/fps. */
++function gapsForFps(fps: number, seconds: number): number[] {
++  const n = Math.round(seconds * fps), total = seconds * 1000, base = Math.floor(1000 / fps);
++  const extra = total - base * n;
++  return Array.from({ length: n }, (_, i) => (i < extra ? base + 1 : base));
++}
++/** Uneven integer gaps (10–41 ms, not a fixed fps) summing to exactly 60,000. */
++function unevenGaps60s(): number[] {
++  const pattern = [10, 16, 20, 7, 24, 33, 15, 8, 41, 12];
++  const gaps: number[] = [];
++  let s = 0, i = 0;
++  while (s < 60_000) {
++    const g = pattern[i % pattern.length];
++    const next = s + g > 60_000 ? 60_000 - s : g;
++    gaps.push(next); s += next; i++;
++  }
++  return gaps;
++}
++
++describe('F7 Game.frame focus carry (BR-R12b(b) Σ fT = Σ F at rAF rates)', () => {
++  // breeds-only so Present eggs are not mixed with Frenzy / streak timed effects
++  const BR_ONLY = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, breeds: 1, golden: 0, streak: 0, tapCoins: 0, abilities: 0, broody: 0 } } } as typeof b;
++  const quiet = (s: GameState): GameState => ({
++    ...s, hensLevel: 12, workers: {}, customers: [], nextCustomerInS: 1e9, coop: 0,
++  });
++  const runFrames = (gaps: number[]) => {
++    const c = { t: Date.UTC(2026, 10, 10, 12) };
++    const g = new Game(BR_ONLY, mem(), () => c.t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
++    g.setAttendedProbe(() => true);
++    g.state = quiet(st(settledLeghorn(), 12));
++    const startCoop = g.state.coop;
++    const prod = prodEggsPerSec(g.state, BR_ONLY);
++    const bp = presentBp(g.state, BR_ONLY);
++    const wallMs = gaps.reduce((a, x) => a + x, 0);
++    for (const gap of gaps) { c.t += gap; g.frame(); }
++    return {
++      focusMs: g.state.breedsCalm!.focusMs,
++      activeMs: g.state.breedsCalm!.activeMs,
++      present_active_s: sessionEndPresentFields(g.state, BR_ONLY).present_active_s,
++      presentEggs: g.state.coop - startCoop - prod * (wallMs / 1000),
++      wantEggs: prod * (wallMs / 1000) * bp / BP_ONE,
++      bp, prod, wallMs, coop: g.state.coop, capOk: g.state.coop < 800,
++    };
++  };
++
++  it.each([
++    { tag: '30fps', gaps: gapsForFps(30, 60) },
++    { tag: '60fps', gaps: gapsForFps(60, 60) },
++    { tag: '144fps', gaps: gapsForFps(144, 60) },
++    { tag: 'uneven', gaps: unevenGaps60s() },
++  ])('[F7] Game.frame $tag × 60 s focused: focusMs, present_active_s and Present eggs match 60 s', ({ gaps }) => {
++    const r = runFrames(gaps);
++    expect(r.wallMs).toBe(60_000);
++    expect(r.capOk).toBe(true);
++    expect(Math.abs(r.focusMs - 60_000)).toBeLessThanOrEqual(100);
++    expect(r.activeMs).toBe(r.focusMs);
++    expect(Math.abs(r.present_active_s! - 60)).toBeLessThanOrEqual(0.1);
++    expect(r.presentEggs).toBeCloseTo(r.wantEggs, 6);
++  });
++});
+diff --git a/tests/v5-f1b-clock-rng.test.ts b/tests/v5-f1b-clock-rng.test.ts
+index 77b6d5d..271913f 100644
+--- a/tests/v5-f1b-clock-rng.test.ts
++++ b/tests/v5-f1b-clock-rng.test.ts
+@@ -108,7 +108,7 @@ describe('F1b focus (attended) clock', () => {
+     const n = focusTicks(fc.focusMs, dtMs); expect(n).toBe(10);
+     const rec: number[] = []; const sys: TimerSystem = (st, _d, f) => { rec.push(f); return st; };
+     let s = initialState(balance, 1);
+-    for (let i = 0; i < 590; i++) { const c = tickClock(i, n, fc); expect(c.nowMs).toBe(123); s = stepTimers(s, dtMs / 1000, B({ golden: 1 }), c, undefined, [sys]); }
++    for (let i = 0; i < 590; i++) { const c = tickClock(i, n, fc, dtMs); expect(c.nowMs).toBe(123); s = stepTimers(s, dtMs / 1000, B({ golden: 1 }), c, undefined, [sys]); }
+     expect(rec.reduce((a, x) => a + x, 0)).toBeCloseTo(FOCUS_DT_MAX_S, 9);
+     expect(rec.slice(0, 10).every(f => f > 0)).toBe(true); expect(rec.slice(10).every(f => f === 0)).toBe(true);
+   });

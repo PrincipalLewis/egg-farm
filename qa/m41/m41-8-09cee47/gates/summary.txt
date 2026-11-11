@@ -1,0 +1,16 @@
+HEAD 09cee47cab5465a7f7103f72497832776165f14c porcelain=0
+npm-ci exit=0 1s
+sync-check exit=0 1s
+tsc exit=0 3s
+vitest exit=0 165s
+build exit=0 4s
+build-html exit=0 4s
+build-qa exit=0 4s
+porcelain-after-nonbrowser=
+check-release-qa exit=1 0s
+check-release-dist exit=0 0s
+check-release-html exit=0 0s
+porcelain-after-checks=
+rc0-chromium exit=0 661s
+check-globals exit=0 278s
+porcelain-after-all=

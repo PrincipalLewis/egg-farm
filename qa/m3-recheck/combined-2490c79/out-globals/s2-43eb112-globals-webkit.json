@@ -1,0 +1,73 @@
+[
+ {
+  "n": "25ca816 window.eggfarmUi absent from release",
+  "pass": true,
+  "i": {
+   "in": false,
+   "type": "undefined"
+  }
+ },
+ {
+  "n": "release globals: only eggfarmExportTelemetry allowed",
+  "pass": true,
+  "i": {
+   "appGlobals": [
+    "eggfarmExportTelemetry"
+   ],
+   "allExtra": [
+    "cookieStore",
+    "ondevicemotion",
+    "ondeviceorientation",
+    "caches",
+    "GPUBuffer",
+    "GPUBufferUsage",
+    "GPUColorWrite",
+    "GPUCommandEncoder",
+    "GPUComputePassEncoder",
+    "GPUMapMode",
+    "GPUQueue",
+    "GPURenderPassEncoder",
+    "GPUShaderStage",
+    "GPUTextureUsage",
+    "Clipboard",
+    "ClipboardItem",
+    "Cache",
+    "CacheStorage",
+    "CookieChangeEvent",
+    "CookieStore",
+    "FileSystemDirectoryHandle",
+    "FileSystemFileHandle",
+    "FileSystemHandle",
+    "FileSystemWritableFileStream",
+    "InputDeviceInfo",
+    "MediaDeviceInfo",
+    "MediaDevices",
+    "PushManager",
+    "PushSubscription",
+    "PushSubscriptionOptions",
+    "WakeLock",
+    "WakeLockSentinel",
+    "StorageManager",
+    "Lock",
+    "LockManager",
+    "AudioWorklet",
+    "AudioWorkletNode",
+    "ImageDecoder",
+    "ImageTrack",
+    "ImageTrackList",
+    "CryptoKey",
+    "SubtleCrypto",
+    "DeviceMotionEvent",
+    "DeviceOrientationEvent",
+    "ServiceWorker",
+    "ServiceWorkerContainer",
+    "ServiceWorkerRegistration",
+    "eggfarmExportTelemetry"
+   ],
+   "eggfarm": {
+    "in": false,
+    "type": "undefined"
+   }
+  }
+ }
+]

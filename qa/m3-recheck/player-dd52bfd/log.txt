@@ -1,0 +1,29 @@
+14:43:33 start
+14:44:5x Collection L1 ($10)
+14:45:5x Collection L2
+14:46:13 Farm L1 ($100)
+~14:47:2x Collection L3, L4
+14:48:24 Farm L2 ($135); L3 costs $182
+14:49:18 Farm L3 ($182)
+14:49:25 Hire Market Hand ($40)
+14:51:01 Farm L4 ($246)
+14:51:46 Farm L5 ($332)
+14:52:16 Farm L6 ($448)
+14:52:48 Farm L7 ($560)
+14:53:20 Hire Coop Hand ($150)
+14:53:55 Farm L8 ($700)
+14:54:04 Hire Hawker ($800)
+14:54:46 Farm L9 ($875)
+14:55:25 Farm L10 ($1094)
+14:56:26 Farm L11 ($1368)
+14:57:47 Farm L12 ($1710)
+14:58:5x Farm L13 ($1.7k approx)
+14:59:4x Farm L14
+15:00:40 Farm L15 (toast "Coop upgraded! +1 customer slot" while card says "Coop upgrade at L20")
+15:02:02 Farm L16
+15:03:52 Farm L17 (price label switches to "$10.2K")
+15:06:44 Farm L18
+15:06:5x Workers found at 11-15% energy (no alert); Manage all refilled all to 100% this time
+15:08:26 Hire Egg Grader ($5,538)
+15:09:3x Farm L19 ($11.1K) - bought by pressing Escape to dismiss DevTools menu (no click on Buy)
+15:09:50 stop

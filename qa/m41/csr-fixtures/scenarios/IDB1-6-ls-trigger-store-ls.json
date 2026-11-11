@@ -1,0 +1,18 @@
+{
+ "id": "IDB1-6-ls-trigger-store-ls",
+ "now": 1792378840000,
+ "csr": [
+  "IDB1-6",
+  "CSR-10"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "idbManifestRecords": "../../csr/fixtures/idb1/IDB1-abc.manifest.json",
+ "expect": {
+  "store": "ls",
+  "triedIdb": "invalid"
+ }
+}

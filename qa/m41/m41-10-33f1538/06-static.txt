@@ -1,0 +1,17 @@
+sha256:
+0ac6225c299d5e6815795c01cdabecfc3037da19e8ebf97503729b639826e5f5  dist-html/egg-farm.html
+dd41ba62ad94cbd3b4e723b92aab4f64111f034f3896d54d3050520e6d427760  dist/index.html
+-rw-r--r-- 1 box box 511090 Oct 22 19:31 dist-html/egg-farm.html
+--- all build-id-like strings (rg -o):
+      3 m4.1+33f1538
+--- meta/data-attr:
+<meta name="build-id" content="m4.1+33f1538">
+data-build-id="m4.1+33f1538"
+--- '+dirty' count:
+0
+--- 'dirty' occurrences (context):
+)){this.kv=e,this.cfg=s,this.now=n,this.dirty=!1,this.tapWin=null
+:n-this.sessionStart}),this.trim(),this.dirty=!0}tap(e){const s=t
+s:this.now()-e.start}),this.trim(),this.dirty=!0)}closeTapWindow(
+:e.count,eggs:e.eggs}),this.trim(),this.dirty=!0)}poll(){this.sum
+is.closeSumWindow()):this.poll(),!!this.dirty)try{this.kv.setItem

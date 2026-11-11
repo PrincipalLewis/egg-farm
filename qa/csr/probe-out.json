@@ -1,0 +1,858 @@
+{
+ "build": "dd223f5",
+ "today": {
+  "OQ1-farmLevel-abc-nobak.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "C1-farmLevel-999-oversized-valid.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 999,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "C2-farmLevel-12.9-float-valid.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 12,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "C3-farmLevel-str12-valid.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 12,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "L1-farmLevel-null.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "L2-farmLevel-neg1.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "L3-farmLevel-inf-1e309.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "L4-hensLevel-str2.5.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "L5-eggValueLevel-bool.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "L6-collectionLevel-obj.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "M3-three-bad-levels.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "M4-four-bad-levels.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "N1-coinsCents-neg.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "N2-coinsCents-null-NaN.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "N3-basket-1e309.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "N4-customers-object.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "N5-workers-array.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 18,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "N6-level-bad-plus-coins-bad.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "P1-bak-valid-F20-older.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 20,
+   "coinsCents": 1000000,
+   "corruptCopies": 0
+  },
+  "P2-idb-valid-older-F17.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 17,
+   "coinsCents": 5000000,
+   "corruptCopies": 0
+  },
+  "P3-idb-newer-seq9-abc.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "P4-ls-valid-seq5.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 18,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "Q1i-csr17-2-three-bad.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "Q1ii-migrated-F0-V12-farmLevel-abc.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "Q1ii-migrated-F0-V12-valid.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 0,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "Q1ii-migrated-F4-V14-farmLevel-abc.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "Q1ii-migrated-F4-V14-valid.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 4,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "Q1ii-migrated-F6-V14-farmLevel-abc.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "Q1ii-migrated-F6-V14-valid.json": {
+   "validate": "ok",
+   "newer": null,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 6,
+   "coinsCents": 7777777,
+   "corruptCopies": 0
+  },
+  "S1-abc-bad-checksum.json": {
+   "validate": "checksum",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "checksum"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "S2-abc-no-sum.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  },
+  "S3-abc-version-7.json": {
+   "validate": "version",
+   "newer": 7,
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": false,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 0
+  },
+  "U1-unmarked-v6-farmLevel-abc.json": {
+   "validate": "invalid_state",
+   "newer": null,
+   "recovery": {
+    "case": "F",
+    "reason": "invalid_state"
+   },
+   "outcome": "fresh",
+   "isNewGame": true,
+   "F": 0,
+   "coinsCents": 0,
+   "corruptCopies": 1
+  }
+ },
+ "oracle": {
+  "OQ1-farmLevel-abc-nobak.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "C1-farmLevel-999-oversized-valid.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "C2-farmLevel-12.9-float-valid.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "C3-farmLevel-str12-valid.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "L1-farmLevel-null.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "L2-farmLevel-neg1.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "L3-farmLevel-inf-1e309.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "L4-hensLevel-str2.5.json": {
+   "bad": [
+    "hensLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "hensLevel": {
+     "value": 0,
+     "bounds": []
+    }
+   }
+  },
+  "L5-eggValueLevel-bool.json": {
+   "bad": [
+    "eggValueLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "eggValueLevel": {
+     "value": 0,
+     "bounds": []
+    }
+   }
+  },
+  "L6-collectionLevel-obj.json": {
+   "bad": [
+    "collectionLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "collectionLevel": {
+     "value": 0,
+     "bounds": []
+    }
+   }
+  },
+  "M3-three-bad-levels.json": {
+   "bad": [
+    "farmLevel",
+    "hensLevel",
+    "eggValueLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 0,
+     "bounds": []
+    },
+    "hensLevel": {
+     "value": 0,
+     "bounds": []
+    },
+    "eggValueLevel": {
+     "value": 0,
+     "bounds": []
+    }
+   }
+  },
+  "M4-four-bad-levels.json": {
+   "bad": [
+    "farmLevel",
+    "hensLevel",
+    "eggValueLevel",
+    "collectionLevel"
+   ],
+   "eligible": false,
+   "repaired": {
+    "farmLevel": {
+     "value": 0,
+     "bounds": []
+    },
+    "hensLevel": {
+     "value": 0,
+     "bounds": []
+    },
+    "eggValueLevel": {
+     "value": 0,
+     "bounds": []
+    },
+    "collectionLevel": {
+     "value": 0,
+     "bounds": []
+    }
+   }
+  },
+  "N1-coinsCents-neg.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "N2-coinsCents-null-NaN.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "N3-basket-1e309.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "N4-customers-object.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "N5-workers-array.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "N6-level-bad-plus-coins-bad.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "P1-bak-valid-F20-older.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "P2-idb-valid-older-F17.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "P3-idb-newer-seq9-abc.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "P4-ls-valid-seq5.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "Q1i-csr17-2-three-bad.json": {
+   "bad": [
+    "farmLevel",
+    "hensLevel",
+    "eggValueLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 10,
+     "bounds": [
+      {
+       "v": 10,
+       "why": "(b) celebratedTier 2"
+      },
+      {
+       "v": 7,
+       "why": "(c) worker coop_hand"
+      }
+     ]
+    },
+    "hensLevel": {
+     "value": 10,
+     "bounds": [
+      {
+       "v": 10,
+       "why": "hens:10"
+      }
+     ]
+    },
+    "eggValueLevel": {
+     "value": 5,
+     "bounds": [
+      {
+       "v": 5,
+       "why": "grade:5"
+      }
+     ]
+    }
+   }
+  },
+  "Q1ii-migrated-F0-V12-farmLevel-abc.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 0,
+     "bounds": [
+      {
+       "v": -3,
+       "why": "(a) hensLevel 0 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "Q1ii-migrated-F0-V12-valid.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "Q1ii-migrated-F4-V14-farmLevel-abc.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 1,
+     "bounds": [
+      {
+       "v": 1,
+       "why": "(a) hensLevel 4 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "Q1ii-migrated-F4-V14-valid.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "Q1ii-migrated-F6-V14-farmLevel-abc.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 5,
+     "bounds": [
+      {
+       "v": 3,
+       "why": "(a) hensLevel 6 - 3"
+      },
+      {
+       "v": 5,
+       "why": "(b) celebratedTier 1"
+      },
+      {
+       "v": 5,
+       "why": "(e) balanced:1"
+      }
+     ]
+    }
+   }
+  },
+  "Q1ii-migrated-F6-V14-valid.json": {
+   "bad": [],
+   "eligible": false,
+   "repaired": {}
+  },
+  "S1-abc-bad-checksum.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "S2-abc-no-sum.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "S3-abc-version-7.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 15,
+     "bounds": [
+      {
+       "v": 15,
+       "why": "(a) hensLevel 18 - 3"
+      }
+     ]
+    }
+   }
+  },
+  "U1-unmarked-v6-farmLevel-abc.json": {
+   "bad": [
+    "farmLevel"
+   ],
+   "eligible": true,
+   "repaired": {
+    "farmLevel": {
+     "value": 0,
+     "bounds": []
+    }
+   }
+  }
+ },
+ "probes": {
+  "idbOnlyCorrupt": {
+   "reconcile": "ls",
+   "recovery": null,
+   "outcome": null,
+   "isNewGame": true,
+   "corruptIndex": null,
+   "idbOutranksFreshSave": true
+  },
+  "b1": {
+   "reconcile": "idb",
+   "recovery": null,
+   "outcome": null,
+   "F": 17,
+   "corruptIndex": 1
+  },
+  "newerBadIdb": {
+   "reconcile": "ls",
+   "corruptIndex": null
+  },
+  "bakPrecedence": {
+   "recovery": {
+    "case": "R",
+    "restored": true
+   },
+   "F": 20,
+   "coins": 1000000
+  },
+  "observationPoint": {
+   "loadSafeChanged": [],
+   "gameChanged": [
+    "pendingOfflineEggs"
+   ]
+  }
+ }
+}

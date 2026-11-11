@@ -1,0 +1,1908 @@
+{
+ "axe": {
+  "path": "/tmp/axe/node_modules/axe-core/axe.min.js",
+  "version": "4.14.0",
+  "sha256": "20c09fe157a8a34a30e241aaa1fcdade657734f08ab379ecfbeb7d45cc46e878"
+ },
+ "runs": [
+  {
+   "w": 360,
+   "case": "hens-pct-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L1 · +20% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-pct-star-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "hens-nosale-pct-hidden",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L1",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-nosale-pct-hidden-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "value-milestone",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Egg value L5: Grade A",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-milestone-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "value-pct-star-27",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Egg value L9 · +9% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-pct-star-27-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "value-truncated-nostar",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3 · +14% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-truncated-nostar-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "collection-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Collection L1: +5/tap",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-collection-star-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "broke",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3 · +14% income",
+    "status": "~6 min 36 s",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "broke-hens-short",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hens L2",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-hens-short-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "broke-collection",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Collection L1: +5/tap",
+    "status": "~2 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-collection-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "hens-milestone",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L10: bigger coop",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-milestone-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "farm-best",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-farm-best-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "farm-waiting",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "~20 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-farm-waiting-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "worker-hire-market-hand",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Market Hand",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-market-hand-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "worker-hire-coop-hand",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Coop Hand",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-coop-hand-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "noinc-broke-value",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-noinc-broke-value-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "noinc-farm",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-noinc-farm-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "worker-hire-hawker-waiting",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Hawker",
+    "status": "~2 h 40 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-hawker-waiting-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "worker-grader-tier",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Grader tier 1: ×1.5",
+    "status": "~18 h 28 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-grader-tier-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "done",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "All upgrades done!",
+    "status": "",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-done-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "collection-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Collection L1: +5/tap",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-collection-star-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 360,
+   "case": "broke-collection",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Collection L1: +5/tap",
+    "status": "~2 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-collection-w360.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "hens-pct-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L1 · +20% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-pct-star-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "hens-nosale-pct-hidden",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L1",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-nosale-pct-hidden-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "value-milestone",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Egg value L5: Grade A",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-milestone-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "value-pct-star-27",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Egg value L9 · +9% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-pct-star-27-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "value-truncated-nostar",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3 · +14% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-truncated-nostar-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "collection-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Collection L1: +5/tap",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-collection-star-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "broke",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3 · +14% income",
+    "status": "~6 min 36 s",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "broke-hens-short",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hens L2",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-hens-short-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "broke-collection",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Collection L1: +5/tap",
+    "status": "~2 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-collection-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "hens-milestone",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L10: bigger coop",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-milestone-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "farm-best",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-farm-best-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "farm-waiting",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "~20 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-farm-waiting-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "worker-hire-market-hand",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Market Hand",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-market-hand-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "worker-hire-coop-hand",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Coop Hand",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-coop-hand-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "noinc-broke-value",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-noinc-broke-value-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "noinc-farm",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-noinc-farm-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "worker-hire-hawker-waiting",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Hawker",
+    "status": "~2 h 40 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-hawker-waiting-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "worker-grader-tier",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Grader tier 1: ×1.5",
+    "status": "~18 h 28 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-grader-tier-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "done",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "All upgrades done!",
+    "status": "",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-done-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "collection-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Collection L1: +5/tap",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-collection-star-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 390,
+   "case": "broke-collection",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Collection L1: +5/tap",
+    "status": "~2 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-collection-w390.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "hens-pct-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L1 · +20% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-pct-star-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "hens-nosale-pct-hidden",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L1",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-nosale-pct-hidden-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "value-milestone",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Egg value L5: Grade A",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-milestone-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "value-pct-star-27",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Egg value L9 · +9% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-pct-star-27-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "value-truncated-nostar",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3 · +14% income",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-value-truncated-nostar-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "collection-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Collection L1: +5/tap",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-collection-star-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "broke",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3 · +14% income",
+    "status": "~6 min 36 s",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "broke-hens-short",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hens L2",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-hens-short-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "broke-collection",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Collection L1: +5/tap",
+    "status": "~2 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-collection-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "hens-milestone",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Hens L10: bigger coop",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-hens-milestone-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "farm-best",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-farm-best-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "farm-waiting",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "~20 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-farm-waiting-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "worker-hire-market-hand",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Market Hand",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-market-hand-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "worker-hire-coop-hand",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Coop Hand",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-coop-hand-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "noinc-broke-value",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Egg value L3",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-noinc-broke-value-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "noinc-farm",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Farm L1",
+    "status": "—",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-noinc-farm-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "worker-hire-hawker-waiting",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Hire Hawker",
+    "status": "~2 h 40 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-hire-hawker-waiting-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "worker-grader-tier",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Grader tier 1: ×1.5",
+    "status": "~18 h 28 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-worker-grader-tier-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "done",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "All upgrades done!",
+    "status": "",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-done-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "collection-star",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "★ Collection L1: +5/tap",
+    "status": "Ready!",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr",
+     "color-contrast"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-collection-star-w430.png",
+   "pageerrors": []
+  },
+  {
+   "w": 430,
+   "case": "broke-collection",
+   "build_id": "m3-rc1-pre+09cee47",
+   "strip": {
+    "label": "Collection L1: +5/tap",
+    "status": "~2 min",
+    "ariaLabel": null,
+    "describedby": "goalDesc",
+    "sheetOpen": false
+   },
+   "labelInName": {
+    "violations": [],
+    "pass": false,
+    "inapplicable": true,
+    "allViolations": []
+   },
+   "fullDefault": {
+    "violations": [],
+    "incomplete": [
+     "aria-prohibited-attr"
+    ]
+   },
+   "fullWithExperimental": {
+    "violations": []
+   },
+   "shot": "shots/chromium/axe-broke-collection-w430.png",
+   "pageerrors": []
+  }
+ ],
+ "negativeControl": [
+  {
+   "w": 360,
+   "flagged": true,
+   "violations": [
+    {
+     "id": "label-content-name-mismatch",
+     "impact": "serious",
+     "nodes": [
+      {
+       "target": "#goal",
+       "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "w": 390,
+   "flagged": true,
+   "violations": [
+    {
+     "id": "label-content-name-mismatch",
+     "impact": "serious",
+     "nodes": [
+      {
+       "target": "#goal",
+       "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "w": 430,
+   "flagged": true,
+   "violations": [
+    {
+     "id": "label-content-name-mismatch",
+     "impact": "serious",
+     "nodes": [
+      {
+       "target": "#goal",
+       "summary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "fails": []
+}

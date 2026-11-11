@@ -1,0 +1,27 @@
+{
+ "id": "CSR7-v6b-never-copied",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-7",
+  "CSR-5",
+  "CSR-11"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-invalid-raw-abc.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovered_from": "none",
+  "notice": "M3",
+  "v6bUnchanged": true,
+  "noCorruptValueEquals": "V6B-invalid-raw-abc.json (record or its raw)"
+ }
+}

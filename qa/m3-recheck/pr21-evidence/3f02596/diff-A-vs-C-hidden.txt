@@ -1,0 +1,4 @@
+43c43
+< passed	economy-copy.test.ts :: data/economy.csv == product/economy.csv (normalised line endings)
+---
+> skipped	economy-copy.test.ts :: data/economy.csv == product/economy.csv (normalised line endings)

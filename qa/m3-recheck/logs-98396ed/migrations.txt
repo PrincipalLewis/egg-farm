@@ -1,0 +1,9 @@
+corrupt-empty.json THROWS Unexpected end of JSON input
+corrupt-missing-state.json OK v5 F0 workers=0
+corrupt-truncated.json THROWS Unterminated string in JSON at position 361
+corrupt-version-99.json THROWS bad save
+corrupt-wrong-type.json THROWS bad save
+m1-rc2-v4-12min.json OK v5 F10 workers=0
+m2-rc1-v5-12min.json OK v5 F10 workers=3
+m2-rc1-v5-40min-edge.json OK v5 F19 workers=4
+m2-rc1-v5-40min.json OK v5 F19 workers=4

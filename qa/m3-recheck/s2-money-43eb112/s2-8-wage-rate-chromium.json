@@ -1,0 +1,48 @@
+[
+ {
+  "n": "(a) real 60s Market Hand wage = $0.75/min ±1¢",
+  "pass": true,
+  "i": {
+   "charged": 75,
+   "coinDelta": 75,
+   "n": 60,
+   "perEvent": [
+    1,
+    2
+   ],
+   "perMinCents": 75,
+   "expectCents": 75
+  }
+ },
+ {
+  "n": "(a) accelerated 60s = 75¢ ±1¢",
+  "pass": true,
+  "i": {
+   "charged": 75,
+   "coinDelta": 75,
+   "n": 60,
+   "expect": 75
+  }
+ },
+ {
+  "n": "(a) accelerated 10 min = 750¢ ±1¢",
+  "pass": true,
+  "i": {
+   "charged": 750,
+   "coinDelta": 750,
+   "n": 600,
+   "expect": 750
+  }
+ },
+ {
+  "n": "(c) net-rate wage value == exact rate == charged rate",
+  "pass": true,
+  "i": {
+   "uiWageCentsPerSec": 1.25,
+   "exactCentsPerSec": 1.25,
+   "chargedCentsPerSec": 1.25,
+   "netCentsPerSec": -1.25,
+   "rateTextsOnScreen": []
+  }
+ }
+]

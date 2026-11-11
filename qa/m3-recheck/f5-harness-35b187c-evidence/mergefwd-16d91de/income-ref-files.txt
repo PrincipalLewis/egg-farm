@@ -1,0 +1,8 @@
+src/config/formulas.ts
+src/config/m5-rules.ts
+src/game.ts
+src/save/m5-fields.ts
+src/sim/actions.ts
+src/sim/income-ref.ts
+src/sim/timers.ts
+tests/v5-income-ref.test.ts

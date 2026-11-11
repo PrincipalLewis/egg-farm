@@ -1,0 +1,3 @@
+# M5.0 QA test plan: Golden Egg (timed collectible + Frenzy)
+**v0.8 DRAFT · 2026-10-24 17:55 CEST · Head of QA · paper only (D-CEO-20261024-06 build hold; repo read-only)**
+**v0.9 re-pin (2026-11-05 21:12 CET; QA-D-1105-GOLD1323):** spec under test is now **v1.3.2.3, sha1 `d3934b4843f8f28a8b459e13b51044ae9f64a617`** (D-HOP-2026-11-05-11; frozen predecessor `m5-golden-egg-spec.910098bd.md` sha1 `91

@@ -1,0 +1,144 @@
+[
+ {
+  "build": "76390f2",
+  "bid": "m4.1+76390f2",
+  "W": 360,
+  "H": 640,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [
+   "label-content-name-mismatch:.nav-manage"
+  ],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ },
+ {
+  "build": "76390f2",
+  "bid": "m4.1+76390f2",
+  "W": 1024,
+  "H": 474,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [
+   "label-content-name-mismatch:.nav-manage",
+   "scrollable-region-focusable:#mRows"
+  ],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ },
+ {
+  "build": "76390f2",
+  "bid": "m4.1+76390f2",
+  "W": 1280,
+  "H": 720,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [
+   "label-content-name-mismatch:.nav-manage",
+   "scrollable-region-focusable:#mRows"
+  ],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ },
+ {
+  "build": "76390f2",
+  "bid": "m4.1+76390f2",
+  "W": 1280,
+  "H": 800,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [
+   "label-content-name-mismatch:.nav-manage"
+  ],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 360,
+  "H": 640,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 1024,
+  "H": 474,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [
+   "scrollable-region-focusable:#mRows"
+  ],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 1280,
+  "H": 720,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [
+   "scrollable-region-focusable:#mRows"
+  ],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 1280,
+  "H": 800,
+  "activeTabs": [
+   "workers"
+  ],
+  "axe": [],
+  "heights": [
+   "manageAll:bar=48",
+   "manage:market_hand=48",
+   "manage:coop_hand=48",
+   "manage:hawker=48"
+  ]
+ }
+]

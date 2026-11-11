@@ -1,0 +1,4 @@
+360 cd30: size (89, 68) vs (89, 68), differing pixels 0, bbox None, sha a 41a050568e32 b 41a050568e32
+360 cd7: size (89, 68) vs (89, 68), differing pixels 0, bbox None, sha a 83893e07ff01 b 83893e07ff01
+1280 cd30: size (145, 52) vs (145, 52), differing pixels 0, bbox None, sha a 88ffec261b86 b 88ffec261b86
+1280 cd7: size (145, 52) vs (145, 52), differing pixels 0, bbox None, sha a d7bfca2ad57f b d7bfca2ad57f

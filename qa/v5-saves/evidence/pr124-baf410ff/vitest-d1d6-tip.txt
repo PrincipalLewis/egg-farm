@@ -1,0 +1,14 @@
+LOCK+START 2026-11-10T00:55:31+01:00 loadavg=1.76 3.73 5.94 2/2439 419675
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr124-baf410ff/wt
+
+ ✓ tests/telemetry-schema.test.ts (51 tests | 50 skipped) 4ms
+ ✓ tests/v5-breeds-state.test.ts (53 tests | 40 skipped) 14ms
+
+ Test Files  2 passed (2)
+      Tests  14 passed | 90 skipped (104)
+   Start at  00:55:32
+   Duration  694ms (transform 274ms, setup 0ms, collect 380ms, tests 18ms, environment 0ms, prepare 92ms)
+
+EXIT=0
+END 2026-11-10T00:55:32+01:00

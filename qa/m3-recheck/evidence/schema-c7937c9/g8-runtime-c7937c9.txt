@@ -1,0 +1,7 @@
+PASS G8V-0 src/telemetry/schema.ts exists at the RC SHA
+PASS G8V-C1a fatigue_cue_tapped with the six SS §8 fields validates ([]), and each of the six missing is rejected
+PASS G8V-C1b n_tired + n_asleep + n_paused <= 4: sum 4 accepted, sum 5 REJECTED on tapped and shown (SS §8 L293)
+PASS G8V-C1c suppressed_by_stall REJECTED on fatigue_cue_tapped; shown requires it (SS note 3: shown only)
+PASS G8V-DZ dead_zone + zero_gain_purchase isPinned; dead_zone valid accepted, reason 'cap' rejected (rev 13 rows #21/#22, L105 single value, V-3)
+PASS G8V-ZG zero_gain_purchase: valid event accepted; capped marker {capped:true, events:50} REJECTED (rev 13 row #21: no marker; pre-merge blocker (b))
+G8V: PASS

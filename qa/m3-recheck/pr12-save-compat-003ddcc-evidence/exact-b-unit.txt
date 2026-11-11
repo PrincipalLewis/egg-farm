@@ -1,0 +1,1 @@
+{"i_written_seq":6,"i_pick":"ls","i_reloadCoins":999999,"ii_pick":"ls","ii_reloadCoins":999999,"iii_lsSeq":2,"iii_pick":"idb","iii_reloadCoins":1000}

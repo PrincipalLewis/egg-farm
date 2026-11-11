@@ -1,0 +1,20 @@
+PASS [chromium] during cooldown both Manage all visible (390) — [{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":""},{"cls":"manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":"Manage all 0:30"}]
+PASS [chromium] during cooldown greyed aria-disabled=true, contrast >=4.5, ring (390) — [["farm-manage-all desk-manage-all is-cooldown","true",4.88,true,""],["manage-all is-cooldown","true",4.88,true,"Manage all 0:30"]]
+PASS [chromium] after cooldown, no worker <=0.4 -> hidden (390) — {"energies":[100,100,90],"a1":[{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":false,"dis":"true","cr":4.88,"ring":false,"txt":""}]}
+PASS [chromium] after cooldown, one worker at 0.4 -> visible + active (390) — [["farm-manage-all desk-manage-all","false",""],["manage-all glow","false","Manage all"]]
+PASS [chromium] pre-click (2 at <=40%) visible+active — [["farm-manage-all desk-manage-all",true,"false"],["manage-all glow",true,"false"]]
+PASS [chromium] during cooldown both Manage all visible (1280) — [{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":""},{"cls":"manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":"Manage all 0:30"}]
+PASS [chromium] during cooldown greyed aria-disabled=true, contrast >=4.5, ring (1280) — [["farm-manage-all desk-manage-all is-cooldown","true",4.88,true,""],["manage-all is-cooldown","true",4.88,true,"Manage all 0:30"]]
+PASS [chromium] after cooldown, no worker <=0.4 -> hidden (1280) — {"energies":[100,100,86],"a1":[{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":false,"dis":"true","cr":4.88,"ring":false,"txt":""}]}
+PASS [chromium] after cooldown, one worker at 0.4 -> visible + active (1280) — [["farm-manage-all desk-manage-all","false",""],["manage-all glow","false","Manage all (1 need it)"]]
+9/9 passed
+PASS [webkit] during cooldown both Manage all visible (390) — [{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":""},{"cls":"manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":"Manage all 0:30"}]
+PASS [webkit] during cooldown greyed aria-disabled=true, contrast >=4.5, ring (390) — [["farm-manage-all desk-manage-all is-cooldown","true",4.88,true,""],["manage-all is-cooldown","true",4.88,true,"Manage all 0:30"]]
+PASS [webkit] after cooldown, no worker <=0.4 -> hidden (390) — {"energies":[100,100,90],"a1":[{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":false,"dis":"true","cr":4.88,"ring":false,"txt":""}]}
+PASS [webkit] after cooldown, one worker at 0.4 -> visible + active (390) — [["farm-manage-all desk-manage-all","false",""],["manage-all glow","false","Manage all"]]
+PASS [webkit] pre-click (2 at <=40%) visible+active — [["farm-manage-all desk-manage-all",true,"false"],["manage-all glow",true,"false"]]
+PASS [webkit] during cooldown both Manage all visible (1280) — [{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":""},{"cls":"manage-all is-cooldown","vis":true,"dis":"true","cr":4.88,"ring":true,"txt":"Manage all 0:30"}]
+PASS [webkit] during cooldown greyed aria-disabled=true, contrast >=4.5, ring (1280) — [["farm-manage-all desk-manage-all is-cooldown","true",4.88,true,""],["manage-all is-cooldown","true",4.88,true,"Manage all 0:30"]]
+PASS [webkit] after cooldown, no worker <=0.4 -> hidden (1280) — {"energies":[100,100,86],"a1":[{"cls":"farm-manage-all desk-manage-all is-cooldown","vis":false,"dis":"true","cr":4.88,"ring":false,"txt":""}]}
+PASS [webkit] after cooldown, one worker at 0.4 -> visible + active (1280) — [["farm-manage-all desk-manage-all","false",""],["manage-all glow","false","Manage all (1 need it)"]]
+9/9 passed

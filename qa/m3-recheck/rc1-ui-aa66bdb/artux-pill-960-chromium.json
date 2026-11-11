@@ -1,0 +1,71 @@
+[
+ {
+  "n": "ArtUX-1 390 net rate text is exactly ▼ U+2212 $0.01/s; no hyphen/en-dash/2nd minus; no pseudo-element content",
+  "pass": true,
+  "i": {
+   "nodes": [
+    {
+     "text": "▼−$0.01/s",
+     "cps": [
+      "U+25BC",
+      "U+2212",
+      "U+0024",
+      "U+0030",
+      "U+002E",
+      "U+0030",
+      "U+0031",
+      "U+002F",
+      "U+0073"
+     ]
+    }
+   ],
+   "pseudo": [],
+   "all": "▼−$0.01/s",
+   "cps": [
+    "U+25BC",
+    "U+2212",
+    "U+0024",
+    "U+0030",
+    "U+002E",
+    "U+0030",
+    "U+0031",
+    "U+002F",
+    "U+0073"
+   ],
+   "sign": "neg",
+   "color": "rgb(184, 59, 55)"
+  }
+ },
+ {
+  "n": "ArtUX-2 960 docked Refill pill normal >= 44px tall (getBoundingClientRect)",
+  "pass": true,
+  "i": {
+   "t": "Refill tired (2)",
+   "x": 692.421875,
+   "y": 436,
+   "w": 154.234375,
+   "h": 44,
+   "pad": "0px 12px 0px 0px",
+   "minH": "44px",
+   "border": "2px",
+   "dis": "false",
+   "boxSizing": "border-box"
+  }
+ },
+ {
+  "n": "ArtUX-2 960 docked Refill pill cooldown >= 44px tall",
+  "pass": true,
+  "i": {
+   "t": "Ready in 29s",
+   "x": 692.421875,
+   "y": 436,
+   "w": 144.78125,
+   "h": 44,
+   "pad": "0px 12px 0px 0px",
+   "minH": "44px",
+   "border": "2px",
+   "dis": "true",
+   "boxSizing": "border-box"
+  }
+ }
+]

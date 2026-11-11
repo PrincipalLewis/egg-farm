@@ -1,0 +1,68 @@
+# TASK saves-qa/g1-d71ed8cf: G1 re-pin 56090a61 -> d71ed8cf (D-HOP-2026-10-30-51). 2026-10-30 CET
+--- product/v5-ship-set.md@56090a61
++++ product/v5-ship-set.md@d71ed8cf
+@@ -16,7 +16,7 @@
+ - m4.flags.clockWage = 1
+ - m4.flags.salesStopped = 1
+ - m4.flags.fatigueCue = 1
+-- m4.flags.bestBuyV2 = 0 (not in ranking bfdfd73e, outside -09; open scope question with the CEO, changes only by a CEO ruling)
++- m4.flags.bestBuyV2 = 1, REQUIRED (D-CEO-20261030-10, no cuts: a 0 at the RC fails shipflags and the schedule slips). Spec product/farm/m5.1-bestbuy-rebaseline-proposal.md v1.0.1 5dc9596b. Merge likely Sun 1 Nov 08:00, high 12:00. D-HOP-2026-10-30-47/-49/-50/-51
+ - m4.zeroGain.confirm = 0 (a tunable value of record, not a flag)
+ 
+ ## Not flags (ship always-on)
+--- a/scripts/v5-saves-gate.sh
++++ b/scripts/v5-saves-gate.sh
+@@ -39,8 +39,8 @@
+ if [ "${1:-}" = --selftest-sign ]; then R=${2:?usage: --selftest-sign <mock-results-dir>}; ST=$R/status.log; [ -f "$ST" ] || { echo "no $ST"; exit 2; }; sign_results; exit 0; fi
+ STUDIO=/workspace/egg-farm-studio; GIT=$STUDIO/game; Q=$STUDIO/qa; V=$Q/v5-saves; SC=$V/scripts; FX=$V/fixtures; M3=$Q/m3-scripts; LOCK=$STUDIO/.browser-test.lock; PORT=5961
+ RC=${1:-}; shift || true; GID=v5-rc-saves; ENGINES=chromium,firefox,webkit; FLAGS=; BASE=30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134; HH=; DRY=0; SHIPSET=${SHIP_SET:-$STUDIO/product/v5-ship-set.md}; EBS=${EXPECTED_BALANCE_SHA:-}; ECSV=${ECONOMY_CSV:-}; TSCHEMA=v062   # T steps: telemetry v0.6.2 is v5 always-on (D-CEO-20261030-09, HoQ Q-TEL-1 ruling); --tel-schema shipped = diagnostic only
+-# G1 ship-set of record pin (D-HOP-2026-10-30-30 rev 2 + -36 'Not in v5' + -40 L23 telemetry reworded + -41 L23 TELEMETRY_SCHEMA_VERSION "0.6.2", HoQ verified 13:4x Oct 30). A changed file needs a new HoP decision + re-pin.
+-SHIPSET_SHA=56090a61cf28d70632b52f09bd86f48b968a978dcc6bb554d3407151d5048de1
++# G1 ship-set of record pin (D-HOP-2026-10-30-30 rev 2 + -36 'Not in v5' + -40 L23 telemetry reworded + -41 L23 TELEMETRY_SCHEMA_VERSION "0.6.2", HoQ verified 13:4x Oct 30). A changed file needs a new HoP decision + re-pin. Re-pin 14:5x: d71ed8cf (D-HOP-2026-10-30-51, D-CEO-20261030-10: L19 m4.flags.bestBuyV2 0 -> 1 REQUIRED; only diff vs 56090a61).
++SHIPSET_SHA=d71ed8cf7a5d2e7132ccf1eda30e3b6eb472c21d3e9d3f41101dec2c1a30fcaa   # re-pinned 2026-10-30 14:5x (TASK saves-qa/g1-d71ed8cf, D-HOP-51: bestBuyV2=1 required; was 56090a61)
+ while [ $# -gt 0 ]; do case $1 in --gate-id) GID=$2; shift;; --engines) ENGINES=$2; shift;; --flags) FLAGS=$2; shift;; --base) BASE=$2; shift;; --ship-set) SHIPSET=$2; shift;; --expected-balance-sha) EBS=$2; shift;; --economy-csv) ECSV=$2; shift;; --tel-schema) TSCHEMA=$2; shift;; --dry-run) DRY=1;; *) echo "unknown $1"; exit 2;; esac; shift; done
+ [ -n "$RC" ] || { sed -n 2,9p "$0"; exit 2; }
+ git -C "$GIT" fetch origin --tags --prune >/dev/null 2>&1; FULL=$(git -C "$GIT" rev-parse --verify "$RC^{commit}" 2>/dev/null) || { echo "cannot resolve $RC"; exit 2; }; S7=${FULL:0:7}
+--- a/changes-20261030/g1-shipset-selftest.sh
++++ b/changes-20261030/g1-shipset-selftest.sh
+@@ -1,9 +1,10 @@
+ #!/usr/bin/env bash
+ # Self-tests for G1-flags-ship-set (pinned scripts/g1-ship-set.cjs + the gate's 0b block). Static: no browser, no lock, no network.
+ # Amendment 2026-10-30 13:1x (HoQ/HoE): tc_streak_cap HARD in balance.json AND data/economy.csv; CSV path from the ship-set only.
++# Re-pin 2026-10-30 14:5x (TASK saves-qa/g1-d71ed8cf): ship-set d71ed8cf (D-HOP-51 / D-CEO-20261030-10: m4.flags.bestBuyV2 = 1 REQUIRED); fixtures now have all 14 flags = 1.
+ set -u; ST=/workspace/egg-farm-studio; D=$(cd "$(dirname "$0")" && pwd)
+ C=${C:-$ST/qa/v5-saves/scripts/g1-ship-set.cjs}; GATE=${GATE:-$ST/qa/v5-saves/scripts/v5-saves-gate.sh}
+-REAL=$ST/product/v5-ship-set.md; PIN=56090a61cf28d70632b52f09bd86f48b968a978dcc6bb554d3407151d5048de1
++REAL=$ST/product/v5-ship-set.md; PIN=d71ed8cf7a5d2e7132ccf1eda30e3b6eb472c21d3e9d3f41101dec2c1a30fcaa
+ BAL0=$ST/qa/v5-saves/dryrun/gate-DRYRUN-3f582db/results/rc-balance.json; T=$(mktemp -d /tmp/g1st.XXXX); P=0; F=0
+ h(){ sha256sum < "$1" | cut -c1-64; }
+ git -C $T init -q repo; mkdir -p $T/repo/data
+@@ -13,7 +14,7 @@
+ R27=$(mkcsv 0.27); CS27=$(git -C $T/repo show $R27:data/economy.csv | sha256sum | cut -c1-64)
+ mkss(){ sed "s#sha recorded here on merge#$1#" $REAL > $2; }    # rewrites only the economy CSV line of the real rev 2 file
+ mkss "sha256 $CS27 path data/economy.csv" $T/ss.md; SSH=$(h $T/ss.md)
+-mkb(){ node -e 'const fs=require("fs");const [src,out,ov]=process.argv.slice(1);const b=JSON.parse(fs.readFileSync(src));for(const k of Object.keys(b.m4.flags))b.m4.flags[k]=k==="bestBuyV2"?0:1;b.m4.enabled=1;b.m4.zeroGain={confirm:0};b.m4.tc.streak_cap=0.27;
++mkb(){ node -e 'const fs=require("fs");const [src,out,ov]=process.argv.slice(1);const b=JSON.parse(fs.readFileSync(src));for(const k of Object.keys(b.m4.flags))b.m4.flags[k]=1;b.m4.enabled=1;b.m4.zeroGain={confirm:0};b.m4.tc.streak_cap=0.27;
+  for(const [p,v] of Object.entries(JSON.parse(ov))){const ks=p.split(".");let o=b;for(const k of ks.slice(0,-1))o=o[k];if(v===null)delete o[ks.at(-1)];else o[ks.at(-1)]=v}fs.writeFileSync(out,JSON.stringify(b))' "$BAL0" "$1" "${2:-{\}}"; }
+ mkb $T/ok.json; OKS=$(h $T/ok.json)
+ ck(){ local name=$1 want=$2; shift 2; out=$(env -u ECONOMY_CSV -u EXPECTED_BALANCE_SHA node "$C" --out $T/d.json "$@" 2>&1); rc=$?
+@@ -59,8 +60,8 @@
+ sed 's/^- First-hire nudge.*/- m4.flags.firstHireNudge = 0\n- first_worker_hired.via_nudge = 0/' $REAL > $T/ssnv.md; ck "13c pass-parse: key-like lines under Not in v5 are ignored (fixture)" fail --balance $T/ok.json --shipset $T/ssnv.md --shipset-sha $(h $T/ssnv.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
+ node -e 'const d=require(process.argv[1]);process.exit(d.expected.length===17&&!JSON.stringify(d.expected).match(/firstHireNudge|via_nudge/)?0:1)' $T/d.json && { P=$((P+1)); echo "ok   13d Not-in-v5 key-like lines not in expected keys"; } || { F=$((F+1)); echo "FAIL 13d"; }
+ # D-HOP-2026-10-30-40: reworded "Not flags" L23 (d170eb09, errata-v5, #T card) keeps telemetry excluded and adds no key (-41: L23 also names TELEMETRY_SCHEMA_VERSION "0.6.2"/legacy:true; still no key)
+-ck "14a fail (CSV placeholder only): REAL 56090a61 file with the real pin" fail --balance $T/ok.json --shipset $REAL --shipset-sha $PIN --expected-balance-sha $OKS --git $T/repo --rc $R27
+-node -e 'const d=require(process.argv[1]);const ex=JSON.stringify(d.expected)+JSON.stringify(d.excluded);const nf=d.not_flags.join(" ");process.exit(d.expected.length===17&&d.excluded.length===0&&!/telemetry|d170eb09|errata|#T|schema/i.test(ex)&&/telemetry v0\.6\.2 .*d170eb09.*errata-v5.*#T card/.test(nf)?0:1)' $T/d.json && { P=$((P+1)); echo "ok   14 real 56090a61: L23 stays under Not flags; no telemetry/d170eb09/errata/#T key; 16 keys + 1 tunable"; } || { F=$((F+1)); echo "FAIL 14 $(cat $T/d.json)"; }
++ck "14a fail (CSV placeholder only): REAL d71ed8cf file with the real pin" fail --balance $T/ok.json --shipset $REAL --shipset-sha $PIN --expected-balance-sha $OKS --git $T/repo --rc $R27
++node -e 'const d=require(process.argv[1]);const ex=JSON.stringify(d.expected)+JSON.stringify(d.excluded);const nf=d.not_flags.join(" ");process.exit(d.expected.length===17&&d.excluded.length===0&&!/telemetry|d170eb09|errata|#T|schema/i.test(ex)&&/telemetry v0\.6\.2 .*d170eb09.*errata-v5.*#T card/.test(nf)?0:1)' $T/d.json && { P=$((P+1)); echo "ok   14 real d71ed8cf: L23 stays under Not flags; no telemetry/d170eb09/errata/#T key; 16 keys + 1 tunable"; } || { F=$((F+1)); echo "FAIL 14 $(cat $T/d.json)"; }
+ sed 's/^- m4.flags.streak = 1/- telemetry v0.6.2 (telemetry-spec.md d170eb09) + telemetry-spec-errata-v5.md: no flag, #T card\n- m4.flags.streak = 1/' $T/ss.md > $T/ssjunk.md; ck "14b fail closed: L23-style text inside Exact config keys is unparseable, never encoded" fail --balance $T/ok.json --shipset $T/ssjunk.md --shipset-sha $(h $T/ssjunk.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
+ echo "$out" | grep -q 'unparseable line in Exact config keys' && { P=$((P+1)); echo "ok   14c reason = unparseable line"; } || { F=$((F+1)); echo "FAIL 14c $out"; }
+ # gate 0b block, extracted from the pinned gate and run with stubs (SC = checker dir)
+@@ -72,7 +73,7 @@
+   if { { [ $want = pass ] && [ "$hf" = HF=0 ]; } || { [ $want = fail ] && [ "$hf" = HF=1 ]; }; } && [ "$n" = 3 ] && { [ "$tl" = 1 ] || [ ! -f "$ss" ]; }; then P=$((P+1)); echo "ok   $name ($hf; 3 sha lines + cap line in status.log)"; else F=$((F+1)); echo "FAIL $name ($hf n=$n tl=$tl) $(cat $R/out.txt $R/status.log)"; fi; }
+ gk "G-a gate: fixture match passes (pin = fixture sha, no override)" pass $T/ss.md $T/ok.json $OKS "" $SSH
+ gk "G-b gate: REAL ship-set + real pin fails closed" fail $REAL $T/ok.json $OKS ""
+-gk "G-c gate: fixture ship-set vs real pin fails (sha != 56090a61)" fail $T/ss.md $T/ok.json $OKS ""
++gk "G-c gate: fixture ship-set vs real pin fails (sha != d71ed8cf)" fail $T/ss.md $T/ok.json $OKS ""
+ gk "G-d gate: ship-set missing fails closed" fail $T/none.md $T/ok.json $OKS ""
+ gk "G-e gate: no expected sha, no pinned file fails closed" fail $T/ss.md $T/ok.json "" "" $SSH
+ gk "G-f gate: ECONOMY_CSV override != ship-set path fails" fail $T/ss.md $T/ok.json $OKS data/economy.f1.csv $SSH

@@ -1,0 +1,440 @@
+[
+ {
+  "n": "TG-6 single tab: no notice, money ticks, saves",
+  "pass": true,
+  "i": {
+   "s0": 1845405,
+   "s1": 1979319
+  }
+ },
+ {
+  "n": "Handover: old tab flushes first, new tab loads its exact unsaved state (no play lost), flush→claim ≤300 ms",
+  "pass": false,
+  "i": {
+   "bought": 5,
+   "aBefore": {
+    "coins": 999953892422,
+    "F": 19,
+    "C": 22,
+    "L": 2219
+   },
+   "lsBefore": {
+    "savedAt": 1792149383260,
+    "coins": 999953892422,
+    "L": 2219
+   },
+   "bLoaded": {
+    "coinsCents": 999953892374,
+    "farmLevel": 19,
+    "collectionLevel": 22,
+    "savedAt": 1792149384736
+   },
+   "flushToClaimMs": 25,
+   "aSent": [
+    "flush",
+    "claim",
+    "flushed"
+   ]
+  }
+ },
+ {
+  "n": "TG-1/TG-UI-1/AC14d(newest tab owns): notice in old tab ≤1 s, old money frozen 5 s, B owns lease",
+  "pass": true,
+  "i": {
+   "tNoticeMsInclStart": 1158,
+   "a0": 999953892374,
+   "a1": 999953892374,
+   "lease": "7z5mq7",
+   "blockedWrites": 0
+  }
+ },
+ {
+  "n": "TG-UI copy = approved (title/body/button), no close button",
+  "pass": true,
+  "i": {
+   "title": "Game open in another tab",
+   "body": "Your farm is running in another tab. Play here to continue from your latest save.",
+   "btn": "Play here",
+   "modal": "true",
+   "lb": "tgT",
+   "db": "tgB",
+   "focus": true,
+   "outline": "3px solid rgb(43, 121, 168)",
+   "offset": "3px",
+   "h": 48,
+   "w": 288,
+   "cardBg": "rgb(255, 255, 255)",
+   "cardW": 342,
+   "close": 1,
+   "inert": true,
+   "ah": "true",
+   "filter": "saturate(0.6)|none"
+  }
+ },
+ {
+  "n": "TG-UI-2 alertdialog aria-modal/labelledby/describedby",
+  "pass": true,
+  "i": {
+   "title": "Game open in another tab",
+   "body": "Your farm is running in another tab. Play here to continue from your latest save.",
+   "btn": "Play here",
+   "modal": "true",
+   "lb": "tgT",
+   "db": "tgB",
+   "focus": true,
+   "outline": "3px solid rgb(43, 121, 168)",
+   "offset": "3px",
+   "h": 48,
+   "w": 288,
+   "cardBg": "rgb(255, 255, 255)",
+   "cardW": 342,
+   "close": 1,
+   "inert": true,
+   "ah": "true",
+   "filter": "saturate(0.6)|none"
+  }
+ },
+ {
+  "n": "TG-UI-3 initial focus on Play here + ring 3px #2B79A8 (4.6:1 vs card white) always visible",
+  "pass": true,
+  "i": {
+   "outline": "3px solid rgb(43, 121, 168)",
+   "offset": "3px",
+   "cardBg": "rgb(255, 255, 255)"
+  }
+ },
+ {
+  "n": "TG-UI-5 button ≥48 px tall (≥44 target) at 390",
+  "pass": true,
+  "i": {
+   "h": 48,
+   "w": 288,
+   "cardW": 342
+  }
+ },
+ {
+  "n": "Game behind inert + aria-hidden + desaturated",
+  "pass": true,
+  "i": {
+   "inert": true,
+   "ah": "true",
+   "filter": "saturate(0.6)|none"
+  }
+ },
+ {
+  "n": "TG-UI-4 Esc/Tab/scrim taps/Back: notice stays, focus stays, frozen, no write by A",
+  "pass": true,
+  "i": {
+   "n": true,
+   "focus": "tgPlay",
+   "coins": 999953892374,
+   "url": "http://127.0.0.1:7162/"
+  }
+ },
+ {
+  "n": "TG-UI-9 (info @4bf4a22, rerun on Eng commit) no new audio starts in old tab while notice up",
+  "pass": true,
+  "i": {
+   "startsBefore": 9,
+   "startsAfter": 9
+  }
+ },
+ {
+  "n": "TG-3 20 buys in B with A inactive: save == B state (LS + IDB)",
+  "pass": true,
+  "i": {
+   "nb": 8,
+   "bS": {
+    "coins": 9997836418278,
+    "F": 19,
+    "C": 30,
+    "L": 3019
+   },
+   "lsB": {
+    "savedAt": 1792149395257,
+    "coins": 9997836290912,
+    "L": 3019
+   },
+   "idbB": {
+    "savedAt": 1792149395257,
+    "coins": 9997836290912,
+    "L": 3019
+   }
+  }
+ },
+ {
+  "n": "TG-2/TG-UI-6 Play here: A loads exactly B money/levels (B frozen at takeover); B then shows notice",
+  "pass": true,
+  "i": {
+   "loadingTxt": "Loading…",
+   "bBefore": 9997837609014,
+   "bAtTakeover": {
+    "coins": 9997837609014,
+    "F": 19,
+    "C": 30,
+    "L": 3019
+   },
+   "aLoaded": {
+    "coinsCents": 9997837609014,
+    "farmLevel": 19,
+    "collectionLevel": 30,
+    "savedAt": 1792149416581
+   }
+  }
+ },
+ {
+  "n": "TG-UI-9 (info) sound possible again after Play here reload (+Tap to start)",
+  "pass": true,
+  "i": {
+   "after": 3
+  }
+ },
+ {
+  "n": "TG-UI-5/7 layout 1280x800",
+  "pass": true,
+  "i": {
+   "cardW": 440,
+   "titleLines": 1,
+   "titleTrunc": false,
+   "btnH": 48,
+   "overflowY": "visible",
+   "cardScroll": false,
+   "cardH": 278,
+   "vh": 800,
+   "pageScroll": false,
+   "anim": "rcPop 0.2s 0s",
+   "bodyOverflow": "hidden auto",
+   "canScrollCard": null
+  }
+ },
+ {
+  "n": "TG-UI-5/7 layout 360x640",
+  "pass": true,
+  "i": {
+   "cardW": 312,
+   "titleLines": 2,
+   "titleTrunc": false,
+   "btnH": 48,
+   "overflowY": "visible",
+   "cardScroll": false,
+   "cardH": 329,
+   "vh": 640,
+   "pageScroll": false,
+   "anim": "rcPop 0.2s 0s",
+   "bodyOverflow": "hidden auto",
+   "canScrollCard": null
+  }
+ },
+ {
+  "n": "TG-UI-5/7 layout 320x568",
+  "pass": true,
+  "i": {
+   "cardW": 272,
+   "titleLines": 2,
+   "titleTrunc": false,
+   "btnH": 48,
+   "overflowY": "visible",
+   "cardScroll": false,
+   "cardH": 352,
+   "vh": 568,
+   "pageScroll": false,
+   "anim": "rcPop 0.2s 0s",
+   "bodyOverflow": "hidden auto",
+   "canScrollCard": null
+  }
+ },
+ {
+  "n": "TG-UI-5/7 layout 320x300 reduced-motion",
+  "pass": true,
+  "i": {
+   "cardW": 272,
+   "titleLines": 2,
+   "titleTrunc": false,
+   "btnH": 48,
+   "overflowY": "auto",
+   "cardScroll": true,
+   "cardH": 262,
+   "vh": 300,
+   "pageScroll": false,
+   "anim": "none 0s 0s",
+   "bodyOverflow": "hidden auto",
+   "canScrollCard": true
+  }
+ },
+ {
+  "n": "TG-4 owner killed, lease stale ≥6 s: reopen loads without notice, takeover reason logged",
+  "pass": true,
+  "i": {
+   "ev": [
+    "{\"reason\":\"stale\",\"type\":\"tab_guard_takeover\",\"ts\":1792149445946,\"sessionMs\":3}"
+   ]
+  }
+ },
+ {
+  "n": "TG-4 owner killed, lease fresh 2 s: reopen loads without notice, takeover reason logged",
+  "pass": true,
+  "i": {
+   "ev": [
+    "{\"reason\":\"new_tab\",\"type\":\"tab_guard_takeover\",\"ts\":1792149450716,\"sessionMs\":6}"
+   ]
+  }
+ },
+ {
+  "n": "TG-5 offline_grant once across 2 tabs (shared telemetry log)",
+  "pass": true,
+  "i": {
+   "A": 1,
+   "B": 1
+  }
+ },
+ {
+  "n": "R1 LS save corrupt (garbage) + valid IDB copy -> silent restore of IDB state, no recovery dialog, corrupt copy kept",
+  "pass": true,
+  "i": {
+   "want": 778331599,
+   "idb": 777777777,
+   "got": 778331599,
+   "rec": 0,
+   "keys": [
+    "eggfarm.save.corrupt.1792149461342",
+    "eggfarm.save.corrupt.index"
+   ]
+  }
+ },
+ {
+  "n": "R1 LS save corrupt (truncated) + valid IDB copy -> silent restore of IDB state, no recovery dialog, corrupt copy kept",
+  "pass": true,
+  "i": {
+   "want": 778331599,
+   "idb": 777777777,
+   "got": 778331599,
+   "rec": 0,
+   "keys": [
+    "eggfarm.save.corrupt.1792149465598",
+    "eggfarm.save.corrupt.index"
+   ]
+  }
+ },
+ {
+  "n": "R1 LS save corrupt (checksum) + valid IDB copy -> silent restore of IDB state, no recovery dialog, corrupt copy kept",
+  "pass": true,
+  "i": {
+   "want": 778331599,
+   "idb": 777777777,
+   "got": 778331599,
+   "rec": 0,
+   "keys": [
+    "eggfarm.save.corrupt.1792149469935",
+    "eggfarm.save.corrupt.index"
+   ]
+  }
+ },
+ {
+  "n": "R2 newest valid wins: IDB (newer) beats older valid LS",
+  "pass": true,
+  "i": {
+   "got": 5000553822,
+   "fixtureCoins": 1291591
+  }
+ },
+ {
+  "n": "R3 no IndexedDB (removed): saving + reload still works via localStorage, no warning",
+  "pass": true,
+  "i": {
+   "n": 3,
+   "s": 2019,
+   "g": 2019
+  }
+ },
+ {
+  "n": "R3b IndexedDB.open throws (blocked): saving + reload works",
+  "pass": true,
+  "i": {
+   "s": 1919,
+   "g": 1919
+  }
+ },
+ {
+  "n": "R4 LS write fails (quota on save key, still readable) -> IDB has latest; reload restores it",
+  "pass": true,
+  "i": {
+   "s": 2019,
+   "idb": 2019,
+   "lsStale": 1719,
+   "warn": true,
+   "reloaded": 2019
+  }
+ },
+ {
+  "n": "R4b quota persists across reload: game loads IDB (newest) not stale LS, IDB not overwritten with stale state",
+  "pass": true,
+  "i": {
+   "want": 2019,
+   "loaded": 2019,
+   "idbAfter": 2019,
+   "lsStale": 1719
+  }
+ },
+ {
+  "n": "R5 old save loads + migrates (m1-rc2-v4-12min.json, v4)",
+  "pass": true,
+  "i": {
+   "v": 4,
+   "F": 10,
+   "C": 11,
+   "rec": 0,
+   "resavedAt": 1792149498885
+  }
+ },
+ {
+  "n": "R5 old save loads + migrates (m2-rc1-v5-12min.json, v5)",
+  "pass": true,
+  "i": {
+   "v": 5,
+   "F": 10,
+   "C": 11,
+   "rec": 0,
+   "resavedAt": 1792149502462
+  }
+ },
+ {
+  "n": "R5 old save loads + migrates (m2-rc1-v5-40min-edge.json, v5)",
+  "pass": true,
+  "i": {
+   "v": 5,
+   "F": 19,
+   "C": 17,
+   "rec": 0,
+   "resavedAt": 1792149506036
+  }
+ },
+ {
+  "n": "R6 v1 save (float dollars) migrates to cents",
+  "pass": true,
+  "i": {
+   "coins": 1234,
+   "F": 10,
+   "C": 11,
+   "L": 1110
+  }
+ },
+ {
+  "n": "D3/D4 ?debug=1&perf=1 inert in release (no panel/overlay/chunk/hooks)",
+  "pass": false,
+  "i": {
+   "dbg": true,
+   "perf": true,
+   "hooks": [
+    "eggfarmPerf",
+    "eggfarmOnb",
+    "eggfarmQaRecovery"
+   ],
+   "eggfarmHandle": true,
+   "chunks": [
+    "http://127.0.0.1:7162/?debug=1&perf=1&ios=1",
+    "http://127.0.0.1:7162/assets/panel-LTWPSoVM.js",
+    "http://127.0.0.1:7162/assets/frame-sampler-DvRddTas.js"
+   ]
+  }
+ }
+]

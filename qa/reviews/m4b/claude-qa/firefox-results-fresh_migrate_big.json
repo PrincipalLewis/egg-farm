@@ -1,0 +1,118 @@
+{
+ "eng": "firefox",
+ "url": "file:///tmp/relchk/egg-farm.html",
+ "fresh-noexp-w360": {
+  "exp1": null,
+  "exp2": null,
+  "state": {
+   "c": 0,
+   "F": 0,
+   "C": 0,
+   "H": 0,
+   "V": 0,
+   "t7": 1,
+   "bk": 0
+  },
+  "state2": {
+   "c": 0,
+   "F": 0,
+   "C": 0,
+   "H": 0,
+   "V": 0,
+   "t7": 1,
+   "bk": 0
+  }
+ },
+ "migrate-reload-w360": {
+  "exp1": "Upgrades got an upgrade! Hens and Egg value are now separate. Top them up! Got it",
+  "state1": {
+   "c": 5000000,
+   "F": 8,
+   "C": 6,
+   "H": 8,
+   "V": 5,
+   "t7": 1,
+   "seen": true,
+   "bk": 0
+  },
+  "eAfter8s": null,
+  "exp2": null,
+  "exp3": null,
+  "state3": {
+   "c": 5000000,
+   "F": 8,
+   "C": 6,
+   "H": 8,
+   "V": 5,
+   "t7": 1,
+   "seen": true,
+   "bk": 0
+  }
+ },
+ "big-numbers-w360": {
+  "k12960": {
+   "hud": {
+    "pill": "Egg Farm $5.00 13K $5.00, 13K eggs",
+    "live": "$5.00, 13K eggs"
+   },
+   "orders": [
+    {
+     "t": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "l1w": 156,
+     "tw": 137,
+     "clip": false
+    }
+   ],
+   "sellAll": [
+    "Sell all (13K eggs · $13K)"
+   ]
+  },
+  "b999": {
+   "hud": {
+    "pill": "Egg Farm $1M 999.9B $1M, 999.9B eggs",
+    "live": "$1M, 999.9B eggs"
+   },
+   "orders": [
+    {
+     "t": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "l1w": 156,
+     "tw": 156,
+     "clip": false
+    },
+    {
+     "t": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "l1w": 156,
+     "tw": 156,
+     "clip": false
+    }
+   ],
+   "sellAll": [
+    "Sell all (999.9B eggs · $999.9B)"
+   ]
+  },
+  "t1500": {
+   "hud": {
+    "pill": "Egg Farm $9,990T 1,500T $9,990T, 1,500T ",
+    "live": "$9,990T, 1,500T eggs"
+   },
+   "orders": [
+    {
+     "t": "0/2,000T eggs · $2,000T Sell 1,500T +$1,500T",
+     "l1w": 156,
+     "tw": 156,
+     "clip": false
+    },
+    {
+     "t": "0/1,000,000T eggs · $1,000,000T Sell 1,500T +$1,500T",
+     "l1w": 156,
+     "tw": 211,
+     "clip": true
+    }
+   ],
+   "sellAll": [
+    "Sell all (1,500T eggs · $1,500T)"
+   ]
+  },
+  "seed1": 2559977948
+ }
+}

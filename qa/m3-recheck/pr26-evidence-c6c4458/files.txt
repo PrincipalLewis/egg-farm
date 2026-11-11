@@ -1,0 +1,14 @@
+.gitattributes
+.gitignore
+engineering/ci-gates.md
+engineering/decisions.md
+engineering/status.md
+package.json
+scripts/check-economy-copy.mjs
+scripts/check-vendor-pins.mjs
+scripts/gen-seller-variance-fixtures.py
+tests/ac7-worst-seed.slow.test.ts
+tests/economy-copy.test.ts
+tests/fixtures/seller_variance.json
+tests/seller-variance.slow.test.ts
+tests/vendor-pins.test.ts

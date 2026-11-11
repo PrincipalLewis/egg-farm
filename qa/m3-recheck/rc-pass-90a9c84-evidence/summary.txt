@@ -1,0 +1,40 @@
+2026-10-17 13:48:42 CEST === RC pass 90a9c8468e3c927dc232ab2e64d6858446c9edb9 steps=[pre unit ac7 l30 saves browser] engines=[chromium firefox webkit] DRY=0
+2026-10-17 13:48:42 CEST pushed on: origin/rc/m4-default-on ; origin/main=dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b; main==RC: NO
+2026-10-17 13:48:42 CEST expected-diff preflight: ONLY m4.enabled 0->1 vs dd52bfd: OK
+2026-10-17 13:48:42 CEST csv changed vs dd52bfd: 0 ()
+2026-10-17 13:48:57 CEST build (dist, dist-qa, dist-html + check-release-build) exit=0 15s
+2026-10-17 13:48:57 CEST static build-id: dist-html/egg-farm.html:m3-rc1-pre+90a9c84 dist-qa/index.html:m3-rc1-pre+90a9c84 dist/index.html:m3-rc1-pre+90a9c84  (want m3-rc1-pre+90a9c84, no +dirty)
+2026-10-17 13:48:57 CEST check-release-build dist-html exit=0
+2026-10-17 13:48:57 CEST tracked changes after build: 0
+2026-10-17 13:48:58 CEST sync-economy --check exit=0
+2026-10-17 13:49:02 CEST tsc exit=0
+2026-10-17 13:50:58 CEST unit exit=1 121s       Tests  62 failed | 789 passed (851)
+2026-10-17 13:52:32 CEST test:slow (vendor pins + AC7 band/worst-seed TS hard asserts) exit=1 94s       Tests  7 failed | 7 passed (14)
+2026-10-17 13:52:35 CEST payout preview==credited unit (M4 on/off cases) exit=1       Tests  28 failed | 114 passed (142)
+2026-10-17 13:55:19 CEST AC7 TS bot WITH workers (official per HoP 00:35; L@30 band 20-24, L18-25 step) 100 seeds exit=1 164s RESULT: FAIL
+2026-10-17 13:55:19 CEST AC7 TS variance bot hard asserts = test:slow above ()
+2026-10-17 13:58:49 CEST INFO only (pre-F1 no-workers M2 gate; dd52bfd baseline = FAIL step 10.0): RESULT: FAIL 210s
+2026-10-17 13:59:30 CEST Python cross-check (variance sim, 100 seeds) exit=0 41s no-workers t20 P95=1737 s (warn line 1740; HoP-recorded 1737) OK
+2026-10-17 13:59:30 CEST L30+ gate: N/A (no CSV change vs dd52bfd)
+2026-10-17 13:59:35 CEST save/load, migration, offline, hidden, quota unit subset exit=1 5s       Tests  31 failed | 188 passed (219)
+2026-10-17 13:59:35 CEST dist-qa is M4 ON natively (no dirty build needed)
+2026-10-17 13:59:35 CEST worktree tracked changes after m4 build: 0 (want 0)
+2026-10-17 13:59:35 CEST --- engine chromium
+2026-10-17 14:03:33 CEST runtime build-id chromium exit=0 238s runtime build ids [chromium]: ["m3-rc1-pre+90a9c84"] (want ["m3-rc1-pre+90a9c84"])
+2026-10-17 14:03:42 CEST runtime globals chromium exit=0 8s PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 14:07:29 CEST rc0 chromium exit=1 227s 243/247 passed
+2026-10-17 14:07:48 CEST dist-html file:// chromium exit=0 19s PASS html-open chromium {"ds":"m3-rc1-pre+90a9c84","meta":"m3-rc1-pre+90a9c84","txt":255,"perf":false,"eggfarm":false,"expect":"m3-rc1-pre+90a9c84","errors":[]}
+2026-10-17 14:08:51 CEST hidden-tab ACs chromium dist-qa exit=0 62s 33/36 (M4-on: want all PASS; per-row table in run.log)
+2026-10-17 14:08:51 CEST --- engine firefox
+2026-10-17 14:09:18 CEST runtime build-id firefox exit=0 27s runtime build ids [firefox]: ["m3-rc1-pre+90a9c84"] (want ["m3-rc1-pre+90a9c84"])
+2026-10-17 14:10:37 CEST runtime globals firefox exit=0 79s PASS [firefox] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 14:16:42 CEST rc0 firefox exit=1 365s 243/247 passed
+2026-10-17 14:16:50 CEST dist-html file:// firefox exit=0 8s PASS html-open firefox {"ds":"m3-rc1-pre+90a9c84","meta":"m3-rc1-pre+90a9c84","txt":255,"perf":false,"eggfarm":false,"expect":"m3-rc1-pre+90a9c84","errors":[]}
+2026-10-17 14:18:00 CEST hidden-tab ACs firefox dist-qa exit=0 70s 33/33 (M4-on: want all PASS; per-row table in run.log)
+2026-10-17 14:18:00 CEST --- engine webkit
+2026-10-17 14:18:08 CEST runtime build-id webkit exit=0 8s runtime build ids [webkit]: ["m3-rc1-pre+90a9c84"] (want ["m3-rc1-pre+90a9c84"])
+2026-10-17 14:18:17 CEST runtime globals webkit exit=0 9s PASS [webkit] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 14:25:24 CEST rc0 webkit exit=1 427s 243/247 passed
+2026-10-17 14:25:44 CEST dist-html file:// webkit exit=0 20s PASS html-open webkit {"ds":"m3-rc1-pre+90a9c84","meta":"m3-rc1-pre+90a9c84","txt":261,"perf":false,"eggfarm":false,"expect":"m3-rc1-pre+90a9c84","errors":[]}
+2026-10-17 14:26:49 CEST hidden-tab ACs webkit dist-qa exit=0 65s 33/33 (M4-on: want all PASS; per-row table in run.log)
+2026-10-17 14:26:49 CEST ALL_DONE 2287s  expect: build-id m3-rc1-pre+90a9c84; globals only eggfarmExportTelemetry; rc0 >=234/234; hidden M4 all PASS x3 engines; AC7 RESULT PASS; t20 <=1740

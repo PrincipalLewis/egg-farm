@@ -1,0 +1,129 @@
+[
+ {
+  "E": "webkit",
+  "mode": "http",
+  "ok": {
+   "fonts4": true,
+   "buildId": true,
+   "noFailedReq": true,
+   "noOtherReq": true,
+   "noConsoleErr": true,
+   "globals": true
+  },
+  "faces": [
+   "Fredoka 500 loaded",
+   "Fredoka 700 loaded",
+   "Nunito 400 loaded",
+   "Nunito 700 loaded"
+  ],
+  "check": {
+   "500 16px Fredoka": true,
+   "700 16px Fredoka": true,
+   "400 16px Nunito": true,
+   "700 16px Nunito": true
+  },
+  "metas": [
+   "m3-rc1-pre+8475bc4"
+  ],
+  "app": "m3-rc1-pre+8475bc4",
+  "nAttr": 1,
+  "tel": "m3-rc1-pre+8475bc4",
+  "sampleFontFamily": "Nunito, system-ui, sans-serif",
+  "settingsText": "Egg Farm m3-rc1-pre+8475bc4",
+  "reqs": [
+   "http://127.0.0.1:5231/"
+  ],
+  "fails": [],
+  "errs": [],
+  "extra": [
+   "eggfarmExportTelemetry"
+  ]
+ },
+ {
+  "E": "webkit",
+  "mode": "file",
+  "ok": {
+   "fonts4": true,
+   "buildId": true,
+   "noFailedReq": true,
+   "noOtherReq": true,
+   "noConsoleErr": true,
+   "globals": false
+  },
+  "faces": [
+   "Fredoka 500 loaded",
+   "Fredoka 700 loaded",
+   "Nunito 400 loaded",
+   "Nunito 700 loaded"
+  ],
+  "check": {
+   "500 16px Fredoka": true,
+   "700 16px Fredoka": true,
+   "400 16px Nunito": true,
+   "700 16px Nunito": true
+  },
+  "metas": [
+   "m3-rc1-pre+8475bc4"
+  ],
+  "app": "m3-rc1-pre+8475bc4",
+  "nAttr": 1,
+  "tel": "m3-rc1-pre+8475bc4",
+  "sampleFontFamily": "Nunito, system-ui, sans-serif",
+  "settingsText": "Egg Farm m3-rc1-pre+8475bc4",
+  "reqs": [
+   "file:///tmp/qa-x/htmlroot/index.html"
+  ],
+  "fails": [],
+  "errs": [],
+  "extra": [
+   "AudioWorklet",
+   "AudioWorkletNode",
+   "Cache",
+   "CacheStorage",
+   "Clipboard",
+   "ClipboardItem",
+   "CookieChangeEvent",
+   "CookieStore",
+   "CryptoKey",
+   "DeviceMotionEvent",
+   "DeviceOrientationEvent",
+   "FileSystemDirectoryHandle",
+   "FileSystemFileHandle",
+   "FileSystemHandle",
+   "FileSystemWritableFileStream",
+   "GPUBuffer",
+   "GPUBufferUsage",
+   "GPUColorWrite",
+   "GPUCommandEncoder",
+   "GPUComputePassEncoder",
+   "GPUMapMode",
+   "GPUQueue",
+   "GPURenderPassEncoder",
+   "GPUShaderStage",
+   "GPUTextureUsage",
+   "ImageDecoder",
+   "ImageTrack",
+   "ImageTrackList",
+   "InputDeviceInfo",
+   "Lock",
+   "LockManager",
+   "MediaDeviceInfo",
+   "MediaDevices",
+   "PushManager",
+   "PushSubscription",
+   "PushSubscriptionOptions",
+   "ServiceWorker",
+   "ServiceWorkerContainer",
+   "ServiceWorkerRegistration",
+   "StorageManager",
+   "SubtleCrypto",
+   "WakeLock",
+   "WakeLockSentinel",
+   "caches",
+   "cookieStore",
+   "eggfarmExportTelemetry",
+   "ondevicemotion",
+   "ondeviceorientation"
+  ]
+ }
+]

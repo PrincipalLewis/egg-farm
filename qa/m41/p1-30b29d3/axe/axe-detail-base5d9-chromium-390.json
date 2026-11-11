@@ -1,0 +1,68 @@
+{
+ "engine": "chromium",
+ "w": 390,
+ "bid": "m4.1+5d9efa6",
+ "r": [
+  {
+   "id": "color-contrast",
+   "nodes": [
+    {
+     "t": ".asleep.wk[data-w=\"market_hand\"] > .meta",
+     "html": "<div class=\"meta\">Energy 0%</div>",
+     "msg": "Fix any of the following:\n  Element has insufficient color contrast of 3.13 (foreground color: #978b7e, background color: #fff7eb, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+     "data": {
+      "fgColor": "#978b7e",
+      "bgColor": "#fff7eb",
+      "contrastRatio": 3.13,
+      "fontSize": "9.0pt (12px)",
+      "fontWeight": "normal",
+      "messageKey": null,
+      "expectedContrastRatio": "4.5:1"
+     }
+    },
+    {
+     "t": ".unpaid > h3 > .st",
+     "html": "<span class=\"st\">Unpaid ⚠</span>",
+     "msg": "Fix any of the following:\n  Element has insufficient color contrast of 2.57 (foreground color: #db8580, background color: #fff7eb, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
+     "data": {
+      "fgColor": "#db8580",
+      "bgColor": "#fff7eb",
+      "contrastRatio": 2.57,
+      "fontSize": "11.3pt (15px)",
+      "fontWeight": "normal",
+      "messageKey": null,
+      "expectedContrastRatio": "4.5:1"
+     }
+    },
+    {
+     "t": ".unpaid > .meta",
+     "html": "<div class=\"meta\">Energy 70%</div>",
+     "msg": "Fix any of the following:\n  Element has insufficient color contrast of 3.13 (foreground color: #978b7e, background color: #fff7eb, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+     "data": {
+      "fgColor": "#978b7e",
+      "bgColor": "#fff7eb",
+      "contrastRatio": 3.13,
+      "fontSize": "9.0pt (12px)",
+      "fontWeight": "normal",
+      "messageKey": null,
+      "expectedContrastRatio": "4.5:1"
+     }
+    },
+    {
+     "t": ".asleep.wk[data-w=\"hawker\"] > .meta",
+     "html": "<div class=\"meta\">Energy 0%</div>",
+     "msg": "Fix any of the following:\n  Element has insufficient color contrast of 3.13 (foreground color: #978b7e, background color: #fff7eb, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+     "data": {
+      "fgColor": "#978b7e",
+      "bgColor": "#fff7eb",
+      "contrastRatio": 3.13,
+      "fontSize": "9.0pt (12px)",
+      "fontWeight": "normal",
+      "messageKey": null,
+      "expectedContrastRatio": "4.5:1"
+     }
+    }
+   ]
+  }
+ ]
+}

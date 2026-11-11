@@ -1,0 +1,494 @@
+{
+ "engine": "chromium",
+ "port": "5961",
+ "scenarios": {
+  "qel12-i-variant-e": {
+   "welcomeShown": true,
+   "cardsWhileModal": 0,
+   "welcomeClosed": true,
+   "during": {
+    "tripped": true,
+    "storageFailed": true,
+    "mem": false,
+    "card": false
+   },
+   "cardsDuring": 0,
+   "lsSeenAtDeath": null,
+   "lsSeqAtDeath": 6,
+   "idbAtDeath": {
+    "seen": null,
+    "seq": 6,
+    "sha": null
+   },
+   "idbPutsSeenTrue": 0,
+   "reload1Card": true,
+   "cardsAfterReload1": 1,
+   "reload1Modal": false,
+   "lsSeenAfterReload1": true,
+   "idbAfterReload1": {
+    "seen": true,
+    "seq": 8,
+    "sha": null
+   },
+   "total": 1,
+   "pageErrors": [
+    "qa: mirror refuses writes",
+    "qa: mirror refuses writes"
+   ],
+   "injectedIdbAborts": 2
+  },
+  "qel12-i-variant-e1-mirror-accepts-first": {
+   "welcomeShown": true,
+   "cardsWhileModal": 0,
+   "welcomeClosed": true,
+   "during": {
+    "tripped": true,
+    "storageFailed": true,
+    "mem": false,
+    "card": false
+   },
+   "cardsDuring": 0,
+   "lsSeenAtDeath": null,
+   "lsSeqAtDeath": 6,
+   "idbAtDeath": {
+    "seen": false,
+    "seq": 7,
+    "sha": null
+   },
+   "idbPutsSeenTrue": 0,
+   "reload1Card": true,
+   "cardsAfterReload1": 1,
+   "reload1Modal": false,
+   "lsSeenAfterReload1": true,
+   "idbAfterReload1": {
+    "seen": true,
+    "seq": 9,
+    "sha": null
+   },
+   "total": 1,
+   "pageErrors": [
+    "qa: mirror refuses writes"
+   ],
+   "injectedIdbAborts": 1
+  },
+  "qel12-iii-hidden": {
+   "welcomeShown": true,
+   "canPersistHidden": false,
+   "welcomeClosed": true,
+   "hidden": {
+    "cards": 0,
+    "mem": false,
+    "ls": null,
+    "idb": {
+     "seen": null,
+     "seq": 7,
+     "sha": null
+    }
+   },
+   "cardOnVisible": true,
+   "cardsVisible": 1,
+   "lsAfterVisible": true,
+   "total": 1,
+   "pageErrors": [],
+   "injectedIdbAborts": 0
+  },
+  "qel13-exp1": {
+   "welcomeShown": true,
+   "cardsWhileModal": 0,
+   "welcomeClosed": true,
+   "card": true,
+   "cards": 1,
+   "ls": true,
+   "idb": {
+    "seen": true,
+    "seq": 7,
+    "sha": null
+   },
+   "flags": {
+    "canPersist": true,
+    "newerSave": null,
+    "storageFailed": false,
+    "tracksV7": 1
+   },
+   "total": 1,
+   "idbAfter": {
+    "seen": true,
+    "seq": 11,
+    "sha": null
+   },
+   "pageErrors": [],
+   "injectedIdbAborts": 0
+  },
+  "qel13-pre-v7-commit": {
+   "welcomeShown": true,
+   "cardsWhileModal": 0,
+   "welcomeClosed": true,
+   "card": true,
+   "cards": 1,
+   "ls": true,
+   "idb": {
+    "seen": true,
+    "seq": 6,
+    "sha": null
+   },
+   "flags": {
+    "canPersist": true,
+    "newerSave": null,
+    "storageFailed": false,
+    "tracksV7": 1
+   },
+   "total": 1,
+   "idbAfter": {
+    "seen": true,
+    "seq": 10,
+    "sha": null
+   },
+   "pageErrors": [],
+   "injectedIdbAborts": 0
+  },
+  "fresh-no-save": {
+   "cards": 0,
+   "ls": null,
+   "pageErrors": [],
+   "injectedIdbAborts": 0
+  }
+ },
+ "checks": [
+  {
+   "name": "qel12-i-variant-e: 'Welcome back!' modal appeared",
+   "pass": true
+  },
+  {
+   "name": "qel12-i-variant-e: modal closed",
+   "pass": true
+  },
+  {
+   "name": "qel12-i-variant-e: no card while the modal was open",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "e: quota tripped by the flag write",
+   "pass": true,
+   "val": {
+    "tripped": true,
+    "storageFailed": true,
+    "mem": false,
+    "card": false
+   }
+  },
+  {
+   "name": "e: 0 cards while quota fails",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "e: seen flag reverted in memory",
+   "pass": true
+  },
+  {
+   "name": "e: LS at death seen=false/absent",
+   "pass": true,
+   "val": null
+  },
+  {
+   "name": "e: IDB at death seen=false/absent",
+   "pass": true,
+   "val": {
+    "seen": null,
+    "seq": 6,
+    "sha": null
+   }
+  },
+  {
+   "name": "e: zero IDB puts carrying seen=true",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "e: reload1 shows the card",
+   "pass": true
+  },
+  {
+   "name": "e: exactly 1 card after reload1",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "e: flag confirmed in LS after the card",
+   "pass": true,
+   "val": true
+  },
+  {
+   "name": "e: exactly once overall (session + 2 reloads)",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "qel12-i-variant-e: no page errors (injected IDB aborts excluded: 2)",
+   "pass": true,
+   "val": []
+  },
+  {
+   "name": "qel12-i-variant-e1-mirror-accepts-first: 'Welcome back!' modal appeared",
+   "pass": true
+  },
+  {
+   "name": "qel12-i-variant-e1-mirror-accepts-first: modal closed",
+   "pass": true
+  },
+  {
+   "name": "qel12-i-variant-e1-mirror-accepts-first: no card while the modal was open",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "e1: quota tripped by the flag write",
+   "pass": true,
+   "val": {
+    "tripped": true,
+    "storageFailed": true,
+    "mem": false,
+    "card": false
+   }
+  },
+  {
+   "name": "e1: 0 cards while quota fails",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "e1: seen flag reverted in memory",
+   "pass": true
+  },
+  {
+   "name": "e1: LS at death seen=false/absent",
+   "pass": true,
+   "val": null
+  },
+  {
+   "name": "e1: IDB at death seen=false/absent",
+   "pass": true,
+   "val": {
+    "seen": false,
+    "seq": 7,
+    "sha": null
+   }
+  },
+  {
+   "name": "e1: zero IDB puts carrying seen=true",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "e1: reload1 shows the card",
+   "pass": true
+  },
+  {
+   "name": "e1: exactly 1 card after reload1",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "e1: flag confirmed in LS after the card",
+   "pass": true,
+   "val": true
+  },
+  {
+   "name": "e1: exactly once overall (session + 2 reloads)",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "qel12-i-variant-e1-mirror-accepts-first: no page errors (injected IDB aborts excluded: 1)",
+   "pass": true,
+   "val": []
+  },
+  {
+   "name": "iii: 'Welcome back!' modal appeared",
+   "pass": true
+  },
+  {
+   "name": "iii: modal closed (while hidden)",
+   "pass": true
+  },
+  {
+   "name": "iii: canPersist false while hidden",
+   "pass": true,
+   "val": false
+  },
+  {
+   "name": "iii: no card while hidden",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "iii: no flag while hidden (memory, LS, IDB)",
+   "pass": true,
+   "val": {
+    "cards": 0,
+    "mem": false,
+    "ls": null,
+    "idb": {
+     "seen": null,
+     "seq": 7,
+     "sha": null
+    }
+   }
+  },
+  {
+   "name": "iii: card shows once when visible",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "iii: flag persisted after showing",
+   "pass": true,
+   "val": true
+  },
+  {
+   "name": "iii: never again on reload (total 1)",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "qel12-iii-hidden: no page errors (injected IDB aborts excluded: 0)",
+   "pass": true,
+   "val": []
+  },
+  {
+   "name": "qel13-exp1: 'Welcome back!' modal appeared",
+   "pass": true
+  },
+  {
+   "name": "qel13-exp1: modal closed",
+   "pass": true
+  },
+  {
+   "name": "qel13-exp1: no card while the modal was open",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "qel13-exp1: card exactly once after closing the modal",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "qel13-exp1: flag in LS",
+   "pass": true,
+   "val": true
+  },
+  {
+   "name": "qel13-exp1: no false newer/hidden/storage reading",
+   "pass": true,
+   "val": {
+    "canPersist": true,
+    "newerSave": null,
+    "storageFailed": false,
+    "tracksV7": 1
+   }
+  },
+  {
+   "name": "qel13-exp1: never again (total 1)",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "qel13-exp1: IDB main carries seen=true after the confirmed write",
+   "pass": true,
+   "val": {
+    "seen": true,
+    "seq": 11,
+    "sha": null
+   }
+  },
+  {
+   "name": "qel13-exp1: no page errors (injected IDB aborts excluded: 0)",
+   "pass": true,
+   "val": []
+  },
+  {
+   "name": "qel13-pre-v7-commit: 'Welcome back!' modal appeared",
+   "pass": true
+  },
+  {
+   "name": "qel13-pre-v7-commit: modal closed",
+   "pass": true
+  },
+  {
+   "name": "qel13-pre-v7-commit: no card while the modal was open",
+   "pass": true,
+   "val": 0
+  },
+  {
+   "name": "qel13-pre-v7-commit: card exactly once after closing the modal",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "qel13-pre-v7-commit: flag in LS",
+   "pass": true,
+   "val": true
+  },
+  {
+   "name": "qel13-pre-v7-commit: no false newer/hidden/storage reading",
+   "pass": true,
+   "val": {
+    "canPersist": true,
+    "newerSave": null,
+    "storageFailed": false,
+    "tracksV7": 1
+   }
+  },
+  {
+   "name": "qel13-pre-v7-commit: never again (total 1)",
+   "pass": true,
+   "val": 1
+  },
+  {
+   "name": "qel13-pre-v7-commit: IDB main carries seen=true after the confirmed write",
+   "pass": true,
+   "val": {
+    "seen": true,
+    "seq": 10,
+    "sha": null
+   }
+  },
+  {
+   "name": "qel13-pre-v7-commit: no page errors (injected IDB aborts excluded: 0)",
+   "pass": true,
+   "val": []
+  },
+  {
+   "name": "fresh: 0 cards, flag not set (EXP-b)",
+   "pass": true,
+   "val": {
+    "cards": 0,
+    "ls": null,
+    "pageErrors": [],
+    "injectedIdbAborts": 0
+   }
+  },
+  {
+   "name": "fresh-no-save: no page errors (injected IDB aborts excluded: 0)",
+   "pass": true,
+   "val": []
+  },
+  {
+   "name": "runtime build-id meta == #app == expected, not dirty",
+   "pass": true,
+   "val": {
+    "meta": "m4.1+5d9efa6",
+    "app": "m4.1+5d9efa6",
+    "tele": "m4.1+5d9efa6"
+   }
+  }
+ ],
+ "buildId": {
+  "meta": "m4.1+5d9efa6",
+  "app": "m4.1+5d9efa6",
+  "tele": "m4.1+5d9efa6"
+ },
+ "fails": 0
+}

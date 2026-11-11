@@ -1,0 +1,87 @@
+forms/01.fixture	shell-kill	# NEGATIVE FIXTURE 01/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/02.fixture	shell-kill	# NEGATIVE FIXTURE 02/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/03.fixture	shell-kill	# NEGATIVE FIXTURE 03/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/04.fixture	shell-kill	# NEGATIVE FIXTURE 04/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/05.fixture	shell-kill	# NEGATIVE FIXTURE 05/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/06.fixture	shell-kill	# NEGATIVE FIXTURE 06/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/07.fixture	shell-kill	# NEGATIVE FIXTURE 07/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/08.fixture	shell-kill	# NEGATIVE FIXTURE 08/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/09.fixture	shell-kill	# NEGATIVE FIXTURE 09/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/10.fixture	shell-kill	# NEGATIVE FIXTURE 10/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/11.fixture	timeout-cmd	# NEGATIVE FIXTURE 11/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/12.fixture	ps	# NEGATIVE FIXTURE 12/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/13.fixture	js-kill-call	# NEGATIVE FIXTURE 13/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/14.fixture	js-kill-call	# NEGATIVE FIXTURE 14/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/15.fixture	loginctl-kill	# NEGATIVE FIXTURE 15/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/16.fixture	kill-tools	# NEGATIVE FIXTURE 16/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/17.fixture	timeout-cmd	# NEGATIVE FIXTURE 17/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/18.fixture	timeout-cmd	# NEGATIVE FIXTURE 18/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/19.fixture	kill-tools	# NEGATIVE FIXTURE 19/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/20.fixture	ps	# NEGATIVE FIXTURE 20/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/21.fixture	proc-enum	# NEGATIVE FIXTURE 21/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/22.fixture	shell-kill	# NEGATIVE FIXTURE 22/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/23.fixture	kill-assigned	# NEGATIVE FIXTURE 23/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/24.fixture	py-signal	# NEGATIVE FIXTURE 24/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/25.fixture	py-signal	# NEGATIVE FIXTURE 25/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/26.fixture	py-signal	# NEGATIVE FIXTURE 26/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/27.fixture	py-signal	# NEGATIVE FIXTURE 27/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/28.fixture	proc-readdir	# NEGATIVE FIXTURE 28/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/29.fixture	proc-readdir	# NEGATIVE FIXTURE 29/29 (Architect review 8bd8fb46 M2) - data, never executed; the audit must flag the next l
+forms/30.fixture	detach	# NEGATIVE FIXTURE 30/36 (Architect N-m4, 2026-10-30) - data, never executed; the audit must flag the next lin
+forms/31.fixture	detach	# NEGATIVE FIXTURE 31/36 (Architect N-m4, 2026-10-30) - data, never executed; the audit must flag the next lin
+forms/32.fixture	detach	# NEGATIVE FIXTURE 32/36 (Architect N-m4, 2026-10-30) - data, never executed; the audit must flag the next lin
+forms/33.fixture	detach	# NEGATIVE FIXTURE 33/36 (Architect N-m4, 2026-10-30) - data, never executed; the audit must flag the next lin
+forms/34.fixture	kill-tools	# NEGATIVE FIXTURE 34/36 (Architect N-m4, 2026-10-30) - data, never executed; the audit must flag the next lin
+forms/35.fixture	proc-enum	# NEGATIVE FIXTURE 35/36 (Architect N-m4, 2026-10-30) - data, never executed; the audit must flag the next lin
+forms/36.fixture	proc-enum	# NEGATIVE FIXTURE 36/36 (Architect N-m4, 2026-10-30) - data, never executed; the audit must flag the next lin
+## /workspace/egg-farm-studio/artifacts/v5-ui/harness/tests/fixtures/audit-negative/forms: caught 36/36
+rule21-negative/01.fixture	shell-kill	kill -9 $pid
+rule21-negative/02.fixture	shell-kill	kill -TERM -$pgid
+rule21-negative/03.fixture	shell-kill	kill -- -$pgid
+rule21-negative/04.fixture	shell-kill	/bin/kill $p
+rule21-negative/05.fixture	shell-kill	command kill $p
+rule21-negative/06.fixture	shell-kill	env kill $p
+rule21-negative/07.fixture	shell-kill	builtin kill $p
+rule21-negative/08.fixture	shell-kill	echo $p | xargs kill
+rule21-negative/09.fixture	shell-kill	trap 'kill 0' EXIT
+rule21-negative/10.fixture	shell-kill	kill %1
+rule21-negative/11.fixture	timeout-cmd	timeout 10m npm test
+rule21-negative/12.fixture	ps	ps axo pid,ppid
+rule21-negative/13.fixture	js-kill-call	process.kill (pid)
+rule21-negative/14.fixture	js-kill-call	process.kill(-srv.pid)
+rule21-negative/15.fixture	loginctl-kill	loginctl kill-session 3
+rule21-negative/16.fixture	kill-tools	fuser -k 5185/tcp
+rule21-negative/17.fixture	timeout-cmd	timeout --signal=TERM 600 node x.mjs
+rule21-negative/18.fixture	timeout-cmd	timeout -k 5 600 node x.mjs
+rule21-negative/19.fixture	kill-tools	pidof node
+rule21-negative/20.fixture	ps	ps aux | grep vite
+rule21-negative/21.fixture	proc-enum	for f in /proc/[0-9]*/stat; do :; done
+rule21-negative/22.fixture	shell-kill	skill -TERM node
+rule21-negative/23.fixture	kill-assigned	K=ki""ll; $K $p
+rule21-negative/24.fixture	py-signal	os.killpg(os.getpgid(p), 15)
+rule21-negative/25.fixture	py-signal	signal.pthread_kill(t, 15)
+rule21-negative/26.fixture	py-signal	p.terminate()
+rule21-negative/27.fixture	py-signal	p.send_signal(15)
+rule21-negative/28.fixture	proc-readdir	os.listdir('/proc')
+rule21-negative/29.fixture	proc-readdir	fs.readdirSync('/proc')
+rule21-negative/30.fixture	detach	nohup node server.mjs &
+rule21-negative/31.fixture	detach	setsid -f vite preview
+rule21-negative/32.fixture	detach	node x.mjs & disown
+rule21-negative/33.fixture	detach	spawn('vite',['preview'],{detached: true})
+rule21-negative/34.fixture	kill-tools	start-stop-daemon --stop --name vite
+rule21-negative/35.fixture	proc-enum	ls /proc | grep -E '^[0-9]+$'
+rule21-negative/36.fixture	proc-enum	for d in /proc/[0-9]*; do cat $d/cmdline; done
+rule21-negative/37.fixture	shell-kill,js-kill-index	process['kill'](pid, 'SIGTERM')
+rule21-negative/38.fixture	shell-kill,js-kill-destructure	const { kill } = process; kill(pid)
+rule21-negative/39.fixture	js-kill-call	child.kill('SIGTERM')
+rule21-negative/40.fixture	shell-kill,exec-kill	execSync('kill -9 ' + pid)
+rule21-negative/41.fixture	shell-kill,exec-kill	spawn('kill', ['-TERM', String(pid)])
+rule21-negative/42.fixture	proc-readdir	fs.readdir('/proc', cb)
+rule21-negative/43.fixture	proc-readdir	await fs.promises.readdir('/proc')
+rule21-negative/44.fixture	proc-readdir	fs.opendirSync('/proc')
+rule21-negative/45.fixture	proc-readdir	fs.readdirSync(`/proc`)
+rule21-negative/46.fixture	shell-kill,exec-kill	execFileSync('/bin/kill', [String(pid)])
+rule21-negative/47.fixture	kill-tools	spawnSync('pkill', ['-f', 'vite'])
+rule21-negative/48.fixture	shell-kill,js-kill-index	process [ 'kill' ] (pid)
+rule21-negative/49.fixture	js-kill-call	srv.kill ()
+## tests/fixtures/rule21-negative: caught 49/49

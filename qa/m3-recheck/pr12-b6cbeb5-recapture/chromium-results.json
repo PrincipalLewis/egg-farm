@@ -1,0 +1,248 @@
+[
+ {
+  "e": "chromium",
+  "n": "360 build ID (+dirty = QA-only m4.enabled=1 balance edit)",
+  "p": true,
+  "i": "m3-rc1-pre+b6cbeb5+dirty"
+ },
+ {
+  "e": "chromium",
+  "n": "360 M4 flag on",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "chromium",
+  "n": "360 layout",
+  "p": "n/a",
+  "i": {
+   "navVisible": true
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "360 nudge visible at L25",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "chromium",
+  "n": "360 nudge copy (full)",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 224
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "360 nudge one line, no clip (scrollWidth<=clientWidth)",
+  "p": true,
+  "i": {
+   "sw": 170,
+   "cw": 170,
+   "h": 16,
+   "lh": 16,
+   "kids": [
+    {
+     "t": "Busy farm! · ",
+     "sw": 0,
+     "cw": 0,
+     "h": 16,
+     "d": "inline"
+    }
+   ]
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "360 nudge 44px hit area (elementFromPoint ±21px)",
+  "p": true,
+  "i": [
+   true,
+   true,
+   true
+  ]
+ },
+ {
+  "e": "chromium",
+  "n": "360 × 44x44, no overlap, 52px reserve",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ],
+   "gap": 10.46875,
+   "reserve": 54.46875
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "360 Workers New dot shown",
+  "p": true,
+  "i": {
+   "inPill": true
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "360 'Workers' not clipped (scrollWidth<=clientWidth pill+tab)",
+  "p": true,
+  "i": {
+   "psw": 95,
+   "pcw": 95,
+   "bsw": 107,
+   "bcw": 107
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "360 dot does not overlap 'Workers' text rect",
+  "p": true,
+  "i": {
+   "gap": 2.01,
+   "textR": 320.42559814453125,
+   "dotL": 322.4323425292969,
+   "dotR": 330.459228515625,
+   "btnR": 340.1793212890625
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "360 Workers tab 44px target (rect or elementFromPoint ±21px; pre-existing tab style, not PR #12 scope)",
+  "p": "n/a",
+  "i": {
+   "h": 26.08740997314453,
+   "w": 107.030517578125,
+   "hit": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 build ID (+dirty = QA-only m4.enabled=1 balance edit)",
+  "p": true,
+  "i": "m3-rc1-pre+b6cbeb5+dirty"
+ },
+ {
+  "e": "chromium",
+  "n": "1280 M4 flag on",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "chromium",
+  "n": "1280 layout",
+  "p": "n/a",
+  "i": {
+   "navVisible": false
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 nudge visible at L25",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "chromium",
+  "n": "1280 nudge copy (full)",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 262
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 nudge one line, no clip (scrollWidth<=clientWidth)",
+  "p": true,
+  "i": {
+   "sw": 170,
+   "cw": 170,
+   "h": 16,
+   "lh": 16,
+   "kids": [
+    {
+     "t": "Busy farm! · ",
+     "sw": 0,
+     "cw": 0,
+     "h": 16,
+     "d": "inline"
+    }
+   ]
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 nudge 44px hit area (elementFromPoint ±21px)",
+  "p": true,
+  "i": [
+   true,
+   true,
+   true
+  ]
+ },
+ {
+  "e": "chromium",
+  "n": "1280 × 44x44, no overlap, 52px reserve",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ],
+   "gap": 48.46875,
+   "reserve": 92.46875
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 Workers New dot shown",
+  "p": true,
+  "i": {
+   "inPill": true
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 'Workers' not clipped (scrollWidth<=clientWidth pill+tab)",
+  "p": true,
+  "i": {
+   "psw": 119,
+   "pcw": 119,
+   "bsw": 119,
+   "bcw": 119
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 dot does not overlap 'Workers' text rect",
+  "p": true,
+  "i": {
+   "gap": 2.11,
+   "textR": 1240.493896484375,
+   "dotL": 1242.605224609375,
+   "dotR": 1251.0509033203125,
+   "btnR": 1263.3233642578125
+  }
+ },
+ {
+  "e": "chromium",
+  "n": "1280 Workers tab 44px target (rect or elementFromPoint ±21px; pre-existing tab style, not PR #12 scope)",
+  "p": true,
+  "i": {
+   "h": 46.45088195800781,
+   "w": 125.974853515625,
+   "hit": [
+    false,
+    false
+   ]
+  }
+ }
+]

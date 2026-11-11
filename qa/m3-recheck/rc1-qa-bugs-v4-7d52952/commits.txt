@@ -1,0 +1,16 @@
+7d52952 QA B-4 (Major): perf overlay never runs in release (frame-sampler returns unless __IOS_FLAG__, import already gated); check-release-build fails on any non-allowlisted eggfarm* identifier (catches aliased writes like w.eggfarmPerf); check-globals asserts ?perf=1 release has only eggfarmExportTelemetry and no overlay. Unit tests for the aliased-write scan
+45e4e8d Review 9601303 G1: docked card-tap highlight uses data-hl (OrderList.fill resets className each frame, which stripped goal-hl); 1.2 s, re-armed on repeat taps
+9601303 QA TUT-1 (Major): docked (landscape >=960px) tutorial Sell step targets the first Sell button (open==='market' || docked.matches), since openPanel keeps open=null when docked; a docked card tap highlights its order row. Unit + rc0 tut1docked at 1024x474/1280x720/1366x768 (new player, 6 collects, click target -> sale + step advances)
+25afd4e Review 94117b6 F1/F2/F4/F5: S2-REL-1 test expects main's IOS_FLAG gate for eggfarmOrderList (rebase blocker); Bug9 collapses only ASCII whitespace and still requires the NBSP before 'eggs'; drop dead .order .sell padding/max-width; test title pad 10
+94117b6 QA M-2: rc0 Bug9 normalises whitespace in order-card text (NBSP span markup puts newlines in innerText)
+ca9fe86 QA M-1: Sell button side padding 12px -> 10px so a 181.2B label fits the 84px content box in Firefox; shared --sell-w unchanged
+e9bc2ba MK-24-1: NBSP between order count and eggs
+eedf0cd MK-24-1 v4: order card shows delivered eggs (filled/demand)
+625311d MK-24-1: fmtMoneyExact for aria/popup/Thanks; S2-REL-1 globals allowlist
+acf2724 MK-24-1 v3: always two-line Sell, shared width, money never truncates
+308719d MK-24-1: max-width 45cqw so the Sell button can grow
+1047200 MK-24-1: width:fit-content so the Sell button grows in the grid
+9aec808 MK-24-1: only stack Sell when row content exceeds 45% of the card
+d827716 MK-24-1: Sell button grows to fit; floored short money preview
+5e0575d MK-24 / HoP: Sell button shows this-Sell amount via payout.ts
+6c4f8e8 QA rc1-pt1 BUG-1/2/3/5: one sale payout fn (sim/payout.ts) for credit, Sell all, +$X popup and order cards; round-then-suffix formatter (K/M/B/T); merged +N floater re-arms its timer; tests + 390px screenshot script

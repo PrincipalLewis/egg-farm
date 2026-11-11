@@ -1,0 +1,5 @@
+EVENTS_TS_VERDICT=PASS
+file=src/sim/events.ts
+vs=0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+change=single union arm: save_migrated line only (added reason|refund_cents|farm_level|backup_stores:[]; comment cite D1)
+neighbouring_lines=untouched (customer_arrive etc. unchanged)

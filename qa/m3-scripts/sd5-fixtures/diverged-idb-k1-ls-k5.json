@@ -1,0 +1,15 @@
+{
+ "_doc": "SD5-1 / M4-19 divergence row R2-DV (HoQA D-2 ruling): IDB saveSeq k+1 (trusted base k, forSeq k+1) vs LS saveSeq k+5 (trusted base k, idbUnknownAtBoot true, forSeq k+5) -> diverged (k < k+1, m4-design 0cadbd5), IDB wins regardless of saveSeq; IDB save/diverged must equal the LS bytes. k=10.",
+ "expect": "idb",
+ "k": 10,
+ "idb": {
+  "savedAtOffsetMs": -120000,
+  "coinsCents": 888888888,
+  "raw": "{\"version\":6,\"savedAt\":0,\"sum\":\"9f39f58f\",\"state\":{\"coinsCents\":888888888,\"coop\":0.10000000000022169,\"basket\":0,\"collectionLevel\":17,\"farmLevel\":19,\"customers\":[{\"id\":328,\"demand\":151,\"filled\":46,\"waitedS\":18.9},{\"id\":329,\"demand\":115,\"filled\":0,\"waitedS\":11.299999999999976},{\"id\":330,\"demand\":148,\"filled\":0,\"waitedS\":3.800000000000002},{\"id\":331,\"demand\":99,\"filled\":0,\"waitedS\":0}],\"nextCustomerInS\":3.700000000000852,\"nextCustomerId\":332,\"rng\":1270709646,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":{\"energy\":100,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":100,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":100,\"cdS\":0},\"grader\":{\"energy\":100,\"cdS\":0}},\"graderTier\":2,\"manageCdS\":30,\"coopFullS\":0,\"wageFracCents\":{},\"saveSeq\":11,\"base\":{\"seq\":10,\"idbUnknownAtBoot\":false,\"forSeq\":11}}}"
+ },
+ "ls": {
+  "savedAtOffsetMs": 0,
+  "coinsCents": 999999999,
+  "raw": "{\"version\":6,\"savedAt\":0,\"sum\":\"6b0c6617\",\"state\":{\"coinsCents\":999999999,\"coop\":0.10000000000022169,\"basket\":0,\"collectionLevel\":17,\"farmLevel\":19,\"customers\":[{\"id\":328,\"demand\":151,\"filled\":46,\"waitedS\":18.9},{\"id\":329,\"demand\":115,\"filled\":0,\"waitedS\":11.299999999999976},{\"id\":330,\"demand\":148,\"filled\":0,\"waitedS\":3.800000000000002},{\"id\":331,\"demand\":99,\"filled\":0,\"waitedS\":0}],\"nextCustomerInS\":3.700000000000852,\"nextCustomerId\":332,\"rng\":1270709646,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":{\"energy\":100,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":100,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":100,\"cdS\":0},\"grader\":{\"energy\":100,\"cdS\":0}},\"graderTier\":2,\"manageCdS\":30,\"coopFullS\":0,\"wageFracCents\":{},\"saveSeq\":15,\"base\":{\"seq\":10,\"idbUnknownAtBoot\":true,\"forSeq\":15}}}"
+ }
+}

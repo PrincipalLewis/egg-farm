@@ -1,0 +1,147 @@
+[
+ {
+  "n": "(1) baseline (rAF running): header follows each sim tick within 250 ms",
+  "pass": true,
+  "i": {
+   "maxLag": 0,
+   "lags": [
+    0,
+    0
+   ],
+   "simTicks": 2,
+   "gap": {
+    "coins": 980,
+    "hint": 1560,
+    "goal": 1480,
+    "buy": 2000
+   },
+   "n": {
+    "coins": 2,
+    "hint": 1,
+    "goal": 1,
+    "buy": 0
+   },
+   "dCoins": 25242,
+   "rafRan": 120,
+   "hdr": "$2,952.20"
+  }
+ },
+ {
+  "n": "(1) rAF stalled 8 s: header, Upgrades hint/ETA and buy button keep updating, header lag <= ~250 ms (300 ms allowed for 20 ms polling)",
+  "pass": false,
+  "i": {
+   "maxLag": 9008280,
+   "lags": [
+    9008280
+   ],
+   "simTicks": 9,
+   "gap": {
+    "coins": 9500,
+    "hint": 9500,
+    "goal": 9500,
+    "buy": 9500
+   },
+   "n": {
+    "coins": 0,
+    "hint": 0,
+    "goal": 0,
+    "buy": 0
+   },
+   "dCoins": 100963,
+   "rafRan": 0,
+   "hdr": "$2,952.20",
+   "live": {
+    "cs": 396183,
+    "hdr": "$2,952.20"
+   },
+   "errs": []
+  }
+ },
+ {
+  "n": "(1b) rAF stalled 6 s: goal chip ETA/progress keeps updating",
+  "pass": false,
+  "i": {
+   "maxLag": 9004940,
+   "lags": [
+    9004940
+   ],
+   "simTicks": 5,
+   "gap": {
+    "coins": 6000,
+    "hint": 6000,
+    "goal": 6000,
+    "buy": 6000
+   },
+   "n": {
+    "coins": 0,
+    "hint": 0,
+    "goal": 0,
+    "buy": 0
+   },
+   "dCoins": 120836,
+   "rafRan": 0,
+   "hdr": "$9.92"
+  }
+ },
+ {
+  "n": "(2b-i) button drawn grey but money now enough: tap buys from live money",
+  "pass": false,
+  "i": {
+   "drawn": "true",
+   "set": 371400,
+   "f0": 12,
+   "f1": 12,
+   "c1": 371400
+  }
+ },
+ {
+  "n": "(2b-ii) money drops below cost after draw: tap rejected, no spend, save unchanged",
+  "pass": true,
+  "i": {
+   "B": {
+    "drawn": "false",
+    "f0": 12,
+    "f1": 12,
+    "c1": 1000
+   },
+   "saved": {
+    "coins": 1000,
+    "farm": 12,
+    "coll": 17,
+    "workers": "{}",
+    "grader": 2
+   },
+   "prevFarm": 12
+  }
+ },
+ {
+  "n": "(1c info) background tab: header still advances (browser throttles timers ~1/s when hidden)",
+  "pass": true,
+  "i": {
+   "vis": "visible",
+   "maxLag": 40,
+   "lags": [
+    0,
+    0,
+    22,
+    40
+   ],
+   "simTicks": 4,
+   "gap": {
+    "coins": 1300,
+    "hint": 5000,
+    "goal": 2022,
+    "buy": 5000
+   },
+   "n": {
+    "coins": 4,
+    "hint": 0,
+    "goal": 2,
+    "buy": 0
+   },
+   "dCoins": 73436,
+   "rafRan": 21,
+   "hdr": "$744.28"
+  }
+ }
+]

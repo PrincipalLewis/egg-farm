@@ -1,0 +1,32 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr127-04add420/probes
+
+stdout | qa-pr127-probe.test.ts > P1 BR-AC27 scripted session (Game, F20, slots 0/1 full, slot 2 empty, freeHatchUsed 0) > counts, payloads, coalescing, offline reveal, reload, session_end, schema
+QA-PROBE free hatch breed / slot2 leghorn
+QA-PROBE after failed press incubator null
+QA-PROBE after mid-incubation reload remainingMs 40000
+QA-PROBE after 10-min gap incubator null slots [ 'brahma', 'rhode_island_red', 'leghorn' ]
+QA-PROBE breed events [{"breed_id":"leghorn","rarity":"Common","cost":0,"coinsBefore":0,"pity_before":0,"free":true,"farm_level":20,"type":"hatch_started"},{"breed_id":"leghorn","rarity":"Common","dupe":false,"stars_after":0,"offline":false,"wait_ms":60000,"type":"breed_revealed"},{"slot":2,"breed_id":"leghorn","cause":"auto_reveal","loadout":"P2A1B0","settling":1,"prev_slot":null,"prev_breed_id":null,"count":1,"type":"breed_slotted"},{"breed_id":"rhode_island_red","rarity":"Rare","cost":50000,"coinsBefore":1000000000000,"pity_before":1,"free":false,"farm_level":20,"type":"hatch_started"},{"breed_id":"rhode_island_red","rarity":"Rare","dupe":true,"stars_after":1,"offline":false,"wait_ms":60000,"type":"breed_revealed"},{"breed_id":"orpington","rarity":"Common","cost":50000,"coinsBefore":999999950000,"pity_before":0,"free":false,"farm_level":20,"type":"hatch_started"},{"breed_id":"orpington","rarity":"Common","dupe":false,"stars_after":0,"offline":true,"wait_ms":60000,"type":"breed_revealed"},{"slot":0,"breed_id":"cochin","cause":"manual","loadout":"P2A0B1","settling":2,"prev_slot":null,"prev_breed_id":"brahma","count":1,"type":"breed_slotted"},{"slot":1,"breed_id":"leghorn","cause":"move","loadout":"P1A0B1","settling":2,"prev_slot":2,"prev_breed_id":"rhode_island_red","count":1,"type":"breed_slotted"},{"slot":0,"breed_id":"cream_legbar","cause":"manual","loadout":"P2A0B0","settling":2,"prev_slot":null,"prev_breed_id":"cochin","count":5,"type":"breed_slotted"}]
+QA-PROBE index offline breed_revealed 121 offline_grant 122
+QA-PROBE session_end breed fields [{"breed_hatches":3,"breed_spend_cents":100000,"breed_present_eggs":0,"breed_away_eggs":0,"breed_broody_cents":0,"breeds_owned":5,"breed_slots_used":3,"breed_loadout_end":"P1A1B0","breed_family_s":{"P":142,"A":142,"B":0}},{"breed_hatches":0,"breed_spend_cents":0,"breed_present_eggs":0,"breed_away_eggs":0,"breed_broody_cents":0,"breeds_owned":5,"breed_slots_used":3,"breed_loadout_end":"P1A1B0","breed_family_s":{"P":0,"A":0,"B":0}},{"breed_hatches":0,"breed_spend_cents":0,"breed_present_eggs":0,"breed_away_eggs":0,"breed_broody_cents":0,"breeds_owned":6,"breed_slots_used":2,"breed_loadout_end":"P0A0B0","breed_family_s":{"P":4,"A":2,"B":0}}]
+
+stdout | qa-pr127-probe.test.ts > P2 flock_complete once per save, also after 2 reloads > tick path completion then 2 reloads: exactly 1 in the exported ring, flockCompleteLogged 1
+QA-PROBE flock_complete [{"hatches":23,"farm_level":30,"elapsed_since_unlock_s":0,"backfilled":false,"type":"flock_complete","ts":1794312000000,"sessionMs":0}]
+
+stdout | qa-pr127-probe.test.ts > P2 flock_complete once per save, also after 2 reloads > pinned-store growth: fresh F30 to full flock: hatch_started <= 25 (24), flock_complete = 1
+QA-PROBE full flock hatch_started 24 flock_complete 1 [{"type":"flock_complete","hatches":24,"farm_level":30,"elapsed_since_unlock_s":1442,"backfilled":false}]
+
+stdout | qa-pr127-probe.test.ts > P3 hidden-tab paths (no duplicates) > hidden 30 s (< 60 s, provisional sim kept): reveal during hidden -> exactly 1 breed_revealed, offline false
+QA-PROBE hidden30 revealed [{"breed_id":"brahma","rarity":"Rare","dupe":false,"stars_after":0,"offline":false,"wait_ms":60000,"type":"breed_revealed","ts":1794312000000,"sessionMs":0}]
+
+stdout | qa-pr127-probe.test.ts > P3 hidden-tab paths (no duplicates) > open breed_slotted window, hidden 120 s (provisional dropped, grant step): exactly 1 breed_slotted
+QA-PROBE hidden120 slotted [{"slot":0,"breed_id":"leghorn","cause":"manual","loadout":"P1A0B0","settling":1,"prev_slot":null,"prev_breed_id":null,"count":1,"type":"breed_slotted","ts":1794312000000,"sessionMs":0}]
+
+ ✓ qa-pr127-probe.test.ts (7 tests) 82ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  01:41:05
+   Duration  600ms (transform 277ms, setup 0ms, collect 346ms, tests 82ms, environment 0ms, prepare 52ms)
+
+PROBE_EXIT=0

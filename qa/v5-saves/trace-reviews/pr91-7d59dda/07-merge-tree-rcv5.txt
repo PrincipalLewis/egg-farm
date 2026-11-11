@@ -1,0 +1,6 @@
+d52f35ba6dbfbc6c748e760888bc3abd250772d4 2026-10-30 10:01:25 +0100 tests/bot-m5: O-3 loud-fail guard (CCR rcv5-vs-main-1a61b36 F-1, D-HOE-20261030-08) (#90)
+458f74cc76767452c9c980b2fed382bc0e461376 2026-10-30 09:31:16 +0100 v5 Saves: streak sim #2 (5d2aa04) (#87)
+== merge-tree origin/rc/v5 7d59dda
+dd38ede7b35e8fb41888d1de56d8d697d47c69b0
+exit=0
+== files touched by both since 458f74c

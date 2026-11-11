@@ -1,0 +1,21 @@
+raw line 120: 2026-11-05 23:14:38 CET (Europe/Belgrade) HEAD is now at d273f45 Merge 35b187cdd56c5428c22069675cd32f9306415602 into 844f8e15774daeb1c0a855cb69b1fabd2f0ab820
+raw line 140: 2026-11-05 23:14:42 CET (Europe/Belgrade) node: v20.20.2
+raw line 273: 2026-11-05 23:15:45 CET (Europe/Belgrade)  ✓ tests/bot-m5-active.test.ts (11 tests) 537ms
+raw line 283: 2026-11-05 23:15:51 CET (Europe/Belgrade) GOLDEN2 {"m1-rc2-v4-12min":"b1e07c13a21b6059ececdc898a4ddfe03b5286ea9133a4def6ae25992ec139dc","m2-rc1-v5-12min":"a425f0135a78b44615468a81fc99f955032e046a6003a9c180b973d51d346297","m2-rc1-v5-40min":"48b1fa43497a912c700461ddd4a2cf0abe59ba685977e7841c012ce8f7e6f1ef","m2-rc1-v5-40min-edge":"78b97634d0bbc3b4a174751917ad573889ec57bc22cc3163deb4c6fec0e4a4bc"}
+raw line 286: 2026-11-05 23:15:51 CET (Europe/Belgrade) GOLDEN1 a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+raw line 295: 2026-11-05 23:15:55 CET (Europe/Belgrade) GOLDEN2 {"m1-rc2-v4-12min":"b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9","m2-rc1-v5-12min":"2ac7070d0c5e7ea2d8fcdd1642732cf44871fe9c5b126d1b5873fcd8244f3a00","m2-rc1-v5-40min":"4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431","m2-rc1-v5-40min-edge":"652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb"}
+raw line 298: 2026-11-05 23:15:55 CET (Europe/Belgrade) GOLDEN1 f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+raw line 353: 2026-11-05 23:16:28 CET (Europe/Belgrade)    ✓ verify: goldens > the copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree 3452ms
+raw line 551: 2026-11-05 23:19:29 CET (Europe/Belgrade)  Test Files  148 passed (148)
+raw line 552: 2026-11-05 23:19:29 CET (Europe/Belgrade)       Tests  2122 passed | 1 skipped (2123)
+raw line 585: 2026-11-05 23:24:23 CET (Europe/Belgrade) stdout | tests/bot-m5-active.slow.test.ts > F5 G0 controls and G1 sampled metrics, source-only rc/v5 > seeds 0–99: funded natural F10 never-tap streak off/on bytes; three-profile F10/F18/F24 paired windows
+raw line 588: 2026-11-05 23:24:23 CET (Europe/Belgrade)  ✓ tests/bot-m5-active.slow.test.ts (2 tests) 293484ms
+raw line 612: 2026-11-05 23:27:34 CET (Europe/Belgrade)  Test Files  5 passed (5)
+raw line 613: 2026-11-05 23:27:34 CET (Europe/Belgrade)       Tests  19 passed | 1 skipped (20)
+raw line 646: 2026-11-05 23:27:40 CET (Europe/Belgrade) ##[group]Run npm run check-globals -- chromium
+raw line 647: 2026-11-05 23:27:40 CET (Europe/Belgrade) npm run check-globals -- chromium
+raw line 651: 2026-11-05 23:27:40 CET (Europe/Belgrade) > egg-farm@0.1.0 check-globals
+raw line 655: 2026-11-05 23:27:41 CET (Europe/Belgrade) check-globals: dist m4.1+d273f45 on port 42721
+raw line 656: 2026-11-05 23:28:16 CET (Europe/Belgrade) PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+raw line 657: 2026-11-05 23:28:17 CET (Europe/Belgrade) PASS [chromium] refused newer-save boot window globals vs blank page: []
+raw line 658: 2026-11-05 23:28:17 CET (Europe/Belgrade) PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]

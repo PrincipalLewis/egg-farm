@@ -1,0 +1,4 @@
+qa-pr125-probe.test.ts: 13/13 PASS (F1 12.2/12.3, F2 660.0/3, F3 1500 pre-grant, F4 0/19411425, F5 2s no emit, P5/P6)
+qa-pr125-rebar-probe.test.ts: Q5 F5 boundary 6/6 PASS (2s,59s,59999 no emit; 60s/61s emit away_bp 1500; real 60s eggs>0 emit 1500; flag-off 59999 none)
+Q7 2/6 PASS (1 and 10 fps); 4 FAIL (20/30/60/144 fps) — see q7-frame-rate.txt
+PROBE_EXIT=1 (due to Q7 only)

@@ -1,0 +1,12 @@
+Egg Farm M4 B (dd223f5), M4 on, capped at L30	Latest	m4b-dd223f5	2026-10-19T06:50:32Z
+Egg Farm rc1-pre (dd52bfd), M4 off		m3-rc1-pre-dd52bfd	2026-10-17T12:42:08Z
+M4-A: Tracks (main acdbedc)		m4a-acdbedc	2026-10-17T08:50:51Z
+m3-rc1-qa-v4 (7d52952)		m3-rc1-qa-v4	2026-10-16T21:09:03Z
+M3 rc1 save-recovery dialog (a01faea)		m3-rc1-dialog	2026-10-16T17:15:17Z
+M3 rc1 save durability v4 (aaaa91a)		m3-rc1-save-v4	2026-10-16T16:33:52Z
+M3 rc1 play build (2490c79) — single-file HTML		rc1-pt1	2026-10-16T11:00:08Z
+SUPERSEDED, use rc1-pt1 — M2 play build (dd15dbf) — single-file HTML		m2-rc1-play	2026-10-15T20:24:01Z
+== view v4.1
+release not found
+== view rc/m4.1-rc1
+release not found

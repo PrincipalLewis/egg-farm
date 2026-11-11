@@ -1,0 +1,2915 @@
+{
+ "summary": {
+  "label": "A0-fresh-m4b",
+  "secs": 180,
+  "farmLevel": 6,
+  "mh": true,
+  "startCents": 1599,
+  "endCents": 171608,
+  "deltaCents": 170009,
+  "wageCentsTotal": 450,
+  "saleCentsTotal": 170459,
+  "unexplainedCents": 0,
+  "basketEmptyAtSec": 82,
+  "centsPerSecAfterBasketEmpty": -2.5,
+  "expectedWageCentsPerSec": 2.5
+ },
+ "rows": [
+  {
+   "sec": 0,
+   "coinsCents": 1599,
+   "wageCents": 0,
+   "saleCents": 0,
+   "other": [],
+   "basket": 629,
+   "coop": 1,
+   "customers": 0,
+   "mh": {
+    "energy": 85.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 1,
+   "coinsCents": 1596,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 629,
+   "coop": 10,
+   "customers": 0,
+   "mh": {
+    "energy": 85.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 2,
+   "coinsCents": 1594,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 629,
+   "coop": 19,
+   "customers": 0,
+   "mh": {
+    "energy": 85.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 3,
+   "coinsCents": 1591,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 629,
+   "coop": 28,
+   "customers": 0,
+   "mh": {
+    "energy": 85.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 4,
+   "coinsCents": 1589,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 629,
+   "coop": 37,
+   "customers": 1,
+   "mh": {
+    "energy": 85.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 5,
+   "coinsCents": 10258,
+   "wageCents": 3,
+   "saleCents": 8672,
+   "other": [],
+   "basket": 597,
+   "coop": 46,
+   "customers": 0,
+   "mh": {
+    "energy": 85.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 6,
+   "coinsCents": 10256,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 597,
+   "coop": 55,
+   "customers": 0,
+   "mh": {
+    "energy": 85.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 7,
+   "coinsCents": 10253,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 597,
+   "coop": 64,
+   "customers": 0,
+   "mh": {
+    "energy": 85,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 8,
+   "coinsCents": 10251,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 597,
+   "coop": 73,
+   "customers": 1,
+   "mh": {
+    "energy": 84.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 9,
+   "coinsCents": 15939,
+   "wageCents": 3,
+   "saleCents": 5691,
+   "other": [],
+   "basket": 576,
+   "coop": 82,
+   "customers": 0,
+   "mh": {
+    "energy": 84.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 10,
+   "coinsCents": 15937,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 576,
+   "coop": 91,
+   "customers": 0,
+   "mh": {
+    "energy": 84.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 11,
+   "coinsCents": 15934,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 576,
+   "coop": 100,
+   "customers": 0,
+   "mh": {
+    "energy": 84.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 12,
+   "coinsCents": 23791,
+   "wageCents": 2,
+   "saleCents": 7859,
+   "other": [],
+   "basket": 547,
+   "coop": 109,
+   "customers": 0,
+   "mh": {
+    "energy": 84.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 13,
+   "coinsCents": 23788,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 547,
+   "coop": 118,
+   "customers": 0,
+   "mh": {
+    "energy": 84.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 14,
+   "coinsCents": 23786,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 547,
+   "coop": 127,
+   "customers": 0,
+   "mh": {
+    "energy": 84.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 15,
+   "coinsCents": 23783,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 547,
+   "coop": 136,
+   "customers": 1,
+   "mh": {
+    "energy": 84.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 16,
+   "coinsCents": 34079,
+   "wageCents": 2,
+   "saleCents": 10298,
+   "other": [],
+   "basket": 509,
+   "coop": 145,
+   "customers": 0,
+   "mh": {
+    "energy": 84,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 17,
+   "coinsCents": 34076,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 509,
+   "coop": 154,
+   "customers": 0,
+   "mh": {
+    "energy": 83.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 18,
+   "coinsCents": 34074,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 509,
+   "coop": 163,
+   "customers": 0,
+   "mh": {
+    "energy": 83.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 19,
+   "coinsCents": 34071,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 509,
+   "coop": 172,
+   "customers": 1,
+   "mh": {
+    "energy": 83.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 20,
+   "coinsCents": 41115,
+   "wageCents": 2,
+   "saleCents": 7046,
+   "other": [],
+   "basket": 483,
+   "coop": 181,
+   "customers": 0,
+   "mh": {
+    "energy": 83.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 21,
+   "coinsCents": 41112,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 483,
+   "coop": 190,
+   "customers": 0,
+   "mh": {
+    "energy": 83.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 22,
+   "coinsCents": 41110,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 483,
+   "coop": 199,
+   "customers": 0,
+   "mh": {
+    "energy": 83.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 23,
+   "coinsCents": 50863,
+   "wageCents": 3,
+   "saleCents": 9756,
+   "other": [],
+   "basket": 447,
+   "coop": 208,
+   "customers": 0,
+   "mh": {
+    "energy": 83.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 24,
+   "coinsCents": 50861,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 447,
+   "coop": 217,
+   "customers": 0,
+   "mh": {
+    "energy": 83.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 25,
+   "coinsCents": 50858,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 447,
+   "coop": 226,
+   "customers": 0,
+   "mh": {
+    "energy": 83,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 26,
+   "coinsCents": 50856,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 447,
+   "coop": 235,
+   "customers": 1,
+   "mh": {
+    "energy": 82.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 27,
+   "coinsCents": 57899,
+   "wageCents": 3,
+   "saleCents": 7046,
+   "other": [],
+   "basket": 421,
+   "coop": 244,
+   "customers": 0,
+   "mh": {
+    "energy": 82.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 28,
+   "coinsCents": 57897,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 421,
+   "coop": 253,
+   "customers": 0,
+   "mh": {
+    "energy": 82.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 29,
+   "coinsCents": 57894,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 421,
+   "coop": 262,
+   "customers": 0,
+   "mh": {
+    "energy": 82.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 30,
+   "coinsCents": 57892,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 421,
+   "coop": 271,
+   "customers": 1,
+   "mh": {
+    "energy": 82.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 31,
+   "coinsCents": 66019,
+   "wageCents": 3,
+   "saleCents": 8130,
+   "other": [],
+   "basket": 391,
+   "coop": 280,
+   "customers": 0,
+   "mh": {
+    "energy": 82.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 32,
+   "coinsCents": 66017,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 391,
+   "coop": 289,
+   "customers": 0,
+   "mh": {
+    "energy": 82.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 33,
+   "coinsCents": 66014,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 391,
+   "coop": 298,
+   "customers": 0,
+   "mh": {
+    "energy": 82.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 34,
+   "coinsCents": 74955,
+   "wageCents": 2,
+   "saleCents": 8943,
+   "other": [],
+   "basket": 358,
+   "coop": 307,
+   "customers": 0,
+   "mh": {
+    "energy": 82,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 35,
+   "coinsCents": 74952,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 358,
+   "coop": 316,
+   "customers": 0,
+   "mh": {
+    "energy": 81.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 36,
+   "coinsCents": 74950,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 358,
+   "coop": 325,
+   "customers": 0,
+   "mh": {
+    "energy": 81.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 37,
+   "coinsCents": 74947,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 358,
+   "coop": 334,
+   "customers": 1,
+   "mh": {
+    "energy": 81.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 38,
+   "coinsCents": 85785,
+   "wageCents": 2,
+   "saleCents": 10840,
+   "other": [],
+   "basket": 318,
+   "coop": 343,
+   "customers": 0,
+   "mh": {
+    "energy": 81.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 39,
+   "coinsCents": 85782,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 318,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 81.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 40,
+   "coinsCents": 85780,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 318,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 81.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 41,
+   "coinsCents": 85777,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 318,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 81.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 42,
+   "coinsCents": 91466,
+   "wageCents": 2,
+   "saleCents": 5691,
+   "other": [],
+   "basket": 297,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 81.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 43,
+   "coinsCents": 91463,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 297,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 81,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 44,
+   "coinsCents": 91461,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 297,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 80.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 45,
+   "coinsCents": 97420,
+   "wageCents": 3,
+   "saleCents": 5962,
+   "other": [],
+   "basket": 275,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 80.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 46,
+   "coinsCents": 97418,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 275,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 80.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 47,
+   "coinsCents": 97415,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 275,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 80.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 48,
+   "coinsCents": 97413,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 275,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 80.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 49,
+   "coinsCents": 104727,
+   "wageCents": 3,
+   "saleCents": 7317,
+   "other": [],
+   "basket": 248,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 80.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 50,
+   "coinsCents": 104725,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 248,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 80.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 51,
+   "coinsCents": 104722,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 248,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 80.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 52,
+   "coinsCents": 104720,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 248,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 80,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 53,
+   "coinsCents": 114744,
+   "wageCents": 3,
+   "saleCents": 10027,
+   "other": [],
+   "basket": 211,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 54,
+   "coinsCents": 114742,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 211,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 55,
+   "coinsCents": 114739,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 211,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 56,
+   "coinsCents": 122054,
+   "wageCents": 2,
+   "saleCents": 7317,
+   "other": [],
+   "basket": 184,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 57,
+   "coinsCents": 122051,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 184,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 58,
+   "coinsCents": 122049,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 184,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 59,
+   "coinsCents": 122046,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 184,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 79.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 60,
+   "coinsCents": 128006,
+   "wageCents": 2,
+   "saleCents": 5962,
+   "other": [],
+   "basket": 162,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 61,
+   "coinsCents": 128003,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 162,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 79,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 62,
+   "coinsCents": 128001,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 162,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 63,
+   "coinsCents": 127998,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 162,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 78.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 64,
+   "coinsCents": 136397,
+   "wageCents": 2,
+   "saleCents": 8401,
+   "other": [],
+   "basket": 131,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 65,
+   "coinsCents": 136394,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 131,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 66,
+   "coinsCents": 136392,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 131,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 67,
+   "coinsCents": 146958,
+   "wageCents": 3,
+   "saleCents": 10569,
+   "other": [],
+   "basket": 92,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 68,
+   "coinsCents": 146956,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 92,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 69,
+   "coinsCents": 146953,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 92,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 70,
+   "coinsCents": 146951,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 92,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 78,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 71,
+   "coinsCents": 155620,
+   "wageCents": 3,
+   "saleCents": 8672,
+   "other": [],
+   "basket": 60,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 72,
+   "coinsCents": 155618,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 60,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 73,
+   "coinsCents": 155615,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 60,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 74,
+   "coinsCents": 155613,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 60,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 77.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 75,
+   "coinsCents": 162656,
+   "wageCents": 3,
+   "saleCents": 7046,
+   "other": [],
+   "basket": 34,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 76,
+   "coinsCents": 162654,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 34,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 77,
+   "coinsCents": 162651,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 34,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 78,
+   "coinsCents": 169966,
+   "wageCents": 2,
+   "saleCents": 7317,
+   "other": [],
+   "basket": 7,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 79,
+   "coinsCents": 169963,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 7,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 77,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 80,
+   "coinsCents": 169961,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 7,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 76.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 81,
+   "coinsCents": 169958,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 7,
+   "coop": 350,
+   "customers": 0,
+   "mh": {
+    "energy": 76.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 82,
+   "coinsCents": 171853,
+   "wageCents": 2,
+   "saleCents": 1897,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 76.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 83,
+   "coinsCents": 171850,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 76.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 84,
+   "coinsCents": 171848,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 1,
+   "mh": {
+    "energy": 76.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 85,
+   "coinsCents": 171845,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 2,
+   "mh": {
+    "energy": 76.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 86,
+   "coinsCents": 171843,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 2,
+   "mh": {
+    "energy": 76.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 87,
+   "coinsCents": 171840,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 2,
+   "mh": {
+    "energy": 76.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 88,
+   "coinsCents": 171838,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 2,
+   "mh": {
+    "energy": 76,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 89,
+   "coinsCents": 171835,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 3,
+   "mh": {
+    "energy": 75.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 90,
+   "coinsCents": 171833,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 3,
+   "mh": {
+    "energy": 75.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 91,
+   "coinsCents": 171830,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 3,
+   "mh": {
+    "energy": 75.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 92,
+   "coinsCents": 171828,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 3,
+   "mh": {
+    "energy": 75.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 93,
+   "coinsCents": 171825,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 4,
+   "mh": {
+    "energy": 75.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 94,
+   "coinsCents": 171823,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 4,
+   "mh": {
+    "energy": 75.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 95,
+   "coinsCents": 171820,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 4,
+   "mh": {
+    "energy": 75.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 96,
+   "coinsCents": 171818,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 5,
+   "mh": {
+    "energy": 75.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 97,
+   "coinsCents": 171815,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 5,
+   "mh": {
+    "energy": 75,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 98,
+   "coinsCents": 171813,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 5,
+   "mh": {
+    "energy": 74.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 99,
+   "coinsCents": 171810,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 5,
+   "mh": {
+    "energy": 74.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 100,
+   "coinsCents": 171808,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 74.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 101,
+   "coinsCents": 171805,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 74.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 102,
+   "coinsCents": 171803,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 74.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 103,
+   "coinsCents": 171800,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 74.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 104,
+   "coinsCents": 171798,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 74.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 105,
+   "coinsCents": 171795,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 74.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 106,
+   "coinsCents": 171793,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 74,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 107,
+   "coinsCents": 171790,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 73.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 108,
+   "coinsCents": 171788,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 73.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 109,
+   "coinsCents": 171785,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 73.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 110,
+   "coinsCents": 171783,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 73.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 111,
+   "coinsCents": 171780,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 73.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 112,
+   "coinsCents": 171778,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 73.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 113,
+   "coinsCents": 171775,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 73.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 114,
+   "coinsCents": 171773,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 73.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 115,
+   "coinsCents": 171770,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 73,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 116,
+   "coinsCents": 171768,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 72.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 117,
+   "coinsCents": 171765,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 72.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 118,
+   "coinsCents": 171763,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 72.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 119,
+   "coinsCents": 171760,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 72.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 120,
+   "coinsCents": 171758,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 72.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 121,
+   "coinsCents": 171755,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 72.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 122,
+   "coinsCents": 171753,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 72.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 123,
+   "coinsCents": 171750,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 72.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 124,
+   "coinsCents": 171748,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 72,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 125,
+   "coinsCents": 171745,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 71.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 126,
+   "coinsCents": 171743,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 71.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 127,
+   "coinsCents": 171740,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 71.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 128,
+   "coinsCents": 171738,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 71.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 129,
+   "coinsCents": 171735,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 71.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 130,
+   "coinsCents": 171733,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 71.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 131,
+   "coinsCents": 171730,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 71.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 132,
+   "coinsCents": 171728,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 71.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 133,
+   "coinsCents": 171725,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 71,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 134,
+   "coinsCents": 171723,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 70.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 135,
+   "coinsCents": 171720,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 70.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 136,
+   "coinsCents": 171718,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 70.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 137,
+   "coinsCents": 171715,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 70.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 138,
+   "coinsCents": 171713,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 70.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 139,
+   "coinsCents": 171710,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 70.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 140,
+   "coinsCents": 171708,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 70.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 141,
+   "coinsCents": 171705,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 70.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 142,
+   "coinsCents": 171703,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 70,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 143,
+   "coinsCents": 171700,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 69.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 144,
+   "coinsCents": 171698,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 69.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 145,
+   "coinsCents": 171695,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 69.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 146,
+   "coinsCents": 171693,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 69.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 147,
+   "coinsCents": 171690,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 69.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 148,
+   "coinsCents": 171688,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 69.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 149,
+   "coinsCents": 171685,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 69.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 150,
+   "coinsCents": 171683,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 69.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 151,
+   "coinsCents": 171680,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 69,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 152,
+   "coinsCents": 171678,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 153,
+   "coinsCents": 171675,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 154,
+   "coinsCents": 171673,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 155,
+   "coinsCents": 171670,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 68.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 156,
+   "coinsCents": 171668,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 157,
+   "coinsCents": 171665,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 158,
+   "coinsCents": 171663,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 159,
+   "coinsCents": 171660,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 160,
+   "coinsCents": 171658,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 68,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 161,
+   "coinsCents": 171655,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 162,
+   "coinsCents": 171653,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 163,
+   "coinsCents": 171650,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 164,
+   "coinsCents": 171648,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 165,
+   "coinsCents": 171645,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 166,
+   "coinsCents": 171643,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 67.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 167,
+   "coinsCents": 171640,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 168,
+   "coinsCents": 171638,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 169,
+   "coinsCents": 171635,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 67,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 170,
+   "coinsCents": 171633,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 171,
+   "coinsCents": 171630,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 172,
+   "coinsCents": 171628,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.7,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 173,
+   "coinsCents": 171625,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.6,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 174,
+   "coinsCents": 171623,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.5,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 175,
+   "coinsCents": 171620,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.4,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 176,
+   "coinsCents": 171618,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.3,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 177,
+   "coinsCents": 171615,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 7,
+   "mh": {
+    "energy": 66.1,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 178,
+   "coinsCents": 171613,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 66,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  },
+  {
+   "sec": 179,
+   "coinsCents": 171610,
+   "wageCents": 3,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 65.9,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.08333333333333126
+  },
+  {
+   "sec": 180,
+   "coinsCents": 171608,
+   "wageCents": 2,
+   "saleCents": 0,
+   "other": [],
+   "basket": 0,
+   "coop": 350,
+   "customers": 6,
+   "mh": {
+    "energy": 65.8,
+    "mood": "working",
+    "cdS": 0.4
+   },
+   "wageFrac": 0.5833333333333313
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+--- /workspace/egg-farm-studio/qa/scratch/SCRIPTS.sha256.orig-20261030-073843	2026-10-30 07:36:07.968504011 +0100
++++ SCRIPTS.sha256	2026-10-30 07:41:23.578539672 +0100
+@@ -7,5 +7,6 @@
+ c8565122bfde45afa7a784308c51cdeea7fe9f7ef1873b2070c5c682a2c77112  ss15-share-guard.mjs
+ 7c6b2621bb7509fbd170b4c4a0fda98a198d2072ff821347d23f7ac6ec8b6bb9  telemetry-check.mjs
+ d634dfc847be6783d01432ba9e24a3fcef977394371f6b4a0470a36d23e793b4  publish-verify.sh
+-1e1d63cf99cf1af66fe3b26f3fbff161f208ec1a037bf1103ccc541f2f121e8d  v5-saves-gate.sh
++542683b2381ca9471b5098abf52827183eac0c5e50dbd6f4cde359afe7b163b1  v5-saves-gate.sh
+ e2c14c0ce944e560d2f16804d32978a5a4d21ab350c7c550ff557570660f3a94  selftest-gate-sums.sh
++2cc81b6519759a111b4cef03c094f6f56c0e7f68a32b0c6b407dd127f601eca5  selftest-gate-timer.sh

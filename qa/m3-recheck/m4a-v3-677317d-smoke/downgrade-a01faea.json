@@ -1,0 +1,66 @@
+{
+ "buildId": "m3-rc1-pre+a01faea",
+ "modal": "Welcome back! | You were away 1m | +590 eggs | Collect",
+ "byteEq": {
+  "input": "[[\"hensLevel\",19],[\"eggValueLevel\",13],[\"celebratedMilestones\",[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]],[\"tracksV7\",1]]",
+  "afterLoad": "[[\"hensLevel\",19],[\"eggValueLevel\",13],[\"celebratedMilestones\",[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]],[\"tracksV7\",1]]",
+  "afterReloadSave": "[[\"hensLevel\",19],[\"eggValueLevel\",13],[\"celebratedMilestones\",[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]],[\"tracksV7\",1]]",
+  "identical": true,
+  "otherKeys": []
+ },
+ "input": {
+  "version": 6,
+  "coins": 1318245,
+  "F": 19,
+  "C": 17,
+  "H": 19,
+  "V": 13,
+  "tracksV7": 1,
+  "celebratedMilestones": [
+   "hens:10",
+   "grade:5",
+   "grade:10",
+   "balanced:1",
+   "balanced:2"
+  ],
+  "workers": "{\"market_hand\":{\"energy\":99.68888888888904,\"cdS\":0.30000000000000016},\"coop_hand\":{\"energy\":99.68888888888904,\"cdS\":0.2999999999999994},\"hawker\":{\"energy\":99.68888888888904,\"cdS\":0},\"grader\":{\"energy\":99.68888888888904,\"cdS\":0}}",
+  "grader": 2
+ },
+ "afterLoad": {
+  "version": 6,
+  "coins": 1365637,
+  "F": 19,
+  "C": 17,
+  "H": 19,
+  "V": 13,
+  "tracksV7": 1,
+  "celebratedMilestones": [
+   "hens:10",
+   "grade:5",
+   "grade:10",
+   "balanced:1",
+   "balanced:2"
+  ],
+  "workers": "{\"market_hand\":{\"energy\":99.44444444444471,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":99.44444444444471,\"cdS\":0.09999999999999937},\"hawker\":{\"energy\":99.44444444444471,\"cdS\":0},\"grader\":{\"energy\":99.44444444444471,\"cdS\":0}}",
+  "grader": 2
+ },
+ "afterReloadSave": {
+  "version": 6,
+  "coins": 2051058,
+  "F": 19,
+  "C": 17,
+  "H": 19,
+  "V": 13,
+  "tracksV7": 1,
+  "celebratedMilestones": [
+   "hens:10",
+   "grade:5",
+   "grade:10",
+   "balanced:1",
+   "balanced:2"
+  ],
+  "workers": "{\"market_hand\":{\"energy\":99.14444444444486,\"cdS\":0.40000000000000013},\"coop_hand\":{\"energy\":99.14444444444486,\"cdS\":1.3999999999999995},\"hawker\":{\"energy\":99.14444444444486,\"cdS\":0},\"grader\":{\"energy\":99.14444444444486,\"cdS\":0}}",
+  "grader": 2
+ },
+ "console": []
+}

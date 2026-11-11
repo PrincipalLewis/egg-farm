@@ -1,0 +1,951 @@
+{
+ "spec": "m5.1-zero-gain-purchase-ui.md v0.3.5 1098f14e",
+ "wt": "/workspace/egg-farm-studio/qa/m5/zg-97-run-20261030-1508/build/0ad018de",
+ "checks": [
+  {
+   "id": "FX-L30",
+   "name": "options == [COLL] (got COLL); gain(COLL)=0 <= 0; COLL affordable",
+   "pass": true,
+   "info": {
+    "keys": [
+     "COLL"
+    ],
+    "gain": 0
+   }
+  },
+  {
+   "id": "FX-L30u",
+   "name": "options {FARM,COLL} (got COLL,FARM); gain(COLL)<=0; COLL affordable; FARM not",
+   "pass": true,
+   "info": {
+    "keys": [
+     "COLL",
+     "FARM"
+    ],
+    "gC": 0,
+    "gF": -0.012499999999818101,
+    "costs": [
+     [
+      "FARM",
+      190000
+     ],
+     [
+      "COLL",
+      1099
+     ]
+    ]
+   }
+  },
+  {
+   "id": "FX-FLIP",
+   "name": "before: gain(COLL)=1 > 0, gain(HENS)=0 <= 0; W1 offered gain<0 (-0.016666666666666607)",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "FX-FLIP",
+   "name": "after 1 COLL buy: gain(COLL)=0 <= 0, gain(HENS)=0.14250614250614202 > 0, HENS affordable, coins >= C1 cost and < Farm cost (9301 vs 1600/33200)",
+   "pass": true,
+   "info": {
+    "coins": 10301,
+    "c0": 10,
+    "c1": 16,
+    "h1": 73,
+    "farm": 332
+   }
+  },
+  {
+   "id": "FX-H20",
+   "name": "HENS offered, gain(HENS)=0 <= 0, dCap=225 > 0 (spec +225), gain(COLL)=5 > 0",
+   "pass": true,
+   "info": {
+    "dCap": 225
+   }
+  },
+  {
+   "id": "FX-FARM0",
+   "name": "FARM offered, gain(FARM)=0 <= 0",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "FX-F27",
+   "name": "FX-F27 from the committed AC7 trace (tests/bot-m4.ts seed 1 seller15, observe-only hook)",
+   "pass": "UNVERIFIED",
+   "info": {
+    "hook": null,
+    "note": "trace derivation runs in zg-trace step when the hook exists; substitute FX-F27s is layout-only"
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(100, 100, 0) -> true (got true)",
+   "pass": true,
+   "info": {
+    "got": true
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(100, 99.999999, 0) -> true (got true)",
+   "pass": true,
+   "info": {
+    "got": true
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(100, 100.000000000001, 0) -> false (got false)",
+   "pass": true,
+   "info": {
+    "got": false
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(1000000000000000, 1000000000000000.1, 0) -> false (got false)",
+   "pass": true,
+   "info": {
+    "got": false
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(100, 100, 1) -> false (got false)",
+   "pass": true,
+   "info": {
+    "got": false
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(100, 101, 0) -> false (got false)",
+   "pass": true,
+   "info": {
+    "got": false
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(NaN, 100, 0) -> throw (got throw)",
+   "pass": true,
+   "info": {
+    "got": "throw"
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(100, NaN, 0) -> throw (got throw)",
+   "pass": true,
+   "info": {
+    "got": "throw"
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(Infinity, 100, 0) -> throw (got throw)",
+   "pass": true,
+   "info": {
+    "got": "throw"
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(100, -Infinity, 0) -> throw (got throw)",
+   "pass": true,
+   "info": {
+    "got": "throw"
+   }
+  },
+  {
+   "id": "ZG-AC1",
+   "name": "zeroGainVerdict(9007199254740994, 100, 0) -> throw (got throw)",
+   "pass": true,
+   "info": {
+    "got": "throw"
+   }
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-L30 COLL: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> true",
+   "pass": true,
+   "info": {
+    "got": true,
+    "want": true
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-L30 COLL: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-L30u FARM exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": -0.012499999999818101
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-L30u FARM: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-L30u COLL: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> true",
+   "pass": true,
+   "info": {
+    "got": true,
+    "want": true
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-L30u COLL: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-FLIP FARM exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": 0
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP FARM: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FLIP HENS: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> true",
+   "pass": true,
+   "info": {
+    "got": true,
+    "want": true
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP HENS: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FLIP VALUE: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP VALUE: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FLIP COLL: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP COLL: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-FLIP W1 exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": -0.016666666666666607
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP W1: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-FLIP-after FARM exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": 0
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP-after FARM: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FLIP-after HENS: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP-after HENS: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FLIP-after VALUE: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP-after VALUE: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FLIP-after COLL: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> true",
+   "pass": true,
+   "info": {
+    "got": true,
+    "want": true
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP-after COLL: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-FLIP-after W1 exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": -0.016666666666666607
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FLIP-after W1: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-H20 FARM exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": 0
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-H20 FARM: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-H20 HENS: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-H20 HENS: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-H20 VALUE: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-H20 VALUE: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-H20 COLL: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-H20 COLL: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-H20 W1 exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": -0.07083333333333375
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-H20 W1: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-H20 W2 exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": 2.3583333333333334
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-H20 W2: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-H20 W3 exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": 0
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-H20 W3: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-FARM0 FARM exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": 0
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FARM0 FARM: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FARM0 HENS: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FARM0 HENS: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FARM0 VALUE: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FARM0 VALUE: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-FARM0 COLL: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> true",
+   "pass": true,
+   "info": {
+    "got": true,
+    "want": true
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-FARM0 COLL: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC2",
+   "name": "FX-F27s FARM exempt -> isZeroGain false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "gain": -0.012499999999818101
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-F27s FARM: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-F27s HENS: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-F27s HENS: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-F27s VALUE: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> false",
+   "pass": true,
+   "info": {
+    "got": false,
+    "want": false
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-F27s VALUE: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC20",
+   "name": "FX-F27s COLL: isZeroGain == oracle (incomePerSec after<=before && dCap<=0) -> true",
+   "pass": true,
+   "info": {
+    "got": true,
+    "want": true
+   }
+  },
+  {
+   "id": "ZG-AC7",
+   "name": "FX-F27s COLL: 20 perturbations (coins, energy, rng) keep isZeroGain; s deep-equal after calls",
+   "pass": true,
+   "info": {}
+  },
+  {
+   "id": "ZG-AC3",
+   "name": "FX-H20: isZeroGain(HENS) false (capacity partial gain)",
+   "pass": true,
+   "info": {}
+  }
+ ],
+ "fixtures": {
+  "FX-F27": {
+   "traceHook": null,
+   "substitute": {
+    "F": 27,
+    "H": 24,
+    "V": 25,
+    "C": 17,
+    "coins": 2951401,
+    "nonZG": [
+     "HENS"
+    ]
+   }
+  },
+  "FX-L30": {
+   "COLL": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 3245185,
+    "affordable": true
+   }
+  },
+  "FX-L30u": {
+   "FARM": {
+    "gain": -0.012499999999818101,
+    "dCap": 100,
+    "oracleZG": false,
+    "cost": 190000,
+    "affordable": false
+   },
+   "COLL": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 1099,
+    "affordable": true
+   }
+  },
+  "FX-FLIP": {
+   "FARM": {
+    "gain": 0,
+    "dCap": 50,
+    "oracleZG": false,
+    "cost": 332,
+    "affordable": false
+   },
+   "HENS": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 73,
+    "affordable": true
+   },
+   "VALUE": {
+    "gain": 0.8999999999999995,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 20,
+    "affordable": true
+   },
+   "COLL": {
+    "gain": 1,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 10,
+    "affordable": true
+   },
+   "W1": {
+    "gain": -0.016666666666666607,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 40,
+    "affordable": true
+   }
+  },
+  "FX-FLIP-after": {
+   "FARM": {
+    "gain": 0,
+    "dCap": 50,
+    "oracleZG": false,
+    "cost": 332,
+    "affordable": false
+   },
+   "HENS": {
+    "gain": 0.14250614250614202,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 73,
+    "affordable": true
+   },
+   "VALUE": {
+    "gain": 1.08,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 20,
+    "affordable": true
+   },
+   "COLL": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 16,
+    "affordable": true
+   },
+   "W1": {
+    "gain": -0.016666666666666607,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 40,
+    "affordable": true
+   }
+  },
+  "FX-H20": {
+   "FARM": {
+    "gain": 0,
+    "dCap": 62,
+    "oracleZG": false,
+    "cost": 10185,
+    "affordable": true
+   },
+   "HENS": {
+    "gain": 0,
+    "dCap": 225,
+    "oracleZG": false,
+    "cost": 5262,
+    "affordable": true
+   },
+   "VALUE": {
+    "gain": 0.8999999999999995,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 20,
+    "affordable": true
+   },
+   "COLL": {
+    "gain": 5,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 10,
+    "affordable": true
+   },
+   "W1": {
+    "gain": -0.07083333333333375,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 40,
+    "affordable": true
+   },
+   "W2": {
+    "gain": 2.3583333333333334,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 150,
+    "affordable": true
+   },
+   "W3": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 800,
+    "affordable": true
+   }
+  },
+  "FX-FARM0": {
+   "FARM": {
+    "gain": 0,
+    "dCap": 50,
+    "oracleZG": false,
+    "cost": 100,
+    "affordable": false
+   },
+   "HENS": {
+    "gain": 0.30000000000000004,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 20,
+    "affordable": false
+   },
+   "VALUE": {
+    "gain": 0.27,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 20,
+    "affordable": false
+   },
+   "COLL": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 10,
+    "affordable": false
+   }
+  },
+  "FX-F27s": {
+   "FARM": {
+    "gain": -0.012499999999818101,
+    "dCap": 75,
+    "oracleZG": false,
+    "cost": 160000,
+    "affordable": false
+   },
+   "HENS": {
+    "gain": 137.20000000000005,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 19540,
+    "affordable": true
+   },
+   "VALUE": {
+    "gain": 89,
+    "dCap": 0,
+    "oracleZG": false,
+    "cost": 41940,
+    "affordable": false
+   },
+   "COLL": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 29514,
+    "affordable": true
+   }
+  }
+ },
+ "symbols": {
+  "zeroGainVerdict": "src/ui/zero-gain.ts",
+  "isZeroGain": "src/ui/zero-gain.ts"
+ },
+ "flags_in_shipped_balance": {
+  "zeroGainUi": 0,
+  "confirm": 0,
+  "bestBuyV2": 0
+ },
+ "states": {
+  "FX-L30": {
+   "farmLevel": 30,
+   "hensLevel": 30,
+   "eggValueLevel": 30,
+   "collectionLevel": 27,
+   "graderTier": 5,
+   "workers": {
+    "market_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "coop_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "hawker": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "grader": {
+     "energy": 100,
+     "cdS": 0
+    }
+   },
+   "coinsCents": 324520501
+  },
+  "FX-L30u": {
+   "farmLevel": 29,
+   "hensLevel": 30,
+   "eggValueLevel": 30,
+   "collectionLevel": 10,
+   "graderTier": 5,
+   "workers": {
+    "market_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "coop_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "hawker": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "grader": {
+     "energy": 100,
+     "cdS": 0
+    }
+   },
+   "coinsCents": 202000
+  },
+  "FX-FLIP": {
+   "farmLevel": 4,
+   "hensLevel": 5,
+   "eggValueLevel": 0,
+   "collectionLevel": 0,
+   "graderTier": 0,
+   "workers": {},
+   "coinsCents": 10301
+  },
+  "FX-FLIP-after": {
+   "farmLevel": 4,
+   "hensLevel": 5,
+   "eggValueLevel": 0,
+   "collectionLevel": 1,
+   "graderTier": 0,
+   "workers": {},
+   "coinsCents": 9301
+  },
+  "FX-H20": {
+   "farmLevel": 17,
+   "hensLevel": 19,
+   "eggValueLevel": 0,
+   "collectionLevel": 0,
+   "graderTier": 0,
+   "workers": {},
+   "coinsCents": 1000000000
+  },
+  "FX-FARM0": {
+   "farmLevel": 0,
+   "hensLevel": 0,
+   "eggValueLevel": 0,
+   "collectionLevel": 0,
+   "graderTier": 0,
+   "workers": {},
+   "coinsCents": 0
+  },
+  "FX-F27s": {
+   "farmLevel": 27,
+   "hensLevel": 24,
+   "eggValueLevel": 25,
+   "collectionLevel": 17,
+   "graderTier": 5,
+   "workers": {
+    "market_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "coop_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "hawker": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "grader": {
+     "energy": 100,
+     "cdS": 0
+    }
+   },
+   "coinsCents": 2951401
+  }
+ },
+ "summary": {
+  "pass": 74,
+  "fail": 0,
+  "unverified": 1
+ },
+ "drainMarginCents": 2000
+}

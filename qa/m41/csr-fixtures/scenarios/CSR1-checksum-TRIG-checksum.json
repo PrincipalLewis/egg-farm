@@ -1,0 +1,26 @@
+{
+ "id": "CSR1-checksum-TRIG-checksum",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "CSR-6",
+  "CSR-15"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-checksum.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "reason": "checksum",
+  "store": "ls",
+  "recovered_from": "none",
+  "notice": "M3",
+  "corruptLsMin": 1
+ }
+}

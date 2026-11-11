@@ -1,0 +1,8 @@
+18c18
+< import pw from 'playwright-core'; import { serveOwn } from './serve-own.mjs';
+---
+> import pw from '/tmp/qa-rc1-5d9efa6/node_modules/playwright-core/index.mjs'; import { serveOwn } from '/tmp/qa-rc1-5d9efa6/scripts/serve-own.mjs';
+20c20
+< const ARGS = process.argv.slice(2), HEAD = execSync('git rev-parse HEAD').toString().trim(), OUT = `/workspace/wt-ui-shots/m41-9-${HEAD.slice(0, 7)}`;
+---
+> const ARGS = process.argv.slice(2), HEAD = execSync('git rev-parse HEAD').toString().trim(), OUT = `/workspace/egg-farm-studio/qa/m41/rc1-${HEAD.slice(0, 7)}-ui/browser/sweep-out`;

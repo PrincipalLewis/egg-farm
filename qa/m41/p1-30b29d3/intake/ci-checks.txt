@@ -1,0 +1,9 @@
+release-globals	skipping	0
+gate	pass	12m17s
+release-globals (chromium)	pass	32s
+release-globals (firefox)	pass	53s
+release-globals (webkit)	pass	1m2s
+release-html	pass	20s
+slow	pass	4m58s
+unit	pass	4m30s
+2026-10-24 18:50:48 CEST

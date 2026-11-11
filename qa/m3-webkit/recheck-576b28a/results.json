@@ -1,0 +1,318 @@
+{
+ "label": "recheck-576b28a",
+ "root": "/tmp/efs2/game",
+ "at": "2026-10-15T21:52:29.842Z",
+ "engine": "Playwright WebKit (proxy, not Safari)",
+ "results": {
+  "iphone-15": {
+   "checks": {
+    "SM-1 load": {
+     "pass": true,
+     "bootMs": 728,
+     "build": "m3-rc0+576b28a+dirty"
+    },
+    "SM-2 core loop": {
+     "pass": true,
+     "afterCollect": 3,
+     "coinsAfterSell": 300,
+     "collectionAfterBuy": 1
+    },
+    "SM-3 save/reload": {
+     "pass": true,
+     "before": {
+      "coins": 9300,
+      "basket": 0,
+      "coop": 8.699999999999989,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     },
+     "after": {
+      "coins": 9300,
+      "basket": 0,
+      "coop": 9.099999999999987,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     }
+    },
+    "SM-5 workers (hire)": {
+     "pass": true,
+     "workers": [
+      "market_hand"
+     ],
+     "coins": 999
+    },
+    "Export log": {
+     "pass": true,
+     "via": "clipboard",
+     "msg": "Log copied to clipboard — paste it into a message."
+    },
+    "Reset": {
+     "pass": true,
+     "id": "2fc39c16-554e-4cb7-8627-99a9f64d2690",
+     "save_reset": 1,
+     "F": 0,
+     "onb": true
+    },
+    "SM-7 layout": {
+     "pass": true,
+     "vw": 393,
+     "vh": 659,
+     "hOverflow": false,
+     "vOverflow": false,
+     "collectInView": true,
+     "small": [],
+     "touchAction": "manipulation",
+     "viewportMeta": "width=device-width,initial-scale=1,viewport-fit=cover"
+    },
+    "SM-8 touch": {
+     "pass": true,
+     "basket": 25,
+     "scale": 1,
+     "sel": ""
+    },
+    "no console/page errors": {
+     "pass": true,
+     "errs": []
+    }
+   },
+   "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
+   "viewport": {
+    "width": 393,
+    "height": 659
+   }
+  },
+  "iphone-se": {
+   "checks": {
+    "SM-1 load": {
+     "pass": true,
+     "bootMs": 703,
+     "build": "m3-rc0+576b28a+dirty"
+    },
+    "SM-2 core loop": {
+     "pass": true,
+     "afterCollect": 3,
+     "coinsAfterSell": 300,
+     "collectionAfterBuy": 1
+    },
+    "SM-3 save/reload": {
+     "pass": true,
+     "before": {
+      "coins": 9300,
+      "basket": 0,
+      "coop": 8.699999999999989,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     },
+     "after": {
+      "coins": 9300,
+      "basket": 0,
+      "coop": 9.099999999999987,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     }
+    },
+    "SM-5 workers (hire)": {
+     "pass": true,
+     "workers": [
+      "market_hand"
+     ],
+     "coins": 999
+    },
+    "Export log": {
+     "pass": true,
+     "via": "clipboard",
+     "msg": "Log copied to clipboard — paste it into a message."
+    },
+    "Reset": {
+     "pass": true,
+     "id": "cb4e49fa-f955-45ed-b6c0-3fc2e462cc17",
+     "save_reset": 1,
+     "F": 0,
+     "onb": true
+    },
+    "SM-7 layout": {
+     "pass": true,
+     "vw": 375,
+     "vh": 667,
+     "hOverflow": false,
+     "vOverflow": false,
+     "collectInView": true,
+     "small": [],
+     "touchAction": "manipulation",
+     "viewportMeta": "width=device-width,initial-scale=1,viewport-fit=cover"
+    },
+    "SM-8 touch": {
+     "pass": true,
+     "basket": 25,
+     "scale": 1,
+     "sel": ""
+    },
+    "no console/page errors": {
+     "pass": true,
+     "errs": []
+    }
+   },
+   "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/27.2 Mobile/19E241 Safari/602.1",
+   "viewport": {
+    "width": 375,
+    "height": 667
+   }
+  },
+  "ipad": {
+   "checks": {
+    "SM-1 load": {
+     "pass": true,
+     "bootMs": 753,
+     "build": "m3-rc0+576b28a+dirty"
+    },
+    "SM-2 core loop": {
+     "pass": true,
+     "afterCollect": 4,
+     "coinsAfterSell": 400,
+     "collectionAfterBuy": 1
+    },
+    "SM-3 save/reload": {
+     "pass": true,
+     "before": {
+      "coins": 9400,
+      "basket": 0,
+      "coop": 7.69999999999999,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     },
+     "after": {
+      "coins": 9400,
+      "basket": 0,
+      "coop": 8.099999999999989,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     }
+    },
+    "SM-5 workers (hire)": {
+     "pass": true,
+     "workers": [
+      "market_hand"
+     ],
+     "coins": 999
+    },
+    "Export log": {
+     "pass": true,
+     "via": "download",
+     "msg": "Log copied to clipboard — paste it into a message."
+    },
+    "Reset": {
+     "pass": true,
+     "id": "2b107aa9-3ae4-4196-a6b4-84715cec6eeb",
+     "save_reset": 1,
+     "F": 0,
+     "onb": true
+    },
+    "SM-7 layout": {
+     "pass": true,
+     "vw": 810,
+     "vh": 1080,
+     "hOverflow": false,
+     "vOverflow": false,
+     "collectInView": true,
+     "small": [],
+     "touchAction": "manipulation",
+     "viewportMeta": "width=device-width,initial-scale=1,viewport-fit=cover"
+    },
+    "SM-8 touch": {
+     "pass": true,
+     "basket": 25,
+     "scale": 1,
+     "sel": ""
+    },
+    "no console/page errors": {
+     "pass": true,
+     "errs": []
+    }
+   },
+   "ua": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
+   "viewport": {
+    "width": 810,
+    "height": 1080
+   }
+  },
+  "mac-webkit": {
+   "checks": {
+    "SM-1 load": {
+     "pass": true,
+     "bootMs": 770,
+     "build": "m3-rc0+576b28a+dirty"
+    },
+    "SM-2 core loop": {
+     "pass": true,
+     "afterCollect": 4,
+     "coinsAfterSell": 400,
+     "collectionAfterBuy": 1
+    },
+    "SM-3 save/reload": {
+     "pass": true,
+     "before": {
+      "coins": 9400,
+      "basket": 0,
+      "coop": 6.799999999999994,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     },
+     "after": {
+      "coins": 9400,
+      "basket": 0,
+      "coop": 7.199999999999992,
+      "F": 0,
+      "C": 1,
+      "workers": []
+     }
+    },
+    "SM-5 workers (hire)": {
+     "pass": true,
+     "workers": [
+      "market_hand"
+     ],
+     "coins": 999
+    },
+    "Export log": {
+     "pass": true,
+     "via": "download",
+     "msg": "Log downloaded."
+    },
+    "Reset": {
+     "pass": true,
+     "id": "e095421e-0cee-4821-b1e4-5ab925845715",
+     "save_reset": 1,
+     "F": 0,
+     "onb": true
+    },
+    "SM-7 layout": {
+     "pass": true,
+     "vw": 1280,
+     "vh": 800,
+     "hOverflow": false,
+     "vOverflow": false,
+     "collectInView": true,
+     "small": [],
+     "touchAction": "manipulation",
+     "viewportMeta": "width=device-width,initial-scale=1,viewport-fit=cover"
+    },
+    "no console/page errors": {
+     "pass": true,
+     "errs": []
+    }
+   },
+   "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ }
+}

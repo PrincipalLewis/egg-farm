@@ -1,0 +1,1 @@
+SUPERSEDED-ba398b6 (2026-10-30T11:54:42+01:00): HoE redirect 11:53 CET - #83 final head is ba398b6 (src a11y fix). This folder holds only the abe9cc6 node-v20.19.2 build log (no runtime matrix was run on abe9cc6) and the abe9cc6 server log used for the abe9cc6-vs-ba398b6 pixel compare. Evidence, not the verdict.

@@ -1,0 +1,17 @@
+QA-D-1106-NOREGATE check — #113 tip 9083c9a77ab831962ba7b7055d3abe2b550a9b31
+Observed Europe/Belgrade: 2026-11-06 00:18 CET
+
+Parents: 560b4d437f06df1e399d3f91c7af850b2b1e2bb5 + f8036e8f0826ca76fcc0ee13092d575533d4969b
+Subject: Merge remote-tracking branch 'origin/rc/v5' into fix/saves-telemetry-ring-export
+
+Clean merge-forward criteria:
+- identical PR patch: git diff 844f8e15..560b4d4 == git diff f8036e8..9083c9a (byte-identical 202-line patches; diff -q equal)
+- same PR files (6): src/telemetry/telemetry.ts + 5 telemetry tests (incl. telemetry-ring-export.test.ts A)
+- no reverts; no conflict markers in tip tree (git grep <<<<<< none)
+- incoming from rc only: #105 income-ref 8 files via second parent (not PR-own edits)
+
+Hosted CI at tip (required merge condition under NOREGATE):
+- ci run 42124631940 conclusion SUCCESS; head_sha 9083c9a; gate job SUCCESS; release-globals skipped-by-design
+- verify URL: https://github.com/PrincipalLewis/egg-farm/actions/runs/42124631940
+
+Verdict: inherits PASS from f2-560b4d4.md @ 560b4d4. No delta re-gate / no local tsc/vitest per QA-D-1106-NOREGATE.

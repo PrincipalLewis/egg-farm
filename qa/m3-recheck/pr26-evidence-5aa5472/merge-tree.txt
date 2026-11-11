@@ -1,0 +1,9 @@
+af9b3660810ba076390bfa96fa527df77d8ba124
+100644 0ff1a744d1081ac81924eebb3a3758ad44b25754 1	.gitignore
+100644 9d295a6fb16093f61629d7b2e50629b2df1d5d39 2	.gitignore
+100644 fcec0daab0430da061ddc4daafbecb02b4ddb723 3	.gitignore
+
+Auto-merging .gitignore
+CONFLICT (content): Merge conflict in .gitignore
+Auto-merging engineering/ci-gates.md
+Auto-merging package.json

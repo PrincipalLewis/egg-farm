@@ -1,0 +1,7 @@
+progress (resume file) — build d56033f, worktree /tmp/cuta-ux, script qa-out/capture.mjs (copy in this folder), port 4396
+01:40 CEST: chromium/webkit main+badge+asleep exist; firefox missing asleep (ff2 01:28 failed: market_hand card not found). Killed stale own chains (1225826/1374651/1403207).
+01:40: added scrollWidth>clientWidth clip scan; rerunning full set per engine: firefox -> webkit -> chromium. logs: run-<eng>.log, report JSON: report-<eng>.json
+firefox rc=0 01:56
+webkit rc=0 02:22
+02:25 README updated (FF/WK PASS). chromium clip rerun still queued (pid 1579954).
+02:27 scope complete (FF/WK/badge/asleep). Killed own queued chromium clip rerun (pids 1579954/1411618) to free lock queue; chromium clip scan = not-run. No servers of mine running.

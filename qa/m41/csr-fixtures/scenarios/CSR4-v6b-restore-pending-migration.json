@@ -1,0 +1,37 @@
+{
+ "id": "CSR4-v6b-restore-pending-migration",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-4",
+  "CSR-5",
+  "CSR-9a",
+  "CSR-9c"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-parse-truncated.raw"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F14-T-1d.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "recovered_from": "v6_backup",
+  "notice": "M2",
+  "variant": "age",
+  "ageText": "about 24 hours",
+  "body": "We restored a save from about 24 hours ago.",
+  "farmLevel": 14,
+  "tracksMigrationPending": true,
+  "v6bUnchangedAtBoot": true,
+  "afterCommit": {
+   "migrationIdChanged": true,
+   "rawUnchanged": 342
+  }
+ }
+}

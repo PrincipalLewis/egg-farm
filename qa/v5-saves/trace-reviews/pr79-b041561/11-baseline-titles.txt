@@ -1,0 +1,57 @@
+✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > shipping balance has no m4.flags: every M5 flag off; SAVE_VERSION stays 6
+✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > [CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)
+✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > flags off: m5Load / m5Offline / m5ShortGap return the SAME object, no events (byte-identical to the base)
+✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > m5Persist: no session key -> same object, so serialize writes exactly the base bytes (an M5 saved shape too)
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > valid values kept; a call spanning the reload ends once (offline, effect_s = tc_ability_s - activeS); activeS cleared
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = -1 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 1000000000 -> 300
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = null -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 87 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = 999 -> 30
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = -0.5 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 12.9 -> 12
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 50000000000000000 -> 1000000000000000
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = -3 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 12 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 2.5 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 11 -> 11
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 0 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967296 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = -4 -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967295 -> 4294967295
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesCoachSeen = yes -> undefined
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesUnlocked = false -> false
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > readyAt clamped to [now, now + tc_ability_cd_s]; non-finite -> ready (absent); a clock rolled back a day loads at most one cooldown
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > activeS > tc_ability_s clamps (effect_s 0); non-finite / <= 0 is no call (no event); junk containers dropped
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > only the fields of a flag that is on are touched (flag off then on: kept, not read; abilities spec E7)
+✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > session-only keys in a hand-edited save never load; legacy v1.0 frenzyEndAt dropped (R23 uses frenzyRemainingS)
+✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > every session key is dropped (F1a M5_SESSION_FIELDS); saved fields and activeS kept (E2); input not mutated
+✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > [CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 8 spec keys; each one is dropped by persist and serialize
+✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > egg expires (offline, fresh evRng gap), calls end at the gap start, s = 0; Frenzy frozen, nest kept, readyAt (wall clock) untouched
+✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > no egg on screen: the countdown is kept, not re-drawn (golden R8, review fix B1); evRng not advanced
+✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > D-C2: drawGap with no evRngState seeds mixSeed(state.rng ^ 0x6576526E) once and never touches state.rng
+✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streak grace/decay in one step over 0 focus seconds: 5 s hidden at 0.28 returns 0.28 (K8); same object, nothing else moves
+✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streakAfter: hold 3 s then 0.03/s, 0 at 12.33 s from 0.28 (ST-AC5); dt < 0 counts as 0
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [GE-AC33][D-C2] derivation matches D-C2 / GE-AC33 (initialState(b,7) at tick 0)
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [Q-F1b-1][GE-AC33] Q-F1b-1 (D-HOP-2026-10-29-06): seeded at the END of the first flag-on tick, after that tick's customer draws
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [D-C2] seeded once: later ticks never re-read state.rng
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [F1(a)][D-C4] isolation: golden/broody on + evRng/brRng drawn every tick leaves the customer sequence byte-identical
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [F1(a)][D-C4] evDraw is xorshift32 from the seed and never touches rng; brDraw never advances evRngState
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [D-C2] invalid evRngState (0, negative, NaN, > uint32, float) is re-derived; draws refuse an unseeded state
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [D-C2] flags off (or only non-RNG flags on): no evRngState is ever created
+✓ tests/v5-f1b-clock-rng.test.ts > F1b evRng / brRng > [F1(a)] pickIndex stays in range
+✓ tests/v5-f1b-clock-rng.test.ts > F1b focus (attended) clock > [F1(b)] stepTimers advances an M5 timer only on focus ticks
+✓ tests/v5-f1b-clock-rng.test.ts > F1b focus (attended) clock > [F1(b)][GE-AC31] focusFrameMs: clamp to 1.0 s, 0 when not attended, non-positive or >= 60 s (§9.1a)
+✓ tests/v5-f1b-clock-rng.test.ts > F1b focus (attended) clock > [D-C3][GE-AC31] D-C3: a 59 s frame gives exactly the first 10 ticks focus (1.0 s), the other 580 suspended
+✓ tests/v5-f1b-clock-rng.test.ts > F1b focus (attended) clock > [F1(b)][D-C3] advance(): focus ticks = ceil(focusMs / tick); state equals the clockless run while M5 timers are inert
+✓ tests/v5-f1b-clock-rng.test.ts > F1b focus (attended) clock > [F1(b)] flags off: step with any clock == step without one (byte-identical sim)
+✓ tests/v5-f1b-clock-rng.test.ts > F1b wall-clock timers (injected now) > [F1(b)] remaining ms against now, clamped to [0, cap] on every read (abilities E2b)
+✓ tests/v5-f1b-clock-rng.test.ts > F1b wall-clock timers (injected now) > [AC-M5A-3][F1(b)] a 300 s cooldown keeps counting on wall clock: not ready at 299 s, ready after a 60 s menu + 10 min offline (t = 610 s)
+✓ tests/v5-f1b-clock-rng.test.ts > F1b Game wiring (attended probe) > [CCR-79-N1][F1(b)] flags off: the probe is never read, and attended or not the game state is identical
+✓ tests/v5-f1b-clock-rng.test.ts > F1b Game wiring (attended probe) > [CCR-79-N1][F1(b)] visible frames read the probe once an M5 flag is on (streak)
+✓ tests/v5-f1b-focus-wiring.test.ts > F1b advance(): D-C3 focus ticks > [D-C3][F1(b)] a 59 s frame with focusMs 1000 gives focus to exactly the first 10 of 590 ticks (sum 1.0 s), through advance()
+✓ tests/v5-f1b-focus-wiring.test.ts > F1b Game: focus only on a visible, attended, live frame (flag on) > [F1(b)] visible attended frames: focus > 0 (control)
+✓ tests/v5-f1b-focus-wiring.test.ts > F1b Game: focus only on a visible, attended, live frame (flag on) > [F1(b)][R5c] read-only game: ticks run, focus is 0
+✓ tests/v5-f1b-focus-wiring.test.ts > F1b Game: focus only on a visible, attended, live frame (flag on) > [F1(b)] hidden frames: ticks run, focus is 0
+✓ tests/v5-f1b-focus-wiring.test.ts > F1b Game: focus only on a visible, attended, live frame (flag on) > [F1(b)] settleHiddenPeriod (gap < 60 s, uncovered time simulated): focus is 0
+✓ tests/v5-f1b-focus-wiring.test.ts > F1b Game: focus only on a visible, attended, live frame (flag on) > [F1(b)] debugAdvance: focus is 0

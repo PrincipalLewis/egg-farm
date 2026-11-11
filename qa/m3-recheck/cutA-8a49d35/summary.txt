@@ -1,0 +1,8 @@
+09:22 gates PASS (tsc, copy, sync --check, vitest 604/1skip, test:slow 11/11, build+check-release-build, build:qa). chromium: layout probe 48/64 (16 FAIL = probe artefacts/minor, see md), rc0 307/307 incl axe, farmLimit, orderFit11, goal v1.6.1. next firefox
+09:30 firefox layout 40/64 (fails = chip/l1 overflow-visible artefacts + FF g-track scrollWidth subpixel, visually unclipped); globals chromium PASS
+09:39 firefox rc0 307/307 (axe, farmLimit, orderFit11, goal v1.6.1 PASS). next webkit
+09:50 webkit rc0 queued on lane 1 behind other agents' holds (pid 1251885 flock)
+10:03 webkit rc0 307/307. next webkit layout probe
+10:09 webkit layout 48/64 (only m1/m2, same as chromium)
+10:23 report filed; webkit globals cancelled (not run). cleanup next
+10:24 worktree removed, no servers left. DONE: PASS, no B/C/M

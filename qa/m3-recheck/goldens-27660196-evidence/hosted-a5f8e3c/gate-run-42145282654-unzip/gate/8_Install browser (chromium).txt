@@ -1,0 +1,4 @@
+﻿2026-11-06T01:50:39.4198172Z ##[group]Run test -x /usr/bin/google-chrome
+2026-11-06T01:50:39.4198582Z [36;1mtest -x /usr/bin/google-chrome[0m
+2026-11-06T01:50:39.4215828Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:50:39.4216060Z ##[endgroup]

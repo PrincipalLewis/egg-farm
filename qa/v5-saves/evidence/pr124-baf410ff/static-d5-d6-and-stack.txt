@@ -1,0 +1,49 @@
+=== static D5: 1000 % tickHz at tip ===
+/workspace/egg-farm-studio/qa/scratch/pr124-baf410ff/wt/src/config/balance.ts:31:  if (1000 % b.tickHz !== 0) throw new Error('balance.tickHz must divide 1000 (BR-R8 / D5)'); // breeds incubation dtMs
+=== balance.ts hunk vs 0bbcea52 ===
+diff --git a/src/config/balance.ts b/src/config/balance.ts
+index 2420e18..706ffe1 100644
+--- a/src/config/balance.ts
++++ b/src/config/balance.ts
+@@ -28,6 +28,7 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
+   check(b, '');
+   if (b.sim_test?.demand_scale !== undefined && !(b.sim_test.demand_scale > 0)) throw new Error('balance.sim_test.demand_scale must be > 0');
+   for (const p of ['tickHz', 'maxLevel', 'feel.max_flying_eggs', 'telemetry.ring_size']) int(b, p);
++  if (1000 % b.tickHz !== 0) throw new Error('balance.tickHz must divide 1000 (BR-R8 / D5)'); // breeds incubation dtMs
+   for (const p of ['feel.tap_combine_window_ms', 'feel.queue_full_cue_min_gap_ms', 'feel.egg_flight_ms', 'feel.served_dwell_ms', 'save.autosaveIntervalS', 'offline.offlineCapSeconds', 'telemetry.flush_interval_s', 'telemetry.tap_batch_ms', 'customers.first_customer_s']) pos(b, p);
+   if (b.offline.offlineRateMultiplier > 1) throw new Error('balance.offline.offlineRateMultiplier must be <= 1');
+   if (b.save.autosaveIntervalS > 5) throw new Error('balance.save.autosaveIntervalS must be <= 5 (AC8)');
+=== schema rarity hunk ===
+diff --git a/src/telemetry/schema.ts b/src/telemetry/schema.ts
+index e1a5e5d..5392c9e 100644
+--- a/src/telemetry/schema.ts
++++ b/src/telemetry/schema.ts
+@@ -71,7 +71,7 @@ export const VIEWPORT_W_BUCKETS = ['<375', '375–767', '≥768'] as const; // s
+  *  on fatigue_cue_shown only. */
+ const FATIGUE_CUE_TAPPED_FIELDS: Readonly<Record<string, FieldSpec>> = { surface: E('hud_chip', 'banner', 'bubble'), loss_per_s: C, loss_share: F(0, 1, 0.001), n_tired: I(0, 4), n_asleep: I(0, 4), n_paused: I(0, 4) };
+ const BBV2 = (balance as { telemetry: { bbv2: { shown_min_gap_s: number; zero_gain_eta_max_s: number; dead_zone_min_s: number; zero_gain_purchase_cap: number } } }).telemetry.bbv2;
+-const RARITY = E('C', 'R', 'E', 'L'); // breeds roster tiers (string values follow breeds next rev, errata V-8)
++const RARITY = E('Common', 'Rare', 'Epic', 'Legendary'); // breeds §8 / D6 (rev 3.8.9; was C/R/E/L)
+ const BREED = E(...BREED_IDS);
+ const LOADOUT = S(/^P[0-3]A[0-3]B[0-3]$/);
+ 
+=== parent of 3354fc7 ===
+3354fc7d6316d14af517ec046846ca104028ea96 parents:0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e fix(breeds): D2 invalid_root + D3/D4/D5/D6 drift (HoE/breeds-drift-d1-d6)
+0bbcea52 ancestor of 3354fc7 YES
+=== shipping flags breeds ===
+{
+  "golden": 0,
+  "streak": 0,
+  "tapCoins": 0,
+  "abilities": 0,
+  "broody": 0,
+  "salesStopped": 0,
+  "fatigueCue": 0,
+  "pause": 0,
+  "rc2Refill": 0,
+  "autoRefill": 0,
+  "clockWage": 0,
+  "breeds": 0,
+  "zeroGainUi": 0,
+  "bestBuyV2": 0
+}

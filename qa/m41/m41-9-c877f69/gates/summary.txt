@@ -1,0 +1,17 @@
+HEAD c877f69a407ec844a4d10612030584be42e34bdf porcelain=0 2026-10-23 03:47:18 CEST
+npm-ci exit=0 2s
+sync-check exit=0 0s
+tsc exit=0 4s
+vitest exit=0 169s
+build exit=0 4s
+build-html exit=0 4s
+build-qa exit=0 4s
+check-release-dist exit=0 0s
+check-release-html exit=0 0s
+dist name="build-id" content="m3-rc1-pre+c877f69" 6a7ac4cc59d7acb57d3dec0430bffaef3a4a1abf627e08a453d03fa60b123873  dist/index.html
+dist-html name="build-id" content="m3-rc1-pre+c877f69" 9e295e9e592e6fcc30592489d5c4897d080fb19ba0c7b508a5a1fb7c5f7c59e2  dist-html/egg-farm.html
+dist-qa name="build-id" content="m3-rc1-pre+c877f69" dd2045af01128e06e20eba1414d58c49dd52a1e1882932cde83d870a1e60a77c  dist-qa/index.html
+porcelain-after-nonbrowser=
+rc0-chromium exit=0 461s
+check-globals exit=0 348s
+porcelain-after-browser=

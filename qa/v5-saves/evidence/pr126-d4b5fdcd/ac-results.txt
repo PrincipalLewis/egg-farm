@@ -1,0 +1,19 @@
+Head contains baf410ff (#124) → G2b cases graded
+Focused tip suites: telemetry-schema 51 + v5-breeds-state 53 + family-caps 7 = 111 passed, EXIT=0
+G2b (expected PASS at tip):
+M5S-BR-D1-TEL-VALIDATE PASS (tip D1 / BR-AC26 schema)
+M5S-BR-D2-ROOT-NULL PASS
+M5S-BR-D2-ROOT-ARRAY PASS
+M5S-BR-D2-ROOT-NUMBER PASS
+M5S-BR-D2-ROOT-STRING PASS
+M5S-BR-D2-TICK-NOTHROW PASS
+M5S-BR-D3-SHAPE-REPAIRS PASS
+M5S-BR-D4-LOCKED-NORAW PASS
+M5S-BR-D5-TICKHZ-MOD PASS
+M5S-BR-D6-RARITY-ENUM PASS
+PR-B / family ACs (gate Card #3 pins ea922eb8):
+BR-AC18 PASS (family-caps)
+E8 PASS
+E9 PASS
+§4.3 L365-368 bc keys PASS
+BRD-AC1 flag-0 goldens PASS (item 5)

@@ -1,0 +1,17 @@
+2026-10-17 09:20:44 CEST PR31 head: d75d41f; target d75d41f; merge-base check: contains 1a44b19
+2026-10-17 09:21:00 CEST build exit=0
+2026-10-17 09:21:00 CEST static build-id: m3-rc1-pre+d75d41f 
+2026-10-17 09:23:58 CEST unit exit=0       Tests  754 passed (754)
+2026-10-17 09:29:47 CEST buildid chromium exit=0 349s runtime build ids [chromium]: ["m3-rc1-pre+d75d41f"]
+2026-10-17 09:33:30 CEST globals chromium exit=0 223s 
+2026-10-17 09:54:50 CEST rc0 chromium exit=0 1280s 224/224 passed
+2026-10-17 10:09:09 CEST fileopen chromium exit=1 859s FAIL file chromium textLen=0 errors=["Access to font at 'file:///fonts/fredoka-latin-700-normal.woff2' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-experimental-site-token-provider, chrome-extension, chrome-untrusted, data, http, https, isolated-app.","Failed to load resource: net::ERR_FAILED","Access to font at 'file:///fonts/nunito-latin-400-normal.woff2' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-experimental-site-token-provider, chrome-extension, chrome-untrusted, data, http, https, isolated-app."]
+2026-10-17 10:15:56 CEST buildid webkit exit=0 407s runtime build ids [webkit]: ["m3-rc1-pre+d75d41f"]
+2026-10-17 10:24:38 CEST globals webkit exit=0 522s 
+2026-10-17 10:28:55 CEST rc0 webkit exit=0 257s 224/224 passed
+2026-10-17 10:29:22 CEST fileopen webkit exit=1 27s FAIL file webkit textLen=0 errors=["Not allowed to load local resource: file:///assets/index-CGGabeaE.js","Not allowed to load local resource: file:///assets/index-DVkQQ7Wh.css"]
+2026-10-17 10:32:54 CEST buildid firefox exit=0 212s runtime build ids [firefox]: ["m3-rc1-pre+d75d41f"]
+2026-10-17 10:34:35 CEST globals firefox exit=0 101s 
+2026-10-17 10:39:25 CEST rc0 firefox exit=0 290s 224/224 passed
+2026-10-17 10:39:46 CEST fileopen firefox exit=1 21s FAIL file firefox textLen=0 errors=[]
+2026-10-17 10:39:46 CEST ALL_DONE (expect build-id m3-rc1-pre+d75d41f, globals only eggfarmExportTelemetry, rc0 209/209 unless merge adds tests)

@@ -1,0 +1,5 @@
+# git rev of the tree under test
+3f582dbfe31a9d309e6b1d0e96a4f77711b333ec
+3f582dbfe31a9d309e6b1d0e96a4f77711b333ec 2026-10-30T11:03:52+01:00 data: M5.0 shipping CSV 8dc90e2b + M5.1 farm_cost L27-29 o1a (V5-HOP-1) (#92)
+scratch copy: git archive 3f582db -> qa/scratch/wt-stkver-3f582db (removed after the run)
+after mutants: src/ diff -r vs git archive 3f582db src = identical

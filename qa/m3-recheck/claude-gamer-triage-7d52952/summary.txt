@@ -1,0 +1,11 @@
+05:09 start: worktree /tmp/qa-cg-7d52952 @7d52952
+build:qa rc=0 05:09
+05:11 script qa-cg.mjs written (B2,B3,+2,B4,full coop,wages)
+chromium rc=0 05:15 lock=.browser-test-2.lock
+05:16 chromium analysed: B2 repro, B3 repro (leaving card stale ~0.5s), +2 = bot artifact (covered button JS click), B4 not repro >=100ms, full coop repro (B-1 not in build), no +$/s UI in build; net=inc-wage ok
+05:26 report drafted (FF/WK pending)
+firefox rc=0 05:34
+05:38 resume: FF done (matches CR; new order 0/8 Need 8), WK waiting on lock
+webkit rc=0 05:51
+05:52 WK done, matches CR/FF; report finalized. Servers: none left (vite 4321/4322 count 0)
+06:08 re-asked by Head of QA: repro already complete (CR/FF/WK x 390/1280, 05:15-05:51), no rerun needed; no servers/worktrees left

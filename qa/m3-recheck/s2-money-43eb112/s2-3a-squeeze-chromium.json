@@ -1,0 +1,62 @@
+[
+ {
+  "n": "S2-3a-1 squeezed card: 120 ms opacity fade + \"+$X\" pop",
+  "pass": true,
+  "i": {
+   "cardInfo": {
+    "txt": "Thanks!+$133.20",
+    "live": 4,
+    "left": 264
+   },
+   "ev": [
+    {
+     "t": 81,
+     "k": "pop",
+     "txt": "+$133.20",
+     "x": "296px"
+    },
+    {
+     "t": 81,
+     "k": "cardGone",
+     "left": -1
+    },
+    {
+     "t": 81,
+     "k": "squeeze",
+     "tr": "0.12s",
+     "prop": "opacity",
+     "fixed": "fixed",
+     "left": "264px"
+    }
+   ],
+   "liveAfter": 5,
+   "cardStillInStrip": false
+  }
+ },
+ {
+  "n": "S2-3a-1 squeezed card, reduced motion: instant cut (no fade clone) + pop",
+  "pass": true,
+  "i": {
+   "cardInfo": {
+    "txt": "Thanks!+$133.20",
+    "live": 4,
+    "left": 264
+   },
+   "ev": [
+    {
+     "t": 39,
+     "k": "pop",
+     "txt": "+$133.20",
+     "x": "296px"
+    },
+    {
+     "t": 39,
+     "k": "cardGone",
+     "left": -1
+    }
+   ],
+   "liveAfter": 5,
+   "cardStillInStrip": false
+  }
+ }
+]

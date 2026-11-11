@@ -1,0 +1,223 @@
+diff --git a/src/game.ts b/src/game.ts
+index 9012010..0132fa2 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -6,7 +6,12 @@ import { advance } from './sim/tick';
+ import { apply, Action, isUpgrade } from './sim/actions';
+ import { applyOffline } from './sim/offline';
+ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
++import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
+ import type { SimEvent } from './sim/events';
++import { focusFrameMs } from './sim/clock';
++import { streakOn, streakPeak } from './sim/streak';
++import { anyM5FlagOn } from './sim/timers';
++import { playerSaleCtx, type SaleCtx } from './sim/effects';
+ import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+ import type { IdbBoot } from './save/idb-mirror';
+ import { TELEMETRY_KEY } from './telemetry/telemetry';
+@@ -86,6 +91,7 @@ export class Game {
+     // migrationId, no backup, never touches an existing v6_backup.
+     if (!f && m4On(b)) this.state = { ...this.state, tracksV7: 1, v6BackupId: (opts.newId ?? newMigrationId)() };
+     this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
++    if (f) { const ev: SimEvent[] = []; this.state = m5Load(this.state, b, now(), ev); this.emit(ev); } // v5 F2: a reload is a >= 60 s gap (AB-1)
+     if (f) {
+       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
+       // so each load produces at most one new grant.
+@@ -294,10 +300,12 @@ export class Game {
+     this.onNewerSave?.(v);
+   }
+   endSession() {
+-    if (this.resetting || this.inactive || this.held()) return; this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
++    if (this.resetting || this.inactive || this.held()) return;
++    const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
++    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+   dispatch(a: Action) {
+     if (this.inactive || this.held()) return;
+-    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev); this.emit(ev); this.checkCoopFull();
++    const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
+     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
+     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
+   }
+@@ -369,18 +377,32 @@ export class Game {
+         this.state = r.state; this.accMs = r.accMs;
+         if (!this.bakAllowed) { this.playedMs += uncover; if (this.playedMs >= 60_000) this.allowBackup(); }
+       }
++      this.state = m5ShortGap(this.state, this.b); // v5 F2
+       this.emit(h.ev); this.checkCoopFull();
+       // n2: capped when the 60 s budget limited credit (gap > budget); false while budget == offlineMin and gap < offlineMin.
+       return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
+     }
+     this.state = h.state; this.accMs = 0;
+     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
++    { const ev: SimEvent[] = []; this.state = m5Offline(this.state, this.b, ev); this.emit(ev); } // v5 F2, before grantOffline (§9.5 #3)
+     const eggs = this.grantOffline(gap);
+     if (eggs > 0) this.notify({ type: 'offline_grant', eggs, awayS: this.offline.awayS });
+     this.checkCoopFull(); this.save();
+     const capS = this.b.offline.offlineCapSeconds;
+     return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
+   }
++  /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach open)? Set by the UI (F6 dialogOpen()).
++   *  Default false: no focus time accrues, so M5 timers stay frozen until the UI wires it. Visibility is handled by frame()
++   *  itself (hidden frames never pass focus). Only read while an M5 flag is on (frame() skips it with every flag off). */
++  private attendedProbe: () => boolean = () => false;
++  setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
++  /** The one attended read (frame focus + player-sale suspension, Q-F1c-1 D-HOP-2026-10-29-06): live game and the UI probe says attended. */
++  /** CCR N-1 #79: with every M5 flag off the probe is never read (no per-frame / per-dispatch DOM query); attended = false
++   *  then, which changes nothing: no timed effect is live, so suspension has nothing to suspend (goldens byte-identical). */
++  private attendedNow() { return !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(); }
++  /** CCR m1 #80: the sale context a player sell/sellAll dispatched now would be credited with. UI previews (order cards, Sell all)
++   *  pass it to saleValueCents / sellAllPreview so the preview equals the credit for the same attended read. */
++  playerSaleCtx(): SaleCtx { return playerSaleCtx(this.attendedNow()); }
+   frame() {
+     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
+     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
+@@ -397,7 +419,10 @@ export class Game {
+     }
+     if (gap > 0) {
+       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
+-      const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
++      // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
++      const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
++      const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
++      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
+       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+     }
+     this.checkCoopFull(); this.telemetry.poll();
+diff --git a/src/save/m5-fields.ts b/src/save/m5-fields.ts
+new file mode 100644
+index 0000000..5b487c6
+--- /dev/null
++++ b/src/save/m5-fields.ts
+@@ -0,0 +1,111 @@
++/**
++ * v5 F2 (engineering/m5.0-sizing.md §1 F2, §9.1/§9.1a, §12.1 D-C2/D-C5, §13 AB-1): the M5 save fields and their
++ * offline/clock rules. Optional GameState fields, NO SAVE_VERSION bump (tracksV7 pattern). Every rule is gated by its
++ * item flag `balance.m4.flags.<item>` (default 0, needs m4.enabled); with every flag off each function returns its input
++ * object unchanged, so saves and the sim stay byte-identical to the base. sim/offline.ts is untouched by design.
++ * Cooldowns: `abilities.{id}.readyAt` is epoch ms in memory and in the save, checked against an injected now and clamped
++ * to [0, tc_ability_cd_s] on every read (F1b sim/clock.ts wallRemainingMs), so wall-clock time (offline, reload, a hidden or
++ * visible gap) elapses with no subtraction here; a load clamps the stored value to [now, now + cd] (E2, clock tamper).
++ */
++import type { Balance } from '../config/balance';
++import { tcNum } from '../config/formulas';
++import { type GameState, nextRand } from '../sim/state';
++import type { SimEvent } from '../sim/events';
++import { WORKERS } from '../sim/workers';
++import { type M5Flag, flagOn } from '../config/flags';
++import { M5_SESSION_FIELDS } from '../sim/m5-state';
++import { sanitizePausedOnLoad } from '../sim/pause';
++import { streakAfter, endStreak } from '../sim/streak';
++export { streakAfter };
++export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
++/** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
++export const m5Flag = (b: Balance, k: M5Flag): boolean => flagOn(b, k);
++const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const).some(k => m5Flag(b, k)); // CCR-F4: + pause
++const tc = tcNum; // throws on a missing tc_* key (validateBalance rejects it at load while the flag is on)
++/** D-C2 salt + seeding: ONE code path, re-exported from F1b sim/rng.ts (identical formula and validity rule). */
++import { EV_RNG_SALT, ensureEvRng } from '../sim/rng';
++export { EV_RNG_SALT, ensureEvRng };
++/** D-C5: the Broody nest clamp (fmtMoneyExact limit) and the yard slot range 0..11. */
++export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
++/** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
++export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
++/** Session keys outside F1a M5Fields: the #2 streak run stats (streak_peak, sim/streak.ts). Never saved either. */
++const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun'];
++const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
++const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
++const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
++/** Golden R3: a fresh gap U[tc_egg_gap_min_s, tc_egg_gap_max_s] from ONE evRng draw (never state.rng). #1 reuses it. */
++export function drawGap(s: GameState, b: Balance): GameState {
++  const e = ensureEvRng(s), [x, u] = nextRand(e.evRngState!), lo = tc(b, 'egg_gap_min_s'), hi = tc(b, 'egg_gap_max_s');
++  return { ...e, evRngState: x, nextSpawnRemainingS: lo + u * (hi - lo) };
++}
++/** The save shape: session-only keys dropped. The same object (so the same bytes) when none is present. */
++export function m5Persist(s: GameState): GameState {
++  if (!SESSION_ONLY_KEYS.some(k => k in s)) return s;
++  const o: any = { ...s }; for (const k of SESSION_ONLY_KEYS) delete o[k]; return o;
++}
++/** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
++function endCalls(o: any, b: Balance, ev: SimEvent[]) {
++  const dur = tc(b, 'ability_s');
++  for (const id of WORKERS) { const a = o.abilities[id]; if (!a || typeof a !== 'object' || !('activeS' in a)) continue;
++    const { activeS, ...rest } = a; o.abilities[id] = rest;
++    if (fin(activeS) && activeS > 0) ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: dur - Math.min(activeS, dur) }); }
++}
++/** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
++ *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
++export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): GameState {
++  if (!anyFlag(b)) return s;
++  const o: any = { ...m5Persist(s) }; // hand-edited session keys never load
++  const num = (k: string, hi: number) => { if (!(k in o)) return; if (!fin(o[k])) delete o[k]; else o[k] = clamp(o[k], 0, hi); };
++  if (m5Flag(b, 'golden')) { num('nextSpawnRemainingS', tc(b, 'egg_gap_max_s')); num('frenzyRemainingS', tc(b, 'frenzy_s')); delete o.frenzyEndAt; } // v1.0 wall-clock name, replaced (R23)
++  if ((m5Flag(b, 'golden') || m5Flag(b, 'broody')) && 'evRngState' in o && !isU32(o.evRngState)) delete o.evRngState; // re-derived per D-C2
++  if (m5Flag(b, 'broody')) {
++    num('broodyNestCents', BROODY_NEST_MAX_CENTS); if ('broodyNestCents' in o) o.broodyNestCents = Math.floor(o.broodyNestCents);
++    if ('broodyHenIdx' in o && !(Number.isInteger(o.broodyHenIdx) && o.broodyHenIdx >= 0 && o.broodyHenIdx < BROODY_SLOTS)) delete o.broodyHenIdx; // #5 re-picks (R6)
++  }
++  if (m5Flag(b, 'abilities')) {
++    for (const k of ['abilitiesUnlocked', 'abilitiesCoachSeen']) if (k in o && typeof o[k] !== 'boolean') delete o[k];
++    if ('abilities' in o && (!o.abilities || typeof o.abilities !== 'object' || Array.isArray(o.abilities))) delete o.abilities;
++    else if (o.abilities) { o.abilities = { ...o.abilities }; const cdMs = tc(b, 'ability_cd_s') * 1000;
++      for (const id of WORKERS) { const a = o.abilities[id]; if (a === undefined) continue; if (!a || typeof a !== 'object') { delete o.abilities[id]; continue; }
++        const { readyAt, ...rest } = a; o.abilities[id] = fin(readyAt) ? { ...rest, readyAt: clamp(readyAt, now, now + cdMs) } : rest; }
++      endCalls(o, b, ev); }
++  }
++  if (m5Flag(b, 'pause') && o.workers && typeof o.workers === 'object') o.workers = pauseLoad(o.workers, o.farmLevel, b);
++  return o;
++}
++/** CCR-F4, Pause spec v1.3.6 rule 1 / rule 7 (B5) / E9 / E12: a non-boolean `paused` is false (absent); below
++ *  tc_pause_unlock_farm nothing is paused or locked; `callLockoutS` (Market Hand only, sim seconds, not a timestamp) is
++ *  absent when non-finite, <= 0 or not a number, else capped at tc_pause_call_lockout_s. Unchanged workers keep their object.
++ *  Both tunables are read through tcNum (throws if missing); validateBalance requires them while pause is on (M5_REQUIRED_TC.pause). */
++function pauseLoad(ws: any, farmLevel: number, b: Balance): any {
++  const open = farmLevel >= tc(b, 'pause_unlock_farm'), cap = tc(b, 'pause_call_lockout_s'); let out = ws;
++  for (const id of WORKERS) { const w = ws[id]; if (!w || typeof w !== 'object') continue;
++    const n: any = sanitizePausedOnLoad(w, open); // the `paused` key is only touched in sim/pause.ts (row-8 QA-10 grep)
++    if ('callLockoutS' in n) { const { callLockoutS: v, ...rest } = n;
++      if (!open || id !== 'market_hand' || !fin(v) || v === 0) { if (out === ws) out = { ...ws }; out[id] = rest; continue; }
++      if (v > cap) { if (out === ws) out = { ...ws }; out[id] = { ...n, callLockoutS: cap }; continue; } }
++    if (n !== w) { if (out === ws) out = { ...ws }; out[id] = n; } }
++  return out;
++}
++/** A hidden-tab or visible frame gap of 60 s or more (§9.1/§9.1a), applied to the state AT THE START of the gap: calls end
++ *  (`offline`), an on-screen egg expires (`collectible_expired{reason:"offline"}`, no reward, fresh R3 gap that runs on the
++ *  focus clock, so it starts once welcome-back closes), streak s = 0, Frenzy frozen, Broody nest kept with no accrual.
++ *  Cooldowns need nothing: readyAt is wall clock. The streak run ends with streak_peak{reason:"offline"} if s > 0 (#2, R11). */
++export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
++  if (!anyFlag(b)) return s;
++  let o: any = { ...s };
++  if (m5Flag(b, 'abilities') && o.abilities && typeof o.abilities === 'object') { o.abilities = { ...o.abilities }; endCalls(o, b, ev); }
++  if (m5Flag(b, 'golden') && o.goldenEgg) {
++    delete o.goldenEgg; ev.push({ type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: o.farmLevel }); o = drawGap(o, b);
++  }
++  if (m5Flag(b, 'streak') && 'streakS' in o) o = endStreak(o, 'offline', b, ev);
++  return o;
++}
++/** A hidden gap under 60 s: the streak grace/decay in one step over the gap's focus time, which is 0 while hidden
++ *  (D-HOP-08 #2, streak R10/K8: 5 s hidden at 0.28 returns 0.28). Egg, Frenzy and calls stay frozen (R7, AB-10). */
++export function m5ShortGap(s: GameState, b: Balance): GameState {
++  if (!m5Flag(b, 'streak') || !fin(s.streakS)) return s;
++  const r = streakAfter(s.streakS, fin(s.streakHoldS) ? s.streakHoldS : 0, 0, b);
++  return r.s === s.streakS && r.holdS === (s.streakHoldS ?? 0) ? s : { ...s, streakS: r.s, streakHoldS: r.holdS };
++}
+diff --git a/src/save/save.ts b/src/save/save.ts
+index 92e526d..9292e85 100644
+--- a/src/save/save.ts
++++ b/src/save/save.ts
+@@ -2,6 +2,7 @@ import type { Balance } from '../config/balance';
+ import { GameState, initialState, coopTier } from '../sim/state';
+ import { m4On } from '../config/formulas';
+ import { migrateStoredTracksV7 } from '../sim/migrate-v7';
++import { m5Persist } from './m5-fields';
+ export const SAVE_KEY = 'eggfarm.save';
+ export const SAVE_VERSION = 6;
+ export interface SaveFile { version: number; savedAt: number; state: GameState;
+@@ -142,7 +143,7 @@ export function checksum(text: string): string {
+ }
+ /** Serialise a save; `sum` covers the state JSON. */
+ export function serialize(state: GameState, now: number, saveSeq?: number): string {
+-  const st = JSON.stringify(state);
++  const st = JSON.stringify(m5Persist(state)); // v5 F2: session-only M5 keys never saved; same object (bytes) when none exist
+   return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
+ }
+ /** Balances of an M4 build whose session runs with the switch off until the migration commits (game.ts tracksOff). */

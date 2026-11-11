@@ -1,0 +1,323 @@
+{
+ "frames": [
+  {
+   "t": 10,
+   "place": "none",
+   "top": 82.3,
+   "bottom": 267.7,
+   "h": 185.4,
+   "hensTop": 238.75,
+   "overlapPx": 28.95,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 27,
+   "place": "none",
+   "top": 78.683,
+   "bottom": 271.333,
+   "h": 192.65,
+   "hensTop": 238.75,
+   "overlapPx": 32.583,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 44,
+   "place": "none",
+   "top": 76,
+   "bottom": 274.017,
+   "h": 198.017,
+   "hensTop": 238.75,
+   "overlapPx": 35.267,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 60,
+   "place": "none",
+   "top": 73.867,
+   "bottom": 276.133,
+   "h": 202.267,
+   "hensTop": 238.75,
+   "overlapPx": 37.383,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 77,
+   "place": "none",
+   "top": 72.4,
+   "bottom": 277.6,
+   "h": 205.2,
+   "hensTop": 238.75,
+   "overlapPx": 38.85,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 93,
+   "place": "none",
+   "top": 71.55,
+   "bottom": 278.467,
+   "h": 206.917,
+   "hensTop": 238.75,
+   "overlapPx": 39.717,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 111,
+   "place": "none",
+   "top": 71.083,
+   "bottom": 278.9,
+   "h": 207.817,
+   "hensTop": 238.75,
+   "overlapPx": 40.15,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 127,
+   "place": "none",
+   "top": 71,
+   "bottom": 279.017,
+   "h": 208.017,
+   "hensTop": 238.75,
+   "overlapPx": 40.267,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 144,
+   "place": "none",
+   "top": 71.133,
+   "bottom": 278.867,
+   "h": 207.733,
+   "hensTop": 238.75,
+   "overlapPx": 40.117,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 163,
+   "place": "none",
+   "top": 71.4,
+   "bottom": 278.6,
+   "h": 207.2,
+   "hensTop": 238.75,
+   "overlapPx": 39.85,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 177,
+   "place": "none",
+   "top": 71.683,
+   "bottom": 278.317,
+   "h": 206.633,
+   "hensTop": 238.75,
+   "overlapPx": 39.567,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 194,
+   "place": "none",
+   "top": 71.917,
+   "bottom": 278.083,
+   "h": 206.167,
+   "hensTop": 238.75,
+   "overlapPx": 39.333,
+   "efpAtOverlap": "buy",
+   "anim": "expin:running"
+  },
+  {
+   "t": 210,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 227,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 244,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 260,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 278,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 294,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 311,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 326,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 344,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 360,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 378,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 393,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  },
+  {
+   "t": 410,
+   "place": "none",
+   "top": 72,
+   "bottom": 278,
+   "h": 206,
+   "hensTop": 238.75,
+   "overlapPx": 39.25,
+   "efpAtOverlap": "buy",
+   "anim": ""
+  }
+ ],
+ "engine": "firefox",
+ "target": "c877",
+ "build_id": "m3-rc1-pre+c877f69",
+ "at200": {
+  "scrollTop": 200,
+  "tab": [
+   "farm"
+  ],
+  "place": "none",
+  "vis": "hidden",
+  "styleTop": "",
+  "offsetHeight": 206,
+  "card": {
+   "t": 72.5,
+   "b": 277.48333740234375,
+   "l": 40.23333740234375,
+   "r": 334.7833251953125,
+   "h": 204.98333740234375
+  },
+  "buys": [
+   {
+    "row": "Hens",
+    "t": 238.75,
+    "b": 286.75,
+    "l": 102,
+    "r": 341,
+    "ct": 238.75,
+    "cb": 286.75
+   },
+   {
+    "row": "Egg value",
+    "t": 441.75,
+    "b": 489.75,
+    "l": 102,
+    "r": 341,
+    "ct": 441.75,
+    "cb": 489.75
+   }
+  ],
+  "ov": []
+ },
+ "efpInOverlap": null,
+ "tapAtButtonCentre": null,
+ "sweepOverlaps": []
+}

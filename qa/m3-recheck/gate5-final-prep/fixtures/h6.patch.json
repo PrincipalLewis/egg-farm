@@ -1,0 +1,12 @@
+{
+ "farmLevel": 10,
+ "collectionLevel": 9,
+ "hensLevel": 9,
+ "eggValueLevel": 9,
+ "celebratedMilestones": [],
+ "coinsCents": 500000000,
+ "basket": 0,
+ "customers": [],
+ "workers": {},
+ "nextCustomerInS": 9999
+}

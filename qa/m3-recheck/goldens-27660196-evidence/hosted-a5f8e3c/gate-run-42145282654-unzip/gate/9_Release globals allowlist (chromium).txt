@@ -1,0 +1,13 @@
+﻿2026-11-06T01:50:39.4283035Z ##[group]Run npm run check-globals -- chromium
+2026-11-06T01:50:39.4283375Z [36;1mnpm run check-globals -- chromium[0m
+2026-11-06T01:50:39.4300407Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:50:39.4300625Z ##[endgroup]
+2026-11-06T01:50:39.5200693Z 
+2026-11-06T01:50:39.5201368Z > egg-farm@0.1.0 check-globals
+2026-11-06T01:50:39.5201907Z > node scripts/release-globals-browser.mjs chromium
+2026-11-06T01:50:39.5202106Z 
+2026-11-06T01:50:40.7025924Z serveOwn: dist on port 37067 (free port; set PORT to pin)
+2026-11-06T01:50:40.7165919Z check-globals: dist m4.1+69f9c61 on port 37067
+2026-11-06T01:51:20.2532285Z PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+2026-11-06T01:51:21.5825982Z PASS [chromium] refused newer-save boot window globals vs blank page: []
+2026-11-06T01:51:21.5827412Z PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]

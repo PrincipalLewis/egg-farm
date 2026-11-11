@@ -1,0 +1,31 @@
+LOCK+START 2026-11-05T23:39:05+01:00 loadavg=1.11 1.32 1.77 2/1640 1408565
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/f2-560b4d4/wt
+
+ ✓ tests/telemetry-m3.test.ts (10 tests) 90ms
+ ✓ tests/telemetry-ring-export.test.ts (6 tests) 6ms
+stderr | tests/telemetry.test.ts > telemetry > events carry ts + sessionMs
+[telemetry] unknown event type: x
+
+stderr | tests/telemetry.test.ts > telemetry > ring buffer capped at ring_size
+[telemetry] unknown event type: e
+
+stderr | tests/telemetry.test.ts > telemetry > flush writes only when dirty; persisted buffer reloads
+[telemetry] unknown event type: a
+
+ ✓ tests/telemetry.test.ts (6 tests) 112ms
+ ✓ tests/export-global.test.ts (1 test) 5ms
+stderr | tests/zg-telemetry-annotate.test.ts > Minor 1: Telemetry.annotateLast tags the newest matching event only > two upgrade events: only the second is annotated, and the buffer is marked dirty (flushed)
+[telemetry] unknown event type: tap_other
+
+stderr | tests/zg-telemetry-annotate.test.ts > Minor 1: Telemetry.annotateLast tags the newest matching event only > no match: nothing changes and nothing is written
+[telemetry] unknown event type: tap_other
+
+ ✓ tests/zg-telemetry-annotate.test.ts (2 tests) 3ms
+
+ Test Files  5 passed (5)
+      Tests  25 passed (25)
+   Start at  23:39:05
+   Duration  1.31s (transform 243ms, setup 0ms, collect 431ms, tests 216ms, environment 1ms, prepare 192ms)
+
+EXIT=0 END 2026-11-05T23:39:06+01:00 loadavg=1.26 1.35 1.78 1/1654 1409283

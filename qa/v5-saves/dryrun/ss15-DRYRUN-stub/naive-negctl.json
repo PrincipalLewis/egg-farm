@@ -1,0 +1,393 @@
+{
+ "module": "stubs/share-guard-stub.mjs",
+ "export": "shareNaive",
+ "sig": "loss,income",
+ "cases": 38,
+ "hardFail": 21,
+ "negZeroInfo": 8,
+ "expectFail": true,
+ "rows": [
+  {
+   "loss": 0,
+   "income": "-10",
+   "d": "-10",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": true
+  },
+  {
+   "loss": 0,
+   "income": "-5e-324",
+   "d": "-5e-324",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": true
+  },
+  {
+   "loss": 0,
+   "income": "0",
+   "d": "0",
+   "result": "NaN",
+   "want": "0",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "0",
+   "d": "0",
+   "result": "NaN",
+   "want": "0",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "NaN",
+   "d": "NaN",
+   "result": "NaN",
+   "want": "0",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "-Infinity",
+   "d": "-Infinity",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": true
+  },
+  {
+   "loss": 0,
+   "income": "5e-324",
+   "d": "5e-324",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "1e-12",
+   "d": "1e-12",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "1",
+   "d": "1",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "100",
+   "d": "100",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "-15",
+   "d": "-10",
+   "result": "-0.5",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "-5",
+   "d": "-5e-324",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "-5",
+   "d": "0",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "-5",
+   "d": "0",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "NaN",
+   "d": "NaN",
+   "result": "NaN",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "-Infinity",
+   "d": "-Infinity",
+   "result": "0",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": true
+  },
+  {
+   "loss": 5,
+   "income": "-5",
+   "d": "5e-324",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "-4.999999999999",
+   "d": "1e-12",
+   "result": "4999555536601.35",
+   "want": "4999555536601.35",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "-4",
+   "d": "1",
+   "result": "5",
+   "want": "5",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 5,
+   "income": "95",
+   "d": "100",
+   "result": "0.05",
+   "want": "0.05",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "-10.001",
+   "d": "-10",
+   "result": "-0.0001",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "-0.001",
+   "d": "-5e-324",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "-0.001",
+   "d": "0",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "-0.001",
+   "d": "0",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "NaN",
+   "d": "NaN",
+   "result": "NaN",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "-Infinity",
+   "d": "-Infinity",
+   "result": "0",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": true
+  },
+  {
+   "loss": 0.001,
+   "income": "-0.001",
+   "d": "5e-324",
+   "result": "Infinity",
+   "want": "1",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "-0.000999999999",
+   "d": "1e-12",
+   "result": "1000000003.9958029",
+   "want": "1000000003.9958029",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "0.999",
+   "d": "1",
+   "result": "0.001",
+   "want": "0.001",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 0.001,
+   "income": "99.999",
+   "d": "100",
+   "result": "0.00001",
+   "want": "0.00001",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "0",
+   "d": "0",
+   "result": "NaN",
+   "want": "0",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "0",
+   "d": "0",
+   "result": "NaN",
+   "want": "0",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "-1",
+   "d": "-1",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": true
+  },
+  {
+   "loss": 0,
+   "income": "-1000000000",
+   "d": "-1000000000",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": true
+  },
+  {
+   "loss": 0,
+   "income": "NaN",
+   "d": "NaN",
+   "result": "NaN",
+   "want": "0",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  },
+  {
+   "loss": 0,
+   "income": "-Infinity",
+   "d": "-Infinity",
+   "result": "0",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": true
+  },
+  {
+   "loss": -1,
+   "income": "0",
+   "d": "-1",
+   "defensive": true,
+   "result": "1",
+   "want": "0",
+   "err": null,
+   "pass": true,
+   "negZero": false
+  },
+  {
+   "loss": null,
+   "income": "1",
+   "d": "NaN",
+   "defensive": true,
+   "result": "NaN",
+   "want": "0",
+   "err": null,
+   "pass": false,
+   "negZero": false
+  }
+ ]
+}

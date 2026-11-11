@@ -1,0 +1,8 @@
+2026-10-19 05:30:04 CEST === GATE4 c0bb3de7963e789e309a7dcfaf25f6f0d8226800 profile=capped steps=[pre unit saves marker release browser] engines=[firefox webkit chromium]
+2026-10-19 05:30:06 CEST own npm ci exit=0
+2026-10-19 05:30:06 CEST pushed on: origin/fix/m4-gate5-explainer   origin/main=dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b
+2026-10-19 05:30:06 CEST m4.enabled at SHA: 1 (want 1)
+2026-10-19 05:30:20 CEST build exit=0
+2026-10-19 05:30:20 CEST static build-id: dist-html/egg-farm.html:m3-rc1-pre+c0bb3de dist-qa/index.html:m3-rc1-pre+c0bb3de dist/index.html:m3-rc1-pre+c0bb3de  (want m3-rc1-pre+c0bb3de, no +dirty)
+2026-10-19 05:30:23 CEST tsc exit=0
+2026-10-19 05:30:24 CEST sync --check exit=0

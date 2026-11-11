@@ -1,0 +1,219 @@
+[
+  {
+    "install_id": "827824fa-f8e0-467b-a43b-eaae803cd8f2",
+    "build": "m4.1+30b29d3",
+    "type": "session_start",
+    "ts": 1793299665561,
+    "sessionMs": 0
+  },
+  {
+    "secondsAway": 281.296,
+    "eggs": 1142,
+    "type": "offline_grant",
+    "ts": 1793299665562,
+    "sessionMs": 1
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "type": "customer_arrive",
+    "ts": 1793299666074,
+    "sessionMs": 513
+  },
+  {
+    "id": 83,
+    "N": 51,
+    "type": "customer_arrive",
+    "ts": 1793299666171,
+    "sessionMs": 610
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696444,
+    "sessionMs": 30883
+  },
+  {
+    "id": 83,
+    "N": 51,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696456,
+    "sessionMs": 30895
+  },
+  {
+    "id": 84,
+    "N": 38,
+    "type": "customer_arrive",
+    "ts": 1793299696456,
+    "sessionMs": 30895
+  },
+  {
+    "id": 84,
+    "N": 38,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696468,
+    "sessionMs": 30907
+  },
+  {
+    "id": 85,
+    "N": 41,
+    "type": "customer_arrive",
+    "ts": 1793299696468,
+    "sessionMs": 30907
+  },
+  {
+    "id": 85,
+    "N": 41,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696473,
+    "sessionMs": 30912
+  },
+  {
+    "id": 86,
+    "N": 55,
+    "type": "customer_arrive",
+    "ts": 1793299696473,
+    "sessionMs": 30912
+  },
+  {
+    "id": 86,
+    "N": 55,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696477,
+    "sessionMs": 30916
+  },
+  {
+    "id": 87,
+    "N": 60,
+    "type": "customer_arrive",
+    "ts": 1793299696477,
+    "sessionMs": 30916
+  },
+  {
+    "id": 87,
+    "N": 60,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696479,
+    "sessionMs": 30918
+  },
+  {
+    "id": 88,
+    "N": 35,
+    "type": "customer_arrive",
+    "ts": 1793299696479,
+    "sessionMs": 30918
+  },
+  {
+    "id": 88,
+    "N": 35,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696480,
+    "sessionMs": 30919
+  },
+  {
+    "id": 89,
+    "N": 63,
+    "type": "customer_arrive",
+    "ts": 1793299696480,
+    "sessionMs": 30919
+  },
+  {
+    "id": 89,
+    "N": 63,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696482,
+    "sessionMs": 30921
+  },
+  {
+    "id": 90,
+    "N": 36,
+    "type": "customer_arrive",
+    "ts": 1793299696482,
+    "sessionMs": 30921
+  },
+  {
+    "id": 90,
+    "N": 36,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696483,
+    "sessionMs": 30922
+  },
+  {
+    "id": 91,
+    "N": 51,
+    "type": "customer_arrive",
+    "ts": 1793299696483,
+    "sessionMs": 30922
+  },
+  {
+    "id": 91,
+    "N": 51,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696485,
+    "sessionMs": 30924
+  },
+  {
+    "id": 92,
+    "N": 38,
+    "type": "customer_arrive",
+    "ts": 1793299696485,
+    "sessionMs": 30924
+  },
+  {
+    "id": 92,
+    "N": 38,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696486,
+    "sessionMs": 30925
+  },
+  {
+    "id": 93,
+    "N": 64,
+    "type": "customer_arrive",
+    "ts": 1793299696486,
+    "sessionMs": 30925
+  },
+  {
+    "id": 93,
+    "N": 64,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299696762,
+    "sessionMs": 31201
+  },
+  {
+    "wage_coop_hand_cents": 267,
+    "coop_hand_eggs": 416,
+    "wage_market_hand_cents": 133,
+    "market_hand_eggs": 585,
+    "market_hand_cents": 277290,
+    "type": "worker_summary",
+    "ts": 1793299665770,
+    "sessionMs": 209,
+    "windowMs": 92237
+  },
+  {
+    "secondsAway": 61.003,
+    "eggs": 247,
+    "type": "offline_grant",
+    "ts": 1793299758009,
+    "sessionMs": 92448
+  },
+  {
+    "type": "session_end",
+    "ts": 1793299758537,
+    "sessionMs": 92976
+  }
+]

@@ -1,0 +1,12 @@
+G1-fetch | PASS | HARD | origin/main=22eac98c75b9e82944f34a1feb77830521f34aee
+G1-sha | PASS | HARD | 5d9efa61c5e6ee31ca9ebdec20ee70167d31d463
+G1-tag | PASS | HARD | m4.1-5d9efa6 -> 5d9efa61c5e6ee31ca9ebdec20ee70167d31d463
+G3-release | INFO | INFO | id 422815505 tag m4.1-5d9efa6 draft=false prerelease=false target=5d9efa61c5e6ee31ca9ebdec20ee70167d31d463 published 2026-10-24 17:31:13 CEST url https://github.com/PrincipalLewis/egg-farm/releases/tag/m4.1-5d9efa6
+G3-latest | FAIL | HARD | Latest=m4.1-p1-30b29d3 draft=false prerelease=false
+G3-asset-digest | PASS | HARD | downloaded sha256 ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1 = GitHub digest, size 537287
+G3-asset-expected | PASS | HARD | asset == expected sha256 ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1
+G3-asset-build-id | PASS | HARD | m4.1+5d9efa6 
+G3-release-asset-run | PASS | INFO | run 40107345648 release success, finished 2026-10-24 17:31:27 CEST, build-id match in log
+G5-runtime-chromium | PASS | HARD | release-egg-farm.html: 6 checks pass
+VERDICT: ROLLBACK RE-VERIFY FAIL (Blocker: escalate to HoE + CEO now)
+hard_fail=1 not_run_hard=0 finished=2026-10-29 19:52:23 CET

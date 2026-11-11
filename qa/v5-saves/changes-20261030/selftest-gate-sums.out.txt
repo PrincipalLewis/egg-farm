@@ -1,0 +1,10 @@
+PASS P1 sha256sum -c SHA256SUMS (31 OK, 0 FAILED)
+PASS P2 sha256sum -c STATUS.sha256 (status.log: OK)
+PASS P3 manifest = all 31 files except status.log/.serve/self
+PASS P4 status.log final before signing (last line: 184K	/workspace/egg-farm-studio/qa/v5-saves/changes-20261030/selftest-gate-sums/mock-results)
+PASS P5 gate check file: 32 OK incl. status.log
+PASS N1 tamper S-chromium.log -> -c FAILS (./S-chromium.log: FAILED)
+PASS N2 late status.log line -> -c STATUS.sha256 FAILS (status.log: FAILED)
+PASS N3 delete telemetry/result.json -> -c FAILS (sha256sum: ./telemetry/result.json: No such file or directory)
+PASS L1 legacy L72 -> later -c FAILS (./status.log: FAILED) = original bug reproduced
+SELFTEST gate-sums: 9 passed, 0 failed

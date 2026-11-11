@@ -1,0 +1,16 @@
+{
+ "tag": "desk",
+ "url": "file:///tmp/relchk/egg-farm.html",
+ "profile": "prof-desk",
+ "aheadHours": 0,
+ "viewport": [
+  1280,
+  800
+ ],
+ "console": [],
+ "pageerrors": [],
+ "build_id": {
+  "meta": "m3-rc1-pre+246de09",
+  "data": "m3-rc1-pre+246de09"
+ }
+}

@@ -1,0 +1,77 @@
+
+> egg-farm@0.1.0 test
+> vite-node scripts/sync-economy-cli.ts -- --check && vitest run
+
+balance.json up to date with economy.csv
+
+ RUN  v2.1.9 /tmp/qarc0/game
+
+ ✓ tests/save-hardening.test.ts (28 tests) 29ms
+ ✓ tests/workers-v11.test.ts (13 tests) 38ms
+ ✓ tests/onboarding.test.ts (13 tests) 17ms
+ ✓ tests/ac14.test.ts (13 tests) 21ms
+ ✓ tests/market.test.ts (24 tests) 100ms
+ ✓ tests/telemetry-m3.test.ts (10 tests) 154ms
+ ✓ tests/workers.test.ts (10 tests) 199ms
+ ✓ tests/ftue-v11.test.ts (8 tests) 18ms
+ ✓ tests/ios-tip.test.ts (12 tests) 9ms
+ ✓ tests/next-goal.test.ts (12 tests) 8ms
+ ✓ tests/save.test.ts (9 tests) 15ms
+ ✓ tests/tick.test.ts (9 tests) 56ms
+ ✓ tests/economy.test.ts (68 tests) 105ms
+ ✓ tests/post-rc1.test.ts (5 tests) 68ms
+ ✓ tests/ui-logic.test.ts (10 tests) 20ms
+ ✓ tests/resume.test.ts (8 tests) 24ms
+ ✓ tests/sync-economy.test.ts (6 tests) 34ms
+ ✓ tests/art-ux-rc0.test.ts (6 tests) 22ms
+ ✓ tests/orders.test.ts (8 tests) 17ms
+ ✓ tests/offline-modal.test.ts (5 tests) 12ms
+ ✓ tests/offline.test.ts (6 tests) 6ms
+ ✓ tests/contrast.test.ts (11 tests) 5ms
+ ✓ tests/slot-preview.test.ts (3 tests) 21ms
+ ✓ tests/frame-sampler.test.ts (6 tests) 5ms
+ ✓ tests/audio-unlock.test.ts (4 tests) 558ms
+   ✓ PT1-3 audio unlock timeout > unlock returns within ~AUDIO_UNLOCK_MS when resume never resolves 502ms
+ ✓ tests/telemetry.test.ts (6 tests) 1441ms
+   ✓ telemetry > ring buffer capped at ring_size 1424ms
+ ✓ tests/recovery-v11.test.ts (3 tests) 6ms
+ ✓ tests/save-fixtures.test.ts (4 tests) 5ms
+ ✓ tests/release-build-id.test.ts (1 test) 394ms
+   ✓ clean id passes, +dirty fails 393ms
+ ✓ tests/release-bundle.test.ts (1 test) 1320ms
+   ✓ release bundle > has no ?ios= override (the flag reader is dead-code eliminated) 1319ms
+stdout | tests/pacing.test.ts > AC7 pacing bot on the real sim > report
+AC7 seller15: { first: 15, up5: 12, f10m: 10, L10min: 9.25, L18min: 27.25, f30m: 18 } cheapest: { up5: 11, f10m: 9, f30m: 17 }
+
+ ✓ tests/pacing.test.ts (6 tests) 844ms
+   ✓ AC7 pacing bot on the real sim > Farm L18 reached within 24-36 min 832ms
+stdout | tests/p4.test.ts > P4 build numbers vs Economy re-sim > report
+P4 build { W4: 5.5, W4b: 7.5, managePer15: 5.63 }
+
+ ✓ tests/p4.test.ts (3 tests) 16ms
+stdout | tests/pacing-m2.test.ts > M2 pacing: managed workers > report
+M2 seller15 {
+  none: [ 9.25, 27.25, 90 ],
+  managed: [ 10, 28.25, 61.5 ],
+  step: 5.5,
+  cheapestStep: 7.5,
+  managesPer10min: 3.75
+}
+
+stdout | tests/pacing-m2.test.ts > M2 pacing: managed workers > AC-W4b (soft, non-gating): cheapest managed steps F18->F25 <= 8 min
+AC-W4b soft pass: 7.5 min
+
+ ✓ tests/pacing-m2.test.ts (4 tests) 5ms
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (100 seeds, slow) > >= 95% reach F10 within 15 min, F18 median <= 40 min, parity with Python (±20% medians, ±5 pts pass rate)
+AC-W1 build { pass10: 100, medF10: 11, medF18: 29 } python { pass10: 98, medF10: 12.33, medF18: 30.67 }
+
+ ✓ tests/pacing-acw1.test.ts (2 tests) 50999ms
+   ✓ AC-W1 casual (100 seeds, slow) > >= 95% reach F10 within 15 min, F18 median <= 40 min, parity with Python (±20% medians, ±5 pts pass rate) 50995ms
+ ✓ tests/pacing-m2b.test.ts (2 tests) 14ms
+
+ Test Files  35 passed (35)
+      Tests  339 passed (339)
+   Start at  01:45:54
+   Duration  53.85s (transform 829ms, setup 0ms, collect 109.36s, tests 56.61s, environment 6ms, prepare 2.19s)
+
+test exit 0

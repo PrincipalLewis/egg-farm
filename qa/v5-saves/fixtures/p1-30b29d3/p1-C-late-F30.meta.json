@@ -1,0 +1,85 @@
+{
+  "id": "p1-C-late-F30",
+  "source": "m4.1-p1-30b29d3 release asset",
+  "html_sha256": "dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b",
+  "build": {
+    "meta": "m4.1+30b29d3",
+    "app": "m4.1+30b29d3",
+    "dirty": false
+  },
+  "seededFrom": "5ac2e85c2d6094b1c14a0530f399e56f611534d76c40cf9b8093d47cf917df1d",
+  "loadTimeWrite": {
+    "preTapPresent": true,
+    "postTapDiffersFromSeed": true
+  },
+  "ui0": {
+    "coins": "$1.23M",
+    "basket": "0",
+    "recovery": false,
+    "recoveryOutcome": null,
+    "welcome": true,
+    "welcomeText": "Welcome back!You were away 2h+ +55.8K eggs Collect",
+    "newer": false,
+    "guardBlocked": false
+  },
+  "play": {
+    "sellLabel": "Sell all (307 eggs · $3,914.25)",
+    "bought": 4
+  },
+  "ui1": {
+    "coins": "$1.15M",
+    "basket": "55.7K",
+    "recovery": false,
+    "recoveryOutcome": null,
+    "welcome": false,
+    "welcomeText": null,
+    "newer": false,
+    "guardBlocked": false
+  },
+  "summary": {
+    "version": 6,
+    "savedAt": 1793299394894,
+    "saveSeq": 12,
+    "coinsCents": 114898714,
+    "basket": 55669,
+    "coop": 133.99999999999991,
+    "pendingOfflineEggs": 0,
+    "eggsTotal": 55803,
+    "farmLevel": 30,
+    "collectionLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 24,
+    "graderTier": 0,
+    "tracksV7": 1,
+    "workers": [],
+    "workersPaused": {},
+    "m5": {},
+    "stateKeys": [
+      "basket",
+      "celebratedMilestones",
+      "celebratedTier",
+      "coinsCents",
+      "collectionLevel",
+      "coop",
+      "coopFullS",
+      "customers",
+      "eggValueLevel",
+      "farmLevel",
+      "graderTier",
+      "hensLevel",
+      "manageCdS",
+      "nextCustomerId",
+      "nextCustomerInS",
+      "pendingOfflineEggs",
+      "rng",
+      "seenTracksExplainer",
+      "tracksV7",
+      "v6BackupId",
+      "wageFracCents",
+      "workers"
+    ]
+  },
+  "errors": [],
+  "save_sha256": "84cd0b0ce6e7940dd26b91c2d51986ce60db8669aba82dc085662831b922d1e3",
+  "generatedAt": "2026-10-29T18:43:15.038Z"
+}

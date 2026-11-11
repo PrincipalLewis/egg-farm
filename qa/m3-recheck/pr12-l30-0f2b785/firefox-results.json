@@ -1,0 +1,2203 @@
+[
+ {
+  "e": "firefox",
+  "n": "360 ON build ID",
+  "p": true,
+  "i": "m3-rc1-pre+0f2b785"
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON flag on at runtime",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON F24 nothing",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON F25 line+dot within 1s",
+  "p": true,
+  "i": {
+   "line": 30,
+   "dot": 20
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON both New dots (nav+Workers tab)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON copy",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 224,
+   "expectLead": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON aria (line, ×, dots)",
+  "p": true,
+  "i": {
+   "a": "Your farm is busy. Hire a worker. Opens Workers.",
+   "x": "Dismiss hire hint",
+   "d": [
+    "New: workers can be hired",
+    "New: workers can be hired"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON not clipped (scrollWidth<=clientWidth, in viewport, 1 line)",
+  "p": true,
+  "i": {
+   "sw": 152,
+   "cw": 152,
+   "bsw": 170,
+   "bcw": 170,
+   "l": 102,
+   "r": 271.51666259765625,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON 12px text",
+  "p": true,
+  "i": {
+   "font": "12px",
+   "weight": "700",
+   "lh": "16px",
+   "color": "rgb(138, 85, 40)",
+   "fam": "\"Nunito\", system-ui, sans-seri"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON 44px hit area (::before -14px, elementFromPoint ±21px)",
+  "p": true,
+  "i": {
+   "h": 16,
+   "before": [
+    "-14px",
+    "-14px"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON separate × 44x44, no overlap",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON × sibling of hint button",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON no overlap with Buy button; slack>=0",
+  "p": true,
+  "i": {
+   "slack": 2,
+   "rowW": 224,
+   "xRightGap": 0,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON F29 long cost: no clip/overlap",
+  "p": true,
+  "i": {
+   "cost": "$323.7K",
+   "sw": 152,
+   "cw": 152,
+   "ovBuy": false,
+   "ovX": false,
+   "right": 326,
+   "vw": 360,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON placement (note only, pending Art&UX)",
+  "p": "n/a",
+  "i": {
+   "prevClass": "btn buy affordable",
+   "belowBuy": 22,
+   "buyKind": "farm"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON click dismiss -> focus on Farm Buy",
+  "p": true,
+  "i": {
+   "match": true,
+   "tag": "BUTTON",
+   "cls": "btn buy affordable"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON dismiss hides line+dots this session",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON returns next session (workers=0)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON keyboard Tab->× Enter dismisses, focus to Farm Buy",
+  "p": true,
+  "i": {
+   "onX": true,
+   "hops": 2,
+   "match": true,
+   "line": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON coop-full tip shown => nudge line hidden",
+  "p": false,
+  "i": {
+   "tip": true,
+   "line": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON nudge back after coop tip gone",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON tap opens Workers, next hire highlighted+focused",
+  "p": true,
+  "i": {
+   "tab": "workers",
+   "row": "market_hand",
+   "inView": true,
+   "focus": "market_hand"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON hire clears dots",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON still cleared after reload (hireNudgeDone=1 in save)",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ],
+   "done": 1,
+   "v": 6
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON never returns after a hire, even if workers->0",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON telemetry shown x3 (3 sessions), dismissed x2, clicked x1; source l25, farm_level 25",
+  "p": true,
+  "i": [
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 2019,
+    "ts": 1792193468989
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 4110,
+    "ts": 1792193471080
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 18,
+    "ts": 1792193473667
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1981,
+    "ts": 1792193475630
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 18,
+    "ts": 1792193477315
+   },
+   {
+    "type": "hire_nudge_clicked",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 2619,
+    "ts": 1792193479916
+   }
+  ]
+ },
+ {
+  "e": "firefox",
+  "n": "360 ON no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "360 OFF build ID",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "360 OFF flag off at runtime",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "360 OFF F30 0 workers: no line, no dots, no shown event",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 OFF stored save has no hireNudgeDone (before+after hire)",
+  "p": true,
+  "i": {
+   "len": 467
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 OFF live cap 30 (buyFarm at 30 stays 30)",
+  "p": true,
+  "i": {
+   "maxLevel": 30,
+   "after": 30,
+   "before": 30
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "360 OFF no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON build ID",
+  "p": true,
+  "i": "m3-rc1-pre+0f2b785"
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON flag on at runtime",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON F24 nothing",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON F25 line+dot within 1s",
+  "p": true,
+  "i": {
+   "line": 21,
+   "dot": 10
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON both New dots (nav+Workers tab)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON copy",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 262,
+   "expectLead": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON aria (line, ×, dots)",
+  "p": true,
+  "i": {
+   "a": "Your farm is busy. Hire a worker. Opens Workers.",
+   "x": "Dismiss hire hint",
+   "d": [
+    "New: workers can be hired",
+    "New: workers can be hired"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON not clipped (scrollWidth<=clientWidth, in viewport, 1 line)",
+  "p": true,
+  "i": {
+   "sw": 152,
+   "cw": 152,
+   "bsw": 170,
+   "bcw": 170,
+   "l": 984,
+   "r": 1153.5166625976562,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON 12px text",
+  "p": true,
+  "i": {
+   "font": "12px",
+   "weight": "700",
+   "lh": "16px",
+   "color": "rgb(138, 85, 40)",
+   "fam": "\"Nunito\", system-ui, sans-seri"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON 44px hit area (::before -14px, elementFromPoint ±21px)",
+  "p": true,
+  "i": {
+   "h": 16,
+   "before": [
+    "-14px",
+    "-14px"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON separate × 44x44, no overlap",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON × sibling of hint button",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON no overlap with Buy button; slack>=0",
+  "p": true,
+  "i": {
+   "slack": 40,
+   "rowW": 262,
+   "xRightGap": 0,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON F29 long cost: no clip/overlap",
+  "p": true,
+  "i": {
+   "cost": "$323.7K",
+   "sw": 152,
+   "cw": 152,
+   "ovBuy": false,
+   "ovX": false,
+   "right": 1246,
+   "vw": 1280,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON placement (note only, pending Art&UX)",
+  "p": "n/a",
+  "i": {
+   "prevClass": "btn buy affordable",
+   "belowBuy": 22,
+   "buyKind": "farm"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON click dismiss -> focus on Farm Buy",
+  "p": true,
+  "i": {
+   "match": true,
+   "tag": "BUTTON",
+   "cls": "btn buy affordable"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON dismiss hides line+dots this session",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON returns next session (workers=0)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON keyboard Tab->× Enter dismisses, focus to Farm Buy",
+  "p": true,
+  "i": {
+   "onX": true,
+   "hops": 2,
+   "match": true,
+   "line": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON coop-full tip shown => nudge line hidden",
+  "p": "n/a",
+  "i": {
+   "tip": false,
+   "line": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON nudge back after coop tip gone",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON tap opens Workers, next hire highlighted+focused",
+  "p": true,
+  "i": {
+   "tab": "workers",
+   "row": "market_hand",
+   "inView": true,
+   "focus": "market_hand"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON hire clears dots",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON still cleared after reload (hireNudgeDone=1 in save)",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false
+   ],
+   "done": 1,
+   "v": 6
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON never returns after a hire, even if workers->0",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON telemetry shown x3 (3 sessions), dismissed x2, clicked x1; source l25, farm_level 25",
+  "p": true,
+  "i": [
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1634,
+    "ts": 1792193492642
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 3656,
+    "ts": 1792193494664
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 16,
+    "ts": 1792193497200
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1619,
+    "ts": 1792193498803
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 19,
+    "ts": 1792193500393
+   },
+   {
+    "type": "hire_nudge_clicked",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 5265,
+    "ts": 1792193505639
+   }
+  ]
+ },
+ {
+  "e": "firefox",
+  "n": "1280 ON no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "1280 OFF build ID",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "1280 OFF flag off at runtime",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "1280 OFF F30 0 workers: no line, no dots, no shown event",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 OFF stored save has no hireNudgeDone (before+after hire)",
+  "p": true,
+  "i": {
+   "len": 467
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 OFF live cap 30 (buyFarm at 30 stays 30)",
+  "p": true,
+  "i": {
+   "maxLevel": 30,
+   "after": 30,
+   "before": 30
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "1280 OFF no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON build ID",
+  "p": true,
+  "i": "m3-rc1-pre+0f2b785"
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON flag on at runtime",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON F24 nothing",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON F25 line+dot within 1s",
+  "p": true,
+  "i": {
+   "line": 27,
+   "dot": 12
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON both New dots (nav+Workers tab)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON copy",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 239,
+   "expectLead": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON aria (line, ×, dots)",
+  "p": true,
+  "i": {
+   "a": "Your farm is busy. Hire a worker. Opens Workers.",
+   "x": "Dismiss hire hint",
+   "d": [
+    "New: workers can be hired",
+    "New: workers can be hired"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON not clipped (scrollWidth<=clientWidth, in viewport, 1 line)",
+  "p": true,
+  "i": {
+   "sw": 152,
+   "cw": 152,
+   "bsw": 170,
+   "bcw": 170,
+   "l": 102,
+   "r": 271.51666259765625,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON 12px text",
+  "p": true,
+  "i": {
+   "font": "12px",
+   "weight": "700",
+   "lh": "16px",
+   "color": "rgb(138, 85, 40)",
+   "fam": "\"Nunito\", system-ui, sans-seri"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON 44px hit area (::before -14px, elementFromPoint ±21px)",
+  "p": true,
+  "i": {
+   "h": 16,
+   "before": [
+    "-14px",
+    "-14px"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON separate × 44x44, no overlap",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON × sibling of hint button",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON no overlap with Buy button; slack>=0",
+  "p": true,
+  "i": {
+   "slack": 17,
+   "rowW": 239,
+   "xRightGap": 0,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON F29 long cost: no clip/overlap",
+  "p": true,
+  "i": {
+   "cost": "$323.7K",
+   "sw": 152,
+   "cw": 152,
+   "ovBuy": false,
+   "ovX": false,
+   "right": 341,
+   "vw": 375,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON placement (note only, pending Art&UX)",
+  "p": "n/a",
+  "i": {
+   "prevClass": "btn buy affordable",
+   "belowBuy": 22,
+   "buyKind": "farm"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON click dismiss -> focus on Farm Buy",
+  "p": true,
+  "i": {
+   "match": true,
+   "tag": "BUTTON",
+   "cls": "btn buy affordable"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON dismiss hides line+dots this session",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON returns next session (workers=0)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON keyboard Tab->× Enter dismisses, focus to Farm Buy",
+  "p": true,
+  "i": {
+   "onX": true,
+   "hops": 2,
+   "match": true,
+   "line": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON coop-full tip shown => nudge line hidden",
+  "p": false,
+  "i": {
+   "tip": true,
+   "line": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON nudge back after coop tip gone",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON tap opens Workers, next hire highlighted+focused",
+  "p": true,
+  "i": {
+   "tab": "workers",
+   "row": "market_hand",
+   "inView": true,
+   "focus": "market_hand"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON hire clears dots",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON still cleared after reload (hireNudgeDone=1 in save)",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ],
+   "done": 1,
+   "v": 6
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON never returns after a hire, even if workers->0",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON telemetry shown x3 (3 sessions), dismissed x2, clicked x1; source l25, farm_level 25",
+  "p": true,
+  "i": [
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1962,
+    "ts": 1792193517797
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 3935,
+    "ts": 1792193519770
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 15,
+    "ts": 1792193522239
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1944,
+    "ts": 1792193524168
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 14,
+    "ts": 1792193525754
+   },
+   {
+    "type": "hire_nudge_clicked",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 2574,
+    "ts": 1792193528314
+   }
+  ]
+ },
+ {
+  "e": "firefox",
+  "n": "375 ON no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "375 OFF build ID",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "375 OFF flag off at runtime",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "375 OFF F30 0 workers: no line, no dots, no shown event",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 OFF stored save has no hireNudgeDone (before+after hire)",
+  "p": true,
+  "i": {
+   "len": 468
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 OFF live cap 30 (buyFarm at 30 stays 30)",
+  "p": true,
+  "i": {
+   "maxLevel": 30,
+   "after": 30,
+   "before": 30
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "375 OFF no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON build ID",
+  "p": true,
+  "i": "m3-rc1-pre+0f2b785"
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON flag on at runtime",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON F24 nothing",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON F25 line+dot within 1s",
+  "p": true,
+  "i": {
+   "line": 27,
+   "dot": 16
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON both New dots (nav+Workers tab)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON copy",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 254,
+   "expectLead": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON aria (line, ×, dots)",
+  "p": true,
+  "i": {
+   "a": "Your farm is busy. Hire a worker. Opens Workers.",
+   "x": "Dismiss hire hint",
+   "d": [
+    "New: workers can be hired",
+    "New: workers can be hired"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON not clipped (scrollWidth<=clientWidth, in viewport, 1 line)",
+  "p": true,
+  "i": {
+   "sw": 152,
+   "cw": 152,
+   "bsw": 170,
+   "bcw": 170,
+   "l": 102,
+   "r": 271.51666259765625,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON 12px text",
+  "p": true,
+  "i": {
+   "font": "12px",
+   "weight": "700",
+   "lh": "16px",
+   "color": "rgb(138, 85, 40)",
+   "fam": "\"Nunito\", system-ui, sans-seri"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON 44px hit area (::before -14px, elementFromPoint ±21px)",
+  "p": true,
+  "i": {
+   "h": 16,
+   "before": [
+    "-14px",
+    "-14px"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON separate × 44x44, no overlap",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON × sibling of hint button",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON no overlap with Buy button; slack>=0",
+  "p": true,
+  "i": {
+   "slack": 32,
+   "rowW": 254,
+   "xRightGap": 0,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON F29 long cost: no clip/overlap",
+  "p": true,
+  "i": {
+   "cost": "$323.7K",
+   "sw": 152,
+   "cw": 152,
+   "ovBuy": false,
+   "ovX": false,
+   "right": 356,
+   "vw": 390,
+   "lead": true,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON placement (note only, pending Art&UX)",
+  "p": "n/a",
+  "i": {
+   "prevClass": "btn buy affordable",
+   "belowBuy": 22,
+   "buyKind": "farm"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON click dismiss -> focus on Farm Buy",
+  "p": true,
+  "i": {
+   "match": true,
+   "tag": "BUTTON",
+   "cls": "btn buy affordable"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON dismiss hides line+dots this session",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON returns next session (workers=0)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON keyboard Tab->× Enter dismisses, focus to Farm Buy",
+  "p": true,
+  "i": {
+   "onX": true,
+   "hops": 2,
+   "match": true,
+   "line": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON coop-full tip shown => nudge line hidden",
+  "p": false,
+  "i": {
+   "tip": true,
+   "line": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON nudge back after coop tip gone",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON tap opens Workers, next hire highlighted+focused",
+  "p": true,
+  "i": {
+   "tab": "workers",
+   "row": "market_hand",
+   "inView": true,
+   "focus": "market_hand"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON hire clears dots",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON still cleared after reload (hireNudgeDone=1 in save)",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ],
+   "done": 1,
+   "v": 6
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON never returns after a hire, even if workers->0",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON telemetry shown x3 (3 sessions), dismissed x2, clicked x1; source l25, farm_level 25",
+  "p": true,
+  "i": [
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1939,
+    "ts": 1792193540849
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 3897,
+    "ts": 1792193542807
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 21,
+    "ts": 1792193545340
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1958,
+    "ts": 1792193547277
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 14,
+    "ts": 1792193548844
+   },
+   {
+    "type": "hire_nudge_clicked",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 2593,
+    "ts": 1792193551423
+   }
+  ]
+ },
+ {
+  "e": "firefox",
+  "n": "390 ON no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "390 OFF build ID",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "390 OFF flag off at runtime",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "390 OFF F30 0 workers: no line, no dots, no shown event",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 OFF stored save has no hireNudgeDone (before+after hire)",
+  "p": true,
+  "i": {
+   "len": 468
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 OFF live cap 30 (buyFarm at 30 stays 30)",
+  "p": true,
+  "i": {
+   "maxLevel": 30,
+   "after": 30,
+   "before": 30
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "390 OFF no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON build ID",
+  "p": true,
+  "i": "m3-rc1-pre+0f2b785"
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON flag on at runtime",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON F24 nothing",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON F25 line+dot within 1s",
+  "p": true,
+  "i": {
+   "line": 31,
+   "dot": 17
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON both New dots (nav+Workers tab)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON copy",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": false,
+   "rowW": 204,
+   "expectLead": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON aria (line, ×, dots)",
+  "p": true,
+  "i": {
+   "a": "Your farm is busy. Hire a worker. Opens Workers.",
+   "x": "Dismiss hire hint",
+   "d": [
+    "New: workers can be hired",
+    "New: workers can be hired"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON not clipped (scrollWidth<=clientWidth, in viewport, 1 line)",
+  "p": true,
+  "i": {
+   "sw": 82,
+   "cw": 82,
+   "bsw": 100,
+   "bcw": 100,
+   "l": 102,
+   "r": 202.46665954589844,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON 12px text",
+  "p": true,
+  "i": {
+   "font": "12px",
+   "weight": "700",
+   "lh": "16px",
+   "color": "rgb(138, 85, 40)",
+   "fam": "\"Nunito\", system-ui, sans-seri"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON 44px hit area (::before -14px, elementFromPoint ±21px)",
+  "p": true,
+  "i": {
+   "h": 16,
+   "before": [
+    "-14px",
+    "-14px"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON separate × 44x44, no overlap",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON × sibling of hint button",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON no overlap with Buy button; slack>=0",
+  "p": true,
+  "i": {
+   "slack": 52,
+   "rowW": 204,
+   "xRightGap": 0,
+   "lead": false,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON F29 long cost: no clip/overlap",
+  "p": true,
+  "i": {
+   "cost": "$323.7K",
+   "sw": 82,
+   "cw": 82,
+   "ovBuy": false,
+   "ovX": false,
+   "right": 306,
+   "vw": 340,
+   "lead": false,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON placement (note only, pending Art&UX)",
+  "p": "n/a",
+  "i": {
+   "prevClass": "btn buy affordable",
+   "belowBuy": 22,
+   "buyKind": "farm"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON click dismiss -> focus on Farm Buy",
+  "p": true,
+  "i": {
+   "match": true,
+   "tag": "BUTTON",
+   "cls": "btn buy affordable"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON dismiss hides line+dots this session",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON returns next session (workers=0)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON keyboard Tab->× Enter dismisses, focus to Farm Buy",
+  "p": true,
+  "i": {
+   "onX": true,
+   "hops": 2,
+   "match": true,
+   "line": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON coop-full tip shown => nudge line hidden",
+  "p": false,
+  "i": {
+   "tip": true,
+   "line": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON nudge back after coop tip gone",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON tap opens Workers, next hire highlighted+focused",
+  "p": true,
+  "i": {
+   "tab": "workers",
+   "row": "market_hand",
+   "inView": true,
+   "focus": "market_hand"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON hire clears dots",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON still cleared after reload (hireNudgeDone=1 in save)",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ],
+   "done": 1,
+   "v": 6
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON never returns after a hire, even if workers->0",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON telemetry shown x3 (3 sessions), dismissed x2, clicked x1; source l25, farm_level 25",
+  "p": true,
+  "i": [
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1950,
+    "ts": 1792193564181
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 3905,
+    "ts": 1792193566136
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 17,
+    "ts": 1792193568639
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1983,
+    "ts": 1792193570605
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 17,
+    "ts": 1792193572189
+   },
+   {
+    "type": "hire_nudge_clicked",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 2617,
+    "ts": 1792193574789
+   }
+  ]
+ },
+ {
+  "e": "firefox",
+  "n": "340 ON no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "340 OFF build ID",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "340 OFF flag off at runtime",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "340 OFF F30 0 workers: no line, no dots, no shown event",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 OFF stored save has no hireNudgeDone (before+after hire)",
+  "p": true,
+  "i": {
+   "len": 468
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 OFF live cap 30 (buyFarm at 30 stays 30)",
+  "p": true,
+  "i": {
+   "maxLevel": 30,
+   "after": 30,
+   "before": 30
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "340 OFF no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON build ID",
+  "p": true,
+  "i": "m3-rc1-pre+0f2b785"
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON flag on at runtime",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON F24 nothing",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON F25 line+dot within 1s",
+  "p": true,
+  "i": {
+   "line": 32,
+   "dot": 19
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON both New dots (nav+Workers tab)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON copy",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": false,
+   "rowW": 184,
+   "expectLead": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON aria (line, ×, dots)",
+  "p": true,
+  "i": {
+   "a": "Your farm is busy. Hire a worker. Opens Workers.",
+   "x": "Dismiss hire hint",
+   "d": [
+    "New: workers can be hired",
+    "New: workers can be hired"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON not clipped (scrollWidth<=clientWidth, in viewport, 1 line)",
+  "p": true,
+  "i": {
+   "sw": 82,
+   "cw": 82,
+   "bsw": 100,
+   "bcw": 100,
+   "l": 102,
+   "r": 202.46665954589844,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON 12px text",
+  "p": true,
+  "i": {
+   "font": "12px",
+   "weight": "700",
+   "lh": "16px",
+   "color": "rgb(138, 85, 40)",
+   "fam": "\"Nunito\", system-ui, sans-seri"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON 44px hit area (::before -14px, elementFromPoint ±21px)",
+  "p": true,
+  "i": {
+   "h": 16,
+   "before": [
+    "-14px",
+    "-14px"
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON separate × 44x44, no overlap",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON × sibling of hint button",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON no overlap with Buy button; slack>=0",
+  "p": true,
+  "i": {
+   "slack": 32,
+   "rowW": 184,
+   "xRightGap": 0,
+   "lead": false,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON F29 long cost: no clip/overlap",
+  "p": true,
+  "i": {
+   "cost": "$323.7K",
+   "sw": 82,
+   "cw": 82,
+   "ovBuy": false,
+   "ovX": false,
+   "right": 286,
+   "vw": 320,
+   "lead": false,
+   "lines": 1
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON placement (note only, pending Art&UX)",
+  "p": "n/a",
+  "i": {
+   "prevClass": "btn buy affordable",
+   "belowBuy": 22,
+   "buyKind": "farm"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON click dismiss -> focus on Farm Buy",
+  "p": true,
+  "i": {
+   "match": true,
+   "tag": "BUTTON",
+   "cls": "btn buy affordable"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON dismiss hides line+dots this session",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON returns next session (workers=0)",
+  "p": true,
+  "i": {
+   "line": true,
+   "dots": [
+    true,
+    true
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON keyboard Tab->× Enter dismisses, focus to Farm Buy",
+  "p": true,
+  "i": {
+   "onX": true,
+   "hops": 2,
+   "match": true,
+   "line": false
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON coop-full tip shown => nudge line hidden",
+  "p": false,
+  "i": {
+   "tip": true,
+   "line": true
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON nudge back after coop tip gone",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON tap opens Workers, next hire highlighted+focused",
+  "p": true,
+  "i": {
+   "tab": "workers",
+   "row": "market_hand",
+   "inView": true,
+   "focus": "market_hand"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON hire clears dots",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON still cleared after reload (hireNudgeDone=1 in save)",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ],
+   "done": 1,
+   "v": 6
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON never returns after a hire, even if workers->0",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON telemetry shown x3 (3 sessions), dismissed x2, clicked x1; source l25, farm_level 25",
+  "p": true,
+  "i": [
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1913,
+    "ts": 1792193588004
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 3869,
+    "ts": 1792193589960
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 18,
+    "ts": 1792193592451
+   },
+   {
+    "type": "hire_nudge_dismissed",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 1949,
+    "ts": 1792193594382
+   },
+   {
+    "type": "hire_nudge_shown",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 17,
+    "ts": 1792193596033
+   },
+   {
+    "type": "hire_nudge_clicked",
+    "source": "l25",
+    "farm_level": 25,
+    "sessionMs": 2597,
+    "ts": 1792193598613
+   }
+  ]
+ },
+ {
+  "e": "firefox",
+  "n": "320 ON no page errors",
+  "p": true,
+  "i": []
+ },
+ {
+  "e": "firefox",
+  "n": "320 OFF build ID",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "320 OFF flag off at runtime",
+  "p": true,
+  "i": ""
+ },
+ {
+  "e": "firefox",
+  "n": "320 OFF F30 0 workers: no line, no dots, no shown event",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": [
+    false,
+    false
+   ]
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 OFF stored save has no hireNudgeDone (before+after hire)",
+  "p": true,
+  "i": {
+   "len": 467
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 OFF live cap 30 (buyFarm at 30 stays 30)",
+  "p": true,
+  "i": {
+   "maxLevel": 30,
+   "after": 30,
+   "before": 30
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "320 OFF no page errors",
+  "p": true,
+  "i": []
+ }
+]

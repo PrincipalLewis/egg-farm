@@ -1,0 +1,40 @@
+== main
+{
+ "newerSavedAt_idbWins": "idb",
+ "newerSavedAt_lsWins": "ls",
+ "equalSavedAt_diffBytes": "ls",
+ "nanLiteral_idb": "ls",
+ "nanLiteral_ls": "idb",
+ "nullSavedAt_idb": "ls",
+ "stringNaN_idb": "ls",
+ "future_idb": "ls",
+ "validate_nanLiteral": "parse",
+ "validate_nullSavedAt": true,
+ "staleSeqLs_vs_newerIdbNoSeq": "idb",
+ "flagOffSaveAfterSeq_hasSeq": false,
+ "bakHasSeq": true,
+ "serializeNoBalance_m4keys": [],
+ "serializeWithOff_m4keys": []
+}
+== pr12
+{
+ "newerSavedAt_idbWins": "idb",
+ "newerSavedAt_lsWins": "ls",
+ "equalSavedAt_diffBytes": "ls",
+ "nanLiteral_idb": "ls",
+ "nanLiteral_ls": "idb",
+ "nullSavedAt_idb": "ls",
+ "stringNaN_idb": "ls",
+ "future_idb": "ls",
+ "validate_nanLiteral": "parse",
+ "validate_nullSavedAt": true,
+ "staleSeqLs_vs_newerIdbNoSeq": "ls",
+ "flagOffSaveAfterSeq_hasSeq": false,
+ "bakHasSeq": true,
+ "serializeNoBalance_m4keys": [
+  "hensLevel",
+  "eggValueLevel",
+  "celebratedMilestones"
+ ],
+ "serializeWithOff_m4keys": []
+}

@@ -1,0 +1,20 @@
+--- a/qa/m3-scripts/rc1-guard-save-qa.mjs
++++ b/qa/m3-scripts/rc1-guard-save-qa.mjs
+@@ -100,10 +100,15 @@
+ // ---- Save robustness
+ const corruptVariants = { garbage: '{{{not json', truncated: null, checksum: null };
+ for (const kind of ['garbage', 'truncated', 'checksum']) { const c = await ctxNew(); await seed(c); const A = await start(await c.newPage());
+-  await A.evaluate(() => { window.eggfarm.state.coinsCents = 777777777; window.eggfarm.save(); }); await sleep(800); const want = await st(A); const idb = await idbSave(A); await A.close();
++  await A.evaluate(() => { window.eggfarm.state.coinsCents = 777777777; window.eggfarm.save(); }); await sleep(800); const want = await st(A); const idb = await idbSave(A);
++  // SD5-1 (HoQA): PRIMARY ref = newest persisted copy (by savedAt, LS vs IDB) read just before close, ZERO tolerance. SECONDARY ref = live state, tolerance one 100 ms tick of income.
++  const r0 = await st(A), t0 = Date.now(); await sleep(1000); const r1 = await st(A), tickIncome = Math.max(0, Math.ceil((r1.coins - r0.coins) / (Date.now() - t0) * 100));
++  const lsP = await lsSave(A), idbP = await idbSave(A), live = await st(A); const persisted = [lsP, idbP].filter(x => x && !x.bad && x.savedAt > 0).sort((x, y) => y.savedAt - x.savedAt)[0] ?? null; await A.close();
+   const p = await c.newPage(); await p.goto(U + '?x=1'); await p.evaluate(k => { const r = localStorage.getItem('eggfarm.save'); localStorage.setItem('eggfarm.save', k === 'garbage' ? '{{{not json' : k === 'truncated' ? r.slice(0, r.length / 2) : r.replace(/"coinsCents":\d+/, '"coinsCents":5')); localStorage.removeItem('eggfarm.lease'); }, kind);
+   const B = await start(p, ''); const got = await st(B), rec = await B.evaluate(() => document.querySelectorAll('.recovery-card').length), keys = await B.evaluate(() => Object.keys(localStorage).filter(k => k.includes('corrupt')));
+-  ok(`R1 LS save corrupt (${kind}) + valid IDB copy -> silent restore of IDB state, no recovery dialog, corrupt copy kept`, got.coins >= want.coins && got.L === want.L && rec === 0, { want: want.coins, idb: idb?.coins, got: got.coins, rec, keys }); await c.close(); }
++  const info = { persisted: persisted && { src: persisted === lsP ? 'ls' : 'idb', savedAt: persisted.savedAt, coins: persisted.coins, L: persisted.L }, ls: lsP, idb: idbP, live: live.coins, tickIncome, got: got.coins, gotL: got.L, shortVsPersisted: persisted ? persisted.coins - got.coins : null, rec, keys };
++  ok(`R1 PRIMARY LS save corrupt (${kind}) + valid IDB copy -> silent restore >= newest persisted copy (by savedAt, 0 tolerance), same levels, no recovery dialog, corrupt copy kept`, persisted !== null && got.coins >= persisted.coins && got.L === persisted.L && rec === 0 && keys.length > 0, info);
++  ok(`R1 SECONDARY (${kind}) restore >= live state at close - one 100 ms tick of income`, got.coins >= live.coins - tickIncome && got.L === live.L, { live: live.coins, tickIncome, got: got.coins, shortVsLive: live.coins - got.coins }); await c.close(); }
+ { const c = await ctxNew(); await seed(c); const A = await start(await c.newPage()); await A.evaluate(() => { window.eggfarm.state.coinsCents = 5e9; window.eggfarm.save(); }); await sleep(600);
+   // make LS older-but-valid than IDB: write an older valid save into LS
+   const ok2 = await A.evaluate(() => { const d = JSON.parse(localStorage.getItem('eggfarm.save')); return d; }); await A.close();

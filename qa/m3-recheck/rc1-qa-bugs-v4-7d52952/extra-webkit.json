@@ -1,0 +1,303 @@
+[
+ {
+  "n": "TUT-1 docked 1024x474: card tap highlights an order row (outline), clears after ~1.2s",
+  "kind": "PASS",
+  "info": {
+   "has": true,
+   "seen": [
+    "1"
+   ],
+   "hl": [
+    "1"
+   ],
+   "outline": "solid",
+   "sheetOpen": false,
+   "gone": true,
+   "errs": []
+  }
+ },
+ {
+  "n": "TUT-1 docked 1280x720: card tap highlights an order row (outline), clears after ~1.2s",
+  "kind": "PASS",
+  "info": {
+   "has": true,
+   "seen": [
+    "1"
+   ],
+   "hl": [
+    "1"
+   ],
+   "outline": "solid",
+   "sheetOpen": false,
+   "gone": true,
+   "errs": []
+  }
+ },
+ {
+  "n": "TUT-1 docked 1366x768: card tap highlights an order row (outline), clears after ~1.2s",
+  "kind": "PASS",
+  "info": {
+   "has": true,
+   "seen": [
+    "1"
+   ],
+   "hl": [
+    "1"
+   ],
+   "outline": "solid",
+   "sheetOpen": false,
+   "gone": true,
+   "errs": []
+  }
+ },
+ {
+  "n": "M-1 360: \"Sell 181.2B\" label inside the button's padding box (info: Firefox is the gate)",
+  "kind": "PASS",
+  "info": {
+   "text": "Sell 181.2B+$1T",
+   "pl": 10,
+   "pr": 10,
+   "bw": 88,
+   "content": 68,
+   "kids": [
+    {
+     "t": "Sell 181.2B",
+     "sw": 65,
+     "cw": 65,
+     "textL": 253.75192260742188,
+     "textR": 318.2637023925781
+    },
+    {
+     "t": "+$1T",
+     "sw": 23,
+     "cw": 23,
+     "textL": 274.2861022949219,
+     "textR": 297.6982727050781
+    }
+   ],
+   "fits": true
+  }
+ },
+ {
+  "n": "M-1 375: \"Sell 181.2B\" label inside the button's padding box (info: Firefox is the gate)",
+  "kind": "PASS",
+  "info": {
+   "text": "Sell 181.2B+$1T",
+   "pl": 10,
+   "pr": 10,
+   "bw": 88,
+   "content": 68,
+   "kids": [
+    {
+     "t": "Sell 181.2B",
+     "sw": 65,
+     "cw": 65,
+     "textL": 268.7519226074219,
+     "textR": 333.2637023925781
+    },
+    {
+     "t": "+$1T",
+     "sw": 23,
+     "cw": 23,
+     "textL": 289.2861022949219,
+     "textR": 312.6982727050781
+    }
+   ],
+   "fits": true
+  }
+ },
+ {
+  "n": "M-1 390: \"Sell 181.2B\" label inside the button's padding box (info: Firefox is the gate)",
+  "kind": "PASS",
+  "info": {
+   "text": "Sell 181.2B+$1T",
+   "pl": 10,
+   "pr": 10,
+   "bw": 88,
+   "content": 68,
+   "kids": [
+    {
+     "t": "Sell 181.2B",
+     "sw": 65,
+     "cw": 65,
+     "textL": 283.7519226074219,
+     "textR": 348.2637023925781
+    },
+    {
+     "t": "+$1T",
+     "sw": 23,
+     "cw": 23,
+     "textL": 304.2861022949219,
+     "textR": 327.6982727050781
+    }
+   ],
+   "fits": true
+  }
+ },
+ {
+  "n": "M-1 430: \"Sell 181.2B\" label inside the button's padding box (info: Firefox is the gate)",
+  "kind": "PASS",
+  "info": {
+   "text": "Sell 181.2B+$1T",
+   "pl": 10,
+   "pr": 10,
+   "bw": 88,
+   "content": 68,
+   "kids": [
+    {
+     "t": "Sell 181.2B",
+     "sw": 65,
+     "cw": 65,
+     "textL": 323.7519226074219,
+     "textR": 388.2637023925781
+    },
+    {
+     "t": "+$1T",
+     "sw": 23,
+     "cw": 23,
+     "textL": 344.2861022949219,
+     "textR": 367.6982727050781
+    }
+   ],
+   "fits": true
+  }
+ },
+ {
+  "n": "M-1 1280: \"Sell 181.2B\" label inside the button's padding box (info: Firefox is the gate)",
+  "kind": "PASS",
+  "info": {
+   "text": "Sell 181.2B+$1T",
+   "pl": 10,
+   "pr": 10,
+   "bw": 88,
+   "content": 68,
+   "kids": [
+    {
+     "t": "Sell 181.2B",
+     "sw": 65,
+     "cw": 65,
+     "textL": 1173.751953125,
+     "textR": 1238.263671875
+    },
+    {
+     "t": "+$1T",
+     "sw": 23,
+     "cw": 23,
+     "textL": 1194.2861328125,
+     "textR": 1217.6982421875
+    }
+   ],
+   "fits": true
+  }
+ },
+ {
+  "n": "B-4 release (no query): window eggfarm* == [eggfarmExportTelemetry], no .perf-ov",
+  "kind": "PASS",
+  "info": {
+   "own": [
+    "eggfarmExportTelemetry"
+   ],
+   "ov": 0,
+   "perf": false
+  }
+ },
+ {
+  "n": "B-4 release ?perf=1: window eggfarm* == [eggfarmExportTelemetry], no .perf-ov",
+  "kind": "PASS",
+  "info": {
+   "own": [
+    "eggfarmExportTelemetry"
+   ],
+   "ov": 0,
+   "perf": false
+  }
+ },
+ {
+  "n": "B-4 release ?perf=1&debug=1&ios=1: window eggfarm* == [eggfarmExportTelemetry], no .perf-ov",
+  "kind": "PASS",
+  "info": {
+   "own": [
+    "eggfarmExportTelemetry"
+   ],
+   "ov": 0,
+   "perf": false
+  }
+ },
+ {
+  "n": "B-4 release bundle has no perf overlay code (eggfarmPerf/perf-ov/FrameSampler)",
+  "kind": "PASS",
+  "info": []
+ },
+ {
+  "n": "B-1 live-rect 360: coop badge shown, inside its coop box and viewport, no overlap, 8 samples",
+  "kind": "PASS",
+  "info": {
+   "widths": [
+    39.7,
+    39.7,
+    39.7,
+    39.7,
+    39.7,
+    39.7,
+    39.8,
+    39.7
+   ],
+   "box": {
+    "l": 8,
+    "t": 235,
+    "r": 352,
+    "b": 493,
+    "w": 344
+   },
+   "hits": [],
+   "errs": []
+  }
+ },
+ {
+  "n": "B-1 copy 360: badge+chip \"⚠ Full!\", badge aria \"Coop full\", rate aria ends \"Coop full.\", one hint, old tip absent, badge ~54px",
+  "kind": "NOT-IN-BUILD",
+  "info": {
+   "b1BuildPresent": false,
+   "text": "Full!",
+   "chip": null,
+   "hints": [],
+   "w": 39.7
+  }
+ },
+ {
+  "n": "B-1 live-rect 1280: coop badge shown, inside its coop box and viewport, no overlap, 8 samples",
+  "kind": "PASS",
+  "info": {
+   "widths": [
+    39.7,
+    39.7,
+    39.7,
+    39.7,
+    39.7,
+    39.7,
+    40.3,
+    39.7
+   ],
+   "box": {
+    "l": 160,
+    "t": 184,
+    "r": 720,
+    "b": 604,
+    "w": 560
+   },
+   "hits": [],
+   "errs": []
+  }
+ },
+ {
+  "n": "B-1 copy 1280: badge+chip \"⚠ Full!\", badge aria \"Coop full\", rate aria ends \"Coop full.\", one hint, old tip absent, badge ~54px",
+  "kind": "NOT-IN-BUILD",
+  "info": {
+   "b1BuildPresent": false,
+   "text": "Full!",
+   "chip": null,
+   "hints": [],
+   "w": 39.7
+  }
+ }
+]

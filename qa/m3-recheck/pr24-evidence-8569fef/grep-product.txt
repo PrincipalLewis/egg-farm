@@ -1,0 +1,2 @@
+scripts/check-economy-copy.mjs:4:// Enable with --product or ECONOMY_PRODUCT_CHECK=1. Product dir defaults to ../product (studio workspace), override with
+scripts/check-economy-copy.mjs:17:const prodDir = process.env.ECONOMY_PRODUCT_DIR || fileURLToPath(new URL('../../product', import.meta.url));

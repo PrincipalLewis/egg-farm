@@ -1,0 +1,426 @@
+{
+  "html_sha256": "dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b",
+  "schema_sha256": "fce0ef7c587ab7c1c030c8e0946565f86be3d17e3b4f8a646ec487f614f217b5",
+  "flags": [],
+  "checks": [
+    {
+      "id": "TS1-build",
+      "pass": true,
+      "hard": true,
+      "short": "m4.1+30b29d3"
+    },
+    {
+      "id": "T-AC1 one session_start reason=load with required fields",
+      "pass": false,
+      "hard": true,
+      "short": [
+        "build,install_id,sessionMs,ts,type"
+      ]
+    },
+    {
+      "id": "T-AC1 every event carries the session sid",
+      "pass": false,
+      "hard": true,
+      "short": {
+        "without": 0
+      }
+    },
+    {
+      "id": "T-AC1 no event carries sessionMs",
+      "pass": false,
+      "hard": true,
+      "short": 15
+    },
+    {
+      "id": "T-AC3 tap batches: Σ count == clicks, no collect_tap",
+      "pass": true,
+      "hard": true,
+      "short": {
+        "sumCount": 20,
+        "clicks": 20,
+        "tapEvents": 1
+      }
+    },
+    {
+      "id": "T-AC3 tap fields count/eggs/empty/full_at_start",
+      "pass": false,
+      "hard": true,
+      "short": {
+        "type": "tap",
+        "ts": 1793299658622,
+        "sessionMs": 861,
+        "count": 20,
+        "eggs": 10
+      }
+    },
+    {
+      "id": "T-AC5 first upgrade is_first_upgrade=true, later false",
+      "pass": false,
+      "hard": true,
+      "short": [
+        [
+          "hens",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "T-AC8 session_end on pagehide: reason unload, taps_total == Σ tap.count, fg_ms",
+      "pass": false,
+      "hard": true,
+      "short": {
+        "type": "session_end",
+        "ts": 1793299664998,
+        "sessionMs": 7237
+      }
+    },
+    {
+      "id": "T-AC9 schema/allowlist/privacy (TS1 log)",
+      "pass": false,
+      "hard": true,
+      "problems": [
+        "session_start: envelope sid missing",
+        "session_start: envelope fgMs missing",
+        "session_start: forbidden sessionMs",
+        "session_start: required session_index missing",
+        "session_start: required reason missing",
+        "session_start: required farm_level missing",
+        "session_start: required collection_level missing",
+        "session_start: required has_coop_hand missing",
+        "session_start: required viewport_w missing",
+        "session_start: required reduced_motion missing",
+        "offline_grant: envelope sid missing",
+        "offline_grant: envelope fgMs missing",
+        "offline_grant: forbidden sessionMs",
+        "customer_arrive: envelope sid missing",
+        "customer_arrive: envelope fgMs missing",
+        "customer_arrive: forbidden sessionMs",
+        "tap: envelope sid missing",
+        "tap: envelope fgMs missing",
+        "tap: forbidden sessionMs",
+        "tap: required empty missing",
+        "tap: required full_at_start missing",
+        "customer_served: envelope sid missing",
+        "customer_served: envelope fgMs missing",
+        "customer_served: forbidden sessionMs",
+        "sell: envelope sid missing",
+        "sell: envelope fgMs missing",
+        "sell: forbidden sessionMs",
+        "upgrade: envelope sid missing",
+        "upgrade: envelope fgMs missing",
+        "upgrade: forbidden sessionMs",
+        "upgrade: required is_first_upgrade missing",
+        "upgrade: required taps_before missing",
+        "session_end: envelope sid missing",
+        "session_end: envelope fgMs missing",
+        "session_end: forbidden sessionMs",
+        "session_end: required reason missing",
+        "session_end: required fg_ms missing",
+        "session_end: required taps_total missing",
+        "session_end: required taps_moved_eggs missing",
+        "session_end: required eggs_collected_manual missing",
+        "session_end: required coop_full_ms missing",
+        "session_end: required eggs_lost_while_full missing",
+        "session_end: required managed missing",
+        "session_end: required farm_level missing",
+        "session_end: required collection_level missing",
+        "worker_summary: envelope sid missing",
+        "worker_summary: envelope fgMs missing",
+        "worker_summary: forbidden sessionMs"
+      ],
+      "short": [
+        "session_start: envelope sid missing",
+        "session_start: envelope fgMs missing",
+        "session_start: forbidden sessionMs",
+        "session_start: required session_index missing",
+        "session_start: required reason missing",
+        "session_start: required farm_level missing",
+        "session_start: required collection_level missing",
+        "session_start: required has_coop_hand missing"
+      ]
+    },
+    {
+      "id": "TS1 0 page/console errors",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "T-AC2 hidden 30 s same session; hidden >= 60 s -> session_end{hidden} + session_start{resume, new sid, index+1}",
+      "pass": false,
+      "hard": false,
+      "short": {
+        "starts": [
+          [
+            null,
+            null,
+            null
+          ]
+        ],
+        "ends": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "id": "TS2 0 page/console errors",
+      "pass": true,
+      "hard": false,
+      "short": []
+    },
+    {
+      "id": "CSR-10 save_corrupt once: recovered_from bak, store ls, tried[bak valid, idb ...] in order",
+      "pass": true,
+      "hard": true,
+      "short": [
+        {
+          "reason": "parse",
+          "had_backup": true,
+          "restored_from_backup": true,
+          "build": "m4.1+30b29d3",
+          "recovered_from": "bak",
+          "store": "ls",
+          "tried": [
+            {
+              "source": "bak",
+              "result": "valid"
+            },
+            {
+              "source": "idb",
+              "result": "absent"
+            }
+          ],
+          "restored_version": 6,
+          "migrated": false,
+          "type": "save_corrupt",
+          "ts": 1793299668079,
+          "sessionMs": 1
+        }
+      ]
+    },
+    {
+      "id": "CSR-10 notice_shown + notice_dismissed {notice, source, store} once each",
+      "pass": true,
+      "hard": true,
+      "short": {
+        "ns": [
+          {
+            "notice": "M1",
+            "source": "bak",
+            "store": "ls",
+            "type": "save_recovery_notice_shown",
+            "ts": 1793299668140,
+            "sessionMs": 62
+          }
+        ],
+        "nd": [
+          {
+            "notice": "M1",
+            "source": "bak",
+            "store": "ls",
+            "type": "save_recovery_notice_dismissed",
+            "ts": 1793299669418,
+            "sessionMs": 1340
+          }
+        ]
+      }
+    },
+    {
+      "id": "T-AC9 schema (TS3 log)",
+      "pass": false,
+      "hard": true,
+      "problems": [
+        "session_start: envelope sid missing",
+        "session_start: envelope fgMs missing",
+        "session_start: forbidden sessionMs",
+        "session_start: required session_index missing",
+        "session_start: required reason missing",
+        "session_start: required farm_level missing",
+        "session_start: required collection_level missing",
+        "session_start: required has_coop_hand missing",
+        "session_start: required viewport_w missing",
+        "session_start: required reduced_motion missing",
+        "save_corrupt: envelope sid missing",
+        "save_corrupt: envelope fgMs missing",
+        "save_corrupt: forbidden sessionMs",
+        "offline_grant: envelope sid missing",
+        "offline_grant: envelope fgMs missing",
+        "offline_grant: forbidden sessionMs",
+        "save_recovery_notice_shown: envelope sid missing",
+        "save_recovery_notice_shown: envelope fgMs missing",
+        "save_recovery_notice_shown: forbidden sessionMs",
+        "customer_arrive: envelope sid missing",
+        "customer_arrive: envelope fgMs missing",
+        "customer_arrive: forbidden sessionMs",
+        "customer_served: envelope sid missing",
+        "customer_served: envelope fgMs missing",
+        "customer_served: forbidden sessionMs",
+        "save_recovery_notice_dismissed: envelope sid missing",
+        "save_recovery_notice_dismissed: envelope fgMs missing",
+        "save_recovery_notice_dismissed: forbidden sessionMs",
+        "session_end: envelope sid missing",
+        "session_end: envelope fgMs missing",
+        "session_end: forbidden sessionMs",
+        "session_end: required reason missing",
+        "session_end: required fg_ms missing",
+        "session_end: required taps_total missing",
+        "session_end: required taps_moved_eggs missing",
+        "session_end: required eggs_collected_manual missing",
+        "session_end: required coop_full_ms missing",
+        "session_end: required eggs_lost_while_full missing",
+        "session_end: required managed missing",
+        "session_end: required farm_level missing",
+        "session_end: required collection_level missing",
+        "worker_summary: envelope sid missing",
+        "worker_summary: envelope fgMs missing",
+        "worker_summary: forbidden sessionMs"
+      ],
+      "short": [
+        "session_start: envelope sid missing",
+        "session_start: envelope fgMs missing",
+        "session_start: forbidden sessionMs",
+        "session_start: required session_index missing",
+        "session_start: required reason missing",
+        "session_start: required farm_level missing"
+      ]
+    },
+    {
+      "id": "TS3 0 page/console errors",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "IDB1-7 save_restore{source:idb} once, no save_restored, no save_corrupt",
+      "pass": true,
+      "hard": true,
+      "short": [
+        {
+          "source": "idb",
+          "type": "save_restore",
+          "ts": 1793299670531,
+          "sessionMs": 1
+        }
+      ]
+    },
+    {
+      "id": "TS4 0 page/console errors",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "CSR-6/10 fresh: save_corrupt{recovered_from:none, reason parse} + notice M3",
+      "pass": true,
+      "hard": true,
+      "short": {
+        "sc": [
+          {
+            "reason": "parse",
+            "had_backup": false,
+            "restored_from_backup": false,
+            "build": "m4.1+30b29d3",
+            "recovered_from": "none",
+            "store": "ls",
+            "tried": [
+              {
+                "source": "bak",
+                "result": "absent"
+              },
+              {
+                "source": "idb",
+                "result": "absent"
+              },
+              {
+                "source": "v6_backup",
+                "result": "absent"
+              }
+            ],
+            "migrated": false,
+            "type": "save_corrupt",
+            "ts": 1793299672358,
+            "sessionMs": 1
+          }
+        ],
+        "ns": [
+          {
+            "notice": "M3",
+            "source": "none",
+            "store": "ls",
+            "type": "save_recovery_notice_shown",
+            "ts": 1793299672390,
+            "sessionMs": 33
+          }
+        ]
+      }
+    },
+    {
+      "id": "TS5 0 page/console errors",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "offline_grant once, eggs > 0, away field present",
+      "pass": true,
+      "hard": true,
+      "short": [
+        {
+          "secondsAway": 7200,
+          "eggs": 29250,
+          "type": "offline_grant",
+          "ts": 1793299674256,
+          "sessionMs": 1
+        }
+      ]
+    },
+    {
+      "id": "offline_grant schema",
+      "pass": false,
+      "hard": true,
+      "short": [
+        "offline_grant: envelope sid missing",
+        "offline_grant: envelope fgMs missing",
+        "offline_grant: forbidden sessionMs"
+      ]
+    },
+    {
+      "id": "TS6 0 page/console errors",
+      "pass": true,
+      "hard": true,
+      "short": []
+    }
+  ],
+  "scenarios": {
+    "TS1": {
+      "build": {
+        "meta": "m4.1+30b29d3",
+        "app": "m4.1+30b29d3",
+        "dirty": false
+      },
+      "clicks": 20,
+      "play": {
+        "sellLabel": "Sell all (38 eggs · $180.12)",
+        "bought": 1
+      },
+      "n": 15,
+      "types": [
+        "session_start",
+        "offline_grant",
+        "customer_arrive",
+        "tap",
+        "customer_served",
+        "sell",
+        "upgrade",
+        "session_end",
+        "worker_summary"
+      ],
+      "errors": []
+    }
+  },
+  "browser": "156.0.8078.47",
+  "hardFail": 9
+}

@@ -1,0 +1,47 @@
+{
+ "farmLevel": 50,
+ "collectionLevel": 49,
+ "hensLevel": 50,
+ "eggValueLevel": 50,
+ "coinsCents": 168000000000000,
+ "customers": [
+  {
+   "id": 903,
+   "demand": 181000000000,
+   "filled": 0,
+   "waitedS": 1
+  }
+ ],
+ "workers": {
+  "market_hand": {
+   "energy": 80,
+   "cdS": 5
+  },
+  "coop_hand": {
+   "energy": 80,
+   "cdS": 5
+  },
+  "hawker": {
+   "energy": 80,
+   "cdS": 5
+  },
+  "grader": {
+   "energy": 80,
+   "cdS": 5
+  }
+ },
+ "graderTier": 5,
+ "basket": 2000000000,
+ "nextCustomerInS": 600,
+ "celebratedMilestones": [
+  "hens:10",
+  "hens:20",
+  "hens:30",
+  "grade:5",
+  "grade:10",
+  "grade:20",
+  "balanced:1",
+  "balanced:2",
+  "balanced:3"
+ ]
+}

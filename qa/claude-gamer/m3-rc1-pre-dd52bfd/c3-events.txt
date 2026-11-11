@@ -1,0 +1,452 @@
+# 2026-10-17T13:25:55.508Z chunk c3 390x844 540s idle=-1--1
+0:03 build {"meta":"m3-rc1-pre+dd52bfd","data":"m3-rc1-pre+dd52bfd"}
+0:03 shot c3-01-0m03-start.png
+0:03 dialog Welcome back! You were away 4m +1,015 eggs Collect
+0:03 shot c3-02-0m03-dialog.png
+0:03 state {"top":"Egg Farm $1,990.66 1,038 $1,990.66, 23 eggs","goal":"Farm L16 — ›","collect":"Collect +75 · 21 ready","cap":"21 / 800","onb":"","sellAll":"","sinceBuy":0}
+0:04 sell-order 0/46 eggs · $215.74 Sell 46 +$215.74
+0:04 shot c3-03-0m04-postsale-0s.png
+0:05 shot c3-04-0m05-postsale-1s.png
+0:05 postsale-1s []
+0:07 sell-order 0/58 eggs · $272.02 Sell 58 +$272.02
+0:07 shot c3-05-0m07-postsale-0s.png
+0:08 shot c3-06-0m08-postsale-1s.png
+0:08 postsale-1s ["0/70 eggs · $328.30 Sell 70 +$328.30"]
+0:09 sell-order 0/70 eggs · $328.30 Sell 70 +$328.30
+0:10 shot c3-07-0m10-postsale-0s.png
+0:11 shot c3-08-0m11-postsale-1s.png
+0:11 postsale-1s []
+0:12 buy [Farm] gap=8s :: L15 Farm level Coop upgrade at L20 Hens 80 → 85 Coop capacity 800 → 850 Egg price $4.69 → $4.82 Customers ever
+0:12 shot c3-09-0m12-buy-0s.png
+0:13 shot c3-10-0m13-buy-1.5s.png
+0:14 noeggs-while-holding top="Egg Farm $362.21 542 $362.21, 513 eggs" sellAll="No eggs to sell"
+0:15 sell-order 0/70 eggs · $337.40 Sell 70 +$337.40
+0:15 shot c3-11-0m15-postsale-0s.png
+0:17 shot c3-12-0m17-postsale-1s.png
+0:17 postsale-1s ["0/58 eggs · $279.56 Sell 58 +$279.56"]
+0:18 sell-order 0/58 eggs · $279.56 Sell 58 +$279.56
+0:19 state {"top":"Egg Farm $1,165.95 448 $978.17, 487 eggs","goal":"Farm L17 ~1 min 35 s ›","collect":"Collect +75 · 19 ready","cap":"19 / 850","onb":"","sellAll":"No eggs to sell","sinceBuy":8}
+0:19 noeggs-while-holding top="Egg Farm $1,165.95 469 $978.17, 487 eggs" sellAll="No eggs to sell"
+0:21 noeggs-while-holding top="Egg Farm $1,165.69 491 $1,165.95, 469 eggs" sellAll="No eggs to sell"
+0:22 sell-order 0/61 eggs · $294.02 Sell 61 +$294.02
+0:23 sell-order 0/49 eggs · $236.18 Sell 49 +$236.18
+0:25 noeggs-while-holding top="Egg Farm $1,695.15 451 $1,695.42, 427 eggs" sellAll="No eggs to sell"
+0:26 sell-order 0/64 eggs · $308.48 Sell 64 +$308.48
+0:27 sell-order 0/68 eggs · $327.76 Sell 68 +$327.76
+0:29 noeggs-while-holding top="Egg Farm $2,330.46 387 $2,330.93, 364 eggs" sellAll="No eggs to sell"
+0:29 shot c3-13-0m29-noeggs.png
+0:31 sell-order 0/73 eggs · $351.86 Sell 73 +$351.86
+0:33 sell-order 0/56 eggs · $269.92 Sell 56 +$269.92
+0:34 noeggs-while-holding top="Egg Farm $2,951.04 349 $2,951.51, 346 eggs" sellAll="No eggs to sell"
+0:35 state {"top":"Egg Farm $2,951.04 349 $2,951.04, 349 eggs","goal":"Farm L17 ~43 s ›","collect":"Collect +75 · 19 ready","cap":"19 / 850","onb":"","sellAll":"No eggs to sell","sinceBuy":24}
+0:35 sell-order 0/64 eggs · $308.48 Sell 64 +$308.48
+0:37 sell-order 0/44 eggs · $212.08 Sell 44 +$212.08
+0:38 noeggs-while-holding top="Egg Farm $3,470.87 309 $3,470.87, 309 eggs" sellAll="No eggs to sell"
+0:39 sell-order 0/59 eggs · $284.38 Sell 59 +$284.38
+0:41 sell-order 0/73 eggs · $351.86 Sell 73 +$351.86
+0:42 noeggs-while-holding top="Egg Farm $4,106.37 245 $4,106.37, 245 eggs" sellAll="No eggs to sell"
+0:43 noeggs-while-holding top="Egg Farm $4,390.55 208 $4,390.55, 186 eggs" sellAll="No eggs to sell"
+0:45 noeggs-while-holding top="Egg Farm $4,390.29 231 $4,390.29, 220 eggs" sellAll="No eggs to sell"
+0:46 noeggs-while-holding top="Egg Farm $4,693.48 193 $4,693.48, 193 eggs" sellAll="No eggs to sell"
+0:48 sell-order 0/41 eggs · $197.62 Sell 41 +$197.62
+0:49 noeggs-while-holding top="Egg Farm $4,890.63 198 $4,890.83, 184 eggs" sellAll="No eggs to sell"
+0:51 sell-order 0/39 eggs · $187.98 Sell 39 +$187.98
+0:52 state {"top":"Egg Farm $5,078.35 188 $5,078.35, 188 eggs","goal":"Farm L17 ~15 s ›","collect":"Collect +75 · 22 ready","cap":"22 / 850","onb":"","sellAll":"No eggs to sell","sinceBuy":40}
+0:52 sell-order 0/50 eggs · $241.00 Sell 50 +$241.00
+0:53 noeggs-while-holding top="Egg Farm $5,318.88 182 $5,318.88, 182 eggs" sellAll="No eggs to sell"
+0:55 sell-order 0/61 eggs · $294.02 Sell 61 +$294.02
+0:56 noeggs-while-holding top="Egg Farm $5,612.17 170 $5,612.43, 145 eggs" sellAll="No eggs to sell"
+0:57 sell-order 0/60 eggs · $289.20 Sell 60 +$289.20
+0:59 sell-order 0/61 eggs · $294.02 Sell 61 +$294.02
+1:00 noeggs-while-holding top="Egg Farm $6,194.65 117 $6,194.92, 92 eggs" sellAll="No eggs to sell"
+1:01 noeggs-while-holding top="Egg Farm $6,502.93 74 $6,502.93, 53 eggs" sellAll="No eggs to sell"
+1:03 sell-order 0/65 eggs · $313.30 Sell 65 +$313.30
+1:04 noeggs-while-holding top="Egg Farm $6,815.50 56 $6,815.97, 33 eggs" sellAll="No eggs to sell"
+1:05 sell-order 0/38 eggs · $183.16 Sell 38 +$183.16
+1:07 noeggs-while-holding top="Egg Farm $6,998.39 63 $6,998.39, 52 eggs" sellAll="No eggs to sell"
+1:08 state {"top":"Egg Farm $6,998.19 63 $6,998.19, 63 eggs","goal":"Farm L17 ~1 s ›","collect":"Collect +75 · 22 ready","cap":"22 / 850","onb":"","sellAll":"No eggs to sell","sinceBuy":56}
+1:08 sell-order 0/61 eggs · $294.02 Sell 61 +$294.02
+1:09 buy [Collection] gap=57s :: L14 Collect per tap Eggs per tap 75 → 80 Egg price $4.82 → $5.04 Level 14 / 30 $7,205.00
+1:09 shot c3-14-1m09-buy-0s.png
+1:10 shot c3-15-1m10-buy-1.5s.png
+1:11 sell-order 59/73 eggs · $367.92 Sell 14 +$70.56
+1:13 sell-order 0/74 eggs · $372.96 Sell 27 +$136.08
+1:14 sell-order 27/74 eggs · $372.96 Sell 27 +$136.08
+1:15 sell-order 54/74 eggs · $372.96 Sell 19 +$95.76
+1:17 sell-order 14/59 eggs · $297.36 Sell 9 +$45.36
+1:18 sell-order 23/59 eggs · $297.36 Sell 25 +$126.00
+1:19 sell-order 48/59 eggs · $297.36 Sell 11 +$55.44
+1:21 sell-order 0/71 eggs · $357.84 Sell 32 +$161.28
+1:23 state {"top":"Egg Farm $1,409.60 0 $1,409.60, 0 eggs","goal":"Farm L17 ~47 s ›","collect":"Collect +80 · 21 ready","cap":"21 / 850","onb":"","sellAll":"No eggs to sell","sinceBuy":14}
+1:23 sell-order 57/71 eggs · $357.84 Sell 14 +$70.56
+1:25 sell-order 0/66 eggs · $332.64 Sell 31 +$156.24
+1:26 sell-order 31/66 eggs · $332.64 Sell 23 +$115.92
+1:27 sell-order 54/66 eggs · $332.64 Sell 12 +$60.48
+1:29 sell-order 22/49 eggs · $246.96 Sell 11 +$55.44
+1:31 sell-order 33/49 eggs · $246.96 Sell 16 +$80.64
+1:33 sell-order 7/40 eggs · $201.60 Sell 33 +$166.32
+1:35 sell-order 35/49 eggs · $246.96 Sell 14 +$70.56
+1:37 sell-order 0/73 eggs · $367.92 Sell 29 +$146.16
+1:38 sell-order 29/73 eggs · $367.92 Sell 25 +$126.00
+1:39 state {"top":"Egg Farm $2,777.35 0 $2,777.35, 0 eggs","goal":"Farm L17 ~40 s ›","collect":"Collect +80 · 21 ready","cap":"21 / 850","onb":"","sellAll":"No eggs to sell","sinceBuy":30}
+1:39 sell-order 54/73 eggs · $367.92 Sell 19 +$95.76
+1:41 sell-order 15/60 eggs · $302.40 Sell 11 +$55.44
+1:42 sell-order 26/60 eggs · $302.40 Sell 23 +$115.92
+1:43 sell-order 49/60 eggs · $302.40 Sell 11 +$55.44
+1:45 sell-order 0/40 eggs · $201.60 Sell 33 +$166.32
+1:46 sell-order 17/59 eggs · $297.36 Sell 2 +$10.08
+1:48 sell-order 19/59 eggs · $297.36 Sell 22 +$110.88
+1:49 sell-order 41/59 eggs · $297.36 Sell 18 +$90.72
+1:50 sell-order 6/59 eggs · $297.36 Sell 22 +$110.88
+1:52 sell-order 28/59 eggs · $297.36 Sell 24 +$120.96
+1:53 sell-order 1/46 eggs · $231.84 Sell 14 +$70.56
+1:54 sell-order 15/46 eggs · $231.84 Sell 24 +$120.96
+1:55 state {"top":"Egg Farm $4,165.05 0 $4,165.25, 0 eggs","goal":"Farm L17 ~30 s ›","collect":"Collect +80 · 22 ready","cap":"22 / 850","onb":"","sellAll":"No eggs to sell","sinceBuy":47}
+1:56 sell-order 39/46 eggs · $231.84 Sell 7 +$35.28
+1:57 sell-order 0/60 eggs · $302.40 Sell 39 +$196.56
+1:58 sell-order 39/60 eggs · $302.40 Sell 21 +$105.84
+2:00 sell-order 0/73 eggs · $367.92 Sell 24 +$120.96
+2:02 sell-order 47/73 eggs · $367.92 Sell 23 +$115.92
+2:04 sell-order 70/73 eggs · $367.92 Sell 3 +$15.12
+2:05 sell-order 26/70 eggs · $352.80 Sell 17 +$85.68
+2:06 sell-order 43/70 eggs · $352.80 Sell 22 +$110.88
+2:08 sell-order 65/70 eggs · $352.80 Sell 5 +$25.20
+2:09 sell-order 0/51 eggs · $257.04 Sell 41 +$206.64
+2:11 sell-order 41/51 eggs · $257.04 Sell 10 +$50.40
+2:12 state {"top":"Egg Farm $5,477.36 14 $5,477.36, 14 eggs","goal":"Farm L17 ~19 s ›","collect":"Collect +80 · 22 ready","cap":"22 / 850","onb":"","sellAll":"Sell all (14 eggs · $70.56)","sinceBuy":63}
+2:12 sell-order 0/43 eggs · $216.72 Sell 36 +$181.44
+2:13 sell-order 41/43 eggs · $216.72 Sell 2 +$10.08
+2:15 sell-order 0/75 eggs · $378.00 Sell 39 +$196.56
+2:16 sell-order 39/75 eggs · $378.00 Sell 22 +$110.88
+2:17 sell-order 66/75 eggs · $378.00 Sell 9 +$45.36
+2:19 sell-order 0/63 eggs · $317.52 Sell 32 +$161.28
+2:20 sell-order 32/63 eggs · $317.52 Sell 27 +$136.08
+2:21 sell-order 59/63 eggs · $317.52 Sell 4 +$20.16
+2:23 sell-order 15/53 eggs · $267.12 Sell 24 +$120.96
+2:24 sell-order 39/53 eggs · $267.12 Sell 14 +$70.56
+2:25 sell-order 11/51 eggs · $257.04 Sell 21 +$105.84
+2:27 sell-order 32/51 eggs · $257.04 Sell 19 +$95.76
+2:28 state {"top":"Egg Farm $6,910.63 4 $6,910.63, 4 eggs","goal":"Farm L17 ~2 s ›","collect":"Collect +80 · 23 ready","cap":"23 / 850","onb":"","sellAll":"Sell all (4 eggs · $20.16)","sinceBuy":79}
+2:28 sell-order 0/53 eggs · $267.12 Sell 28 +$141.12
+2:29 buy [Farm] gap=80s :: L16 Farm level Coop upgrade at L20 Hens 85 → 90 Coop capacity 850 → 900 Egg price $5.04 → $5.18 Customers ever
+2:29 shot c3-16-2m29-buy-0s.png
+2:30 shot c3-17-2m30-buy-1.5s.png
+2:31 sell-order 0/50 eggs · $259.00 Sell 50 +$259.00
+2:33 sell-order 0/60 eggs · $310.80 Sell 30 +$155.40
+2:34 sell-order 30/60 eggs · $310.80 Sell 26 +$134.68
+2:35 sell-order 56/60 eggs · $310.80 Sell 4 +$20.72
+2:37 sell-order 0/64 eggs · $331.52 Sell 44 +$227.92
+2:38 sell-order 44/64 eggs · $331.52 Sell 20 +$103.60
+2:39 sell-order 0/55 eggs · $284.90 Sell 29 +$150.22
+2:41 sell-order 29/55 eggs · $284.90 Sell 23 +$119.14
+2:42 sell-order 52/55 eggs · $284.90 Sell 3 +$15.54
+2:43 state {"top":"Egg Farm $1,211.73 22 $1,211.73, 22 eggs","goal":"Farm L18: Grader tier 1 ~1 min 46 s ›","collect":"Collect +80 · 24 ready","cap":"24 / 900","onb":"","sellAll":"Sell all (22 eggs · $113.96)","sinceBuy":15}
+2:43 sell-order 0/46 eggs · $238.28 Sell 46 +$238.28
+2:45 sell-order 0/58 eggs · $300.44 Sell 25 +$129.50
+2:46 sell-order 25/58 eggs · $300.44 Sell 23 +$119.14
+2:48 sell-order 48/58 eggs · $300.44 Sell 10 +$51.80
+2:49 sell-order 0/75 eggs · $388.50 Sell 39 +$202.02
+2:50 sell-order 39/75 eggs · $388.50 Sell 25 +$129.50
+2:52 sell-order 64/75 eggs · $388.50 Sell 11 +$56.98
+2:53 sell-order 0/54 eggs · $279.72 Sell 38 +$196.84
+2:54 sell-order 38/54 eggs · $279.72 Sell 16 +$82.88
+2:56 sell-order 0/53 eggs · $274.54 Sell 32 +$165.76
+2:57 sell-order 32/53 eggs · $274.54 Sell 21 +$108.78
+2:58 sell-order 0/73 eggs · $378.14 Sell 28 +$145.04
+2:59 state {"top":"Egg Farm $2,835.99 0 $2,835.99, 0 eggs","goal":"Farm L18: Grader tier 1 ~1 min 23 s ›","collect":"Collect +80 · 23 ready","cap":"23 / 900","onb":"","sellAll":"No eggs to sell","sinceBuy":31}
+3:00 sell-order 28/73 eggs · $378.14 Sell 23 +$119.14
+3:01 sell-order 51/73 eggs · $378.14 Sell 22 +$113.96
+3:02 sell-order 0/51 eggs · $264.18 Sell 27 +$139.86
+3:04 sell-order 27/51 eggs · $264.18 Sell 24 +$124.32
+3:05 sell-order 0/43 eggs · $222.74 Sell 25 +$129.50
+3:06 sell-order 25/43 eggs · $222.74 Sell 18 +$93.24
+3:08 sell-order 0/74 eggs · $383.32 Sell 30 +$155.40
+3:09 sell-order 30/74 eggs · $383.32 Sell 25 +$129.50
+3:10 sell-order 55/74 eggs · $383.32 Sell 19 +$98.42
+3:12 sell-order 0/58 eggs · $300.44 Sell 30 +$155.40
+3:13 sell-order 30/58 eggs · $300.44 Sell 23 +$119.14
+3:15 sell-order 53/58 eggs · $300.44 Sell 5 +$25.90
+3:16 state {"top":"Egg Farm $4,237.50 21 $4,237.50, 21 eggs","goal":"Farm L18: Grader tier 1 ~1 min 7 s ›","collect":"Collect +80 · 23 ready","cap":"23 / 900","onb":"","sellAll":"Sell all (21 eggs · $108.78)","sinceBuy":47}
+3:16 sell-order 0/71 eggs · $367.78 Sell 44 +$227.92
+3:17 sell-order 44/71 eggs · $367.78 Sell 25 +$129.50
+3:19 sell-order 69/71 eggs · $367.78 Sell 2 +$10.36
+3:20 sell-order 0/61 eggs · $315.98 Sell 50 +$259.00
+3:21 sell-order 50/61 eggs · $315.98 Sell 11 +$56.98
+3:23 sell-order 0/68 eggs · $352.24 Sell 34 +$176.12
+3:24 sell-order 34/68 eggs · $352.24 Sell 28 +$145.04
+3:25 sell-order 62/68 eggs · $352.24 Sell 6 +$31.08
+3:27 sell-order 0/73 eggs · $378.14 Sell 39 +$202.02
+3:28 sell-order 0/57 eggs · $295.26 Sell 27 +$139.86
+3:29 sell-order 27/57 eggs · $295.26 Sell 21 +$108.78
+3:31 sell-order 48/57 eggs · $295.26 Sell 9 +$46.62
+3:32 state {"top":"Egg Farm $5,768.51 16 $5,768.51, 16 eggs","goal":"Farm L18: Grader tier 1 ~49 s ›","collect":"Collect +80 · 24 ready","cap":"24 / 900","onb":"","sellAll":"Sell all (16 eggs · $82.88)","sinceBuy":63}
+3:32 sell-order 0/37 eggs · $191.66 Sell 37 +$191.66
+3:33 sell-order 0/58 eggs · $300.44 Sell 28 +$145.04
+3:35 sell-order 28/58 eggs · $300.44 Sell 23 +$119.14
+3:37 sell-order 51/58 eggs · $300.44 Sell 7 +$36.26
+3:38 sell-order 0/52 eggs · $269.36 Sell 52 +$269.36
+3:40 sell-order 0/46 eggs · $238.28 Sell 28 +$145.04
+3:41 sell-order 28/46 eggs · $238.28 Sell 18 +$93.24
+3:42 sell-order 0/57 eggs · $295.26 Sell 30 +$155.40
+3:44 sell-order 30/57 eggs · $295.26 Sell 26 +$134.68
+3:45 sell-order 56/57 eggs · $295.26 Sell 1 +$5.18
+3:46 sell-order 0/54 eggs · $279.72 Sell 47 +$243.46
+3:47 state {"top":"Egg Farm $7,304.71 0 $7,304.71, 0 eggs","goal":"Farm L18: Grader tier 1 ~31 s ›","collect":"Collect +80 · 24 ready","cap":"24 / 900","onb":"","sellAll":"No eggs to sell","sinceBuy":79}
+3:48 sell-order 47/54 eggs · $279.72 Sell 7 +$36.26
+3:49 sell-order 0/56 eggs · $290.08 Sell 42 +$217.56
+3:50 sell-order 42/56 eggs · $290.08 Sell 14 +$72.52
+3:52 sell-order 0/48 eggs · $248.64 Sell 34 +$176.12
+3:53 sell-order 34/48 eggs · $248.64 Sell 14 +$72.52
+3:54 sell-order 0/66 eggs · $341.88 Sell 35 +$181.30
+3:56 sell-order 35/66 eggs · $341.88 Sell 23 +$119.14
+3:57 sell-order 58/66 eggs · $341.88 Sell 8 +$41.44
+3:59 sell-order 0/59 eggs · $305.62 Sell 41 +$212.38
+4:00 sell-order 41/59 eggs · $305.62 Sell 18 +$93.24
+4:01 sell-order 0/61 eggs · $315.98 Sell 31 +$160.58
+4:03 sell-order 31/61 eggs · $315.98 Sell 25 +$129.50
+4:04 state {"top":"Egg Farm $8,815.00 0 $8,815.00, 0 eggs","goal":"Farm L18: Grader tier 1 ~15 s ›","collect":"Collect +80 · 23 ready","cap":"23 / 900","onb":"","sellAll":"No eggs to sell","sinceBuy":95}
+4:04 sell-order 56/61 eggs · $315.98 Sell 5 +$25.90
+4:05 sell-order 0/54 eggs · $279.72 Sell 43 +$222.74
+4:07 sell-order 43/54 eggs · $279.72 Sell 11 +$56.98
+4:08 sell-order 0/36 eggs · $186.48 Sell 36 +$186.48
+4:09 sell-order 0/42 eggs · $217.56 Sell 25 +$129.50
+4:11 sell-order 25/42 eggs · $217.56 Sell 17 +$88.06
+4:12 sell-order 0/40 eggs · $207.20 Sell 36 +$186.48
+4:13 sell-order 36/40 eggs · $207.20 Sell 4 +$20.72
+4:15 sell-order 0/36 eggs · $186.48 Sell 36 +$186.48
+4:16 sell-order 0/46 eggs · $238.28 Sell 32 +$165.76
+4:17 sell-order 32/46 eggs · $238.28 Sell 14 +$72.52
+4:19 sell-order 0/66 eggs · $341.88 Sell 32 +$165.76
+4:19 buy [Farm] gap=111s :: L17 Farm level Coop upgrade at L20 Hens 90 → 95 Coop capacity 900 → 950 Egg price $5.18 → $5.32 Customers ever
+4:20 shot c3-18-4m20-buy-0s.png
+4:21 shot c3-19-4m21-buy-1.5s.png
+4:22 state {"top":"Egg Farm $134.51 26 $134.51, 26 eggs","goal":"Grader tier 1: ×1.5 ~1 min ›","collect":"Collect +80 · 31 ready","cap":"31 / 950","onb":"","sellAll":"No eggs to sell","sinceBuy":2}
+4:22 sell-order 32/66 eggs · $351.12 Sell 34 +$180.88
+4:23 sell-order 0/43 eggs · $228.76 Sell 43 +$228.76
+4:25 sell-order 0/57 eggs · $303.24 Sell 35 +$186.20
+4:26 sell-order 35/57 eggs · $303.24 Sell 22 +$117.04
+4:27 sell-order 0/45 eggs · $239.40 Sell 29 +$154.28
+4:29 sell-order 29/45 eggs · $239.40 Sell 16 +$85.12
+4:30 sell-order 0/55 eggs · $292.60 Sell 35 +$186.20
+4:31 sell-order 35/55 eggs · $292.60 Sell 20 +$106.40
+4:33 sell-order 0/66 eggs · $351.12 Sell 33 +$175.56
+4:34 sell-order 33/66 eggs · $351.12 Sell 25 +$133.00
+4:36 sell-order 58/66 eggs · $351.12 Sell 8 +$42.56
+4:37 state {"top":"Egg Farm $1,728.11 30 $1,728.11, 30 eggs","goal":"Grader tier 1: ×1.5 ~41 s ›","collect":"Collect +80 · 13 ready","cap":"13 / 950","onb":"","sellAll":"Sell all (19 eggs · $101.08)","sinceBuy":17}
+4:37 sell-order 0/66 eggs · $351.12 Sell 43 +$228.76
+4:38 sell-order 43/66 eggs · $351.12 Sell 23 +$122.36
+4:40 sell-order 0/44 eggs · $234.08 Sell 29 +$154.28
+4:41 sell-order 29/44 eggs · $234.08 Sell 15 +$79.80
+4:42 sell-order 0/50 eggs · $266.00 Sell 36 +$191.52
+4:44 sell-order 36/50 eggs · $266.00 Sell 14 +$74.48
+4:45 sell-order 0/67 eggs · $356.44 Sell 39 +$207.48
+4:46 sell-order 39/67 eggs · $356.44 Sell 25 +$133.00
+4:48 sell-order 64/67 eggs · $356.44 Sell 3 +$15.96
+4:49 sell-order 0/65 eggs · $345.80 Sell 48 +$255.36
+4:50 sell-order 48/65 eggs · $345.80 Sell 17 +$90.44
+4:52 sell-order 0/36 eggs · $191.52 Sell 35 +$186.20
+4:53 state {"top":"Egg Farm $3,465.35 7 $3,465.35, 7 eggs","goal":"Grader tier 1: ×1.5 ~22 s ›","collect":"Collect +80 · 19 ready","cap":"19 / 950","onb":"","sellAll":"No eggs to sell","sinceBuy":33}
+4:53 sell-order 35/36 eggs · $191.52 Sell 1 +$5.32
+4:55 sell-order 0/44 eggs · $234.08 Sell 44 +$234.08
+4:56 sell-order 0/39 eggs · $207.48 Sell 32 +$170.24
+4:57 sell-order 32/39 eggs · $207.48 Sell 7 +$37.24
+4:59 sell-order 0/55 eggs · $292.60 Sell 45 +$239.40
+5:00 sell-order 45/55 eggs · $292.60 Sell 10 +$53.20
+5:01 sell-order 0/55 eggs · $292.60 Sell 41 +$218.12
+5:03 sell-order 41/55 eggs · $292.60 Sell 14 +$74.48
+5:04 sell-order 0/52 eggs · $276.64 Sell 41 +$218.12
+5:05 sell-order 41/52 eggs · $276.64 Sell 11 +$58.52
+5:07 sell-order 0/40 eggs · $212.80 Sell 37 +$196.84
+5:08 sell-order 37/40 eggs · $212.80 Sell 3 +$15.96
+5:09 state {"top":"Egg Farm $4,984.47 25 $4,984.47, 25 eggs","goal":"Grader tier 1: ×1.5 ~6 s ›","collect":"Collect +80 · 23 ready","cap":"23 / 950","onb":"","sellAll":"Sell all (25 eggs · $133.00)","sinceBuy":50}
+5:09 sell-order 0/53 eggs · $281.96 Sell 48 +$255.36
+5:11 sell-order 48/53 eggs · $281.96 Sell 5 +$26.60
+5:12 sell-order 0/50 eggs · $266.00 Sell 48 +$255.36
+5:13 sell-order 48/50 eggs · $266.00 Sell 2 +$10.64
+5:15 sell-order 0/36 eggs · $191.52 Sell 36 +$191.52
+5:16 buy [Workers] gap=56s :: Manage all Market Hand · Asleep 💤 Energy 0% Manage Coop Hand · Tired Energy 7% Manage Hawker · Tired Energy 1
+5:16 shot c3-20-5m16-buy-0s.png
+5:17 shot c3-21-5m17-buy-1.5s.png
+5:18 sell-order 0/56 eggs · $446.88 Sell 56 +$446.88
+5:19 sell-order 0/40 eggs · $319.20 Sell 39 +$311.22
+5:21 sell-order 39/40 eggs · $319.20 Sell 1 +$7.98
+5:22 sell-order 0/34 eggs · $271.32 Sell 34 +$271.32
+5:23 sell-order 0/46 eggs · $367.08 Sell 43 +$343.14
+5:24 state {"top":"Egg Farm $1,564.09 17 $1,564.69, 0 eggs","goal":"Farm L19: Grader tier 2 ~1 min 27 s ›","collect":"Collect +80 · 8 ready","cap":"8 / 950","onb":"","sellAll":"No eggs to sell","sinceBuy":9}
+5:25 sell-order 43/46 eggs · $367.08 Sell 3 +$23.94
+5:26 sell-order 0/40 eggs · $319.20 Sell 40 +$319.20
+5:27 sell-order 0/62 eggs · $494.76 Sell 35 +$279.30
+5:29 sell-order 35/62 eggs · $494.76 Sell 25 +$199.50
+5:30 sell-order 60/62 eggs · $494.76 Sell 2 +$15.96
+5:31 sell-order 0/42 eggs · $335.16 Sell 42 +$335.16
+5:33 sell-order 0/48 eggs · $383.04 Sell 34 +$271.32
+5:34 sell-order 34/48 eggs · $383.04 Sell 14 +$111.72
+5:35 sell-order 0/67 eggs · $534.66 Sell 37 +$295.26
+5:37 sell-order 37/67 eggs · $534.66 Sell 25 +$199.50
+5:38 sell-order 62/67 eggs · $534.66 Sell 5 +$39.90
+5:39 sell-order 0/43 eggs · $343.14 Sell 43 +$343.14
+5:41 state {"top":"Egg Farm $3,995.59 16 $3,996.19, 3 eggs","goal":"Farm L19: Grader tier 2 ~59 s ›","collect":"Collect +80 · 12 ready","cap":"12 / 950","onb":"","sellAll":"Sell all (3 eggs · $23.94)","sinceBuy":25}
+5:41 sell-order 0/36 eggs · $287.28 Sell 29 +$231.42
+5:42 sell-order 29/36 eggs · $287.28 Sell 7 +$55.86
+5:44 sell-order 0/52 eggs · $414.96 Sell 45 +$359.10
+5:45 sell-order 45/52 eggs · $414.96 Sell 7 +$55.86
+5:46 sell-order 0/58 eggs · $462.84 Sell 44 +$351.12
+5:48 sell-order 44/58 eggs · $462.84 Sell 14 +$111.72
+5:49 sell-order 0/53 eggs · $422.94 Sell 37 +$295.26
+5:50 sell-order 37/53 eggs · $422.94 Sell 16 +$127.68
+5:52 sell-order 0/51 eggs · $406.98 Sell 36 +$287.28
+5:53 sell-order 36/51 eggs · $406.98 Sell 15 +$119.70
+5:54 sell-order 0/43 eggs · $343.14 Sell 36 +$287.28
+5:56 sell-order 36/43 eggs · $343.14 Sell 7 +$55.86
+5:57 state {"top":"Egg Farm $6,331.33 27 $6,331.33, 27 eggs","goal":"Farm L19: Grader tier 2 ~36 s ›","collect":"Collect +80 · 17 ready","cap":"17 / 950","onb":"","sellAll":"Sell all (20 eggs · $159.60)","sinceBuy":41}
+5:57 sell-order 0/57 eggs · $454.86 Sell 44 +$351.12
+5:58 sell-order 44/57 eggs · $454.86 Sell 13 +$103.74
+6:00 sell-order 0/40 eggs · $319.20 Sell 39 +$311.22
+6:01 sell-order 39/40 eggs · $319.20 Sell 1 +$7.98
+6:02 sell-order 0/53 eggs · $422.94 Sell 50 +$399.00
+6:04 sell-order 50/53 eggs · $422.94 Sell 3 +$23.94
+6:05 sell-order 0/53 eggs · $422.94 Sell 48 +$383.04
+6:07 sell-order 48/53 eggs · $422.94 Sell 5 +$39.90
+6:08 sell-order 0/57 eggs · $454.86 Sell 46 +$367.08
+6:09 sell-order 46/57 eggs · $454.86 Sell 11 +$87.78
+6:11 sell-order 0/54 eggs · $430.92 Sell 41 +$327.18
+6:12 sell-order 41/54 eggs · $430.92 Sell 13 +$103.74
+6:13 state {"top":"Egg Farm $8,834.65 17 $8,834.65, 17 eggs","goal":"Farm L19: Grader tier 2 ~16 s ›","collect":"Collect +80 · 21 ready","cap":"21 / 950","onb":"","sellAll":"Sell all (17 eggs · $135.66)","sinceBuy":57}
+6:13 sell-order 0/54 eggs · $430.92 Sell 38 +$303.24
+6:15 sell-order 38/54 eggs · $430.92 Sell 16 +$127.68
+6:16 sell-order 0/36 eggs · $287.28 Sell 36 +$287.28
+6:17 sell-order 0/59 eggs · $470.82 Sell 26 +$207.48
+6:19 sell-order 26/59 eggs · $470.82 Sell 25 +$199.50
+6:20 sell-order 51/59 eggs · $470.82 Sell 8 +$63.84
+6:21 sell-order 0/34 eggs · $271.32 Sell 34 +$271.32
+6:23 sell-order 0/53 eggs · $422.94 Sell 35 +$279.30
+6:24 sell-order 35/53 eggs · $422.94 Sell 18 +$143.64
+6:25 sell-order 0/54 eggs · $430.92 Sell 34 +$271.32
+6:27 sell-order 34/54 eggs · $430.92 Sell 20 +$159.60
+6:27 buy [Farm] gap=72s :: L18 Farm level Coop upgrade at L20 Hens 95 → 100 Coop capacity 950 → 1,000 Egg price $5.32 → $5.46 Customers e
+6:28 sell-order 0/56 eggs · $458.64 Sell 32 +$262.08
+6:29 state {"top":"Egg Farm $334.33 0 $334.33, 0 eggs","goal":"Grader tier 2: ×2 ~57 s ›","collect":"Collect +80 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"No eggs to sell","sinceBuy":2}
+6:30 sell-order 32/56 eggs · $458.64 Sell 24 +$196.56
+6:31 sell-order 0/34 eggs · $278.46 Sell 30 +$245.70
+6:32 sell-order 30/34 eggs · $278.46 Sell 4 +$32.76
+6:34 sell-order 0/59 eggs · $483.21 Sell 50 +$409.50
+6:35 sell-order 50/59 eggs · $483.21 Sell 9 +$73.71
+6:36 sell-order 0/36 eggs · $294.84 Sell 36 +$294.84
+6:38 sell-order 0/34 eggs · $278.46 Sell 34 +$278.46
+6:39 sell-order 0/37 eggs · $303.03 Sell 29 +$237.51
+6:40 sell-order 29/37 eggs · $303.03 Sell 8 +$65.52
+6:42 sell-order 0/62 eggs · $507.78 Sell 46 +$376.74
+6:43 sell-order 46/62 eggs · $507.78 Sell 16 +$131.04
+6:44 sell-order 0/51 eggs · $417.69 Sell 38 +$311.22
+6:45 state {"top":"Egg Farm $2,987.89 0 $2,987.89, 0 eggs","goal":"Grader tier 2: ×2 ~39 s ›","collect":"Collect +80 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"No eggs to sell","sinceBuy":18}
+6:46 sell-order 38/51 eggs · $417.69 Sell 13 +$106.47
+6:47 sell-order 0/47 eggs · $384.93 Sell 41 +$335.79
+6:48 sell-order 41/47 eggs · $384.93 Sell 6 +$49.14
+6:50 sell-order 0/40 eggs · $327.60 Sell 40 +$327.60
+6:51 sell-order 0/42 eggs · $343.98 Sell 34 +$278.46
+6:52 sell-order 34/42 eggs · $343.98 Sell 8 +$65.52
+6:54 sell-order 0/40 eggs · $327.60 Sell 40 +$327.60
+6:55 sell-order 0/47 eggs · $384.93 Sell 34 +$278.46
+6:56 sell-order 34/47 eggs · $384.93 Sell 13 +$106.47
+6:58 sell-order 0/37 eggs · $303.03 Sell 37 +$303.03
+6:59 sell-order 0/35 eggs · $286.65 Sell 30 +$245.70
+7:01 sell-order 30/35 eggs · $286.65 Sell 5 +$40.95
+7:02 state {"top":"Egg Farm $5,453.08 23 $5,453.08, 23 eggs","goal":"Grader tier 2: ×2 ~24 s ›","collect":"Collect +80 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"Sell all (23 eggs · $188.37)","sinceBuy":34}
+7:02 sell-order 0/66 eggs · $540.54 Sell 49 +$401.31
+7:03 sell-order 49/66 eggs · $540.54 Sell 17 +$139.23
+7:05 sell-order 0/50 eggs · $409.50 Sell 37 +$303.03
+7:06 sell-order 37/50 eggs · $409.50 Sell 13 +$106.47
+7:07 sell-order 0/55 eggs · $450.45 Sell 41 +$335.79
+7:09 sell-order 41/55 eggs · $450.45 Sell 14 +$114.66
+7:10 sell-order 0/42 eggs · $343.98 Sell 40 +$327.60
+7:11 sell-order 40/42 eggs · $343.98 Sell 2 +$16.38
+7:13 sell-order 0/34 eggs · $278.46 Sell 34 +$278.46
+7:14 sell-order 0/37 eggs · $303.03 Sell 37 +$303.03
+7:15 sell-order 0/47 eggs · $384.93 Sell 35 +$286.65
+7:17 sell-order 35/47 eggs · $384.93 Sell 12 +$98.28
+7:18 state {"top":"Egg Farm $8,163.97 16 $8,163.97, 16 eggs","goal":"Grader tier 2: ×2 ~6 s ›","collect":"Collect +80 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"Sell all (16 eggs · $131.04)","sinceBuy":50}
+7:18 sell-order 0/66 eggs · $540.54 Sell 42 +$343.98
+7:19 sell-order 42/66 eggs · $540.54 Sell 24 +$196.56
+7:21 sell-order 0/61 eggs · $499.59 Sell 30 +$245.70
+7:22 sell-order 30/61 eggs · $499.59 Sell 28 +$229.32
+7:23 buy [Workers] gap=56s :: Manage all Market Hand · Asleep 💤 Energy 0% Manage Coop Hand · Asleep 💤 Energy 0% Manage Hawker · Tired Ener
+7:23 sell-order 58/61 eggs · $666.12 Sell 3 +$32.76
+7:25 sell-order 0/64 eggs · $698.88 Sell 51 +$556.92
+7:26 sell-order 51/64 eggs · $698.88 Sell 13 +$141.96
+7:28 sell-order 0/52 eggs · $567.84 Sell 41 +$447.72
+7:29 sell-order 41/52 eggs · $567.84 Sell 11 +$120.12
+7:30 sell-order 0/64 eggs · $698.88 Sell 43 +$469.56
+7:32 sell-order 43/64 eggs · $698.88 Sell 21 +$229.32
+7:33 sell-order 0/63 eggs · $687.96 Sell 33 +$360.36
+7:34 state {"top":"Egg Farm $2,438.25 0 $2,438.25, 0 eggs","goal":"Collection L16: +5/tap ~53 s ›","collect":"Collect +80 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"No eggs to sell","sinceBuy":11}
+7:34 sell-order 33/63 eggs · $687.96 Sell 26 +$283.92
+7:36 sell-order 59/63 eggs · $687.96 Sell 4 +$43.68
+7:37 sell-order 0/35 eggs · $382.20 Sell 35 +$382.20
+7:38 sell-order 0/53 eggs · $578.76 Sell 43 +$469.56
+7:40 sell-order 43/53 eggs · $578.76 Sell 10 +$109.20
+7:41 sell-order 0/55 eggs · $600.60 Sell 44 +$480.48
+7:42 sell-order 44/55 eggs · $600.60 Sell 11 +$120.12
+7:44 sell-order 0/42 eggs · $458.64 Sell 42 +$458.64
+7:45 sell-order 0/44 eggs · $480.48 Sell 27 +$294.84
+7:46 sell-order 27/44 eggs · $480.48 Sell 17 +$185.64
+7:48 sell-order 0/48 eggs · $524.16 Sell 37 +$404.04
+7:49 sell-order 37/48 eggs · $524.16 Sell 11 +$120.12
+7:50 state {"top":"Egg Farm $5,790.69 17 $5,790.69, 17 eggs","goal":"Collection L16: +5/tap ~32 s ›","collect":"Collect +80 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"Sell all (17 eggs · $185.64)","sinceBuy":27}
+7:50 sell-order 0/37 eggs · $404.04 Sell 37 +$404.04
+7:52 sell-order 0/46 eggs · $502.32 Sell 34 +$371.28
+7:53 sell-order 34/46 eggs · $502.32 Sell 12 +$131.04
+7:55 sell-order 0/34 eggs · $371.28 Sell 34 +$371.28
+7:56 sell-order 0/50 eggs · $546.00 Sell 34 +$371.28
+7:57 sell-order 34/50 eggs · $546.00 Sell 16 +$174.72
+7:59 sell-order 0/51 eggs · $556.92 Sell 38 +$414.96
+8:00 sell-order 38/51 eggs · $556.92 Sell 13 +$141.96
+8:01 sell-order 0/59 eggs · $644.28 Sell 41 +$447.72
+8:03 sell-order 41/59 eggs · $644.28 Sell 18 +$196.56
+8:04 sell-order 0/57 eggs · $622.44 Sell 36 +$393.12
+8:05 sell-order 36/57 eggs · $622.44 Sell 21 +$229.32
+8:06 state {"top":"Egg Farm $9,437.97 7 $9,437.97, 7 eggs","goal":"Collection L16: +5/tap ~11 s ›","collect":"Collect +80 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"Sell all (7 eggs · $76.44)","sinceBuy":43}
+8:07 sell-order 0/56 eggs · $611.52 Sell 33 +$360.36
+8:08 sell-order 33/56 eggs · $611.52 Sell 23 +$251.16
+8:09 sell-order 0/61 eggs · $666.12 Sell 31 +$338.52
+8:11 sell-order 31/61 eggs · $666.12 Sell 28 +$305.76
+8:12 sell-order 59/61 eggs · $666.12 Sell 2 +$21.84
+8:13 sell-order 0/52 eggs · $567.84 Sell 52 +$567.84
+8:15 sell-order 0/35 eggs · $382.20 Sell 26 +$283.92
+8:15 buy [Collection] gap=52s :: L15 Collect per tap Eggs per tap 80 → 85 Egg price $5.46 → $5.69 Level 15 / 30 $11.5K
+8:16 sell-order 26/35 eggs · $398.30 Sell 9 +$102.42
+8:17 sell-order 0/52 eggs · $591.76 Sell 45 +$512.10
+8:19 sell-order 45/52 eggs · $591.76 Sell 7 +$79.66
+8:20 sell-order 0/38 eggs · $432.44 Sell 38 +$432.44
+8:22 sell-order 0/34 eggs · $386.92 Sell 34 +$386.92
+8:23 state {"top":"Egg Farm $1,551.91 3 $1,551.91, 3 eggs","goal":"Farm L20: new coop ~1 min 17 s ›","collect":"Collect +85 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"Sell all (3 eggs · $34.14)","sinceBuy":7}
+8:23 sell-order 0/32 eggs · $364.16 Sell 29 +$330.02
+8:24 sell-order 29/32 eggs · $364.16 Sell 3 +$34.14
+8:26 sell-order 0/51 eggs · $580.38 Sell 51 +$580.38
+8:27 sell-order 0/50 eggs · $569.00 Sell 28 +$318.64
+8:28 sell-order 28/50 eggs · $569.00 Sell 22 +$250.36
+8:30 sell-order 0/61 eggs · $694.18 Sell 32 +$364.16
+8:31 sell-order 32/61 eggs · $694.18 Sell 26 +$295.88
+8:32 sell-order 58/61 eggs · $694.18 Sell 3 +$34.14
+8:34 sell-order 0/57 eggs · $648.66 Sell 51 +$580.38
+8:35 sell-order 51/57 eggs · $648.66 Sell 6 +$68.28
+8:36 sell-order 0/56 eggs · $637.28 Sell 48 +$546.24
+8:38 sell-order 48/56 eggs · $637.28 Sell 8 +$91.04
+8:39 state {"top":"Egg Farm $5,045.57 20 $5,045.57, 20 eggs","goal":"Farm L20: new coop ~1 min 1 s ›","collect":"Collect +85 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"Sell all (20 eggs · $227.60)","sinceBuy":24}
+8:39 sell-order 0/60 eggs · $682.80 Sell 46 +$523.48
+8:40 sell-order 46/60 eggs · $682.80 Sell 14 +$159.32
+8:42 sell-order 0/39 eggs · $443.82 Sell 39 +$443.82
+8:43 sell-order 0/46 eggs · $523.48 Sell 29 +$330.02
+8:44 sell-order 29/46 eggs · $523.48 Sell 17 +$193.46
+8:46 sell-order 0/45 eggs · $512.10 Sell 37 +$421.06
+8:47 sell-order 37/45 eggs · $512.10 Sell 8 +$91.04
+8:49 sell-order 0/55 eggs · $625.90 Sell 46 +$523.48
+8:50 sell-order 46/55 eggs · $625.90 Sell 9 +$102.42
+8:51 sell-order 0/37 eggs · $421.06 Sell 37 +$421.06
+8:53 sell-order 0/60 eggs · $682.80 Sell 34 +$386.92
+8:54 sell-order 34/60 eggs · $682.80 Sell 26 +$295.88
+8:55 state {"top":"Egg Farm $8,937.53 2 $8,937.53, 2 eggs","goal":"Farm L20: new coop ~42 s ›","collect":"Collect +85 · 26 ready","cap":"26 / 1,000","onb":"","sellAll":"Sell all (2 eggs · $22.76)","sinceBuy":40}
+8:55 sell-order 0/56 eggs · $637.28 Sell 28 +$318.64
+8:57 sell-order 28/56 eggs · $637.28 Sell 28 +$318.64
+8:58 sell-order 0/31 eggs · $352.78 Sell 26 +$295.88
+8:59 sell-order 26/31 eggs · $352.78 Sell 5 +$56.90
+9:00 shot c3-22-9m00-end.png

@@ -1,0 +1,43 @@
+{
+ "id": "M1-midgame-L18",
+ "build": "dd52bfd (M4 off, shipped)",
+ "ls": {
+  "eggfarm.install_id": "7cb30d2e-49a2-4b17-b21a-be69a179d94e",
+  "eggfarm.save": "{\"version\":6,\"savedAt\":1792353600000,\"sum\":\"5f0fbdce\",\"state\":{\"coinsCents\":4567890,\"coop\":133,\"basket\":412,\"collectionLevel\":11,\"farmLevel\":18,\"customers\":[{\"id\":41,\"demand\":30,\"filled\":7,\"waitedS\":12}],\"nextCustomerInS\":10,\"nextCustomerId\":42,\"rng\":2789948889,\"pendingOfflineEggs\":0,\"celebratedTier\":2,\"workers\":{\"market_hand\":1,\"coop_hand\":1},\"graderTier\":3,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{\"market_hand\":0.4}}}",
+  "eggfarm.telemetry": "[{\"install_id\":\"7cb30d2e-49a2-4b17-b21a-be69a179d94e\",\"build\":\"qa-dd52bfd\",\"type\":\"session_start\",\"ts\":1792350000000,\"sessionMs\":0}]",
+  "eggfarm.save.bak": "{\"version\":6,\"savedAt\":1792350000000,\"sum\":\"cf1cddb6\",\"state\":{\"coinsCents\":0,\"coop\":0,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":2789948889,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{},\"graderTier\":0,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{}}}"
+ },
+ "idb": "{\"version\":6,\"savedAt\":1792353600000,\"sum\":\"5f0fbdce\",\"state\":{\"coinsCents\":4567890,\"coop\":133,\"basket\":412,\"collectionLevel\":11,\"farmLevel\":18,\"customers\":[{\"id\":41,\"demand\":30,\"filled\":7,\"waitedS\":12}],\"nextCustomerInS\":10,\"nextCustomerId\":42,\"rng\":2789948889,\"pendingOfflineEggs\":0,\"celebratedTier\":2,\"workers\":{\"market_hand\":1,\"coop_hand\":1},\"graderTier\":3,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{\"market_hand\":0.4}}}",
+ "savedAt": 1792353600000,
+ "saveSeq": 0,
+ "state": {
+  "coinsCents": 4567890,
+  "coop": 133,
+  "basket": 412,
+  "collectionLevel": 11,
+  "farmLevel": 18,
+  "customers": [
+   {
+    "id": 41,
+    "demand": 30,
+    "filled": 7,
+    "waitedS": 12
+   }
+  ],
+  "nextCustomerInS": 10,
+  "nextCustomerId": 42,
+  "rng": 2789948889,
+  "pendingOfflineEggs": 0,
+  "celebratedTier": 2,
+  "workers": {
+   "market_hand": 1,
+   "coop_hand": 1
+  },
+  "graderTier": 3,
+  "manageCdS": 0,
+  "coopFullS": 0,
+  "wageFracCents": {
+   "market_hand": 0.4
+  }
+ }
+}

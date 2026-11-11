@@ -1,0 +1,492 @@
+diff --git a/scripts/m41-9-scroll-sweep.mjs b/scripts/m41-9-scroll-sweep.mjs
+new file mode 100644
+index 0000000..f3f8d55
+--- /dev/null
++++ b/scripts/m41-9-scroll-sweep.mjs
+@@ -0,0 +1,121 @@
++// M41-9 #65 exit criteria (HoQA + Art, after CCR M1 on 7779088): the explainer card is NEVER over a visible Buy hit area or a
++// hittable Collect, and the FIRST tap on every visible Buy buys, with the Upgrades sheet scrolled.
++// Usage: npm run build:qa && node scripts/m41-9-scroll-sweep.mjs <chromium|firefox|webkit> [360|375|390 ...]   (default: all three)
++//        node scripts/m41-9-scroll-sweep.mjs --summary            (matrix over every sweep-*.jsonl in the out dir)
++//   Serves this worktree's dist-qa (must be HEAD, not +dirty); writes /workspace/wt-ui-shots/m41-9-<sha7>/sweep-<engine>-<w>.jsonl,
++//   one screenshot per (tab, refund, scroll) state (mouse pass) and merges them into manifest.json. No environment overrides.
++//   One engine per run, inside the browser-test flock.
++// Matrix: 360x640 / 375x667 / 390x844 x Farm + Collection tabs x refund line off / on (migrationRefundCents 0 / 123450)
++//   x sheet scroll 0 / 100 / 200 / 300 px / end x mouse (page.mouse.click) + touch (hasTouch, touchscreen.tap).
++// Fine sweep: Farm + Collection x refund off/on, mouse pass, scrollTop every 4 px 0..end, overlap + hit test only (CCR's sweep).
++// Per state: the card is shown at scroll 0 (g.onTracksCommitted, the in-session hook), THEN the sheet body is scrolled (the CCR
++//   repro order: the card must re-place on scroll). Measured independently of the app's own placement code:
++//   - overlap: the painted card's rect vs every Buy rect clipped to the sheet's scroll container and the viewport, and #collect if
++//     elementsFromPoint at its centre (skipping the card) is Collect; a [data-place=none] card has visibility:hidden (no paint, no
++//     hit area) and is recorded as such.
++//   - first tap: for EACH visible Buy (centre hit-testable with no card), re-arm state + card, scroll, tap the hittable centre once:
++//     BUY (level +1, coins down) / DISMISS-ONLY (card closed, nothing bought) / NOTHING. Exit: 0 overlaps, 0 DISMISS-ONLY, 0 NOTHING.
++import pw from 'playwright-core'; import { serveOwn } from './serve-own.mjs';
++import { mkdirSync, writeFileSync, appendFileSync, readFileSync, existsSync, readdirSync } from 'node:fs'; import { execSync } from 'node:child_process';
++const ARGS = process.argv.slice(2), HEAD = execSync('git rev-parse HEAD').toString().trim(), OUT = `/workspace/wt-ui-shots/m41-9-${HEAD.slice(0, 7)}`;
++const SIZES = { 360: 640, 375: 667, 390: 844 }, SCROLLS = [0, 100, 200, 300, 'end'], TABS = ['farm', 'collection'], REFUNDS = [0, 123450], INPUTS = ['mouse', 'touch'];
++if (ARGS[0] === '--summary') {
++  const rows = readdirSync(OUT).filter(f => /^sweep-(chromium|firefox|webkit)-\d+\.jsonl$/.test(f)).flatMap(f => readFileSync(`${OUT}/${f}`, 'utf8').trim().split('\n').map(l => JSON.parse(l)));
++  const st = rows.filter(r => r.kind === 'state'), fine = rows.filter(r => r.kind === 'fine'), taps = rows.filter(r => r.kind === 'tap'), ends = rows.filter(r => r.kind === 'done');
++  const lines = ['| engine | width | states | card over Buy/Collect | 4px fine sweep: positions / over a Buy | places (states) | taps | BUY | DISMISS-ONLY | NOTHING | page errors |', '|---|---|---|---|---|---|---|---|---|---|---|'];
++  let bad = 0;
++  for (const eng of ['chromium', 'firefox', 'webkit']) for (const w of [360, 375, 390]) {
++    const s = st.filter(r => r.engine === eng && r.w === w), t = taps.filter(r => r.engine === eng && r.w === w), d = ends.find(r => r.engine === eng && r.w === w);
++    if (!s.length) { lines.push(`| ${eng} | ${w} | not run | | | | | | | | |`); bad++; continue; }
++    const pl = {}; s.forEach(r => pl[r.place] = (pl[r.place] ?? 0) + 1);
++    const f = fine.filter(r => r.engine === eng && r.w === w), fp = f.reduce((a, r) => a + r.positions, 0), fo = f.reduce((a, r) => a + r.over.length, 0);
++    const ov = s.filter(r => r.overlaps.length || r.efp.some(e => e.onCard)).length, n = k => t.filter(r => r.outcome === k).length, pe = d?.pageErrors?.length ?? 'n/a';
++    bad += ov + fo + (fp ? 0 : 1) + n('DISMISS-ONLY') + n('NOTHING') + (t.length ? 0 : 1) + (pe === 0 ? 0 : 1);
++    lines.push(`| ${eng} | ${w} | ${s.length} | ${ov} | ${fp} / ${fo} | ${Object.entries(pl).map(([k, v]) => `${k} ${v}`).join(', ')} | ${t.length} | ${n('BUY')} | ${n('DISMISS-ONLY')} | ${n('NOTHING')} | ${pe} |`);
++  }
++  const fineNone = fine.filter(r => r.places.none).map(r => `${r.engine} ${r.w} ${r.tab} refund=${r.refund ? 'on' : 'off'}: ${r.places.none} of ${r.positions} positions (fine sweep)`);
++  const none = st.filter(r => r.place === 'none').map(r => `${r.engine} ${r.w} ${r.tab} refund=${r.refund ? 'on' : 'off'} scroll=${r.scroll}(${r.scrollTop}px) ${r.input}`);
++  const txt = `M41-9 #65 scroll sweep @ ${HEAD} (scripts/m41-9-scroll-sweep.mjs)\n\n${lines.join('\n')}\n\nplace:'none' states (card kept out of the way, hidden): ${none.length}\n${none.join('\n')}\n${fineNone.join('\n')}\n\n${bad ? `FAIL (${bad})` : 'PASS: 0 overlaps, 0 dismiss-only, 0 nothing, every engine x width run'}\n`;
++  writeFileSync(`${OUT}/sweep-summary.md`, txt); console.log(txt); process.exit(bad ? 1 : 0);
++}
++const [eng, ...wa] = ARGS, WIDTHS = wa.length ? wa.map(Number) : [360, 375, 390];
++if (!['chromium', 'firefox', 'webkit'].includes(eng) || WIDTHS.some(w => !SIZES[w])) { console.error('usage: node scripts/m41-9-scroll-sweep.mjs <chromium|firefox|webkit> [360|375|390 ...] | --summary'); process.exit(2); }
++const srv = await serveOwn('dist-qa'); const die = m => { console.error(`m41-9-scroll-sweep: ${m}`); srv.stop(); process.exit(2); };
++const html = await (await fetch(srv.url)).text(); let bid = null;
++for (const [, u] of html.matchAll(/src="([^"]+\.js)"/g)) { const m = (await (await fetch(new URL(u, srv.url))).text()).match(/["'`](m\d[a-z0-9.-]*)\+([0-9a-f]{7,40})(\+dirty)?["'`]/); if (m) { bid = m; break; } }
++if (!bid) die('no build id in dist-qa'); if (bid[3]) die(`dist-qa is +dirty (${bid[0]})`); if (!HEAD.startsWith(bid[2])) die(`dist-qa ${bid[0]} is not HEAD ${HEAD}; npm run build:qa`);
++mkdirSync(`${OUT}/sweep`, { recursive: true });
++const br = eng === 'chromium' ? await pw.chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[eng].launch();
++const LV = { farm: 'farmLevel', hens: 'hensLevel', eggValue: 'eggValueLevel', collection: 'collectionLevel' };
++const BASE = { farmLevel: 3, hensLevel: 2, eggValueLevel: 2, collectionLevel: 1, coinsCents: 5e7 }, shots = [];
++// In-page measurement (independent of tracks-explainer.ts): visible Buy hit areas clipped to the scroll body + viewport, hittable Collect.
++const MEASURE = () => {
++  const body = document.querySelector('#p-upgrades .body'), br = body.getBoundingClientRect(), card = document.querySelector('.tracks-exp');
++  const clip = r => ({ l: Math.max(r.left, br.left, 0), r: Math.min(r.right, br.right, innerWidth), t: Math.max(r.top, br.top, 0), b: Math.min(r.bottom, br.bottom, innerHeight) });
++  const notCard = e => !e.closest('.tracks-exp,.tracks-exp-out');
++  const buys = [...document.querySelectorAll('#p-upgrades .btn.buy')].map((e, i) => ({ i, kind: e.dataset.kind ?? e.dataset.act ?? '', ...clip(e.getBoundingClientRect()) })).filter(r => r.r > r.l && r.b > r.t);
++  const c = document.getElementById('collect'), cr = c.getBoundingClientRect(), top = document.elementsFromPoint(cr.left + cr.width / 2, cr.top + cr.height / 2).find(notCard);
++  const collect = top && (top === c || c.contains(top)) ? { kind: 'collect', l: cr.left, r: cr.right, t: cr.top, b: cr.bottom } : null;
++  const cs = card && getComputedStyle(card), k = card?.getBoundingClientRect(), painted = !!card && cs.visibility === 'visible' && cs.display !== 'none';
++  const cardR = k ? { l: k.left, r: k.right, t: k.top, b: k.bottom } : null, hit = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
++  const overlaps = painted ? [...buys, ...(collect ? [collect] : [])].filter(r => hit(cardR, r)).map(r => r.kind) : [];
++  const efp = buys.map(b => { const e = document.elementFromPoint((b.l + b.r) / 2, (b.t + b.b) / 2); return { kind: b.kind, onBuy: !!e?.closest('.btn.buy'), onCard: !!e?.closest('.tracks-exp') }; });
++  return { scrollTop: Math.round(body.scrollTop), maxScroll: body.scrollHeight - body.clientHeight, card: cardR, place: card?.dataset.place ?? null, painted, buys, collect, overlaps, efp };
++};
++let tapN = 0;
++for (const w of WIDTHS) {
++  const h = SIZES[w], OUTF = `${OUT}/sweep-${eng}-${w}.jsonl`; writeFileSync(OUTF, ''); const errs = [];
++  const rec = o => appendFileSync(OUTF, JSON.stringify({ sha: HEAD, build: bid[0], engine: eng, w, h, ...o }) + '\n');
++  for (const input of INPUTS) {
++    const ctx = await br.newContext({ viewport: { width: w, height: h }, hasTouch: input === 'touch' }); const p = await ctx.newPage(); p.on('pageerror', e => errs.push(e.message));
++    await p.addInitScript(() => localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, seenSlots: 10, sfx: false })));
++    await p.goto(srv.url); await p.getByText('Tap to start').click({ force: true, timeout: 5000 }).catch(() => {}); await p.waitForFunction(() => window.eggfarm && window.eggfarmUi);
++    await p.evaluate(() => { document.getElementById('modal-layer')?.classList.remove('open'); document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); });
++    const reset = () => p.evaluate(st => { document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); const g = window.eggfarm; g.state = { ...g.state, ...st, customers: [], nextCustomerInS: 1e9, seenTracksExplainer: true }; window.eggfarmUi.render(); }, BASE);
++    const scrollTo = s => p.evaluate(s => { const b = document.querySelector('#p-upgrades .body'); b.scrollTop = s === 'end' ? b.scrollHeight : s; }, s);
++    const arm = async (refund, s) => { await reset(); await scrollTo(0); await p.waitForTimeout(120);
++      await p.evaluate(r => { const g = window.eggfarm; g.migrationRefundCents = r; g.state = { ...g.state, seenTracksExplainer: false }; g.onTracksCommitted(); }, refund);
++      await p.waitForSelector('.tracks-exp', { state: 'attached', timeout: 3000 }); await p.waitForTimeout(300); await scrollTo(s); await p.waitForTimeout(250); };
++    await reset(); await p.locator('[data-nav=upgrades]').click(); await p.waitForTimeout(500);
++    for (const tab of TABS) {
++      await p.locator(`[data-tab=${tab}]`).click(); await p.waitForTimeout(300);
++      // fine sweep (mouse pass): every 4 px from 0 to the end with the card up (re-armed every 4 s, inside its 8 s life), overlap only
++      if (input === 'mouse') for (const refund of REFUNDS) {
++        const max = await p.evaluate(() => { const b = document.querySelector('#p-upgrades .body'); return b.scrollHeight - b.clientHeight; });
++        let armed = 0; const fine = { positions: 0, over: [], places: {} };
++        for (let s = 0; s <= max + 3; s += 4) { if (Date.now() - armed > 4000) { await arm(refund, 0); armed = Date.now(); }
++          await scrollTo(Math.min(s, max)); await p.waitForTimeout(60); const m = await p.evaluate(MEASURE); fine.positions++;
++          fine.places[m.place] = (fine.places[m.place] ?? 0) + 1; if (m.overlaps.length || m.efp.some(e => e.onCard)) fine.over.push({ scrollTop: m.scrollTop, place: m.place, overlaps: m.overlaps }); }
++        rec({ kind: 'fine', input, tab, refund, maxScroll: max, ...fine });
++      }
++      for (const refund of REFUNDS) for (const s of SCROLLS) {
++        await arm(refund, s); const m = await p.evaluate(MEASURE);
++        rec({ kind: 'state', input, tab, refund, scroll: s, ...m });
++        if (input === 'mouse') { const file = `sweep/${eng}-${tab}-${refund ? 'refund' : 'plain'}-scroll${s}-${w}x${h}.png`; await p.screenshot({ path: `${OUT}/${file}` });
++          shots.push({ state: `#65 scroll sweep: ${tab} sheet, refund line ${refund ? 'on' : 'off'}, scroll ${s} (${m.scrollTop}px), card place=${m.place}${m.painted ? '' : ' (hidden)'}`, viewport: `${w}x${h}`, engine: eng, file, sha: HEAD, build: bid[0] }); }
++        // tap targets: Buys whose (clipped) centre hits the Buy with NO card up
++        await reset(); await scrollTo(s); await p.waitForTimeout(150);
++        const targets = await p.evaluate(() => [...document.querySelectorAll('#p-upgrades #uRow .btn.buy[data-kind]')].map((e, i) => { const body = document.querySelector('#p-upgrades .body').getBoundingClientRect(), r = e.getBoundingClientRect();
++          const t = Math.max(r.top, body.top, 0), b = Math.min(r.bottom, body.bottom, innerHeight), x = r.left + r.width / 2, y = (t + b) / 2, hit = document.elementFromPoint(x, y);
++          return { i, kind: e.dataset.kind, x, y, ok: b > t && !!hit && (hit === e || e.contains(hit)) }; }).filter(b => b.ok));
++        for (const tg of targets) {
++          await arm(refund, s); const pre = await p.evaluate(([i, k]) => { const g = window.eggfarm.state, c = document.querySelector('.tracks-exp'); return { lv: g[k], coins: g.coinsCents, place: c?.dataset.place ?? null, painted: !!c && getComputedStyle(c).visibility === 'visible', scrollTop: Math.round(document.querySelector('#p-upgrades .body').scrollTop) }; }, [tg.i, LV[tg.kind]]);
++          const cur = await p.evaluate(i => { const e = document.querySelectorAll('#p-upgrades #uRow .btn.buy[data-kind]')[i], body = document.querySelector('#p-upgrades .body').getBoundingClientRect(), r = e.getBoundingClientRect();
++            const t = Math.max(r.top, body.top, 0), b = Math.min(r.bottom, body.bottom, innerHeight); return { x: r.left + r.width / 2, y: (t + b) / 2 }; }, tg.i);
++          if (input === 'mouse') await p.mouse.click(cur.x, cur.y); else await p.touchscreen.tap(cur.x, cur.y); await p.waitForTimeout(300);
++          const post = await p.evaluate(k => { const g = window.eggfarm.state; return { lv: g[k], coins: g.coinsCents, card: !!document.querySelector('.tracks-exp') }; }, LV[tg.kind]);
++          const bought = post.lv === pre.lv + 1 && post.coins < pre.coins, outcome = bought ? 'BUY' : !post.card ? 'DISMISS-ONLY' : 'NOTHING'; tapN++;
++          rec({ kind: 'tap', input, tab, refund, scroll: s, scrollTop: pre.scrollTop, buy: tg.kind, at: cur, place: pre.place, painted: pre.painted, cardAfter: post.card, outcome });
++          console.log(eng, w, input, tab, refund ? 'refund' : 'plain', `scroll=${s}`, tg.kind, pre.place, outcome);
++        }
++      }
++    }
++    await ctx.close();
++  }
++  rec({ kind: 'done', pageErrors: errs });
++}
++const MF = `${OUT}/manifest.json`, man = existsSync(MF) ? JSON.parse(readFileSync(MF, 'utf8')) : { shots: [] };
++man.sweepScript = 'scripts/m41-9-scroll-sweep.mjs'; man.shots = [...(man.shots ?? []).filter(s => !(s.engine === eng && s.file.startsWith('sweep/') && WIDTHS.some(w => s.viewport.startsWith(`${w}x`)))), ...shots]; man.head = HEAD;
++writeFileSync(MF, JSON.stringify(man, null, 1) + '\n');
++console.log(`m41-9-scroll-sweep ${eng} ${WIDTHS.join('/')}: ${tapN} taps; run --summary for the matrix`);
++await br.close(); srv.stop(); process.exit(0);
+diff --git a/scripts/rc0-browser.mjs b/scripts/rc0-browser.mjs
+index 7e501c0..97ba7e2 100644
+--- a/scripts/rc0-browser.mjs
++++ b/scripts/rc0-browser.mjs
+@@ -715,8 +715,11 @@ sections.g5 = async () => {
+       if (w === 360) await shotIt(page, `focus-after-${how.toLowerCase()}`, w, h, `card closed via ${how}, focus ring on the Farm tab`);
+     }
+     {
+-      await page.evaluate(() => { const g = window.eggfarm; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
++      // #65 CCR M1: the Buy click above scrolled the sheet (Farm Buy into view); a 206px refund card has no slot clear of every Buy
++      // there (place 'none', kept hidden; covered by scripts/m41-9-scroll-sweep.mjs), so this shot re-shows it with the sheet at the top.
++      await page.evaluate(() => { const g = window.eggfarm; const b = document.querySelector('#p-upgrades .body'); if (b) b.scrollTop = 0; g.migrationRefundCents = 123456; g.state = { ...g.state, seenTracksExplainer: false }; document.querySelectorAll('.tracks-exp').forEach(e => e.remove()); g.onTracksCommitted(); });
+       await page.waitForSelector('.tracks-exp-refund', { timeout: 3000 }).catch(() => {});
++      { const pl = await page.evaluate(() => document.querySelector('.tracks-exp')?.dataset.place ?? null); ok(`G5 refund card on screen (place ${pl}, not none) with the sheet at the top at ${w}`, !!pl && pl !== 'none', pl); }
+       const rl = await page.evaluate(() => document.querySelector('.tracks-exp-refund')?.textContent.trim() ?? null);
+       ok(`G5 refund line shown when migrationRefundCents > 0 at ${w}`, rl === 'We refunded +$1,234.56 for your old upgrades.', rl);
+       await cardUp(page, 'refund-line', w);
+diff --git a/src/ui/styles.css b/src/ui/styles.css
+index 18e33f9..0cbd07a 100644
+--- a/src/ui/styles.css
++++ b/src/ui/styles.css
+@@ -514,6 +514,9 @@ html,body{overflow-x:hidden;max-width:100%}
+ .tracks-exp h2,.tracks-exp-out h2{margin:0 0 4px;font:700 18px var(--f-display,var(--f-body))}
+ .tracks-exp p,.tracks-exp-out p{margin:0 0 8px;font:400 16px var(--f-body)}
+ .tracks-exp-ok,.tracks-exp-out .btn{min-height:48px;min-width:48px;width:100%}
++/* CCR M1 on #65 @7779088: no slot clear of every visible Buy / Collect -> the card is kept out of the way (no paint, no hit area)
++   until a scroll / resize opens one; taps never pass through a visible card */
++.tracks-exp[data-place=none]{visibility:hidden}
+ @keyframes expin{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+ @media (prefers-reduced-motion:reduce){.tracks-exp{animation:expfade .15s linear}}
+ @keyframes expfade{from{opacity:0}to{opacity:1}}
+diff --git a/src/ui/tracks-explainer.ts b/src/ui/tracks-explainer.ts
+index 3bc19c5..747fcb3 100644
+--- a/src/ui/tracks-explainer.ts
++++ b/src/ui/tracks-explainer.ts
+@@ -20,36 +20,72 @@ export const shouldShowTracksExplainer = (g: G) => m4On(g.balance) && !g.state.s
+ export const EXP_OUT_MS = 150, EXP_POP_MS = 800;
+ const reducedMotion = (doc: Document) => doc.documentElement.classList.contains('reduced-motion') ||
+   !!doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+-export type ExpPlace = 'default' | 'above' | 'inside';
++/** 'default' = main's placement (top 72, over the tab row); 'none' = no clear slot: the card is kept out of the way (hidden via
++ *  [data-place=none] { visibility:hidden }, so it can't take a tap) until a scroll / resize opens a clear slot; taps never pass through it. */
++export type ExpPlace = 'default' | 'above' | 'inside' | 'band' | 'below' | 'nav' | 'none';
+ type Box = { left: number; right: number; top: number; bottom: number };
+ const meets = (a: Box, b: Box) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+-/** UX-M3 + Art ruling on #65 (1): where the card goes when the Upgrades sheet is open. Pure (rects in viewport px).
+- *  The card must never overlap a visible Buy hit area (`buys`). Order: above the sheet (top = sheet top - card height - 8, if
+- *  that clears the top bar and every Buy); inside the sheet 8px below the tab row (if clear of every Buy); else main's
+- *  placement (top 72, over the tab row) - on phones (360/375/390) the rows start right under the tabs, so this is the case.
+- *  `sheet`/`tabs` null = sheet closed; a sheet that doesn't share the card's columns (docked 1280 panel) keeps the default. */
++/** Viewport facts for placeExplainer: vh = viewport height (a slot must fit inside it); bodyTop = top of the sheet's scroll
++ *  container (the tabs scroll away with it); navTop = top of the bottom nav. All optional (pure tests). */
++export type ExpEnv = { vh?: number; bodyTop?: number; navTop?: number };
++export const EXP_BAND_STEP = 4;
++/** UX-M3 + Art ruling on #65 (1) + CCR M1 on 7779088: where the card goes. Pure (rects in viewport px). The card NEVER overlaps
++ *  a visible Buy hit area or Collect (`buys`): EVERY candidate is clear-checked, first clear one wins, in this order:
++ *  1 above the sheet (sheet top - card height - 8); 2 inside the sheet 8px under the tabs (or under the scroll container top once
++ *  the tabs have scrolled away); 3 main's placement (top 72, over the tab row); 4 other tops in the header/tab band (minTop up to
++ *  the tabs / scroll-container top, EXP_BAND_STEP px apart); 5 8px below the lowest visible Buy; 6 8px above the bottom nav.
++ *  1/2 only when the sheet is open and shares the card's columns. 1, 2, 4, 5, 6 must sit at or below minTop (under the HUD)
++ *  and fit in the viewport. Nothing clear -> 'none'. */
+ export function placeExplainer(card: { left: number; right: number; height: number }, sheet: { top: number; left: number; right: number } | null,
+-  tabs: { bottom: number } | null, minTop: number, defTop = 72, buys: readonly Box[] = []): { place: ExpPlace; top: number } {
+-  if (!sheet || !tabs || card.right <= sheet.left || card.left >= sheet.right) return { place: 'default', top: defTop };
+-  const clear = (top: number) => !buys.some(b => meets({ left: card.left, right: card.right, top, bottom: top + card.height }, b));
+-  const above = Math.round(sheet.top - card.height - 8), inside = Math.round(tabs.bottom + 8);
+-  if (above >= minTop && clear(above)) return { place: 'above', top: above };
+-  if (clear(inside)) return { place: 'inside', top: inside };
+-  return { place: 'default', top: defTop };
++  tabs: { bottom: number } | null, minTop: number, defTop = 72, buys: readonly Box[] = [], env: ExpEnv = {}): { place: ExpPlace; top: number } {
++  const h = card.height, vh = env.vh ?? Infinity;
++  const clear = (top: number) => !buys.some(b => meets({ left: card.left, right: card.right, top, bottom: top + h }, b));
++  const fits = (top: number) => top >= minTop && top + h <= vh;
++  const open = !!sheet && !!tabs && card.right > sheet.left && card.left < sheet.right;
++  const under = open ? Math.max(tabs!.bottom, env.bodyTop ?? -Infinity) : defTop;
++  const cands: [ExpPlace, number][] = [];
++  if (open) cands.push(['above', Math.round(sheet!.top - h - 8)], ['inside', Math.round(under + 8)]);
++  cands.push(['default', defTop]);
++  for (let t = Math.ceil(minTop); t <= under; t += EXP_BAND_STEP) if (t !== defTop) cands.push(['band', t]);
++  if (buys.length) cands.push(['below', Math.round(Math.max(...buys.map(b => b.bottom)) + 8)]);
++  if (env.navTop !== undefined) cands.push(['nav', Math.round(env.navTop - h - 8)]);
++  for (const [place, top] of cands) if ((place === 'default' || fits(top)) && clear(top)) return { place, top };
++  return { place: 'none', top: defTop };
+ }
+ const visibleRect = (e: Element | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? r : null; };
+-/** Visible Buy hit areas (upgrade rows, docked or in the sheet): rendered, inside the viewport. */
++const clip = (a: Box, b: Box): Box => ({ left: Math.max(a.left, b.left), right: Math.min(a.right, b.right), top: Math.max(a.top, b.top), bottom: Math.min(a.bottom, b.bottom) });
++const nonEmpty = (r: Box) => r.right > r.left && r.bottom > r.top, CLIPS = /^(auto|scroll|hidden|clip|overlay)$/;
++/** Visible Buy hit areas (upgrade rows, docked or in the sheet): each .btn.buy rect clipped to every clipping ancestor (the sheet's
++ *  scroll container) and to the viewport; fully clipped / hidden / zero-size ones are dropped. */
+ export const buyRects = (doc: Document = document): Box[] => {
+-  const vh = doc.defaultView?.innerHeight ?? 0;
+-  return [...doc.querySelectorAll('.btn.buy')].map(b => visibleRect(b)).filter((r): r is DOMRect => !!r && r.bottom > 0 && r.top < vh);
++  const win = doc.defaultView, view: Box = { left: 0, top: 0, right: win?.innerWidth ?? 0, bottom: win?.innerHeight ?? 0 }, out: Box[] = [];
++  for (const b of doc.querySelectorAll('.btn.buy')) {
++    const r0 = visibleRect(b); if (!r0) continue;
++    let r = clip(r0, view);
++    for (let a = b.parentElement; a && a !== doc.body && a !== doc.documentElement && nonEmpty(r); a = a.parentElement) {
++      const cs = win?.getComputedStyle(a); if (cs && [cs.overflow, cs.overflowX, cs.overflowY].some(v => CLIPS.test(v ?? ''))) r = clip(r, a.getBoundingClientRect());
++    }
++    if (nonEmpty(r)) out.push(r);
++  }
++  return out;
+ };
++/** CCR n3: #collect counts only when a tap at its centre would land on it (not when the sheet covers it); the card itself is skipped. */
++export const collectRect = (doc: Document = document): Box | null => {
++  const c = doc.getElementById('collect'), r = visibleRect(c); if (!c || !r || typeof doc.elementsFromPoint !== 'function') return null;
++  const top = doc.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find(e => !e.closest('.tracks-exp,.tracks-exp-out'));
++  return top && (top === c || c.contains(top)) ? r : null;
++};
++/** Everything the card must stay clear of: visible Buy hit areas + a hittable Collect. */
++export const blockRects = (doc: Document = document): Box[] => { const c = collectRect(doc); return c ? [...buyRects(doc), c] : buyRects(doc); };
+ /** Measure and apply placeExplainer to the live card (data-place names the branch for QA). */
+ export function placeCard(el: HTMLElement, doc: Document = document) {
+   const sheet = visibleRect(doc.querySelector('#p-upgrades')); // [hidden] (closed / Market open) is display:none -> null; docked panel stays
+-  const tabs = sheet ? visibleRect(doc.querySelector('#p-upgrades .tabs')) : null, r = el.getBoundingClientRect();
+-  const hud = visibleRect(doc.querySelector('.hud')), minTop = (hud ? hud.bottom : 56) + 8;
+-  const { place, top } = placeExplainer({ left: r.left, right: r.right, height: el.offsetHeight || r.height }, sheet, tabs, minTop, 72, buyRects(doc));
+-  if (el.dataset.place !== place || el.style.top !== `${top}px`) { el.dataset.place = place; el.style.top = place === 'default' ? '' : `${top}px`; }
++  const tabs = sheet ? visibleRect(doc.querySelector('#p-upgrades .tabs')) : null, body = sheet ? visibleRect(doc.querySelector('#p-upgrades .body')) : null, r = el.getBoundingClientRect();
++  const hud = visibleRect(doc.querySelector('.hud')), minTop = (hud ? hud.bottom : 56) + 8, nav = visibleRect(doc.querySelector('nav.actions'));
++  const { place, top } = placeExplainer({ left: r.left, right: r.right, height: el.offsetHeight || r.height }, sheet, tabs, minTop, 72, blockRects(doc),
++    { vh: doc.defaultView?.innerHeight || Infinity, bodyTop: body?.top, navTop: nav?.top });
++  const css = place === 'default' || place === 'none' ? '' : `${top}px`;
++  if (el.dataset.place !== place || el.style.top !== css) { el.dataset.place = place; el.style.top = css; }
+ }
+ /** UX-M5 + Art ruling on #65 (3) (m4-tracks-explainer.md:21): on DISMISS, the coin pill gets the standard number pop (Sell style,
+  *  number-pop-spec.md) and a coin burst; nothing while the card is up. Decorative (aria-hidden). Reduced motion: none; the
+@@ -69,7 +105,7 @@ function refundPop(cents: number, doc: Document) {
+ /** UX-M5: the card leaves the DOM at once (focus, EXP_CLOSED, explainerOpen() unchanged); an inert, aria-hidden copy plays the
+  *  150 ms opacity + translateY(4px) out. Reduced motion: no copy (instant). */
+ function fadeOut(el: HTMLElement, doc: Document) {
+-  if (reducedMotion(doc)) return;
++  if (reducedMotion(doc) || el.dataset.place === 'none') return; // a kept-out-of-the-way card was not on screen: nothing to fade
+   const ghost = el.cloneNode(true) as HTMLElement; ghost.className = 'tracks-exp-out'; ghost.removeAttribute('role'); ghost.removeAttribute('aria-modal');
+   ghost.removeAttribute('aria-labelledby'); ghost.setAttribute('aria-hidden', 'true'); ghost.setAttribute('inert', ''); ghost.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+   doc.body.append(ghost); setTimeout(() => ghost.remove(), EXP_OUT_MS + 30);
+@@ -96,9 +132,9 @@ export function showTracksExplainer(g: G, doc: Document = document, storageBlock
+   el.className = 'tracks-exp'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'tracks-exp-t');
+   el.innerHTML = `<h2 id="tracks-exp-t">${EXP_TITLE}</h2><p>${EXP_BODY}</p>${(g.migrationRefundCents ?? 0) > 0 ? `<p class="tracks-exp-refund"><img src="${import.meta.env.BASE_URL}assets/icon-coin.svg" alt="" width="16" height="16"> ${refundLine(g.migrationRefundCents!)}</p>` : ''}<button type="button" class="btn tracks-exp-ok">Got it</button>`;
+   doc.body.append(el);
+-  // UX-M3: placed at show, then re-placed only on events that can move the sheet or rows (CCR n3: no per-frame re-measure):
+-  // resize, scroll (sheet body), the sheet's slide transition ending, and after any click (nav / tab switch). Coalesced to one
+-  // measure per frame.
++  // UX-M3: placed at show, then re-placed only on events that can move the sheet or rows (no per-frame re-measure, no rAF loop):
++  // resize, scroll (sheet body: CCR M1 on 7779088, every scroll re-runs the clear check), the sheet's slide transition ending, and
++  // after any click (nav / tab switch / a Buy that re-renders rows). Coalesced to at most one measure per frame.
+   const win = doc.defaultView, raf = win?.requestAnimationFrame?.bind(win) ?? ((f: () => void) => setTimeout(f, 16));
+   let queued = false; const replace = () => { if (queued || !el.isConnected) return; queued = true; raf(() => { queued = false; if (el.isConnected) placeCard(el, doc); }); };
+   const afterClick = () => setTimeout(replace, 0);
+diff --git a/tests/m41-9-ux-ccr-m1.test.ts b/tests/m41-9-ux-ccr-m1.test.ts
+new file mode 100644
+index 0000000..e5074e8
+--- /dev/null
++++ b/tests/m41-9-ux-ccr-m1.test.ts
+@@ -0,0 +1,177 @@
++// @vitest-environment jsdom
++// CCR delta review on #65 @7779088 (reviews/pr65-delta-7779088.md): M1 (the fallback placement is clear-checked too: Art ruling (1)
++// "never over a visible Buy / Collect"; no exemption), n1 (surviving mutants), n2 (off() removes every listener), n3 (Collect counts
++// only when a tap at its centre lands on it).
++import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { balance, type Balance } from '../src/config/balance';
++import { initialState } from '../src/sim/state';
++import { fmtMoney, fmtMoneyShort } from '../src/ui/format';
++import { showTracksExplainer, placeExplainer, placeCard, buyRects, collectRect, blockRects, EXP_POP_MS } from '../src/ui/tracks-explainer';
++import { toastSafeBottom, trackToastSafe, TOAST_GAP } from '../src/ui/toast-safe';
++const on: Balance = { ...balance, m4: { ...balance.m4!, enabled: 1 } };
++beforeAll(() => {
++  window.matchMedia = ((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as any;
++});
++afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); document.body.innerHTML = ''; document.documentElement.className = ''; document.documentElement.removeAttribute('style'); });
++type Box = { left: number; right: number; top: number; bottom: number };
++const meets = (a: Box, b: Box) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
++const rect = (left: number, top: number, w: number, h: number) => ({ left, top, right: left + w, bottom: top + h, width: w, height: h, x: left, y: top, toJSON() {} }) as DOMRect;
++const set = (sel: string, r: DOMRect) => { (document.querySelector(sel) as any).getBoundingClientRect = () => r; };
++const game = (refund = 0) => ({ state: { ...initialState(on), seenTracksExplainer: false } as any, balance: on, save() {}, migrationRefundCents: refund });
++
++/** The live 360x640 Upgrades sheet (Chromium @7779088): HUD 0-56, sheet 160-640, header 162-218, scroll body 218-640 (tabs 234-278 at
++ *  scrollTop 0), nav 576-640 under the sheet; Farm Buys at 432 / 635 / 893 (48 tall, x 102-326) at scrollTop 0. */
++function farmSheet(scroll: number, cardH: number, W = 360, H = 640, sheetTop = 160) {
++  document.body.innerHTML = '<div class="hud"></div><section id="p-upgrades" class="sheet"><header></header><div class="body" style="overflow:auto"><div class="tabs"></div>' +
++    '<div id="uRow"><button class="btn buy" id="b0"></button><button class="btn buy" id="b1"></button><button class="btn buy" id="b2"></button></div></div></section>' +
++    '<nav class="actions"></nav><button id="collect"></button><div class="tracks-exp"></div>';
++  vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(H); vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(W);
++  const bodyTop = sheetTop + 58, d = bodyTop - 218;
++  set('.hud', rect(0, 0, W, 56)); set('#p-upgrades', rect(0, sheetTop, W, H - sheetTop)); set('.body', rect(0, bodyTop, W, H - bodyTop));
++  set('.tabs', rect(16, 234 + d - scroll, W - 32, 44)); set('nav.actions', rect(0, H - 64, W, 64)); set('#collect', rect(8, H - 136, W - 32, 64));
++  [432, 635, 893].forEach((t, i) => set(`#b${i}`, rect(102, t + d - scroll, W - 136, 48)));
++  const el = document.querySelector<HTMLElement>('.tracks-exp')!, cl = (W - Math.min(296, W - 32)) / 2;
++  el.getBoundingClientRect = () => rect(cl, 72, Math.min(296, W - 32), cardH); Object.defineProperty(el, 'offsetHeight', { value: cardH });
++  return el;
++}
++const cardBox = (el: HTMLElement, W: number, h: number) => { const top = el.style.top ? parseFloat(el.style.top) : 72, w = Math.min(296, W - 32), l = (W - w) / 2; return { left: l, right: l + w, top, bottom: top + h }; };
++
++describe('CCR M1: the scrolled sheet (no fallback exemption)', () => {
++  it('CCR repro: Farm, refund line (card 206), sheet scrolled 200 px at 360x640: the Buy at 232-280 is never under the card', () => {
++    const el = farmSheet(200, 206); placeCard(el);
++    const b = buyRects(); expect(b[0]).toEqual({ left: 102, right: 326, top: 232, bottom: 280 });
++    expect(el.dataset.place).not.toBe('default'); // was default (72-278) over the Buy
++    if (el.dataset.place !== 'none') b.forEach(r => expect(meets(cardBox(el, 360, 206), r)).toBe(false));
++    expect(el.dataset.place).toBe('none'); // 232-280 + 435-483 visible, 206 px fits no gap -> kept out of the way
++    expect(el.style.top).toBe('');
++  });
++  it('same scroll, plain card (154): main placement 72-226 is clear of the Buy at 232 and is kept', () => {
++    const el = farmSheet(200, 154); placeCard(el); expect(el.dataset.place).toBe('default');
++  });
++  it('375x667 repro (Buy 239-287): never under the card', () => {
++    const el = farmSheet(200, 206, 375, 667, 167); placeCard(el);
++    const b = buyRects(); expect(b[0].top).toBe(239);
++    if (el.dataset.place !== 'none') b.forEach(r => expect(meets(cardBox(el, 375, 206), r)).toBe(false));
++    expect(el.dataset.place).not.toBe('default');
++  });
++  it('sweep: every scrollTop 0..359 at 360/375/390, card 154 and 206: the placed card never meets a visible Buy; every state is named', () => {
++    const seen = new Set<string>();
++    for (const [W, H, st] of [[360, 640, 160], [375, 667, 167], [390, 844, 211]]) for (const h of [154, 206]) for (let s = 0; s <= 359; s++) {
++      const el = farmSheet(s, h, W, H, st); placeCard(el); const place = el.dataset.place!; seen.add(place);
++      expect(['default', 'above', 'inside', 'band', 'below', 'nav', 'none']).toContain(place);
++      if (place !== 'none') buyRects().forEach(r => expect(meets(cardBox(el, W, h), r), `${W} h${h} s${s} ${place}`).toBe(false));
++    }
++    expect(seen.has('none')).toBe(true); expect(seen.has('default')).toBe(true);
++  });
++  it('none: hidden via [data-place=none] (visibility:hidden: no paint, no hit area); no fade copy on dismiss; the pop still plays', () => {
++    expect(readFileSync('src/ui/styles.css', 'utf8')).toMatch(/\.tracks-exp\[data-place=none\]\{visibility:hidden\}/);
++    vi.useFakeTimers(); document.body.innerHTML = '<nav class="actions"><button data-nav="upgrades">Upgrades</button></nav><button id="collect">Collect</button>';
++    const el = showTracksExplainer(game(12_345) as any)!; el.dataset.place = 'none';
++    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
++    expect(document.querySelector('.tracks-exp-out')).toBeNull(); expect(document.querySelectorAll('.exp-pop').length).toBe(1);
++  });
++});
++
++describe('CCR n1: placement mutants', () => {
++  const card = { left: 32, right: 328, height: 150 };
++  it('above is clear-checked too (a Buy above the sheet, e.g. a docked row, blocks it)', () => {
++    const p = placeExplainer(card, { top: 400, left: 0, right: 360 }, { bottom: 452 }, 64, 72, [{ left: 40, right: 120, top: 300, bottom: 340 }]);
++    expect(p.place).not.toBe('above'); expect(meets({ ...card, top: p.top, bottom: p.top + 150 }, { left: 40, right: 120, top: 300, bottom: 340 })).toBe(false);
++  });
++  it('every Buy is checked, not just the first', () => {
++    const buys = [{ left: 248, right: 336, top: 900, bottom: 944 }, { left: 248, right: 336, top: 230, bottom: 274 }];
++    const p = placeExplainer(card, { top: 160, left: 0, right: 360 }, { bottom: 212 }, 64, 72, buys);
++    expect(p.place).not.toBe('inside'); buys.forEach(b => expect(meets({ ...card, top: p.top, bottom: p.top + 150 }, b)).toBe(false));
++  });
++  it('candidate order: above, inside, default (72), band, below the last Buy, above the nav; none when nothing is clear', () => {
++    const S = { top: 160, left: 0, right: 360 }, T = { bottom: 212 }, E = { vh: 640, bodyTop: 218, navTop: 576 }, B = (t: number) => ({ left: 102, right: 326, top: t, bottom: t + 48 });
++    expect(placeExplainer(card, S, T, 64, 72, [B(600)], E)).toEqual({ place: 'inside', top: 226 });
++    expect(placeExplainer(card, S, T, 64, 72, [B(230)], E)).toEqual({ place: 'default', top: 72 });
++    expect(placeExplainer(card, S, T, 64, 72, [B(218)], E)).toEqual({ place: 'band', top: 64 }); // 72-222 meets 218; 64-214 clear
++    expect(placeExplainer(card, S, T, 64, 72, [B(150), B(230)], E)).toEqual({ place: 'below', top: 286 });
++    expect(placeExplainer(card, S, T, 64, 72, [B(150), B(230), B(570)], E)).toEqual({ place: 'nav', top: 418 }); // below (626) doesn't fit: 418-568
++    expect(placeExplainer(card, S, T, 64, 72, [B(150), B(230), B(400), B(570)], E)).toEqual({ place: 'none', top: 72 });
++  });
++  it('slots must fit the viewport (no slot below the fold)', () => {
++    const p = placeExplainer(card, { top: 160, left: 0, right: 360 }, { bottom: 212 }, 64, 72, [{ left: 102, right: 326, top: 150, bottom: 260 }], { vh: 400 });
++    expect(p.place).toBe('none');
++  });
++  it('buyRects: clipped to the scroll container and the viewport; fully clipped / off-screen / zero-size Buys are dropped', () => {
++    const el = farmSheet(200, 206); void el;
++    expect(buyRects()).toEqual([{ left: 102, right: 326, top: 232, bottom: 280 }, { left: 102, right: 326, top: 435, bottom: 483 }]); // b2 at 693 is below 640
++    set('#b0', rect(102, 190, 224, 48)); // half under the sheet header: only 218-238 is hittable
++    expect(buyRects()[0]).toEqual({ left: 102, right: 326, top: 218, bottom: 238 });
++    set('#b0', rect(102, 150, 224, 48)); expect(buyRects().length).toBe(1); // entirely above the scroll container
++    set('#b1', rect(0, 0, 0, 0)); expect(buyRects().length).toBe(0);
++    document.body.insertAdjacentHTML('beforeend', '<button class="btn buy" id="bx"></button>'); set('#bx', rect(10, 600, 100, 80)); // not in a scroll container
++    expect(buyRects()).toEqual([{ left: 10, right: 110, top: 600, bottom: 640 }]); // clipped to the viewport (640)
++  });
++});
++
++describe('CCR n3: Collect counts only when a tap at its centre lands on it', () => {
++  const page = () => { document.body.innerHTML = '<button id="collect"><span>Collect</span></button><div class="tracks-exp"></div><div class="sheet"></div>';
++    set('#collect', rect(8, 504, 320, 64)); vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(640); vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(360); };
++  it('hittable (or only under the card): counted; covered by the sheet: not counted', () => {
++    page(); const c = document.getElementById('collect')!, card = document.querySelector('.tracks-exp')!, sheet = document.querySelector('.sheet')!;
++    const efp = vi.fn(); (document as any).elementsFromPoint = efp;
++    efp.mockReturnValue([c.firstElementChild, c, document.body]); expect(collectRect()).toMatchObject({ top: 504, bottom: 568 });
++    efp.mockReturnValue([card, c, document.body]); expect(blockRects()).toEqual([expect.objectContaining({ top: 504, bottom: 568 })]);
++    expect(efp).toHaveBeenLastCalledWith(168, 536);
++    efp.mockReturnValue([sheet, c, document.body]); expect(collectRect()).toBeNull(); expect(blockRects()).toEqual([]);
++    delete (document as any).elementsFromPoint;
++  });
++  it('placeExplainer keeps the card off a hittable Collect', () => {
++    const p = placeExplainer({ left: 32, right: 328, height: 150 }, null, null, 64, 72, [{ left: 8, right: 328, top: 100, bottom: 164 }], { vh: 640 });
++    expect(meets({ left: 32, right: 328, top: p.top, bottom: p.top + 150 }, { left: 8, right: 328, top: 100, bottom: 164 })).toBe(false);
++  });
++});
++
++describe('CCR n2: off() removes every listener the card added', () => {
++  it('each addEventListener(type, fn, capture) made by showTracksExplainer has a matching removeEventListener on close', () => {
++    for (const how of ['esc', 'timeout'] as const) {
++      vi.useFakeTimers(); document.body.innerHTML = '<nav class="actions"><button data-nav="upgrades">Upgrades</button></nav><button id="collect">Collect</button>';
++      const cap = (o: any) => typeof o === 'boolean' ? o : !!o?.capture, adds: any[] = [], rems: any[] = [];
++      for (const t of [document, window] as EventTarget[]) {
++        const a = t.addEventListener.bind(t), r = t.removeEventListener.bind(t);
++        vi.spyOn(t, 'addEventListener').mockImplementation((ty: string, fn: any, o?: any) => { adds.push([t, ty, fn, cap(o)]); a(ty, fn, o); });
++        vi.spyOn(t, 'removeEventListener').mockImplementation((ty: string, fn: any, o?: any) => { rems.push([t, ty, fn, cap(o)]); r(ty, fn, o); });
++      }
++      showTracksExplainer(game() as any);
++      const mine = adds.filter(([, ty]) => ['click', 'keydown', 'scroll', 'resize', 'transitionend'].includes(ty));
++      expect(mine.length).toBe(6);
++      if (how === 'esc') document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })); else vi.advanceTimersByTime(8000);
++      for (const [t, ty, fn, c] of mine) expect(rems.some(([t2, ty2, fn2, c2]) => t2 === t && ty2 === ty && fn2 === fn && c2 === c), `${ty} capture=${c}`).toBe(true);
++      vi.restoreAllMocks(); vi.useRealTimers(); document.body.innerHTML = '';
++    }
++  });
++});
++
++describe('CCR n1: toast-safe and pop mutants', () => {
++  it('GOAL_COVER_MAX_W is 390: 390 anchors on Collect (may cover the strip), 391 and 412 clear the goal strip', () => {
++    const collect = { top: 700, height: 64 }, goal = { top: 650, height: 40 };
++    expect(toastSafeBottom(collect, 844, 64, goal, 390)).toBe(844 - 700 + TOAST_GAP);
++    expect(toastSafeBottom(collect, 844, 64, goal, 391)).toBe(844 - 650 + TOAST_GAP);
++    expect(toastSafeBottom(collect, 915, 64, goal, 412)).toBe(915 - 650 + TOAST_GAP);
++  });
++  it('trackToastSafe passes the real viewport width and re-measures when #goal resizes', () => {
++    document.body.innerHTML = '<nav class="actions"></nav><div id="goal"></div><button id="collect"></button>';
++    vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(412); vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(915);
++    const collect = document.getElementById('collect')!, goal = document.getElementById('goal')!;
++    collect.getBoundingClientRect = () => rect(8, 771, 396, 64); let gt = 723; goal.getBoundingClientRect = () => rect(8, gt, 396, 40);
++    (document.querySelector('nav.actions') as any).getBoundingClientRect = () => rect(0, 851, 412, 64);
++    const observed: Element[] = []; let cb: (() => void) | null = null;
++    (window as any).ResizeObserver = class { constructor(f: () => void) { cb = f; } observe(e: Element) { observed.push(e); } disconnect() {} };
++    trackToastSafe(collect);
++    expect(document.documentElement.style.getPropertyValue('--toast-safe-b')).toBe(`${915 - 723 + TOAST_GAP}px`); // goal-anchored: width 412 > 390
++    expect(observed).toContain(goal); expect(observed).toContain(collect);
++    gt = 700; cb!(); expect(document.documentElement.style.getPropertyValue('--toast-safe-b')).toBe(`${915 - 700 + TOAST_GAP}px`);
++    delete (window as any).ResizeObserver;
++  });
++  it('refund pop uses the compact amount (fmtMoneyShort), not the full one', () => {
++    vi.useFakeTimers(); const cents = 123_456_789; expect(fmtMoneyShort(cents)).not.toBe(fmtMoney(cents));
++    document.body.innerHTML = '<div class="hud"><div class="pill coins"><span id="coins">$1</span></div></div><nav class="actions"><button data-nav="upgrades">Upgrades</button></nav><button id="collect">Collect</button>';
++    showTracksExplainer(game(cents) as any); document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
++    expect(document.querySelector('.exp-pop')!.textContent).toBe(`+${fmtMoneyShort(cents)}`); vi.advanceTimersByTime(EXP_POP_MS + 50);
++  });
++});
+diff --git a/tests/m41-9-ux-rulings.test.ts b/tests/m41-9-ux-rulings.test.ts
+index d0cd2b8..24b1219 100644
+--- a/tests/m41-9-ux-rulings.test.ts
++++ b/tests/m41-9-ux-rulings.test.ts
+@@ -32,17 +32,18 @@ describe('Art (1): the card never overlaps a visible Buy', () => {
+     expect(placeExplainer(card, { top: 400, left: 0, right: 360 }, { bottom: 452 }, 64, 72, [{ left: 248, right: 336, top: 468, bottom: 512 }])).toEqual({ place: 'above', top: 242 });
+     expect(placeExplainer(card, { top: 160, left: 0, right: 360 }, { bottom: 212 }, 64, 72, [{ left: 248, right: 336, top: 600, bottom: 644 }])).toEqual({ place: 'inside', top: 220 });
+   });
+-  it('property: whatever is chosen, no Buy rect intersects the card unless only main placement remains (and main is always clear of Buy rows below the tabs)', () => {
+-    let n = 0;
+-    for (let sheetTop = 100; sheetTop <= 700; sheetTop += 20) for (let rowGap = 0; rowGap <= 400; rowGap += 40) for (const h of [120, 150, 190]) {
+-      const tabsB = sheetTop + 52, c = { left: 16, right: 344, height: h };
+-      const buys = [0, 72, 144, 216].map(k => ({ left: 248, right: 336, top: tabsB + 16 + rowGap + k, bottom: tabsB + 60 + rowGap + k }));
+-      const p = placeExplainer(c, { top: sheetTop, left: 0, right: 360 }, { bottom: tabsB }, 64, 72, buys);
++  it('property (CCR M1: no exemption): whatever is chosen, including main placement, no Buy rect intersects the card; nothing clear -> none', () => {
++    let n = 0, none = 0;
++    for (let sheetTop = 100; sheetTop <= 700; sheetTop += 20) for (let rowGap = -300; rowGap <= 400; rowGap += 20) for (const h of [120, 150, 190, 206]) {
++      const tabsB = sheetTop + 52, c = { left: 16, right: 344, height: h }, vh = sheetTop + 480;
++      const buys = [0, 72, 144, 216].map(k => ({ left: 248, right: 336, top: tabsB + 16 + rowGap + k, bottom: tabsB + 60 + rowGap + k }))
++        .map(b => ({ ...b, top: Math.max(b.top, sheetTop + 56) })).filter(b => b.bottom > b.top); // clipped to the scroll container
++      const p = placeExplainer(c, { top: sheetTop, left: 0, right: 360 }, { bottom: tabsB + rowGap }, 64, 72, buys, { vh, bodyTop: sheetTop + 56 });
++      if (p.place === 'none') { none++; continue; }
+       const box = { ...c, top: p.top, bottom: p.top + h };
+-      if (p.place !== 'default') { buys.forEach(b => expect(meets(box, b)).toBe(false)); n++; }
+-      else if (72 + h <= tabsB + 16 + rowGap) buys.forEach(b => expect(meets(box, b)).toBe(false));
++      buys.forEach(b => expect(meets(box, b)).toBe(false)); n++;
+     }
+-    expect(n).toBeGreaterThan(50);
++    expect(n).toBeGreaterThan(500); expect(none).toBeGreaterThan(0);
+   });
+   it('placeCard feeds the visible .btn.buy rects (hidden / zero-size / off-screen ones are ignored)', () => {
+     document.body.innerHTML = '<div class="hud"></div><section id="p-upgrades"><div class="tabs"></div><button class="btn buy" id="b1"></button><button class="btn buy" id="b0"></button></section><div class="tracks-exp"></div>';

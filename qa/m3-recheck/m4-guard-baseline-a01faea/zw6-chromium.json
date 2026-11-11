@@ -1,0 +1,299 @@
+[
+ {
+  "n": "ZW-1 rc1 × m4-v7-basic.json: newer-save dialog shown",
+  "pass": true,
+  "i": {
+   "txt": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again"
+  }
+ },
+ {
+  "n": "ZW-2 rc1 × m4-v7-basic.json: export works and returns the v7 bytes exactly",
+  "pass": false,
+  "i": {
+   "got": null,
+   "want": "860B"
+  }
+ },
+ {
+  "n": "ZW-3 rc1 × m4-v7-basic.json: localStorage(all keys)+IndexedDB+v6_backup byte-identical after 10s + visibilitychange/pagehide/beforeunload + 2nd tab",
+  "pass": true,
+  "i": {
+   "diffs": [],
+   "lsKeys": [
+    "eggfarm.save",
+    "eggfarm.ui",
+    "eggfarm.install_id",
+    "eggfarm.save.v6_backup"
+   ],
+   "idbKeys": []
+  }
+ },
+ {
+  "n": "ZW-4 rc1 × m4-v7-basic.json: zero write calls to every save key (save/.bak/v6_backup/ui/corrupt/...) and save IDB stores; only eggfarm.lease/tab/telemetry written; install_id create-if-absent only",
+  "pass": true,
+  "i": {
+   "installId": null,
+   "disallowed": []
+  }
+ },
+ {
+  "n": "ZW-5 rc1 × m4-v7-basic.json: no allowed (lease/tab/telemetry) write holds a save object or a copy of save/.bak/v6_backup",
+  "pass": true,
+  "i": {
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "814dffa0-be0c-4988-8e79-fac2dcaf58bd",
+     "t": 1792178343734,
+     "tab": 1
+    }
+   ]
+  }
+ },
+ {
+  "n": "ZW-1 rc1 × m4-v7-refund.json: newer-save dialog shown",
+  "pass": true,
+  "i": {
+   "txt": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again"
+  }
+ },
+ {
+  "n": "ZW-2 rc1 × m4-v7-refund.json: export works and returns the v7 bytes exactly",
+  "pass": false,
+  "i": {
+   "got": null,
+   "want": "864B"
+  }
+ },
+ {
+  "n": "ZW-3 rc1 × m4-v7-refund.json: localStorage(all keys)+IndexedDB+v6_backup byte-identical after 10s + visibilitychange/pagehide/beforeunload + 2nd tab",
+  "pass": true,
+  "i": {
+   "diffs": [],
+   "lsKeys": [
+    "eggfarm.save",
+    "eggfarm.ui",
+    "eggfarm.install_id",
+    "eggfarm.save.v6_backup"
+   ],
+   "idbKeys": []
+  }
+ },
+ {
+  "n": "ZW-4 rc1 × m4-v7-refund.json: zero write calls to every save key (save/.bak/v6_backup/ui/corrupt/...) and save IDB stores; only eggfarm.lease/tab/telemetry written; install_id create-if-absent only",
+  "pass": true,
+  "i": {
+   "installId": null,
+   "disallowed": []
+  }
+ },
+ {
+  "n": "ZW-5 rc1 × m4-v7-refund.json: no allowed (lease/tab/telemetry) write holds a save object or a copy of save/.bak/v6_backup",
+  "pass": true,
+  "i": {
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "76088ecc-5e58-43a2-a215-8ee37e5c004f",
+     "t": 1792178361650,
+     "tab": 1
+    }
+   ]
+  }
+ },
+ {
+  "n": "ZW-6a rc1: press 'Try again' x3 -> zero forbidden writes, save keys byte-identical, no save object in allowed writes",
+  "pass": true,
+  "i": {
+   "dialogAfter": true,
+   "diffs": [],
+   "installId": null,
+   "saveKeysOk": true,
+   "disallowed": [],
+   "leaking": [],
+   "allowedWrites": [],
+   "preBootWrites": 0,
+   "idbKeys": []
+  }
+ },
+ {
+  "n": "ZW-6b1 rc1: boot with existing IndexedDB copy (v7 in IDB eggfarm/save/main) -> zero forbidden writes, save keys byte-identical, no save object in allowed writes",
+  "pass": true,
+  "i": {
+   "diffs": [],
+   "installId": null,
+   "saveKeysOk": true,
+   "disallowed": [],
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "ef0ba43c-5445-44e5-91e3-585c785ec483",
+     "t": 1792178389215,
+     "tab": 1
+    }
+   ],
+   "preBootWrites": 0,
+   "idbKeys": [
+    "eggfarm/save/\"main\""
+   ]
+  }
+ },
+ {
+  "n": "ZW-6b1v6 rc1: boot with existing older v6 IndexedDB copy (reconcile LS v7 vs IDB v6) -> zero forbidden writes, save keys byte-identical, no save object in allowed writes",
+  "pass": true,
+  "i": {
+   "diffs": [],
+   "installId": null,
+   "saveKeysOk": true,
+   "disallowed": [],
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "f1cab9f9-f173-48b0-81ee-d8243636de4e",
+     "t": 1792178397732,
+     "tab": 1
+    }
+   ],
+   "preBootWrites": 0,
+   "idbKeys": [
+    "eggfarm/save/\"main\""
+   ]
+  }
+ },
+ {
+  "n": "ZW-6b2 rc1: boot with existing .bak (v6) + v6_backup -> zero forbidden writes, save keys byte-identical, no save object in allowed writes",
+  "pass": true,
+  "i": {
+   "diffs": [],
+   "installId": null,
+   "saveKeysOk": true,
+   "disallowed": [],
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "77e297a1-82b1-49df-b5c1-554a929618cc",
+     "t": 1792178406659,
+     "tab": 1
+    }
+   ],
+   "preBootWrites": 0,
+   "idbKeys": []
+  }
+ },
+ {
+  "n": "ZW-6c rc1: long session 12.5s (>=2x autosave 5s) + visibilitychange/pagehide/beforeunload -> zero forbidden writes, save keys byte-identical, no save object in allowed writes",
+  "pass": true,
+  "i": {
+   "diffs": [],
+   "installId": null,
+   "saveKeysOk": true,
+   "disallowed": [],
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "6a319f95-2d69-41e3-a675-37f6ace1103d",
+     "t": 1792178415333,
+     "tab": 1
+    }
+   ],
+   "preBootWrites": 0,
+   "idbKeys": []
+  }
+ },
+ {
+  "n": "ZW-6d rc1: tab-lease writes (lease holds no save object) -> zero forbidden writes, save keys byte-identical, no save object in allowed writes",
+  "pass": true,
+  "i": {
+   "lease": null,
+   "tabKey": null,
+   "leaseHoldsSave": false,
+   "diffs": [],
+   "installId": null,
+   "saveKeysOk": true,
+   "disallowed": [],
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "92cae6bb-87e3-4962-b9fe-acc074b8c01b",
+     "t": 1792178436634,
+     "tab": 1
+    }
+   ],
+   "preBootWrites": 0,
+   "idbKeys": []
+  }
+ },
+ {
+  "n": "ZW-6e rc1: second tab opened while first shows the dialog -> zero forbidden writes, save keys byte-identical, no save object in allowed writes",
+  "pass": true,
+  "i": {
+   "aDialog": true,
+   "bDialog": true,
+   "aDialogAfter": true,
+   "aGuard": false,
+   "diffs": [],
+   "installId": null,
+   "saveKeysOk": true,
+   "disallowed": [],
+   "leaking": [],
+   "allowedWrites": [
+    {
+     "op": "ls.set",
+     "key": "eggfarm.install_id",
+     "value": "20a4318a-df1c-4fff-923e-e74fe8f7b8c0",
+     "t": 1792178441521,
+     "tab": 1
+    }
+   ],
+   "preBootWrites": 0,
+   "idbKeys": []
+  }
+ },
+ {
+  "n": "M4-W1 rc1: v6 save -> written as v6",
+  "pass": true,
+  "i": {
+   "v": 6
+  }
+ },
+ {
+  "n": "MK-1 rc1 × m4-v6-marked.json: written v6, tracksV7 marker byte-identical, no refund added",
+  "pass": true,
+  "i": {
+   "hook": false,
+   "savedCoins": 1317629,
+   "v": 6,
+   "mkIn": "{\"hensLevel\":19,\"eggValueLevel\":2,\"migrationRefundCents\":0,\"refunded\":true}",
+   "mkOut": "{\"hensLevel\":19,\"eggValueLevel\":2,\"migrationRefundCents\":0,\"refunded\":true}",
+   "coinsIn": 1291591,
+   "loaded": null
+  }
+ },
+ {
+  "n": "MK-1 rc1 × m4-v6-marked-refunded.json: written v6, tracksV7 marker byte-identical, no refund added",
+  "pass": true,
+  "i": {
+   "hook": false,
+   "savedCoins": 1317629,
+   "v": 6,
+   "mkIn": "{\"hensLevel\":19,\"eggValueLevel\":2,\"migrationRefundCents\":12345,\"refunded\":true}",
+   "mkOut": "{\"hensLevel\":19,\"eggValueLevel\":2,\"migrationRefundCents\":12345,\"refunded\":true}",
+   "coinsIn": 1291591,
+   "loaded": null
+  }
+ }
+]

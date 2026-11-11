@@ -1,0 +1,48 @@
+2026-10-23 01:39:05 CEST === CSR ACs on 86942226ed792598efa2dbc5b473dc7bc93073ab
+2026-10-23 01:39:05 CEST spec sha256: 530b29d3d37ab965d2375ad05a2c431c4aaac976e959eb245395f6ef9fe3f874 (want 2fbcd4eb…af445)
+2026-10-23 01:39:05 CEST fixtures: SHA256SUMS OK SHA256SUMS=e2d2eee776928553
+2026-10-23 01:39:05 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 4c94704 Y, dfdf49c Y, b986cd3 Y (info: ff from b986cd3?); pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-23 01:39:05 CEST DRY syntax ok csr-m41-7-browser.mjs
+2026-10-23 01:39:05 CEST DRY syntax ok csr-m41-7-b8-14.mjs
+2026-10-23 01:39:05 CEST DRY syntax ok csr-m41-7-ui.mjs
+2026-10-23 01:39:05 CEST DRY syntax ok csr12-ls-throw-probe.mjs
+2026-10-23 01:39:05 CEST DRY syntax ok csr9c-explainer-queue.mjs
+2026-10-23 01:39:05 CEST DRY syntax ok csr-m41-7-fixtures.mjs
+2026-10-23 01:39:05 CEST DRY syntax ok csr-m41-7-resetat.mjs
+2026-10-23 01:39:05 CEST DRY syntax ok m41-7-testdiff.sh
+DRY BRS-AC1-ui-reset-ls+idb-copy: want=- fault=- offSeed=0 offAfter=0 post=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRS-AC1-ui-reset-3-idb-copies: want=- fault=- offSeed=0 offAfter=0 post=false ls=eggfarm.save idb=main,corrupt.<ts>,corrupt.<ts>,corrupt.<ts>
+DRY BRS-AC1-ui-reset-no-copies: want=- fault=- offSeed=0 offAfter=0 post=false ls=eggfarm.save idb=main
+DRY BRS-AC3-rollback-1d: want=- fault=- offSeed=0 offAfter=-86460000 post=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRS-AC3-rollback-30d: want=- fault=- offSeed=0 offAfter=-2592000000 post=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRS-AC3-clock-ahead-1d-at-copy+reset-then-back-1d: want=- fault=- offSeed=86400000 offAfter=-86400000 post=false ls=eggfarm.save idb=main,corrupt.<ts>
+DRY BRS-AC2-post-reset-idb-orphan-8b-M3-export: want=M3 fault=- offSeed=0 offAfter=0 post=true ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRS-AC2-post-reset-ls-main-corrupt-bak-valid-M1: want=M1 fault=- offSeed=0 offAfter=0 post=true ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRS-CLK-ahead2h-reset-back-idb-main-corrupt-M3-export: want=M3 fault=- offSeed=7200000 offAfter=0 post=true ls=eggfarm.save idb=main,corrupt.<ts>
+DRY BRS-CLK-ahead2h-reset-back-idb-orphan-T+1h-M3-export: want=M3 fault=- offSeed=7200000 offAfter=0 post=true ls=eggfarm.save idb=main,corrupt.<ts>
+DRY BRS-CLK-ahead2h-reset-back-ls-main-corrupt-bak-valid-M1: want=M1 fault=- offSeed=7200000 offAfter=0 post=true ls=eggfarm.save idb=main,corrupt.<ts>
+DRY BRS-CLK-ahead2h-reset-back-ls-main-corrupt-nothing-valid-M3: want=M3 fault=- offSeed=7200000 offAfter=0 post=true ls=eggfarm.save idb=main,corrupt.<ts>
+DRY BRS-AC4-throw-inside-reset-tx: want=- fault=throwPut offSeed=0 offAfter=0 post=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>,reset.surfaced
+DRY BRS-AC4-abort()-quota-stub-at-reset.surfaced-put: want=- fault=abortPut offSeed=0 offAfter=0 post=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>,reset.surfaced
+DRY BRS-AC4-throw-delete-path-no-idb-copies: want=- fault=throwDel offSeed=0 offAfter=0 post=false ls=eggfarm.save idb=main,reset.surfaced
+DRY BRS-AC4-control-no-fault: want=- fault=control offSeed=0 offAfter=0 post=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>,reset.surfaced
+DRY OK
+2026-10-23 01:39:06 CEST DRY RESET_AT vitest block present: 1 (want 1); it() in block: 
+2026-10-23 01:39:06 CEST DRY plan: testdiff (-07 m4-exp1 byte-identity vs dfdf49c, HARD; review diffs); worktree /workspace/egg-farm-studio/qa/wt-m41-7-8694222-acs; npm ci; build:qa; vitest csr-m41-7.qa.test.ts (incl. RESET_AT -07(b)); [browser] resetat (csr-m41-7-resetat.mjs) -> flock:5961 csr-m41-7-browser.mjs -> b8-14 (CSR-8a/8b, CSR-14 M5/Q, re-measure) -> ui (M1/M1cf/M2/M3/M4/M5/legacy @360/375/390, settled+mid-animation, aria, copy); evidence /workspace/egg-farm-studio/qa/m41/m41-7-8694222/csr
+2026-10-23 01:39:06 CEST DRY :5961 free; lock holders: 1
+2026-10-23 01:39:07 CEST === CSR ACs on 86942226ed792598efa2dbc5b473dc7bc93073ab
+2026-10-23 01:39:07 CEST spec sha256: 530b29d3d37ab965d2375ad05a2c431c4aaac976e959eb245395f6ef9fe3f874 (want 2fbcd4eb…af445)
+2026-10-23 01:39:07 CEST fixtures: SHA256SUMS OK SHA256SUMS=e2d2eee776928553
+2026-10-23 01:39:07 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 4c94704 Y, dfdf49c Y, b986cd3 Y (info: ff from b986cd3?); pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-23 01:39:07 CEST -07 testdiff exit=0 TESTDIFF m4-exp1 IDENTICAL (0 = m4-exp1 identical; 1 = changed lines need HoE justification: /workspace/egg-farm-studio/qa/m41/m41-7-8694222/csr/testdiff/m4-exp1.changed-lines.txt)
+2026-10-23 01:39:09 CEST npm ci exit=0
+2026-10-23 01:39:14 CEST build:qa exit=0 build-id: m3-rc1-pre+8694222 
+2026-10-23 01:39:25 CEST vitest exit=1 11s       Tests  13 failed | 181 passed (194)
+2026-10-23 01:39:25 CEST worktree tracked/untracked changes after run: 0 (want 0)
+2026-10-23 01:39:25 CEST RESET_AT -07(b) vitest: hard 21/33 pass, info 6 FAIL: RESET_AT-RS-AC2-post-reset-main-corrupt-bak-valid-M1,RESET_AT-RS-AC2-post-reset-main-corrupt-bak-invalid-idb-valid-M1,RESET_AT-RS-AC2-post-reset-main-corrupt-nothing-valid-M3,RESET_AT-RS-AC2-post-reset-idb-main-corrupt-IDB1-M3,RESET_AT-RS-AC2-post-reset-idb-main-same-bytes-as-surfaced-copy-M3,RESET_AT-RS-AC2-post-reset-idb-orphan-copy-8b-M3,RESET_AT-RS-AC2-post-reset-idb-orphan-stamped-1d-BEFORE-the-surfaced-copy-M3,RESET_AT-RS-AC4-throw-inside-reset-tx-at-reset.surfaced-put,RESET_AT-RS-AC4-throw-inside-reset-tx-no-prior-record,RESET_AT-RS-AC4-abort()-quota-stub-at-reset.surfaced-put,RESET_AT-RS-AC4-throw-inside-reset-tx-delete-path-no-idb-copies,RESET_AT-RS4-static
+2026-10-23 01:40:56 CEST chromium DOM subset exit=0 91s PASS=159 FAIL=
+2026-10-23 01:44:53 CEST B-CSR8/B-CSR14/re-measure exit=0 237s PASS=107 FAIL=; re-measure: 6 checks, fails: 0 (fail => log M4.2 Minor, min-height fix absent)
+2026-10-23 01:47:59 CEST dialog UI exit=0 186s PASS=234 FAIL=3 INFO=42
+2026-10-23 01:59:33 CEST -07(b) reset_at browser exit=1 694s PASS=166 FAIL=14 INFO= CSR_RESET_AT FAIL fails=14 build=m3-rc1-pre+8694222 engine=chromium
+2026-10-23 01:59:33 CEST :5961 free
+2026-10-23 01:59:33 CEST ALL_DONE

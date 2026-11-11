@@ -1,0 +1,7 @@
+npm_run_build_EXIT=0
+embedded_check-release-build: m4.1+d4b5fdc ok (printed during npm run build)
+separate npm run check-release-build: Missing script (wrapper artifact; not a product fail)
+dist meta build-id=m4.1+d4b5fdc
+dist data-build-id=m4.1+d4b5fdc
+js const yo=m4.1+d4b5fdc (no +dirty)
+VERDICT_BUILD=PASS

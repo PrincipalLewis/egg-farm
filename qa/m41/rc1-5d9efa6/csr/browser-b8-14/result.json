@@ -1,0 +1,1614 @@
+{
+ "port": "5961",
+ "sha7": "5d9efa6",
+ "cases": {
+  "B-CSR8a-owner-loses-to-newer-tab": {
+   "checks": [
+    {
+     "n": "runtime build-id",
+     "pass": true,
+     "v": "m4.1+5d9efa6"
+    },
+    {
+     "n": "A (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "A: 0 LS eggfarm.save* writes after B took over (12 s, > 2 autosaves)",
+     "pass": true,
+     "v": []
+    },
+    {
+     "n": "A: 0 IDB puts/deletes after B took over",
+     "pass": true,
+     "v": []
+    },
+    {
+     "n": "B: tab_guard_takeover recorded, B is the live owner",
+     "pass": true,
+     "v": [
+      "session_start",
+      "offline_grant",
+      "onboarding_step",
+      "session_start",
+      "tab_guard_takeover",
+      "customer_arrive",
+      "customer_arrive",
+      "customer_arrive"
+     ]
+    }
+   ],
+   "buildId": "m4.1+5d9efa6",
+   "aWritesAfterTakeover": {
+    "ls": [],
+    "idb": []
+   },
+   "bTelemetry": [
+    "session_start",
+    "offline_grant",
+    "onboarding_step",
+    "session_start",
+    "tab_guard_takeover",
+    "customer_arrive",
+    "customer_arrive",
+    "customer_arrive"
+   ]
+  },
+  "B-CSR8b-race-loser-during-idb-copy#1": {
+   "checks": [
+    {
+     "n": "B (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "B: no Game created (no window.eggfarm)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "B: 0 LS eggfarm.save* writes",
+     "pass": true,
+     "v": [
+      "set:eggfarm.lease"
+     ]
+    },
+    {
+     "n": "B: 0 IDB puts to main",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792848992648",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "HARD (8694222): loser B lease loss observed (storage event from C)",
+     "pass": true,
+     "v": 1792848993081
+    },
+    {
+     "n": "HARD (8694222): loser B makes NO IDB put/delete after losing the lease",
+     "pass": true,
+     "v": [
+      {
+       "dt": -431,
+       "op": "put:corrupt.1792848992648"
+      },
+      {
+       "dt": -431,
+       "op": "delete:main"
+      }
+     ]
+    },
+    {
+     "n": "B: IDB ops limited to the awaited corrupt.* copy tx (info: main delete in that tx)",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792848992648",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "the seeded corrupt IDB bytes survive (main or corrupt.*) -- never destroyed",
+     "pass": true,
+     "v": {
+      "corrupt.1792848992648": 225,
+      "main": 512
+     }
+    },
+    {
+     "n": "HARD: C (winner) never boots silently (dialog or save_corrupt)",
+     "pass": true,
+     "v": {
+      "dialog": true,
+      "notice": "M3",
+      "save_corrupt": [
+       {
+        "reason": "parse",
+        "had_backup": false,
+        "restored_from_backup": false,
+        "build": "m4.1+5d9efa6",
+        "recovered_from": "none",
+        "store": "idb",
+        "tried": [
+         {
+          "source": "bak",
+          "result": "absent"
+         },
+         {
+          "source": "idb",
+          "result": "invalid",
+          "reason": "parse"
+         },
+         {
+          "source": "v6_backup",
+          "result": "absent"
+         }
+        ],
+        "migrated": false,
+        "type": "save_corrupt",
+        "ts": 1792848993085,
+        "sessionMs": 1
+       }
+      ],
+      "isNewGame": true
+     }
+    },
+    {
+     "n": "HARD: loser B made no IDB put/delete OR winner C shows M3 with save_corrupt{store:idb}",
+     "pass": true,
+     "v": {
+      "loserIdbOps": [
+       "put:corrupt.1792848992648",
+       "delete:main"
+      ],
+      "winnerNotice": "M3",
+      "save_corrupt": [
+       {
+        "store": "idb",
+        "reason": "parse",
+        "recovered_from": "none"
+       }
+      ]
+     }
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bText": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here",
+   "bWrites": {
+    "ls": [
+     "set:eggfarm.lease"
+    ],
+    "idb": [
+     "put:corrupt.1792848992648",
+     "delete:main"
+    ],
+    "errors": [],
+    "ti": [
+     {
+      "t": 1792848992649.5,
+      "op": "put:corrupt.1792848992648"
+     },
+     {
+      "t": 1792848992649.5,
+      "op": "delete:main"
+     }
+    ],
+    "own": "56b8uz85fydmvmg002i",
+    "lost": 1792848993081
+   },
+   "bLeaseLostAt": 1792848993081,
+   "bIdbTimeline": [
+    {
+     "dt": -431,
+     "op": "put:corrupt.1792848992648"
+    },
+    {
+     "dt": -431,
+     "op": "delete:main"
+    }
+   ],
+   "bIdbOps": [
+    "put:corrupt.1792848992648",
+    "delete:main"
+   ],
+   "idbAfter": {
+    "corrupt.1792848992648": 225,
+    "main": 512
+   },
+   "c": {
+    "dialog": true,
+    "notice": "M3",
+    "save_corrupt": [
+     {
+      "reason": "parse",
+      "had_backup": false,
+      "restored_from_backup": false,
+      "build": "m4.1+5d9efa6",
+      "recovered_from": "none",
+      "store": "idb",
+      "tried": [
+       {
+        "source": "bak",
+        "result": "absent"
+       },
+       {
+        "source": "idb",
+        "result": "invalid",
+        "reason": "parse"
+       },
+       {
+        "source": "v6_backup",
+        "result": "absent"
+       }
+      ],
+      "migrated": false,
+      "type": "save_corrupt",
+      "ts": 1792848993085,
+      "sessionMs": 1
+     }
+    ],
+    "isNewGame": true
+   }
+  },
+  "B-CSR8b-race-loser-during-idb-copy#2": {
+   "checks": [
+    {
+     "n": "B (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "B: no Game created (no window.eggfarm)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "B: 0 LS eggfarm.save* writes",
+     "pass": true,
+     "v": [
+      "set:eggfarm.lease"
+     ]
+    },
+    {
+     "n": "B: 0 IDB puts to main",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849005647",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "HARD (8694222): loser B lease loss observed (storage event from C)",
+     "pass": true,
+     "v": 1792849006064.4001
+    },
+    {
+     "n": "HARD (8694222): loser B makes NO IDB put/delete after losing the lease",
+     "pass": true,
+     "v": [
+      {
+       "dt": -416,
+       "op": "put:corrupt.1792849005647"
+      },
+      {
+       "dt": -416,
+       "op": "delete:main"
+      }
+     ]
+    },
+    {
+     "n": "B: IDB ops limited to the awaited corrupt.* copy tx (info: main delete in that tx)",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849005647",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "the seeded corrupt IDB bytes survive (main or corrupt.*) -- never destroyed",
+     "pass": true,
+     "v": {
+      "corrupt.1792849005647": 225,
+      "main": 509
+     }
+    },
+    {
+     "n": "HARD: C (winner) never boots silently (dialog or save_corrupt)",
+     "pass": true,
+     "v": {
+      "dialog": true,
+      "notice": "M3",
+      "save_corrupt": [
+       {
+        "reason": "parse",
+        "had_backup": false,
+        "restored_from_backup": false,
+        "build": "m4.1+5d9efa6",
+        "recovered_from": "none",
+        "store": "idb",
+        "tried": [
+         {
+          "source": "bak",
+          "result": "absent"
+         },
+         {
+          "source": "idb",
+          "result": "invalid",
+          "reason": "parse"
+         },
+         {
+          "source": "v6_backup",
+          "result": "absent"
+         }
+        ],
+        "migrated": false,
+        "type": "save_corrupt",
+        "ts": 1792849006067,
+        "sessionMs": 1
+       }
+      ],
+      "isNewGame": true
+     }
+    },
+    {
+     "n": "HARD: loser B made no IDB put/delete OR winner C shows M3 with save_corrupt{store:idb}",
+     "pass": true,
+     "v": {
+      "loserIdbOps": [
+       "put:corrupt.1792849005647",
+       "delete:main"
+      ],
+      "winnerNotice": "M3",
+      "save_corrupt": [
+       {
+        "store": "idb",
+        "reason": "parse",
+        "recovered_from": "none"
+       }
+      ]
+     }
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bText": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here",
+   "bWrites": {
+    "ls": [
+     "set:eggfarm.lease"
+    ],
+    "idb": [
+     "put:corrupt.1792849005647",
+     "delete:main"
+    ],
+    "errors": [],
+    "ti": [
+     {
+      "t": 1792849005648.4001,
+      "op": "put:corrupt.1792849005647"
+     },
+     {
+      "t": 1792849005648.4001,
+      "op": "delete:main"
+     }
+    ],
+    "own": "jim1vrklenjmvmg0a3l",
+    "lost": 1792849006064.4001
+   },
+   "bLeaseLostAt": 1792849006064.4001,
+   "bIdbTimeline": [
+    {
+     "dt": -416,
+     "op": "put:corrupt.1792849005647"
+    },
+    {
+     "dt": -416,
+     "op": "delete:main"
+    }
+   ],
+   "bIdbOps": [
+    "put:corrupt.1792849005647",
+    "delete:main"
+   ],
+   "idbAfter": {
+    "corrupt.1792849005647": 225,
+    "main": 509
+   },
+   "c": {
+    "dialog": true,
+    "notice": "M3",
+    "save_corrupt": [
+     {
+      "reason": "parse",
+      "had_backup": false,
+      "restored_from_backup": false,
+      "build": "m4.1+5d9efa6",
+      "recovered_from": "none",
+      "store": "idb",
+      "tried": [
+       {
+        "source": "bak",
+        "result": "absent"
+       },
+       {
+        "source": "idb",
+        "result": "invalid",
+        "reason": "parse"
+       },
+       {
+        "source": "v6_backup",
+        "result": "absent"
+       }
+      ],
+      "migrated": false,
+      "type": "save_corrupt",
+      "ts": 1792849006067,
+      "sessionMs": 1
+     }
+    ],
+    "isNewGame": true
+   }
+  },
+  "B-CSR8b-race-loser-during-idb-copy#3": {
+   "checks": [
+    {
+     "n": "B (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "B: no Game created (no window.eggfarm)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "B: 0 LS eggfarm.save* writes",
+     "pass": true,
+     "v": [
+      "set:eggfarm.lease"
+     ]
+    },
+    {
+     "n": "B: 0 IDB puts to main",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849018663",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "HARD (8694222): loser B lease loss observed (storage event from C)",
+     "pass": true,
+     "v": 1792849019079.7002
+    },
+    {
+     "n": "HARD (8694222): loser B makes NO IDB put/delete after losing the lease",
+     "pass": true,
+     "v": [
+      {
+       "dt": -415,
+       "op": "put:corrupt.1792849018663"
+      },
+      {
+       "dt": -415,
+       "op": "delete:main"
+      }
+     ]
+    },
+    {
+     "n": "B: IDB ops limited to the awaited corrupt.* copy tx (info: main delete in that tx)",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849018663",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "the seeded corrupt IDB bytes survive (main or corrupt.*) -- never destroyed",
+     "pass": true,
+     "v": {
+      "corrupt.1792849018663": 225,
+      "main": 512
+     }
+    },
+    {
+     "n": "HARD: C (winner) never boots silently (dialog or save_corrupt)",
+     "pass": true,
+     "v": {
+      "dialog": true,
+      "notice": "M3",
+      "save_corrupt": [
+       {
+        "reason": "parse",
+        "had_backup": false,
+        "restored_from_backup": false,
+        "build": "m4.1+5d9efa6",
+        "recovered_from": "none",
+        "store": "idb",
+        "tried": [
+         {
+          "source": "bak",
+          "result": "absent"
+         },
+         {
+          "source": "idb",
+          "result": "invalid",
+          "reason": "parse"
+         },
+         {
+          "source": "v6_backup",
+          "result": "absent"
+         }
+        ],
+        "migrated": false,
+        "type": "save_corrupt",
+        "ts": 1792849019083,
+        "sessionMs": 1
+       }
+      ],
+      "isNewGame": true
+     }
+    },
+    {
+     "n": "HARD: loser B made no IDB put/delete OR winner C shows M3 with save_corrupt{store:idb}",
+     "pass": true,
+     "v": {
+      "loserIdbOps": [
+       "put:corrupt.1792849018663",
+       "delete:main"
+      ],
+      "winnerNotice": "M3",
+      "save_corrupt": [
+       {
+        "store": "idb",
+        "reason": "parse",
+        "recovered_from": "none"
+       }
+      ]
+     }
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bText": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here",
+   "bWrites": {
+    "ls": [
+     "set:eggfarm.lease"
+    ],
+    "idb": [
+     "put:corrupt.1792849018663",
+     "delete:main"
+    ],
+    "errors": [],
+    "ti": [
+     {
+      "t": 1792849018664.6,
+      "op": "put:corrupt.1792849018663"
+     },
+     {
+      "t": 1792849018664.6,
+      "op": "delete:main"
+     }
+    ],
+    "own": "953s1on0wrcmvmg0k55",
+    "lost": 1792849019079.7002
+   },
+   "bLeaseLostAt": 1792849019079.7002,
+   "bIdbTimeline": [
+    {
+     "dt": -415,
+     "op": "put:corrupt.1792849018663"
+    },
+    {
+     "dt": -415,
+     "op": "delete:main"
+    }
+   ],
+   "bIdbOps": [
+    "put:corrupt.1792849018663",
+    "delete:main"
+   ],
+   "idbAfter": {
+    "corrupt.1792849018663": 225,
+    "main": 512
+   },
+   "c": {
+    "dialog": true,
+    "notice": "M3",
+    "save_corrupt": [
+     {
+      "reason": "parse",
+      "had_backup": false,
+      "restored_from_backup": false,
+      "build": "m4.1+5d9efa6",
+      "recovered_from": "none",
+      "store": "idb",
+      "tried": [
+       {
+        "source": "bak",
+        "result": "absent"
+       },
+       {
+        "source": "idb",
+        "result": "invalid",
+        "reason": "parse"
+       },
+       {
+        "source": "v6_backup",
+        "result": "absent"
+       }
+      ],
+      "migrated": false,
+      "type": "save_corrupt",
+      "ts": 1792849019083,
+      "sessionMs": 1
+     }
+    ],
+    "isNewGame": true
+   }
+  },
+  "B-CSR8b-race-loser-during-idb-copy#4": {
+   "checks": [
+    {
+     "n": "B (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "B: no Game created (no window.eggfarm)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "B: 0 LS eggfarm.save* writes",
+     "pass": true,
+     "v": [
+      "set:eggfarm.lease"
+     ]
+    },
+    {
+     "n": "B: 0 IDB puts to main",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849031695",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "HARD (8694222): loser B lease loss observed (storage event from C)",
+     "pass": true,
+     "v": 1792849032153.0999
+    },
+    {
+     "n": "HARD (8694222): loser B makes NO IDB put/delete after losing the lease",
+     "pass": true,
+     "v": [
+      {
+       "dt": -456,
+       "op": "put:corrupt.1792849031695"
+      },
+      {
+       "dt": -456,
+       "op": "delete:main"
+      }
+     ]
+    },
+    {
+     "n": "B: IDB ops limited to the awaited corrupt.* copy tx (info: main delete in that tx)",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849031695",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "the seeded corrupt IDB bytes survive (main or corrupt.*) -- never destroyed",
+     "pass": true,
+     "v": {
+      "corrupt.1792849031695": 225,
+      "main": 510
+     }
+    },
+    {
+     "n": "HARD: C (winner) never boots silently (dialog or save_corrupt)",
+     "pass": true,
+     "v": {
+      "dialog": true,
+      "notice": "M3",
+      "save_corrupt": [
+       {
+        "reason": "parse",
+        "had_backup": false,
+        "restored_from_backup": false,
+        "build": "m4.1+5d9efa6",
+        "recovered_from": "none",
+        "store": "idb",
+        "tried": [
+         {
+          "source": "bak",
+          "result": "absent"
+         },
+         {
+          "source": "idb",
+          "result": "invalid",
+          "reason": "parse"
+         },
+         {
+          "source": "v6_backup",
+          "result": "absent"
+         }
+        ],
+        "migrated": false,
+        "type": "save_corrupt",
+        "ts": 1792849032156,
+        "sessionMs": 1
+       }
+      ],
+      "isNewGame": true
+     }
+    },
+    {
+     "n": "HARD: loser B made no IDB put/delete OR winner C shows M3 with save_corrupt{store:idb}",
+     "pass": true,
+     "v": {
+      "loserIdbOps": [
+       "put:corrupt.1792849031695",
+       "delete:main"
+      ],
+      "winnerNotice": "M3",
+      "save_corrupt": [
+       {
+        "store": "idb",
+        "reason": "parse",
+        "recovered_from": "none"
+       }
+      ]
+     }
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bText": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here",
+   "bWrites": {
+    "ls": [
+     "set:eggfarm.lease"
+    ],
+    "idb": [
+     "put:corrupt.1792849031695",
+     "delete:main"
+    ],
+    "errors": [],
+    "ti": [
+     {
+      "t": 1792849031696.7998,
+      "op": "put:corrupt.1792849031695"
+     },
+     {
+      "t": 1792849031696.7998,
+      "op": "delete:main"
+     }
+    ],
+    "own": "z96i5ljbcfmvmg0u76",
+    "lost": 1792849032153.0999
+   },
+   "bLeaseLostAt": 1792849032153.0999,
+   "bIdbTimeline": [
+    {
+     "dt": -456,
+     "op": "put:corrupt.1792849031695"
+    },
+    {
+     "dt": -456,
+     "op": "delete:main"
+    }
+   ],
+   "bIdbOps": [
+    "put:corrupt.1792849031695",
+    "delete:main"
+   ],
+   "idbAfter": {
+    "corrupt.1792849031695": 225,
+    "main": 510
+   },
+   "c": {
+    "dialog": true,
+    "notice": "M3",
+    "save_corrupt": [
+     {
+      "reason": "parse",
+      "had_backup": false,
+      "restored_from_backup": false,
+      "build": "m4.1+5d9efa6",
+      "recovered_from": "none",
+      "store": "idb",
+      "tried": [
+       {
+        "source": "bak",
+        "result": "absent"
+       },
+       {
+        "source": "idb",
+        "result": "invalid",
+        "reason": "parse"
+       },
+       {
+        "source": "v6_backup",
+        "result": "absent"
+       }
+      ],
+      "migrated": false,
+      "type": "save_corrupt",
+      "ts": 1792849032156,
+      "sessionMs": 1
+     }
+    ],
+    "isNewGame": true
+   }
+  },
+  "B-CSR8b-race-loser-during-idb-copy#5": {
+   "checks": [
+    {
+     "n": "B (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "B: no Game created (no window.eggfarm)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "B: 0 LS eggfarm.save* writes",
+     "pass": true,
+     "v": [
+      "set:eggfarm.lease"
+     ]
+    },
+    {
+     "n": "B: 0 IDB puts to main",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849044762",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "HARD (8694222): loser B lease loss observed (storage event from C)",
+     "pass": true,
+     "v": 1792849045196.1
+    },
+    {
+     "n": "HARD (8694222): loser B makes NO IDB put/delete after losing the lease",
+     "pass": true,
+     "v": [
+      {
+       "dt": -433,
+       "op": "put:corrupt.1792849044762"
+      },
+      {
+       "dt": -433,
+       "op": "delete:main"
+      }
+     ]
+    },
+    {
+     "n": "B: IDB ops limited to the awaited corrupt.* copy tx (info: main delete in that tx)",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792849044762",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "the seeded corrupt IDB bytes survive (main or corrupt.*) -- never destroyed",
+     "pass": true,
+     "v": {
+      "corrupt.1792849044762": 225,
+      "main": 511
+     }
+    },
+    {
+     "n": "HARD: C (winner) never boots silently (dialog or save_corrupt)",
+     "pass": true,
+     "v": {
+      "dialog": true,
+      "notice": "M3",
+      "save_corrupt": [
+       {
+        "reason": "parse",
+        "had_backup": false,
+        "restored_from_backup": false,
+        "build": "m4.1+5d9efa6",
+        "recovered_from": "none",
+        "store": "idb",
+        "tried": [
+         {
+          "source": "bak",
+          "result": "absent"
+         },
+         {
+          "source": "idb",
+          "result": "invalid",
+          "reason": "parse"
+         },
+         {
+          "source": "v6_backup",
+          "result": "absent"
+         }
+        ],
+        "migrated": false,
+        "type": "save_corrupt",
+        "ts": 1792849045198,
+        "sessionMs": 1
+       }
+      ],
+      "isNewGame": true
+     }
+    },
+    {
+     "n": "HARD: loser B made no IDB put/delete OR winner C shows M3 with save_corrupt{store:idb}",
+     "pass": true,
+     "v": {
+      "loserIdbOps": [
+       "put:corrupt.1792849044762",
+       "delete:main"
+      ],
+      "winnerNotice": "M3",
+      "save_corrupt": [
+       {
+        "store": "idb",
+        "reason": "parse",
+        "recovered_from": "none"
+       }
+      ]
+     }
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bText": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here",
+   "bWrites": {
+    "ls": [
+     "set:eggfarm.lease"
+    ],
+    "idb": [
+     "put:corrupt.1792849044762",
+     "delete:main"
+    ],
+    "errors": [],
+    "ti": [
+     {
+      "t": 1792849044763.4001,
+      "op": "put:corrupt.1792849044762"
+     },
+     {
+      "t": 1792849044763.4001,
+      "op": "delete:main"
+     }
+    ],
+    "own": "24d74kazbu9mvmg14a4",
+    "lost": 1792849045196.1
+   },
+   "bLeaseLostAt": 1792849045196.1,
+   "bIdbTimeline": [
+    {
+     "dt": -433,
+     "op": "put:corrupt.1792849044762"
+    },
+    {
+     "dt": -433,
+     "op": "delete:main"
+    }
+   ],
+   "bIdbOps": [
+    "put:corrupt.1792849044762",
+    "delete:main"
+   ],
+   "idbAfter": {
+    "corrupt.1792849044762": 225,
+    "main": 511
+   },
+   "c": {
+    "dialog": true,
+    "notice": "M3",
+    "save_corrupt": [
+     {
+      "reason": "parse",
+      "had_backup": false,
+      "restored_from_backup": false,
+      "build": "m4.1+5d9efa6",
+      "recovered_from": "none",
+      "store": "idb",
+      "tried": [
+       {
+        "source": "bak",
+        "result": "absent"
+       },
+       {
+        "source": "idb",
+        "result": "invalid",
+        "reason": "parse"
+       },
+       {
+        "source": "v6_backup",
+        "result": "absent"
+       }
+      ],
+      "migrated": false,
+      "type": "save_corrupt",
+      "ts": 1792849045198,
+      "sessionMs": 1
+     }
+    ],
+    "isNewGame": true
+   }
+  },
+  "B-CSR8b-forced-claim-inside-copy-tx#1": {
+   "checks": [
+    {
+     "n": "precondition: the forced foreign claim fired inside B's copy tx",
+     "pass": true,
+     "v": [
+      {
+       "t": 1792849057812.1,
+       "op": "FORCED-foreign-claim"
+      }
+     ]
+    },
+    {
+     "n": "B shows 'Game open in another tab' and creates no Game",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "HARD: B makes NO IDB put/delete after losing the lease (tx aborted in-tx)",
+     "pass": true,
+     "v": []
+    },
+    {
+     "n": "IDB main still holds the seeded corrupt bytes (no delete applied), no corrupt.* made by B",
+     "pass": true,
+     "v": {
+      "main": 225
+     }
+    },
+    {
+     "n": "HARD: C (next owner) is never silent: M3 with save_corrupt{store:idb} x1",
+     "pass": true,
+     "v": {
+      "notice": "M3",
+      "save_corrupt": [
+       "idb"
+      ]
+     }
+    },
+    {
+     "n": "C: the corrupt bytes are kept as IDB corrupt.* (IDB1-5 by the owner)",
+     "pass": true,
+     "v": [
+      "corrupt.1792849060486",
+      "main"
+     ]
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bTimeline": [
+    {
+     "t": 1792849057812.1,
+     "op": "FORCED-foreign-claim"
+    }
+   ],
+   "idbAfterB": {
+    "main": 225
+   },
+   "c": {
+    "notice": "M3",
+    "save_corrupt": [
+     "idb"
+    ]
+   }
+  },
+  "B-CSR8b-forced-claim-inside-copy-tx#2": {
+   "checks": [
+    {
+     "n": "precondition: the forced foreign claim fired inside B's copy tx",
+     "pass": true,
+     "v": [
+      {
+       "t": 1792849063628.2,
+       "op": "FORCED-foreign-claim"
+      }
+     ]
+    },
+    {
+     "n": "B shows 'Game open in another tab' and creates no Game",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "HARD: B makes NO IDB put/delete after losing the lease (tx aborted in-tx)",
+     "pass": true,
+     "v": []
+    },
+    {
+     "n": "IDB main still holds the seeded corrupt bytes (no delete applied), no corrupt.* made by B",
+     "pass": true,
+     "v": {
+      "main": 225
+     }
+    },
+    {
+     "n": "HARD: C (next owner) is never silent: M3 with save_corrupt{store:idb} x1",
+     "pass": true,
+     "v": {
+      "notice": "M3",
+      "save_corrupt": [
+       "idb"
+      ]
+     }
+    },
+    {
+     "n": "C: the corrupt bytes are kept as IDB corrupt.* (IDB1-5 by the owner)",
+     "pass": true,
+     "v": [
+      "corrupt.1792849066292",
+      "main"
+     ]
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bTimeline": [
+    {
+     "t": 1792849063628.2,
+     "op": "FORCED-foreign-claim"
+    }
+   ],
+   "idbAfterB": {
+    "main": 225
+   },
+   "c": {
+    "notice": "M3",
+    "save_corrupt": [
+     "idb"
+    ]
+   }
+  },
+  "B-CSR8b-forced-claim-inside-copy-tx#3": {
+   "checks": [
+    {
+     "n": "precondition: the forced foreign claim fired inside B's copy tx",
+     "pass": true,
+     "v": [
+      {
+       "t": 1792849069430,
+       "op": "FORCED-foreign-claim"
+      }
+     ]
+    },
+    {
+     "n": "B shows 'Game open in another tab' and creates no Game",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "HARD: B makes NO IDB put/delete after losing the lease (tx aborted in-tx)",
+     "pass": true,
+     "v": []
+    },
+    {
+     "n": "IDB main still holds the seeded corrupt bytes (no delete applied), no corrupt.* made by B",
+     "pass": true,
+     "v": {
+      "main": 225
+     }
+    },
+    {
+     "n": "HARD: C (next owner) is never silent: M3 with save_corrupt{store:idb} x1",
+     "pass": true,
+     "v": {
+      "notice": "M3",
+      "save_corrupt": [
+       "idb"
+      ]
+     }
+    },
+    {
+     "n": "C: the corrupt bytes are kept as IDB corrupt.* (IDB1-5 by the owner)",
+     "pass": true,
+     "v": [
+      "corrupt.1792849072085",
+      "main"
+     ]
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bTimeline": [
+    {
+     "t": 1792849069430,
+     "op": "FORCED-foreign-claim"
+    }
+   ],
+   "idbAfterB": {
+    "main": 225
+   },
+   "c": {
+    "notice": "M3",
+    "save_corrupt": [
+     "idb"
+    ]
+   }
+  },
+  "B-CSR14-M5-lease-quota": {
+   "checks": [
+    {
+     "n": "dialog shown",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "M5 title",
+     "pass": true,
+     "v": "Your farm is back!"
+    },
+    {
+     "n": "M5 body",
+     "pass": true,
+     "v": "Saving is paused on this device right now, so progress may not be kept."
+    },
+    {
+     "n": "M5 button",
+     "pass": true,
+     "v": "Continue"
+    },
+    {
+     "n": "M5 secondary 'Export save file'",
+     "pass": true,
+     "v": "Export save file"
+    },
+    {
+     "n": "M5 export aria names the CURRENT farm",
+     "pass": true,
+     "v": "Export save file, downloads a copy of your current farm"
+    },
+    {
+     "n": "export downloads the current farm (F20), never the corrupt bytes",
+     "pass": true,
+     "v": 20
+    },
+    {
+     "n": "notice_shown x1 notice=M5",
+     "pass": true,
+     "v": [
+      {
+       "notice": "M5",
+       "source": "bak",
+       "store": "ls",
+       "type": "save_recovery_notice_shown",
+       "ts": 1792849075275,
+       "sessionMs": 47
+      }
+     ]
+    },
+    {
+     "n": "no-storage notice after closing M5",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "notice_dismissed x1 notice=M5",
+     "pass": true,
+     "v": [
+      {
+       "notice": "M5",
+       "source": "bak",
+       "store": "ls",
+       "type": "save_recovery_notice_dismissed",
+       "ts": 1792849075644,
+       "sessionMs": 416
+      }
+     ]
+    },
+    {
+     "n": "farmLevel=20 (restored from .bak)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "copy": {
+    "t": "Your farm is back!",
+    "b": "Saving is paused on this device right now, so progress may not be kept.",
+    "g": "Continue"
+   },
+   "export": {
+    "exText": "Export save file",
+    "aria": "Export save file, downloads a copy of your current farm"
+   },
+   "exportFile": "eggfarm-save-20261024-1537.json",
+   "shown": [
+    {
+     "notice": "M5",
+     "source": "bak",
+     "store": "ls",
+     "type": "save_recovery_notice_shown",
+     "ts": 1792849075275,
+     "sessionMs": 47
+    }
+   ]
+  },
+  "B-CSR14-Q-preserve-quota": {
+   "checks": [
+    {
+     "n": "dialog shown",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "save_corrupt x1 copy_failed=true",
+     "pass": true,
+     "v": [
+      {
+       "reason": "invalid_state",
+       "had_backup": false,
+       "restored_from_backup": false,
+       "build": "m4.1+5d9efa6",
+       "copy_failed": true,
+       "recovered_from": "none",
+       "store": "ls",
+       "tried": [
+        {
+         "source": "bak",
+         "result": "absent"
+        },
+        {
+         "source": "idb",
+         "result": "absent"
+        },
+        {
+         "source": "v6_backup",
+         "result": "absent"
+        }
+       ],
+       "migrated": false,
+       "type": "save_corrupt",
+       "ts": 1792849076218,
+       "sessionMs": 1
+      }
+     ]
+    },
+    {
+     "n": "LS corrupt.* write was attempted and refused",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "export (from memory) = the corrupt main bytes",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "layer": {
+    "outcome": "storage",
+    "variant": null,
+    "title": "A fresh start",
+    "body": "We couldn't open your farm. Export it now to keep a copy."
+   },
+   "save_corrupt": [
+    {
+     "reason": "invalid_state",
+     "had_backup": false,
+     "restored_from_backup": false,
+     "build": "m4.1+5d9efa6",
+     "copy_failed": true,
+     "recovered_from": "none",
+     "store": "ls",
+     "tried": [
+      {
+       "source": "bak",
+       "result": "absent"
+      },
+      {
+       "source": "idb",
+       "result": "absent"
+      },
+      {
+       "source": "v6_backup",
+       "result": "absent"
+      }
+     ],
+     "migrated": false,
+     "type": "save_corrupt",
+     "ts": 1792849076218,
+     "sessionMs": 1
+    }
+   ],
+   "exportFile": "eggfarm-old-save-20261024-1537.json"
+  },
+  "REMEASURE-M3@360": {
+   "checks": [
+    {
+     "n": "primary >= 48 CSS px (strict) @360",
+     "pass": true,
+     "v": {
+      "w": 258,
+      "h": 48,
+      "minHeight": "48px"
+     }
+    },
+    {
+     "n": "export link >= 44 CSS px (strict) @360",
+     "pass": true,
+     "v": {
+      "w": 144.59375,
+      "h": 44,
+      "minHeight": "44px"
+     }
+    },
+    {
+     "n": "card width == min(440, vw-48) @360 (info, ±1)",
+     "pass": true,
+     "v": 312
+    }
+   ],
+   "immediate": {
+    "go": 48,
+    "ex": 44
+   },
+   "m": {
+    "card": {
+     "w": 312,
+     "h": 331.578125,
+     "minHeight": "auto"
+    },
+    "go": {
+     "w": 258,
+     "h": 48,
+     "minHeight": "48px"
+    },
+    "ex": {
+     "w": 144.59375,
+     "h": 44,
+     "minHeight": "44px"
+    },
+    "dpr": 1
+   }
+  },
+  "REMEASURE-M3@375": {
+   "checks": [
+    {
+     "n": "primary >= 48 CSS px (strict) @375",
+     "pass": true,
+     "v": {
+      "w": 273,
+      "h": 48,
+      "minHeight": "48px"
+     }
+    },
+    {
+     "n": "export link >= 44 CSS px (strict) @375",
+     "pass": true,
+     "v": {
+      "w": 144.59375,
+      "h": 44,
+      "minHeight": "44px"
+     }
+    },
+    {
+     "n": "card width == min(440, vw-48) @375 (info, ±1)",
+     "pass": true,
+     "v": 327
+    }
+   ],
+   "immediate": {
+    "go": 48,
+    "ex": 44
+   },
+   "m": {
+    "card": {
+     "w": 327,
+     "h": 331.578125,
+     "minHeight": "auto"
+    },
+    "go": {
+     "w": 273,
+     "h": 48,
+     "minHeight": "48px"
+    },
+    "ex": {
+     "w": 144.59375,
+     "h": 44,
+     "minHeight": "44px"
+    },
+    "dpr": 1
+   }
+  },
+  "REMEASURE-M3@390": {
+   "checks": [
+    {
+     "n": "primary >= 48 CSS px (strict) @390",
+     "pass": true,
+     "v": {
+      "w": 288,
+      "h": 48,
+      "minHeight": "48px"
+     }
+    },
+    {
+     "n": "export link >= 44 CSS px (strict) @390",
+     "pass": true,
+     "v": {
+      "w": 144.59375,
+      "h": 44,
+      "minHeight": "44px"
+     }
+    },
+    {
+     "n": "card width == min(440, vw-48) @390 (info, ±1)",
+     "pass": true,
+     "v": 342
+    }
+   ],
+   "immediate": {
+    "go": 48,
+    "ex": 44
+   },
+   "m": {
+    "card": {
+     "w": 342,
+     "h": 331.578125,
+     "minHeight": "auto"
+    },
+    "go": {
+     "w": 288,
+     "h": 48,
+     "minHeight": "48px"
+    },
+    "ex": {
+     "w": 144.59375,
+     "h": 44,
+     "minHeight": "44px"
+    },
+    "dpr": 1
+   }
+  }
+ },
+ "fails": 0
+}

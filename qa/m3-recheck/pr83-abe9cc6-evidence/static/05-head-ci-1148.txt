@@ -1,0 +1,6 @@
+# head check 2026-10-30T11:48:49+01:00
+abe9cc620421779bda2be1dc2ce0be94f6c7670c	refs/heads/fix/m41-p2
+abe9cc620421779bda2be1dc2ce0be94f6c7670c	refs/pull/83/head
+# cursor-github get_pull_request #83: head abe9cc620421779bda2be1dc2ce0be94f6c7670c fix/m41-p2 -> rc/v5, open, mergeable_state clean, updated_at 2026-10-30T09:49:21Z (10:49 CET)
+# list_pull_request_commits: 29 commits, last = abe9cc6 (08:32:40Z = 09:32 CET). No test-only commit after abe9cc6.
+# CI run 41036225674 'ci' head_sha abe9cc6 status completed conclusion success, 10:49:24-10:58:17 CET

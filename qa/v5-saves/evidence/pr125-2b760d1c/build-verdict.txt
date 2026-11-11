@@ -1,0 +1,5 @@
+BUILD_EXIT=0 CHECK_EXIT=0
+check-release-build: m4.1+2b760d1 ok
+dist data-build-id / meta = m4.1+2b760d1
+no +dirty
+VERDICT=PASS

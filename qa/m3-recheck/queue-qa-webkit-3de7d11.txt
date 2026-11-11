@@ -1,0 +1,9 @@
+13_no_flicker_positions_only_on_serve_leave PASS {"moves":0,"replaced":0,"removals":19}
+15_CLS_and_long_tasks PASS {"cls":0,"sources":{},"clsMeasured":true,"longTasks":0}
+17_chip_live_coalesced_identity PASS {"chipWrites":24,"minChipGapMs":1999,"liveWrites":20,"minLiveGapMs":2000}
+14_scroll_anchor PASS {"worstPx":0,"reAnchors":0,"scrollable":true}
+16_tap_target_stable_while_held PASS {"rects":["16,378,328,60,232,8,80,44"]}
+18_partial_leave PASS {"afterSell":{"coins":1496,"w":24.80000000000001,"filled":2},"afterTimeout":{"coins":1496,"n":0,"card":false}}
+19_farm_strip PASS {"chips":4,"more":"+6","marketOpened":true}
+20_farm_row_preview PASS {"3":{"slot":null,"orders":null,"single":true,"aria":null},"4":{"slot":"+1 customer slot (6 → 7)","orders":"Orders 17–33 → 19–38 eggs","single":true,"aria":"Next level: plus 1 customer slot, 6 to 7"},"9":{"slot":"+1 customer slot (7 → 8)","orders":"Orders 26–51 → 27–53 eggs","single":true,"aria":"Next level: plus 1 customer slot, 7 to 8"},"14":{"slot":"+1 customer slot (8 → 9)","orders":"Orders 30–59 → 30–60 eggs","single":true,"aria":"Next level: plus 1 customer slot, 8 to 9"},"19":{"slot":"+1 customer slot (9 → 10)","orders":null,"single":true,"aria":"Next level: plus 1 customer slot, 9 to 10"},"20":{"slot":null,"orders":null,"single":true,"aria":null}}
+F24_frame_sampler FAIL {"frames":1277,"p50":24,"p95":26,"max":36,"over20Pct":92.09083790133124,"over100":0,"durationMs":30000,"pass":false}

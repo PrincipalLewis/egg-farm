@@ -1,0 +1,15 @@
+c29ffdf8f10cb608686b200d17b001d79caaeda8	refs/pull/115/head
+checked_at: 2026-11-06 01:48 CET (Europe/Belgrade, UTC+1)
+task: HoQA/pr115-mergefwd-1106
+tip: c29ffdf8f10cb608686b200d17b001d79caaeda8
+parents: 9cfd8b17d07018bd443aeb783347d135e39f4db7 19121b75b44199beebf44fdb34a69b1120035cb0
+subject: Merge rc/v5 (#114 19121b75) into cursor/saves-pause-sim-4c0b
+tip_tree: 2db06bcaf99c049f5dd12fa8dc9ba7bdb5ca8e5b
+9cfd8b17_tree: 2db06bcaf99c049f5dd12fa8dc9ba7bdb5ca8e5b
+36f4e88_tree: 2db06bcaf99c049f5dd12fa8dc9ba7bdb5ca8e5b
+diff_9cfd8b17_vs_tip: EMPTY
+diff_36f4e88_vs_tip: EMPTY
+merge-tree(9cfd8b17, 19121b75): 2db06bcaf99c049f5dd12fa8dc9ba7bdb5ca8e5b EQUALS tip tree
+offlineAccrualFrozen: ABSENT (git grep exit 1 / no hits on tip)
+own-code/conflict edits: NONE (tree-identical to 9cfd8b17 and 36f4e88)
+CLEAN: yes — content/local/gate PASS at 57c187e CARRIES (no local re-run)

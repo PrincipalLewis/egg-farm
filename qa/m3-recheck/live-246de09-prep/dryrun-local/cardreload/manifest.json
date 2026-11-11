@@ -1,0 +1,703 @@
+{
+ "sha": "246de09c8b329360754cc0d77a6cd6b6788b6ad4",
+ "base_url": "http://127.0.0.1:4825/",
+ "build_id_expected": "m3-rc1-pre+246de09",
+ "pushed_branches": [
+  "gh/fix/m4-exp1-seen-revert",
+  "gh/rc/m4-t3-capped"
+ ],
+ "entries": [
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-1-blocked-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 1-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "fb1add02759ae9b82c86f0201d7369ba9f415342e17bee9b25c20b97c9c907bb"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-1b-reload-still-blocked-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 1b-reload-still-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "a10146c91ad7df5760e99c3283ea9507d66666b2c077fb683aa8e7e6722f9806"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-2-writable-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 2-writable \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "5a565c1116a4bc31cae0c9ff1daf818585b401729ca1ced61fb48c6fb3c3676a"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-3-reload-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 3-reload \u00b7 card shown \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true
+   },
+   "sha256": "6ba803049da566748d4c8cae4927c12783722bd8a1d1e790d65e3c2d6483a42a"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-4-reload-after-gotit-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 4-reload-after-gotit \u00b7 card absent \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true,
+    "eggfarm.save.bak": true
+   },
+   "sha256": "969f0d2f9e0b10d0f79c47d0c9d3fd347f895c3c3113aa3e32ba98568e9a8b22"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-1-blocked-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 1-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "58402913a8854e986f20245f755d4e6a5328682b7c4cff59b81d576f04590737"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-1b-reload-still-blocked-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 1b-reload-still-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "3cc5a56db8b0c633b463affeffd10aa4e733ac5cc668f188d1db0986f3bd73fb"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-2-writable-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 2-writable \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "5a565c1116a4bc31cae0c9ff1daf818585b401729ca1ced61fb48c6fb3c3676a"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-3-reload-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 3-reload \u00b7 card shown \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true
+   },
+   "sha256": "6ba803049da566748d4c8cae4927c12783722bd8a1d1e790d65e3c2d6483a42a"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-4-reload-after-gotit-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 4-reload-after-gotit \u00b7 card absent \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true,
+    "eggfarm.save.bak": true
+   },
+   "sha256": "969f0d2f9e0b10d0f79c47d0c9d3fd347f895c3c3113aa3e32ba98568e9a8b22"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-1-blocked-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 1-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "c4e3e68846e92e77816e6ef272cf43616aa9c20f9c9d164115ba851b8981bcf0"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-1b-reload-still-blocked-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 1b-reload-still-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "5d20112be93ba4badea40e4ea3ea8de4ca2c3dd4070ed39f7923bb92cc10f761"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-2-writable-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 2-writable \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "59dfc15ead7348a12138fa045433729aa2ad9d917db229aafec0b6d51e93b041"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-3-reload-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 3-reload \u00b7 card shown \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true
+   },
+   "sha256": "5089e58cc7ed6c19ea5c5b29b0d1e2bee55e2f819df8095dbb4a7f9c8afa3c8f"
+  },
+  {
+   "file": "chromium/expcrl-real-canonical-committed-unseen-4-reload-after-gotit-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage real \u00b7 4-reload-after-gotit \u00b7 card absent \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true,
+    "eggfarm.save.bak": true
+   },
+   "sha256": "37939a8b40ddf0cc632a1560e076bd5fbb1b8e7478aa99fb969a9a9a8d798e2f"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-1-blocked-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 1-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "c4e3e68846e92e77816e6ef272cf43616aa9c20f9c9d164115ba851b8981bcf0"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-1b-reload-still-blocked-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 1b-reload-still-blocked \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "5d20112be93ba4badea40e4ea3ea8de4ca2c3dd4070ed39f7923bb92cc10f761"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-2-writable-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 2-writable \u00b7 card absent \u00b7 count 0",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {},
+   "sha256": "59dfc15ead7348a12138fa045433729aa2ad9d917db229aafec0b6d51e93b041"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-3-reload-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 3-reload \u00b7 card shown \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true
+   },
+   "sha256": "c32b2a62448204ddebb7b1d7a3c7bcc60b936f46553b8d914c2477ee8310dc86"
+  },
+  {
+   "file": "chromium/expcrl-mock-canonical-committed-unseen-4-reload-after-gotit-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "canonical-committed-unseen",
+   "seed": null,
+   "group": "exp1-storage-blocked",
+   "state": "EXP1 storage mock \u00b7 4-reload-after-gotit \u00b7 card absent \u00b7 count 1",
+   "asserted_tab": "collection",
+   "asserted_nav": null,
+   "flag": {
+    "eggfarm.save": true,
+    "eggfarm.save.bak": true
+   },
+   "sha256": "5c9ff2c095d53b745f0e9ef56157a065c1a1878082c723dab51e6d51bddd8882"
+  }
+ ],
+ "cardreload": [
+  {
+   "engine": "chromium",
+   "build_id": "m3-rc1-pre+246de09",
+   "sha": "246de09c8b329360754cc0d77a6cd6b6788b6ad4",
+   "base": "http://127.0.0.1:4825/",
+   "size": "390x844",
+   "variant": "real",
+   "fixture": "canonical-committed-unseen",
+   "fill": {
+    "mode": "real",
+    "chunks": 14,
+    "firstErr": "QuotaExceededError",
+    "probe": "QuotaExceededError(DOMException)"
+   },
+   "gameState": null,
+   "blocked": {
+    "size": "390x844",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "1-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null,
+    "fill": {
+     "mode": "real",
+     "chunks": 14,
+     "firstErr": "QuotaExceededError",
+     "probe": "QuotaExceededError(DOMException)"
+    },
+    "gameState": null
+   },
+   "blockedReload": {
+    "size": "390x844",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "1b-reload-still-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "writable": {
+    "size": "390x844",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "2-writable",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "reload": {
+    "size": "390x844",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "3-reload",
+    "card": true,
+    "flag": {
+     "eggfarm.save": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null
+   },
+   "reloadAfterGotIt": {
+    "size": "390x844",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "4-reload-after-gotit",
+    "card": false,
+    "flag": {
+     "eggfarm.save": true,
+     "eggfarm.save.bak": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null,
+    "gotItClicked": true
+   },
+   "ok": {
+    "reloadAfterGotItNoCard": true,
+    "blockedNoCard": true,
+    "reloadBlockedNoCard": true,
+    "writableOnce": false,
+    "reloadGone": false
+   },
+   "pass": false,
+   "ok_by_design": {
+    "blockedNoCard": true,
+    "writableSessionNoCard": true,
+    "nextLoadOnce": true,
+    "reloadBlockedNoCard": true,
+    "reloadAfterGotItNoCard": true
+   },
+   "pass_by_design": true
+  },
+  {
+   "engine": "chromium",
+   "build_id": "m3-rc1-pre+246de09",
+   "sha": "246de09c8b329360754cc0d77a6cd6b6788b6ad4",
+   "base": "http://127.0.0.1:4825/",
+   "size": "390x844",
+   "variant": "mock",
+   "fixture": "canonical-committed-unseen",
+   "fill": {
+    "mode": "mock"
+   },
+   "gameState": null,
+   "blocked": {
+    "size": "390x844",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "1-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null,
+    "fill": {
+     "mode": "mock"
+    },
+    "gameState": null
+   },
+   "blockedReload": {
+    "size": "390x844",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "1b-reload-still-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "writable": {
+    "size": "390x844",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "2-writable",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "reload": {
+    "size": "390x844",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "3-reload",
+    "card": true,
+    "flag": {
+     "eggfarm.save": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null
+   },
+   "reloadAfterGotIt": {
+    "size": "390x844",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "4-reload-after-gotit",
+    "card": false,
+    "flag": {
+     "eggfarm.save": true,
+     "eggfarm.save.bak": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null,
+    "gotItClicked": true
+   },
+   "ok": {
+    "reloadAfterGotItNoCard": true,
+    "blockedNoCard": true,
+    "reloadBlockedNoCard": true,
+    "writableOnce": false,
+    "reloadGone": false
+   },
+   "pass": false,
+   "ok_by_design": {
+    "blockedNoCard": true,
+    "writableSessionNoCard": true,
+    "nextLoadOnce": true,
+    "reloadBlockedNoCard": true,
+    "reloadAfterGotItNoCard": true
+   },
+   "pass_by_design": true
+  },
+  {
+   "engine": "chromium",
+   "build_id": "m3-rc1-pre+246de09",
+   "sha": "246de09c8b329360754cc0d77a6cd6b6788b6ad4",
+   "base": "http://127.0.0.1:4825/",
+   "size": "1280x800",
+   "variant": "real",
+   "fixture": "canonical-committed-unseen",
+   "fill": {
+    "mode": "real",
+    "chunks": 14,
+    "firstErr": "QuotaExceededError",
+    "probe": "QuotaExceededError(DOMException)"
+   },
+   "gameState": null,
+   "blocked": {
+    "size": "1280x800",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "1-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null,
+    "fill": {
+     "mode": "real",
+     "chunks": 14,
+     "firstErr": "QuotaExceededError",
+     "probe": "QuotaExceededError(DOMException)"
+    },
+    "gameState": null
+   },
+   "blockedReload": {
+    "size": "1280x800",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "1b-reload-still-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "writable": {
+    "size": "1280x800",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "2-writable",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "reload": {
+    "size": "1280x800",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "3-reload",
+    "card": true,
+    "flag": {
+     "eggfarm.save": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null
+   },
+   "reloadAfterGotIt": {
+    "size": "1280x800",
+    "variant": "real",
+    "fixture": "canonical-committed-unseen",
+    "step": "4-reload-after-gotit",
+    "card": false,
+    "flag": {
+     "eggfarm.save": true,
+     "eggfarm.save.bak": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null,
+    "gotItClicked": true
+   },
+   "ok": {
+    "reloadAfterGotItNoCard": true,
+    "blockedNoCard": true,
+    "reloadBlockedNoCard": true,
+    "writableOnce": false,
+    "reloadGone": false
+   },
+   "pass": false,
+   "ok_by_design": {
+    "blockedNoCard": true,
+    "writableSessionNoCard": true,
+    "nextLoadOnce": true,
+    "reloadBlockedNoCard": true,
+    "reloadAfterGotItNoCard": true
+   },
+   "pass_by_design": true
+  },
+  {
+   "engine": "chromium",
+   "build_id": "m3-rc1-pre+246de09",
+   "sha": "246de09c8b329360754cc0d77a6cd6b6788b6ad4",
+   "base": "http://127.0.0.1:4825/",
+   "size": "1280x800",
+   "variant": "mock",
+   "fixture": "canonical-committed-unseen",
+   "fill": {
+    "mode": "mock"
+   },
+   "gameState": null,
+   "blocked": {
+    "size": "1280x800",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "1-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null,
+    "fill": {
+     "mode": "mock"
+    },
+    "gameState": null
+   },
+   "blockedReload": {
+    "size": "1280x800",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "1b-reload-still-blocked",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "writable": {
+    "size": "1280x800",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "2-writable",
+    "card": false,
+    "flag": {},
+    "count": 0,
+    "tab": "collection",
+    "nav": null
+   },
+   "reload": {
+    "size": "1280x800",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "3-reload",
+    "card": true,
+    "flag": {
+     "eggfarm.save": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null
+   },
+   "reloadAfterGotIt": {
+    "size": "1280x800",
+    "variant": "mock",
+    "fixture": "canonical-committed-unseen",
+    "step": "4-reload-after-gotit",
+    "card": false,
+    "flag": {
+     "eggfarm.save": true,
+     "eggfarm.save.bak": true
+    },
+    "count": 1,
+    "tab": "collection",
+    "nav": null,
+    "gotItClicked": true
+   },
+   "ok": {
+    "reloadAfterGotItNoCard": true,
+    "blockedNoCard": true,
+    "reloadBlockedNoCard": true,
+    "writableOnce": false,
+    "reloadGone": false
+   },
+   "pass": false,
+   "ok_by_design": {
+    "blockedNoCard": true,
+    "writableSessionNoCard": true,
+    "nextLoadOnce": true,
+    "reloadBlockedNoCard": true,
+    "reloadAfterGotItNoCard": true
+   },
+   "pass_by_design": true
+  }
+ ],
+ "missing_files": [],
+ "all_pass": true
+}

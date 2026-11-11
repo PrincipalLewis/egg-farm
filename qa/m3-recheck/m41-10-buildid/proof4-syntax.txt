@@ -1,0 +1,34 @@
+# proof 4 syntax, 2026-10-19 10:04:58 CEST
+bash -n gate4-run.sh exit=0
+bash -n rc-pass.sh exit=0
+bash -n rc-pass-m4on.sh exit=0
+bash -n m4a-31-delta.sh exit=0
+bash -n pr25-fwd-delta.sh exit=0
+node --check build-id-expect.mjs exit=0
+node --check build-id-expect.cases.mjs exit=0
+node --check smoke-release.mjs exit=0
+node --check m4on-browser-v6load.mjs exit=0
+node --check m4-hidden.mjs exit=0
+node --check gate4-m4on-clock.mjs exit=0
+node --check pr25-fwd-hidden.mjs exit=0
+node --check rc-html-open.mjs exit=0
+node --check scratch/m4a-31-delta/buildid-probe.mjs exit=0
+bash -n run-browser-proofs.sh exit=0
+--- unchanged (no build-id code): smoke-step.mjs qe-late-browser.mjs
+identical
+--- remaining m3-rc1-pre literals in qa/m3-scripts (want only helper fallback + cases)
+m3-scripts/build-id-expect.cases.mjs:10:C('U1a', "m3-rc1-pre+246de09 @246de09, old build-id.ts (BUILD_PREFIX='m3-rc1-pre')", 'm3-rc1-pre+246
+m3-scripts/build-id-expect.cases.mjs:11:C('U1b', 'm3-rc1-pre+246de09 @246de09, build-id.ts treated as absent (fallback)', 'm3-rc1-pre+246de0
+m3-scripts/build-id-expect.cases.mjs:19:C('U5', "wrong prefix m3-rc1-pre+4e1252d @4e1252d (BUILD_PREFIX m4.1)", 'm3-rc1-pre+4e1252d', E.pr53
+m3-scripts/build-id-expect.cases.mjs:20:C('U5b', "wrong prefix m4.1+246de09 @246de09 (BUILD_PREFIX m3-rc1-pre)", 'm4.1+246de09', E.old, 'FAI
+m3-scripts/build-id-expect.cases.mjs:21:C('U6a', 'fallback (build-id.ts missing @d72008a): m3-rc1-pre+d72008a', 'm3-rc1-pre+d72008a', E.fbMi
+m3-scripts/build-id-expect.cases.mjs:25:C('U6e', 'fallback (missing): m3-rc1-pre+d72008a+dirty', 'm3-rc1-pre+d72008a+dirty', E.fbMissing, 'F
+m3-scripts/build-id-expect.cases.mjs:33:{ n++; const f = scanIds('<meta name="build-id" content="m3-rc1-pre+4e1252d"> x="m4.1+4e1252d+dirty"
+m3-scripts/build-id-expect.cases.mjs:35:for (const [id, args, wantExit] of [['CLI1', ['check', G, '246de09', 'm3-rc1-pre+246de09'], 0], ['CL
+m3-scripts/build-id-expect.cases.mjs:36:  ['CLI4', ['check', G, '4e1252d', 'm3-rc1-pre+4e1252d'], 1], ['CLI5', ['check', G, '4e1252d', 'm4.1
+m3-scripts/build-id-expect.mjs:3:// If the file or the exported constant is missing at that SHA: fallback regex ^(m3-rc1-pre|m4\.1)\+[0-9a-f
+m3-scripts/build-id-expect.mjs:16:export const FALLBACK_RE = /^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7}/;
+m3-scripts/build-id-expect.mjs:17:const FALLBACK_PREFIXES = ['m3-rc1-pre', 'm4.1'];
+m3-scripts/gate4-run.sh:11:BX="node $SC/build-id-expect.mjs"  # M41-10: expected prefix = BUILD_PREFIX in scripts/build-id.ts AT $FULL (fall
+m3-scripts/rc-pass-m4on.sh:21:BX="node $SC/build-id-expect.mjs"  # M41-10: expected prefix = BUILD_PREFIX in scripts/build-id.ts AT $FULL (f
+m3-scripts/rc-pass.sh:20:BX="node $SC/build-id-expect.mjs"  # M41-10: expected prefix = BUILD_PREFIX in scripts/build-id.ts AT $FULL (fallba

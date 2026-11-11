@@ -1,0 +1,128 @@
+{
+ "R": [
+  {
+   "t": "pre",
+   "n": "runtime build-id",
+   "pass": true,
+   "info": "[\"m3-rc1-pre+c11e3a0\",\"m3-rc1-pre+c11e3a0\"]"
+  },
+  {
+   "t": "pre",
+   "n": "live M4 on",
+   "pass": true,
+   "info": "1"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 30s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":0,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"seq\":3,\"savedAt\":1792386327788,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 59s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":300,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":300,\"awayS\":60.011},\"seq\":3,\"savedAt\":1792386329875,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 60s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":305,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":305,\"awayS\":61.002},\"seq\":3,\"savedAt\":1792386331973,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 61s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":309,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":309,\"awayS\":61.998},\"seq\":3,\"savedAt\":1792386334035,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 671s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":3360,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":3360,\"awayS\":672.023},\"seq\":3,\"savedAt\":1792386336091,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 3600s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":18004,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":18004,\"awayS\":3600.975},\"seq\":3,\"savedAt\":1792386338162,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 7199s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":35999,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":35999,\"awayS\":7199.996},\"seq\":3,\"savedAt\":1792386340215,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 7200s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":36000,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":36000,\"awayS\":7200},\"seq\":3,\"savedAt\":1792386342277,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 10800s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":36000,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":36000,\"awayS\":7200},\"seq\":3,\"savedAt\":1792386344355,\"rec\":null}"
+  },
+  {
+   "t": "(O)",
+   "n": "closed 86400s: grant = M4 rate x min(away,cap), floor; <60 s none",
+   "pass": true,
+   "info": "{\"pend\":36000,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":36000,\"awayS\":7200},\"seq\":3,\"savedAt\":1792386346943,\"rec\":null}"
+  },
+  {
+   "t": "(CF)",
+   "n": "clock +3h: one capped M4 grant; reload: no 2nd grant, basket includes 1st",
+   "pass": true,
+   "info": "{\"a\":{\"pend\":36000,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":36000,\"awayS\":7200},\"seq\":3,\"savedAt\":1792397148983,\"rec\":null},\"b\":{\"pend\":0,\"basket\":36040,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"seq\":8,\"savedAt\":1792397151550,\"rec\":null}}"
+  },
+  {
+   "t": "(CB)",
+   "n": "clock -1h: savedAt in future -> 0 grant, save re-stamped <= now, coins/basket/levels kept",
+   "pass": true,
+   "info": "{\"pend\":0,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"seq\":3,\"savedAt\":1792382753693,\"rec\":null}"
+  },
+  {
+   "t": "(CB)",
+   "n": "clock -1h then reload: still no grant (no double/over-credit when clock returns)",
+   "pass": true,
+   "info": "{\"a\":{\"pend\":0,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"seq\":3,\"savedAt\":1792382753693,\"rec\":null},\"b\":{\"pend\":0,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"seq\":8,\"savedAt\":1792382756274,\"rec\":null}}"
+  },
+  {
+   "t": "(CB2)",
+   "n": "1 h away grant exact",
+   "pass": true,
+   "info": "{\"pend\":18005,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":18005,\"awayS\":3601.011},\"seq\":3,\"savedAt\":1792386358326,\"rec\":null}"
+  },
+  {
+   "t": "(MR)",
+   "n": "mid-session reload <60 s: no grant, coins/levels/M4 equal, saveSeq +",
+   "pass": true,
+   "info": "{\"a\":{\"pend\":0,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"seq\":4,\"savedAt\":1792386364208,\"rec\":null},\"b\":{\"pend\":0,\"basket\":40,\"coins\":12345,\"H\":15,\"V\":8,\"v7\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"seq\":9,\"savedAt\":1792386365956,\"rec\":null},\"errs\":[]}"
+  }
+ ],
+ "TABLE": [
+  {
+   "name": "clockFwd3h",
+   "s": 10800,
+   "rate": 5,
+   "exp": 36000,
+   "got": 36000,
+   "d": 0,
+   "st": "OK",
+   "note": "cap"
+  },
+  {
+   "name": "closed3600-cb2",
+   "s": 3601.011,
+   "rate": 5,
+   "exp": 18005,
+   "got": 18005,
+   "d": 0,
+   "st": "OK",
+   "note": ""
+  }
+ ]
+}

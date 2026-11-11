@@ -1,0 +1,227 @@
+{
+ "engine": "chromium",
+ "port": 5251,
+ "build_id": "m4.1+65a7443",
+ "label": "RECORD ONLY - NOT EVIDENCE; UI1 cell = PROXY (FX-L17 $3,000 farm screen on rc/v5 65a7443, BBv2 not built)",
+ "launch": [
+  {
+   "launch_ms": 208.3,
+   "close_ms": 48.4
+  },
+  {
+   "launch_ms": 163.3,
+   "close_ms": 37.9
+  },
+  {
+   "launch_ms": 152,
+   "close_ms": 34.5
+  }
+ ],
+ "cells": [
+  {
+   "size": "360x640",
+   "rep": 0,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 723.5,
+   "bid_ok": true,
+   "shot_ms": 34.5,
+   "checkOut": {
+    "rects": 4,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 1.6,
+   "axeInject_ms": 104.9,
+   "axe_ms": 82.2,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "360x640",
+   "rep": 1,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 591.1,
+   "bid_ok": true,
+   "shot_ms": 40.5,
+   "checkOut": {
+    "rects": 4,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 1.4,
+   "axeInject_ms": 96,
+   "axe_ms": 77.4,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "360x640",
+   "rep": 2,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 559.9,
+   "bid_ok": true,
+   "shot_ms": 32,
+   "checkOut": {
+    "rects": 4,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 1.3,
+   "axeInject_ms": 98.7,
+   "axe_ms": 76,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "390x844",
+   "rep": 0,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 613.8,
+   "bid_ok": true,
+   "shot_ms": 36.6,
+   "checkOut": {
+    "rects": 4,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2.4,
+   "axeInject_ms": 92.9,
+   "axe_ms": 74.4,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "390x844",
+   "rep": 1,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 553.6,
+   "bid_ok": true,
+   "shot_ms": 35.5,
+   "checkOut": {
+    "rects": 4,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 1.1,
+   "axeInject_ms": 88.3,
+   "axe_ms": 72.2,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "390x844",
+   "rep": 2,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 567.8,
+   "bid_ok": true,
+   "shot_ms": 32.2,
+   "checkOut": {
+    "rects": 4,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 1.5,
+   "axeInject_ms": 93.5,
+   "axe_ms": 76.8,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "1280x800",
+   "rep": 0,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 622.3,
+   "bid_ok": true,
+   "shot_ms": 62,
+   "checkOut": {
+    "rects": 5,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 1
+   },
+   "check_ms": 2.8,
+   "axeInject_ms": 95.3,
+   "axe_ms": 92.8,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "1280x800",
+   "rep": 1,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 617.1,
+   "bid_ok": true,
+   "shot_ms": 50.6,
+   "checkOut": {
+    "rects": 5,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 1
+   },
+   "check_ms": 1.3,
+   "axeInject_ms": 98.7,
+   "axe_ms": 90,
+   "axe_violations_recorded_not_graded": 0
+  },
+  {
+   "size": "1280x800",
+   "rep": 2,
+   "proxy": true,
+   "goal": true,
+   "eggfarm": true,
+   "load_ms": 612.8,
+   "bid_ok": true,
+   "shot_ms": 59.6,
+   "checkOut": {
+    "rects": 5,
+    "overflow": 0,
+    "under44": 0,
+    "stars": 1
+   },
+   "check_ms": 1.4,
+   "axeInject_ms": 92.2,
+   "axe_ms": 90.7,
+   "axe_violations_recorded_not_graded": 0
+  }
+ ],
+ "runFor": {
+  "booted": true,
+  "single_240000_ms": 80605.1,
+  "single_coins_after": 5413481,
+  "chunked_48x5000_plus_2000_ms": 80583.5,
+  "chunk_ms": {
+   "min": 1592.8,
+   "max": 1792,
+   "mean": 1664
+  },
+  "qaPicker_present": false
+ },
+ "bidChecks": [
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
+ ]
+}

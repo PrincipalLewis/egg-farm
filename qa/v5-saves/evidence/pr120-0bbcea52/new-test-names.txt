@@ -1,0 +1,6 @@
+-  it('[BR-AC26 E10 / PMC Q5] unknown slot id: null at runtime, raw id written back on a save with no slot change', () => {
++  it('[BR-AC26 E10] F14 unknown slot id: null at runtime, save-roundtrip keeps raw "silkie", no save_migrated', () => {
++  it('[BR-AC26 E10] owned-only unknown id (clean slots): kept ignored, no save_migrated', () => {
++  it.each([['undefined', undefined], ['object', { x: 1 }]])('[BR-AC26 Q6] remainingMs %s -> 60,000 (non-number), one save_migrated', (_n, v) => {
++  it('[BR-AC26 Q6] finite fractional remainingMs is rounded then clamped', () => {
++  it('[BR-AC26 E12 OQ-4] non-string slot entry becomes null, one save_migrated', () => {

@@ -1,0 +1,3 @@
+release-globals (firefox)	completed	success	2026-10-24T19:08:36Z
+release-globals (webkit)	completed	success	2026-10-24T19:08:57Z
+gate	completed	success	2026-10-24T19:07:47Z

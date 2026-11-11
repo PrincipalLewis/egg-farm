@@ -1,0 +1,42 @@
+{
+ "F": 3,
+ "csvPerMin": 0.75,
+ "r1": {
+  "charged": 60,
+  "coinDelta": 60,
+  "n": 60,
+  "perEvent": [
+   1
+  ]
+ },
+ "a60": {
+  "charged": 60,
+  "coinDelta": 60,
+  "n": 60
+ },
+ "a600": {
+  "charged": 600,
+  "coinDelta": 600,
+  "n": 600
+ },
+ "labels": [],
+ "rates": {
+  "incomeCentsPerSec": 0,
+  "wageCentsPerSec": 1,
+  "netCentsPerSec": -1,
+  "queueFull": false,
+  "workers": {
+   "market_hand": {
+    "hired": true,
+    "wageCentsPerSec": 1,
+    "listedWageCentsPerSec": 1
+   },
+   "coop_hand": {
+    "hired": false,
+    "wageCentsPerSec": 0,
+    "listedWageCentsPerSec": 2.5
+   }
+  }
+ },
+ "errs": []
+}

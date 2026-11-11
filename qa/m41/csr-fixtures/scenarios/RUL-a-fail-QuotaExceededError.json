@@ -1,0 +1,18 @@
+{
+ "id": "RUL-a-fail-QuotaExceededError",
+ "now": 1792378840000,
+ "csr": [
+  "D-HOP-2026-10-22-01(a)",
+  "IDB1-3"
+ ],
+ "idbManifest": "../../csr/fixtures/idb1/IDB1-abc.manifest.json",
+ "idbFail": "QuotaExceededError",
+ "expect": {
+  "recovery": true,
+  "idbCorruptExact": 0,
+  "noIdbMainDelete": true,
+  "idbMainUnchanged": true,
+  "idbPutsToMain": 0,
+  "copy_failed": true
+ }
+}

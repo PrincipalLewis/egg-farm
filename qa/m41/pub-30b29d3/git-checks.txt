@@ -1,0 +1,73 @@
+== origin/main
+d1fb206b8f59a1a1f19623526fdbf3003d12efce
+== d1fb206 full
+d1fb206b8f59a1a1f19623526fdbf3003d12efce
+== branches containing
+  origin/main
+== parents
+2efb445800dd52967a6116e4778077f31d8021b8 30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134
+Korshunov Vadim <dflz666@gmail.com> | committer GitHub | 2026-10-24 20:56:48 +0200
+Merge pull request #70 from PrincipalLewis/fix/m41-patch1
+M4.1 patch1: asleep/unpaid signal + yard hens + m-RC1-1
+== 30b29d3 full
+30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134
+b12c8fe5b8007d0739f13501cf3b79a5a71d8ae9 | 2026-10-24 18:10:17 +0200 | M4.1 patch 1: shots - unpaid views hire only the role under test
+== ancestor
+30b29d3 IS ancestor of d1fb206
+== 5d9efa6 ancestor of 30b29d3?
+yes
+== trees
+d1fb206 26f929eaf686212426f753b86492747b070aa03d
+30b29d3 5996599b43940856d2e56a395bd42ef18223fe8c
+== diff --stat 30b29d3 d1fb206
+ .github/workflows/ci.yml | 98 +++++++++++++++++++++++++++++-------------------
+ 1 file changed, 60 insertions(+), 38 deletions(-)
+(lines=2)
+== log main
+d1fb206 Merge pull request #70 from PrincipalLewis/fix/m41-patch1
+30b29d3 M4.1 patch 1: shots - unpaid views hire only the role under test
+b12c8fe M4.1 patch 1: Art shots add Coop Hand asleep/unpaid and Market Hand asleep + Coop Hand unpaid
+e5f5a1b M4.1 patch 1: AC-R7 test - HUD, card and ETA read the one incomePerSec value
+b2e0405 M4.1 patch 1: D-HOP-29 tests - AC-R8 caption from manage_prompt_threshold; frozen Coop Hand copy
+4e7a10b M4.1 patch 1: banner effect from the role's own state only; HUD aria ', sales stopped' only for a stalled Market Hand
+e6a8510 M4.1 patch 1: Coop Hand banner copy per rc1-asleep-state-spec v1.0.6 (copy only)
+2efb445 Merge pull request #68 from PrincipalLewis/ci/diet
+== log 5d9efa6..30b29d3
+30b29d3 M4.1 patch 1: shots - unpaid views hire only the role under test
+b12c8fe M4.1 patch 1: Art shots add Coop Hand asleep/unpaid and Market Hand asleep + Coop Hand unpaid
+e5f5a1b M4.1 patch 1: AC-R7 test - HUD, card and ETA read the one incomePerSec value
+b2e0405 M4.1 patch 1: D-HOP-29 tests - AC-R8 caption from manage_prompt_threshold; frozen Coop Hand copy
+4e7a10b M4.1 patch 1: banner effect from the role's own state only; HUD aria ', sales stopped' only for a stalled Market Hand
+e6a8510 M4.1 patch 1: Coop Hand banner copy per rc1-asleep-state-spec v1.0.6 (copy only)
+d5fc626 M4.1 patch 1: HoQA m-RC1-1 - explainer entry (expin) without scale overshoot (CSS only)
+b75a7a2 M4.1 patch 1: Art shots script (scripts/m41-p1-shots.mjs)
+3922391 M4.1 patch 1 (5): #scene tap guard checks for the ported banner, Refill and badges (HoQA via HoE)
+b0a0266 M4.1 patch 1 (4/4): Market Hand banner copy per D-HOP-2026-10-24-14 and D-HOP-2026-10-24-17
+49ce43b M4.1 patch 1 (3/4): D-HOP-2026-10-24-13 sales-stopped-spec §4.2 live-income fix
+645f12b M4.1 patch 1 (2/4): S2 asleep signal - targeted port of rc1 AC-R1..R9
+ebf3a7a M4.1-P1 yard hens: with M4 on, yard sprites = min(hens[H], 12) and #henpill shows hens[H] when > 12 (Hens track, CSV hens[hensLevel]); M4 off keeps S.hens(F). Pill keeps the NBSP ('×N\u00a0hens'); m41-9-big-number pins fmtCount(hensN). Tests from fix/yard-hens-from-track 2c9c0bb (10, incl. CCR boundary 12/13) with NBSP pill expectations. CCR resolution engineering/reviews/pr69-c849ccf-on-rc1-resolution.patch
+35931cb Merge #67: M4.1 RC1 (5d9efa6) — CI green, Art PASS, HoQA PASS
+== diff stat 5d9efa6..30b29d3
+ public/assets/icon-moon.svg              |   1 +
+ public/assets/icon-warning.svg           |   1 +
+ scripts/m41-p1-income-states.ts          |  46 ++
+ scripts/m41-p1-shots.mjs                 | 131 +++++
+ scripts/rc0-browser.mjs                  | 189 ++++++-
+ src/econ/income.ts                       |  15 +
+ src/ui/app.ts                            |  72 ++-
+ src/ui/s2-economy-ui.ts                  |  34 ++
+ src/ui/styles.css                        |  62 ++-
+ src/ui/workers-ui.ts                     |  89 +++-
+ tests/fixtures/m41-p1/income-before.json | 849 +++++++++++++++++++++++++++++++
+ tests/m41-8-f4-label.test.ts             |   5 +-
+ tests/m41-9-big-number.test.ts           |   2 +-
+ tests/m41-p1-acr7.test.ts                |  25 +
+ tests/m41-p1-acr8-coop-copy.test.ts      |  79 +++
+ tests/m41-p1-asleep-signal.test.ts       | 205 ++++++++
+ tests/m41-p1-live-income.test.ts         |  64 +++
+ tests/m41-p1-mh-copy.test.ts             |  74 +++
+ tests/m41-p1-scene-tap-guard.test.ts     | 103 ++++
+ tests/m41-p1-yard-hens.test.ts           | 130 +++++
+ tests/post-rc1.test.ts                   |   2 +-
+ tests/workers-v11.test.ts                |  59 ++-
+ 22 files changed, 2186 insertions(+), 51 deletions(-)

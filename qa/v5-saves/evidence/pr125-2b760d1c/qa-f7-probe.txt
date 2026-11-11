@@ -1,0 +1,23 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr125-2b760d1c/probes
+
+stdout | qa-pr125-f7-probe.test.ts > QA F7 Game.frame Σ fT = Σ F (30/60/144 fps + uneven, 60 s attended) > 30fps × 60 s attended: focusMs = 60,000 ± 100; present_active_s = 60 ± 0.1; Present eggs match prod×60×bp/10000
+QA-F7 30fps {"focusMs":60000,"activeMs":60000,"present_active_s":60,"present_lost_count":0,"presentEggs":19.500000000004206,"wantEggs":19.5,"bp":250,"prod":13,"wallMs":60000,"coop":799.5000000000042} nGaps 1800
+
+stdout | qa-pr125-f7-probe.test.ts > QA F7 Game.frame Σ fT = Σ F (30/60/144 fps + uneven, 60 s attended) > 60fps × 60 s attended: focusMs = 60,000 ± 100; present_active_s = 60 ± 0.1; Present eggs match prod×60×bp/10000
+QA-F7 60fps {"focusMs":60000,"activeMs":60000,"present_active_s":60,"present_lost_count":0,"presentEggs":19.500000000004206,"wantEggs":19.5,"bp":250,"prod":13,"wallMs":60000,"coop":799.5000000000042} nGaps 3600
+
+stdout | qa-pr125-f7-probe.test.ts > QA F7 Game.frame Σ fT = Σ F (30/60/144 fps + uneven, 60 s attended) > 144fps × 60 s attended: focusMs = 60,000 ± 100; present_active_s = 60 ± 0.1; Present eggs match prod×60×bp/10000
+QA-F7 144fps {"focusMs":60000,"activeMs":60000,"present_active_s":60,"present_lost_count":0,"presentEggs":19.500000000004206,"wantEggs":19.5,"bp":250,"prod":13,"wallMs":60000,"coop":799.5000000000042} nGaps 8640
+
+stdout | qa-pr125-f7-probe.test.ts > QA F7 Game.frame Σ fT = Σ F (30/60/144 fps + uneven, 60 s attended) > uneven × 60 s attended: focusMs = 60,000 ± 100; present_active_s = 60 ± 0.1; Present eggs match prod×60×bp/10000
+QA-F7 uneven {"focusMs":60000,"activeMs":60000,"present_active_s":60,"present_lost_count":0,"presentEggs":19.500000000004206,"wantEggs":19.5,"bp":250,"prod":13,"wallMs":60000,"coop":799.5000000000042} nGaps 3226
+
+ ✓ qa-pr125-f7-probe.test.ts (4 tests) 41ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  03:39:00
+   Duration  461ms (transform 221ms, setup 0ms, collect 277ms, tests 41ms, environment 0ms, prepare 42ms)
+
+PROBE_EXIT=0

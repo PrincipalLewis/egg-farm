@@ -1,0 +1,3321 @@
+{
+ "port": "5961",
+ "engine": "chromium",
+ "cases": {
+  "BRS-AC1-ui-reset-ls+idb-copy": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842236776",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792842236776",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792842236776"
+      ],
+      "want": [
+       "corrupt.1792842236776"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792842236776"
+     ],
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 1 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842236776",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 1: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842236776",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 2 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842236776",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 2: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842236776",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 3 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842236776",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 3: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842236776",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842236776",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842236776",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842236776",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842236776",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792842236776",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792842236776"
+    ]
+   }
+  },
+  "BRS-AC1-ui-reset-3-idb-copies": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792838680321",
+      "corrupt.1792842280321",
+      "corrupt.1792845880321",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321"
+      ],
+      "want": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792838680321",
+      "corrupt.1792842280321",
+      "corrupt.1792845880321"
+     ],
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 1 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 1: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 2 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 2: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 3 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 3: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792838680321",
+       "corrupt.1792842280321",
+       "corrupt.1792845880321",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792838680321",
+      "corrupt.1792842280321",
+      "corrupt.1792845880321",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792838680321",
+      "corrupt.1792842280321",
+      "corrupt.1792845880321",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792838680321",
+      "corrupt.1792842280321",
+      "corrupt.1792845880321",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792838680321",
+      "corrupt.1792842280321",
+      "corrupt.1792845880321",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792838680321",
+     "corrupt.1792842280321",
+     "corrupt.1792845880321",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792838680321",
+     "corrupt.1792842280321",
+     "corrupt.1792845880321"
+    ]
+   }
+  },
+  "BRS-AC1-ui-reset-no-copies": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "Reset: no corrupt.* -> no reset.surfaced record",
+     "pass": true,
+     "x": {
+      "surfaced": null,
+      "want": "absent"
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 1 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": []
+     },
+     "hard": true
+    },
+    {
+     "n": "load 1: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 2 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 2: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": []
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "main"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [],
+    "surfaced": null
+   }
+  },
+  "BRS-AC3-rollback-1d": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842355227",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792842355227",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792842355227"
+      ],
+      "want": [
+       "corrupt.1792842355227"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792842355227"
+     ],
+     "hard": true
+    },
+    {
+     "n": "precondition: page clock rolled to -86460000 ms vs real",
+     "pass": true,
+     "x": -86460000.1,
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 1 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842355227",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 1: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842355227",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 2 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842355227",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 2: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842355227",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 3 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842355227",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 3: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842355227",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842355227",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842355227",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842355227",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842355227",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792842355227",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792842355227"
+    ]
+   }
+  },
+  "BRS-AC3-rollback-30d": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842398632",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792842398632",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792842398632"
+      ],
+      "want": [
+       "corrupt.1792842398632"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792842398632"
+     ],
+     "hard": true
+    },
+    {
+     "n": "precondition: page clock rolled to -2592000000 ms vs real",
+     "pass": true,
+     "x": -2592000000.700049,
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 1 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842398632",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 1: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842398632",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 2 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842398632",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 2: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842398632",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 3 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842398632",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 3: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792842398632",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842398632",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842398632",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842398632",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842398632",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792842398632",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792842398632"
+    ]
+   }
+  },
+  "BRS-AC3-clock-ahead-1d-at-copy+reset-then-back-1d": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792935982153",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792935982153",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792935982153"
+      ],
+      "want": [
+       "corrupt.1792935982153"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792935982153"
+     ],
+     "hard": true
+    },
+    {
+     "n": "precondition: page clock rolled to -86400000 ms vs real",
+     "pass": true,
+     "x": -86400000.7,
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 1 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792935982153",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 1: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792935982153",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 2 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792935982153",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 2: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792935982153",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC1/AC3 load 3 after Reset: no recovery dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792935982153",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "load 3: corrupt.* bytes kept and reset.surfaced unchanged",
+     "pass": true,
+     "x": {
+      "keys": [
+       "corrupt.1792935982153",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792935982153",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792935982153",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792935982153",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792935982153",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792935982153",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792935982153"
+    ]
+   }
+  },
+  "BRS-AC2-post-reset-idb-orphan-8b-M3-export": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842485876",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792842485876",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792842485876"
+      ],
+      "want": [
+       "corrupt.1792842485876"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792842485876"
+     ],
+     "hard": true
+    },
+    {
+     "n": "post-reset fresh farm boot: no dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842485876",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC2/CLK: post-reset corrupt main follows the chain: M3",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": "M3",
+      "F": 0,
+      "newGame": true,
+      "recovery": "F",
+      "ev": [
+       "save_corrupt",
+       "save_recovery_notice_shown"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842485876",
+       "corrupt.1792849105393",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Export downloads the post-reset corrupt bytes",
+     "pass": true,
+     "x": {
+      "len": 226
+     },
+     "hard": true
+    },
+    {
+     "n": "reset.surfaced unchanged by the recovery",
+     "pass": true,
+     "x": {
+      "sAfter": [
+       "corrupt.1792842485876"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "next load: no repeat dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [
+       "save_recovery_notice_dismissed"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842485876",
+       "corrupt.1792849105393",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842485876",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842485876",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": "M3",
+     "F": 0,
+     "newGame": true,
+     "recovery": "F",
+     "ev": [
+      "save_corrupt",
+      "save_recovery_notice_shown"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842485876",
+      "corrupt.1792849105393",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_recovery_notice_dismissed"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842485876",
+      "corrupt.1792849105393",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792842485876",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792842485876"
+    ]
+   }
+  },
+  "BRS-AC2-post-reset-ls-main-corrupt-bak-valid-M1": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842522883",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792842522883",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792842522883"
+      ],
+      "want": [
+       "corrupt.1792842522883"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792842522883"
+     ],
+     "hard": true
+    },
+    {
+     "n": "post-reset fresh farm boot: no dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842522883",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC2/CLK: post-reset corrupt main follows the chain: M1",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": "M1",
+      "F": 20,
+      "newGame": false,
+      "recovery": "R",
+      "ev": [
+       "save_corrupt",
+       "save_recovery_notice_shown"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842522883",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "reset.surfaced unchanged by the recovery",
+     "pass": true,
+     "x": {
+      "sAfter": [
+       "corrupt.1792842522883"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "next load: no repeat dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [
+       "save_recovery_notice_dismissed"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842522883",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842522883",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842522883",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": "M1",
+     "F": 20,
+     "newGame": false,
+     "recovery": "R",
+     "ev": [
+      "save_corrupt",
+      "save_recovery_notice_shown"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842522883",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_recovery_notice_dismissed"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842522883",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792842522883",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792842522883"
+    ]
+   }
+  },
+  "BRS-CLK-ahead2h-reset-back-idb-main-corrupt-M3-export": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792856960965",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792856960965",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792856960965"
+      ],
+      "want": [
+       "corrupt.1792856960965"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792856960965"
+     ],
+     "hard": true
+    },
+    {
+     "n": "precondition: page clock rolled to 0 ms vs real",
+     "pass": true,
+     "x": -0.49990234337747097,
+     "hard": true
+    },
+    {
+     "n": "post-reset fresh farm boot: no dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792856960965",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC2/CLK: post-reset corrupt main follows the chain: M3",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": "M3",
+      "F": 0,
+      "newGame": true,
+      "recovery": "F",
+      "ev": [
+       "save_corrupt",
+       "save_recovery_notice_shown"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792856960965",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Export downloads the post-reset corrupt bytes",
+     "pass": true,
+     "x": {
+      "len": 226
+     },
+     "hard": true
+    },
+    {
+     "n": "reset.surfaced unchanged by the recovery",
+     "pass": true,
+     "x": {
+      "sAfter": [
+       "corrupt.1792856960965"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "next load: no repeat dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [
+       "save_recovery_notice_dismissed"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792849775915",
+       "corrupt.1792856960965",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792856960965",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792856960965",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": "M3",
+     "F": 0,
+     "newGame": true,
+     "recovery": "F",
+     "ev": [
+      "save_corrupt",
+      "save_recovery_notice_shown"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792856960965",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_recovery_notice_dismissed"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792849775915",
+      "corrupt.1792856960965",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792856960965",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792856960965"
+    ]
+   }
+  },
+  "BRS-CLK-ahead2h-reset-back-idb-orphan-T+1h-M3-export": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792856997886",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792856997886",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792856997886"
+      ],
+      "want": [
+       "corrupt.1792856997886"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792856997886"
+     ],
+     "hard": true
+    },
+    {
+     "n": "precondition: page clock rolled to 0 ms vs real",
+     "pass": true,
+     "x": -0.8999999994412065,
+     "hard": true
+    },
+    {
+     "n": "post-reset fresh farm boot: no dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792856997886",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC2/CLK: post-reset corrupt main follows the chain: M3",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": "M3",
+      "F": 0,
+      "newGame": true,
+      "recovery": "F",
+      "ev": [
+       "save_corrupt",
+       "save_recovery_notice_shown"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792853412366",
+       "corrupt.1792856997886",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Export downloads the post-reset corrupt bytes",
+     "pass": true,
+     "x": {
+      "len": 226
+     },
+     "hard": true
+    },
+    {
+     "n": "reset.surfaced unchanged by the recovery",
+     "pass": true,
+     "x": {
+      "sAfter": [
+       "corrupt.1792856997886"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "next load: no repeat dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [
+       "save_recovery_notice_dismissed"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792853412366",
+       "corrupt.1792856997886",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792856997886",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792856997886",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": "M3",
+     "F": 0,
+     "newGame": true,
+     "recovery": "F",
+     "ev": [
+      "save_corrupt",
+      "save_recovery_notice_shown"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792853412366",
+      "corrupt.1792856997886",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_recovery_notice_dismissed"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792853412366",
+      "corrupt.1792856997886",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792856997886",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792856997886"
+    ]
+   }
+  },
+  "BRS-CLK-ahead2h-reset-back-ls-main-corrupt-bak-valid-M1": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857034770",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792857034770",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792857034770"
+      ],
+      "want": [
+       "corrupt.1792857034770"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792857034770"
+     ],
+     "hard": true
+    },
+    {
+     "n": "precondition: page clock rolled to 0 ms vs real",
+     "pass": true,
+     "x": -0.7000000001862645,
+     "hard": true
+    },
+    {
+     "n": "post-reset fresh farm boot: no dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857034770",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC2/CLK: post-reset corrupt main follows the chain: M1",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": "M1",
+      "F": 20,
+      "newGame": false,
+      "recovery": "R",
+      "ev": [
+       "save_corrupt",
+       "save_recovery_notice_shown"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857034770",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "reset.surfaced unchanged by the recovery",
+     "pass": true,
+     "x": {
+      "sAfter": [
+       "corrupt.1792857034770"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "next load: no repeat dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [
+       "save_recovery_notice_dismissed"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857034770",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857034770",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857034770",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": "M1",
+     "F": 20,
+     "newGame": false,
+     "recovery": "R",
+     "ev": [
+      "save_corrupt",
+      "save_recovery_notice_shown"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857034770",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_recovery_notice_dismissed"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857034770",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792857034770",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792857034770"
+    ]
+   }
+  },
+  "BRS-CLK-ahead2h-reset-back-ls-main-corrupt-nothing-valid-M3": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857067758",
+       "main"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: IDB main deleted",
+     "pass": true,
+     "x": [
+      "corrupt.1792857067758",
+      "reset.surfaced"
+     ],
+     "hard": true
+    },
+    {
+     "n": "Reset: reset.surfaced = exactly the corrupt.* keys present at reset",
+     "pass": true,
+     "x": {
+      "surfaced": [
+       "corrupt.1792857067758"
+      ],
+      "want": [
+       "corrupt.1792857067758"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "Reset: every seeded corrupt.* kept (LS + IDB)",
+     "pass": true,
+     "x": [
+      "corrupt.1792857067758"
+     ],
+     "hard": true
+    },
+    {
+     "n": "precondition: page clock rolled to 0 ms vs real",
+     "pass": true,
+     "x": -0.800048828125,
+     "hard": true
+    },
+    {
+     "n": "post-reset fresh farm boot: no dialog",
+     "pass": true,
+     "x": {
+      "L": 2,
+      "dialog": null,
+      "F": 0,
+      "newGame": true,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857067758",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC2/CLK: post-reset corrupt main follows the chain: M3",
+     "pass": true,
+     "x": {
+      "L": 3,
+      "dialog": "M3",
+      "F": 0,
+      "newGame": true,
+      "recovery": "F",
+      "ev": [
+       "save_corrupt",
+       "save_recovery_notice_shown"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857067758",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "reset.surfaced unchanged by the recovery",
+     "pass": true,
+     "x": {
+      "sAfter": [
+       "corrupt.1792857067758"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "next load: no repeat dialog",
+     "pass": true,
+     "x": {
+      "L": 4,
+      "dialog": null,
+      "F": 0,
+      "newGame": false,
+      "recovery": null,
+      "ev": [
+       "save_recovery_notice_dismissed"
+      ],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792857067758",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857067758",
+      "main"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 0,
+     "newGame": true,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857067758",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": "M3",
+     "F": 0,
+     "newGame": true,
+     "recovery": "F",
+     "ev": [
+      "save_corrupt",
+      "save_recovery_notice_shown"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857067758",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 4,
+     "dialog": null,
+     "F": 0,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_recovery_notice_dismissed"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792857067758",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "afterReset": {
+    "idbKeys": [
+     "corrupt.1792857067758",
+     "reset.surfaced"
+    ],
+    "surfaced": [
+     "corrupt.1792857067758"
+    ]
+   }
+  },
+  "BRS-AC4-throw-inside-reset-tx": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842699498",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 precondition: the fault fired inside the Reset tx (throwPut)",
+     "pass": true,
+     "x": "throwPut",
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: IDB main byte-identical (no delete applied)",
+     "pass": true,
+     "x": {
+      "pre": 946,
+      "post": 946
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: every corrupt.* key and value unchanged",
+     "pass": true,
+     "x": {
+      "pre": [
+       "corrupt.1792842699498",
+       "main",
+       "reset.surfaced"
+      ],
+      "post": [
+       "corrupt.1792842699498",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: reset.surfaced unchanged (prior record kept, not replaced)",
+     "pass": true,
+     "x": {
+      "pre": [
+       "corrupt.1700000000000"
+      ],
+      "post": [
+       "corrupt.1700000000000"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: whole IDB store identical before/after the aborted Reset",
+     "pass": true,
+     "x": {
+      "pre": {
+       "corrupt.1792842699498": 225,
+       "main": 946,
+       "reset.surfaced": [
+        "corrupt.1700000000000"
+       ]
+      },
+      "post": {
+       "corrupt.1792842699498": 225,
+       "main": 946,
+       "reset.surfaced": [
+        "corrupt.1700000000000"
+       ]
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot shows the same dialog as the pre-reset boot",
+     "pass": true,
+     "x": {
+      "base": null,
+      "next": null
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot has the same farm state (farmLevel, isNewGame)",
+     "pass": true,
+     "x": {
+      "base": [
+       20,
+       false
+      ],
+      "next": [
+       20,
+       false
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot after full cReset emits save_restore{idb} x1 and 0 save_corrupt (LS cleared by resetProgress before the aborted IDB tx; IDB main untouched)",
+     "pass": true,
+     "x": {
+      "preResetBootEv": [],
+      "nextAfterAbortedCResetEv": [
+       "save_restore"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "INFO AC4: LS keys after the aborted Reset (resetProgress runs before, outside the IDB tx)",
+     "pass": true,
+     "x": [
+      "eggfarm.install_id",
+      "eggfarm.lease",
+      "eggfarm.save.corrupt.1792842699498",
+      "eggfarm.save.corrupt.index",
+      "eggfarm.telemetry",
+      "eggfarm.ui"
+     ],
+     "hard": false
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [
+      "qa throw inside reset tx"
+     ],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842699498",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842699498",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_restore"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842699498",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "pre": {
+    "corrupt.1792842699498": 225,
+    "main": 946,
+    "reset.surfaced": [
+     "corrupt.1700000000000"
+    ]
+   },
+   "post": {
+    "corrupt.1792842699498": 225,
+    "main": 946,
+    "reset.surfaced": [
+     "corrupt.1700000000000"
+    ]
+   },
+   "lsAfterReset": [
+    "eggfarm.install_id",
+    "eggfarm.lease",
+    "eggfarm.save.corrupt.1792842699498",
+    "eggfarm.save.corrupt.index",
+    "eggfarm.telemetry",
+    "eggfarm.ui"
+   ]
+  },
+  "BRS-AC4-abort()-quota-stub-at-reset.surfaced-put": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842725464",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 precondition: the fault fired inside the Reset tx (abortPut)",
+     "pass": true,
+     "x": "abortPut",
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: IDB main byte-identical (no delete applied)",
+     "pass": true,
+     "x": {
+      "pre": 946,
+      "post": 946
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: every corrupt.* key and value unchanged",
+     "pass": true,
+     "x": {
+      "pre": [
+       "corrupt.1792842725464",
+       "main",
+       "reset.surfaced"
+      ],
+      "post": [
+       "corrupt.1792842725464",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: reset.surfaced unchanged (prior record kept, not replaced)",
+     "pass": true,
+     "x": {
+      "pre": [
+       "corrupt.1700000000000"
+      ],
+      "post": [
+       "corrupt.1700000000000"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: whole IDB store identical before/after the aborted Reset",
+     "pass": true,
+     "x": {
+      "pre": {
+       "corrupt.1792842725464": 225,
+       "main": 946,
+       "reset.surfaced": [
+        "corrupt.1700000000000"
+       ]
+      },
+      "post": {
+       "corrupt.1792842725464": 225,
+       "main": 946,
+       "reset.surfaced": [
+        "corrupt.1700000000000"
+       ]
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot shows the same dialog as the pre-reset boot",
+     "pass": true,
+     "x": {
+      "base": null,
+      "next": null
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot has the same farm state (farmLevel, isNewGame)",
+     "pass": true,
+     "x": {
+      "base": [
+       20,
+       false
+      ],
+      "next": [
+       20,
+       false
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot after full cReset emits save_restore{idb} x1 and 0 save_corrupt (LS cleared by resetProgress before the aborted IDB tx; IDB main untouched)",
+     "pass": true,
+     "x": {
+      "preResetBootEv": [],
+      "nextAfterAbortedCResetEv": [
+       "save_restore"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "INFO AC4: LS keys after the aborted Reset (resetProgress runs before, outside the IDB tx)",
+     "pass": true,
+     "x": [
+      "eggfarm.install_id",
+      "eggfarm.lease",
+      "eggfarm.save.corrupt.1792842725464",
+      "eggfarm.save.corrupt.index",
+      "eggfarm.telemetry",
+      "eggfarm.ui"
+     ],
+     "hard": false
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842725464",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842725464",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_restore"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842725464",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "pre": {
+    "corrupt.1792842725464": 225,
+    "main": 946,
+    "reset.surfaced": [
+     "corrupt.1700000000000"
+    ]
+   },
+   "post": {
+    "corrupt.1792842725464": 225,
+    "main": 946,
+    "reset.surfaced": [
+     "corrupt.1700000000000"
+    ]
+   },
+   "lsAfterReset": [
+    "eggfarm.install_id",
+    "eggfarm.lease",
+    "eggfarm.save.corrupt.1792842725464",
+    "eggfarm.save.corrupt.index",
+    "eggfarm.telemetry",
+    "eggfarm.ui"
+   ]
+  },
+  "BRS-AC4-throw-delete-path-no-idb-copies": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 precondition: the fault fired inside the Reset tx (throwDel)",
+     "pass": true,
+     "x": "throwDel",
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: IDB main byte-identical (no delete applied)",
+     "pass": true,
+     "x": {
+      "pre": 947,
+      "post": 947
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: every corrupt.* key and value unchanged",
+     "pass": true,
+     "x": {
+      "pre": [
+       "main",
+       "reset.surfaced"
+      ],
+      "post": [
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: reset.surfaced unchanged (prior record kept, not replaced)",
+     "pass": true,
+     "x": {
+      "pre": [
+       "corrupt.1700000000000"
+      ],
+      "post": [
+       "corrupt.1700000000000"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 1: whole IDB store identical before/after the aborted Reset",
+     "pass": true,
+     "x": {
+      "pre": {
+       "main": 947,
+       "reset.surfaced": [
+        "corrupt.1700000000000"
+       ]
+      },
+      "post": {
+       "main": 947,
+       "reset.surfaced": [
+        "corrupt.1700000000000"
+       ]
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot shows the same dialog as the pre-reset boot",
+     "pass": true,
+     "x": {
+      "base": null,
+      "next": null
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot has the same farm state (farmLevel, isNewGame)",
+     "pass": true,
+     "x": {
+      "base": [
+       20,
+       false
+      ],
+      "next": [
+       20,
+       false
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "AC4 part 2: next boot after full cReset emits save_restore{idb} x1 and 0 save_corrupt (LS cleared by resetProgress before the aborted IDB tx; IDB main untouched)",
+     "pass": true,
+     "x": {
+      "preResetBootEv": [],
+      "nextAfterAbortedCResetEv": [
+       "save_restore"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "INFO AC4: LS keys after the aborted Reset (resetProgress runs before, outside the IDB tx)",
+     "pass": true,
+     "x": [
+      "eggfarm.install_id",
+      "eggfarm.lease",
+      "eggfarm.telemetry",
+      "eggfarm.ui"
+     ],
+     "hard": false
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [
+      "qa throw inside reset tx"
+     ],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 3,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [
+      "save_restore"
+     ],
+     "lsResetAt": null,
+     "initDump": [
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "pre": {
+    "main": 947,
+    "reset.surfaced": [
+     "corrupt.1700000000000"
+    ]
+   },
+   "post": {
+    "main": 947,
+    "reset.surfaced": [
+     "corrupt.1700000000000"
+    ]
+   },
+   "lsAfterReset": [
+    "eggfarm.install_id",
+    "eggfarm.lease",
+    "eggfarm.telemetry",
+    "eggfarm.ui"
+   ]
+  },
+  "BRS-AC4-control-no-fault": {
+   "checks": [
+    {
+     "n": "precondition: the seeded valid farm boots without a dialog",
+     "pass": true,
+     "x": {
+      "L": 1,
+      "dialog": null,
+      "F": 20,
+      "newGame": false,
+      "recovery": null,
+      "ev": [],
+      "lsResetAt": null,
+      "initDump": [
+       "corrupt.1792842778075",
+       "main",
+       "reset.surfaced"
+      ]
+     },
+     "hard": true
+    },
+    {
+     "n": "control: no fault -> main deleted and reset.surfaced = corrupt.* keys present",
+     "pass": true,
+     "x": {
+      "post": {
+       "corrupt.1792842778075": 225,
+       "reset.surfaced": [
+        "corrupt.1792842778075"
+       ]
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "LS eggfarm.save.reset_at never written (rule VOID)",
+     "pass": true,
+     "x": [],
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "loads": [
+    {
+     "L": 1,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842778075",
+      "main",
+      "reset.surfaced"
+     ]
+    },
+    {
+     "L": 2,
+     "dialog": null,
+     "F": 20,
+     "newGame": false,
+     "recovery": null,
+     "ev": [],
+     "lsResetAt": null,
+     "initDump": [
+      "corrupt.1792842778075",
+      "main",
+      "reset.surfaced"
+     ]
+    }
+   ],
+   "pre": {
+    "corrupt.1792842778075": 225,
+    "main": 947,
+    "reset.surfaced": [
+     "corrupt.1700000000000"
+    ]
+   },
+   "post": {
+    "corrupt.1792842778075": 225,
+    "reset.surfaced": [
+     "corrupt.1792842778075"
+    ]
+   }
+  }
+ },
+ "buildId": "m4.1+5d9efa6",
+ "fails": 0
+}

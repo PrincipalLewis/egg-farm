@@ -1,0 +1,120 @@
+[
+  {
+    "install_id": "ffc61775-1d8a-4cef-b30b-7e85eb57326e",
+    "build": "m4.1+22eac98",
+    "type": "session_start",
+    "ts": 1793309147459,
+    "sessionMs": 0
+  },
+  {
+    "secondsAway": 7200,
+    "eggs": 29250,
+    "type": "offline_grant",
+    "ts": 1793309147460,
+    "sessionMs": 1
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "type": "customer_arrive",
+    "ts": 1793309147963,
+    "sessionMs": 504
+  },
+  {
+    "id": 83,
+    "N": 51,
+    "type": "customer_arrive",
+    "ts": 1793309148061,
+    "sessionMs": 602
+  },
+  {
+    "type": "tap",
+    "ts": 1793309148321,
+    "sessionMs": 862,
+    "count": 20,
+    "eggs": 10
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793309148663,
+    "sessionMs": 1204
+  },
+  {
+    "id": 83,
+    "N": 51,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793309148664,
+    "sessionMs": 1205
+  },
+  {
+    "id": 84,
+    "N": 38,
+    "type": "customer_arrive",
+    "ts": 1793309150961,
+    "sessionMs": 3502
+  },
+  {
+    "id": 84,
+    "k": 38,
+    "N": 38,
+    "price": 474,
+    "value": 18012,
+    "by": "player",
+    "type": "sell",
+    "ts": 1793309151607,
+    "sessionMs": 4148
+  },
+  {
+    "id": 84,
+    "N": 38,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793309151607,
+    "sessionMs": 4148
+  },
+  {
+    "upgrade": "hens",
+    "newLevel": 13,
+    "cost": 83800,
+    "coinsBefore": 106327,
+    "track": "hens",
+    "type": "upgrade",
+    "ts": 1793309153036,
+    "sessionMs": 5577
+  },
+  {
+    "id": 85,
+    "N": 41,
+    "type": "customer_arrive",
+    "ts": 1793309153961,
+    "sessionMs": 6502
+  },
+  {
+    "id": 85,
+    "N": 41,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793309154662,
+    "sessionMs": 7203
+  },
+  {
+    "type": "session_end",
+    "ts": 1793309154721,
+    "sessionMs": 7262
+  },
+  {
+    "wage_coop_hand_cents": 67,
+    "coop_hand_eggs": 94,
+    "wage_market_hand_cents": 33,
+    "market_hand_eggs": 145,
+    "market_hand_cents": 68730,
+    "type": "worker_summary",
+    "ts": 1793309147662,
+    "sessionMs": 203,
+    "windowMs": 7059
+  }
+]

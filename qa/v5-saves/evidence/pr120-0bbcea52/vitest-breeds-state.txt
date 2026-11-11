@@ -1,0 +1,13 @@
+LOCK+START 2026-11-10T00:24:55+01:00 loadavg=15.44 11.50 7.62 22/3048 257454
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr120-0bbcea52/wt
+
+ ✓ tests/v5-breeds-state.test.ts (40 tests) 375ms
+
+ Test Files  1 passed (1)
+      Tests  40 passed (40)
+   Start at  00:28:59
+   Duration  1.29s (transform 514ms, setup 0ms, collect 655ms, tests 375ms, environment 0ms, prepare 78ms)
+
+EXIT=0
+END 2026-11-10T00:29:00+01:00

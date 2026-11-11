@@ -1,0 +1,63 @@
+{
+  "checked_at_cet": "2026-11-06 02:03 CET",
+  "method": "cursor-github MCP one-shot (no poll) \u2014 HoQA/hosted-followup-0200",
+  "head_sha": "147e116ca79db38f270189efbb978c7013e7936b",
+  "note": "#114 merged as rc/v5 19121b75; tip 147e116c tree-identical to bar 66c9184",
+  "ci": {
+    "run_id": 42136449877,
+    "name": "ci",
+    "run_number": 903,
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/PrincipalLewis/egg-farm/actions/runs/42136449877",
+    "head_sha": "147e116ca79db38f270189efbb978c7013e7936b",
+    "completed_at_utc": "2026-11-06T00:38:23Z",
+    "completed_at_cet": "2026-11-06 01:38:23 CET",
+    "gate_job": {
+      "id": 127625710133,
+      "name": "gate",
+      "conclusion": "success"
+    },
+    "release_globals_job": {
+      "id": 127631882323,
+      "name": "release-globals",
+      "conclusion": "skipped",
+      "note": "skipped-by-design on non-rc/*; \u2260 pass, not a block"
+    },
+    "chromium_globals_step": "Release globals allowlist (chromium) SUCCESS (gate job step 9)"
+  },
+  "pacing": {
+    "run_id": 42136450016,
+    "name": "pacing-x1-stack",
+    "run_number": 76,
+    "status": "in_progress",
+    "conclusion": null,
+    "html_url": "https://github.com/PrincipalLewis/egg-farm/actions/runs/42136450016",
+    "head_sha": "147e116ca79db38f270189efbb978c7013e7936b",
+    "shards": [
+      {
+        "id": 127626225587,
+        "name": "casual",
+        "status": "in_progress",
+        "conclusion": null,
+        "step": "Shard casual (seeds 1-200\u2026)"
+      },
+      {
+        "id": 127626226136,
+        "name": "optimal",
+        "status": "in_progress",
+        "conclusion": null,
+        "step": "Shard optimal (seeds 1-200\u2026)"
+      },
+      {
+        "id": 127626226185,
+        "name": "seller15",
+        "status": "completed",
+        "conclusion": "success",
+        "completed_at_utc": "2026-11-06T00:46:24Z",
+        "completed_at_cet": "2026-11-06 01:46:24 CET"
+      }
+    ],
+    "aggregate": "not yet scheduled"
+  }
+}

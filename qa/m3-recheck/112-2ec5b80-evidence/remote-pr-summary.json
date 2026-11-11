@@ -1,0 +1,9 @@
+{
+  "source": "cursor-github.get_pull_request PrincipalLewis/egg-farm #112 (read-only, this session)",
+  "head": "2ec5b803e65bc6c16299202d581114e3cacdebdf",
+  "base": "30df38c0a0bd5d48db96d0705abccc6db197d161",
+  "changed_files": 9,
+  "draft": false,
+  "mergeable_state": "unstable",
+  "note": "Metadata only; does not constitute HoE exact-head confirmation or test evidence."
+}

@@ -1,0 +1,59 @@
+[
+ {
+  "n": "F2 no \"$0.00\" anywhere in Market (empty basket)",
+  "pass": true,
+  "i": {
+   "sell": "No eggs to sell"
+  }
+ },
+ {
+  "n": "F3 390x844 Market shows 5 cards",
+  "pass": true,
+  "i": {
+   "cards": 5
+  }
+ },
+ {
+  "n": "F4 order line \"{have}/{want} eggs · ${value}\" with spaced separator",
+  "pass": false,
+  "i": [
+   "0/50 eggs · $374.00",
+   "500/51 eggs · $381.48",
+   "510/52 eggs · $388.96"
+  ]
+ },
+ {
+  "n": "F5 strip \"+N\" and Market \"+N waiting\" add up to the same queue of 10",
+  "pass": true,
+  "i": {
+   "strip": {
+    "chips": 4,
+    "more": "+6"
+   },
+   "market": {
+    "cards": 5,
+    "more": "+5 waiting"
+   }
+  }
+ },
+ {
+  "n": "F1 Farm L4->L5 (real slot gain): toast not over the queue strip; slot copy present",
+  "pass": true,
+  "i": {
+   "text": "Coop upgraded! +1 customer slot",
+   "top": 144,
+   "queueBottom": 136,
+   "overlaps": false
+  }
+ },
+ {
+  "n": "F1 Farm L5->L6 (no slot gain): toast not over the queue strip; slot copy absent",
+  "pass": true,
+  "i": {
+   "text": "Coop upgraded!",
+   "top": 136,
+   "queueBottom": 136,
+   "overlaps": false
+  }
+ }
+]

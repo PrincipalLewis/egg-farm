@@ -1,0 +1,23 @@
+START 2026-11-05T23:53:06+01:00 loadavg=2.75 1.89 1.74 5/2155 1458649
+
+> egg-farm@0.1.0 build
+> vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+
+balance.json up to date with economy.csv
+vite v5.4.21 building for production...
+transforming...
+✓ 72 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.68 kB │ gzip:  0.39 kB
+dist/assets/index-DUjXgk7c.css   53.57 kB │ gzip: 11.58 kB
+dist/assets/index-DOVZAC2Z.js   210.04 kB │ gzip: 71.58 kB
+✓ built in 666ms
+check-release-build: m4.1+dc58705 ok
+check-release-build: release prefix m4.1 ok
+check-release-build: no eggfarmUi in release ok
+check-release-build: no ?debug/?perf/?ios/QA hooks ok
+check-release-build: window global writes only eggfarmExportTelemetry ok
+check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+EXIT=0 END 2026-11-05T23:53:11+01:00

@@ -1,0 +1,480 @@
+{
+ "e3-future-ls-beats-idb-mobile": {
+  "staleA": {
+   "v": 6,
+   "savedAt": 1792158391762,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "idbB_before": {
+   "v": 6,
+   "savedAt": 1792158401762,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfter": {
+   "v": 6,
+   "savedAt": 1792158403661,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "idbAfter": {
+   "v": 6,
+   "savedAt": 1792158403661,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n5\n$0.00, 5 eggs\n5 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "e3-future-ls-beats-idb-desktop": {
+  "staleA": {
+   "v": 6,
+   "savedAt": 1792158411537,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "idbB_before": {
+   "v": 6,
+   "savedAt": 1792158421545,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfter": {
+   "v": 6,
+   "savedAt": 1792158423520,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "idbAfter": {
+   "v": 6,
+   "savedAt": 1792158423520,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n6 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n\nNext customer soon… (3s)\n\nNo eggs to sell\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg"
+ },
+ "f1-live-newer-in-idb-mobile": {
+  "lsMain": {
+   "v": 6,
+   "savedAt": 1792158436475,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 99,
+   "savedAt": 1792158431475,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n5\n$0.00, 5 eggs\n10\n10 / 50\nCollect +5\nMarket\nUpgrades\nFarm\nA customer! Tap them to sell eggs.\n○ ● ○\nSkip\nThis save is from a newer version of Egg Farm. Open the newer build to keep play"
+ },
+ "f1-live-newer-in-idb-desktop": {
+  "lsMain": {
+   "v": 6,
+   "savedAt": 1792158459679,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 99,
+   "savedAt": 1792158454679,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n5\n$0.00, 5 eggs\n6\n10 / 50\nCollect +5\nMarket\n5/6 eggs\n · $6.00\nSell 5\n\nSell all (5 eggs · $5.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 →"
+ },
+ "f2-live-newer-bak-mobile": {
+  "lsMain": {
+   "v": 6,
+   "savedAt": 1792158477798,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 99,
+   "savedAt": 1792158477798,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792158477798,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n12\n11 / 50\nCollect +5\nMarket\nUpgrades\nFarm\nA customer! Tap them to sell eggs.\n○ ● ○\nSkip\nThis save is from a newer version of Egg Farm. Open the newer build to keep play"
+ },
+ "f2-live-newer-bak-desktop": {
+  "lsMain": {
+   "v": 6,
+   "savedAt": 1792158494337,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 99,
+   "savedAt": 1792158494337,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792158494337,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n8\n11 / 50\nCollect +5\nMarket\n4/8 eggs\n · $8.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 →"
+ },
+ "f3-main-missing-bak-corrupt-mobile": {
+  "main": {
+   "v": 6,
+   "savedAt": 1792158521317,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfter7s": {
+   "v": 6,
+   "savedAt": 1792158521317,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "corruptKeys": [
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.corrupt.1792158521318"
+  ],
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n3 / 50\nCollect +5 · 3 ready\nMarket\nUpgrades\nFarm\nYour hens are laying eggs…\n● ○ ○\nSkip"
+ },
+ "f3-main-missing-bak-badsum-mobile": {
+  "main": {
+   "v": 6,
+   "savedAt": 1792158546467,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfter7s": {
+   "v": 6,
+   "savedAt": 1792158546467,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "corruptKeys": [
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.corrupt.1792158546468"
+  ],
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n3 / 50\nCollect +5 · 3 ready\nMarket\nUpgrades\nFarm\nYour hens are laying eggs…\n● ○ ○\nSkip"
+ },
+ "f3-main-missing-bak-corrupt-desktop": {
+  "main": {
+   "v": 6,
+   "savedAt": 1792158571598,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfter7s": {
+   "v": 6,
+   "savedAt": 1792158571598,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "corruptKeys": [
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.corrupt.1792158571599"
+  ],
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n3 / 50\nCollect +5 · 3 ready\nMarket\n\nNext customer soon… (8s)\n\nNo eggs to sell\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 → $1.12\nLevel 0 / 30\n$10.00\nNeed $10.00 mor"
+ },
+ "f3-main-missing-bak-badsum-desktop": {
+  "main": {
+   "v": 6,
+   "savedAt": 1792158597155,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfter7s": {
+   "v": 6,
+   "savedAt": 1792158597155,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "corruptKeys": [
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.corrupt.1792158597156"
+  ],
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n3 / 50\nCollect +5 · 3 ready\nMarket\n\nNext customer soon… (8s)\n\nNo eggs to sell\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 → $1.12\nLevel 0 / 30\n$10.00\nNeed $10.00 mor"
+ },
+ "f4-main-and-bak-corrupt-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158616999,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "main": {
+   "v": 6,
+   "savedAt": 1792158622399,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "corruptKeys": [
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.corrupt.1792158622398",
+   "eggfarm.save.corrupt.1792158622399"
+  ],
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n3 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5 · 3 ready\nMarket\nUpgrades\nFarm\nA fresh start\n\nWe couldn't open your saved farm, so a new one is ready for you. We've kept a copy of the old save, just in case.\n\nStar"
+ },
+ "f4-main-and-bak-corrupt-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158635203,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "main": {
+   "v": 6,
+   "savedAt": 1792158640723,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "corruptKeys": [
+   "eggfarm.save.corrupt.1792158640722",
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.corrupt.1792158640723"
+  ],
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n3 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5 · 3 ready\nMarket\n\nNext customer soon… (8s)\n\nNo eggs to sell\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 → $1.12\nLevel 0 /"
+ },
+ "f5-rapid-reloads-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158648677,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "seq": [
+   {
+    "basket": 4,
+    "pend": 0
+   },
+   {
+    "basket": 4,
+    "pend": 0
+   },
+   {
+    "basket": 4,
+    "pend": 675
+   },
+   {
+    "basket": 679,
+    "pend": 0
+   },
+   {
+    "basket": 679,
+    "pend": 0
+   },
+   {
+    "basket": 679,
+    "pend": 0
+   }
+  ],
+  "final": {
+   "v": 6,
+   "savedAt": 1792158655481,
+   "coins": 0,
+   "basket": 679,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792158655481,
+   "coins": 0,
+   "basket": 679,
+   "pend": 0,
+   "fl": 0
+  }
+ },
+ "f5-rapid-reloads-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158662982,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "seq": [
+   {
+    "basket": 4,
+    "pend": 0
+   },
+   {
+    "basket": 4,
+    "pend": 0
+   },
+   {
+    "basket": 4,
+    "pend": 675
+   },
+   {
+    "basket": 679,
+    "pend": 0
+   },
+   {
+    "basket": 679,
+    "pend": 0
+   },
+   {
+    "basket": 679,
+    "pend": 0
+   }
+  ],
+  "final": {
+   "v": 6,
+   "savedAt": 1792158669907,
+   "coins": 0,
+   "basket": 679,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792158669907,
+   "coins": 0,
+   "basket": 679,
+   "pend": 0,
+   "fl": 0
+  }
+ },
+ "f6-quota-stale-ls-vs-idb-mobile": {
+  "fill": "52/198",
+  "staleA": {
+   "v": 6,
+   "savedAt": 1792158677393,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "newerIdbBefore": {
+   "v": 6,
+   "savedAt": 1792158687393,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfter": {
+   "v": 6,
+   "savedAt": 1792158689148,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "idbAfter": {
+   "v": 6,
+   "savedAt": 1792158694152,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n15\n$0.00, 15 eggs\n12\n9\n7\n21 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm\nYour browser isn't letting us save right now (low space or private mode), so progress won't be saved."
+ },
+ "f6-quota-stale-ls-vs-idb-desktop": {
+  "fill": "52/199",
+  "staleA": {
+   "v": 6,
+   "savedAt": 1792158703270,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "newerIdbBefore": {
+   "v": 6,
+   "savedAt": 1792158713267,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfter": {
+   "v": 6,
+   "savedAt": 1792158703270,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "idbAfter": {
+   "v": 6,
+   "savedAt": 1792158714703,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+ }
+}

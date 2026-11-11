@@ -1,0 +1,210 @@
+[
+ {
+  "build": "abe9cc6",
+  "bid": "m4.1+abe9cc6",
+  "W": 360,
+  "H": 640,
+  "cd": 30,
+  "docked": false,
+  "sel": "nav.actions [data-act=manageAll]",
+  "info": {
+   "x": 186,
+   "y": 576,
+   "w": 81,
+   "h": 64,
+   "label": "Refill, cooling down",
+   "active": [
+    "collection"
+   ]
+  },
+  "clip": {
+   "x": 182,
+   "y": 572,
+   "width": 89,
+   "height": 72
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-abe9cc6-360-cd30.png"
+ },
+ {
+  "build": "abe9cc6",
+  "bid": "m4.1+abe9cc6",
+  "W": 360,
+  "H": 640,
+  "cd": 7,
+  "docked": false,
+  "sel": "nav.actions [data-act=manageAll]",
+  "info": {
+   "x": 186,
+   "y": 576,
+   "w": 81,
+   "h": 64,
+   "label": "Refill, cooling down",
+   "active": [
+    "collection"
+   ]
+  },
+  "clip": {
+   "x": 182,
+   "y": 572,
+   "width": 89,
+   "height": 72
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-abe9cc6-360-cd7.png"
+ },
+ {
+  "build": "abe9cc6",
+  "bid": "m4.1+abe9cc6",
+  "W": 1280,
+  "H": 800,
+  "cd": 30,
+  "docked": true,
+  "sel": "#p-upgrades header [data-act=manageAll]",
+  "info": {
+   "x": 1012.421875,
+   "y": 436,
+   "w": 136.4375,
+   "h": 44,
+   "label": "Refill, cooling down",
+   "active": [
+    "workers"
+   ]
+  },
+  "clip": {
+   "x": 1008,
+   "y": 432,
+   "width": 145,
+   "height": 52
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-abe9cc6-1280-cd30.png"
+ },
+ {
+  "build": "abe9cc6",
+  "bid": "m4.1+abe9cc6",
+  "W": 1280,
+  "H": 800,
+  "cd": 7,
+  "docked": true,
+  "sel": "#p-upgrades header [data-act=manageAll]",
+  "info": {
+   "x": 1012.421875,
+   "y": 436,
+   "w": 136.4375,
+   "h": 44,
+   "label": "Refill, cooling down",
+   "active": [
+    "workers"
+   ]
+  },
+  "clip": {
+   "x": 1008,
+   "y": 432,
+   "width": 145,
+   "height": 52
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-abe9cc6-1280-cd7.png"
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 360,
+  "H": 640,
+  "cd": 30,
+  "docked": false,
+  "sel": "nav.actions [data-act=manageAll]",
+  "info": {
+   "x": 186,
+   "y": 576,
+   "w": 81,
+   "h": 64,
+   "label": "Refill, cooling down",
+   "active": [
+    "collection"
+   ]
+  },
+  "clip": {
+   "x": 182,
+   "y": 572,
+   "width": 89,
+   "height": 72
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-ba398b6-360-cd30.png"
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 360,
+  "H": 640,
+  "cd": 7,
+  "docked": false,
+  "sel": "nav.actions [data-act=manageAll]",
+  "info": {
+   "x": 186,
+   "y": 576,
+   "w": 81,
+   "h": 64,
+   "label": "Refill, cooling down",
+   "active": [
+    "collection"
+   ]
+  },
+  "clip": {
+   "x": 182,
+   "y": 572,
+   "width": 89,
+   "height": 72
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-ba398b6-360-cd7.png"
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 1280,
+  "H": 800,
+  "cd": 30,
+  "docked": true,
+  "sel": "#p-upgrades header [data-act=manageAll]",
+  "info": {
+   "x": 1012.421875,
+   "y": 436,
+   "w": 136.4375,
+   "h": 44,
+   "label": "Refill, cooling down",
+   "active": [
+    "workers"
+   ]
+  },
+  "clip": {
+   "x": 1008,
+   "y": 432,
+   "width": 145,
+   "height": 52
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-ba398b6-1280-cd30.png"
+ },
+ {
+  "build": "ba398b6",
+  "bid": "m4.1+ba398b6",
+  "W": 1280,
+  "H": 800,
+  "cd": 7,
+  "docked": true,
+  "sel": "#p-upgrades header [data-act=manageAll]",
+  "info": {
+   "x": 1012.421875,
+   "y": 436,
+   "w": 136.4375,
+   "h": 44,
+   "label": "Refill, cooling down",
+   "active": [
+    "workers"
+   ]
+  },
+  "clip": {
+   "x": 1008,
+   "y": 432,
+   "width": 145,
+   "height": 52
+  },
+  "file": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/pixel/px-ba398b6-1280-cd7.png"
+ }
+]

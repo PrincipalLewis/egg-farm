@@ -1,0 +1,14 @@
+SCOPE CHECK vs eb92b375 — STOP
+Allowed: clock/frame paths and tests only.
+IN SCOPE:
+  src/game.ts                     Game.frame / focusAccMs (frame path)
+  src/sim/clock.ts                FrameClock.focusAccMs, focusAssignedMs, tickClock default dropped
+  src/sim/tick.ts                 advance() carries focusAccMs, Σ fT = Σ F
+  tests/v5-breeds-present.test.ts [F7] Game.frame 30/60/144 fps + uneven gaps
+  tests/v5-f1b-clock-rng.test.ts  one-line caller: tickClock(..., dtMs) after default removed
+OUT OF SCOPE (gate fail):
+  engineering/status.md           +7 lines, eng diary of this F7 + F3-no-literal fix only; no product/sim/UI code
+VERDICT_SCOPE=STOP (status.md is not a clock/frame path or test). No tsc/vitest/build/hosted started.
+Parent of 2b760d1c is exactly eb92b375. Single fix commit.
+
+WAIVER 2026-11-10 03:26 CET HoQA: engineering/status.md +7 diary lines are documentation only and do not widen the bar. Item 0 cleared; items 1-4 resumed.

@@ -1,0 +1,41 @@
+{
+ "id": "CSR1-v6b-version7-is-invalid-not-newer",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "CSR-4"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-invalid-raw-version7.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "newer": null,
+  "recovered_from": "none",
+  "notice": "M3",
+  "tried": [
+   [
+    "bak",
+    "absent"
+   ],
+   [
+    "idb",
+    "absent"
+   ],
+   [
+    "v6_backup",
+    "invalid",
+    "version"
+   ]
+  ]
+ }
+}

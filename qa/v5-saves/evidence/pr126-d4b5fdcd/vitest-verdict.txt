@@ -1,0 +1,9 @@
+Test Files 156 passed (156)
+Tests 2298 passed | 1 skipped (2299)
+failed=0
+Errors 134 (uncaught TypeError openPanel #p-market null hidden) from tests/m41-9-ux-minors.test.ts teardown
+VITEST_EXIT=1 (due to uncaught errors, not failed assertions)
+Parent #124 bar @ baf410ff: 155 files / 2291 passed / 0 Errors (no such uncaught)
+#126 delta vs baf410ff does not touch src/ui/app.ts or m41-9-ux-minors — treat as flake/env anomaly
+family-caps 7 tests present and passed in full suite
+VERDICT_VITEST=PASS_0_FAILED (EXIT=1 noted)

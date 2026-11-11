@@ -1,0 +1,17 @@
+HEAD 5d9efa61c5e6ee31ca9ebdec20ee70167d31d463 porcelain=0 2026-10-24 14:40:23 CEST
+npm-ci exit=0 1s
+sync-check exit=0 1s
+tsc exit=0 4s
+vitest exit=0 192s
+build exit=0 5s
+build-html exit=0 5s
+build-qa exit=0 5s
+check-release-dist exit=0 0s
+check-release-html exit=0 0s
+dist name="build-id" content="m4.1+5d9efa6" 36db8b7beb0ed941f9e1f562bebb62f082805bf90dbce4830b55e26ead245868  dist/index.html
+dist-html name="build-id" content="m4.1+5d9efa6" ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1  dist-html/egg-farm.html
+dist-qa name="build-id" content="m4.1+5d9efa6" c54d92b648b6bab8d1637f2642a7dd110a1ab79bad590ab1e4bf7531f39e7927  dist-qa/index.html
+porcelain-after-nonbrowser=
+rc0-chromium exit=0 444s
+check-globals exit=0 434s
+porcelain-after-browser=

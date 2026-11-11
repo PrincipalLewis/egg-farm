@@ -1,0 +1,1034 @@
+{
+ "engine": "chromium",
+ "port": "5961",
+ "scenarios": {
+  "IDB1-abc@390": {
+   "checks": [
+    {
+     "n": "runtime build-id",
+     "pass": true,
+     "v": "m3-rc1-pre+dd223f5"
+    },
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": false,
+     "v": false
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "save_corrupt.store=idb",
+     "pass": false
+    },
+    {
+     "n": "reason=invalid_state",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M3",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "IDB corrupt.* == 1",
+     "pass": false,
+     "v": []
+    },
+    {
+     "n": "IDB corrupt.* equals seeded main",
+     "pass": false,
+     "v": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "telemetry": {
+    "save_corrupt": [],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [
+     "main"
+    ],
+    "afterKeys": [
+     "main"
+    ]
+   }
+  },
+  "IDB1-truncated@390": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": false,
+     "v": false
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "save_corrupt.store=idb",
+     "pass": false
+    },
+    {
+     "n": "reason=parse",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M3",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "IDB corrupt.* == 1",
+     "pass": false,
+     "v": []
+    },
+    {
+     "n": "IDB corrupt.* equals seeded main",
+     "pass": false,
+     "v": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "telemetry": {
+    "save_corrupt": [],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [
+     "main"
+    ],
+    "afterKeys": [
+     "main"
+    ],
+    "mainOverwrittenAfterSave": true
+   }
+  },
+  "IDB1-wrongtype-version-string@390": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": false,
+     "v": false
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "save_corrupt.store=idb",
+     "pass": false
+    },
+    {
+     "n": "reason=wrong_type",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M3",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "IDB corrupt.* == 1",
+     "pass": false,
+     "v": []
+    },
+    {
+     "n": "IDB corrupt.* equals seeded main",
+     "pass": false,
+     "v": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "telemetry": {
+    "save_corrupt": [],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [
+     "main"
+    ],
+    "afterKeys": [
+     "main"
+    ],
+    "mainOverwrittenAfterSave": true
+   }
+  },
+  "IDB1-nonstring-object@390": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": false,
+     "v": false
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "save_corrupt.store=idb",
+     "pass": false
+    },
+    {
+     "n": "reason=wrong_type",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M3",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "IDB corrupt.* == 1",
+     "pass": false,
+     "v": []
+    },
+    {
+     "n": "IDB corrupt.* equals seeded main",
+     "pass": false,
+     "v": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "telemetry": {
+    "save_corrupt": [],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [
+     "main"
+    ],
+    "afterKeys": [
+     "main"
+    ],
+    "mainOverwrittenAfterSave": true
+   }
+  },
+  "CSR3-B1@390": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": false,
+     "v": false
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "save_corrupt.store=ls",
+     "pass": false
+    },
+    {
+     "n": "recovered_from=idb",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M1",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": false,
+     "v": 1
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "farmLevel=17",
+     "pass": true,
+     "v": 17
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "telemetry": {
+    "save_corrupt": [],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [
+     {
+      "source": "idb",
+      "type": "save_restore",
+      "ts": 1792693213876,
+      "sessionMs": 3
+     }
+    ],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [
+     "main"
+    ],
+    "afterKeys": [
+     "main"
+    ]
+   }
+  },
+  "CSR11-all-invalid@360": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "M3 title",
+     "pass": true,
+     "v": "A fresh start"
+    },
+    {
+     "n": "M3 body",
+     "pass": false,
+     "v": "We couldn't open your farm. Your old save is kept safe."
+    },
+    {
+     "n": "M3 button",
+     "pass": true,
+     "v": "Start farming"
+    },
+    {
+     "n": "card width min(440, vw-48)",
+     "pass": false,
+     "v": 309.99908447265625
+    },
+    {
+     "n": "primary >= 48px tall",
+     "pass": false,
+     "v": 47.69219970703125
+    },
+    {
+     "n": "export control present (corrupt copy exists)",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "export >= 44px tall",
+     "pass": false,
+     "v": 43.71783447265625
+    },
+    {
+     "n": "export hit area >= 120 wide",
+     "pass": true,
+     "v": 120.8449935913086
+    },
+    {
+     "n": "body <= 2 lines at 360",
+     "pass": true,
+     "v": 2
+    },
+    {
+     "n": "no horizontal clipping",
+     "pass": true,
+     "v": false
+    },
+    {
+     "n": "initial focus on primary",
+     "pass": true,
+     "v": "rcGo"
+    },
+    {
+     "n": "Esc does not close",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": true,
+     "v": 1
+    },
+    {
+     "n": "save_corrupt.store=ls",
+     "pass": false
+    },
+    {
+     "n": "recovered_from=none",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M3",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "copy": {
+    "t": "A fresh start",
+    "b": "We couldn't open your farm. Your old save is kept safe.",
+    "g": "Start farming"
+   },
+   "layout": {
+    "cardW": 309.99908447265625,
+    "go": {
+     "x": 51.827301025390625,
+     "y": 408.532470703125,
+     "width": 256.34539794921875,
+     "height": 47.69219970703125,
+     "top": 408.532470703125,
+     "right": 308.1726989746094,
+     "bottom": 456.22467041015625,
+     "left": 51.827301025390625
+    },
+    "ex": {
+     "x": 119.57750701904297,
+     "y": 464.17333984375,
+     "width": 120.8449935913086,
+     "height": 43.71783447265625,
+     "top": 464.17333984375,
+     "right": 240.42250061035156,
+     "bottom": 507.89117431640625,
+     "left": 119.57750701904297
+    },
+    "bodyLines": 2,
+    "overflowX": false,
+    "focused": "rcGo"
+   },
+   "telemetry": {
+    "save_corrupt": [
+     {
+      "reason": "invalid_state",
+      "had_backup": true,
+      "restored_from_backup": false,
+      "build": "m3-rc1-pre+dd223f5",
+      "type": "save_corrupt",
+      "ts": 1792693219874,
+      "sessionMs": 1
+     }
+    ],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [
+     "main"
+    ],
+    "afterKeys": [
+     "main"
+    ]
+   }
+  },
+  "CSR11-all-invalid@1280": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "M3 title",
+     "pass": true,
+     "v": "A fresh start"
+    },
+    {
+     "n": "M3 body",
+     "pass": false,
+     "v": "We couldn't open your farm. Your old save is kept safe."
+    },
+    {
+     "n": "M3 button",
+     "pass": true,
+     "v": "Start farming"
+    },
+    {
+     "n": "card width min(440, vw-48)",
+     "pass": false,
+     "v": 442.8926086425781
+    },
+    {
+     "n": "primary >= 48px tall",
+     "pass": true,
+     "v": 48.3155517578125
+    },
+    {
+     "n": "export control present (corrupt copy exists)",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "export >= 44px tall",
+     "pass": true,
+     "v": 44.28924560546875
+    },
+    {
+     "n": "export hit area >= 120 wide",
+     "pass": true,
+     "v": 122.424560546875
+    },
+    {
+     "n": "no horizontal clipping",
+     "pass": true,
+     "v": false
+    },
+    {
+     "n": "initial focus on primary",
+     "pass": true,
+     "v": "rcGo"
+    },
+    {
+     "n": "Esc does not close",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": true,
+     "v": 1
+    },
+    {
+     "n": "save_corrupt.store=ls",
+     "pass": false
+    },
+    {
+     "n": "recovered_from=none",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M3",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "copy": {
+    "t": "A fresh start",
+    "b": "We couldn't open your farm. Your old save is kept safe.",
+    "g": "Start farming"
+   },
+   "layout": {
+    "cardW": 442.8926086425781,
+    "go": {
+     "x": 445.7311706542969,
+     "y": 439.0362548828125,
+     "width": 388.5376281738281,
+     "height": 48.3155517578125,
+     "top": 439.0362548828125,
+     "right": 834.268798828125,
+     "bottom": 487.351806640625,
+     "left": 445.7311706542969
+    },
+    "ex": {
+     "x": 578.7877197265625,
+     "y": 495.4044189453125,
+     "width": 122.424560546875,
+     "height": 44.28924560546875,
+     "top": 495.4044189453125,
+     "right": 701.2122802734375,
+     "bottom": 539.6936645507812,
+     "left": 578.7877197265625
+    },
+    "bodyLines": 2,
+    "overflowX": false,
+    "focused": "rcGo"
+   },
+   "telemetry": {
+    "save_corrupt": [
+     {
+      "reason": "invalid_state",
+      "had_backup": true,
+      "restored_from_backup": false,
+      "build": "m3-rc1-pre+dd223f5",
+      "type": "save_corrupt",
+      "ts": 1792693221191,
+      "sessionMs": 1
+     }
+    ],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [
+     "main"
+    ],
+    "afterKeys": [
+     "main"
+    ]
+   }
+  },
+  "CSR9a-age@390": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "M2 title",
+     "pass": false,
+     "v": "A fresh start"
+    },
+    {
+     "n": "M2 button",
+     "pass": false,
+     "v": "Start farming"
+    },
+    {
+     "n": "M2 body",
+     "pass": false,
+     "v": "We couldn't open your farm. Your old save is kept safe."
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": true,
+     "v": 1
+    },
+    {
+     "n": "save_corrupt.store=ls",
+     "pass": false
+    },
+    {
+     "n": "recovered_from=v6_backup",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M2",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "copy": {
+    "t": "A fresh start",
+    "b": "We couldn't open your farm. Your old save is kept safe.",
+    "g": "Start farming"
+   },
+   "telemetry": {
+    "save_corrupt": [
+     {
+      "reason": "parse",
+      "had_backup": false,
+      "restored_from_backup": false,
+      "build": "m3-rc1-pre+dd223f5",
+      "type": "save_corrupt",
+      "ts": 1792693222391,
+      "sessionMs": 1
+     }
+    ],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [],
+    "afterKeys": [
+     "main"
+    ]
+   }
+  },
+  "CSR9a-level@390": {
+   "checks": [
+    {
+     "n": "recovery dialog shown (not silent)",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "M2 title",
+     "pass": false,
+     "v": "A fresh start"
+    },
+    {
+     "n": "M2 button",
+     "pass": false,
+     "v": "Start farming"
+    },
+    {
+     "n": "M2 body",
+     "pass": false,
+     "v": "We couldn't open your farm. Your old save is kept safe."
+    },
+    {
+     "n": "save_corrupt x1",
+     "pass": true,
+     "v": 1
+    },
+    {
+     "n": "save_corrupt.store=ls",
+     "pass": false
+    },
+    {
+     "n": "recovered_from=v6_backup",
+     "pass": false
+    },
+    {
+     "n": "notice_shown x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice_dismissed x1",
+     "pass": false,
+     "v": 0
+    },
+    {
+     "n": "notice=M2",
+     "pass": false
+    },
+    {
+     "n": "notice.store == save_corrupt.store (never defaulted)",
+     "pass": false,
+     "v": [
+      null,
+      null
+     ]
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "copy": {
+    "t": "A fresh start",
+    "b": "We couldn't open your farm. Your old save is kept safe.",
+    "g": "Start farming"
+   },
+   "telemetry": {
+    "save_corrupt": [
+     {
+      "reason": "checksum",
+      "had_backup": false,
+      "restored_from_backup": false,
+      "build": "m3-rc1-pre+dd223f5",
+      "type": "save_corrupt",
+      "ts": 1792693223658,
+      "sessionMs": 0
+     }
+    ],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [],
+    "afterKeys": [
+     "main"
+    ]
+   }
+  },
+  "CONTROL-valid-no-dialog@390": {
+   "checks": [
+    {
+     "n": "no recovery dialog",
+     "pass": true,
+     "v": false
+    },
+    {
+     "n": "no save_corrupt",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "no notice events",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "no save_restore on a corrupt boot",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "never save_restored",
+     "pass": true,
+     "v": 0
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "telemetry": {
+    "save_corrupt": [],
+    "shown": [],
+    "dismissed": [],
+    "save_restore": [],
+    "save_restored": 0
+   },
+   "idb": {
+    "beforeKeys": [],
+    "afterKeys": [
+     "main"
+    ]
+   }
+  }
+ },
+ "buildId": "m3-rc1-pre+dd223f5",
+ "fails": 85
+}

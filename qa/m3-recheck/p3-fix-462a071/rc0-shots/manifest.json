@@ -1,0 +1,32 @@
+{
+ "pr": 40,
+ "branch": "fix/p3-collection-card-375",
+ "sha": "462a07102cad3b485ad3bcbdb1aeb26950dac867",
+ "pushed": true,
+ "build_label_checked": true,
+ "build_label": "m3-rc1-pre+462a071",
+ "rev": 1,
+ "author": "QA Engineer, UI/Layout & Gameplay Verification",
+ "created": "2026-10-17T12:28:00+02:00",
+ "note": "",
+ "shots": [
+  {
+   "file": "m3-rc0-bug9-375-market.png",
+   "engine": "chromium",
+   "size": "375×667",
+   "docked": false,
+   "save": "rc0 seeded state",
+   "seed": null,
+   "state": "rc0 section shot: m3-rc0-bug9-375-market.png"
+  },
+  {
+   "file": "p3-collection-card-375.png",
+   "engine": "chromium",
+   "size": "375×667",
+   "docked": false,
+   "save": "rc0 seeded state",
+   "seed": null,
+   "state": "rc0 section shot: p3-collection-card-375.png"
+  }
+ ]
+}

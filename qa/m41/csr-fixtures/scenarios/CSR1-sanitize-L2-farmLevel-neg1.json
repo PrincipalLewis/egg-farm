@@ -1,0 +1,24 @@
+{
+ "id": "CSR1-sanitize-L2-farmLevel-neg1",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "CSR-15"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "../../csr/fixtures/L2-farmLevel-neg1.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "reason": "invalid_state",
+  "store": "ls",
+  "recovered_from": "none",
+  "notice": "M3"
+ }
+}

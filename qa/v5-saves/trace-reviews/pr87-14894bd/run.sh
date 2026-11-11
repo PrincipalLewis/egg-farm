@@ -1,0 +1,9 @@
+#!/bin/bash
+# usage: run.sh <label> [full]  (tsc + the author's 8 targeted files, maxWorkers=2; "full" = whole suite)
+cd /workspace/egg-farm-studio/qa/scratch/wt-pr87-14894bd
+W=/workspace/egg-farm-studio/qa/v5-saves/trace-reviews/pr87-14894bd
+L=$1
+{ echo "== $L @ $(git rev-parse HEAD) $(date '+%F %T %Z')"; git diff --stat; npx tsc --noEmit; echo "tsc exit=$?"; } > $W/$L-tsc.log 2>&1
+if [ "${2:-}" = full ]; then T=""; else T="tests/v5-streak-sim.test.ts tests/v5-f2-m5-fields.test.ts tests/v5-f1a-fields.test.ts tests/v5-f2-game-settle.test.ts tests/v5-f2-roundtrip.test.ts tests/v5-f2-downgrade.test.ts tests/v5-f1b-clock-rng.test.ts tests/v5-f1b-focus-wiring.test.ts"; fi
+{ npx vitest run --minWorkers=1 --maxWorkers=2 --reporter=verbose $T; echo "vitest exit=$?"; } > $W/$L-vitest.log 2>&1
+echo DONE >> $W/$L-vitest.log

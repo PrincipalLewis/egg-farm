@@ -1,0 +1,12 @@
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-f2-ring.txt:26: Test Files  5 passed (5)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-f2-ring.txt:27:      Tests  25 passed (25)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-f2-ring.txt:31:EXIT=0 END 2026-11-05T23:39:06+01:00 loadavg=1.26 1.35 1.78 1/1654 1409283
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-f1-4files.txt:41: Test Files  4 passed (4)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-f1-4files.txt:42:      Tests  86 passed (86)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-f1-4files.txt:46:EXIT=0 END 2026-11-05T23:39:39+01:00 loadavg=1.79 1.46 1.80 1/1657 1411158
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-zg-schema.txt:53: Test Files  11 passed (11)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-zg-schema.txt:54:      Tests  140 passed (140)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-zg-schema.txt:58:EXIT=0 END 2026-11-05T23:39:56+01:00 loadavg=1.76 1.47 1.80 3/1659 1412014
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-full.txt:348: Test Files  148 passed (148)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-full.txt:349:      Tests  2117 passed | 1 skipped (2118)
+/workspace/egg-farm-studio/qa/m3-recheck/evidence/f2-560b4d4/vitest-full.txt:353:EXIT=0 END 2026-11-05T23:43:41+01:00 loadavg=2.00 1.68 1.81 1/1667 1422085

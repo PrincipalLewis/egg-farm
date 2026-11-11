@@ -1,0 +1,11 @@
+observation 2026-11-06 02:00 CET (check 1 of max 2), read-only gh api
+PR100 head 21861ca8b3d67e7376f2770d38a3395701492d22 base 49ee46ddce010f0087515c173d34c6076d47ea44 state open changed_files 32
+compare b6705124...21861ca8 status ahead ahead 1 files 1: .github/workflows/ci.yml +2/-1
+ci.yml delta: timeout-minutes 30->45 plus one comment line; no src/test change
+127625531178 pacing-x1-stack shard (casual) completed success
+127625531047 pacing-x1-stack shard (seller15) in_progress null
+127625530701 pacing-x1-stack shard (optimal) completed success
+127625076606 k10-breeds-offset (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53) completed failure
+127625076445 gate in_progress null
+run 42136264834 in_progress null head 21861ca8b3d67e7376f2770d38a3395701492d22
+gate step 6 Slow suites in_progress; steps 7-12 (build, chromium globals, release html) pending

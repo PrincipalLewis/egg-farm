@@ -1,0 +1,1017 @@
+{
+ "pr": 62,
+ "sha": "fcf98235545359c56313235a31d73ff3bd3154a1",
+ "branch": "feat/m41-8-f3-f4",
+ "pushed": true,
+ "pushed_evidence": "git ls-remote origin: refs/heads/feat/m41-8-f3-f4 and refs/pull/62/head = fcf98235545359c56313235a31d73ff3bd3154a1",
+ "merged": false,
+ "note": "DO NOT MERGE",
+ "base": "dd223f5",
+ "build_id": "m3-rc1-pre+fcf9823",
+ "build_id_runtime_verified": "meta[name=build-id] read in-page before every browser case (dist-qa)",
+ "dist_hashes": {
+  "dist-html/egg-farm.html": "16b61417a7058512bd978634e5229c5be3c5436f334f9b05e6229e1d4685de16",
+  "dist-qa/index.html": "9e420fbf0b6f165486fd87b4df85fa9f748ac642c0428b2d7379cc975e8fba0b"
+ },
+ "spec": {
+  "path": "product/farm/frozen/m4a-spec.v1.24.md",
+  "sha256": "38e95a5d335d77855395eacd3834d3d2d3c5319611e9e963d9079292847a94e9"
+ },
+ "checkout": "/tmp/qa-m41-8-fcf9823 (clean, porcelain empty before/after)",
+ "combined_merge": {
+  "tree": "/tmp/qa-m41-8-combined",
+  "parents": [
+   "5789805911ad7f96c23fdf42d06a1854a936c0c3",
+   "fcf98235545359c56313235a31d73ff3bd3154a1"
+  ],
+  "method": "git merge --no-commit --no-ff",
+  "committed": false,
+  "pushed": false,
+  "conflicts": "none"
+ },
+ "engines": {
+  "chromium": "/usr/bin/google-chrome (blocking)",
+  "firefox": "playwright-core (non-blocking)",
+  "webkit": "playwright-core (non-blocking)"
+ },
+ "widths": [
+  360,
+  375,
+  390
+ ],
+ "browser_fails": 0,
+ "shots": [
+  {
+   "path": "shots/chromium/broke-chip-w360.png",
+   "sha256": "2bae7906eaedb6fa3e1c4e61ccde21608f316eb0fede0af3f5f473db94b2f93e"
+  },
+  {
+   "path": "shots/chromium/broke-chip-w375.png",
+   "sha256": "c7b6f1f37af8e268f8d5156925162227d61f8ddb4bc428ae0671f41d9a19f7b9"
+  },
+  {
+   "path": "shots/chromium/broke-chip-w390.png",
+   "sha256": "2c8a54ca9d9cef14e7ee18e45b1e7e25d87594655f981c824a148e6db4dcf372"
+  },
+  {
+   "path": "shots/chromium/broke-collection-chip-w360.png",
+   "sha256": "5c71f7b1922604a38917d8255e8b75fd9ee12e0eff9e4c9563d6581ffc50ef9b"
+  },
+  {
+   "path": "shots/chromium/broke-collection-chip-w375.png",
+   "sha256": "822f7c473a545cf1d4340cc8ca542dbf359cdc828bee4276808c121957a4df7f"
+  },
+  {
+   "path": "shots/chromium/broke-collection-chip-w390.png",
+   "sha256": "d2766d898d8432014d45f3c83c1976f2c8040ee778e0d77d1eb1c563df1441f5"
+  },
+  {
+   "path": "shots/chromium/broke-collection-strip-w360.png",
+   "sha256": "854de17362242be3865aa2b455741f46551c64eb43d0177c2e6fb59bf13f0260"
+  },
+  {
+   "path": "shots/chromium/broke-collection-strip-w375.png",
+   "sha256": "a22e6a80b52ea7462c848ffe882e44e3e76a41d20cd9f7445d39901623f581be"
+  },
+  {
+   "path": "shots/chromium/broke-collection-strip-w390.png",
+   "sha256": "17c04f9c4dc8dd4966d4159619ff59404de73be851e33bfec15fe224c2f1ed4c"
+  },
+  {
+   "path": "shots/chromium/broke-hens-short-chip-w360.png",
+   "sha256": "61a846163db052987829e585d2adf4e5f420f135858592eee20502080952e36b"
+  },
+  {
+   "path": "shots/chromium/broke-hens-short-chip-w375.png",
+   "sha256": "1653ce1111865d4ecace0c259e9c4ff9e027c2d67a3f81b9e314417d024b134b"
+  },
+  {
+   "path": "shots/chromium/broke-hens-short-chip-w390.png",
+   "sha256": "e09776aeed1ca6cf43d028caca6be3fbc5518560d2e9f5d33a73f9bb134e3e94"
+  },
+  {
+   "path": "shots/chromium/broke-hens-short-strip-w360.png",
+   "sha256": "38515eb1b245706927f5e7cece086ba84a0c216ed29002f212ab389d5b53ed25"
+  },
+  {
+   "path": "shots/chromium/broke-hens-short-strip-w375.png",
+   "sha256": "74b4711c33b796d0a658a48f722dd43eb3f42689bcc9034c26b5769c098b1a7c"
+  },
+  {
+   "path": "shots/chromium/broke-hens-short-strip-w390.png",
+   "sha256": "a4d483c4bdf78a96dd4cc391df037d8486ebff8c59cc23043ee0a4a66b02cf52"
+  },
+  {
+   "path": "shots/chromium/broke-strip-w360.png",
+   "sha256": "35c5d5891634c965f323d9821ead40b9a55f8c7374a57b76b6313ddc68468421"
+  },
+  {
+   "path": "shots/chromium/broke-strip-w375.png",
+   "sha256": "03fc8d45fba0aba0d807caf3bba563aca5e71c46c557ebf993525db4eab97aef"
+  },
+  {
+   "path": "shots/chromium/broke-strip-w390.png",
+   "sha256": "5724ae12745adbdd5a939e18cdca74618984b108bf4c29e5dbd0c718b0e0feae"
+  },
+  {
+   "path": "shots/chromium/collection-star-chip-w360.png",
+   "sha256": "814e42cdfc8299455da87791776f8c6d078bcaf63591903df227914424ae0cf8"
+  },
+  {
+   "path": "shots/chromium/collection-star-chip-w375.png",
+   "sha256": "9239ac104102a8e946e6d3557c4f9908e163f768a094457695073c0470c1884c"
+  },
+  {
+   "path": "shots/chromium/collection-star-chip-w390.png",
+   "sha256": "9584922840061b59b6417f9f139193bbbd86b5ff93d63c028eefdf0206ddf067"
+  },
+  {
+   "path": "shots/chromium/collection-star-strip-w360.png",
+   "sha256": "0784683a4d6dbd89b560f4fc5ea36a0d0b32e398b80d39c889e1f193400b1db2"
+  },
+  {
+   "path": "shots/chromium/collection-star-strip-w375.png",
+   "sha256": "f790b388b6eab44f17e1b72d9565d7fc82b5837d4644e76b838d994cdb55aae1"
+  },
+  {
+   "path": "shots/chromium/collection-star-strip-w390.png",
+   "sha256": "5806c850ad66f74ce29d722b17fd51793eb9ecf30932b335006653a8c7e92501"
+  },
+  {
+   "path": "shots/chromium/farm-best-chip-w360.png",
+   "sha256": "4c5baeefdba2672ffdf75cb795b9577115ba509f1909b382322de8927aaceb24"
+  },
+  {
+   "path": "shots/chromium/farm-best-chip-w375.png",
+   "sha256": "8b6f3c4522bff8419664afcdac0ead142515243d4b5c5f8e4c34b30f7d43968c"
+  },
+  {
+   "path": "shots/chromium/farm-best-chip-w390.png",
+   "sha256": "5e935fab5588ea08c5b5f7aff557096280e4f03501197f0c5d42e7f9c956457b"
+  },
+  {
+   "path": "shots/chromium/farm-best-strip-w360.png",
+   "sha256": "67ebdabc94b8c54ac857357fc696255b723d33efcb8710b9d1780f92f9f8c065"
+  },
+  {
+   "path": "shots/chromium/farm-best-strip-w375.png",
+   "sha256": "5524ce5a7f8993bff5047db15acae80e88fd7b89efef6dc03e9592a0c9262351"
+  },
+  {
+   "path": "shots/chromium/farm-best-strip-w390.png",
+   "sha256": "4e168b773498ec095ec8d3ffbb1db76180b3f24ffccb27724a2366c0e97546f6"
+  },
+  {
+   "path": "shots/chromium/hens-milestone-chip-w360.png",
+   "sha256": "5fe9f8c0aaca8db16a1e29493c9b6d3d2436eba67ad0efa3b0ccfd8f0ce4c4ab"
+  },
+  {
+   "path": "shots/chromium/hens-milestone-chip-w375.png",
+   "sha256": "1d003d1bdc3be6153e8148de6f01b92c54311bb5d67d8d01ba521489f2ccf171"
+  },
+  {
+   "path": "shots/chromium/hens-milestone-chip-w390.png",
+   "sha256": "632796fbc25b6171e1f86ee7a5f34a136ccff91505de5ddc14b08d731f37b113"
+  },
+  {
+   "path": "shots/chromium/hens-milestone-strip-w360.png",
+   "sha256": "aaed1397da80206b27c4869883da3219b1010b31b504786b82c73461f1ffe007"
+  },
+  {
+   "path": "shots/chromium/hens-milestone-strip-w375.png",
+   "sha256": "949385182c2728fb12669ccad4e345311630cc9e7902dcaeca7082a73203a3b3"
+  },
+  {
+   "path": "shots/chromium/hens-milestone-strip-w390.png",
+   "sha256": "f0c5dfbb2bb5c9f741ada3613ae921f18e25fb64eeba56c2a38478f1aee38ed2"
+  },
+  {
+   "path": "shots/chromium/hens-pct-star-chip-w360.png",
+   "sha256": "61feae78cce31dee7c8d3b2d79589d36eaa2fa6f13966b782ec81f88a1b1eeb9"
+  },
+  {
+   "path": "shots/chromium/hens-pct-star-chip-w375.png",
+   "sha256": "b1a8d1a09274280ab6543bee68adb2cc64c96cc06f7c1218bdb8d8996376d2e8"
+  },
+  {
+   "path": "shots/chromium/hens-pct-star-chip-w390.png",
+   "sha256": "249c9c5e0e6bf88d89e3738718e7ca241d914caf77cb190663574b394a901c1b"
+  },
+  {
+   "path": "shots/chromium/hens-pct-star-strip-w360.png",
+   "sha256": "175c2fa8d20e724cbd24e46c010b148928042508fb511c2be1a1aa03c05f3e42"
+  },
+  {
+   "path": "shots/chromium/hens-pct-star-strip-w375.png",
+   "sha256": "546eb543a6b14a3f6e3975fb203765cac0c3012568ea6be9a325da179fac76f1"
+  },
+  {
+   "path": "shots/chromium/hens-pct-star-strip-w390.png",
+   "sha256": "ec46b7fff422a25505e071018fd999b767eb71ff1497ebe49675e28f073352ca"
+  },
+  {
+   "path": "shots/chromium/lag-t0-w360.png",
+   "sha256": "08ae5a5c63276b81c38f05fe29f7d544f758b20974c2a073029db0427ed14eb0"
+  },
+  {
+   "path": "shots/chromium/lag-t0-w375.png",
+   "sha256": "ce11d31865d74332ba237bed2d13f35a1b221427dfd8f9530053b6882f6b25eb"
+  },
+  {
+   "path": "shots/chromium/lag-t0-w390.png",
+   "sha256": "4e5ea88445a9fa4a377e965d98c4f95792ca1bfb83ec634c218cb201c1426634"
+  },
+  {
+   "path": "shots/chromium/lag-t1300-w360.png",
+   "sha256": "4d72999afb5e698323cfea8fda2ed60089c8353521cd8dc3e006db3319bb06e3"
+  },
+  {
+   "path": "shots/chromium/lag-t1300-w375.png",
+   "sha256": "8902eb9c5a0b7b0b6dc1e2af4d963f873e12dfaf00a1bb4a91770b220d1f176b"
+  },
+  {
+   "path": "shots/chromium/lag-t1300-w390.png",
+   "sha256": "f574a168233177e093c59999112191882d23e3326a3eaa4da30985f48dbe6306"
+  },
+  {
+   "path": "shots/chromium/value-milestone-chip-w360.png",
+   "sha256": "4ca8a6c8817943270c90c071cbd92053bc808d349ae1601cb0bedf0abe2bef53"
+  },
+  {
+   "path": "shots/chromium/value-milestone-chip-w375.png",
+   "sha256": "0fd2e3812a24761004a470bd90901eb1d11b212959f9ffb0df49a33ff65659ff"
+  },
+  {
+   "path": "shots/chromium/value-milestone-chip-w390.png",
+   "sha256": "caf7cee8eef8c04c68bf0d4e11399ca999e4c49c0734d5cd54b6724e462a5043"
+  },
+  {
+   "path": "shots/chromium/value-milestone-strip-w360.png",
+   "sha256": "f10cf28939c22a422daf7b8b049de7ba30f1fde1693513a55709087172cdec02"
+  },
+  {
+   "path": "shots/chromium/value-milestone-strip-w375.png",
+   "sha256": "27c54836e1c8a500a9d67657898d3f277058c8c83ed1297da477270a357061dc"
+  },
+  {
+   "path": "shots/chromium/value-milestone-strip-w390.png",
+   "sha256": "dffa3527e041091429c551b1e62222686f5c5d8021eb41c02b7199e8b0d5e05c"
+  },
+  {
+   "path": "shots/chromium/value-pct-star-27-chip-w360.png",
+   "sha256": "34a4ed2077c57b2fd160efcc57a730df63efa8b12a3d98dac49009a771ddd022"
+  },
+  {
+   "path": "shots/chromium/value-pct-star-27-chip-w375.png",
+   "sha256": "defd95fa407c65fd65d53cb41a82e2eb415943774638fc2a0f14644df2620621"
+  },
+  {
+   "path": "shots/chromium/value-pct-star-27-chip-w390.png",
+   "sha256": "f199959a0377ada5f35990166628be1d76e341ecc5fe20a90e9ce2f86e59bbe7"
+  },
+  {
+   "path": "shots/chromium/value-pct-star-27-strip-w360.png",
+   "sha256": "41ed7bc5da8e0599ab9af50a1fcc86eecd09443d97d194db6f1dc23cfc8d6867"
+  },
+  {
+   "path": "shots/chromium/value-pct-star-27-strip-w375.png",
+   "sha256": "ad25d3f599fbb5c30bf94b510e8c17b2d758a8a1c084b29cdd674c9cd34b6e46"
+  },
+  {
+   "path": "shots/chromium/value-pct-star-27-strip-w390.png",
+   "sha256": "baf3d8c7f54040bd4916bb9e63d3715d8707c06f5fe90462f5a7b4d5f350db66"
+  },
+  {
+   "path": "shots/chromium/value-truncated-nostar-chip-w360.png",
+   "sha256": "e84cb5aa643ad8192c37f0fd267ea7a211f538f1d11f320845f46df22426aa12"
+  },
+  {
+   "path": "shots/chromium/value-truncated-nostar-chip-w375.png",
+   "sha256": "de14f9a210abffa11c02e9bfc441db5a07652be1a57c1bf84c261456519751d8"
+  },
+  {
+   "path": "shots/chromium/value-truncated-nostar-chip-w390.png",
+   "sha256": "e92ee088633464af990604a56320fd633269e6e75def4fdef5fe88eac94edd37"
+  },
+  {
+   "path": "shots/chromium/value-truncated-nostar-strip-w360.png",
+   "sha256": "021b4c27fd72b77b5672d3fb563492f133e1ee97cb99c8eb0a11c5f23ddcfb81"
+  },
+  {
+   "path": "shots/chromium/value-truncated-nostar-strip-w375.png",
+   "sha256": "856a602bf22f73dd4dfd07b433921cc981f6d695c550f2d2b1468c9fcf969b28"
+  },
+  {
+   "path": "shots/chromium/value-truncated-nostar-strip-w390.png",
+   "sha256": "475fc457a6282abc23fbd4b2415987ed598df63c950084c41877afb5da2c2981"
+  },
+  {
+   "path": "shots/chromium/worst1-strip-w360.png",
+   "sha256": "b046ae0067d199763b72cbc1cb3f0fd3a761e4743c755fed5c00dedea8622dae"
+  },
+  {
+   "path": "shots/chromium/worst1-strip-w375.png",
+   "sha256": "515158e1746a55660915ff473c71c086de0b86fc1049653e16ad7361284424ed"
+  },
+  {
+   "path": "shots/chromium/worst1-strip-w390.png",
+   "sha256": "09fae39ec2d14201362f6b73580be43d16b2c1fb38b22093d0fc3d597e1e01f9"
+  },
+  {
+   "path": "shots/chromium/worst2-strip-w360.png",
+   "sha256": "9cc8154470457ef15ddf81a81348edd632c58e50e6c823b22129855cfd1d124c"
+  },
+  {
+   "path": "shots/chromium/worst2-strip-w375.png",
+   "sha256": "a03e6ed8f81acff8d346f126047ce78bb04aed70146fa0218b860ecfff9eb6ac"
+  },
+  {
+   "path": "shots/chromium/worst2-strip-w390.png",
+   "sha256": "5e0b7fc17100efb69b2396a072fd66ec397283702aad54f16477089864775b4b"
+  },
+  {
+   "path": "shots/chromium/worst3-strip-w360.png",
+   "sha256": "56c82821c9f359267eebfce94bef4360beeb403b2c740e6229ee98314917f73d"
+  },
+  {
+   "path": "shots/chromium/worst3-strip-w375.png",
+   "sha256": "49924c231243d6d369fffb911643dd2890b9148ca626a46cb4d4ed8cc81a6fd0"
+  },
+  {
+   "path": "shots/chromium/worst3-strip-w390.png",
+   "sha256": "4b1b1ebc934bbcd68559007f4165513e67f417eb9886cc80d6c109c324b16932"
+  },
+  {
+   "path": "shots/chromium/worst4-strip-w360.png",
+   "sha256": "b5a2ba713aafdae79532d4a9833c18f150bdcb09e0f01dedfbbe3d34116f813f"
+  },
+  {
+   "path": "shots/chromium/worst4-strip-w375.png",
+   "sha256": "20a5294bd7f122dea5ec58f72130f9026bd1c6cb4a081b84c6ecfb40d937a480"
+  },
+  {
+   "path": "shots/chromium/worst4-strip-w390.png",
+   "sha256": "bb595a020110e91fb74d3627caf2fe6126a2da62cdda0e7ae9bb22ab5bcd7d9e"
+  },
+  {
+   "path": "shots/chromium/worst5-strip-w360.png",
+   "sha256": "dbcb3ea721f0de66cfc529e70aba622c3e67b2518615313b8a4935d577e8ed92"
+  },
+  {
+   "path": "shots/chromium/worst5-strip-w375.png",
+   "sha256": "95ac24d18d55de4c335b939a3dcad3520acfb8a5670c88a582091a592ddb2a25"
+  },
+  {
+   "path": "shots/chromium/worst5-strip-w390.png",
+   "sha256": "9edf879c5c55591ae87a8aa36af2a806c1ecaf983f7f8e02600290caea9830b2"
+  },
+  {
+   "path": "shots/firefox/broke-chip-w360.png",
+   "sha256": "4970d565921846abfcab0c292b172088592500f89928e18fdaaafaf3ff2d857b"
+  },
+  {
+   "path": "shots/firefox/broke-chip-w375.png",
+   "sha256": "eaebfb8b8deb880086c05ecc0d4d5524b872532f93d0a92ef18d3d412a008ca8"
+  },
+  {
+   "path": "shots/firefox/broke-chip-w390.png",
+   "sha256": "57c77d6bcc25fac4727c9e068897bd1d77df102ad2f1b9633e30fecace34c320"
+  },
+  {
+   "path": "shots/firefox/broke-collection-chip-w360.png",
+   "sha256": "a93241eb5b695ead3ed1d21fa3bbb79d20b6e7bc6aedcb10076e9dd4a50593ba"
+  },
+  {
+   "path": "shots/firefox/broke-collection-chip-w375.png",
+   "sha256": "978c718da81f1f26a408ee9de32bea0ef5acd65faa3f574d8208b7603038c19d"
+  },
+  {
+   "path": "shots/firefox/broke-collection-chip-w390.png",
+   "sha256": "ebce70169c6617fb929cb25cf369e3f822e626c0683697e4d7ae8cc1a5dcf8e7"
+  },
+  {
+   "path": "shots/firefox/broke-collection-strip-w360.png",
+   "sha256": "9d5fa3b0fc825aecb6a619475cbfe6a544575c21b1e9fd838400ae9a4c590141"
+  },
+  {
+   "path": "shots/firefox/broke-collection-strip-w375.png",
+   "sha256": "2edabdc422b9f194ae29981627ff3b550b5d49fdc8fd4418efd8365e12605834"
+  },
+  {
+   "path": "shots/firefox/broke-collection-strip-w390.png",
+   "sha256": "55055018989c96ecec6949f8d521349b5d09c865453e29ea4bb7d4d595513326"
+  },
+  {
+   "path": "shots/firefox/broke-hens-short-chip-w360.png",
+   "sha256": "573e459d094d42967971a2cdd78cf7a7675f7c963454eaa0384a0d3384f841b6"
+  },
+  {
+   "path": "shots/firefox/broke-hens-short-chip-w375.png",
+   "sha256": "d10bd5f9e34ad5874347ea420c16acf36cd866f28f5430ddf5204a106656dd18"
+  },
+  {
+   "path": "shots/firefox/broke-hens-short-chip-w390.png",
+   "sha256": "be3cba76829ae5d99aacf6e34ae55fa7819cc34482e769bffcfb409127d8e663"
+  },
+  {
+   "path": "shots/firefox/broke-hens-short-strip-w360.png",
+   "sha256": "ad884c4e32d229291246601e9ebe9a920a935be57506100e0d706de13b7c314e"
+  },
+  {
+   "path": "shots/firefox/broke-hens-short-strip-w375.png",
+   "sha256": "eeee8cd52506f4050c7fa1d2da03ac64c1c188a2ef57ba9086e97adb13ba3bbc"
+  },
+  {
+   "path": "shots/firefox/broke-hens-short-strip-w390.png",
+   "sha256": "15227e5685db18d8233d03b3d099201c22fb6e852aaf18f04a75554c64aa9114"
+  },
+  {
+   "path": "shots/firefox/broke-strip-w360.png",
+   "sha256": "0a973c8b697f7ab8737a77274e6ed177880876909dbd78ea99496be8d908ede8"
+  },
+  {
+   "path": "shots/firefox/broke-strip-w375.png",
+   "sha256": "15464e24f60795bf84d2abeb3bc1eb816a92f096fb6d307b9a6f9d7fd5fb3f1d"
+  },
+  {
+   "path": "shots/firefox/broke-strip-w390.png",
+   "sha256": "61c6ef405a3fe7addc44c46f5f7ca9c9a9f552d8b47bd3ba48f45e725073feaa"
+  },
+  {
+   "path": "shots/firefox/collection-star-chip-w360.png",
+   "sha256": "f90516cf30ec5bd580d2cab7d588655e4baddaaa3e914717776736172adebcc6"
+  },
+  {
+   "path": "shots/firefox/collection-star-chip-w375.png",
+   "sha256": "7be0f4d9abf02f7f2d3fd3957b7413cbb14763d538782e9666d1244df906738f"
+  },
+  {
+   "path": "shots/firefox/collection-star-chip-w390.png",
+   "sha256": "112a7d8291c216c976d5e9f8f6b4a76fce820dbae48d8611d5d29028edc83eb6"
+  },
+  {
+   "path": "shots/firefox/collection-star-strip-w360.png",
+   "sha256": "c845012d45f73306774ca37f9296d97360e7e89b0ac8b41c87bf13d17ff731bc"
+  },
+  {
+   "path": "shots/firefox/collection-star-strip-w375.png",
+   "sha256": "7a37ed0c4c68587fdcae736c7ba9ea77d8c1f578a7cd17063f76d0a61b94407c"
+  },
+  {
+   "path": "shots/firefox/collection-star-strip-w390.png",
+   "sha256": "ef658ac0edb2dbebed5feb5bb57dcdf94e140d015bc59cc33c3223c911b766fe"
+  },
+  {
+   "path": "shots/firefox/farm-best-chip-w360.png",
+   "sha256": "bc2a3437fe06b9b4c9fec942e7e5a68ebae0e38d1c9c1405b8ccf6b61869f843"
+  },
+  {
+   "path": "shots/firefox/farm-best-chip-w375.png",
+   "sha256": "62a7f3253b26d5e12f4543f02c25acb65716dedf3b48b7ff64739c4bae58db7b"
+  },
+  {
+   "path": "shots/firefox/farm-best-chip-w390.png",
+   "sha256": "3bb93192cf12af4fcdb1b592aed516af5421408a0399aa9a5c3e8fd07d4be06c"
+  },
+  {
+   "path": "shots/firefox/farm-best-strip-w360.png",
+   "sha256": "8e773acf1bddc293d806ad3bf153cc91f33256867d9a6128b31f5bf6f052ec3f"
+  },
+  {
+   "path": "shots/firefox/farm-best-strip-w375.png",
+   "sha256": "91768bf9588c4c4abac87eaf07400febb14716e53852648d8f50ddacb2bdc25f"
+  },
+  {
+   "path": "shots/firefox/farm-best-strip-w390.png",
+   "sha256": "cdedf3c2fe24e484976edd528d95ba3cb1dd59db712db308c1640d4ce0c1d772"
+  },
+  {
+   "path": "shots/firefox/hens-milestone-chip-w360.png",
+   "sha256": "87dec1c85a2675a6109fbc55d55d39a2b4044c4b10625fd94ebb74a7d9ea3bfd"
+  },
+  {
+   "path": "shots/firefox/hens-milestone-chip-w375.png",
+   "sha256": "fde67aa078006b79fd6d2bf1f019cee298cdf3ba7778a78aaaa0c5c8a0564e0f"
+  },
+  {
+   "path": "shots/firefox/hens-milestone-chip-w390.png",
+   "sha256": "4dd1442ea6ced35d2b0771df32ff2984e16905d632164c2c71d008413440a5f6"
+  },
+  {
+   "path": "shots/firefox/hens-milestone-strip-w360.png",
+   "sha256": "ec9c870b0a6b41960e9e55d783863186c3274baca1b0ea60ada714a6a2e30d97"
+  },
+  {
+   "path": "shots/firefox/hens-milestone-strip-w375.png",
+   "sha256": "ba388cac5eb93164b362db05be832f0ec2837fd2e87af93fb73627d7ddff0f1a"
+  },
+  {
+   "path": "shots/firefox/hens-milestone-strip-w390.png",
+   "sha256": "63ac71abb4dfdb1c00c7547daf73c2dc2166f82dc2cb3266ab99b2ccf317c52d"
+  },
+  {
+   "path": "shots/firefox/hens-pct-star-chip-w360.png",
+   "sha256": "52c3b02157d5887198dd7c7e25eb52eef478536bb90df232f58e7a6ac08f3f92"
+  },
+  {
+   "path": "shots/firefox/hens-pct-star-chip-w375.png",
+   "sha256": "649fee5fa629b6442ed58e6275ccbbd04535de2b6cc5604a12be2ea26870cf5a"
+  },
+  {
+   "path": "shots/firefox/hens-pct-star-chip-w390.png",
+   "sha256": "13081c48425e499c0a9b2d2217e643d3c888eb16aa7ef5d04b68a6874146d4dc"
+  },
+  {
+   "path": "shots/firefox/hens-pct-star-strip-w360.png",
+   "sha256": "331e77a9d3ce2bca041999d68785398fc347037b5ab5bcd839c186d7abf9c5bd"
+  },
+  {
+   "path": "shots/firefox/hens-pct-star-strip-w375.png",
+   "sha256": "a7573662facfbec3a19f9ba07e7325153d4596ed4df0c90722ea72b4cc3a9bca"
+  },
+  {
+   "path": "shots/firefox/hens-pct-star-strip-w390.png",
+   "sha256": "db91f3a8110799b4a725be550eaceec10706d5ba56145056a5f0241d806ecc25"
+  },
+  {
+   "path": "shots/firefox/lag-t0-w360.png",
+   "sha256": "c382f684f1649d5d1ec7806203bc5b149a764d70029fea3b4ab66cbb3face71c"
+  },
+  {
+   "path": "shots/firefox/lag-t0-w375.png",
+   "sha256": "917961ddb6f2489e74707408f6e7b10341c28d37bb7192f8d09ca3c745ff312e"
+  },
+  {
+   "path": "shots/firefox/lag-t0-w390.png",
+   "sha256": "e4e4b22c3c20448de3a99d9a00784021895b98be5f0d3298ff24b097454ae89a"
+  },
+  {
+   "path": "shots/firefox/lag-t1300-w360.png",
+   "sha256": "b138ce2e3cb6a03eac03fd74381581cc226204f212256a41715994a4ea16ee5a"
+  },
+  {
+   "path": "shots/firefox/lag-t1300-w375.png",
+   "sha256": "51df98636f809742f5ef7189255a3f6951d74ed35677bac7330a7afbcc7d6944"
+  },
+  {
+   "path": "shots/firefox/lag-t1300-w390.png",
+   "sha256": "f79ab999ea8c3f15df07053c0d106dc22e458c4c558da4a28f40dfe86c881bf0"
+  },
+  {
+   "path": "shots/firefox/value-milestone-chip-w360.png",
+   "sha256": "66a9e8225be056be150a1b2d69bbbf5dff00b845733a724bcc40ea15eef21628"
+  },
+  {
+   "path": "shots/firefox/value-milestone-chip-w375.png",
+   "sha256": "b116b2e928600f0278eb176d37ef801d69c70ae52608ea6e82b32aa4b1efb05a"
+  },
+  {
+   "path": "shots/firefox/value-milestone-chip-w390.png",
+   "sha256": "ee9c632073bbbc4362931bc94caeb738c0fdaf4336ef1dc10a2d4c87f87a9f9c"
+  },
+  {
+   "path": "shots/firefox/value-milestone-strip-w360.png",
+   "sha256": "cf442f17cd5d94601f988d264a60333778c98018e22c49b47b771792cc556d00"
+  },
+  {
+   "path": "shots/firefox/value-milestone-strip-w375.png",
+   "sha256": "ea96e18b120f219a226d6a9f15e0d6dd1b0600c8bbe6bb0c66870aee2702f400"
+  },
+  {
+   "path": "shots/firefox/value-milestone-strip-w390.png",
+   "sha256": "427f71ccb266b56a2eee4c03158665c3a7d94c22d8c65e4995d5bb1f5a4a5a58"
+  },
+  {
+   "path": "shots/firefox/value-pct-star-27-chip-w360.png",
+   "sha256": "3dde0bb12d7c2a31240843620fd1e5e7e57e055f7540f4d8550f80318797f87a"
+  },
+  {
+   "path": "shots/firefox/value-pct-star-27-chip-w375.png",
+   "sha256": "0b00e34e52c6223c64079d0738688449ea50e37f0e1a156bdf7950b3b16a8336"
+  },
+  {
+   "path": "shots/firefox/value-pct-star-27-chip-w390.png",
+   "sha256": "31b9c5997f14fe82e1564cfa8ae2a6013bcc7400c458c66965e492bb5007a169"
+  },
+  {
+   "path": "shots/firefox/value-pct-star-27-strip-w360.png",
+   "sha256": "e9574d9f93b7955f095230c8b1207fb532beaccb6e9022baf74555eeda52837c"
+  },
+  {
+   "path": "shots/firefox/value-pct-star-27-strip-w375.png",
+   "sha256": "f713bdd20e4eb44c9ebc1cd0df138ca2ef95d0c2edd4472d80c3c117979018df"
+  },
+  {
+   "path": "shots/firefox/value-pct-star-27-strip-w390.png",
+   "sha256": "cbe6c59052b58e3c133e83e0ddb5c5926f6f84fb155416ede513c2f870928212"
+  },
+  {
+   "path": "shots/firefox/value-truncated-nostar-chip-w360.png",
+   "sha256": "1226f6b7852d977a56f66677f72dcb20c36de07ed2d56f41661507917fedb344"
+  },
+  {
+   "path": "shots/firefox/value-truncated-nostar-chip-w375.png",
+   "sha256": "19bbeb3944cf43e36267bd8274f95e5afb43ad5becbc6a678116c4e956753fd8"
+  },
+  {
+   "path": "shots/firefox/value-truncated-nostar-chip-w390.png",
+   "sha256": "8fbf45eb67c6b252b836e24ea31c9a979aa3b6fa37898834e9a3925a1ffb18ab"
+  },
+  {
+   "path": "shots/firefox/value-truncated-nostar-strip-w360.png",
+   "sha256": "939c344e4c2d4ff1f39fba5d70e3b5881851a63b3e175137a6e6e662e92c4e1b"
+  },
+  {
+   "path": "shots/firefox/value-truncated-nostar-strip-w375.png",
+   "sha256": "2fa1c9884860f0f7623451c0540dd7a1177af60a379ed736be1be837ef4e7e1a"
+  },
+  {
+   "path": "shots/firefox/value-truncated-nostar-strip-w390.png",
+   "sha256": "617769dc26170cb5216856019d9913c678ee4aadafc4abea5a0b2566a736ca75"
+  },
+  {
+   "path": "shots/firefox/worst1-strip-w360.png",
+   "sha256": "fc86c6c3f916589c1fb08f18c837a33316300799b4ca980673b568ed3747196e"
+  },
+  {
+   "path": "shots/firefox/worst1-strip-w375.png",
+   "sha256": "d992ff87074f7bf009da3fbc3f84f1dd0e449d2ccaa7b4ec1bb37b929c5d4f9a"
+  },
+  {
+   "path": "shots/firefox/worst1-strip-w390.png",
+   "sha256": "d927e570e9bc92e116f3a6eec0a82ad8bd504b245f84218e2caf8dcea0a6bfe9"
+  },
+  {
+   "path": "shots/firefox/worst2-strip-w360.png",
+   "sha256": "efe6ad8d89fcb7d2a1c03c40813ce137240067bf8e8e723e638e6c9826c66e50"
+  },
+  {
+   "path": "shots/firefox/worst2-strip-w375.png",
+   "sha256": "fc243deea0e4cbfbcaf8bc50e6981f5f21a39755d605b663b8f2d86a42985db0"
+  },
+  {
+   "path": "shots/firefox/worst2-strip-w390.png",
+   "sha256": "783cea9b0057e3f835ce55bef13ee04324dfc06db77f605cb9530f4cf2a659fe"
+  },
+  {
+   "path": "shots/firefox/worst3-strip-w360.png",
+   "sha256": "6cfe4dd22a6b0901e527e39f4495f49add3ccd8a6626c506de7e69ef9e7d46be"
+  },
+  {
+   "path": "shots/firefox/worst3-strip-w375.png",
+   "sha256": "61dd422385e01537cf77f1c502e5d150d29e2757606112b93f99827de3bb19b8"
+  },
+  {
+   "path": "shots/firefox/worst3-strip-w390.png",
+   "sha256": "916882ef8187be34834f512593cb825d0e79d47dbc04b1c0a12d8b0d5c9300dc"
+  },
+  {
+   "path": "shots/firefox/worst4-strip-w360.png",
+   "sha256": "e59e96b310177f5bcfd6ad58abc30e2a578f4eb13c1b17c18eb5ce6bf65c39d5"
+  },
+  {
+   "path": "shots/firefox/worst4-strip-w375.png",
+   "sha256": "fd5a936fa510788ac573b54003b1ff6f46ac1a7458c466b2eed39976141c735a"
+  },
+  {
+   "path": "shots/firefox/worst4-strip-w390.png",
+   "sha256": "770324117b088a109c273efb6a44fc4794929c41fc0ce22892c562b7018e3261"
+  },
+  {
+   "path": "shots/firefox/worst5-strip-w360.png",
+   "sha256": "af4365a1472d2566c7143e4b96b8c64ccb15ce8dcd7d515744d44fdfeb4ea3c2"
+  },
+  {
+   "path": "shots/firefox/worst5-strip-w375.png",
+   "sha256": "3bf95f9700b7a00c9abebfe25d01900f387e62a7c9a6d3696765d18ddbb641da"
+  },
+  {
+   "path": "shots/firefox/worst5-strip-w390.png",
+   "sha256": "be8ef38c8cb1e28894d6696032ad3cf325b118da9287590b59735698ac6b14c1"
+  },
+  {
+   "path": "shots/webkit/broke-chip-w360.png",
+   "sha256": "a2e412540942254faf6418d86c22cf43ea8128b6ca4a82ae1f098c5a379b4e93"
+  },
+  {
+   "path": "shots/webkit/broke-chip-w375.png",
+   "sha256": "10c0e70790d02acf980fa7edf4043e9a71fe51b4fc12e2e8de864003b03bb093"
+  },
+  {
+   "path": "shots/webkit/broke-chip-w390.png",
+   "sha256": "0ce1801215f7e3cf743abc36ae1f384909af446c5e54a5c4bce2e3a9c91e2618"
+  },
+  {
+   "path": "shots/webkit/broke-collection-chip-w360.png",
+   "sha256": "e4157b61d337c3a6fa96c3878b484de2be1ec5f074752239680d607c606c2589"
+  },
+  {
+   "path": "shots/webkit/broke-collection-chip-w375.png",
+   "sha256": "8d0775e894ea6f764a1a90abf39653522be7c682a64e276c9153ace7c0ddb982"
+  },
+  {
+   "path": "shots/webkit/broke-collection-chip-w390.png",
+   "sha256": "764dfd0a8d9cd160c90d68b5fe58c9ec576278c883ce8d7972e886804f535487"
+  },
+  {
+   "path": "shots/webkit/broke-collection-strip-w360.png",
+   "sha256": "729a47ab38d3dc3136827e7afb43376dee88068ebe2fe1d36821dd72d27f0ca1"
+  },
+  {
+   "path": "shots/webkit/broke-collection-strip-w375.png",
+   "sha256": "7f98e73edec2b2c9f262de7a39be82727d5957eb5a6f1342abc68b5c8d23bb0e"
+  },
+  {
+   "path": "shots/webkit/broke-collection-strip-w390.png",
+   "sha256": "21c4cc82a61bb684140016345d5d43804c58c6306409e1b80bcb1fab776db53b"
+  },
+  {
+   "path": "shots/webkit/broke-hens-short-chip-w360.png",
+   "sha256": "db979f95e159b783fe89554f0bf1033853640a776599fb7ce95c02c28267691a"
+  },
+  {
+   "path": "shots/webkit/broke-hens-short-chip-w375.png",
+   "sha256": "f5143274f2c8c82defdbc4de4a1162b695259bcde5133f502e8abf74fad6223b"
+  },
+  {
+   "path": "shots/webkit/broke-hens-short-chip-w390.png",
+   "sha256": "b7368a1449d8d413d5a4579d9f7ae3abef96d2f5e03aa962dbbfbfccb2712c76"
+  },
+  {
+   "path": "shots/webkit/broke-hens-short-strip-w360.png",
+   "sha256": "1b9e18b32205027e6331e3d874efd73f26e35181798c18456639905761f5e935"
+  },
+  {
+   "path": "shots/webkit/broke-hens-short-strip-w375.png",
+   "sha256": "5985954b274848b5da8e351b623bd6671de6d00832a57a94c7b8eb7972ebe812"
+  },
+  {
+   "path": "shots/webkit/broke-hens-short-strip-w390.png",
+   "sha256": "bc9fd0fedacae296139cef92731d65acd5b6fe3419d988ba8bba26e9c927034c"
+  },
+  {
+   "path": "shots/webkit/broke-strip-w360.png",
+   "sha256": "e82341957ffdc357ff45c2ae715c57343ba29c10d1193ebf0c906f6255795b93"
+  },
+  {
+   "path": "shots/webkit/broke-strip-w375.png",
+   "sha256": "b1056af9365ef54f50fb067a0368280be7cf4956fa3469bab4818f2866b18dcd"
+  },
+  {
+   "path": "shots/webkit/broke-strip-w390.png",
+   "sha256": "27f35c3526ef5a88c342fb00dee56bbd76c611d092a6da5ca2c8e66657008336"
+  },
+  {
+   "path": "shots/webkit/collection-star-chip-w360.png",
+   "sha256": "80465b36a545cfbe9dbad3422fe35bcf30c8c2685ba48559ab3782f6095ae2ae"
+  },
+  {
+   "path": "shots/webkit/collection-star-chip-w375.png",
+   "sha256": "974d0d1c9390c55667b6bb4628d66921297f0b8ddde34ff05e8a5f8ac2e41049"
+  },
+  {
+   "path": "shots/webkit/collection-star-chip-w390.png",
+   "sha256": "e39f19d760aae5a752e0ca1ffca8703eebb7d93282fb6dd45a6740c597530cce"
+  },
+  {
+   "path": "shots/webkit/collection-star-strip-w360.png",
+   "sha256": "29c5000bea025968f4c78e9471747a3e0f433f040ba385b695a8602af56e3c8b"
+  },
+  {
+   "path": "shots/webkit/collection-star-strip-w375.png",
+   "sha256": "19833a55373689fda876d45f99592805eead6de65fdcec6dfa9e8cdcf94180ef"
+  },
+  {
+   "path": "shots/webkit/collection-star-strip-w390.png",
+   "sha256": "130db76256659de6a76559e857068215b68391f4abdad2cfd2baa82904937cb9"
+  },
+  {
+   "path": "shots/webkit/farm-best-chip-w360.png",
+   "sha256": "aca1debd7136024fe8573db9020aff0693c817ae918b886e2b4bafd8581876ba"
+  },
+  {
+   "path": "shots/webkit/farm-best-chip-w375.png",
+   "sha256": "2e09f893d2bdbf138246c3bed8f7ea35b4973524e6883b1fc2b058c5e947bc3b"
+  },
+  {
+   "path": "shots/webkit/farm-best-chip-w390.png",
+   "sha256": "677dbf2aa61b245b8fefb5a2fb5b592142a2afdc3f6aa111d630f516cc97395d"
+  },
+  {
+   "path": "shots/webkit/farm-best-strip-w360.png",
+   "sha256": "42cffd82e1b333265db01a87ee9736686b4cbe77d5c36ba6babd83792d77f743"
+  },
+  {
+   "path": "shots/webkit/farm-best-strip-w375.png",
+   "sha256": "508c479aa5faa824df886603bf34c493c266336e6bbcb217baaae63a4033d3ff"
+  },
+  {
+   "path": "shots/webkit/farm-best-strip-w390.png",
+   "sha256": "49a40f540f805ccfd585d6c0c0564e0a944de49ac78c284eaefa8d295b39014d"
+  },
+  {
+   "path": "shots/webkit/hens-milestone-chip-w360.png",
+   "sha256": "f89b40582d1b3c41e3442f7f48f82dabb0dff85ae88bf4740f1ab18642656940"
+  },
+  {
+   "path": "shots/webkit/hens-milestone-chip-w375.png",
+   "sha256": "f0f132db989f62965cb53954e5ba2daa13ee6ed265a40c74eb1b5ce6d09789da"
+  },
+  {
+   "path": "shots/webkit/hens-milestone-chip-w390.png",
+   "sha256": "a2a7905c721aef455a5d72eeb010c28260dd5e5c4d3a49e166949713d375b640"
+  },
+  {
+   "path": "shots/webkit/hens-milestone-strip-w360.png",
+   "sha256": "a1c4e930bc5e0357c6e9928f8203ea7c2664ffeeed40b4aaef38f8809830f50b"
+  },
+  {
+   "path": "shots/webkit/hens-milestone-strip-w375.png",
+   "sha256": "435550ad0e80cf89d45cdf74646ec17f7159926ae4a99b20dab197731651f55a"
+  },
+  {
+   "path": "shots/webkit/hens-milestone-strip-w390.png",
+   "sha256": "bfb36a7d3ef7c2eccbae1199f853c46d1225e5d2ba3235f42bd54f16668b545c"
+  },
+  {
+   "path": "shots/webkit/hens-pct-star-chip-w360.png",
+   "sha256": "6acfe537dd19570c722431a51ff2581607c62ca01da952e01ed4ca03ab77c512"
+  },
+  {
+   "path": "shots/webkit/hens-pct-star-chip-w375.png",
+   "sha256": "fb3245963ba790f8b30d9be5c20ec0573fa2ba0b1248f8e3e603cb67199c4bc4"
+  },
+  {
+   "path": "shots/webkit/hens-pct-star-chip-w390.png",
+   "sha256": "c2c82df201af522b12bec16e4e65406978c8a3a9829ee01abd9be5492182e9bd"
+  },
+  {
+   "path": "shots/webkit/hens-pct-star-strip-w360.png",
+   "sha256": "8d8cc12311b8f49290d2b561574f93bd4baae1cdfd9ebfc21ecd5453ccb9e06d"
+  },
+  {
+   "path": "shots/webkit/hens-pct-star-strip-w375.png",
+   "sha256": "9dc84cfcc8fea6060ca85511d17f5d65f550d05bc6239a0fd410b9764cdc25a6"
+  },
+  {
+   "path": "shots/webkit/hens-pct-star-strip-w390.png",
+   "sha256": "898cadeebac4facb1997aa88088cf160df42b704bc7b2aa1b73d44ac207b3c53"
+  },
+  {
+   "path": "shots/webkit/lag-t0-w360.png",
+   "sha256": "8c2bdf2e55401940cf1c88785b4547dd3b80891b4fd2235689963515b0c0d305"
+  },
+  {
+   "path": "shots/webkit/lag-t0-w375.png",
+   "sha256": "5b75e9d3fe0e73f0f8834fbeed0cbd416ff90229c8487d620ff6f22dae74c088"
+  },
+  {
+   "path": "shots/webkit/lag-t0-w390.png",
+   "sha256": "f9e16abf3b5758435ee884ae58c138ffef58d7417ed3aef3495a49951061517c"
+  },
+  {
+   "path": "shots/webkit/lag-t1300-w360.png",
+   "sha256": "9a8d6c929ea5b530362abbc5e06f24371d58af8ea88b61ce8d0d478e77b50cf1"
+  },
+  {
+   "path": "shots/webkit/lag-t1300-w375.png",
+   "sha256": "7f160a9ffba71b2a667fb9482f16d6ec3ad82e1050d81a844607d3e533e4bcda"
+  },
+  {
+   "path": "shots/webkit/lag-t1300-w390.png",
+   "sha256": "19aa66f7b8e04b646155d26ceeb08cfbe54c38ce04fdddbc3bcac990d5023ee8"
+  },
+  {
+   "path": "shots/webkit/value-milestone-chip-w360.png",
+   "sha256": "df5417f0c3ef32f8fd9a15fdd69ab7909d7679fc5e440feff2027e2be51ebf5e"
+  },
+  {
+   "path": "shots/webkit/value-milestone-chip-w375.png",
+   "sha256": "d75908b060f0650ba894c8e4af6cb89adef1f94b62f2e1d160cd67ad934ab84c"
+  },
+  {
+   "path": "shots/webkit/value-milestone-chip-w390.png",
+   "sha256": "2c9bfa84180b0ca7c27b39f96099ee4c2a35483cbf9bac5a786286f4acb5fc53"
+  },
+  {
+   "path": "shots/webkit/value-milestone-strip-w360.png",
+   "sha256": "1affb3382abbadfbd7a2da0d8672aab414c88ba4445656a9b09ca9b2921739a4"
+  },
+  {
+   "path": "shots/webkit/value-milestone-strip-w375.png",
+   "sha256": "a834f62c0807a98a1573044d206602156d408177a36241d4909471580f629c15"
+  },
+  {
+   "path": "shots/webkit/value-milestone-strip-w390.png",
+   "sha256": "015efdd66fce7ddc48c14abe3ca9e0d32659902f909dcd5cabd67e66241f2d68"
+  },
+  {
+   "path": "shots/webkit/value-pct-star-27-chip-w360.png",
+   "sha256": "36a96c6b77f2d1d64f1301dae1b06fe1ebb44f8a98a540c4fe09643c46bf7d88"
+  },
+  {
+   "path": "shots/webkit/value-pct-star-27-chip-w375.png",
+   "sha256": "6461a554a23096e5ed66d5cfd0cf601710a79f82be973e61cb3ec62dad56991d"
+  },
+  {
+   "path": "shots/webkit/value-pct-star-27-chip-w390.png",
+   "sha256": "89f9c7b889c86c9657efad49d71564a256ef3eacad3311fd92bf91892186db0e"
+  },
+  {
+   "path": "shots/webkit/value-pct-star-27-strip-w360.png",
+   "sha256": "7061278a7ba6640fb11afabb210123fad2d2ee6ee311a2b03235d5e7744d35fc"
+  },
+  {
+   "path": "shots/webkit/value-pct-star-27-strip-w375.png",
+   "sha256": "1c5f4dd71bb96813f1f301302bbdd3347cd07ba4631b01ed0253f5b6559d596f"
+  },
+  {
+   "path": "shots/webkit/value-pct-star-27-strip-w390.png",
+   "sha256": "bdcb286dfea22e2eff22c15ff0b838752e3710da50b1522aab3178c6d170d5ca"
+  },
+  {
+   "path": "shots/webkit/value-truncated-nostar-chip-w360.png",
+   "sha256": "b7f55d2d5dd32c74dbf7b70064adf47fa25681ff47678479f6946a205d58d37b"
+  },
+  {
+   "path": "shots/webkit/value-truncated-nostar-chip-w375.png",
+   "sha256": "65a88fd11b23370178d785df540f2b1f81b87cc4d34c4493a6743855634ed138"
+  },
+  {
+   "path": "shots/webkit/value-truncated-nostar-chip-w390.png",
+   "sha256": "a9cfce93db7a610472043866f0e785c5934e0544cec7e973bb96ea54f7745f1b"
+  },
+  {
+   "path": "shots/webkit/value-truncated-nostar-strip-w360.png",
+   "sha256": "959985e14dabe5455bd356db71cc557fe296a2cb5a4d510ed1335cd0225eefea"
+  },
+  {
+   "path": "shots/webkit/value-truncated-nostar-strip-w375.png",
+   "sha256": "936ba7d81fa88e0749944bf3c10676068a5dcb45c1e5cbd0287b95bb95154a10"
+  },
+  {
+   "path": "shots/webkit/value-truncated-nostar-strip-w390.png",
+   "sha256": "05777241ebd0bcc5787f8af92331485d31d5a72a368e90998e5c1a62e1bfa646"
+  },
+  {
+   "path": "shots/webkit/worst1-strip-w360.png",
+   "sha256": "98e1cf5937dc94bb1ed796b783827d8e8961ed0eb5c25ed9d5a9804cd1ed456f"
+  },
+  {
+   "path": "shots/webkit/worst1-strip-w375.png",
+   "sha256": "638af01e099bced1cbe3ac8cc489ee2e9d0f4a9eb55f6a37606e809d035c8db3"
+  },
+  {
+   "path": "shots/webkit/worst1-strip-w390.png",
+   "sha256": "c8ede5e1782942ff23e7b9662bc9a5b128ef5432eb72174e548d8670d7961da7"
+  },
+  {
+   "path": "shots/webkit/worst2-strip-w360.png",
+   "sha256": "b8611a3741cbc0d114fecfd89e525a0171d6e522526551593cb342f09f6f3945"
+  },
+  {
+   "path": "shots/webkit/worst2-strip-w375.png",
+   "sha256": "93ea30bbf1e654694bf085cd2e0b972a772704f226b517f880bfd1a80216636b"
+  },
+  {
+   "path": "shots/webkit/worst2-strip-w390.png",
+   "sha256": "1f3af5863b0082b10afe33f99e0a76e9adc9fb2597486f904404583ee44fa4b7"
+  },
+  {
+   "path": "shots/webkit/worst3-strip-w360.png",
+   "sha256": "a7bb27072844c4c0913693026a34e0ee5f3b24c27a64b9af6fe5b71aaf234e96"
+  },
+  {
+   "path": "shots/webkit/worst3-strip-w375.png",
+   "sha256": "de6851a1b56ceb369c64de70698fbe87d0c5b73045085f1cdb94cba5e90f7929"
+  },
+  {
+   "path": "shots/webkit/worst3-strip-w390.png",
+   "sha256": "bc57b43fa4e7c4c6a0f9d336c81042da6e207977af2323d2f98240060921c727"
+  },
+  {
+   "path": "shots/webkit/worst4-strip-w360.png",
+   "sha256": "eb94c42c3264c47a938ddbba34f69b5c696ecab3e575b5634f1d5d88913b2070"
+  },
+  {
+   "path": "shots/webkit/worst4-strip-w375.png",
+   "sha256": "f8b4d3066cbfa9cd2ca05c68232a30f3ded8872fea9e04a4fe5927e0c22c6d40"
+  },
+  {
+   "path": "shots/webkit/worst4-strip-w390.png",
+   "sha256": "630cb0e27db6142af80192555bd08939833813e33c77e8b43d792b8c36703074"
+  },
+  {
+   "path": "shots/webkit/worst5-strip-w360.png",
+   "sha256": "2b0e87fbed44c78b86f1a7aee4969ca1c4aa186cd5d4cb309c24780a038a5e50"
+  },
+  {
+   "path": "shots/webkit/worst5-strip-w375.png",
+   "sha256": "b73beaf0bc7c95a7e06e9527eddd5c92e4294527153b6549b4812978fc14542d"
+  },
+  {
+   "path": "shots/webkit/worst5-strip-w390.png",
+   "sha256": "218866747671096c8dfddf7da80db5f956337b96d8eb4e841adbb1831b303264"
+  }
+ ]
+}

@@ -1,0 +1,152 @@
+{
+ "chromium": {
+  "idbBefore": [],
+  "idbAfter": [],
+  "mainAfter": {
+   "version": 5,
+   "coins": 0,
+   "F": 0
+  },
+  "fixtureByteIdenticalInCorruptKey": true,
+  "corruptKeys": [
+   "eggfarm.save.corrupt.1792151824039"
+  ],
+  "mainUnchanged": false,
+  "dlg": "",
+  "ui": "Egg Farm\nTap to start",
+  "diffKeys": [
+   "eggfarm.save",
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save.bak",
+   "eggfarm.save.corrupt.1792151824039",
+   "eggfarm.save.corrupt.index"
+  ],
+  "diff": {
+   "eggfarm.save": {
+    "before": "{\"version\":6,\"savedAt\":1792151816785,\"sum\":\"494ac7a1\",\"state\":{\"coinsCents\":123456,\"coop\":15.000000000000025,\"basket\":0,",
+    "after": "{\"version\":5,\"savedAt\":1792151889048,\"sum\":\"adcdcca6\",\"state\":{\"coinsCents\":0,\"coop\":50,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[{\"id\":7,\"deman"
+   },
+   "eggfarm.telemetry": {
+    "before": "[{\"install_id\":\"4ecbe9a8-08e9-4bef-a02d-401c2562db9e\",\"build\":\"m3-rc1-pre+2490c79\",\"type\":\"session_start\",\"ts\":179215180",
+    "after": "[{\"install_id\":\"4ecbe9a8-08e9-4bef-a02d-401c2562db9e\",\"build\":\"m3-rc1-pre+2490c79\",\"type\":\"session_start\",\"ts\":1792151806767,\"sessionMs\":0},{\"step\":1,\"name\":\"co"
+   },
+   "eggfarm.ui": {
+    "before": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":6,\"onboardingDone\":false,\"sessions\":1,\"onbStep\":1}",
+    "after": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":6,\"onboardingDone\":false,\"sessions\":2}"
+   },
+   "eggfarm.save.bak": {
+    "before": null,
+    "after": "{\"version\":5,\"savedAt\":1792151884048,\"sum\":\"92ab985e\",\"state\":{\"coinsCents\":0,\"coop\":50,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[{\"id\":6,\"deman"
+   },
+   "eggfarm.save.corrupt.1792151824039": {
+    "before": null,
+    "after": "{\"version\":6,\"savedAt\":1792151816785,\"sum\":\"494ac7a1\",\"state\":{\"coinsCents\":123456,\"coop\":15.000000000000025,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":7,\"custo"
+   },
+   "eggfarm.save.corrupt.index": {
+    "before": null,
+    "after": "[\"eggfarm.save.corrupt.1792151824039\"]"
+   }
+  }
+ },
+ "firefox": {
+  "idbBefore": [],
+  "idbAfter": [],
+  "mainAfter": {
+   "version": 5,
+   "coins": 0,
+   "F": 0
+  },
+  "fixtureByteIdenticalInCorruptKey": true,
+  "corruptKeys": [
+   "eggfarm.save.corrupt.1792151914158"
+  ],
+  "mainUnchanged": false,
+  "dlg": "",
+  "ui": "Egg Farm\nTap to start",
+  "diffKeys": [
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save",
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.bak",
+   "eggfarm.save.corrupt.1792151914158"
+  ],
+  "diff": {
+   "eggfarm.telemetry": {
+    "before": "[{\"install_id\":\"e0779395-c3e1-4a31-9329-e9e661268229\",\"build\":\"m3-rc1-pre+2490c79\",\"type\":\"session_start\",\"ts\":179215189",
+    "after": "[{\"install_id\":\"e0779395-c3e1-4a31-9329-e9e661268229\",\"build\":\"m3-rc1-pre+2490c79\",\"type\":\"session_start\",\"ts\":1792151896683,\"sessionMs\":2},{\"step\":1,\"name\":\"co"
+   },
+   "eggfarm.ui": {
+    "before": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":6,\"onboardingDone\":false,\"sessions\":1,\"onbStep\":1}",
+    "after": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":6,\"onboardingDone\":false,\"sessions\":2}"
+   },
+   "eggfarm.save": {
+    "before": "{\"version\":6,\"savedAt\":1792151906762,\"sum\":\"f188651f\",\"state\":{\"coinsCents\":123456,\"coop\":15.000000000000025,\"basket\":0,",
+    "after": "{\"version\":5,\"savedAt\":1792151979269,\"sum\":\"b6d49711\",\"state\":{\"coinsCents\":0,\"coop\":50,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[{\"id\":7,\"deman"
+   },
+   "eggfarm.save.corrupt.index": {
+    "before": null,
+    "after": "[\"eggfarm.save.corrupt.1792151914158\"]"
+   },
+   "eggfarm.save.bak": {
+    "before": null,
+    "after": "{\"version\":5,\"savedAt\":1792151974268,\"sum\":\"4840e1cd\",\"state\":{\"coinsCents\":0,\"coop\":50,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[{\"id\":6,\"deman"
+   },
+   "eggfarm.save.corrupt.1792151914158": {
+    "before": null,
+    "after": "{\"version\":6,\"savedAt\":1792151906762,\"sum\":\"f188651f\",\"state\":{\"coinsCents\":123456,\"coop\":15.000000000000025,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":7,\"custo"
+   }
+  }
+ },
+ "webkit": {
+  "idbBefore": [],
+  "idbAfter": [],
+  "mainAfter": {
+   "version": 5,
+   "coins": 0,
+   "F": 0
+  },
+  "fixtureByteIdenticalInCorruptKey": true,
+  "corruptKeys": [
+   "eggfarm.save.corrupt.1792152003224"
+  ],
+  "mainUnchanged": false,
+  "dlg": "",
+  "ui": "Egg Farm\nTap to start",
+  "diffKeys": [
+   "eggfarm.save",
+   "eggfarm.ui",
+   "eggfarm.telemetry",
+   "eggfarm.save.bak",
+   "eggfarm.save.corrupt.1792152003224",
+   "eggfarm.save.corrupt.index"
+  ],
+  "diff": {
+   "eggfarm.save": {
+    "before": "{\"version\":6,\"savedAt\":1792151995766,\"sum\":\"7acfaeab\",\"state\":{\"coinsCents\":123456,\"coop\":15.150000000000025,\"basket\":0,",
+    "after": "{\"version\":5,\"savedAt\":1792152068304,\"sum\":\"55a16b46\",\"state\":{\"coinsCents\":0,\"coop\":50,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[{\"id\":7,\"deman"
+   },
+   "eggfarm.ui": {
+    "before": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":6,\"onboardingDone\":false,\"sessions\":1,\"onbStep\":1}",
+    "after": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":6,\"onboardingDone\":false,\"sessions\":2}"
+   },
+   "eggfarm.telemetry": {
+    "before": "[{\"install_id\":\"a7437843-7fd9-40c8-898f-3ef977239f33\",\"build\":\"m3-rc1-pre+2490c79\",\"type\":\"session_start\",\"ts\":179215198",
+    "after": "[{\"install_id\":\"a7437843-7fd9-40c8-898f-3ef977239f33\",\"build\":\"m3-rc1-pre+2490c79\",\"type\":\"session_start\",\"ts\":1792151985652,\"sessionMs\":29},{\"step\":1,\"name\":\"c"
+   },
+   "eggfarm.save.bak": {
+    "before": null,
+    "after": "{\"version\":5,\"savedAt\":1792152063300,\"sum\":\"8e194920\",\"state\":{\"coinsCents\":0,\"coop\":50,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[{\"id\":6,\"deman"
+   },
+   "eggfarm.save.corrupt.1792152003224": {
+    "before": null,
+    "after": "{\"version\":6,\"savedAt\":1792151995766,\"sum\":\"7acfaeab\",\"state\":{\"coinsCents\":123456,\"coop\":15.150000000000025,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":7,\"custo"
+   },
+   "eggfarm.save.corrupt.index": {
+    "before": null,
+    "after": "[\"eggfarm.save.corrupt.1792152003224\"]"
+   }
+  }
+ }
+}

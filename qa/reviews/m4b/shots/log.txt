@@ -1,0 +1,55 @@
+Egg Farm M4 B player-experience pass - build label m3-rc1-pre+246de09 (Settings)
+09:16:30 game started (fresh farm, Tap to start; onboarding)
+09:16:5x Settings checked, build label OK -> 01_settings_build_label.png
+09:17:52 FIRST UPGRADE: Collect per tap L1 ($10). No upgrade-tracks explainer card appeared.
+09:18:2x Hens L1, Egg value L2, Collect L2 bought
+09:20:12 FARM L1 ($100). Next L2 $135.
+09:21:32 FARM L2 ($135). Next L3 $182 (unlocks Market Hand).
+09:22:27 Egg value L3 ($33)
+09:23:00 FARM L3 ($182). Next L4 $246.
+09:23:27 Hens L2 ($21). Found Upgrades tabs Collection/Farm/Workers; Market Hand hire $40 in Workers tab (Farm tab default view hid it - confusing)
+09:23:47 HIRE: Market Hand ($40). Coach tip 'Workers get tired over time' covers the tab bar.
+09:24:18 Hens L3 ($24), Egg value L4 ($50), Hens L4 ($35)
+09:24:47 FARM L4 ($246).
+09:26:30 FARM L5 ($332). Egg value L5 ($75) bought just before (~09:25:2x). Note: taps faster than ~1/1.5s mostly ignored; money ticks down slowly with Market Hand (wages?).
+09:27:30 Collect L3 ($25), Hens L5 ($51). Toast 'Balanced farm 1/5: +10% income' - but Egg value & Farm were already L5 while label read 0/5 (counting inconsistent). Hens card: 'Next at L10: bigger coop, offline x1.25'
+09:29:10 FARM L6 ($448). Next L7 $560, 'Ready in ~2 min 10 s'. Farm cost grows ~1.25x/level -> L30 est. tens of thousands $; not reachable by hand in session.
+Note: Market Hand only sells eggs you collect; with coop full (300/300) nothing accrues while idle, money drifts down (wages). Taps register intermittently (many ignored).
+09:29:30 session stopped early by tester (partial run, ~13 min of play).
+09:31:27 FARM L7 ($560). Next L8 $700. NOTE: earlier 'ignored taps' were largely my own rapid/overlapping inputs; spaced single taps (~1.5s) each register +20 eggs reliably.
+09:32:37 HIRE: Coop Hand ($150). Saved 03_balanced_farm_1of5_with_three_tracks_ge5_L7.png (Hens5/Egg5/Farm7 yet 1/5). Hens card 'Affordable in ~0:12' rose to ~0:22 while wages drain money (ETA drifts up).
+09:33:11 FARM L8 ($700). Next $875.
+09:33:46 HIRE: Hawker ($800) (~09:33:5x). Manage is free, refills energy to 100%, 0:29 cooldown.
+~09:34:28 FARM L9 ($875). Next $1094 'Ready in ~43 s'. 09:34:31 Egg value L6 ($109). Note: Farm buy button moves as card text changes (mis-tap risk).
+09:35:44 FARM L10 ($1094) (~2s earlier). Next ~$1368 'Ready in ~1 min 15 s'. Farm card 'Ready in ~46s' fell only to ~29s after 25s (ETA lags clock).
+~09:35:2x Egg value L7 ($159), ~09:36:0x Hens L6 ($73). Manage buttons greyed while energy 75-81% (only usable when tired?).
+09:37:08 FARM L11 ($1368). Next ~$1710, 'Ready in ~1 min 17 s'.
+09:38:30 FARM L12 ($1710). Next ~$2138, 'Ready in ~1 min 33 s'.
+09:40:18 FARM L13 ($2138). Next ~$2672, 'Ready in ~1 min 53 s'. Income ~$20/s, flat.
+~09:40:5x Egg value L8 ($229); ~09:41:5x Egg value L9 ($328).
+09:42:29 FARM L14 ($2672). Next ~$3340, 'Ready in ~2 min 2 s'.
+~09:43:2x Egg value L10 ($468, Large x1.25). 09:43:33 Hens L7-L10 ($103/146/205/285). Toast 'Balanced farm 2/5: +15% income'.
+CORRECTION: 'Balanced farm N/5' is a TIER counter (tier1 = all tracks >=5, tier2 = all >=10...), not 'tracks at level'. Earlier 0/5->1/5 flip on Hens L5 was correct; label is just unclear (reads like '1 of 5 tracks'). Downgraded from bug to confusing copy.
+09:45:37 FARM L15 ($3340). Next $4844 (x1.45 jump!), 'Ready in ~3 min 17 s'.
+~09:46:3x Collect per tap L4 ($40). 09:46:08 Workers tab: ALL workers 'Tired' (12-19% energy) - nothing on the farm screen warned me; 'Manage all' button only appears when tired. Used Manage all -> 100%. Income had been flat ~$20-30/s, likely due to fatigue.
+~09:47:1x Manage all done; income jumped to ~$75/s after rest. 09:47:2x Egg value L11 ($685)
+09:47:24 FARM L16 ($4844). Next $7024 (x1.45), 'Ready in ~1 min 39 s'.
+09:49:13 FARM L17 ($7024). Next ~$10.2K, 'Ready in ~2 min 29 s'. Price now abbreviated '$10.2K'.
+~09:50:3x Egg value L12 ($1003)
+09:51:52 FARM L18 ($10.2K). Next ~$14.1K 'Ready in ~2 min 32 s'. Egg Grader now hireable $5,538 (Workers tab).
+09:53:14 HIRE: Egg Grader ($5,538). Grade x1.5, 'Next grade x2 at Farm L19'.
+~09:54:0x Manage all (energy was 45%).
+09:55:30 FARM L19 ($11.1K) - 39 min into session (prev build: L19 at 26 min). Next ~$15.2K 'Ready in ~2 min 17 s'. ~09:55:3x Egg value L13 ($1470).
+09:57:4x Farm L20 ($18.2K) NOT yet affordable at $17.1K; ETA 'Ready in ~12 s' then ~14 s 2s later (money dipped 17.1K->16.9K: ETA drifting up). Price '$18.2K' glyph '8' reads like '6' at this size -> I thought it was affordable. -> 04_farm_L19_price_18_2K_glyph_reads_like_16_2K.png (capture fired just as it became affordable).
+NOTE: Device-toolbar 'Capture screenshot' Save dialog pops up delayed and steals the next click (my Farm buy click was eaten by it).
+09:58:3x FARM L20 ($18.2K) (lost ~25s to Save dialog). Toast 'Coop upgraded! +1 customer slot'. Next ~$26K 'Ready in ~4 min 32 s'.
+~09:59-10:00 Egg value L14 ($1955), L15 ($2401). Farm L21 price jumped to $31.1K (x1.71 from $18.2K).
+~10:00:3x Hens L11-L15 ($409..$1417). NOTE: one Hens buy tap at L13 with $10.6K ignored (retap worked).
+~10:01:xx Collect per tap L5-L15 ($65..$7.2K; costs x1.6/level late). 10:01:59 Balanced farm 3/5 (+20%), next +25% at all >=20.
+10:04:56 FARM L21 ($31.1K). Next $40.7K 'Ready in ~4 min 28 s'. Income ~$190/s.
+~10:05:1x Manage all (workers had reached 'Tired' 29% again ~10 min after last rest).
+10:08:47 FARM L22 ($40.7K). Next $56.6K 'Ready in ~5 min 17 s'. Decided to push Egg value to L20 (Jumbo x1.5) first.
+10:09-10:11 Egg value L16 ($3459), L17 ($4.9K?), L18 ($6119), L19 ($8138), 10:11:44 Egg value L20 ($10.8K) -> Jumbo x1.5: price $9.59->$12.24. Customer row briefly empty right after.
+10:14:4x FARM L23 ($56.6K). Next $68.8K 'Ready in ~3 min 49 s' -> ~3 min 53 s a few s later while money fell $1,543->$369 (wages? unexplained drop) - ETA drifting up again. Income now ~$310/s after Jumbo.
+~10:16:4x Manage all (Tired 24%). Farm ETA fell only 3:53->2:47 over ~90 s (ETA lags real time).
+10:18:54 FARM L24 ($68.8K). Next ~$72.2K 'Ready in ~3 min 59 s'.

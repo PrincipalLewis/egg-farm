@@ -1,0 +1,10 @@
+2026-10-17 04:16:33 CEST geo chromium DONE geo chromium fails=3 of 12
+2026-10-17 04:16:43 CEST NOTE geo v1 direct 1280 FAILs = harness: preOpen counted tips while docked Workers tab already active (legit visit); v2 counts only !workersTab
+2026-10-17 04:28:49 CEST guard chromium release=0 qa=0 BUILD OK 192f273 chromium
+2026-10-17 04:31:10 CEST geo chromium exit=0 DONE geo chromium fails=0 of 12
+2026-10-17 04:32:05 CEST state chromium exit=0 DONE state chromium fails=1 of 4
+2026-10-17 04:32:15 CEST smoke chromium exit=1 4 fails; page.evaluate: TypeError: Cannot read properties of undefined (reading 'state')
+2026-10-17 04:40:27 CEST NOTE state v2: come-back window 3s->8s, logs manAt + after-reload tip names (chromium state rerun queued after chain)
+2026-10-17 04:42:15 CEST rc0 chromium exit=124 7/34 passed
+2026-10-17 04:42:15 CEST WARN listener left
+2026-10-17 04:48:02 CEST FILED b2-pr4-192f273.md (handed to Saves QA, partial)

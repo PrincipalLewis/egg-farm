@@ -1,0 +1,79 @@
+{
+ "pr": 43,
+ "branch": "fix/pl1-key-guard",
+ "sha": "48bdb09fe66a836446eb7d4007be1d44baba009e",
+ "pushed": true,
+ "build_label_checked": true,
+ "rev": 1,
+ "author": "QA Engineer, UI/Layout & Gameplay Verification",
+ "created": "2026-10-18T23:47:26.560Z",
+ "notes": "build-id from runtime meta (m3-rc1-pre+48bdb09) per shot; Farm tab asserted active + Farm card before each shot; shot taken right after the level/coin measurement. The tab strip is scrolled out of frame at 1280 docked (Farm card visible).",
+ "shots": [
+  {
+   "file": "chromium/pl1-a_escape_tap-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:pl1 (gate5-pr41/lib.mjs)",
+   "seed": null,
+   "state": "a_escape_tap: Farm Buy focused; levels bought 0, coin delta 0",
+   "asserted_tab": "farm",
+   "build_id": "m3-rc1-pre+48bdb09"
+  },
+  {
+   "file": "chromium/pl1-c4_enter_hold_2s-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:pl1 (gate5-pr41/lib.mjs)",
+   "seed": null,
+   "state": "c4_enter_hold_2s: Farm Buy focused; levels bought 1, coin delta -1368",
+   "asserted_tab": "farm",
+   "build_id": "m3-rc1-pre+48bdb09"
+  },
+  {
+   "file": "firefox/pl1-a_escape_tap-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:pl1 (gate5-pr41/lib.mjs)",
+   "seed": null,
+   "state": "a_escape_tap: Farm Buy focused; levels bought 0, coin delta 0",
+   "asserted_tab": "farm",
+   "build_id": "m3-rc1-pre+48bdb09"
+  },
+  {
+   "file": "firefox/pl1-c4_enter_hold_2s-1280x800.png",
+   "engine": "firefox",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:pl1 (gate5-pr41/lib.mjs)",
+   "seed": null,
+   "state": "c4_enter_hold_2s: Farm Buy focused; levels bought 1, coin delta -1368",
+   "asserted_tab": "farm",
+   "build_id": "m3-rc1-pre+48bdb09"
+  },
+  {
+   "file": "webkit/pl1-a_escape_tap-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:pl1 (gate5-pr41/lib.mjs)",
+   "seed": null,
+   "state": "a_escape_tap: Farm Buy focused; levels bought 0, coin delta 0",
+   "asserted_tab": "farm",
+   "build_id": "m3-rc1-pre+48bdb09"
+  },
+  {
+   "file": "webkit/pl1-c4_enter_hold_2s-1280x800.png",
+   "engine": "webkit",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:pl1 (gate5-pr41/lib.mjs)",
+   "seed": null,
+   "state": "c4_enter_hold_2s: Farm Buy focused; levels bought 1, coin delta -1368",
+   "asserted_tab": "farm",
+   "build_id": "m3-rc1-pre+48bdb09"
+  }
+ ]
+}

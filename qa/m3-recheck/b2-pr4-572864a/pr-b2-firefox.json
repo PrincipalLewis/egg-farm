@@ -1,0 +1,730 @@
+{
+ "viaHireTip-1280x720": {
+  "errs": [],
+  "hire": {
+   "txt": "Hire them for $40.00. They wor",
+   "l": 921,
+   "t": 494,
+   "r": 1241,
+   "b": 566,
+   "w": 320,
+   "tabOv": 3840,
+   "rowOv": 13440,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "tired": {
+   "n": 25,
+   "first": {
+    "ms": 121,
+    "txt": "Workers get tired over time.",
+    "l": 942.8,
+    "t": 578,
+    "r": 1219.2,
+    "b": 646,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 25,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 937.5,
+   "t": 510,
+   "r": 1224.5,
+   "b": 578,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ },
+ "viaHireTip-1280x600": {
+  "errs": [],
+  "hire": {
+   "txt": "Hire them for $40.00. They wor",
+   "l": 921,
+   "t": 407,
+   "r": 1241,
+   "b": 479,
+   "w": 320,
+   "tabOv": 3840,
+   "rowOv": 13440,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "tired": {
+   "n": 25,
+   "first": {
+    "ms": 122,
+    "txt": "Workers get tired over time.",
+    "l": 942.8,
+    "t": 491,
+    "r": 1219.2,
+    "b": 559,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 25,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 937.5,
+   "t": 423,
+   "r": 1224.5,
+   "b": 491,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ },
+ "viaHireTip-390x640": {
+  "errs": [],
+  "hire": {
+   "txt": "Hire them for $40.00. They wor",
+   "l": 55,
+   "t": 256,
+   "r": 335,
+   "b": 328,
+   "w": 280,
+   "tabOv": 3360,
+   "rowOv": 11760,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "tired": {
+   "n": 25,
+   "first": {
+    "ms": 116,
+    "txt": "Workers get tired over time.",
+    "l": 56.8,
+    "t": 340,
+    "r": 333.2,
+    "b": 408,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 25,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 55,
+   "t": 268,
+   "r": 335,
+   "b": 340,
+   "w": 280,
+   "tabOv": 0,
+   "rowOv": 15120,
+   "ebarOv": 2240,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": false
+ },
+ "viaHireTip-360x740": {
+  "errs": [],
+  "hire": {
+   "txt": "Hire them for $40.00. They wor",
+   "l": 40,
+   "t": 291,
+   "r": 320,
+   "b": 363,
+   "w": 280,
+   "tabOv": 3360,
+   "rowOv": 11760,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "tired": {
+   "n": 25,
+   "first": {
+    "ms": 133,
+    "txt": "Workers get tired over time.",
+    "l": 41.8,
+    "t": 375,
+    "r": 318.2,
+    "b": 443,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 25,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 40,
+   "t": 303,
+   "r": 320,
+   "b": 375,
+   "w": 280,
+   "tabOv": 0,
+   "rowOv": 15120,
+   "ebarOv": 2240,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ },
+ "viaHireTip-1024x474": {
+  "errs": [],
+  "hire": {
+   "txt": "Hire them for $40.00. They wor",
+   "l": 665,
+   "t": 312,
+   "r": 985,
+   "b": 384,
+   "w": 320,
+   "tabOv": 3840,
+   "rowOv": 13440,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "tired": {
+   "n": 26,
+   "first": {
+    "ms": 108,
+    "txt": "Workers get tired over time.",
+    "l": 686.8,
+    "t": 396,
+    "r": 963.2,
+    "b": 464,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 26,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 681.5,
+   "t": 328,
+   "r": 968.5,
+   "b": 396,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ },
+ "viaHireTip-1366x768": {
+  "errs": [],
+  "hire": {
+   "txt": "Hire them for $40.00. They wor",
+   "l": 1007,
+   "t": 518,
+   "r": 1327,
+   "b": 590,
+   "w": 320,
+   "tabOv": 3840,
+   "rowOv": 13440,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "tired": {
+   "n": 26,
+   "first": {
+    "ms": 120,
+    "txt": "Workers get tired over time.",
+    "l": 1028.8,
+    "t": 602,
+    "r": 1305.2,
+    "b": 670,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 26,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 1023.5,
+   "t": 534,
+   "r": 1310.5,
+   "b": 602,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ },
+ "direct-1280x720": {
+  "errs": [],
+  "hire": "n/a (direct hire, rc0 b2tip flow)",
+  "tired": {
+   "n": 26,
+   "first": {
+    "ms": 116,
+    "txt": "Workers get tired over time.",
+    "l": 942.8,
+    "t": 578,
+    "r": 1219.2,
+    "b": 646,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 26,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 937.5,
+   "t": 510,
+   "r": 1224.5,
+   "b": 578,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ },
+ "direct-1280x600": {
+  "errs": [],
+  "hire": "n/a (direct hire, rc0 b2tip flow)",
+  "tired": {
+   "n": 26,
+   "first": {
+    "ms": 106,
+    "txt": "Workers get tired over time.",
+    "l": 942.8,
+    "t": 518,
+    "r": 1219.2,
+    "b": 586,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 26,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 937.5,
+   "t": 450,
+   "r": 1224.5,
+   "b": 518,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ },
+ "direct-390x640": {
+  "errs": [],
+  "hire": "n/a (direct hire, rc0 b2tip flow)",
+  "tired": {
+   "n": 26,
+   "first": {
+    "ms": 127,
+    "txt": "Workers get tired over time.",
+    "l": 56.8,
+    "t": 256,
+    "r": 333.2,
+    "b": 324,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": null,
+    "ebarOv": null,
+    "covers": [],
+    "side": null,
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 0
+   },
+   "tabHits": 0,
+   "rowHits": 0,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    null
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 55,
+   "t": 256,
+   "r": 335,
+   "b": 328,
+   "w": 280,
+   "tabOv": 0,
+   "rowOv": null,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 0
+  },
+  "under": null,
+  "pass": true
+ },
+ "direct-360x740": {
+  "errs": [],
+  "hire": "n/a (direct hire, rc0 b2tip flow)",
+  "tired": {
+   "n": 27,
+   "first": {
+    "ms": 107,
+    "txt": "Workers get tired over time.",
+    "l": 41.8,
+    "t": 296,
+    "r": 318.2,
+    "b": 364,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": null,
+    "ebarOv": null,
+    "covers": [],
+    "side": null,
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 0
+   },
+   "tabHits": 0,
+   "rowHits": 0,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    null
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 40,
+   "t": 296,
+   "r": 320,
+   "b": 368,
+   "w": 280,
+   "tabOv": 0,
+   "rowOv": null,
+   "ebarOv": null,
+   "covers": [],
+   "side": null,
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 0
+  },
+  "under": null,
+  "pass": true
+ },
+ "direct-1024x474": {
+  "errs": [],
+  "hire": "n/a (direct hire, rc0 b2tip flow)",
+  "tired": {
+   "n": 27,
+   "first": {
+    "ms": 107,
+    "txt": "Workers get tired over time.",
+    "l": 686.8,
+    "t": 355,
+    "r": 963.2,
+    "b": 423,
+    "w": 276.4,
+    "tabOv": 7739,
+    "rowOv": 6081,
+    "ebarOv": 0,
+    "covers": [],
+    "side": "above",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 27,
+   "rowHits": 27,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "above"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 681.5,
+   "t": 387,
+   "r": 968.5,
+   "b": 455,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": false
+ },
+ "direct-1366x768": {
+  "errs": [],
+  "hire": "n/a (direct hire, rc0 b2tip flow)",
+  "tired": {
+   "n": 26,
+   "first": {
+    "ms": 125,
+    "txt": "Workers get tired over time.",
+    "l": 1028.8,
+    "t": 602,
+    "r": 1305.2,
+    "b": 670,
+    "w": 276.4,
+    "tabOv": 0,
+    "rowOv": 18795,
+    "ebarOv": 0,
+    "covers": [
+     "manage"
+    ],
+    "side": "below",
+    "inVpY": true,
+    "inVpX": true,
+    "tabs": 1
+   },
+   "tabHits": 0,
+   "rowHits": 26,
+   "ebarHits": 0,
+   "outY": 0,
+   "outX": 0,
+   "sides": [
+    "below"
+   ]
+  },
+  "manage": {
+   "txt": "Tap Manage to perk them up!",
+   "l": 1023.5,
+   "t": 534,
+   "r": 1310.5,
+   "b": 602,
+   "w": 287,
+   "tabOv": 0,
+   "rowOv": 15498,
+   "ebarOv": 2296,
+   "covers": [
+    "ebar"
+   ],
+   "side": "mid",
+   "inVpY": true,
+   "inVpX": true,
+   "tabs": 1
+  },
+  "under": null,
+  "pass": true
+ }
+}

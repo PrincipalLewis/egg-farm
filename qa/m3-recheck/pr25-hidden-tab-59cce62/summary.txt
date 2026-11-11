@@ -1,0 +1,13 @@
+06:08 start pr25 59cce62, clone /tmp/qa-x/pr25, build+build:qa rc=0, runtime id m3-rc1-pre+59cce62
+06:08 unit rc=0
+06:14 unit(rerun, default pool) rc=0
+06:17 hidden chromium rc=0
+06:22 hidden firefox rc=0
+06:32 hidden webkit rc=0
+06:41 globals chromium rc=0
+06:54 globals firefox rc=0
+07:01 globals webkit rc=0
+07:13 rc0 chromium rc=0
+07:25 rc0 firefox rc=0
+07:34 rc0 webkit rc=0
+07:38 report finalized: PASS

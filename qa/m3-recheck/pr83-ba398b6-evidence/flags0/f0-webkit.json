@@ -1,0 +1,156 @@
+[
+ {
+  "engine": "webkit",
+  "W": 360,
+  "H": 640,
+  "scene": "fresh-default",
+  "bid": "m4.1+ba398b6",
+  "pass": true,
+  "flags": {
+   "golden": 0,
+   "streak": 0,
+   "tapCoins": 0,
+   "abilities": 0,
+   "broody": 0,
+   "salesStopped": 0,
+   "fatigueCue": 0,
+   "pause": 0,
+   "rc2Refill": 0,
+   "autoRefill": 0,
+   "clockWage": 0,
+   "breeds": 0,
+   "zeroGainUi": 0,
+   "bestBuyV2": 0
+  },
+  "enabled": 1,
+  "allZero": true,
+  "domHits": [],
+  "textHits": [],
+  "activeTabs": [
+   "collection"
+  ],
+  "baseNavRefill": {
+   "hidden": true,
+   "label": "Refill tired workers"
+  },
+  "nodes": 155,
+  "errs": [],
+  "viewOk": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/flags0/f0-webkit-fresh-default-360x640.png",
+  "shotSha": "e3a1f813bbc2ba0331d5a16babe26a5dc6e75e9f5e6be5e47b5eaa0eb862f40a"
+ },
+ {
+  "engine": "webkit",
+  "W": 360,
+  "H": 640,
+  "scene": "midgame-workers-tab",
+  "bid": "m4.1+ba398b6",
+  "pass": true,
+  "flags": {
+   "golden": 0,
+   "streak": 0,
+   "tapCoins": 0,
+   "abilities": 0,
+   "broody": 0,
+   "salesStopped": 0,
+   "fatigueCue": 0,
+   "pause": 0,
+   "rc2Refill": 0,
+   "autoRefill": 0,
+   "clockWage": 0,
+   "breeds": 0,
+   "zeroGainUi": 0,
+   "bestBuyV2": 0
+  },
+  "enabled": 1,
+  "allZero": true,
+  "domHits": [],
+  "textHits": [],
+  "activeTabs": [
+   "workers"
+  ],
+  "baseNavRefill": {
+   "hidden": false,
+   "label": "Refill, cooling down"
+  },
+  "nodes": 235,
+  "errs": [],
+  "viewOk": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/flags0/f0-webkit-midgame-workers-tab-360x640.png",
+  "shotSha": "fb1a5a96d652b2ec2ed231bcfb899557cd5621b013ec5b6a87bd73824d6d164e"
+ },
+ {
+  "engine": "webkit",
+  "W": 1280,
+  "H": 800,
+  "scene": "fresh-default",
+  "bid": "m4.1+ba398b6",
+  "pass": true,
+  "flags": {
+   "golden": 0,
+   "streak": 0,
+   "tapCoins": 0,
+   "abilities": 0,
+   "broody": 0,
+   "salesStopped": 0,
+   "fatigueCue": 0,
+   "pause": 0,
+   "rc2Refill": 0,
+   "autoRefill": 0,
+   "clockWage": 0,
+   "breeds": 0,
+   "zeroGainUi": 0,
+   "bestBuyV2": 0
+  },
+  "enabled": 1,
+  "allZero": true,
+  "domHits": [],
+  "textHits": [],
+  "activeTabs": [
+   "collection"
+  ],
+  "baseNavRefill": null,
+  "nodes": 172,
+  "errs": [],
+  "viewOk": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/flags0/f0-webkit-fresh-default-1280x800.png",
+  "shotSha": "f09182678fdf4ac0b09610fe2d467336c57a004d3b6d1ec4231dd98f6cb2d7af"
+ },
+ {
+  "engine": "webkit",
+  "W": 1280,
+  "H": 800,
+  "scene": "midgame-workers-tab",
+  "bid": "m4.1+ba398b6",
+  "pass": true,
+  "flags": {
+   "golden": 0,
+   "streak": 0,
+   "tapCoins": 0,
+   "abilities": 0,
+   "broody": 0,
+   "salesStopped": 0,
+   "fatigueCue": 0,
+   "pause": 0,
+   "rc2Refill": 0,
+   "autoRefill": 0,
+   "clockWage": 0,
+   "breeds": 0,
+   "zeroGainUi": 0,
+   "bestBuyV2": 0
+  },
+  "enabled": 1,
+  "allZero": true,
+  "domHits": [],
+  "textHits": [],
+  "activeTabs": [
+   "workers"
+  ],
+  "baseNavRefill": null,
+  "nodes": 235,
+  "errs": [],
+  "viewOk": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/flags0/f0-webkit-midgame-workers-tab-1280x800.png",
+  "shotSha": "3e8428de19f29f156ec979fb50d8cb858b49d86f64bddbc9d31f89cb3dc273b5"
+ }
+]

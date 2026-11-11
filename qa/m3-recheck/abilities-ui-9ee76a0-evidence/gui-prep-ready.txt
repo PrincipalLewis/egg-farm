@@ -1,0 +1,64 @@
+QA-D-1106-PR116-GUI targeted prep — READY (server) with FLAG-0 LIMITATION on Architect O1/O2 pending path.
+
+Identity (fresh ls-remote): tip 9ee76a0aa1d9e83fd28a7196844d2a00c32c1a86 MATCH; tree c914276c901a0c780689abc336fab87356595eb5 MATCH Architect bound. No drift. Draft.
+
+EXACT URL (release dist, existing build, no source fixes):
+  http://127.0.0.1:5216/?marketSeed=3
+
+Required non-secret client state (parent sets in Chromium before sheet checks; not secrets):
+  - Viewport: 360×640, portrait (NOT docked). Docked MQ = (min-width:960px) and (orientation:landscape).
+  - After load: click "Tap to start".
+  - Skip onboarding: localStorage eggfarm.ui =
+      {"onboardingDone":true,"workersIntroA":true,"workersIntroB":true,"sfx":false,"reducedMotion":false}
+    then reload once if needed so intros do not block taps.
+  - Optional: clear eggfarm.save first for a clean run, or keep prior local save.
+
+Runtime build-id proof (served HTML meta + #app data-build-id + bundle const):
+  m4.1+9ee76a0
+  chunk index-B2JjHXU9.js present in served index.html
+
+Server (LEAVE UP until parent resumes cleanup):
+  lane: uiqa-pr116
+  PID: 1746941
+  record: 1746941 7727782 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-11-06T02:53:51+01:00 6e8aba12e8ce29cd bash .../gui-prep-serve.sh
+  LANE_RUN_TAG=uiqa-pr116:6e8aba12e8ce29cd
+  cmd: vite preview --outDir dist --port 5216 --strictPort --host 127.0.0.1
+  log: qa/m3-recheck/abilities-ui-9ee76a0-evidence/gui-prep-server.log
+  port: 5216 (≠4173)
+
+Browser lock (parent holds; prep does NOT hold — avoids deadlock):
+  Lock file: /workspace/egg-farm-studio/.browser-test.lock (ops/locks.md lane 1, shared)
+  Pattern: only the browser command under flock; hold ≤600s via timeout; one engine (Chromium) per hold.
+  Example wrapper for parent computerUse session:
+    flock /workspace/egg-farm-studio/.browser-test.lock timeout 600 <chromium-computerUse-cmd>
+  Lock was FREE at prep time (load ~0.36). Do not start a second engine concurrently.
+  Server is NOT under flock (correct).
+
+How to access sheets/panels (approved UI / app.ts):
+  - Upgrades sheet: tap nav button [data-nav=upgrades] → #p-upgrades[data-testid=upgrades-panel]
+  - Workers tab (abilities chrome when flag on): .tabs button[data-tab=workers]
+  - Close sheet: header .close, or .scrim, or Esc, or nav [data-nav=farm]
+  - Market sheet: tap a customer chip in queue (deliberate) → #p-market
+  - Switch panels while open: with Upgrades open, open Market (or Farm) via nav / chips — openPanel cancels pending close first (O2 wiring)
+
+Architect O1/O2 expected behaviors (APPROVE addendum @ 9ee76a0):
+  O1: While upgradesClosePending (portrait sheet mid-close after in-sheet ability fire/activateAll), flip to docked
+      (widen to ≥960 landscape OR emulate matchMedia). Must call sheetCloseComplete → #p-upgrades.hidden,
+      anySheetOpen false, attendance probe resumes (not frozen forever). Docked CSS would otherwise nullify transform.
+  O2: While upgradesClosePending, reopen Upgrades (tap [data-nav=upgrades]) before transitionend.
+      openPanel must sheetCloseComplete first; late transform transitionend must NOT hide the newly open panel;
+      panel stays visible / panel-layer.open; attendance still frozen while open.
+
+FLAG-0 LIMITATION / real edge blocker on THIS existing release build:
+  balance m4.flags.abilities = 0 (baked). abilitiesUiOn → false; call / Activate-all chrome hidden.
+  upgradesClosePending is ONLY set by closeUpgradesAfterAbility after successful in-sheet fireAbility/activateAll.
+  Therefore Architect O1/O2 pending-close edges are NOT reachable on release dist without enabling abilities
+  (would need QA build + flag-on or source/balance change — NOT done; task forbids source fixes; existing build only).
+  Parent CAN still verify portrait sheet: open / close / reopen / switch panels while open / reload while open
+  at 360×640 with screenshots. Closing-mid-animation via ability path = BLOCKED on flag_0 until HoQA authorizes flag-on path.
+
+Cleanup (parent after GUI return ONLY):
+  /workspace/egg-farm-studio/ops/tools/lane-kill.sh uiqa-pr116 1746941
+  Expect rc0 and exact GONE 1746941 or TERM 1746941[(group)|]. No other signals; never Claude.
+
+GUI did NOT run in this prep. No Shell browser automation. #107 hosted slots not read.

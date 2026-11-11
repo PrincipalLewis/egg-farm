@@ -1,0 +1,44 @@
+{
+ "id": "RUL-b-cap3",
+ "now": 1792378840000,
+ "csr": [
+  "D-HOP-2026-10-22-01(b)",
+  "IDB1-1"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-invalid-truncated.raw"
+   },
+   {
+    "key": "corrupt.1792378700000-2",
+    "ref": "raw/PRIOR-corrupt-1.raw"
+   },
+   {
+    "key": "corrupt.1792378700000-10",
+    "ref": "raw/PRIOR-corrupt-2.raw"
+   },
+   {
+    "key": "corrupt.1792378750000",
+    "ref": "raw/PRIOR-corrupt-3.raw"
+   }
+  ]
+ },
+ "expect": {
+  "recovery": false,
+  "noSaveCorrupt": true,
+  "idbCorruptExact": 3,
+  "idbEvicted": "corrupt.1792378700000-2",
+  "idbKept": [
+   "corrupt.1792378700000-10",
+   "corrupt.1792378750000"
+  ]
+ }
+}

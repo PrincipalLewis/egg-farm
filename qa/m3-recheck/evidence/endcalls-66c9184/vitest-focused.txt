@@ -1,0 +1,126 @@
+LOCK+START 2026-11-06T00:52:23+01:00 loadavg=0.45 0.52 0.57 1/1917 1553868
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/endcalls-66c9184/wt
+
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > ready by default (absent readyAt) at F >= unlock with the flag on
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > first-reason order: asleep, unpaid, paused, lockout, cooldown
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > cooldown uses wallReady on injected nowMs, E2b cap; ready exactly at readyAt
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > not hired / below unlock / flag off / bad clock: not available, no telemetry reason
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > success: readyAt = nowMs + cd*1000, activeS = tc_ability_s, ability_used with combo:false, closeSheet only inSheet
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > absent readyAt -> t_since_ready_s 0; Tired applies (rule 5), energy untouched (energy_cost 0)
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > blocked: emits exactly one ability_blocked{count:1}, state unchanged, no close (E14 d)
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > viaAll fire never emits ability_blocked (Activate-all skips silently)
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > comboQualifies: inclusive sim ms (10000 in, 10001 out), needs both flags
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > sheet Boost in window -> activeS = combo_boost_duration_s, combo:true; card / Activate-all / out of window -> 30 s, combo:false
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > refillAgoSimMs guards (Architect #112 §2): non-finite / negative / absent -> no combo; ignored unless abilities && rc2Refill && inSheet && !viaAll
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > combo window reads tc_combo_window_s from balance (no literal): widening the tc key widens the window
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > combo call ends expired with effect_s = combo duration
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > combo early end: effect_s = durS - activeS (focus seconds run), durS cleared with activeS
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > a running entry with no durS (older tip / save) falls back to tc_ability_s for effect_s
+ ✓ tests/v5-abilities-sim.test.ts > activateAll (rule 7, E14 c, AC-M5A-7) > AC-M5A-7: W1 asleep, W2 cooldown, W3 ready, W4 unpaid -> exactly W3, one ability_used{via_all:true}, no ability_blocked
+ ✓ tests/v5-abilities-sim.test.ts > activateAll (rule 7, E14 c, AC-M5A-7) > order MH -> CH -> Hawker -> Grader, same tick; sheet success -> one close
+ ✓ tests/v5-abilities-sim.test.ts > activateAll (rule 7, E14 c, AC-M5A-7) > 0 eligible: fires nothing, no events, no close, same state
+ ✓ tests/v5-abilities-sim.test.ts > timer system: suspension, expiry, early end (rules 6, 10) > activeS counts down only on focus ticks (suspended under a closing sheet / menu); expires with effect_s = tc_ability_s
+ ✓ tests/v5-abilities-sim.test.ts > timer system: suspension, expiry, early end (rules 6, 10) > early end: asleep / unpaid / paused ends that tick, readyAt unchanged, effect_s = focus seconds run
+ ✓ tests/v5-abilities-sim.test.ts > timer system: suspension, expiry, early end (rules 6, 10) > paused flag off: a stray paused:true does not end the call
+ ✓ tests/v5-abilities-sim.test.ts > effects (rule 2) through the F1c registry / graderMult; suspended = no multiplier > Rush: Market Hand sales only; Shout: all sales; stack x1.3225 (rule 8)
+ ✓ tests/v5-abilities-sim.test.ts > effects (rule 2) through the F1c registry / graderMult; suspended = no multiplier > Sweep A: laying x tc_ability_w2_lay_mult (live ctx only), suspended = 1
+ ✓ tests/v5-abilities-sim.test.ts > effects (rule 2) through the F1c registry / graderMult; suspended = no multiplier > Inspect: graderMult = 1 + (tier mult + tier_add - 1) x share(mood); tier 3 working -> x3.0 (AC-M5A-2)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > abilities flag 0: a stray abilities.activeS is inert (no events, no countdown, no multipliers)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > no top-level abilityDurS anywhere in src (Architect #112: rejected persisted shape; durS lives on AbilityState)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > m5Persist save view of a running combo call carries durS on the entry and no top-level duration map
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > no prod 10 / 45 literals in abilities.ts (combo values via tcNum only)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > no Date.now in the abilities sim
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: flags and session state (R13a, §4.1 storage) > flag off (tapCoins 0, or m4 off, or the shipping balance): no ring, no refWarmS, refCents 0, sales unchanged
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: flags and session state (R13a, §4.1 storage) > the window is tc_tap_bonus_income_window_s (60): W + 1 slots (60 complete seconds + the open one)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: flags and session state (R13a, §4.1 storage) > validateBalance: the window must be a whole number of seconds >= 1, and tapCoins on requires it (no silent default)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: flags and session state (R13a, §4.1 storage) > never saved: m5Persist strips the ring and refWarmS; a load starts a warm-up (§4.1a #2)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: flags and session state (R13a, §4.1 storage) > deterministic: the same inputs give the same ring, warm counter and refCents
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: warm-up I_ss (§4.1a, ST-AC16d) > ST-AC16d (a)/(g): from the first tick of a fresh start, refCents = Math.round(100 x max(0, incomePerSec + wagesPerSec)), every tick < 60 s
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: warm-up I_ss (§4.1a, ST-AC16d) > I_ss is gross of wages and clamps at 0
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: warm-up I_ss (§4.1a, ST-AC16d) > ST-AC2b warm-up float edge: refCents = Math.round(I_ss x 100) on the float, so 1.005 -> 100 (reference built from the same float expression)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: warm-up I_ss (§4.1a, ST-AC16d) > ST-AC16d (b): live I_ss: the Coop Hand put to sleep at t = 20 s moves refCents on that tick
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: warm-up I_ss (§4.1a, ST-AC16d) > ST-AC16e: a hired Market Hand Asleep (or Unpaid) during a warm-up gives I_ss = 0, refCents 0; working again -> > 0 on that tick
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: warm-up I_ss (§4.1a, ST-AC16d) > ST-AC16d (d): uplifts never enter I_ss (streak s = 0.28 and a x2 fixture effect, live)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: ring and hard handover (§4.1, §4.1b, ST-AC16b/c/d) > ST-AC2b: trailing refCents = floor((ring sum + 30) / 60) in integers: 465,029 -> 7750, 465,030 -> 7751
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: ring and hard handover (§4.1, §4.1b, ST-AC16b/c/d) > ST-AC16d (c): hard switch at refWarmS >= 60 to floor((Σ ring + 30) / 60), and I_ss is never read again until the next warm-up
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: ring and hard handover (§4.1, §4.1b, ST-AC16b/c/d) > ST-AC16b: $600.00 of base sales over a completed 60 s window -> I_ref = $10.00/s exactly (1000 cents/s)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: ring and hard handover (§4.1, §4.1b, ST-AC16b/c/d) > ST-AC16b: a sale records its BASE value (price chain x Grader); the streak and live sale effects are credited but kept out of the ring
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: ring and hard handover (§4.1, §4.1b, ST-AC16b/c/d) > §4.1: the open second only counts once it completes; sales older than the window drop out
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: ring and hard handover (§4.1, §4.1b, ST-AC16b/c/d) > player and worker sales both enter (D-HOP-08 #1); tap coins / grants never call recordSale
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: ring and hard handover (§4.1, §4.1b, ST-AC16b/c/d) > the window follows config (tc 30): handover at 30 s, divisor 30 (no code change)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: hidden tab, offline return (§4.1 hidden tab, ST-AC16b, ST-AC16d (e)/(f)) > ST-AC16d (f) / ST-AC16b: a 40 s hide at t = 30 s keeps ticking (rc1 hidden sim, no clock): refWarmS = 70, trailing window in use, hidden sales count
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: hidden tab, offline return (§4.1 hidden tab, ST-AC16b, ST-AC16d (e)/(f)) > ST-AC16d (e): an offline return (m5Offline, a gap >= 60 s) clears the ring and starts a new warm-up: I_ref = I_ss again
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: hidden tab, offline return (§4.1 hidden tab, ST-AC16b, ST-AC16d (e)/(f)) > m5Offline with income-ref off leaves the state untouched (flag-off identity)
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: actual Game frame/visibility return boundary > visible gap 60000 ms starts a fresh 60 s warm-up AFTER the unchanged catch-up
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: actual Game frame/visibility return boundary > visible gap 600000 ms starts a fresh 60 s warm-up AFTER the unchanged catch-up
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: actual Game frame/visibility return boundary > a visible gap below 60 s keeps the existing ring and warm clock
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: actual Game frame/visibility return boundary > hidden offline return 60000 ms still resets, including provisional hidden ticks
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: actual Game frame/visibility return boundary > hidden offline return 600000 ms still resets, including provisional hidden ticks
+ ✓ tests/v5-income-ref.test.ts > #3 income-ref: actual Game frame/visibility return boundary > a short hidden return retains its simulated sales and warm clock
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > shipping balance has no m4.flags: every M5 flag off; SAVE_VERSION stays 6
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > [CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > flags off: m5Load / m5Offline / m5ShortGap return the SAME object, no events (byte-identical to the base)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > m5Persist: no session key -> same object, so serialize writes exactly the base bytes (an M5 saved shape too)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > valid values kept; a call spanning the reload ends once (offline, effect_s = tc_ability_s - activeS); activeS cleared
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = -1 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 1000000000 -> 300
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = null -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 87 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = 999 -> 30
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = -0.5 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 12.9 -> 12
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 50000000000000000 -> 1000000000000000
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = -3 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 12 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 2.5 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 11 -> 11
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 0 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967296 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = -4 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967295 -> 4294967295
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesCoachSeen = yes -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesUnlocked = false -> false
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > readyAt clamped to [now, now + tc_ability_cd_s]; non-finite -> ready (absent); a clock rolled back a day loads at most one cooldown
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > activeS > tc_ability_s clamps (effect_s 0); non-finite / <= 0 is no call (no event); junk containers dropped
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > only the fields of a flag that is on are touched (flag off then on: kept, not read; abilities spec E7)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > session-only keys in a hand-edited save never load; legacy v1.0 frenzyEndAt dropped (R23 uses frenzyRemainingS)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > every session key is dropped (F1a M5_SESSION_FIELDS); saved fields and activeS kept (E2); input not mutated
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > [CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 8 spec keys; each one is dropped by persist and serialize
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > egg expires (offline, fresh evRng gap), calls end at the gap start, s = 0; Frenzy frozen, nest kept, readyAt (wall clock) untouched
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > no egg on screen: the countdown is kept, not re-drawn (golden R8, review fix B1); evRng not advanced
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > D-C2: drawGap with no evRngState seeds mixSeed(state.rng ^ 0x6576526E) once and never touches state.rng
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] legacy save without durS: effect_s = tc_ability_s - activeS; no leftover durS
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS=45, activeS=40: effect_s≈5; both cleared (load and offline; with or without the combo key)
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS present but activeS>granted: clamp then clear both
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streak grace/decay in one step over 0 focus seconds: 5 s hidden at 0.28 returns 0.28 (K8); same object, nothing else moves
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streakAfter: hold 3 s then 0.03/s, 0 at 12.33 s from 0.28 (ST-AC5); dt < 0 counts as 0
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][B5][E2b] callLockoutS: NaN, ±Infinity, negative, null, string, object -> absent (= 0); huge -> cap; valid kept
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][E9] paused: a non-boolean is false (absent); true and false are kept
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][rule 1][E12][AC-P2] below tc_pause_unlock_farm a saved pause is cleared (not saved back as true), lockout too
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][B5] callLockoutS exists only on the Market Hand: dropped from any other worker
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4] missing fields stay missing; other worker fields untouched; no events
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][E2][AC-P13] reload round trip: a valid pause survives serialize -> validate -> m5Load unchanged
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][E2] a tampered JSON save (null / string / 1e308) is sanitised after validate
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4][E9][AC-P1] flag off / M4.1-style load: Pause fields are ignored and preserved (byte-identical) > shipping (all flags 0): m5Load returns the same object; isPaused false; serialize writes the fields back
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4][E9][AC-P1] flag off / M4.1-style load: Pause fields are ignored and preserved (byte-identical) > M4.1-style balance (no m4.flags): m5Load returns the same object; isPaused false; serialize writes the fields back
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4][F-5] validateBalance requires the Pause tc keys m5Load reads while m4.flags.pause is on > missing tc_pause_call_lockout_s / tc_pause_unlock_farm is a load error, never a silent 0
+ ✓ tests/v5-f2-game-settle.test.ts > F2 settleHiddenPeriod > hidden >= 60 s (exactly 60.0 s): offline path once per period; a replay changes nothing
+ ✓ tests/v5-f2-game-settle.test.ts > F2 settleHiddenPeriod > the save written by the offline path keeps readyAt (epoch, wall clock), never the egg or the streak
+ ✓ tests/v5-f2-game-settle.test.ts > F2 settleHiddenPeriod > hidden < 60 s: online path; egg, streak, Frenzy and the call are exactly as at the hide (R7, R10, AB-10)
+ ✓ tests/v5-f2-game-settle.test.ts > F2 settleHiddenPeriod > clock went back while hidden (mode none): no M5 change
+ ✓ tests/v5-f2-game-settle.test.ts > F2 visible-throttled frame gap >= 60 s (§9.1a) > M5 systems take the offline path at the gap start; the legacy 60 s catch-up is unchanged
+ ✓ tests/v5-f2-game-settle.test.ts > F2 visible-throttled frame gap >= 60 s (§9.1a) > a 59 s frame is not the offline path
+ ✓ tests/v5-f2-game-settle.test.ts > F2 reload (AB-1) and flag-off identity > a call running at save time ends once on load with offline; readyAt kept (wall clock) and clamped to [now, now + cd]
+ ✓ tests/v5-f2-game-settle.test.ts > F2 reload (AB-1) and flag-off identity > flags off: an M5 save loads, plays and re-saves with every M5 field byte-for-byte untouched
+ ✓ tests/v5-f2-roundtrip.test.ts > v5 F2 fixture > tests/fixtures/v5-f2/m5-save.json is exactly serialize(m5State, T0, saveSeq 5)
+ ✓ tests/v5-f2-roundtrip.test.ts > old -> new -> old -> new, M5 save starting in ls > fields survive every hop; the new build clamps/ends per F2; the old build leaves them untouched; bytes pinned
+ ✓ tests/v5-f2-roundtrip.test.ts > old -> new -> old -> new, M5 save starting in bak > fields survive every hop; the new build clamps/ends per F2; the old build leaves them untouched; bytes pinned
+ ✓ tests/v5-f2-roundtrip.test.ts > old -> new -> old -> new, M5 save starting in idb > fields survive every hop; the new build clamps/ends per F2; the old build leaves them untouched; bytes pinned
+
+ Test Files  6 passed (6)
+      Tests  115 passed (115)
+   Start at  00:52:23
+   Duration  1.71s (transform 285ms, setup 0ms, collect 529ms, tests 395ms, environment 1ms, prepare 227ms)
+
+EXIT=0 END 2026-11-06T00:52:25+01:00 loadavg=0.50 0.53 0.57 1/1917 1554078

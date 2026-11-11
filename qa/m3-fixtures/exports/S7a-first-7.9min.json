@@ -1,0 +1,1 @@
+{"exportedAt": 1760861275000, "events": [{"type": "session_start", "ts": 1760860800000, "sessionMs": 0, "install_id": "00000000-0000-4000-8000-000000000005", "build": "m3-pt1"}, {"type": "upgrade", "ts": 1760860820000, "sessionMs": 20000, "upgrade": "collection", "newLevel": 1}, {"type": "session_end", "ts": 1760861274000, "sessionMs": 474000}]}

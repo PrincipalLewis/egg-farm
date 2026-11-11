@@ -1,0 +1,870 @@
+{
+ "sha7": "b986cd3",
+ "results": {
+  "RESET_AT-pre": {
+   "pass": true,
+   "resetAt": "1792375240000",
+   "want": "1792375240000",
+   "ls": 1,
+   "idb": 1,
+   "lsMain": false,
+   "bak": false,
+   "idbMain": false
+  },
+  "RESET_AT-RA1-pre-reset-ls+idb": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RA1-pre-reset-ls+idb-tab-dies-before-1st-save": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RA1-pre-reset-idb": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RA1-pre-reset-idb-tab-dies-before-1st-save": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RA1-pre-reset-ls": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RA1-pre-reset-ls-tab-dies-before-1st-save": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RA2-post-reset-main-corrupt-bak-valid": {
+   "pass": true,
+   "obs": {
+    "case": "R",
+    "source": "bak",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M1",
+    "newGame": false,
+    "err": null,
+    "resetAt": "1792375240000"
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RA2-post-reset-main-corrupt-bak-invalid-idb-valid": {
+   "pass": true,
+   "obs": {
+    "case": "R",
+    "source": "idb",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M1",
+    "newGame": false,
+    "err": null,
+    "resetAt": "1792375240000"
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RA2-post-reset-main-corrupt-nothing-valid-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "err": null,
+    "resetAt": "1792375240000"
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RA2-post-reset-idb-main-corrupt-IDB1-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "err": null,
+    "resetAt": "1792375240000"
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RA2-post-reset-idb-orphan-copy-8b-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "err": null,
+    "resetAt": "1792375240000"
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RA3-quota-reset_at-write": {
+   "pass": true,
+   "hard": true,
+   "resetThrew": true,
+   "resetAt": null,
+   "dialogs": 1,
+   "allKept": true,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-INFO-RA3-quota-reset_at-write-tab-dies-before-1st-save": {
+   "pass": null,
+   "hard": false,
+   "resetThrew": true,
+   "resetAt": null,
+   "dialogs": 1,
+   "allKept": true,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-INFO-RA3-quota-persists-all-setItem-every-boot": {
+   "pass": null,
+   "hard": false,
+   "resetThrew": true,
+   "resetAt": null,
+   "dialogs": 1,
+   "allKept": true,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": null,
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RA4-survives-save-load": {
+   "pass": true,
+   "vals": [
+    "1792375240000",
+    "1792375240000",
+    "1792375240000"
+   ]
+  },
+  "RESET_AT-RA4-export": {
+   "pass": true,
+   "notice": "M3",
+   "exportFn": true,
+   "bytesLen": 450,
+   "unchanged": true,
+   "resetAt": "1792375240000"
+  },
+  "RESET_AT-RA4-static": {
+   "pass": true,
+   "set": [
+    "src/save/save.ts:127"
+   ],
+   "remove": [],
+   "sweep": [],
+   "importPath": [],
+   "keysListIt": false,
+   "importNote": "no import path in this build (N/A)"
+  },
+  "RESET_AT-INFO-RA5-malformed-abc": {
+   "pass": null,
+   "resetAt": "abc",
+   "postResetOrphan": false,
+   "dialogs": 1,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "err": null,
+     "resetAt": "abc",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "abc",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "abc",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-INFO-RA5-empty-string": {
+   "pass": null,
+   "resetAt": "",
+   "postResetOrphan": false,
+   "dialogs": 1,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "err": null,
+     "resetAt": "",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-INFO-RA5-negative": {
+   "pass": null,
+   "resetAt": "-5",
+   "postResetOrphan": false,
+   "dialogs": 1,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "err": null,
+     "resetAt": "-5",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "-5",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "-5",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-INFO-RA5-float-pre": {
+   "pass": null,
+   "resetAt": "1792375240000.5",
+   "postResetOrphan": false,
+   "dialogs": 0,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1792375240000.5",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000.5",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1792375240000.5",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-INFO-RA5-future-1y-with-post-reset-orphan": {
+   "pass": null,
+   "resetAt": "1823914840000",
+   "postResetOrphan": true,
+   "dialogs": 0,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1823914840000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1823914840000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1823914840000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-INFO-RA5-future-1y-pre-reset-only": {
+   "pass": null,
+   "resetAt": "1823914840000",
+   "postResetOrphan": false,
+   "dialogs": 0,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "err": null,
+     "resetAt": "1823914840000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1823914840000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "err": null,
+     "resetAt": "1823914840000",
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  }
+ }
+}

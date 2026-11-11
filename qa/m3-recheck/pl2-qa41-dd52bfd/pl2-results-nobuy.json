@@ -1,0 +1,482 @@
+{
+ "sizes": {
+  "390": {
+   "bid": "m3-rc1-pre+dd52bfd",
+   "res": [
+    {
+     "try": 22,
+     "w": 390,
+     "variant": "single",
+     "before": 14100,
+     "hudNow": "$14.1K",
+     "hudLater": "$14.1K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 23,
+     "w": 390,
+     "variant": "rapid5",
+     "before": 14100,
+     "hudNow": "$14.1K",
+     "hudLater": "$14.6K",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 24,
+     "w": 390,
+     "variant": "rapid5_noDelay",
+     "before": 14600,
+     "hudNow": "$14.6K",
+     "hudLater": "$14.6K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 25,
+     "w": 390,
+     "variant": "tickOffset",
+     "before": 14600,
+     "hudNow": "$14.6K",
+     "hudLater": "$15.1K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 26,
+     "w": 390,
+     "variant": "afterSell",
+     "before": 15100,
+     "hudNow": "$15.6K",
+     "hudLater": "$15.6K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 27,
+     "w": 390,
+     "variant": "afterSwitch",
+     "before": 15600,
+     "hudNow": "$15.6K",
+     "hudLater": "$15.6K",
+     "samples": 6,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 28,
+     "w": 390,
+     "variant": "afterEscape",
+     "before": 15600,
+     "hudNow": "$15.6K",
+     "hudLater": "$16.1K",
+     "samples": 5,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 29,
+     "w": 390,
+     "variant": "single",
+     "before": 16100.000000000002,
+     "hudNow": "$16.1K",
+     "hudLater": "$16.1K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 30,
+     "w": 390,
+     "variant": "rapid5",
+     "before": 16100.000000000002,
+     "hudNow": "$16.1K",
+     "hudLater": "$16.1K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 31,
+     "w": 390,
+     "variant": "rapid5_noDelay",
+     "before": 16100.000000000002,
+     "hudNow": "$16.1K",
+     "hudLater": "$16.4K",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 32,
+     "w": 390,
+     "variant": "tickOffset",
+     "before": 16400,
+     "hudNow": "$16.4K",
+     "hudLater": "$16.4K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 33,
+     "w": 390,
+     "variant": "afterSell",
+     "before": 16400,
+     "hudNow": "$17.1K",
+     "hudLater": "$17.1K",
+     "samples": 4,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 34,
+     "w": 390,
+     "variant": "afterSwitch",
+     "before": 17100,
+     "hudNow": "$17.1K",
+     "hudLater": "$17.1K",
+     "samples": 6,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 35,
+     "w": 390,
+     "variant": "afterEscape",
+     "before": 17100,
+     "hudNow": "$17.1K",
+     "hudLater": "$17.5K",
+     "samples": 5,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 36,
+     "w": 390,
+     "variant": "single",
+     "before": 17500,
+     "hudNow": "$17.5K",
+     "hudLater": "$17.5K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 37,
+     "w": 390,
+     "variant": "rapid5",
+     "before": 17500,
+     "hudNow": "$17.5K",
+     "hudLater": "$17.5K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 38,
+     "w": 390,
+     "variant": "rapid5_noDelay",
+     "before": 17500,
+     "hudNow": "$17.5K",
+     "hudLater": "$18K",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 39,
+     "w": 390,
+     "variant": "tickOffset",
+     "before": 18000,
+     "hudNow": "$18K",
+     "hudLater": "$18K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 40,
+     "w": 390,
+     "variant": "afterSell",
+     "before": 18000,
+     "hudNow": "$18.5K",
+     "hudLater": "$18.5K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 41,
+     "w": 390,
+     "variant": "afterSwitch",
+     "before": 18500,
+     "hudNow": "$19K",
+     "hudLater": "$19K",
+     "samples": 7,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 42,
+     "w": 390,
+     "variant": "afterEscape",
+     "before": 19000,
+     "hudNow": "$19K",
+     "hudLater": "$19K",
+     "samples": 4,
+     "maxDropPct": 0,
+     "bad": false
+    }
+   ],
+   "stateCoins": 1899116,
+   "hud": "$19K"
+  },
+  "1280": {
+   "bid": "m3-rc1-pre+dd52bfd",
+   "res": [
+    {
+     "try": 1,
+     "w": 1280,
+     "variant": "single",
+     "before": 14200,
+     "hudNow": "$14.2K",
+     "hudLater": "$14.2K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 2,
+     "w": 1280,
+     "variant": "rapid5",
+     "before": 14200,
+     "hudNow": "$14.2K",
+     "hudLater": "$14.6K",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 3,
+     "w": 1280,
+     "variant": "rapid5_noDelay",
+     "before": 14600,
+     "hudNow": "$14.6K",
+     "hudLater": "$14.6K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 4,
+     "w": 1280,
+     "variant": "tickOffset",
+     "before": 14600,
+     "hudNow": "$14.6K",
+     "hudLater": "$15.2K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 5,
+     "w": 1280,
+     "variant": "afterSell",
+     "before": 15200,
+     "hudNow": "$15.6K",
+     "hudLater": "$15.6K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 6,
+     "w": 1280,
+     "variant": "afterSwitch",
+     "before": 15600,
+     "hudNow": "$15.6K",
+     "hudLater": "$15.6K",
+     "samples": 6,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 7,
+     "w": 1280,
+     "variant": "afterEscape",
+     "before": 15600,
+     "hudNow": "$16K",
+     "hudLater": "$16K",
+     "samples": 5,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 8,
+     "w": 1280,
+     "variant": "single",
+     "before": 16000,
+     "hudNow": "$16K",
+     "hudLater": "$16K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 9,
+     "w": 1280,
+     "variant": "rapid5",
+     "before": 16000,
+     "hudNow": "$16K",
+     "hudLater": "$16.4K",
+     "samples": 11,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 10,
+     "w": 1280,
+     "variant": "rapid5_noDelay",
+     "before": 16400,
+     "hudNow": "$16.4K",
+     "hudLater": "$16.4K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 11,
+     "w": 1280,
+     "variant": "tickOffset",
+     "before": 16400,
+     "hudNow": "$16.4K",
+     "hudLater": "$16.4K",
+     "samples": 2,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 12,
+     "w": 1280,
+     "variant": "afterSell",
+     "before": 16400,
+     "hudNow": "$16.7K",
+     "hudLater": "$17.1K",
+     "samples": 4,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 13,
+     "w": 1280,
+     "variant": "afterSwitch",
+     "before": 17100,
+     "hudNow": "$17.1K",
+     "hudLater": "$17.1K",
+     "samples": 6,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 14,
+     "w": 1280,
+     "variant": "afterEscape",
+     "before": 17100,
+     "hudNow": "$17.1K",
+     "hudLater": "$17.1K",
+     "samples": 4,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 15,
+     "w": 1280,
+     "variant": "single",
+     "before": 17100,
+     "hudNow": "$17.1K",
+     "hudLater": "$17.7K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 16,
+     "w": 1280,
+     "variant": "rapid5",
+     "before": 17700,
+     "hudNow": "$17.7K",
+     "hudLater": "$17.7K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 17,
+     "w": 1280,
+     "variant": "rapid5_noDelay",
+     "before": 17700,
+     "hudNow": "$17.7K",
+     "hudLater": "$17.7K",
+     "samples": 10,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 18,
+     "w": 1280,
+     "variant": "tickOffset",
+     "before": 17700,
+     "hudNow": "$18.1K",
+     "hudLater": "$18.1K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 19,
+     "w": 1280,
+     "variant": "afterSell",
+     "before": 18100,
+     "hudNow": "$18.4K",
+     "hudLater": "$18.4K",
+     "samples": 3,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 20,
+     "w": 1280,
+     "variant": "afterSwitch",
+     "before": 18400,
+     "hudNow": "$18.9K",
+     "hudLater": "$18.9K",
+     "samples": 7,
+     "maxDropPct": 0,
+     "bad": false
+    },
+    {
+     "try": 21,
+     "w": 1280,
+     "variant": "afterEscape",
+     "before": 18900,
+     "hudNow": "$18.9K",
+     "hudLater": "$18.9K",
+     "samples": 4,
+     "maxDropPct": 0,
+     "bad": false
+    }
+   ],
+   "stateCoins": 1886588,
+   "hud": "$18.9K"
+  }
+ },
+ "tries": 42,
+ "fails": []
+}

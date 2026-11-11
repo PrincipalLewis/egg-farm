@@ -1,0 +1,32 @@
+{
+ "id": "CSR3-B1-corrupt-ls-valid-idb",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-3",
+  "CSR-7",
+  "CSR-10"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-valid-F17-seq4-T-10m.json"
+   }
+  ]
+ },
+ "expect": {
+  "recovery": true,
+  "recovered_from": "idb",
+  "notice": "M1",
+  "store": "ls",
+  "farmLevel": 17,
+  "corruptLsMin": 1,
+  "noSaveRestoreEvent": true
+ }
+}

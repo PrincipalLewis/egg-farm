@@ -1,0 +1,217 @@
+0:02 shot m390-01-0m02-title.png
+0:04 build m3-rc1-pre+ccd7bf9
+0:04 shot m390-02-0m04-start.png
+0:04 shot m390-03-0m04-collect-tap.png
+0:05 state {"top":"Egg Farm $0.00 +$1.50/s 1 build ccd7bf9 $0.00, 1 eggs","goal":"★ Collection L1 · +12% income~0:07›","collect":"Collect +5 · 3 ready","toast":"A customer is on the way… 8 s | ○ ● ○","t":"0:05","sinceBuy":2}
+0:13 sell Sell all (8 eggs · $8.00)
+0:14 shot m390-04-0m14-sell-feedback.png
+0:19 sell Sell all (12 eggs · $12.00)
+0:20 shot m390-05-0m20-first-upgrade.png
+0:20 buy [Collection] gap=16s :: Collect per tap +12% egg price · +5/tap Egg price +0% → +12% Eggs per tap 5 → 10 +12% income Pays back in ~56 s ★ Best buy Level 0 / 30 $10.
+0:21 state {"top":"Egg Farm $10.00 +$1.68/s 4 build ccd7bf9 $10.00, 4 eggs","goal":"★ Collection L2 · +11% income ~0:04 ›","collect":"Collect +10 · 3 ready","toast":"","t":"0:21","sinceBuy":1}
+0:25 sell Sell all (8 eggs · $8.96)
+0:26 buy [Collection] gap=6s :: Collect per tap +12% egg price · +5/tap Egg price +12% → +24% Eggs per tap 10 → 15 +11% income Pays back in ~1 min 29 s ★ Best buy Level 1 /
+0:29 sell Sell all (10 eggs · $12.40)
+0:34 sell Sell all (6 eggs · $7.44)
+0:38 state {"top":"Egg Farm $22.80 +$1.86/s 6 build ccd7bf9 $22.80, 6 eggs","goal":"★ Farm L1 · +40% income ~0:42 ›","collect":"Collect +15 · 2 ready","toast":"","t":"0:38","sinceBuy":12}
+0:40 sell Sell all (7 eggs · $8.68)
+0:40 buy [Collection] gap=14s :: Collect per tap +12% egg price · +5/tap Egg price +24% → +36% Eggs per tap 15 → 20 +10% income Pays back in ~2 min 19 s Level 2 / 30 $25.00
+0:43 sell Sell all (8 eggs · $10.88)
+0:49 sell Sell all (10 eggs · $13.60)
+0:52 sell Sell all (1 eggs · $1.36)
+0:53 state {"top":"Egg Farm $32.32 +$2.04/s 3 build ccd7bf9 $32.32, 3 eggs","goal":"★ Farm L1 · +40% income ~0:34 ›","collect":"Collect +20 · 2 ready","toast":"","t":"0:53","sinceBuy":13}
+0:55 sell Sell all (8 eggs · $10.88)
+0:56 buy [Collection] gap=15s :: Collect per tap +12% egg price · +5/tap Egg price +36% → +48% Eggs per tap 20 → 25 +9% income Pays back in ~3 min 43 s Level 3 / 30 $40.00
+0:58 sell Sell all (5 eggs · $7.40)
+1:02 sell Sell all (5 eggs · $7.40)
+1:02 shot m390-06-1m02-upgrades-Collection.png
+1:03 shot m390-07-1m02-upgrades-Farm.png
+1:03 shot m390-08-1m03-upgrades-Workers.png
+1:05 sell Sell all (5 eggs · $7.40)
+1:08 sell Sell all (4 eggs · $5.92)
+1:09 state {"top":"Egg Farm $31.32 +$2.22/s 0 build ccd7bf9 $31.32, 0 eggs","goal":"★ Farm L1 · +40% income ~0:31 ›","collect":"Collect +25 · 2 ready","toast":"","t":"1:09","sinceBuy":14}
+1:11 sell Sell all (4 eggs · $5.92)
+1:14 sell Sell all (5 eggs · $7.40)
+1:17 sell Sell all (4 eggs · $5.92)
+1:19 sell Sell all (4 eggs · $5.92)
+1:22 sell Sell all (4 eggs · $5.92)
+1:25 sell Sell all (4 eggs · $5.92)
+1:25 buy [Collection] gap=30s :: Collect per tap +12% egg price · +5/tap Egg price +48% → +60% Eggs per tap 25 → 30 +8% income Pays back in ~6 min 2 s Level 4 / 30 $65.00
+1:26 state {"top":"Egg Farm $3.32 +$2.40/s 0 build ccd7bf9 $3.32, 0 eggs","goal":"★ Farm L1 · +40% income ~0:41 ›","collect":"Collect +30 · 3 ready","toast":"","t":"1:26","sinceBuy":1}
+1:27 sell Sell all (4 eggs · $6.40)
+1:31 sell Sell all (5 eggs · $8.00)
+1:34 sell Sell all (5 eggs · $8.00)
+1:37 sell Sell all (5 eggs · $8.00)
+1:40 sell Sell all (4 eggs · $6.40)
+1:41 state {"top":"Egg Farm $40.12 +$2.40/s 0 build ccd7bf9 $40.12, 0 eggs","goal":"★ Farm L1 · +40% income ~0:25 ›","collect":"Collect +30 · 2 ready","toast":"","t":"1:41","sinceBuy":16}
+1:43 sell Sell all (5 eggs · $8.00)
+1:47 sell Sell all (5 eggs · $8.00)
+1:49 sell Sell all (4 eggs · $6.40)
+1:52 sell Sell all (4 eggs · $6.40)
+1:55 sell Sell all (5 eggs · $8.00)
+1:56 state {"top":"Egg Farm $76.92 +$2.40/s 0 build ccd7bf9 $76.92, 0 eggs","goal":"★ Farm L1 · +40% income ~0:10 ›","collect":"Collect +30 · 2 ready","toast":"","t":"1:56","sinceBuy":31}
+1:56 shot m390-09-1m56-periodic.png
+1:58 sell Sell all (5 eggs · $8.00)
+2:01 sell Sell all (4 eggs · $6.40)
+2:04 sell Sell all (4 eggs · $6.40)
+2:07 sell Sell all (5 eggs · $8.00)
+2:08 buy [Collection] gap=43s :: Collect per tap +12% egg price · +5/tap Egg price +60% → +72% Eggs per tap 30 → 35 +7% income Pays back in ~9 min 38 s Level 5 / 30 $104.00
+2:10 sell Sell all (4 eggs · $6.88)
+2:12 state {"top":"Egg Farm $8.60 +$2.58/s 3 build ccd7bf9 $8.60, 0 eggs","goal":"★ Farm L1 · +40% income ~0:36 ›","collect":"Collect +35 · 0 ready","toast":"","t":"2:12","sinceBuy":4}
+2:13 sell Sell all (4 eggs · $6.88)
+2:16 sell Sell all (5 eggs · $8.60)
+2:19 sell Sell all (5 eggs · $8.60)
+2:23 sell Sell all (5 eggs · $8.60)
+2:26 sell Sell all (5 eggs · $8.60)
+2:27 state {"top":"Egg Farm $49.88 +$2.58/s 0 build ccd7bf9 $49.88, 0 eggs","goal":"★ Farm L1 · +40% income ~0:20 ›","collect":"Collect +35 · 2 ready","toast":"","t":"2:27","sinceBuy":19}
+2:29 sell Sell all (5 eggs · $8.60)
+2:32 sell Sell all (4 eggs · $6.88)
+2:35 sell Sell all (4 eggs · $6.88)
+2:38 sell Sell all (5 eggs · $8.60)
+2:41 sell Sell all (4 eggs · $6.88)
+2:42 state {"top":"Egg Farm $87.72 +$2.58/s 0 build ccd7bf9 $87.72, 0 eggs","goal":"★ Farm L1 · +40% income ~0:05 ›","collect":"Collect +35 · 3 ready","toast":"","t":"2:42","sinceBuy":34}
+2:44 sell Sell all (5 eggs · $8.60)
+2:47 sell Sell all (4 eggs · $6.88)
+2:47 buy [Farm] gap=40s :: Farm level Coop upgrade at L5 Hens 5 → 10 Coop capacity 50 → 100 Egg price $1.72 → $1.81 Customers every 5s → 4.75s Customer demand 6–12 → 8
+2:50 sell Sell all (6 eggs · $10.86)
+2:53 sell Sell all (5 eggs · $9.05)
+2:56 sell Sell all (6 eggs · $10.86)
+2:57 state {"top":"Egg Farm $33.97 +$3.62/s 0 build ccd7bf9 $33.97, 0 eggs","goal":"★ Farm L2 · +57% income ~0:28 ›","collect":"Collect +35 · 4 ready","toast":"","t":"2:57","sinceBuy":10}
+2:58 sell Sell all (6 eggs · $10.86)
+3:02 sell Sell all (7 eggs · $12.67)
+3:04 sell Sell all (5 eggs · $9.05)
+3:07 sell Sell all (6 eggs · $10.86)
+3:10 sell Sell all (5 eggs · $9.05)
+3:12 state {"top":"Egg Farm $86.46 +$3.62/s 4 build ccd7bf9 $86.46, 0 eggs","goal":"★ Farm L2 · +57% income ~0:14 ›","collect":"Collect +35 · 1 ready","toast":"","t":"3:12","sinceBuy":25}
+3:13 sell Sell all (6 eggs · $10.86)
+3:16 sell Sell all (7 eggs · $12.67)
+3:19 sell Sell all (5 eggs · $9.05)
+3:22 sell Sell all (7 eggs · $12.67)
+3:25 sell Sell all (5 eggs · $9.05)
+3:26 buy [Farm] gap=38s :: Farm level Coop upgrade at L5 Hens 10 → 15 Coop capacity 100 → 150 Egg price $1.81 → $1.89 Customers every 4.75s → 4.51s Customer demand 8–1
+3:28 sell Sell all (8 eggs · $15.12)
+3:29 state {"top":"Egg Farm $20.88 +$5.67/s 0 build ccd7bf9 $20.88, 0 eggs","goal":"★ Farm L3 · +40% income ~0:29 ›","collect":"Collect +35 · 4 ready","toast":"","t":"3:29","sinceBuy":3}
+3:31 sell Sell all (9 eggs · $17.01)
+3:34 sell Sell all (9 eggs · $17.01)
+3:37 sell Sell all (9 eggs · $17.01)
+3:40 sell Sell all (9 eggs · $17.01)
+3:43 sell Sell all (9 eggs · $17.01)
+3:44 state {"top":"Egg Farm $105.93 +$5.67/s 0 build ccd7bf9 $105.93, 0 eggs","goal":"★ Farm L3 · +40% income ~0:14 ›","collect":"Collect +35 · 5 ready","toast":"","t":"3:44","sinceBuy":19}
+3:46 sell Sell all (9 eggs · $17.01)
+3:49 sell Sell all (9 eggs · $17.01)
+3:52 sell Sell all (9 eggs · $17.01)
+3:55 sell Sell all (8 eggs · $15.12)
+3:55 buy [Collection] gap=30s :: Collect per tap +12% egg price · +5/tap Egg price +72% → +84% Eggs per tap 35 → 40 +7% income Pays back in ~7 min 9 s Level 6 / 30 $167.00
+3:58 sell Sell all (9 eggs · $18.18)
+4:00 sell Sell all (8 eggs · $16.16)
+4:02 state {"top":"Egg Farm $39.42 +$6.06/s 0 build ccd7bf9 $39.42, 0 eggs","goal":"★ Farm L3 · +40% income ~0:24 ›","collect":"Collect +40 · 5 ready","toast":"","t":"4:02","sinceBuy":6}
+4:02 shot m390-10-4m02-periodic.png
+4:03 sell Sell all (8 eggs · $16.16)
+4:06 sell Sell all (9 eggs · $18.18)
+4:09 sell Sell all (9 eggs · $18.18)
+4:12 sell Sell all (9 eggs · $18.18)
+4:15 sell Sell all (9 eggs · $18.18)
+4:17 state {"top":"Egg Farm $128.30 +$6.06/s 5 build ccd7bf9 $128.30, 0 eggs","goal":"★ Farm L3 · +40% income ~0:09 ›","collect":"Collect +40 · 2 ready","toast":"","t":"4:17","sinceBuy":22}
+4:18 sell Sell all (9 eggs · $18.18)
+4:21 sell Sell all (9 eggs · $18.18)
+4:24 sell Sell all (8 eggs · $16.16)
+4:27 sell Sell all (10 eggs · $20.20)
+4:28 buy [Farm] gap=32s :: Farm level Coop upgrade at L5 Hens 15 → 20 Coop capacity 150 → 200 Egg price $2.02 → $2.12 Customers every 4.51s → 4.29s Customer demand 11–
+4:30 sell Sell all (9 eggs · $19.08)
+4:32 sell Sell all (10 eggs · $21.20)
+4:33 buy [Workers] gap=5s :: Market Hand Serves customers for you Wage $0.75/min Hire $40.00
+4:33 shot m390-11-4m33-workers-manage.png
+4:33 manage-state [{"t":"Refill","dis":"true","title":"Refill Market Hand"}]
+4:33 state {"top":"Egg Farm $19.29 +$8.48/s 0 build ccd7bf9 $19.29, 0 eggs","goal":"★ Farm L4 · +30% income ~0:27 ›","collect":"Collect +40 · 7 ready","toast":"","t":"4:33","sinceBuy":0}
+4:35 sell Sell all (2 eggs · $4.24)
+4:38 sell Sell all (2 eggs · $4.24)
+4:41 sell Sell all (3 eggs · $6.36)
+4:44 sell Sell all (2 eggs · $4.24)
+4:47 sell Sell all (2 eggs · $4.24)
+4:49 sell Sell all (10 eggs · $21.20)
+4:50 state {"top":"Egg Farm $163.28 +$8.47/s 0 build ccd7bf9 $163.29, 0 eggs","goal":"★ Farm L4 · +30% income ~0:10 ›","collect":"Collect +40 · 6 ready","toast":"","t":"4:50","sinceBuy":17}
+4:52 sell Sell all (2 eggs · $4.24)
+4:54 sell Sell all (10 eggs · $21.20)
+4:57 sell Sell all (2 eggs · $4.24)
+5:00 sell Sell all (2 eggs · $4.24)
+5:00 buy [Farm] gap=27s :: Farm level Coop upgrade at L5 Hens 20 → 25 Coop capacity 200 → 250 Egg price $2.12 → $2.21 Customers every 4.29s → 4.07s Customer demand 14–
+5:03 sell Sell all (3 eggs · $6.63)
+5:06 sell Sell all (2 eggs · $4.42)
+5:07 state {"top":"Egg Farm $70.19 +$11.03/s 0 build ccd7bf9 $70.21, 0 eggs","goal":"★ Farm L5 · +25% income ~0:24 ›","collect":"Collect +40 · 8 ready","toast":"","t":"5:07","sinceBuy":6}
+5:38 sell Sell all (13 eggs · $28.73)
+5:39 state {"top":"Egg Farm $98.26 +$11.03/s 0 build ccd7bf9 $98.26, 0 eggs","goal":"★ Farm L5 · +25% income ~0:22 ›","collect":"Collect +40","toast":"","t":"5:39","sinceBuy":39}
+5:40 shot m390-12-5m40-collect-empty.png
+5:40 collect-empty Collect +40
+6:10 sell Sell all (40 eggs · $88.40)
+6:11 state {"top":"Egg Farm $186.02 +$11.03/s 0 build ccd7bf9 $186.04, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"6:11","sinceBuy":71}
+6:27 state {"top":"Egg Farm $185.72 +$11.03/s 0 build ccd7bf9 $185.74, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"6:27","sinceBuy":86}
+6:42 state {"top":"Egg Farm $185.42 +$11.03/s 0 build ccd7bf9 $185.44, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"6:42","sinceBuy":101}
+6:42 shot m390-13-6m42-periodic.png
+6:57 state {"top":"Egg Farm $185.12 +$11.03/s 0 build ccd7bf9 $185.12, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"6:57","sinceBuy":117}
+7:13 state {"top":"Egg Farm $184.78 +$11.03/s 0 build ccd7bf9 $184.78, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"7:13","sinceBuy":133}
+7:29 state {"top":"Egg Farm $184.46 +$11.03/s 0 build ccd7bf9 $184.46, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"7:29","sinceBuy":149}
+7:45 state {"top":"Egg Farm $184.16 +$11.03/s 0 build ccd7bf9 $184.16, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"7:45","sinceBuy":164}
+8:00 state {"top":"Egg Farm $183.86 +$11.03/s 0 build ccd7bf9 $183.86, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"8:00","sinceBuy":179}
+8:15 state {"top":"Egg Farm $183.54 +$11.03/s 0 build ccd7bf9 $183.56, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"8:15","sinceBuy":195}
+8:31 state {"top":"Egg Farm $183.24 +$11.03/s 0 build ccd7bf9 $183.24, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"8:31","sinceBuy":211}
+8:48 state {"top":"Egg Farm $182.90 +$11.03/s 0 build ccd7bf9 $182.90, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"8:48","sinceBuy":227}
+8:48 shot m390-14-8m48-periodic.png
+9:04 state {"top":"Egg Farm $182.58 +$11.03/s 0 build ccd7bf9 $182.58, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"9:04","sinceBuy":243}
+9:20 state {"top":"Egg Farm $182.26 +$11.03/s 0 build ccd7bf9 $182.26, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"9:20","sinceBuy":260}
+9:37 state {"top":"Egg Farm $181.92 +$11.03/s 0 build ccd7bf9 $181.92, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"9:37","sinceBuy":276}
+9:53 state {"top":"Egg Farm $181.58 +$11.03/s 0 build ccd7bf9 $181.60, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"9:53","sinceBuy":293}
+10:09 state {"top":"Egg Farm $181.26 +$11.03/s 0 build ccd7bf9 $181.28, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"10:09","sinceBuy":309}
+10:24 state {"top":"Egg Farm $180.96 +$11.03/s 0 build ccd7bf9 $180.96, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"10:24","sinceBuy":324}
+10:40 state {"top":"Egg Farm $180.64 +$11.03/s 0 build ccd7bf9 $180.66, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"10:40","sinceBuy":340}
+10:57 state {"top":"Egg Farm $180.32 +$11.03/s 0 build ccd7bf9 $180.32, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"10:57","sinceBuy":357}
+10:57 shot m390-15-10m57-periodic.png
+11:13 state {"top":"Egg Farm $179.98 +$11.03/s 0 build ccd7bf9 $180.00, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"11:13","sinceBuy":373}
+11:29 state {"top":"Egg Farm $179.66 +$11.03/s 0 build ccd7bf9 $179.68, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"11:29","sinceBuy":389}
+11:45 state {"top":"Egg Farm $179.36 +$11.03/s 0 build ccd7bf9 $179.38, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"11:45","sinceBuy":404}
+12:01 state {"top":"Egg Farm $179.04 +$11.03/s 0 build ccd7bf9 $179.04, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"12:01","sinceBuy":421}
+12:16 state {"top":"Egg Farm $178.72 +$11.03/s 0 build ccd7bf9 $178.74, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"12:16","sinceBuy":436}
+12:32 state {"top":"Egg Farm $178.42 +$11.03/s 0 build ccd7bf9 $178.42, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"12:32","sinceBuy":451}
+12:48 state {"top":"Egg Farm $178.10 +$11.03/s 0 build ccd7bf9 $178.10, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"12:48","sinceBuy":467}
+13:04 state {"top":"Egg Farm $177.78 +$11.03/s 0 build ccd7bf9 $177.80, 0 eggs","goal":"★ Farm L5 · +25% income ~0:14 ›","collect":"Collect +40","toast":"","t":"13:04","sinceBuy":484}
+13:04 shot m390-16-13m04-periodic.png
+13:20 state {"top":"Egg Farm $177.46 +$11.03/s 0 build ccd7bf9 $177.46, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"13:20","sinceBuy":500}
+13:36 state {"top":"Egg Farm $177.14 +$11.03/s 0 build ccd7bf9 $177.14, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"13:36","sinceBuy":515}
+13:52 state {"top":"Egg Farm $176.82 +$11.03/s 0 build ccd7bf9 $176.82, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"13:52","sinceBuy":531}
+14:07 state {"top":"Egg Farm $176.50 +$11.03/s 0 build ccd7bf9 $176.52, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"14:07","sinceBuy":547}
+14:23 state {"top":"Egg Farm $176.18 +$11.03/s 0 build ccd7bf9 $176.20, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"14:23","sinceBuy":563}
+14:38 state {"top":"Egg Farm $175.88 +$11.03/s 0 build ccd7bf9 $175.90, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"14:38","sinceBuy":578}
+14:54 state {"top":"Egg Farm $175.56 +$11.03/s 0 build ccd7bf9 $175.56, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"14:54","sinceBuy":594}
+15:11 state {"top":"Egg Farm $175.24 +$11.03/s 0 build ccd7bf9 $175.24, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"15:11","sinceBuy":610}
+15:11 shot m390-17-15m11-periodic.png
+15:27 state {"top":"Egg Farm $174.90 +$11.03/s 0 build ccd7bf9 $174.92, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"15:27","sinceBuy":627}
+15:43 state {"top":"Egg Farm $174.60 +$11.03/s 0 build ccd7bf9 $174.60, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"15:43","sinceBuy":642}
+15:59 state {"top":"Egg Farm $174.28 +$11.03/s 0 build ccd7bf9 $174.30, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"15:59","sinceBuy":658}
+16:14 state {"top":"Egg Farm $173.98 +$11.03/s 0 build ccd7bf9 $173.98, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"16:14","sinceBuy":674}
+16:30 state {"top":"Egg Farm $173.66 +$11.03/s 0 build ccd7bf9 $173.66, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"16:30","sinceBuy":690}
+16:45 state {"top":"Egg Farm $173.34 +$11.03/s 0 build ccd7bf9 $173.34, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"16:45","sinceBuy":705}
+17:00 state {"top":"Egg Farm $173.04 +$11.03/s 0 build ccd7bf9 $173.06, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"17:00","sinceBuy":720}
+17:16 state {"top":"Egg Farm $172.72 +$11.03/s 0 build ccd7bf9 $172.74, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"17:16","sinceBuy":736}
+17:16 shot m390-18-17m16-periodic.png
+17:32 state {"top":"Egg Farm $172.40 +$11.03/s 0 build ccd7bf9 $172.42, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"17:32","sinceBuy":752}
+17:49 state {"top":"Egg Farm $172.08 +$11.03/s 0 build ccd7bf9 $172.10, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"17:49","sinceBuy":768}
+18:05 state {"top":"Egg Farm $171.76 +$11.03/s 0 build ccd7bf9 $171.76, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"18:05","sinceBuy":784}
+18:20 state {"top":"Egg Farm $171.44 +$11.03/s 0 build ccd7bf9 $171.44, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"18:20","sinceBuy":800}
+18:36 state {"top":"Egg Farm $171.14 +$11.03/s 0 build ccd7bf9 $171.14, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"18:36","sinceBuy":815}
+18:51 state {"top":"Egg Farm $170.82 +$11.03/s 0 build ccd7bf9 $170.84, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"18:51","sinceBuy":831}
+19:08 state {"top":"Egg Farm $170.50 +$11.03/s 0 build ccd7bf9 $170.52, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"19:08","sinceBuy":847}
+19:24 state {"top":"Egg Farm $170.16 +$11.03/s 0 build ccd7bf9 $170.18, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"19:24","sinceBuy":864}
+19:24 shot m390-19-19m24-periodic.png
+19:41 state {"top":"Egg Farm $169.84 +$11.03/s 0 build ccd7bf9 $169.84, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"19:41","sinceBuy":881}
+19:56 state {"top":"Egg Farm $169.52 +$11.03/s 0 build ccd7bf9 $169.54, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"19:56","sinceBuy":896}
+20:12 state {"top":"Egg Farm $169.20 +$11.03/s 0 build ccd7bf9 $169.22, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"20:12","sinceBuy":912}
+20:27 state {"top":"Egg Farm $168.90 +$11.03/s 0 build ccd7bf9 $168.92, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"20:27","sinceBuy":927}
+20:43 state {"top":"Egg Farm $168.58 +$11.03/s 0 build ccd7bf9 $168.60, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"20:43","sinceBuy":943}
+20:59 state {"top":"Egg Farm $168.28 +$11.03/s 0 build ccd7bf9 $168.28, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"20:59","sinceBuy":958}
+21:14 state {"top":"Egg Farm $167.96 +$11.03/s 0 build ccd7bf9 $167.96, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"21:14","sinceBuy":974}
+21:31 state {"top":"Egg Farm $167.62 +$11.03/s 0 build ccd7bf9 $167.64, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"21:31","sinceBuy":991}
+21:31 shot m390-20-21m31-periodic.png
+21:48 state {"top":"Egg Farm $167.30 +$11.03/s 0 build ccd7bf9 $167.30, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"21:48","sinceBuy":1008}
+22:03 state {"top":"Egg Farm $166.98 +$11.03/s 0 build ccd7bf9 $167.00, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"22:03","sinceBuy":1023}
+22:19 state {"top":"Egg Farm $166.68 +$11.03/s 0 build ccd7bf9 $166.70, 0 eggs","goal":"★ Farm L5 · +25% income ~0:15 ›","collect":"Collect +40","toast":"","t":"22:19","sinceBuy":1038}
+22:34 state {"top":"Egg Farm $166.38 +$11.03/s 0 build ccd7bf9 $166.38, 0 eggs","goal":"★ Farm L5 · +25% income ~0:16 ›","collect":"Collect +40","toast":"","t":"22:34","sinceBuy":1053}
+22:49 state {"top":"Egg Farm $166.06 +$11.03/s 0 build ccd7bf9 $166.06, 0 eggs","goal":"★ Farm L5 · +25% income ~0:16 ›","collect":"Collect +40","toast":"","t":"22:49","sinceBuy":1069}

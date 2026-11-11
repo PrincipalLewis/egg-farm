@@ -1,0 +1,29 @@
+== 2026-10-24T21:12:00+02:00 releases/latest
+{"assets":[{"digest":"sha256:dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b","id":673050571,"name":"egg-farm.html","size":547466,"updated_at":"2026-10-24T18:58:40Z"}],"draft":false,"id":422922551,"name":"M4.1 patch 1 (30b29d3)","prerelease":false,"published_at":"2026-10-24T19:11:02Z","tag_name":"m4.1-p1-30b29d3","target_commitish":"30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134"}
+== tag ref
+30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134 commit
+30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134	refs/tags/m4.1-p1-30b29d3
+== run 40124125129
+Unknown JSON field: "path"
+Available fields:
+  attempt
+  conclusion
+  createdAt
+  databaseId
+  displayTitle
+  event
+  headBranch
+  headSha
+  jobs
+  name
+  number
+  startedAt
+  status
+  updatedAt
+  url
+  workflowDatabaseId
+  workflowName
+{"completedAt":"2026-10-24T19:11:20Z","conclusion":"success","name":"check-uploaded-html","startedAt":"2026-10-24T19:11:07Z","steps":["Set up job: success","Run actions/checkout@v4: success","Run actions/setup-node@v4: success","Download release .html assets: success","check-release-build --build-id on each uploaded html: success","Post Run actions/setup-node@v4: success","Post Run actions/checkout@v4: success","Complete job: success"]}
+== other release-asset runs
+[{"conclusion":"success","databaseId":40124125129,"headBranch":"m4.1-p1-30b29d3","updatedAt":"2026-10-24T19:11:21Z"},{"conclusion":"success","databaseId":40107345648,"headBranch":"m4.1-5d9efa6","updatedAt":"2026-10-24T15:31:27Z"},{"conclusion":"failure","databaseId":39212260477,"headBranch":"m4b-dd223f5","updatedAt":"2026-10-19T06:50:37Z"}]
+{"conclusion":"success","createdAt":"2026-10-24T19:11:04Z","displayTitle":"M4.1 patch 1 (30b29d3)","event":"release","headBranch":"m4.1-p1-30b29d3","headSha":"30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134","status":"completed","updatedAt":"2026-10-24T19:11:21Z","url":"https://github.com/PrincipalLewis/egg-farm/actions/runs/40124125129","workflowName":"release-asset"}

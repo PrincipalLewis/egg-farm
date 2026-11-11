@@ -1,0 +1,33 @@
+=== shipping paths vs 0bbcea52 ===
+=== flags.ts present? ===
+-rw-r--r-- 1 box box 1554 Nov 10 00:51 src/config/flags.ts
+=== balance.json? ===
+-rw-r--r-- 1 box box 8880 Nov 10 00:51 src/config/balance.json
+=== golden test files + pins vs 0bbcea52 ===
+M	tests/telemetry-schema.test.ts
+M	tests/v5-breeds-state.test.ts
+tests/m4a-flag-off.test.ts
+tests/v5-golden-m5persist.test.ts
+tests/v5-golden-rewards.test.ts
+tests/v5-golden-spawn.test.ts
+tests/zg-flagoff-dom.test.ts
+=== golden-related file blobs tip vs 0bbcea52 ===
+tests/m4a-flag-off.test.ts tip=2c9130528d7b9ab5a770133df6b00b6c86d34b3c base120=2c9130528d7b9ab5a770133df6b00b6c86d34b3c identical=YES
+tests/zg-flagoff-dom.test.ts tip=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6 base120=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6 identical=YES
+tests/v5-golden-m5persist.test.ts tip=a40c9bf06c0fe5cb9834bf5fc1830a7401240771 base120=a40c9bf06c0fe5cb9834bf5fc1830a7401240771 identical=YES
+tests/v5-golden-rewards.test.ts tip=c7ccb2544f7a8029ce3c454e2e20970d2426212d base120=c7ccb2544f7a8029ce3c454e2e20970d2426212d identical=YES
+tests/v5-golden-spawn.test.ts tip=f5e9967494dcfea6f63f079d4a32f652ccf43df7 base120=f5e9967494dcfea6f63f079d4a32f652ccf43df7 identical=YES
+src/config/flags.ts tip=991a4c2ae3131a23ede22590a76c222ea95aaf79 base120=991a4c2ae3131a23ede22590a76c222ea95aaf79 identical=YES
+src/config/balance.json tip=ccf51e9e68c3af89745f5b9b0fdaa69afb5f4e78 base120=ccf51e9e68c3af89745f5b9b0fdaa69afb5f4e78 identical=YES
+src/config/balance.ts tip=706ffe15e8171c62d30f835c38cb5dede8c54168 base120=2420e186a00009dce9cb5511f68f64fe9a17194b identical=NO
+data/economy.json MISSING_AT_TIP
+public/data/economy.json MISSING_AT_TIP
+=== flags breeds value at tip ===
+2: * v5 release flags: ONE namespace, balance.m4.flags.* (HoE D-C1, engineering/m5.0-sizing.md §12.1; D-HOE-20261029-02).
+4: * Names are the spec names. zeroGainUi / bestBuyV2 are spelled m5.flags.* in the M5.1 specs; they live here as m4.flags.*.
+10:  'rc2Refill', 'autoRefill', 'clockWage', 'breeds', 'zeroGainUi', 'bestBuyV2', // M5.1
+14:/** True only when balance.m4.enabled AND balance.m4.flags[f] === 1. */
+15:export const flagOn = (p: EconomyParams, f: M5Flag): boolean => !!p.m4?.enabled && p.m4.flags?.[f] === 1;
+=== engineering/golden vs 0bbcea52 ===
+flagoff-golden.a01faea.test.ts
+m4on-golden.90a9c84.test.ts

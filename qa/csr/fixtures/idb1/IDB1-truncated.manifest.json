@@ -1,0 +1,35 @@
+{
+ "fixtureId": "IDB1-truncated",
+ "ac": "CSR-AC-IDB1 (D-HOP-34)",
+ "builtAgainst": "dd223f5",
+ "idb": {
+  "db": "eggfarm",
+  "version": 1,
+  "store": "save",
+  "keyPath": null,
+  "autoIncrement": false,
+  "key": "main",
+  "source": "dd223f5 src/save/idb-mirror.ts:11",
+  "records": [
+   {
+    "key": "main",
+    "valueType": "string",
+    "value": "{\"version\":6,\"savedAt\":1792378780000,\"saveSeq\":5,\"sum\":\"c9ece8d1\",\"state\":{\"coinsCents\":7777777,\"coop\":0,\"basket\":55,\"collectionLevel\":12,\"farmLevel\":\"abc\",\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":92056499"
+   }
+  ]
+ },
+ "localStorage": {
+  "set": {
+   "eggfarm.ui": "{\"onboardingDone\":true}"
+  },
+  "mustBeAbsent": [
+   "eggfarm.save",
+   "eggfarm.save.bak",
+   "eggfarm.save.v6_backup",
+   "eggfarm.save.corrupt.index"
+  ]
+ },
+ "valueSha256": "afc1d4798cbd72bcd1251fa82ab5ab723ae561b9543225fc554660be4c217b34",
+ "todayValidateReason": "parse",
+ "note": "OQ-1 payload cut at half its length (truncated JSON)"
+}

@@ -1,0 +1,8 @@
+c46476dda4c931badbe0ab4b0ddce9385e250d84
+100644 ea14b4231c0c94527cba067dd814d2a58fb02a9b 1	src/telemetry/telemetry.ts
+100644 fa8775e8238079fd0b6fc0ae063248a9090a9ab0 2	src/telemetry/telemetry.ts
+100644 3cd0134a940043dc66a70a0f033428c26bfa25b8 3	src/telemetry/telemetry.ts
+
+Auto-merging src/telemetry/telemetry.ts
+CONFLICT (content): Merge conflict in src/telemetry/telemetry.ts
+exit_code=1

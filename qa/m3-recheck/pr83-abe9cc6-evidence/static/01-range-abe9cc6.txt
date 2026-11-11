@@ -1,0 +1,22 @@
+# fetched 2026-10-30T11:05:38+01:00
+abe9cc620421779bda2be1dc2ce0be94f6c7670c
+a923206b80f2c301341d100d9eaa34554e948fb9
+abe9cc6 Merge origin/rc/v5 (458f74c) into fix/m41-p2 (#83 final head, HoE GO 09:31)
+f883dad #83 D-HOP-2026-10-30-02 fit: docked Refill pill reserves the widest countdown (Fredoka has no tabular digits)
+8be9ae7 #83 nit: AC-R9 JSDoc back above refillTiredLabel (QA pre-review F8)
+b159379 #83 shots: nav-upgrades-n{1,2,0} frame the bottom nav with the Upgrades sheet closed (QA F6)
+3ecf482 #83 Art-c2 on every Refill: refused-tap shake / reduced-motion refusedFlash on the nav, docked-header and Workers-bar Refill (QA F4)
+d4989fa #83 D-HOP-2026-10-30-02 (b): cooldown Refill shows "Refill" + countdown; name starts with the visible text (QA F2, F3)
+
+ scripts/m41-p2-browser.mjs         | 64 +++++++++++++++++++++++++++++++++-----
+ scripts/rc0-browser.mjs            |  8 ++---
+ src/ui/app.ts                      |  4 +--
+ src/ui/styles.css                  | 17 +++++++---
+ src/ui/workers-ui.ts               | 20 +++++++-----
+ tests/m41-p1-asleep-signal.test.ts | 12 +++----
+ tests/m41-p2-ui-dom.test.ts        | 20 ++++++++++--
+ tests/m41-p2-ui-minors.test.ts     | 43 +++++++++++++++++++++++--
+ 8 files changed, 151 insertions(+), 37 deletions(-)
+## merge abe9cc6 tree == merge-tree(f883dad,458f74c):
+e4ba5b913308af23f30b6719e2b701c62f127a9f
+e4ba5b913308af23f30b6719e2b701c62f127a9f

@@ -1,0 +1,4 @@
+370b5581a1fc66407085569d4433e14733f39448121363c16de62f7e23d03d22  qa/m5/test-plan-abilities.md
+e83d72ec7ab53c49bb352ae1c5081029a75cd10cc087ee31d54d361f0ca8082d  artifacts/v5-ui/harness-rc-next/m5/abilities-v08-rules.mjs
+f912c2087fdf68345b8cda470e38f9c9c22c5cee1c159c277d8e146e8e94a041  artifacts/v5-ui/harness-rc-next/m5/abilities-v08.mjs
+f2fce77c1f921240d902a23400f00a2e2c60be68a605537a039931c0738b0db1  artifacts/v5-ui/harness-rc-next/tests/fixtures/m5b/ab-cases.json

@@ -1,0 +1,16 @@
+{"eng":"webkit","mode":"headless","scene":"blank rAF","frames":0}
+{"eng":"webkit","mode":"headless","scene":"F24 farm view","frames":868,"p50":24,"p95":26,"max":31,"over20Pct":87.9}
+{"eng":"webkit","mode":"headless","scene":"F24 Market open","frames":845,"p50":24,"p95":26,"max":32,"over20Pct":95.5}
+{"eng":"webkit","mode":"headed","scene":"blank rAF","frames":0}
+{"eng":"webkit","mode":"headed","scene":"F24 farm view","frames":1200,"p50":17,"p95":18,"max":18,"over20Pct":0}
+{"eng":"webkit","mode":"headed","scene":"F24 Market open","frames":1200,"p50":17,"p95":18,"max":21,"over20Pct":0.1}
+{"eng":"chromium","mode":"headless","scene":"blank rAF","frames":0}
+{"eng":"chromium","mode":"headless","scene":"F24 farm view","frames":1201,"p50":16.7,"p95":16.7,"max":16.8,"over20Pct":0}
+{"eng":"chromium","mode":"headless","scene":"F24 Market open","frames":1201,"p50":16.7,"p95":16.7,"max":16.8,"over20Pct":0}
+{"eng":"chromium","mode":"headed","scene":"blank rAF","frames":0}
+{"eng":"chromium","mode":"headed","scene":"F24 farm view","frames":1201,"p50":16.7,"p95":16.8,"max":16.8,"over20Pct":0}
+{"eng":"chromium","mode":"headed","scene":"F24 Market open","frames":1201,"p50":16.7,"p95":16.7,"max":16.8,"over20Pct":0}
+{"eng":"webkit","mode":"headless","scene":"blank rAF (setContent)","frames":600,"p50":16,"p95":17}
+{"eng":"webkit","mode":"headed","scene":"blank rAF (setContent)","frames":600,"p50":17,"p95":18}
+{"eng":"chromium","mode":"headless","scene":"blank rAF (setContent)","frames":600,"p50":16.7,"p95":16.7}
+{"eng":"chromium","mode":"headed","scene":"blank rAF (setContent)","frames":600,"p50":16.7,"p95":16.8}

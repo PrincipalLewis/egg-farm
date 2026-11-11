@@ -1,0 +1,32 @@
+== git diff --stat 458f74c a923206 -- src/game.ts src/save/
+ src/save/m5-fields.ts | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+== git diff --stat d52f35b a923206 -- src/game.ts src/save/
+ src/save/m5-fields.ts | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+== git diff --stat 5d9efa61 a923206 -- src/game.ts src/save/
+ src/game.ts           |  31 ++++++++++++--
+ src/save/m5-fields.ts | 111 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/save/save.ts      |   3 +-
+ 3 files changed, 141 insertions(+), 4 deletions(-)
+== git log -L74,79 / -L172,178 src/game.ts @a923206 (commits)
+3f5c6327273d64c7f5846777b4214987b86cb581 2026-10-16 22:40:27 +0200 M4-A fixed: §3d localStorage-only interim migration, built to frozen arch/m4-design @ 96c4a1e (m4-design v0.3.3), spec v1.10
+01a4643ac19602104f5ad5ecfe845d8a010f6ea6 2026-10-16 21:30:56 +0200 v3 review fixes (CHANGES REQUESTED on 677317d; HoE + Architect: M4A-31(a)/(f)1 governs) - M1/m2: the v6 backup must be in localStorage AND IndexedDB (boot writes LS first, then IDB with the stored LS bytes). If either fails, the migration is aborted: the migrated state is discarded, the session runs and saves plain v6 with the M4 flag off (no tracksV7 marker), save_migration_aborted{reason: ls_backup_failed|idb_backup_failed}, and it retries on the next load only. The Can't-save notice comes only from the normal v6 save path. - m1: the backup is written after the newer-save refusal and the lease claim (boot re-checks ownership and newer saves after the IDB await). - m3: write-once keeping the first backup is recorded as an accepted risk (game.ts comment). - m4: Reset clears v6_backup (RESET_KEYS + IDB clear). - n1: migrate() flags tracksMigrated; only validate() attaches the raw bytes. n2: debugBackdateSave goes through the load-time gate (documented). - m5: tests for .bak + IDB mirror/reconcile round trip with the flag off, LS and IDB quota failures (v6 saves, progress across a reload, retry next load, never mid-session), the real IdbMirror.writeV6Backup failure, newer-save ordering and Reset. The old test that asserted play-on-migrated is replaced.
+6dc2f5abded7f6905ec13f4e1d2ba9a6401a0fee 2026-10-17 10:52:15 +0200 Merge origin/main (acdbedc, incl. #31 M4-A) into fix/hidden-tab-offline
+aaec8ba8121da3d2446d8db0a66c8a89642415b1 2026-10-17 05:30:34 +0200 M4-A v4: flag-off storage bytes = main+#17 (golden f90d1678 + storage pins pass) - save(): a flag-off build writes an unmarked farm in main's shape (no hensLevel/eggValueLevel/celebratedMilestones; flagOffShape shared with Game.persisted) and without saveSeq; saveSeq (ADR M4-19) rides only on M4-build saves (flag on, an M4 build pre-migration via tracksOff, or a tracksV7 farm). IDB mirror writes follow the same rule. - Tests back on live balance like #12 69265f2: economy/p4/pacing/pacing-acw1/m2-runs = main+#17; m4a-sync builds with economy-config (#17 farmCostFromCsv).
+7bb285cfe7fbdb300ada8f5bd5498cfbd9ccd14b 2026-10-17 04:12:14 +0200 M4-A flag-off: gate F1 farm cost curve, grader tier costs and v7 save fields behind balance.m4.enabled (HoE flag-off rule)
+3f5c6327273d64c7f5846777b4214987b86cb581 2026-10-16 22:40:27 +0200 M4-A fixed: §3d localStorage-only interim migration, built to frozen arch/m4-design @ 96c4a1e (m4-design v0.3.3), spec v1.10
+== blame
+3f5c6327 (Senior Engineer, Features & Economy Wiring 2026-10-16 22:40:27 +0200 74)     if (f?.tracksMigrated && f.v6State && f.preTracksRaw && r.newer === undefined) {
+3f5c6327 (Senior Engineer, Features & Economy Wiring 2026-10-16 22:40:27 +0200 75)       this.tracksPending = { raw: f.preTracksRaw, on: b, v6Keys: f.v6Keys ?? Object.keys(f.v6State) };
+3f5c6327 (Senior Engineer, Features & Economy Wiring 2026-10-16 22:40:27 +0200 76)       f.state = f.v6State; b = this.b = tracksOff(b);
+3f5c6327 (Senior Engineer, Features & Economy Wiring 2026-10-16 22:40:27 +0200 77)       // M4-24 / M4-20: IndexedDB gets no writes until the commit is confirmed (deferral sessions never write it).
+3f5c6327 (Senior Engineer, Features & Economy Wiring 2026-10-16 22:40:27 +0200 78)       this.pausedMirror = this.mirror; this.mirror = null;
+01a4643a (Senior Engineer, Features & Economy Wiring 2026-10-16 21:30:56 +0200 79)     }
+6dc2f5ab (Senior Engineer, Saves & Persistence       2026-10-17 10:52:15 +0200 172)   private persisted(st: GameState = this.state): GameState {
+7bb285cf (Senior Engineer, UI & rc1 Fixes            2026-10-17 04:12:14 +0200 173)     const p = this.tracksPending;
+7bb285cf (Senior Engineer, UI & rc1 Fixes            2026-10-17 04:12:14 +0200 174)     if (!p) {
+6dc2f5ab (Senior Engineer, Saves & Persistence       2026-10-17 10:52:15 +0200 175)       return flagOffShape(st, this.b); // HoE flag-off rule (save.ts)
+7bb285cf (Senior Engineer, UI & rc1 Fixes            2026-10-17 04:12:14 +0200 176)     }
+6dc2f5ab (Senior Engineer, Saves & Persistence       2026-10-17 10:52:15 +0200 177)     const o: any = {}; for (const k of p.v6Keys) if (k in st) o[k] = (st as any)[k]; return o;
+3f5c6327 (Senior Engineer, Features & Economy Wiring 2026-10-16 22:40:27 +0200 178)   }

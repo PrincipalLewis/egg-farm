@@ -1,0 +1,362 @@
+--- a/qa/v5-saves/scripts/v5-saves-gate.sh
++++ b/qa/v5-saves/scripts/v5-saves-gate.sh
+@@ -45,8 +45,29 @@
+ if [ $DRY = 1 ]; then R=$V/dryrun/gate-DRYRUN-$S7/results; else R=$STUDIO/artifacts/$GID/results; fi
+ case "$R" in */scratch/*|*/out/*|/tmp/*|*/tmp/*) echo "refusing results dir $R (rule 19)"; exit 2;; esac
+ [ $DRY = 0 ] && [ -e "$R/SHA256SUMS" ] && { echo "$R already has a MANIFEST (gate runs once); move it aside with HoQ's OK first"; exit 2; }
++# ---- Preflight (QA-D-1030-SAVES-RC-1 (2)(3), 2026-10-30): refuse to START (exit 2) before anything is written, locked or timed, so a
++# refusal never burns the once-only RC results dir. Same rules in --dry-run (RC semantics), except the engine set may be narrowed there.
++NAF=$SC/gate-na.txt   # pinned in SCRIPTS.sha256: "<step-id> | <citation>" = explicit, cited NOT APPLICABLE (never an unset env)
++na_cite(){ [ "${GATE_NO_NA:-0}" = 1 ] && return 1; [ -f "$NAF" ] || return 1; local c; c=$(awk -F' [|] ' -v id="$1" '$0 !~ /^#/ && $1==id {print $2; exit}' "$NAF"); [ -n "$c" ] && echo "$c"; }   # GATE_NO_NA=1 can only make the gate stricter
++pf(){ echo "$(date '+%F %T %Z') PREFLIGHT REFUSED: $*" >&2; exit 2; }
++ss -ltn | grep -q ":$PORT " && pf "port $PORT is busy (G0-port-free would FAIL and a stale server could serve the wrong files): $(ss -ltnp 2>/dev/null | grep ":$PORT " | head -1 | tr -s ' ')"
++[ $DRY = 0 ] && [ "$(tr ',' '\n' <<<"$ENGINES" | sort | paste -sd,)" != chromium,firefox,webkit ] && pf "RC mode needs all 3 engines (got '$ENGINES')"
++if [ -z "${SS15_MODULE:-}" ] && ! na_cite U-ss15-share-guard >/dev/null; then pf "U-ss15-share-guard is required: set SS15_MODULE/SS15_EXPORT or add a cited N/A line to $NAF (an uncited NOT RUN hard-fails)"; fi
+ mkdir -p "$R"; ST=$R/status.log; SUM=$R/summary.txt; : > "$SUM"; HF=0
+-step(){ local id=$1 hard=$2; shift 2; if [ -n "${NEEDBUILD:-}" ] && [ "$id" != G1-build ] && ! grep -q "^G1-build | PASS" "$SUM"; then echo "$id | NOT RUN | $hard | build failed" | tee -a "$SUM"; [ $hard = HARD ] && HF=$((HF+1)); return 0; fi; say "START $id"; "$@" > "$R/$id.log" 2>&1; local rc=$?; local res=$([ $rc = 0 ] && echo PASS || echo FAIL)
++notrun(){ echo "$1 | NOT RUN | $2 | $3" | tee -a "$SUM"; [ "$2" = HARD ] && HF=$((HF+1)); return 0; }   # a required step that did not run is a hard fail (both modes)
++na(){ echo "$1 | N/A | $2 | $3" | tee -a "$SUM"; say "N/A $1: $3"; return 0; }   # explicit, cited, from $NAF only; not counted
++# Lock logging (QA-D-1030-SAVES-RC-1 (4)): read-only. Holder from /proc/locks (FLOCK on the lock file's inode) -> /proc/<pid>/stat
++# (pgid, sid) -> lane = the .pids/<lane>.pids file whose recorded leader PID is that sid or pgid -> cmdline. Never signals anything.
++lockwho(){ local id=$1 ino h p g s lane cmd; ino=$(stat -c %i "$LOCK" 2>/dev/null) || return 0
++  h=$(awk -v i="$ino" '$2=="FLOCK" {n=split($6,a,":"); if (a[n]==i) print $5}' /proc/locks 2>/dev/null | sort -u)
++  [ -z "$h" ] && { say "LOCK $id: free"; return 0; }
++  for p in $h; do read -r g s < <(sed 's/^.*) //' /proc/$p/stat 2>/dev/null | awk '{print $3, $4}'); cmd=$(tr '\0' ' ' < /proc/$p/cmdline 2>/dev/null | cut -c1-200)
++    lane=$(for f in $STUDIO/.pids/*.pids; do awk -v s="$s" -v g="$g" '$1==s || $1==g {found=1} END {exit !found}' "$f" 2>/dev/null && basename "$f" .pids; done | paste -sd, )
++    say "LOCK $id: busy, holder pid ${p} pgid ${g:-?} sid ${s:-?} lane ${lane:-unknown} cmd: ${cmd:-?} (read-only /proc; not signalled)"; done; }
++LK(){ local id=$1; shift; lockwho "$id"; local t0 rc i; t0=$(date +%s)   # flock -w 1200 as before, in 40 x 30 s slices so every holder change is logged
++  for i in $(seq 1 40); do flock -E 75 -w 30 "$LOCK" bash -c 'printf "%s LOCK %s: acquired after %ss wait\n" "$(date "+%F %T %Z")" "$1" "$(( $(date +%s) - $2 ))" >> "$3"; shift 3; exec "$@"' _ "$id" "$t0" "$ST" "$@"; rc=$?
++    [ $rc = 75 ] || return $rc; lockwho "$id (still waiting $(( $(date +%s) - t0 ))s)"; done; say "LOCK $id: gave up after $(( $(date +%s) - t0 ))s"; return 75; }
++step(){ local id=$1 hard=$2; shift 2; if [ -n "${NEEDBUILD:-}" ] && [ "$id" != G1-build ] && ! grep -q "^G1-build | PASS" "$SUM"; then notrun "$id" $hard "build failed"; return 0; fi; say "START $id"; "$@" > "$R/$id.log" 2>&1; local rc=$?; local res=$([ $rc = 0 ] && echo PASS || echo FAIL)
+   [ $res = FAIL ] && [ $hard = HARD ] && HF=$((HF+1)); echo "$id | $res | $hard | exit $rc" | tee -a "$SUM"; say "END $id $res"; return 0; }
+ T0=$(date +%s); GATE_WINDOW_S=${GATE_WINDOW_S:-7200}; GATE_WARN_S=${GATE_WARN_S:-6300}
+ startwin; trap stopwin EXIT   # lane-run timer on lane saves-qa; stopwin = lane-kill on its recorded PID only (rule 21)
+@@ -66,17 +87,23 @@
+   SV=$(grep -ho 'SAVE_VERSION *= *[0-9]*' "$WT"/src/save/*.ts | head -1 | grep -o '[0-9]*$'); echo "SAVE_VERSION=$SV (expected 6: no bump per m5.0-sizing F2 / breeds spec §6)" | tee -a "$SUM"
+   [ -z "$FLAGS" ] && FLAGS=$(cd "$WT" && node -e "try{const b=require('./src/config/balance.json');const m=b.m4||{};const f=m.flags||{};console.log(m.enabled?Object.keys(f).filter(k=>f[k]===1||f[k]===true).join(','):'')}catch(e){console.log('')}" 2>/dev/null); echo "telemetry flags on (m4.enabled && m4.flags.*=1, v5-rc-manifest rule 5): '$FLAGS'" | tee -a "$SUM"
+   # 2 saves-browser, one engine per lock hold
+-  for E in ${ENGINES//,/ }; do step S-$E HARD flock -w 1200 "$LOCK" timeout 600 node "$SC/saves-browser.mjs" --html "$HTML" --engine $E --port $PORT --out "$R/saves-$E" --expect-build "$XB" --expect-version ${SV:-6} \
++  for E in chromium firefox webkit; do [[ ",$ENGINES," == *",$E,"* ]] || notrun S-$E HARD "engine not selected (--engines $ENGINES)"; done
++  for E in ${ENGINES//,/ }; do step S-$E HARD LK S-$E timeout 600 node "$SC/saves-browser.mjs" --html "$HTML" --engine $E --port $PORT --out "$R/saves-$E" --expect-build "$XB" --expect-version ${SV:-6} \
+       --old-l41 "$FX/src-m4.1-5d9efa6.egg-farm.html" --old-p1 "$FX/src-m4.1-p1-30b29d3.egg-farm.html"; done
+   # 3 telemetry v0.6.2 (Chromium)
+   # T-AC2 hidden split (HoQ 2026-10-29 20:12): HARD on Chromium (in T-chromium); Firefox/WebKit run TS2 only, HARD unless the document.hidden stub can't apply (reason logged by the checker)
+   MIDS=$(cd "$WT" && node -e "try{const M=require('./src/config/balance.json').m4.milestones;console.log([...M.hens.map(m=>'hens:'+m.level),...M.grades.map(g=>'grade:'+g.level),...M.balanced.map((_,i)=>'balanced:'+(i+1))].join(','))}catch(e){console.log('')}" 2>/dev/null); echo "milestone id enum (RC balance.json): '$MIDS'" | tee -a "$SUM"
+   RING=$(cd "$WT" && node -e "try{const b=require('./src/config/balance.json');const f=o=>o&&typeof o==='object'?('ring_size' in o?o.ring_size:Object.values(o).map(f).find(x=>x!==undefined)):undefined;console.log(f(b)??'')}catch(e){console.log('')}" 2>/dev/null); echo "telemetry ring_size (RC balance.json): '$RING'" | tee -a "$SUM"
+-  step T-chromium HARD flock -w 1200 "$LOCK" timeout 600 node "$SC/telemetry-check.mjs" --html "$HTML" --engine chromium --port $PORT --out "$R/telemetry" --expect-build "$XB" ${FLAGS:+--flags "$FLAGS"} ${MIDS:+--milestone-ids "$MIDS"} ${RING:+--ring-size $RING} --qa-dir "$WT/dist-qa"
++  # T steps re-targeted to the telemetry rc/v5 ships (--schema shipped; v0.6.2 rows N/A-by-scope, D-CEO-20261030-04)
++  [[ ",$ENGINES," == *,chromium,* ]] || notrun T-chromium HARD "engine not selected"
++  [[ ",$ENGINES," == *,chromium,* ]] && step T-chromium HARD LK T-chromium timeout 600 node "$SC/telemetry-check.mjs" --schema shipped --html "$HTML" --engine chromium --port $PORT --out "$R/telemetry" --expect-build "$XB" ${FLAGS:+--flags "$FLAGS"} ${MIDS:+--milestone-ids "$MIDS"} ${RING:+--ring-size $RING} --qa-dir "$WT/dist-qa"
+   # SS-15 Rule 2 share guard (Q10). TODO(RC): set SS15_MODULE (path under the worktree), SS15_EXPORT and SS15_SIG from the #5b PR body.
+   if [ -n "${SS15_MODULE:-}" ]; then step U-ss15-share-guard HARD bash -c "cd $WT && node_modules/.bin/vite-node $SC/ss15-share-guard.mjs -- --module $WT/$SS15_MODULE --export ${SS15_EXPORT:?} --sig ${SS15_SIG:-loss,income} --out $R/ss15/result.json"
+-  else echo "U-ss15-share-guard | NOT RUN | HARD | TODO(RC): SS15_MODULE/SS15_EXPORT not bound (HoE names the function in the #5b PR body)" | tee -a "$SUM"; [ $DRY = 0 ] && HF=$((HF+1)); fi
+-  for E in ${ENGINES//,/ }; do [ $E = chromium ] && continue; step T2-$E HARD flock -w 1200 "$LOCK" timeout 600 node "$SC/telemetry-check.mjs" --html "$HTML" --engine $E --port $PORT --out "$R/telemetry-$E" --expect-build "$XB" --only TS2 ${FLAGS:+--flags "$FLAGS"}; done
++  elif C=$(na_cite U-ss15-share-guard); then na U-ss15-share-guard HARD "$C"
++  else notrun U-ss15-share-guard HARD "SS15_MODULE/SS15_EXPORT not bound and no cited N/A in gate-na.txt"; fi
++  for E in firefox webkit; do [[ ",$ENGINES," == *",$E,"* ]] || notrun T2-$E HARD "engine not selected"; done
++  for E in ${ENGINES//,/ }; do [ $E = chromium ] && continue; step T2-$E HARD LK T2-$E timeout 600 node "$SC/telemetry-check.mjs" --schema shipped --html "$HTML" --engine $E --port $PORT --out "$R/telemetry-$E" --expect-build "$XB" --only TS2 ${FLAGS:+--flags "$FLAGS"}; done
++else for id in S-chromium S-firefox S-webkit T-chromium U-ss15-share-guard T2-firefox T2-webkit; do notrun $id HARD "no RC html ($HTML)"; done
+ fi
+ # 4 existing suites (may need adapting to M5 APIs: triage a FAIL before calling it a defect)
+ for t in m41-7-save-noreg oq2-offline-grant-once; do [ -d "$WT/tests" ] && cp "$M3/$t.qa.test.ts" "$WT/tests/"; done
+@@ -85,13 +112,14 @@
+ step V-noreg-base INFO basewt
+ step V-noreg-rc HARD bash -c "cd $WT && NOREG_OUT=$R/noreg-rc-$S7.json npx vitest run tests/m41-7-save-noreg.qa.test.ts --maxWorkers=2 --minWorkers=1"
+ step V-noreg-compare HARD bash -c "node $M3/m41-7-save-noreg-compare.mjs $R/noreg-rc-$S7.json $R/noreg-base-${BASE:0:7}.json > $R/noreg-compare.txt && sed -n 2,4p $R/noreg-compare.txt && grep -q 'valid-DIFF 0, .*errors 0' $R/noreg-compare.txt && grep -q 'reloadLossless=false: none' $R/noreg-compare.txt && ! grep -qE 'samePick=false|sameState=false' $R/noreg-compare.txt"
+-step B-csr8-lease HARD bash -c "flock -w 1200 $LOCK timeout 600 node $M3/csr-m41-7-b8-14.mjs $WT $PORT $R/csr8 $S7 csr8 | tee /dev/stderr | grep -q '^DONE fails=0$'"
++csr8(){ ( set +o pipefail; LK B-csr8-lease timeout 600 node $M3/csr-m41-7-b8-14.mjs $WT $PORT $R/csr8 $S7 csr8 | tee /dev/stderr | grep -q '^DONE fails=0$' ); }
++step B-csr8-lease HARD csr8
+ # resetat full run held the lock ~9.5 min in the dry run: split into two holds to stay under 10 min each
+-step B-resetat-AC1-3 HARD env ONLY=BRS-AC1,BRS-AC2,BRS-AC3 flock -w 1200 "$LOCK" timeout 600 node "$M3/csr-m41-7-resetat.mjs" "$WT" $PORT "$R/resetat-a" $S7 chromium
+-step B-resetat-AC4-CLK HARD env ONLY=BRS-AC4,BRS-CLK flock -w 1200 "$LOCK" timeout 600 node "$M3/csr-m41-7-resetat.mjs" "$WT" $PORT "$R/resetat-b" $S7 chromium
++step B-resetat-AC1-3 HARD LK B-resetat-AC1-3 env ONLY=BRS-AC1,BRS-AC2,BRS-AC3 timeout 600 node "$M3/csr-m41-7-resetat.mjs" "$WT" $PORT "$R/resetat-a" $S7 chromium
++step B-resetat-AC4-CLK HARD LK B-resetat-AC4-CLK env ONLY=BRS-AC4,BRS-CLK timeout 600 node "$M3/csr-m41-7-resetat.mjs" "$WT" $PORT "$R/resetat-b" $S7 chromium
+ # 5 cleanup (own worktrees only; keep if dirty) + manifest
+ for w in "$WT" "$WB"; do [ -d "$w" ] && { rm -f "$w"/tests/*.qa.test.ts; git -C "$w" status --porcelain | grep -q . && say "KEEP dirty $w" || git -C "$GIT" worktree remove --force "$w"; }; done
+ stopwin; say "lock window used: $(( ($(date +%s)-T0)/60 )) min of $((GATE_WINDOW_S/60))$([ $(( $(date +%s)-T0 )) -gt $GATE_WINDOW_S ] && echo ' OVERRUN: HoQ + UI QA must already have been told')"
+-NR=$(grep -c '| FAIL | HARD' "$SUM"); VERD=$([ $HF = 0 ] && echo PASS || echo FAIL); echo "VERDICT: $VERD (hard_fail=$HF) $([ $DRY = 1 ] && echo DRYRUN)" | tee -a "$SUM"; say "DONE $VERD"
++NR=$(grep -c '| FAIL | HARD' "$SUM"); echo "counts: PASS $(grep -c '| PASS |' "$SUM"), FAIL-HARD $NR, NOT-RUN-HARD $(grep -c '| NOT RUN | HARD' "$SUM"), N/A $(grep -c '| N/A |' "$SUM") (N/A only from gate-na.txt, cited)" | tee -a "$SUM"; VERD=$([ $HF = 0 ] && echo PASS || echo FAIL); echo "VERDICT: $VERD (hard_fail=$HF) $([ $DRY = 1 ] && echo DRYRUN)" | tee -a "$SUM"; say "DONE $VERD"
+ sign_results   # LAST writer of status.log, then signs it (see sign_results above)
+ exit $([ $HF = 0 ] && echo 0 || echo 1)
+--- a/qa/v5-saves/scripts/saves-browser.mjs
++++ b/qa/v5-saves/scripts/saves-browser.mjs
+@@ -71,9 +71,14 @@
+   if (off['S-OFF-2h'] && off['S-OFF-3h']) { const a = off['S-OFF-2h'].grant, c = off['S-OFF-3h'].grant; rec('S-OFF-cap', a > 0 && Math.abs(c - a) <= Math.max(1, a * 0.01), { grant2h: a, grant3h: c, rule: '2 h offline cap: 3 h away grants the same as 2 h (±1%)', short: { a, c } }); }
+   // S-BAK: corrupt main (truncated) + valid .bak (p1-B) -> recovery restores the .bak state, no loss vs .bak
+   if (want('S-BAK')) { const id = 'S-BAK-p1-B'; const errs = []; const ctx = await newCtx(); const p = await ctx.newPage(); watch(p, errs, id); const bak = fx(FIX['p1-B']);
+-    await seedLS(p, { 'eggfarm.save': bak.slice(0, Math.floor(bak.length / 2)), 'eggfarm.save.bak': bak }); const { b, u, after } = await bootNew(p, null); await shot(p, id);
+-    const nl = noLoss(bak, after, { expectVersion: EV }); const dump = await lsDump(p); const kept = Object.keys(dump).some(k => k.startsWith('eggfarm.save.corrupt'));
+-    rec(id, buildOk(b) && u.recovery && nl.pass && kept, { ui: u, noLoss: nl, corruptKept: kept, errors: errs, short: { recovery: u.recoveryOutcome, fails: nl.fails, kept, errs: errs.length } }); await ctx.close(); }
++    // Race fix (QA-D-1030-SAVES-RC-1 (1)): `prev` = the planted truncated main, so waitSave returns only the game's own rewrite;
++    // the UI is read only after .recovery-layer is attached (Firefox could read it before the restore screen mounted: dry-run a923206, 1/3 FAIL).
++    const trunc = bak.slice(0, Math.floor(bak.length / 2)); await seedLS(p, { 'eggfarm.save': trunc, 'eggfarm.save.bak': bak });
++    await p.goto(srv.url + 'new.html'); const b = await ids(p); await start(p); await skipOnb(p);
++    const layer = await p.waitForSelector('.recovery-layer', { state: 'attached', timeout: 10000 }).then(() => true, () => false);
++    const u = await ui(p); const after = await waitSave(p, trunc, 7000); await shot(p, id);
++    const nl = noLoss(bak, after === trunc ? null : after, { expectVersion: EV }); const dump = await lsDump(p); const kept = Object.keys(dump).some(k => k.startsWith('eggfarm.save.corrupt'));
++    rec(id, buildOk(b) && layer && u.recovery && nl.pass && kept, { ui: u, layer, noLoss: nl, corruptKept: kept, errors: errs, short: { layer, recovery: u.recoveryOutcome, fails: nl.fails, kept, errs: errs.length } }); await ctx.close(); }
+   // S-IDB: LS main absent, IDB main = valid p1-B -> silent restore (save_restore{source:'idb'}), no loss
+   if (want('S-IDB')) { const id = 'S-IDB-p1-B'; const errs = []; const ctx = await newCtx(); const p = await ctx.newPage(); watch(p, errs, id); const raw = fx(FIX['p1-B']); await idbPut(p, raw);
+     const { b, u, after } = await bootNew(p, null); await shot(p, id); const nl = noLoss(raw, after, { expectVersion: EV });
+--- a/qa/v5-saves/scripts/telemetry-check.mjs
++++ b/qa/v5-saves/scripts/telemetry-check.mjs
+@@ -1,3 +1,6 @@
++// SCHEMA SELECT (D-CEO-20261030-04 / QA-D-1030-SAVES-RC-1, 2026-10-30): default --schema shipped = the telemetry rc/v5 3f582db ships
++// (src/telemetry/telemetry.ts + call sites, table SHIPPED below with file:line). --schema v062 = the original v0.6.2 checker, unchanged;
++// under `shipped` every v0.6.2-only assertion is still evaluated but recorded as N/A-by-scope (cited, never counted), not deleted.
+ // Telemetry v0.6.2 checker (Saves QA, prep 2026-10-29). Captures the real event log in-browser (UI-driven play only) and
+ // asserts names (allowlist, T-AC9), payload schemas (required / enums / types / forbidden), envelope (sid + fgMs, no sessionMs),
+ // session_start-only fields, privacy, and firing rules T-AC1/3/5/8 (+T-AC2 best effort), plus the Saves-lane events
+@@ -6,7 +9,9 @@
+ // Flags: conditional fields/events are required ONLY for flags named in --flags and must be ABSENT otherwise.
+ import { serve, serveDir, launch, watch, seedLS, ids, start, skipOnb, play, writeJSON, readText, sha256, dismissWelcome } from './lib.mjs';
+ import { parseArgs } from 'node:util'; import path from 'node:path'; import { readFileSync } from 'node:fs';
+-const { values: A } = parseArgs({ options: { html: { type: 'string' }, port: { type: 'string', default: '5961' }, out: { type: 'string' }, engine: { type: 'string', default: 'chromium' }, flags: { type: 'string', default: '' }, 'expect-build': { type: 'string' }, 'hidden-hard': { type: 'boolean', default: false }, only: { type: 'string' }, 'milestone-ids': { type: 'string' }, 'ring-size': { type: 'string', default: '5000' }, 'selftest-only': { type: 'boolean', default: false }, 'qa-dir': { type: 'string' } } });
++const { values: A } = parseArgs({ options: { html: { type: 'string' }, port: { type: 'string', default: '5961' }, out: { type: 'string' }, engine: { type: 'string', default: 'chromium' }, flags: { type: 'string', default: '' }, 'expect-build': { type: 'string' }, 'hidden-hard': { type: 'boolean', default: false }, only: { type: 'string' }, 'milestone-ids': { type: 'string' }, 'ring-size': { type: 'string', default: '5000' }, 'selftest-only': { type: 'boolean', default: false }, 'qa-dir': { type: 'string' }, schema: { type: 'string', default: 'shipped' } } });
++if (!['shipped', 'v062'].includes(A.schema)) { console.error('--schema shipped|v062'); process.exit(2); } const V062 = A.schema === 'v062';
++const NA_V062 = 'N/A-by-scope: telemetry v0.6.2 (manifest rows 11/24) moved to 5.1 by HoE ruling 11:08 Oct 30, confirmed D-CEO-20261030-04; not a waiver';
+ if (!A.html || !A.out) { console.error('need --html --out'); process.exit(2); }
+ const HERE = path.dirname(new URL(import.meta.url).pathname); const SCH = JSON.parse(readFileSync(path.join(HERE, '../spec/telemetry-v062.schema.json'), 'utf8'));
+ const FX = path.join(HERE, '../fixtures'); const P1B = readText(path.join(FX, 'p1-30b29d3/p1-B-workers-F10.save.json'));
+@@ -26,6 +31,94 @@
+   balanced_tier: { req: ['id', 'tier', 'min_level'], opt: [], v: e => { const [k, n] = String(e.id).split(':');
+     return [!MILESTONE_IDS.has(e.id) && `id ${JSON.stringify(e.id)} not in milestone enum`, k !== 'balanced' && `id kind ${k} is not balanced`, !(Number.isInteger(e.tier) && e.tier === +n) && `tier ${e.tier} does not match id ${e.id}`, !(Number.isInteger(e.min_level) && e.min_level >= 0) && `min_level ${e.min_level} not a non-negative integer`].filter(Boolean).join('; '); } } };
+ CLOSED.save_recovery_notice_dismissed = CLOSED.save_recovery_notice_shown;
++// ---- SHIPPED schema: rc/v5 3f582dbfe31a9d309e6b1d0e96a4f77711b333ec (read 2026-10-30 by Saves QA; HoQ to OK before re-pin) ----
++// Envelope telemetry.ts:40 (track), :58 (worker_summary), :62 (tap): {type, ts: integer ms, sessionMs: integer >= 0} on every stored event,
++// ts - sessionMs == the Telemetry's sessionStart (one constant per page load = the shipped session identity). No sid/fgMs (v0.6.2 envelope).
++// Field types: i = integer, n = finite number, b = boolean, s = string, a = array, [..] = enum, T = literal true. '?' = optional.
++const WID = ['market_hand', 'coop_hand', 'hawker', 'grader'], MOOD = ['working', 'tired', 'asleep', 'unpaid'];   // sim/workers.ts:4, :6
++const CORRUPT = ['missing', 'empty', 'parse', 'wrong_type', 'version', 'missing_state', 'checksum', 'invalid_state'];   // save/save.ts:201
++const RSRC = ['bak', 'idb', 'v6_backup', 'none', 'deferred'];   // save/save.ts:237
++const SKIN = ['golden_egg', 'broody_hen'];   // sim/events.ts:25
++const SHIPPED = {
++  session_start: { f: { install_id: 's', build: 's' }, src: 'game.ts:57' },
++  session_end: { f: {}, src: 'game.ts:305 (endSession, main.ts:145 pagehide)' },
++  tap: { f: { count: 'i', eggs: 'n' }, src: 'telemetry.ts:62 (closeTapWindow; game.ts:115 collect -> tap)' },
++  worker_summary: { f: { windowMs: 'i' }, dyn: /^(wage_(market_hand|coop_hand|hawker|grader)_cents|coop_hand_eggs|market_hand_eggs|market_hand_cents)$/, src: 'telemetry.ts:58; keys game.ts:116-118' },
++  customer_arrive: { f: { id: 'i', N: 'i' }, src: 'sim/events.ts:4' },
++  customer_served: { f: { id: 'i', N: 'i', partial: 'b' }, src: 'sim/events.ts:5' },
++  customer_partial: { f: { id: 'i', N: 'i', filled: 'n' }, src: 'sim/events.ts:6' },
++  customer_lost: { f: { reason: ['timeout', 'full_queue'], 'id?': 'i', 'N?': 'i' }, src: 'sim/events.ts:7' },
++  sell: { f: { id: 'i', k: 'n', N: 'i', price: 'n', value: 'n', by: ['player'] }, src: "sim/events.ts:8; by 'market_hand' is summed, game.ts:118" },
++  upgrade: { f: { upgrade: ['collection', 'farm', 'hens', 'eggValue'], newLevel: 'i', cost: 'n', coinsBefore: 'n', 'track?': ['farm', 'hens', 'egg_value', 'collection'] }, src: 'sim/events.ts:9' },
++  worker_hire: { f: { worker: WID, cost: 'n', farm: 'i' }, src: 'sim/events.ts:12' },
++  worker_manage: { f: { worker: WID, energyBefore: 'n' }, src: 'sim/events.ts:13' },
++  worker_manage_all: { f: { workers: 'a', energyBefore: 'a' }, src: 'sim/events.ts:14' },
++  worker_state: { f: { worker: WID, state: MOOD }, src: 'sim/events.ts:15' },
++  worker_yawn: { f: { worker_id: WID, energy_pct: 'n', farm_level: 'i' }, src: 'sim/events.ts:16' },
++  grader_tier: { f: { tier: 'i', mult: 'n', cost: 'n' }, src: 'sim/events.ts:18' },
++  milestone_reached: { closed: true, src: 'sim/events.ts:19 (validator CLOSED.milestone_reached)' },
++  balanced_tier: { closed: true, src: 'sim/events.ts:20 (validator CLOSED.balanced_tier)' },
++  coop_full: { f: { phase: ['start', 'end'], 'durationMs?': 'i' }, src: 'game.ts:124-125' },
++  offline_grant: { f: { secondsAway: 'n', eggs: 'n' }, src: 'game.ts:109' },
++  save_restore: { f: { source: ['idb'] }, src: 'game.ts:70' },
++  save_corrupt: { f: { reason: CORRUPT, had_backup: 'b', restored_from_backup: 'b', build: 's', 'copy_failed?': 'T', recovered_from: RSRC, store: ['ls', 'idb'], tried: 'a', 'restored_version?': 'i', migrated: 'b' }, src: 'game.ts:81-85; save.ts:201, :237-238' },
++  save_savedat_invalid: { f: {}, src: 'game.ts:100' },
++  save_newer_version: { f: { version: 'i', build: 's', 'live?': 'T' }, src: 'game.ts:66, :299' },
++  save_migration_aborted: { f: { store: 's', reason: 's', path: 's', attempt_count: 'i', 'stuck_on_v6?': 'T' }, src: 'game.ts:206' },
++  save_backup_idb_unavailable: { f: { reason: 's', path: 's' }, src: 'game.ts:225' },
++  save_migrated: { f: { from: 'i', to: 'i', migration: 's', refund_cents: 'n', farm_level: 'i', backup_stores: 'a' }, src: 'game.ts:252' },
++  save_failed: { f: { reason: 's' }, src: 'game.ts:282' },
++  tab_guard_blocked_write: { f: {}, src: 'game.ts:273' },
++  tab_guard_takeover: { f: { reason: 's' }, src: 'main.ts:122' },
++  save_reset: { f: {}, src: 'ui/app.ts:282; debug/panel.ts:38' },
++  save_recovery_export: { f: { case: ['R', 'F', 'Q', 'D'] }, src: 'ui/app.ts:748; save.ts:241' },
++  save_recovery_notice_shown: { closed: true, src: 'ui/save-recovery.ts:113, :207 (validator CLOSED, enums save-recovery.ts:47, :52-53)' },
++  save_recovery_notice_dismissed: { closed: true, src: 'ui/save-recovery.ts:113, :209' },
++  coop_hand_tip: { f: { phase: ['tap', 'shown'], 'farm?': 'i' }, src: 'ui/app.ts:157, :626' },
++  goal_tap: { f: { target: 's', state: ['ready', 'waiting', 'noincome', 'done'] }, src: 'ui/app.ts:448; ui/next-goal.ts:14' },
++  onboarding_step: { f: { step: 'i', name: 's', 'action?': ['shown', 'open', 'dismiss', 'done'], 'timeout?': 'T' }, src: 'telemetry.ts:85; ui/app.ts:647-702' },
++  onboarding_skip: { f: { atStep: 'i' }, src: 'telemetry.ts:86; ui/app.ts:700' },
++  onboarding_abandon: { f: { atStep: 'i', reason: ['reload'] }, src: 'ui/app.ts:693' },
++  ios_home_tip_shown: { f: { browser: 's' }, src: 'ui/app.ts:723' },
++  ios_home_tip_dismissed: { f: {}, src: 'ui/app.ts:728' },
++  // M5.0 sim events (sim/events.ts:29-40): allowed ONLY with their m4.flags.* on; any of them with the flag off FAILS (flags-off RC).
++  collectible_spawned: { flag: 'golden+broody', f: { skin: SKIN, farm_level: 'i', collection_level: 'i', slot_id: 's', interval_s: 'n', deferred_ms: 'n' }, src: 'sim/events.ts:30' },
++  collectible_collected: { flag: 'golden+broody', f: { skin: SKIN, reaction_ms: 'n', in_warning: 'b', reward_type: ['cash', 'frenzy', 'eggs', 'eggs_cash', 'broody_cash'], reward_value: 'n', reward_duration_s: 'n', farm_level: 'i', 'nest_fill_share?': 'n' }, src: 'sim/events.ts:31' },
++  collectible_expired: { flag: 'golden+broody', f: { skin: SKIN, reason: ['timeout', 'offline', 'reload', 'takeover', 'reset'], farm_level: 'i' }, src: 'sim/events.ts:32' },
++  frenzy_started: { flag: 'golden', f: { mult: 'n', duration_s: 'n', farm_level: 'i', grader_tier: 'i' }, src: 'sim/events.ts:33' },
++  frenzy_ended: { flag: 'golden', f: { extra_coins: 'n', eggs_sold: 'n', sold_by_player: 'n', sold_by_workers: 'n', reason: ['timeout', 'reset'] }, src: 'sim/events.ts:34' },
++  streak_started: { flag: 'streak', f: { farm_level: 'i', collection_level: 'i' }, src: 'sim/events.ts:35' },
++  streak_peak: { flag: 'streak', f: { value: 'n', duration_s: 'n', credited_taps: 'n', time_at_cap_s: 'n', extra_coins: 'n', frenzy_overlap_s: 'n', reason: 's', max_tier: 'i' }, src: 'sim/events.ts:36; game.ts:304' },
++  abilities_unlocked: { flag: 'abilities', f: { farm: 'i', hired: 'a' }, src: 'sim/events.ts:37' },
++  ability_used: { flag: 'abilities', f: { worker: WID, farm: 'i', energy_pct: 'n', mood: MOOD, via_all: 'b', t_since_ready_s: 'n', in_sheet: 'b' }, src: 'sim/events.ts:38' },
++  ability_blocked: { flag: 'abilities', f: { worker: WID, reason: ['cooldown', 'asleep', 'unpaid', 'paused', 'lockout'], count: 'i' }, src: 'sim/events.ts:39' },
++  ability_ended: { flag: 'abilities', f: { worker: WID, cause: ['expired', 'paused', 'offline', 'asleep', 'unpaid'], effect_s: 'n' }, src: 'sim/events.ts:40' } };
++const ENV_S = ['type', 'ts', 'sessionMs'], V062_ENV = ['sid', 'fgMs'];   // telemetry.ts:40/:58/:62; v0.6.2 envelope fields must be ABSENT in the shipped build
++const tOk = (t, v) => Array.isArray(t) ? t.includes(v) : t === 'i' ? Number.isInteger(v) : t === 'n' ? typeof v === 'number' && Number.isFinite(v) : t === 'b' ? typeof v === 'boolean' : t === 's' ? typeof v === 'string' : t === 'a' ? Array.isArray(v) : t === 'T' ? v === true : false;
++const LONG_OK = { session_start: ['install_id', 'build'], save_corrupt: ['build'], save_newer_version: ['build'], save_migration_aborted: ['path'], save_backup_idb_unavailable: ['path'], save_migrated: ['migration'] };
++/** Shipped-schema problems for one STORED event (LS eggfarm.telemetry). */
++function shippedProblems(e) {
++  const P = []; const s = SHIPPED[e.type]; if (typeof e.type !== 'string') return ['event without string type'];
++  if (!s) return [`not in shipped allowlist: ${e.type}`];
++  if (!Number.isInteger(e.ts)) P.push(`${e.type}: envelope ts ${JSON.stringify(e.ts)} not integer`);
++  if (!(Number.isInteger(e.sessionMs) && e.sessionMs >= 0)) P.push(`${e.type}: envelope sessionMs ${JSON.stringify(e.sessionMs)} not integer >= 0`);
++  for (const f of V062_ENV) if (f in e) P.push(`${e.type}: ${f} present (v0.6.2 envelope is not in the shipped build: drift)`);
++  if (s.flag && !s.flag.split('+').some(fl => FLAGS.has(fl))) P.push(`${e.type}: fired with flag ${s.flag} off (flags-off RC)`);
++  if (s.closed) { const C = CLOSED[e.type]; const allowed = new Set([...ENV_S, ...C.req, ...C.opt]); for (const f of C.req) if (!(f in e)) P.push(`${e.type}: required ${f} missing`);
++    for (const f of Object.keys(e)) if (!allowed.has(f)) P.push(`${e.type}: field ${f} outside the closed list`); const bad = C.v(e); if (bad) P.push(`${e.type}: ${bad}`); }
++  else { const allowed = new Set(ENV_S);
++    for (const [k, t] of Object.entries(s.f)) { const opt = k.endsWith('?'), f = opt ? k.slice(0, -1) : k; allowed.add(f);
++      if (!(f in e)) { if (!opt) P.push(`${e.type}: required ${f} missing`); continue; } if (!tOk(t, e[f])) P.push(`${e.type}.${f}=${JSON.stringify(e[f])} not ${Array.isArray(t) ? 'in enum ' + JSON.stringify(t) : t}`); }
++    for (const f of Object.keys(e)) if (!allowed.has(f) && !(s.dyn && s.dyn.test(f) && typeof e[f] === 'number' && Number.isFinite(e[f]))) P.push(`${e.type}: field ${f} outside the closed list`); }
++  if (e.type === 'offline_grant' && 'awayS' in e) P.push('offline_grant: forbidden field awayS (G-TEL-3: use secondsAway)');
++  if (e.type === 'tap' && !(Number.isInteger(e.count) && e.count >= 1 && e.eggs >= 0)) P.push(`tap: count ${e.count} / eggs ${e.eggs} out of range`);
++  if (e.type === 'save_corrupt' && Array.isArray(e.tried)) for (const t of e.tried) if (!(t && ['bak', 'idb', 'v6_backup'].includes(t.source) && ['valid', 'invalid', 'absent', 'unavailable'].includes(t.result) && Object.keys(t).every(k => ['source', 'result', 'reason'].includes(k)))) P.push(`save_corrupt.tried entry ${JSON.stringify(t)} not {source,result,reason?} (save.ts:238)`);
++  if (e.type === 'worker_manage_all' && !(Array.isArray(e.workers) && e.workers.every(w => WID.includes(w)) && Array.isArray(e.energyBefore) && e.energyBefore.length === e.workers.length)) P.push('worker_manage_all: workers/energyBefore malformed');
++  for (const [k, v] of Object.entries(e)) if (typeof v === 'string') { if (v.length > SCH.privacy.maxStringLen && !(LONG_OK[e.type] ?? []).includes(k)) P.push(`${e.type}.${k}: free text? len ${v.length}`); for (const pat of SCH.privacy.patterns) if (new RegExp(pat).test(v)) P.push(`${e.type}.${k}: PII-like value`); }
++  return P; }
++const evProblems = e => V062 ? schemaProblems(e) : shippedProblems(e);
++/** Shipped session identity: every event of one page load has the same anchor ts - sessionMs (telemetry.ts:40/:58/:62). */
++const anchor = e => e.ts - e.sessionMs;
+ // sales_stall (sales-stopped-spec 2c2c323b §8; allowed only with m4.flags.salesStopped on, SS-23). Closed list per §8; no reuse_count.
+ const STALL = { phase: ['shown', 'resolved'], cause: ['mh_asleep', 'mh_paused', 'mh_unpaid', 'no_mh', 'ch_asleep', 'ch_unpaid', 'other'], st: ['working', 'tired', 'asleep', 'unpaid', 'paused', 'none'],
+   resolved_by: ['chip_refill', 'chip_sell_all', 'chip_collect', 'refill_elsewhere', 'sell_elsewhere', 'collect_elsewhere', 'auto_resume', 'queue_empty', 'basket_empty', 'paused', 'focus_lost', 'cause_changed', 'none'] };
+@@ -36,6 +129,9 @@
+ res.triage = {};
+ const flagT = (k, why) => { res.triage[k] = (res.triage[k] || { why, n: 0 }); res.triage[k].n++; };
+ let hard = 0; const ck = (id, pass, d = {}, isHard = true) => { if (!pass && isHard) hard++; res.checks.push({ id, pass: !!pass, hard: isHard, ...d }); console.log(`${pass ? 'PASS' : isHard ? 'FAIL' : 'INFO-FAIL'} ${id} ${JSON.stringify(d.short ?? '')}`); };
++/** v0.6.2-only assertion: real check under --schema v062; under shipped it is evaluated, recorded N/A-by-scope with its would-be result, never counted. */
++const ckV = (id, pass, d = {}, isHard = true) => { if (V062) return ck(id, pass, d, isHard); res.checks.push({ id, na: NA_V062, wouldPass: !!pass, hard: false, ...d }); console.log(`N/A-BY-SCOPE ${id} (v0.6.2 would ${pass ? 'pass' : 'fail'})`); };
++res.schema = A.schema;
+ /** Extract every event-like object from the stored telemetry value (array today; {ring,pinned,...} tolerated for v0.5 storage). */
+ function events(v) { const out = []; const walk = x => { if (Array.isArray(x)) x.forEach(walk); else if (x && typeof x === 'object') { if (typeof x.type === 'string' && 'ts' in x) out.push(x); else Object.values(x).forEach(walk); } }; walk(v); return out; }
+ const readLS = p => p.evaluate(() => { try { return JSON.parse(localStorage.getItem('eggfarm.telemetry') || 'null'); } catch { return null; } });
+@@ -98,7 +194,34 @@
+     chk('G-TEL-4 negative: milestone_reached ring-trimmed (lost) FAILS', lostM, /milestone_reached hens:10 lost/);
+     chk('G-TEL-4 negative: balanced_tier ring-trimmed (lost) FAILS', lostB, /balanced_tier balanced:1 lost/);
+     chk('G-TEL-4 negative: no trim happened FAILS (not exercised)', noTrim, /did not happen/); }
+-  for (const [name, ev, re] of cases) { const p = T(ev); R[name] = p; ck(`SELFTEST ${name}`, re ? p.some(x => re.test(x)) : p.length === 0, { short: p }); }
++  for (const [name, ev, re] of cases) { const p = T(ev); R[name] = p; ckV(`SELFTEST ${name}`, re ? p.some(x => re.test(x)) : p.length === 0, { short: p }); }
++  // Shipped-schema self-tests (3f582db): one positive per family + one negative per rule. HARD under --schema shipped.
++  if (!V062) { const E = { ts: 1000, sessionMs: 5 }; const S = o => shippedProblems({ ...E, ...o });
++    const MR2 = { type: 'milestone_reached', id: 'hens:10', track: 'hens', level: 10, mult: 1.25 };
++    const sc = [
++      ['S positive: session_start {install_id, build}', { type: 'session_start', install_id: '0b7c3f0e-1111-4222-8333-944445555666', build: 'm4.1+3f582db' }, null],
++      ['S positive: tap {count, eggs}', { type: 'tap', count: 3, eggs: 3 }, null], ['S positive: session_end (no payload)', { type: 'session_end' }, null],
++      ['S positive: upgrade with track', { type: 'upgrade', upgrade: 'eggValue', newLevel: 2, cost: 100, coinsBefore: 150, track: 'egg_value' }, null],
++      ['S positive: worker_summary dynamic keys', { type: 'worker_summary', windowMs: 60000, wage_coop_hand_cents: 5, coop_hand_eggs: 9 }, null],
++      ['S positive: save_corrupt bak restore', { type: 'save_corrupt', reason: 'parse', had_backup: true, restored_from_backup: true, build: 'm4.1+3f582db', recovered_from: 'bak', store: 'ls', tried: [{ source: 'bak', result: 'valid' }, { source: 'idb', result: 'absent' }], restored_version: 6, migrated: false }, null],
++      ['S positive: milestone_reached (closed validator)', MR2, null], ['S positive: offline_grant {secondsAway, eggs}', { type: 'offline_grant', secondsAway: 7200, eggs: 5 }, null],
++      ['S negative: unlisted event FAILS', { type: 'not_a_real_event' }, /not in shipped allowlist/],
++      ['S negative: extra field FAILS (closed list)', { type: 'tap', count: 1, eggs: 1, empty: false }, /outside the closed list/],
++      ['S negative: missing required FAILS', { type: 'session_start', build: 'm4.1+3f582db' }, /required install_id missing/],
++      ['S negative: enum violation FAILS', { type: 'upgrade', upgrade: 'luck', newLevel: 2, cost: 1, coinsBefore: 1 }, /not in enum/],
++      ['S negative: type violation FAILS', { type: 'customer_served', id: 1, N: 2, partial: 'no' }, /partial="no" not b/],
++      ['S negative: v0.6.2 sid in envelope FAILS (drift)', { type: 'session_end', sid: 'abc123' }, /sid present/],
++      ['S negative: sessionMs missing FAILS', { type: 'session_end', sessionMs: undefined }, /sessionMs/],
++      ['S negative: ts non-integer FAILS', { type: 'session_end', ts: 1.5 }, /ts 1.5 not integer/],
++      ['S negative: M5 event with flag off FAILS', { type: 'streak_started', farm_level: 3, collection_level: 2 }, /flag streak off/],
++      ['S negative: worker_summary unknown key FAILS', { type: 'worker_summary', windowMs: 1, wage_boss_cents: 2 }, /outside the closed list/],
++      ['S negative: offline_grant awayS FAILS (G-TEL-3)', { type: 'offline_grant', secondsAway: 1, eggs: 1, awayS: 1 }, /awayS/],
++      ['S negative: save_corrupt bad tried entry FAILS', { type: 'save_corrupt', reason: 'parse', had_backup: true, restored_from_backup: true, build: 'b', recovered_from: 'bak', store: 'ls', tried: [{ source: 'cloud', result: 'valid' }], migrated: false }, /tried entry/],
++      ['S negative: sell by market_hand FAILS (summed, never tracked)', { type: 'sell', id: 1, k: 1, N: 1, price: 1, value: 1, by: 'market_hand' }, /by="market_hand" not in enum/],
++      ['S negative: milestone id not in enum FAILS', { ...MR2, id: 'hens:11', level: 11 }, /not in milestone enum/],
++      ['S negative: PII-like string FAILS', { type: 'save_failed', reason: 'a@b.co' }, /PII-like/],
++      ['S negative: free text > 64 FAILS', { type: 'goal_tap', target: 'x'.repeat(65), state: 'ready' }, /free text/] ];
++    for (const [name, ev, re] of sc) { const p = S(ev); R[name] = p; ck(`SELFTEST ${name}`, re ? p.some(x => re.test(x)) : p.length === 0, { short: p }); } }
+   res.triage = {}; writeJSON(path.join(OUT, 'selftest.json'), R); }
+ if (A['selftest-only']) { writeJSON(path.join(OUT, `telemetry-selftest.json`), res); console.log(hard ? `SELFTEST: ${hard} FAIL` : 'SELFTEST: OK'); process.exit(hard ? 1 : 0); }
+ const srv = await serve(path.join(OUT, '.serve'), { 'g.html': A.html }, A.port); const br = await launch(A.engine); res.browser = br.version(); const G = srv.url + 'g.html';
+@@ -112,18 +235,32 @@
+     const ev = await endAndRead(p, srv.url); res.scenarios.TS1 = { build: b, clicks, play: pl, n: ev.length, types: [...new Set(ev.map(e => e.type))], errors: errs }; writeJSON(path.join(OUT, 'TS1-events.json'), ev);
+     if (A['expect-build']) ck('TS1-build', b.meta === A['expect-build'] && !b.dirty, { short: b.meta });
+     const ss = ev.filter(e => e.type === 'session_start'); const sid = ss[0]?.sid;
+-    ck('T-AC1 one session_start reason=load with required fields', ss.length === 1 && ss[0].reason === 'load' && ss[0].install_id && 'session_index' in ss[0] && 'viewport_w' in ss[0], { short: ss.map(e => Object.keys(e).sort().join(',')) });
+-    ck('T-AC1 every event carries the session sid', !!sid && ev.every(e => e.sid === sid), { short: { sid, without: ev.filter(e => e.sid !== sid).length } });
+-    ck('T-AC1 no event carries sessionMs', ev.every(e => !('sessionMs' in e)), { short: ev.filter(e => 'sessionMs' in e).length });
++    if (!V062) { // shipped T-AC1/3/5/8 equivalents (3f582db): session identity = anchor ts - sessionMs (telemetry.ts:40/:58/:62)
++      const lsId = await p.evaluate(() => localStorage.getItem('eggfarm.install_id')).catch(() => null);
++      const a0 = ss[0] ? anchor(ss[0]) : null; res.scenarios.TS1.anchor = a0;
++      ck('S-AC1 one session_start {install_id = LS eggfarm.install_id, build = expect-build} (game.ts:57)', ss.length === 1 && typeof ss[0].install_id === 'string' && ss[0].install_id.length > 0 && (lsId === null || ss[0].install_id === lsId) && (!A['expect-build'] || ss[0].build === A['expect-build']), { short: ss.map(e => ({ build: e.build, idLen: e.install_id?.length, lsMatch: e.install_id === lsId })) });
++      ck('S-AC1 every event carries the same session anchor ts - sessionMs (one load = one session)', a0 !== null && ev.every(e => anchor(e) === a0), { short: { a0, other: ev.filter(e => anchor(e) !== a0).length } });
++      ck('S-AC1 no v0.6.2 envelope (sid/fgMs) on any event', ev.every(e => !('sid' in e) && !('fgMs' in e)), { short: ev.filter(e => 'sid' in e || 'fgMs' in e).length }); }
++    ckV('T-AC1 one session_start reason=load with required fields', ss.length === 1 && ss[0].reason === 'load' && ss[0].install_id && 'session_index' in ss[0] && 'viewport_w' in ss[0], { short: ss.map(e => Object.keys(e).sort().join(',')) });
++    ckV('T-AC1 every event carries the session sid', !!sid && ev.every(e => e.sid === sid), { short: { sid, without: ev.filter(e => e.sid !== sid).length } });
++    ckV('T-AC1 no event carries sessionMs', ev.every(e => !('sessionMs' in e)), { short: ev.filter(e => 'sessionMs' in e).length });
+     const taps = ev.filter(e => e.type === 'tap'); const sumCount = taps.reduce((a, e) => a + (e.count || 0), 0);
+     ck('T-AC3 tap batches: Σ count == clicks, no collect_tap', sumCount === clicks && !ev.some(e => e.type === 'collect_tap'), { short: { sumCount, clicks, tapEvents: taps.length } });
+-    ck('T-AC3 tap fields count/eggs/empty/full_at_start', taps.length > 0 && taps.every(e => ['count', 'eggs', 'empty', 'full_at_start'].every(f => f in e)), { short: taps[0] });
++    ckV('T-AC3 tap fields count/eggs/empty/full_at_start', taps.length > 0 && taps.every(e => ['count', 'eggs', 'empty', 'full_at_start'].every(f => f in e)), { short: taps[0] });
+     const ups = ev.filter(e => e.type === 'upgrade');
+-    ck('T-AC5 first upgrade is_first_upgrade=true, later false', pl.bought >= 2 && ups[0]?.is_first_upgrade === true && ups.slice(1).every(e => e.is_first_upgrade === false), { short: ups.map(e => [e.upgrade, e.is_first_upgrade]) });
++    if (!V062) { ck('S-AC3 tap events are exactly {count, eggs} + envelope, count integer >= 1 (telemetry.ts:62)', taps.length > 0 && taps.every(e => Object.keys(e).sort().join(',') === 'count,eggs,sessionMs,ts,type' && Number.isInteger(e.count) && e.count >= 1), { short: taps[0] });
++      ck('S-AC5 one upgrade event per purchase (>= 1 bought), newLevel integer, coinsBefore >= cost (sim/events.ts:9)', pl.bought >= 1 && ups.length === pl.bought && ups.every(e => Number.isInteger(e.newLevel) && e.coinsBefore >= e.cost), { short: ups.map(e => [e.upgrade, e.newLevel, e.cost, e.coinsBefore]) }); }
++    ckV('T-AC5 first upgrade is_first_upgrade=true, later false', pl.bought >= 2 && ups[0]?.is_first_upgrade === true && ups.slice(1).every(e => e.is_first_upgrade === false), { short: ups.map(e => [e.upgrade, e.is_first_upgrade]) });
+     const se = ev.filter(e => e.type === 'session_end' && e.sid === sid);
+-    ck('T-AC8 session_end on pagehide: reason unload, taps_total == Σ tap.count, fg_ms', se.length === 1 && se[0].reason === 'unload' && se[0].taps_total === sumCount && Number.isInteger(se[0].fg_ms), { short: se[0] ?? null });
+-    const probs = ev.flatMap(schemaProblems); ck('T-AC9 schema/allowlist/privacy (TS1 log)', probs.length === 0, { problems: [...new Set(probs)], short: [...new Set(probs)].slice(0, 8) });
++    if (!V062) { const a0 = ss[0] ? anchor(ss[0]) : null; const seS = ev.filter(e => e.type === 'session_end');
++      ck('S-AC8 exactly one session_end on pagehide, same anchor, no payload, last pinned event (game.ts:302-305, main.ts:145)', seS.length === 1 && anchor(seS[0]) === a0 && Object.keys(seS[0]).sort().join(',') === 'sessionMs,ts,type' && ev.filter(e => e.ts > seS[0].ts && e.type !== 'tap' && e.type !== 'worker_summary').length === 0, { short: seS }); }
++    ckV('T-AC8 session_end on pagehide: reason unload, taps_total == Σ tap.count, fg_ms', se.length === 1 && se[0].reason === 'unload' && se[0].taps_total === sumCount && Number.isInteger(se[0].fg_ms), { short: se[0] ?? null });
++    if (!V062) ckV('T-AC9 v0.6.2 schema (TS1 log)', ev.flatMap(schemaProblems).length === 0, {});
++    const probs = ev.flatMap(evProblems); ck(`T-AC9 schema/allowlist/privacy (TS1 log, ${A.schema})`, probs.length === 0, { problems: [...new Set(probs)], short: [...new Set(probs)].slice(0, 8) });
+     ck('TS1 0 page/console errors', errs.length === 0, { short: errs }); await ctx.close(); }
++  if (want('TS1') && !V062) { const ctx = await ctxNew(); const p = await ctx.newPage(); await seedLS(p, { 'eggfarm.save': P1B }); await p.goto(G); await start(p); await skipOnb(p);
++    const x = await p.evaluate(() => { try { return JSON.parse(window.eggfarmExportTelemetry()); } catch (e) { return { err: String(e) }; } }); const evs = x?.events ?? [];
++    ck('S-PRIV export eggfarmExportTelemetry: events present, no install_id anywhere (telemetry.ts:72-80, main.ts:124)', evs.length > 0 && !JSON.stringify(x).includes('install_id'), { short: { n: evs.length, err: x?.err } }); await ctx.close(); }
+   // TS2 T-AC2 hidden split, DETERMINISTIC (HoQ ruling 2026-10-29 20:12 (2)): document.hidden/visibilityState stubbed with Object.defineProperty,
+   // visibilitychange dispatched (bubbles, as the browser does), Playwright fake clock (Date + performance + timers) advanced explicitly; no real tab hiding.
+   // HARD on Chromium always; on Firefox/WebKit HARD when the stub applies, INFO (with the logged reason) only if it cannot be applied. Run twice: sequences must match.
+@@ -151,7 +288,8 @@
+     ck('TS2-harness deterministic: two runs give the same session_start/end sequence', JSON.stringify(r1.norm) === JSON.stringify(r2.norm), { short: { r1: r1.norm, r2: r2.norm } }, ts2Hard);
+     const starts = r1.ev.filter(e => e.type === 'session_start'), ends = r1.ev.filter(e => e.type === 'session_end');
+     const ok = starts.length === 2 && starts[0].reason === 'load' && starts[1].reason === 'resume' && !!starts[0].sid && starts[1].sid !== starts[0].sid && starts[1].session_index === starts[0].session_index + 1 && ends.filter(e => e.reason === 'hidden').length === 1 && ends.some(e => e.reason === 'hidden' && e.sid === starts[0].sid);
+-    ck('T-AC2 hidden 30 s same session; hidden >= 60 s -> session_end{hidden} + session_start{resume, new sid, index+1}', ok, { short: { starts: starts.map(e => [e.reason, e.sid, e.session_index]), ends: ends.map(e => [e.reason, e.sid]) } }, ts2Hard);
++    if (!V062) ck('S-AC2 hidden 30 s and 61 s do NOT split the session (no visibility logic in 3f582db telemetry): one session_start, one session_end at unload, one anchor', starts.length === 1 && ends.length === 1 && r1.ev.every(e => anchor(e) === anchor(starts[0])), { short: { starts: starts.length, ends: ends.length, anchors: [...new Set(r1.ev.map(anchor))].length } }, ts2Hard);
++    ckV('T-AC2 hidden 30 s same session; hidden >= 60 s -> session_end{hidden} + session_start{resume, new sid, index+1}', ok, { short: { starts: starts.map(e => [e.reason, e.sid, e.session_index]), ends: ends.map(e => [e.reason, e.sid]) } }, ts2Hard);
+     ck('TS2 0 page/console errors', r1.errs.length === 0 && r2.errs.length === 0, { short: [...r1.errs, ...r2.errs] }, ts2Hard); }
+   // TS3 save lane: corrupt main + valid .bak -> save_corrupt{recovered_from:'bak'} + notice shown/dismissed (CSR-10, IDB1-6)
+   if (want('TS3')) { const errs = []; const ctx = await ctxNew(); const p = await ctx.newPage(); watch(p, errs, 'TS3'); await seedLS(p, { 'eggfarm.save': P1B.slice(0, 200), 'eggfarm.save.bak': P1B });
+@@ -160,7 +298,7 @@
+     const sc = ev.filter(e => e.type === 'save_corrupt'), ns = ev.filter(e => e.type === 'save_recovery_notice_shown'), nd = ev.filter(e => e.type === 'save_recovery_notice_dismissed');
+     ck('CSR-10 save_corrupt once: recovered_from bak, store ls, tried[bak valid, idb ...] in order', sc.length === 1 && sc[0].recovered_from === 'bak' && sc[0].store === 'ls' && Array.isArray(sc[0].tried) && sc[0].tried[0]?.source === 'bak' && sc[0].tried[0]?.result === 'valid' && sc[0].tried[1]?.source === 'idb', { short: sc });
+     ck('CSR-10 notice_shown + notice_dismissed {notice, source, store} once each', shown === 1 && ns.length === 1 && nd.length === 1 && ns[0].notice === 'M1' && ns[0].source === 'bak' && 'store' in ns[0] && JSON.stringify({ ...nd[0], type: 0, ts: 0, sid: 0, fgMs: 0, sessionMs: 0 }) === JSON.stringify({ ...ns[0], type: 0, ts: 0, sid: 0, fgMs: 0, sessionMs: 0 }), { short: { ns, nd } });
+-    const probs = ev.flatMap(schemaProblems); ck('T-AC9 schema (TS3 log)', probs.length === 0, { problems: [...new Set(probs)], short: [...new Set(probs)].slice(0, 6) });
++    const probs = ev.flatMap(evProblems); ck('T-AC9 schema (TS3 log)', probs.length === 0, { problems: [...new Set(probs)], short: [...new Set(probs)].slice(0, 6) });
+     ck('TS3 0 page/console errors', errs.length === 0, { short: errs }); await ctx.close(); }
+   // TS4 IDB1-7: LS main absent, valid IDB main -> save_restore {source:'idb'} exactly once; never save_restored; no save_corrupt
+   if (want('TS4')) { const errs = []; const ctx = await ctxNew(); const p = await ctx.newPage(); watch(p, errs, 'TS4'); await p.goto(srv.url + 'blank.txt');
+@@ -179,7 +317,7 @@
+   if (want('TS6')) { const errs = []; const ctx = await ctxNew(); const p = await ctx.newPage(); watch(p, errs, 'TS6'); const j = JSON.parse(P1B); j.savedAt = Date.now() - 2 * 3600e3; await seedLS(p, { 'eggfarm.save': JSON.stringify(j) });
+     await p.goto(G); await start(p); await p.waitForTimeout(800); await dismissWelcome(p, 1500); const ev = await endAndRead(p, srv.url); writeJSON(path.join(OUT, 'TS6-events.json'), ev);
+     const og = ev.filter(e => e.type === 'offline_grant'); ck('offline_grant once, eggs > 0, secondsAway present, no awayS (G-TEL-3)', og.length === 1 && og[0].eggs > 0 && Number.isFinite(og[0].secondsAway) && !('awayS' in og[0]), { short: og });
+-    const probs = og.flatMap(schemaProblems); ck('offline_grant schema', probs.length === 0, { short: probs });
++    const probs = og.flatMap(evProblems); ck('offline_grant schema', probs.length === 0, { short: probs });
+     ck('TS6 0 page/console errors', errs.length === 0, { short: errs }); await ctx.close(); }
+   // TS8 G-TEL-4 pinned retention (HARD): seed LS eggfarm.telemetry with the two pinned events (oldest), a non-pinned marker, then ring_size non-pinned taps;
+   // the game's load-time trim must drop the marker and keep both pinned events.
+@@ -207,7 +345,7 @@
+           await p.evaluate(() => { const q = window.eggfarmQa; q.set?.basket?.(30); q.set?.queue?.(3); q.worker.set('market_hand', { energy: 0 }); }); await p.waitForTimeout(10500);
+           await p.evaluate(() => window.eggfarmQa.worker.set('market_hand', { energy: 100 })); await p.waitForTimeout(2500);
+           const ev = await endAndRead(p, qs.url); writeJSON(path.join(OUT, 'TS7-events.json'), ev); const st = ev.filter(e => e.type === 'sales_stall');
+-          const shown = st.filter(e => e.phase === 'shown'), resd = st.filter(e => e.phase === 'resolved'); const probs = st.flatMap(schemaProblems);
++          const shown = st.filter(e => e.phase === 'shown'), resd = st.filter(e => e.phase === 'resolved'); const probs = st.flatMap(evProblems);
+           ck('TS7 SS-19 live: >= 1 shown, exactly one resolved per shown stall_id, no reuse_count', shown.length >= 1 && shown.every(sh => resd.filter(r => r.stall_id === sh.stall_id).length === 1) && !st.some(e => 'reuse_count' in e), { short: st.map(e => [e.phase, e.stall_id, e.cause, e.resolved_by]) });
+           ck('TS7 §8 schema on the live sales_stall events (closed list + enums)', probs.length === 0, { short: probs });
+           ck('TS7 live cause mh_asleep (never other)', shown.length > 0 && shown.every(e => e.cause === 'mh_asleep'), { short: shown.map(e => e.cause) }); }
+--- a/qa/v5-saves/scripts/gate-na.txt
++++ b/qa/v5-saves/scripts/gate-na.txt
+@@ -0,0 +1,4 @@
++# v5-saves-gate explicit NOT APPLICABLE registry (QA-D-1030-SAVES-RC-1 (2)). Format: <step-id> | <citation>. Pinned in SCRIPTS.sha256.
++# Only steps listed here may be N/A; any other required step that does not run is NOT RUN = hard fail. GATE_NO_NA=1 ignores this file.
++# HoQ still has to rule that this N/A is acceptable (flagged in the RC report).
++U-ss15-share-guard | QA-D-1030-SS15-NA / D-CEO-20261030-04: #5b not in RC (manifest row 23), HoE 11:08 Oct 30; salesStopped ships flag-off with no Rule 2 share code
+--- a/qa/v5-saves/scripts/SCRIPTS.sha256
++++ b/qa/v5-saves/scripts/SCRIPTS.sha256
+@@ -3,10 +3,11 @@
+ e18f8920556f228b5d4c6e9ebb6df99448c438ea7e1108060ee9323ae7ffa2b8  offline-seed-proof.mjs
+ f9c21487514e9218e698f1cdbd86628ed7b47afafc04a0f05a68e246e574ef82  offline-seed.mjs
+ 968e2b9070a22fc5edc024893e52dbc10626b8654cc5919073f6a4bfce86b76a  runtime-smoke.mjs
+-a019e3ebfc7980a57aa8028f99f342872382e6501bafac9c533b8323e28f36ac  saves-browser.mjs
++c36c83d0c6b653f995f9b76e05e91aa9b57c0bda40f9250dbe6c56a0f25aa32a  saves-browser.mjs
+ c8565122bfde45afa7a784308c51cdeea7fe9f7ef1873b2070c5c682a2c77112  ss15-share-guard.mjs
+-7c6b2621bb7509fbd170b4c4a0fda98a198d2072ff821347d23f7ac6ec8b6bb9  telemetry-check.mjs
++387f48ab3f683797cff199cf00712ef004d7f0f476b0345f30f5c6c8429d2095  telemetry-check.mjs
+ d634dfc847be6783d01432ba9e24a3fcef977394371f6b4a0470a36d23e793b4  publish-verify.sh
+-542683b2381ca9471b5098abf52827183eac0c5e50dbd6f4cde359afe7b163b1  v5-saves-gate.sh
++59732a44c952f1ec504a1c2b8b29cf8adbedc2d264064134ee48e1c53d5659d9  v5-saves-gate.sh
+ e2c14c0ce944e560d2f16804d32978a5a4d21ab350c7c550ff557570660f3a94  selftest-gate-sums.sh
+ 2cc81b6519759a111b4cef03c094f6f56c0e7f68a32b0c6b407dd127f601eca5  selftest-gate-timer.sh
++49b6f43c2d6f61d2f78aa4d531d0602f320f26e0412a4e8a6aa121460ce3db6c  gate-na.txt

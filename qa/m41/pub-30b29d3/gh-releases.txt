@@ -1,0 +1,25 @@
+== release list
+Egg Farm M4.1 (5d9efa6)	Latest	m4.1-5d9efa6	2026-10-24T15:31:13Z
+Egg Farm M4 B (dd223f5), M4 on, capped at L30		m4b-dd223f5	2026-10-19T06:50:32Z
+Egg Farm rc1-pre (dd52bfd), M4 off		m3-rc1-pre-dd52bfd	2026-10-17T12:42:08Z
+M4-A: Tracks (main acdbedc)		m4a-acdbedc	2026-10-17T08:50:51Z
+m3-rc1-qa-v4 (7d52952)		m3-rc1-qa-v4	2026-10-16T21:09:03Z
+M3 rc1 save-recovery dialog (a01faea)		m3-rc1-dialog	2026-10-16T17:15:17Z
+M3 rc1 save durability v4 (aaaa91a)		m3-rc1-save-v4	2026-10-16T16:33:52Z
+M3 rc1 play build (2490c79) — single-file HTML		rc1-pt1	2026-10-16T11:00:08Z
+SUPERSEDED, use rc1-pt1 — M2 play build (dd15dbf) — single-file HTML		m2-rc1-play	2026-10-15T20:24:01Z
+== api releases (incl drafts)
+m4.1-5d9efa6	draft=false	pre=false	target=5d9efa61c5e6ee31ca9ebdec20ee70167d31d463	pub=2026-10-24T15:31:13Z	assets=egg-farm.html:537287:sha256:ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1
+m4b-dd223f5	draft=false	pre=false	target=main	pub=2026-10-19T06:50:32Z	assets=egg-farm.html:511108:sha256:0bc5bb72df4ab0dee287d3e1d57b7d8178659a147dd6740738b3f0ea8f179a4c
+m4a-acdbedc	draft=false	pre=false	target=acdbedc2f5a903c512775717ddef63923ed98a39	pub=2026-10-17T08:50:51Z	assets=egg-farm.html:500382:sha256:a218f8c7f60ecf61e0b773e209f3673e6a6ff0076b1ef2b45f97767e078e049c
+m3-rc1-pre-dd52bfd	draft=false	pre=false	target=dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b	pub=2026-10-17T12:42:08Z	assets=egg-farm.html:506531:sha256:913c7febcdf885fbdcb2a474160da3a949fc10e52667ed565dc22a992ed21cc7
+rc1-pt1	draft=false	pre=false	target=2490c793caed92c5e5d9df1a7296ff3465c061b8	pub=2026-10-16T11:00:08Z	assets=egg-farm-rc1-pt1-2490c79.html:667593:sha256:5f542f491e08d28ed3f9124facff2d976cd69adefab32cf8e03996b5051c4298
+m3-rc1-save-v4	draft=false	pre=false	target=main	pub=2026-10-16T16:33:52Z	assets=egg-farm-m3-rc1-save-v4-aaaa91a.html:465832:sha256:d63b9d0b6d9c79086ec26b1a9ebb3dc5170bb52778dc8e6945d4b16e15d86ae2
+m3-rc1-qa-v4	draft=false	pre=false	target=main	pub=2026-10-16T21:09:03Z	assets=egg-farm-m3-rc1-qa-v4-7d52952.html:471475:sha256:32d7cd530ad0d1cae679526544c274b55b7a89dec29d3bf98c5cfea1aaef8e1a
+m3-rc1-dialog	draft=false	pre=false	target=main	pub=2026-10-16T17:15:17Z	assets=egg-farm-m3-rc1-dialog-a01faea.html:468557:sha256:291229bca7e6d6fbcc12626ca6c07a4c265f05b1018ca9cb32ad10d05075bbc7
+m2-rc1-play	draft=false	pre=false	target=dd15dbf10110cf9e5d6bdf82d2d88143f5e9c967	pub=2026-10-15T20:24:01Z	assets=egg-farm-dd15dbf.html:573098:sha256:e968aef31c9fa435405d90d803c73fc142c278e4f54898971368a94bb9510f33
+== latest
+m4.1-5d9efa6
+== tags at 30b29d3/d1fb206
+5d9efa61c5e6ee31ca9ebdec20ee70167d31d463	refs/tags/m4.1-5d9efa6
+30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134	refs/tags/m4.1-p1-30b29d3

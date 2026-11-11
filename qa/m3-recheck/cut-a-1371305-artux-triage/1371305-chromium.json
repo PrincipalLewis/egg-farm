@@ -1,0 +1,691 @@
+{
+ "engine": "chromium",
+ "sha": "1371305",
+ "build": "m3-rc1-pre+1371305",
+ "farm": [
+  {
+   "eta": null,
+   "placeholderHint": true,
+   "hasLink": true,
+   "pbText": "Pays back in ~3 min 43 s",
+   "linkBox": {
+    "l": 97.2,
+    "t": 502.8,
+    "r": 237.8,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 97.2,
+    "t": 530.8,
+    "r": 237.8,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 561,
+    "r": 326,
+    "b": 577,
+    "w": 224,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 585,
+    "r": 326,
+    "b": 633,
+    "w": 224,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 344,
+    "b": 675,
+    "w": 328,
+    "h": 345
+   },
+   "ovGlyphsVsPb": {
+    "x": 135.8,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 135.8,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 135.8,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 135.8,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "affordable_noETA",
+   "w": 360,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": "Affordable in ~0:41",
+   "placeholderHint": false,
+   "hasLink": true,
+   "pbText": "Pays back in ~3 min 43 s",
+   "linkBox": {
+    "l": 97.2,
+    "t": 502.8,
+    "r": 237.8,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 97.2,
+    "t": 530.8,
+    "r": 237.8,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 561,
+    "r": 326,
+    "b": 577,
+    "w": 224,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 585,
+    "r": 326,
+    "b": 633,
+    "w": 224,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 344,
+    "b": 675,
+    "w": 328,
+    "h": 345
+   },
+   "ovGlyphsVsPb": {
+    "x": 135.8,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 135.8,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 135.8,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 135.8,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "unaffordable_withETA",
+   "w": 360,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": "Affordable in ~0:17",
+   "placeholderHint": false,
+   "hasLink": true,
+   "pbText": "Pays back in ~1 min 30 s",
+   "linkBox": {
+    "l": 97.2,
+    "t": 502.8,
+    "r": 237.8,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 97.2,
+    "t": 530.8,
+    "r": 237.8,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 585,
+    "r": 326,
+    "b": 601,
+    "w": 224,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 609,
+    "r": 326,
+    "b": 657,
+    "w": 224,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 344,
+    "b": 699,
+    "w": 328,
+    "h": 369
+   },
+   "ovGlyphsVsPb": {
+    "x": 135.8,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 135.8,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 135.8,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 135.8,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "control_C25_notLimited",
+   "w": 360,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": null,
+   "placeholderHint": true,
+   "hasLink": true,
+   "pbText": "Pays back in ~3 min 43 s",
+   "linkBox": {
+    "l": 101.3,
+    "t": 502.8,
+    "r": 241.8,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 101.3,
+    "t": 530.8,
+    "r": 241.8,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 561,
+    "r": 341,
+    "b": 577,
+    "w": 239,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 585,
+    "r": 341,
+    "b": 633,
+    "w": 239,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 359,
+    "b": 675,
+    "w": 343,
+    "h": 345
+   },
+   "ovGlyphsVsPb": {
+    "x": 139.8,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 139.8,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 139.8,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 139.8,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "affordable_noETA",
+   "w": 375,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": "Affordable in ~0:41",
+   "placeholderHint": false,
+   "hasLink": true,
+   "pbText": "Pays back in ~3 min 43 s",
+   "linkBox": {
+    "l": 101.3,
+    "t": 502.8,
+    "r": 241.8,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 101.3,
+    "t": 530.8,
+    "r": 241.8,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 561,
+    "r": 341,
+    "b": 577,
+    "w": 239,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 585,
+    "r": 341,
+    "b": 633,
+    "w": 239,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 359,
+    "b": 675,
+    "w": 343,
+    "h": 345
+   },
+   "ovGlyphsVsPb": {
+    "x": 139.8,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 139.8,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 139.8,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 139.8,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "unaffordable_withETA",
+   "w": 375,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": "Affordable in ~0:17",
+   "placeholderHint": false,
+   "hasLink": true,
+   "pbText": "Pays back in ~1 min 30 s",
+   "linkBox": {
+    "l": 101.3,
+    "t": 502.8,
+    "r": 241.8,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 101.3,
+    "t": 530.8,
+    "r": 241.8,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 585,
+    "r": 341,
+    "b": 601,
+    "w": 239,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 609,
+    "r": 341,
+    "b": 657,
+    "w": 239,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 359,
+    "b": 699,
+    "w": 343,
+    "h": 369
+   },
+   "ovGlyphsVsPb": {
+    "x": 139.8,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 139.8,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 139.8,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 139.8,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "control_C25_notLimited",
+   "w": 375,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": null,
+   "placeholderHint": true,
+   "hasLink": true,
+   "pbText": "Pays back in ~3 min 43 s",
+   "linkBox": {
+    "l": 105.3,
+    "t": 502.8,
+    "r": 245.9,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 105.3,
+    "t": 530.8,
+    "r": 245.9,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 561,
+    "r": 356,
+    "b": 577,
+    "w": 254,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 585,
+    "r": 356,
+    "b": 633,
+    "w": 254,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 374,
+    "b": 675,
+    "w": 358,
+    "h": 345
+   },
+   "ovGlyphsVsPb": {
+    "x": 140.6,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 140.6,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 140.6,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 140.6,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "affordable_noETA",
+   "w": 390,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": "Affordable in ~0:41",
+   "placeholderHint": false,
+   "hasLink": true,
+   "pbText": "Pays back in ~3 min 43 s",
+   "linkBox": {
+    "l": 105.3,
+    "t": 502.8,
+    "r": 245.9,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 105.3,
+    "t": 530.8,
+    "r": 245.9,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 561,
+    "r": 356,
+    "b": 577,
+    "w": 254,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 585,
+    "r": 356,
+    "b": 633,
+    "w": 254,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 374,
+    "b": 675,
+    "w": 358,
+    "h": 345
+   },
+   "ovGlyphsVsPb": {
+    "x": 140.6,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 140.6,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 140.6,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 140.6,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "unaffordable_withETA",
+   "w": 390,
+   "runtimeBuild": "build 1371305"
+  },
+  {
+   "eta": "Affordable in ~0:17",
+   "placeholderHint": false,
+   "hasLink": true,
+   "pbText": "Pays back in ~1 min 30 s",
+   "linkBox": {
+    "l": 105.3,
+    "t": 502.8,
+    "r": 245.9,
+    "b": 574.8,
+    "w": 140.6,
+    "h": 72
+   },
+   "linkGlyphs": {
+    "l": 105.3,
+    "t": 530.8,
+    "r": 245.9,
+    "b": 546.8
+   },
+   "pb": {
+    "l": 102,
+    "t": 531,
+    "r": 270.8,
+    "b": 551,
+    "w": 168.8,
+    "h": 20
+   },
+   "meta": {
+    "l": 102,
+    "t": 561,
+    "r": 356,
+    "b": 577,
+    "w": 254,
+    "h": 16
+   },
+   "btn": {
+    "l": 102,
+    "t": 585,
+    "r": 356,
+    "b": 633,
+    "w": 254,
+    "h": 48
+   },
+   "card": {
+    "l": 16,
+    "t": 330,
+    "r": 374,
+    "b": 675,
+    "w": 358,
+    "h": 345
+   },
+   "ovGlyphsVsPb": {
+    "x": 140.6,
+    "y": 15.8
+   },
+   "ovBoxVsPb": {
+    "x": 140.6,
+    "y": 20
+   },
+   "ovGlyphsVsMeta": {
+    "x": 140.6,
+    "y": 0
+   },
+   "ovGlyphsVsBtn": {
+    "x": 140.6,
+    "y": 0
+   },
+   "linkPos": "static",
+   "coach": [],
+   "case": "control_C25_notLimited",
+   "w": 390,
+   "runtimeBuild": "build 1371305"
+  }
+ ],
+ "goal": [
+  {
+   "natural": 176.17,
+   "parts": [
+    12.56,
+    62.14,
+    97.47
+   ],
+   "labelW": 188,
+   "clientW": 188,
+   "scrollW": 188,
+   "trackClipped": false,
+   "labelClipped": false,
+   "lines": 1,
+   "ws": "nowrap",
+   "ov": "hidden",
+   "to": "ellipsis",
+   "font": "600 14px Fredoka, system-ui, sans-serif",
+   "fontsReady": "loaded",
+   "fredoka": [
+    "500:loaded",
+    "700:loaded"
+   ],
+   "runtimeBuild": "build 1371305",
+   "afterShot": "★ Egg value · +999% income"
+  }
+ ]
+}

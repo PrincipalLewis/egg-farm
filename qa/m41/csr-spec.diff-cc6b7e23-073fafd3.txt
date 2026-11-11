@@ -1,0 +1,3 @@
+27a28,29
+> **D-HOP-2026-10-22-07 (22:12):** (a) Explainer after an M1/M2 restore: it waits until `.recovery-layer` is gone, and `seenTracksExplainer` is set only when the player dismisses it, for M1/M2 restore boots only. Every other path keeps m4a §17 / EXP-B1 as built (seen is set when shown, the 8 s auto-hide counts, reload → not shown). (b) `eggfarm.save.reset_at` (LS, written by resetProgress): corrupt.* copies with a ts older than reset_at are ignored by recovery, so there's no M3 for pre-reset junk. Accepted edge: if the reset_at write is quota-blocked, an old copy may show M3 once, with no data lost. *AC:* after a reset, a seeded pre-reset corrupt copy shows no dialog; a post-reset corrupt main still follows the CSR chain.
+> 

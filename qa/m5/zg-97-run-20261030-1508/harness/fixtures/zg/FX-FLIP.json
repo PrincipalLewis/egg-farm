@@ -1,0 +1,34 @@
+{
+ "id": "FX-FLIP",
+ "spec": "product/collection/m5.1-zero-gain-purchase-ui.md v0.3.5 sha1 1098f14e100edb0e80b43a099777be22fa13fd04 \u00a79",
+ "ac": [
+  "ZG-AC2",
+  "ZG-AC8",
+  "ZG-AC21"
+ ],
+ "state": {
+  "farmLevel": 4,
+  "hensLevel": 5,
+  "eggValueLevel": 0,
+  "collectionLevel": 0,
+  "graderTier": 0,
+  "workers": {}
+ },
+ "coins": {
+  "rule": "cost(COLL)+cost(COLL@C1)+max(0,cost(HENS@after)-cost(COLL@C1))+1; assert < cost(COLL)+cost(FARM)",
+  "drainMarginCents": 2000,
+  "drainNote": "+2000 cents (QA_DRAIN_CENTS) so live wage drain between state set and tap cannot make the just-affordable row unaffordable; preconditions re-checked with the margin by zg-unit.ts"
+ },
+ "flags": {
+  "m4.enabled": 1
+ },
+ "pre": [
+  "gain(COLL)>0 (not ZG)",
+  "gain(HENS)<=0 (ZG)",
+  "W1 offered with gain<0 (ZG-AC2)",
+  "after 1 COLL buy: gain(COLL)<=0",
+  "after: gain(HENS)>0",
+  "after: coins>=cost(COLL@C1) && coins<cost(FARM)",
+  "after: HENS affordable"
+ ]
+}

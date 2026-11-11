@@ -1,0 +1,54 @@
+F0 C30 -> V12 cap 3 shown L1 real L10
+F5 C15 -> V9 cap 8 shown L6 real L7
+F27 C0 -> V5 cap 30 shown L28 real L3
+capOverFarm=3 max=30; saves F,C in 0..30: 961; V>F+3 (text wrong): 186; worst { gap: 9, F: 0, C: 30, V: 12 }
+{
+  '0': [
+    'F0:V0',  'F5:V2',
+    'F10:V3', 'F15:V4',
+    'F20:V5', 'F25:V5',
+    'F30:V6'
+  ],
+  '5': [
+    'F0:V4',   'F5:V5',
+    'F10:V5',  'F15:V7',
+    'F20:V8',  'F25:V9',
+    'F30:V10'
+  ],
+  '10': [
+    'F0:V5',   'F5:V7',
+    'F10:V8',  'F15:V10',
+    'F20:V10', 'F25:V11',
+    'F30:V12'
+  ],
+  '15': [
+    'F0:V8',   'F5:V9',
+    'F10:V10', 'F15:V11',
+    'F20:V12', 'F25:V14',
+    'F30:V15'
+  ],
+  '20': [
+    'F0:V10',  'F5:V10',
+    'F10:V11', 'F15:V13',
+    'F20:V15', 'F25:V16',
+    'F30:V18'
+  ],
+  '25': [
+    'F0:V10',  'F5:V12',
+    'F10:V13', 'F15:V15',
+    'F20:V17', 'F25:V18',
+    'F30:V20'
+  ],
+  '30': [
+    'F0:V12',  'F5:V13',
+    'F10:V15', 'F15:V17',
+    'F20:V19', 'F25:V20',
+    'F30:V20'
+  ]
+}
+F25 interval 1.5s -> 1.5s; hensCap 28 -> 29
+F26 interval 1.5s -> 1.5s; hensCap 29 -> 30
+F27 interval 1.5s -> 1.5s; hensCap 30 -> 30
+F28 interval 1.5s -> 1.5s; hensCap 30 -> 30
+F29 interval 1.5s -> 1.5s; hensCap 30 -> 30
+F30 interval 1.5s -> 1.5s; hensCap 30 -> 30

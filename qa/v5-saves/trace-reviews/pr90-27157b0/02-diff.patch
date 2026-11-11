@@ -1,0 +1,99 @@
+commit 27157b073b3c06dd6b46a427733e22b8b19c2b7c
+Author: Senior Software Architect <architect@eggfarm.studio>
+Date:   Fri Oct 30 09:39:55 2026 +0100
+
+    tests/bot-m5: O-3 loud-fail guard (CCR rcv5-vs-main-1a61b36 F-1, D-HOE-20261030-08)
+    
+    bot-m5 layers its own golden/streak/tapCoins/Broody/abilities/pause model on the real step()/apply().
+    run() now throws when a stack with `on` meets any of those src m4.flags.* on (src flagOn: m4.enabled and
+    flag === 1), so verify --profile m5x-casual, windowGate and scripts/bot-m5x.ts fail loudly instead of
+    double-counting. Flags-off behaviour is unchanged (pure check, shipped flags are all 0).
+    
+    Tests (fixture CSV b48be8a4 with sha256 assert, D-HOE-20261030-05): per-flag throw, either-alone runs,
+    m4.enabled=0 runs, unmodelled flags run, the review's runVerify/windowGate repro, and the verify CLI
+    exiting 1 with the O-3 reason instead of the generic exit 4.
+
+diff --git a/tests/bot-m5.test.ts b/tests/bot-m5.test.ts
+index aa8392b..fa18d31 100644
+--- a/tests/bot-m5.test.ts
++++ b/tests/bot-m5.test.ts
+@@ -60,3 +60,45 @@ describe('bot-m5: run()', () => {
+     expect(JSON.stringify(balance)).toBe(before);
+   });
+ });
++
++// ---- CCR rcv5-vs-main-1a61b36 F-1 (D-HOE-20261030-08): O-3 loud fail. bot-m5 layers its OWN golden/streak/tap-coin/Broody/
++// ability/pause model on the real step()/apply(); with the matching src m4.flags.* on too, both would run and double-count.
++// Balance here is built from the pinned fixture CSV (sha256 asserted, D-HOE-20261030-05); no balance value is asserted.
++import { SRC_M5_FLAGS } from './bot-m5';
++import { runVerify } from '../scripts/verify/sim';
++import { withFlags } from '../scripts/verify/cli';
++import { spawnSync } from 'node:child_process';
++import { mkdtempSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { fileURLToPath } from 'node:url';
++describe('bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1)', () => {
++  const fx = () => { const csv = readFileSync(PARITY_CSV_URL); expect(createHash('sha256').update(csv).digest('hex')).toBe(PARITY_CSV_SHA256); return csvBalance(csv.toString('utf8')); };
++  const withSrc = (b: Balance, flags: Record<string, number>, enabled = 1) => ({ ...b, m4: { ...(b as any).m4, enabled, flags: { ...(b as any).m4?.flags, ...flags } } }) as Balance;
++  it('[F-1][O-3] the guarded list is exactly the mechanics the bot models itself', () => {
++    expect([...SRC_M5_FLAGS]).toEqual(['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause']);
++  });
++  it('[F-1][O-3] run(): bot M5 model (stack on) + any modelled src flag on throws, naming the flag; either alone runs', () => {
++    const b = fx();
++    for (const k of SRC_M5_FLAGS) expect(() => run(withSrc(b, { [k]: 1 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1), k).toThrow(new RegExp(`bot-m5 models M5 itself.*m4\\.flags\\.${k}.*double-count`));
++    expect(() => run(withSrc(b, { golden: 1 }), 1, PROFS.casual, M5X_STACKS.none, 1)).not.toThrow(); // bot model off: src mechanics only
++    expect(() => run(withSrc(b, { golden: 1 }, 0), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // src flags need m4.enabled
++    expect(() => run(withSrc(b, {}), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // shipped flags (all 0): unchanged
++    expect(() => run(withSrc(b, { clockWage: 1, zeroGainUi: 1 }), 1, PROFS.casual, M5X_STACKS.AssZ, 1)).not.toThrow(); // not modelled by the bot
++  });
++  it('[F-1][O-3] repro: runVerify m5x-casual and windowGate with m4.flags.golden=1 fail loudly instead of returning', () => {
++    const b = withFlags(fx(), { 'm4.flags.golden': 1 });
++    expect(() => runVerify(b, { hours: 0.25, seed: 1, profile: 'm5x-casual' })).toThrow(/bot-m5 models M5 itself.*m4\.flags\.golden/);
++    expect(() => windowGate(b, gateOptsFromEnv({ CFG: 'AssZ', PROFS: 'casual', SEEDS: '1', T: '10', NOWIN: '1' }, loadTargets()))).toThrow(/m4\.flags\.golden/);
++  });
++  it('[F-1][O-3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4)', () => {
++    const root = fileURLToPath(new URL('..', import.meta.url)), dir = mkdtempSync(join(tmpdir(), 'o3-')), html = join(dir, 'fake.html'), out = join(dir, 'out');
++    writeFileSync(html, '<!doctype html><meta name="build-id" content="m4.1+0000000"><div id="app" data-build-id="m4.1+0000000"></div>');
++    const r = spawnSync(process.execPath, [`${root}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', '--hours', '0.1', '--profile', 'm5x-casual', '--skip-build', '--no-shot', '--flags', 'm4.flags.golden=1', '--out', out],
++      { cwd: root, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html, CHROME: join(dir, 'must-not-launch') } });
++    expect(r.status).toBe(1);
++    const j = JSON.parse(readFileSync(join(out, 'verify.json'), 'utf8'));
++    expect(j.result).toBe('FAIL'); expect(j.complete).toBe(false);
++    expect(j.reason).toMatch(/bot-m5 models M5 itself.*m4\.flags\.golden.*double-count/);
++  }, 120_000);
++});
+diff --git a/tests/bot-m5.ts b/tests/bot-m5.ts
+index 91caeb4..00b878b 100644
+--- a/tests/bot-m5.ts
++++ b/tests/bot-m5.ts
+@@ -20,17 +20,29 @@ import { candidates } from '../src/ui/next-goal';
+ import { priceDollars } from '../src/econ/income';
+ import { prodEggsPerSec, coopCap } from '../src/sim/tracks';
+ import { maxStepRatio, quantile, type PacingTargets } from './pacing-guards';
++import { flagOn, type M5Flag } from '../src/config/flags';
+ type B = Balance;
+ export interface Stack { on: boolean; streakCap: number; tapShare: number; broody: boolean; golden: { gapMin: number; gapMax: number } | null; abil: boolean; sweep: 'A' | 'B'; sweepMult: number; pause: boolean; pat?: 'none' | 'yawn' | 'long' | 'fullcoop' | 'wages' | 'stock' | 'bench' | 'grader'; lockoutS?: number; hold?: boolean; ssZero?: boolean; warm?: boolean; }
+ export interface Prof { tap: 'idle' | 'ac7' | number; checkBase: number; catchP: number; }
+ export const PROFS: Record<string, Prof> = { slow: { tap: 0.25, checkBase: 60, catchP: 0.4 }, idle: { tap: 'idle', checkBase: 15, catchP: 0 }, optimal: { tap: 3, checkBase: 5, catchP: 1 }, seller15: { tap: 'ac7', checkBase: 15, catchP: 0.75 }, casual: { tap: 0.5, checkBase: 30, catchP: 0.6 } };
+ const rng = (seed: number) => { let a = (seed * 2654435761 + 99) >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+ const WIDS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
++/** CCR O-3 on #78 / CCR rcv5-vs-main-1a61b36 F-1 (D-HOE-20261030-08): the bot layers its OWN model of the M5 mechanics (golden egg,
++ *  streak, tap coins, Broody, abilities, pause) on the real step()/apply(). It may do so only while the matching src flags are off;
++ *  once src implements them behind m4.flags.*, a run with both would count them twice. So a stack with `on` and any of those src
++ *  flags on (src flagOn: m4.enabled and flag === 1) throws. Turn the bot model off (`on: false`) to run on the src mechanics.
++ *  Flags the bot does not model (clockWage, UI flags, ...) are not in the list. */
++export const SRC_M5_FLAGS = ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const satisfies readonly M5Flag[];
++export function assertNoDoubleModel(b: B, K: Stack): void {
++  const both = K.on ? SRC_M5_FLAGS.filter(k => flagOn(b, k)) : [];
++  if (both.length) throw new Error(`bot-m5 models M5 itself: its own M5 model (stack on) and src m4.flags.${both.join('/m4.flags.')} are both on; that would double-count. Turn those src flags off, or use a stack with on: false to run on the src mechanics.`);
++}
+ /** Read-only observers (port addition): they see events and states, never change them. */
+ export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number;
+   /** Every drained batch of sim events, with the run second it happened in. */ onEvents?: (t: number, evs: readonly SimEvent[]) => void;
+   /** The state at the end of each run second (after taps, check-in and buys). */ onSecond?: (t: number, s: GameState) => void; }
+ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: RunOpts = {}) {
++  assertNoDoubleModel(bal, K);
+   const tsnaps: [number, number, GameState][] = [];
+   const b = { ...bal, sim_test: { ...bal.sim_test, poisson_arrivals: true } } as B;
+   const V = new SellerVariance(VAR_DEFAULT, seed), R = rng(seed);

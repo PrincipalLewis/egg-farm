@@ -1,0 +1,45 @@
+{
+  "traj_identity": {
+    "S01_optimal_1_200": {
+      "compared": 200,
+      "mismatches": 0
+    },
+    "R04_optimal_1_200": {
+      "compared": 200,
+      "mismatches": 0
+    },
+    "S01_seller15_1_20": {
+      "compared": 20,
+      "mismatches": 0
+    },
+    "S01_casual_1_20": {
+      "compared": 20,
+      "mismatches": 0
+    },
+    "total_compared": 440,
+    "total_mismatches": 0,
+    "method": "sha256 of buyLog fields [t,kind,costCents,farmLevel,hensLevel,eggValueLevel,collectionLevel,farmAfter,hensAfter,eggValueAfter,collectionAfter] \u2014 measure runner vs m5trace-order baseline"
+  },
+  "lengthening": {
+    "seed_max_lengthened": {
+      "S01_opt_200": 0,
+      "R04_opt_200": 0,
+      "S01_s15_20": 0,
+      "S01_cas_20": 0
+    },
+    "earlier_open_events": 0,
+    "fractional_opens": 0,
+    "after_sellAll_opens": 0,
+    "structural_note": "The only channel for (a) to lengthen a stretch vs current is an after_sellAll sample with mrAff=false while the stretch is closed, opening at fractional (or check-in) t before the next current integer open. Because sellAll weakly increases coins, post-sale unaffordable implies prior same-interval coins were also unaffordable whenever costs/candidates are unchanged; so the prior integer sample has usually already opened the stretch. Wage drain between an affordable integer and a still-unaffordable post-sale check-in is the remaining theoretical channel; it did not occur in these 440 runs."
+  },
+  "worst": {
+    "S01_opt": {
+      "current": 183,
+      "a": 121
+    },
+    "R04_opt": {
+      "current": 189,
+      "a": 121
+    }
+  }
+}

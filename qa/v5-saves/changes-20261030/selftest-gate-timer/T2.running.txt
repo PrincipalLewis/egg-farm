@@ -1,0 +1,4 @@
+WINPID=294340
+pgid=294340 sid=294340 comm=bash
+member 294340 ppid=53 comm=bash cmd=bash /workspace/egg-farm-studio/qa/v5-saves/scripts/v5-saves-gate.sh --win-timer /workspace/egg-farm-studio/qa/v5-saves/changes-20261030/selftest-gate-timer/mock-results/status.log /workspace/egg-farm-studio/qa/v5-saves/changes-20261030/selftest-gate-timer/mock-results/summary.txt 2 6 294332 
+member 294445 ppid=294340 comm=sleep cmd=sleep 4 

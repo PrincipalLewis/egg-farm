@@ -1,0 +1,15 @@
+2026-10-22 20:57:47 CEST porcelain after start: 0 lines
+2026-10-22 20:57:48 CEST sync --check exit=0
+2026-10-22 20:57:51 CEST tsc exit=0
+2026-10-22 20:57:56 CEST build exit=0
+2026-10-22 20:57:56 CEST porcelain after build: 0 lines
+2026-10-22 20:58:00 CEST build:qa exit=0
+2026-10-22 20:58:00 CEST porcelain after build-qa: 0 lines
+2026-10-22 20:58:05 CEST build:html exit=0
+2026-10-22 20:58:05 CEST porcelain after build-html: 0 lines
+2026-10-22 20:58:05 CEST html e62803966e752bf8e99605a5cd471d3bb4b70d6fca889ff6cd4aaf76dd641057  dist-html/egg-farm.html
+2026-10-22 20:58:05 CEST check-release-build dist-html exit=0
+2026-10-22 20:58:05 CEST check-release-build dist exit=0
+2026-10-22 21:00:55 CEST vitest full exit=0 170s  Test Files 95 passed (95)  Tests 1175 passed (1175) 
+2026-10-22 21:00:55 CEST porcelain after vitest: 0 lines
+2026-10-22 21:00:58 CEST goldens subset exit=0  Test Files 5 passed (5)  Tests 89 passed (89) 

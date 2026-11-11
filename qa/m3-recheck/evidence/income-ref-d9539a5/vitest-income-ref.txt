@@ -1,0 +1,12 @@
+LOCK+START 2026-11-05T22:41:51+01:00 loadavg=0.83 1.82 2.49 2/2435 1283215
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/income-ref-d9539a5/wt
+
+ ✓ tests/v5-income-ref.test.ts (27 tests) 104ms
+
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+   Start at  22:41:51
+   Duration  514ms (transform 206ms, setup 0ms, collect 259ms, tests 104ms, environment 0ms, prepare 44ms)
+
+EXIT=0 END 2026-11-05T22:41:52+01:00 loadavg=0.83 1.82 2.49 2/2431 1283312

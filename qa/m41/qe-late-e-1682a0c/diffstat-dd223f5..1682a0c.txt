@@ -1,0 +1,8 @@
+ src/game.ts                                        |  16 +-
+ src/ui/tracks-explainer.ts                         |  12 +-
+ tests/fixtures/saves/m4-exp1-committed-unseen.json |  25 +++
+ tests/m4-exp1-explainer.test.ts                    |   9 +-
+ tests/m41-6-explainer-storage.test.ts              | 190 +++++++++++++++++++++
+ tests/m41-6-roundtrip-migrate.test.ts              |  45 +++++
+ tests/m41-6-save-mirror-canpersist.test.ts         | 154 +++++++++++++++++
+ 7 files changed, 440 insertions(+), 11 deletions(-)

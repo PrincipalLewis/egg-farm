@@ -1,0 +1,45 @@
+{
+ "S1-yes": {
+  "d1": true,
+  "first_session_min": 10,
+  "note": ""
+ },
+ "S2-no-too-soon": {
+  "d1": false,
+  "first_session_min": 10,
+  "note": ""
+ },
+ "S3-no-late": {
+  "d1": false,
+  "first_session_min": 10,
+  "note": ""
+ },
+ "S4-edge-20h": {
+  "d1": true,
+  "first_session_min": 10,
+  "note": "inclusive"
+ },
+ "S5-edge-48h": {
+  "d1": true,
+  "first_session_min": 10,
+  "note": "inclusive"
+ },
+ "S7a-first-7.9min": {
+  "d1": false,
+  "first_session_min": 7.9,
+  "note": "first session 7.9 min"
+ },
+ "S7b-first-8.1min": {
+  "d1": true,
+  "first_session_min": 8.1,
+  "note": "first session 8.1 min"
+ },
+ "S6a-two-install-ids": {
+  "d1": null,
+  "note": "flag, not counted"
+ },
+ "S6b-missing-install-id": {
+  "d1": null,
+  "note": "flag, not counted"
+ }
+}

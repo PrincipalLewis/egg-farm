@@ -1,0 +1,900 @@
+{
+ "320": {
+  "steps": [
+   {
+    "n": "0-start",
+    "t": "Egg Farm $0.00 0 $0.00, 0 eggs 2 / 50 Collect +5 · 2 ready Market Upgrades Farm Your hens are laying eggs… ● ○ ○ Skip"
+   },
+   {
+    "n": "1-collected",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 8 7 6 32 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "2-customer-wait",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 8 7 6 8 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "3-tapped-customer",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 7 6 8 6 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "4-market",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 7 6 8 6 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm Market 0/7 eggs · $7.00 Sell 4 +$4.00 0/6 eggs · $6.00 Sell 4 +$4.00 0/8 eggs · $8.00 Sell 4 +$4.00 0/6 eggs · $6.00 Sell 4 +$4.00 0/11 eggs · $11.00 Sell 4 +$4.00 +1 waiting 1 more customers waiting S"
+   },
+   {
+    "n": "5-after-sell",
+    "t": "Egg Farm $4.00 0 $0.00, 4 eggs 3 6 8 6 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm Market 4/7 eggs · $7.00 Need 3 0/6 eggs · $6.00 Need 6 0/8 eggs · $8.00 Need 8 0/6 eggs · $6.00 Need 6 0/11 eggs · $11.00 Need 11 +1 waiting 1 more customers waiting No eggs to sell +$4.00 Sell a few m"
+   }
+  ],
+  "globalsDebugUrl": [
+   "eggfarmExportTelemetry"
+  ],
+  "abuse": {
+   "type": "object",
+   "keys": [
+    "exportedAt",
+    "events"
+   ],
+   "hasInstall": false
+  },
+  "custErr": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[clas",
+  "auditMarket": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "0/7 eggs · $7.00 Sell 4 +$4.00 0/6 eggs · $6.00 Se",
+     "w": 320,
+     "l": 0,
+     "r": 320,
+     "sw": 320,
+     "cw": 320,
+     "tw": 288,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/7 eggs · $7.00 Sell 4 +$4.00",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/6 eggs · $6.00 Sell 4 +$4.00",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/8 eggs · $8.00 Sell 4 +$4.00",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/6 eggs · $6.00 Sell 4 +$4.00",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/11 eggs · $11.00 Sell 4 +$4.00",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  },
+  "sellLabel": "Sell 4\n+$4.00",
+  "sellAria": "Sell 4 · +$4.00",
+  "auditAfter": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "4/7 eggs · $7.00 Need 3 0/6 eggs · $6.00 Need 6 0/",
+     "w": 320,
+     "l": 0,
+     "r": 320,
+     "sw": 320,
+     "cw": 320,
+     "tw": 288,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "4/7 eggs · $7.00 Need 3",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/6 eggs · $6.00 Need 6",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/8 eggs · $8.00 Need 8",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/6 eggs · $6.00 Need 6",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/11 eggs · $11.00 Need 11",
+     "w": 288,
+     "l": 16,
+     "r": 304,
+     "sw": 284,
+     "cw": 284,
+     "tw": 260,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  }
+ },
+ "360": {
+  "steps": [
+   {
+    "n": "0-start",
+    "t": "Egg Farm $0.00 0 $0.00, 0 eggs 2 / 50 Collect +5 · 2 ready Market Upgrades Farm Your hens are laying eggs… ● ○ ○ Skip"
+   },
+   {
+    "n": "1-collected",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 8 8 6 32 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "2-customer-wait",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 8 8 6 10 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "3-tapped-customer",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 8 6 10 9 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "4-market",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 8 6 10 9 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm Market 0/8 eggs · $8.00 Sell 4 +$4.00 0/6 eggs · $6.00 Sell 4 +$4.00 0/10 eggs · $10.00 Sell 4 +$4.00 0/9 eggs · $9.00 Sell 4 +$4.00 0/7 eggs · $7.00 Sell 4 +$4.00 +1 waiting 1 more customers waiting "
+   },
+   {
+    "n": "5-after-sell",
+    "t": "Egg Farm $4.00 0 $0.00, 4 eggs 4 6 10 9 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm Market 4/8 eggs · $8.00 Need 4 0/6 eggs · $6.00 Need 6 0/10 eggs · $10.00 Need 10 0/9 eggs · $9.00 Need 9 0/7 eggs · $7.00 Need 7 +1 waiting 1 more customers waiting No eggs to sell +$4.00 Sell a few "
+   }
+  ],
+  "globalsDebugUrl": [
+   "eggfarmExportTelemetry"
+  ],
+  "abuse": {
+   "type": "object",
+   "keys": [
+    "exportedAt",
+    "events"
+   ],
+   "hasInstall": false
+  },
+  "custErr": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[clas",
+  "auditMarket": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "0/8 eggs · $8.00 Sell 4 +$4.00 0/6 eggs · $6.00 Se",
+     "w": 360,
+     "l": 0,
+     "r": 360,
+     "sw": 360,
+     "cw": 360,
+     "tw": 328,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/8 eggs · $8.00 Sell 4 +$4.00",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/6 eggs · $6.00 Sell 4 +$4.00",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/10 eggs · $10.00 Sell 4 +$4.00",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/9 eggs · $9.00 Sell 4 +$4.00",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/7 eggs · $7.00 Sell 4 +$4.00",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  },
+  "sellLabel": "Sell 4\n+$4.00",
+  "sellAria": "Sell 4 · +$4.00",
+  "auditAfter": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "4/8 eggs · $8.00 Need 4 0/6 eggs · $6.00 Need 6 0/",
+     "w": 360,
+     "l": 0,
+     "r": 360,
+     "sw": 360,
+     "cw": 360,
+     "tw": 328,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "4/8 eggs · $8.00 Need 4",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/6 eggs · $6.00 Need 6",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/10 eggs · $10.00 Need 10",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/9 eggs · $9.00 Need 9",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/7 eggs · $7.00 Need 7",
+     "w": 328,
+     "l": 16,
+     "r": 344,
+     "sw": 324,
+     "cw": 324,
+     "tw": 300,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  }
+ },
+ "390": {
+  "steps": [
+   {
+    "n": "0-start",
+    "t": "Egg Farm $0.00 0 $0.00, 0 eggs 2 / 50 Collect +5 · 2 ready Market Upgrades Farm Your hens are laying eggs… ● ○ ○ Skip"
+   },
+   {
+    "n": "1-collected",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 10 9 8 32 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "2-customer-wait",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 10 9 8 10 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "3-tapped-customer",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 9 8 10 7 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm A customer! Tap them to sell eggs. ○ ● ○ Skip"
+   },
+   {
+    "n": "4-market",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 9 8 10 7 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm Market 0/9 eggs · $9.00 Sell 4 +$4.00 0/8 eggs · $8.00 Sell 4 +$4.00 0/10 eggs · $10.00 Sell 4 +$4.00 0/7 eggs · $7.00 Sell 4 +$4.00 0/12 eggs · $12.00 Sell 4 +$4.00 +1 waiting 1 more customers waitin"
+   },
+   {
+    "n": "5-after-sell",
+    "t": "Egg Farm $4.00 0 $0.00, 4 eggs 5 8 10 7 +2 Queue full Full! 50 / 50 Collect +5 Market Upgrades Farm Market 4/9 eggs · $9.00 Need 5 0/8 eggs · $8.00 Need 8 0/10 eggs · $10.00 Need 10 0/7 eggs · $7.00 Need 7 0/12 eggs · $12.00 Need 12 +1 waiting 1 more customers waiting No eggs to sell +$4.00 Sell a f"
+   }
+  ],
+  "globalsDebugUrl": [
+   "eggfarmExportTelemetry"
+  ],
+  "abuse": {
+   "type": "object",
+   "keys": [
+    "exportedAt",
+    "events"
+   ],
+   "hasInstall": false
+  },
+  "custErr": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[clas",
+  "auditMarket": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "0/9 eggs · $9.00 Sell 4 +$4.00 0/8 eggs · $8.00 Se",
+     "w": 390,
+     "l": 0,
+     "r": 390,
+     "sw": 390,
+     "cw": 390,
+     "tw": 358,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/9 eggs · $9.00 Sell 4 +$4.00",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/8 eggs · $8.00 Sell 4 +$4.00",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/10 eggs · $10.00 Sell 4 +$4.00",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/7 eggs · $7.00 Sell 4 +$4.00",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/12 eggs · $12.00 Sell 4 +$4.00",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  },
+  "sellLabel": "Sell 4\n+$4.00",
+  "sellAria": "Sell 4 · +$4.00",
+  "auditAfter": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "4/9 eggs · $9.00 Need 5 0/8 eggs · $8.00 Need 8 0/",
+     "w": 390,
+     "l": 0,
+     "r": 390,
+     "sw": 390,
+     "cw": 390,
+     "tw": 358,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "4/9 eggs · $9.00 Need 5",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/8 eggs · $8.00 Need 8",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/10 eggs · $10.00 Need 10",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/7 eggs · $7.00 Need 7",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/12 eggs · $12.00 Need 12",
+     "w": 358,
+     "l": 16,
+     "r": 374,
+     "sw": 354,
+     "cw": 354,
+     "tw": 330,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  }
+ },
+ "1280": {
+  "steps": [
+   {
+    "n": "0-start",
+    "t": "Egg Farm $0.00 0 $0.00, 0 eggs 2 / 50 Collect +5 · 2 ready Market Next customer soon… (9s) No eggs to sell Upgrades Collection Farm Workers L0 Collect per tap Eggs per tap 5 → 10 Egg price $1.00 → $1.12 Level 0 / 30 $10.00 Need $10.00 more Your hens are laying eggs… ● ○ ○ Skip"
+   },
+   {
+    "n": "1-collected",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 6 10 6 32 / 50 Collect +5 Market 0/6 eggs · $6.00 Sell 4 +$4.00 0/10 eggs · $10.00 Sell 4 +$4.00 0/6 eggs · $6.00 Sell 4 +$4.00 Sell all (4 eggs · $4.00) Upgrades Collection Farm Workers L0 Collect per tap Eggs per tap 5 → 10 Egg price $1.00 → $1.12 Level 0 / 30 $10.00"
+   },
+   {
+    "n": "2-customer-wait",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 6 10 6 9 +2 Queue full Full! 50 / 50 Collect +5 Market 0/6 eggs · $6.00 Sell 4 +$4.00 0/10 eggs · $10.00 Sell 4 +$4.00 0/6 eggs · $6.00 Sell 4 +$4.00 0/9 eggs · $9.00 Sell 4 +$4.00 0/8 eggs · $8.00 Sell 4 +$4.00 0/11 eggs · $11.00 Sell 4 +$4.00 Sell all (4 eggs · $4.00"
+   },
+   {
+    "n": "3-tapped-customer",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 10 6 9 8 +2 Queue full Full! 50 / 50 Collect +5 Market 0/10 eggs · $10.00 Sell 4 +$4.00 0/6 eggs · $6.00 Sell 4 +$4.00 0/9 eggs · $9.00 Sell 4 +$4.00 0/8 eggs · $8.00 Sell 4 +$4.00 0/11 eggs · $11.00 Sell 4 +$4.00 0/8 eggs · $8.00 Sell 4 +$4.00 Sell all (4 eggs · $4.00"
+   },
+   {
+    "n": "4-market",
+    "t": "Egg Farm $0.00 4 $0.00, 4 eggs 10 6 9 8 +2 Queue full Full! 50 / 50 Collect +5 Market 0/10 eggs · $10.00 Sell 4 +$4.00 0/6 eggs · $6.00 Sell 4 +$4.00 0/9 eggs · $9.00 Sell 4 +$4.00 0/8 eggs · $8.00 Sell 4 +$4.00 0/11 eggs · $11.00 Sell 4 +$4.00 0/8 eggs · $8.00 Sell 4 +$4.00 Sell all (4 eggs · $4.00"
+   },
+   {
+    "n": "5-after-sell",
+    "t": "Egg Farm $4.00 0 $0.00, 4 eggs 6 6 9 8 +2 Queue full Full! 50 / 50 Collect +5 Market 4/10 eggs · $10.00 Need 6 0/6 eggs · $6.00 Need 6 0/9 eggs · $9.00 Need 9 0/8 eggs · $8.00 Need 8 0/11 eggs · $11.00 Need 11 0/8 eggs · $8.00 Need 8 No eggs to sell Upgrades Collection Farm Workers L0 Collect per ta"
+   }
+  ],
+  "globalsDebugUrl": [
+   "eggfarmExportTelemetry"
+  ],
+  "abuse": {
+   "type": "object",
+   "keys": [
+    "exportedAt",
+    "events"
+   ],
+   "hasInstall": false
+  },
+  "custErr": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[clas",
+  "auditMarket": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "0/10 eggs · $10.00 Sell 4 +$4.00 0/6 eggs · $6.00 ",
+     "w": 398,
+     "l": 882,
+     "r": 1280,
+     "sw": 398,
+     "cw": 398,
+     "tw": 366,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/10 eggs · $10.00 Sell 4 +$4.00",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/6 eggs · $6.00 Sell 4 +$4.00",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/9 eggs · $9.00 Sell 4 +$4.00",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/8 eggs · $8.00 Sell 4 +$4.00",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/11 eggs · $11.00 Sell 4 +$4.00",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order partial",
+     "txt": "0/8 eggs · $8.00 Sell 4 +$4.00",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  },
+  "sellLabel": "Sell 4\n+$4.00",
+  "sellAria": "Sell 4 · +$4.00",
+  "auditAfter": {
+   "bad": [
+    {
+     "cls": "body order-list",
+     "txt": "4/10 eggs · $10.00 Need 6 0/6 eggs · $6.00 Need 6 ",
+     "w": 398,
+     "l": 882,
+     "r": 1280,
+     "sw": 398,
+     "cw": 398,
+     "tw": 366,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "4/10 eggs · $10.00 Need 6",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/6 eggs · $6.00 Need 6",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/9 eggs · $9.00 Need 9",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/8 eggs · $8.00 Need 8",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/11 eggs · $11.00 Need 11",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    },
+    {
+     "cls": "order wait",
+     "txt": "0/8 eggs · $8.00 Need 8",
+     "w": 366,
+     "l": 898,
+     "r": 1264,
+     "sw": 362,
+     "cw": 362,
+     "tw": 338,
+     "ov": true,
+     "off": false,
+     "clip": false
+    }
+   ],
+   "docOverflow": false,
+   "globals": [
+    "performance",
+    "eggfarmExportTelemetry"
+   ],
+   "perfOv": false
+  }
+ }
+}

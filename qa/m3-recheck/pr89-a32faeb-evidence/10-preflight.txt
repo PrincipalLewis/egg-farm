@@ -1,0 +1,16 @@
+2026-10-30T09:26:22+01:00
+WT=/tmp/qa-pr89-a32faeb-20261030-092237 HEAD=a32faeb34585db0d62c0c559e09e112b1a301e7d dirty=0
+# Pinned lane helpers (HoO, 2026-10-30 08:07 CET; lane-kill m6 fix). These are the current cleared versions.
+sha1   f286a9a0a21aa1687f44f90fc4ebd65d6b561fad  lane-run.sh
+sha1   be1362520c6de7e562c6d5becc765e6fe887598a  lane-kill.sh
+sha256 061e7c4fa31d46e47a9440becb90ca10e7ac9c46bee8f85aab8339892a1f1901  lane-run.sh
+sha256 9c89ddc06a1b8d6dd36073c65084d2d2156dab031291bdc9ff557abf644d3817  lane-kill.sh
+Superseded: lane-kill 7e8b5f4d (backup at ops/.lane-kill.sh.bak-0807), and lane-kill 2fc4353e and lane-run 1a8756ca (ops/.lane-*.bak-0730).
+f286a9a0a21aa1687f44f90fc4ebd65d6b561fad  ops/tools/lane-run.sh
+be1362520c6de7e562c6d5becc765e6fe887598a  ops/tools/lane-kill.sh
+061e7c4fa31d46e47a9440becb90ca10e7ac9c46bee8f85aab8339892a1f1901  ops/tools/lane-run.sh
+9c89ddc06a1b8d6dd36073c65084d2d2156dab031291bdc9ff557abf644d3817  ops/tools/lane-kill.sh
+loadavg: 5.39 5.79 5.35 4/2672 906977
+uiqa-pr89.pids before:
+475149 505099 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T08:44:27+01:00 sh -c cd /tmp/qa-pr89-20261030-084154 && npm ci --no-audit --no-fund > /workspace/egg-farm-studio/qa/m3-recheck/pr89-58ad41b-evidence/01-npm-ci.log 2>&1; echo rc=$? > /workspace/egg-farm-studio/qa/m3-recheck/pr89-58ad41b-evidence/01-npm-ci.rc
+476650 506629 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T08:44:43+01:00 sh -c cd /tmp/qa-pr89-20261030-084154 && npx vitest run tests/recorded-pid.test.ts --minWorkers=1 --maxWorkers=1 --reporter=verbose --reporter=json --outputFile.json=/workspace/egg-farm-studio/qa/m3-recheck/pr89-58ad41b-evidence/03-vitest-results.json > /workspace/egg-farm-studio/qa/m3-recheck/pr89-58ad41b-evidence/02-vitest.log 2>&1; echo rc=$? > /workspace/egg-farm-studio/qa/m3-recheck/pr89-58ad41b-evidence/02-vitest.rc

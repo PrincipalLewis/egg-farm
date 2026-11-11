@@ -1,0 +1,34 @@
+{
+ "id": "IDB1-1-cap3-parsed-order",
+ "now": 1792378840000,
+ "csr": [
+  "IDB1-1"
+ ],
+ "ls": {},
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-invalid-truncated.raw"
+   },
+   {
+    "key": "corrupt.1792378700000-2",
+    "ref": "raw/PRIOR-corrupt-1.raw"
+   },
+   {
+    "key": "corrupt.1792378700000-10",
+    "ref": "raw/PRIOR-corrupt-2.raw"
+   },
+   {
+    "key": "corrupt.1792378750000",
+    "ref": "raw/PRIOR-corrupt-3.raw"
+   }
+  ]
+ },
+ "expect": {
+  "idbCorruptExact": 3,
+  "evicted": "corrupt.1792378700000-2 (oldest by parsed (ts,n); lexical order would wrongly evict -10)",
+  "sameTransaction": true
+ }
+}

@@ -1,0 +1,24 @@
+# 2026-10-19T07:23:17.360Z s1-explainer-1st file:///tmp/relchk/egg-farm.html profile=prof-old 390x844 45s aheadHours=0
+0:03 build {"meta":"m3-rc1-pre+246de09","data":"m3-rc1-pre+246de09"}
+0:03 shot s1-explainer-1st-01-0m03-start.png
+0:03 overlay ["card: Welcome back! You were away 2m +71 eggs Collect"]
+0:03 shot s1-explainer-1st-02-0m03-overlay.png
+0:03 overlay-click Collect
+0:04 state {"top":"Egg Farm $76.38 71 $76.38, 71 eggs","goal":"Hens L2 Ready! ›","collect":"Collect +35 · 7 ready","sellAll":"","sinceBuy":0}
+0:05 tabs Collection|Farm|Workers
+0:05 shot s1-explainer-1st-03-0m05-upgrades-tabs.png
+0:05 buy [Collection] gap=1s :: L6 Collect per tap Eggs per tap 35 → 40 Level 6 / 30 $167.00
+0:05 shot s1-explainer-1st-04-0m05-buy.png
+0:05 buy [Farm] gap=1s :: L1 Hens Eggs/s 2 → 3 Level 1 / 30 $21.00
+0:06 shot s1-explainer-1st-05-0m06-buy.png
+0:09 buy [Farm] gap=4s :: L2 Hens Eggs/s 3 → 4 Level 2 / 30 $24.00
+0:10 shot s1-explainer-1st-06-0m10-buy.png
+0:14 buy [Farm] gap=4s :: L3 Hens Eggs/s 4 → 5 Level 3 / 30 $35.00
+0:14 shot s1-explainer-1st-07-0m14-buy.png
+0:19 state {"top":"Egg Farm $33.98 38 $33.98, 38 eggs","goal":"Farm L2 ~30 s ›","collect":"Collect +40 · 6 ready","sellAll":"No eggs to sell","sinceBuy":6}
+0:32 sell Sell all (10 eggs · $22.00)
+0:35 state {"top":"Egg Farm $99.98 89 $99.98, 89 eggs","goal":"Farm L2 ~8 s ›","collect":"Collect +40 · 6 ready","sellAll":"No eggs to sell","sinceBuy":22}
+0:42 sell Sell all (10 eggs · $22.00)
+0:42 buy [Farm] gap=29s :: L1 Farm level Coop upgrade at L5 Hens & Egg value up to L4 → L5 Coop capacity 100 → 150 Customers every 4.75s → 4.51s Customer demand 8–16 →
+0:43 shot s1-explainer-1st-08-0m43-buy.png
+0:46 shot s1-explainer-1st-09-0m46-end.png

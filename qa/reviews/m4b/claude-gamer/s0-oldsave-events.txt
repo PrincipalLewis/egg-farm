@@ -1,0 +1,50 @@
+# 2026-10-19T07:18:00.244Z s0-oldsave file:///tmp/egg-claude-gamer/old/egg-farm.html profile=prof-old 390x844 180s aheadHours=0
+0:03 build {"meta":"m3-rc1-pre+dd52bfd","data":"m3-rc1-pre+dd52bfd"}
+0:03 shot s0-oldsave-01-0m03-start.png
+0:03 state {"top":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap—›","collect":"Collect +5 · 2 ready","sellAll":"","sinceBuy":0}
+0:04 tabs Collection|Farm|Workers
+0:04 shot s0-oldsave-02-0m04-upgrades-tabs.png
+0:18 buy [Collection] gap=14s :: L0 Collect per tap Eggs per tap 5 → 10 Egg price $1.00 → $1.12 Level 0 / 30 $10.00
+0:18 shot s0-oldsave-03-0m18-buy.png
+0:19 state {"top":"Egg Farm $4.00 9 $4.00, 9 eggs","goal":"Collection L2: +5/tap ~52 s ›","collect":"Collect +10 · 2 ready","sellAll":"No eggs to sell","sinceBuy":1}
+0:28 buy [Collection] gap=10s :: L1 Collect per tap Eggs per tap 10 → 15 Egg price $1.12 → $1.24 Level 1 / 30 $16.00
+0:28 shot s0-oldsave-04-0m28-buy.png
+0:34 state {"top":"Egg Farm $18.20 6 $18.20, 6 eggs","goal":"Collection L3: +5/tap ~10 s ›","collect":"Collect +15 · 2 ready","sellAll":"No eggs to sell","sinceBuy":6}
+0:38 buy [Collection] gap=10s :: L2 Collect per tap Eggs per tap 15 → 20 Egg price $1.24 → $1.36 Level 2 / 30 $25.00
+0:39 shot s0-oldsave-05-0m39-buy.png
+0:42 sell Sell all (10 eggs · $13.60)
+0:48 sell Sell all (2 eggs · $2.72)
+0:49 state {"top":"Egg Farm $31.44 0 $31.44, 0 eggs","goal":"Collection L4: +5/tap ~7 s ›","collect":"Collect +20 · 2 ready","sellAll":"No eggs to sell","sinceBuy":11}
+0:53 buy [Collection] gap=15s :: L3 Collect per tap Eggs per tap 20 → 25 Egg price $1.36 → $1.48 Level 3 / 30 $40.00
+0:54 shot s0-oldsave-06-0m54-buy.png
+0:56 sell Sell all (2 eggs · $2.96)
+1:04 state {"top":"Egg Farm $24.64 0 $24.64, 0 eggs","goal":"Collection L5: +5/tap ~21 s ›","collect":"Collect +25 · 2 ready","sellAll":"No eggs to sell","sinceBuy":11}
+1:05 sell Sell all (2 eggs · $2.96)
+1:11 sell Sell all (2 eggs · $2.96)
+1:12 sell Sell all (2 eggs · $2.96)
+1:13 sell Sell all (2 eggs · $2.96)
+1:17 sell Sell all (1 eggs · $1.48)
+1:21 state {"top":"Egg Farm $60.16 0 $60.16, 0 eggs","goal":"Collection L5: +5/tap ~3 s ›","collect":"Collect +25 · 2 ready","sellAll":"No eggs to sell","sinceBuy":27}
+1:22 buy [Collection] gap=29s :: L4 Collect per tap Eggs per tap 25 → 30 Egg price $1.48 → $1.60 Level 4 / 30 $65.00 Limited by coop · Upgrade Farm →
+1:26 sell Sell all (1 eggs · $1.60)
+1:32 sell Sell all (2 eggs · $3.20)
+1:37 state {"top":"Egg Farm $33.08 0 $33.08, 0 eggs","goal":"Farm L1 ~28 s ›","collect":"Collect +30 · 2 ready","sellAll":"No eggs to sell","sinceBuy":14}
+1:39 sell Sell all (2 eggs · $3.20)
+1:44 sell Sell all (2 eggs · $3.20)
+1:53 state {"top":"Egg Farm $73.08 0 $73.08, 0 eggs","goal":"Farm L1 ~12 s ›","collect":"Collect +30 · 1 ready","sellAll":"No eggs to sell","sinceBuy":30}
+1:54 sell Sell all (2 eggs · $3.20)
+1:56 sell Sell all (2 eggs · $3.20)
+1:58 sell Sell all (2 eggs · $3.20)
+2:05 buy [Farm] gap=42s :: L0 Farm level Coop upgrade at L5 Hens 5 → 10 Coop capacity 50 → 100 Egg price $1.60 → $1.68 Customers every 5s → 4.75s Customer demand 6–12 
+2:05 shot s0-oldsave-07-2m05-buy.png
+2:08 state {"top":"Egg Farm $10.28 0 $10.28, 0 eggs","goal":"Collection L6: +5/tap ~40 s ›","collect":"Collect +30 · 3 ready","sellAll":"No eggs to sell","sinceBuy":3}
+2:17 sell Sell all (2 eggs · $3.36)
+2:22 sell Sell all (2 eggs · $3.36)
+2:24 state {"top":"Egg Farm $65.72 0 $65.72, 0 eggs","goal":"Collection L6: +5/tap ~15 s ›","collect":"Collect +30 · 2 ready","sellAll":"No eggs to sell","sinceBuy":19}
+2:35 buy [Collection] gap=30s :: L5 Collect per tap Eggs per tap 30 → 35 Egg price $1.68 → $1.81 Level 5 / 30 $104.00
+2:39 state {"top":"Egg Farm $13.03 0 $13.03, 0 eggs","goal":"Farm L2 ~42 s ›","collect":"Collect +35 · 3 ready","sellAll":"No eggs to sell","sinceBuy":4}
+2:41 sell Sell all (2 eggs · $3.62)
+2:51 sell Sell all (2 eggs · $3.62)
+2:55 state {"top":"Egg Farm $67.33 0 $67.33, 0 eggs","goal":"Farm L2 ~21 s ›","collect":"Collect +35 · 3 ready","sellAll":"No eggs to sell","sinceBuy":19}
+2:58 sell Sell all (2 eggs · $3.62)
+3:00 shot s0-oldsave-08-3m00-end.png

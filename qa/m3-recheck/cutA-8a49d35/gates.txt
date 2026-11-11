@@ -1,0 +1,7 @@
+tsc=0
+copy=0
+sync=0
+vitest=0
+build=0
+buildqa=0
+slow=0

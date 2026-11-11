@@ -1,0 +1,268 @@
+{
+ "farm-best": {
+  "state": {
+   "farmLevel": 0,
+   "hensLevel": 3,
+   "eggValueLevel": 3,
+   "collectionLevel": 0,
+   "coinsCents": 10000000000000
+  },
+  "key": "FARM",
+  "label": "Farm L1",
+  "labelRaw": "Farm L1",
+  "len": 7,
+  "ariaHead": "Next goal: Farm L1.",
+  "chip": "FARM",
+  "hint": {
+   "key": "FARM",
+   "affordable": true,
+   "costCents": 10000,
+   "payback": 76.93979140328697
+  },
+  "tab": "farm",
+  "sale": true,
+  "ariaFull": "Next goal: Farm L1"
+ },
+ "broke": {
+  "state": {
+   "farmLevel": 0,
+   "hensLevel": 3,
+   "eggValueLevel": 2,
+   "collectionLevel": 0,
+   "coinsCents": 0
+  },
+  "key": "VALUE",
+  "label": "Egg value L3 · +14% income",
+  "labelRaw": "Egg value L3 · +14% income",
+  "len": 26,
+  "ariaHead": "Next goal: Egg value level 3, plus 14 percent income.",
+  "chip": null,
+  "hint": {
+   "key": "VALUE",
+   "affordable": false,
+   "costCents": 3300,
+   "payback": 82.22581417624521
+  },
+  "tab": "farm",
+  "sale": true,
+  "ariaFull": "Next goal: Egg value level 3, plus 14 percent income"
+ },
+ "value-truncated-nostar": {
+  "state": {
+   "farmLevel": 0,
+   "hensLevel": 3,
+   "eggValueLevel": 2,
+   "collectionLevel": 0,
+   "coinsCents": 10000000000000
+  },
+  "key": "VALUE",
+  "label": "Egg value L3 · +14% income",
+  "labelRaw": "Egg value L3 · +14% income",
+  "len": 26,
+  "ariaHead": "Next goal: best buy, Egg value level 3, plus 14 percent income.",
+  "chip": "VALUE",
+  "hint": {
+   "key": "VALUE",
+   "affordable": true,
+   "costCents": 3300,
+   "payback": 82.22581417624521
+  },
+  "tab": "farm",
+  "sale": true,
+  "ariaFull": "Next goal: best buy, Egg value level 3, plus 14 percent income"
+ },
+ "broke-hens-short": {
+  "state": {
+   "farmLevel": 0,
+   "hensLevel": 1,
+   "eggValueLevel": 3,
+   "collectionLevel": 0,
+   "coinsCents": 0
+  },
+  "key": "HENS",
+  "label": "Hens L2",
+  "labelRaw": "Hens L2",
+  "len": 7,
+  "ariaHead": "Next goal: Hens level 2.",
+  "chip": null,
+  "hint": {
+   "key": "HENS",
+   "affordable": false,
+   "costCents": 2100,
+   "payback": 101.25280478683625
+  },
+  "tab": "farm",
+  "sale": false,
+  "ariaFull": "Next goal: Hens level 2"
+ },
+ "hens-pct-star": {
+  "state": {
+   "farmLevel": 0,
+   "hensLevel": 0,
+   "eggValueLevel": 3,
+   "collectionLevel": 0,
+   "coinsCents": 10000000000000
+  },
+  "key": "HENS",
+  "label": "★ Hens L1 · +20% income",
+  "labelRaw": "★ Hens L1 · +20% income",
+  "len": 23,
+  "ariaHead": "Next goal: best buy, Hens level 1, plus 20 percent income.",
+  "chip": "HENS",
+  "hint": {
+   "key": "HENS",
+   "affordable": true,
+   "costCents": 2000,
+   "payback": 42.7350427350427
+  },
+  "tab": "farm",
+  "sale": true,
+  "ariaFull": "Next goal: best buy, Hens level 1, plus 20 percent income"
+ },
+ "value-milestone": {
+  "state": {
+   "farmLevel": 2,
+   "hensLevel": 5,
+   "eggValueLevel": 4,
+   "collectionLevel": 0,
+   "coinsCents": 10000000000000
+  },
+  "key": "VALUE",
+  "label": "★ Egg value L5: Grade A",
+  "labelRaw": "★ Egg value L5: Grade A",
+  "len": 23,
+  "ariaHead": "Next goal: best buy, Egg value level 5, Grade A.",
+  "chip": "VALUE",
+  "hint": {
+   "key": "VALUE",
+   "affordable": true,
+   "costCents": 7500,
+   "payback": 48.80952380952377
+  },
+  "tab": "farm",
+  "sale": true,
+  "ariaFull": "Next goal: best buy, Egg value level 5, Grade A"
+ },
+ "broke-collection": {
+  "state": {
+   "farmLevel": 3,
+   "hensLevel": 6,
+   "eggValueLevel": 6,
+   "collectionLevel": 0,
+   "coinsCents": 0
+  },
+  "key": "COLL",
+  "label": "Collection L1: +5/tap",
+  "labelRaw": "Collection L1: +5/tap",
+  "len": 21,
+  "ariaHead": "Next goal: Collection level 1, plus 5 per tap.",
+  "chip": null,
+  "hint": {
+   "key": "COLL",
+   "affordable": false,
+   "costCents": 1000,
+   "payback": 83.4254742547426
+  },
+  "tab": "collection",
+  "sale": true,
+  "ariaFull": "Next goal: Collection level 1, plus 5 per tap"
+ },
+ "collection-star": {
+  "state": {
+   "farmLevel": 3,
+   "hensLevel": 6,
+   "eggValueLevel": 6,
+   "collectionLevel": 0,
+   "coinsCents": 10000000000000
+  },
+  "key": "COLL",
+  "label": "★ Collection L1: +5/tap",
+  "labelRaw": "★ Collection L1: +5/tap",
+  "len": 23,
+  "ariaHead": "Next goal: best buy, Collection level 1, plus 5 per tap.",
+  "chip": "COLL",
+  "hint": {
+   "key": "COLL",
+   "affordable": true,
+   "costCents": 1000,
+   "payback": 83.4254742547426
+  },
+  "tab": "collection",
+  "sale": true,
+  "ariaFull": "Next goal: best buy, Collection level 1, plus 5 per tap"
+ },
+ "value-pct-star-27": {
+  "state": {
+   "farmLevel": 6,
+   "hensLevel": 9,
+   "eggValueLevel": 8,
+   "collectionLevel": 1,
+   "coinsCents": 10000000000000
+  },
+  "key": "VALUE",
+  "label": "★ Egg value L9 · +9% income",
+  "labelRaw": "★ Egg value L9 · +9% income",
+  "len": 27,
+  "ariaHead": "Next goal: best buy, Egg value level 9, plus 9 percent income.",
+  "chip": "VALUE",
+  "hint": {
+   "key": "VALUE",
+   "affordable": true,
+   "costCents": 32800,
+   "payback": 85.76444273285902
+  },
+  "tab": "farm",
+  "sale": true,
+  "ariaFull": "Next goal: best buy, Egg value level 9, plus 9 percent income"
+ },
+ "hens-milestone": {
+  "state": {
+   "farmLevel": 7,
+   "hensLevel": 9,
+   "eggValueLevel": 10,
+   "collectionLevel": 4,
+   "coinsCents": 10000000000000
+  },
+  "key": "HENS",
+  "label": "★ Hens L10: bigger coop",
+  "labelRaw": "★ Hens L10: bigger coop",
+  "len": 23,
+  "ariaHead": "Next goal: best buy, Hens level 10, bigger coop.",
+  "chip": "HENS",
+  "hint": {
+   "key": "HENS",
+   "affordable": true,
+   "costCents": 28500,
+   "payback": 178.85756435189637
+  },
+  "tab": "farm",
+  "sale": true,
+  "ariaFull": "Next goal: best buy, Hens level 10, bigger coop"
+ },
+ "hens-nosale-pct-hidden": {
+  "state": {
+   "farmLevel": 0,
+   "hensLevel": 0,
+   "eggValueLevel": 3,
+   "collectionLevel": 0,
+   "coinsCents": 10000000000000
+  },
+  "key": "HENS",
+  "label": "★ Hens L1",
+  "labelRaw": "★ Hens L1 · +20% income",
+  "len": 23,
+  "ariaHead": "Next goal: best buy, Hens level 1.",
+  "chip": "HENS",
+  "hint": {
+   "key": "HENS",
+   "affordable": true,
+   "costCents": 2000,
+   "payback": 42.7350427350427
+  },
+  "tab": "farm",
+  "sale": false,
+  "ariaFull": "Next goal: best buy, Hens level 1",
+  "note": "CCR M1/F4-11: income/s 0 -> % hidden",
+  "expectStatus": "Ready!"
+ }
+}

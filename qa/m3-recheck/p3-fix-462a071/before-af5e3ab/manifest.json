@@ -1,0 +1,338 @@
+{
+ "pr": 40,
+ "branch": "main (before)",
+ "sha": "af5e3abba1bca9bee582f22f4a019724f8abf165",
+ "pushed": true,
+ "build_label_checked": true,
+ "build_label": "m3-rc1-pre+af5e3ab",
+ "rev": 2,
+ "author": "QA Engineer, UI/Layout & Gameplay Verification",
+ "created": "2026-10-17T12:28:00+02:00",
+ "note": "rev2: *-farmtab shots are Farm tab. The webkit 390x844 normal full shot was never written.",
+ "shots": [
+  {
+   "file": "chromium-af5e3ab-360x800-capped-card.png",
+   "engine": "chromium",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-360x800-capped-farmtab.png",
+   "engine": "chromium",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-360x800-normal-card.png",
+   "engine": "chromium",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "chromium-af5e3ab-360x800-normal-farmtab.png",
+   "engine": "chromium",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "chromium-af5e3ab-375x700-capped-card.png",
+   "engine": "chromium",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-375x700-capped-farmtab.png",
+   "engine": "chromium",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-375x700-normal-card.png",
+   "engine": "chromium",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "chromium-af5e3ab-375x700-normal-farmtab.png",
+   "engine": "chromium",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "chromium-af5e3ab-375x800-capped-card.png",
+   "engine": "chromium",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-375x800-capped.png",
+   "engine": "chromium",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-375x800-normal-card.png",
+   "engine": "chromium",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "chromium-af5e3ab-375x800-normal.png",
+   "engine": "chromium",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "chromium-af5e3ab-390x844-capped-card.png",
+   "engine": "chromium",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-390x844-capped-farmtab.png",
+   "engine": "chromium",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "chromium-af5e3ab-390x844-normal-card.png",
+   "engine": "chromium",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "chromium-af5e3ab-390x844-normal-farmtab.png",
+   "engine": "chromium",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-af5e3ab-360x800-capped-farmtab.png",
+   "engine": "firefox",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-af5e3ab-360x800-normal-farmtab.png",
+   "engine": "firefox",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-af5e3ab-375x700-capped-farmtab.png",
+   "engine": "firefox",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-af5e3ab-375x700-normal-farmtab.png",
+   "engine": "firefox",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-af5e3ab-390x844-capped-farmtab.png",
+   "engine": "firefox",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-af5e3ab-390x844-normal-farmtab.png",
+   "engine": "firefox",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "sprite-chromium-af5e3ab-360x800.png",
+   "engine": "chromium",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-chromium-af5e3ab-375x700.png",
+   "engine": "chromium",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-chromium-af5e3ab-390x844.png",
+   "engine": "chromium",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-firefox-af5e3ab-360x800.png",
+   "engine": "firefox",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-firefox-af5e3ab-375x700.png",
+   "engine": "firefox",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-firefox-af5e3ab-390x844.png",
+   "engine": "firefox",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-webkit-af5e3ab-360x800.png",
+   "engine": "webkit",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-webkit-af5e3ab-375x700.png",
+   "engine": "webkit",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "sprite-webkit-af5e3ab-390x844.png",
+   "engine": "webkit",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Farm view, #coop sprite region, F3/C19 $20, animations paused"
+  },
+  {
+   "file": "webkit-af5e3ab-360x800-capped-farmtab.png",
+   "engine": "webkit",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-af5e3ab-360x800-normal-farmtab.png",
+   "engine": "webkit",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-af5e3ab-375x700-capped-farmtab.png",
+   "engine": "webkit",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-af5e3ab-375x700-normal-farmtab.png",
+   "engine": "webkit",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-af5e3ab-390x844-capped-farmtab.png",
+   "engine": "webkit",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > FARM tab (full page). Taken after the probe switched to Farm; NOT a Collection shot. F3/C19, $20, coop-capped, short of coins"
+  }
+ ]
+}

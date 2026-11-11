@@ -1,0 +1,21 @@
+{
+ "id": "CSR12-ls-throws-securityerror",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-12"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "lsThrows": "SecurityError",
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "notice": "cantsave|storage (existing v2.2 outcome)",
+  "noFreshAutosave": true
+ }
+}

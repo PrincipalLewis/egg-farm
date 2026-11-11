@@ -1,0 +1,18 @@
+[chromium] dialog R copy/role/focus PASS {"title":"Welcome back!","role":"alertdialog","modal":"true","focus":"rcGo","hasExport":true,"text":"Welcome back!\n\nSomething went wrong with your latest save, so we loaded your most recent backup. You might be a few moments behind.\n\nKeep farming\nExport old save"}
+[chromium] dialog R Esc / scrim don't close PASS ""
+[chromium] dialog R focus trapped PASS {"f0":"rcGo","f1":"rcExport","f2":"rcGo"}
+[chromium] dialog R export PASS {"file":"eggfarm-old-save-20261016-0147.json","msg":"Saved a copy."}
+[chromium] dialog R closes on button, focus -> Collect PASS {"open":false,"focus":"welcome-modal","quota":0,"coins":22692,"F":10,"C":11}
+[chromium] dialog F copy/role/focus PASS {"title":"A fresh start","role":"alertdialog","modal":"true","focus":"rcGo","hasExport":true,"text":"A fresh start\n\nWe couldn't open your saved farm, so a new one is ready for you. We've kept a copy of the old save, just in case.\n\nStart farming\nExport old save"}
+[chromium] dialog F Esc / scrim don't close PASS ""
+[chromium] dialog F focus trapped PASS {"f0":"rcGo","f1":"rcExport","f2":"rcGo"}
+[chromium] dialog F export PASS {"file":"eggfarm-old-save-20261016-0147.json","msg":"Saved a copy."}
+[chromium] dialog F closes on button, focus -> Collect PASS {"open":false,"focus":"collect","quota":0,"coins":0,"F":0,"C":0}
+[chromium] dialog Q copy/role/focus PASS {"title":"A fresh start","role":"alertdialog","modal":"true","focus":"rcGo","hasExport":true,"text":"A fresh start\n\nWe couldn't open your saved farm, so a new one is ready for you. Your device is low on space, so we couldn't keep a copy.\n\nExport it now if you'd like to keep it.\n\nStart farming\nExport old save"}
+[chromium] dialog Q Esc / scrim don't close PASS ""
+[chromium] dialog Q focus trapped PASS {"f0":"rcGo","f1":"rcExport","f2":"rcGo"}
+[chromium] dialog Q export PASS {"file":"eggfarm-old-save-20261016-0147.json","msg":"Saved a copy."}
+[chromium] dialog Q closes on button, focus -> Collect, single quota attempt PASS {"open":false,"focus":"collect","quota":1,"coins":0,"F":0,"C":0}
+[chromium] AC14c quota: one "won't be saved" notice, game keeps running PASS {"notices":1,"text":"Your browser isn't letting us save right now (low space or private mode), so progress won't be saved.","basket":5,"failed":1}
+[chromium] AC14d second tab warns, is read-only, never writes PASS {"ro":true,"notice":"Egg Farm is open in another tab. Progress in this tab won't be saved.","coins":4242,"F":0,"C":0,"saved":4242,"aRo":false}
+exit 0

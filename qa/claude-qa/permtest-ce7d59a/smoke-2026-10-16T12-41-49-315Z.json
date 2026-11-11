@@ -1,0 +1,11 @@
+{
+  "url": "http://127.0.0.1:4173/",
+  "pass_id": "permtest-ce7d59a",
+  "started": "2026-10-16T12:41:49.315Z",
+  "console": [],
+  "pageerrors": [],
+  "title": "Egg Farm",
+  "build_id": null,
+  "screenshot": "/workspace/egg-farm-studio/qa/claude-qa/permtest-ce7d59a/smoke-2026-10-16T12-41-49-315Z.png",
+  "finished": "2026-10-16T12:41:51.873Z"
+}

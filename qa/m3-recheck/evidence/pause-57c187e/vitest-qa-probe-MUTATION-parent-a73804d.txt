@@ -1,0 +1,106 @@
+LOCK+START 2026-11-06T00:26:20+01:00 loadavg=1.53 1.21 1.01 2/2045 1524993
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pause-57c187e/wt
+
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > m4 on in shipping balance (grant path)
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap u59.9s(<min): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ × ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 60s: applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+   → allPaused direct: expected +0 to be 930 // Object.is equality
+ × ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 600s(under-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+   → allPaused direct: expected +0 to be 9300 // Object.is equality
+ × ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 2h(=cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+   → allPaused direct: expected +0 to be 111600 // Object.is equality
+ × ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 3h(over-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+   → allPaused direct: expected +0 to be 111600 // Object.is equality
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap u59.9s(<min): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 60s: applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 600s(under-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 2h(=cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 3h(over-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ × ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 grant == flag1 grant per gap; cap clamps (2h == 3h > 600s > 60s)
+   → expected 2 to be 1 // Object.is equality
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > hidden >= 60 s while paused (flag1): recovery +0, lockout frozen, paused kept; 59.9 s hidden: +1.66% ±0.05
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: online freeze, resume no double-pay, save/load > online paused 30 s: wage 0, no wage/collect/sell events, cdS frozen, energy +0.25x recovery (rule 3), lockout counts down (rule 7)
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: online freeze, resume no double-pay, save/load > resume after a paused 2h hide: no back-pay; next 5 s equals an open twin; MH lockout = 45
+ ✓ ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: online freeze, resume no double-pay, save/load > paused + callLockoutS survive save/load (<60 s reload and 2h reload); legacy fixture loads unpaused
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 60s: applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+AssertionError: allPaused direct: expected +0 to be 930 // Object.is equality
+
+- Expected
++ Received
+
+- 930
++ 0
+
+ ❯ ../probe-mut/pause-offline-parity.qa.test.ts:72:50
+     70|         rows.push({ flag: flagName, gap: gName, ref, out });
+     71|         for (const vn of Object.keys(out)) {
+     72|           expect(out[vn].direct, `${vn} direct`).toBe(ref);
+       |                                                  ^
+     73|           if (gap >= 60_000) {
+     74|             expect(out[vn].hideShow.shown, `${vn} hide/show`).toBe(ref…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 600s(under-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+AssertionError: allPaused direct: expected +0 to be 9300 // Object.is equality
+
+- Expected
++ Received
+
+- 9300
++ 0
+
+ ❯ ../probe-mut/pause-offline-parity.qa.test.ts:72:50
+     70|         rows.push({ flag: flagName, gap: gName, ref, out });
+     71|         for (const vn of Object.keys(out)) {
+     72|           expect(out[vn].direct, `${vn} direct`).toBe(ref);
+       |                                                  ^
+     73|           if (gap >= 60_000) {
+     74|             expect(out[vn].hideShow.shown, `${vn} hide/show`).toBe(ref…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 2h(=cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ FAIL  ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 3h(over-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+AssertionError: allPaused direct: expected +0 to be 111600 // Object.is equality
+
+- Expected
++ Received
+
+- 111600
++ 0
+
+ ❯ ../probe-mut/pause-offline-parity.qa.test.ts:72:50
+     70|         rows.push({ flag: flagName, gap: gName, ref, out });
+     71|         for (const vn of Object.keys(out)) {
+     72|           expect(out[vn].direct, `${vn} direct`).toBe(ref);
+       |                                                  ^
+     73|           if (gap >= 60_000) {
+     74|             expect(out[vn].hideShow.shown, `${vn} hide/show`).toBe(ref…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  ../probe-mut/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 grant == flag1 grant per gap; cap clamps (2h == 3h > 600s > 60s)
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ ../probe-mut/pause-offline-parity.qa.test.ts:88:210
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 11 passed (16)
+   Start at  00:26:20
+   Duration  480ms (transform 218ms, setup 0ms, collect 269ms, tests 69ms, environment 0ms, prepare 43ms)
+
+EXIT=1 END 2026-11-06T00:26:20+01:00 loadavg=1.53 1.21 1.01 6/2063 1525110

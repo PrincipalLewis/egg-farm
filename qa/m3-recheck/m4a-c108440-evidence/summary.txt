@@ -1,0 +1,18 @@
+2026-10-17 04:49:02 CEST buildid firefox exit=1
+2026-10-17 04:55:15 CEST globals firefox exit=1
+2026-10-17 04:55:47 CEST NOTE FF buildid exit1 = playwright firefox libs mid-restore after box reset; FF globals exit1 = serve-own needs dist/assets (single-file html) -> qa-globals-single.mjs; both re-queued
+2026-10-17 05:10:26 CEST rc0 firefox exit=124
+2026-10-17 05:25:41 CEST buildid webkit exit=1
+2026-10-17 05:38:25 CEST NOTE rc0 FF 04:55 7/33 (all game-boot sections timed out on window.eggfarm) = box reset (firefox libs restored 04:49); ffprobe 05:38 boots fine (eggfarm object, no errors) -> rc0 FF re-queued in m4a-run2 pass 2
+2026-10-17 05:44:25 CEST globals webkit exit=1
+2026-10-17 06:05:49 CEST rc0 webkit exit=124
+2026-10-17 06:16:42 CEST buildid firefox exit=1
+2026-10-17 06:18:30 CEST ROOT CAUSE rc0 FF/WK 7/33: leaked release-build vite (dist) on shared :5723 from prior step -> rc0 strictPort lost, tested release build w/o window.eggfarm. Killed own PID 230027; pass3 uses per-step ports 5741-3 + reap
+2026-10-17 06:25:09 CEST buildid firefox exit=0 fails=0 summary="runtime build ids [firefox]: ["m3-rc1-pre+c108440"]" 06:25:09
+2026-10-17 06:33:41 CEST globals firefox exit=0 fails=0 summary="served build m3-rc1-pre+c108440 (single-file html)" 06:33:41
+2026-10-17 06:54:13 CEST rc0 firefox exit=0 fails=0 summary="209/209 passed" 06:54:13
+2026-10-17 07:01:01 CEST buildid webkit exit=0 fails=0 summary="runtime build ids [webkit]: ["m3-rc1-pre+c108440"]" 07:01:01
+2026-10-17 07:07:20 CEST globals webkit exit=0 fails=0 summary="served build m3-rc1-pre+c108440 (single-file html)" 07:07:20
+2026-10-17 07:21:21 CEST rc0 webkit exit=0 fails=0 summary="209/209 passed" 07:21:21
+2026-10-17 07:24:18 CEST FILED m4a-c108440.md PASS FF+WK
+2026-10-17 08:40:57 CEST HANDED TO SAVES QA (#31). M4-A finished before handoff: FF+WK buildid/globals/rc0 all PASS (pass 3); no M4-A processes or servers of mine running.

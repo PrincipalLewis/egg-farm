@@ -1,0 +1,82 @@
+{
+ "chromium": {
+  "install_id": "911ef188-3497-43ad-b2a0-47d5d346809a",
+  "session_start": [
+   {
+    "install_id": "911ef188-3497-43ad-b2a0-47d5d346809a",
+    "build": "m3-pt1"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-911ef188-2026-10-15.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "911ef188-3497-43ad-b2a0-47d5d346809a",
+   "tel": null,
+   "ui": null
+  },
+  "afterCorrupt": "911ef188-3497-43ad-b2a0-47d5d346809a",
+  "idStable": true,
+  "errors": []
+ },
+ "firefox": {
+  "error": "Error: page.evaluate: window.eggfarmExportTelemetry is not a function\n@debugger eval code line 370 > eval:1:25\nevaluate@debugger eval code:372:16\n@debugger eval code:1:44\n@debugger eval code:1:62\n",
+  "errors": []
+ },
+ "webkit": {
+  "install_id": "d375d202-7453-4d7e-a029-826fa94890b2",
+  "session_start": [
+   {
+    "install_id": "d375d202-7453-4d7e-a029-826fa94890b2",
+    "build": "m3-pt1"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-d375d202-2026-10-15.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "d375d202-7453-4d7e-a029-826fa94890b2",
+   "tel": null,
+   "ui": null
+  },
+  "afterCorrupt": "d375d202-7453-4d7e-a029-826fa94890b2",
+  "idStable": true,
+  "errors": []
+ },
+ "ios-webkit": {
+  "install_id": "08e6bf27-4631-4eca-b52f-29a10fb936af",
+  "session_start": [
+   {
+    "install_id": "08e6bf27-4631-4eca-b52f-29a10fb936af",
+    "build": "m3-pt1"
+   }
+  ],
+  "export": {
+   "via": "clipboard",
+   "ok": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "share": {
+   "file": "eggfarm-log-08e6bf27-2026-10-15.json",
+   "msg": "Log shared."
+  },
+  "shareCancel": {
+   "clip": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "afterReset": {
+   "id": "08e6bf27-4631-4eca-b52f-29a10fb936af",
+   "tel": null,
+   "ui": null
+  },
+  "afterCorrupt": "08e6bf27-4631-4eca-b52f-29a10fb936af",
+  "idStable": true,
+  "errors": []
+ }
+}

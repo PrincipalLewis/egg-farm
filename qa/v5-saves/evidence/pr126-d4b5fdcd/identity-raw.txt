@@ -1,0 +1,8 @@
+=== ls-remote refs/pull/126/head ===
+d4b5fdcd7e45a5c3b5d0062cf2a3a982bf9e74a9	refs/pull/126/head
+=== origin/rc/v5 ===
+f20b91839fdf09ba0ed45a890281ccbf7bf2909d	refs/heads/rc/v5
+=== gh pr view 126 ===
+{"base_ref":"rc/v5","base_sha":"f20b91839fdf09ba0ed45a890281ccbf7bf2909d","body":"## Summary\nHoE/breeds-sim-prB-traits **COMMIT 0** — family clamps for PR-A Flock sheet `max` label.\n\n**Stack:** base `rc/v5`, stacked on **#124** @ `baf410f`; **merges right after #124**.\n\n**Head:** `d4b5fdcd7e45a5c3b5d0062cf2a3a982bf9e74a9`\n\n### Cites\n- Spec **v0.2 rev 3.8.9** sha1 **ea922eb8** §4.3 **L365–368** (family clamps)\n- **E8** L565 — family sum over clamp → sheet shows `max`\n- **E9** L566 — Farm crosses F18 → Present clamp 700 → 1500\n\n### API (matches PR-B UI stubs)\n| Name | Signature","draft":false,"head_ref":"saves/breeds-sim-prB-traits-c0","head_sha":"d4b5fdcd7e45a5c3b5d0062cf2a3a982bf9e74a9","mergeable":true,"mergeable_state":"unstable","number":126,"state":"open","title":"feat(breeds): familyClamp + familyActiveBp (prB commit 0)"}
+=== parents of d4b5fdcd ===
+{"message":"WIP: feat(breeds): familyClamp + familyActiveBp (prB commit 0)\n\n§4.3 L365–368 / E8/E9 / BR-AC18. BC_SPEC_DEFAULTS: lay_cap_bp_lt18=700,\nlay_cap_bp=1500, lay_cap_farm=18, away_cap_bp=3000, broody_cap_bp=2000\n(CSV pending RC-PIN). familyClamp(s,b,family)→{rawBp,clampedBp,atCap};\nfamilyActiveBp(s,b,family) via shared clampFamilyBp. Names match PR-B stubs.","parents":["baf410fff30cb6a66e8565693f84ade2250719c2"],"sha":"d4b5fdcd7e45a5c3b5d0062cf2a3a982bf9e74a9","tree":"f6ea41375a918dc1090d9fc51688a20894de6042"}

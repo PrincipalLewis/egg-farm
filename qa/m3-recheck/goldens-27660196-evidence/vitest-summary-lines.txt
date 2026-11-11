@@ -1,0 +1,5 @@
+41:   ✓ verify: goldens > the copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree 723ms
+150:GOLDEN1 a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+158:GOLDEN1 f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+352: Test Files  152 passed (152)
+353:      Tests  2219 passed | 1 skipped (2220)

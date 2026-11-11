@@ -1,0 +1,33 @@
+Observed 2026-11-05T23:48:52+01:00
+tip dc58705a3ca86902ef0a0d4a58e1799671800ac0
+parents e5b3d02b380e0dde1096d789d6a46301a2883f27 f8036e8f0826ca76fcc0ee13092d575533d4969b
+subject Merge origin/rc/v5 (f8036e8, #105) into feat/v5-tapcoins
+committer-date 2026-11-05T23:46:59+01:00
+origin/rc/v5 f8036e8f0826ca76fcc0ee13092d575533d4969b
+origin/feat/v5-tapcoins dc58705a3ca86902ef0a0d4a58e1799671800ac0
+contains origin/rc/v5: YES
+--- diff --stat origin/rc/v5...tip(two-dot)
+ src/config/formulas.ts     |   2 +-
+ src/config/m5-rules.ts     |   1 +
+ src/sim/actions.ts         |  10 ++-
+ src/sim/events.ts          |   2 +-
+ src/sim/streak.ts          |  10 ++-
+ src/sim/tap-coins.ts       |  32 +++++++++
+ tests/v5-tap-coins.test.ts | 164 +++++++++++++++++++++++++++++++++++++++++++++
+ 7 files changed, 213 insertions(+), 8 deletions(-)
+--- name-status
+M	src/config/formulas.ts
+M	src/config/m5-rules.ts
+M	src/sim/actions.ts
+M	src/sim/events.ts
+M	src/sim/streak.ts
+A	src/sim/tap-coins.ts
+A	tests/v5-tap-coins.test.ts
+--- numstat
+1	1	src/config/formulas.ts
+1	0	src/config/m5-rules.ts
+7	3	src/sim/actions.ts
+1	1	src/sim/events.ts
+7	3	src/sim/streak.ts
+32	0	src/sim/tap-coins.ts
+164	0	tests/v5-tap-coins.test.ts

@@ -1,0 +1,5 @@
+
+--- draft message (priority, to HoE + CEO) ---
+Rollback re-verify FAIL: Latest = m4.1-p1-30b29d3 https://github.com/PrincipalLewis/egg-farm/releases/tag/m4.1-5d9efa6
+egg-farm.html sha256 ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1 (expected ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1), build-id m4.1+5d9efa6 (expected m4.1+5d9efa6).
+MISMATCH = Blocker.

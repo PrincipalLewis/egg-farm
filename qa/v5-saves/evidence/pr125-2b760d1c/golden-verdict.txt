@@ -1,0 +1,5 @@
+GOLDEN1 flag-off f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544 pass=true
+GOLDEN1 m4on     a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5 pass=true
+GOLDEN_RECOMPUTE_EXIT=0
+hashes also in full vitest log
+VERDICT=PASS

@@ -1,0 +1,108 @@
+[
+ {
+  "n": "2 offline open + runtime build id",
+  "p": true,
+  "i": {
+   "telemetryBuild": "m3-rc1-pre+a01faea",
+   "settingsText": null,
+   "settingsOpened": false,
+   "externalRequestsBlocked": []
+  }
+ },
+ {
+  "n": "3 load v3 (derived from m1-rc2-v4): no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792174980033,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792174981935,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "ui": "Egg Farm | $1,415.85 | 154 | $1,415.85, 154 eggs | 79 | 62 | 57 | 37 | +2 | ×55 hens | 132 / 550 | Hire Market Hand | Ready! | › | Collect +60 | Market | Upgrades | Farm | New helper! | Hire a Market "
+  }
+ },
+ {
+  "n": "3 load v4 m1-rc2-v4-12min: no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792174995817,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792174997518,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "ui": "Egg Farm | $1,415.85 | 154 | $1,415.85, 154 eggs | 79 | 62 | 57 | 37 | +2 | ×55 hens | 132 / 550 | Hire Market Hand | Ready! | › | Collect +60 | Market | Upgrades | Farm | New helper! | Hire a Market "
+  }
+ },
+ {
+  "n": "3 load v5 m2-rc1-v5-40min: no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 1291591,
+    "farm": 19,
+    "coll": 17
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792175011223,
+    "coins": 1507206,
+    "farm": 19,
+    "coll": 17
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792175012882,
+    "coins": 1554598,
+    "farm": 19,
+    "coll": 17
+   },
+   "ui": "Egg Farm | $15.5K | 0 | $15.1K, 0 eggs | 146 | 99 | 54 | 59 | +3 | ×100 hens | 0 / 1,000 | Collection L18: +5/tap | ~11 min | › | Collect +90 · 0 ready | Market | Upgrades | Farm | +$225.34+$11.86+$1."
+  }
+ },
+ {
+  "n": "5 only non-standard global is eggfarmExportTelemetry",
+  "p": true,
+  "i": {
+   "extra": [
+    "eggfarmExportTelemetry"
+   ],
+   "typeofExport": "function",
+   "eggfarmInWindow": false
+  }
+ },
+ {
+  "n": "4 no console errors / page errors (all sessions above)",
+  "p": true,
+  "i": {
+   "errors": []
+  }
+ }
+]

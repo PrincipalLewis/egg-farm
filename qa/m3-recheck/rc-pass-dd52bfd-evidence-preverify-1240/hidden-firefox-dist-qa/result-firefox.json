@@ -1,0 +1,617 @@
+{
+ "res": {
+  "engine": "firefox",
+  "build": "m3-rc1-pre+dd52bfd",
+  "cases": {
+   "hide61": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 244,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 244,
+      "awayS": 61
+     },
+     "popup": "Welcome back! | You were away 1m | +244 eggs | Collect"
+    },
+    "b1": {
+     "pend": 248,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 248,
+      "awayS": 62.006
+     },
+     "popup": "Welcome back! | You were away 1m | +248 eggs | Collect"
+    },
+    "errs": []
+   },
+   "hide120": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 480,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 480,
+      "awayS": 120
+     },
+     "popup": "Welcome back! | You were away 2m | +480 eggs | Collect"
+    },
+    "b1": {
+     "pend": 484,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 484,
+      "awayS": 121.007
+     },
+     "popup": "Welcome back! | You were away 2m | +484 eggs | Collect"
+    },
+    "errs": []
+   },
+   "hide671": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 2684,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 2684,
+      "awayS": 671
+     },
+     "popup": "Welcome back! | You were away 11m | +2,684 eggs | Collect"
+    },
+    "b1": {
+     "pend": 2688,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 2688,
+      "awayS": 672.003
+     },
+     "popup": "Welcome back! | You were away 11m | +2,688 eggs | Collect"
+    },
+    "errs": []
+   },
+   "hide10800": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 28800,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 28800,
+      "awayS": 7200
+     },
+     "popup": "Welcome back! | You were away 2h+ | +28.8K eggs | Collect"
+    },
+    "b1": {
+     "pend": 28800,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 28800,
+      "awayS": 7200
+     },
+     "popup": "Welcome back! | You were away 2h+ | +28.8K eggs | Collect"
+    },
+    "errs": []
+   },
+   "hide30": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 592.8000000000042,
+     "coins": 12345,
+     "cust": 9,
+     "nextId": 10,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "errs": []
+   },
+   "hide59": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 800,
+     "coins": 12345,
+     "cust": 9,
+     "nextId": 19,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "errs": []
+   },
+   "hide59.999": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 800,
+     "coins": 12345,
+     "cust": 9,
+     "nextId": 19,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "errs": []
+   },
+   "hide60": {
+    "a0": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "a1": {
+     "pend": 240,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 240,
+      "awayS": 60
+     },
+     "popup": "Welcome back! | You were away 1m | +240 eggs | Collect"
+    },
+    "errs": []
+   },
+   "dbl": {
+    "f": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 114.39999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "g1": {
+     "pend": 2684,
+     "basket": 40,
+     "coop": 130.3999999999999,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 2684,
+      "awayS": 671
+     },
+     "popup": "Welcome back! | You were away 11m | +2,684 eggs | Collect"
+    },
+    "g2": {
+     "pend": 0,
+     "basket": 2724,
+     "coop": 130.3999999999999,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 2684,
+      "awayS": 671
+     },
+     "popup": null
+    },
+    "g3": {
+     "pend": 2684,
+     "basket": 2724,
+     "coop": 146.39999999999984,
+     "coins": 12345,
+     "cust": 1,
+     "nextId": 2,
+     "offline": {
+      "eggs": 2684,
+      "awayS": 671
+     },
+     "popup": "Welcome back! | You were away 11m | +2,684 eggs | Collect"
+    },
+    "g4": {
+     "pend": 0,
+     "basket": 5408,
+     "coop": 800,
+     "coins": 12345,
+     "cust": 9,
+     "nextId": 19,
+     "offline": {
+      "eggs": 2684,
+      "awayS": 671
+     },
+     "popup": null
+    },
+    "errs": []
+   },
+   "sameMs": {
+    "e1": {
+     "pend": 2684,
+     "basket": 40,
+     "coop": 112.79999999999995,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 2684,
+      "awayS": 671
+     },
+     "popup": "Welcome back! | You were away 11m | +2,684 eggs | Collect"
+    },
+    "st": {
+     "hiddenSince": null,
+     "isHidden": false
+    }
+   },
+   "m1_deactivate": {
+    "m": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 192.79999999999967,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "isHiddenAtFreeze": false,
+    "after": {
+     "isHidden": false,
+     "inactive": true
+    },
+    "saveUnchanged": true,
+    "errs": []
+   },
+   "m1_refuseNewer": {
+    "m": {
+     "pend": 0,
+     "basket": 40,
+     "coop": 192.79999999999967,
+     "coins": 12345,
+     "cust": 0,
+     "nextId": 1,
+     "offline": {
+      "eggs": 0,
+      "awayS": 0
+     },
+     "popup": null
+    },
+    "isHiddenAtFreeze": false,
+    "after": {
+     "isHidden": false,
+     "inactive": true
+    },
+    "saveUnchanged": true,
+    "errs": []
+   }
+  }
+ },
+ "R": [
+  {
+   "t": "(1)",
+   "name": "61s hide: N = 244 exact",
+   "pass": true,
+   "info": "[244,{\"eggs\":244,\"awayS\":61}]"
+  },
+  {
+   "t": "(1)",
+   "name": "61s hide == reload: both N = floor(min(away,7200)*4) for their own away (reload has ~0.5 s load slop), basket/coins/customers equal, coop ±2",
+   "pass": true,
+   "info": "{\"hide\":{\"pend\":244,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":244,\"awayS\":61},\"popup\":\"Welcome back! | You were away 1m | +244 eggs | Collect\"},\"reload\":{\"pend\":248,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":248,\"awayS\":62.006},\"popup\":\"Welcome back! | You were away 1m | +248 eggs | Collect\"}}"
+  },
+  {
+   "t": "(1)",
+   "name": "61s popup same text as reload",
+   "pass": true,
+   "info": "{\"hide\":\"Welcome back! | You were away 1m | +244 eggs | Collect\",\"reload\":\"Welcome back! | You were away 1m | +248 eggs | Collect\"}"
+  },
+  {
+   "t": "(OC)",
+   "name": "61s coins: hide == reload and unchanged by hide (no live-sim sales stacked on grant)",
+   "pass": true,
+   "info": "[12345,12345,12345]"
+  },
+  {
+   "t": "(1)",
+   "name": "61s no over-credit arrivals (customers/nextId unchanged from hide)",
+   "pass": true,
+   "info": "[1,1]"
+  },
+  {
+   "t": "(1)",
+   "name": "120s hide: N = 480 exact",
+   "pass": true,
+   "info": "[480,{\"eggs\":480,\"awayS\":120}]"
+  },
+  {
+   "t": "(1)",
+   "name": "120s hide == reload: both N = floor(min(away,7200)*4) for their own away (reload has ~0.5 s load slop), basket/coins/customers equal, coop ±2",
+   "pass": true,
+   "info": "{\"hide\":{\"pend\":480,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":480,\"awayS\":120},\"popup\":\"Welcome back! | You were away 2m | +480 eggs | Collect\"},\"reload\":{\"pend\":484,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":484,\"awayS\":121.007},\"popup\":\"Welcome back! | You were away 2m | +484 eggs | Collect\"}}"
+  },
+  {
+   "t": "(1)",
+   "name": "120s popup same text as reload",
+   "pass": true,
+   "info": "{\"hide\":\"Welcome back! | You were away 2m | +480 eggs | Collect\",\"reload\":\"Welcome back! | You were away 2m | +484 eggs | Collect\"}"
+  },
+  {
+   "t": "(OC)",
+   "name": "120s coins: hide == reload and unchanged by hide (no live-sim sales stacked on grant)",
+   "pass": true,
+   "info": "[12345,12345,12345]"
+  },
+  {
+   "t": "(1)",
+   "name": "120s no over-credit arrivals (customers/nextId unchanged from hide)",
+   "pass": true,
+   "info": "[1,1]"
+  },
+  {
+   "t": "(1)",
+   "name": "671s hide: N = 2684 exact",
+   "pass": true,
+   "info": "[2684,{\"eggs\":2684,\"awayS\":671}]"
+  },
+  {
+   "t": "(1)",
+   "name": "671s hide == reload: both N = floor(min(away,7200)*4) for their own away (reload has ~0.5 s load slop), basket/coins/customers equal, coop ±2",
+   "pass": true,
+   "info": "{\"hide\":{\"pend\":2684,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":2684,\"awayS\":671},\"popup\":\"Welcome back! | You were away 11m | +2,684 eggs | Collect\"},\"reload\":{\"pend\":2688,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":2688,\"awayS\":672.003},\"popup\":\"Welcome back! | You were away 11m | +2,688 eggs | Collect\"}}"
+  },
+  {
+   "t": "(1)",
+   "name": "671s popup same text as reload",
+   "pass": true,
+   "info": "{\"hide\":\"Welcome back! | You were away 11m | +2,684 eggs | Collect\",\"reload\":\"Welcome back! | You were away 11m | +2,688 eggs | Collect\"}"
+  },
+  {
+   "t": "(OC)",
+   "name": "671s coins: hide == reload and unchanged by hide (no live-sim sales stacked on grant)",
+   "pass": true,
+   "info": "[12345,12345,12345]"
+  },
+  {
+   "t": "(1)",
+   "name": "671s no over-credit arrivals (customers/nextId unchanged from hide)",
+   "pass": true,
+   "info": "[1,1]"
+  },
+  {
+   "t": "(1)",
+   "name": "10800s hide: N = 28800 exact",
+   "pass": true,
+   "info": "[28800,{\"eggs\":28800,\"awayS\":7200}]"
+  },
+  {
+   "t": "(1)",
+   "name": "10800s hide == reload: both N = floor(min(away,7200)*4) for their own away (reload has ~0.5 s load slop), basket/coins/customers equal, coop ±2",
+   "pass": true,
+   "info": "{\"hide\":{\"pend\":28800,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":28800,\"awayS\":7200},\"popup\":\"Welcome back! | You were away 2h+ | +28.8K eggs | Collect\"},\"reload\":{\"pend\":28800,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":28800,\"awayS\":7200},\"popup\":\"Welcome back! | You were away 2h+ | +28.8K eggs | Collect\"}}"
+  },
+  {
+   "t": "(1)",
+   "name": "10800s popup same text as reload incl. 2h cap",
+   "pass": true,
+   "info": "{\"hide\":\"Welcome back! | You were away 2h+ | +28.8K eggs | Collect\",\"reload\":\"Welcome back! | You were away 2h+ | +28.8K eggs | Collect\"}"
+  },
+  {
+   "t": "(OC)",
+   "name": "10800s coins: hide == reload and unchanged by hide (no live-sim sales stacked on grant)",
+   "pass": true,
+   "info": "[12345,12345,12345]"
+  },
+  {
+   "t": "(1)",
+   "name": "10800s no over-credit arrivals (customers/nextId unchanged from hide)",
+   "pass": true,
+   "info": "[1,1]"
+  },
+  {
+   "t": "(2)",
+   "name": "30s hide: no popup, no grant, played online (coop/basket progressed or customers moved)",
+   "pass": true,
+   "info": "{\"a0\":{\"pend\":0,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null},\"a1\":{\"pend\":0,\"basket\":40,\"coop\":592.8000000000042,\"coins\":12345,\"cust\":9,\"nextId\":10,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null}}"
+  },
+  {
+   "t": "(2)",
+   "name": "59s hide: no popup, no grant, played online (coop/basket progressed or customers moved)",
+   "pass": true,
+   "info": "{\"a0\":{\"pend\":0,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null},\"a1\":{\"pend\":0,\"basket\":40,\"coop\":800,\"coins\":12345,\"cust\":9,\"nextId\":19,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null}}"
+  },
+  {
+   "t": "(3)",
+   "name": "59.999s hide: no popup, no grant, played online (coop/basket progressed or customers moved)",
+   "pass": true,
+   "info": "{\"a0\":{\"pend\":0,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null},\"a1\":{\"pend\":0,\"basket\":40,\"coop\":800,\"coins\":12345,\"cust\":9,\"nextId\":19,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null}}"
+  },
+  {
+   "t": "(3)",
+   "name": "60s hide: grant 240 + popup \"Away 1m\"",
+   "pass": true,
+   "info": "{\"pend\":240,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":240,\"awayS\":60},\"popup\":\"Welcome back! | You were away 1m | +240 eggs | Collect\"}"
+  },
+  {
+   "t": "(4)",
+   "name": "fast hide/show (0.1 s): no grant/popup",
+   "pass": true,
+   "info": "{\"pend\":0,\"basket\":40,\"coop\":114.39999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null}"
+  },
+  {
+   "t": "(4)",
+   "name": "double hidden + double visible for 671s: exactly one grant 2,684 + popup",
+   "pass": true,
+   "info": "{\"pend\":2684,\"basket\":40,\"coop\":130.3999999999999,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":2684,\"awayS\":671},\"popup\":\"Welcome back! | You were away 11m | +2,684 eggs | Collect\"}"
+  },
+  {
+   "t": "(4)",
+   "name": "second separate 671s hide after Collect: one more grant 2,684; basket = 40 + 2,684",
+   "pass": true,
+   "info": "{\"g2\":{\"pend\":0,\"basket\":2724,\"coop\":130.3999999999999,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":2684,\"awayS\":671},\"popup\":null},\"g3\":{\"pend\":2684,\"basket\":2724,\"coop\":146.39999999999984,\"coins\":12345,\"cust\":1,\"nextId\":2,\"offline\":{\"eggs\":2684,\"awayS\":671},\"popup\":\"Welcome back! | You were away 11m | +2,684 eggs | Collect\"}}"
+  },
+  {
+   "t": "(4)",
+   "name": "5 x 10s hides: no grant, no popup",
+   "pass": true,
+   "info": "{\"pend\":0,\"basket\":5408,\"coop\":800,\"coins\":12345,\"cust\":9,\"nextId\":19,\"offline\":{\"eggs\":2684,\"awayS\":671},\"popup\":null}"
+  },
+  {
+   "t": "errors",
+   "name": "(4) no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "t": "(4b)",
+   "name": "same-ms re-hide: 671s still granted once, game not stuck hidden",
+   "pass": true,
+   "info": "{\"e1\":{\"pend\":2684,\"basket\":40,\"coop\":112.79999999999995,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":2684,\"awayS\":671},\"popup\":\"Welcome back! | You were away 11m | +2,684 eggs | Collect\"},\"st\":{\"hiddenSince\":null,\"isHidden\":false}}"
+  },
+  {
+   "t": "(m1)",
+   "name": "hide + deactivate: period closed at freeze, 671s later show -> no grant, no popup, no save write, not stuck hidden",
+   "pass": true,
+   "info": "{\"m\":{\"pend\":0,\"basket\":40,\"coop\":192.79999999999967,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null},\"isHiddenAtFreeze\":false,\"after\":{\"isHidden\":false,\"inactive\":true},\"saveUnchanged\":true,\"errs\":[]}"
+  },
+  {
+   "t": "(m1)",
+   "name": "hide + refuseNewer: period closed at freeze, 671s later show -> no grant, no popup, no save write, not stuck hidden",
+   "pass": true,
+   "info": "{\"m\":{\"pend\":0,\"basket\":40,\"coop\":192.79999999999967,\"coins\":12345,\"cust\":0,\"nextId\":1,\"offline\":{\"eggs\":0,\"awayS\":0},\"popup\":null},\"isHiddenAtFreeze\":false,\"after\":{\"isHidden\":false,\"inactive\":true},\"saveUnchanged\":true,\"errs\":[]}"
+  }
+ ]
+}

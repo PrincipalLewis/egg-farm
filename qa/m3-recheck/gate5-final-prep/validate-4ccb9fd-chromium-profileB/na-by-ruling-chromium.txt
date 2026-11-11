@@ -1,0 +1,5 @@
+chromium cap farm50 360x800: N/A by ruling (D-CEO-09 option B)
+chromium cap farm50-tracks55 360x800: N/A by ruling (D-CEO-09 option B)
+chromium c4 c4 360x800: N/A by ruling (D-CEO-09 option B)
+chromium l5x L50 360x800: N/A by ruling (D-CEO-09 option B)
+chromium l5x L55 360x800: N/A by ruling (D-CEO-09 option B)

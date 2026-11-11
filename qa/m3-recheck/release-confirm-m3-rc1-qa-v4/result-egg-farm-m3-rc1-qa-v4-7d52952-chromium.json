@@ -1,0 +1,188 @@
+[
+ {
+  "n": "2 offline open + runtime build id",
+  "p": true,
+  "i": {
+   "telemetryBuild": "m3-rc1-pre+7d52952",
+   "settingsText": null,
+   "settingsOpened": false,
+   "externalRequestsBlocked": []
+  }
+ },
+ {
+  "n": "3 load v3 (derived from m1-rc2-v4): no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792187719422,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792187721190,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "ui": "Egg Farm | $1,415.85 | 154 | $1,415.85, 154 eggs | 79 | 62 | 57 | 37 | +2 | ×55 hens | 133 / 550 | Hire Market Hand | Ready! | › | Collect +60 | Market | Upgrades | Farm | New helper! | Hire a Market "
+  }
+ },
+ {
+  "n": "3 load v4 m1-rc2-v4-12min: no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792187735122,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792187737019,
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11
+   },
+   "ui": "Egg Farm | $1,415.85 | 154 | $1,415.85, 154 eggs | 79 | 62 | 57 | 37 | +2 | ×55 hens | 132 / 550 | Hire Market Hand | Ready! | › | Collect +60 | Market | Upgrades | Farm | New helper! | Hire a Market "
+  }
+ },
+ {
+  "n": "3 load v5 m2-rc1-v5-40min: no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 1291591,
+    "farm": 19,
+    "coll": 17
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792187750827,
+    "coins": 1507206,
+    "farm": 19,
+    "coll": 17
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792187752609,
+    "coins": 1554598,
+    "farm": 19,
+    "coll": 17
+   },
+   "ui": "Egg Farm | $15.5K | 0 | $15.1K, 0 eggs | 146 | 99 | 54 | 59 | +3 | ×100 hens | 2 / 1,000 | Collection L18: +5/tap | ~5 min 19 s | › | Collect +90 · 2 ready | Market | Upgrades | Farm | +$450.68 | +$23"
+  }
+ },
+ {
+  "n": "3b load a01faea-written save (v5mid): no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 1601984,
+    "farm": 19,
+    "coll": 17,
+    "basket": 0
+   },
+   "srcSavedAt": 1792187680438,
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792187761442,
+    "coins": 2193663,
+    "farm": 19,
+    "coll": 17
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792187765279,
+    "coins": 2288447,
+    "farm": 19,
+    "coll": 17
+   },
+   "recoveryDialog": false
+  }
+ },
+ {
+  "n": "3b load a01faea-written save (fresh): no loss",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 0,
+    "farm": 0,
+    "coll": 0,
+    "basket": 18
+   },
+   "srcSavedAt": 1792187697214,
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792187774364,
+    "coins": 0,
+    "farm": 0,
+    "coll": 0
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792187778304,
+    "coins": 0,
+    "farm": 0,
+    "coll": 0
+   },
+   "recoveryDialog": false
+  }
+ },
+ {
+  "n": "4b core-loop smoke: collect, sell, buy upgrade, persists over reload",
+  "p": true,
+  "i": {
+   "collected": 18,
+   "sold": true,
+   "bought": true,
+   "maxCoins": 700,
+   "log": [
+    "sold@14",
+    "bought@17"
+   ],
+   "before": {
+    "coins": 500,
+    "farm": 0,
+    "coll": 1
+   },
+   "after": {
+    "coins": 500,
+    "farm": 0,
+    "coll": 1
+   }
+  }
+ },
+ {
+  "n": "5 only non-standard global is eggfarmExportTelemetry",
+  "p": true,
+  "i": {
+   "extra": [
+    "eggfarmExportTelemetry"
+   ],
+   "typeofExport": "function",
+   "eggfarmInWindow": false
+  }
+ },
+ {
+  "n": "4 no console errors / page errors (all sessions above)",
+  "p": true,
+  "i": {
+   "errors": []
+  }
+ }
+]

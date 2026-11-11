@@ -1,0 +1,146 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr125-eb92b375/probes
+
+stdout | qa-pr125-probe.test.ts > P1 (a) present_active_s half-up > P1a pure rounding: round(ms/100)/10 equals integer half-up for every integer ms 0..2,000,000
+QA-PROBE P1a mismatches 0 first null
+
+stdout | qa-pr125-probe.test.ts > P1 (a) present_active_s half-up > P1b sim reachability (BR-AC53 non-whole, BR-R12b(b) fT=min(100,F-given)): 12,249 focus-ms -> 12.2, 12,250 -> 12.3
+QA-PROBE P1b lastF=249 {"focusMs":12249,"activeMs":12249,"f":{"present_active_s":12.2,"present_lost_count":0}} lastF=250 {"focusMs":12250,"activeMs":12250,"f":{"present_active_s":12.3,"present_lost_count":0}}
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2a BR-AC53 (taps applied after the tick that reaches their focus second) -> 660.0 / 3
+QA-PROBE P2a {"focusMs":747000,"activeMs":660000,"f":{"present_active_s":660,"present_lost_count":3}}
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2b BR-AC53 (taps applied before that tick, i.e. counted on it) -> 660.0 / 3
+QA-PROBE P2b {"focusMs":747000,"activeMs":660000,"f":{"present_active_s":660,"present_lost_count":3}}
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2c no settled Present: both fields present and 0 even after 30 fast taps
+QA-PROBE P2c {"present_active_s":0,"present_lost_count":0} stamps 6
+
+stdout | qa-pr125-probe.test.ts > P2 (b) present_lost_count / BR-AC53 > P2d BR-AC47 steady 1/s taps 0..59 s: lost_count = 1
+QA-PROBE P2d {"present_active_s":22,"present_lost_count":1}
+
+stdout | qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3a eggs=0 grant with gap >= 60 s (hens track rate forced to 0) still carries away_bp
+QA-PROBE P3a eggs 0 [{"type":"offline_grant","fields":{"secondsAway":3600,"eggs":0,"away_bp":1500}}]
+
+stdout | qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3b away_bp reported equals the bp applied to the grant (dupe Sussex hatch completes during the absence)
+QA-PROBE P3b applied bp 1500 eggs 16818 expEggs@applied 13455 reported {"secondsAway":3600,"eggs":16818,"away_bp":1500} awayBp after 1875
+
+stdout | qa-pr125-probe.test.ts > P3 (c) offline_grant.away_bp > P3c sub-60 s reload gap: is an offline_grant emitted? (diagnostic: records behaviour)
+QA-PROBE P3c 2 s gap offline_grant events []
+
+stdout | qa-pr125-probe.test.ts > P4 BR-R13 float order > P4a impl equals spec order floor(min(min(a,cap)*rate*(1e4+bp)/1e4, max)*mult) over H x bp x a x mult
+QA-PROBE P4a cases 19411425 mismatches 0 []
+
+stdout | qa-pr125-probe.test.ts > P4 BR-R13 float order > P4b BR-AC17 Away 3000 @ H=30, 60 min and 3 h
+QA-PROBE P4b bp 3000 g60 72540 g3h 111600 flagOffCap 111600 spec60(mult1) 36270
+
+stdout | qa-pr125-probe.test.ts > P5 BR-AC50 reload: calm ring not saved > saves with 0 and 6 stamps are byte-identical
+QA-PROBE P5 identical true has breedsCalm false
+
+ ✓ qa-pr125-probe.test.ts (13 tests) 1035ms
+   ✓ P4 BR-R13 float order > P4a impl equals spec order floor(min(min(a,cap)*rate*(1e4+bp)/1e4, max)*mult) over H x bp x a x mult 675ms
+stdout | qa-pr125-probe.test.ts > P6 BR-R12 Present bp only while settled (BR-AC4b) > settling Present slot: presentBp 0 and no activeMs
+QA-PROBE P6 activeMs while settling 0
+
+stdout | qa-pr125-rebar-probe.test.ts > Q5 F5 boundary (BR-R18 / PMC) > gap 2000 ms, eggs forced 0, Sussex settled -> 0 offline_grant (away_bp 1500 when emitted)
+QA-PROBE2 Q5 2000 eggs 0 []
+
+stdout | qa-pr125-rebar-probe.test.ts > Q5 F5 boundary (BR-R18 / PMC) > gap 59000 ms, eggs forced 0, Sussex settled -> 0 offline_grant (away_bp 1500 when emitted)
+QA-PROBE2 Q5 59000 eggs 0 []
+
+stdout | qa-pr125-rebar-probe.test.ts > Q5 F5 boundary (BR-R18 / PMC) > gap 59999 ms, eggs forced 0, Sussex settled -> 0 offline_grant (away_bp 1500 when emitted)
+QA-PROBE2 Q5 59999 eggs 0 []
+
+stdout | qa-pr125-rebar-probe.test.ts > Q5 F5 boundary (BR-R18 / PMC) > gap 60000 ms, eggs forced 0, Sussex settled -> 1 offline_grant (away_bp 1500 when emitted)
+QA-PROBE2 Q5 60000 eggs 0 [{"type":"offline_grant","fields":{"secondsAway":60,"eggs":0,"away_bp":1500}}]
+
+stdout | qa-pr125-rebar-probe.test.ts > Q5 F5 boundary (BR-R18 / PMC) > gap 61000 ms, eggs forced 0, Sussex settled -> 1 offline_grant (away_bp 1500 when emitted)
+QA-PROBE2 Q5 61000 eggs 0 [{"type":"offline_grant","fields":{"secondsAway":61,"eggs":0,"away_bp":1500}}]
+
+stdout | qa-pr125-rebar-probe.test.ts > Q5 F5 boundary (BR-R18 / PMC) > gap 60,000 ms real balance (eggs>0) emits with away_bp 1500; flag-off 59,999 emits nothing
+QA-PROBE2 Q5 real 60s eggs 280 [{"type":"offline_grant","fields":{"secondsAway":60,"eggs":280,"away_bp":1500}}]
+
+stdout | qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 1 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+QA-PROBE2 Q7 1 fps {"focusMs":60000,"activeMs":60000,"coop":799.5000000000042,"f":{"present_active_s":60,"present_lost_count":0}}
+
+stdout | qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 10 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+QA-PROBE2 Q7 10 fps {"focusMs":60000,"activeMs":60000,"coop":799.5000000000042,"f":{"present_active_s":60,"present_lost_count":0}}
+
+stdout | qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 20 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+QA-PROBE2 Q7 20 fps {"focusMs":30000,"activeMs":30000,"coop":789.7500000000003,"f":{"present_active_s":30,"present_lost_count":0}}
+
+stdout | qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 30 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+QA-PROBE2 Q7 30 fps {"focusMs":19800,"activeMs":19800,"coop":786.4349999999857,"f":{"present_active_s":19.8,"present_lost_count":0}}
+
+stdout | qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 60 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+QA-PROBE2 Q7 60 fps {"focusMs":9600,"activeMs":9600,"coop":783.1199999999831,"f":{"present_active_s":9.6,"present_lost_count":0}}
+
+ ❯ qa-pr125-rebar-probe.test.ts (12 tests | 4 failed) 28ms
+   × Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 20 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick) 6ms
+     → expected 30000 to be less than or equal to 100
+   × Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 30 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick) 3ms
+     → expected 40200 to be less than or equal to 100
+   × Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 60 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick) 3ms
+     → expected 50400 to be less than or equal to 100
+   × Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 144 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick) 3ms
+     → expected 56400 to be less than or equal to 100
+stdout | qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 144 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+QA-PROBE2 Q7 144 fps {"focusMs":3600,"activeMs":3600,"coop":781.1699999999901,"f":{"present_active_s":3.6,"present_lost_count":0}}
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 20 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+AssertionError: expected 30000 to be less than or equal to 100
+ ❯ qa-pr125-rebar-probe.test.ts:60:44
+     58|     it(`${fps} fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT…
+     59|       const r = frames(fps, 60); log('Q7', fps, 'fps', JSON.stringify(…
+     60|       expect(Math.abs(r.focusMs - 60_000)).toBeLessThanOrEqual(100);
+       |                                            ^
+     61|     });
+     62|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 30 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+AssertionError: expected 40200 to be less than or equal to 100
+ ❯ qa-pr125-rebar-probe.test.ts:60:44
+     58|     it(`${fps} fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT…
+     59|       const r = frames(fps, 60); log('Q7', fps, 'fps', JSON.stringify(…
+     60|       expect(Math.abs(r.focusMs - 60_000)).toBeLessThanOrEqual(100);
+       |                                            ^
+     61|     });
+     62|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 60 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+AssertionError: expected 50400 to be less than or equal to 100
+ ❯ qa-pr125-rebar-probe.test.ts:60:44
+     58|     it(`${fps} fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT…
+     59|       const r = frames(fps, 60); log('Q7', fps, 'fps', JSON.stringify(…
+     60|       expect(Math.abs(r.focusMs - 60_000)).toBeLessThanOrEqual(100);
+       |                                            ^
+     61|     });
+     62|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  qa-pr125-rebar-probe.test.ts > Q7 BR-R12b(b) Σ fT = F at real frame rates (focusMs = cumulative focus advance) > 144 fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT = Σ F, tolerance 1 tick)
+AssertionError: expected 56400 to be less than or equal to 100
+ ❯ qa-pr125-rebar-probe.test.ts:60:44
+     58|     it(`${fps} fps x 60 s attended: breedsCalm.focusMs ~= 60,000 (Σ fT…
+     59|       const r = frames(fps, 60); log('Q7', fps, 'fps', JSON.stringify(…
+     60|       expect(Math.abs(r.focusMs - 60_000)).toBeLessThanOrEqual(100);
+       |                                            ^
+     61|     });
+     62|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 21 passed (25)
+   Start at  03:15:20
+   Duration  1.55s (transform 244ms, setup 0ms, collect 328ms, tests 1.06s, environment 0ms, prepare 43ms)
+
+PROBE_EXIT=1

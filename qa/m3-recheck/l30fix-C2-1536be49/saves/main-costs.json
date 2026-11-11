@@ -1,0 +1,14 @@
+{
+ "29": {
+  "farmCostAtLevel": 323719,
+  "collCost": 8307674,
+  "maxLevel": 30,
+  "costTable30": 624316
+ },
+ "30": {
+  "farmCostAtLevel": 624316,
+  "collCost": 13292279,
+  "maxLevel": 30,
+  "costTable30": 624316
+ }
+}

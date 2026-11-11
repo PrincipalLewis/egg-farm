@@ -1,0 +1,228 @@
+{
+ "mode": "preview",
+ "port": "5961",
+ "runs": {
+  "SecurityError-idb-valid-save": {
+   "buildId": "m3-rc1-pre+dfdf49c",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:5795)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6230)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55149) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55282) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new ts (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:37441) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40759) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at _i (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:36936) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40798) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621) |     at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430"
+    ]
+   },
+   "idbMainAfter": {
+    "len": 447,
+    "farmLevel": 20
+   },
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+   ]
+  },
+  "SecurityError-no-save": {
+   "buildId": "m3-rc1-pre+dfdf49c",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:5795)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6230)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55149) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55282) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new ts (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:37441) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40759) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at _i (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:36936) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40798) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621) |     at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430"
+    ]
+   },
+   "idbMainAfter": null,
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+   ]
+  },
+  "InvalidStateError-idb-valid-save": {
+   "buildId": "m3-rc1-pre+dfdf49c",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:5795)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6230)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55149) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55282) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new ts (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:37441) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40759) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at _i (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:36936) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40798) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621) |     at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430"
+    ]
+   },
+   "idbMainAfter": {
+    "len": 447,
+    "farmLevel": 20
+   },
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+   ]
+  },
+  "InvalidStateError-no-save": {
+   "buildId": "m3-rc1-pre+dfdf49c",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:5795)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6230)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55149) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.claim (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55282) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6303)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new ts (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:37441) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40759) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at _i (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:36936) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40798) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067) |     at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621) |     at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393) |     at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974) |     at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at Es (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:54212) |     at Ei.write (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55548) |     at Ei.beat (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55798) |     at http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:55430"
+    ]
+   },
+   "idbMainAfter": null,
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at Oe (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:28067)\n    at ki (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33621)\n    at wi (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:33393)\n    at new uo (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:1:40974)\n    at Ec (http://127.0.0.1:5961/assets/index-dV0f61FQ.js:68:6588)"
+   ]
+  }
+ }
+}

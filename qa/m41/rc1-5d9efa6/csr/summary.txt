@@ -1,0 +1,15 @@
+2026-10-24 15:32:01 CEST === CSR ACs on 5d9efa61c5e6ee31ca9ebdec20ee70167d31d463
+2026-10-24 15:32:01 CEST spec sha256: 530b29d3d37ab965d2375ad05a2c431c4aaac976e959eb245395f6ef9fe3f874 (want 2fbcd4eb…af445)
+2026-10-24 15:32:02 CEST fixtures: SHA256SUMS OK SHA256SUMS=e2d2eee776928553
+2026-10-24 15:32:02 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 4c94704 Y, dfdf49c Y, b986cd3 Y (info: ff from b986cd3?); pushed on: origin/rc/m4.1-rc1 
+2026-10-24 15:32:02 CEST -07 testdiff exit=0 TESTDIFF m4-exp1 IDENTICAL (0 = m4-exp1 identical; 1 = changed lines need HoE justification: /workspace/egg-farm-studio/qa/m41/rc1-5d9efa6/csr/testdiff/m4-exp1.changed-lines.txt)
+2026-10-24 15:32:07 CEST build:qa exit=0 build-id: m4.1+5d9efa6 
+2026-10-24 15:32:18 CEST vitest exit=1 11s       Tests  1 failed | 193 passed (194)
+2026-10-24 15:32:18 CEST worktree tracked/untracked changes after run: 0 (want 0)
+2026-10-24 15:32:19 CEST RESET_AT -07(b) vitest: hard 33/33 pass, info 6
+2026-10-24 15:35:31 CEST chromium DOM subset exit=0 192s PASS=159 FAIL=
+2026-10-24 15:37:59 CEST B-CSR8/B-CSR14/re-measure exit=0 148s PASS=107 FAIL=; re-measure: 6 checks, fails: 0 (fail => log M4.2 Minor, min-height fix absent)
+2026-10-24 15:41:14 CEST dialog UI exit=0 195s PASS=237 FAIL= INFO=42
+2026-10-24 15:53:18 CEST -07(b) reset_at browser exit=0 724s PASS=180 FAIL= INFO= CSR_RESET_AT PASS fails=0 build=m4.1+5d9efa6 engine=chromium
+2026-10-24 15:53:18 CEST :5961 free
+2026-10-24 15:53:18 CEST ALL_DONE

@@ -1,0 +1,2413 @@
+{
+ "pr": 41,
+ "branch": "main",
+ "sha": "dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b",
+ "pushed": true,
+ "build_label_checked": true,
+ "rev": 1,
+ "author": "QA Engineer, UI/Layout & Gameplay Verification",
+ "created": "2026-10-18T22:30:57.588Z",
+ "notes": "build label = Settings \".version\" (asserted == m3-rc1-pre+<sha7> in every Settings shot) and runtime meta[name=build-id] asserted before every state; dd52bfd has no HUD label. asserted_tab/asserted_panel per shot.",
+ "shots": [
+  {
+   "file": "chromium/fresh-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-market-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-upgrades-collection-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-upgrades-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-upgrades-workers-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-settings-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-market-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-collection-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.60"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-workers-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 26
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 26
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 26
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.60"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-settings-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.56"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-market-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-collection-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-workers-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 26
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 26
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 26
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-settings-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-market-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-collection-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-farm-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-workers-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 107,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 107,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-settings-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-market-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-collection-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-workers-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-settings-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/L10-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-market-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-collection-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.60"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-workers-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 26
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 26
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 26
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.56"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-settings-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.56"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-market-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-collection-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-workers-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 26
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 26
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 26
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-settings-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-market-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-collection-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-farm-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-workers-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 112,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 112,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-settings-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-market-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-collection-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-workers-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-settings-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/L10-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-market-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-collection-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.60"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-workers-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.60"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-settings-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,780.56"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-market-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-collection-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-workers-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 26
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 26
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 26
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-settings-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.59T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-market-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-collection-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-farm-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-workers-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [
+     {
+      "t": "Collection",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Farm",
+      "w": 117,
+      "h": 36
+     },
+     {
+      "t": "Workers",
+      "w": 117,
+      "h": 36
+     }
+    ],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-settings-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/fresh-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-market-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-collection-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-upgrades-workers-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/fresh-settings-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fresh",
+   "seed": null,
+   "state": "fresh · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$0.00"
+   },
+   "console_errors": 1
+  },
+  {
+   "file": "chromium/L10-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-market-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-collection-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-upgrades-workers-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L10-settings-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L10",
+   "seed": null,
+   "state": "L10 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$2,500.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-market-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-collection-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-upgrades-workers-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/L30-settings-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "inline:L30",
+   "seed": null,
+   "state": "L30 · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$1.5T"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · farm · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "farm",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-market-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · market · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "market",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-collection-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-collection · animations paused",
+   "asserted_tab": "collection",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-farm-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-farm · animations paused",
+   "asserted_tab": "farm",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-upgrades-workers-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · upgrades-workers · animations paused",
+   "asserted_tab": "workers",
+   "asserted_panel": "upgrades",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  },
+  {
+   "file": "chromium/migrated-acdbedc-settings-1280x800.png",
+   "engine": "chromium",
+   "size": "1280x800",
+   "docked": true,
+   "save": "fixtures/acdbedc-v6rich.json",
+   "seed": null,
+   "state": "migrated-acdbedc · settings · build label m3-rc1-pre+dd52bfd · animations paused",
+   "asserted_tab": null,
+   "asserted_panel": "settings",
+   "checks": {
+    "docOverflow": false,
+    "small": [],
+    "clip": [],
+    "badText": false,
+    "hud": "$5,000.00"
+   },
+   "console_errors": 2
+  }
+ ]
+}

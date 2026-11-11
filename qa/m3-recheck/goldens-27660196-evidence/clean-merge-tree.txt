@@ -1,0 +1,13 @@
+274c6bc334e84f2ef89d9c15e4c09ea65200baac
+100644 88d8753a7b4f615ca6388934b2ca129279fca34e 1	src/sim/effects.ts
+100644 90fb3516ea3a13eb5e58f054935df927ab407c53 2	src/sim/effects.ts
+100644 17561e0bdf070660501fd8e11d9d5c16fac5b6a1 3	src/sim/effects.ts
+100644 440e28419b6e7a33be686da3d541c38cefe6ee5b 1	src/sim/timers.ts
+100644 241898bd2292facaed27ca1918b323a1eb26842d 2	src/sim/timers.ts
+100644 1a941adc61981f1fdd652e4f41552bc25718178a 3	src/sim/timers.ts
+
+Auto-merging src/sim/effects.ts
+CONFLICT (content): Merge conflict in src/sim/effects.ts
+Auto-merging src/sim/timers.ts
+CONFLICT (content): Merge conflict in src/sim/timers.ts
+exit_code=1

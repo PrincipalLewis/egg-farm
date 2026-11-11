@@ -1,0 +1,974 @@
+[
+ {
+  "n": "layout market 360x800: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 360,
+   "cw": 360,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "l1",
+     "t": "1.23M/9.99M · $20.8M",
+     "sw": 167,
+     "cw": 164
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 360x800: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 360x800: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 360x800: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 360x800: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 360x800: no intersecting visible parts, all inside card",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy ",
+    "hint eta ",
+    "hint limit"
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    16,
+    330,
+    344,
+    699
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 360x800: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 360x800",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "layout market 375x800: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 375,
+   "cw": 375,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 375x800: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 375x800: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 375x800: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 375x800: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 375x800: no intersecting visible parts, all inside card",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy ",
+    "hint eta ",
+    "hint limit"
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    16,
+    330,
+    359,
+    699
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 375x800: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 375x800",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "layout market 390x844: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 390,
+   "cw": 390,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 390x844: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 390x844: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 390x844: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 390x844: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 390x844: no intersecting visible parts, all inside card",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy ",
+    "hint eta ",
+    "hint limit"
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    16,
+    341,
+    374,
+    710
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 390x844: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 390x844",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "layout market 430x932: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 430,
+   "cw": 430,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 430x932: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 430x932: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 430x932: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 430x932: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 430x932 (info)",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy ",
+    "hint eta ",
+    "hint limit"
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    16,
+    363,
+    414,
+    708
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 430x932: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 430x932",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "layout market 1280x800: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 1280,
+   "cw": 1280,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 1280x800: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 1280x800: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 1280x800: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 1280x800: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 1280x800 (info)",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy ",
+    "hint eta ",
+    "hint limit"
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    898,
+    459,
+    1264,
+    828
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 1280x800: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 1280x800",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "layout market 1024x474: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 1024,
+   "cw": 1024,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 1024x474: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 1024x474: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 1024x474: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 1024x474: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 1024x474 (info)",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy "
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    642,
+    214,
+    1008,
+    583
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 1024x474: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 1024x474",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "layout market 1280x720: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 1280,
+   "cw": 1280,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 1280x720: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 1280x720: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 1280x720: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 1280x720: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 1280x720 (info)",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy ",
+    "hint eta "
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    898,
+    399,
+    1264,
+    768
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 1280x720: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 1280x720",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "layout market 1366x768: no h-scroll, no .l1/button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "sw": 1366,
+   "cw": 1366,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets market 1366x768: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Need-state order buttons 1366x768: exactly 44px high",
+  "p": true,
+  "info": [
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   },
+   {
+    "t": "No eggs",
+    "h": 44
+   }
+  ]
+ },
+ {
+  "n": "layout upgrades/farm 1366x768: no h-scroll, no button overflow",
+  "p": false,
+  "info": {
+   "hs": false,
+   "over": [
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "181.2B",
+     "sw": 57,
+     "cw": 50
+    },
+    {
+     "ox": "visible",
+     "to": "clip",
+     "c": "chip arrive",
+     "t": "8.76M",
+     "sw": 56,
+     "cw": 50
+    }
+   ]
+  }
+ },
+ {
+  "n": "tap targets upgrades/farm 1366x768: >=44px",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "Farm card G-strict 1366x768 (info)",
+  "p": true,
+  "info": {
+   "n": [
+    "",
+    "chips",
+    "btn buy ",
+    "hint eta "
+   ],
+   "ov": [],
+   "out": [],
+   "card": [
+    984,
+    435,
+    1350,
+    804
+   ],
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3"
+  }
+ },
+ {
+  "n": "v1.6 goal label 1366x768: no clip/ellipsis, gain unsplit, track <=2 lines, ★ kept",
+  "p": false,
+  "info": {
+   "t": "★ Collection L6· +8% income",
+   "ell": false,
+   "trackClip": true,
+   "gainClip": false,
+   "gainLines": 1,
+   "trackLines": 1,
+   "star": true,
+   "labelClip": false
+  }
+ },
+ {
+  "n": "page errors 1366x768",
+  "p": true,
+  "info": []
+ }
+]

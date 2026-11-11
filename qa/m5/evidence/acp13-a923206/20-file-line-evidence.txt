@@ -1,0 +1,15 @@
+src/save/save.ts:147: return `{"version":${SAVE_VERSION},"savedAt":${now},${saveSeq ? `"saveSeq":${saveSeq},` : ''}"sum":"${checksum(st)}","state":${st}}`;
+src/save/save.ts:159: return hadSeq || (b && (m4On(b) || M4_BUILD_OFF.has(b))) || (state as { tracksV7?: unknown }).tracksV7 ? saveSeqOf(prev) + 1 : undefined;
+src/save/save.ts:175: const raw = serialize(state, now, m4SaveSeq(state, b, prev)); // HoE correction: saveSeq on main (missing = 0)
+src/save/save.ts:180: if (cur && validate(cur, b).ok && newerSaveVersion(kv.getItem(BAK_KEY)) === null) { try { kv.setItem(BAK_KEY, cur); } catch { /* full: keep old .bak *
+src/save/save.ts:182: kv.setItem(SAVE_KEY, raw);
+src/game.ts:100: if (Number.isFinite(f.savedAt)) this.grantOffline(now() - f.savedAt); else this.telemetry.track('save_savedat_invalid', {}); // one absence = last sav
+src/game.ts:105: if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeat
+src/game.ts:276: const t = this.hidden ? this.hidden.at : this.now(), base = this.hidden ? this.hidden.state : this.state;
+src/game.ts:278: try { const raw = this.saveWithQuotaRetry(t, base); this.lastMainRaw = raw; this.mirror?.write(raw); }
+src/save/tab-lease.ts:50: try { this.kv.setItem(LEASE_KEY, JSON.stringify({ id: this.id, at })); } catch { return false; }
+src/save/tab-lease.ts:64: try { this.kv.setItem(LEASE_KEY, JSON.stringify({ id: this.id, at: this.now() })); } catch { /* ignore */ }
+src/main.ts:90: const takeover = lease.claim(playHere);
+src/telemetry/telemetry.ts:7: if (!id) { id = rnd(); try { kv.setItem(INSTALL_ID_KEY, id); } catch { /* private mode: id lives for this session */ } }
+src/telemetry/telemetry.ts:68: if (!this.dirty) return; try { this.kv.setItem(TELEMETRY_KEY, JSON.stringify(this.buf)); this.dirty = false; this.writes++; } catch { /* AC14c: quota/
+src/save/idb-mirror.ts:180: if (w === 'idb') { try { kv.setItem(SAVE_KEY, idbRaw!); } catch { /* quota: Game falls back to localStorage as-is */ return 'ls'; } }

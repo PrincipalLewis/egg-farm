@@ -1,0 +1,31 @@
+PASS [webkit] release: ?ios=safari inert (no tip on non-iOS UA)
+PASS [webkit] release: ?ios=chrome inert (no tip on non-iOS UA)
+PASS [webkit] release: ?ios=standalone inert (no tip on non-iOS UA)
+FAIL [webkit] release: ?perf=1 sampler refused/absent in prod (SM-9 rule) — {"perfNodes":["perf-ov:SM-9 warm-up 10 s…"],"res":["http://127.0.0.1:4638/assets/frame-sampler-DvRddTas.js"]}
+FAIL [webkit] release: ?debug=1 panel absent in prod (info) — ["http://127.0.0.1:4638/assets/panel-BcWG5yzN.js"]
+PASS [webkit] AC14g qa ?ios=safari — {"t":{"b":"safari","text":"Add Egg Farm to your Home Screen so your farm is never cleared.\n\nTap Share , then Add to Home Screen.","role":"status"},"errs":[]}
+PASS [webkit] AC14g qa ?ios=chrome — {"t":{"b":"chrome","text":"Add Egg Farm to your Home Screen so your farm is never cleared.\n\nTap Share  in the address bar, then Add to Home Screen.","role":"status"},"errs":[]}
+PASS [webkit] AC14g qa ?ios=standalone — {"t":null,"errs":[]}
+PASS [webkit] AC14g session 1 -> no tip
+PASS [webkit] AC14g release real iPhone UA -> safari tip
+PASS [webkit] rotate: phone landscape overlay shown — {"shown":true,"role":"alertdialog","modal":"true","name":"Turn your phone","desc":"Egg Farm plays best in portrait.","focus":"rotate-prompt","inert":true,"anim":"rp-wobble"}
+PASS [webkit] rotate: role alertdialog + aria-modal + name/description — {"shown":true,"role":"alertdialog","modal":"true","name":"Turn your phone","desc":"Egg Farm plays best in portrait.","focus":"rotate-prompt","inert":true,"anim":"rp-wobble"}
+PASS [webkit] rotate: focus moves into prompt; #app inert — {"shown":true,"role":"alertdialog","modal":"true","name":"Turn your phone","desc":"Egg Farm plays best in portrait.","focus":"rotate-prompt","inert":true,"anim":"rp-wobble"}
+PASS [webkit] rotate: input blocked behind (hit-test + Tab/Enter/Space do not reach #app) — {"hit":"prompt","f2":{"f":"BODY","inApp":false}}
+PASS [webkit] rotate: back to portrait hides prompt, #app interactive, focus not stranded on prompt — {"shown":false,"inert":false,"focus":"BODY"}
+PASS [webkit] rotate: focus returns to the control focused before (Collect)
+PASS [webkit] rotate: tablet landscape 1024x768 touch overlay absent — {"shown":false,"role":"alertdialog","modal":"true","name":"Turn your phone","desc":"Egg Farm plays best in portrait.","focus":"","inert":false,"anim":"rp-wobble"}
+PASS [webkit] rotate: desktop 1280x800 overlay absent — {"shown":false,"role":"alertdialog","modal":"true","name":"Turn your phone","desc":"Egg Farm plays best in portrait.","focus":"","inert":false,"anim":"rp-wobble"}
+PASS [webkit] rotate: phone portrait overlay absent — {"shown":false,"role":"alertdialog","modal":"true","name":"Turn your phone","desc":"Egg Farm plays best in portrait.","focus":"","inert":false,"anim":"rp-wobble"}
+PASS [webkit] rotate: prefers-reduced-motion -> no wobble — "none"
+PASS [webkit] rotate: default motion -> wobble animation present — "rp-wobble"
+PASS [webkit] D1 re-confirm (360): licence link overlaps #sReset — {"linkTop":387.2890625,"linkBottom":431.2890625,"resetTop":429.6875,"overlap":1.6,"hitBottom":"sReset"}
+PASS [webkit] font credits (360): link -> OFL.txt bundled, 200, OFL text — {"href":"/fonts/OFL.txt","tgt":"_blank","status":200}
+PASS [webkit] D1 re-confirm (390): licence link overlaps #sReset — {"linkTop":489.2890625,"linkBottom":533.2890625,"resetTop":531.6875,"overlap":1.6,"hitBottom":"sReset"}
+PASS [webkit] font credits (390): link -> OFL.txt bundled, 200, OFL text — {"href":"/fonts/OFL.txt","tgt":"_blank","status":200}
+PASS [webkit] font credits: tapping link opens OFL.txt — {"u":"http://127.0.0.1:4638/fonts/OFL.txt","newTab":true}
+PASS [webkit] D1 re-confirm (1280): licence link overlaps #sReset — {"linkTop":467.2890625,"linkBottom":511.2890625,"resetTop":509.6875,"overlap":1.6,"hitBottom":"sReset"}
+PASS [webkit] font credits (1280): link -> OFL.txt bundled, 200, OFL text — {"href":"/fonts/OFL.txt","tgt":"_blank","status":200}
+FAIL [webkit] tap grid: 67 control-instances scanned; all ≥44x44 effective and unobstructed — {"#goal":["360 farm: 320x40 eff 320.5x40.5 own 97.9% {\"DIV.collectbar\":134}","390 farm: 350x40 eff 350.5x40.5 own 98.1% {\"DIV.collectbar\":134}"],"A.SIL Open Font Licens":["360 settings: 140x44 eff 140x42.5 own 93.2% {\"#sReset\":210}","390 settings: 140x44 eff 140x42.5 own 93.2% {\"#sReset\":210}","1280 settings: 140x44 eff 140x42.5 own 93.2% {\"#sReset\":210}"]}
+PASS [webkit] big numbers: coinsCents=1e30, basket=1e15 -> no NaN/Infinity/e+ in UI — {"coins":"$10000000000000000000B","basket":"1000000B"}
+TOTAL 27/30

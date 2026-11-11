@@ -1,0 +1,19 @@
+# hosted gate read (one-shot via cursor-github) at local 2026-11-06 03:57:41 CET
+run 42152085295 ci pull_request completed success f46544efaae907217126491b29588d77258ab28a feat/v5-golden-spawn 2026-11-06T02:43:05Z 2026-11-06T02:51:40Z
+job 127677462601 gate completed success f46544efaae907217126491b29588d77258ab28a 2026-11-06T02:43:08Z 2026-11-06T02:51:39Z
+  step 1 Set up job completed success
+  step 2 Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262 completed success
+  step 3 Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 completed success
+  step 4 npm ci completed success
+  step 5 Unit tests (npm test; includes sync-economy --check) completed success
+  step 6 Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR completed success
+  step 7 Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist) completed success
+  step 8 Install browser (chromium) completed success
+  step 9 Release globals allowlist (chromium) completed success
+  step 10 Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html) completed success
+  step 11 check-release-build --build-id (expected id = BUILD_PREFIX + this commit) completed success
+  step 12 Upload egg-farm-html artifact completed success
+  step 23 Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 completed success
+  step 24 Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262 completed success
+  step 25 Complete job completed success
+job 127680353901 release-globals completed skipped (from list_workflow_run_jobs)

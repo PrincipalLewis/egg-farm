@@ -1,0 +1,242 @@
+# G1 AMENDMENT (tc_streak_cap HARD in balance+CSV; CSV path from ship-set). Base = pinned checker c92ad47b, gate 518164f2, SCRIPTS 2baa6669, READINESS aeaa0b68, selftest aca65273. Backup ../scratch/repin-g1-amend-1312
+--- a/qa/v5-saves/scripts/g1-ship-set.cjs
++++ b/qa/v5-saves/scripts/g1-ship-set.cjs
+@@ -4,10 +4,12 @@
+ //          --out <derived.json> [--expected-balance-sha <hex>] [--git <repo> --rc <sha>]   (env EXPECTED_BALANCE_SHA also read)
+ // exit 0 only if ALL hold; anything else exit 1 (fail closed):
+ //  - ship-set present, parseable, sha256 == --shipset-sha;  - balance.json sha256 == the expected sha (HoE pins it at the RC cut);
+-//  - every "Exact config keys" path exists in balance.json with that exact value, tc_* "Tunables of record" are INFO only (recorded, ship-set vs balance; parent/HoQ 13:09);
++//  - every "Exact config keys" path exists in balance.json with that exact value, every tc_* "Tunables of record" value is a HARD check in BOTH balance.json m4.tc.<name> AND the committed economy CSV column tc_<name>
++//    (every row; HoQ amendment 13:12/13:13, tc_streak_cap = 0.27 D-HOP-27);
+ //  - every balance.json m4.flags key is listed (exact key set);  - the economy CSV sha256 is present (not a placeholder) and, when the
+-//    ECONOMY_CSV path (--csv-path or env ECONOMY_CSV, NO default) is given and equals the committed file at the run SHA (--git/--rc).
+-//    ECONOMY_CSV unset or CSV sha placeholder = FAIL closed.
++//    CSV PATH comes from the ship-set (recorded next to the sha by HoE) and must be data/economy.csv (the only source: scripts/sync-economy.ts;
++//    economy.f1.csv is test-only, HoE via HoQ 13:13). --csv-path / env ECONOMY_CSV is an optional override that must EQUAL the ship-set path.
++//    The committed file at the run SHA (--git/--rc) must match the sha. Path or sha missing/placeholder = FAIL closed.
+ // Telemetry / post-L10 have no flag (HoQ addendum 2026-10-30 13:05 #1, ship-set rev 2 "Not flags"): if listed as a key they are
+ // reported and excluded, never encoded.
+ const fs = require('fs'), crypto = require('crypto'), cp = require('child_process');
+@@ -24,15 +26,15 @@
+ const exact = sec('Exact config keys'), notFlags = sec('Not flags'), tun = sec('Tunables of record');
+ if (!exact || !exact.length || !tun) die('ship-set unparseable: missing "Exact config keys" or "Tunables of record" section (fail closed) | sha256 ' + mdsha);
+ const NOFLAG = /^(m4\.flags\.)?(telemetry|post-?L10|postL10)/i;
+-const expected = [], excluded = [], info = [];
++const expected = [], excluded = [], CSV_OF_RECORD = 'data/economy.csv';
+ const kv = l => { const m = l.match(/^- ([A-Za-z0-9_.\-]+) = (-?\d+(?:\.\d+)?)(?=[\s,;]|$)/); return m ? { key: m[1], value: Number(m[2]), raw: l.slice(2) } : null; };
+ for (const l of exact) { const e = kv(l); if (!e) die('ship-set unparseable line in Exact config keys: ' + l); if (NOFLAG.test(e.key)) { excluded.push(e); continue; } if (!/^m4\./.test(e.key)) die('ship-set key outside m4.*: ' + e.key); expected.push({ ...e, path: e.key }); }
+ let csvRaw = null, csvSha = null, csvPath = null;
+-for (const l of tun) { let m; if ((m = l.match(/^- economy CSV:\s*(.*)$/i))) { csvRaw = m[1]; const h = m[1].match(/\b[0-9a-f]{64}\b/); csvSha = h ? h[0] : null; continue; }
+-  const e = kv(l); if (!e) die('ship-set unparseable line in Tunables of record: ' + l); if (!/^tc_[a-z0-9_]+$/.test(e.key)) die('ship-set tunable not tc_*: ' + e.key); info.push({ ...e, path: 'm4.tc.' + e.key.slice(3) }); }
++for (const l of tun) { let m; if ((m = l.match(/^- economy CSV:\s*(.*)$/i))) { csvRaw = m[1]; const h = m[1].match(/\b[0-9a-f]{64}\b/); csvSha = h ? h[0] : null; const p = m[1].match(/([\w\-\/.]*\w\.csv)\b/); csvPath = p ? p[1] : null; continue; }
++  const e = kv(l); if (!e) die('ship-set unparseable line in Tunables of record: ' + l); if (!/^tc_[a-z0-9_]+$/.test(e.key)) die('ship-set tunable not tc_*: ' + e.key); expected.push({ ...e, path: 'm4.tc.' + e.key.slice(3), tunable: true }); }
+ if (csvRaw === null) die('ship-set unparseable: no "economy CSV" line (fail closed)');
+ for (const l of notFlags || []) notes.push('not-a-flag: ' + l.slice(2));
+-fs.writeFileSync(A.out, JSON.stringify({ source: A.shipset, source_sha256: mdsha, expected, excluded, info_tunables: info, not_flags: notFlags || [], economy_csv: { raw: csvRaw, sha256: csvSha, path: csvPath } }, null, 1) + '\n');
++fs.writeFileSync(A.out, JSON.stringify({ source: A.shipset, source_sha256: mdsha, expected, excluded, not_flags: notFlags || [], economy_csv: { raw: csvRaw, sha256: csvSha, path: csvPath } }, null, 1) + '\n');
+ let bb; try { bb = fs.readFileSync(A.balance); } catch (e) { die('balance.json missing (fail closed)'); }
+ let b; try { b = JSON.parse(bb); } catch (e) { die('balance.json not JSON (fail closed)'); }
+ const bsha = sha(bb), want = String(A['expected-balance-sha'] || process.env.EXPECTED_BALANCE_SHA || '').trim().toLowerCase();
+@@ -43,15 +45,23 @@
+ for (const e of expected) { const v = get(e.path); if (v === undefined) errs.push(e.path + ' missing in balance.json'); else if (v !== e.value) errs.push(e.path + '=' + JSON.stringify(v) + ' != ship-set ' + e.value); }
+ const f = b && b.m4 && b.m4.flags; if (!f || typeof f !== 'object' || Array.isArray(f)) errs.push('balance m4.flags missing');
+ else { const L = new Set(expected.filter(e => e.path.startsWith('m4.flags.')).map(e => e.path.slice(9))); const x = Object.keys(f).filter(k => !L.has(k)); if (x.length) errs.push('m4.flags keys not in ship-set: ' + x.join(',')); }
+-for (const t of info) { const v = get(t.path); notes.push('INFO ' + t.key + ': ship-set ' + t.value + ', balance ' + t.path + '=' + JSON.stringify(v)); }
+-csvPath = String(A['csv-path'] || process.env.ECONOMY_CSV || '').trim() || null;
+-let csvNote;
+-if (!csvPath) errs.push('ECONOMY_CSV path not supplied (no default) - fail closed');
+-if (!csvSha) { errs.push('economy CSV sha256 missing/placeholder in ship-set ("' + csvRaw + '") - fail closed'); csvNote = 'economy CSV sha256 MISSING'; }
+-else if (!csvPath) csvNote = 'economy CSV sha256 ' + csvSha + ' (ECONOMY_CSV unset)';
+-else if (!(A.git && A.rc)) { errs.push('economy CSV cannot be verified: --git/--rc not given'); csvNote = 'economy CSV not verified'; }
+-else { let c = null; try { c = cp.execFileSync('git', ['-C', A.git, 'show', A.rc + ':' + csvPath], { maxBuffer: 64e6 }); } catch (e) {}
+-  if (!c) errs.push('economy CSV ' + csvPath + ' not found at ' + A.rc); else if (sha(c) !== csvSha) errs.push('economy CSV ' + csvPath + ' sha256 ' + sha(c) + ' != ship-set ' + csvSha); csvNote = 'economy CSV ' + csvPath + ' sha256 ' + csvSha + ' verified at run SHA'; }
++const ov = String(A['csv-path'] || process.env.ECONOMY_CSV || '').trim() || null;
++let csvNote = 'economy CSV ' + (csvPath || '<no path>') + ' sha256 ' + (csvSha || 'MISSING'), csvBuf = null;
++if (!csvPath) errs.push('economy CSV path missing/placeholder in ship-set ("' + csvRaw + '") - fail closed');
++else if (csvPath !== CSV_OF_RECORD) errs.push('ship-set CSV path ' + csvPath + ' != ' + CSV_OF_RECORD + ' (only source; economy.f1.csv is test-only)');
++if (ov && ov !== csvPath) errs.push('ECONOMY_CSV override ' + ov + ' != ship-set path ' + (csvPath || '<none>'));
++if (!csvSha) errs.push('economy CSV sha256 missing/placeholder in ship-set ("' + csvRaw + '") - fail closed');
++if (csvPath) { if (!(A.git && A.rc)) errs.push('economy CSV cannot be read: --git/--rc not given');
++  else { try { csvBuf = cp.execFileSync('git', ['-C', A.git, 'show', A.rc + ':' + csvPath], { maxBuffer: 64e6, stdio: ['ignore', 'pipe', 'ignore'] }); } catch (e) {}
++    if (!csvBuf) errs.push('economy CSV ' + csvPath + ' not found at ' + A.rc);
++    else { const cs = sha(csvBuf); csvNote = 'economy CSV ' + csvPath + ' sha256 ' + cs + (csvSha ? (cs === csvSha ? ' == ship-set' : ' != ship-set ' + csvSha) : ' (ship-set sha missing)');
++      if (csvSha && cs !== csvSha) errs.push('economy CSV ' + csvPath + ' sha256 ' + cs + ' != ship-set ' + csvSha); } } }
++const rows = csvBuf ? csvBuf.toString('utf8').trim().split(/\r?\n/).map(l => l.split(',')) : null;
++for (const t of expected.filter(e => e.tunable)) { let cv = '<csv unread>';
++  if (rows) { const i = rows[0].indexOf(t.key); if (i < 0) { cv = '<no column>'; errs.push('economy CSV has no column ' + t.key); }
++    else { const vals = [...new Set(rows.slice(1).map(r => r[i]))]; cv = vals.join('|'); if (vals.length !== 1 || Number(vals[0]) !== t.value || vals[0].trim() === '') errs.push('economy CSV ' + t.key + '=' + cv + ' != ship-set ' + t.value); } }
++  else errs.push('economy CSV ' + t.key + ' not checked (CSV not readable) - fail closed');
++  notes.push('TUNABLE ' + t.key + ': ship-set ' + t.value + ', balance ' + t.path + '=' + JSON.stringify(get(t.path)) + ', csv ' + t.key + '=' + cv); }
+ const tail = ' || ship-set sha256 ' + mdsha + '; balance.json sha256 ' + bsha + '; ' + expected.length + ' keys; excluded: ' + (excluded.map(e => e.key).join(',') || 'none') + '; ' + csvNote + (notes.length ? '; ' + notes.join('; ') : '');
+ if (errs.length) die(errs.join(' | ') + tail);
+ console.log('ship-set match: ' + expected.map(e => e.path + '=' + e.value).join(',') + tail);
+--- a/qa/v5-saves/scripts/v5-saves-gate.sh
++++ b/qa/v5-saves/scripts/v5-saves-gate.sh
+@@ -82,16 +82,17 @@
+ #    The COMMITTED src/config/balance.json at the run SHA (git show, not the worktree) is kept as rc-balance.json; the ship-set .md is copied to
+ #    ship-set.md and parsed to ship-set.derived.json by scripts/g1-ship-set.cjs. All three sha256s go into status.log and STATUS.sha256.
+ #    FAIL closed: ship-set missing/unparseable/sha != pin; expected balance sha (HoE pins at RC cut) not supplied or != ; any exact key/value
+-#    differs or an m4.flags key is unlisted; economy CSV sha placeholder or ECONOMY_CSV unset (no default). tc_* tunables = INFO only.
++#    differs or an m4.flags key is unlisted; economy CSV path/sha placeholder in the ship-set, path != data/economy.csv, override ECONOMY_CSV != ship-set path, CSV != sha;
++#    tc_* tunables (tc_streak_cap) HARD in balance.json AND the CSV (both values logged).
+ BJ=$R/rc-balance.json; git -C "$GIT" show "$FULL:src/config/balance.json" > "$BJ" 2>/dev/null || : > "$BJ"; BSHA=$(sha256sum < "$BJ" | cut -c1-64)
+ [ -z "$EBS" ] && [ -f "$V/expected-balance.sha256" ] && EBS=$(grep -oE '\b[0-9a-f]{64}\b' "$V/expected-balance.sha256" | head -1)
+ SJ=$R/ship-set.md; DJ=$R/ship-set.derived.json; rm -f "$DJ"; if [ -f "$SHIPSET" ]; then cp "$SHIPSET" "$SJ"; SSHA=$(sha256sum < "$SJ" | cut -c1-64); else rm -f "$SJ"; SSHA=MISSING; fi
+ say "balance.json@$S7 (committed src/config/balance.json) sha256 $BSHA; expected ${EBS:-<not supplied>}"
+-say "ship-set $SHIPSET sha256 $SSHA (pinned $SHIPSET_SHA); economy CSV path ${ECSV:-<unset>}"
++say "ship-set $SHIPSET sha256 $SSHA (pinned $SHIPSET_SHA); economy CSV path from ship-set, override ${ECSV:-<none>}"
+ flagck(){ local out rc; say "START G1-flags-ship-set"
+   out=$(node "$SC/g1-ship-set.cjs" --balance "$BJ" --shipset "$SJ" --shipset-sha "$SHIPSET_SHA" --out "$DJ" --expected-balance-sha "$EBS" --csv-path "$ECSV" --git "$GIT" --rc "$FULL" 2>&1); rc=$?
+   echo "$out" > "$R/G1-flags-ship-set.log"; DSHA=$([ -f "$DJ" ] && sha256sum < "$DJ" | cut -c1-64 || echo MISSING)
+-  say "ship-set.derived.json sha256 $DSHA"; echo "$out" | grep -o 'INFO tc_[^;|]*' | while read -r l; do say "$l"; done
++  say "ship-set.derived.json sha256 $DSHA"; echo "$out" | grep -o 'TUNABLE tc_[^;|]*' | while read -r l; do say "$l"; done
+   if [ $rc = 0 ]; then echo "G1-flags-ship-set | PASS | HARD | $out" | tee -a "$SUM"; say "END G1-flags-ship-set PASS"
+   else HF=$((HF+1)); echo "G1-flags-ship-set | FAIL | HARD | flags≠ship-set: $out" | tee -a "$SUM"; say "END G1-flags-ship-set FAIL"; fi; }
+ flagck
+--- a/qa/v5-saves/scripts/SCRIPTS.sha256
++++ b/qa/v5-saves/scripts/SCRIPTS.sha256
+@@ -7,8 +7,8 @@
+ c8565122bfde45afa7a784308c51cdeea7fe9f7ef1873b2070c5c682a2c77112  ss15-share-guard.mjs
+ fbd82199f47c844d0c21cbdbf80eef88d3a2d5cd17a67f46a47a9d23b9a3bf36  telemetry-check.mjs
+ d634dfc847be6783d01432ba9e24a3fcef977394371f6b4a0470a36d23e793b4  publish-verify.sh
+-518164f2509761f80950331832c97c1a9f15deaf3ded0b9f0b61a449a666dcb9  v5-saves-gate.sh
+-c92ad47b5434a1fe0262d7e618690258a0c3ba0c1211e8a14cc09720f33f83ad  g1-ship-set.cjs
++861a6e716a8e76c74c858e5604863ac767e43e1c2a7ecfee590a864a741e94cb  v5-saves-gate.sh
++c1e2b05c1db046f3d1211db5b4ad1438a05a6aef61ae8fc75892ae591554725c  g1-ship-set.cjs
+ e2c14c0ce944e560d2f16804d32978a5a4d21ab350c7c550ff557570660f3a94  selftest-gate-sums.sh
+ 2cc81b6519759a111b4cef03c094f6f56c0e7f68a32b0c6b407dd127f601eca5  selftest-gate-timer.sh
+ 49b6f43c2d6f61d2f78aa4d531d0602f320f26e0412a4e8a6aa121460ce3db6c  gate-na.txt
+--- a/qa/v5-saves/READINESS.md
++++ b/qa/v5-saves/READINESS.md
+@@ -95,14 +95,14 @@
+    - SS-15 step.
+ 3. telemetry-check.mjs: (b), (c) and (d) above.
+ 
+-**SCRIPTS.sha256 = 2baa6669…** (re-pinned 2026-10-30 ~13:1x CET, G1 ONLY: G1-flags-ship-set now checks the ship-set of record product/v5-ship-set.md rev 2 (D-HOP-2026-10-30-30, sha256 0d53b45b… pinned in the gate, HoQ verified 13:07) via new scripts/g1-ship-set.cjs (c92ad47b): exact keys m4.enabled=1, 13 m4.flags=1, m4.flags.bestBuyV2=0, m4.zeroGain.confirm=0, every balance m4.flags key listed; tc_streak_cap INFO only; telemetry/post-L10 not flags (excluded if listed). FAIL closed while: ship-set missing/unparseable/sha≠pin, expected balance.json sha256 not supplied (EXPECTED_BALANCE_SHA / --expected-balance-sha / v5-saves/expected-balance.sha256, HoE pins at RC cut) or ≠, economy CSV sha placeholder, ECONOMY_CSV unset (no default) or CSV≠committed file at run SHA. balance.json, ship-set.md and ship-set.derived.json sha256s in status.log + STATUS.sha256. Self-test 25/25 (changes-20261030/g1-shipset-selftest.out.txt). gate 4ba2dda1 -> 518164f2; diff changes-20261030/g1-shipset-PIN.diff. Current real state = G1 FAIL (CSV sha placeholder, no expected sha). Previous: a78c572f… (re-pinned 2026-10-30 ~12:2x CET, ONE change set, HoQ OK QA-D-1030-SAVES-RC-2 + D-CEO-20261030-06 flags-0 package; diff `changes-20261030/repin-flags0-20261030.diff`). Changes: S-BAK-p1-B race fix (saves-browser a019e3eb -> c36c83d0; 10/10 Firefox + negative FAIL); telemetry re-targeted to the shipped rc/v5 schema 083fcc11 with `--schema shipped`, v0.6.2 rows N/A-by-scope, S-AC5 upgrade events == harness purchases (telemetry-check 7c6b2621 -> fbd82199; selftest 34 PASS shipped / 25 PASS v062; T-chromium/T2-firefox/T2-webkit PASS on 3f582db); gate 542683b2 -> 4ba2dda1: NOT RUN = hard fail in both modes, cited N/A registry gate-na.txt (new, 49b6f43c; U-ss15-share-guard N/A per QA-D-1030-SS15-NA / D-CEO-20261030-04), port preflight (refuses if :5961 busy), lock log (holder via /proc, 30 s re-log, acquired/released, LOCK handover line), G1-flags-ship-set (committed balance.json sha256 in status.log + STATUS.sha256; any m4.flags != 0 = HARD FAIL flags≠ship-set). Previous: bcc54543… (re-pinned 2026-10-30 after the HoQ-approved rule-21 timer fix: v5-saves-gate 1e1d63cf -> 542683b2, lock-window timer now started via ops/tools/lane-run.sh saves-qa and stopped via lane-kill.sh on its recorded PID, `pkill -P` removed, gate stops with "ask HoO" if the timer group survives; new selftest-gate-timer 2cc81b65, 10/10 PASS; gate-sums 9/9, telemetry 25/25, `-c` 12/12 OK; evidence changes-20261030/. Before: a045b620… (status.log signing fix: v5-saves-gate 1e1d63cf, new selftest-gate-sums e2c14c0c; status.log now excluded from SHA256SUMS and signed last in STATUS.sha256; self-test 9/9 PASS incl. negatives, evidence changes-20261030/; before: 72977983… (V5E-SCOPE lock-window timer, v5-saves-gate aabf3614), f20f17d0…, 6b5cf63f…)), covering:
++**SCRIPTS.sha256 = 760687f2…** (G1 AMENDMENT 2026-10-30 ~13:2x CET, HoQ ruling relaying HoE, G1 only: (1) tc_streak_cap moves INFO -> HARD FAIL: value of record parsed from ship-set rev 2 (0.27, D-HOP-27, breeds=1), checked in balance.json m4.tc.streak_cap AND in every row of the committed data/economy.csv column tc_streak_cap; both values logged in status.log (TUNABLE line). (2) economy CSV PATH comes from the ship-set (recorded by HoE next to the sha) and must be data/economy.csv (only source, scripts/sync-economy.ts; economy.f1.csv test-only); ECONOMY_CSV/--economy-csv is only an override that must equal it; path or sha missing/placeholder = FAIL closed. checker c92ad47b -> c1e2b05c, gate 518164f2 -> 861a6e71 (comments, log line, TUNABLE grep). Self-test 37/37 (changes-20261030/g1-shipset-selftest.sh/.out.txt). Reference e77fc5c: data/economy.csv sha256 a8c4e268… (matches HoQ), cap 0.28 in CSV and balance -> G1 FAIL as expected (changes-20261030/g1-amend-e77fc5c-reference.txt). Diff changes-20261030/g1-shipset-AMEND.diff. Previous: 2baa6669… (re-pinned 2026-10-30 ~13:1x CET, G1 ONLY: G1-flags-ship-set now checks the ship-set of record product/v5-ship-set.md rev 2 (D-HOP-2026-10-30-30, sha256 0d53b45b… pinned in the gate, HoQ verified 13:07) via new scripts/g1-ship-set.cjs (c92ad47b): exact keys m4.enabled=1, 13 m4.flags=1, m4.flags.bestBuyV2=0, m4.zeroGain.confirm=0, every balance m4.flags key listed; tc_streak_cap INFO only; telemetry/post-L10 not flags (excluded if listed). FAIL closed while: ship-set missing/unparseable/sha≠pin, expected balance.json sha256 not supplied (EXPECTED_BALANCE_SHA / --expected-balance-sha / v5-saves/expected-balance.sha256, HoE pins at RC cut) or ≠, economy CSV sha placeholder, ECONOMY_CSV unset (no default) or CSV≠committed file at run SHA. balance.json, ship-set.md and ship-set.derived.json sha256s in status.log + STATUS.sha256. Self-test 25/25 (changes-20261030/g1-shipset-selftest.out.txt). gate 4ba2dda1 -> 518164f2; diff changes-20261030/g1-shipset-PIN.diff. Current real state = G1 FAIL (CSV sha placeholder, no expected sha). Previous: a78c572f… (re-pinned 2026-10-30 ~12:2x CET, ONE change set, HoQ OK QA-D-1030-SAVES-RC-2 + D-CEO-20261030-06 flags-0 package; diff `changes-20261030/repin-flags0-20261030.diff`). Changes: S-BAK-p1-B race fix (saves-browser a019e3eb -> c36c83d0; 10/10 Firefox + negative FAIL); telemetry re-targeted to the shipped rc/v5 schema 083fcc11 with `--schema shipped`, v0.6.2 rows N/A-by-scope, S-AC5 upgrade events == harness purchases (telemetry-check 7c6b2621 -> fbd82199; selftest 34 PASS shipped / 25 PASS v062; T-chromium/T2-firefox/T2-webkit PASS on 3f582db); gate 542683b2 -> 4ba2dda1: NOT RUN = hard fail in both modes, cited N/A registry gate-na.txt (new, 49b6f43c; U-ss15-share-guard N/A per QA-D-1030-SS15-NA / D-CEO-20261030-04), port preflight (refuses if :5961 busy), lock log (holder via /proc, 30 s re-log, acquired/released, LOCK handover line), G1-flags-ship-set (committed balance.json sha256 in status.log + STATUS.sha256; any m4.flags != 0 = HARD FAIL flags≠ship-set). Previous: bcc54543… (re-pinned 2026-10-30 after the HoQ-approved rule-21 timer fix: v5-saves-gate 1e1d63cf -> 542683b2, lock-window timer now started via ops/tools/lane-run.sh saves-qa and stopped via lane-kill.sh on its recorded PID, `pkill -P` removed, gate stops with "ask HoO" if the timer group survives; new selftest-gate-timer 2cc81b65, 10/10 PASS; gate-sums 9/9, telemetry 25/25, `-c` 12/12 OK; evidence changes-20261030/. Before: a045b620… (status.log signing fix: v5-saves-gate 1e1d63cf, new selftest-gate-sums e2c14c0c; status.log now excluded from SHA256SUMS and signed last in STATUS.sha256; self-test 9/9 PASS incl. negatives, evidence changes-20261030/; before: 72977983… (V5E-SCOPE lock-window timer, v5-saves-gate aabf3614), f20f17d0…, 6b5cf63f…)), covering:
+ 
+ | script | sha256 (prefix) |
+ |---|---|
+ | telemetry-check | fbd82199 |
+ | lib | dc7ccbac |
+-| v5-saves-gate | 518164f2 |
+-| g1-ship-set | c92ad47b |
++| v5-saves-gate | 861a6e71 |
++| g1-ship-set | c1e2b05c |
+ | ss15-share-guard | c8565122 |
+ | offline-seed | f9c21487 |
+ | offline-seed-proof | e18f8920 |
+--- a/qa/v5-saves/changes-20261030/g1-shipset-selftest.sh
++++ b/qa/v5-saves/changes-20261030/g1-shipset-selftest.sh
+@@ -1,49 +1,70 @@
+ #!/usr/bin/env bash
+-# Self-tests for G1-flags-ship-set (checker g1-ship-set.cjs + the gate's 0b block). Static: no browser, no lock, no network.
+-set -u; D=$(cd "$(dirname "$0")" && pwd); C=${C:-$D/g1-ship-set.cjs}; GATE=${GATE:-$D/v5-saves-gate.sh}
+-ST=/workspace/egg-farm-studio; REAL=$ST/product/v5-ship-set.md; PIN=0d53b45b401d9600aa3165f5a0f14ddf2b85b13b10bdb2f678452b5c244e7006
+-BAL0=$ST/qa/v5-saves/dryrun/gate-DRYRUN-3f582db/results/rc-balance.json; T=$(mktemp -d "$D/t.XXXX"); P=0; F=0
++# Self-tests for G1-flags-ship-set (pinned scripts/g1-ship-set.cjs + the gate's 0b block). Static: no browser, no lock, no network.
++# Amendment 2026-10-30 13:1x (HoQ/HoE): tc_streak_cap HARD in balance.json AND data/economy.csv; CSV path from the ship-set only.
++set -u; ST=/workspace/egg-farm-studio; D=$(cd "$(dirname "$0")" && pwd)
++C=${C:-$ST/qa/v5-saves/scripts/g1-ship-set.cjs}; GATE=${GATE:-$ST/qa/v5-saves/scripts/v5-saves-gate.sh}
++REAL=$ST/product/v5-ship-set.md; PIN=0d53b45b401d9600aa3165f5a0f14ddf2b85b13b10bdb2f678452b5c244e7006
++BAL0=$ST/qa/v5-saves/dryrun/gate-DRYRUN-3f582db/results/rc-balance.json; T=$(mktemp -d /tmp/g1st.XXXX); P=0; F=0
+ h(){ sha256sum < "$1" | cut -c1-64; }
+-# fixture repo with the committed CSV, ship-set naming its sha, balance equal to the ship-set
+-git -C $T init -q repo && mkdir -p $T/repo/data && printf 'level,price\n11,1\n' > $T/repo/data/economy.csv && git -C $T/repo add -A && git -C $T/repo -c user.email=qa@x -c user.name=qa commit -qm f && RCS=$(git -C $T/repo rev-parse HEAD); CSH=$(h $T/repo/data/economy.csv)
+-sed "s/sha recorded here on merge/sha256 $CSH/" $REAL > $T/ss.md; SSH=$(h $T/ss.md)
+-mkb(){ node -e 'const fs=require("fs");const [src,out,ov]=process.argv.slice(1);const b=JSON.parse(fs.readFileSync(src));for(const k of Object.keys(b.m4.flags))b.m4.flags[k]=k==="bestBuyV2"?0:1;b.m4.enabled=1;b.m4.zeroGain={confirm:0};
++git -C $T init -q repo; mkdir -p $T/repo/data
++# commit a CSV (tc_streak_cap value per row, "" = column absent); prints the commit sha
++mkcsv(){ local v=$1 f=${2:-data/economy.csv}; if [ "$v" = none ]; then printf 'level,tc_x\n0,1\n1,1\n' > $T/repo/$f; else printf 'level,tc_streak_cap\n0,%s\n1,%s\n' $v ${3:-$v} > $T/repo/$f; fi
++  git -C $T/repo add -A; git -C $T/repo -c user.email=qa@x -c user.name=qa commit -qm "csv $v" --allow-empty; git -C $T/repo rev-parse HEAD; }
++R27=$(mkcsv 0.27); CS27=$(git -C $T/repo show $R27:data/economy.csv | sha256sum | cut -c1-64)
++mkss(){ sed "s#sha recorded here on merge#$1#" $REAL > $2; }    # rewrites only the economy CSV line of the real rev 2 file
++mkss "sha256 $CS27 path data/economy.csv" $T/ss.md; SSH=$(h $T/ss.md)
++mkb(){ node -e 'const fs=require("fs");const [src,out,ov]=process.argv.slice(1);const b=JSON.parse(fs.readFileSync(src));for(const k of Object.keys(b.m4.flags))b.m4.flags[k]=k==="bestBuyV2"?0:1;b.m4.enabled=1;b.m4.zeroGain={confirm:0};b.m4.tc.streak_cap=0.27;
+  for(const [p,v] of Object.entries(JSON.parse(ov))){const ks=p.split(".");let o=b;for(const k of ks.slice(0,-1))o=o[k];if(v===null)delete o[ks.at(-1)];else o[ks.at(-1)]=v}fs.writeFileSync(out,JSON.stringify(b))' "$BAL0" "$1" "${2:-{\}}"; }
+ mkb $T/ok.json; OKS=$(h $T/ok.json)
+-ck(){ local name=$1 want=$2; shift 2; out=$(node "$C" --out $T/d.json "$@" 2>&1); rc=$?
+-  if { [ $want = pass ] && [ $rc = 0 ]; } || { [ $want = fail ] && [ $rc = 1 ]; }; then P=$((P+1)); echo "ok   $name (rc=$rc) ${out:0:170}"; else F=$((F+1)); echo "FAIL $name (rc=$rc want $want) $out"; fi; }
+-G="--git $T/repo --rc $RCS --csv-path data/economy.csv"
+-ck "01 pass: balance == ship-set, CSV sha + path + expected sha supplied" pass --balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $OKS $G
+-mkb $T/flip.json '{"m4.flags.pause":0}'; ck "02 fail: one flipped key (pause=0)" fail --balance $T/flip.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/flip.json) $G
+-mkb $T/zg.json '{"m4.zeroGain.confirm":1}'; ck "02b fail: m4.zeroGain.confirm=1" fail --balance $T/zg.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/zg.json) $G
+-mkb $T/en.json '{"m4.enabled":0}'; ck "02c fail: m4.enabled=0" fail --balance $T/en.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/en.json) $G
+-ck "03 fail: ship-set file missing" fail --balance $T/ok.json --shipset $T/nope.md --shipset-sha $SSH --expected-balance-sha $OKS $G
+-printf '# junk\nno sections\n' > $T/junk.md; ck "03b fail: ship-set unparseable" fail --balance $T/ok.json --shipset $T/junk.md --shipset-sha $(h $T/junk.md) --expected-balance-sha $OKS $G
+-ck "04 fail: CSV sha missing (REAL rev 2 file, real pin)" fail --balance $T/ok.json --shipset $REAL --shipset-sha $PIN --expected-balance-sha $OKS $G
+-ck "04b fail: ECONOMY_CSV unset" fail --balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $OKS --git $T/repo --rc $RCS
+-sed "s/sha256 $CSH/sha256 $(printf '%064d' 0)/" $T/ss.md > $T/ssbad.md; ck "04c fail: CSV sha != committed CSV" fail --balance $T/ok.json --shipset $T/ssbad.md --shipset-sha $(h $T/ssbad.md) --expected-balance-sha $OKS $G
+-ck "05 fail: expected balance sha missing" fail --balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH $G
+-ck "06 fail: expected balance sha wrong" fail --balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $BAL0) $G
+-mkb $T/extra.json '{"m4.flags.newFlag":1}'; ck "07 fail: extra m4.flags key" fail --balance $T/extra.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/extra.json) $G
+-mkb $T/miss.json '{"m4.flags.breeds":null}'; ck "07b fail: missing m4.flags key" fail --balance $T/miss.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/miss.json) $G
+-mkb $T/mzg.json '{"m4.zeroGain":null}'; ck "07c fail: missing m4.zeroGain.confirm" fail --balance $T/mzg.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/mzg.json) $G
+-ck "08 fail: real 3f582db all-0 balance (its own sha as expected)" fail --balance $BAL0 --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $BAL0) $G
+-sed 's/m4.flags.golden = 1/m4.flags.golden = 0/' $T/ss.md > $T/ss2.md; ck "09 fail: changed ship-set (sha != pinned)" fail --balance $T/ok.json --shipset $T/ss2.md --shipset-sha $SSH --expected-balance-sha $OKS $G
+-sed 's/^- m4.flags.streak = 1/- m4.flags.telemetry = 1\n- m4.flags.streak = 1/' $T/ss.md > $T/sstel.md; ck "10 pass: telemetry listed as a key is excluded, not encoded" pass --balance $T/ok.json --shipset $T/sstel.md --shipset-sha $(h $T/sstel.md) --expected-balance-sha $OKS $G
+-grep -q '"excluded": \[\s*$' $T/d.json && grep -q 'm4.flags.telemetry' $T/d.json && echo "     (derived JSON lists telemetry under excluded)"
+-ck "11 info: tc_streak_cap 0.28 vs 0.27 does not fail, is reported" pass --balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $OKS $G
+-echo "$out" | grep -q 'INFO tc_streak_cap: ship-set 0.27, balance m4.tc.streak_cap=0.28' && { P=$((P+1)); echo "ok   11b INFO line present"; } || { F=$((F+1)); echo "FAIL 11b INFO line"; }
+-# gate 0b block, extracted from the gate and run with stubs (SC=checker dir)
++ck(){ local name=$1 want=$2; shift 2; out=$(env -u ECONOMY_CSV -u EXPECTED_BALANCE_SHA node "$C" --out $T/d.json "$@" 2>&1); rc=$?
++  if { [ $want = pass ] && [ $rc = 0 ]; } || { [ $want = fail ] && [ $rc = 1 ]; }; then P=$((P+1)); echo "ok   $name (rc=$rc) ${out:0:180}"; else F=$((F+1)); echo "FAIL $name (rc=$rc want $want) $out"; fi; }
++OK="--balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $OKS --git $T/repo --rc $R27"
++ck "01 pass: == ship-set, cap 0.27 in balance+CSV, CSV path+sha from ship-set, expected sha" pass $OK
++echo "$out" | grep -q 'TUNABLE tc_streak_cap: ship-set 0.27, balance m4.tc.streak_cap=0.27, csv tc_streak_cap=0.27' && { P=$((P+1)); echo "ok   01b both cap values logged"; } || { F=$((F+1)); echo "FAIL 01b TUNABLE line: $out"; }
++ck "01c pass: ECONOMY_CSV override equal to ship-set path" pass $OK --csv-path data/economy.csv
++mkb $T/flip.json '{"m4.flags.pause":0}'; ck "02 fail: one flipped key (pause=0)" fail --balance $T/flip.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/flip.json) --git $T/repo --rc $R27
++mkb $T/zg.json '{"m4.zeroGain.confirm":1}'; ck "02b fail: m4.zeroGain.confirm=1" fail --balance $T/zg.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/zg.json) --git $T/repo --rc $R27
++mkb $T/en.json '{"m4.enabled":0}'; ck "02c fail: m4.enabled=0" fail --balance $T/en.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/en.json) --git $T/repo --rc $R27
++ck "03 fail: ship-set file missing" fail --balance $T/ok.json --shipset $T/nope.md --shipset-sha $SSH --expected-balance-sha $OKS --git $T/repo --rc $R27
++printf '# junk\n' > $T/junk.md; ck "03b fail: ship-set unparseable" fail --balance $T/ok.json --shipset $T/junk.md --shipset-sha $(h $T/junk.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
++ck "04 fail: REAL rev 2 file (CSV path+sha placeholder), real pin" fail --balance $T/ok.json --shipset $REAL --shipset-sha $PIN --expected-balance-sha $OKS --git $T/repo --rc $R27
++mkss "sha256 $CS27" $T/nopath.md; ck "04b fail: CSV path missing in ship-set (sha present)" fail --balance $T/ok.json --shipset $T/nopath.md --shipset-sha $(h $T/nopath.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
++mkss "sha256 $CS27 path <tbd>" $T/phpath.md; ck "04c fail: CSV path placeholder <tbd>" fail --balance $T/ok.json --shipset $T/phpath.md --shipset-sha $(h $T/phpath.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
++mkss "path data/economy.csv, sha TBD" $T/nosha.md; ck "04d fail: CSV path present, sha placeholder" fail --balance $T/ok.json --shipset $T/nosha.md --shipset-sha $(h $T/nosha.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
++ck "04e fail: ECONOMY_CSV override != ship-set path" fail $OK --csv-path data/economy.f1.csv
++RF1=$(mkcsv 0.27 data/economy.f1.csv); CF1=$(git -C $T/repo show $RF1:data/economy.f1.csv | sha256sum | cut -c1-64)
++mkss "sha256 $CF1 path data/economy.f1.csv" $T/f1.md; ck "04f fail: ship-set names data/economy.f1.csv (test-only)" fail --balance $T/ok.json --shipset $T/f1.md --shipset-sha $(h $T/f1.md) --expected-balance-sha $OKS --git $T/repo --rc $RF1
++mkss "sha256 $(printf '%064d' 0) path data/economy.csv" $T/badsha.md; ck "04g fail: CSV sha != committed CSV" fail --balance $T/ok.json --shipset $T/badsha.md --shipset-sha $(h $T/badsha.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
++ck "05 fail: expected balance sha missing" fail --balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH --git $T/repo --rc $R27
++ck "06 fail: expected balance sha wrong" fail --balance $T/ok.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $BAL0) --git $T/repo --rc $R27
++mkb $T/extra.json '{"m4.flags.newFlag":1}'; ck "07 fail: extra m4.flags key" fail --balance $T/extra.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/extra.json) --git $T/repo --rc $R27
++mkb $T/miss.json '{"m4.flags.breeds":null}'; ck "07b fail: missing m4.flags key" fail --balance $T/miss.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/miss.json) --git $T/repo --rc $R27
++mkb $T/mzg.json '{"m4.zeroGain":null}'; ck "07c fail: missing m4.zeroGain.confirm" fail --balance $T/mzg.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/mzg.json) --git $T/repo --rc $R27
++ck "08 fail: real 3f582db balance (all 0 AND cap 0.28)" fail --balance $BAL0 --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $BAL0) --git $T/repo --rc $R27
++echo "$out" | grep -q 'm4.flags.streak=0 != ship-set 1' && echo "$out" | grep -q 'm4.tc.streak_cap=0.28 != ship-set 0.27' && { P=$((P+1)); echo "ok   08b fails for both reasons (flags + cap)"; } || { F=$((F+1)); echo "FAIL 08b"; }
++sed 's/m4.flags.golden = 1/m4.flags.golden = 0/' $T/ss.md > $T/ss2.md; ck "09 fail: changed ship-set (sha != pinned)" fail --balance $T/ok.json --shipset $T/ss2.md --shipset-sha $SSH --expected-balance-sha $OKS --git $T/repo --rc $R27
++sed 's/^- m4.flags.streak = 1/- m4.flags.telemetry = 1\n- m4.flags.streak = 1/' $T/ss.md > $T/sstel.md; ck "10 pass: telemetry listed as a key is excluded, not encoded" pass --balance $T/ok.json --shipset $T/sstel.md --shipset-sha $(h $T/sstel.md) --expected-balance-sha $OKS --git $T/repo --rc $R27
++for v in 0.28 0.30; do mkb $T/c$v.json "{\"m4.tc.streak_cap\":$v}"; R=$(mkcsv $v); CS=$(git -C $T/repo show $R:data/economy.csv | sha256sum | cut -c1-64); mkss "sha256 $CS path data/economy.csv" $T/s$v.md
++  ck "11 fail: cap $v in balance AND CSV" fail --balance $T/c$v.json --shipset $T/s$v.md --shipset-sha $(h $T/s$v.md) --expected-balance-sha $(h $T/c$v.json) --git $T/repo --rc $R; done
++mkb $T/c28.json '{"m4.tc.streak_cap":0.28}'; ck "12a fail: CSV 0.27, balance 0.28 (disagree)" fail --balance $T/c28.json --shipset $T/ss.md --shipset-sha $SSH --expected-balance-sha $(h $T/c28.json) --git $T/repo --rc $R27
++R28=$(mkcsv 0.28); CS28=$(git -C $T/repo show $R28:data/economy.csv | sha256sum | cut -c1-64); mkss "sha256 $CS28 path data/economy.csv" $T/s28b.md
++ck "12b fail: CSV 0.28, balance 0.27 (disagree)" fail --balance $T/ok.json --shipset $T/s28b.md --shipset-sha $(h $T/s28b.md) --expected-balance-sha $OKS --git $T/repo --rc $R28
++RM=$(mkcsv 0.27 data/economy.csv 0.28); CM=$(git -C $T/repo show $RM:data/economy.csv | sha256sum | cut -c1-64); mkss "sha256 $CM path data/economy.csv" $T/smix.md
++ck "12c fail: CSV rows mixed 0.27/0.28" fail --balance $T/ok.json --shipset $T/smix.md --shipset-sha $(h $T/smix.md) --expected-balance-sha $OKS --git $T/repo --rc $RM
++RN=$(mkcsv none); CN=$(git -C $T/repo show $RN:data/economy.csv | sha256sum | cut -c1-64); mkss "sha256 $CN path data/economy.csv" $T/snone.md
++ck "12d fail: CSV has no tc_streak_cap column" fail --balance $T/ok.json --shipset $T/snone.md --shipset-sha $(h $T/snone.md) --expected-balance-sha $OKS --git $T/repo --rc $RN
++# gate 0b block, extracted from the pinned gate and run with stubs (SC = checker dir)
+ blk=$(sed -n '/^SHIPSET_SHA=/p' "$GATE"; sed -n '/^# 0b ship-flag set/,/^flagck$/p' "$GATE" | grep -v '^BJ=' | grep -v '^flagck$')
+ gk(){ local name=$1 want=$2 ss=$3 bal=$4 ebs=$5 ecsv=$6 pin=${7:-}; local R=$T/r$RANDOM; mkdir -p $R; cp $bal $R/rc-balance.json
+-  ( V=$T/v; SC=$(dirname $C); S7=t; HF=0; SUM=$R/summary.txt; BJ=$R/rc-balance.json; BSHA=$(h $BJ); GIT=$T/repo; FULL=$RCS; SHIPSET=$ss; EBS=$ebs; ECSV=$ecsv; say(){ echo "$*" >> $R/status.log; }
++  ( V=$T/v; SC=$(dirname $C); S7=t; HF=0; SUM=$R/summary.txt; BJ=$R/rc-balance.json; BSHA=$(h $BJ); GIT=$T/repo; FULL=$R27; SHIPSET=$ss; EBS=$ebs; ECSV=$ecsv; say(){ echo "$*" >> $R/status.log; }
+     eval "$blk"; [ -n "$pin" ] && SHIPSET_SHA=$pin; flagck >/dev/null; echo "HF=$HF" ) > $R/out.txt 2>&1
+-  hf=$(grep -o 'HF=[0-9]*' $R/out.txt | tail -1); n=$(grep -cE 'balance.json@.* sha256 [0-9a-f]{64}|ship-set .* sha256 |derived.json sha256 ' $R/status.log)
+-  if { { [ $want = pass ] && [ "$hf" = HF=0 ]; } || { [ $want = fail ] && [ "$hf" = HF=1 ]; }; } && [ "$n" = 3 ]; then P=$((P+1)); echo "ok   $name ($hf; 3 sha lines in status.log)"; else F=$((F+1)); echo "FAIL $name ($hf n=$n) $(cat $R/out.txt $R/status.log)"; fi; }
+-gk "G-a gate: fixture match passes (pin overridden to fixture sha), 3 shas logged" pass $T/ss.md $T/ok.json $OKS data/economy.csv $SSH
+-gk "G-b gate: REAL ship-set + real pin fails closed (CSV placeholder)" fail $REAL $T/ok.json $OKS data/economy.csv
+-gk "G-c gate: fixture ship-set vs real pin fails (sha != 0d53b45b)" fail $T/ss.md $T/ok.json $OKS data/economy.csv
+-gk "G-d gate: ship-set missing fails closed" fail $T/none.md $T/ok.json $OKS data/economy.csv
+-gk "G-e gate: no expected sha, no pinned file fails closed" fail $T/ss.md $T/ok.json "" data/economy.csv $SSH
+-gk "G-f gate: ECONOMY_CSV unset fails closed" fail $T/ss.md $T/ok.json $OKS "" $SSH
++  hf=$(grep -o 'HF=[0-9]*' $R/out.txt | tail -1); n=$(grep -cE 'balance.json@.* sha256 [0-9a-f]{64}|ship-set .* sha256 |derived.json sha256 ' $R/status.log); tl=$(grep -c '^TUNABLE tc_streak_cap: ship-set 0.27, balance .*, csv ' $R/status.log)
++  if { { [ $want = pass ] && [ "$hf" = HF=0 ]; } || { [ $want = fail ] && [ "$hf" = HF=1 ]; }; } && [ "$n" = 3 ] && { [ "$tl" = 1 ] || [ ! -f "$ss" ]; }; then P=$((P+1)); echo "ok   $name ($hf; 3 sha lines + cap line in status.log)"; else F=$((F+1)); echo "FAIL $name ($hf n=$n tl=$tl) $(cat $R/out.txt $R/status.log)"; fi; }
++gk "G-a gate: fixture match passes (pin = fixture sha, no override)" pass $T/ss.md $T/ok.json $OKS "" $SSH
++gk "G-b gate: REAL ship-set + real pin fails closed" fail $REAL $T/ok.json $OKS ""
++gk "G-c gate: fixture ship-set vs real pin fails (sha != 0d53b45b)" fail $T/ss.md $T/ok.json $OKS ""
++gk "G-d gate: ship-set missing fails closed" fail $T/none.md $T/ok.json $OKS ""
++gk "G-e gate: no expected sha, no pinned file fails closed" fail $T/ss.md $T/ok.json "" "" $SSH
++gk "G-f gate: ECONOMY_CSV override != ship-set path fails" fail $T/ss.md $T/ok.json $OKS data/economy.f1.csv $SSH
++gk "G-g gate: ECONOMY_CSV override == ship-set path passes" pass $T/ss.md $T/ok.json $OKS data/economy.csv $SSH
+ echo "RESULT pass=$P fail=$F"; rm -rf "$T"; [ $F = 0 ]

@@ -1,0 +1,86 @@
+[
+ {
+  "n": "S2-10 buy-normal: header+button update <= 100 ms (p95), never left on pre-tap state",
+  "pass": false,
+  "i": {
+   "n": 15,
+   "miss": 0,
+   "hdrMed": 14,
+   "hdrP95": 32,
+   "btnMed": 12,
+   "btnP95": 32,
+   "noChange": 5,
+   "sync": 0
+  }
+ },
+ {
+  "n": "S2-10 collect-normal: header+button update <= 100 ms (p95), never left on pre-tap state",
+  "pass": true,
+  "i": {
+   "n": 15,
+   "miss": 0,
+   "hdrMed": 11,
+   "hdrP95": 25,
+   "btnMed": 11,
+   "btnP95": 25,
+   "noChange": 0,
+   "sync": 0
+  }
+ },
+ {
+  "n": "S2-10 hire-normal: header+button update <= 100 ms (p95), never left on pre-tap state",
+  "pass": true,
+  "i": {
+   "n": 15,
+   "miss": 0,
+   "hdrMed": 18,
+   "hdrP95": 50,
+   "btnMed": 18,
+   "btnP95": 50,
+   "noChange": 0,
+   "sync": 0
+  }
+ },
+ {
+  "n": "S2-10 buy-stalled: header+button update <= 100 ms (p95), never left on pre-tap state",
+  "pass": false,
+  "i": {
+   "n": 15,
+   "miss": 0,
+   "hdrMed": 156,
+   "hdrP95": 250,
+   "btnMed": 141,
+   "btnP95": 250,
+   "noChange": 5,
+   "sync": 0
+  }
+ },
+ {
+  "n": "S2-10 collect-stalled: header+button update <= 100 ms (p95), never left on pre-tap state",
+  "pass": false,
+  "i": {
+   "n": 15,
+   "miss": 0,
+   "hdrMed": 126,
+   "hdrP95": 248,
+   "btnMed": 126,
+   "btnP95": 248,
+   "noChange": 0,
+   "sync": 0
+  }
+ },
+ {
+  "n": "S2-10 hire-stalled: header+button update <= 100 ms (p95), never left on pre-tap state",
+  "pass": false,
+  "i": {
+   "n": 15,
+   "miss": 0,
+   "hdrMed": 156,
+   "hdrP95": 258,
+   "btnMed": 156,
+   "btnP95": 258,
+   "noChange": 0,
+   "sync": 0
+  }
+ }
+]

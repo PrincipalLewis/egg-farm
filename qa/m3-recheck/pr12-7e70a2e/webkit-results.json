@@ -1,0 +1,314 @@
+[
+ {
+  "e": "webkit",
+  "n": "360 build ID (+dirty = QA-only m4.enabled=1 balance edit)",
+  "p": true,
+  "i": "m3-rc1-pre+7e70a2e+dirty"
+ },
+ {
+  "e": "webkit",
+  "n": "360 M4 flag on",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "webkit",
+  "n": "360 layout",
+  "p": "n/a",
+  "i": {
+   "navVisible": true
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 nudge visible at L25",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "webkit",
+  "n": "360 nudge copy (full)",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 224
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 nudge one line, no clip (scrollWidth<=clientWidth)",
+  "p": true,
+  "i": {
+   "sw": 170,
+   "cw": 170,
+   "h": 16,
+   "lh": 16,
+   "kids": [
+    {
+     "t": "Busy farm! · ",
+     "sw": 0,
+     "cw": 0,
+     "h": 16,
+     "d": "inline"
+    }
+   ]
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 nudge 44px hit area (elementFromPoint ±21px)",
+  "p": true,
+  "i": [
+   true,
+   true,
+   true
+  ]
+ },
+ {
+  "e": "webkit",
+  "n": "360 × 44x44, no overlap, 52px reserve",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ],
+   "gap": 10.46875,
+   "reserve": 54.46875
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 Workers New dot shown",
+  "p": true,
+  "i": {
+   "inPill": true
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 'Workers' not clipped (scrollWidth<=clientWidth pill+tab; text+dot rect inside pill)",
+  "p": true,
+  "i": {
+   "psw": 95,
+   "pcw": 95,
+   "bsw": 107,
+   "bcw": 107,
+   "textR": 321.59967041015625,
+   "dotR": 331.98138427734375,
+   "pillR": 335.80908203125,
+   "pContentR": 335.80908203125,
+   "overflow": "visible/clip",
+   "note": ""
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 dot does not overlap 'Workers' text rect",
+  "p": true,
+  "i": {
+   "gap": 2.08,
+   "textR": 321.59967041015625,
+   "dotL": 323.6772155761719,
+   "dotR": 331.98138427734375,
+   "btnR": 342.0372009277344
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 Workers tab effective tap area >=44x44 (elementFromPoint scan + corners)",
+  "p": true,
+  "i": {
+   "rect": [
+    110.72749328613281,
+    30.1025390625
+   ],
+   "eff": {
+    "atC": "BUTTON.pulse <button role=\"tab\" aria-label=\"Workers\" data-tab=\"workers\" class=\"pulse\"><span class=\"tab-",
+    "vp": [
+     360,
+     800,
+     286.67345428466797,
+     292.5
+    ],
+    "h": 49.5,
+    "w": 112,
+    "top": -9.94873046875,
+    "bot": 8.94873046875,
+    "edges": {
+     "tl": true,
+     "tr": true,
+     "bl": true,
+     "br": true
+    }
+   },
+   "before": {
+    "content": "\"\"",
+    "pos": "absolute",
+    "top": "-9px",
+    "bottom": "-9px",
+    "left": "0px",
+    "right": "0px",
+    "h": "47px",
+    "w": "106.671875px"
+   }
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 build ID (+dirty = QA-only m4.enabled=1 balance edit)",
+  "p": true,
+  "i": "m3-rc1-pre+7e70a2e+dirty"
+ },
+ {
+  "e": "webkit",
+  "n": "1280 M4 flag on",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "webkit",
+  "n": "1280 layout",
+  "p": "n/a",
+  "i": {
+   "navVisible": false
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 nudge visible at L25",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "webkit",
+  "n": "1280 nudge copy (full)",
+  "p": true,
+  "i": {
+   "text": "Busy farm! · Hire a worker ›",
+   "lead": true,
+   "rowW": 262
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 nudge one line, no clip (scrollWidth<=clientWidth)",
+  "p": true,
+  "i": {
+   "sw": 170,
+   "cw": 170,
+   "h": 16,
+   "lh": 16,
+   "kids": [
+    {
+     "t": "Busy farm! · ",
+     "sw": 0,
+     "cw": 0,
+     "h": 16,
+     "d": "inline"
+    }
+   ]
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 nudge 44px hit area (elementFromPoint ±21px)",
+  "p": true,
+  "i": [
+   true,
+   true,
+   true
+  ]
+ },
+ {
+  "e": "webkit",
+  "n": "1280 × 44x44, no overlap, 52px reserve",
+  "p": true,
+  "i": {
+   "x": [
+    44,
+    44
+   ],
+   "gap": 48.46875,
+   "reserve": 92.46875
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 Workers New dot shown",
+  "p": true,
+  "i": {
+   "inPill": true
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 'Workers' not clipped (scrollWidth<=clientWidth pill+tab; text+dot rect inside pill)",
+  "p": true,
+  "i": {
+   "psw": 119,
+   "pcw": 119,
+   "bsw": 119,
+   "bcw": 119,
+   "textR": 1240.565185546875,
+   "dotR": 1251.152099609375,
+   "pillR": 1263.45068359375,
+   "pContentR": 1251.45068359375,
+   "overflow": "visible/clip",
+   "note": ""
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 dot does not overlap 'Workers' text rect",
+  "p": true,
+  "i": {
+   "gap": 2.12,
+   "textR": 1240.565185546875,
+   "dotL": 1242.6885986328125,
+   "dotR": 1251.152099609375,
+   "btnR": 1263.45068359375
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 Workers tab effective tap area >=44x44 (elementFromPoint scan + corners)",
+  "p": true,
+  "i": {
+   "rect": [
+    126.24169921875,
+    46.54925537109375
+   ],
+   "eff": {
+    "atC": "BUTTON.pulse <button role=\"tab\" aria-label=\"Workers\" data-tab=\"workers\" class=\"pulse\"><span class=\"tab-",
+    "vp": [
+     1280,
+     720,
+     1200.329833984375,
+     484
+    ],
+    "h": 66.5,
+    "w": 128,
+    "top": -10.225372314453125,
+    "bot": 9.225372314453125,
+    "edges": {
+     "tl": true,
+     "tr": true,
+     "bl": true,
+     "br": true
+    }
+   },
+   "before": {
+    "content": "\"\"",
+    "pos": "absolute",
+    "top": "-9px",
+    "bottom": "-9px",
+    "left": "0px",
+    "right": "0px",
+    "h": "62px",
+    "w": "119.328125px"
+   }
+  }
+ }
+]

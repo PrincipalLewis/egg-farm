@@ -1,0 +1,3 @@
+tsc exit=0
+vitest exit=0
+sync-check exit=0

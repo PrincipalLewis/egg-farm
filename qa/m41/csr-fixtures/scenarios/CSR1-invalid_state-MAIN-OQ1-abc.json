@@ -1,0 +1,26 @@
+{
+ "id": "CSR1-invalid_state-MAIN-OQ1-abc",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "CSR-6",
+  "CSR-15"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "reason": "invalid_state",
+  "store": "ls",
+  "recovered_from": "none",
+  "notice": "M3",
+  "corruptLsMin": 1
+ }
+}

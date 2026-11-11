@@ -1,0 +1,111 @@
+# playwright-core 1.64.1 (a32faeb worktree node_modules) exit/kill paths
+
+// packages/utils/processLauncher.ts
+async function gracefullyCloseAll() {
+  await Promise.all(Array.from(gracefullyCloseSet).map((gracefullyClose) => gracefullyClose().catch((e) => {
+  })));
+}
+function gracefullyProcessExitDoNotHang(code, onExit2) {
+  const beforeExit = onExit2 ? () => onExit2().catch(() => {
+  }) : () => Promise.resolve();
+  const callback = () => beforeExit().then(() => (0, import_bootstrap.processExit)(code));
+  setTimeout(callback, 3e4);
+  gracefullyCloseAll().then(callback);
+}
+function exitHandler() {
+  for (const kill of killSet)
+    kill();
+}
+function sigintHandler() {
+  const exitWithCode130 = () => {
+    if (isUnderTest()) {
+      setTimeout(() => (0, import_bootstrap.processExit)(130), 1e3);
+    } else {
+      (0, import_bootstrap.processExit)(130);
+    }
+  };
+  if (sigintHandlerCalled) {
+    process.off("SIGINT", sigintHandler);
+    for (const kill of killSet)
+      kill();
+    exitWithCode130();
+  } else {
+    sigintHandlerCalled = true;
+    gracefullyCloseAll().then(() => exitWithCode130());
+  }
+}
+function sigtermHandler() {
+  gracefullyCloseAll();
+}
+function sighupHandler() {
+  gracefullyCloseAll();
+}
+function addProcessHandlerIfNeeded(name) {
+  if (!installedHandlers.has(name)) {
+    installedHandlers.add(name);
+    gracefullyCloseSet.delete(gracefullyClose);
+    killSet.delete(killProcessAndCleanup);
+    removeProcessHandlersIfNeeded();
+    options.onExit(exitCode, signal);
+    cleanup().then(fulfillCleanup);
+  });
+  addProcessHandlerIfNeeded("exit");
+  if (options.handleSIGINT)
+    addProcessHandlerIfNeeded("SIGINT");
+  if (options.handleSIGTERM)
+    addProcessHandlerIfNeeded("SIGTERM");
+  if (options.handleSIGHUP)
+    addProcessHandlerIfNeeded("SIGHUP");
+  gracefullyCloseSet.add(gracefullyClose);
+  killSet.add(killProcessAndCleanup);
+  let gracefullyClosing = false;
+  async function gracefullyClose() {
+    if (gracefullyClosing) {
+      options.log(`[pid=${spawnedProcess.pid}] <forcefully close>`);
+      killProcess();
+      await waitForCleanup;
+      return;
+    }
+    gracefullyClosing = true;
+    options.log(`[pid=${spawnedProcess.pid}] <gracefully close start>`);
+    await options.attemptToGracefullyClose().catch(() => killProcess());
+    await waitForCleanup;
+    options.log(`[pid=${spawnedProcess.pid}] <gracefully close end>`);
+  }
+  function killProcess() {
+    gracefullyCloseSet.delete(gracefullyClose);
+    killSet.delete(killProcessAndCleanup);
+    removeProcessHandlersIfNeeded();
+    options.log(`[pid=${spawnedProcess.pid}] <kill>`);
+    if (spawnedProcess.pid && !spawnedProcess.killed && !processClosed) {
+      options.log(`[pid=${spawnedProcess.pid}] <will force kill>`);
+      try {
+        if (process.platform === "win32")
+          killProcessTree(spawnedProcess.pid);
+        else
+          process.kill(-spawnedProcess.pid, "SIGKILL");
+      } catch (e) {
+        options.log(`[pid=${spawnedProcess.pid}] exception while trying to kill process: ${e}`);
+      }
+    } else {
+      options.log(`[pid=${spawnedProcess.pid}] <skipped force kill spawnedProcess.killed=${spawnedProcess.killed} processClosed=${processClosed}>`);
+    }
+  }
+  function killProcessAndCleanup() {
+    killProcess();
+    options.log(`[pid=${spawnedProcess.pid || "N/A"}] starting temporary directories cleanup`);
+    for (const dir of options.tempDirectories) {
+      try {
+        import_fs6.default.rmSync(dir, { force: true, recursive: true, maxRetries: 5 });
+      } catch (e) {
+        options.log(`[pid=${spawnedProcess.pid || "N/A"}] exception while removing ${dir}: ${e}`);
+      }
+    }
+    options.log(`[pid=${spawnedProcess.pid || "N/A"}] finished temporary directories cleanup`);
+  }
+  function killAndWait() {
+    killProcess();
+    return waitForCleanup;
+  }
+  return { launchedProcess: spawnedProcess, gracefullyClose, kill: killAndWait };
+}

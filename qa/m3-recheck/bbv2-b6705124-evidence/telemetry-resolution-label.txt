@@ -1,0 +1,5 @@
+ALLOWED RESOLUTION (labeled):
+1) Preserve #113 ring-export intact from base 49ee46dd: TELEMETRY_SCHEMA_VERSION import, tagLegacy, readRing (bare/legacy/versioned/corrupt), exportDoc(schema_version), constructor readRing, flush {v,events}, snapshotJSON/exportJSON via exportDoc.
+2) Preserve #100 BBv2 config: TelemetryConfig.bbv2 block; isPinned includes zero_gain_purchase and dead_zone.
+3) Dropped: duplicate TelemetryConfig from rc without bbv2 (subset). Conflict markers removed.
+This is an authored conflict resolution, NOT a clean automatic merge-tree (merge-tree exit 1 on telemetry.ts). Same PR file set as prior approved tip except allowed telemetry resolution and inherited rc-delta paths.

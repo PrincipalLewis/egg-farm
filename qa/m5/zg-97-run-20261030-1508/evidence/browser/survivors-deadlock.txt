@@ -1,0 +1,6 @@
+SURVIVORS (deadlocked nested flock on .browser-test-2.lock; NOT in uiqa-zg97.pids; not signalled):
+478674 flock .browser-test-2.lock timeout 600 run-one.sh ...
+478678 timeout 600 run-one.sh
+478679 bash run-one.sh
+478680 flock .browser-test-2.lock (blocked forever on nested lock)
+Will self-clear when outer timeout 600 fires (~20:17+10min). Using .browser-test.lock for Chromium meanwhile.

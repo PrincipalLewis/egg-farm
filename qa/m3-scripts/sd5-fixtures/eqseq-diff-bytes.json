@@ -1,0 +1,14 @@
+{
+ "_doc": "F2-EQ row R2-EQ (m4-design ab4ca9f, ADR M4-19 rev 3): LS and IDB both saveSeq 20, different coins/sum; IDB has the LATER savedAt -> diverged, IDB wins, LS loser byte-for-byte in IDB save/diverged. No base (pre-SQ-1 rollback writes).",
+ "expect": "idb",
+ "idb": {
+  "savedAtOffsetMs": 0,
+  "coinsCents": 444444444,
+  "raw": "{\"version\":6,\"savedAt\":0,\"sum\":\"7345d495\",\"state\":{\"coinsCents\":444444444,\"coop\":0.10000000000022169,\"basket\":0,\"collectionLevel\":17,\"farmLevel\":19,\"customers\":[{\"id\":328,\"demand\":151,\"filled\":46,\"waitedS\":18.9},{\"id\":329,\"demand\":115,\"filled\":0,\"waitedS\":11.299999999999976},{\"id\":330,\"demand\":148,\"filled\":0,\"waitedS\":3.800000000000002},{\"id\":331,\"demand\":99,\"filled\":0,\"waitedS\":0}],\"nextCustomerInS\":3.700000000000852,\"nextCustomerId\":332,\"rng\":1270709646,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":{\"energy\":100,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":100,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":100,\"cdS\":0},\"grader\":{\"energy\":100,\"cdS\":0}},\"graderTier\":2,\"manageCdS\":30,\"coopFullS\":0,\"wageFracCents\":{},\"saveSeq\":20}}"
+ },
+ "ls": {
+  "savedAtOffsetMs": -60000,
+  "coinsCents": 555555555,
+  "raw": "{\"version\":6,\"savedAt\":0,\"sum\":\"1d03e946\",\"state\":{\"coinsCents\":555555555,\"coop\":0.10000000000022169,\"basket\":0,\"collectionLevel\":17,\"farmLevel\":19,\"customers\":[{\"id\":328,\"demand\":151,\"filled\":46,\"waitedS\":18.9},{\"id\":329,\"demand\":115,\"filled\":0,\"waitedS\":11.299999999999976},{\"id\":330,\"demand\":148,\"filled\":0,\"waitedS\":3.800000000000002},{\"id\":331,\"demand\":99,\"filled\":0,\"waitedS\":0}],\"nextCustomerInS\":3.700000000000852,\"nextCustomerId\":332,\"rng\":1270709646,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":{\"energy\":100,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":100,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":100,\"cdS\":0},\"grader\":{\"energy\":100,\"cdS\":0}},\"graderTier\":2,\"manageCdS\":30,\"coopFullS\":0,\"wageFracCents\":{},\"saveSeq\":20}}"
+ }
+}

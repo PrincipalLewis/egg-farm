@@ -1,0 +1,13 @@
+=== hosted runs, exact tip dc58705 (GitHub connector list_workflow_run_jobs; observed 2026-11-06T00:38:08+01:00) ===
+--- ci 42124406327
+127584770718 gate completed success dc58705 2026-11-05T22:58:56Z
+127590161412 release-globals completed skipped dc58705 2026-11-05T22:58:56Z
+--- pacing-x1-stack 42124406279
+127584770354 pacing-x1-stack shard (seller15) completed success dc58705 2026-11-05T23:27:44Z
+127584770592 pacing-x1-stack shard (optimal) completed success dc58705 2026-11-05T23:31:01Z
+127584770593 pacing-x1-stack shard (casual) completed success dc58705 2026-11-05T23:19:02Z
+127603711152 pacing-x1-stack completed failure dc58705 2026-11-05T23:32:55Z
+--- k10-breeds-offset 42124406304
+127584771075 k10-breeds-offset (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53) completed failure dc58705 2026-11-05T23:09:32Z
+(completed_at values are UTC; CET = +1h)
+--- PR #106 (get_pull_request): open, not draft, not merged; head feat/v5-tapcoins dc58705; base rc/v5 f8036e8; 7 files +213/-8; mergeable_state unstable (k10/pacing aggregate red)

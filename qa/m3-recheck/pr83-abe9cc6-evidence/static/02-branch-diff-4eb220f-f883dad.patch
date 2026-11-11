@@ -1,0 +1,391 @@
+diff --git a/scripts/m41-p2-browser.mjs b/scripts/m41-p2-browser.mjs
+index cd252d6..9257ef9 100644
+--- a/scripts/m41-p2-browser.mjs
++++ b/scripts/m41-p2-browser.mjs
+@@ -21,7 +21,7 @@ const MAN = `${OUT}/manifest.json`, manifest = existsSync(MAN) ? JSON.parse(read
+ manifest.shots = manifest.shots.filter(s => s.engine !== ENGINE);
+ const browser = ENGINE === 'webkit' ? await webkit.launch() : ENGINE === 'firefox' ? await firefox.launch() : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+ const URL0 = `http://127.0.0.1:${srv.port}/`, UI = JSON.stringify({ onboardingDone: true, workersIntroA: true, workersIntroB: true, sfx: false });
+-const results = []; let fails = 0;
++const results = [], fit = []; let fails = 0;
+ // info(): recorded in results-<engine>.json with its real pass/fail and printed as INFO, never counted as a gate failure. Used only for a
+ // finding outside the ruled scope that waits for a ruling (named in the check text).
+ const info = (id, w, name, pass, data) => { results.push({ id, engine: ENGINE, w, name, pass: !!pass, info: true, data }); console.log(`INFO [${ENGINE} ${w}] ${id} ${pass ? 'pass' : 'FINDING'} ${name} ${pass ? '' : JSON.stringify(data)}`); };
+@@ -147,7 +147,7 @@ for (const [w, h] of SIZES) {
+         // AC-R17 / Art-c1 (HoE 2026-10-30 00:19): the Upgrades badge follows the label in the DOM, so the visible text reads "Upgrades N";
+         // the name "Upgrades, N worker(s) need(s) attention" starts with it (punctuation dropped, as axe compares)
+         const v = vis(e).replace(/\s+/g, ' ').trim(), name = e.getAttribute('aria-label');
+-        return { sel, shown: true, v, name, ok: sel.includes('upgrades') ? words(name).startsWith(words(v)) && name.startsWith('Upgrades') : name.startsWith(v) }; }); });
++        return { sel, shown: true, v, name, ok: v.length > 0 && (sel.includes('upgrades') ? words(name).startsWith(words(v)) && name.startsWith('Upgrades') : name.startsWith(v)) }; }); }); // F3: non-empty visible text
+     const n = { 'mh-asleep': 1, 'ch-asleep': 1, 'both-asleep': 2, 'mh-unpaid': 1, 'ch-unpaid': 1, 'both-unpaid': 2, 'mh-asleep-ch-unpaid': 2, none: 0 }[scene];
+     const shown = r.filter(x => x.shown), wt = r[1];
+     check('AC-R17', w, `${scene}: every shown control's name starts with its visible text; Workers tab ${n ? `"Workers ${n}, …"` : '"Workers"'}`, shown.every(x => x.ok) && wt.shown && (n ? wt.name === `Workers ${n}, ${n} asleep or unpaid` : wt.name === 'Workers'), r);
+@@ -159,14 +159,25 @@ for (const [w, h] of SIZES) {
+         return { bd: true, ah: bd.getAttribute('aria-hidden'), afterLbl: bd.previousElementSibling?.classList.contains('nav-lbl') ?? false, text: bd.textContent,
+           dRight: +(a.right - c.right).toFixed(2), dTop: +(c.top - a.top).toFixed(2), w: +a.width.toFixed(2), h: +a.height.toFixed(2), gen: [gen(bd, '::before'), gen(bd, '::after'), gen(up, '::before'), gen(up, '::after')] }; });
+       check('Art-c1', w, `${scene}: Upgrades badge after the label, aria-hidden, at the icon's top-right (+6 right, -6 top, ±0.5 px), no CSS-generated count`, g.bd && g.ah === 'true' && g.afterLbl && g.text === String(n) && Math.abs(g.dRight - 6) <= 0.5 && Math.abs(g.dTop - 6) <= 0.5 && g.gen.every(x => x === 'none' || x === 'normal'), g);
+-      if (scene === 'mh-asleep' || scene === 'both-asleep') { const bb = await page.locator('nav.actions').boundingBox();
+-        await shot(page, `nav-upgrades-n${n}`, w, `Bottom nav, Upgrades badge N=${n} after the label (Art-c1: aria-hidden, icon top-right -6/-6)`, g, { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 }); } }
++    }
+     if (axeSrc) { await page.addScriptTag({ content: axeSrc });
+       const ax = await page.evaluate(async () => { const inc = ['nav [data-nav=upgrades]', '.tabs [data-tab=workers]', 'nav [data-act=manageAll]', '#p-upgrades header [data-act=manageAll]'].filter(s => document.querySelector(s));
+         const res = await window.axe.run({ include: inc.map(s => [s]) }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } });
+         return { v: res.violations.flatMap(x => x.nodes.map(n => n.target.join(' '))), passes: res.passes.flatMap(x => x.nodes.length), incomplete: res.incomplete.flatMap(x => x.nodes.map(n => n.target.join(' '))) }; });
+       check('AC-R17 axe', w, `${scene}: axe 4.14 label-content-name-mismatch violations = 0`, ax.v.length === 0, ax);
+     } else check('AC-R17 axe', w, `${scene}: axe not run (AXE path missing)`, false, AXE);
++    // QA pre-review F6: the nav-upgrades shots must frame the bottom nav, so close the Upgrades sheet first (Escape = openPanel(null));
++    // badge on at N=1 / N=2, off at N=0. The frame is verified (sheet closed, nav on screen, badge state) before the shot.
++    if (phone && (scene === 'mh-asleep' || scene === 'both-asleep' || scene === 'none')) {
++      await page.keyboard.press('Escape'); await page.waitForTimeout(450);
++      const f = await page.evaluate(() => { const nav = document.querySelector('nav.actions'), r = nav.getBoundingClientRect(), x = innerWidth / 2, y = r.top + r.height / 2;
++        const top = document.elementFromPoint(x, y), bd = document.querySelector('nav [data-nav=upgrades] > .asleep-badge');
++        return { sheetOpen: !!document.querySelector('#panel-layer.open'), navOnTop: nav.contains(top), navTop: r.top, navH: r.height, vh: innerHeight, badge: bd && bd.checkVisibility() ? bd.textContent : null }; });
++      const want = n ? String(n) : null;
++      check('Art-c1 shot frame (F6)', w, `${scene}: Upgrades sheet closed, bottom nav on top, badge ${want ? `"${want}" shown` : 'off'} before the nav-upgrades-n${n} shot`, !f.sheetOpen && f.navOnTop && f.badge === want, f);
++      const bb = await page.locator('nav.actions').boundingBox();
++      await shot(page, `nav-upgrades-n${n}`, w, `Bottom nav (Upgrades sheet closed), Upgrades badge ${n ? `N=${n} after the label (Art-c1: aria-hidden, icon top-right -6/-6)` : 'off (N=0)'}`, f, { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 });
++    }
+     await ctx.close();
+   }
+   // ---- AC-R17 P2a (D-HOP-2026-10-29-10): count 0 -> nav Refill not rendered (3 hired, all rested); Tab skips it ----
+@@ -191,11 +202,11 @@ for (const [w, h] of SIZES) {
+       const shown = e.checkVisibility(), name = e.getAttribute('aria-label'), v = vis(e).replace(/\s+/g, ' ').trim(), lbl = e.querySelector('.nav-lbl');
+       e.click(); window.eggfarmUi.render();
+       const st2 = JSON.stringify({ cd: window.eggfarm.state.manageCdS, w: window.eggfarm.state.workers, c: window.eggfarm.state.coinsCents });
+-      return { present: true, shown, name, v, countdown: lbl?.textContent ?? null, countdownAriaHidden: lbl?.getAttribute('aria-hidden') ?? null, ariaDisabled: e.getAttribute('aria-disabled'), unchanged: st === st2 }; }, [sel, vis.toString()]);
++      return { present: true, shown, name, v, label: lbl?.textContent ?? null, countdown: lbl?.dataset.cd ?? null, hiddenText: [...e.querySelectorAll('[aria-hidden=true]')].map(x => x.textContent.trim()).filter(Boolean), ariaDisabled: e.getAttribute('aria-disabled'), unchanged: st === st2 }; }, [sel, vis.toString()]);
+     if (how === 'tab') {
+-      check('D-HOP-10-addendum', w, `cooldown, count 0: ${phone ? 'nav' : 'header'} Refill visible, name "Refill, cooling down" starts with its visible text (countdown aria-hidden), aria-disabled, a tap changes nothing`, d.present && d.shown && d.name === 'Refill, cooling down' && d.name.startsWith(d.v) && d.countdownAriaHidden === 'true' && d.ariaDisabled === 'true' && d.unchanged, d);
++      check('D-HOP-10-addendum / D-HOP-2026-10-30-02', w, `cooldown, count 0: ${phone ? 'nav' : 'header'} Refill visible, visible text "Refill" (non-empty, F3) + countdown "${phone ? ' ' : ' · '}0:20" (CSS data-cd), name "Refill, cooling down" starts with it, aria-disabled, a tap changes nothing`, d.present && d.shown && d.name === 'Refill, cooling down' && d.v === 'Refill' && d.v.length > 0 && d.name.startsWith(d.v) && d.countdown === (phone ? ' 0:20' : ' · 0:20') && d.ariaDisabled === 'true' && d.unchanged, d);
+       if (axeSrc) { await page.addScriptTag({ content: axeSrc }); const ax = await page.evaluate(async sel => { const res = await window.axe.run({ include: [[sel]] }, { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } }); return { v: res.violations.flatMap(x => x.nodes.map(n => n.target.join(' '))) }; }, sel);
+-        info('D-HOP-10-addendum axe', w, 'cooldown Refill: axe 4.14 label-content-name-mismatch (axe counts the aria-hidden "0:NN" countdown as visible text; behaviour unchanged per HoP 00:22, escalated to HoE for a ruling)', ax.v.length === 0, ax); }
++        check('AC-R17 D-HOP-2026-10-30-02 axe', w, `cooldown ${phone ? 'nav' : 'header'} Refill: axe 4.14 label-content-name-mismatch violations = 0`, ax.v.length === 0, ax); }
+     }
+     if (phone) { // focus on Refill when the cooldown ends at count 0: Tab -> Farm, Shift+Tab -> Upgrades (no gap, no trap); then a full Tab sweep of the nav
+       await page.waitForTimeout(400); await page.locator(sel).focus();
+@@ -213,6 +224,33 @@ for (const [w, h] of SIZES) {
+       check('D-HOP-10-addendum', w, 'cooldown ends at count 0 (docked): the header Refill copy is hidden (nav not displayed)', gone, { gone });
+     }
+     await ctx.close(); }
++  // ---- D-HOP-2026-10-30-02 (b) fit (Art 08:53): "Refill" + countdown on one line, no clip/ellipsis, tabular (no jump), target >= 44, contrast >= 4.5:1.
++  // Widest countdown = manage_cooldown_s (30 s -> "0:30"), typical "0:07"; Upgrades badge on (MH asleep) in the same frame. Measurements -> cooldown-fit-<engine>.json
++  for (const cd of [30, 7]) { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 0, cdS: 0 }, coop_hand: { energy: 90, cdS: 0 }, hawker: { energy: 90, cdS: 0 } }, coinsCents: 1e6, manageCdS: cd }, { freeze: true });
++    if (!phone) await toTab(page, 'workers'); await page.evaluate(PAGE_LIB); await page.waitForTimeout(300);
++    const sel = phone ? 'nav.actions .nav-manage' : '#p-upgrades header [data-act=manageAll]';
++    const f = await page.evaluate(([sel, max]) => { const P = window.__p2, e = document.querySelector(sel), nl = e.querySelector('.nav-lbl'), b = e.getBoundingClientRect(), l = nl.getBoundingClientRect();
++      const lh = parseFloat(getComputedStyle(nl).lineHeight) || parseFloat(getComputedStyle(nl).fontSize) * 1.2, cd0 = nl.dataset.cd;
++      const widths = {}; for (let i = 1; i <= max; i++) { nl.dataset.cd = cd0.replace(/\d+:\d\d$/, `${Math.floor(i / 60)}:${String(i % 60).padStart(2, '0')}`); widths[i] = +nl.getBoundingClientRect().width.toFixed(2); } nl.dataset.cd = cd0;
++      const ws = Object.values(widths), after = getComputedStyle(nl, '::after'), fg = P.rgb(after.color), bg = P.bgOf(e), op = P.effOpacity(nl);
++      const up = document.querySelector('nav [data-nav=upgrades] > .asleep-badge');
++      return { text: nl.textContent + cd0, label: nl.textContent, countdown: cd0, name: e.getAttribute('aria-label'), lines: nl.getClientRects().length, labelH: +l.height.toFixed(2), lineH: +lh.toFixed(2),
++        btn: P.r(e), lbl: P.r(nl), inside: l.left >= b.left - 0.5 && l.right <= b.right + 0.5 && l.top >= b.top - 0.5 && l.bottom <= b.bottom + 0.5, inView: b.left >= -0.5 && b.right <= innerWidth + 0.5,
++        overflow: e.scrollWidth > e.clientWidth + 0.5, ellipsis: getComputedStyle(nl).textOverflow, afterContent: after.content, numeric: after.fontVariantNumeric,
++        widthMin: Math.min(...ws), widthMax: Math.max(...ws), color: after.color, bg: `rgb(${bg.r}, ${bg.g}, ${bg.b})`, opacity: op, contrastRaw: P.ratio(fg, bg), contrastEff: P.contrast(nl),
++        badge: up ? { shown: up.checkVisibility(), text: up.textContent } : null }; }, [sel, 30]);
++    f.engine = ENGINE; f.w = w; f.h = h; f.cd = cd; fit.push(f);
++    const oneLine = f.lines === 1 && f.labelH <= f.lineH * 1.5, noClip = f.inside && f.inView && !f.overflow, noJump = f.widthMax - f.widthMin < 0.01 && /tabular-nums/.test(f.numeric);
++    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: "${f.text}" on one line (${f.lines} line box, ${f.labelH}px), not clipped/ellipsised, inside the button`, oneLine && noClip && f.ellipsis !== 'ellipsis', f);
++    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: tabular digits, label width constant over 0:01..0:30 (${f.widthMin}..${f.widthMax}px)`, noJump, { widthMin: f.widthMin, widthMax: f.widthMax, numeric: f.numeric });
++    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: tap target ${f.btn.w}x${f.btn.h} >= 44x44`, f.btn.w >= 44 && f.btn.h >= 44, f.btn);
++    check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: countdown/label contrast ${f.contrastEff}:1 >= 4.5:1 (${f.color} on ${f.bg}, opacity ${f.opacity})`, f.contrastEff >= 4.5, { color: f.color, bg: f.bg, opacity: f.opacity, contrast: f.contrastEff });
++    if (phone) check('AC-R17 D-HOP-2026-10-30-02 fit', w, `cooldown ${cd}s: Upgrades badge on (N=1) in the same frame`, f.badge?.shown && f.badge.text === '1', f.badge);
++    const clip = phone ? await (async () => { const bb = await page.locator('nav.actions').boundingBox(); return { x: 0, y: Math.max(0, Math.floor(bb.y) - 12), width: w, height: Math.ceil(bb.height) + 12 }; })()
++      : await page.evaluate(() => { const a = document.querySelector('#p-upgrades header').getBoundingClientRect(), t = document.querySelector('#p-upgrades .tabs')?.getBoundingClientRect() ?? a;
++        const x = Math.floor(Math.min(a.left, t.left)), y = Math.floor(Math.min(a.top, t.top)); return { x, y, width: Math.ceil(Math.max(a.right, t.right)) - x, height: Math.ceil(Math.max(a.bottom, t.bottom)) - y + 4 }; });
++    await shot(page, `cooldown-${cd === 30 ? 'max-0-30' : 'typ-0-07'}`, w, `${phone ? 'Bottom nav' : 'Docked Upgrades header + tabs'}: Refill cooldown "${f.text.trim()}" (D-HOP-2026-10-30-02 (b)), ${phone ? 'Upgrades badge N=1' : 'Workers tab badge 1'} on`, f, clip);
++    await ctx.close(); }
+   // ---- P2b-U / Art-c2: Unpaid Refill refused tap = shake; reduced motion = static refusedFlash, no translate ----
+   for (const rm of [false, true]) { const { ctx, page } = await open(w, h, { workers: { ...MH_UNPAID, coop_hand: { energy: 90, cdS: 0 } }, coinsCents: 0 }, { rm, freeze: true });
+     await toTab(page, 'workers');
+@@ -220,6 +258,17 @@ for (const [w, h] of SIZES) {
+       requestAnimationFrame(() => { const cs = getComputedStyle(bt); res({ cls: bt.className, anim: cs.animationName, dur: cs.animationDuration, tf: cs.transform, shadow: cs.boxShadow }); }); }));
+     check('P2b-U / Art-c2', w, rm ? 'reduced motion: refused Unpaid Refill tap = refusedFlash (300ms), no transform' : 'full motion: refused Unpaid Refill tap = shake', /\bshake\b/.test(r.cls) && (rm ? r.anim === 'refusedFlash' && r.dur === '0.3s' && r.tf === 'none' : r.anim === 'shake'), r);
+     await ctx.close(); }
++  // ---- Art-c2 (all Refill buttons, Art 2026-10-30 08:59; QA F4): refused tap during the cooldown on the nav (phone) / docked-header Refill and
++  // on the Workers-tab Refill bar: full motion = shake; reduced motion (emulated prefers-reduced-motion) = refusedFlash 300ms, no transform ----
++  for (const rm of [false, true]) { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 30, cdS: 0 }, coop_hand: { energy: 25, cdS: 0 }, hawker: { energy: 20, cdS: 0 } }, coinsCents: 1e9, manageCdS: 20 }, { rm, freeze: true });
++    const probe = sel => page.evaluate(sel => new Promise(res => { const bt = document.querySelector(sel); if (!bt || !bt.checkVisibility()) return res({ missing: sel }); bt.click();
++      requestAnimationFrame(() => { const cs = getComputedStyle(bt); res({ sel, cls: bt.className, anim: cs.animationName, dur: cs.animationDuration, tf: cs.transform, shadow: cs.boxShadow, cd: window.eggfarm.state.manageCdS }); }); }), sel);
++    const ok = r => !r.missing && /\bshake\b/.test(r.cls) && r.cd > 0 && (rm ? r.anim === 'refusedFlash' && r.dur === '0.3s' && r.tf === 'none' : r.anim === 'shake');
++    if (phone) { const r = await probe('nav.actions .nav-manage'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused nav Refill tap (cooldown) = ${rm ? 'refusedFlash (300ms), no transform' : 'shake'}`, ok(r), r); }
++    await toTab(page, 'workers'); await page.waitForTimeout(300);
++    if (!phone) { const r = await probe('#p-upgrades header [data-act=manageAll]'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused docked-header Refill tap (cooldown) = ${rm ? 'refusedFlash (300ms), no transform' : 'shake'}`, ok(r), r); }
++    const r = await probe('#uRow > .refill-wrap button.manage-all'); check('Art-c2', w, `${rm ? 'reduced motion' : 'full motion'}: refused Workers-tab Refill bar tap (cooldown) = ${rm ? 'refusedFlash (300ms), no transform' : 'shake'}`, ok(r), r);
++    await ctx.close(); }
+   // ---- WCAG 2.4.11: keyboard focus through the Workers list never hidden under the sticky Refill bar ----
+   { const { ctx, page } = await open(w, h, { workers: { market_hand: { energy: 30, cdS: 0 }, coop_hand: { energy: 25, cdS: 0 }, hawker: { energy: 20, cdS: 0 }, grader: { energy: 90, cdS: 0 } }, coinsCents: 1e9, graderTier: 1 });
+     await toTab(page, 'workers'); await page.waitForTimeout(300);
+@@ -289,6 +338,7 @@ for (const [w, h] of SIZES) for (const rm of [false, true]) {
+ }
+ await browser.close(); srv.stop();
+ writeFileSync(MAN, JSON.stringify(manifest, null, 1) + '\n');
++writeFileSync(`${OUT}/cooldown-fit-${ENGINE}.json`, JSON.stringify({ head, buildId: srv.buildId, engine: ENGINE, fit }, null, 1) + '\n');
+ writeFileSync(`${OUT}/results-${ENGINE}.json`, JSON.stringify({ head, buildId: srv.buildId, engine: ENGINE, checks: results.length, fails, results }, null, 1) + '\n');
+ console.log(`m41-p2-browser [${ENGINE}] ${results.filter(r => !r.info).length - fails}/${results.filter(r => !r.info).length} checks pass (+${results.filter(r => r.info).length} INFO, ${results.filter(r => r.info && !r.pass).length} findings), ${manifest.shots.filter(s => s.engine === ENGINE).length} shots -> ${OUT}`);
+ process.exitCode = fails ? 1 : 0;
+diff --git a/scripts/rc0-browser.mjs b/scripts/rc0-browser.mjs
+index e566aae..0a50f3d 100644
+--- a/scripts/rc0-browser.mjs
++++ b/scripts/rc0-browser.mjs
+@@ -228,8 +228,8 @@ sections.b58 = async () => {
+     if (w < 900) { await page.locator('[data-nav=upgrades]').click(); }
+     await page.locator('[data-tab=workers]').click(); await page.waitForTimeout(300);
+     if (w > 900) { await page.evaluate(() => window.eggfarm.dispatch({ type: 'manageAll' })); await page.waitForTimeout(400);
+-      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText }; });
+-      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && /^Ready in \d+s$/.test(d.text.trim()), JSON.stringify(d));
++      const d = await page.evaluate(() => { const r = document.querySelector('.farm-manage-all').getBoundingClientRect(); return { h: r.height, w: r.width, text: document.querySelector('.farm-manage-all').innerText, cd: document.querySelector('.farm-manage-all .nav-lbl')?.dataset.cd }; });
++      ok(`Review #2: docked Refill pill >=44px tall during cooldown (${w})`, d.h >= 44 && d.text.trim() === 'Refill' && /^ · \d+:\d\d$/.test(d.cd ?? ''), JSON.stringify(d)); // D-HOP-2026-10-30-02 (b): "Refill · 0:NN", countdown from data-cd
+       { const bb = await page.evaluate(() => { const rs = [document.querySelector('.farm-manage-all'), ...document.querySelectorAll('.farm-manage-all *')].map(e => e.getBoundingClientRect()).filter(r => r.width);
+           const x = Math.min(...rs.map(r => r.left)), y = Math.min(...rs.map(r => r.top)); return { x, y, width: Math.max(...rs.map(r => r.right)) - x, height: Math.max(...rs.map(r => r.bottom)) - y }; }), pad = 16; // pill + overhanging icon // whole pill in frame (Art & UX 10:01)
+         ok(`Review #2b: docked Refill pill fully inside the viewport (${w}) — h=${bb && bb.height}px`, !!bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= w && bb.y + bb.height <= 900, JSON.stringify(bb));
+@@ -702,10 +702,10 @@ sections.s25 = async () => {
+   const r2 = await read(); check(r2, 'after reload');
+   ok('S2-5 exactly one worker button in the DOM after reload', (await page.locator('[data-act=manageAll]').count()) === 1);
+   await page.locator('nav [data-act=manageAll]').click(); await page.waitForTimeout(300);
+-  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, lblHidden: b.querySelector('.nav-lbl').getAttribute('aria-hidden'), aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
++  const cd = await page.evaluate(() => { const b = document.querySelector('nav [data-act=manageAll]'), i = getComputedStyle(b.querySelector('.manage-ico img')); return { label: b.querySelector('.nav-lbl').textContent, cdText: b.querySelector('.nav-lbl').dataset.cd, hiddenKids: [...b.querySelectorAll('[aria-hidden=true]')].filter(x => x.textContent.trim()).length, aria: b.getAttribute('aria-label'), dis: b.getAttribute('aria-disabled'), filter: i.filter, op: i.opacity }; });
+   ok('Review #1: nav Refill icon greyed during cooldown (grayscale(1), opacity .55)', cd.filter === 'grayscale(1)' && cd.op === '0.55', JSON.stringify(cd));
+   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-review1-nav-refill-cooldown-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
+-  ok('S2-5 cooldown: label "0:NN", aria "Refill, cooling down" with the countdown aria-hidden (review 23a3798 #1), aria-disabled', /^0:\d\d$/.test(cd.label) && cd.aria === 'Refill, cooling down' && cd.lblHidden === 'true' && cd.dis === 'true', JSON.stringify(cd));
++  ok('S2-5 cooldown (D-HOP-2026-10-30-02 (b)): label "Refill" + countdown " 0:NN" (CSS data-cd), aria "Refill, cooling down" (review 23a3798 #1), aria-disabled', cd.label === 'Refill' && /^ \d+:\d\d$/.test(cd.cdText ?? '') && cd.hiddenKids === 0 && cd.aria === 'Refill, cooling down' && cd.dis === 'true', JSON.stringify(cd));
+   if (shot) await page.screenshot({ path: `${SHOTS}/rc1-s2-5-nav-390.png`, clip: { x: 0, y: 844 - 80, width: 390, height: 80 } });
+   await ctx.close();
+ };
+diff --git a/src/ui/app.ts b/src/ui/app.ts
+index 942dec5..7cb6872 100644
+--- a/src/ui/app.ts
++++ b/src/ui/app.ts
+@@ -624,9 +624,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     for (const fb of farmMAs) {
+       setHidden(fb, !farmMAShown);
+       if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
+-        // S2-5 / AC-R9: visible "Refill" (or the aria-hidden "0:NN" countdown) + N badge; aria "Refill N tired workers" / "Refill, cooling down"
++        // S2-5 / AC-R9: visible "Refill" + N badge, or "Refill" + the CSS-drawn countdown (D-HOP-2026-10-30-02); aria "Refill N tired workers" / "Refill, cooling down"
+         const v = navRefillState(s, b, docked.matches, maAria, now());
+-        { const nl = fb.querySelector('.nav-lbl')!; setText(nl, v.label); const ah = v.hideLabel ? 'true' : 'false'; if (nl.getAttribute('aria-hidden') !== ah) nl.setAttribute('aria-hidden', ah); } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
++        { const nl = fb.querySelector('.nav-lbl') as HTMLElement; setText(nl, v.label); if (nl.dataset.cd !== v.countdown) nl.dataset.cd = v.countdown; } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
+     }
+     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
+diff --git a/src/ui/styles.css b/src/ui/styles.css
+index 09d5c37..0e0c9d8 100644
+--- a/src/ui/styles.css
++++ b/src/ui/styles.css
+@@ -43,11 +43,14 @@ img{user-select:none;-webkit-user-drag:none}
+ .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
+ /* Art-c2: a refused Refill is aria-disabled, and .btn[aria-disabled=true]{animation:none} (0,2,0) beat .shake (0,1,0), so the full-motion
+    shake never played on it (found by the 1befa17 browser check). Same specificity as the reduced-motion swap below, placed before it. */
+-.btn.manage.shake{animation:shake var(--t-med) linear}
+-/* P2b-U / Art-c2 (2026-10-29 23:20): a refused Refill tap (Unpaid) keeps the shake; under reduced motion it is a static refused flash, no translate. */
++.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:shake var(--t-med) linear}
++/* P2b-U / Art-c2 (2026-10-29 23:20; scope = ALL Refill buttons, Art 2026-10-30 08:59, QA pre-review F4): a refused Refill tap keeps the shake;
++   under reduced motion it is a static refused flash, no translate, on the worker-card Refill, the nav / docked-header Refill (.nav-manage,
++   no .btn) and the Workers-tab Refill bar (.btn.manage-all; (0,4,0) beats its [aria-disabled=true]{animation:none} rule further down). */
+ @keyframes refusedFlash{0%,100%{box-shadow:inset 0 0 0 2px var(--c-danger)}}
+-@media (prefers-reduced-motion:reduce){.btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}}
+-.reduced-motion .btn.manage.shake,.rm .btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}
++@media (prefers-reduced-motion:reduce){.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}}
++.reduced-motion .btn.manage.shake,.rm .btn.manage.shake,.reduced-motion .manage.nav-manage.shake,.rm .manage.nav-manage.shake,
++.reduced-motion .btn.manage-all.shake[aria-disabled=true],.rm .btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}
+ .icon-btn{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;display:grid;place-items:center;padding:0}.icon-btn img{width:28px;height:28px}
+ /* HUD */
+ .hud{display:flex;align-items:center;gap:var(--s-2);padding:0 var(--s-3);background:var(--c-wood);border-bottom:var(--bw) solid var(--c-outline)}
+@@ -592,6 +595,12 @@ nav.actions button.nav-manage[aria-disabled=true] .nav-lbl{color:#5A4C42}
+ /* Art & UX review rc1-ui-fc8e1cf #1: the phone-nav Refill icon greys out during cooldown (timer text stays #5A4C42) */
+ .nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55}
+ nav.actions button.nav-manage.is-cooldown .manage-ico img{filter:grayscale(1);opacity:.55} /* beats the S2-5 filter:none reset */
++/* D-HOP-2026-10-30-02 (b): cooldown label = "Refill" + the countdown from data-cd (generated content: not text in the button, so axe
++   label-content-name-mismatch sees "Refill" and the name "Refill, cooling down" starts with it). One line; tabular digits so it never jumps. */
++.nav-lbl[data-cd]::after{content:attr(data-cd);white-space:pre;font-variant-numeric:tabular-nums}
++/* Docked header pill: Fredoka has no tabular digits (tabular-nums is ignored; " · 0:01".." · 0:30" measured 31.27-36.52 px at 600 14px in Cr/FF/WK,
++   8be9ae7), so the countdown reserves its widest width (2.609em -> 2.65em) and the pill never changes size as it ticks (Art 08:53 fit rule). */
++@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-lbl[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}
+ /* #2: docked Upgrades-header Refill pill never under 44px tall */
+ @media (min-width:960px) and (orientation:landscape){.sheet header button.desk-manage-all:not([hidden]){min-height:44px;box-sizing:border-box}}
+ /* S2-5: nav buttons are the full 64px (the 2px top rule is drawn over them instead of taking 2px of the track) */
+diff --git a/src/ui/workers-ui.ts b/src/ui/workers-ui.ts
+index c20e9ee..98ebede 100644
+--- a/src/ui/workers-ui.ts
++++ b/src/ui/workers-ui.ts
+@@ -63,10 +63,10 @@ export class YawnSfx {
+     return id;
+   }
+ }
+-/** AC-R9 plural: "Refill 1 tired worker" / "Refill N tired workers" (never "1 tired workers"). */
+ /** AC-R17 / Art-c1 (HoE ruling 2026-10-30 00:19/00:20, WCAG 2.5.3): accessible name of the Upgrades nav button. It starts with the
+  *  visible label "Upgrades"; the aria-hidden count badge after it is announced as N workers needing attention. N = 0 -> "Upgrades". */
+ export const upgradesNavName = (n: number) => n > 0 ? `Upgrades, ${n} ${n === 1 ? 'worker needs' : 'workers need'} attention` : 'Upgrades';
++/** AC-R9 plural: "Refill 1 tired worker" / "Refill N tired workers" (never "1 tired workers"). */
+ export const refillTiredLabel = (n: number) =>
+   n === 1 ? 'Refill 1 tired worker' : `Refill ${n} tired workers`;
+ 
+@@ -158,18 +158,22 @@ export function shouldShowCoopTip(s: GameState, b: Balance, shownThisSession: bo
+   return !shownThisSession && !s.workers.coop_hand && s.farmLevel >= t.coop_hand_tip_min_farm && s.coopFullS >= t.coop_hand_tip_full_s;
+ }
+ export const COOP_TIP_TEXT = 'Coop full! Hire a Coop Hand to collect eggs for you.';
+-/** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav (Art & UX 08:47, v1.3 copy): "Refill" / "0:28" + N badge; docked header: "Refill tired (N)" /
+- *  "Ready in Ns". aria-label "Refill N tired workers" / "Refill, cooling down" during the cooldown (countdown label aria-hidden, review 23a3798 #1); the cooldown aria text changes at most every 5 s. */
++/** S2-5 (session2-ui-triage (b)): Farm View Manage button copy. Nav (Art & UX 08:47, v1.3 copy): "Refill" + N badge; docked header: "Refill N tired workers".
++ *  Cooldown (D-HOP-2026-10-30-02 (b)): "Refill 0:28" (docked "Refill · 0:28"), the countdown drawn by CSS from data-cd. aria-label "Refill N tired workers" /
++ *  "Refill, cooling down" during the cooldown (review 23a3798 #1). */
+ export interface NavAria { text: string; at: number }
+ /** Pure nav/docked Refill state from the game state (what app.ts renders); same count as the Refill bar (refillCount). */
+ export const navRefillState = (s: GameState, b: Balance, docked: boolean, prev: NavAria, nowMs: number) => navManageView(refillCount(s, b), s.manageCdS, docked, prev, nowMs);
+ export const REFILL_COOLDOWN_ARIA = 'Refill, cooling down';
+-export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; badge: string; aria: NavAria; hideLabel: boolean } {
++/** D-HOP-2026-10-30-02: m:ss for the cooldown countdown (manage_cooldown_s is 30 today, so "0:30" … "0:01"). */
++export const fmtCooldown = (cd: number) => `${Math.floor(cd / 60)}:${String(cd % 60).padStart(2, '0')}`;
++export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; countdown: string; badge: string; aria: NavAria } {
+   const cd = Math.ceil(cdS - 1e-9);
+   if (cd > 0) {
+-    const label = docked ? `Ready in ${cd}s` : `0:${String(cd).padStart(2, '0')}`;
+-    // review 23a3798 #1: the countdown is a visual-only, aria-hidden label; the name is stable for the whole cooldown, so it never goes stale
+-    return { label, badge: '', hideLabel: true, aria: prev.text === REFILL_COOLDOWN_ARIA ? prev : { text: REFILL_COOLDOWN_ARIA, at: nowMs } };
++    // D-HOP-2026-10-30-02 option (b): the visible label is "Refill" next to the countdown; the name stays "Refill, cooling down" (review
++    // 23a3798 #1: stable for the whole cooldown, never stale). The countdown is CSS generated content (.nav-lbl[data-cd]::after), not text
++    // in the button: axe 4.14 counts aria-hidden text as visible (label-content-name-mismatch), and the aria-label keeps it out of the name.
++    return { label: 'Refill', countdown: docked ? ` · ${fmtCooldown(cd)}` : ` ${fmtCooldown(cd)}`, badge: '', aria: prev.text === REFILL_COOLDOWN_ARIA ? prev : { text: REFILL_COOLDOWN_ARIA, at: nowMs } };
+   }
+-  return { hideLabel: false, label: docked ? refillTiredLabel(n) : 'Refill', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
++  return { label: docked ? refillTiredLabel(n) : 'Refill', countdown: '', badge: docked || n < 1 ? '' : String(n), aria: { text: refillTiredLabel(n), at: nowMs } };
+ }
+diff --git a/tests/m41-p1-asleep-signal.test.ts b/tests/m41-p1-asleep-signal.test.ts
+index 4720579..b594c33 100644
+--- a/tests/m41-p1-asleep-signal.test.ts
++++ b/tests/m41-p1-asleep-signal.test.ts
+@@ -140,15 +140,15 @@ describe('S2-5 nav labels + AC-R9 / AC-R8 Refill copy', () => {
+     for (const x of btns) { expect(x).toMatch(/aria-label="[^"]+"/); expect(x).toMatch(/<img /); expect(x).toMatch(/class="nav-lbl[^"]*">[^<]+</); }
+   });
+   it('ready: "Refill" + N badge; aria "Refill N tired workers"', () => {
+-    expect(navManageView(2, 0, false, P, 0)).toEqual({ hideLabel: false, label: 'Refill', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
++    expect(navManageView(2, 0, false, P, 0)).toEqual({ label: 'Refill', countdown: '', badge: '2', aria: { text: 'Refill 2 tired workers', at: 0 } });
+     expect(navManageView(2, 0, true, P, 0).label).toBe('Refill 2 tired workers');
+   });
+-  it('cooldown: "0:28" visual-only (aria-hidden), stable name for the whole cooldown (review 23a3798 #1)', () => {
+-    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('0:28'); expect(a.badge).toBe(''); expect(a.hideLabel).toBe(true);
++  it('cooldown (D-HOP-2026-10-30-02 (b)): visible "Refill" + countdown " 0:28" (CSS data-cd), stable name for the whole cooldown (review 23a3798 #1)', () => {
++    const a = navManageView(1, 27.4, false, P, 1000); expect(a.label).toBe('Refill'); expect(a.countdown).toBe(' 0:28'); expect(a.badge).toBe('');
+     expect(a.aria.text).toBe('Refill, cooling down');
+-    for (const [cd, t] of [[25.1, 3000], [22.9, 6100], [1.2, 27000]]) { const v = navManageView(1, cd, false, a.aria, t); expect(v.aria).toBe(a.aria); expect(v.hideLabel).toBe(true); }
+-    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Ready in 28s'); expect(d.hideLabel).toBe(true); expect(d.aria.text).toBe('Refill, cooling down');
+-    expect(navManageView(2, 0, false, a.aria, 30000)).toMatchObject({ hideLabel: false, aria: { text: 'Refill 2 tired workers' } });
++    for (const [cd, t] of [[25.1, 3000], [22.9, 6100], [1.2, 27000]]) { const v = navManageView(1, cd, false, a.aria, t); expect(v.aria).toBe(a.aria); expect(v.label).toBe('Refill'); }
++    const d = navManageView(1, 27.4, true, P, 1000); expect(d.label).toBe('Refill'); expect(d.countdown).toBe(' · 0:28'); expect(d.aria.text).toBe('Refill, cooling down');
++    expect(navManageView(2, 0, false, a.aria, 30000)).toMatchObject({ countdown: '', aria: { text: 'Refill 2 tired workers' } });
+   });
+   it('AC-R9: "Refill N tired workers", N = workers at <= threshold; hidden at N=0', () => {
+     const h = manageAllHtml(S([T, T + 1, 10]), b); expect(h).toContain('Refill 2 tired workers'); expect(h).toContain('aria-label="Refill 2 tired workers"'); expect(h).not.toMatch(/Manage all|need it|All rested|1 tired workers|Refill tired \(/);
+diff --git a/tests/m41-p2-ui-dom.test.ts b/tests/m41-p2-ui-dom.test.ts
+index 2c47903..64a3782 100644
+--- a/tests/m41-p2-ui-dom.test.ts
++++ b/tests/m41-p2-ui-dom.test.ts
+@@ -97,7 +97,12 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in
+   const domText = (el: Element): string => [...el.childNodes].map(n => n.nodeType === 3 ? n.nodeValue ?? '' : n.nodeType === 1 && !(n as HTMLElement).hidden ? domText(n as Element) : '').join('');
+   const words = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim(); // axe-style: punctuation dropped
+   const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
+-  const startsWithVisible = (el: Element) => { const v = norm(visible(el)), name = el.getAttribute('aria-label') ?? ''; return { v, name, ok: name.startsWith(v) }; };
++  // QA pre-review F3: an empty visible text would make name.startsWith('') vacuously true, so the visible text must be non-empty.
++  const startsWithVisible = (el: Element) => { const v = norm(visible(el)), name = el.getAttribute('aria-label') ?? ''; return { v, name, ok: v.trim().length > 0 && name.startsWith(v) }; };
++  it('AC-R17 F3: the starts-with-visible-text check fails on empty visible text (all aria-hidden)', () => {
++    const el = document.createElement('button'); el.setAttribute('aria-label', 'Refill, cooling down'); el.innerHTML = '<span aria-hidden="true">0:20</span>';
++    document.body.append(el); try { const r = startsWithVisible(el); expect(r.v).toBe(''); expect(r.ok).toBe(false); } finally { el.remove(); }
++  });
+   const scenes: [string, Record<string, unknown>, number][] = [
+     ['MH asleep', { market_hand: { energy: 0, cdS: 5 } }, 1], ['CH asleep', { coop_hand: { energy: 0, cdS: 5 } }, 1],
+     ['MH + CH asleep', { market_hand: { energy: 0, cdS: 5 }, coop_hand: { energy: 0, cdS: 5 } }, 2],
+@@ -169,8 +174,8 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in
+     const { g, ui } = await restedCd(20);
+     const rf = document.querySelector('nav .nav-manage') as HTMLElement;
+     expect(rf.hidden).toBe(false); expect(navOrder()).toEqual(['market', 'upgrades', 'manageAll', 'farm']);
+-    const r = startsWithVisible(rf); // the "0:20" countdown is aria-hidden (review 23a3798 #1), so axe's visible text is the exposed rest
+-    expect(rf.querySelector('.nav-lbl')!.textContent).toBe('0:20'); expect(rf.querySelector('.nav-lbl')!.getAttribute('aria-hidden')).toBe('true');
++    const r = startsWithVisible(rf); // D-HOP-2026-10-30-02 (b): visible "Refill"; the countdown is CSS generated content from data-cd
++    const nl = rf.querySelector('.nav-lbl') as HTMLElement; expect(nl.textContent).toBe('Refill'); expect(nl.dataset.cd).toBe(' 0:20'); expect(nl.hasAttribute('aria-hidden')).toBe(false);
+     expect(r.name).toBe('Refill, cooling down'); expect(r.ok, JSON.stringify(r)).toBe(true); expect(r.name.startsWith('Refill')).toBe(true);
+     expect(rf.getAttribute('aria-disabled')).toBe('true'); expect(rf.classList.contains('is-cooldown')).toBe(true);
+     const before = JSON.stringify({ cd: g.state.manageCdS, w: g.state.workers, c: g.state.coinsCents });
+@@ -178,6 +183,15 @@ describe('P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in
+     expect(JSON.stringify({ cd: g.state.manageCdS, w: g.state.workers, c: g.state.coinsCents })).toBe(before); // refused: no Refill, no spend
+     expect(rf.classList.contains('shake')).toBe(true); // the refused-tap feedback (cantAfford)
+   });
++  it('AC-R17 D-HOP-2026-10-30-02: cooldown Refill accessible name starts with the visible label text', async () => {
++    for (const [cd, want] of [[30, ' 0:30'], [7, ' 0:07'], [0.4, ' 0:01']] as const) {
++      await restedCd(cd); const rf = document.querySelector('nav .nav-manage') as HTMLElement, r = startsWithVisible(rf);
++      expect(r.v).toBe('Refill'); expect(r.name).toBe('Refill, cooling down'); expect(r.ok, JSON.stringify(r)).toBe(true);
++      expect((rf.querySelector('.nav-lbl') as HTMLElement).dataset.cd).toBe(want); expect([...rf.querySelectorAll('[aria-hidden=true]')].filter(x => x.textContent!.trim()).length).toBe(0); // no hidden text (decorative ring only)
++    }
++    const { navManageView } = await import('../src/ui/workers-ui'); // docked header copy: same rule
++    const d = navManageView(0, 20, true, { text: '', at: 0 }, 0); expect(d.label).toBe('Refill'); expect(d.countdown).toBe(' · 0:20'); expect(d.aria.text.startsWith(d.label)).toBe(true);
++  });
+   it('D-HOP-10-addendum: the cooldown ends at count 0 -> nav Refill leaves the nav; Tab order Market → Upgrades → Farm (no gap, no trap), also with focus on Refill', async () => {
+     const { g, ui } = await restedCd(20);
+     const rf = document.querySelector('nav .nav-manage') as HTMLElement; rf.focus(); expect(document.activeElement).toBe(rf);
+diff --git a/tests/m41-p2-ui-minors.test.ts b/tests/m41-p2-ui-minors.test.ts
+index de311f0..79c974e 100644
+--- a/tests/m41-p2-ui-minors.test.ts
++++ b/tests/m41-p2-ui-minors.test.ts
+@@ -151,8 +151,8 @@ describe('P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake;
+     const f = kf('refusedFlash'); expect(f).toBe('0%,100%{box-shadow:inset 0 0 0 2px var(--c-danger)}'); expect(f).not.toMatch(/transform|translate|opacity/);
+   });
+   it('P2b-U / Art-c2: prefers-reduced-motion and the .reduced-motion / .rm classes swap the Refill shake for refusedFlash (300ms, not --t-med = 0)', () => {
+-    expect(css).toContain('@media (prefers-reduced-motion:reduce){.btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}}');
+-    expect(css).toContain('.reduced-motion .btn.manage.shake,.rm .btn.manage.shake{animation:refusedFlash 300ms steps(1,end) 1}');
++    expect(css).toContain('@media (prefers-reduced-motion:reduce){.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}}');
++    expect(css).toContain('.reduced-motion .btn.manage.shake,.rm .btn.manage.shake,.reduced-motion .manage.nav-manage.shake,.rm .manage.nav-manage.shake,\n.reduced-motion .btn.manage-all.shake[aria-disabled=true],.rm .btn.manage-all.shake[aria-disabled=true]{animation:refusedFlash 300ms steps(1,end) 1}');
+   });
+   it('P2b-U / Art-c2: the worker-card Refill is .btn.manage (the selector the swap keys on) and an Unpaid tap still goes through cantAfford (shake)', () => {
+     expect(wui).toMatch(/<button class="btn secondary manage\$\{/);
+@@ -161,11 +161,33 @@ describe('P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake;
+     expect(app).toMatch(/const cantAfford = \(el: HTMLElement\) => \{ retrigger\(el, 'shake'\);/);
+   });
+   it('P2b-U / Art-c2: the full-motion shake beats .btn[aria-disabled=true]{animation:none} on a refused Refill (.btn.manage.shake, before the reduced-motion swap)', () => {
+-    const i = css.indexOf('.btn.manage.shake{animation:shake var(--t-med) linear}'), j = css.indexOf('@media (prefers-reduced-motion:reduce){.btn.manage.shake');
++    const i = css.indexOf('.btn.manage.shake,.manage.nav-manage.shake,.btn.manage-all.shake[aria-disabled=true]{animation:shake var(--t-med) linear}'), j = css.indexOf('@media (prefers-reduced-motion:reduce){.btn.manage.shake');
+     expect(i).toBeGreaterThan(-1); expect(j).toBeGreaterThan(i); expect(css).toContain('.btn[aria-disabled=true]{');
+   });
+ });
+ 
++describe('Art-c2 (all Refill buttons, Art 2026-10-30 08:59; QA F4): refused tap on the nav / header and Workers-bar Refill', () => {
++  const app = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
++  it('Art-c2: the nav / docked-header Refill is .manage.nav-manage (no .btn) and a refused tap goes through cantAfford (shake)', () => {
++    expect(app).toMatch(/<button class="manage nav-manage farm-manage-all desk-manage-all"/);
++    expect(app).toMatch(/for \(const fb of farmMAs\) fb\.addEventListener\('click', e => \{ e\.stopPropagation\(\); if \(!act\(\{ type: 'manageAll' \}\)\) return cantAfford\(fb\);/);
++  });
++  it('Art-c2: the Workers-tab Refill bar is .btn.manage.manage-all; the shake / refusedFlash rule (0,4,0) outranks its [aria-disabled=true]{animation:none} (0,3,0)', () => {
++    expect(wui).toMatch(/<button class="btn manage manage-all\$\{/);
++    expect(css).toContain('.btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}');
++    expect(css).toMatch(/\.btn\.manage-all\.shake\[aria-disabled=true\]\{animation:shake var\(--t-med\) linear\}/);
++  });
++  it('Art-c2: every Refill surface (card, nav/header, Workers bar) has both the full-motion shake and the reduced-motion refusedFlash (media query + .reduced-motion + .rm)', () => {
++    const full = css.split('\n').find(l => l.endsWith('{animation:shake var(--t-med) linear}') && l.includes('.nav-manage'))!;
++    const media = css.split('\n').find(l => l.startsWith('@media (prefers-reduced-motion:reduce){') && l.includes('refusedFlash 300ms'))!;
++    const cls = css.slice(css.indexOf('.reduced-motion .btn.manage.shake'), css.indexOf('{animation:refusedFlash 300ms', css.indexOf('.reduced-motion .btn.manage.shake')));
++    for (const sel of ['.btn.manage.shake', '.manage.nav-manage.shake', '.btn.manage-all.shake[aria-disabled=true]']) {
++      expect(full.split('{')[0].split(',')).toContain(sel); expect(media.split('{')[1].split(',')).toContain(sel);
++      for (const c of ['.reduced-motion ', '.rm ']) expect(cls.split(/,\n?/)).toContain(c + sel);
++    }
++  });
++});
++
+ describe('Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, same place on screen, no CSS-generated count', () => {
+   it('Art-c1: the nav badge sits on the icon\'s top-right -6/-6 (flex static position + margin, out of flow), the Workers tab badge rule unchanged', () => {
+     expect(css).toContain('nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);margin-bottom:calc(28px + 2px + 12px * 1.2 - 6px)}');
+@@ -177,3 +199,18 @@ describe('Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, s
+     expect(rules.length).toBeGreaterThan(2); for (const m of rules) expect(m[2], m[1]).not.toMatch(/(^|;)\s*content\s*:/);
+   });
+ });
++
++describe('AC-R17 D-HOP-2026-10-30-02: cooldown Refill label CSS', () => {
++  it('AC-R17 D-HOP-2026-10-30-02: the countdown is generated content from data-cd, one line, tabular digits (no jump as it ticks)', () => {
++    expect(css).toMatch(/\.nav-lbl\[data-cd\]::after\{content:attr\(data-cd\);white-space:pre;font-variant-numeric:tabular-nums\}/);
++    expect(css).toMatch(/\.actions \.nav-lbl\{[^}]*white-space:nowrap/);
++  });
++  it('AC-R17 D-HOP-2026-10-30-02: docked header pill reserves the widest Fredoka countdown (2.65em >= measured 2.609em), only while a countdown shows', () => {
++    expect(css).toContain('@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-lbl[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}');
++  });
++  it('AC-R17 D-HOP-2026-10-30-02: fmtCooldown is m:ss; every countdown up to manage_cooldown_s has the same glyph count', async () => {
++    const { fmtCooldown } = await import('../src/ui/workers-ui'); const { balance } = await import('../src/config/balance');
++    const max = balance.workers.energy.manage_cooldown_s; expect(fmtCooldown(30)).toBe('0:30'); expect(fmtCooldown(7)).toBe('0:07'); expect(fmtCooldown(75)).toBe('1:15');
++    const lens = new Set(Array.from({ length: Math.ceil(max) }, (_, i) => fmtCooldown(i + 1).length)); expect(lens.size).toBe(1);
++  });
++});

@@ -1,0 +1,1 @@
+min_wait_s=2 MH sells=5520 min customer dwell at MH sell=2.000s {"2.0":500,"2.1":580,"2.2":535,"2.3":585,"2.4":535}

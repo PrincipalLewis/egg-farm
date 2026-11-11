@@ -1,0 +1,168 @@
+{
+ "a1-newer-ls-mobile": {
+  "unchanged": false,
+  "lsKeysBefore": [
+   "eggfarm.save",
+   "eggfarm.lease",
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save.bak",
+   "eggfarm.install_id"
+  ],
+  "lsKeysAfter": [
+   "eggfarm.save",
+   "eggfarm.lease",
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save.bak",
+   "eggfarm.install_id"
+  ],
+  "idbAfter": {
+   "v": 6,
+   "savedAt": 1792155035760,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n5\n$0.00, 5 eggs\n9\n12\n20 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "a1-newer-ls-desktop": {
+  "unchanged": false,
+  "lsKeysBefore": [
+   "eggfarm.save",
+   "eggfarm.lease",
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save.bak",
+   "eggfarm.install_id"
+  ],
+  "lsKeysAfter": [
+   "eggfarm.save",
+   "eggfarm.lease",
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save.bak",
+   "eggfarm.install_id"
+  ],
+  "idbAfter": {
+   "v": 6,
+   "savedAt": 1792155054500,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n5\n$0.00, 5 eggs\n9\n10\n20 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n5/9 eggs\n · $9.00\nSell 5\n5/10 eggs\n · $10.00\nSell 5\n\nSell all (5 eggs · "
+ },
+ "a2-newer-idb-only-mobile": {
+  "unchanged": true,
+  "lsKeysAfter": [
+   "eggfarm.install_id"
+  ],
+  "idbAfter": {
+   "v": 99,
+   "savedAt": 1792155063588,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again"
+ },
+ "a2-newer-idb-only-desktop": {
+  "unchanged": true,
+  "lsKeysAfter": [
+   "eggfarm.install_id"
+  ],
+  "idbAfter": {
+   "v": 99,
+   "savedAt": 1792155082271,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again"
+ },
+ "a3-newer-bak-only-mobile": {
+  "unchanged": true,
+  "lsKeysAfter": [
+   "eggfarm.lease",
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save.bak",
+   "eggfarm.install_id"
+  ],
+  "idbAfter": null,
+  "text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again"
+ },
+ "a3-newer-bak-only-desktop": {
+  "unchanged": true,
+  "lsKeysAfter": [
+   "eggfarm.lease",
+   "eggfarm.telemetry",
+   "eggfarm.ui",
+   "eggfarm.save.bak",
+   "eggfarm.install_id"
+  ],
+  "idbAfter": null,
+  "text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again"
+ },
+ "a4-two-tabs-tab1-mobile": {
+  "mainAfterTab2Boot": {
+   "v": 6,
+   "savedAt": 1792155142234,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfterTab1Saves": {
+   "v": 6,
+   "savedAt": 1792155153909,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792155153909,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "tab2text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again",
+  "tab1text": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n10\n6\n7\n30 / 50\nCollect +5\nMarket\nUpgrades\nFarm\nA customer! Tap them to sell eggs.\n○ ● ○\nS"
+ },
+ "a4-two-tabs-tab1-desktop": {
+  "mainAfterTab2Boot": {
+   "v": 6,
+   "savedAt": 1792155167077,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfterTab1Saves": {
+   "v": 6,
+   "savedAt": 1792155178704,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792155178704,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "tab2text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again",
+  "tab1text": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n9\n11\n30 / 50\nCollect +5\nMarket\n4/9 eggs\n · $9.00\nSell 4\n4/9 eggs\n · $9.00\nSell 4\n4/11 e"
+ }
+}

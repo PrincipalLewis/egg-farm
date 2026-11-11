@@ -1,0 +1,100 @@
+{
+ "eng": "chromium",
+ "url": "file:///tmp/relchk/egg-farm.html",
+ "fresh-noexp-w360": {
+  "exp1": null,
+  "exp2": null,
+  "state": {
+   "c": 0,
+   "F": 0,
+   "C": 0,
+   "H": 0,
+   "V": 0,
+   "t7": 1,
+   "bk": 0
+  },
+  "state2": {
+   "c": 0,
+   "F": 0,
+   "C": 0,
+   "H": 0,
+   "V": 0,
+   "t7": 1,
+   "bk": 0
+  }
+ },
+ "fresh-noexp-w1280": {
+  "exp1": null,
+  "exp2": null,
+  "state": {
+   "c": 0,
+   "F": 0,
+   "C": 0,
+   "H": 0,
+   "V": 0,
+   "t7": 1,
+   "bk": 0
+  },
+  "state2": {
+   "c": 0,
+   "F": 0,
+   "C": 0,
+   "H": 0,
+   "V": 0,
+   "t7": 1,
+   "bk": 0
+  }
+ },
+ "migrate-reload-w360": {
+  "exp1": "Upgrades got an upgrade! Hens and Egg value are now separate. Top them up! Got it",
+  "state1": {
+   "c": 5000000,
+   "F": 8,
+   "C": 6,
+   "H": 8,
+   "V": 5,
+   "t7": 1,
+   "seen": true,
+   "bk": 0
+  },
+  "eAfter8s": null,
+  "exp2": null,
+  "exp3": null,
+  "state3": {
+   "c": 5000000,
+   "F": 8,
+   "C": 6,
+   "H": 8,
+   "V": 5,
+   "t7": 1,
+   "seen": true,
+   "bk": 0
+  }
+ },
+ "migrate-reload-w1280": {
+  "exp1": "Upgrades got an upgrade! Hens and Egg value are now separate. Top them up! Got it",
+  "state1": {
+   "c": 5000000,
+   "F": 8,
+   "C": 6,
+   "H": 8,
+   "V": 5,
+   "t7": 1,
+   "seen": true,
+   "bk": 0
+  },
+  "eAfter8s": null,
+  "exp2": null,
+  "exp3": null,
+  "state3": {
+   "c": 5000000,
+   "F": 8,
+   "C": 6,
+   "H": 8,
+   "V": 5,
+   "t7": 1,
+   "seen": true,
+   "bk": 0
+  }
+ }
+}

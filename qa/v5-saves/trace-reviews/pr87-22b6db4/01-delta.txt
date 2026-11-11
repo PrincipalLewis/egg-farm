@@ -1,0 +1,36 @@
+22b6db41a7424285f10aa003ada774a415d4e9c5
+parents 14894bd32fdb072f5f54369bce677853e6b53962 6bcc194090ea2c24fe7331d97c5ad653d4419dde
+Senior Engineer, Saves & Persistence 2026-10-30 08:40:09 +0100
+Merge origin/rc/v5 (6bcc194, #80 F1c + #88) into feat/saves-v5-streak-sim-2
+Conflicts: src/sim/actions.ts, src/sim/payout.ts, src/sim/tick.ts. payout.ts and tick.ts: took #80 whole (SaleCtx from sim/effects.ts, saleEffectFactors, MH suspended = M5 flag live && no focus); our SaleCtx/streakSaleFactor plumbing dropped. actions.ts: #80's sellTo ctx (player = playerSaleCtx(!suspended); MH {by} or {by, suspended}) and apply(attended), kept our credited 'collect' and the extra_coins line (now with the same ctx). The streak (1 + s) is now ONE SALE_EFFECTS entry in sim/effects.ts. tests/v5-f1c-effects.test.ts: registry fixtures reset before AND after each test (the registry now ships the streak entry).
+
+== diff vs p1 14894bd
+ src/game.ts                         |  12 ++-
+ src/sim/actions.ts                  |  17 ++--
+ src/sim/effects.ts                  |  41 ++++++++
+ src/sim/payout.ts                   |  25 +++--
+ src/sim/tick.ts                     |  11 +-
+ src/sim/tracks.ts                   |   8 +-
+ tests/bot-m5.test.ts                |  15 ++-
+ tests/fixtures/economy-b48be8a4.csv |  32 ++++++
+ tests/v5-f1c-effects.test.ts        | 194 ++++++++++++++++++++++++++++++++++++
+ 9 files changed, 324 insertions(+), 31 deletions(-)
+== diff vs rc/v5 6bcc194
+ src/config/balance.ts          |   4 +-
+ src/config/formulas.ts         |  10 +++
+ src/game.ts                    |   5 +-
+ src/save/m5-fields.ts          |  20 +++---
+ src/sim/actions.ts             |  14 +++-
+ src/sim/effects.ts             |   4 +-
+ src/sim/state.ts               |   3 +
+ src/sim/streak.ts              |  68 ++++++++++++++++++
+ src/sim/timers.ts              |   5 +-
+ tests/v5-f1b-clock-rng.test.ts |   4 +-
+ tests/v5-f1c-effects.test.ts   |   4 +-
+ tests/v5-f2-helpers.ts         |   8 ++-
+ tests/v5-f2-m5-fields.test.ts  |   4 +-
+ tests/v5-streak-sim.test.ts    | 156 +++++++++++++++++++++++++++++++++++++++++
+ 14 files changed, 286 insertions(+), 23 deletions(-)
+== payout/tick vs rc/v5
+payout EQUAL
+tick EQUAL

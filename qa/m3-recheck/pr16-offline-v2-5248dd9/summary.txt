@@ -1,0 +1,20 @@
+02:56 start: worktree /tmp/qa-pr16-5248dd9 @5248dd9 (ancestor fix/rc1-qa-bugs-v4 OK). C-AC27 math: L15 eps 16.0*0.25=4.0/s; 671s->2684, 683s->2732.
+build rc=0
+build:qa rc=0
+unit rc=0 02:55
+03:10 chromium func try1: BUILD MISMATCH (no meta build-id; ID is bundle-only) -> script now reads ID from loaded bundle
+03:22 chromium func try2: popup never showed (IDB mirror overrode seeded LS save). Fixed: seed fresh context via addInitScript. rerun.
+03:32 try3: seeded save failed checksum (sum) -> reset to fresh. Now deleting sum (pre-rc0 path). rerun.
+03:36 chromium func 23/24 (C-AC27 real load shows +2,685 = 671.3s*4; spec number 2,732 wrong). next: chromium layout
+03:42 chromium layout 72/96: close×/wb-head overlap = row-box false positive (title text clear, visual OK); real: no focus on open (BODY), no focus trap. next: firefox+webkit func/layout on main lock
+globals chromium rc=0
+rc0 chromium 200/200 03:37
+firefox func rc=0 03:42 20/24 (firefox func)
+04:15 FF func 20/24: hero mid count-up at 1.4 s (FF slower; aria N correct) = timing, not defect; 59s popup = load-slop artifact (savedAt-59s + >1s load). C-AC27/28 aria N correct.
+firefox layout rc=0 03:54 71/96 (firefox layout)
+webkit func rc=0 03:59 22/24 (webkit func)
+webkit layout rc=0 04:08 72/96 (webkit layout)
+04:22 report filed qa/m3-recheck/pr16-offline-v2-5248dd9.md (pending FF/WK rc0/globals)
+04:26 resume: PR16 rc0 FF waiting on main lock (then globals FF, rc0+globals WK)
+rc0 firefox rc=0 04:38 200/200 passed
+04:50 box reset 04:43; report marked 'handed to Saves QA, partial'. Done: unit, build, globals CR, rc0 CR+FF, func+layout 3 engines. Not run: globals FF/WK, rc0 WK, C-AC36 real hook.

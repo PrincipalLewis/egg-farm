@@ -1,0 +1,718 @@
+{
+ "a4-two-tabs-tab1-mobile": {
+  "mainAfterTab2Boot": {
+   "v": 99,
+   "savedAt": 1792157894563,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfterTab1Saves": {
+   "v": 99,
+   "savedAt": 1792157894563,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792157894563,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "tab2text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again",
+  "tab1text": "Egg Farm\n$0.00\n5\n$0.00, 5 eggs\n9 / 50\nCollect +5\nMarket\nUpgrades\nFarm\nA customer is on the way… 1 s\n○ ● ○\nSkip\nThis save",
+  "lsMainFinal": {
+   "v": 99,
+   "savedAt": 1792157894563,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  }
+ },
+ "a4-two-tabs-tab1-desktop": {
+  "mainAfterTab2Boot": {
+   "v": 99,
+   "savedAt": 1792157919822,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfterTab1Saves": {
+   "v": 99,
+   "savedAt": 1792157919822,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "idb": {
+   "v": 6,
+   "savedAt": 1792157919822,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  },
+  "tab2text": "This save is from a newer version of Egg Farm. Open the newer build to keep playing.\nTry again",
+  "tab1text": "Egg Farm\n$0.00\n5\n$0.00, 5 eggs\n9 / 50\nCollect +5\nMarket\n\nNext customer soon… (1s)\n\nNo eggs to sell\nUpgrades\nCollection\nF",
+  "lsMainFinal": {
+   "v": 99,
+   "savedAt": 1792157919822,
+   "coins": 0,
+   "basket": 5,
+   "pend": 0,
+   "fl": 0
+  }
+ },
+ "b-savedat-missing-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792157949948,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792157944947,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792157955345,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792157958925,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n12\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "b-savedat-string-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792157971708,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792157966708,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792157977150,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792157980776,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n7\n9\n21 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm\nWelcome back!\n\nSomething went wrong with your latest save, so we loaded your most recent backup. Yo",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n7\n9\n8\n26 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "b-savedat-null-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792157993634,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792157988612,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792157999186,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158002933,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n11\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "b-savedat-zero-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158016008,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158011000,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158021553,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158025179,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n10\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n10\n7\n19 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "b-savedat-y2019-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158038096,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158033096,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158043506,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158047120,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n12\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n12\n7\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "b-savedat-negative-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158060136,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158055136,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158065519,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158069103,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n12\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n12\n9\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "b-savedat-future-mobile": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158081874,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158076874,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158087268,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158090868,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n7\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n7\n7\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "b-savedat-missing-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158103642,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158098641,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158109004,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158112619,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n8\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/8 eggs\n · $8.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per ta",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n8\n7\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/8 eggs\n · $8.00\nSell 4\n4/7 eggs"
+ },
+ "b-savedat-string-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158125408,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158120405,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158130836,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158134467,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n7\n21 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/9 eggs\n · $9.00\nSell 4\n4/7 eggs\n · $7.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\n",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n7\n9\n26 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/9 eggs\n · $9.00\nSell 4\n4/7 eg"
+ },
+ "b-savedat-null-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158147388,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158142379,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158152788,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158156402,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n6\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/6 eggs\n · $6.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per ta",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n6\n7\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/6 eggs\n · $6.00\nSell 4\n4/7 eggs"
+ },
+ "b-savedat-zero-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158169238,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158164237,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158174615,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158178253,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/9 eggs\n · $9.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per ta",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n9\n7\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/9 eggs\n · $9.00\nSell 4\n4/7 eggs"
+ },
+ "b-savedat-y2019-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158191082,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158186077,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158196464,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158200047,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n7\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/7 eggs\n · $7.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per ta",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n7\n11\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/7 eggs\n · $7.00\nSell 4\n4/11 eg"
+ },
+ "b-savedat-negative-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158212889,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158207890,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158218282,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158221896,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n10\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/10 eggs\n · $10.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n10\n12\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/10 eggs\n · $10.00\nSell 4\n4/12"
+ },
+ "b-savedat-future-desktop": {
+  "before": {
+   "v": 6,
+   "savedAt": 1792158234680,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "bak": {
+   "v": 6,
+   "savedAt": 1792158229680,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load1": {
+   "v": 6,
+   "savedAt": 1792158240044,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "load2": {
+   "v": 6,
+   "savedAt": 1792158243630,
+   "coins": 0,
+   "basket": 4,
+   "pend": 0,
+   "fl": 0
+  },
+  "text1": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n11\n14 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/11 eggs\n · $11.00\nSell 4\n\nSell all (4 eggs · $4.00)\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per",
+  "text2": "Egg Farm\n$0.00\n4\n$0.00, 4 eggs\n11\n9\n18 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n4/11 eggs\n · $11.00\nSell 4\n4/9 e"
+ },
+ "e1-main-deleted-bak-ignored-mobile": {
+  "bakBefore": {
+   "v": 6,
+   "savedAt": 1792158261550,
+   "coins": 0,
+   "basket": 14,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfterLoad": {
+   "v": 6,
+   "savedAt": 1792158268029,
+   "coins": 0,
+   "basket": 14,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfterLoad": {
+   "v": 6,
+   "savedAt": 1792158267612,
+   "coins": 0,
+   "basket": 14,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfter7s": {
+   "v": 6,
+   "savedAt": 1792158268029,
+   "coins": 0,
+   "basket": 14,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n14\n$0.00, 14 eggs\n8\n10\n7\n20 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm\nWelcome back!\n"
+ },
+ "e1-main-deleted-bak-ignored-desktop": {
+  "bakBefore": {
+   "v": 6,
+   "savedAt": 1792158292829,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "mainAfterLoad": {
+   "v": 6,
+   "savedAt": 1792158299557,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfterLoad": {
+   "v": 6,
+   "savedAt": 1792158299085,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakAfter7s": {
+   "v": 6,
+   "savedAt": 1792158299557,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n15\n$0.00, 15 eggs\n11\n8\n8\n19 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n11/11 eggs\n · $11.00\nSell\n8/"
+ },
+ "e2-reset-leaves-bak-mobile": {
+  "beforeReset": {
+   "v": 6,
+   "savedAt": 1792158329547,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakBeforeReset": {
+   "v": 6,
+   "savedAt": 1792158324547,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "afterReset_main": {
+   "v": 6,
+   "savedAt": 1792158335243,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "afterCorrupt_main": {
+   "v": 6,
+   "savedAt": 1792158338018,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n6 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\nUpgrades\nFarm"
+ },
+ "e2-reset-leaves-bak-desktop": {
+  "beforeReset": {
+   "v": 6,
+   "savedAt": 1792158360968,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "bakBeforeReset": {
+   "v": 6,
+   "savedAt": 1792158355969,
+   "coins": 0,
+   "basket": 15,
+   "pend": 0,
+   "fl": 0
+  },
+  "afterReset_main": {
+   "v": 6,
+   "savedAt": 1792158366780,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "afterCorrupt_main": {
+   "v": 6,
+   "savedAt": 1792158369427,
+   "coins": 0,
+   "basket": 0,
+   "pend": 0,
+   "fl": 0
+  },
+  "text": "Egg Farm\n$0.00\n0\n$0.00, 0 eggs\n6 / 50\nCollection L1: +5/tap\n—\n›\nCollect +5\nMarket\n\nNext customer soon… (6s)\n\nNo eggs to sell\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 → $1.12\nLevel 0 / 30\n$10.00\nNeed $10.00 more"
+ }
+}

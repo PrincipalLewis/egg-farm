@@ -1,0 +1,10 @@
+{
+  "old_base": "30df38c0a0bd5d48db96d0705abccc6db197d161",
+  "old_head": "2ec5b803e65bc6c16299202d581114e3cacdebdf",
+  "base": "844f8e15774daeb1c0a855cb69b1fabd2f0ab820",
+  "head": "c43d2db5dd56f90096a6ba5c509d33ccef69117d",
+  "normalized_patch_equal": true,
+  "old_patch_sha256": "6e8eb25b6b1e79995997f79d83cfd3760f733a5dd5264f911fc00ba4a393fa4d",
+  "new_patch_sha256": "b11e4af6bd83f3a6f73fc4a7ac9c44dc1f79f5e552261c9c96802ebd74196172",
+  "normalization": "Remove index metadata and hunk line-number spans only; retain context and all added/deleted lines."
+}

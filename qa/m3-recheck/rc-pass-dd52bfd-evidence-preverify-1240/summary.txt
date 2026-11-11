@@ -1,0 +1,59 @@
+2026-10-17 12:40:15 CEST === RC pass dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b steps=[pre unit ac7 l30 saves browser] engines=[chromium firefox webkit] DRY=1
+2026-10-17 12:40:15 CEST pushed on: origin/main ; origin/main=dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b; main==RC: YES
+2026-10-17 12:40:15 CEST csv changed vs dd52bfd: 0 ()
+2026-10-17 12:40:30 CEST build (dist, dist-qa, dist-html + check-release-build) exit=0 15s
+2026-10-17 12:40:30 CEST static build-id: dist-html/egg-farm.html:m3-rc1-pre+dd52bfd dist-qa/index.html:m3-rc1-pre+dd52bfd dist/index.html:m3-rc1-pre+dd52bfd  (want m3-rc1-pre+dd52bfd, no +dirty)
+2026-10-17 12:40:30 CEST check-release-build dist-html exit=0
+2026-10-17 12:40:30 CEST tracked changes after build: 0
+2026-10-17 12:40:31 CEST sync-economy --check exit=0
+2026-10-17 12:40:34 CEST tsc exit=0
+2026-10-17 12:42:55 CEST unit exit=0 145s       Tests  851 passed (851)
+2026-10-17 12:45:06 CEST test:slow (vendor pins + AC7 band/worst-seed TS hard asserts) exit=0 131s       Tests  14 passed (14)
+2026-10-17 12:45:07 CEST payout preview==credited unit (M4 on/off cases) exit=0       Tests  11 passed (11)
+2026-10-17 12:46:53 CEST AC7 TS bot (L@30 P95 band, L18-25 step) 100 seeds exit=1 106s RESULT: FAIL
+2026-10-17 12:47:30 CEST Python cross-check (variance sim, 100 seeds) exit=0 37s no-workers t20 P95=1737 s (warn line 1740; HoP-recorded 1737) OK
+2026-10-17 12:47:51 CEST L30+ gate (HoP rule: CSV change) csv=b59c4e0db7e7 lc=ab928dc96d1c exit=0 21s OVERALL: PASS (fail_gates=0) in 21s
+2026-10-17 12:47:55 CEST save/load, migration, offline, hidden, quota unit subset exit=0 4s       Tests  219 passed (219)
+2026-10-17 12:47:56 CEST dist-qa-m4 (M4 on, +dirty by design) exit=0
+2026-10-17 12:47:56 CEST worktree tracked changes after m4 build: 0 (want 0)
+2026-10-17 12:47:56 CEST --- engine chromium
+2026-10-17 12:47:56 CEST DRY skip: node /workspace/egg-farm-studio/qa/m3-recheck/../scratch/m4a-31-delta/buildid-probe.mjs /tmp/qa-rc/dd52bfd chromium 5961
+2026-10-17 12:47:56 CEST runtime build-id chromium exit=0 0s  (want ["m3-rc1-pre+dd52bfd"])
+2026-10-17 12:47:56 CEST DRY skip: env PORT=5962 node scripts/release-globals-browser.mjs chromium
+2026-10-17 12:47:56 CEST runtime globals chromium exit=0 0s 
+2026-10-17 12:47:57 CEST DRY skip: env PORT=5963 SHOTS=/workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/shots-rc0-chromium node scripts/rc0-browser.mjs chromium
+2026-10-17 12:47:57 CEST rc0 chromium exit=0 0s 
+2026-10-17 12:47:57 CEST DRY skip: node /workspace/egg-farm-studio/qa/m3-scripts/rc-html-open.mjs /tmp/qa-rc/dd52bfd chromium /workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/shots-html m3-rc1-pre+dd52bfd
+2026-10-17 12:47:57 CEST dist-html file:// chromium exit=0 0s 
+2026-10-17 12:47:57 CEST --- engine firefox
+2026-10-17 12:47:57 CEST DRY skip: node /workspace/egg-farm-studio/qa/m3-recheck/../scratch/m4a-31-delta/buildid-probe.mjs /tmp/qa-rc/dd52bfd firefox 5961
+2026-10-17 12:47:57 CEST runtime build-id firefox exit=0 0s  (want ["m3-rc1-pre+dd52bfd"])
+2026-10-17 12:47:57 CEST DRY skip: env PORT=5962 node scripts/release-globals-browser.mjs firefox
+2026-10-17 12:47:57 CEST runtime globals firefox exit=0 0s 
+2026-10-17 12:47:57 CEST DRY skip: env PORT=5963 SHOTS=/workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/shots-rc0-firefox node scripts/rc0-browser.mjs firefox
+2026-10-17 12:47:57 CEST rc0 firefox exit=0 0s 
+2026-10-17 12:47:57 CEST DRY skip: node /workspace/egg-farm-studio/qa/m3-scripts/rc-html-open.mjs /tmp/qa-rc/dd52bfd firefox /workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/shots-html m3-rc1-pre+dd52bfd
+2026-10-17 12:47:57 CEST dist-html file:// firefox exit=0 0s 
+2026-10-17 12:47:57 CEST DRY skip: env PORT=5964 DIST=dist-qa EXPECT_BUILD=m3-rc1-pre+dd52bfd OUT=/workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/hidden-firefox-dist-qa node qa-hidden.mjs firefox
+2026-10-17 12:47:57 CEST hidden-tab ACs firefox dist-qa exit=0 0s  (flag-off want 32/32; M4-on: invariants only, 20/32 baseline)
+2026-10-17 12:47:57 CEST DRY skip: env PORT=5964 DIST=dist-qa-m4 EXPECT_BUILD=m3-rc1-pre+dd52bfd+dirty OUT=/workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/hidden-firefox-dist-qa-m4 node qa-hidden.mjs firefox
+2026-10-17 12:47:57 CEST hidden-tab ACs firefox dist-qa-m4 exit=0 0s  (flag-off want 32/32; M4-on: invariants only, 20/32 baseline)
+2026-10-17 12:47:57 CEST --- engine webkit
+2026-10-17 12:47:57 CEST DRY skip: node /workspace/egg-farm-studio/qa/m3-recheck/../scratch/m4a-31-delta/buildid-probe.mjs /tmp/qa-rc/dd52bfd webkit 5961
+2026-10-17 12:47:57 CEST runtime build-id webkit exit=0 0s  (want ["m3-rc1-pre+dd52bfd"])
+2026-10-17 12:47:57 CEST DRY skip: env PORT=5962 node scripts/release-globals-browser.mjs webkit
+2026-10-17 12:47:57 CEST runtime globals webkit exit=0 0s 
+2026-10-17 12:47:57 CEST DRY skip: env PORT=5963 SHOTS=/workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/shots-rc0-webkit node scripts/rc0-browser.mjs webkit
+2026-10-17 12:47:57 CEST rc0 webkit exit=0 0s 
+2026-10-17 12:47:57 CEST DRY skip: node /workspace/egg-farm-studio/qa/m3-scripts/rc-html-open.mjs /tmp/qa-rc/dd52bfd webkit /workspace/egg-farm-studio/qa/m3-recheck/rc-pass-dd52bfd-evidence/shots-html m3-rc1-pre+dd52bfd
+2026-10-17 12:47:57 CEST dist-html file:// webkit exit=0 0s 
+2026-10-17 12:47:57 CEST ALL_DONE 462s  expect: build-id m3-rc1-pre+dd52bfd; globals only eggfarmExportTelemetry; rc0 >=234/234; hidden ff 32/32; AC7 RESULT PASS; t20 <=1740
+2026-10-17 12:48:42 CEST === RC pass dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b steps=[browser] engines=[firefox] DRY=0
+2026-10-17 12:48:42 CEST --- engine firefox
+2026-10-17 12:48:50 CEST runtime build-id firefox exit=0 8s runtime build ids [firefox]: ["m3-rc1-pre+dd52bfd"] (want ["m3-rc1-pre+dd52bfd"])
+2026-10-17 12:49:02 CEST runtime globals firefox exit=0 12s PASS [firefox] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 12:53:39 CEST rc0 firefox exit=0 277s 249/249 passed
+2026-10-17 12:53:46 CEST dist-html file:// firefox exit=0 7s PASS html-open firefox {"ds":"m3-rc1-pre+dd52bfd","meta":"m3-rc1-pre+dd52bfd","txt":279,"perf":false,"eggfarm":false,"expect":"m3-rc1-pre+dd52bfd","errors":[]}
+2026-10-17 12:54:52 CEST hidden-tab ACs firefox dist-qa exit=0 66s 32/32 (flag-off want 32/32; M4-on: invariants only, 20/32 baseline)
+2026-10-17 12:55:58 CEST hidden-tab ACs firefox dist-qa-m4 exit=0 66s 20/32 (flag-off want 32/32; M4-on: invariants only, 20/32 baseline)
+2026-10-17 12:55:58 CEST ALL_DONE 436s  expect: build-id m3-rc1-pre+dd52bfd; globals only eggfarmExportTelemetry; rc0 >=234/234; hidden ff 32/32; AC7 RESULT PASS; t20 <=1740

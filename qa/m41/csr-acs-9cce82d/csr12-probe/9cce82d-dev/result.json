@@ -1,0 +1,236 @@
+{
+ "mode": "dev",
+ "port": "5961",
+ "runs": {
+  "SecurityError-idb-valid-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:123:16)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:151:17)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:58:18) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:60:33) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new Telemetry (http://127.0.0.1:5961/src/telemetry/telemetry.ts:30:22) |     at new Game (http://127.0.0.1:5961/src/game.ts:74:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at installId (http://127.0.0.1:5961/src/telemetry/telemetry.ts:6:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:75:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17) |     at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:78:15) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58"
+    ]
+   },
+   "idbMainAfter": {
+    "len": 447,
+    "farmLevel": 20
+   },
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[debug] [vite] connecting... @ http://127.0.0.1:5961/@vite/client:494",
+    "[debug] [vite] connected. @ http://127.0.0.1:5961/@vite/client:617",
+    "[pageerror] SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+   ]
+  },
+  "SecurityError-no-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:123:16)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:151:17)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:58:18) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:60:33) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new Telemetry (http://127.0.0.1:5961/src/telemetry/telemetry.ts:30:22) |     at new Game (http://127.0.0.1:5961/src/game.ts:74:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at installId (http://127.0.0.1:5961/src/telemetry/telemetry.ts:6:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:75:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17) |     at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:78:15) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "SecurityError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58"
+    ]
+   },
+   "idbMainAfter": null,
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[debug] [vite] connecting... @ http://127.0.0.1:5961/@vite/client:494",
+    "[debug] [vite] connected. @ http://127.0.0.1:5961/@vite/client:617",
+    "[pageerror] SecurityError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+   ]
+  },
+  "InvalidStateError-idb-valid-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:123:16)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:151:17)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:58:18) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:60:33) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new Telemetry (http://127.0.0.1:5961/src/telemetry/telemetry.ts:30:22) |     at new Game (http://127.0.0.1:5961/src/game.ts:74:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at installId (http://127.0.0.1:5961/src/telemetry/telemetry.ts:6:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:75:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17) |     at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:78:15) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58"
+    ]
+   },
+   "idbMainAfter": {
+    "len": 447,
+    "farmLevel": 20
+   },
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[debug] [vite] connecting... @ http://127.0.0.1:5961/@vite/client:494",
+    "[debug] [vite] connected. @ http://127.0.0.1:5961/@vite/client:617",
+    "[pageerror] InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+   ]
+  },
+  "InvalidStateError-no-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B",
+     "set:eggfarm.lease:46B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+    ],
+    "errors": [],
+    "throwStacks": [
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:123:16)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at boot (http://127.0.0.1:5961/src/main.ts:151:17)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:58:18) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.claim (http://127.0.0.1:5961/src/save/tab-lease.ts:60:33) |     at boot (http://127.0.0.1:5961/src/main.ts:159:26)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at new Telemetry (http://127.0.0.1:5961/src/telemetry/telemetry.ts:30:22) |     at new Game (http://127.0.0.1:5961/src/game.ts:74:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at installId (http://127.0.0.1:5961/src/telemetry/telemetry.ts:6:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:75:22) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25) |     at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17) |     at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13) |     at new Game (http://127.0.0.1:5961/src/game.ts:78:15) |     at boot (http://127.0.0.1:5961/src/main.ts:184:13)",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58",
+     "InvalidStateError: qa: localStorage read blocked |     at Storage.getItem (<anonymous>:17:170) |     at readLease (http://127.0.0.1:5961/src/save/tab-lease.ts:5:29) |     at TabLease.write (http://127.0.0.1:5961/src/save/tab-lease.ts:74:15) |     at TabLease.beat (http://127.0.0.1:5961/src/save/tab-lease.ts:91:35) |     at http://127.0.0.1:5961/src/save/tab-lease.ts:64:58"
+    ]
+   },
+   "idbMainAfter": null,
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[debug] [vite] connecting... @ http://127.0.0.1:5961/@vite/client:494",
+    "[debug] [vite] connected. @ http://127.0.0.1:5961/@vite/client:617",
+    "[pageerror] InvalidStateError: qa: localStorage read blocked\n    at Storage.getItem (<anonymous>:17:170)\n    at newerStoredVersion (http://127.0.0.1:5961/src/save/save.ts:126:25)\n    at loadSafeInner (http://127.0.0.1:5961/src/save/save.ts:361:17)\n    at loadSafe (http://127.0.0.1:5961/src/save/save.ts:354:13)\n    at new Game (http://127.0.0.1:5961/src/game.ts:78:15)\n    at boot (http://127.0.0.1:5961/src/main.ts:184:13)"
+   ]
+  }
+ }
+}

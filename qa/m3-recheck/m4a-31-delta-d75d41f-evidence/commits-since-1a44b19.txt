@@ -1,0 +1,9 @@
+d75d41f Merge resolution (take main's pins): m4a-sync Grader T3 cost 20959 -> 20330
+fb8c809 Merge main 8e6d53e into m4/m4a-tracks-v4-frz (M4-A freeze merge-forward of 1a44b19)
+8e6d53e Merge PR #36: AC7 L21 -3% trim (CSV 6dca24cd)
+ca9c9bc staging: economy.f1-m4cols.csv 86f0e80e -> 6dca24cd (AC7 L21 trim)
+38c3651 economy: AC7 L21 trim -3% (HoP-approved), economy.csv 86f0e80e -> 6dca24cd
+acaceee Merge pull request #34 from PrincipalLewis/econ/vendor-variance-f1
+1ec03ad Merge remote-tracking branch 'origin/main' into econ/vendor-variance-f1
+0c642e9 tests: CCR #33 follow-ups (drop dead pre-F1 p1q freshness row, M2_CURRENT comment)
+384fccc vendor: seller variance sim 68a64c59 (M2_F1, M2_CURRENT = M2_F1)

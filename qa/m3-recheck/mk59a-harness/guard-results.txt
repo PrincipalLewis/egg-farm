@@ -1,0 +1,40 @@
+per-level per-seed paired SD and SE (n=400):
+  L3: SD 2.47  SE 0.123
+  L4: SD 7.22  SE 0.361
+  L5: SD 9.07  SE 0.454
+  L6: SD 12.01  SE 0.600
+  L7: SD 12.37  SE 0.619
+  L8: SD 12.73  SE 0.636
+  L9: SD 19.83  SE 0.991
+  L10: SD 20.61  SE 1.030
+  L11: SD 18.91  SE 0.946
+  L12: SD 20.16  SE 1.008
+  L13: SD 15.77  SE 0.788
+  L14: SD 15.14  SE 0.757
+  L15: SD 13.63  SE 0.682
+  L16: SD 10.49  SE 0.524
+  L17: SD 8.17  SE 0.409
+  L18: SD 7.87  SE 0.393
+  L19: SD 6.85  SE 0.343
+  L20: SD 7.24  SE 0.362
+  L21: SD 5.53  SE 0.276
+  L22: SD 6.00  SE 0.300
+  L23: SD 5.92  SE 0.296
+  L24: SD 6.19  SE 0.309
+  L25: SD 6.45  SE 0.323
+
+[a: all true 0] P(guard false-fail)=0.0968 (indep. analytic 0.0980); P(L20 LB>=-2)=0.9995; P(full served gate PASS)=0.9028
+  L10: marginal trip 0.0273, worst-level share of fails 0.27 (analytic 0.0261)
+  L12: marginal trip 0.0236, worst-level share of fails 0.24 (analytic 0.0236)
+  L9: marginal trip 0.0212, worst-level share of fails 0.21 (analytic 0.0218)
+  L11: marginal trip 0.0164, worst-level share of fails 0.16 (analytic 0.0172)
+  L13: marginal trip 0.0066, worst-level share of fails 0.06 (analytic 0.0056)
+  L14: marginal trip 0.0037, worst-level share of fails 0.03 (analytic 0.0041)
+
+[b: Economy t2_lc1 hold5-base] P(guard false-fail)=0.0926 (indep. analytic 0.0930); P(L20 LB>=-2)=0.9851; P(full served gate PASS)=0.8940
+  L10: marginal trip 0.0274, worst-level share of fails 0.28 (analytic 0.0261)
+  L12: marginal trip 0.0237, worst-level share of fails 0.25 (analytic 0.0236)
+  L9: marginal trip 0.0208, worst-level share of fails 0.22 (analytic 0.0218)
+  L11: marginal trip 0.0185, worst-level share of fails 0.18 (analytic 0.0172)
+  L13: marginal trip 0.0052, worst-level share of fails 0.05 (analytic 0.0056)
+  L8: marginal trip 0.0007, worst-level share of fails 0.01 (analytic 0.0008)

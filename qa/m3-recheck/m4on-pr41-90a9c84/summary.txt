@@ -1,0 +1,41 @@
+2026-10-17 13:53:05 CEST rc0 chromium exit=0 243/247 passed FAIL=4
+2026-10-17 13:59:29 CEST rc0 firefox exit=0 243/247 passed FAIL=4
+2026-10-17 14:03:26 CEST rc0 webkit exit=0 243/247 passed FAIL=4
+2026-10-17 14:03:55 CEST gen chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:07:43 CEST loop chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:07:56 CEST hl chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:09:09 CEST p3 chromium exit=0 CONSOLE_ERRORS 0 BAD 6 
+2026-10-17 14:10:24 CEST layout chromium exit=0 CONSOLE_ERRORS 0 BAD 18 
+2026-10-17 14:12:05 CEST shots chromium exit=0 
+2026-10-17 14:16:43 CEST loop firefox exit=0 
+2026-10-17 14:16:51 CEST hl firefox exit=0 
+2026-10-17 14:18:01 CEST p3 firefox exit=0 
+2026-10-17 14:18:08 CEST layout firefox exit=0 
+2026-10-17 14:18:18 CEST shots firefox exit=0 
+--- rerun (playwright resolution fix + .ic grouping) 2026-10-17 14:22:10 CEST
+2026-10-17 14:22:22 CEST loop chromium exit=0 
+--- (aborted 1st rerun after seconds: lock wrapper typo; restarted)
+2026-10-17 14:25:31 CEST hl chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:25:38 CEST loop chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:25:51 CEST hl chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:26:02 CEST p3 chromium exit=0 
+2026-10-17 14:27:07 CEST p3 chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:28:15 CEST layout chromium exit=0 CONSOLE_ERRORS 0 BAD 18 
+2026-10-17 14:28:15 CEST layout chromium exit=0 CONSOLE_ERRORS 0 BAD 18 
+--- clean restart 2026-10-17 14:35:15 CEST (a stray duplicate runner from the aborted rerun was killed; all chromium results above discarded)
+2026-10-17 14:35:30 CEST loop chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:35:38 CEST hl chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:35:57 CEST p3 chromium exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:37:04 CEST layout chromium exit=0 CONSOLE_ERRORS 0 BAD 18 
+2026-10-17 14:38:33 CEST shots chromium exit=0 
+2026-10-17 14:39:45 CEST loop firefox exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:39:54 CEST hl firefox exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:40:17 CEST p3 firefox exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:41:37 CEST layout firefox exit=0 CONSOLE_ERRORS 0 BAD 18 
+2026-10-17 14:43:25 CEST shots firefox exit=0 
+2026-10-17 14:44:15 CEST loop webkit exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 14:44:48 CEST hl webkit exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 15:08:33 CEST p3 webkit exit=0 CONSOLE_ERRORS 0 BAD 0 
+2026-10-17 15:12:45 CEST layout webkit exit=0 CONSOLE_ERRORS 0 BAD 18 
+2026-10-17 15:23:22 CEST shots webkit exit=0 
+ALLDONE

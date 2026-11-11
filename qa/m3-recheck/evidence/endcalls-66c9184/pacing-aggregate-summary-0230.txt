@@ -1,0 +1,20 @@
+2026-11-06T01:07:21.1371098Z ##[group]Run npx vite-node scripts/pacing-x1-stack.ts -- verdict --in x1-out --out x1-out
+2026-11-06T01:07:21.1371797Z [36;1mnpx vite-node scripts/pacing-x1-stack.ts -- verdict --in x1-out --out x1-out[0m
+2026-11-06T01:07:21.1393251Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:07:21.1393525Z ##[endgroup]
+2026-11-06T01:07:22.0150651Z ## pacing-x1-stack: **FAIL**
+2026-11-06T01:07:22.0151109Z 
+2026-11-06T01:07:22.0153922Z - data: `shipped-tree` (shipped data/economy.csv + src/config/balance.json from the tree, full M5.0 stack (pause rows out)); CSV data/economy.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f, src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a (read from the tree, sha256 recorded)
+2026-11-06T01:07:22.0157162Z - run: seeds 1-200, T 4000 s, windows every 300 s (A1/A2), step ratio from L11; commit d7acdbd04636; shard runtimes casual 2534s, optimal 2490s, seller15 1293s
+2026-11-06T01:07:22.0159891Z - **balance.json (QA-D-1030-SHIPFLAGS):** src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a; m4.enabled=1; m4.flags golden=0 streak=0 tapCoins=0 abilities=0 broody=0 salesStopped=0 fatigueCue=0 pause=0 rc2Refill=0 autoRefill=0 clockWage=0 breeds=0 zeroGainUi=0 bestBuyV2=0; flags ON: none; bot-modelled src M5 flags (golden/s
+2026-11-06T01:07:22.0162341Z - table: tests/fixtures/x1/pred-13.2a-7bbb5925.csv sha256 7bbb5925 (§13.2a of record, economy.c0d9492b.md L879-913)
+2026-11-06T01:07:22.0163618Z - rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED (not judged until HoP signs the re-prediction), 3 N/A (row 903, D-CEO-20261030-04), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P pause rows)
+2026-11-06T01:07:22.0164942Z - **FAIL: blocking row 904 optimal NOT-WIRED**
+2026-11-06T01:07:22.0165703Z - **FAIL: blocking row 904 seller15 NOT-WIRED**
+2026-11-06T01:07:22.0166612Z WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+2026-11-06T01:07:22.0167258Z FAIL: blocking row 904 optimal NOT-WIRED
+2026-11-06T01:07:22.0167620Z FAIL: blocking row 904 seller15 NOT-WIRED
+2026-11-06T01:07:22.0167978Z FAIL: blocking row 904 casual NOT-WIRED
+2026-11-06T01:07:22.0348838Z ##[error]Process completed with exit code 1.
+2026-11-06T01:07:22.0499453Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-06T01:07:22.0499907Z with:

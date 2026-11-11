@@ -1,0 +1,180 @@
+[
+ {
+  "n": "1 loads, build id",
+  "p": true,
+  "i": {
+   "build": "m3-rc1-pre+7d52952"
+  }
+ },
+ {
+  "n": "2 core loop collect/sell/buy",
+  "p": true,
+  "i": {
+   "collected": 18,
+   "sold": true,
+   "bought": true,
+   "log": [
+    "sold@14",
+    "bought@17"
+   ],
+   "before": {
+    "v": 6,
+    "savedAt": 1792188824682,
+    "coins": 900,
+    "farm": 0,
+    "coll": 1
+   }
+  }
+ },
+ {
+  "n": "3 save survives reload (+storage inspection)",
+  "p": true,
+  "i": {
+   "before": {
+    "v": 6,
+    "savedAt": 1792188824682,
+    "coins": 900,
+    "farm": 0,
+    "coll": 1
+   },
+   "afterReload": {
+    "v": 6,
+    "savedAt": 1792188827552,
+    "coins": 900,
+    "farm": 0,
+    "coll": 1
+   },
+   "storage": {
+    "origin": "file://",
+    "ls": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "idb": {
+     "available": true,
+     "probe": "open ok",
+     "databases": [
+      {
+       "name": "eggfarm",
+       "version": 1
+      }
+     ]
+    },
+    "idbEvents": []
+   }
+  }
+ },
+ {
+  "n": "6 Settings build label",
+  "p": true,
+  "i": {
+   "label": "Egg Farm m3-rc1-pre+7d52952"
+  }
+ },
+ {
+  "n": "4 close + reopen persistent context keeps progress",
+  "p": true,
+  "i": {
+   "lastSaved": {
+    "v": 6,
+    "savedAt": 1792188832555,
+    "coins": 900,
+    "farm": 0,
+    "coll": 1
+   },
+   "reopened": {
+    "v": 6,
+    "savedAt": 1792188834010,
+    "coins": 900,
+    "farm": 0,
+    "coll": 1
+   },
+   "storage": {
+    "origin": "file://",
+    "ls": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "idb": {
+     "available": true,
+     "probe": "open ok",
+     "databases": [
+      {
+       "name": "eggfarm",
+       "version": 1
+      }
+     ]
+    },
+    "idbEvents": []
+   }
+  }
+ },
+ {
+  "n": "5 a01faea save (v5mid) no loss incl. close+reopen",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 1601984,
+    "farm": 19,
+    "coll": 17
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792188842185,
+    "coins": 2433235,
+    "farm": 19,
+    "coll": 17
+   },
+   "afterReopen": {
+    "v": 6,
+    "savedAt": 1792188846331,
+    "coins": 2433235,
+    "farm": 19,
+    "coll": 17
+   },
+   "recoveryDialog": false
+  }
+ },
+ {
+  "n": "5 a01faea save (fresh) no loss incl. close+reopen",
+  "p": true,
+  "i": {
+   "want": {
+    "coins": 0,
+    "farm": 0,
+    "coll": 0
+   },
+   "afterBoot": {
+    "v": 6,
+    "savedAt": 1792188854727,
+    "coins": 0,
+    "farm": 0,
+    "coll": 0
+   },
+   "afterReopen": {
+    "v": 6,
+    "savedAt": 1792188858956,
+    "coins": 0,
+    "farm": 0,
+    "coll": 0
+   },
+   "recoveryDialog": false
+  }
+ },
+ {
+  "n": "1b no console errors/pageerrors, no external requests (all sessions)",
+  "p": true,
+  "i": {
+   "errs": [],
+   "ext": []
+  }
+ }
+]

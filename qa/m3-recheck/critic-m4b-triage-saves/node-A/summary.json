@@ -1,0 +1,131 @@
+{
+ "fixture": {
+  "file": "A1-dd52bfd-F6-marketHand.json",
+  "mainSha256": "4e9b18c198ac55d931b545bf04f765591686cde444c853f646d114feafef140c",
+  "farmLevel": 6,
+  "coinsCents": 923,
+  "workers": {
+   "market_hand": {
+    "energy": 86.50000000000652,
+    "cdS": 0.6000000000000001
+   }
+  },
+  "keys": [
+   "coinsCents",
+   "coop",
+   "basket",
+   "collectionLevel",
+   "farmLevel",
+   "customers",
+   "nextCustomerInS",
+   "nextCustomerId",
+   "rng",
+   "pendingOfflineEggs",
+   "celebratedTier",
+   "workers",
+   "graderTier",
+   "manageCdS",
+   "coopFullS",
+   "wageFracCents"
+  ]
+ },
+ "c_dd52bfd_idle": {
+  "label": "C-dd52bfd-same-save",
+  "secs": 180,
+  "farmLevel": 6,
+  "mh": true,
+  "startCents": 923,
+  "endCents": 473,
+  "deltaCents": -450,
+  "wageCentsTotal": 450,
+  "saleCentsTotal": 0,
+  "unexplainedCents": 0,
+  "basketEmptyAtSec": 1,
+  "centsPerSecAfterBasketEmpty": -2.4972067039106145,
+  "expectedWageCentsPerSec": 2.5
+ },
+ "migration": {
+  "outcome": "committed",
+  "tracksV7": 1,
+  "v6BackupId": "d2f5a606112fa88e",
+  "hasBackup": true,
+  "refund": 0,
+  "before": {
+   "coins": 923,
+   "workers": {
+    "market_hand": {
+     "energy": 86.50000000000652,
+     "cdS": 0.6000000000000001
+    }
+   },
+   "wageFracCents": {
+    "market_hand": 0.5833333333333313
+   }
+  },
+  "after": {
+   "coins": 923,
+   "workers": {
+    "market_hand": {
+     "energy": 86.50000000000652,
+     "cdS": 0.6000000000000001
+    }
+   },
+   "wageFracCents": {
+    "market_hand": 0.5833333333333313
+   },
+   "hens": 6,
+   "eggValue": 5
+  },
+  "mainSha256": "e20d3a8d386ecea98043dc3c83d291b0703ad64f4e8979fd146c5117e9c190eb"
+ },
+ "A_migrated_idle": {
+  "label": "A-migrated-m4b",
+  "secs": 180,
+  "farmLevel": 6,
+  "mh": true,
+  "startCents": 923,
+  "endCents": 473,
+  "deltaCents": -450,
+  "wageCentsTotal": 450,
+  "saleCentsTotal": 0,
+  "unexplainedCents": 0,
+  "basketEmptyAtSec": 1,
+  "centsPerSecAfterBasketEmpty": -2.4972067039106145,
+  "expectedWageCentsPerSec": 2.5
+ },
+ "b_migrated_noMH_idle": {
+  "label": "B-migrated-m4b-noMarketHand",
+  "secs": 180,
+  "farmLevel": 6,
+  "mh": false,
+  "startCents": 923,
+  "endCents": 923,
+  "deltaCents": 0,
+  "wageCentsTotal": 0,
+  "saleCentsTotal": 0,
+  "unexplainedCents": 0,
+  "basketEmptyAtSec": 1,
+  "centsPerSecAfterBasketEmpty": 0,
+  "expectedWageCentsPerSec": 0
+ },
+ "a_fresh": {
+  "frames": 3797,
+  "tracksV7": 1,
+  "hasBackup": false
+ },
+ "a_fresh_idle": {
+  "label": "A0-fresh-m4b",
+  "secs": 180,
+  "farmLevel": 6,
+  "mh": true,
+  "startCents": 1599,
+  "endCents": 171608,
+  "deltaCents": 170009,
+  "wageCentsTotal": 450,
+  "saleCentsTotal": 170459,
+  "unexplainedCents": 0,
+  "basketEmptyAtSec": 82,
+  "centsPerSecAfterBasketEmpty": -2.5,
+  "expectedWageCentsPerSec": 2.5
+ }
+}

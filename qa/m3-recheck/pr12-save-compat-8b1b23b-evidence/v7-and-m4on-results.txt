@@ -1,0 +1,37 @@
+{
+ "onTracks": {
+  "tracksV7": 1,
+  "v6BackupId": "qa-mig-1",
+  "hensLevel": 19,
+  "eggValueLevel": 13,
+  "celebratedMilestones": [
+   "hens:10",
+   "grade:5",
+   "grade:10",
+   "balanced:1",
+   "balanced:2"
+  ]
+ },
+ "offTracks": {
+  "tracksV7": 1,
+  "v6BackupId": "qa-mig-1",
+  "hensLevel": 19,
+  "eggValueLevel": 13,
+  "celebratedMilestones": [
+   "hens:10",
+   "grade:5",
+   "grade:10",
+   "balanced:1",
+   "balanced:2"
+  ]
+ },
+ "trackFieldsEqual": true,
+ "stateBytesEqual": true,
+ "offHdr": "{\"version\":6,\"savedAt\":1790000001000,\"saveSeq\":2",
+ "onHdr": "{\"version\":6,\"savedAt\":1790000000000,\"saveSeq\":1",
+ "secondRoundStateEqual": true,
+ "on_seq7old_vs_seq3new": "ls",
+ "on_rankCompare_seq": 1,
+ "on_equalSeq_savedAt": "idb",
+ "on_seqIncrements": 2
+}

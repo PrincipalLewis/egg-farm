@@ -1,0 +1,42 @@
+Egg Farm
+$0.00
+11
+$0.00, 11 eggs
+11
+12
+9 / 50
+Collection L2: +5/tap
+~1 min 36 s
+›
+Next goal: Collection L2, +5/tap. Ready in about 1 minute 36 seconds.
+Collect +10 · 9 ready
+Market
+11/11 eggs
+ · $12.32
+Sell
+11/12 eggs
+ · $13.44
+Sell 11
+
+Sell all (11 eggs · $12.32)
+Upgrades
+Collection
+Farm
+Workers
+L1
+Collect per tap
+Eggs per tap 10 → 15
+Egg price $1.12 → $1.24
+Level 1 / 30
+$16.00
+Need $16.00 more
+Settings
+Sound effects
+Reduced motion
+Export log
+
+Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors. SIL Open Font License 1.1.
+
+Reset save
+Egg Farm m3-rc1-pre+a01faea
+Your next goal is always shown here.

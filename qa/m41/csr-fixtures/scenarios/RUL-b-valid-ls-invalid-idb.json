@@ -1,0 +1,29 @@
+{
+ "id": "RUL-b-valid-ls-invalid-idb",
+ "now": 1792378840000,
+ "csr": [
+  "D-HOP-2026-10-22-01(b)"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-invalid-truncated.raw"
+   }
+  ]
+ },
+ "expect": {
+  "recovery": false,
+  "noSaveCorrupt": true,
+  "noNotice": true,
+  "farmLevel": 20,
+  "idbCorruptExact": 1,
+  "idbCorruptByteEqual": true
+ }
+}

@@ -1,0 +1,21 @@
+tsc exit=0
+unit exit=0       Tests  475 passed | 2 skipped (477)
+build(+check-release-build) exit=0
+build:qa exit=0
+dist/assets/index-BzdSZKK9.js:m3-rc1-pre+a56b3a2
+2026-10-17 10:06:04 CEST guard chromium release=0 qa=0 BUILD OK a56b3a2 chromium
+2026-10-17 10:11:20 CEST globals chromium exit=0 PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 10:13:55 CEST rc0 chromium exit=0 213/213 passed toastfirst=14pass/14
+2026-10-17 10:14:14 CEST midfade chromium exit=0 DONE midfade chromium fails=4
+2026-10-17 10:14:14 CEST CHECKPOINT chromium done
+2026-10-17 10:25:41 CEST guard firefox release=0 qa=0 BUILD OK a56b3a2 firefox
+2026-10-17 10:29:07 CEST globals firefox exit=0 PASS [firefox] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 10:32:47 CEST rc0 firefox exit=0 213/213 passed toastfirst=14pass/14
+2026-10-17 10:34:24 CEST midfade firefox exit=0 DONE midfade firefox fails=4
+2026-10-17 10:34:24 CEST CHECKPOINT firefox done
+2026-10-17 10:39:29 CEST guard webkit release=0 qa=0 BUILD OK a56b3a2 webkit
+2026-10-17 10:39:55 CEST globals webkit exit=0 PASS [webkit] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 10:42:46 CEST rc0 webkit exit=0 213/213 passed toastfirst=14pass/14
+2026-10-17 10:43:06 CEST midfade webkit exit=0 DONE midfade webkit fails=4
+2026-10-17 10:43:06 CEST CHECKPOINT webkit done
+CHAIN-DONE

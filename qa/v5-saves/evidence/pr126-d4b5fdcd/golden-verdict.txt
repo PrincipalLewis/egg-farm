@@ -1,0 +1,5 @@
+GOLDEN1 flag-off f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544 (from engineering/golden flag-off suite in full vitest)
+GOLDEN1 m4on a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+m4a-flag-off 2/2 PASS; zg-flagoff-dom 1/1 PASS (focused golden run EXIT=0)
+flags.ts + balance.json identical to baf410ff
+VERDICT_GOLDENS=PASS

@@ -1,0 +1,52 @@
+ls-remote 2026-11-10T01:36:45+01:00
+refs/pull/127/head 04add420ffcf001139938ec0ebeac5297fd6ee17
+refs/pull/126/head d4b5fdcd7e45a5c3b5d0062cf2a3a982bf9e74a9
+refs/pull/125/head a8a1ae8a224d69c6b9099f25351ecd6ed1d4361b
+refs/heads/rc/v5 d65391b0868cc993aa39e5bde49d279967c3b8af
+04add420ffcf001139938ec0ebeac5297fd6ee17 db83f12c860fc06848e4445f966a6f2ba120158c 332824f6473d4e9c2a58846a6ee0f3c1f006634b Senior Engineer, Generalist (Sim/TS + UI) test(breeds): type the telemetry test filter helper (tsc)
+db83f12c860fc06848e4445f966a6f2ba120158c baf410fff30cb6a66e8565693f84ade2250719c2 1841cb140ed5d205f4609d0940e225f5f1a93cb6 Senior Engineer, Generalist (Sim/TS + UI) feat(breeds): §8 telemetry emitters hatch_started / breed_revealed / breed_slotted / flock_complete + session_end breed_* (drift row 34)
+baf410fff30cb6a66e8565693f84ade2250719c2 3354fc7d6316d14af517ec046846ca104028ea96 66f69ef648a0c8ace81a93205c11cb29844ba279 Senior Engineer, Saves & Persistence fix(breeds): D1 full save_migrated shape (events.ts + schema-validated)
+ancestor baf410ff YES
+ancestor d4b5fdcd NO
+ancestor a8a1ae8a NO
+ancestor d65391b0 NO
+ancestor f20b9183 YES
+ancestor 0bbcea52 YES
+ src/game.ts                       |  12 +-
+ src/save/m5-fields.ts             |   2 +-
+ src/sim/actions.ts                |   4 +-
+ src/sim/breeds-hatch.ts           |  26 ++++-
+ src/sim/breeds.ts                 | 103 +++++++++++++++--
+ src/sim/events.ts                 |  11 +-
+ src/sim/offline.ts                |   5 +-
+ src/sim/state.ts                  |   3 +
+ src/sim/timers.ts                 |   2 +-
+ src/telemetry/breeds-session.ts   |  31 ++++++
+ src/telemetry/telemetry.ts        |   3 +-
+ tests/v5-breeds-telemetry.test.ts | 228 ++++++++++++++++++++++++++++++++++++++
+ 12 files changed, 402 insertions(+), 28 deletions(-)
+M	src/game.ts
+M	src/save/m5-fields.ts
+M	src/sim/actions.ts
+M	src/sim/breeds-hatch.ts
+M	src/sim/breeds.ts
+M	src/sim/events.ts
+M	src/sim/offline.ts
+M	src/sim/state.ts
+M	src/sim/timers.ts
+A	src/telemetry/breeds-session.ts
+M	src/telemetry/telemetry.ts
+A	tests/v5-breeds-telemetry.test.ts
+numstat:
+10	2	src/game.ts
+1	1	src/save/m5-fields.ts
+2	2	src/sim/actions.ts
+20	6	src/sim/breeds-hatch.ts
+91	12	src/sim/breeds.ts
+10	1	src/sim/events.ts
+3	2	src/sim/offline.ts
+3	0	src/sim/state.ts
+1	1	src/sim/timers.ts
+31	0	src/telemetry/breeds-session.ts
+2	1	src/telemetry/telemetry.ts
+228	0	tests/v5-breeds-telemetry.test.ts

@@ -1,0 +1,30 @@
+﻿2026-11-06T01:39:36.3071429Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-06T01:39:36.3072850Z with:
+2026-11-06T01:39:36.3073644Z   node-version: 20
+2026-11-06T01:39:36.3074481Z   cache: npm
+2026-11-06T01:39:36.3075263Z   always-auth: false
+2026-11-06T01:39:36.3076119Z   check-latest: false
+2026-11-06T01:39:36.3084281Z   token: ***
+2026-11-06T01:39:36.3085070Z ##[endgroup]
+2026-11-06T01:39:36.4395731Z Attempting to download 20...
+2026-11-06T01:39:36.4623017Z (node:2127) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-06T01:39:36.4624963Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-06T01:39:37.2375280Z Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+2026-11-06T01:39:38.1114212Z Extracting ...
+2026-11-06T01:39:38.1222873Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/11a2b385-f639-41a6-95b9-9ab716289667 -f /home/runner/work/_temp/7564cbca-76b8-4848-8da3-9f0a74910386
+2026-11-06T01:39:38.9976525Z Adding to the cache ...
+2026-11-06T01:39:40.7074987Z ##[group]Environment details
+2026-11-06T01:39:40.9073704Z node: v20.20.2
+2026-11-06T01:39:40.9074019Z npm: 10.8.2
+2026-11-06T01:39:40.9074228Z yarn: 1.22.22
+2026-11-06T01:39:40.9074672Z ##[endgroup]
+2026-11-06T01:39:40.9089332Z [command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache
+2026-11-06T01:39:40.9987053Z /home/runner/.npm
+2026-11-06T01:39:41.2335387Z Cache hit for: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898
+2026-11-06T01:39:41.2426580Z (node:2127) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-06T01:39:42.5293835Z Received 5913334 of 22690550 (26.1%), 5.6 MBs/sec
+2026-11-06T01:39:42.7433066Z Received 22690550 of 22690550 (100.0%), 17.8 MBs/sec
+2026-11-06T01:39:42.7433656Z Cache Size: ~22 MB (22690550 B)
+2026-11-06T01:39:42.7532240Z [command]/usr/bin/tar -xf /home/runner/work/_temp/f83015f2-3b35-4c36-b86b-29be9ff2eba0/cache.tzst -P -C /home/runner/work/egg-farm/egg-farm --use-compress-program unzstd
+2026-11-06T01:39:42.8071703Z Cache restored successfully
+2026-11-06T01:39:42.8089081Z Cache restored from key: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898

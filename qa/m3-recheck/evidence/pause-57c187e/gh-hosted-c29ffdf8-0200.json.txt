@@ -1,0 +1,66 @@
+{
+  "checked_at_cet": "2026-11-06 02:03 CET",
+  "method": "cursor-github MCP one-shot (no poll) \u2014 HoQA/hosted-followup-0200",
+  "head_sha": "c29ffdf8f10cb608686b200d17b001d79caaeda8",
+  "ci": {
+    "run_id": 42139212054,
+    "name": "ci",
+    "run_number": 905,
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/PrincipalLewis/egg-farm/actions/runs/42139212054",
+    "head_sha": "c29ffdf8f10cb608686b200d17b001d79caaeda8",
+    "completed_at_utc": "2026-11-06T00:57:43Z",
+    "completed_at_cet": "2026-11-06 01:57:43 CET",
+    "gate_job": {
+      "id": 127634959044,
+      "name": "gate",
+      "conclusion": "success",
+      "chromium_globals_step": {
+        "name": "Release globals allowlist (chromium)",
+        "conclusion": "success",
+        "started_at": "2026-11-06T00:57:05Z",
+        "completed_at": "2026-11-06T00:57:32Z"
+      }
+    },
+    "release_globals_job": {
+      "id": 127639467756,
+      "name": "release-globals",
+      "conclusion": "skipped",
+      "note": "skipped-by-design on non-rc/*; \u2260 pass, not a block"
+    }
+  },
+  "pacing": {
+    "run_id": 42139212027,
+    "name": "pacing-x1-stack",
+    "run_number": 78,
+    "status": "in_progress",
+    "conclusion": null,
+    "html_url": "https://github.com/PrincipalLewis/egg-farm/actions/runs/42139212027",
+    "shards": [
+      {
+        "id": 127635340347,
+        "name": "casual",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 127635340667,
+        "name": "seller15",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 127635340815,
+        "name": "optimal",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ],
+    "aggregate": "not yet scheduled"
+  },
+  "k10_breeds_offset": {
+    "run_id": 42139212023,
+    "note": "not required / not assessed"
+  }
+}

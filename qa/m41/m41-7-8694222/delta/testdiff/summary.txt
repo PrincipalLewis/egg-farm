@@ -1,0 +1,8 @@
+2026-10-23 01:59:39 CEST === testdiff 86942226ed792598efa2dbc5b473dc7bc93073ab vs dfdf49c (dfdf49cd904398c7e302eec16161f8fb63b10a8d)
+2026-10-23 01:59:39 CEST blob dfdf49c:tests/m4-exp1-explainer.test.ts 15b43290a5d2245381e6e535c06dc69a8f9b6c1d  8694222:tests/m4-exp1-explainer.test.ts 15b43290a5d2245381e6e535c06dc69a8f9b6c1d
+2026-10-23 01:59:39 CEST PASS -07 m4-exp1 byte-identical to dfdf49c (git diff empty)
+2026-10-23 01:59:39 CEST REVIEW tests/m41-6* vs dfdf49c: (empty = unchanged) | vs b986cd3: tests/m41-6-explainer-storage.test.ts +6 -12; tests/m41-6-save-mirror-canpersist.test.ts +3 -6; 
+2026-10-23 01:59:39 CEST REVIEW tests/m41-7-hop-rulings.test.ts vs dfdf49c: tests/m41-7-hop-rulings.test.ts +1 -1; (empty = unchanged) | vs b986cd3: 
+2026-10-23 01:59:39 CEST REVIEW scripts/rc0-browser.mjs vs dfdf49c: (empty = unchanged) | vs b986cd3: scripts/rc0-browser.mjs +3 -7; 
+2026-10-23 01:59:39 CEST all tests/ + scripts/ files changed vs dfdf49c: tests/fake-idb.ts tests/m41-7-csr8b-race.test.ts tests/m41-7-explainer-recovery.test.ts tests/m41-7-hop-rulings.test.ts 
+2026-10-23 01:59:39 CEST TESTDIFF m4-exp1 IDENTICAL

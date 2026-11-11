@@ -1,0 +1,101 @@
+{
+ "chromium": {
+  "install_id": "a07e2728-e0d0-4456-a224-b7fdfcdb5a79",
+  "session_start": [
+   {
+    "install_id": "a07e2728-e0d0-4456-a224-b7fdfcdb5a79",
+    "build": "m3-rc1-pre+aa66bdb"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-a07e2728-2026-10-16.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "a07e2728-e0d0-4456-a224-b7fdfcdb5a79",
+   "tel": "[{\"install_id\":\"a07e2728-e0d0-4456-a224-b7fdfcdb5a79\",\"build\":\"m3-rc1-pre+aa66bdb\",\"type\":\"session_start\",\"ts\":1792150031916,\"sessionMs\":0},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792150031924,\"sessionMs\":8},{\"type\":\"save_reset\",\"ts\":1792150033141,\"sessionMs\":1225}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "a07e2728-e0d0-4456-a224-b7fdfcdb5a79",
+  "idStable": true,
+  "errors": []
+ },
+ "firefox": {
+  "install_id": "9fd3b44e-876a-4580-a16c-ba1ff8f73f9e",
+  "session_start": [
+   {
+    "install_id": "9fd3b44e-876a-4580-a16c-ba1ff8f73f9e",
+    "build": "m3-rc1-pre+aa66bdb"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-9fd3b44e-2026-10-16.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "9fd3b44e-876a-4580-a16c-ba1ff8f73f9e",
+   "tel": "[{\"install_id\":\"9fd3b44e-876a-4580-a16c-ba1ff8f73f9e\",\"build\":\"m3-rc1-pre+aa66bdb\",\"type\":\"session_start\",\"ts\":1792150039397,\"sessionMs\":0},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792150039399,\"sessionMs\":2},{\"type\":\"save_reset\",\"ts\":1792150040699,\"sessionMs\":1302}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "9fd3b44e-876a-4580-a16c-ba1ff8f73f9e",
+  "idStable": true,
+  "errors": []
+ },
+ "webkit": {
+  "install_id": "8dbed483-d63c-4b44-8561-82275f1f129a",
+  "session_start": [
+   {
+    "install_id": "8dbed483-d63c-4b44-8561-82275f1f129a",
+    "build": "m3-rc1-pre+aa66bdb"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-8dbed483-2026-10-16.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "8dbed483-d63c-4b44-8561-82275f1f129a",
+   "tel": "[{\"install_id\":\"8dbed483-d63c-4b44-8561-82275f1f129a\",\"build\":\"m3-rc1-pre+aa66bdb\",\"type\":\"session_start\",\"ts\":1792150044678,\"sessionMs\":2},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792150044683,\"sessionMs\":7},{\"type\":\"save_reset\",\"ts\":1792150045992,\"sessionMs\":1316}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "8dbed483-d63c-4b44-8561-82275f1f129a",
+  "idStable": true,
+  "errors": []
+ },
+ "ios-webkit": {
+  "install_id": "89daf2f4-faeb-4743-a1af-79606479e9d1",
+  "session_start": [
+   {
+    "install_id": "89daf2f4-faeb-4743-a1af-79606479e9d1",
+    "build": "m3-rc1-pre+aa66bdb"
+   }
+  ],
+  "export": {
+   "via": "clipboard",
+   "ok": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "share": {
+   "file": "eggfarm-log-89daf2f4-2026-10-16.json",
+   "msg": "Log shared."
+  },
+  "shareCancel": {
+   "clip": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "afterReset": {
+   "id": "89daf2f4-faeb-4743-a1af-79606479e9d1",
+   "tel": "[{\"install_id\":\"89daf2f4-faeb-4743-a1af-79606479e9d1\",\"build\":\"m3-rc1-pre+aa66bdb\",\"type\":\"session_start\",\"ts\":1792150049714,\"sessionMs\":1},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792150049720,\"sessionMs\":7},{\"type\":\"save_reset\",\"ts\":1792150052962,\"sessionMs\":3249}]",
+   "ui": "{\"sfx\":true,\"reducedMotion\":false,\"sessions\":1}"
+  },
+  "afterCorrupt": "89daf2f4-faeb-4743-a1af-79606479e9d1",
+  "idStable": true,
+  "errors": []
+ }
+}

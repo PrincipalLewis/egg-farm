@@ -1,0 +1,195 @@
+[
+ {
+  "n": "save v4->v6 m1-rc2-v4-12min.json: money, levels, workers kept; wageFracCents {}",
+  "pass": true,
+  "i": {
+   "from": {
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11,
+    "workers": "{}"
+   },
+   "to": {
+    "coins": 141585,
+    "farm": 10,
+    "coll": 11,
+    "workers": "{}"
+   },
+   "version": 6,
+   "frac": {}
+  }
+ },
+ {
+  "n": "save v5->v6 m2-rc1-v5-12min.json: money, levels, workers kept; wageFracCents {}",
+  "pass": true,
+  "i": {
+   "from": {
+    "coins": 15061,
+    "farm": 10,
+    "coll": 11,
+    "workers": "{\"market_hand\":{\"e\":87,\"u\":false},\"coop_hand\":{\"e\":87,\"u\":false},\"hawker\":{\"e\":87,\"u\":false}}"
+   },
+   "to": {
+    "coins": 15061,
+    "farm": 10,
+    "coll": 11,
+    "workers": "{\"market_hand\":{\"e\":87,\"u\":false},\"coop_hand\":{\"e\":87,\"u\":false},\"hawker\":{\"e\":87,\"u\":false}}"
+   },
+   "version": 6,
+   "frac": {}
+  }
+ },
+ {
+  "n": "save v5->v6 m2-rc1-v5-40min.json: money, levels, workers kept; wageFracCents {}",
+  "pass": true,
+  "i": {
+   "from": {
+    "coins": 1291591,
+    "farm": 19,
+    "coll": 17,
+    "workers": "{\"market_hand\":{\"e\":100,\"u\":false},\"coop_hand\":{\"e\":100,\"u\":false},\"hawker\":{\"e\":100,\"u\":false},\"grader\":{\"e\":100,\"u\":false}}"
+   },
+   "to": {
+    "coins": 1291591,
+    "farm": 19,
+    "coll": 17,
+    "workers": "{\"market_hand\":{\"e\":100,\"u\":false},\"coop_hand\":{\"e\":100,\"u\":false},\"hawker\":{\"e\":100,\"u\":false},\"grader\":{\"e\":100,\"u\":false}}"
+   },
+   "version": 6,
+   "frac": {}
+  }
+ },
+ {
+  "n": "save v5->v6 m2-rc1-v5-40min-edge.json: money, levels, workers kept; wageFracCents {}",
+  "pass": false,
+  "i": {
+   "from": {
+    "coins": 1291591,
+    "farm": 19,
+    "coll": 17,
+    "workers": "{\"market_hand\":{\"e\":100,\"u\":false},\"coop_hand\":{\"e\":55,\"u\":true},\"hawker\":{\"e\":0,\"u\":false},\"grader\":{\"e\":25,\"u\":false}}"
+   },
+   "to": {
+    "coins": 1293332,
+    "farm": 19,
+    "coll": 17,
+    "workers": "{\"market_hand\":{\"e\":100,\"u\":false},\"coop_hand\":{\"e\":55,\"u\":false},\"hawker\":{\"e\":0,\"u\":false},\"grader\":{\"e\":25,\"u\":false}}"
+   },
+   "version": 6,
+   "frac": {
+    "coop_hand": 0.6666666666666643,
+    "market_hand": 0.9166666666666661
+   }
+  }
+ },
+ {
+  "n": "wageFracCents survives save/reload",
+  "pass": true,
+  "i": {
+   "f0": {
+    "frac": {
+     "market_hand": 0.75
+    },
+    "coins": 99997
+   },
+   "f1": {
+    "frac": {
+     "market_hand": 0
+    },
+    "coins": 99995
+   }
+  }
+ },
+ {
+  "n": "wageFracCents survives a kill (last autosave reloads with its frac)",
+  "pass": true,
+  "i": {
+   "snapFrac": {
+    "market_hand": 0.5
+   },
+   "onDiskAfterKill": {
+    "market_hand": 0.5
+   },
+   "loaded": {
+    "market_hand": 0.5
+   }
+  }
+ },
+ {
+  "n": "$0 gate with carried frac: money >= 0 integer, unpaid never charged, frac frozen while unpaid, resumes",
+  "pass": true,
+  "i": {
+   "min": 1,
+   "nonInt": 0,
+   "chargedWhileUnpaid": 0,
+   "fracWhileUnpaid": [
+    0.9
+   ],
+   "unpaidAtEnd": true,
+   "resumed": true,
+   "coinsAfterResume": 997,
+   "log": [
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ],
+    [
+     1,
+     0.9,
+     true
+    ]
+   ]
+  }
+ }
+]

@@ -1,0 +1,39 @@
+{
+ "id": "CSR12-idb-absent-skipped",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-12"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F14-T-1d.json"
+  }
+ },
+ "idb": {
+  "status": "absent",
+  "reason": "no_global",
+  "records": []
+ },
+ "expect": {
+  "recovered_from": "v6_backup",
+  "notice": "M2",
+  "tried": [
+   [
+    "bak",
+    "absent"
+   ],
+   [
+    "idb",
+    "absent",
+    "no_global"
+   ],
+   [
+    "v6_backup",
+    "valid"
+   ]
+  ]
+ }
+}

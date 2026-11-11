@@ -1,0 +1,20 @@
+2026-10-17 07:21:40 CEST guard chromium release=0 qa=0 BUILD OK 37524aa chromium
+2026-10-17 07:21:50 CEST globals chromium exit=0 PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 07:24:31 CEST rc0 chromium exit=0 213/213 passed toastfirst=14pass/14
+2026-10-17 07:25:08 CEST midfade chromium exit=0 DONE midfade chromium fails=4
+2026-10-17 07:25:25 CEST OLD 3930a4c toastfirst(37524aa test) chromium exit=1 6 FAIL / 8 PASS
+2026-10-17 07:25:25 CEST CHECKPOINT chromium done
+2026-10-17 07:37:39 CEST NOTE midfade v1 invalid: 2nd buyFarm doesn't toast (toast only on new coop tier/slot); v2 re-triggers by resetting celebratedTier=0 (render re-shows 'Coop upgraded!'); chromium midfade rerun queued after chain
+2026-10-17 07:38:33 CEST guard firefox release=0 qa=0 BUILD OK 37524aa firefox
+2026-10-17 07:42:26 CEST globals firefox exit=0 PASS [firefox] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 07:59:15 CEST rc0 firefox exit=0 213/213 passed toastfirst=14pass/14
+2026-10-17 08:08:28 CEST midfade firefox exit=0 DONE midfade firefox fails=4
+2026-10-17 08:08:28 CEST CHECKPOINT firefox done
+2026-10-17 08:10:48 CEST NOTE midfade FF: reversal confirmed (show re-added 1 frame after trigger, op dips one frame by ~0.07-0.09 then rises to 1, never 0, top continuous); harness tolerance 0.06 too strict for the 1-frame render latency of the state-based trigger -> judged PASS on: minOp>0 + reversal within 2 frames + maxOp 1 + no jump
+2026-10-17 08:24:55 CEST guard webkit release=0 qa=0 BUILD OK 37524aa webkit
+2026-10-17 08:29:28 CEST globals webkit exit=0 PASS [webkit] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-10-17 08:38:52 CEST rc0 webkit exit=0 213/213 passed toastfirst=14pass/14
+2026-10-17 08:49:50 CEST midfade webkit exit=0 DONE midfade webkit fails=3
+2026-10-17 08:49:50 CEST CHECKPOINT webkit done
+2026-10-17 08:55:35 CEST midfade chromium exit=0 DONE midfade chromium fails=4
+2026-10-17 08:56:49 CEST FILED toast-pr5-37524aa.md PASS

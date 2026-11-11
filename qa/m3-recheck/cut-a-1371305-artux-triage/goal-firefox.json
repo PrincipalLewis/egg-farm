@@ -1,0 +1,33 @@
+{
+ "engine": "firefox",
+ "sha": "1371305",
+ "build": "m3-rc1-pre+1371305",
+ "farm": [],
+ "goal": [
+  {
+   "natural": 176.13,
+   "parts": [
+    12.55,
+    62.13,
+    97.45
+   ],
+   "labelW": 188,
+   "clientW": 188,
+   "scrollW": 188,
+   "trackClipped": false,
+   "labelClipped": false,
+   "lines": 1,
+   "ws": "nowrap",
+   "ov": "hidden",
+   "to": "ellipsis",
+   "font": "600 14px \"Fredoka\", system-ui, sans-serif",
+   "fontsReady": "loaded",
+   "fredoka": [
+    "500:loaded",
+    "700:loaded"
+   ],
+   "runtimeBuild": "build 1371305",
+   "afterShot": "★ Egg value · +999% income"
+  }
+ ]
+}

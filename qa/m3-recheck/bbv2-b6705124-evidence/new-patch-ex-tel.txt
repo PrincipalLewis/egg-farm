@@ -1,0 +1,1709 @@
+diff --git a/scripts/check-release-build.mjs b/scripts/check-release-build.mjs
+index ce1907c..055fd1a 100644
+--- a/scripts/check-release-build.mjs
++++ b/scripts/check-release-build.mjs
+@@ -71,7 +71,7 @@ for (const g of ['eggfarmUi']) if (js.includes(g)) { console.error(`check-releas
+ console.log('check-release-build: no eggfarmUi in release ok');
+ // D3/D4 + AC14g: QA/debug hooks are compiled out of release (same __IOS_FLAG__ flag): no sampler/panel chunk, no hook names.
+ const chunks = files.filter(f => /^(frame-sampler|panel)-.*\.js$/.test(f));
+-const hooks = [/\.eggfarm\s*=/.test(js) ? 'window.eggfarm' : '', 'eggfarmOnb', 'eggfarmQa', 'eggfarmQaRecovery', 'eggfarmPerf', 'perf-ov', 'dbgInfo', 'get("debug")', 'get("perf")', 'get("ios")'].filter(h => h && (h === 'window.eggfarm' || js.includes(h)));
++const hooks = [/\.eggfarm\s*=/.test(js) ? 'window.eggfarm' : '', 'eggfarmOnb', 'eggfarmQa', 'eggfarmQaRecovery', 'qaPicker', 'eggfarmPerf', 'perf-ov', 'dbgInfo', 'get("debug")', 'get("perf")', 'get("ios")'].filter(h => h && (h === 'window.eggfarm' || js.includes(h)));
+ if (chunks.length || hooks.length) { console.error(`check-release-build: debug/QA code in release bundle: ${[...chunks, ...hooks].join(', ')}`); process.exit(1); }
+ console.log('check-release-build: no ?debug/?perf/?ios/QA hooks ok');
+ // Window globals allowlist: the release may assign exactly these own properties on window, incl. computed keys
+diff --git a/scripts/m2-18-state-diagnostic.ts b/scripts/m2-18-state-diagnostic.ts
+new file mode 100644
+index 0000000..e71e9a4
+--- /dev/null
++++ b/scripts/m2-18-state-diagnostic.ts
+@@ -0,0 +1,128 @@
++/**
++ * M2 18-state diagnostic (pre-fix ship picker).
++ * Cite: Architect b6dec409 §M2; D-HOP-2026-11-05-14; spec v1.0.4 4ea3841a; Card #12 9f900304.
++ *
++ * Pre-fix picker = DualPicker(zgFiltered(scorer with rankable empty→all)).
++ * Seeds 1–200 × (runBot seller15 3600s + runM2 workers 7200s), VAR_DEFAULT.
++ * Writes engineering/tasks/bbv2/m2-18-state-diagnostic.{json,md} under the studio tree.
++ */
++import { writeFileSync, mkdirSync } from 'fs';
++import { AC14_CONFIGS, seeds } from '../tests/bbv2-sim';
++import { meaningfulKeys, options, optionGain, bbv2Mark, paybackOf, type BuyKey } from '../src/econ/best-buy';
++import { isZeroGain, zeroGainInputs, zgFiltered } from '../src/ui/zero-gain';
++import { DualPicker, type Scorer } from '../src/ui/pick-hysteresis';
++import { STATE_TRACE, runBot } from '../tests/bot';
++import { runM2 } from '../tests/bot-m2';
++import { VAR_DEFAULT } from '../tests/seller-variance';
++import { bestBuyV2On } from '../src/config/flags';
++import type { GameState } from '../src/sim/state';
++import type { Balance } from '../src/config/balance';
++
++const SHIP = AC14_CONFIGS['CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1'];
++const LEVEL: Record<BuyKey, (s: GameState) => number> = {
++  FARM: s => s.farmLevel, HENS: s => s.hensLevel, VALUE: s => s.eggValueLevel, COLL: s => s.collectionLevel,
++  W1: s => +!!s.workers.market_hand, W2: s => +!!s.workers.coop_hand, W3: s => +!!s.workers.hawker,
++  W4: s => s.workers.grader ? s.graderTier : 0,
++};
++/** PRE-FIX rankable: empty meaningful → all keys (ship used this before D-HOP-14). */
++const oldRankable = <K extends BuyKey>(s: GameState, b: Balance, keys: readonly K[]): K[] => {
++  if (!bestBuyV2On(b)) return [...keys];
++  const m = meaningfulKeys(s, b);
++  return m.size ? keys.filter(k => m.has(k)) : [...keys];
++};
++const oldScorerFor = (keys: readonly BuyKey[]): Scorer => (s, b) => {
++  const ks = oldRankable(s, b, keys);
++  return options(s, b).filter(o => ks.includes(o.key)).map(o => ({
++    key: o.key, costCents: Math.round(o.cost * 100), payback: paybackOf(s, b, o.key), level: LEVEL[o.key](s),
++  }));
++};
++const oldAppPicker = () => new DualPicker(
++  zgFiltered(oldScorerFor(['FARM', 'HENS', 'VALUE'])),
++  zgFiltered(oldScorerFor(['FARM', 'HENS', 'VALUE', 'COLL', 'W1', 'W2', 'W3', 'W4'])),
++);
++
++const rows: any[] = [];
++let states = 0, suppressedAffordable = 0, below30 = 0;
++const perBot: Record<string, number> = {};
++
++const runOne = (bot: string, run: (b: Balance, sd: number) => void) => {
++  for (const sd of seeds(1, 200)) {
++    const P = oldAppPicker();
++    STATE_TRACE.fn = (t, s) => {
++      states++;
++      const h = P.tick(s, SHIP, t * 1000).hint; if (!h) return;
++      const mark = bbv2Mark(h, s, SHIP);
++      if (!(h.affordable && mark === null)) return;
++      suppressedAffordable++;
++      perBot[bot] = (perBot[bot] ?? 0) + 1;
++      if (s.farmLevel < 30) { below30++; return; }
++      if (rows.length >= 40) return;
++      const offered = options(s, SHIP);
++      rows.push({
++        bot, seed: sd, t, F: s.farmLevel, H: s.hensLevel, V: s.eggValueLevel, C: s.collectionLevel,
++        coinsCents: s.coinsCents, selected: h.key, affordable: true, mark: null,
++        gains: Object.fromEntries(offered.map(o => [o.key, optionGain(s, SHIP, o.key)?.gain ?? null])),
++        dCap: Object.fromEntries(['HENS', 'VALUE', 'COLL'].map(k => {
++          const zi = offered.some(o => o.key === k) ? zeroGainInputs(s, SHIP, k as any) : null;
++          return [k, zi?.dCap ?? null];
++        })),
++        zg: Object.fromEntries(['HENS', 'VALUE', 'COLL'].map(k => [
++          k, offered.some(o => o.key === k) ? isZeroGain(s, SHIP, k as any) : null,
++        ])),
++        meaningful: [...meaningfulKeys(s, SHIP)],
++        offered: offered.map(o => o.key),
++      });
++    };
++    run(SHIP, sd);
++  }
++  STATE_TRACE.fn = null;
++};
++
++runOne('runBot', (b, sd) => runBot(b, sd, 'seller15', 3600, 15, VAR_DEFAULT));
++console.error('runBot done', { states, suppressedAffordable, perBot, below30 });
++runOne('runM2', (b, sd) => runM2(b, sd, { model: 'seller15', T: 7200, variance: VAR_DEFAULT }));
++console.error('runM2 done', { states, suppressedAffordable, perBot, below30 });
++
++const outDir = '/workspace/egg-farm-studio/engineering/tasks/bbv2';
++mkdirSync(outDir, { recursive: true });
++const payload = {
++  title: 'M2 18-state diagnostic (pre-fix ship picker)',
++  generatedAt: new Date().toISOString(),
++  method: 'oldAppPicker=DualPicker(zgFiltered(scorer with rankable empty→all)); seeds 1–200; runBot seller15 3600s + runM2 7200s; VAR_DEFAULT; STATE_TRACE @ 1 Hz',
++  cite: 'Architect v5-m51-bbv2-b6dec409-architect.md §M2; D-HOP-2026-11-05-14; spec v1.0.4 4ea3841a; Card #12 9f900304',
++  counts: { states, suppressedAffordable, below30, perBot, rowsDumped: rows.length },
++  note: 'Post-fix rankable(ship empty→[]): CONFIRMATORY suppressedAffordable===0. DECISIVE zg-off net unchanged.',
++  states: rows,
++};
++writeFileSync(`${outDir}/m2-18-state-diagnostic.json`, JSON.stringify(payload, null, 2));
++writeFileSync(`${outDir}/m2-18-state-diagnostic.md`, `# M2 18-state diagnostic (pre-fix)
++
++**Cite:** Architect b6dec409 §M2; D-HOP-2026-11-05-14; spec v1.0.4 \`4ea3841a\`; Card #12 \`9f900304\`.
++
++## How generated
++Pre-fix ship picker = \`DualPicker(zgFiltered(scorerUsingRankableEmptyToAll))\`.
++Seeds 1–200 × (runBot seller15 3600 s + runM2 workers 7200 s), VAR_DEFAULT.
++\`STATE_TRACE\` every integer sim second; record when \`hint.affordable && bbv2Mark===null\`.
++Script: \`scripts/m2-18-state-diagnostic.ts\` (lane H). JSON: \`m2-18-state-diagnostic.json\`.
++
++## Counts
++- states traced: ${states}
++- suppressedAffordable (all Farms): ${suppressedAffordable}
++- suppressedAffordableBelow30: ${below30}
++- per bot: ${JSON.stringify(perBot)}
++- rows dumped: ${rows.length}
++
++## Fix (this PR)
++Ship \`rankable\`: empty BBv2 set → \`[]\` → no-pick strip / BR-BB4 (v1.0.4 §2.7/§4.1; D-HOP-14).
++DECISIVE zg-off keeps empty→all mark-null net. CONFIRMATORY asserts \`suppressedAffordable===0\`.
++
++## Rows (selected / gains / meaningful candidates)
++${rows.map((r, i) => `### ${i + 1}. ${r.bot} seed ${r.seed} t=${r.t} F${r.F} H${r.H} V${r.V} C${r.C}
++- selected: **${r.selected}** affordable mark=null
++- offered: ${r.offered.join(', ')}
++- meaningful: ${r.meaningful.length ? r.meaningful.join(', ') : '(empty)'}
++- gains: \`${JSON.stringify(r.gains)}\`
++- dCap: \`${JSON.stringify(r.dCap)}\`  zg: \`${JSON.stringify(r.zg)}\`
++- coinsCents: ${r.coinsCents}`).join('\n\n')}
++`);
++console.log(JSON.stringify(payload.counts));
+diff --git a/src/config/flags.ts b/src/config/flags.ts
+index 991a4c2..92dd8fd 100644
+--- a/src/config/flags.ts
++++ b/src/config/flags.ts
+@@ -15,5 +15,9 @@ export type M5Flags = Partial<Record<M5Flag, number>>;
+ export const flagOn = (p: EconomyParams, f: M5Flag): boolean => !!p.m4?.enabled && p.m4.flags?.[f] === 1;
+ /** Any M5 flag that reads the event RNG is on (golden or broody: golden spec R10a, HoE Q4 ruling). */
+ export const evRngFlagOn = (p: EconomyParams) => flagOn(p, 'golden') || flagOn(p, 'broody');
++/** Best buy v2 (spec m5.1-bestbuy-rebaseline-proposal v1.0.3 27e753d8 Part I, "m5.flags.bestBuyV2", here m4.flags.bestBuyV2). */
++export const bestBuyV2On = (p: EconomyParams): boolean => flagOn(p, 'bestBuyV2');
++/** Zero-gain UI strip (spec m5.flags.zeroGainUi, here m4.flags.zeroGainUi). Named helper so callers avoid raw flagOn (F3-no-literal M5 scan). */
++export const zeroGainUiOn = (p: EconomyParams): boolean => flagOn(p, 'zeroGainUi');
+ /** Zero-gain confirm strip (spec "m5.zeroGain.confirm", here m4.zeroGain.confirm): only with zeroGainUi on AND confirm === 1. Off in M5.1. */
+ export const zeroGainConfirmOn = (p: EconomyParams): boolean => flagOn(p, 'zeroGainUi') && p.m4?.zeroGain?.confirm === 1;
+diff --git a/src/econ/best-buy.ts b/src/econ/best-buy.ts
+index c19276a..fb4b8d5 100644
+--- a/src/econ/best-buy.ts
++++ b/src/econ/best-buy.ts
+@@ -11,6 +11,7 @@ import { farmCost, collectionCost } from '../sim/state';
+ import { hireCostCents, unlockFarm, graderTierCostCents, mood, isOff, type WorkerId } from '../sim/workers';
+ import { incomePerSec } from './income';
+ import { m4On } from '../config/formulas';
++import { bestBuyV2On, zeroGainUiOn } from '../config/flags';
+ import { trackLock, trackCost } from '../sim/tracks';
+ 
+ export type BuyKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
+@@ -68,6 +69,30 @@ export function options(s: GameState, b: Balance): BuyOpt[] {
+ 
+ const working = { assumeWorking: true as const };
+ 
++/** BBv2 (spec v1.0.3 27e753d8 §2; m4.flags.bestBuyV2). Exempt keys: always meaningful (Farm's single-step gain is negative by design). */
++export const BBV2_EXEMPT: readonly BuyKey[] = ['FARM', 'W1', 'W2', 'W3', 'W4'];
++/** Offered keys that are meaningful: exempt, or single-step gain > 0 ($/s, assumeWorking, ε = 0; = optionGain().gain > 0). */
++export function meaningfulKeys(s: GameState, b: Balance): Set<BuyKey> {
++  const base = incomePerSec(s, b, working), out = new Set<BuyKey>();
++  for (const o of options(s, b)) if (BBV2_EXEMPT.includes(o.key) || incomePerSec(o.after, b, working) - base > 0) out.add(o.key);
++  return out;
++}
++export const isMeaningful = (s: GameState, b: Balance, key: BuyKey): boolean => meaningfulKeys(s, b).has(key);
++/** BBv2-1: the keys a picker may rank. Flag off: `keys` unchanged. Flag on: only the meaningful ones while any meaningful row is
++ *  offered; when none is offered (after Farm L30 = MAX): zeroGainUi = 0 keeps every key (mark-null net / DECISIVE); ship
++ *  (zeroGainUi = 1) returns empty → no-pick strip / BR-BB4 (v1.0.4 §2.7/§4.1; D-HOP-2026-11-05-14). */
++export function rankable<K extends BuyKey>(s: GameState, b: Balance, keys: readonly K[]): K[] {
++  if (!bestBuyV2On(b)) return [...keys];
++  const m = meaningfulKeys(s, b);
++  if (m.size) return keys.filter(k => m.has(k));
++  return zeroGainUiOn(b) ? [] : [...keys];
++}
++/** BBv2 ★ key (PMFU BB12): the hint's key when it is affordable and meaningful, else null (the inert mark-null net). */
++export const bbv2Mark = (pick: { key: BuyKey; affordable: boolean } | null | undefined, s: GameState, b: Balance): BuyKey | null =>
++  pick?.affordable && isMeaningful(s, b, pick.key) ? pick.key : null;
++/** BBv2-3: two ∞ paybacks tie on BUY_ORDER alone (FARM first); cost never decides an ∞-tie. Finite ties unchanged. */
++export const infTie = (bb: boolean, a: number, z: number) => bb && a === Infinity && z === Infinity;
++
+ /** Depth-3 look-ahead: pick first item of the best Σgain/Σcost bundle. Ties → BUY_ORDER. */
+ export function bestBuy(s: GameState, b: Balance): BestBuy | null {
+   const base = incomePerSec(s, b, working);
+@@ -150,12 +175,14 @@ export function paybackOf(s: GameState, b: Balance, key: BuyKey): number {
+ /** Best-payback option among `keys` (only those currently offered). Tie-breaks: payback, then cost, then BUY_ORDER. */
+ export function bestPaybackAmong(s: GameState, b: Balance, keys: BuyKey[]): { key: BuyKey; cost: number; payback: number } | null {
+   let best: { key: BuyKey; cost: number; payback: number } | null = null;
++  const bb = bestBuyV2On(b), ranked = rankable(s, b, keys); // BBv2-1: zero-gain keys are never ranked (flag off: keys)
+   for (const o of options(s, b)) {
+-    if (!keys.includes(o.key)) continue;
++    if (!ranked.includes(o.key)) continue;
+     const c = { key: o.key, cost: o.cost, payback: paybackOf(s, b, o.key) };
+     const tie = c.payback === best?.payback || (best !== null && Math.abs(c.payback - best.payback) <= 1e-12);
++    const order = best !== null && BUY_ORDER.indexOf(c.key) < BUY_ORDER.indexOf(best.key);
+     const better = !best || (!tie && c.payback < best.payback)
+-      || (tie && (c.cost < best.cost || (c.cost === best.cost && BUY_ORDER.indexOf(c.key) < BUY_ORDER.indexOf(best.key))));
++      || (tie && (infTie(bb, c.payback, best.payback) ? order : (c.cost < best.cost || (c.cost === best.cost && order))));
+     if (better) best = c;
+   }
+   return best;
+diff --git a/src/econ/income.ts b/src/econ/income.ts
+index b475237..e54e369 100644
+--- a/src/econ/income.ts
++++ b/src/econ/income.ts
+@@ -11,10 +11,14 @@ import { eggsPerTap, demandRange, customerIntervalS } from '../sim/state';
+ import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
+ import { mood, isOff, graderMult, hawkerDemandMult, type Workers } from '../sim/workers';
+ import { isPaused } from '../sim/pause';
++import { bestBuyV2On } from '../config/flags';
+ 
+ export type IncomeOpts = {
+   /** When true, treat every hired worker as Working (Economy best() scoring). */
+   assumeWorking?: boolean;
++  /** When true with assumeWorking, skip BBv2 Q-E2 (keep pre-Q-E2 collect = tap × 1.5). Hatch/sim BR-R5 planRef only
++   *  (D-ECON-20261105-M1-QE2-HATCH (a); HoP). Default false: planner/best-buy paths still apply Q-E2 when bestBuyV2 on. */
++  ignoreQE2?: boolean;
+ };
+ 
+ /** Egg sale price in dollars (Python-compatible round to 2 dp × grader mult). */
+@@ -29,7 +33,10 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}):
+   const tap = eggsPerTap(s.collectionLevel, b);
+   const w = s.workers.coop_hand;
+   if (!w) return tap;
+-  if (opts.assumeWorking) return tap * 1.5;
++  // BBv2 Q-E2 (spec v1.0.3 §2.5, Econ 14:05): planner path only, flag on, Coop Hand hired -> 0 player taps,
++  // collect = eggs_per_tap[C] / coop_hand.every_s. The live path (no assumeWorking) below is unchanged.
++  // ignoreQE2 (BR-R5 hatch): keep tap × 1.5 so hatchCostCents is bestBuyV2-invariant (D-ECON-20261105-M1-QE2-HATCH).
++  if (opts.assumeWorking) return bestBuyV2On(b) && !opts.ignoreQE2 ? tap / b.workers.coop_hand.every_s : tap * 1.5;
+   const m = mood(w, b);
+   if (!m || isOff(m)) return tap; // asleep / unpaid / paused → no auto collect
+   if (m === 'working') return tap * 1.5;
+diff --git a/src/game.ts b/src/game.ts
+index 5dcebee..80708fe 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -19,6 +19,7 @@ import type { IdbBoot } from './save/idb-mirror';
+ import { TELEMETRY_KEY } from './telemetry/telemetry';
+ import { migrateStoredTracksV7 } from './sim/migrate-v7';
+ import { Telemetry, installId } from './telemetry/telemetry';
++import { Bbv2Tel, bbv2TelOn, buyKeyOf, type BuyCtx } from './telemetry/bbv2';
+ export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
+ /** Glue between sim, storage and telemetry; UI only talks to this. */
+ /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
+@@ -52,6 +53,10 @@ export class Game {
+   /** QA case 2: after a fresh start, `.bak` rotation waits for a valid save + progress (1 purchase or 60 s played). */
+   private bakAllowed = true; private playedMs = 0;
+   installId = ''; telemetry: Telemetry; private coopFullSince: number | null = null;
++  /** BBv2 §8 telemetry (rows #19–22): null unless m4.flags.bestBuyV2 = 1 and m4.enabled, so flag 0 runs no BBv2 code path. */
++  bbTel: Bbv2Tel | null = null; private bbSimMs = 0;
++  /** UI context at a purchase (picker clock, rendered ★, its switch time, live income); set by the app. */
++  bbCtx: () => BuyCtx = () => ({ t: this.now(), mark: null, markSinceT: this.now(), rateCentsPerS: 0 });
+   private listeners: ((e: GameEvent) => void)[] = [];
+   /** Subscribe to sim/game events (UI feedback, sfx). Returns unsubscribe. */
+   on(fn: (e: GameEvent) => void) { this.listeners.push(fn); return () => { this.listeners = this.listeners.filter(f => f !== fn); }; }
+@@ -63,6 +68,7 @@ export class Game {
+     this.telemetry = new Telemetry(kv, b.telemetry, now);
+     this.installId = installId(kv);
+     this.telemetry.track('session_start', { install_id: this.installId, build });
++    if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);
+     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
+     // tier (CSR-2/3/13, CSR-AC-IDB1) and the stale-LS reconcile runs inside it; without it (tests, refused-newer) the legacy
+     // raw is only used for the newer-build check.
+@@ -310,10 +316,14 @@ export class Game {
+   endSession() {
+     if (this.resetting || this.inactive || this.held()) return;
+     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
+-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
++    if (this.bbTel) { this.bbTel.flushOpen(Math.floor(this.bbSimMs / 1000)); this.telemetry.track('session_end', this.bbTel.sessionEndFields()); }
++    else this.telemetry.track('session_end');
++    this.save(); this.telemetry.flush(true); }
+   dispatch(a: Action) {
+     if (this.inactive || this.held()) return;
++    const before = this.state, bbKey = this.bbTel ? buyKeyOf(a) : null;
+     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
++    if (bbKey && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.bbTel!.purchase(before, bbKey, this.bbCtx());
+     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
+     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
+   }
+@@ -351,6 +361,7 @@ export class Game {
+   onHidden(at = this.now()) {
+     if (this.hidden) return;
+     this.frame(); // bring the sim up to the hide
++    this.bbTel?.flushOpen(Math.floor(this.bbSimMs / 1000)); // V-2d (a): background flush, fresh sampling on resume
+     this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
+   }
+   /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
+@@ -435,6 +446,7 @@ export class Game {
+       // must not consume the NEW I_ref warm-up: start that window at the return boundary (§4.1a), like a hidden offline return.
+       this.state = gap >= maxMs && incomeRefOn(this.b) ? resetIncomeRef(r.state) : r.state;
+       this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
++      if (this.bbTel) { this.bbSimMs += Math.min(gap, maxMs); this.bbTel.sample(Math.floor(this.bbSimMs / 1000), this.state); } // V-2d: integer sim seconds
+     }
+     this.checkCoopFull(); this.telemetry.poll();
+   }
+diff --git a/src/sim/breeds-hatch.ts b/src/sim/breeds-hatch.ts
+index 94864ff..0b84a88 100644
+--- a/src/sim/breeds-hatch.ts
++++ b/src/sim/breeds-hatch.ts
+@@ -46,9 +46,10 @@ export function rollBreed(x: BreedsSave, F: number, b: Balance, free: boolean):
+   const l = el.filter(id => ROSTER[id][0] === pick); [rng, u] = nextRand(rng); return { id: l[Math.floor(u * l.length)], rng };
+ }
+ /** BR-R5 cost in cents: max(min, min(planRef x cost_s, house-round(farmStep x share_bp))). planRef = planner income
+- *  (assumeWorking) on the breed-neutral state, rounded once (no traits exist yet, so the state is neutral). */
++ *  (assumeWorking, ignoreQE2) on the breed-neutral state, rounded once (no traits exist yet, so the state is neutral).
++ *  ignoreQE2 keeps planRef bestBuyV2-invariant (D-ECON-20261105-M1-QE2-HATCH (a); HoP / PMC). */
+ export function hatchCostCents(s: GameState, b: Balance): number {
+-  return hatchCostFrom(Math.round(incomePerSec(s, b, { assumeWorking: true }) * CENTS_PER_DOLLAR), farmCost(s.farmLevel, b) * CENTS_PER_DOLLAR, b);
++  return hatchCostFrom(Math.round(incomePerSec(s, b, { assumeWorking: true, ignoreQE2: true }) * CENTS_PER_DOLLAR), farmCost(s.farmLevel, b) * CENTS_PER_DOLLAR, b);
+ }
+ /** BR-R5 on injected integer cents (BR-AC6 / BR-AC13). BR-R17 guard: planRef x cost_s is never formed when it would exceed the
+  *  Farm branch, so it can't pass 2^53 - 1 (planRef > floor(farmBranch / cost_s) <=> planRef x cost_s > farmBranch). */
+diff --git a/src/telemetry/bbv2.ts b/src/telemetry/bbv2.ts
+new file mode 100644
+index 0000000..fe2fd1d
+--- /dev/null
++++ b/src/telemetry/bbv2.ts
+@@ -0,0 +1,93 @@
++import type { Balance } from '../config/balance';
++import type { GameState } from '../sim/state';
++import type { Action } from '../sim/actions';
++import { m4On } from '../config/formulas';
++import { bestBuyV2On } from '../config/flags';
++import { meaningfulKeys, type BuyKey } from '../econ/best-buy';
++import { candidates } from '../ui/next-goal';
++import { trackLevel } from '../sim/tracks';
++
++/** BBv2 field telemetry (spec v1.0.3 27e753d8 §8; source of record: PMC telemetry errata v5 rev 12 `0cfe168a` rows #19–22,
++ *  V-2d; D-HOE-20261030-31/-32/-35). Built only with m4.flags.bestBuyV2 = 1 and m4.enabled (Game/app hold null otherwise,
++ *  so nothing here can run, and no field is added, at flag 0: spec §5). Row #23 (SG-8) is the stopgap's and is not built (D-HOE-33). */
++export interface Bbv2TelCfg { shown_min_gap_s: number; zero_gain_eta_max_s: number; dead_zone_min_s: number; zero_gain_purchase_cap: number }
++export const BBV2_TEL_DEFAULTS: Bbv2TelCfg = { shown_min_gap_s: 5, zero_gain_eta_max_s: 60, dead_zone_min_s: 30, zero_gain_purchase_cap: 50 };
++export const bbv2TelOn = (b: Balance) => m4On(b) && bestBuyV2On(b);
++export const bbv2TelCfg = (b: Balance): Bbv2TelCfg => {
++  const src = (b.telemetry.bbv2 ?? {}) as Partial<Bbv2TelCfg>, out = { ...BBV2_TEL_DEFAULTS };
++  for (const k of Object.keys(out) as (keyof Bbv2TelCfg)[]) if (typeof src[k] === 'number') out[k] = src[k] as number;
++  return out;
++};
++/** Float telemetry fields: 1 dp; Infinity/NaN -> null (null = infinite or unreachable; never the "Infinity" string). */
++export const f1 = (x: number): number | null => (Number.isFinite(x) ? Math.round(x * 10) / 10 : null);
++const WKEY = { market_hand: 'W1', coop_hand: 'W2', hawker: 'W3', grader: 'W4' } as const;
++/** The BuyKey a purchase action buys, or null (not a Best-buy row purchase). */
++export function buyKeyOf(a: Action): BuyKey | null {
++  switch (a.type) {
++    case 'buyFarm': return 'FARM';
++    case 'buyCollection': return 'COLL';
++    case 'buyTrack': return a.track === 'hens' ? 'HENS' : a.track === 'eggValue' ? 'VALUE' : null;
++    case 'hire': return (WKEY as Record<string, BuyKey>)[a.worker] ?? null;
++    case 'buyGraderTier': return 'W4';
++    default: return null;
++  }
++}
++const levelOf = (s: GameState, k: BuyKey) => k === 'HENS' ? trackLevel(s, 'hens') : k === 'VALUE' ? trackLevel(s, 'eggValue') : k === 'COLL' ? s.collectionLevel : k === 'FARM' ? s.farmLevel : 0;
++/** Live ETA (s) of the nearest offered meaningful row: 0 if one is affordable, Infinity if none is reachable at this rate. */
++export function meaningfulEtaS(s: GameState, b: Balance, rateCentsPerS: number): number {
++  const m = meaningfulKeys(s, b); let best = Infinity;
++  for (const c of candidates(s, b)) if (m.has(c.key)) {
++    const need = c.costCents - s.coinsCents; const eta = need <= 0 ? 0 : rateCentsPerS > 0 ? need / rateCentsPerS : Infinity;
++    if (eta < best) best = eta;
++  }
++  return best;
++}
++/** V-2d (2): some offered row is affordable AND meaningful (hatches are not candidates). */
++export const meaningfulAffordable = (s: GameState, b: Balance) => { const m = meaningfulKeys(s, b); return candidates(s, b).some(c => m.has(c.key) && s.coinsCents >= c.costCents); };
++
++export type Sink = (type: string, data: Record<string, unknown>) => void;
++export interface ShownPick { key: BuyKey; affordable: boolean; payback: number; costCents: number }
++/** UI-side context at a purchase: picker clock, the ★ key rendered right now, when ★ last switched to it, live income. */
++export interface BuyCtx { t: number; mark: BuyKey | null; markSinceT: number; rateCentsPerS: number }
++
++export class Bbv2Tel {
++  private shownSig: string | null = null; private shownAt = -Infinity;
++  private zgCount = 0; dropped = 0;
++  private dz: { sec: number; farm: number } | null = null; private lastSec: number | null = null;
++  constructor(private sink: Sink, private b: Balance, readonly cfg: Bbv2TelCfg = bbv2TelCfg(b)) {}
++  /** #19: on every hint key or affordability change, at most one per shown_min_gap_s (picker clock, ms). No pick -> no event.
++   *  A change inside the gap is emitted once the gap has passed if the hint still differs from the last emitted one. */
++  shown(t: number, s: GameState, pick: ShownPick | null, rateCentsPerS: number) {
++    if (!pick) return;
++    const sig = `${pick.key}|${pick.affordable}`; if (sig === this.shownSig || t - this.shownAt < this.cfg.shown_min_gap_s * 1000) return;
++    this.shownSig = sig; this.shownAt = t;
++    const need = pick.costCents - s.coinsCents;
++    this.sink('best_buy_shown', { key: pick.key, meaningful: meaningfulKeys(s, this.b).has(pick.key), affordable: pick.affordable,
++      payback_s: f1(pick.payback), farm: s.farmLevel, eta_s: pick.affordable ? 0 : f1(need <= 0 ? 0 : rateCentsPerS > 0 ? need / rateCentsPerS : Infinity) });
++  }
++  /** #20/#21: a successful purchase of `key`, with the state BEFORE it. */
++  purchase(before: GameState, key: BuyKey, ctx: BuyCtx) {
++    if (ctx.mark !== null && key === ctx.mark) this.sink('best_buy_followed', { key, ms_since_shown: Math.max(0, Math.round(ctx.t - ctx.markSinceT)) });
++    if (meaningfulKeys(before, this.b).has(key)) return; // exempt or positive gain: never zero-gain
++    const eta = meaningfulEtaS(before, this.b, ctx.rateCentsPerS);
++    if (!(eta <= this.cfg.zero_gain_eta_max_s)) return;
++    if (this.zgCount >= this.cfg.zero_gain_purchase_cap) { this.dropped++; return; }
++    this.zgCount++;
++    this.sink('zero_gain_purchase', { key, farm: before.farmLevel, level: levelOf(before, key), meaningful_eta_s: f1(eta) as number });
++  }
++  /** #22 V-2d: call with the integer sim second just reached (after collect, before any buy). Scope 10 <= farm < maxLevel. */
++  sample(sec: number, s: GameState) {
++    if (this.lastSec !== null && sec <= this.lastSec) return; this.lastSec = sec;
++    const F = s.farmLevel, inScope = F >= 10 && F < this.b.maxLevel;
++    if (inScope && !meaningfulAffordable(s, this.b)) { if (!this.dz) this.dz = { sec, farm: F }; return; }
++    this.endStretch(sec, false);
++  }
++  private endStretch(sec: number, open: boolean) {
++    const d = this.dz; this.dz = null; if (!d) return; const len = sec - d.sec;
++    if (len >= this.cfg.dead_zone_min_s) this.sink('dead_zone', { farm: d.farm, s: f1(len), reason: 'none_affordable', ...(open ? { open: true } : {}) });
++  }
++  /** Unload / background flush: an open stretch >= dead_zone_min_s is emitted with open:true; sampling then starts fresh. */
++  flushOpen(sec: number) { this.endStretch(sec, true); this.lastSec = null; }
++  /** session_end field (rev 11 M-2). */
++  sessionEndFields(): Record<string, unknown> { return { zero_gain_purchase_dropped: this.dropped }; }
++}
+diff --git a/src/ui/app.ts b/src/ui/app.ts
+index 688196a..75fb109 100644
+--- a/src/ui/app.ts
++++ b/src/ui/app.ts
+@@ -23,7 +23,8 @@ import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hen
+ import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
+ import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } from './pick-hysteresis';
+ import { isZeroGain, zeroGainUiOn, zgFiltered, ZG_KEY_OF, ZG_DESC, ZG_CHIP } from './zero-gain'; // v5 zeroGainUi (m4.flags.zeroGainUi)
+-import { zeroGainConfirmOn } from '../config/flags';
++import { zeroGainConfirmOn, bestBuyV2On } from '../config/flags';
++import { bbv2Mark, type BuyKey } from '../econ/best-buy';
+ import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, TRACK_FARM_MAX_TEXT, trackFarmMaxAria, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
+ import type { Recovery } from '../save/save';
+@@ -506,16 +507,30 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
+   // v5 zeroGainUi §5.6: with the flag on, ZG rows are dropped from both scorers BEFORE the pick (flag off: the stock DualPicker).
+   const picker = ZG ? new DualPicker(zgFiltered(defaultScorer), zgFiltered(allScorer)) : new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
++  // BBv2 (spec v1.0.4 §6, PMFU BB12): `hintMark` is THE ★ key the chip and the strip render from (flag read once at boot):
++  // bestBuyV2 = 1 -> the Part A ★ (affordable AND meaningful, else null = the inert mark-null net); 0 -> today's single-arg bestBuyMark.
++  const BB2 = bestBuyV2On(b); let hintMark: BuyKey | null = null;
++  let bbMarkSinceT = 0; if (g.bbTel) g.bbCtx = () => { const t = now(); return { t, mark: hintMark, markSinceT: bbMarkSinceT, rateCentsPerS: income.centsPerSec(t) }; };
++  // SG-12 qaPicker history (stopgap v1.2.6 fdc1c199 SG-12; QA/dev builds only, compiled out of release with IOS_FLAG_ENABLED).
++  const qaHist: { t: number; key: string | null; affordable: boolean | null; mark: string | null }[] = []; let qaKeySinceT = 0, qaLast: string | null = null;
+   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+   const renderGoal = () => {
+     const t = now();
+-    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = bestBuyMark(hintPick);
++    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = hintMark;
+     if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
++    hintMark = BB2 ? bbv2Mark(hintPick, g.state, b) : bestBuyMark(hintPick);
++    if (IOS_FLAG_ENABLED) { // SG-12: one entry when key, affordable or mark changed since the last frame; load counts as a change
++      const k = hintPick?.key ?? null, sig = `${k}|${hintPick?.affordable ?? null}|${hintMark}`;
++      if (sig !== qaLast) { if (qaLast === null || k !== (qaHist[qaHist.length - 1]?.key ?? null)) qaKeySinceT = t; qaLast = sig;
++        qaHist.push({ t, key: k, affordable: hintPick?.affordable ?? null, mark: hintMark }); if (qaHist.length > 32) qaHist.shift(); }
++    }
++    // BBv2 §8 (errata rev 12 #19/#20): ms_since_shown runs on this picker clock from the last ★ switch; g.bbTel is null at flag 0.
++    if (g.bbTel) { if (hintMark !== null && hintMark !== prevMark) bbMarkSinceT = t; g.bbTel.shown(t, g.state, hintPick, income.centsPerSec(t)); }
+     // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
+     // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
+-    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || bestBuyMark(hintPick) !== prevMark))) return;
++    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || hintMark !== prevMark))) return;
+     const imm = goalNow || M4; goalNow = false; goalTickAt = t;
+-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? bestBuyMark(hintPick) : null), imm); goalShown = gl;
++    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? hintMark : null), imm); goalShown = gl;
+     if (gl.parts) { const html = goalLabelHtml(gl.parts); if (goalLbl.dataset.html !== html) { goalLbl.dataset.html = html; goalLbl.innerHTML = html; } goalLbl.classList.add('ng'); }
+     else { if (goalLbl.dataset.html) { delete goalLbl.dataset.html; goalLbl.textContent = ''; } goalLbl.classList.remove('ng'); setText(goalLbl, gl.label); } setText(goalSt, gl.status);
+     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
+@@ -601,7 +616,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+    *  applied on the DOM (zgApply), so toggling never re-renders the tab (UI-ZG-15). */
+   const zgStrip = (zg: boolean, k: string) => !(zg && ZGC) ? '' : `<div class="zg-confirm" role="group" aria-labelledby="zgc-${ZK[k as ZRow]}-t" id="zgc-${ZK[k as ZRow]}" data-zg-kind="${k}" hidden><p id="zgc-${ZK[k as ZRow]}-t">This won't raise income now.</p><div class="acts"><button class="btn buy" type="button" data-zg="confirm">Buy anyway</button><button class="btn secondary" type="button" data-zg="cancel">Cancel</button></div></div>`;
+   /** M41-8 F3 = UX-M4 ★ Best buy chip: on the one row bestBuyMark names (same source as the strip ★, F4-13). */
+-  const bestChip = (key: string) => m4On(b) && bestBuyMark(hintPick) === key ? `<div class="best-chip" data-best-buy="${key}"><span aria-hidden="true">★</span> Best buy</div>` : '';
++  const bestChip = (key: string) => m4On(b) && hintMark === key ? `<div class="best-chip" data-best-buy="${key}"><span aria-hidden="true">★</span> Best buy</div>` : '';
+   /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
+   const trackRowHtml = (t: Track) => {
+     const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
+@@ -888,5 +903,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
+   g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
+   if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
+-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort() };
++  /** SG-12 `qaPicker()` (v: 1, fields exactly as SG-12; v5 sources per BBv2 spec v1.0.4 §6): read-only, fresh JSON-safe object, no state,
++   *  DOM, picker or telemetry change. hintRaw = picker.hint.shown (after the ZG filter and Part A, before the highlight merge). */
++  const qaPick = (p: SharedPick | null) => p && { key: p.key, affordable: p.affordable, costCents: p.costCents, payback: p.payback === Infinity ? 'Infinity' : p.payback };
++  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort(),
++    ...(IOS_FLAG_ENABLED ? { qaPicker: () => { const t = now(); return { v: 1, t, m4: m4On(b), hint: qaPick(hintPick), hintRaw: qaPick(picker.hint.shown), highlight: qaPick(rowPick),
++      mark: hintMark, suppressed: hintPick !== null && hintMark === null, heldMs: hintPick ? t - qaKeySinceT : 0, evals: picker.hint.evals, changes: picker.hint.changes,
++      history: qaHist.map(h => ({ ...h })) }; } } : {}) };
+ }
+diff --git a/src/ui/next-goal.ts b/src/ui/next-goal.ts
+index f6620fe..1d6726f 100644
+--- a/src/ui/next-goal.ts
++++ b/src/ui/next-goal.ts
+@@ -8,7 +8,8 @@ import { fmtTimeToAfford } from './format';
+ import { m4On } from '../config/formulas';
+ import { trackLock, trackCost, trackLevel } from '../sim/tracks';
+ import { trackGoalLabel } from './tracks-ui';
+-import { bestPaybackAmong } from '../econ/best-buy';
++import { bestPaybackAmong, rankable, meaningfulKeys } from '../econ/best-buy';
++import { bestBuyV2On, zeroGainUiOn } from '../config/flags';
+ import { goalLabelParts, goalLabelSpec, type GoalLabelParts } from './goal-label';
+ export type GoalKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
+ export type GoalState = 'ready' | 'waiting' | 'noincome' | 'done';
+@@ -18,7 +19,7 @@ const WK = { W1: 'market_hand', W2: 'coop_hand', W3: 'hawker' } as const;
+ const WNAME = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker' } as const;
+ export interface Candidate { key: GoalKey; costCents: number; }
+ export interface Goal { key: GoalKey | null; state: GoalState; label: string; status: string; costCents: number; tab: 'farm' | 'collection' | 'workers';
+-  /** M41-8 F4 (M4 on, HENS / VALUE / COLL): rendered spans + untruncated aria; `label` is then parts.text. */
++  /** M41-8 F4 (M4 on, HENS / VALUE / COLL) + BBv2 v1.0.4 FARM ★: rendered spans + untruncated aria; `label` is then parts.text. */
+   parts?: GoalLabelParts; }
+ export function candidates(s: GameState, b: Balance): Candidate[] {
+   const out: Candidate[] = [], F = s.farmLevel;
+@@ -53,19 +54,34 @@ export function labelFor(key: GoalKey, s: GameState, b: Balance): string {
+  *  always matches the Farm-tab highlight (M4A-41). Omitted = stateless best-payback / cheapest rule. */
+ /** `star` (M41-8 F4): the key that carries ★ = goal-label.ts bestBuyMark (the same source as the UX-M4 row chip). */
+ export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shared?: GoalKey | null, star?: GoalKey | null): Goal {
+-  const c = candidates(s, b);
+-  if (!c.length) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
++  const c0 = candidates(s, b), rk = rankable(s, b, c0.map(x => x.key)); // BBv2-1/-4 (flag on): rank meaningful rows only, before affordable-first
++  const cf = rk.length === c0.length ? c0 : c0.filter(x => rk.includes(x.key));
++  // Ship (bb1+zg1): empty BBv2 set → no-pick strip (v1.0.4 §4.1 / D-HOP-14); do not fall back to income-zero capacity rows.
++  const shipEmpty = bestBuyV2On(b) && zeroGainUiOn(b) && meaningfulKeys(s, b).size === 0;
++  const c = cf.length ? cf : (shipEmpty ? [] : c0);
++  if (!c0.length || (shipEmpty && !c.length)) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
+   const coins = Math.round(s.coinsCents); // coins at 2 dp vs integer cost; equal = affordable
+   const aff = c.filter(x => coins >= x.costCents), ready = aff.length > 0;
+   // M4-A (HoP 15:29): with the flag on, the hint follows the same best-payback rule as the Farm-tab highlight. Off = main.
+   const pool = ready ? aff : c, bp = m4On(b) ? bestPaybackAmong(s, b, pool.map(x => x.key)) : null;
+-  const forced = m4On(b) && shared ? c.find(x => x.key === shared) : undefined;
++  const forced = m4On(b) && shared ? c0.find(x => x.key === shared) : undefined;
+   const t = forced ?? (bp ? pool.find(x => x.key === bp.key) : null) ?? cheapest(pool)!;
+   const state: GoalState = (forced ? coins >= forced.costCents : ready) ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
+   const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtTimeToAfford((t.costCents - coins) / rateCentsPerS);
+   // M41-8 F4 (M4 on only; flag-off keeps the AC5 labels byte-identical): ★ / % / truncation for HENS, VALUE, COLL.
+   // F4-11: the % is hidden while the strip's own income rate is 0 (fresh save before the first sale).
+-  const parts = m4On(b) && (t.key === 'HENS' || t.key === 'VALUE' || t.key === 'COLL') ? goalLabelParts(goalLabelSpec(t.key, s, b, !!star && star === t.key, rateCentsPerS > 0)) : undefined;
++  // BBv2 v1.0.4 §6 Farm strip ★ (behind bestBuyV2): when FARM is the hint AND affordable (star==='FARM'),
++  // the strip shows ★ via the same ng markup as F4; unaffordable FARM keeps the plain m3 farmLabel (no ★).
++  // FARM is NOT routed through the 27-char F4 truncator (m3 farm labels can be longer than 27).
++  const starred = !!star && star === t.key;
++  let parts: GoalLabelParts | undefined;
++  if (m4On(b) && (t.key === 'HENS' || t.key === 'VALUE' || t.key === 'COLL')) {
++    parts = goalLabelParts(goalLabelSpec(t.key, s, b, starred, rateCentsPerS > 0));
++  } else if (m4On(b) && bestBuyV2On(b) && t.key === 'FARM' && starred) {
++    const fl = farmLabel(s.farmLevel, b);
++    parts = { star: '★ ', name: fl, level: '', suffix: '', text: `★ ${fl}`,
++      aria: `best buy, ${fl.replace(/\bL(\d+)\b/, 'level $1').replace(':', ',')}`, accName: fl };
++  }
+   return { key: t.key, state, label: parts ? parts.text : labelFor(t.key, s, b), ...(parts ? { parts } : {}), status, costCents: t.costCents, tab: t.key === 'FARM' || t.key === 'HENS' || t.key === 'VALUE' ? 'farm' : t.key === 'COLL' ? 'collection' : 'workers' };
+ }
+ /** Anti-flicker (spec §1): without a purchase, a change of target or Ready<->Waiting is applied only after the new
+diff --git a/src/ui/pick-hysteresis.ts b/src/ui/pick-hysteresis.ts
+index 60322b7..350e4c2 100644
+--- a/src/ui/pick-hysteresis.ts
++++ b/src/ui/pick-hysteresis.ts
+@@ -10,7 +10,8 @@
+  *  - re-evaluate on every state change; 5 s periodic re-check as the fallback. */
+ import type { Balance } from '../config/balance';
+ import type { GameState } from '../sim/state';
+-import { options, paybackOf, BUY_ORDER, type BuyKey } from '../econ/best-buy';
++import { options, paybackOf, rankable, infTie, BUY_ORDER, type BuyKey } from '../econ/best-buy';
++import { bestBuyV2On } from '../config/flags';
+ 
+ export const SWITCH_RATIO = 0.9, MIN_SHOWN_MS = 2000, RECHECK_MS = 5000;
+ export type FarmKey = 'FARM' | 'HENS' | 'VALUE';
+@@ -23,20 +24,21 @@ const LEVEL: Record<BuyKey, (s: GameState) => number> = {
+   FARM: s => s.farmLevel, HENS: s => s.hensLevel, VALUE: s => s.eggValueLevel, COLL: s => s.collectionLevel,
+   W1: s => +!!s.workers.market_hand, W2: s => +!!s.workers.coop_hand, W3: s => +!!s.workers.hawker, W4: s => s.workers.grader ? s.graderTier : 0 };
+ /** Offered (not capped / MAX / locked) options in `keys` with their bundle payback. */
+-export const scorerFor = (keys: readonly BuyKey[]): Scorer => (s, b) => options(s, b)
+-  .filter(o => keys.includes(o.key))
+-  .map(o => ({ key: o.key, costCents: Math.round(o.cost * 100), payback: paybackOf(s, b, o.key), level: LEVEL[o.key](s) }));
++export const scorerFor = (keys: readonly BuyKey[]): Scorer => (s, b) => { const ks = rankable(s, b, keys); return options(s, b) // BBv2-1/2 (flag on): zero-gain rows never scored, so never kept
++  .filter(o => ks.includes(o.key))
++  .map(o => ({ key: o.key, costCents: Math.round(o.cost * 100), payback: paybackOf(s, b, o.key), level: LEVEL[o.key](s) })); };
+ /** Highlight instance: Farm-tab rows only (M4A-18). */
+ export const defaultScorer: Scorer = scorerFor(FARM_ROWS);
+ /** Hint instance: every option incl. Collection and workers (clarity UC7). */
+ export const allScorer: Scorer = scorerFor(['FARM', 'HENS', 'VALUE', 'COLL', 'W1', 'W2', 'W3', 'W4']);
+ 
+-const better = (a: RowScore, z: RowScore) => {
++const better = (a: RowScore, z: RowScore, bb = false) => {
+   const tie = a.payback === z.payback || Math.abs(a.payback - z.payback) <= 1e-12;
+   if (!tie) return a.payback < z.payback;
++  if (infTie(bb, a.payback, z.payback)) return BUY_ORDER.indexOf(a.key) < BUY_ORDER.indexOf(z.key); // BBv2-3
+   return a.costCents !== z.costCents ? a.costCents < z.costCents : BUY_ORDER.indexOf(a.key) < BUY_ORDER.indexOf(z.key);
+ };
+-const bestOf = (r: RowScore[]) => r.reduce<RowScore | null>((m, x) => !m || better(x, m) ? x : m, null);
++const bestOf = (r: RowScore[], bb = false) => r.reduce<RowScore | null>((m, x) => !m || better(x, m, bb) ? x : m, null);
+ 
+ export class PickHysteresis {
+   shown: SharedPick | null = null;
+@@ -52,8 +54,8 @@ export class PickHysteresis {
+   }
+   evaluate(s: GameState, b: Balance, nowMs: number): SharedPick | null {
+     this.evals++; this.lastEval = nowMs; this.lastSig = this.sig(s);
+-    const rows = this.scorer(s, b), coins = Math.round(s.coinsCents);
+-    const aff = rows.filter(r => coins >= r.costCents), best = bestOf(aff.length ? aff : rows);
++    const rows = this.scorer(s, b), coins = Math.round(s.coinsCents), bb = bestBuyV2On(b);
++    const aff = rows.filter(r => coins >= r.costCents), best = bestOf(aff.length ? aff : rows, bb);
+     if (!best) return this.set(null, nowMs);
+     const cur = this.shown && rows.find(r => r.key === this.shown!.key);
+     const mk = (r: RowScore): SharedPick => ({ key: r.key, affordable: aff.includes(r), costCents: r.costCents, payback: r.payback });
+@@ -62,7 +64,7 @@ export class PickHysteresis {
+     if (!keepable) return this.set(mk(best), nowMs, best.level); // no current pick / bought / unaffordable / cap: at once
+     // HoP 16:15: a row that just became affordable skips the 2 s hold but must still clear the 0.9x bar.
+     // Every newly affordable row is checked; the best of those clearing 0.9x wins at once.
+-    const freshWin = bestOf(aff.filter(r => !prevAff.has(r.key) && r.key !== cur.key && r.payback <= SWITCH_RATIO * cur.payback));
++    const freshWin = bestOf(aff.filter(r => !prevAff.has(r.key) && r.key !== cur.key && r.payback <= SWITCH_RATIO * cur.payback), bb);
+     if (freshWin) return this.set(mk(freshWin), nowMs, freshWin.level);
+     if (best.key !== cur.key && best.payback <= SWITCH_RATIO * cur.payback && nowMs - this.shownAt >= MIN_SHOWN_MS) return this.set(mk(best), nowMs, best.level);
+     this.shown = mk(cur); return this.shown; // refresh numbers, keep shownAt
+diff --git a/src/ui/tracks-ui.ts b/src/ui/tracks-ui.ts
+index c43412d..bacc662 100644
+--- a/src/ui/tracks-ui.ts
++++ b/src/ui/tracks-ui.ts
+@@ -3,7 +3,7 @@
+ import type { Balance } from '../config/balance';
+ import type { GameState } from '../sim/state';
+ import { balancedStrip, trackLock, trackCost, trackLevel } from '../sim/tracks';
+-import { options, bestPaybackAmong } from '../econ/best-buy';
++import { options, bestPaybackAmong, rankable } from '../econ/best-buy';
+ import { gradeMult } from '../config/formulas';
+ const pct = (mult: number) => Math.round((mult - 1) * 100);
+ export const GRADE_NAMES = ['Grade A', 'Large', 'Jumbo'] as const;
+@@ -72,7 +72,7 @@ const KEY_ROW = { HENS: 'hens', VALUE: 'eggValue', FARM: 'farm' } as const;
+  *  bundle payback, ties lower cost then Farm > Hens > Egg value = BUY_ORDER). If none is affordable: the best-payback row
+  *  overall with affordable = false (the UI shows its ETA). null only when every row is capped / MAX. */
+ export function highlightPick(s: GameState, b: Balance): { row: RowKey; affordable: boolean; costCents: number } | null {
+-  const offered = options(s, b).filter(o => o.key in KEY_ROW);
++  const rk = rankable(s, b, ['FARM', 'HENS', 'VALUE'] as const), offered = options(s, b).filter(o => o.key in KEY_ROW && rk.includes(o.key as never)); // BBv2-1
+   const aff = offered.filter(o => s.coinsCents >= Math.round(o.cost * 100)).map(o => o.key);
+   const pick = bestPaybackAmong(s, b, aff.length ? aff : offered.map(o => o.key));
+   return pick ? { row: KEY_ROW[pick.key as keyof typeof KEY_ROW], affordable: aff.length > 0, costCents: Math.round(pick.cost * 100) } : null;
+diff --git a/src/ui/zero-gain.ts b/src/ui/zero-gain.ts
+index f1e2b11..2230e6a 100644
+--- a/src/ui/zero-gain.ts
++++ b/src/ui/zero-gain.ts
+@@ -9,7 +9,8 @@ import type { GameState } from '../sim/state';
+ import { options, type BuyKey } from '../econ/best-buy';
+ import { incomePerSec } from '../econ/income';
+ import { trackCoopCapacity } from '../config/formulas';
+-import { flagOn } from '../config/flags';
++import { zeroGainUiOn } from '../config/flags';
++export { zeroGainUiOn };
+ import type { Scorer } from './pick-hysteresis';
+ 
+ /** Non-exempt keys. FARM and W1–W4 are never ZG (D-HOP-37, ZG-AC2). */
+@@ -41,8 +42,7 @@ export function zeroGainInputs(s: GameState, b: Balance, key: BuyKey): { incBefo
+ export function isZeroGain(s: GameState, b: Balance, key: BuyKey, dev = DEV): boolean {
+   const i = zeroGainInputs(s, b, key); return !!i && zeroGainVerdict(i.incBefore, i.incAfter, i.dCap, dev);
+ }
+-/** Flag read (boot-time in the UI). Needs m4.enabled (flagOn). */
+-export const zeroGainUiOn = (b: Balance): boolean => flagOn(b, 'zeroGainUi');
++/** Flag read (boot-time in the UI): re-exported from config/flags (single source). */
+ /** §5.6: drop ZG rows BEFORE the pick; rows (and their payback) are otherwise the stock scorer's. */
+ export const zgFiltered = (scorer: Scorer, pred: (s: GameState, b: Balance, k: BuyKey) => boolean = isZeroGain): Scorer =>
+   (s, b) => scorer(s, b).filter(r => !pred(s, b, r.key));
+diff --git a/tests/bbv2-fixtures.ts b/tests/bbv2-fixtures.ts
+new file mode 100644
+index 0000000..829d552
+--- /dev/null
++++ b/tests/bbv2-fixtures.ts
+@@ -0,0 +1,23 @@
++// BBv2 test fixtures (spec v1.0.3 27e753d8 Part I; Card #12 4a154bb4). Preconditions are asserted in the tests that use them.
++import { balance, type Balance } from '../src/config/balance';
++import { initialState, type GameState } from '../src/sim/state';
++
++export const bal = (bestBuyV2: number, extra: { zeroGainUi?: number; enabled?: number } = {}): Balance =>
++  ({ ...balance, m4: { ...balance.m4!, enabled: extra.enabled ?? 1, flags: { ...balance.m4!.flags, bestBuyV2, zeroGainUi: extra.zeroGainUi ?? 0 } } }) as Balance;
++export const ON = bal(1), OFF = bal(0);
++const W = { energy: 100, cdS: 0 };
++export const fx = (F: number, H: number, V: number, C: number, extra: Partial<GameState> = {}): GameState =>
++  ({ ...initialState(ON, 1), farmLevel: F, hensLevel: H, eggValueLevel: V, collectionLevel: C, tracksV7: 1, ...extra } as GameState);
++const W3 = { market_hand: W, coop_hand: W, hawker: W };
++export const ALLW = { workers: { ...W3, grader: W }, graderTier: 5 } as Partial<GameState>;
++/** FX-L17 (BBv2 spec v1.0.3 BB-AC2 / Card #12 B1): F17 H19 V18 C10, Market Hand, Coop Hand, Hawker at energy 100, Grader tier 0. */
++export const L17 = (coinsCents: number) => fx(17, 19, 18, 10, { workers: { ...W3 } as any, graderTier: 0, coinsCents });
++/** BB-1 fixtures F10/C10, F14/C10, F17/C14, F22/C18 (H/V/workers chosen here; built in this file, no stopgap fixture, D-HOE-33). */
++export const BB1 = {
++  'F10/C10': (c: number) => fx(10, 10, 9, 10, { workers: { market_hand: W, coop_hand: W } as any, coinsCents: c }),
++  'F14/C10': (c: number) => fx(14, 15, 13, 10, { workers: { ...W3 } as any, coinsCents: c }),
++  'F17/C14': (c: number) => fx(17, 19, 18, 14, { workers: { ...W3 } as any, coinsCents: c }),
++  'F22/C18': (c: number) => fx(22, 24, 22, 18, { ...ALLW, graderTier: 2, coinsCents: c }),
++};
++/** FX-TIE (v0.3 names): every ranked payback is ∞ on the rc/v5 CSV (precondition asserted). */
++export const TIE = { 'F28 H30 V30 C21': () => fx(28, 30, 30, 21, { ...ALLW, coinsCents: 1e5 }), 'F29 H30 V30 C22': () => fx(29, 30, 30, 22, { ...ALLW, coinsCents: 1e5 }) };
+diff --git a/tests/bbv2-m1-hatch-qe2.test.ts b/tests/bbv2-m1-hatch-qe2.test.ts
+new file mode 100644
+index 0000000..2e3bfcb
+--- /dev/null
++++ b/tests/bbv2-m1-hatch-qe2.test.ts
+@@ -0,0 +1,55 @@
++// M1 flip prerequisite: BR-R5 hatchCostCents isolates Q-E2 (D-ECON-20261105-M1-QE2-HATCH (a); HoP/PMC).
++// planRef / hatch quote / charged coins identical bb0 vs bb1; assumeWorking kept; planner Q-E2 untouched (BB-AC10).
++import { describe, it, expect } from 'vitest';
++import { bal, fx } from './bbv2-fixtures';
++import { hatchCostCents, startHatch } from '../src/sim/breeds-hatch';
++import { collectPerSec, incomePerSec } from '../src/econ/income';
++import { eggsPerTap, type GameState } from '../src/sim/state';
++import type { BreedsSave } from '../src/sim/breeds';
++
++const W = { energy: 100, cdS: 0 };
++/** breeds-on + Market Hand + Coop Hand + Hawker; bestBuyV2 0|1. */
++const br = (bestBuyV2: 0 | 1) => {
++  const b = bal(bestBuyV2);
++  return { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, breeds: 1, bestBuyV2 } } } as typeof b;
++};
++const BB0 = br(0), BB1 = br(1);
++const fresh = (o: Partial<BreedsSave> = {}): BreedsSave => ({
++  owned: {}, slots: [null, null, null], incubator: null, settleMs: [0, 0, 0], hatches: 0, pity: 0, rng: 0x9e3779b9,
++  freeHatchUsed: 1, flockCompleteLogged: 0, ...o,
++});
++/** Collect-binding farm/collection pairs (Architect M1 probe e.g. F22 C5) + workers. */
++const states = (): GameState[] => {
++  const workers = { market_hand: W, coop_hand: W, hawker: W } as GameState['workers'];
++  const pairs = [[10, 5], [14, 5], [17, 5], [17, 10], [22, 5], [22, 10], [22, 14], [28, 10]];
++  return pairs.map(([F, C]) => fx(F, Math.min(F, 20), Math.min(F, 18), C, { workers, graderTier: 0, breeds: fresh(), coinsCents: 1e12 } as any));
++};
++
++describe('M1 BR-R5 hatchCostCents bestBuyV2-invariant (Q-E2 isolated)', () => {
++  it('collect-binding + workers: hatchCostCents(bb0) === hatchCostCents(bb1); planRef ignores Q-E2', () => {
++    for (const s of states()) {
++      expect(hatchCostCents(s, BB0)).toBe(hatchCostCents(s, BB1));
++      const plan0 = Math.round(incomePerSec(s, BB0, { assumeWorking: true, ignoreQE2: true }) * 100);
++      const plan1 = Math.round(incomePerSec(s, BB1, { assumeWorking: true, ignoreQE2: true }) * 100);
++      expect(plan1).toBe(plan0);
++      // Pre-Q-E2 bb0 baseline equals hatch planRef under bb1
++      expect(plan1).toBe(Math.round(incomePerSec(s, BB0, { assumeWorking: true }) * 100));
++      // Planner Q-E2 still applies without ignoreQE2 (BB-AC10; no regression)
++      const tap = eggsPerTap(s.collectionLevel, BB1);
++      expect(collectPerSec(s, BB1, { assumeWorking: true })).toBe(tap / BB1.workers.coop_hand.every_s);
++      expect(collectPerSec(s, BB1, { assumeWorking: true, ignoreQE2: true })).toBe(tap * 1.5);
++    }
++  });
++  it('startHatch charged coins identical bb0 vs bb1 when not free', () => {
++    for (const s0 of states()) {
++      const cost = hatchCostCents(s0, BB0);
++      expect(cost).toBeGreaterThan(0);
++      const s = { ...s0, coinsCents: cost + 50_000 };
++      const a = startHatch(s, BB0), z = startHatch(s, BB1);
++      expect(a.coinsCents).toBe(s.coinsCents - cost);
++      expect(z.coinsCents).toBe(a.coinsCents);
++      expect(a.breeds!.incubator!.costCents).toBe(cost);
++      expect(z.breeds!.incubator!.costCents).toBe(cost);
++    }
++  });
++});
+diff --git a/tests/bbv2-m2-ship-nopick.test.ts b/tests/bbv2-m2-ship-nopick.test.ts
+new file mode 100644
+index 0000000..56fccb6
+--- /dev/null
++++ b/tests/bbv2-m2-ship-nopick.test.ts
+@@ -0,0 +1,74 @@
++// M2 flip prerequisite: ENFORCE v1.0.4 ship-config no affordable suppressed ★ (D-HOP-2026-11-05-14; Card #12 9f900304).
++// After L30 ship: empty BBv2 set → no-pick strip / BR-BB4. DECISIVE zg-off mark-null net preserved. Flags-0 unchanged.
++import { describe, it, expect } from 'vitest';
++import { bal, fx, ALLW, OFF } from './bbv2-fixtures';
++import { meaningfulKeys, options, bbv2Mark, rankable, isMeaningful } from '../src/econ/best-buy';
++import { isZeroGain, zeroGainInputs } from '../src/ui/zero-gain';
++import { DualPicker } from '../src/ui/pick-hysteresis';
++import { selectGoal } from '../src/ui/next-goal';
++import { appPicker } from './bbv2-sim';
++
++const SHIP = bal(1, { zeroGainUi: 1 });
++const DEC = bal(1, { zeroGainUi: 0 }); // DECISIVE
++const W = { energy: 100, cdS: 0 };
++
++describe('M2 ship no-pick after L30 (D-HOP-14 / v1.0.4 §2.7 §4.1)', () => {
++  it('post-L30 all-zero-gain (FX-L30 shape): ship hint null + no-pick strip; decisive mark-null COLL without ★', () => {
++    const s = fx(30, 30, 30, 22, { ...ALLW, coinsCents: 1e12 });
++    expect(meaningfulKeys(s, SHIP).size).toBe(0);
++    expect(options(s, SHIP).map(o => o.key)).toEqual(['COLL']);
++    expect(isZeroGain(s, SHIP, 'COLL')).toBe(true);
++
++    const ship = appPicker(SHIP).tick(s, SHIP, 0);
++    expect(ship.hint).toBeNull();
++    expect(bbv2Mark(ship.hint, s, SHIP)).toBeNull();
++    const g = selectGoal(s, SHIP, 100, ship.hint?.key as any, null);
++    expect(g.key).toBeNull(); // no-pick strip (BR-BB4 when breeds on is separate UI)
++
++    const dec = appPicker(DEC).tick(s, DEC, 0); // zg0 → DualPicker stock
++    expect(dec.hint?.key).toBe('COLL');
++    expect(bbv2Mark(dec.hint, s, DEC)).toBeNull(); // allowed mark-null net
++  });
++
++  it('post-L30 capacity-only HENS milestone (dCap>0, gain<=0): not ZG, not meaningful; ship never ★s it; breeds off/on', () => {
++    // Collect-bound F30 H29 C5 ALLW: HENS capacity-only; COLL is the meaningful ★ under ship.
++    const base = fx(30, 29, 30, 5, { ...ALLW, coinsCents: 1e12 });
++    const zi = zeroGainInputs(base, SHIP, 'HENS')!;
++    expect(zi.dCap).toBeGreaterThan(0);
++    expect(zi.incAfter - zi.incBefore).toBeLessThanOrEqual(0);
++    expect(isZeroGain(base, SHIP, 'HENS')).toBe(false);
++    expect(isMeaningful(base, SHIP, 'HENS')).toBe(false);
++
++    for (const breeds of [0, 1] as const) {
++      const b = { ...SHIP, m4: { ...SHIP.m4!, flags: { ...SHIP.m4!.flags, breeds } } } as typeof SHIP;
++      const s = breeds ? { ...base, breeds: { owned: {}, slots: [null, null, null], incubator: null, settleMs: [0, 0, 0], hatches: 0, pity: 0, rng: 1, freeHatchUsed: 1, flockCompleteLogged: 0 } } as any : base;
++      const ship = appPicker(b).tick(s, b, 0);
++      expect(bbv2Mark(ship.hint, s, b)).not.toBe('HENS');
++      expect(ship.hint?.key === 'HENS' && ship.hint.affordable && bbv2Mark(ship.hint, s, b) === null).toBe(false);
++      // When COLL is meaningful, ship ★s COLL; when BBv2 set empty, no-pick (covered above).
++      if (meaningfulKeys(s, b).size === 0) {
++        expect(ship.hint).toBeNull();
++        expect(selectGoal(s, b, 100, undefined, null).key).toBeNull();
++      } else {
++        expect(ship.hint && meaningfulKeys(s, b).has(ship.hint.key)).toBe(true);
++      }
++    }
++  });
++
++  it('rankable: ship empty BBv2 set → []; decisive empty → all keys (mark-null net)', () => {
++    const s = fx(30, 30, 30, 22, { ...ALLW, coinsCents: 1e12 });
++    const keys = options(s, SHIP).map(o => o.key);
++    expect(rankable(s, SHIP, keys)).toEqual([]);
++    expect(rankable(s, DEC, keys)).toEqual(keys);
++  });
++
++  it('flags-0: rankable identity and DualPicker / selectGoal unchanged vs pre-BBv2 absent key', () => {
++    const s = fx(17, 19, 18, 10, { workers: { market_hand: W, coop_hand: W, hawker: W } as any, coinsCents: 3e5 });
++    const keys = options(s, OFF).map(o => o.key);
++    expect(rankable(s, OFF, keys)).toEqual(keys);
++    const { bestBuyV2: _x, ...noKey } = OFF.m4!.flags as any;
++    const ABSENT = { ...OFF, m4: { ...OFF.m4!, flags: noKey } } as any;
++    expect(new DualPicker().tick(s, OFF, 0)).toEqual(new DualPicker().tick(s, ABSENT, 0));
++    expect(selectGoal(s, OFF, 100)).toEqual(selectGoal(s, ABSENT, 100));
++  });
++});
+diff --git a/tests/bbv2-parta.test.ts b/tests/bbv2-parta.test.ts
+new file mode 100644
+index 0000000..7ea628d
+--- /dev/null
++++ b/tests/bbv2-parta.test.ts
+@@ -0,0 +1,120 @@
++// BBv2 Part A (spec v1.0.4 4ea3841a §2.1–2.4, §4; Card #12 9f900304 BBV2-AC1/2c/3/4/5/6/11). Flag m4.flags.bestBuyV2.
++import { describe, it, expect } from 'vitest';
++import { options, paybackOf, meaningfulKeys, bestPaybackAmong, rankable, bbv2Mark, BUY_ORDER, type BuyKey } from '../src/econ/best-buy';
++import { PickHysteresis, DualPicker, allScorer, type Scorer } from '../src/ui/pick-hysteresis';
++import { highlightPick } from '../src/ui/tracks-ui';
++import { selectGoal } from '../src/ui/next-goal';
++import { pickM4All, M1_KEYS } from './bot-m4';
++import { bal, ON, OFF, fx, ALLW, L17, BB1, TIE } from './bbv2-fixtures';
++import type { GameState } from '../src/sim/state';
++
++const ROWKEY = { farm: 'FARM', hens: 'HENS', eggValue: 'VALUE' } as const;
++const BOTKEY = { f: 'FARM', c: 'COLL', hens: 'HENS', eggValue: 'VALUE', W1: 'W1', W2: 'W2', W3: 'W3', W4: 'W4' } as const;
++const affFirst = (s: GameState, b = ON) => { const o = options(s, b), a = o.filter(x => s.coinsCents >= Math.round(x.cost * 100)).map(x => x.key); return a.length ? a : o.map(x => x.key); };
++/** Every pick path of spec §1 (+ the ★) on one state, flag on. */
++function paths(s: GameState, b = ON) {
++  const d = new DualPicker().tick(s, b, 0), hp = highlightPick(s, b), g = selectGoal(s, b, 100), bot = pickM4All(s, b, [...M1_KEYS, 'W1', 'W2', 'W3', 'W4']);
++  return { bpa: bestPaybackAmong(s, b, affFirst(s, b))?.key ?? null, hint: d.hint?.key ?? null, highlight: d.highlight?.key ?? null,
++    tracks: hp ? ROWKEY[hp.row] : null, goal: g.key, bot: bot ? BOTKEY[bot] : null, mark: bbv2Mark(d.hint, s, b) };
++}
++/** Generated grid: Farm 3..29, Collection / tracks around it, workers none / all, coins 0 / short / rich. */
++function* grid() {
++  for (let F = 3; F <= 29; F += 2) for (const dc of [-6, -2, 0, 3]) for (const dh of [-1, 1]) for (const w of [0, 1]) for (const coins of [0, 2e5, 5e6, 1e9]) {
++    const C = Math.max(0, Math.min(30, F + dc)), H = Math.max(0, Math.min(30, F + dh)), V = Math.max(0, Math.min(30, F + dh - 1));
++    yield fx(F, H, V, C, { ...(w ? ALLW : {}), coinsCents: coins });
++  }
++}
++
++describe('BBV2-AC1 [B] zero-gain never ranked while a meaningful row is offered (all §1 paths + ★)', () => {
++  it('generated grid: hint, highlight, next-goal, tracks highlight, bestPaybackAmong, bot pick and ★ are meaningful (0 violations)', () => {
++    let n = 0, offFlagged = 0; const bad: string[] = [];
++    for (const s of grid()) {
++      const M = meaningfulKeys(s, ON); if (!M.size) continue; n++;
++      for (const [k, v] of Object.entries(paths(s))) if (v !== null && !M.has(v as BuyKey)) bad.push(`F${s.farmLevel} C${s.collectionLevel} $${s.coinsCents / 100} ${k}=${v}`);
++      const off = paths(s, OFF); if (Object.values(off).some(v => v !== null && !M.has(v as BuyKey))) offFlagged++;
++    }
++    expect(bad).toEqual([]); expect(n).toBeGreaterThan(300);
++    expect(offFlagged, 'non-vacuity: the flag-off pickers do rank zero-gain rows on this grid').toBeGreaterThan(0);
++  });
++  it.each(Object.keys(BB1))('fixture %s at $0 / $3,000 / $37,300 / rich: same property', (name) => {
++    for (const c of [0, 3e5, 3.73e6, 1e10]) {
++      const s = BB1[name as keyof typeof BB1](c), M = meaningfulKeys(s, ON); expect(M.size).toBeGreaterThan(0);
++      for (const [k, v] of Object.entries(paths(s))) if (v !== null) expect(M.has(v as BuyKey), `${name} $${c / 100} ${k}=${v}`).toBe(true);
++    }
++  });
++});
++
++describe('BBV2-AC2 (c) / BBV2-AC3 [B] hysteresis never protects a zero-gain pick', () => {
++  it('FX-L17 at $3,000: flag off shows COLL (the C4 lock); the same picker under flag on switches to FARM on the next evaluate, no 2 s hold', () => {
++    const s = L17(3e5); expect(meaningfulKeys(s, ON).has('COLL'), 'precondition: COLL zero-gain at FX-L17').toBe(false);
++    const p = new PickHysteresis(allScorer); expect(p.evaluate(s, OFF, 1000)?.key).toBe('COLL');
++    const q = p.evaluate(s, ON, 1001); expect(q?.key).toBe('FARM'); expect(q?.affordable).toBe(false);
++    expect(bbv2Mark(q, s, ON)).toBeNull();
++  });
++  it('FX-L17 at $37,300: hint = highlight = FARM, ★ FARM (BB-AC2 (a), unit)', () => {
++    const s = L17(3.73e6), d = new DualPicker().tick(s, ON, 0);
++    expect(d.hint?.key).toBe('FARM'); expect(d.highlight?.key).toBe('FARM'); expect(bbv2Mark(d.hint, s, ON)).toBe('FARM');
++  });
++  it('generated: every state where the flag-off picker shows a zero-gain pick and a meaningful row is offered drops it on the next evaluate (100%)', () => {
++    let cases = 0;
++    for (const s of grid()) {
++      const M = meaningfulKeys(s, ON); if (!M.size) continue;
++      const p = new PickHysteresis(allScorer), k = p.evaluate(s, OFF, 0)?.key; if (!k || M.has(k)) continue;
++      cases++; const q = p.evaluate(s, ON, 1); expect(q && M.has(q.key), `F${s.farmLevel} C${s.collectionLevel} ${k}→${q?.key}`).toBe(true);
++    }
++    expect(cases).toBeGreaterThan(0);
++  });
++});
++
++describe('BBV2-AC4 [B] ∞-tie: FARM, then BUY_ORDER; cost never decides an ∞-tie', () => {
++  it.each(Object.keys(TIE))('FX-TIE %s (reachable on the rc/v5 CSV): all ranked paybacks ∞; bestPaybackAmong = hint = highlight = bot = FARM; unaffordable strip = Farm countdown, no ★', (n) => {
++    const s = TIE[n as keyof typeof TIE](), ks = rankable(s, ON, options(s, ON).map(o => o.key));
++    for (const k of ks) expect(paybackOf(s, ON, k), `precondition ${k} ∞`).toBe(Infinity);
++    const p = paths(s); expect([p.bpa, p.hint, p.highlight]).toEqual(['FARM', 'FARM', 'FARM']);
++    expect(pickM4All({ ...s, coinsCents: 1e12 }, ON, M1_KEYS)).toBe('f');
++    const g = selectGoal(s, ON, 100, p.hint as any, p.mark as any); expect(g.key).toBe('FARM'); expect(g.state).toBe('waiting'); expect(p.mark).toBeNull();
++  });
++  it('unit (constructed scorer): ∞ FARM vs a cheaper ∞ row: flag on FARM, flag off the cheaper row; finite ties keep lower cost', () => {
++    const rows = (a: [BuyKey, number, number][]): Scorer => () => a.map(([key, costCents, payback]) => ({ key, costCents, payback, level: 0 }));
++    const s = fx(29, 30, 30, 22, { coinsCents: 1e12 });
++    expect(new PickHysteresis(rows([['W1', 10, Infinity], ['FARM', 100, Infinity]])).evaluate(s, ON, 0)?.key).toBe('FARM');
++    expect(new PickHysteresis(rows([['W1', 10, Infinity], ['FARM', 100, Infinity]])).evaluate(s, OFF, 0)?.key).toBe('W1');
++    expect(new PickHysteresis(rows([['W2', 10, Infinity], ['W1', 100, Infinity]])).evaluate(s, ON, 0)?.key).toBe('W1'); // BUY_ORDER
++    expect(new PickHysteresis(rows([['W1', 10, 50], ['FARM', 100, 50]])).evaluate(s, ON, 0)?.key).toBe('W1'); // finite: cost
++    expect(BUY_ORDER[0]).toBe('FARM');
++  });
++});
++
++describe('BBV2-AC5 [B] dead zone: no affordable meaningful row -> best meaningful row, countdown, no ★', () => {
++  it('FX-L17 at $3,000 (COLL affordable, zero-gain): strip targets FARM (best meaningful payback), waiting, no ★; flag off targets COLL', () => {
++    const s = L17(3e5), d = new DualPicker().tick(s, ON, 0), mark = bbv2Mark(d.hint, s, ON);
++    const g = selectGoal(s, ON, 100, d.hint?.key as any, mark as any);
++    expect(g.key).toBe('FARM'); expect(g.state).toBe('waiting'); expect(g.status).toMatch(/^~/); expect(mark).toBeNull();
++    expect(selectGoal(s, ON, 100).key).toBe('FARM'); // stateless path agrees
++    expect(selectGoal(s, OFF, 100).key).toBe('COLL');
++  });
++  it('after Farm L30 (no meaningful row offered, zeroGainUi = 0 test config): a zero-gain target is allowed, never ★', () => {
++    const s = fx(30, 30, 30, 22, { ...ALLW, coinsCents: 1e12 }); expect(meaningfulKeys(s, ON).size).toBe(0);
++    const d = new DualPicker().tick(s, ON, 0); expect(d.hint?.key).toBe('COLL'); expect(bbv2Mark(d.hint, s, ON)).toBeNull();
++  });
++});
++
++describe('BBV2-AC6 [B] Max-for-this-farm / capped tracks / R11 rows are never candidates', () => {
++  it('options() keys are BuyKeys only; a capped or MAX track is never ranked, flag on', () => {
++    for (const s of grid()) { const ks = options(s, ON).map(o => o.key); for (const k of ks) expect(BUY_ORDER).toContain(k); }
++    const capped = fx(10, 30, 30, 10, { coinsCents: 1e12 }); const p = paths(capped);
++    expect([p.hint, p.highlight, p.tracks, p.goal, p.mark]).not.toContain('HENS'); expect([p.hint, p.highlight, p.tracks, p.goal, p.mark]).not.toContain('VALUE');
++  });
++});
++
++describe('BBV2-AC11 [B] flag 0 = pre-BBv2 behaviour', () => {
++  it('rankable is the identity and bestPaybackAmong / DualPicker / selectGoal / highlightPick equal m4.flags.bestBuyV2 absent', () => {
++    const { bestBuyV2: _x, ...noKey } = OFF.m4!.flags as any; const ABSENT = { ...OFF, m4: { ...OFF.m4!, flags: noKey } } as any;
++    for (const s of grid()) {
++      const ks = options(s, OFF).map(o => o.key); expect(rankable(s, OFF, ks)).toEqual(ks);
++      expect(paths(s, OFF)).toEqual(paths(s, ABSENT));
++    }
++    expect(bal(1, { enabled: 0 }).m4!.flags.bestBuyV2).toBe(1); // m4 off: the flag is inert
++    const s = L17(3e5); expect(paths(s, bal(1, { enabled: 0 }))).toEqual(paths(s, bal(0, { enabled: 0 })));
++  });
++});
+diff --git a/tests/bbv2-qapicker.test.ts b/tests/bbv2-qapicker.test.ts
+new file mode 100644
+index 0000000..b2871b4
+--- /dev/null
++++ b/tests/bbv2-qapicker.test.ts
+@@ -0,0 +1,130 @@
++// @vitest-environment jsdom
++// SG-12 qaPicker (stopgap v1.2.6 fdc1c199 SG-12) as reused by BBv2 (spec v1.0.4 4ea3841a §6, PMFU BB12; Card #12 9f900304):
++// BBV2-AC15 (fields, read-only), BBV2-AC2 (a)/(b) jsdom analog (the browser run on the RC dist is QA's), mark = the rendered ★,
++// suppressed rules (BBV2-AC14: tested property is `suppressed && hint.affordable` = 0).
++import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { Game } from '../src/game';
++import { mem } from './helpers';
++import { meaningfulKeys } from '../src/econ/best-buy';
++import { bal, ON, OFF, fx, ALLW, L17, BB1 } from './bbv2-fixtures';
++import type { Balance } from '../src/config/balance';
++
++let t = 1000;
++beforeAll(() => {
++  window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as any;
++  (globalThis as any).requestAnimationFrame ??= (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0);
++  (Element.prototype as any).scrollIntoView ??= function () { /* jsdom */ };
++  (Element.prototype as any).animate ??= function () { return { cancel() {}, finished: Promise.resolve(), onfinish: null }; };
++  vi.spyOn(performance, 'now').mockImplementation(() => t);
++});
++afterEach(() => { document.body.innerHTML = ''; localStorage.clear(); });
++async function mount(state: object, bal: Balance, tab = 'farm') {
++  const g = new Game(bal, mem() as any, () => 1760000000000 + t, 1, 'test'); g.state = { ...g.state, ...state } as any;
++  const { mountApp } = await import('../src/ui/app');
++  document.body.innerHTML = '<div id="app"></div>';
++  const ui: any = mountApp(document.getElementById('app')!, g, bal, { enabled: false, play() {}, unlock() {} } as any, 'test', { newGame: false });
++  document.getElementById('modal-layer')?.classList.remove('open');
++  ui.openPanel('upgrades'); (document.querySelector(`[data-tab=${tab}]`) as HTMLElement)?.click(); ui.render(); ui.render();
++  return { g, ui };
++}
++const FIELDS = ['v', 't', 'm4', 'hint', 'hintRaw', 'highlight', 'mark', 'suppressed', 'heldMs', 'evals', 'changes', 'history'];
++const chip = () => document.querySelector<HTMLElement>('[data-best-buy]')?.dataset.bestBuy ?? null;
++const stripStar = () => /★/.test(document.querySelector('#goal')!.textContent!);
++/** Strip ★ via goalLabelParts: F4 targets always; FARM too when bestBuyV2=1 (spec v1.0.4 §6). Workers still have none. */
++const F4 = (k?: string | null) => k === 'HENS' || k === 'VALUE' || k === 'COLL';
++const stripWantsStar = (q: any, bb2: boolean) =>
++  q.mark !== null && q.mark === q.hint?.key && (F4(q.hint?.key) || (bb2 && q.hint?.key === 'FARM'));
++
++describe('BBV2-AC15 [B] qaPicker v1 fields unchanged with the flag on; read-only', () => {
++  it.each([['bestBuyV2 0', OFF], ['bestBuyV2 1', ON]])('%s: exactly the SG-12 field names and types (pick = key/affordable/costCents/payback)', async (_n, b) => {
++    const { ui } = await mount(L17(3.73e6), b); const q = ui.qaPicker();
++    expect(Object.keys(q)).toEqual(FIELDS); expect(q.v).toBe(1); expect(typeof q.t).toBe('number'); expect(q.m4).toBe(true);
++    for (const k of ['hint', 'hintRaw', 'highlight']) if (q[k]) expect(Object.keys(q[k])).toEqual(['key', 'affordable', 'costCents', 'payback']);
++    expect(typeof q.suppressed).toBe('boolean'); expect(typeof q.heldMs).toBe('number'); expect(typeof q.evals).toBe('number');
++    expect(q.history.length).toBe(1); expect(Object.keys(q.history[0])).toEqual(['t', 'key', 'affordable', 'mark']); // load counts as one
++    expect(JSON.parse(JSON.stringify(q))).toEqual(q);
++  });
++  it('payback Infinity serialises as "Infinity"; history is a 32-entry ring; heldMs counts from the last key change', async () => {
++    const { g, ui } = await mount(fx(29, 30, 30, 22, { ...ALLW, coinsCents: 0 }), ON);
++    expect(ui.qaPicker().hint.payback).toBe('Infinity');
++    for (let i = 0; i < 40; i++) { t += 100; g.state = { ...g.state, coinsCents: i % 2 ? 1e12 : 0 }; ui.render(); }
++    const q = ui.qaPicker(); expect(q.history.length).toBe(32); expect(q.history[0].t).toBeLessThan(q.history[31].t);
++    expect(q.history.every((h: any) => h.key === q.hint.key)).toBe(true); // only affordable flips: the key never changed
++    expect(q.heldMs).toBe(4000); // counts from load (t 1000 -> 5000), not capped by the overflowed ring
++  });
++  it('1,000 calls between frames change no game state, no DOM, no picker evals, no telemetry', async () => {
++    const { g, ui } = await mount(L17(3e5), ON); const st = JSON.stringify(g.state), dom = document.body.innerHTML, ev = g.telemetry.events().length, e0 = ui.qaPicker().evals;
++    for (let i = 0; i < 1000; i++) ui.qaPicker();
++    expect(JSON.stringify(g.state)).toBe(st); expect(document.body.innerHTML).toBe(dom); expect(g.telemetry.events().length).toBe(ev); expect(ui.qaPicker().evals).toBe(e0);
++  });
++  it('release build lists qaPicker in check-release-build (the gate fails if the string is in dist)', () => {
++    expect(readFileSync(`${process.cwd()}/scripts/check-release-build.mjs`, 'utf8')).toMatch(/'qaPicker'/);
++  });
++});
++
++describe('PMFU BB12: mark is the exact ★ the chip and the strip render; suppressed = hint !== null && mark === null', () => {
++  const cases: [string, object, string][] = [['L17 $37,300', L17(3.73e6), 'farm'], ['L17 $3,000', L17(3e5), 'farm'], ['L17 $3,000 coll tab', L17(3e5), 'collection'],
++    ...Object.entries(BB1).map(([n, f]) => [n, f(5e6), 'farm'] as [string, object, string]), ['post-L30', fx(30, 30, 30, 22, { ...ALLW, coinsCents: 1e12 }), 'collection']];
++  it.each([['bestBuyV2 0', OFF], ['bestBuyV2 1', ON]])('%s: chip key = mark; strip ★ iff mark; suppressed per the rule', async (_n, b) => {
++    for (const [name, s, tab] of cases) {
++      const { ui } = await mount(s, b, tab); const q = ui.qaPicker();
++      expect(chip() === null || chip() === q.mark, `${name} chip ${chip()} mark ${q.mark}`).toBe(true); // the visible row's chip names mark
++      if (q.mark === null) expect(chip(), name).toBeNull();
++      expect(stripStar(), name).toBe(stripWantsStar(q, b === ON));
++      expect(q.suppressed, name).toBe(q.hint !== null && q.mark === null);
++    }
++  });
++  it('bestBuyV2 0: mark = single-arg bestBuyMark = hint key when affordable; suppressed never with an affordable hint (no stopgap, D-HOE-33)', async () => {
++    for (const [name, s, tab] of cases) { const { ui } = await mount(s, OFF, tab); const q = ui.qaPicker();
++      expect(q.mark, name).toBe(q.hint?.affordable ? q.hint.key : null); expect(q.suppressed && q.hint?.affordable, name).toBeFalsy(); }
++  });
++  it('bestBuyV2 1: suppressed (with an affordable hint) only in the inert mark-null net = no meaningful row offered (after L30)', async () => {
++    for (const [name, s, tab] of cases) { const { g, ui } = await mount(s, ON, tab); const q = ui.qaPicker();
++      if (q.suppressed && q.hint?.affordable) expect(meaningfulKeys(g.state, ON).size, name).toBe(0); }
++  });
++  // v1.0.4 §6: literal `suppressed` is true for every unaffordable hint (★ affordable-only); the QA property is
++  // `suppressed && hint.affordable` = 0. Ship-config assertion below uses that property.
++  it('ship config (bestBuyV2 1 + zeroGainUi 1): never an affordable hint with a null ★ at any Farm (D-HOP-14; post-L30 empty BBv2 → no-pick)', async () => {
++    const SHIP = bal(1, { zeroGainUi: 1 }), nulled = (q: any) => q.suppressed && q.hint?.affordable;
++    for (const [name, s, tab] of cases) { const { ui } = await mount(s, SHIP, tab); expect(nulled(ui.qaPicker()), name).toBeFalsy(); }
++    // post-L30 fixture: hint null (no-pick), not an affordable null-★
++    const { ui: uiL30 } = await mount(fx(30, 30, 30, 22, { ...ALLW, coinsCents: 1e12 }), SHIP, 'collection');
++    expect(uiL30.qaPicker().hint).toBeNull();
++    const { g, ui } = await mount(L17(3e5), SHIP);
++    for (let i = 0; i < 2400; i++) { t += 100; g.frame(); ui.render(); expect(nulled(ui.qaPicker())).toBeFalsy(); }
++  });
++});
++
++describe('BBV2-AC2 (a)/(b) jsdom analog on FX-L17 (DOM/page.clock checks on the RC dist and build:qa are QA browser runs)', () => {
++  // v1.0.4 §6 Farm strip ★: FARM is an ordinary meaningful row — affordable FARM hint => mark==='FARM' and strip+row show ★;
++  // unaffordable FARM hint = countdown without ★. A missing ★ on an affordable FARM hint is a bug.
++  it('(a) $37,300 affordable FARM: hint = mark = FARM, chip [data-best-buy=FARM], strip ★ on Farm', async () => {
++    const { ui } = await mount(L17(3.73e6), ON); const q = ui.qaPicker();
++    expect(q.hint).toMatchObject({ key: 'FARM', affordable: true }); expect(q.mark).toBe('FARM'); expect(chip()).toBe('FARM');
++    expect(stripStar()).toBe(true);
++    expect(document.querySelector('#goal .goal-label .ng-star')?.textContent).toBe('★ ');
++  });
++  it('(a′) $3,000 unaffordable FARM: hint FARM, mark null, no chip, no strip ★', async () => {
++    const { ui } = await mount(L17(3e5), ON); const q = ui.qaPicker();
++    expect(q.hint).toMatchObject({ key: 'FARM', affordable: false }); expect(q.mark).toBeNull();
++    expect(chip()).toBeNull(); expect(stripStar()).toBe(false);
++    expect(document.querySelector('#goal .goal-label .ng-star')).toBeNull();
++  });
++  it('(a″) bestBuyV2=0 control: affordable FARM still has mark+chip but no strip ★ (flag-off template unchanged)', async () => {
++    const { ui } = await mount(L17(3.73e6), OFF); const q = ui.qaPicker();
++    expect(q.hint).toMatchObject({ key: 'FARM', affordable: true }); expect(q.mark).toBe('FARM'); expect(chip()).toBe('FARM');
++    expect(stripStar()).toBe(false); expect(document.querySelector('#goal .goal-label')!.classList.contains('ng')).toBe(false);
++  });
++  it('(b) $3,000 + 240 s sim, no buy input: no history entry with key or mark COLL; every non-null mark meaningful; hint starts FARM unaffordable/null; at >= $37,300 hint = mark = FARM', async () => {
++    const { g, ui } = await mount(L17(3e5), ON); const q0 = ui.qaPicker();
++    expect(q0.hint).toMatchObject({ key: 'FARM', affordable: false }); expect(q0.mark).toBeNull();
++    const seen: any[] = [];
++    for (let i = 0; i < 2400; i++) { t += 100; g.frame(); ui.render(); const q = ui.qaPicker(); seen.push(...q.history);
++      if (q.mark) expect(meaningfulKeys(g.state, ON).has(q.mark), `mark ${q.mark}`).toBe(true);
++      if (g.state.coinsCents >= 3.73e6) { expect(q.hint.key).toBe('FARM'); expect(q.mark).toBe('FARM'); } }
++    expect(seen.some(h => h.key === 'COLL' || h.mark === 'COLL')).toBe(false);
++    // flag-off control: pre-BBv2 rc/v5 (spec §5) picks COLL here -> the test is not vacuous
++    const { g: g0, ui: u0 } = await mount(L17(3e5), OFF); expect(u0.qaPicker().hint.key).toBe('COLL'); void g0;
++  });
++});
+diff --git a/tests/bbv2-qe2.test.ts b/tests/bbv2-qe2.test.ts
+new file mode 100644
+index 0000000..9fb3ed8
+--- /dev/null
++++ b/tests/bbv2-qe2.test.ts
+@@ -0,0 +1,43 @@
++// BBV2-AC10 [B] Q-E2 collect fix (spec v1.0.3 27e753d8 §2.5; Econ 14:05): planner path only, flag on.
++import { describe, it, expect } from 'vitest';
++import { collectPerSec, incomePerSec, secondsToAffordSteady } from '../src/econ/income';
++import { headerRate } from '../src/ui/s2-economy-ui';
++import { applyOffline } from '../src/sim/offline';
++import { eggsPerTap } from '../src/sim/state';
++import { ON, OFF, fx, L17 } from './bbv2-fixtures';
++import type { GameState } from '../src/sim/state';
++
++const W = (energy: number, extra = {}) => ({ energy, cdS: 0, ...extra });
++const moods: [string, Partial<GameState>][] = [
++  ['no Coop Hand', {}], ['working', { workers: { coop_hand: W(100) } as any }], ['tired', { workers: { coop_hand: W(20) } as any }],
++  ['asleep', { workers: { coop_hand: W(0) } as any }], ['unpaid', { workers: { coop_hand: W(80, { unpaid: true }) } as any }],
++  ['all three', { workers: { market_hand: W(100), coop_hand: W(100), hawker: W(100) } as any }],
++];
++describe('BBV2-AC10 [B] Q-E2', () => {
++  it('flag on, assumeWorking, Coop Hand hired: collect = eggs_per_tap[C] / coop_hand.every_s; no Coop Hand: eggs_per_tap[C]', () => {
++    for (const C of [0, 5, 10, 14, 22, 29]) {
++      const tap = eggsPerTap(C, ON);
++      expect(collectPerSec(fx(17, 19, 18, C), ON, { assumeWorking: true })).toBe(tap);
++      expect(collectPerSec(fx(17, 19, 18, C, moods[1][1]), ON, { assumeWorking: true })).toBe(tap / ON.workers.coop_hand.every_s);
++      expect(collectPerSec(fx(17, 19, 18, C, moods[1][1]), OFF, { assumeWorking: true })).toBe(tap * 1.5); // flag off unchanged
++    }
++    expect(ON.workers.coop_hand.every_s).toBe(2);
++  });
++  it('spec probe FX-L17 C10: planner collect 82.5 -> 27.5 eggs/s (flag off -> on)', () => {
++    const s = L17(0); expect(collectPerSec(s, OFF, { assumeWorking: true })).toBeCloseTo(82.5, 9); expect(collectPerSec(s, ON, { assumeWorking: true })).toBeCloseTo(27.5, 9);
++  });
++  it.each(moods)('live path byte-identical flag on vs off (%s): collectPerSec, incomePerSec, headerRate, secondsToAffordSteady', (_n, w) => {
++    for (const C of [0, 10, 22]) for (const coins of [0, 5e5]) {
++      const s = fx(17, 19, 18, C, { ...w, coinsCents: coins });
++      expect(collectPerSec(s, ON)).toBe(collectPerSec(s, OFF)); expect(incomePerSec(s, ON)).toBe(incomePerSec(s, OFF));
++      expect(headerRate(s, ON)).toEqual(headerRate(s, OFF));
++      for (const need of [1e4, 1e6, 1e8]) expect(secondsToAffordSteady(s, ON, need)).toBe(secondsToAffordSteady(s, OFF, need));
++    }
++  });
++  it('offline earnings identical flag on vs off (live model)', () => {
++    for (const [, w] of moods) for (const away of [60e3, 3600e3, 8 * 3600e3]) {
++      const s = fx(17, 19, 18, 10, { ...w, coinsCents: 1e5 });
++      expect(JSON.stringify(applyOffline(s, away, ON))).toBe(JSON.stringify(applyOffline(s, away, OFF)));
++    }
++  });
++});
+diff --git a/tests/bbv2-sim.slow.test.ts b/tests/bbv2-sim.slow.test.ts
+new file mode 100644
+index 0000000..ec9f1b0
+--- /dev/null
++++ b/tests/bbv2-sim.slow.test.ts
+@@ -0,0 +1,19 @@
++// BBV2-AC9 / AC14 [B] seeds 1–200 (Card #12 9f900304 N3/N6). Run with `npm run test:slow` (lane H; one heavy sim at a time).
++import { describe, it, expect } from 'vitest';
++import { ac9, ac14, AC14_CONFIGS, seeds } from './bbv2-sim';
++import { ON } from './bbv2-fixtures';
++const S = seeds(1, 200);
++describe('BBV2-AC9 seeds 1–200', () => {
++  it('flag on: zero-gain buys below L30 = 0 (runBot band + runM2 workers)', () => {
++    const r = ac9(ON, S); console.log(`AC9 seeds 1-200: ${r.zeroGainBelow30} zero-gain of ${r.buys} buys`);
++    expect(r.perSeed).toEqual([]); expect(r.zeroGainBelow30).toBe(0);
++  }, 1_800_000);
++});
++describe('BBV2-AC14 seeds 1–200 (DECISIVE first, then CONFIRMATORY ship)', () => {
++  for (const [label, b] of Object.entries(AC14_CONFIGS)) it(label, () => {
++    const r = ac14(b, S); console.log(`AC14 ${label} seeds 1-200: ${JSON.stringify(r)}`);
++    expect(r.violations).toBe(0); expect(r.suppressedAffordableBelow30).toBe(0);
++    // D-HOP-2026-11-05-14 / Card #12 9f900304: ship has no post-L30 exception; decisive net stays report-only.
++    if (label.startsWith('CONFIRMATORY')) expect(r.suppressedAffordable).toBe(0);
++  }, 3_600_000);
++});
+diff --git a/tests/bbv2-sim.test.ts b/tests/bbv2-sim.test.ts
+new file mode 100644
+index 0000000..c297665
+--- /dev/null
++++ b/tests/bbv2-sim.test.ts
+@@ -0,0 +1,35 @@
++// BBV2-AC8 / AC9 / AC14 [B] unit subset (Card #12 9f900304; spec v1.0.4 4ea3841a §7; Card #12 9f900304 / D-HOP-2026-11-05-14). Seeds 1–200: bbv2-sim.slow.test.ts.
++import { describe, it, expect } from 'vitest';
++import { ac8, ac9, ac14, AC14_CONFIGS, seeds } from './bbv2-sim';
++import { ON } from './bbv2-fixtures';
++
++describe('BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps)', () => {
++  it('seeds 1–200, 15 s check-in sells (gating cadence): 0 violating seeds', () => {
++    const r = seeds(1, 200).map(sd => ({ sd, ...ac8(ON, sd, 'fixed') }));
++    const bad = r.filter(x => !(x.t <= 30) || !x.meaningful || x.firstHintMeaningful !== true);
++    console.log(`AC8 fixed cadence: max first ★ ${Math.max(...r.map(x => x.t))} s; keys ${[...new Set(r.map(x => x.key))].join(',')}; violating ${bad.length}`);
++    expect(bad.map(x => x.sd)).toEqual([]);
++  });
++  it('VAR_DEFAULT check-in cadence: REPORT-ONLY (the bot\'s random first check-in), every seed gets a meaningful ★', () => {
++    const r = seeds(1, 200).map(sd => ac8(ON, sd, 'variance'));
++    console.log(`AC8 variance cadence (report-only): ${r.filter(x => x.t > 30).length}/200 first ★ after 30 s, max ${Math.max(...r.map(x => x.t))} s`);
++    expect(r.every(x => Number.isFinite(x.t) && x.meaningful && x.firstHintMeaningful)).toBe(true);
++  });
++});
++
++describe('BBV2-AC9 [B] seller15 bots (runBot band + runM2 workers, VAR_DEFAULT): zero-gain buys below L30 = 0', () => {
++  it('flag on, seeds 1–10 (1–200 in the slow test)', () => {
++    const r = ac9(ON, seeds(1, 10)); console.log(`AC9 seeds 1-10: ${r.zeroGainBelow30} zero-gain of ${r.buys} buys`);
++    expect(r.buys).toBeGreaterThan(0); expect(r.perSeed).toEqual([]); expect(r.zeroGainBelow30).toBe(0);
++  });
++});
++
++describe('BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0', () => {
++  for (const [label, b] of Object.entries(AC14_CONFIGS)) it(`${label}: seeds 1–3 (1–200 in the slow test)`, () => {
++    const r = ac14(b, seeds(1, 3)); console.log(`AC14 ${label} seeds 1-3: ${JSON.stringify(r)}`);
++    expect(r.states).toBeGreaterThan(0); expect(r.violations).toBe(0); expect(r.examples).toEqual([]);
++    expect(r.suppressedAffordableBelow30).toBe(0); // v1.0.4 / D-HOP-14: never below L30
++    // CONFIRMATORY ship (bb1+zg1): no exception at any Farm (empty BBv2 set → no-pick). DECISIVE zg-off: post-L30 net report-only.
++    if (label.startsWith('CONFIRMATORY')) expect(r.suppressedAffordable).toBe(0);
++  }, 120_000);
++});
+diff --git a/tests/bbv2-sim.ts b/tests/bbv2-sim.ts
+new file mode 100644
+index 0000000..360bf2b
+--- /dev/null
++++ b/tests/bbv2-sim.ts
+@@ -0,0 +1,76 @@
++// BBv2 sim-AC drivers (spec v1.0.4 4ea3841a §7; Card #12 9f900304 BBV2-AC8/9/14). Shared by the unit subset (bbv2-sim.test.ts)
++// and the seeds 1–200 run (bbv2-sim.slow.test.ts). Pure functions of (balance, seeds): deterministic.
++import type { Balance } from '../src/config/balance';
++import { initialState } from '../src/sim/state';
++import { step } from '../src/sim/tick';
++import { apply } from '../src/sim/actions';
++import { DualPicker, defaultScorer, allScorer } from '../src/ui/pick-hysteresis';
++import { zeroGainUiOn, zgFiltered } from '../src/ui/zero-gain';
++import { bbv2Mark, meaningfulKeys } from '../src/econ/best-buy';
++import { buyKeyOf } from '../src/telemetry/bbv2';
++import { runBot, BUY_TRACE, STATE_TRACE } from './bot';
++import { runM2 } from './bot-m2';
++import { SellerVariance, VAR_DEFAULT } from './seller-variance';
++import { bal } from './bbv2-fixtures';
++
++/** BBV2-AC14 run configs (HoQA 14:38, spec v1.0.4 BB-AC14). */
++export const AC14_CONFIGS = {
++  'DECISIVE bestBuyV2=1 zeroGainUi=0': bal(1, { zeroGainUi: 0 }),
++  'CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1': bal(1, { zeroGainUi: 1 }),
++} as const;
++/** The picker app.ts builds (rc/v5 >= 0ad018de, #97): with zeroGainUi on, ZG rows are dropped from both scorers before the pick. */
++export const appPicker = (b: Balance) => zeroGainUiOn(b) ? new DualPicker(zgFiltered(defaultScorer), zgFiltered(allScorer)) : new DualPicker();
++export const seeds = (a: number, z: number) => Array.from({ length: z - a + 1 }, (_, i) => a + i);
++
++/** BBV2-AC8: fresh save, VAR_DEFAULT taps; sells at the 15 s check-in grid (`cadence: 'fixed'`, gating, as ac7-first-purchase's
++ *  deterministic bot) or at VAR_DEFAULT check intervals (`'variance'`, report-only: it measures the bot's random first check-in).
++ *  Per seed: time of the first non-null ★ (sim s, picker ticked every 0.1 s) and whether the first non-null hint was meaningful. */
++export function ac8(b: Balance, seed: number, cadence: 'fixed' | 'variance', T = 120) {
++  const V = new SellerVariance(VAR_DEFAULT, seed); let s = initialState(b, seed); const dt = 1 / b.tickHz;
++  let tapT = 1, sellT = cadence === 'fixed' ? 15 : V.checkInterval(15); const P = appPicker(b); let firstHintMeaningful: boolean | null = null;
++  for (let i = 1; i <= T * b.tickHz; i++) {
++    const t = Math.round(i * dt * 10) / 10; s = step(s, dt, b);
++    if (t >= tapT) { tapT += V.tapInterval(); s = apply(s, { type: 'collect' }, b); }
++    if (t >= sellT) { sellT = cadence === 'fixed' ? sellT + 15 : t + V.checkInterval(15); s = apply(s, { type: 'sellAll' }, b); }
++    const h = P.tick(s, b, t * 1000).hint;
++    if (h && firstHintMeaningful === null) firstHintMeaningful = meaningfulKeys(s, b).has(h.key);
++    const m = bbv2Mark(h, s, b); if (m) return { t, key: m, meaningful: meaningfulKeys(s, b).has(m), firstHintMeaningful };
++  }
++  return { t: Infinity, key: null, meaningful: false, firstHintMeaningful };
++}
++
++/** The two seller15 bots of BB-AC9 / Card N3: runBot band (VAR_DEFAULT, 3600 s) and runM2 with workers (VAR_DEFAULT, 7200 s). */
++const BOTS = { runBot: (b: Balance, sd: number) => runBot(b, sd, 'seller15', 3600, 15, VAR_DEFAULT), runM2: (b: Balance, sd: number) => runM2(b, sd, { model: 'seller15', T: 7200, variance: VAR_DEFAULT }) };
++
++/** BBV2-AC9: zero-gain purchases (purchase-time verdict: key not meaningful in the state before the buy) below Farm L30. */
++export function ac9(b: Balance, ss: number[]) {
++  const out = { zeroGainBelow30: 0, buys: 0, perSeed: [] as { seed: number; bot: string; zg: number }[] };
++  try {
++    for (const sd of ss) for (const [bot, run] of Object.entries(BOTS)) {
++      let zg = 0; BUY_TRACE.fn = (p, a) => { out.buys++; const k = buyKeyOf(a); if (k && p.farmLevel < 30 && !meaningfulKeys(p, b).has(k)) zg++; };
++      run(b, sd); out.zeroGainBelow30 += zg; if (zg) out.perSeed.push({ seed: sd, bot, zg });
++    }
++  } finally { BUY_TRACE.fn = null; }
++  return out;
++}
++
++/** BBV2-AC14: trace the hint (DualPicker, as app.ts renderGoal) every integer sim second of both bots. Violation = the hint is a
++ *  zero-gain row while a meaningful row is offered. Also counts literal `suppressed` (hint !== null && mark === null) split by
++ *  hint affordability; v1.0.4 / D-HOP-2026-11-05-14: CONFIRMATORY ship `suppressed && hint.affordable` = 0 at ALL Farms (empty BBv2 → no-pick);
++ *  DECISIVE zg-off may count post-L30 mark-null net (report-only). */
++export function ac14(b: Balance, ss: number[]) {
++  const out = { states: 0, violations: 0, suppressed: 0, suppressedAffordable: 0, suppressedAffordableBelow30: 0, examples: [] as string[] };
++  try {
++    for (const sd of ss) for (const [bot, run] of Object.entries(BOTS)) {
++      const P = appPicker(b); // CONFIRMATORY ship run: the #97 ZG filter is in front of Part A, as in the build
++      STATE_TRACE.fn = (t, s) => {
++        out.states++; const h = P.tick(s, b, t * 1000).hint; if (!h) return;
++        const m = meaningfulKeys(s, b);
++        if (m.size > 0 && !m.has(h.key)) { out.violations++; if (out.examples.length < 5) out.examples.push(`${bot} seed ${sd} t ${t} F${s.farmLevel} hint ${h.key}`); }
++        if (bbv2Mark(h, s, b) === null) { out.suppressed++; if (h.affordable) { out.suppressedAffordable++; if (s.farmLevel < 30) out.suppressedAffordableBelow30++; } }
++      };
++      run(b, sd);
++    }
++  } finally { STATE_TRACE.fn = null; }
++  return out; // v5 has no SG-8 emitter (spec v1.0.4 §5, D-HOE-33): no event count is probed here
++}
+diff --git a/tests/bbv2-telemetry.test.ts b/tests/bbv2-telemetry.test.ts
+new file mode 100644
+index 0000000..6667a56
+--- /dev/null
++++ b/tests/bbv2-telemetry.test.ts
+@@ -0,0 +1,145 @@
++// BBV2-AC16 [B] §8 events on the event sink (spec v1.0.3 27e753d8 §8; source of record: telemetry errata v5 rev 12 0cfe168a
++// rows #19–22 + V-2d; D-HOE-20261030-31/-32/-35: meaningful_eta_s non-null float >= 0, no farm_eta_s; payback_s/eta_s float|null).
++import { describe, it, expect } from 'vitest';
++import { Bbv2Tel, bbv2TelCfg, buyKeyOf, f1, meaningfulEtaS } from '../src/telemetry/bbv2';
++import { isPinned, Telemetry } from '../src/telemetry/telemetry';
++import { meaningfulKeys, BUY_ORDER } from '../src/econ/best-buy';
++import { Game } from '../src/game';
++import { balance } from '../src/config/balance';
++import { ON, OFF, bal, L17, fx } from './bbv2-fixtures';
++
++type Ev = { type: string; d: Record<string, unknown> };
++const mk = (b = ON) => { const ev: Ev[] = []; const tel = new Bbv2Tel((type, d) => ev.push({ type, d }), b); return { ev, tel }; };
++const kvm = () => { const m = new Map<string, string>(); return { m, getItem: (k: string) => m.get(k) ?? null, removeItem: (k: string) => void m.delete(k), setItem: (k: string, v: string) => void m.set(k, v) }; };
++const KEYS = new RegExp(`^(${BUY_ORDER.join('|')})$`);
++const ctx = (o: Partial<{ t: number; mark: any; markSinceT: number; rateCentsPerS: number }> = {}) => ({ t: 10_000, mark: null, markSinceT: 0, rateCentsPerS: 0, ...o });
++
++describe('BBV2-AC16 [B] config + registration', () => {
++  it('tunables come from balance.json telemetry.bbv2 (G-17/M-2): 5 / 60 / 30 / 50', () => {
++    expect(balance.telemetry.bbv2).toMatchObject({ shown_min_gap_s: 5, zero_gain_eta_max_s: 60, dead_zone_min_s: 30, zero_gain_purchase_cap: 50 });
++    expect(bbv2TelCfg(ON)).toEqual({ shown_min_gap_s: 5, zero_gain_eta_max_s: 60, dead_zone_min_s: 30, zero_gain_purchase_cap: 50 });
++  });
++  it('pins (D-HOE-31): zero_gain_purchase + dead_zone pinned; best_buy_shown + best_buy_followed ring', () => {
++    expect(isPinned('zero_gain_purchase')).toBe(true); expect(isPinned('dead_zone')).toBe(true);
++    expect(isPinned('best_buy_shown')).toBe(false); expect(isPinned('best_buy_followed')).toBe(false);
++  });
++  it('f1: 1 dp, Infinity/NaN -> null (no "Infinity" string)', () => {
++    expect(f1(12.345)).toBe(12.3); expect(f1(Infinity)).toBeNull(); expect(f1(NaN)).toBeNull(); expect(f1(0)).toBe(0);
++  });
++  it('buyKeyOf maps every row purchase to its BuyKey', () => {
++    expect(buyKeyOf({ type: 'buyFarm' })).toBe('FARM'); expect(buyKeyOf({ type: 'buyCollection' })).toBe('COLL');
++    expect(buyKeyOf({ type: 'buyTrack', track: 'hens' } as any)).toBe('HENS'); expect(buyKeyOf({ type: 'buyTrack', track: 'eggValue' } as any)).toBe('VALUE');
++    expect(buyKeyOf({ type: 'hire', worker: 'market_hand' })).toBe('W1'); expect(buyKeyOf({ type: 'hire', worker: 'coop_hand' })).toBe('W2');
++    expect(buyKeyOf({ type: 'hire', worker: 'hawker' })).toBe('W3'); expect(buyKeyOf({ type: 'hire', worker: 'grader' })).toBe('W4');
++    expect(buyKeyOf({ type: 'buyGraderTier' })).toBe('W4'); expect(buyKeyOf({ type: 'collect' } as any)).toBeNull();
++  });
++});
++
++describe('BBV2-AC16 [B] #19 best_buy_shown', () => {
++  it('fields and types; eta_s = 0 when affordable; payback ∞ -> null', () => {
++    const { ev, tel } = mk(); const s = L17(600_000);
++    tel.shown(0, s, { key: 'HENS', affordable: true, payback: 123.456, costCents: 526_200 }, 1000);
++    expect(ev).toEqual([{ type: 'best_buy_shown', d: { key: 'HENS', meaningful: true, affordable: true, payback_s: 123.5, farm: 17, eta_s: 0 } }]);
++    expect(ev[0].d.key).toMatch(KEYS);
++    tel.shown(6000, L17(0), { key: 'FARM', affordable: false, payback: Infinity, costCents: 1_018_500 }, 1000);
++    expect(ev[1].d).toEqual({ key: 'FARM', meaningful: true, affordable: false, payback_s: null, farm: 17, eta_s: 1018.5 });
++    tel.shown(12_000, L17(0), { key: 'HENS', affordable: false, payback: 50, costCents: 526_200 }, 0);
++    expect(ev[2].d.eta_s).toBeNull(); // not reachable at rate 0
++  });
++  it('no pick -> no event; unchanged key+affordable -> no event; change inside 5 s waits for the gap', () => {
++    const { ev, tel } = mk(); const s = L17(0), p = { key: 'HENS' as const, affordable: false, payback: 9, costCents: 526_200 };
++    tel.shown(0, s, null, 1); expect(ev).toHaveLength(0);
++    tel.shown(0, s, p, 1); tel.shown(1000, s, p, 1); tel.shown(9000, s, p, 1); expect(ev).toHaveLength(1);
++    tel.shown(10_000, s, { ...p, affordable: true }, 1); expect(ev).toHaveLength(2);
++    tel.shown(11_000, s, { ...p, key: 'FARM' }, 1); tel.shown(14_999, s, { ...p, key: 'FARM' }, 1); expect(ev).toHaveLength(2); // rate limit
++    tel.shown(15_000, s, { ...p, key: 'FARM' }, 1); expect(ev).toHaveLength(3); expect(ev[2].d.key).toBe('FARM');
++  });
++  it('meaningful is false only when no meaningful row is offered (key not in meaningfulKeys)', () => {
++    const { ev, tel } = mk(); const s = L17(0); expect(meaningfulKeys(s, ON).has('COLL')).toBe(false);
++    tel.shown(0, s, { key: 'COLL', affordable: false, payback: Infinity, costCents: 109_900 }, 1); expect(ev[0].d.meaningful).toBe(false);
++  });
++});
++
++describe('BBV2-AC16 [B] #20 best_buy_followed', () => {
++  it('fires when the purchased key equals the ★ shown; ms_since_shown from the last ★ switch (picker clock)', () => {
++    const { ev, tel } = mk(); tel.purchase(L17(600_000), 'HENS', ctx({ t: 12_345, mark: 'HENS', markSinceT: 2_000 }));
++    expect(ev).toEqual([{ type: 'best_buy_followed', d: { key: 'HENS', ms_since_shown: 10_345 } }]);
++  });
++  it('no event when ★ is null or another key', () => {
++    const { ev, tel } = mk(); tel.purchase(L17(600_000), 'HENS', ctx({ mark: null })); tel.purchase(L17(600_000), 'HENS', ctx({ mark: 'FARM' }));
++    expect(ev).toHaveLength(0);
++  });
++});
++
++describe('BBV2-AC16 [B] #21 zero_gain_purchase', () => {
++  const s = L17(500_000); // COLL ($1,099) zero-gain at FX-L17; nearest meaningful HENS $5,262 needs 26,200 cents
++  it('precondition: COLL zero-gain, HENS/VALUE/FARM meaningful', () => { expect([...meaningfulKeys(s, ON)].sort()).toEqual(['FARM', 'HENS', 'VALUE']); });
++  it('fires with key, farm, level (before), meaningful_eta_s (non-null float, 1 dp) while a meaningful row is <= 60 s away', () => {
++    const { ev, tel } = mk(); tel.purchase(s, 'COLL', ctx({ rateCentsPerS: 1000 }));
++    expect(ev).toEqual([{ type: 'zero_gain_purchase', d: { key: 'COLL', farm: 17, level: 10, meaningful_eta_s: 26.2 } }]);
++    expect(Object.keys(ev[0].d)).not.toContain('farm_eta_s');
++    expect(meaningfulEtaS(s, ON, 1000)).toBeCloseTo(26.2, 9);
++  });
++  it('affordable meaningful row -> meaningful_eta_s 0; > 60 s or unreachable -> no event; meaningful purchases never fire', () => {
++    const a = mk(); a.tel.purchase(L17(600_000), 'COLL', ctx()); expect(a.ev[0].d.meaningful_eta_s).toBe(0);
++    const b = mk(); b.tel.purchase(s, 'COLL', ctx({ rateCentsPerS: 26_200 / 60.5 })); b.tel.purchase(s, 'COLL', ctx({ rateCentsPerS: 0 }));
++    b.tel.purchase(s, 'HENS', ctx({ rateCentsPerS: 1e6 })); b.tel.purchase(s, 'FARM', ctx({ rateCentsPerS: 1e6 })); expect(b.ev).toHaveLength(0);
++    const c = mk(); c.tel.purchase(s, 'COLL', ctx({ rateCentsPerS: 26_200 / 60 })); expect(c.ev[0].d.meaningful_eta_s).toBe(60);
++  });
++  it('cap 50 per session; over the cap nothing is emitted and session_end.zero_gain_purchase_dropped counts them', () => {
++    const { ev, tel } = mk(); for (let i = 0; i < 53; i++) tel.purchase(L17(600_000), 'COLL', ctx());
++    expect(ev.filter(e => e.type === 'zero_gain_purchase')).toHaveLength(50); expect(tel.sessionEndFields()).toEqual({ zero_gain_purchase_dropped: 3 });
++  });
++});
++
++describe('BBV2-AC16 [B] #22 dead_zone (V-2d)', () => {
++  const dry = L17(0), wet = L17(600_000);
++  it('emitted once at stretch end with farm at start, s = end − start (sim s, 1 dp), reason none_affordable, no open', () => {
++    const { ev, tel } = mk(); for (let t = 100; t < 140; t++) tel.sample(t, dry); expect(ev).toHaveLength(0);
++    tel.sample(140, wet); expect(ev).toEqual([{ type: 'dead_zone', d: { farm: 17, s: 40, reason: 'none_affordable' } }]);
++    tel.sample(141, wet); expect(ev).toHaveLength(1);
++  });
++  it('stretches under 30 s are not emitted; exactly 30 s is', () => {
++    const { ev, tel } = mk(); for (let t = 0; t < 29; t++) tel.sample(t, dry); tel.sample(29, wet); expect(ev).toHaveLength(0);
++    for (let t = 30; t < 60; t++) tel.sample(t, dry); tel.sample(60, wet); expect(ev.map(e => e.d.s)).toEqual([30]);
++  });
++  it('scope 10 <= farm < 30: no stretch below F10; reaching max ends the stretch', () => {
++    const lo = mk(); for (let t = 0; t < 100; t++) lo.tel.sample(t, fx(9, 9, 9, 9)); lo.tel.flushOpen(100); expect(lo.ev).toHaveLength(0);
++    const hi = mk(); for (let t = 0; t < 45; t++) hi.tel.sample(t, dry); hi.tel.sample(45, fx(30, 30, 30, 21)); expect(hi.ev[0].d).toEqual({ farm: 17, s: 45, reason: 'none_affordable' });
++  });
++  it('unload/background flush: open:true only if s >= 30; sampling then starts fresh', () => {
++    const a = mk(); for (let t = 0; t < 31; t++) a.tel.sample(t, dry); a.tel.flushOpen(31);
++    expect(a.ev).toEqual([{ type: 'dead_zone', d: { farm: 17, s: 31, reason: 'none_affordable', open: true } }]);
++    const b = mk(); for (let t = 0; t < 20; t++) b.tel.sample(t, dry); b.tel.flushOpen(20); expect(b.ev).toHaveLength(0);
++    for (let t = 20; t < 40; t++) b.tel.sample(t, dry); b.tel.sample(40, wet); expect(b.ev).toHaveLength(0); // fresh: 20 s, not 40
++  });
++});
++
++describe('BBV2-AC16 [B] Game wiring; flag 0 emits nothing (spec §5)', () => {
++  const types = (g: Game) => g.telemetry.events().map(e => e.type);
++  it('flag 0: no Bbv2Tel, no BBv2 event, session_end has no BBv2 field', () => {
++    const g = new Game(OFF, kvm(), () => 1_000, 1, 'x'); expect(g.bbTel).toBeNull();
++    g.state = L17(600_000); g.dispatch({ type: 'buyCollection' }); g.endSession();
++    expect(types(g).filter(t => /best_buy|zero_gain|dead_zone/.test(t))).toEqual([]);
++    expect(g.telemetry.events().find(e => e.type === 'session_end')).not.toHaveProperty('zero_gain_purchase_dropped');
++  });
++  it('m4 off with bestBuyV2 = 1: nothing either', () => { expect(new Game(bal(1, { enabled: 0 }), kvm(), () => 1_000, 1, 'x').bbTel).toBeNull(); });
++  it('flag 1: a zero-gain buy emits zero_gain_purchase (pinned in the Telemetry ring) and session_end carries the dropped count', () => {
++    const g = new Game(ON, kvm(), () => 1_000, 1, 'x'); expect(g.bbTel).not.toBeNull();
++    g.state = L17(600_000); g.dispatch({ type: 'buyCollection' }); g.dispatch({ type: 'buyFarm' }); g.endSession();
++    const zg = g.telemetry.events().filter(e => e.type === 'zero_gain_purchase'); expect(zg).toHaveLength(1);
++    expect(zg[0]).toMatchObject({ key: 'COLL', farm: 17, level: 10, meaningful_eta_s: 0 });
++    expect(g.telemetry.events().find(e => e.type === 'session_end')).toMatchObject({ zero_gain_purchase_dropped: 0 });
++  });
++  it('flag 1: an unaffordable buy (no state change) emits nothing', () => {
++    const g = new Game(ON, kvm(), () => 1_000, 1, 'x'); g.state = L17(0); g.dispatch({ type: 'buyCollection' });
++    expect(types(g).filter(t => /zero_gain|best_buy/.test(t))).toEqual([]);
++  });
++  it('flag 1: frame() samples integer sim seconds; onHidden flushes an open stretch with open:true', () => {
++    let t = 0; const g = new Game(ON, kvm(), () => t, 1, 'x'); g.state = L17(0);
++    const freeze = { ...g.state }; for (let i = 0; i < 40; i++) { t += 1000; g.state = { ...freeze }; g.frame(); }
++    g.state = { ...freeze }; g.onHidden();
++    const dz = g.telemetry.events().filter(e => e.type === 'dead_zone'); expect(dz).toHaveLength(1);
++    expect(dz[0]).toMatchObject({ farm: 17, reason: 'none_affordable', open: true }); expect(dz[0].s as number).toBeGreaterThanOrEqual(30);
++  });
++});
+diff --git a/tests/bot-m2.ts b/tests/bot-m2.ts
+index 36372bd..6063d93 100644
+--- a/tests/bot-m2.ts
++++ b/tests/bot-m2.ts
+@@ -7,7 +7,7 @@ import { step } from '../src/sim/tick';
+ import { apply } from '../src/sim/actions';
+ import type { SimEvent } from '../src/sim/events';
+ import { WorkerId, showManageAll, hireCostCents, unlockFarm, graderTierCostCents } from '../src/sim/workers';
+-import type { Model } from './bot';
++import { BUY_TRACE, STATE_TRACE, type Model } from './bot';
+ import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
+ import { pickBuy, pickAction, M1_KEYS } from './bot-m4';
+ import { m4On } from '../src/config/formulas';
+@@ -35,6 +35,7 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
+     const t = Math.round(i * dt * 10) / 10, f = s.farmLevel;
+     s = step(s, dt, b, ev); drain(t, f);
+     if (t >= tapT) { tapT += V ? V.tapInterval() : 1; if (!o.taps || ((tapT - 2) % o.taps[0]) < o.taps[1]) s = apply(s, { type: 'collect' }, b); }
++    if (STATE_TRACE.fn && Number.isInteger(t)) STATE_TRACE.fn(t, s);
+     if (t < sellT) continue;
+     sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery;
+     s = apply(s, { type: 'sellAll' }, b, ev); drain(t, s.farmLevel);
+@@ -56,7 +57,7 @@ export function runM2(b: Balance, seed: number, o: M2Opts): M2Result {
+       // D-HOP-2026-10-19-02: tests/bot-m4.ts pickBuy (M4 on, seller15: game pick over every purchasable incl. workers, wait rule; flag off = old rule).
+       let kind = pickBuy(s, b, o.model, chf, [...M1_KEYS, ...(['W1', 'W2', 'W3', 'W4'] as const).filter(k => use.has(({ W1: 'market_hand', W2: 'coop_hand', W3: 'hawker', W4: 'grader' } as const)[k]))]);
+       if (kind === 'c' && chf && !allPick) chf = false; // variance p_cheap_first
+-      if (kind) { const next = apply(s, pickAction(kind), b); if (next === s) kind = null; else { s = next; if (kind === 'f') reach.set(s.farmLevel, t); } }
++      if (kind) { const act = pickAction(kind), next = apply(s, act, b); if (next === s) kind = null; else { BUY_TRACE.fn?.(s, act, next); s = next; if (kind === 'f') reach.set(s.farmLevel, t); } }
+       if (!kind && !bought) break;
+     }
+   }
+diff --git a/tests/bot.ts b/tests/bot.ts
+index 782521d..029507d 100644
+--- a/tests/bot.ts
++++ b/tests/bot.ts
+@@ -2,10 +2,14 @@
+ import type { Balance } from '../src/config/balance';
+ import { initialState, GameState } from '../src/sim/state';
+ import { step } from '../src/sim/tick';
+-import { apply } from '../src/sim/actions';
++import { apply, type Action } from '../src/sim/actions';
+ import { SellerVariance, SellerVarianceParams, TRACE } from './seller-variance';
+ import { pickBuy, pickAction } from './bot-m4';
+ export type Model = 'seller15' | 'cheapest';
++/** BBV2-AC9: optional purchase observer (state before, action, state after); null = no observer (default; zero effect on runs). */
++/** BBV2-AC14: optional state observer, called once per integer sim second after the tick and the tap (before sell/buy); null = none. */
++export const STATE_TRACE: { fn: ((t: number, s: GameState) => void) | null } = { fn: null };
++export const BUY_TRACE: { fn: ((prev: GameState, a: Action, next: GameState) => void) | null } = { fn: null };
+ export interface BotResult { firstUpgradeS: number | null; upgradesAt: (s: number) => number; farmAt: (s: number) => number; farmReachedS: (L: number) => number | null;
+   /** Farm level -> first time reached (s); 0 -> 0. */ reach: Map<number, number> }
+ /** Buy step: tests/bot-m4.ts pickBuy (D-HOP-2026-10-19-01: + HENS/VALUE with M4 on; flag off = the old Farm/Collection rule).
+@@ -15,7 +19,8 @@ export function buy(s: GameState, model: Model, b: Balance, log: (kind: 'c' | 'f
+     const pick = pickBuy(s, b, model, cheapFirst);
+     if (pick === 'c' && cheapFirst) cheapFirst = false; // variance p_cheap_first: one affordable Collection, ignoring the 50 % rule
+     if (!pick) return s;
+-    const next = apply(s, pickAction(pick), b); if (next === s) return s; // refused buy: stop (no spin)
++    const act = pickAction(pick), next = apply(s, act, b); if (next === s) return s; // refused buy: stop (no spin)
++    BUY_TRACE.fn?.(s, act, next);
+     s = next; log(pick === 'f' ? 'f' : pick === 'c' ? 'c' : 't', next);
+   }
+   return s;
+@@ -33,6 +38,7 @@ export function runBot(b: Balance, seed: number, model: Model, T = 1800, sellEve
+     const t = Math.round(i * dt * 10) / 10;
+     s = step(s, dt, b);
+     if (t >= tapT) { tapT += V ? V.tapInterval() : 1; s = apply(s, { type: 'collect' }, b); }
++    if (STATE_TRACE.fn && Number.isInteger(t)) STATE_TRACE.fn(t, s);
+     if (t >= sellT) {
+       sellT = V ? t + V.checkInterval(sellEvery) : sellT + sellEvery; s = apply(s, { type: 'sellAll' }, b);
+       if (V?.delay()) continue; // variance p_delay: this check-in skips buying
+diff --git a/tests/pacing-acw1.test.ts b/tests/pacing-acw1.test.ts
+index 84ac637..7b2c399 100644
+--- a/tests/pacing-acw1.test.ts
++++ b/tests/pacing-acw1.test.ts
+@@ -6,11 +6,16 @@ import { median } from './bot';
+ // seller15 buy rule, managed, v1.1 values, 2 h runs, seeds 0-99 (one RNG stream per run, seeded by the integer seed).
+ // Refs: D-HOP-2026-10-19-09 (product/decisions.md:241), D-CEO-20261019-06 (decisions.md:57, IN FORCE per its 04:04 entry: >= 95% reach F10 within 16 min, inclusive, on seeds 1-200 and 201-299; median F18 <= 40 min), product/decisions.md:232.
+ // Old reference: product/sim/economy_sim.py run_m2(seller15, spec=M2_CURRENT, **CASUAL), seeds 0-99 (M2_CURRENT = M2_F1, 50 / 0.5, since sim 10f29a4a).
+-// M4-on reference (Economy round 4, D-HOP-08; scratch/m4-retune/REPORT.md Round 4 §C/§D): REGRESSION BASELINE ONLY; Python has no M4 model.
+-// Same code as the build, so this is not an independent check. pass10 here = count reaching F10 within 15 min (900 s).
+-// Replaces the Python F1 m4cols re-sim 100 / 10.33 / 21.33.
+-const PY = { pass10: 91, medF10: 13.67, medF18: 25.0 };
++// BBv2 / BB-AC13 signed re-baseline: QA-D-1105-ACW1, Economy+HoQA, 2026-11-05.
++// REGRESSION BASELINE ONLY, not a design-gate change; Python has no M4 model.
++// Same code as the build, so this is not an independent check. pass10 = percentage reaching F10 within 900 s.
++// Evidence: investigation b563ae6c, seeds d1529197, countersign sha25666764c12cf07845b468ce7d54d8ea6d320ef081d55cc95cc9701904e4b5a4a04 (supersedes 456f94bc, same values).
++// Seeds 1-200: 200/200 F10 <=900 s, median F10 620 s, F18 1180 s; confirm 201-299: 99/99, 620 s / 1200 s.
++// Zero F10 regressions (no seed got slower flag-on); isolated F18 seed 208 +100 s, still within gates.
++const BBV2_BASELINE = { pass10: 100, medF10: 10.333333, medF18: 19.666667 };
+ const casual: Balance = { ...balance, sim_test: { poisson_arrivals: true, demand_scale: 0.75 } };
++// Test-local decisive flag-on config; ship balance and its design-gate runs remain unchanged.
++const bbv2Casual: Balance = { ...casual, m4: { ...casual.m4!, enabled: 1, flags: { ...casual.m4!.flags, bestBuyV2: 1, zeroGainUi: 0 } } };
+ describe('AC-W1 casual (seeds 1-200, 201-299, slow)', () => {
+   it('hooks are off by default and rejected in production', () => {
+     expect(balance.sim_test).toBeUndefined();
+@@ -22,23 +27,26 @@ describe('AC-W1 casual (seeds 1-200, 201-299, slow)', () => {
+   // Run cap: runM2 runs T = 7200 s (tests/bot-m2.ts:25); there is no 900 s cut-off. Buys happen only at sell check-ins
+   // (sellEvery 20 s), so reach times sit on a 20 s grid and 900 s = 45 x 20 s is a real check-in time, not a cap.
+   const GATE_S = 960, GATE_PCT = 95, F18_MAX_MIN = 40;
+-  const measure = (seeds: number[]) => {
+-    const R = seeds.map(seed => runM2(casual, seed, { model: 'seller15', sellEvery: 20 }));
++  const measure = (seeds: number[], b: Balance = casual) => {
++    const R = seeds.map(seed => runM2(b, seed, { model: 'seller15', sellEvery: 20 }));
+     const t10 = R.map(r => r.reach.get(10) ?? Infinity), t18 = R.map(r => r.reach.get(18) ?? Infinity);
+     const pct = (lim: number) => 100 * t10.filter(t => t <= lim).length / seeds.length;
+     return { pass10: pct(900), pass10at16: pct(960), pass10gate: pct(GATE_S), medF10: median(t10) / 60, medF18: median(t18) / 60, at900: t10.filter(t => t === 900).length };
+   };
+   const range = (a: number, b: number) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+   for (const [a, z] of [[1, 200], [201, 299]] as const) {
+-    it(`design gate seeds ${a}-${z}: >= ${GATE_PCT}% reach F10 within ${GATE_S / 60} min, F18 median <= ${F18_MAX_MIN} min; M4 baseline (1-200 only)`, () => {
++    it(`design gate seeds ${a}-${z}: >= ${GATE_PCT}% reach F10 within ${GATE_S / 60} min, F18 median <= ${F18_MAX_MIN} min; ship config`, () => {
+       const m = measure(range(a, z));
+-      console.log(`AC-W1 build ${a}-${z}`, Object.fromEntries(Object.entries(m).map(([k, v]) => [k, +v.toFixed(2)])), 'M4 baseline', PY);
+-      if (a === 1) { // REGRESSION BASELINE ONLY; Python has no M4 model (pass10 baseline is measured at 900 s)
+-        expect(Math.abs(m.pass10 - PY.pass10)).toBeLessThanOrEqual(5);
+-        expect(Math.abs(m.medF10 / PY.medF10 - 1)).toBeLessThanOrEqual(0.2);
+-        expect(Math.abs(m.medF18 / PY.medF18 - 1)).toBeLessThanOrEqual(0.2);
+-      }
++      console.log(`AC-W1 build ${a}-${z}`, Object.fromEntries(Object.entries(m).map(([k, v]) => [k, +v.toFixed(2)])));
+       expect(m.pass10gate).toBeGreaterThanOrEqual(GATE_PCT); expect(m.medF18).toBeLessThanOrEqual(F18_MAX_MIN);
+     });
+   }
++  it('BB-AC13 flag-on regression baseline seeds 1-200 (bestBuyV2=1, zeroGainUi=0)', () => {
++    const m = measure(range(1, 200), bbv2Casual);
++    console.log('AC-W1 BBv2 flag-on 1-200', m, 'signed baseline', BBV2_BASELINE);
++    // REGRESSION BASELINE ONLY: retain the signed ±5 pp / ±20% / ±20% bands.
++    expect(Math.abs(m.pass10 - BBV2_BASELINE.pass10)).toBeLessThanOrEqual(5);
++    expect(Math.abs(m.medF10 / BBV2_BASELINE.medF10 - 1)).toBeLessThanOrEqual(0.2);
++    expect(Math.abs(m.medF18 / BBV2_BASELINE.medF18 - 1)).toBeLessThanOrEqual(0.2);
++  });
+ }, 1_800_000);
+diff --git a/tests/v5-breeds-hatch.test.ts b/tests/v5-breeds-hatch.test.ts
+index 46afc80..dbd0617 100644
+--- a/tests/v5-breeds-hatch.test.ts
++++ b/tests/v5-breeds-hatch.test.ts
+@@ -71,7 +71,7 @@ describe('hatch action (BR-R5..R7; BR-AC5, BR-AC7, E4/E5)', () => {
+     expect(s.breeds!.rng).toBe(nextRand(nextRand(0x9e3779b9)[0])[0]);
+   });
+   it('[BR-AC6 basis] cost = max(min, min(planRef x 45, house-round(farm_cost x 10000 bp))) on planner income', () => {
+-    for (const F of [10, 16, 26, 30]) { const s = st({ freeHatchUsed: 1 }, F), planRef = Math.round(incomePerSec(s, BR, { assumeWorking: true }) * 100);
++    for (const F of [10, 16, 26, 30]) { const s = st({ freeHatchUsed: 1 }, F), planRef = Math.round(incomePerSec(s, BR, { assumeWorking: true, ignoreQE2: true }) * 100);
+       expect(hatchCostCents(s, BR)).toBe(Math.max(50_000, Math.min(planRef * 45, farmCost(F, BR) * 100))); }
+   });
+   it('[BR-AC7 / E4 / E5] busy incubator, flock complete, below F10, and all Commons 2★ below F14: nothing starts, no draw', () => {
+@@ -216,7 +216,7 @@ describe('#96 Architect review d7df1f9: BR-R17 guard, BR-R5 literals, E10 shadow
+     expect(hatchCostFrom(277_971, 62_431_600, BR)).toBe(12_508_695);
+     expect(hatchCostFrom(1, 136_800, BR)).toBe(50_000); // bc_hatch_min_cents floor
+     for (const F of [10, 14, 20, 28, 30]) { const s = st({ freeHatchUsed: 1 }, F);
+-      expect(hatchCostCents(s, BR)).toBe(hatchCostFrom(Math.round(incomePerSec(s, BR, { assumeWorking: true }) * 100), farmCost(F, BR) * 100, BR)); }
++      expect(hatchCostCents(s, BR)).toBe(hatchCostFrom(Math.round(incomePerSec(s, BR, { assumeWorking: true, ignoreQE2: true }) * 100), farmCost(F, BR) * 100, BR)); }
+   });
+   it('[BR-AC26 E10 / PMC Q5] an auto-slot over a raw-id slot drops the shadow; moving that breed on does not resurrect the raw id', () => {
+     const s0 = { ...st({ owned: { leghorn: { stars: 0 } }, slots: ['leghorn', null, null], incubator: { breed: 'brahma', remainingMs: 100, costCents: 0 } }, 20),
+diff --git a/tests/zg-ac13-sim.test.ts b/tests/zg-ac13-sim.test.ts
+index 4327ac1..3a67056 100644
+--- a/tests/zg-ac13-sim.test.ts
++++ b/tests/zg-ac13-sim.test.ts
+@@ -1,5 +1,6 @@
+ // ZG-AC13 / ZGU-AC1 [no-regression]: the zero-gain UI is UI-only. The AC7 bots (tests/bot.ts runBot, seller15 + cheapest) give
+-// byte-identical results with m4.flags.zeroGainUi 0 and 1 (and with bestBuyV2 1 on top). Bounded: seeds 1–20 x 1,800 s here;
++// byte-identical results with m4.flags.zeroGainUi 0 and 1, at each bestBuyV2 value (BBv2 Part A changes the bots by design,
++// BBV2-AC7/AC13 re-baseline, so zeroGainUi parity is asserted per bestBuyV2 value, not across it). Bounded: seeds 1–20 x 1,800 s here;
+ // the seeds 1–200 / 12,000 s run is QA's P1/P2 (m5-gate-acs card #9).
+ import { describe, it, expect } from 'vitest';
+ import { balance, type Balance } from '../src/config/balance';
+@@ -7,11 +8,11 @@ import { runBot } from './bot';
+ 
+ const with_ = (f: Record<string, number>) => ({ ...balance, m4: { ...balance.m4!, enabled: 1, flags: { ...balance.m4!.flags, ...f } } }) as Balance;
+ describe('ZG-AC13 AC7 bots unchanged by zeroGainUi', () => {
+-  it.each(['seller15', 'cheapest'] as const)('%s seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 / 1+bestBuyV2', model => {
++  it.each(['seller15', 'cheapest'] as const)('%s seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 (bestBuyV2 0; seeds 1–3 also at bestBuyV2 1)', model => {
+     for (let seed = 1; seed <= 20; seed++) {
+       const a = JSON.stringify(runBot(with_({ zeroGainUi: 0 }), seed, model)), z = JSON.stringify(runBot(with_({ zeroGainUi: 1 }), seed, model));
+       expect(z, `seed ${seed}`).toBe(a);
+-      if (seed <= 3) expect(JSON.stringify(runBot(with_({ zeroGainUi: 1, bestBuyV2: 1 }), seed, model))).toBe(a);
++      if (seed <= 3) expect(JSON.stringify(runBot(with_({ zeroGainUi: 1, bestBuyV2: 1 }), seed, model)), `bb1 seed ${seed}`).toBe(JSON.stringify(runBot(with_({ zeroGainUi: 0, bestBuyV2: 1 }), seed, model)));
+     }
+   });
+ });
+diff --git a/tests/zg-matrix.test.ts b/tests/zg-matrix.test.ts
+index 2c5a652..064ea50 100644
+--- a/tests/zg-matrix.test.ts
++++ b/tests/zg-matrix.test.ts
+@@ -3,7 +3,8 @@
+ // (spec v0.3.7 f86de04e + errata v0.3.8 rev 2 4cfe6895). Per cell: verdict / ★-filter parity with the (bb 0, confirm 0) reference,
+ // Buy behaviour (direct at confirm 0, strip at confirm 1), upgrade.zero_gain, ★ never on a ZG row. Flag-off cells (zeroGainUi = 0) at
+ // each bestBuyV2 (and confirm) value: DOM and telemetry identical to the m4-on/zeroGainUi-0 config pinned to 65a7443 in zg-flagoff-dom.
+-// BBv2 mechanics are row 29 and not built here: bestBuyV2 = 1 is expected to change nothing in these cells.
++// BBv2 (row 29, gen/bbv2) is built: bestBuyV2 = 1 changes verdicts (Q-E2 collect fix) and the ★ (Part A), so every parity below is
++// asserted PER bestBuyV2 value (reference = the same bb with confirm 0 / zeroGainUi 0); bb 0 cells keep the 65a7443-pinned reference.
+ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
+ import { balance, type Balance } from '../src/config/balance';
+ import { Game } from '../src/game';
+@@ -54,12 +55,11 @@ function dump() {
+   return [document.querySelector('#uRow')!.innerHTML, (document.querySelector('[data-nav=upgrades] .badge') as HTMLElement).hidden,
+     document.querySelector('#goal')!.outerHTML, document.querySelector('#goalDesc')?.textContent ?? '', b?.outerHTML ?? ''].join('\u0001');
+ }
+-const REF = mk(1, 0, 0);
+ const CELLS = [[0, 0], [0, 1], [1, 0], [1, 1]] as const;
+ 
+ describe.each(CELLS)('ZG matrix zeroGainUi=1, bestBuyV2=%i, confirm=%i', (bb, confirm) => {
+-  const B = mk(1, confirm, bb);
+-  it('verdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18)', async () => {
++  const B = mk(1, confirm, bb), REF = mk(1, 0, bb);
++  it('verdict + ★ filter parity with (same bb, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18)', async () => {
+     let zgRows = 0, stars = 0; // non-vacuity: the fixtures must show ZG rows and a ★ somewhere
+     for (const [n, f] of Object.entries(FIX)) {
+       for (const k of KEYS) expect(isZeroGain(f() as any, B, k), `${n} ${k}`).toBe(isZeroGain(f() as any, REF, k));
+@@ -101,8 +101,8 @@ describe.each(CELLS)('ZG matrix zeroGainUi=1, bestBuyV2=%i, confirm=%i', (bb, co
+ });
+ 
+ describe.each([0, 1])('ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=%i', (bb) => {
+-  const REF0 = mk(0, 0, 0);
+-  it.each([0, 1])('confirm=%i: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19)', async (confirm) => {
++  const REF0 = mk(0, 0, bb); // bb 0: the 65a7443-pinned zeroGainUi-0 config; bb 1: the BBv2 flag-on config
++  it.each([0, 1])('confirm=%i: DOM byte-identical to the zeroGainUi-0 config at the same bestBuyV2 on every fixture/tab; no ZG nodes (ZG-AC12/19)', async (confirm) => {
+     for (const [n, f] of Object.entries(FIX)) for (const tab of TABS) {
+       await mount(f(), tab, REF0); const ref = dump();
+       await mount(f(), tab, mk(0, confirm, bb)); expect(dump(), `${n}/${tab}`).toBe(ref);
+diff --git a/tests/zg-ui.test.ts b/tests/zg-ui.test.ts
+index 63c0774..3848e17 100644
+--- a/tests/zg-ui.test.ts
++++ b/tests/zg-ui.test.ts
+@@ -6,6 +6,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
+ import { balance, type Balance } from '../src/config/balance';
+ import { Game } from '../src/game';
+ import { isZeroGain } from '../src/ui/zero-gain';
++import { meaningfulKeys } from '../src/econ/best-buy';
+ import { mem } from './helpers';
+ import { fx, FX } from './zg-fixtures';
+ 
+@@ -168,13 +169,24 @@ describe('ZG-AC12 [no-regression] flag off: no ZG markup, stock picker, no zero_
+   });
+ });
+ 
+-describe('bestBuyV2 interaction (errata E-3; BBv2 mechanics are row 29, not built: the flag alone changes nothing here)', () => {
+-  it('zeroGainUi on: markup, nav dot and ★ are identical with m4.flags.bestBuyV2 = 0 and 1 on every fixture', async () => {
++describe('bestBuyV2 interaction (errata E-3; BBv2 built: Q-E2 changes ZG verdicts, so the contract is asserted per bestBuyV2 value)', () => {
++  it.each([0, 1])('zeroGainUi on, bestBuyV2 = %i: ZG rows = isZeroGain at that bb; ★ never on a ZG row; at bb 1 ★ only on a meaningful row', async (bb) => {
++    const B = mk(1, 0, bb); let zgSeen = 0;
+     for (const f of [FX.FLIP, COLL_ZG, FX.L30, FX.L30u, FX.H20]) for (const tab of ['collection', 'farm'] as const) {
+-      const out: string[] = [];
+-      for (const bb of [0, 1]) { await mount(f(), tab, mk(1, 0, bb)); out.push(document.querySelector('#uRow')!.innerHTML + '|' + dot().hidden + '|' + document.querySelector('#goal')!.textContent); }
+-      expect(out[1]).toBe(out[0]);
++      const { g } = await mount(f(), tab, B);
++      for (const r of document.querySelectorAll('#uRow .up')) {
++        const k = r.getAttribute('data-track') === 'hens' ? 'HENS' : r.getAttribute('data-track') === 'eggValue' ? 'VALUE' : tab === 'collection' ? 'COLL' : null;
++        if (!k || !r.querySelector('button.btn.buy')) continue;
++        expect(r.getAttribute('data-zero-gain') === k, `${tab}/${k}`).toBe(isZeroGain(g.state, B, k as any)); if (r.hasAttribute('data-zero-gain')) zgSeen++;
++      }
++      for (const r of document.querySelectorAll('[data-zero-gain]')) expect(r.querySelector('[data-best-buy]')).toBeNull();
++      const star = document.querySelector('[data-best-buy]')?.getAttribute('data-best-buy');
++      if (bb && star) expect(meaningfulKeys(g.state, B).has(star as any), `${tab} ★ ${star}`).toBe(true);
+     }
++    expect(zgSeen).toBeGreaterThan(0);
++  });
++  it('Q-E2 at bestBuyV2 = 1 changes the COLL verdict on FX.L30u (ZG at bb 0, not ZG at bb 1): documented, not a regression', () => {
++    const s = FX.L30u() as any; expect(isZeroGain(s, mk(1, 0, 0), 'COLL')).toBe(true); expect(isZeroGain(s, mk(1, 0, 1), 'COLL')).toBe(false);
+   });
+ });
+ 

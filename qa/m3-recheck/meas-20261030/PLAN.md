@@ -1,0 +1,11 @@
+# One measurement run (HoQ 14:29 CET) - UI QA group A, TASK uiqa/M5-groupA. RECORD ONLY, NO GRADING, NOT EVIDENCE FOR ANY AC.
+- Build: rc/v5 65a7443 (origin/rc/v5 at 14:3x), private `git clone --shared --no-checkout` of game/ into /tmp/uiqa-meas-65a7443, detached at 65a7443 (the source repo is not written; no worktree added). Start 1 (14:32, git archive) was stopped by lane-kill at once: the archive has no .git, so the build-id was m4.1+unknown and every load would have failed the +65a7443 check, `npm ci` + `npm run build:qa` -> dist-qa. Build-id read from dist-qa/index.html and asserted on every page load (must contain +65a7443).
+- Lane: ONE `ops/tools/lane-run.sh uiqa-meas -- bash meas-run.sh`; stopped/confirmed only with `ops/tools/lane-kill.sh uiqa-meas <pid>` (pid from lane-run). Deadline 27 min from start, then lane-kill; accepted output rc 0 + exactly 'GONE <pid>' | 'TERM <pid> (group)' | 'TERM <pid>', else HALT.
+- Engines, one at a time: Chromium (.browser-test-2.lock if 1-min load < 12, else .browser-test.lock), then WebKit (.browser-test.lock), Firefox only if >= 8 min of the cap remain. Each engine = `flock -w 600 <lock> timeout 600 node meas.mjs <engine> <port>`. Ports: Chromium 5251, WebKit 5252, Firefox 5253 (never 4173).
+- Playwright-core 1.64.1 from qa/v5-saves/tools/node_modules (read-only use, as in ws-proof); axe-core 4.14.0 from artifacts/v5-ui/tools.
+- Measured per engine (wall ms, performance.now in node):
+  1. browser launch, 3 x (launch -> close), separately;
+  2. per-case (excluding launch): 9 cells = {360x640, 390x844, 1280x800} x 3 reps, each: context+page+seed+goto+wait #goal ("load"), screenshot ("shot"), DOM rect/overflow/tap check ("check"), axe inject ("axeInject") and axe.run ("axe");
+  3. runFor(240000): page.clock.install before goto, FX-L17 $3,000 save with savedAt = fake now; (i) one runFor(240000) call; (ii) the SG-3 gate path 48 x runFor(5000) + qaPicker read per chunk + runFor(2000).
+- UI1 proxy: BBv2 is NOT on rc/v5, so the "UI1 cell" = the nearest real cell: FX-L17 $3,000 farm screen (the SG-3 / FX-L17 fixture, today's stopgap strip) at the 3 UI1 sizes. Labelled PROXY everywhere.
+- Fixtures as written: tests/fixtures/sg3/l10-save.template.json via m5/sg3-precond.mjs l17SaveRaw (harness-rc-next). No source edits, no grading.

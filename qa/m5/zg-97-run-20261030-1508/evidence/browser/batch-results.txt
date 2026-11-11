@@ -1,0 +1,50 @@
+START chromium 360x640 lock=/workspace/egg-farm-studio/.browser-test.lock port=5293
+pid=533462
+DONE zg zg-off chromium 360x640: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 533462
+gone 533462
+SKIP chromium 390x844
+START chromium 1280x800 lock=/workspace/egg-farm-studio/.browser-test.lock port=5294
+pid=559063
+DONE zg zg-off chromium 1280x800: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 559063
+gone 559063
+START webkit 360x640 lock=/workspace/egg-farm-studio/.browser-test.lock port=5295
+pid=592703
+DONE zg zg-off webkit 360x640: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 592703
+gone 592703
+START webkit 390x844 lock=/workspace/egg-farm-studio/.browser-test.lock port=5296
+pid=624569
+DONE zg zg-off webkit 390x844: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 624569
+gone 624569
+START webkit 1280x800 lock=/workspace/egg-farm-studio/.browser-test.lock port=5297
+pid=657174
+DONE zg zg-off webkit 1280x800: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 657174
+gone 657174
+START firefox 360x640 lock=/workspace/egg-farm-studio/.browser-test.lock port=5298
+pid=676599
+DONE zg zg-off firefox 360x640: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 676599
+gone 676599
+START firefox 390x844 lock=/workspace/egg-farm-studio/.browser-test.lock port=5299
+pid=694383
+DONE zg zg-off firefox 390x844: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 694383
+gone 694383
+START firefox 1280x800 lock=/workspace/egg-farm-studio/.browser-test.lock port=5300
+pid=708776
+DONE zg zg-off firefox 1280x800: 18 pass, 0 fail, 0 unverified, loads 2 (bid ok true), shots 0
+EXIT:0
+kill: GONE 708776
+gone 708776
+BATCH_DONE

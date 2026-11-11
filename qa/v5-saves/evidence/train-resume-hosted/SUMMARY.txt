@@ -1,0 +1,105 @@
+TASK HoQA/TRAIN-RESUME-S step 1 — one-shot hosted read
+Read at: 2026-11-10 03:01:30 CET (Europe/Belgrade, UTC+1). No re-runs, no polling. Each run/jobs/log fetched once via gh (local CLI). Repo PrincipalLewis/egg-farm.
+
+PASS rule for pacing: all 3 shards (seller15, casual, optimal) SUCCESS, and the aggregate fails only on row 904 NOT-WIRED. k10 is known-red and non-blocking. 1 WARN L897 (optimal worst 191 > 180 s, pre-existing L0–30 dead zone) is recorded on all three aggregates and is not a FAIL.
+
+================================================================================
+(a) #124 pacing-x1-stack 42723343747  — verdict SUCCESS
+================================================================================
+url: https://github.com/PrincipalLewis/egg-farm/actions/runs/42723343747
+head_sha: baf410fff30cb6a66e8565693f84ade2250719c2  (branch saves/breeds-drift-d1-d6)
+event: pull_request  attempt: 1
+status: completed  conclusion: failure (aggregate only; expected under PASS rule)
+started: 2026-11-10 00:48:00 CET   finished: 2026-11-10 01:38:01 CET
+
+jobs:
+  129522693151  pacing-x1-stack shard (seller15)  completed / success   00:51:15–01:24:16 CET
+  129522693340  pacing-x1-stack shard (casual)    completed / success   00:49:36–01:32:37 CET
+  129522693737  pacing-x1-stack shard (optimal)   completed / success   00:52:31–01:36:09 CET
+  129543789051  pacing-x1-stack (aggregate)       completed / failure   01:37:44–01:38:00 CET
+
+aggregate failing rows (only these FAIL lines):
+  FAIL: blocking row 904 optimal NOT-WIRED
+  FAIL: blocking row 904 seller15 NOT-WIRED
+  FAIL: blocking row 904 casual NOT-WIRED
+rows summary: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED, 3 N/A (row 903), 12 NOT-WIRED (3 blocking), 24 EXCLUDED
+WARN (non-FAIL): L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+
+Note: this step did not re-read #124 ci 42723343775 or k10 42723343855.
+
+================================================================================
+(b) #126 pacing-x1-stack 42726279381  — verdict SUCCESS
+================================================================================
+url: https://github.com/PrincipalLewis/egg-farm/actions/runs/42726279381
+head_sha: d4b5fdcd7e45a5c3b5d0062cf2a3a982bf9e74a9  (branch saves/breeds-sim-prB-traits-c0)
+event: pull_request  attempt: 1
+status: completed  conclusion: failure (aggregate only; expected under PASS rule)
+started: 2026-11-10 01:10:42 CET   finished: 2026-11-10 01:56:27 CET
+
+jobs:
+  129532603300  pacing-x1-stack shard (seller15)  completed / success   01:11:23–01:44:53 CET
+  129532602625  pacing-x1-stack shard (casual)    completed / success   01:10:46–01:47:51 CET
+  129532602876  pacing-x1-stack shard (optimal)   completed / success   01:10:46–01:56:07 CET
+  129552240482  pacing-x1-stack (aggregate)       completed / failure   01:56:10–01:56:26 CET
+
+aggregate failing rows (only these FAIL lines):
+  FAIL: blocking row 904 optimal NOT-WIRED
+  FAIL: blocking row 904 seller15 NOT-WIRED
+  FAIL: blocking row 904 casual NOT-WIRED
+rows summary: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED, 3 N/A (row 903), 12 NOT-WIRED (3 blocking), 24 EXCLUDED
+WARN (non-FAIL): L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+
+Note: this step did not re-read #126 ci 42726279282 or k10 42726279060.
+
+================================================================================
+(c) PR #120 at current head — hosted final; overall SUCCESS (k10 known-red, non-blocking)
+================================================================================
+PR #120 still open, not draft, not merged.
+current head.sha: 0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e  (unchanged from the local bar)
+head.ref: saves/breeds-recite-389
+base: rc/v5 @ f20b91839fdf09ba0ed45a890281ccbf7bf2909d
+title: Saves: breeds re-cite to rev 3.8.9 ea922eb8 (HoE/breeds-recite-389)
+
+Exactly 3 hosted workflow runs at this head (list total_count=3):
+
+--- ci 42719317192  verdict SUCCESS ---
+url: https://github.com/PrincipalLewis/egg-farm/actions/runs/42719317192
+head_sha: 0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+status: completed  conclusion: success
+started: 2026-11-10 00:18:03 CET   finished: 2026-11-10 00:33:09 CET
+jobs:
+  129508923300  gate              completed / success   00:18:06–00:33:08 CET
+  129515854922  release-globals   completed / skipped   00:33:09–00:33:08 CET
+
+--- pacing-x1-stack 42719317458  verdict SUCCESS ---
+url: https://github.com/PrincipalLewis/egg-farm/actions/runs/42719317458
+head_sha: 0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+status: completed  conclusion: failure (aggregate only; expected under PASS rule)
+started: 2026-11-10 00:18:03 CET   finished: 2026-11-10 01:03:05 CET
+jobs:
+  129508926243  pacing-x1-stack shard (seller15)  completed / success   00:18:07–01:02:02 CET
+  129508926403  pacing-x1-stack shard (casual)    completed / success   00:18:07–00:51:12 CET
+  129508926030  pacing-x1-stack shard (optimal)   completed / success   00:18:07–01:02:18 CET
+  129528859812  pacing-x1-stack (aggregate)       completed / failure   01:02:48–01:03:05 CET
+aggregate failing rows (only these FAIL lines):
+  FAIL: blocking row 904 optimal NOT-WIRED
+  FAIL: blocking row 904 seller15 NOT-WIRED
+  FAIL: blocking row 904 casual NOT-WIRED
+rows summary: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED, 3 N/A (row 903), 12 NOT-WIRED (3 blocking), 24 EXCLUDED
+WARN (non-FAIL): L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+
+--- k10-breeds-offset 42719317403  conclusion failure (KNOWN-RED, non-blocking) ---
+url: https://github.com/PrincipalLewis/egg-farm/actions/runs/42719317403
+head_sha: 0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+status: completed  conclusion: failure
+started: 2026-11-10 00:18:03 CET   finished: 2026-11-10 00:36:18 CET
+jobs:
+  129508922143  k10-breeds-offset (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53)
+                completed / failure   00:18:06–00:36:18 CET
+                failing step 5: K10 trigger + 200-seed offset test when triggered (npm run test:k10)
+
+================================================================================
+API calls (read-only, once each): 12
+  pulls/120; runs 42723343747 + jobs + aggregate log; runs 42726279381 + jobs + aggregate log;
+  actions/runs?head_sha=0bbcea52; #120 ci/pacing/k10 jobs; #120 pacing aggregate log.
+No GITHUB_TOKEN printed or placed on a command line. No push/merge/tag. No re-run.

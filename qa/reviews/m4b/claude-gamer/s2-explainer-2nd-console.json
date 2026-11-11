@@ -1,0 +1,16 @@
+{
+ "tag": "s2-explainer-2nd",
+ "url": "file:///tmp/relchk/egg-farm.html",
+ "profile": "prof-old",
+ "aheadHours": 0,
+ "viewport": [
+  390,
+  844
+ ],
+ "console": [],
+ "pageerrors": [],
+ "build_id": {
+  "meta": "m3-rc1-pre+246de09",
+  "data": "m3-rc1-pre+246de09"
+ }
+}

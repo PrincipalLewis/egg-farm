@@ -1,0 +1,21 @@
+﻿2026-11-06T01:51:21.8681423Z ##[group]Run npm run build:html
+2026-11-06T01:51:21.8681693Z [36;1mnpm run build:html[0m
+2026-11-06T01:51:21.8700022Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:51:21.8700255Z ##[endgroup]
+2026-11-06T01:51:21.9608042Z 
+2026-11-06T01:51:21.9608770Z > egg-farm@0.1.0 build:html
+2026-11-06T01:51:21.9610037Z > vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && node scripts/build-html.mjs dist-html && node scripts/check-release-build.mjs dist-html/egg-farm.html
+2026-11-06T01:51:21.9610831Z 
+2026-11-06T01:51:22.2323706Z balance.json up to date with economy.csv
+2026-11-06T01:51:28.2812048Z build:html: dist-html/egg-farm.html (595828 bytes, 16 asset rewrites, 45 inlined files)
+2026-11-06T01:51:28.3285784Z check-release-build: single-file dist-html/egg-farm.html (595828 bytes)
+2026-11-06T01:51:28.3328545Z check-release-build: m4.1+69f9c61 ok
+2026-11-06T01:51:28.3331684Z check-release-build: release prefix m4.1 ok
+2026-11-06T01:51:28.3332311Z check-release-build: build id m4.1+69f9c61 matches HEAD ok
+2026-11-06T01:51:28.3351487Z check-release-build: build-id meta + data-build-id = m4.1+69f9c61 ok
+2026-11-06T01:51:28.3353718Z check-release-build: no eggfarmUi in release ok
+2026-11-06T01:51:28.3372896Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+2026-11-06T01:51:28.3488995Z check-release-build: window global writes only eggfarmExportTelemetry ok
+2026-11-06T01:51:28.3513199Z check-release-build: every asset/font URL inlined (data:) ok
+2026-11-06T01:51:28.3584018Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+2026-11-06T01:51:28.3586914Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok

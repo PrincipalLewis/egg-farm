@@ -1,0 +1,15 @@
+'asleep')).toBe(true);
+  });
+});
+
+describe('sheet close cancel edges [Architect O1/O2]', () => {
+  it('O1: docking mid-close completes pending sheet and restores attendance', async () => {
+    const { ui, probe, setDocked } = await mountAbilitiesUi();
+    const btn = document.query
+---
+ expect(document.getElementById('p-upgrades')?.hidden).toBe(true);
+  });
+
+  it('O2: reopen Upgrades during pending close cancels stale listener before open', async () => {
+    const { ui, probe } = await mountAbilitiesUi();
+    const btn = document.querySelector('[data-testid="call

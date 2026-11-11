@@ -1,0 +1,19 @@
+{
+  "exportedAt": 1792154502262,
+  "events": [
+    {
+      "install_id": "f8866668-af32-4ffb-b8cf-3fb08e84f7a2",
+      "build": "m3-rc1-pre+8669522",
+      "type": "session_start",
+      "ts": 1792154501298,
+      "sessionMs": 0
+    },
+    {
+      "step": 1,
+      "name": "collect",
+      "type": "onboarding_step",
+      "ts": 1792154501303,
+      "sessionMs": 5
+    }
+  ]
+}

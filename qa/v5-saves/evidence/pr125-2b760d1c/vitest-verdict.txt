@@ -1,0 +1,9 @@
+TSC_EXIT=0
+VITEST_EXIT=1
+Test Files: 160 passed (160)
+Tests: 2350 passed | 1 skipped (2351); 0 failed
+v5-f3-config.test.ts 28/28 PASS (F3-no-literal cleared)
+v5-breeds-present.test.ts 17/17 PASS (includes eng [F7] Game.frame cases)
+N1: 134 m41-9-ux-minors teardown errors. Non-blocking per QA-D-1110 02:00 (0 failed tests).
+Duration 286.07s, start 03:28:04 CET
+VERDICT=PASS (0 failed tests; EXIT=1 is N1 only)

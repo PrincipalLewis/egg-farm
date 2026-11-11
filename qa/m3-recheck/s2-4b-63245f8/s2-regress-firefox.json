@@ -1,0 +1,75 @@
+[
+ {
+  "n": "(a) greyed taps incl. L12 farm upgrade leave money and save unchanged (no workers)",
+  "pass": true,
+  "i": {
+   "tapped": [
+    "farm:1",
+    "collection:1",
+    "workers:3",
+    "sellAll",
+    "collect(empty)"
+   ],
+   "s0": 1500,
+   "s1": 1500,
+   "v0": 1500,
+   "v1": 1500,
+   "hdr": [
+    "$15.00",
+    "$15.00"
+   ]
+  }
+ },
+ {
+  "n": "(a2) greyed worker/Manage taps during cooldown: no refill, cooldown not reset, no spend",
+  "pass": true,
+  "i": {
+   "n": 5,
+   "refilled": [],
+   "cd": 28.199999999999974,
+   "d": 13583
+  }
+ },
+ {
+  "n": "(b) Upgrades sheet: money and ETA update live while open",
+  "pass": true,
+  "i": {
+   "stateMoved": 20,
+   "hdr": 20,
+   "eta": 3,
+   "flip": true,
+   "first": {
+    "c": "$3,199.78",
+    "cs": 319978,
+    "h": "Ready in ~6 min 50 s",
+    "dis": "true"
+   },
+   "last": {
+    "c": "$5,471.51",
+    "cs": 547151,
+    "h": "",
+    "dis": "false"
+   }
+  }
+ },
+ {
+  "n": "(c) offline popup count matches basket stock (away 600s)",
+  "pass": true,
+  "i": {
+   "txt": "+3,005 eggs",
+   "pend": 3005,
+   "delta": 3005,
+   "basketHdr": "3,005"
+  }
+ },
+ {
+  "n": "(c) offline popup count matches basket stock (away 7200s)",
+  "pass": true,
+  "i": {
+   "txt": "+36K eggs",
+   "pend": 36000,
+   "delta": 36000,
+   "basketHdr": "36K"
+  }
+ }
+]

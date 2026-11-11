@@ -1,0 +1,104 @@
+{
+ "engine": "chromium",
+ "port": 4400,
+ "asset_sha256": "291229bca7e6d6fbcc12626ca6c07a4c265f05b1018ca9cb32ad10d05075bbc7",
+ "results": [
+  {
+   "fixture": "m1-rc2-v4-12min",
+   "rep": 1,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "19da5c83fdc580ccdfa057e080120c3fb0ed647ffdc7ef7fe7057dc37895623e",
+   "bytes": 855,
+   "hasM4": [],
+   "coins": 141585,
+   "errs": []
+  },
+  {
+   "fixture": "m1-rc2-v4-12min",
+   "rep": 2,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "58a1ad33a471660bdddb0a101c34045eb18305361c3cdeccc475fc16e1c89480",
+   "bytes": 844,
+   "hasM4": [],
+   "coins": 141585,
+   "errs": []
+  },
+  {
+   "fixture": "m2-rc1-v5-12min",
+   "rep": 1,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "ac8df4089f34cff450825aecc657a2216001ece5dc17b02301f4b73faabe0e39",
+   "bytes": 984,
+   "hasM4": [],
+   "coins": 221098,
+   "errs": []
+  },
+  {
+   "fixture": "m2-rc1-v5-12min",
+   "rep": 2,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "836e734dcc4fd85722c28f9422be4270718c4449ce8acb0461bed565a8e16081",
+   "bytes": 939,
+   "hasM4": [],
+   "coins": 221098,
+   "errs": []
+  },
+  {
+   "fixture": "m2-rc1-v5-40min",
+   "rep": 1,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "3c5aafbfea25db97248c8c700f752a5a304aac2214ff0f6ae695b4a6774f53f6",
+   "bytes": 1118,
+   "hasM4": [],
+   "coins": 2502441,
+   "errs": []
+  },
+  {
+   "fixture": "m2-rc1-v5-40min",
+   "rep": 2,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "9c04f5e4923cb8c96163d897b89e5d8ad301169e00cde67598a3208cacaf6d06",
+   "bytes": 1182,
+   "hasM4": [],
+   "coins": 2549841,
+   "errs": []
+  },
+  {
+   "fixture": "m2-rc1-v5-40min-edge",
+   "rep": 1,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "32418250d79a33bcee5a703744a23e8671461f8302e283cd4a94e88dc6ec6454",
+   "bytes": 1168,
+   "hasM4": [],
+   "coins": 2217176,
+   "errs": []
+  },
+  {
+   "fixture": "m2-rc1-v5-40min-edge",
+   "rep": 2,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "32418250d79a33bcee5a703744a23e8671461f8302e283cd4a94e88dc6ec6454",
+   "bytes": 1168,
+   "hasM4": [],
+   "coins": 2217176,
+   "errs": []
+  }
+ ],
+ "build_id": "m3-rc1-pre+a01faea"
+}

@@ -1,0 +1,13 @@
+2026-10-17 10:09:59 CEST ancestry d75d41f: NOT-contained
+2026-10-17 10:09:59 CEST ancestry 72078b5: contained
+2026-10-17 10:09:59 CEST ancestry 8e6d53e: NOT-contained
+2026-10-17 10:09:59 CEST parents: b3e17fa96367031e82a23a89e80348c3bcc9c0e0
+2026-10-17 10:09:59 CEST #31 merged on main? no
+2026-10-17 10:09:59 CEST step1 done: payout base salePriceCents: 0|payout eggPriceCents left: 2|actions local saleValueCents defs (want 0): 0|actions re-export: 1|app sellAllPreview from actions (want 0): 0|app unit via saleValueCents: 1|app fmtMoneyShort uses: |save hidden stamp: 1 quotaRetry(t, st): 0 persisted(st: 0 N6: 0|hiddenSimMaxSeconds: balance 1 formulas 1 m4 block 0|format exports: export const fmtMoneyShort;export const fmtMoneyPreview;export const fmtMoneyExact;|styles: tgPlay48 1 ghosts 5|
+2026-10-17 10:10:01 CEST payout/parity unit exit=0       Tests  92 passed (92)
+2026-10-17 10:10:01 CEST DRY=1: skipping browser steps 3/4/7
+2026-10-17 10:10:04 CEST save() unit subset exit=0       Tests  157 passed (157)
+2026-10-17 10:10:04 CEST save() body captured (14 lines); reviewer checks hidden.at/hidden.state flow into persisted, quota retry, mirror fallback
+2026-10-17 10:10:04 CEST loosened: ghost 1500 ms in app: 1; fmtMoneyShort non-trackPrice uses in app (want 0): 0
+2026-10-17 10:10:05 CEST qa-rc1-bugs exit=0       Tests  45 passed (45)
+2026-10-17 10:10:05 CEST ALL_DONE steps=[ 1 5 6 ]

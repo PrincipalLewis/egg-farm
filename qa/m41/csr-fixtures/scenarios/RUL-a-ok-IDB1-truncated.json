@@ -1,0 +1,14 @@
+{
+ "id": "RUL-a-ok-IDB1-truncated",
+ "now": 1792378840000,
+ "csr": [
+  "D-HOP-2026-10-22-01(a)",
+  "IDB1-1",
+  "IDB1-5"
+ ],
+ "idbManifest": "../../csr/fixtures/idb1/IDB1-truncated.manifest.json",
+ "expect": {
+  "idbCorruptExact": 1,
+  "mainDeleteOnlyInPutTx": true
+ }
+}

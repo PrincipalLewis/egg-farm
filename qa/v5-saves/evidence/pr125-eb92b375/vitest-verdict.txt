@@ -1,0 +1,6 @@
+VITEST_EXIT=1
+Test Files: 1 failed | 159 passed (160)
+Tests: 1 failed | 2345 passed | 1 skipped (2347)
+Failed test: tests/v5-f3-config.test.ts [F3-no-literal] expected [ sim/clock.ts:38 100 ] to equal []
+Introduced by eb92b37 tickClock default tickMs=100 (see f3-literal-origin.txt)
+N1: m41-9-ux-minors teardown errors (count below). Do not fail the bar by themselves per QA-D-1110 02:00 if 0 failed tests and hosted green; here there IS 1 failed test.

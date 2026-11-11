@@ -1,0 +1,9 @@
+2026-11-06T01:39:30.1940000Z Requested labels: ubuntu-latest
+2026-11-06T01:39:30.1940000Z Job defined at: PrincipalLewis/egg-farm/.github/workflows/ci.yml@refs/pull/107/merge
+2026-11-06T01:39:30.1940000Z Waiting for a runner to pick up this job...
+2026-11-06T01:39:30.1940000Z Evaluating gate.if
+2026-11-06T01:39:30.1940000Z Evaluating: (success() && (((github.event_name != 'pull_request') || !github.event.pull_request.draft)))
+2026-11-06T01:39:30.1940000Z Expanded: (true && (('pull_request' != 'pull_request') || !false))
+2026-11-06T01:39:30.1940000Z Result: true
+2026-11-06T01:39:30.9950000Z Job is waiting for a hosted runner to come online.
+2026-11-06T01:39:30.9950000Z Job is about to start running on the hosted runner: GitHub Actions 1000007341

@@ -1,0 +1,14 @@
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/o1o2-vitest.log:5:   ✓ AB-14 / AC-M5A-22 sheetCloseComplete hold [Architect CHANGES] > fireAbility from portrait sheet keeps attendance frozen until sheetCloseComplete 312ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/o1o2-vitest.log:7: Test Files  1 passed (1)
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/o1o2-vitest.log:8:      Tests  15 passed (15)
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:41:   ✓ verify: goldens > the copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree 710ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:45:   ✓ verify: save round-trip guard (VER-1a, CCR R1) > CLI: with the marker skipped (VERIFY_TEST_SKIP_MARKER=1) verify exits 4, records saveRoundTrip FAIL, and leaves no PNG 1174ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:55:   ✓ verify: exit codes and the browser step (CCR n1/n3) > exit 1 on a failed check (wrong build id, no screenshot); verify.json says FAIL and names no PNG 1128ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:57:   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M28/M29): without --out, a usage error clears the existing default dir verify-out/<HEAD id>/ and writes the FAIL report there 728ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:59:   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M33): --skip-build with an older html clears that html's default dir; a crash then writes the FAIL report there 386ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:60:   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M27): a crash after the browser step wrote verify.png removes that PNG with the FAIL report 1094ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:65:   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-4 (NC5): when the first of two claimed dirs cannot take the FAIL report, the second still gets it and loses its PNG 1173ms
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:145:GOLDEN1 a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:156:GOLDEN1 f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:350: Test Files  152 passed (152)
+/workspace/egg-farm-studio/qa/m3-recheck/abilities-ui-9ee76a0-evidence/full-vitest.log:351:      Tests  2213 passed | 1 skipped (2214)

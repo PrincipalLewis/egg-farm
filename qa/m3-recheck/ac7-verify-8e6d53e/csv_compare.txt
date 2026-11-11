@@ -1,0 +1,7 @@
+levels 6dca: 0 - 30  b59c: 0 - 55
+cols equal 6dca/86f0: True  6dca/b59c: False
+cols only in b59c: ['farm_ms_price_mult', 'feed_mill_price_mult', 'auto_collect_every_s', 'contracts_manual_bonus', 'hv_extra_cost_farm_share', 'farm_max_level', 'hv_extra_second_markup']
+cols only in 6dca: []
+86f0e80e L21: [('farm_cost', '41918', '40660'), ('w4_tier_cost', '20959', '20330')]
+b59c4e0d L21: [('farm_cost', '41918', '40660'), ('w4_tier_cost', '20959', '20330')]
+b59c4e0d L30: [('farm_cost', '330194', '624316'), ('eggs_per_sec', '31', '31.0'), ('w2_wage_per_min', '15', '15.0'), ('w4_price_mult', '4', '4.0'), ('hens_cost', '74005', '94319'), ('egg_value_cost', '133856', '249339'), ('hens_ms3_coop_mult', '2', '2.0'), ('hens_ms3_offline_mult', '2', '2.0'), ('w2_asleep_collect_share', '0.2', '0.20'), ('nudge_coopfull_share', '0.5', '0.50')]

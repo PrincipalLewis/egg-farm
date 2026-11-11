@@ -1,0 +1,16 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr127-04add420/wt
+
+ ✓ tests/m4a-flag-off.test.ts (2 tests) 242ms
+stdout | tests/zg-flagoff-dom.test.ts > ZG-AC12/19 flag-off DOM byte-identical to 65a7443 > sha256 over (config x fixture x tab) markup + nav dot + strip
+ZG-FLAGOFF-DOM 9c4b6439016e5d5b6a779b34643f70793fda5df8d44728f9bcc32844c662ee35
+
+ ✓ tests/zg-flagoff-dom.test.ts (1 test) 1144ms
+   ✓ ZG-AC12/19 flag-off DOM byte-identical to 65a7443 > sha256 over (config x fixture x tab) markup + nav dot + strip 1143ms
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  01:41:02
+   Duration  2.39s (transform 545ms, setup 0ms, collect 495ms, tests 1.39s, environment 217ms, prepare 79ms)
+
+GOLDEN_EXIT=0

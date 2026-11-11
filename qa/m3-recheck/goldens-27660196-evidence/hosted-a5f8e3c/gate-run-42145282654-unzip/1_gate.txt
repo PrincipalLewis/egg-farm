@@ -1,0 +1,740 @@
+﻿2026-11-06T01:39:33.7088879Z Current runner version: '2.338.2'
+2026-11-06T01:39:33.7114107Z ##[group]Runner Image Provisioner
+2026-11-06T01:39:33.7114985Z Hosted Compute Agent
+2026-11-06T01:39:33.7115549Z Version: 20261028.624
+2026-11-06T01:39:33.7116159Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+2026-11-06T01:39:33.7116754Z Build Date: 2026-10-28T21:51:42Z
+2026-11-06T01:39:33.7117399Z Worker ID: {69066f85-b3e6-40c5-b079-f45f2d1f494d}
+2026-11-06T01:39:33.7118326Z Region: westus2
+2026-11-06T01:39:33.7118837Z Cloud: Azure
+2026-11-06T01:39:33.7119326Z ##[endgroup]
+2026-11-06T01:39:33.7121019Z ##[group]Operating System
+2026-11-06T01:39:33.7121665Z Ubuntu
+2026-11-06T01:39:33.7122420Z 24.04.5
+2026-11-06T01:39:33.7122859Z LTS
+2026-11-06T01:39:33.7123620Z ##[endgroup]
+2026-11-06T01:39:33.7124235Z ##[group]Runner Image
+2026-11-06T01:39:33.7124824Z Image: ubuntu-24.04
+2026-11-06T01:39:33.7125365Z Version: 20261101.360.1
+2026-11-06T01:39:33.7126596Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-06T01:39:33.7128166Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+2026-11-06T01:39:33.7129015Z ##[endgroup]
+2026-11-06T01:39:33.7130019Z ##[group]GITHUB_TOKEN Permissions
+2026-11-06T01:39:33.7132188Z Contents: read
+2026-11-06T01:39:33.7132712Z Metadata: read
+2026-11-06T01:39:33.7133179Z ##[endgroup]
+2026-11-06T01:39:33.7135284Z Secret source: Actions
+2026-11-06T01:39:33.7136109Z Cache mode: write
+2026-11-06T01:39:33.7136844Z Prepare workflow directory
+2026-11-06T01:39:33.7432284Z Prepare all required actions
+2026-11-06T01:39:33.7474862Z Getting action download info
+2026-11-06T01:39:34.0934433Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-06T01:39:34.2060999Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-06T01:39:34.4005381Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-06T01:39:34.7662648Z Complete job name: gate
+2026-11-06T01:39:34.8462937Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-11-06T01:39:34.8463865Z with:
+2026-11-06T01:39:34.8464280Z   repository: PrincipalLewis/egg-farm
+2026-11-06T01:39:34.8468146Z   token: ***
+2026-11-06T01:39:34.8468537Z   ssh-strict: true
+2026-11-06T01:39:34.8468933Z   ssh-user: git
+2026-11-06T01:39:34.8469328Z   persist-credentials: true
+2026-11-06T01:39:34.8469767Z   clean: true
+2026-11-06T01:39:34.8470173Z   sparse-checkout-cone-mode: true
+2026-11-06T01:39:34.8470661Z   fetch-depth: 1
+2026-11-06T01:39:34.8471050Z   fetch-tags: false
+2026-11-06T01:39:34.8471445Z   show-progress: true
+2026-11-06T01:39:34.8471855Z   lfs: false
+2026-11-06T01:39:34.8472245Z   submodules: false
+2026-11-06T01:39:34.8472704Z   set-safe-directory: true
+2026-11-06T01:39:34.8473145Z   allow-unsafe-pr-checkout: false
+2026-11-06T01:39:34.8473855Z ##[endgroup]
+2026-11-06T01:39:35.4984199Z Syncing repository: PrincipalLewis/egg-farm
+2026-11-06T01:39:35.4987867Z ##[group]Getting Git version info
+2026-11-06T01:39:35.4988751Z Working directory is '/home/runner/work/egg-farm/egg-farm'
+2026-11-06T01:39:35.4990016Z [command]/usr/bin/git version
+2026-11-06T01:39:35.5044704Z git version 2.56.0
+2026-11-06T01:39:35.5064304Z ##[endgroup]
+2026-11-06T01:39:35.5078355Z Temporarily overriding HOME='/home/runner/work/_temp/72cd195e-a67a-4624-867a-4dfc410e7767' before making global git config changes
+2026-11-06T01:39:35.5083222Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-06T01:39:35.5085319Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/egg-farm/egg-farm
+2026-11-06T01:39:35.5140944Z Deleting the contents of '/home/runner/work/egg-farm/egg-farm'
+2026-11-06T01:39:35.5150875Z ##[group]Initializing the repository
+2026-11-06T01:39:35.5153880Z [command]/usr/bin/git init /home/runner/work/egg-farm/egg-farm
+2026-11-06T01:39:35.5242494Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-06T01:39:35.5245157Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-06T01:39:35.5247362Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-06T01:39:35.5249310Z hint: call:
+2026-11-06T01:39:35.5250563Z hint:
+2026-11-06T01:39:35.5252055Z hint: 	git config --global init.defaultBranch <name>
+2026-11-06T01:39:35.5253643Z hint:
+2026-11-06T01:39:35.5255288Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-06T01:39:35.5257737Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-06T01:39:35.5259496Z hint:
+2026-11-06T01:39:35.5260404Z hint: 	git branch -m <name>
+2026-11-06T01:39:35.5261422Z hint:
+2026-11-06T01:39:35.5262766Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-06T01:39:35.6586024Z Initialized empty Git repository in /home/runner/work/egg-farm/egg-farm/.git/
+2026-11-06T01:39:35.6595495Z [command]/usr/bin/git remote add origin https://github.com/PrincipalLewis/egg-farm
+2026-11-06T01:39:35.6650847Z ##[endgroup]
+2026-11-06T01:39:35.6652607Z ##[group]Disabling automatic garbage collection
+2026-11-06T01:39:35.6654285Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-06T01:39:35.6693076Z ##[endgroup]
+2026-11-06T01:39:35.6694851Z ##[group]Setting up auth
+2026-11-06T01:39:35.6698870Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-06T01:39:35.6741127Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-06T01:39:35.7059382Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-06T01:39:35.7100510Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-06T01:39:35.7320176Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-06T01:39:35.7363212Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-06T01:39:35.7579924Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-06T01:39:35.7647423Z ##[endgroup]
+2026-11-06T01:39:35.7649338Z ##[group]Fetching the repository
+2026-11-06T01:39:35.7660831Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +69f9c6194e405a94866c513645541765c6852cd4:refs/remotes/pull/107/merge
+2026-11-06T01:39:36.1789046Z From https://github.com/PrincipalLewis/egg-farm
+2026-11-06T01:39:36.1790710Z  * [new ref]         69f9c6194e405a94866c513645541765c6852cd4 -> pull/107/merge
+2026-11-06T01:39:36.1794907Z ##[endgroup]
+2026-11-06T01:39:36.1796488Z ##[group]Determining the checkout info
+2026-11-06T01:39:36.1798615Z ##[endgroup]
+2026-11-06T01:39:36.1806919Z [command]/usr/bin/git sparse-checkout disable
+2026-11-06T01:39:36.1862864Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-06T01:39:36.1901511Z ##[group]Checking out the ref
+2026-11-06T01:39:36.1902933Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/107/merge
+2026-11-06T01:39:36.2224341Z Note: switching to 'refs/remotes/pull/107/merge'.
+2026-11-06T01:39:36.2225526Z 
+2026-11-06T01:39:36.2226435Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-06T01:39:36.2228922Z changes and commit them, and you can discard any commits you make in this
+2026-11-06T01:39:36.2231107Z state without impacting any branches by switching back to a branch.
+2026-11-06T01:39:36.2232121Z 
+2026-11-06T01:39:36.2232820Z If you want to create a new branch to retain commits you create, you may
+2026-11-06T01:39:36.2234853Z do so (now or later) by using -c with the switch command. Example:
+2026-11-06T01:39:36.2235818Z 
+2026-11-06T01:39:36.2236215Z   git switch -c <new-branch-name>
+2026-11-06T01:39:36.2236835Z 
+2026-11-06T01:39:36.2237219Z Or undo this operation with:
+2026-11-06T01:39:36.2238035Z 
+2026-11-06T01:39:36.2238441Z   git switch -
+2026-11-06T01:39:36.2238918Z 
+2026-11-06T01:39:36.2239683Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-06T01:39:36.2240736Z 
+2026-11-06T01:39:36.2241951Z HEAD is now at 69f9c61 Merge a5f8e3c916833eae0a68aca03940e2fd08e01725 into 71375901de8b72acfaa49c695c5c18f0d0088080
+2026-11-06T01:39:36.2245404Z ##[endgroup]
+2026-11-06T01:39:36.2283269Z [command]/usr/bin/git log -1 --format=%H
+2026-11-06T01:39:36.2314862Z 69f9c6194e405a94866c513645541765c6852cd4
+2026-11-06T01:39:36.3071450Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-06T01:39:36.3072854Z with:
+2026-11-06T01:39:36.3073648Z   node-version: 20
+2026-11-06T01:39:36.3074483Z   cache: npm
+2026-11-06T01:39:36.3075275Z   always-auth: false
+2026-11-06T01:39:36.3076123Z   check-latest: false
+2026-11-06T01:39:36.3084284Z   token: ***
+2026-11-06T01:39:36.3085074Z ##[endgroup]
+2026-11-06T01:39:36.4395790Z Attempting to download 20...
+2026-11-06T01:39:36.4623069Z (node:2127) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-06T01:39:36.4624967Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-06T01:39:37.2375329Z Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+2026-11-06T01:39:38.1114264Z Extracting ...
+2026-11-06T01:39:38.1223008Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/11a2b385-f639-41a6-95b9-9ab716289667 -f /home/runner/work/_temp/7564cbca-76b8-4848-8da3-9f0a74910386
+2026-11-06T01:39:38.9976569Z Adding to the cache ...
+2026-11-06T01:39:40.7075028Z ##[group]Environment details
+2026-11-06T01:39:40.9073744Z node: v20.20.2
+2026-11-06T01:39:40.9074023Z npm: 10.8.2
+2026-11-06T01:39:40.9074230Z yarn: 1.22.22
+2026-11-06T01:39:40.9074674Z ##[endgroup]
+2026-11-06T01:39:40.9089341Z [command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache
+2026-11-06T01:39:40.9987097Z /home/runner/.npm
+2026-11-06T01:39:41.2335416Z Cache hit for: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898
+2026-11-06T01:39:41.2426618Z (node:2127) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-06T01:39:42.5293917Z Received 5913334 of 22690550 (26.1%), 5.6 MBs/sec
+2026-11-06T01:39:42.7433114Z Received 22690550 of 22690550 (100.0%), 17.8 MBs/sec
+2026-11-06T01:39:42.7433660Z Cache Size: ~22 MB (22690550 B)
+2026-11-06T01:39:42.7532284Z [command]/usr/bin/tar -xf /home/runner/work/_temp/f83015f2-3b35-4c36-b86b-29be9ff2eba0/cache.tzst -P -C /home/runner/work/egg-farm/egg-farm --use-compress-program unzstd
+2026-11-06T01:39:42.8071752Z Cache restored successfully
+2026-11-06T01:39:42.8089097Z Cache restored from key: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898
+2026-11-06T01:39:42.8290741Z ##[group]Run npm ci
+2026-11-06T01:39:42.8291016Z [36;1mnpm ci[0m
+2026-11-06T01:39:42.8313905Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:39:42.8314162Z ##[endgroup]
+2026-11-06T01:39:43.5708622Z npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+2026-11-06T01:39:44.4127346Z 
+2026-11-06T01:39:44.4128352Z added 87 packages, and audited 88 packages in 2s
+2026-11-06T01:39:44.4128757Z 
+2026-11-06T01:39:44.4128987Z 21 packages are looking for funding
+2026-11-06T01:39:44.4129714Z   run `npm fund` for details
+2026-11-06T01:39:44.4335096Z 
+2026-11-06T01:39:44.4336653Z 6 vulnerabilities (3 moderate, 1 high, 2 critical)
+2026-11-06T01:39:44.4336909Z 
+2026-11-06T01:39:44.4337121Z To address all issues (including breaking changes), run:
+2026-11-06T01:39:44.4337584Z   npm audit fix --force
+2026-11-06T01:39:44.4337797Z 
+2026-11-06T01:39:44.4337919Z Run `npm audit` for details.
+2026-11-06T01:39:44.4518829Z ##[group]Run npm test
+2026-11-06T01:39:44.4519075Z [36;1mnpm test[0m
+2026-11-06T01:39:44.4540346Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:39:44.4540574Z ##[endgroup]
+2026-11-06T01:39:44.5451708Z 
+2026-11-06T01:39:44.5452298Z > egg-farm@0.1.0 test
+2026-11-06T01:39:44.5452759Z > vite-node scripts/sync-economy-cli.ts -- --check && vitest run
+2026-11-06T01:39:44.5453006Z 
+2026-11-06T01:39:44.8512506Z balance.json up to date with economy.csv
+2026-11-06T01:39:45.1162944Z 
+2026-11-06T01:39:45.1169799Z [1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/egg-farm/egg-farm[39m
+2026-11-06T01:39:45.1178993Z 
+2026-11-06T01:39:45.7675072Z [90mstdout[2m | tests/telemetry-schema.test.ts[2m > [22m[2m[G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2)[2m > [22m[2m[G-8] worst-case 1 h session: every event valid and pinned; serialized <= 200 KB
+2026-11-06T01:39:45.7676468Z [22m[39mG-8 pinned bytes (base): 155374
+2026-11-06T01:39:45.7676837Z 
+2026-11-06T01:39:45.7678528Z [90mstdout[2m | tests/telemetry-schema.test.ts[2m > [22m[2m[G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2)[2m > [22m[2m[G-8] worst-case 1 h session + buy-spam fixture: every event valid and pinned; serialized <= 200 KB
+2026-11-06T01:39:45.7679886Z [22m[39mG-8 pinned bytes (buy-spam): 175905
+2026-11-06T01:39:45.7680171Z 
+2026-11-06T01:39:45.7700641Z  [32m✓[39m tests/telemetry-schema.test.ts [2m([22m[2m50 tests[22m[2m)[22m[90m 82[2mms[22m[39m
+2026-11-06T01:39:46.0191307Z  [32m✓[39m tests/m4a-v3-backup.test.ts [2m([22m[2m32 tests[22m[2m)[22m[90m 232[2mms[22m[39m
+2026-11-06T01:39:46.8136829Z  [32m✓[39m tests/v5-breeds-hatch.test.ts [2m([22m[2m37 tests[22m[2m)[22m[33m 485[2mms[22m[39m
+2026-11-06T01:39:47.4779847Z  [32m✓[39m tests/csr-loadsafe.test.ts [2m([22m[2m64 tests[22m[2m)[22m[90m 287[2mms[22m[39m
+2026-11-06T01:39:48.0651244Z  [32m✓[39m tests/m41-p2-ui-minors.test.ts [2m([22m[2m32 tests[22m[2m)[22m[90m 140[2mms[22m[39m
+2026-11-06T01:39:48.5769664Z  [32m✓[39m tests/v5-abilities-sim.test.ts [2m([22m[2m29 tests[22m[2m)[22m[90m 104[2mms[22m[39m
+2026-11-06T01:39:49.0409687Z  [32m✓[39m tests/v5-pause-sim.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 36[2mms[22m[39m
+2026-11-06T01:39:49.5989396Z  [32m✓[39m tests/m41-p1-asleep-signal.test.ts [2m([22m[2m26 tests[22m[2m)[22m[90m 67[2mms[22m[39m
+2026-11-06T01:39:51.4113274Z  [32m✓[39m tests/pacing-x1.test.ts [2m([22m[2m22 tests[22m[2m)[22m[33m 1430[2mms[22m[39m
+2026-11-06T01:39:51.4119471Z    [33m[2m✓[22m[39m QA-D-1030-SHIPFLAGS: the run records balance.json sha256 + m4 flags (results/ and SHA256SUMS)[2m > [22m`pacing-x1-stack.ts -- inputs` writes balance.txt (sha256 first, every m4 flag) and a byte copy whose sha256 is the tree file [33m1316[2mms[22m[39m
+2026-11-06T01:39:52.6419675Z  [32m✓[39m tests/m41-8-f4-label.test.ts [2m([22m[2m27 tests[22m[2m)[22m[33m 903[2mms[22m[39m
+2026-11-06T01:39:52.6422028Z    [33m[2m✓[22m[39m F4-7 length property: no rendered label over 27, level + suffix intact, aria untruncated[2m > [22mHens / Egg value / Collection × levels 0..maxLevel and 0..55 × X × milestone × ★ [33m412[2mms[22m[39m
+2026-11-06T01:39:53.0912647Z  [32m✓[39m tests/m41-7-csr8b-race.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 196[2mms[22m[39m
+2026-11-06T01:39:53.8539621Z  [32m✓[39m tests/v5-income-ref.test.ts [2m([22m[2m27 tests[22m[2m)[22m[33m 456[2mms[22m[39m
+2026-11-06T01:39:54.1442281Z  [32m✓[39m tests/v5-f2-m5-fields.test.ts [2m([22m[2m37 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+2026-11-06T01:39:54.7139536Z  [32m✓[39m tests/v5-f1c-effects.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 301[2mms[22m[39m
+2026-11-06T01:39:55.2529548Z  [32m✓[39m tests/v5-breeds-state.test.ts [2m([22m[2m35 tests[22m[2m)[22m[90m 260[2mms[22m[39m
+2026-11-06T01:39:55.5850195Z  [32m✓[39m tests/v5-streak-sim.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 69[2mms[22m[39m
+2026-11-06T01:40:11.5452913Z  [32m✓[39m tests/m41-9-big-number.test.ts [2m([22m[2m35 tests[22m[2m)[22m[33m 15686[2mms[22m[39m
+2026-11-06T01:40:11.5454521Z    [33m[2m✓[22m[39m K–T golden byte-identity (old dd223f5 vs new, 0..1e15)[2m > [22mfmtCount over 24554 values [33m429[2mms[22m[39m
+2026-11-06T01:40:11.5456426Z    [33m[2m✓[22m[39m K–T golden byte-identity (old dd223f5 vs new, 0..1e15)[2m > [22mfmtMoney / fmtMoneyShort / fmtMoneyPreview / fmtMoneyExact over the same values as dollars (cents < 1e17) [33m14498[2mms[22m[39m
+2026-11-06T01:40:11.5474661Z    [33m[2m✓[22m[39m QA4-1: no thousands separator in a suffixed value, widest strings are 8 chars[2m > [22mlog-spaced 1e4..1e40 [33m598[2mms[22m[39m
+2026-11-06T01:40:11.8761728Z  [32m✓[39m tests/v5-tap-coins.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 90[2mms[22m[39m
+2026-11-06T01:40:12.3432657Z  [32m✓[39m tests/m41-7-hop-rulings.test.ts [2m([22m[2m26 tests[22m[2m)[22m[90m 206[2mms[22m[39m
+2026-11-06T01:40:12.6825894Z  [32m✓[39m tests/workers-v11.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 56[2mms[22m[39m
+2026-11-06T01:40:13.0271185Z  [32m✓[39m tests/qa-rc1-bugs.test.ts [2m([22m[2m45 tests[22m[2m)[22m[90m 88[2mms[22m[39m
+2026-11-06T01:40:14.3190568Z  [32m✓[39m tests/m4a-pick-hysteresis.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 973[2mms[22m[39m
+2026-11-06T01:40:14.3191927Z    [33m[2m✓[22m[39m M4A-41: 60 s of steady income, hint === highlight[2m > [22mtwo rows within 10% give 0 changes [33m424[2mms[22m[39m
+2026-11-06T01:40:14.7284338Z  [32m✓[39m tests/hidden-time.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 123[2mms[22m[39m
+2026-11-06T01:40:16.7916031Z  [32m✓[39m tests/economy-copy.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 1832[2mms[22m[39m
+2026-11-06T01:40:16.7917707Z    [33m[2m✓[22m[39m --strict: each vendored sim file in SOURCE must match product/ by sha256 (fail closed on drift or missing) [33m449[2mms[22m[39m
+2026-11-06T01:40:17.7959487Z  [32m✓[39m tests/v5-f1b-clock-rng.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 737[2mms[22m[39m
+2026-11-06T01:40:17.7960797Z    [33m[2m✓[22m[39m F1b evRng / brRng[2m > [22m[F1(a)][D-C4] isolation: golden/broody on + evRng/brRng drawn every tick leaves the customer sequence byte-identical [33m376[2mms[22m[39m
+2026-11-06T01:40:18.0997043Z  [32m✓[39m tests/v5-golden-rewards.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+2026-11-06T01:40:18.3890016Z  [32m✓[39m tests/cost-segments.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 80[2mms[22m[39m
+2026-11-06T01:40:20.9443695Z  [32m✓[39m tests/release-html.test.ts [2m([22m[2m51 tests[22m[2m)[22m[33m 2331[2mms[22m[39m
+2026-11-06T01:40:20.9445040Z    [33m[2m✓[22m[39m --build-id <id> and --build-id=<id> [33m375[2mms[22m[39m
+2026-11-06T01:40:21.2589646Z  [32m✓[39m tests/m4a-tracks.test.ts [2m([22m[2m31 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+2026-11-06T01:40:21.5941359Z  [32m✓[39m tests/v5-f3-config.test.ts [2m([22m[2m28 tests[22m[2m)[22m[90m 75[2mms[22m[39m
+2026-11-06T01:40:21.9849542Z  [32m✓[39m tests/idb-mirror.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 82[2mms[22m[39m
+2026-11-06T01:40:22.3529512Z  [32m✓[39m tests/save-level-tolerance.test.ts [2m([22m[2m72 tests[22m[2m)[22m[90m 74[2mms[22m[39m
+2026-11-06T01:40:22.6000242Z  [32m✓[39m tests/m41-p2-unpaid.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+2026-11-06T01:40:22.9324526Z  [32m✓[39m tests/save-majors-2959ba0.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 59[2mms[22m[39m
+2026-11-06T01:40:23.2739833Z  [32m✓[39m tests/save-hardening.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+2026-11-06T01:40:29.9669875Z  [32m✓[39m tests/zg-verdict.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 4344[2mms[22m[39m
+2026-11-06T01:40:29.9672099Z    [33m[2m✓[22m[39m ZG-AC7 [property] determinism, breed-neutrality, purity[2m > [22m20 perturbations of coins / moods / energy / time / rng / settle stamps leave isZeroGain unchanged; s deep-equal after [33m534[2mms[22m[39m
+2026-11-06T01:40:29.9674715Z    [33m[2m✓[22m[39m ZG-AC20 [sim] parity with the Best buy verdict (bounded trace; full seeds 1–200 x 12,000 s is QA P2)[2m > [22misZeroGain === optionGain.gain <= 0 for every offered COLL/HENS/VALUE, except HENS milestone steps with Δcap > 0 [33m3773[2mms[22m[39m
+2026-11-06T01:40:30.3619568Z  [32m✓[39m tests/save-recovery-v21.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+2026-11-06T01:40:30.9796332Z  [32m✓[39m tests/s2-3a.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 299[2mms[22m[39m
+2026-11-06T01:40:31.3813158Z  [32m✓[39m tests/hidden-tab.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 153[2mms[22m[39m
+2026-11-06T01:40:31.6979405Z  [32m✓[39m tests/onboarding.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+2026-11-06T01:40:35.8130004Z [90mstderr[2m | tests/serve-own.test.ts[2m > [22m[2mexpectHeadBuild wiring (a real git tree + a served page)[2m > [22m[2mgit unavailable (not a repo) is an error, also with ALLOW_DIRTY; only ALLOW_NO_GIT skips it
+2026-11-06T01:40:35.8159080Z [22m[39mserveOwn: WARNING git unavailable in /tmp/so-nogit-6Us0W0; ALLOW_NO_GIT=1, served build m3-rc1-pre+abcdef1 NOT checked
+2026-11-06T01:40:35.8160372Z  [32m✓[39m tests/serve-own.test.ts [2m([22m[2m15 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[33m 3895[2mms[22m[39m
+2026-11-06T01:40:35.8160965Z 
+2026-11-06T01:40:35.8161740Z    [33m[2m✓[22m[39m serveForRun wiring: one line, exit 2[2m > [22mrc0-browser.mjs: PORT=abc -> exit 2, one stderr line, no stack [33m687[2mms[22m[39m
+2026-11-06T01:40:35.8206530Z    [33m[2m✓[22m[39m serveForRun wiring: one line, exit 2[2m > [22mrelease-globals-browser.mjs: PORT=abc -> exit 2, one stderr line, no stack [33m605[2mms[22m[39m
+2026-11-06T01:40:35.8208124Z    [33m[2m✓[22m[39m serveForRun wiring: one line, exit 2[2m > [22mn5: vite cannot be spawned (no npx on PATH) -> exit 2, one line [33m2350[2mms[22m[39m
+2026-11-06T01:40:36.1474432Z  [32m✓[39m tests/m4a-tracks-ui.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 65[2mms[22m[39m
+2026-11-06T01:40:36.8119533Z  [32m✓[39m tests/csr-idb1-mirror.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 257[2mms[22m[39m
+2026-11-06T01:40:41.1649174Z  [32m✓[39m tests/k10-breeds-offset.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 3999[2mms[22m[39m
+2026-11-06T01:40:41.1655294Z    [33m[2m✓[22m[39m k10 harness[2m > [22mseed 1 equals the scratch harness of record (g1csv.ts -> g1tap/m5tap/breeds 76c07ecf, SEEDS=1, g1max @0.27) [33m3960[2mms[22m[39m
+2026-11-06T01:40:41.5789413Z  [32m✓[39m tests/market.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 122[2mms[22m[39m
+2026-11-06T01:40:41.9479351Z  [32m✓[39m tests/ac14.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+2026-11-06T01:40:42.3799449Z [90mstdout[2m | tests/economy.test.ts[2m > [22m[2mparity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures)[2m > [22m[2mvendored SOURCE provenance equals the SHA256SUMS pins (unmodified copies)
+2026-11-06T01:40:42.3802019Z [22m[39meconomy-sim vendored sim/economy_sim.py from product/sim/economy_sim.py sha256 10f29a4a38c8b22d3b952736c2627c0b83892fb5b299e257e4db9c7adf9fa6d6 on 2026-10-17
+2026-11-06T01:40:42.3803737Z economy-sim vendored economy.f1-m4cols.csv from product/economy.f1-m4cols.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f on 2026-10-17
+2026-11-06T01:40:42.3806011Z economy-sim vendored sim/seller_variance_sim.py from product/sim/seller_variance_sim.py sha256 68a64c59f0db10e67d4edc3a68a9a86bc559db72bc33102d3d9e3c7b669d98f1 on 2026-10-17
+2026-11-06T01:40:42.3807946Z economy-sim vendored sim/seller-variance-proposal.md from product/sim/seller-variance-proposal.md sha256 17877b4106116951ec9d41987bd03aec43af45f0b79bfd157f81abc984e4d4e5 on 2026-10-17
+2026-11-06T01:40:42.3808795Z 
+2026-11-06T01:40:42.3898589Z  [32m✓[39m tests/economy.test.ts [2m([22m[2m70 tests[22m[2m)[22m[90m 162[2mms[22m[39m
+2026-11-06T01:40:42.9744249Z  [32m✓[39m tests/v5-f1a-fields.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 295[2mms[22m[39m
+2026-11-06T01:40:44.0398700Z  [32m✓[39m tests/pacing-x1-ac7.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 813[2mms[22m[39m
+2026-11-06T01:40:44.7947892Z  [32m✓[39m tests/s2-8-10.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 485[2mms[22m[39m
+2026-11-06T01:40:44.7951526Z    [33m[2m✓[22m[39m S2-8 gate: wages draining money to $0[2m > [22mmoney never goes negative (small, exact-wage and huge balances) [33m382[2mms[22m[39m
+2026-11-06T01:40:45.0835797Z  [32m✓[39m tests/newer-save.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+2026-11-06T01:40:45.4159446Z  [32m✓[39m tests/tab-guard-tg.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+2026-11-06T01:40:45.9056668Z  [32m✓[39m tests/workers.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 243[2mms[22m[39m
+2026-11-06T01:40:46.1565923Z  [32m✓[39m tests/orders.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+2026-11-06T01:40:46.3688132Z  [32m✓[39m tests/m41-9-art-rulings.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+2026-11-06T01:40:46.6323016Z  [32m✓[39m tests/pacing-guards.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 68[2mms[22m[39m
+2026-11-06T01:40:46.8979766Z  [32m✓[39m tests/v5-m5load-pause-sanitize.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+2026-11-06T01:40:47.3088021Z  [32m✓[39m tests/telemetry-m3.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 197[2mms[22m[39m
+2026-11-06T01:40:47.5789538Z  [32m✓[39m tests/m41-p1-mh-copy.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+2026-11-06T01:40:47.8038477Z  [32m✓[39m tests/next-goal.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+2026-11-06T01:40:48.1108315Z  [32m✓[39m tests/v5-f2-game-settle.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 61[2mms[22m[39m
+2026-11-06T01:40:48.3928954Z  [32m✓[39m tests/save-durability-v4.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+2026-11-06T01:40:48.8165098Z  [32m✓[39m tests/m4a-migrate-v7.test.ts [2m([22m[2m29 tests[22m[2m)[22m[90m 128[2mms[22m[39m
+2026-11-06T01:40:49.1406915Z  [32m✓[39m tests/s2-money.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+2026-11-06T01:40:49.5888062Z  [32m✓[39m tests/v5-f3-qa-seam.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 202[2mms[22m[39m
+2026-11-06T01:40:49.9369179Z  [32m✓[39m tests/save.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+2026-11-06T01:40:50.1924573Z  [32m✓[39m tests/ftue-v11.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+2026-11-06T01:40:50.8049611Z  [32m✓[39m tests/v5-f2-roundtrip.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 277[2mms[22m[39m
+2026-11-06T01:40:51.2150040Z  [32m✓[39m tests/m41-p1-live-income.test.ts [2m([22m[2m31 tests[22m[2m)[22m[90m 123[2mms[22m[39m
+2026-11-06T01:40:52.0521326Z  [32m✓[39m tests/payout-parity.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 548[2mms[22m[39m
+2026-11-06T01:40:52.0522705Z    [33m[2m✓[22m[39m payout parity (a): M4 off == pre-merge eggPriceCents values[2m > [22mgrid of 560 states [33m319[2mms[22m[39m
+2026-11-06T01:40:52.3793877Z  [32m✓[39m tests/v7-marker-run-once.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+2026-11-06T01:40:52.8799542Z  [32m✓[39m tests/telemetry-ring-export.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+2026-11-06T01:40:56.1030211Z [90mstdout[2m | engineering/golden/m4on-golden.90a9c84.test.ts[2m > [22m[2mgolden[2m > [22m[2mstorage bytes
+2026-11-06T01:40:56.1034034Z [22m[39mGOLDEN2 {"m1-rc2-v4-12min":"b1e07c13a21b6059ececdc898a4ddfe03b5286ea9133a4def6ae25992ec139dc","m2-rc1-v5-12min":"a425f0135a78b44615468a81fc99f955032e046a6003a9c180b973d51d346297","m2-rc1-v5-40min":"48b1fa43497a912c700461ddd4a2cf0abe59ba685977e7841c012ce8f7e6f1ef","m2-rc1-v5-40min-edge":"78b97634d0bbc3b4a174751917ad573889ec57bc22cc3163deb4c6fec0e4a4bc"}
+2026-11-06T01:40:56.1036093Z 
+2026-11-06T01:40:56.1036989Z [90mstdout[2m | engineering/golden/m4on-golden.90a9c84.test.ts[2m > [22m[2mgolden[2m > [22m[2msim trace
+2026-11-06T01:40:56.1038465Z [22m[39mGOLDEN1 a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+2026-11-06T01:40:56.1039127Z 
+2026-11-06T01:40:56.1122941Z  [32m✓[39m engineering/golden/m4on-golden.90a9c84.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 2902[2mms[22m[39m
+2026-11-06T01:40:56.1125621Z    [33m[2m✓[22m[39m golden[2m > [22msim trace [33m2765[2mms[22m[39m
+2026-11-06T01:40:56.5143870Z  [32m✓[39m tests/hidden-save-paths.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 56[2mms[22m[39m
+2026-11-06T01:40:56.8518032Z  [32m✓[39m tests/v5-f3-is-paused.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+2026-11-06T01:40:57.1632467Z  [32m✓[39m tests/sellall-label-grader.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+2026-11-06T01:40:57.5179946Z  [32m✓[39m tests/m41-6-roundtrip-migrate.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+2026-11-06T01:40:59.7472788Z [90mstdout[2m | engineering/golden/flagoff-golden.a01faea.test.ts[2m > [22m[2mgolden[2m > [22m[2mstorage bytes
+2026-11-06T01:40:59.7505669Z [22m[39mGOLDEN2 {"m1-rc2-v4-12min":"b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9","m2-rc1-v5-12min":"2ac7070d0c5e7ea2d8fcdd1642732cf44871fe9c5b126d1b5873fcd8244f3a00","m2-rc1-v5-40min":"4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431","m2-rc1-v5-40min-edge":"652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb"}
+2026-11-06T01:40:59.7518011Z 
+2026-11-06T01:40:59.7524233Z [90mstdout[2m | engineering/golden/flagoff-golden.a01faea.test.ts[2m > [22m[2mgolden[2m > [22m[2msim trace
+2026-11-06T01:40:59.7527376Z [22m[39mGOLDEN1 f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+2026-11-06T01:40:59.7554760Z 
+2026-11-06T01:40:59.7558560Z  [32m✓[39m engineering/golden/flagoff-golden.a01faea.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 1863[2mms[22m[39m
+2026-11-06T01:40:59.7559680Z    [33m[2m✓[22m[39m golden[2m > [22msim trace [33m1794[2mms[22m[39m
+2026-11-06T01:41:00.0119293Z  [32m✓[39m tests/ios-tip.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+2026-11-06T01:41:00.3843544Z  [32m✓[39m tests/tick.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 76[2mms[22m[39m
+2026-11-06T01:41:03.7133271Z  [32m✓[39m tests/m4a-pacing.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 130[2mms[22m[39m
+2026-11-06T01:41:03.7137420Z [90mstdout[2m | tests/m4a-pacing.test.ts[2m > [22m[2mM4-A pacing (game sim, flag on)[2m > [22m[2mreport (diagnostic, not gating: in-game farm_cost is main's, not the F1 + M3 taper table TR-5 uses)
+2026-11-06T01:41:03.7139616Z [22m[39mM4A-PACING {"highlightF30":[22,22,22,22,21,22,22,22,22,22],"H":[24,24,24,24,24,24,24,24,24,24],"V":[24,24,24,24,24,24,24,24,24,24],"farmOnlyF30":[7,7,7,7,7,7,7,7,7,7],"worstGapS":[105,105,105,90,90,105,90,105,105,105]}
+2026-11-06T01:41:03.7140393Z 
+2026-11-06T01:41:04.0169343Z  [32m✓[39m tests/post-rc1.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 89[2mms[22m[39m
+2026-11-06T01:41:04.9442269Z  [32m✓[39m tests/release-build-id.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 719[2mms[22m[39m
+2026-11-06T01:41:07.2043567Z [90mstderr[2m | tests/telemetry.test.ts[2m > [22m[2mtelemetry[2m > [22m[2mevents carry ts + sessionMs
+2026-11-06T01:41:07.2044469Z [22m[39m[telemetry] unknown event type: x
+2026-11-06T01:41:07.2044955Z 
+2026-11-06T01:41:07.2048524Z [90mstderr[2m | tests/telemetry.test.ts[2m > [22m[2mtelemetry[2m > [22m[2mring buffer capped at ring_size
+2026-11-06T01:41:07.2049911Z [22m[39m[telemetry] unknown event type: e
+2026-11-06T01:41:07.2050209Z 
+2026-11-06T01:41:07.2051025Z [90mstderr[2m | tests/telemetry.test.ts[2m > [22m[2mtelemetry[2m > [22m[2mflush writes only when dirty; persisted buffer reloads
+2026-11-06T01:41:07.2051875Z [22m[39m[telemetry] unknown event type: a
+2026-11-06T01:41:07.2052130Z 
+2026-11-06T01:41:07.2052699Z  [32m✓[39m tests/telemetry.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 2010[2mms[22m[39m
+2026-11-06T01:41:07.2053637Z    [33m[2m✓[22m[39m telemetry[2m > [22mring buffer capped at ring_size [33m1988[2mms[22m[39m
+2026-11-06T01:41:07.4799841Z  [32m✓[39m tests/rc2-fmt.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+2026-11-06T01:41:14.4407341Z  [32m✓[39m tests/bot-m5.test.ts [2m([22m[2m24 tests[22m[2m)[22m[33m 88361[2mms[22m[39m
+2026-11-06T01:41:14.4410918Z    [33m[2m✓[22m[39m bot-m5: parity with m5x.ts[2m > [22m[F-1][AC5] windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual) [33m8426[2mms[22m[39m
+2026-11-06T01:41:14.4412556Z    [33m[2m✓[22m[39m bot-m5: run()[2m > [22mobservers are read-only: same end state, reach and mechanics totals with and without them [33m1509[2mms[22m[39m
+2026-11-06T01:41:14.4413569Z    [33m[2m✓[22m[39m bot-m5: run()[2m > [22mis deterministic per seed, and the stack changes the outcome [33m1101[2mms[22m[39m
+2026-11-06T01:41:14.4414696Z    [33m[2m✓[22m[39m bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)[2m > [22m[REQ-d M5.2] pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2 [33m24498[2mms[22m[39m
+2026-11-06T01:41:14.4416087Z    [33m[2m✓[22m[39m bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)[2m > [22m[REQ-d M5.1] refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32 [33m7099[2mms[22m[39m
+2026-11-06T01:41:14.4417651Z    [33m[2m✓[22m[39m bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)[2m > [22m[REQ-d M5.1] charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only [33m3744[2mms[22m[39m
+2026-11-06T01:41:14.4419839Z    [33m[2m✓[22m[39m [Q4] bot-m5: onObserve (QA seam Q4) is observe-only[2m > [22m[Q4][AC7] windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given [33m6765[2mms[22m[39m
+2026-11-06T01:41:14.4421893Z    [33m[2m✓[22m[39m [Q4] bot-m5: onObserve (QA seam Q4) is observe-only[2m > [22m[Q4] M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call [33m12816[2mms[22m[39m
+2026-11-06T01:41:14.4423941Z    [33m[2m✓[22m[39m bot-m5: driver input (CCR N-1, N-2 on #78)[2m > [22m[VER-1h N-1][VER-1h N-2] the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts) [33m7578[2mms[22m[39m
+2026-11-06T01:41:14.4425805Z    [33m[2m✓[22m[39m [REQ-L35] bot-m5 B: parity-break report and toggle metric[2m > [22m[REQ-L35 FDT] scripts/bot-m5-diverge.ts exits 0 on identical files, 1 with the first divergence, 2 on usage [33m2258[2mms[22m[39m
+2026-11-06T01:41:14.4427243Z    [33m[2m✓[22m[39m [REQ-L35] bot-m5 B: parity-break report and toggle metric[2m > [22m[REQ-L35 D6] toggle sidecar: Asleep<->Unpaid flips per 30 min = tog / tAll * 1800, F10 variant on t10, casual seeds 1-2 within the D6 bar (<= 12) [33m11077[2mms[22m[39m
+2026-11-06T01:41:14.4429823Z    [33m[2m✓[22m[39m [REQ-L35] bot-m5 B: parity-break report and toggle metric[2m > [22m[REQ-L35 D6][RF3 positive control] a forced Unpaid->Asleep flip is counted: tog = tog10 = 1 pinned, per-30-min = 3 over 600 s [33m529[2mms[22m[39m
+2026-11-06T01:41:14.4432647Z    [33m[2m✓[22m[39m bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1)[2m > [22m[F-1][O-3][AC3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4) [33m901[2mms[22m[39m
+2026-11-06T01:41:14.6633224Z  [32m✓[39m tests/sync-economy.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+2026-11-06T01:41:14.8787710Z  [32m✓[39m tests/m4a-save-migrate.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+2026-11-06T01:41:15.0849713Z  [32m✓[39m tests/m4a-sync.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+2026-11-06T01:41:15.4937792Z  [32m✓[39m tests/v5-f1b-focus-wiring.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+2026-11-06T01:41:15.8070187Z  [32m✓[39m tests/staging-f1-m4cols.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 78[2mms[22m[39m
+2026-11-06T01:41:16.0393793Z  [32m✓[39m tests/ui-logic.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+2026-11-06T01:41:16.3164696Z  [32m✓[39m tests/resume.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+2026-11-06T01:41:16.5583365Z  [32m✓[39m tests/m4a-offline-csv.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+2026-11-06T01:41:16.7399615Z  [32m✓[39m tests/art-ux-rc0.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+2026-11-06T01:41:26.5888629Z  [32m✓[39m tests/verify.test.ts [2m([22m[2m56 tests[22m[2m)[22m[33m 100693[2mms[22m[39m
+2026-11-06T01:41:26.5919595Z    [33m[2m✓[22m[39m verify: the run[2m > [22mis the AC7 workers bot: same Farm reach, Manage count, hires and Grader tiers as tests/bot-m2.ts runM2 (seller15, managed) [33m710[2mms[22m[39m
+2026-11-06T01:41:26.5934817Z    [33m[2m✓[22m[39m verify: the run[2m > [22mis deterministic: same seed -> identical checkpoints and trace hash; another seed -> another trace [33m390[2mms[22m[39m
+2026-11-06T01:41:26.5940170Z    [33m[2m✓[22m[39m verify: the run[2m > [22mflag off changes the run (m4.enabled = 0 via --flags) [33m328[2mms[22m[39m
+2026-11-06T01:41:26.5942228Z    [33m[2m✓[22m[39m verify: the run[2m > [22m[VER-1h N-5] CCR N-5 on #78: m5x-casual 0.25 h seed 1 trace and checkpoint egg counters are pinned (24 h pin 07139bdd: tests/bot-m5-trace.slow.test.ts) [33m367[2mms[22m[39m
+2026-11-06T01:41:26.5944370Z    [33m[2m✓[22m[39m verify: the run[2m > [22mm5x-casual is available and is tests/bot-m5.ts run() (casual, AssZ): same end state and Farm reach [33m2631[2mms[22m[39m
+2026-11-06T01:41:26.5959039Z    [33m[2m✓[22m[39m verify: the run[2m > [22mm5x-casual is deterministic, differs from idle, and its checkpoints are finite, non-negative, integer cents [33m825[2mms[22m[39m
+2026-11-06T01:41:26.5961386Z    [33m[2m✓[22m[39m verify: end-state save round-trip (QA-D-1027-GOALPILL)[2m > [22mvalidate(save(marked run.end)) is not tracksMigrated and keeps every level, tier, worker and coin [33m654[2mms[22m[39m
+2026-11-06T01:41:26.5963601Z    [33m[2m✓[22m[39m verify: end-state save round-trip (QA-D-1027-GOALPILL)[2m > [22mthe unmarked end state is what the bug was: the load price-matches V down [33m574[2mms[22m[39m
+2026-11-06T01:41:26.5966041Z    [33m[2m✓[22m[39m verify: end-state save round-trip (QA-D-1027-GOALPILL)[2m > [22m24 h seed 1: the loaded end state has nothing left to buy (pill = All upgrades done!) [33m11573[2mms[22m[39m
+2026-11-06T01:41:26.5968553Z    [33m[2m✓[22m[39m verify: goldens[2m > [22mthe copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree [33m2392[2mms[22m[39m
+2026-11-06T01:41:26.5970866Z    [33m[2m✓[22m[39m verify: arguments and flags[2m > [22m[VER-1h N-4] CLI: usage errors exit 2 before building anything (no UNAVAILABLE path) [33m1570[2mms[22m[39m
+2026-11-06T01:41:26.5974223Z    [33m[2m✓[22m[39m verify: save round-trip guard (VER-1a, CCR R1)[2m > [22msaveRoundTrip passes for the marked end state and fails (tracksMigrated, V mismatch) for the unmarked one [33m647[2mms[22m[39m
+2026-11-06T01:41:26.5979848Z    [33m[2m✓[22m[39m verify: save round-trip guard (VER-1a, CCR R1)[2m > [22mm5x-casual: the marked end state round-trips under the shipped balance (not migrated, no mismatches) [33m1291[2mms[22m[39m
+2026-11-06T01:41:26.5982186Z    [33m[2m✓[22m[39m verify: save round-trip guard (VER-1a, CCR R1)[2m > [22mCLI: --profile m5x-casual runs (no exit 2) and records its profile and bot in verify.json [33m4536[2mms[22m[39m
+2026-11-06T01:41:26.5984500Z    [33m[2m✓[22m[39m verify: save round-trip guard (VER-1a, CCR R1)[2m > [22mCLI: with the marker skipped (VERIFY_TEST_SKIP_MARKER=1) verify exits 4, records saveRoundTrip FAIL, and leaves no PNG [33m4091[2mms[22m[39m
+2026-11-06T01:41:26.5986913Z    [33m[2m✓[22m[39m verify: save round-trip guard (VER-1a, CCR R1)[2m > [22mCLI: with the marker applied the same run passes the round-trip (exit 1 here only for the fake html / no shot) [33m4508[2mms[22m[39m
+2026-11-06T01:41:26.5989340Z    [33m[2m✓[22m[39m verify: VER-1b (CCR F1/N2 on #72)[2m > [22mF1: --flags m4.enabled=0 no longer gives a false PASS: exit 4, flagsDifferFromBuild, no screenshot, no PNG [33m4286[2mms[22m[39m
+2026-11-06T01:41:26.5991383Z    [33m[2m✓[22m[39m verify: VER-1b (CCR F1/N2 on #72)[2m > [22mF1: --flags equal to the shipped flags (m4.enabled=1) is not an override and passes the round-trip [33m4922[2mms[22m[39m
+2026-11-06T01:41:26.5993286Z    [33m[2m✓[22m[39m verify: VER-1c (CCR S1/N-a/N-b on #73)[2m > [22mS1: a usage error (exit 2) leaves no stale PASS verify.json and no verify.png in --out [33m2302[2mms[22m[39m
+2026-11-06T01:41:26.5995174Z    [33m[2m✓[22m[39m verify: VER-1c (CCR S1/N-a/N-b on #73)[2m > [22mS1: a build failure (exit 3) leaves no stale PASS verify.json and no verify.png in --out [33m565[2mms[22m[39m
+2026-11-06T01:41:26.5997213Z    [33m[2m✓[22m[39m verify: VER-1c (CCR S1/N-a/N-b on #73)[2m > [22mS1: an uncaught throw (exit 1) leaves no stale PASS verify.json and no verify.png in --out [33m663[2mms[22m[39m
+2026-11-06T01:41:26.5999394Z    [33m[2m✓[22m[39m verify: VER-1c (CCR S1/N-a/N-b on #73)[2m > [22mN-a: --flags m4.enabled=2 (round-trips under the shipped balance, but differs from the build) exits 4, no PNG [33m4608[2mms[22m[39m
+2026-11-06T01:41:26.6001348Z    [33m[2m✓[22m[39m verify: VER-1c (CCR S1/N-a/N-b on #73)[2m > [22mN-b: the CLI exits 2 with a clear message for both, and writes no PASS [33m1618[2mms[22m[39m
+2026-11-06T01:41:26.6002990Z    [33m[2m✓[22m[39m verify: exit codes and the browser step (CCR n1/n3)[2m > [22mexit 3 when the html to verify is missing [33m829[2mms[22m[39m
+2026-11-06T01:41:26.6004917Z    [33m[2m✓[22m[39m verify: exit codes and the browser step (CCR n1/n3)[2m > [22mexit 1 on a failed check (wrong build id, no screenshot); verify.json says FAIL and names no PNG [33m4259[2mms[22m[39m
+2026-11-06T01:41:26.6007070Z    [33m[2m✓[22m[39m verify: exit codes and the browser step (CCR n1/n3)[2m > [22mn1: a Chromium launch failure gives ok:false with the launch error and leaves no (stale) PNG [33m574[2mms[22m[39m
+2026-11-06T01:41:26.6009288Z    [33m[2m✓[22m[39m verify: VER-1d (CCR m1/N-c on #74)[2m > [22mm1 (M31): a real tsc break in a temp copy of the repo exits 3 (stage build), not 1, and leaves no stale PASS [33m10456[2mms[22m[39m
+2026-11-06T01:41:26.6011447Z    [33m[2m✓[22m[39m verify: VER-1d (CCR m1/N-c on #74)[2m > [22mm1 (M28/M29): without --out, a usage error clears the existing default dir verify-out/<HEAD id>/ and writes the FAIL report there [33m1711[2mms[22m[39m
+2026-11-06T01:41:26.6013582Z    [33m[2m✓[22m[39m verify: VER-1d (CCR m1/N-c on #74)[2m > [22mm1 (M17/M18/M19): a run SIGKILLed mid-sim (no handler runs) leaves neither verify.json nor verify.png [33m904[2mms[22m[39m
+2026-11-06T01:41:26.6015920Z    [33m[2m✓[22m[39m verify: VER-1d (CCR m1/N-c on #74)[2m > [22mm1 (M33): --skip-build with an older html clears that html's default dir; a crash then writes the FAIL report there [33m977[2mms[22m[39m
+2026-11-06T01:41:26.6018326Z    [33m[2m✓[22m[39m verify: VER-1d (CCR m1/N-c on #74)[2m > [22mm1 (M27): a crash after the browser step wrote verify.png removes that PNG with the FAIL report [33m4490[2mms[22m[39m
+2026-11-06T01:41:26.6021039Z    [33m[2m✓[22m[39m verify: VER-1d (CCR m1/N-c on #74)[2m > [22mN-c: <out>/verify.json being a directory: the original error (rm EISDIR) is what fails the run; the writer failure is only logged [33m724[2mms[22m[39m
+2026-11-06T01:41:26.6023865Z    [33m[2m✓[22m[39m verify: VER-1d (CCR m1/N-c on #74)[2m > [22mN-c: an unwritable out dir keeps the original exit code (usage 2, not 1) and logs the writer failure [33m693[2mms[22m[39m
+2026-11-06T01:41:26.6026127Z    [33m[2m✓[22m[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)[2m > [22mN-1 (NC4): the writer-failure line is sanitised: an out dir under the home dir prints as ~ [33m792[2mms[22m[39m
+2026-11-06T01:41:26.6028194Z    [33m[2m✓[22m[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)[2m > [22mN-1: an out dir outside the repo and home prints <redacted>, never an absolute path [33m719[2mms[22m[39m
+2026-11-06T01:41:26.6030285Z    [33m[2m✓[22m[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)[2m > [22mN-4 (NC5): when the first of two claimed dirs cannot take the FAIL report, the second still gets it and loses its PNG [33m3417[2mms[22m[39m
+2026-11-06T01:41:26.6032690Z    [33m[2m✓[22m[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)[2m > [22mN-4 (H2): the after-shot hook really writes its stand-in verify.png before the crash (seen by a watcher), and the writer removes it [33m5038[2mms[22m[39m
+2026-11-06T01:41:26.6035110Z    [33m[2m✓[22m[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)[2m > [22mO-1: a hostile html build id (../../victim) cannot move the default out dir outside the out root [33m3936[2mms[22m[39m
+2026-11-06T01:41:26.6037608Z    [33m[2m✓[22m[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)[2m > [22mO-2: a read-only out dir on a run that fails the save round-trip keeps exit 4 (not an uncaught 1) and logs one line [33m4851[2mms[22m[39m
+2026-11-06T01:41:27.8410335Z  [32m✓[39m tests/m4a-flag-off.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 987[2mms[22m[39m
+2026-11-06T01:41:27.8412560Z    [33m[2m✓[22m[39m M4-A flag off = main[2m > [22msim trace hash equals main (rc1 economy, flag off) [33m986[2mms[22m[39m
+2026-11-06T01:41:28.0321001Z  [32m✓[39m tests/seen-tracks-explainer-save.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+2026-11-06T01:41:35.4692526Z [90mstdout[2m | tests/pacing.test.ts[2m > [22m[2mAC7 pacing bot on the real sim[2m > [22m[2mreport
+2026-11-06T01:41:35.4718129Z [22m[39mAC7 seller15: {
+2026-11-06T01:41:35.4720586Z   first: [33m15[39m,
+2026-11-06T01:41:35.4722346Z   up5: [33m21[39m,
+2026-11-06T01:41:35.4722828Z   f10m: [33m10[39m,
+2026-11-06T01:41:35.4723300Z   L10min: [33m9.875[39m,
+2026-11-06T01:41:35.4723793Z   L18min: [33m21.25[39m,
+2026-11-06T01:41:35.4724267Z   f30m: [33m20[39m
+2026-11-06T01:41:35.4725038Z } cheapest: { up5: [33m19[39m, f10m: [33m8[39m, f30m: [33m20[39m }
+2026-11-06T01:41:35.4725595Z 
+2026-11-06T01:41:35.4726251Z  [32m✓[39m tests/pacing.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+2026-11-06T01:41:35.7374110Z  [32m✓[39m tests/bug6-savedat.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+2026-11-06T01:41:35.9888540Z  [32m✓[39m tests/m4a-saveseq-carry.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+2026-11-06T01:41:36.1802862Z  [32m✓[39m tests/csr-recovery-types.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+2026-11-06T01:41:36.3589368Z  [32m✓[39m tests/r1-dialog-spacing.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+2026-11-06T01:41:36.7751026Z  [32m✓[39m tests/vendor-pins.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 215[2mms[22m[39m
+2026-11-06T01:41:37.0153677Z  [32m✓[39m tests/offline-modal.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+2026-11-06T01:41:37.2422847Z  [32m✓[39m tests/m4a-maxlevel-data.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+2026-11-06T01:41:37.4863700Z  [32m✓[39m tests/v5-f2-downgrade.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+2026-11-06T01:41:37.6582335Z  [32m✓[39m tests/offline.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+2026-11-06T01:41:37.8301760Z  [32m✓[39m tests/m41-p1-acr7.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+2026-11-06T01:41:44.1170137Z  [32m✓[39m tests/release-bundle.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 5990[2mms[22m[39m
+2026-11-06T01:41:44.1171684Z    [33m[2m✓[22m[39m release bundle[2m > [22mhas no ?ios= override (the flag reader is dead-code eliminated) [33m2071[2mms[22m[39m
+2026-11-06T01:41:44.1173094Z    [33m[2m✓[22m[39m release bundle[2m > [22mhas no window.eggfarmOnb onboarding debug handle (QA builds only) [33m1404[2mms[22m[39m
+2026-11-06T01:41:44.1174616Z    [33m[2m✓[22m[39m release bundle[2m > [22mD3/D4: no ?perf=1 SM-9 sampler and no ?debug=1 cheat panel in release (QA builds keep both) [33m1198[2mms[22m[39m
+2026-11-06T01:41:44.1176020Z    [33m[2m✓[22m[39m release bundle[2m > [22mhas no window.eggfarm game handle in release (QA/dev builds keep it) [33m1314[2mms[22m[39m
+2026-11-06T01:41:44.4182994Z  [32m✓[39m tests/export-global.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 11[2mms[22m[39m
+2026-11-06T01:41:44.6139861Z  [32m✓[39m tests/contrast.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+2026-11-06T01:41:44.8391285Z [90mstderr[2m | tests/zg-telemetry-annotate.test.ts[2m > [22m[2mMinor 1: Telemetry.annotateLast tags the newest matching event only[2m > [22m[2mtwo upgrade events: only the second is annotated, and the buffer is marked dirty (flushed)
+2026-11-06T01:41:44.8393381Z  [32m✓[39m tests/zg-telemetry-annotate.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+2026-11-06T01:41:44.8398600Z [22m[39m[telemetry] unknown event type: tap_other
+2026-11-06T01:41:44.8398934Z 
+2026-11-06T01:41:44.8400222Z [90mstderr[2m | tests/zg-telemetry-annotate.test.ts[2m > [22m[2mMinor 1: Telemetry.annotateLast tags the newest matching event only[2m > [22m[2mno match: nothing changes and nothing is written
+2026-11-06T01:41:44.8401457Z [22m[39m[telemetry] unknown event type: tap_other
+2026-11-06T01:41:44.8401763Z 
+2026-11-06T01:41:48.8254227Z [90mstdout[2m | tests/ac7-first-purchase.test.ts[2m > [22m[2mAC7 new save: first purchase within 30 s (seeds 1-200, M4 on)[2m > [22m[2mdeterministic bot (fixed 1 s taps, 15 s check-ins): every seed's first purchase <= 30 s
+2026-11-06T01:41:48.8256103Z [22m[39mfirst purchase deterministic: max 15 s
+2026-11-06T01:41:48.8318571Z 
+2026-11-06T01:41:48.8321007Z  [32m✓[39m tests/ac7-first-purchase.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 3757[2mms[22m[39m
+2026-11-06T01:41:48.8322416Z    [33m[2m✓[22m[39m AC7 new save: first purchase within 30 s (seeds 1-200, M4 on)[2m > [22mdeterministic bot (fixed 1 s taps, 15 s check-ins): every seed's first purchase <= 30 s [33m2256[2mms[22m[39m
+2026-11-06T01:41:48.8324186Z    [33m[2m✓[22m[39m AC7 new save: first purchase within 30 s (seeds 1-200, M4 on)[2m > [22mvariance bot (random timing): REPORT-ONLY, non-gating, first-purchase time logged [33m1499[2mms[22m[39m
+2026-11-06T01:41:48.8325666Z [90mstdout[2m | tests/ac7-first-purchase.test.ts[2m > [22m[2mAC7 new save: first purchase within 30 s (seeds 1-200, M4 on)[2m > [22m[2mvariance bot (random timing): REPORT-ONLY, non-gating, first-purchase time logged
+2026-11-06T01:41:48.8327268Z [22m[39mfirst purchase variance: 40/200 over 30 s, max 57.8 s
+2026-11-06T01:41:48.8327867Z 
+2026-11-06T01:41:49.5589502Z [90mstdout[2m | tests/p4.test.ts[2m > [22m[2mP4 build numbers vs Economy re-sim[2m > [22m[2mreport
+2026-11-06T01:41:49.5599171Z [22m[39mP4 build { W4: [33m3[39m, W4b: [33m3.25[39m, managePer15: [33m6.75[39m }
+2026-11-06T01:41:49.5600385Z 
+2026-11-06T01:41:49.5601075Z  [32m✓[39m tests/p4.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+2026-11-06T01:41:49.5978274Z  [32m✓[39m tests/audio-unlock.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 557[2mms[22m[39m
+2026-11-06T01:41:49.5979875Z    [33m[2m✓[22m[39m PT1-3 audio unlock timeout[2m > [22munlock returns within ~AUDIO_UNLOCK_MS when resume never resolves [33m503[2mms[22m[39m
+2026-11-06T01:41:49.7559417Z  [32m✓[39m tests/slot-preview.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+2026-11-06T01:41:49.7886036Z  [32m✓[39m tests/frame-sampler.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+2026-11-06T01:42:30.0354721Z [90mstdout[2m | tests/pacing-m2.test.ts[2m > [22m[2mM2 pacing: managed workers[2m > [22m[2mreport
+2026-11-06T01:42:30.0398884Z [22m[39mM2 seller15 {
+2026-11-06T01:42:30.0408657Z   none: [ [33m9.875[39m, [33m21.25[39m, [33m52.75[39m ],
+2026-11-06T01:42:30.0409405Z   managed: [ [33m10.25[39m, [33m21[39m, [33m36[39m ],
+2026-11-06T01:42:30.0412201Z   step: [33m3[39m,
+2026-11-06T01:42:30.0412852Z   cheapestStep: [33m3.25[39m,
+2026-11-06T01:42:30.0413389Z   managesPer10min: [33m4.5[39m
+2026-11-06T01:42:30.0413849Z }
+2026-11-06T01:42:30.0414120Z 
+2026-11-06T01:42:30.0415251Z [90mstdout[2m | tests/pacing-m2.test.ts[2m > [22m[2mM2 pacing: managed workers[2m > [22m[2mAC-W4b (soft, non-gating): cheapest managed steps F18->F25 <= 8 min
+2026-11-06T01:42:30.0416494Z [22m[39mAC-W4b soft pass: 3.25 min
+2026-11-06T01:42:30.0416858Z 
+2026-11-06T01:42:30.0417636Z  [32m✓[39m tests/pacing-m2.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+2026-11-06T01:42:30.2060078Z  [32m✓[39m tests/recovery-v11.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+2026-11-06T01:42:39.9755754Z  [32m✓[39m tests/zg-ac13-sim.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 9598[2mms[22m[39m
+2026-11-06T01:42:39.9757875Z    [33m[2m✓[22m[39m ZG-AC13 AC7 bots unchanged by zeroGainUi[2m > [22mseller15 seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 / 1+bestBuyV2 [33m6460[2mms[22m[39m
+2026-11-06T01:42:39.9759743Z    [33m[2m✓[22m[39m ZG-AC13 AC7 bots unchanged by zeroGainUi[2m > [22mcheapest seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 / 1+bestBuyV2 [33m3137[2mms[22m[39m
+2026-11-06T01:42:40.1442408Z  [32m✓[39m tests/s2-6-qtag.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+2026-11-06T01:42:40.3726126Z  [32m✓[39m tests/save-fixtures.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+2026-11-06T01:42:40.6167600Z  [32m✓[39m tests/bot-farm-log.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 7[2mms[22m[39m
+2026-11-06T01:42:40.8158070Z  [32m✓[39m tests/p3-collection-card.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+2026-11-06T01:42:41.0039070Z  [32m✓[39m tests/m4a-max-label.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+2026-11-06T01:42:41.1949674Z  [32m✓[39m tests/d5-goal-pill.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+2026-11-06T01:42:43.1685506Z  [32m✓[39m tests/m4-exp1-explainer.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 828[2mms[22m[39m
+2026-11-06T01:42:43.1686460Z    [33m[2m✓[22m[39m M4-AC-EXP1 tracks explainer[2m > [22mmigrated save: shown once at the in-session commit, persisted, never again after reload [33m471[2mms[22m[39m
+2026-11-06T01:42:47.2910952Z  [32m✓[39m tests/zg-ui.test.ts [2m([22m[2m34 tests[22m[2m)[22m[33m 3400[2mms[22m[39m
+2026-11-06T01:42:47.2913324Z    [33m[2m✓[22m[39m ZG-AC9 / ZG-AC15 [UI + telemetry] Buy works with confirm 0; upgrade.zero_gain[2m > [22mflag on: zero_gain = isZeroGain(pre-buy) for collection/hens/eggValue (true and false cases); absent for farm; flag off absent [33m562[2mms[22m[39m
+2026-11-06T01:42:47.2917310Z    [33m[2m✓[22m[39m bestBuyV2 interaction (errata E-3; BBv2 mechanics are row 29, not built: the flag alone changes nothing here)[2m > [22mzeroGainUi on: markup, nav dot and ★ are identical with m4.flags.bestBuyV2 = 0 and 1 on every fixture [33m512[2mms[22m[39m
+2026-11-06T01:42:48.8419901Z  [32m✓[39m tests/m41-p2-ui-dom.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 831[2mms[22m[39m
+2026-11-06T01:42:51.2358723Z  [32m✓[39m tests/m41-8-best-chip.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 1552[2mms[22m[39m
+2026-11-06T01:42:52.0073267Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE[2m > [22m[2mEXP-SB-QE-LATE commit-in-session
+2026-11-06T01:42:52.0075809Z [22m[39mQE_LATE commit-in-session {"storageFailed":false,"mem":false,"persistedBefore":null,"cardsDuringQE":0,"persistedAfterAutosave":null,"storageFailedAfter":false,"cardsOnReload":1,"cardsOnReload2":0}
+2026-11-06T01:42:52.0077084Z 
+2026-11-06T01:42:52.0119121Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE[2m > [22m[2mEXP-SB-QE-LATE reload-committed-unseen
+2026-11-06T01:42:52.0122540Z [22m[39mQE_LATE reload-committed-unseen {"storageFailed":true,"mem":false,"persistedBefore":null,"cardsDuringQE":0,"persistedAfterAutosave":false,"storageFailedAfter":true,"cardsOnReload":1,"cardsOnReload2":0}
+2026-11-06T01:42:52.0123929Z 
+2026-11-06T01:42:52.0167625Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE mirror/reload variants[2m > [22m[2mEXP-SB-QE-LATE-a
+2026-11-06T01:42:52.0173486Z [22m[39mQE_LATE_a {"v":"a","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":null,"lsAfter":false,"idbAfter":null,"lsSeqAtDeath":5,"idbSeqAtDeath":null,"reloadSrc":"ls","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[],"shownDuringQE":0,"total":1}
+2026-11-06T01:42:52.0176526Z 
+2026-11-06T01:42:52.0220441Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE mirror/reload variants[2m > [22m[2mEXP-SB-QE-LATE-b
+2026-11-06T01:42:52.0242462Z [22m[39mQE_LATE_b {"v":"b","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,5,6,7,8,9],"shownDuringQE":0,"total":1}
+2026-11-06T01:42:52.0249800Z 
+2026-11-06T01:42:52.0263665Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE mirror/reload variants[2m > [22m[2mEXP-SB-QE-LATE-c
+2026-11-06T01:42:52.0266695Z [22m[39mQE_LATE_c {"v":"c","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":false,"idbAfter":false,"lsSeqAtDeath":5,"idbSeqAtDeath":5,"reloadSrc":"ls","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,5,6,7,8,9],"shownDuringQE":0,"total":1}
+2026-11-06T01:42:52.0270315Z 
+2026-11-06T01:42:52.0308982Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE mirror/reload variants[2m > [22m[2mEXP-SB-QE-LATE-d
+2026-11-06T01:42:52.0330490Z [22m[39mQE_LATE_d {"v":"d","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,6,7,8,9],"shownDuringQE":0,"total":1}
+2026-11-06T01:42:52.0333547Z 
+2026-11-06T01:42:52.0368928Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE mirror/reload variants[2m > [22m[2mEXP-SB-QE-LATE-e
+2026-11-06T01:42:52.0374223Z [22m[39mQE_LATE_e {"v":"e","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,6,7,8,9],"shownDuringQE":0,"total":1}
+2026-11-06T01:42:52.0377012Z 
+2026-11-06T01:42:52.0390279Z [90mstdout[2m | tests/m41-6-explainer-storage.test.ts[2m > [22m[2mEXP-SB-QE-LATE mirror/reload variants[2m > [22m[2mEXP-SB-QE-LATE-f
+2026-11-06T01:42:52.0395441Z [22m[39mQE_LATE_f {"v":"f","s1":{"mig":"committed","coins":123456789,"F":30,"H":30,"V":20,"bid":"60eae65901116870","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":3,"idbSeqAtDeath":4,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"60eae65901116870","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"60eae65901116870","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[2,3,4,5,6,7,8],"idbSeqs":[3,4,5,6,7,8],"shownDuringQE":0,"total":1}
+2026-11-06T01:42:52.0398424Z 
+2026-11-06T01:42:52.0399304Z  [32m✓[39m tests/m41-6-explainer-storage.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 101[2mms[22m[39m
+2026-11-06T01:42:52.7892799Z  [32m✓[39m tests/m41-7-csr-copy.test.ts [2m([22m[2m26 tests[22m[2m)[22m[90m 67[2mms[22m[39m
+2026-11-06T01:42:59.5595421Z  [32m✓[39m tests/m41-9-ux-ccr-m1.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 6107[2mms[22m[39m
+2026-11-06T01:42:59.5597711Z    [33m[2m✓[22m[39m CCR M1: the scrolled sheet (no fallback exemption)[2m > [22msweep: every scrollTop 0..359 at 360/375/390, card 154 and 206: the placed card never meets a visible Buy; every state is named [33m5785[2mms[22m[39m
+2026-11-06T01:43:00.2730272Z  [32m✓[39m tests/m41-9-ux-minors.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 177[2mms[22m[39m
+2026-11-06T01:43:01.2693338Z  [32m✓[39m tests/m41-6-save-mirror-canpersist.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 275[2mms[22m[39m
+2026-11-06T01:43:02.3769857Z  [32m✓[39m tests/m41-9-ux-rulings.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 524[2mms[22m[39m
+2026-11-06T01:43:03.7139450Z  [32m✓[39m tests/m41-11-egg-unlock.test.ts [2m([22m[2m30 tests[22m[2m)[22m[33m 650[2mms[22m[39m
+2026-11-06T01:43:04.6262948Z  [32m✓[39m tests/v5-p8-slim.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 270[2mms[22m[39m
+2026-11-06T01:43:12.6900523Z  [32m✓[39m tests/zg-matrix.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 7467[2mms[22m[39m
+2026-11-06T01:43:12.6902700Z    [33m[2m✓[22m[39m ZG matrix zeroGainUi=1, bestBuyV2=0, confirm=0[2m > [22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) [33m1208[2mms[22m[39m
+2026-11-06T01:43:12.6959808Z    [33m[2m✓[22m[39m ZG matrix zeroGainUi=1, bestBuyV2=0, confirm=1[2m > [22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) [33m677[2mms[22m[39m
+2026-11-06T01:43:12.6990358Z    [33m[2m✓[22m[39m ZG matrix zeroGainUi=1, bestBuyV2=1, confirm=0[2m > [22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) [33m808[2mms[22m[39m
+2026-11-06T01:43:12.6993111Z    [33m[2m✓[22m[39m ZG matrix zeroGainUi=1, bestBuyV2=1, confirm=1[2m > [22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) [33m780[2mms[22m[39m
+2026-11-06T01:43:12.6995615Z    [33m[2m✓[22m[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=0[2m > [22mconfirm=0: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) [33m761[2mms[22m[39m
+2026-11-06T01:43:12.6998165Z    [33m[2m✓[22m[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=0[2m > [22mconfirm=1: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) [33m775[2mms[22m[39m
+2026-11-06T01:43:12.7000654Z    [33m[2m✓[22m[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=1[2m > [22mconfirm=0: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) [33m787[2mms[22m[39m
+2026-11-06T01:43:12.7003122Z    [33m[2m✓[22m[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=1[2m > [22mconfirm=1: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) [33m792[2mms[22m[39m
+2026-11-06T01:43:13.8205299Z  [32m✓[39m tests/m41-p1-scene-tap-guard.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 456[2mms[22m[39m
+2026-11-06T01:43:16.6483695Z  [32m✓[39m tests/m41-11-farm-max.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 2270[2mms[22m[39m
+2026-11-06T01:43:16.6485818Z    [33m[2m✓[22m[39m B1-10 / F4-19: best_roi, the ★ and the strip never target a Max-for-this-farm row[2m > [22mgrid over F0..20 and Egg value / Hens L23..29 on the farm-max-20 balance, broke and rich [33m1834[2mms[22m[39m
+2026-11-06T01:43:17.6781882Z  [32m✓[39m tests/m41-p1-yard-hens.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 493[2mms[22m[39m
+2026-11-06T01:43:18.4711372Z  [32m✓[39m tests/m41-7-explainer-recovery.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 98[2mms[22m[39m
+2026-11-06T01:43:19.2149608Z  [32m✓[39m tests/m41-9-card-wrap.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 87[2mms[22m[39m
+2026-11-06T01:43:19.9623199Z  [32m✓[39m tests/m41-7-ui-fixes.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 92[2mms[22m[39m
+2026-11-06T01:43:21.0963278Z  [32m✓[39m tests/zg-followup.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 548[2mms[22m[39m
+2026-11-06T01:43:21.7279946Z  [32m✓[39m tests/m41-p1-acr8-coop-copy.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 57[2mms[22m[39m
+2026-11-06T01:43:22.8607726Z  [32m✓[39m tests/pl1-key-guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 537[2mms[22m[39m
+2026-11-06T01:43:22.9702773Z  [32m✓[39m tests/pacing-m2b.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+2026-11-06T01:43:23.8954155Z  [32m✓[39m tests/zg-ui-onestrip.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 294[2mms[22m[39m
+2026-11-06T01:43:24.7608534Z [90mstdout[2m | tests/zg-flagoff-dom.test.ts[2m > [22m[2mZG-AC12/19 flag-off DOM byte-identical to 65a7443[2m > [22m[2msha256 over (config x fixture x tab) markup + nav dot + strip
+2026-11-06T01:43:24.7610325Z [22m[39mZG-FLAGOFF-DOM 9c4b6439016e5d5b6a779b34643f70793fda5df8d44728f9bcc32844c662ee35
+2026-11-06T01:43:24.7611063Z 
+2026-11-06T01:43:24.7617833Z  [32m✓[39m tests/zg-flagoff-dom.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 1231[2mms[22m[39m
+2026-11-06T01:43:24.7618917Z    [33m[2m✓[22m[39m ZG-AC12/19 flag-off DOM byte-identical to 65a7443[2m > [22msha256 over (config x fixture x tab) markup + nav dot + strip [33m1230[2mms[22m[39m
+2026-11-06T01:44:40.4283372Z [90mstdout[2m | tests/pacing-acw1.test.ts[2m > [22m[2mAC-W1 casual (seeds 1-200, 201-299, slow)[2m > [22m[2mdesign gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+2026-11-06T01:44:40.4284450Z [22m[39mAC-W1 build 1-200 {
+2026-11-06T01:44:40.4284793Z   pass10: [33m91[39m,
+2026-11-06T01:44:40.4285183Z   pass10at16: [33m98[39m,
+2026-11-06T01:44:40.4285521Z   pass10gate: [33m98[39m,
+2026-11-06T01:44:40.4285840Z   medF10: [33m13.67[39m,
+2026-11-06T01:44:40.4286166Z   medF18: [33m25[39m,
+2026-11-06T01:44:40.4286472Z   at900: [33m16[39m
+2026-11-06T01:44:40.4287097Z } M4 baseline { pass10: [33m91[39m, medF10: [33m13.67[39m, medF18: [33m25[39m }
+2026-11-06T01:44:40.4287743Z 
+2026-11-06T01:44:40.4289006Z [90mstdout[2m | tests/pacing-acw1.test.ts[2m > [22m[2mAC-W1 casual (seeds 1-200, 201-299, slow)[2m > [22m[2mdesign gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+2026-11-06T01:44:40.4290068Z [22m[39mAC-W1 build 201-299 {
+2026-11-06T01:44:40.4290316Z   pass10: [33m90.91[39m,
+2026-11-06T01:44:40.4290560Z   pass10at16: [33m96.97[39m,
+2026-11-06T01:44:40.4290804Z   pass10gate: [33m96.97[39m,
+2026-11-06T01:44:40.4291024Z   medF10: [33m14[39m,
+2026-11-06T01:44:40.4291234Z   medF18: [33m25[39m,
+2026-11-06T01:44:40.4291430Z   at900: [33m7[39m
+2026-11-06T01:44:40.4291826Z } M4 baseline { pass10: [33m91[39m, medF10: [33m13.67[39m, medF18: [33m25[39m }
+2026-11-06T01:44:40.4292075Z 
+2026-11-06T01:44:40.4292447Z  [32m✓[39m tests/pacing-acw1.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 212667[2mms[22m[39m
+2026-11-06T01:44:40.4293376Z    [33m[2m✓[22m[39m AC-W1 casual (seeds 1-200, 201-299, slow)[2m > [22mdesign gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) [33m159958[2mms[22m[39m
+2026-11-06T01:44:40.4294440Z    [33m[2m✓[22m[39m AC-W1 casual (seeds 1-200, 201-299, slow)[2m > [22mdesign gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) [33m52702[2mms[22m[39m
+2026-11-06T01:44:40.4524492Z 
+2026-11-06T01:44:40.4566541Z [2m Test Files [22m [1m[32m153 passed[39m[22m[90m (153)[39m
+2026-11-06T01:44:40.4575686Z [2m      Tests [22m [1m[32m2240 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (2241)[39m
+2026-11-06T01:44:40.4576628Z [2m   Start at [22m 01:39:45
+2026-11-06T01:44:40.4581497Z [2m   Duration [22m 295.34s[2m (transform 3.65s, setup 0ms, collect 189.30s, tests 504.62s, environment 9.39s, prepare 10.59s)[22m
+2026-11-06T01:44:40.4588246Z 
+2026-11-06T01:44:40.5214626Z ##[group]Run npm run test:slow
+2026-11-06T01:44:40.5214893Z [36;1mnpm run test:slow[0m
+2026-11-06T01:44:40.5232937Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:44:40.5233161Z ##[endgroup]
+2026-11-06T01:44:40.6175141Z 
+2026-11-06T01:44:40.6175731Z > egg-farm@0.1.0 test:slow
+2026-11-06T01:44:40.6176881Z > node scripts/check-vendor-pins.mjs && vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1
+2026-11-06T01:44:40.6178226Z 
+2026-11-06T01:44:40.6513768Z check-vendor-pins: 4 vendored file(s) match SHA256SUMS, no unlisted files
+2026-11-06T01:44:40.9128574Z 
+2026-11-06T01:44:40.9149193Z [1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/egg-farm/egg-farm[39m
+2026-11-06T01:44:40.9151189Z 
+2026-11-06T01:47:03.0200093Z [90mstdout[2m | tests/seller-variance.slow.test.ts[2m > [22m[2mold deterministic bot (variance off) = Python var=None[2m > [22m[2mm2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds
+2026-11-06T01:47:03.0201177Z [22m[39mm2 old: 87/100 seeds bit-exact
+2026-11-06T01:47:03.0201491Z 
+2026-11-06T01:47:03.0202306Z [90mstdout[2m | tests/seller-variance.slow.test.ts[2m > [22m[2mm1 variance bot vs Python, 100 seeds (distribution)[2m > [22m[2mAC7 quantiles match; proposal targets 1-2 hold
+2026-11-06T01:47:03.0203390Z [22m[39mm1 variance t18 P5/P50/P95 TS 20.03/20.61/22.07 PY 20.04/20.63/22.05; spread TS 7.1% PY 6.8%; L@30 P5/P95 20/20
+2026-11-06T01:47:03.0203879Z 
+2026-11-06T01:47:03.0204639Z [90mstdout[2m | tests/seller-variance.slow.test.ts[2m > [22m[2mm2 variance bot vs Python, 100 seeds (distribution)[2m > [22m[2mAC7 quantiles match; proposal targets 1-2 hold
+2026-11-06T01:47:03.0205659Z [22m[39mm2 variance t18 P5/P50/P95 TS 20.63/21.11/22.61 PY 20.56/21.06/22.39; spread TS 7.1% PY 6.3%; L@30 P5/P95 20/21
+2026-11-06T01:47:03.0206108Z 
+2026-11-06T01:47:03.0207292Z  [32m✓[39m tests/seller-variance.slow.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 141613[2mms[22m[39m
+2026-11-06T01:47:03.0208649Z    [33m[2m✓[22m[39m variance stream = CPython random.Random (exact)[2m > [22mm1: full action trace equals Python (seeds 1,2,3,4,5) [33m959[2mms[22m[39m
+2026-11-06T01:47:03.0209889Z    [33m[2m✓[22m[39m variance stream = CPython random.Random (exact)[2m > [22mm2: full action trace equals Python (seeds 1,2,3,4,5) [33m1758[2mms[22m[39m
+2026-11-06T01:47:03.0211626Z    [33m[2m✓[22m[39m old deterministic bot (variance off) = Python var=None[2m > [22mm1: per-seed reach times exact, 100 seeds [33m14320[2mms[22m[39m
+2026-11-06T01:47:03.0213346Z    [33m[2m✓[22m[39m old deterministic bot (variance off) = Python var=None[2m > [22mm2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds [33m26862[2mms[22m[39m
+2026-11-06T01:47:03.0215244Z    [33m[2m✓[22m[39m m1 variance bot vs Python, 100 seeds (distribution)[2m > [22mAC7 quantiles match; proposal targets 1-2 hold [33m13142[2mms[22m[39m
+2026-11-06T01:47:03.0216633Z    [33m[2m✓[22m[39m m2 variance bot vs Python, 100 seeds (distribution)[2m > [22mAC7 quantiles match; proposal targets 1-2 hold [33m26073[2mms[22m[39m
+2026-11-06T01:47:03.0218134Z    [33m[2m✓[22m[39m AC7 band, variance bot (data/economy.csv a8c4e268)[2m > [22mband per CSV sha a8c4e268 (F1: hard band) [33m58479[2mms[22m[39m
+2026-11-06T01:49:09.9789184Z [90mstdout[2m | tests/ac7-worst-seed.slow.test.ts[2m > [22m[2mAC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22m[2mF1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+2026-11-06T01:49:09.9791688Z [22m[39mvariance L18-25 slowest level P95 236.4s (<= 390) worst 255.9s (<= 480); t20 P5/P50/P95/worst 1413/1476/1555/1583s (warn P95 > 1740)
+2026-11-06T01:49:09.9792664Z 
+2026-11-06T01:49:09.9800717Z [90mstdout[2m | tests/ac7-worst-seed.slow.test.ts[2m > [22m[2mAC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22m[2mF1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+2026-11-06T01:49:09.9805348Z [22m[39mfixed L18-25 slowest level P95 180.0s worst 180.0s (<= 360)
+2026-11-06T01:49:09.9805899Z 
+2026-11-06T01:49:09.9806643Z  [32m✓[39m tests/ac7-worst-seed.slow.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 126771[2mms[22m[39m
+2026-11-06T01:49:09.9809039Z    [33m[2m✓[22m[39m AC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22mF1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) [33m63012[2mms[22m[39m
+2026-11-06T01:49:09.9811503Z    [33m[2m✓[22m[39m AC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22mF1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) [33m63757[2mms[22m[39m
+2026-11-06T01:50:14.8393185Z [90mstdout[2m | tests/ac7-dceo-04.slow.test.ts[2m > [22m[2mAC7 D-CEO-20261019-04 final-SHA gate[2m > [22m[2mseeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min
+2026-11-06T01:50:14.8394149Z [22m[39mD-CEO-04 1-200 L10 nw P95 12.02 fastest 7.87 | w P95 12.08 fastest 8.32
+2026-11-06T01:50:14.8394526Z 
+2026-11-06T01:50:14.8398189Z [90mstdout[2m | tests/ac7-dceo-04.slow.test.ts[2m > [22m[2mAC7 D-CEO-20261019-04 final-SHA gate[2m > [22m[2mseeds 201-300 pass all original gates strictly
+2026-11-06T01:50:14.8399402Z [22m[39mD-CEO-04 201-300 L10 nw P95 11.81 fastest 8.13 | w P95 11.81 fastest 8.76; L@30 nw P5/P95 19/20 w 21/22
+2026-11-06T01:50:14.8399953Z 
+2026-11-06T01:50:14.8400968Z  [32m✓[39m tests/ac7-dceo-04.slow.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[33m 333429[2mms[22m[39m
+2026-11-06T01:50:14.8414484Z    [33m[2m✓[22m[39m AC7 D-CEO-20261019-04 final-SHA gate[2m > [22mseeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min [33m179671[2mms[22m[39m
+2026-11-06T01:50:14.8415844Z    [33m[2m✓[22m[39m AC7 D-CEO-20261019-04 final-SHA gate[2m > [22mseeds 201-300 pass all original gates strictly [33m153756[2mms[22m[39m
+2026-11-06T01:50:32.7981579Z  [32m✓[39m tests/bot-m5-trace.slow.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 17710[2mms[22m[39m
+2026-11-06T01:50:32.7983365Z    [33m[2m✓[22m[39m verify m5x-casual: pinned trace and checkpoint counters (CCR N-5)[2m > [22m[VER-1h N-5] 24 h seed 1: trace 07139bdd, and eggs.collected/sold at each checkpoint equal sums over bot-m5 events [33m17709[2mms[22m[39m
+2026-11-06T01:50:32.8127738Z 
+2026-11-06T01:50:32.8133847Z [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+2026-11-06T01:50:32.8134862Z [2m      Tests [22m [1m[32m17 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (18)[39m
+2026-11-06T01:50:32.8135570Z [2m   Start at [22m 01:44:40
+2026-11-06T01:50:32.8136627Z [2m   Duration [22m 351.90s[2m (transform 357ms, setup 0ms, collect 827ms, tests 619.52s, environment 1ms, prepare 195ms)[22m
+2026-11-06T01:50:32.8137256Z 
+2026-11-06T01:50:32.8392044Z ##[group]Run npm run build
+2026-11-06T01:50:32.8392292Z [36;1mnpm run build[0m
+2026-11-06T01:50:32.8410418Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:50:32.8410636Z ##[endgroup]
+2026-11-06T01:50:32.9323473Z 
+2026-11-06T01:50:32.9324081Z > egg-farm@0.1.0 build
+2026-11-06T01:50:32.9324817Z > vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+2026-11-06T01:50:32.9325193Z 
+2026-11-06T01:50:33.2433430Z balance.json up to date with economy.csv
+2026-11-06T01:50:38.4859871Z [36mvite v5.4.21 [32mbuilding for production...[36m[39m
+2026-11-06T01:50:38.5293677Z transforming...
+2026-11-06T01:50:39.1291272Z [32m✓[39m 74 modules transformed.
+2026-11-06T01:50:39.3321357Z rendering chunks...
+2026-11-06T01:50:39.3371866Z computing gzip size...
+2026-11-06T01:50:39.3435055Z [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.68 kB[22m[1m[22m[2m │ gzip:  0.39 kB[22m
+2026-11-06T01:50:39.3436477Z [2mdist/[22m[2massets/[22m[35mindex-DUjXgk7c.css  [39m[1m[2m 53.57 kB[22m[1m[22m[2m │ gzip: 11.58 kB[22m
+2026-11-06T01:50:39.3437872Z [2mdist/[22m[2massets/[22m[36mindex-DeigIhum.js   [39m[1m[2m213.01 kB[22m[1m[22m[2m │ gzip: 72.50 kB[22m
+2026-11-06T01:50:39.3438903Z [32m✓ built in 835ms[39m
+2026-11-06T01:50:39.3931941Z check-release-build: m4.1+69f9c61 ok
+2026-11-06T01:50:39.3936715Z check-release-build: release prefix m4.1 ok
+2026-11-06T01:50:39.3938404Z check-release-build: no eggfarmUi in release ok
+2026-11-06T01:50:39.3949954Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+2026-11-06T01:50:39.4042119Z check-release-build: window global writes only eggfarmExportTelemetry ok
+2026-11-06T01:50:39.4086109Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+2026-11-06T01:50:39.4087898Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+2026-11-06T01:50:39.4198182Z ##[group]Run test -x /usr/bin/google-chrome
+2026-11-06T01:50:39.4198587Z [36;1mtest -x /usr/bin/google-chrome[0m
+2026-11-06T01:50:39.4215833Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:50:39.4216062Z ##[endgroup]
+2026-11-06T01:50:39.4283045Z ##[group]Run npm run check-globals -- chromium
+2026-11-06T01:50:39.4283377Z [36;1mnpm run check-globals -- chromium[0m
+2026-11-06T01:50:39.4300414Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:50:39.4300627Z ##[endgroup]
+2026-11-06T01:50:39.5200739Z 
+2026-11-06T01:50:39.5201375Z > egg-farm@0.1.0 check-globals
+2026-11-06T01:50:39.5201910Z > node scripts/release-globals-browser.mjs chromium
+2026-11-06T01:50:39.5202109Z 
+2026-11-06T01:50:40.7025969Z serveOwn: dist on port 37067 (free port; set PORT to pin)
+2026-11-06T01:50:40.7165954Z check-globals: dist m4.1+69f9c61 on port 37067
+2026-11-06T01:51:20.2532329Z PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+2026-11-06T01:51:21.5826032Z PASS [chromium] refused newer-save boot window globals vs blank page: []
+2026-11-06T01:51:21.5827769Z PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+2026-11-06T01:51:21.8681437Z ##[group]Run npm run build:html
+2026-11-06T01:51:21.8681695Z [36;1mnpm run build:html[0m
+2026-11-06T01:51:21.8700036Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:51:21.8700257Z ##[endgroup]
+2026-11-06T01:51:21.9608097Z 
+2026-11-06T01:51:21.9608777Z > egg-farm@0.1.0 build:html
+2026-11-06T01:51:21.9610046Z > vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && node scripts/build-html.mjs dist-html && node scripts/check-release-build.mjs dist-html/egg-farm.html
+2026-11-06T01:51:21.9610848Z 
+2026-11-06T01:51:22.2323755Z balance.json up to date with economy.csv
+2026-11-06T01:51:28.2812108Z build:html: dist-html/egg-farm.html (595828 bytes, 16 asset rewrites, 45 inlined files)
+2026-11-06T01:51:28.3285832Z check-release-build: single-file dist-html/egg-farm.html (595828 bytes)
+2026-11-06T01:51:28.3328564Z check-release-build: m4.1+69f9c61 ok
+2026-11-06T01:51:28.3331689Z check-release-build: release prefix m4.1 ok
+2026-11-06T01:51:28.3332406Z check-release-build: build id m4.1+69f9c61 matches HEAD ok
+2026-11-06T01:51:28.3351499Z check-release-build: build-id meta + data-build-id = m4.1+69f9c61 ok
+2026-11-06T01:51:28.3353724Z check-release-build: no eggfarmUi in release ok
+2026-11-06T01:51:28.3372902Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+2026-11-06T01:51:28.3489007Z check-release-build: window global writes only eggfarmExportTelemetry ok
+2026-11-06T01:51:28.3513214Z check-release-build: every asset/font URL inlined (data:) ok
+2026-11-06T01:51:28.3584026Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+2026-11-06T01:51:28.3586918Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+2026-11-06T01:51:28.3700913Z ##[group]Run prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
+2026-11-06T01:51:28.3701419Z [36;1mprefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)[0m
+2026-11-06T01:51:28.3701983Z [36;1mnode scripts/check-release-build.mjs dist-html/egg-farm.html --build-id "$prefix+$(git rev-parse --short HEAD)"[0m
+2026-11-06T01:51:28.3720218Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:51:28.3720434Z ##[endgroup]
+2026-11-06T01:51:28.4084007Z check-release-build: single-file dist-html/egg-farm.html (595828 bytes)
+2026-11-06T01:51:28.4126417Z check-release-build: m4.1+69f9c61 ok
+2026-11-06T01:51:28.4130084Z check-release-build: release prefix m4.1 ok
+2026-11-06T01:51:28.4130708Z check-release-build: build id m4.1+69f9c61 matches expected ok
+2026-11-06T01:51:28.4152624Z check-release-build: build-id meta + data-build-id = m4.1+69f9c61 ok
+2026-11-06T01:51:28.4160867Z check-release-build: no eggfarmUi in release ok
+2026-11-06T01:51:28.4174240Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+2026-11-06T01:51:28.4298768Z check-release-build: window global writes only eggfarmExportTelemetry ok
+2026-11-06T01:51:28.4316015Z check-release-build: every asset/font URL inlined (data:) ok
+2026-11-06T01:51:28.4386680Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+2026-11-06T01:51:28.4389892Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+2026-11-06T01:51:28.4506015Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-06T01:51:28.4506557Z with:
+2026-11-06T01:51:28.4506805Z   name: egg-farm-html
+2026-11-06T01:51:28.4507112Z   path: dist-html/egg-farm.html
+2026-11-06T01:51:28.4507792Z   retention-days: 14
+2026-11-06T01:51:28.4508088Z   if-no-files-found: warn
+2026-11-06T01:51:28.4508395Z   compression-level: 6
+2026-11-06T01:51:28.4508674Z   overwrite: false
+2026-11-06T01:51:28.4508962Z   include-hidden-files: false
+2026-11-06T01:51:28.4509271Z ##[endgroup]
+2026-11-06T01:51:28.5903839Z (node:9399) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-06T01:51:28.5904566Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-06T01:51:28.5945525Z With the provided path, there will be 1 file uploaded
+2026-11-06T01:51:28.5963940Z Artifact name is valid!
+2026-11-06T01:51:28.5970041Z Root directory input is valid!
+2026-11-06T01:51:28.9651037Z Beginning upload of artifact content to blob storage
+2026-11-06T01:51:28.9956259Z (node:9399) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-06T01:51:29.5941620Z Uploaded bytes 308620
+2026-11-06T01:51:29.6722381Z Finished uploading artifact content to blob storage!
+2026-11-06T01:51:29.6723786Z SHA256 digest of uploaded artifact zip is 34a6ce539a3e42c6942e45f44c3cf8c514842341b34dfe5ab9356c650e49d013
+2026-11-06T01:51:29.6724749Z Finalizing artifact upload
+2026-11-06T01:51:30.1210913Z Artifact egg-farm-html.zip successfully finalized. Artifact ID 13470381766
+2026-11-06T01:51:30.1212123Z Artifact egg-farm-html has been successfully uploaded! Final size is 308620 bytes. Artifact ID is 13470381766
+2026-11-06T01:51:30.1218131Z Artifact download URL: https://github.com/PrincipalLewis/egg-farm/actions/runs/42145282654/artifacts/13470381766
+2026-11-06T01:51:30.1403287Z Post job cleanup.
+2026-11-06T01:51:30.2418519Z (node:9413) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-06T01:51:30.2419181Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-06T01:51:30.2421676Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898, not saving cache.
+2026-11-06T01:51:30.2544712Z Post job cleanup.
+2026-11-06T01:51:30.3295449Z [command]/usr/bin/git version
+2026-11-06T01:51:30.3333083Z git version 2.56.0
+2026-11-06T01:51:30.3363966Z Temporarily overriding HOME='/home/runner/work/_temp/79794974-35d6-4289-8ed9-e622c992e838' before making global git config changes
+2026-11-06T01:51:30.3365428Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-06T01:51:30.3366546Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/egg-farm/egg-farm
+2026-11-06T01:51:30.3404477Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-06T01:51:30.3465020Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-06T01:51:30.3695400Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-06T01:51:30.3724074Z http.https://github.com/.extraheader
+2026-11-06T01:51:30.3741062Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-06T01:51:30.3773662Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-06T01:51:30.4012404Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-06T01:51:30.4055253Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-06T01:51:30.4420791Z Cleaning up orphan processes
+2026-11-06T01:51:30.4731844Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

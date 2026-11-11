@@ -1,0 +1,11 @@
+import { chromium } from 'playwright-core'; import { spawn } from 'node:child_process';
+const port=4291; const srv=spawn('npx',['vite','preview','--outDir','dist-qa','--port',String(port),'--strictPort','--host','127.0.0.1'],{stdio:'ignore',detached:true});
+await new Promise(r=>setTimeout(r,2500));
+const b=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']}); const p=await (await b.newContext({viewport:{width:390,height:844},hasTouch:true})).newPage();
+await p.goto(`http://127.0.0.1:${port}/?marketSeed=3`); await p.getByText('Tap to start').click(); await p.waitForFunction(()=>window.eggfarm);
+console.log('cap0', JSON.stringify(await p.locator('.onb-cap').textContent()));
+await p.waitForTimeout(1500); console.log('cap1.5s', JSON.stringify(await p.locator('.onb-cap').textContent()));
+await p.goto(`http://127.0.0.1:${port}/?debug=1`); await p.getByText('Tap to start').click(); await p.waitForTimeout(300);
+console.log('debug eggfarm after 300ms', await p.evaluate(()=>typeof window.eggfarm), 'dbg', await p.locator('.dbg').count());
+await p.waitForTimeout(3000); console.log('debug eggfarm after 3.3s', await p.evaluate(()=>typeof window.eggfarm));
+await b.close(); process.kill(-srv.pid);

@@ -1,0 +1,7 @@
+CONTAMINATION_NOTE 2026-11-10T01:00:48+01:00
+Throwaway G2b probe tests/_qa_g2b_pr124_probe.test.ts was present during first full vitest+build.
+Effects: (1) full vitest EXIT=1 solely on probe D6 fixture bug (wrong breed_revealed fields: duplicate vs dupe, missing offline);
+         tip D6 suite + hatch_started Common path PASS; product tests otherwise 2300-9 probe passes.
+         (2) build id m4.1+baf410f+dirty because untracked probe.
+Probe moved to scratch /workspace/egg-farm-studio/qa/scratch/pr124-baf410ff/_qa_g2b_pr124_probe.test.ts. Re-running ONLY full vitest + build on clean tree (no redo of tsc/goldens/g2b case probes).
+G2b D1–D5: PASS in vitest-g2b-probe.txt. G2b D6: PASS via tip telemetry-schema D6 (vitest-d1d6-tip.txt 14 passed); probe D6 FAIL is fixture error not product.

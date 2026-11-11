@@ -1,0 +1,6 @@
+buildid firefox exit=0 fails=0 summary="runtime build ids [firefox]: ["m3-rc1-pre+c108440"]" 06:25:09
+globals firefox exit=0 fails=0 summary="served build m3-rc1-pre+c108440 (single-file html)" 06:33:41
+rc0 firefox exit=0 fails=0 summary="209/209 passed" 06:54:13
+buildid webkit exit=0 fails=0 summary="runtime build ids [webkit]: ["m3-rc1-pre+c108440"]" 07:01:01
+globals webkit exit=0 fails=0 summary="served build m3-rc1-pre+c108440 (single-file html)" 07:07:20
+rc0 webkit exit=0 fails=0 summary="209/209 passed" 07:21:21

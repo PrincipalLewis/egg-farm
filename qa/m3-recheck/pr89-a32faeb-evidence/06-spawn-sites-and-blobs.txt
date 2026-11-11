@@ -1,0 +1,47 @@
+## G: spawn/exec sites in scripts/ and tests/ (a32faeb)
+scripts/recorded-pid.mjs:68:  const child = spawn(cmd, args, { ...opts, detached: true }); // rule-21 guarded site: detached spawn, recorded below
+scripts/verify.ts:34:const git = (a: string[]) => { const r = spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
+scripts/verify.ts:77:      const r = spawnSync(cmd, args, { cwd: ROOT, stdio: ['ignore', 2, 2] });
+scripts/verify.ts:128:      const r = spawnSync(process.execPath, [join(ROOT, 'scripts/verify/shot.mjs'), resolve(ROOT, HTML), sp, png], { cwd: ROOT, encoding: 'utf8', timeout: 120_000 });
+tests/release-html.test.ts:12:const exec = (...a: string[]) => spawnSync('node', [script, ...a], { env: { ...process.env, HEAD_COMMIT: 'abc1234deadbeef' }, encoding: 'utf8' });
+tests/vendor-pins.test.ts:11:  const r = spawnSync('node', [script], { encoding: 'utf8', env }); return { code: r.status, out: r.stdout + r.stderr };
+tests/economy.test.ts:79:    execFileSync('python3', [new URL('sim/economy_sim.py', vdir).pathname, '--config', config, '--csv', out, '--seeds', '1', '--mins', '1'], { stdio: 'ignore' });
+tests/recorded-pid.test.ts:13:function sleeper(detached = true): ChildProcess { const c = detached ? spawnRecorded('sleep', ['30'], { stdio: 'ignore' }).child : spawn('sleep', ['30'], { stdio: 'ignore' }); mine.push(c); return c; }
+tests/verify.test.ts:148:    const run = (a: string[]) => spawnSync(process.execPath, [`${ROOT}node_modules/vite-node/vite-node.mjs`, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8' });
+tests/verify.test.ts:192:    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--profile', 'm5x-casual', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env
+tests/verify.test.ts:211:    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html, VERIFY_TEST_SKIP_MA
+tests/verify.test.ts:227:    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML: html } });
+tests/verify.test.ts:249:    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--flags', 'm4.enabled=0', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VERIFY_HTML
+tests/verify.test.ts:262:    const r = spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--no-shot', '--flags', 'm4.enabled=1', '--out', out], { cwd: ROOT, encoding: 'utf8', env: { ...process.env
+tests/verify.test.ts:281:    spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...args], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ...env } });
+tests/verify.test.ts:344:  const run = (a: string[], env: Record<string, string> = {}) => spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...a], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ...env } });
+tests/verify.test.ts:365:    const r = spawnSync(process.execPath, [join(ROOT, 'scripts/verify/shot.mjs'), join(dir, 'x.html'), sv, png], { encoding: 'utf8', env: { ...process.env, CHROME: join(dir, 'no-chrome') } });
+tests/verify.test.ts:386:    spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...args], { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
+tests/verify.test.ts:397:    const files = spawnSync('git', ['ls-files', '-co', '--exclude-standard', '-z'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\0').filter(Boolean);
+tests/verify.test.ts:423:    const p = spawn(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '24', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, env: { ...process.env, VERIFY_HTML: html }, stdio: ['ignore', 'ignore',
+tests/verify.test.ts:485:    spawnSync(process.execPath, [vn, 'scripts/verify.ts', '--', ...args], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ...env } });
+tests/verify.test.ts:533:      const p = spawn(process.execPath, [vn, 'scripts/verify.ts', '--', '--hours', '0.1', '--skip-build', '--no-shot', '--out', out], { cwd: ROOT, env: { ...process.env, VERIFY_HTML: html, VERIFY_TEST_THROW: 'after-
+tests/economy-copy.test.ts:10:  const r = spawnSync('node', [script, ...args], { encoding: 'utf8', env: { ...process.env, ECONOMY_PRODUCT_CHECK: '', ...env } });
+tests/economy-copy.test.ts:98:  const r = spawnSync('node', [script, '--strict'], { encoding: 'utf8', env: { ...process.env, VITEST: 'true', ECONOMY_PRODUCT_DIR: ok, ECONOMY_VENDOR_DIR: broken } });
+tests/economy-copy.test.ts:101:  const n = spawnSync('node', [script, '--strict'], { encoding: 'utf8', env });
+tests/serve-own.test.ts:89:  const run = (script: string, env: Record<string, string>) => spawnSync(process.execPath, [`scripts/${script}`, 'chromium'], { encoding: 'utf8', env: { ...process.env, ...env }, timeout: 60000 });
+tests/serve-own.test.ts:103:    const p = spawn(process.execPath, ['scripts/rc0-browser.mjs', 'chromium'], { env: { ...process.env, PORT: String(port) }, stdio: 'ignore' });
+tests/release-build-id.test.ts:5:  return spawnSync('node', [new URL('../scripts/check-release-build.mjs', import.meta.url).pathname, d], { env: { ...process.env, HEAD_COMMIT: head } }).status; };
+tests/release-build-id.test.ts:11:  return spawnSync('node', [new URL('../scripts/check-release-build.mjs', import.meta.url).pathname, d], { env: { ...process.env, HEAD_COMMIT: head }, encoding: 'utf8' });
+tests/m41-p1-asleep-signal.test.ts:201:      let rc1: Buffer | null = null; try { rc1 = execFileSync('git', ['show', `8a49d35:public/assets/${f}`], { cwd: new URL('..', import.meta.url), stdio: ['ignore', 'pipe', 'ignore'] }); } catch { /* 
+## H: verify.test.ts / shot.mjs changed 58ad41b..a32faeb?
+(empty = unchanged)
+## I: blob ids at a32faeb
+eb62926d169d10b4f18c475c0cea4f541bfe328b -> 01e8422dcaabbebf2c498a6cdea1483db17f1ccc scripts/d2-kill-browser.mjs
+91cbb6e40900c91e202d8bd10e808c2946f1df52 -> 297e3238726869240cdac7e1076b97d537e5a23e scripts/recorded-pid.mjs
+58ad41b:scripts/d2-guard.mjs
+(absent) -> 6f7f568efcfc32988d0a856879c16bfc1dc30434 scripts/d2-guard.mjs
+2466a41d2fc3f87cbf5590ff564f32ffd19c7a11 -> 05203207162bbe3e00c9a6352117d41d3cc5c64e scripts/serve-own.mjs
+76d7d2bad05ee527abbb91b0dc053902b6505569 -> 76d7d2bad05ee527abbb91b0dc053902b6505569 tests/verify.test.ts
+2caa718af85a2f46374b998c62a752e57f8c4701 -> 2caa718af85a2f46374b998c62a752e57f8c4701 scripts/verify/shot.mjs
+19a15407812c601a8c8c515db561cf0c51198369 -> 19a15407812c601a8c8c515db561cf0c51198369 tests/serve-own.test.ts
+## sha256 at a32faeb
+35652ecd42d8b080ffcd31729d3fbdd294ba00d509a1ad19db299545345dac8d  scripts/d2-kill-browser.mjs
+36de9ffb6ade530e0edfb33094a3379f472639a7ae691837076fefc79f62ccd3  scripts/recorded-pid.mjs
+b5809ac5032874a5c3b4d3721394ee32738618f89de0baa8f9a3aa8ebe15663d  scripts/d2-guard.mjs
+48389249829740034d1665bd953217fbf2d0a7c1d8d055610fbf364d3d87c446  scripts/serve-own.mjs

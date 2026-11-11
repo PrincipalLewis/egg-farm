@@ -1,0 +1,9 @@
+test points: before(0,120,s7) 0.683 after(1500,120,s7) 0.917 seeds1,2,3,99@60s 0.835 0.835 0.835 0.835
+L12 dwell 0 60s n=200: min 0.625 p5 0.625 med 0.625 p95 0.625 max 0.625
+L12 dwell 0 120s n=200: min 0.683 p5 0.683 med 0.683 p95 0.683 max 0.683
+L12 dwell 1500 60s n=200: min 0.835 p5 0.835 med 0.835 p95 0.835 max 0.835
+L12 dwell 1500 120s n=200: min 0.917 p5 0.917 med 0.917 p95 0.917 max 0.917
+L10 dwell 0 60s n=200: min 0.567 p5 0.567 med 0.567 p95 0.567 max 0.567
+L10 dwell 1500 60s n=200: min 0.835 p5 0.835 med 0.835 p95 0.835 max 0.835
+L14 dwell 0 60s n=200: min 0.688 p5 0.688 med 0.688 p95 0.688 max 0.688
+L14 dwell 1500 60s n=200: min 0.835 p5 0.835 med 0.835 p95 0.835 max 0.835

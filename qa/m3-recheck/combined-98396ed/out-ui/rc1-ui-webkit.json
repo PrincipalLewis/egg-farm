@@ -1,0 +1,201 @@
+[
+ {
+  "n": "S2-6 360px queue-full tag straddles strip, covers no chip",
+  "pass": false,
+  "i": {
+   "text": "Queue full",
+   "straddle": false,
+   "over": true,
+   "n": 9
+  }
+ },
+ {
+  "n": "S2-6/S2-9 (script error)",
+  "pass": false,
+  "i": "Error: page.evaluate: TypeError: Argument 1 ('element') to Window.getComputedStyle must be an instance of Element"
+ },
+ {
+  "n": "Yellow fragment: no fx nodes ~1 s after collect animation, none near top-left",
+  "pass": true,
+  "i": {
+   "mid": 6,
+   "left": [],
+   "corner": 0
+  }
+ },
+ {
+  "n": "S2-5 one visible Manage-all control, labelled (no unlabeled/duplicate)",
+  "pass": false,
+  "i": {
+   "manageAll": 1,
+   "unlabeled": 1,
+   "nav": [
+    [
+     "Market",
+     108,
+     62
+    ],
+    [
+     "Upgrades",
+     108,
+     62
+    ],
+    [
+     "",
+     44,
+     44
+    ],
+    [
+     "Farm",
+     108,
+     62
+    ]
+   ],
+   "badge": null,
+   "bg": null
+  }
+ },
+ {
+  "n": "S2-5 nav \"Refill\" 12px + red N=2 badge, aria \"Refill 2 tired workers\", no green fill",
+  "pass": false,
+  "i": {
+   "manageAll": 1,
+   "unlabeled": 1,
+   "nav": [
+    [
+     "Market",
+     108,
+     62
+    ],
+    [
+     "Upgrades",
+     108,
+     62
+    ],
+    [
+     "",
+     44,
+     44
+    ],
+    [
+     "Farm",
+     108,
+     62
+    ]
+   ],
+   "badge": null,
+   "bg": null
+  }
+ },
+ {
+  "n": "S2-5 4 equal nav buttons, 64px tall",
+  "pass": false,
+  "i": [
+   [
+    "Market",
+    108,
+    62
+   ],
+   [
+    "Upgrades",
+    108,
+    62
+   ],
+   [
+    "",
+    44,
+    44
+   ],
+   [
+    "Farm",
+    108,
+    62
+   ]
+  ]
+ },
+ {
+  "n": "S2-5 (script error)",
+  "pass": false,
+  "i": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('nav.actions .nav-manage')\n"
+ },
+ {
+  "n": "S2-1 F4->5: coop-l5.svg, toast above open sheet, up at 2.2 s, gone by 2.9 s",
+  "pass": false,
+  "i": {
+   "src": "coop-l5.svg",
+   "sheet": true,
+   "text": "Coop upgraded!",
+   "show": true,
+   "onTop": true,
+   "tz": 31,
+   "pz": 10,
+   "at22": false,
+   "at29": false
+  }
+ },
+ {
+  "n": "S2-1 F9->10: coop-l10.svg, toast above open sheet, up at 2.2 s, gone by 2.9 s",
+  "pass": false,
+  "i": {
+   "src": "coop-l10.svg",
+   "sheet": true,
+   "text": "Coop upgraded!",
+   "show": true,
+   "onTop": true,
+   "tz": 31,
+   "pz": 10,
+   "at22": false,
+   "at29": false
+  }
+ },
+ {
+  "n": "S2-1 F19->20: coop-l20.svg, toast above open sheet, up at 2.2 s, gone by 2.9 s",
+  "pass": false,
+  "i": {
+   "src": "coop-l20.svg",
+   "sheet": true,
+   "text": "Coop upgraded!",
+   "show": true,
+   "onTop": true,
+   "tz": 31,
+   "pz": 10,
+   "at22": false,
+   "at29": false
+  }
+ },
+ {
+  "n": "S2-1 three distinct coop SVGs served",
+  "pass": true,
+  "i": [
+   "893:",
+   "1263:",
+   "1634:"
+  ]
+ },
+ {
+  "n": "S2-4c line \"Market Hand sold X right away · +$Y\" with formatted values",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "S2-4c money rises by at least +$Y within 1.5 s of Collect (one Market Hand cycle)",
+  "pass": false,
+  "i": {
+   "t": null,
+   "gain": 17529
+  }
+ },
+ {
+  "n": "S2-4c line hidden when nothing sold (no Market Hand)",
+  "pass": true,
+  "i": {
+   "wb": true,
+   "sold": null
+  }
+ },
+ {
+  "n": "S2-8 (script error)",
+  "pass": false,
+  "i": "Error: page.evaluate: TypeError: null is not an object (evaluating 'e.textContent')"
+ }
+]

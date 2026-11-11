@@ -1,0 +1,43 @@
+{
+ "id": "CSR7-cap3-evicts-oldest",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-7"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-invalid-neg1.json"
+  },
+  "eggfarm.save.corrupt.1792378000000": {
+   "ref": "raw/PRIOR-corrupt-1.raw"
+  },
+  "eggfarm.save.corrupt.1792378100000": {
+   "ref": "raw/PRIOR-corrupt-2.raw"
+  },
+  "eggfarm.save.corrupt.1792378200000": {
+   "ref": "raw/PRIOR-corrupt-3.raw"
+  },
+  "eggfarm.save.corrupt.index": {
+   "value": "[\"eggfarm.save.corrupt.1792378000000\",\"eggfarm.save.corrupt.1792378100000\",\"eggfarm.save.corrupt.1792378200000\"]"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-invalid-truncated.raw"
+   }
+  ]
+ },
+ "expect": {
+  "corruptLsExact": 3,
+  "idbCorruptExact": 1,
+  "idbBytesNotInLs": true,
+  "survivors": "LS: the 3 newest by index order (PRIOR-1/2 evicted); IDB copy only in IDB (D-HOP-22-03(3))",
+  "v6bNeverCopied": true
+ }
+}

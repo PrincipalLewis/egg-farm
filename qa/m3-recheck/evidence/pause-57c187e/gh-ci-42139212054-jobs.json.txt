@@ -1,0 +1,21 @@
+{
+  "checked_at_cet": "2026-11-06 02:03 CET",
+  "run_id": 42139212054,
+  "status": "completed",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "id": 127634959044,
+      "name": "gate",
+      "status": "completed",
+      "conclusion": "success",
+      "chromium_step": "Release globals allowlist (chromium) SUCCESS"
+    },
+    {
+      "id": 127639467756,
+      "name": "release-globals",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ]
+}

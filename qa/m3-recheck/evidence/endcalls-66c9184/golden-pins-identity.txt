@@ -1,0 +1,8 @@
+golden pin files: blob tip vs rc/v5 49ee46ddce010f0087515c173d34c6076d47ea44 (2026-11-06T00:52:19+01:00)
+engineering/golden/flagoff-golden.a01faea.test.ts tip=3584795c42b509f61799260323e46ee37c210bc2 rc=3584795c42b509f61799260323e46ee37c210bc2
+engineering/golden/m4on-golden.90a9c84.test.ts tip=dd9c637fc3d28acc013bc72fce90889b9863175a rc=dd9c637fc3d28acc013bc72fce90889b9863175a
+tests/m4a-flag-off.test.ts tip=2c9130528d7b9ab5a770133df6b00b6c86d34b3c rc=2c9130528d7b9ab5a770133df6b00b6c86d34b3c
+tests/zg-flagoff-dom.test.ts tip=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6 rc=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6
+PIN_CONST_flagoff=f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+PIN_CONST_m4on=a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+BLOB_IDENTICAL_TO_RC=YES (all 4)

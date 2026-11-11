@@ -1,0 +1,191 @@
+[
+ {
+  "fx": "EXP1",
+  "name": "S1 after collect",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 111600
+ },
+ {
+  "fx": "EXP1",
+  "name": "S1 reload1",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "EXP1",
+  "name": "S1 reload2",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "EXP1",
+  "name": "S2 reload1 settled",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "EXP1",
+  "name": "S2 reload2",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "EXP1",
+  "name": "S3 reload1 via IDB",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "idb"
+ },
+ {
+  "fx": "EXP1",
+  "name": "S3 reload2",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "EXP1",
+  "name": "S4 reload1",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "idb"
+ },
+ {
+  "fx": "EXP1",
+  "name": "S5 session (pending)",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 111600,
+  "mirrorWritesDuringFlag": 1
+ },
+ {
+  "fx": "EXP1",
+  "name": "S5 reload1",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "idb",
+  "cards": 1
+ },
+ {
+  "fx": "EXP1",
+  "name": "S5 reload2",
+  "coins": 123456789,
+  "eggs": 111600,
+  "expectEggs": 111600,
+  "G": 111600,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S1 after collect",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 34200
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S1 reload1",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S1 reload2",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S2 reload1 settled",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S2 reload2",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S3 reload1 via IDB",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 0,
+  "via": "idb"
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S3 reload2",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 0,
+  "via": "ls"
+ },
+ {
+  "fx": "M1-midgame",
+  "name": "S4 reload1",
+  "coins": 4567890,
+  "eggs": 34612,
+  "expectEggs": 34612,
+  "G": 34200,
+  "newGrant": 0,
+  "via": "ls"
+ }
+]

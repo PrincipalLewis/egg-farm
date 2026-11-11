@@ -1,0 +1,1163 @@
+{
+ "320": {
+  "b999": [
+   {
+    "card": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/999.9B eggs · $999.9B",
+      "w": 116,
+      "textW": 148,
+      "sw": 148,
+      "cw": 116,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/999.9B ",
+      "w": 72.3,
+      "textW": 72.3,
+      "sw": 72,
+      "cw": 72,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 0,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 0,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $999.9B",
+      "w": 75.6,
+      "textW": 75.6,
+      "sw": 76,
+      "cw": 76,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 999.9B +$999.9B",
+      "w": 88,
+      "textW": 67.6,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 999.9B",
+      "w": 67.6,
+      "textW": 67.6,
+      "sw": 68,
+      "cw": 68,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$999.9B",
+      "w": 46.1,
+      "textW": 46.1,
+      "sw": 46,
+      "cw": 46,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": [
+     [
+      ".v",
+      "button"
+     ],
+     [
+      ".v",
+      ".sk"
+     ],
+     [
+      ".v",
+      ".sy"
+     ]
+    ]
+   },
+   {
+    "card": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "500B/1.2T eggs · $1.2T",
+      "w": 116,
+      "textW": 137.6,
+      "sw": 138,
+      "cw": 116,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "500B/1.2T ",
+      "w": 82.3,
+      "textW": 82.3,
+      "sw": 82,
+      "cw": 82,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 0,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 0,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $1.2T",
+      "w": 55.4,
+      "textW": 55.4,
+      "sw": 55,
+      "cw": 55,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 700B +$700B",
+      "w": 88,
+      "textW": 58.5,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 700B",
+      "w": 58.5,
+      "textW": 58.5,
+      "sw": 58,
+      "cw": 58,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$700B",
+      "w": 38.3,
+      "textW": 38.3,
+      "sw": 38,
+      "cw": 38,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": [
+     [
+      ".v",
+      "button"
+     ]
+    ]
+   }
+  ],
+  "t1500": [
+   {
+    "card": "0/2,000T eggs · $2,000T Sell 1,500T +$1,500T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/2,000T eggs · $2,000T",
+      "w": 116,
+      "textW": 145.8,
+      "sw": 146,
+      "cw": 116,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/2,000T ",
+      "w": 71.3,
+      "textW": 71.3,
+      "sw": 71,
+      "cw": 71,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 0,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 0,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $2,000T",
+      "w": 74.5,
+      "textW": 74.5,
+      "sw": 75,
+      "cw": 75,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 1,500T +$1,500T",
+      "w": 88,
+      "textW": 66.9,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 1,500T",
+      "w": 66.9,
+      "textW": 66.9,
+      "sw": 67,
+      "cw": 67,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$1,500T",
+      "w": 45.6,
+      "textW": 45.6,
+      "sw": 46,
+      "cw": 46,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": [
+     [
+      ".v",
+      "button"
+     ],
+     [
+      ".v",
+      ".sk"
+     ],
+     [
+      ".v",
+      ".sy"
+     ]
+    ]
+   },
+   {
+    "card": "0/1,000,000T eggs · $1,000,000T Sell 1,500T +$1,500T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/1,000,000T eggs · $1,000,000T",
+      "w": 116,
+      "textW": 211.3,
+      "sw": 211,
+      "cw": 116,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/1,000,000T ",
+      "w": 104,
+      "textW": 104,
+      "sw": 104,
+      "cw": 104,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 0,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 0,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $1,000,000T",
+      "w": 107.3,
+      "textW": 107.3,
+      "sw": 107,
+      "cw": 107,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 1,500T +$1,500T",
+      "w": 88,
+      "textW": 66.9,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 1,500T",
+      "w": 66.9,
+      "textW": 66.9,
+      "sw": 67,
+      "cw": 67,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$1,500T",
+      "w": 45.6,
+      "textW": 45.6,
+      "sw": 46,
+      "cw": 46,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": [
+     [
+      ".v",
+      "button"
+     ],
+     [
+      ".v",
+      ".sk"
+     ],
+     [
+      ".v",
+      ".sy"
+     ]
+    ]
+   }
+  ],
+  "t5": [
+   {
+    "card": "1T/9.9T eggs · $9.9T Sell 5T +$5T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "1T/9.9T eggs · $9.9T",
+      "w": 116,
+      "textW": 116.5,
+      "sw": 117,
+      "cw": 116,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "1T/9.9T ",
+      "w": 61.2,
+      "textW": 61.2,
+      "sw": 61,
+      "cw": 61,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 0,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 0,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $9.9T",
+      "w": 55.4,
+      "textW": 55.4,
+      "sw": 55,
+      "cw": 55,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 5T +$5T",
+      "w": 88,
+      "textW": 42.7,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 5T",
+      "w": 42.7,
+      "textW": 42.7,
+      "sw": 43,
+      "cw": 43,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$5T",
+      "w": 24.8,
+      "textW": 24.8,
+      "sw": 25,
+      "cw": 25,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": []
+   },
+   {
+    "card": "0/123.4T eggs · $123.4T Sell 5T +$5T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/123.4T eggs · $123.4T",
+      "w": 116,
+      "textW": 145.8,
+      "sw": 146,
+      "cw": 116,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/123.4T ",
+      "w": 71.3,
+      "textW": 71.3,
+      "sw": 71,
+      "cw": 71,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 0,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 0,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $123.4T",
+      "w": 74.5,
+      "textW": 74.5,
+      "sw": 75,
+      "cw": 75,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 5T +$5T",
+      "w": 88,
+      "textW": 42.7,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 5T",
+      "w": 42.7,
+      "textW": 42.7,
+      "sw": 43,
+      "cw": 43,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$5T",
+      "w": 24.8,
+      "textW": 24.8,
+      "sw": 25,
+      "cw": 25,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": [
+     [
+      ".v",
+      "button"
+     ]
+    ]
+   }
+  ],
+  "pageerrors": []
+ },
+ "360": {
+  "b999": [
+   {
+    "card": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/999.9B eggs · $999.9B",
+      "w": 156,
+      "textW": 156,
+      "sw": 156,
+      "cw": 156,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/999.9B ",
+      "w": 72.3,
+      "textW": 72.3,
+      "sw": 72,
+      "cw": 72,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 8,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 8,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $999.9B",
+      "w": 75.6,
+      "textW": 75.6,
+      "sw": 76,
+      "cw": 76,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 999.9B +$999.9B",
+      "w": 88,
+      "textW": 67.6,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 999.9B",
+      "w": 67.6,
+      "textW": 67.6,
+      "sw": 68,
+      "cw": 68,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$999.9B",
+      "w": 46.1,
+      "textW": 46.1,
+      "sw": 46,
+      "cw": 46,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": []
+   },
+   {
+    "card": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "500B/1.2T eggs · $1.2T",
+      "w": 156,
+      "textW": 156,
+      "sw": 156,
+      "cw": 156,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "500B/1.2T ",
+      "w": 82.3,
+      "textW": 82.3,
+      "sw": 82,
+      "cw": 82,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 18.4,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 18,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $1.2T",
+      "w": 55.4,
+      "textW": 55.4,
+      "sw": 55,
+      "cw": 55,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 700B +$700B",
+      "w": 88,
+      "textW": 58.5,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 700B",
+      "w": 58.5,
+      "textW": 58.5,
+      "sw": 58,
+      "cw": 58,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$700B",
+      "w": 38.3,
+      "textW": 38.3,
+      "sw": 38,
+      "cw": 38,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": []
+   }
+  ],
+  "t1500": [
+   {
+    "card": "0/2,000T eggs · $2,000T Sell 1,500T +$1,500T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/2,000T eggs · $2,000T",
+      "w": 156,
+      "textW": 156,
+      "sw": 156,
+      "cw": 156,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/2,000T ",
+      "w": 71.3,
+      "textW": 71.3,
+      "sw": 71,
+      "cw": 71,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 10.2,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 10,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $2,000T",
+      "w": 74.5,
+      "textW": 74.5,
+      "sw": 75,
+      "cw": 75,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 1,500T +$1,500T",
+      "w": 88,
+      "textW": 66.9,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 1,500T",
+      "w": 66.9,
+      "textW": 66.9,
+      "sw": 67,
+      "cw": 67,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$1,500T",
+      "w": 45.6,
+      "textW": 45.6,
+      "sw": 46,
+      "cw": 46,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": []
+   },
+   {
+    "card": "0/1,000,000T eggs · $1,000,000T Sell 1,500T +$1,500T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/1,000,000T eggs · $1,000,000T",
+      "w": 156,
+      "textW": 211.3,
+      "sw": 211,
+      "cw": 156,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/1,000,000T ",
+      "w": 104,
+      "textW": 104,
+      "sw": 104,
+      "cw": 104,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 0,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 0,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $1,000,000T",
+      "w": 107.3,
+      "textW": 107.3,
+      "sw": 107,
+      "cw": 107,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 1,500T +$1,500T",
+      "w": 88,
+      "textW": 66.9,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 1,500T",
+      "w": 66.9,
+      "textW": 66.9,
+      "sw": 67,
+      "cw": 67,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$1,500T",
+      "w": 45.6,
+      "textW": 45.6,
+      "sw": 46,
+      "cw": 46,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": [
+     [
+      ".v",
+      "button"
+     ],
+     [
+      ".v",
+      ".sk"
+     ],
+     [
+      ".v",
+      ".sy"
+     ]
+    ]
+   }
+  ],
+  "t5": [
+   {
+    "card": "1T/9.9T eggs · $9.9T Sell 5T +$5T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "1T/9.9T eggs · $9.9T",
+      "w": 156,
+      "textW": 152.4,
+      "sw": 156,
+      "cw": 156,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "1T/9.9T ",
+      "w": 61.2,
+      "textW": 61.2,
+      "sw": 61,
+      "cw": 61,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 35.8,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 36,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $9.9T",
+      "w": 55.4,
+      "textW": 55.4,
+      "sw": 55,
+      "cw": 55,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 5T +$5T",
+      "w": 88,
+      "textW": 42.7,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 5T",
+      "w": 42.7,
+      "textW": 42.7,
+      "sw": 43,
+      "cw": 43,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$5T",
+      "w": 24.8,
+      "textW": 24.8,
+      "sw": 25,
+      "cw": 25,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": []
+   },
+   {
+    "card": "0/123.4T eggs · $123.4T Sell 5T +$5T",
+    "els": [
+     {
+      "sel": ".l1",
+      "text": "0/123.4T eggs · $123.4T",
+      "w": 156,
+      "textW": 156,
+      "sw": 156,
+      "cw": 156,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".n",
+      "text": "0/123.4T ",
+      "w": 71.3,
+      "textW": 71.3,
+      "sw": 71,
+      "cw": 71,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".egg",
+      "text": "eggs",
+      "w": 10.2,
+      "textW": 35.8,
+      "sw": 36,
+      "cw": 10,
+      "overflowX": true,
+      "inkPastBox": true,
+      "ellipsis": true,
+      "overflow": "hidden"
+     },
+     {
+      "sel": ".v",
+      "text": " · $123.4T",
+      "w": 74.5,
+      "textW": 74.5,
+      "sw": 75,
+      "cw": 75,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": "button",
+      "text": "Sell 5T +$5T",
+      "w": 88,
+      "textW": 42.7,
+      "sw": 84,
+      "cw": 84,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sk",
+      "text": "Sell 5T",
+      "w": 42.7,
+      "textW": 42.7,
+      "sw": 43,
+      "cw": 43,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     },
+     {
+      "sel": ".sy",
+      "text": "+$5T",
+      "w": 24.8,
+      "textW": 24.8,
+      "sw": 25,
+      "cw": 25,
+      "overflowX": false,
+      "inkPastBox": false,
+      "ellipsis": false,
+      "overflow": "visible"
+     }
+    ],
+    "overlaps": []
+   }
+  ],
+  "pageerrors": []
+ },
+ "bid": "m3-rc1-pre+dd52bfd"
+}

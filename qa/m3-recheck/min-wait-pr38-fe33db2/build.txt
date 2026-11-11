@@ -1,0 +1,20 @@
+
+> egg-farm@0.1.0 build
+> vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+
+balance.json up to date with economy.csv
+vite v5.4.21 building for production...
+transforming...
+✓ 39 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.80 kB │ gzip:  0.42 kB
+dist/assets/index-CeTA2jjO.css   38.23 kB │ gzip:  8.73 kB
+dist/assets/index-DxjkSqUL.js   105.59 kB │ gzip: 36.25 kB
+✓ built in 710ms
+check-release-build: m3-rc1-pre+fe33db2 ok
+check-release-build: no eggfarmUi in release ok
+check-release-build: no ?debug/?perf/?ios/QA hooks ok
+check-release-build: window global writes only eggfarmExportTelemetry ok
+check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+exit=0

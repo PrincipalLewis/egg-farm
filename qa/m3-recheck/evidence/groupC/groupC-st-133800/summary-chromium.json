@@ -1,0 +1,283 @@
+{
+ "engine": "chromium",
+ "version": "156.0.8078.47",
+ "fixture": "tests/fixtures/m5c/fatigue-dom.html",
+ "fixtureSha256": "a0c3cea4f27cd6541a53472abafac1dd8379e7687dd9a24a3a5a364b4e5c123a",
+ "port": 5281,
+ "seconds": 155,
+ "positive": {
+  "SS-38a": {
+   "pass": 24,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-39": {
+   "pass": 18,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-39a": {
+   "pass": 9,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40a": {
+   "pass": 6,
+   "fail": 6,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "LAYOUT": {
+   "pass": 6,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-41": {
+   "pass": 9,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-37": {
+   "pass": 24,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-42": {
+   "pass": 15,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-RATE": {
+   "pass": 4,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40c": {
+   "pass": 10,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40p1": {
+   "pass": 24,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40p2": {
+   "pass": 8,
+   "fail": 0,
+   "unverified": 1,
+   "blocked": 0
+  },
+  "SS-40p3": {
+   "pass": 16,
+   "fail": 0,
+   "unverified": 2,
+   "blocked": 0
+  },
+  "SS-40all": {
+   "pass": 15,
+   "fail": 1,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40d": {
+   "pass": 4,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40e": {
+   "pass": 2,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-38b": {
+   "pass": 6,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-38c": {
+   "pass": 21,
+   "fail": 1,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-38e": {
+   "pass": 7,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-42r": {
+   "pass": 7,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-TEL": {
+   "pass": 3,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-36j": {
+   "pass": 0,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 1
+  }
+ },
+ "positiveFails": [
+  "SS-40a 360x640: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110",
+  "SS-40a 360x640: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110",
+  "SS-40a 375x667: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110",
+  "SS-40a 375x667: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110",
+  "SS-40a 360x739: popover right 248.671875 != chip right 260.390625 [SS-G31 360x739 popover rect not given (anchoring rule asserted)]",
+  "SS-40a 360x739: popover right 248.671875 != chip right 260.390625 [SS-G31 360x739 popover rect not given (anchoring rule asserted)]",
+  "SS-40all 360x640: target received 0 click events (want exactly 1: swallowed)",
+  "SS-38c 360x740: ii 360x740->360x739 closed: focus lost (activeElement body, visible false)"
+ ],
+ "negatives": {
+  "chip740": {
+   "rows": [
+    "SS-38a"
+   ],
+   "caught": 2,
+   "first": ".fslot not rendered at >=740; .hud .fchip rendered at >=740; no CSSOM rule with media (max-height: 739px)"
+  },
+  "debounce": {
+   "rows": [
+    "SS-38b"
+   ],
+   "caught": 3,
+   "first": "739->740: 2 rAF after resize variant=icon, want subline (JS-debounced or not CSS-driven)"
+  },
+  "bucket": {
+   "rows": [
+    "SS-38e"
+   ],
+   "caught": 1,
+   "first": "viewport_h '<740' != '740-899' at innerHeight 740"
+  },
+  "geom": {
+   "rows": [
+    "SS-41"
+   ],
+   "caught": 1,
+   "first": "chip 220.4,5–264.4,49 != 216.4,5–260.4,49"
+  },
+  "coinsbtn": {
+   "rows": [
+    "SS-41"
+   ],
+   "caught": 1,
+   "first": "coins pill is focusable (display pill, not a tap target) [SS-G38 coins/basket not-focusable is a QA reading (reported, not failed, if flag-off is focusable too)]; coins pill has an interactive role/handler (button)"
+  },
+  "arialabel": {
+   "rows": [
+    "SS-39a"
+   ],
+   "caught": 2,
+   "first": "chip has aria-label \"Tired workers\" (must be content-based); name raw \"Tired workers\" != \"Tired workers are costing $999.9K per second. Open workers.\""
+  },
+  "cover": {
+   "rows": [
+    "SS-40a",
+    "SS-37"
+   ],
+   "caught": 3,
+   "first": "popover 14.4,190–248.7,242 != 26.1,62–260.4,114; Manage 160.7,194–242.7,238 != 172.4,66–254.4,110; popover covers golden spot(s) S1"
+  },
+  "shift": {
+   "rows": [
+    "SS-40a"
+   ],
+   "caught": 2,
+   "first": "popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110; layout shift 10 px on open/close"
+  },
+  "trap": {
+   "rows": [
+    "SS-40a"
+   ],
+   "caught": 2,
+   "first": "popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110"
+  },
+  "labelclip": {
+   "rows": [
+    "LAYOUT"
+   ],
+   "caught": 2,
+   "first": "label fpop-t clipped (scrollWidth 121 > clientWidth 40)"
+  },
+  "swallow": {
+   "rows": [
+    "SS-40p1"
+   ],
+   "caught": 6,
+   "first": "target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); golden egg still present"
+  },
+  "double": {
+   "rows": [
+    "SS-40p3"
+   ],
+   "caught": 1,
+   "first": "target received 2 click events (want exactly 1: double activation)"
+  },
+  "timeout": {
+   "rows": [
+    "SS-40c"
+   ],
+   "caught": 1,
+   "first": "idle10s: popover closed (want open, no timeout)"
+  },
+  "resizeopen": {
+   "rows": [
+    "SS-38c"
+   ],
+   "caught": 7,
+   "first": "i 360x739->360x740 open-chip: popover still open after the crossing"
+  },
+  "rmscale": {
+   "rows": [
+    "SS-40e"
+   ],
+   "caught": 1,
+   "first": "scale animation under reduced motion on popover,popover"
+  },
+  "tapnav": {
+   "rows": [
+    "SS-42"
+   ],
+   "caught": 1,
+   "first": "h 740: sub-line tap did not open Workers; h 740: sub-line tap opened the popover; Workers order unreadable"
+  },
+  "ratex": {
+   "rows": [
+    "SS-RATE"
+   ],
+   "caught": 1,
+   "first": "#rate \"−$999.9K/s\" shows the fatigue loss X $999.9K"
+  },
+  "sub740": {
+   "rows": [
+    "SS-37"
+   ],
+   "caught": 2,
+   "first": "counts 5/5/2 != flag-off 8/7/4; failing spot set S4,S5,S8 != flag-off S4; Broody-eligible 0,11 != flag-off 0,5,8,9,10,11"
+  }
+ },
+ "negMissed": [],
+ "ok": false
+}

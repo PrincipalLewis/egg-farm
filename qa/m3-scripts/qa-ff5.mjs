@@ -1,0 +1,10 @@
+import { firefox } from 'playwright-core'; import { spawn } from 'node:child_process';
+const srv = spawn('npx', ['vite', 'preview', '--port', '4206', '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+await new Promise(r => setTimeout(r, 2500));
+const b = await firefox.launch(); const p = await (await b.newContext()).newPage();
+await p.goto('http://127.0.0.1:4206/'); await p.waitForTimeout(1000);
+const t = (f) => p.evaluate(`Promise.race([(${f})().then(x=>'ok '+x, e=>'err '+e), new Promise(r=>setTimeout(()=>r('HANG'),4000))])`);
+console.log('ctx state', await p.evaluate(() => { window.__c = new AudioContext(); return window.__c.state; }));
+console.log('resume', await t("async()=>{await window.__c.resume(); return window.__c.state}"));
+console.log('decode', await t("async()=>{const r=await fetch('/assets/audio/sfx-collect-pop.mp3'); const a=await r.arrayBuffer(); const d=await window.__c.decodeAudioData(a); return d.duration}"));
+await b.close(); process.kill(-srv.pid); process.exit(0);

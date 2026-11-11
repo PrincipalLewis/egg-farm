@@ -1,0 +1,14 @@
+  save() {
+    if (this.resetting || this.readOnly || this.inactive || this.held()) return;
+    if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
+    if (this.newerGuard()) return;
+    // S2: while hidden, persist the state as of the hide, stamped at the hide, so a tab killed while hidden reloads exactly
+    // like one closed at the hide (C-AC36); the provisional hidden sim is never saved.
+    const t = this.hidden ? this.hidden.at : this.now(), st = this.hidden ? this.hidden.state : this.state;
+    try { const raw = save(this.kv, st, t, this.b, this.bakAllowed); this.mirror?.write(raw); }
+    catch (e) {
+      if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
+      if (this.mirror) try { this.mirror.write(serialize(st, t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+      if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
+    this.telemetry.flush();
+  }

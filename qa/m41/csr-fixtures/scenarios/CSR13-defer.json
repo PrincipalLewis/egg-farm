@@ -1,0 +1,41 @@
+{
+ "id": "CSR13-defer",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-13",
+  "CSR-5"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-invalid-neg1.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F14-T-1d.json"
+  }
+ },
+ "idb": {
+  "status": "unknown",
+  "reason": "idb_timeout",
+  "records": []
+ },
+ "expect": {
+  "recovered_from": "deferred",
+  "notice": "M4",
+  "noSaveWrite": true,
+  "v6bUnchanged": true,
+  "onlyCorruptKeysMayChange": true,
+  "triedPairs": [
+   [
+    "bak",
+    "invalid"
+   ],
+   [
+    "idb",
+    "unavailable"
+   ]
+  ]
+ }
+}

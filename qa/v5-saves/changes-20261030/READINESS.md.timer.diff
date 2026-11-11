@@ -1,0 +1,26 @@
+--- ../scratch/READINESS.md.orig-20261030-073843	2026-10-30 07:36:22.712212814 +0100
++++ READINESS.md	2026-10-30 07:41:32.074531279 +0100
+@@ -95,13 +95,13 @@
+    - SS-15 step.
+ 3. telemetry-check.mjs: (b), (c) and (d) above.
+ 
+-**SCRIPTS.sha256 = a045b620…** (re-pinned 2026-10-30 after the HoQ-approved status.log signing fix: v5-saves-gate 1e1d63cf, new selftest-gate-sums e2c14c0c; status.log now excluded from SHA256SUMS and signed last in STATUS.sha256; self-test 9/9 PASS incl. negatives, evidence changes-20261030/; before: 72977983… (V5E-SCOPE lock-window timer, v5-saves-gate aabf3614), f20f17d0…, 6b5cf63f…), covering:
++**SCRIPTS.sha256 = bcc54543…** (re-pinned 2026-10-30 after the HoQ-approved rule-21 timer fix: v5-saves-gate 1e1d63cf -> 542683b2, lock-window timer now started via ops/tools/lane-run.sh saves-qa and stopped via lane-kill.sh on its recorded PID, `pkill -P` removed, gate stops with "ask HoO" if the timer group survives; new selftest-gate-timer 2cc81b65, 10/10 PASS; gate-sums 9/9, telemetry 25/25, `-c` 12/12 OK; evidence changes-20261030/. Before: a045b620… (status.log signing fix: v5-saves-gate 1e1d63cf, new selftest-gate-sums e2c14c0c; status.log now excluded from SHA256SUMS and signed last in STATUS.sha256; self-test 9/9 PASS incl. negatives, evidence changes-20261030/; before: 72977983… (V5E-SCOPE lock-window timer, v5-saves-gate aabf3614), f20f17d0…, 6b5cf63f…)), covering:
+ 
+ | script | sha256 (prefix) |
+ |---|---|
+ | telemetry-check | 7c6b2621 |
+ | lib | dc7ccbac |
+-| v5-saves-gate | 1e1d63cf |
++| v5-saves-gate | 542683b2 |
+ | ss15-share-guard | c8565122 |
+ | offline-seed | f9c21487 |
+ | offline-seed-proof | e18f8920 |
+@@ -110,6 +110,7 @@
+ | publish-verify | d634dfc8 |
+ | gen-fixtures | 87f41c8a |
+ | selftest-gate-sums | e2c14c0c |
++| selftest-gate-timer | 2cc81b65 |
+ 
+ SPEC.sha256 cd39288f…, FIXTURES.sha256 25e4e603…, case doc v5-saves-cases.md ef87eb96…
+ 

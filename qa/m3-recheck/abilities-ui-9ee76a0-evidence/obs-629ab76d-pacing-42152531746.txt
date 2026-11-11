@@ -1,0 +1,13 @@
+Look time: 2026-11-06 04:37:14 CET (Europe/Belgrade)
+Same look as hoqa/pr100-hosted (no extra loop)
+PR #116 head ls-remote/gh: 629ab76d0c529497591498bd0c716e82b405bcf6 MATCH
+Pacing run 42152531746: status=completed conclusion=failure head_sha=629ab76d0c529497591498bd0c716e82b405bcf6
+  url=https://github.com/PrincipalLewis/egg-farm/actions/runs/42152531746
+  shard seller15 127679079302 SUCCESS
+  shard optimal 127679079580 SUCCESS
+  shard casual 127679079726 SUCCESS
+  aggregate job pacing-x1-stack 127693345742 FAILURE
+  raw: 45 PASS, 0 FAIL, 1 WARN, 12 NOT-WIRED (3 blocking)
+  FAIL: blocking row 904 optimal/seller15/casual NOT-WIRED
+  WARN L897 optimal N / H: worst 191 > 180 s — non-blocking
+  checkout: HEAD is now at f0910fd Merge 629ab76d0c529497591498bd0c716e82b405bcf6 into eed62687...

@@ -1,0 +1,7 @@
+# golden-game-browser artifact 13718928643 from run 42717222277
+# downloaded 2026-11-10 00:18 CET into qa/scratch/goldens-111-cf55d44/artifact/
+913cdc785748b30c79b7290be320b7e5c8e54d934473678b248ebb3ee0c303b0  golden-game-browser/flag0-farm.png
+c50010fae717818a5a2cc049c06689856f47d824e8eded8764d463f513020b05  golden-game-browser/flag1-after-unload.png
+821a19b6526f99a8a3b1fd16bf1eba7c7a77c3720e00ff4d5948ce490e0182b3  golden-game-browser/flag1-egg-live.png
+59bbf1704157489583e9d1d82e7c4136797fe0f75e153c02a2dac3590c19471e  golden-game-browser/flag1-farm.png
+7f9a71dce2a84eb1b6ccc9506a340acc29865154470a09ac2086bd50739b97c9  golden-game-browser.zip

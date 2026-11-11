@@ -1,0 +1,6 @@
+ engineering/f5-active-pacing.md  | 70 ++++++++++++++++++++++++++++++++++
+ tests/bot-m5-active.slow.test.ts | 77 +++++++++++++++++++++++++++++++++++++
+ tests/bot-m5-active.test.ts      | 82 ++++++++++++++++++++++++++++++++++++++++
+ tests/bot-m5-active.ts           | 60 +++++++++++++++++++++++++++++
+ tests/bot-m5.ts                  | 22 +++++++++--
+ 5 files changed, 307 insertions(+), 4 deletions(-)

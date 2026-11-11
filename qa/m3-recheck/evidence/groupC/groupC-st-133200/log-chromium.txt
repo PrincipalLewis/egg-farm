@@ -1,0 +1,44 @@
+2026-10-30T12:31:49.866Z # fatigue-cue selftest chromium 156.0.8078.47 fixture sha256 c0e6d6371c169a302dd2d92fc1a8c314a618e8e25bab6035a4fbbc635d9c93e6 port 5281 pid 3435939
+2026-10-30T12:31:51.201Z FAIL SS-40a 360x640: popover 9.1,60.8–254,115.2 != 26.1,62–260.4,114; Manage 162,65–247.7,111 != 172.4,66–254.4,110; popover h 54.4 not in 44-52
+2026-10-30T12:31:51.523Z FAIL SS-40a 360x640: popover 9.2,60.9–253.8,115.1 != 26.1,62–260.4,114; Manage 162,65–247.6,111 != 172.4,66–254.4,110; popover h 54.3 not in 44-52; Tab from chip: #settings>#cust1 (want Manage, then out of the popover: no focus trap)
+2026-10-30T12:31:51.946Z FAIL SS-41 360x640: elementFromPoint misses settings at corner(s) 0,1,2,3
+2026-10-30T12:31:54.484Z FAIL SS-40a 375x667: popover 9.2,60.9–253.8,115.1 != 26.1,62–260.4,114; Manage 162,65–247.6,111 != 172.4,66–254.4,110; popover h 54.3 not in 44-52
+2026-10-30T12:31:54.811Z FAIL SS-40a 375x667: popover 9.2,60.9–253.8,115.1 != 26.1,62–260.4,114; Manage 162,65–247.6,111 != 172.4,66–254.4,110; popover h 54.3 not in 44-52; Tab from chip: #settings>#cust1 (want Manage, then out of the popover: no focus trap)
+2026-10-30T12:31:55.227Z FAIL SS-41 375x667: elementFromPoint misses settings at corner(s) 0,1,2,3
+2026-10-30T12:31:57.568Z FAIL SS-40a 360x739: popover right 253.8141326904297 != chip right 260.390625 [SS-G31 360x739 popover rect not given (anchoring rule asserted)]; popover top 60.85872268676758 != HUD bottom + 6 (62) [SS-G31 360x739 popover rect not given (anchoring rule asserted)]; popover h 54.3 not in 44-52
+2026-10-30T12:31:57.875Z FAIL SS-40a 360x739: popover right 253.9740753173828 != chip right 260.390625 [SS-G31 360x739 popover rect not given (anchoring rule asserted)]; popover top 60.82322692871094 != HUD bottom + 6 (62) [SS-G31 360x739 popover rect not given (anchoring rule asserted)]; popover h 54.4 not in 44-52; Tab from chip: #settings>#cust1 (want Manage, then out of the popover: no focus trap)
+2026-10-30T12:31:58.294Z FAIL SS-41 360x739: elementFromPoint misses settings at corner(s) 0,1,2,3
+2026-10-30T12:32:00.475Z FAIL SS-42 360x740: h 740: sub-line tap did not open Workers; Workers order unreadable
+2026-10-30T12:32:01.553Z FAIL SS-42 360x780: h 780: sub-line tap did not open Workers; Workers order unreadable
+2026-10-30T12:32:02.635Z FAIL SS-42 390x844: h 844: sub-line tap did not open Workers; Workers order unreadable
+2026-10-30T12:32:24.599Z FAIL SS-40all 360x640: threw: page.evaluate: TypeError: Cannot read properties of null (reading 'id')
+2026-10-30T12:32:26.116Z FAIL SS-38c 360x739: i 360x739->360x740 open-chip: focus lost (activeElement body, visible false); i 360x739->360x740 open-chip: focus on body, want counterpart pill
+2026-10-30T12:32:26.632Z FAIL SS-38c 360x739: i 360x739->360x740 closed: focus lost (activeElement body, visible false); i 360x739->360x740 closed: focus on body, want counterpart pill
+2026-10-30T12:32:26.834Z FAIL SS-38c 360x740: ii 360x740->360x739 closed: focus lost (activeElement body, visible false)
+2026-10-30T12:32:27.019Z FAIL SS-38c 360x740: ii 360x740->360x739 pill-focus: focus lost (activeElement body, visible false); ii 360x740->360x739 pill-focus: focus on body, want counterpart chip
+2026-10-30T12:32:27.366Z FAIL SS-38c 375x667: iii 375x667->390x844->375x667 open-chip: focus lost (activeElement body, visible false)
+2026-10-30T12:32:27.916Z FAIL SS-38c 375x667: iii 375x667->390x844->375x667 closed: focus lost (activeElement body, visible false)
+2026-10-30T12:32:30.023Z FAIL SS-38c 360x739: iv 360x739->360x740->360x739->360x740->360x739->360x740->360x739->360x740->360x739->360x740->360x739 open-chip: focus lost (activeElement body, visible false)
+2026-10-30T12:32:34.139Z FAIL SS-38c 360x739: iv 360x739->360x740->360x739->360x740->360x739->360x740->360x739->360x740->360x739->360x740->360x739 closed: focus lost (activeElement body, visible false)
+2026-10-30T12:32:35.636Z FAIL SS-42r 360x739: h 740: sub-line tap did not open Workers; Workers order unreadable
+2026-10-30T12:32:36.782Z FAIL SS-42r 360x739: h 740: sub-line tap did not open Workers; Workers order unreadable
+2026-10-30T12:32:43.446Z # positive: 209 pass, 23 fail, 3 unverified, 1 blocked (54 s)
+2026-10-30T12:32:43.822Z PASS  NEG chip740    -> SS-38a: caught: .fslot not rendered at >=740; .hud .fchip rendered at >=740; no CSSOM rule with media (max-height: 739px)
+2026-10-30T12:32:44.207Z PASS  NEG debounce   -> SS-38b: caught: precondition: farm view active, cue none (want shown), mq=true ih=739
+2026-10-30T12:32:45.253Z PASS  NEG bucket     -> SS-38e: caught: viewport_h '<740' != '740-899' at innerHeight 740
+2026-10-30T12:32:45.684Z PASS  NEG geom       -> SS-41: caught: chip 220.4,5–264.4,49 != 216.4,5–260.4,49; elementFromPoint misses settings at corner(s) 0,1,2,3
+2026-10-30T12:32:46.111Z PASS  NEG coinsbtn   -> SS-41: caught: elementFromPoint misses settings at corner(s) 0,1,2,3; coins pill is focusable (display pill, not a tap target) [SS-G38 coins/basket not-focusable is a QA readi
+2026-10-30T12:32:46.438Z PASS  NEG arialabel  -> SS-39a: caught: chip has aria-label "Tired workers" (must be content-based); name raw "Tired workers" != "Tired workers are costing $999.9K per second. Open workers."
+2026-10-30T12:32:47.570Z PASS  NEG cover      -> SS-40a,SS-37: caught: popover 9.2,188.9–253.8,243.1 != 26.1,62–260.4,114; Manage 162,193–247.6,239 != 172.4,66–254.4,110; popover h 54.3 not in 44-52; popover covers golden spot(s) S
+2026-10-30T12:32:48.177Z PASS  NEG shift      -> SS-40a: caught: popover 9.1,60.8–254,115.2 != 26.1,62–260.4,114; Manage 162,65–247.7,111 != 172.4,66–254.4,110; popover h 54.4 not in 44-52; layout shift 10 px on open/close
+2026-10-30T12:32:48.798Z PASS  NEG trap       -> SS-40a: caught: popover 9.2,60.9–253.8,115.1 != 26.1,62–260.4,114; Manage 162,65–247.6,111 != 172.4,66–254.4,110; popover h 54.3 not in 44-52
+2026-10-30T12:32:49.409Z PASS  NEG labelclip  -> LAYOUT: caught: label fpop-t clipped (scrollWidth 121 > clientWidth 40)
+2026-10-30T12:32:51.505Z PASS  NEG swallow    -> SS-40p1: caught: target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); golden egg still present
+2026-10-30T12:32:55.272Z PASS  NEG double     -> SS-40p3: caught: target received 2 click events (want exactly 1: double activation)
+2026-10-30T12:33:07.343Z PASS  NEG timeout    -> SS-40c: caught: idle10s: popover closed (want open, no timeout)
+2026-10-30T12:33:15.811Z PASS  NEG resizeopen -> SS-38c: caught: i 360x739->360x740 open-chip: popover still open after the crossing
+2026-10-30T12:33:15.971Z PASS  NEG rmscale    -> SS-40e: caught: scale animation under reduced motion on popover,popover
+2026-10-30T12:33:16.435Z PASS  NEG tapnav     -> SS-42: caught: h 740: sub-line tap did not open Workers; Workers order unreadable
+2026-10-30T12:33:16.753Z PASS  NEG ratex      -> SS-RATE: caught: #rate "−$999.9K/s" shows the fatigue loss X $999.9K
+2026-10-30T12:33:17.236Z PASS  NEG sub740     -> SS-37: caught: counts 5/5/2 != flag-off 8/7/4; failing spot set S4,S5,S8 != flag-off S4; Broody-eligible 0,11 != flag-off 0,5,8,9,10,11
+2026-10-30T12:33:17.237Z # chromium: SELFTEST FAIL (positive fails 23, negatives missed 0/18) 87 s

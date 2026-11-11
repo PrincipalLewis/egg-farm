@@ -1,0 +1,5 @@
+product/m5-gate-acs.md  sha1 e485f7624b9760a0b8a54b2472dd2b955b20077e  YES
+product/m5.1-breeds-spec.md  sha1 ea922eb8574740f15c1998cf534689d1259c12a7  YES
+product/collection/drift-audit-rc-v5-f20b9183-20261110.md  sha1 e328cef1598c39cb9c62ae5af0c8664e8667a53c  YES
+product/collection/telemetry-spec-errata-v5.md  sha1 5e12a5918a092558a90db8f217a7fdbe2e5f090d  YES
+qa/v5-saves/m5-save-cases-DRAFT.md  sha256 12fe292400eaf18b27d5010c86d7175fdd316a7b879cdcb5d8aa3d9e949f55a5  YES (not edited)

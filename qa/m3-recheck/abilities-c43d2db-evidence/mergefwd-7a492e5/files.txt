@@ -1,0 +1,9 @@
+src/sim/abilities.ts
+src/sim/effects.ts
+src/sim/events.ts
+src/sim/m5-state.ts
+src/sim/payout.ts
+src/sim/timers.ts
+src/sim/workers.ts
+tests/v5-abilities-sim.test.ts
+tests/v5-f1a-fields.test.ts

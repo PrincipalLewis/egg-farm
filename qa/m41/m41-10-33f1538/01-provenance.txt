@@ -1,0 +1,27 @@
+commit 33f153884606b4a72c60a8760463264745d21962
+parents dd223f510e9acabf9b1915b56e39da8b88dcac63
+author Senior Engineer, UI & rc1 Fixes <engineering@egg-farm-studio.local> Mon Oct 19 09:33:57 2026 +0200
+committer Senior Engineer, UI & rc1 Fixes Thu Oct 22 19:22:04 2026 +0200
+
+M4.1 M41-10: build-id release prefix constant (m4.1)
+
+- scripts/build-id.ts BUILD_PREFIX = 'm4.1' is the one release prefix; vite injects it as __BUILD_PREFIX__ and
+  src/build-id.ts derives the fallback id and BUILD_ID_RE from it (no hard-coded m3-rc1-pre left in src/scripts)
+- check-release-build: every embedded id and --build-id must carry BUILD_PREFIX (m3-rc0 tag build stays the one legacy
+  exception); release-scan findBuildIds also recognises dotted release names (m4.1+<hash>)
+- mk24-1-overflow.mjs reads any release prefix
+- tests: telemetry-m3, release-html (+ its fixtures' embedded ids), release-build-id updated to m4.1; new prefix-mismatch cases
+
+(cherry picked from commit 4e1252d6bfe81f94912e899281049bff9ca96f75)
+
+--- branch contains:
+  origin/fix/m41-10-build-id-prefix-v2
+--- ls-remote:
+33f153884606b4a72c60a8760463264745d21962	refs/heads/fix/m41-10-build-id-prefix-v2
+33f153884606b4a72c60a8760463264745d21962	refs/pull/61/head
+--- tree ids (33f1538, 4e1252d):
+f52d84d82bb2b4e05b569a8b277ff53bdccff4c3
+f52d84d82bb2b4e05b569a8b277ff53bdccff4c3
+--- diff 4e1252d 33f1538 (expect empty):
+--- 4e1252d parent:
+4e1252d6bfe81f94912e899281049bff9ca96f75 dd223f510e9acabf9b1915b56e39da8b88dcac63

@@ -1,0 +1,52 @@
+[
+ {
+  "n": "1 h away: offline grant > 0 with welcome-back modal",
+  "pass": false,
+  "i": {
+   "pend": 9903,
+   "modal": false,
+   "cap": 7200,
+   "errs": 0
+  }
+ },
+ {
+  "n": "grant proportional: cap grant / 1 h grant = cap/3600 (±1 egg)",
+  "pass": false,
+  "i": {
+   "h1": 9903,
+   "cap": 19800
+  }
+ },
+ {
+  "n": "48 h away is clamped to the cap",
+  "pass": true,
+  "i": {
+   "d2": 19800,
+   "cap": 19800
+  }
+ },
+ {
+  "n": "clock moved back 1 h (savedAt in the future): no grant, no modal",
+  "pass": true,
+  "i": {
+   "pend": 0,
+   "modal": false,
+   "cap": 7200,
+   "errs": 0
+  }
+ },
+ {
+  "n": "20 s away (< min): no grant",
+  "pass": true,
+  "i": {
+   "pend": 0,
+   "modal": false,
+   "cap": 7200,
+   "errs": 0
+  }
+ },
+ {
+  "n": "no page errors",
+  "pass": true
+ }
+]

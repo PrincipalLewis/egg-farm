@@ -1,0 +1,1702 @@
+{
+ "base": "main OQ-1 bytes (invalid_state)",
+ "note": "IDB \"missing\" = status ok, no main key; \"absent\" = status absent (no_global); \"unavailable\" = status unknown (idb_timeout) with a valid copy present",
+ "cases": [
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_valid-idb-newer",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_valid-bak-newer",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq6.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_valid-tie",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F19-tie-with-BAK-F20-seq4.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_invalid-idb-newer",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_invalid-bak-newer",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq6.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_invalid-tie",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F19-tie-with-BAK-F20-seq4.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_absent-idb-newer",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_absent-bak-newer",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq6.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_valid-v6b_absent-tie",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F19-tie-with-BAK-F20-seq4.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_invalid-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_invalid-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_invalid-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_missing-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_missing-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_missing-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_unavailable-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "idbPutsAfterAutosave": 0
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_unavailable-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "idbPutsAfterAutosave": 0
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_unavailable-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "idbPutsAfterAutosave": 0
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_absent-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_absent-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_valid-idb_absent-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-valid-F20-seq4-older.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "bak",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "valid"
+     ],
+     [
+      "idb",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_valid-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_valid-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_valid-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_invalid-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "v6_backup",
+    "notice": "M2",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "invalid"
+     ],
+     [
+      "v6_backup",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_invalid-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "invalid"
+     ],
+     [
+      "v6_backup",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_invalid-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "invalid"
+     ],
+     [
+      "v6_backup",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_missing-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "v6_backup",
+    "notice": "M2",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_missing-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_missing-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_unavailable-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "deferred",
+    "notice": "M4",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "v6bUnchanged": true,
+    "noSaveWrite": true
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_unavailable-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "deferred",
+    "notice": "M4",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "v6bUnchanged": true,
+    "noSaveWrite": true
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_unavailable-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "deferred",
+    "notice": "M4",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "v6bUnchanged": true,
+    "noSaveWrite": true
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_absent-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "v6_backup",
+    "notice": "M2",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_absent-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_invalid-idb_absent-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.bak": "raw/BAK-invalid-neg1.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "invalid"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 2,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_valid-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_valid-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_valid-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "idb",
+    "notice": "M1",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_invalid-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "v6_backup",
+    "notice": "M2",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "invalid"
+     ],
+     [
+      "v6_backup",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_invalid-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "invalid"
+     ],
+     [
+      "v6_backup",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_invalid-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": "raw/IDB-invalid-truncated.raw"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "invalid"
+     ],
+     [
+      "v6_backup",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 1,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_missing-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "v6_backup",
+    "notice": "M2",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_missing-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_missing-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json"
+   },
+   "idb": {
+    "status": "ok",
+    "main": null
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_unavailable-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "deferred",
+    "notice": "M4",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "v6bUnchanged": true,
+    "noSaveWrite": true
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_unavailable-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "deferred",
+    "notice": "M4",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "v6bUnchanged": true,
+    "noSaveWrite": true
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_unavailable-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json"
+   },
+   "idb": {
+    "status": "unknown",
+    "reason": "idb_timeout",
+    "main": "raw/IDB-valid-F17-seq4-T-10m.json"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "deferred",
+    "notice": "M4",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "unavailable"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer",
+    "v6bUnchanged": true,
+    "noSaveWrite": true
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_absent-v6b_valid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-valid-unmarked-F14-T-1d.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "v6_backup",
+    "notice": "M2",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "valid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_absent-v6b_invalid",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json",
+    "eggfarm.save.v6_backup": "raw/V6B-invalid-raw-abc.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "invalid"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  },
+  {
+   "id": "CSR2-bak_absent-idb_absent-v6b_absent",
+   "ls": {
+    "eggfarm.save": "raw/MAIN-OQ1-abc.json"
+   },
+   "idb": {
+    "status": "absent",
+    "reason": "no_global"
+   },
+   "now": 1792378840000,
+   "expect": {
+    "recovered_from": "none",
+    "notice": "M3",
+    "store": "ls",
+    "reason": "invalid_state",
+    "triedPairs": [
+     [
+      "bak",
+      "absent"
+     ],
+     [
+      "idb",
+      "absent"
+     ],
+     [
+      "v6_backup",
+      "absent"
+     ]
+    ],
+    "corruptLsExact": 1,
+    "idbCorruptExact": 0,
+    "triedOrder": "D-HOP-2026-10-22-03: bak, idb always (fixed order, own result); v6_backup only if tier A has no valid copy; never on defer"
+   }
+  }
+ ]
+}

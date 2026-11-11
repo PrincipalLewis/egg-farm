@@ -1,0 +1,5 @@
+// QA static server for /tmp/qa-p1-30b29d3/dist-qa on 127.0.0.1:<port> (never 4173). usage: node serve.mjs <port>
+import http from 'node:http';import {readFileSync,existsSync,statSync} from 'node:fs';import {join,extname} from 'node:path';
+const D='/tmp/qa-p1-30b29d3/dist-qa',P=+process.argv[2];if(!P||P===4173)throw new Error('port');
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.png':'image/png','.json':'application/json','.woff2':'font/woff2','.webmanifest':'application/manifest+json','.mp3':'audio/mpeg','.ogg':'audio/ogg','.wav':'audio/wav'};
+http.createServer((q,res)=>{let p=decodeURIComponent(q.url.split('?')[0]);if(p.endsWith('/'))p+='index.html';const f=join(D,p);if(!f.startsWith(D)||!existsSync(f)||statSync(f).isDirectory()){res.writeHead(404);return res.end();}res.writeHead(200,{'content-type':MIME[extname(f)]??'application/octet-stream'});res.end(readFileSync(f));}).listen(P,'127.0.0.1',()=>console.log('serving',D,'on',P));

@@ -1,0 +1,213 @@
+== entries-chromium-1280.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=4 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=136px notice={'l': 400, 'r': 880, 't': 606.21875, 'b': 664, 'w': 480, 'h': 57.78125} collect={'l': 160, 'r': 720, 't': 724, 'b': 788, 'w': 560, 'h': 64} goal={'l': 160, 'r': 720, 't': 672, 'b': 716, 'w': 560, 'h': 44} overGoal=False pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8281px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-chromium-360.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 348, 't': 419.328125, 'b': 496, 'w': 336, 'h': 76.671875} collect={'l': 8, 'r': 328, 't': 504, 'b': 568, 'w': 320, 'h': 64} goal={'l': 8, 'r': 328, 't': 456, 'b': 500, 'w': 320, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'none', 'vis': 'hidden'} sEnd={'place': 'band', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8281px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-chromium-375.jsonl done after-fails 1
+  FAIL UX-M3 dynamic @375: Farm scroll=200 refund sets data-place="none" (visibility:hidden)
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 363, 't': 446.328125, 'b': 523, 'w': 351, 'h': 76.671875} collect={'l': 8, 'r': 343, 't': 531, 'b': 595, 'w': 335, 'h': 64} goal={'l': 8, 'r': 343, 't': 483, 'b': 527, 'w': 335, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'band', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8281px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-chromium-390.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 378, 't': 642.21875, 'b': 700, 'w': 366, 'h': 57.78125} collect={'l': 8, 'r': 358, 't': 708, 'b': 772, 'w': 350, 'h': 64} goal={'l': 8, 'r': 358, 't': 660, 'b': 704, 'w': 350, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'band', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8281px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-chromium-430.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=196px notice={'l': 12, 'r': 418, 't': 678.21875, 'b': 736, 'w': 406, 'h': 57.78125} collect={'l': 12, 'r': 394, 't': 792, 'b': 856, 'w': 382, 'h': 64} goal={'l': 12, 'r': 394, 't': 744, 'b': 788, 'w': 382, 'h': 44} overGoal=False pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=above buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8281px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-firefox-1280.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=4 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=136px notice={'l': 400, 'r': 880, 't': 606.2000122070312, 'b': 664.0000152587891, 'w': 480, 'h': 57.80000305175781} collect={'l': 160, 'r': 720, 't': 724, 'b': 788, 'w': 560, 'h': 64} goal={'l': 160, 'r': 720, 't': 672, 'b': 716, 'w': 560, 'h': 44} overGoal=False pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8167px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-firefox-360.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 348, 't': 419.29998779296875, 'b': 495.99998474121094, 'w': 336, 'h': 76.69999694824219} collect={'l': 8, 'r': 328, 't': 504, 'b': 568, 'w': 320, 'h': 64} goal={'l': 8, 'r': 328, 't': 456, 'b': 500, 'w': 320, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'none', 'vis': 'hidden'} sEnd={'place': 'band', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8167px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-firefox-375.jsonl done after-fails 1
+  FAIL UX-M3 dynamic @375: Farm scroll=200 refund sets data-place="none" (visibility:hidden)
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 363, 't': 446.29998779296875, 'b': 522.9999847412109, 'w': 351, 'h': 76.69999694824219} collect={'l': 8, 'r': 343, 't': 531, 'b': 595, 'w': 335, 'h': 64} goal={'l': 8, 'r': 343, 't': 483, 'b': 527, 'w': 335, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'band', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8167px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-firefox-390.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 378, 't': 642.2000122070312, 'b': 700.0000152587891, 'w': 366, 'h': 57.80000305175781} collect={'l': 8, 'r': 358, 't': 708, 'b': 772, 'w': 350, 'h': 64} goal={'l': 8, 'r': 358, 't': 660, 'b': 704, 'w': 350, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'band', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8167px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-firefox-430.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=196px notice={'l': 12, 'r': 418, 't': 678.2000122070312, 'b': 736.0000152587891, 'w': 406, 'h': 57.80000305175781} collect={'l': 12, 'r': 394, 't': 792, 'b': 856, 'w': 382, 'h': 64} goal={'l': 12, 'r': 394, 't': 744, 'b': 788, 'w': 382, 'h': 44} overGoal=False pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=above buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.8167px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-webkit-1280.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=4 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=136px notice={'l': 400, 'r': 880, 't': 606.21875, 'b': 664, 'w': 480, 'h': 57.78125} collect={'l': 160, 'r': 720, 't': 724, 'b': 788, 'w': 560, 'h': 64} goal={'l': 160, 'r': 720, 't': 672, 'b': 716, 'w': 560, 'h': 44} overGoal=False pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.828125px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-webkit-360.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 348, 't': 419.328125, 'b': 496, 'w': 336, 'h': 76.671875} collect={'l': 8, 'r': 328, 't': 504, 'b': 568, 'w': 320, 'h': 64} goal={'l': 8, 'r': 328, 't': 456, 'b': 500, 'w': 320, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'none', 'vis': 'hidden'} sEnd={'place': 'band', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.828125px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-webkit-375.jsonl done after-fails 1
+  FAIL UX-M3 dynamic @375: Farm scroll=200 refund sets data-place="none" (visibility:hidden)
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 363, 't': 446.328125, 'b': 523, 'w': 351, 'h': 76.671875} collect={'l': 8, 'r': 343, 't': 531, 'b': 595, 'w': 335, 'h': 64} goal={'l': 8, 'r': 343, 't': 483, 'b': 527, 'w': 335, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'band', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.828125px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-webkit-390.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=144px notice={'l': 12, 'r': 378, 't': 642.21875, 'b': 700, 'w': 366, 'h': 57.78125} collect={'l': 8, 'r': 358, 't': 708, 'b': 772, 'w': 350, 'h': 64} goal={'l': 8, 'r': 358, 't': 660, 'b': 704, 'w': 350, 'h': 44} overGoal=True pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=inside buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'band', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.828125px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False
+== entries-webkit-430.jsonl done after-fails 0
+  before-defects []
+  after M1 rows=8 collectFallback=BUTTON#collect bodyTapKbd=False
+  after M2 var=196px notice={'l': 12, 'r': 418, 't': 678.21875, 'b': 736, 'w': 406, 'h': 57.78125} collect={'l': 12, 'r': 394, 't': 792, 'b': 856, 'w': 382, 'h': 64} goal={'l': 12, 'r': 394, 't': 744, 'b': 788, 'w': 382, 'h': 44} overGoal=False pts=[1, 1, 1, 1, 1, 1, 1, 1, 1] basket=[0, 5]
+  after M3 refund=0 end=gotit place=above buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=gotit place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3 refund=123450 end=timeout place=default buyCoveredWhileUp=[] gone=True buysAfterOK=True
+  after M3-dynamic s0={'place': 'default', 'vis': 'visible'} s200={'place': 'default', 'vis': 'visible'} sEnd={'place': 'default', 'vis': 'visible'} sBack0={'place': 'default', 'vis': 'visible'}
+  after M5 pop={'text': '+$1.2K', 'font': '26px', 'color': 'rgb(232, 176, 32)', 'dur': 800, 'ariaHidden': 'true', 'left': '79.828125px', 'top': '77px'} pops=1 coins=3 fade={'card': False, 'out': True, 'name': 'expout', 'dur': 150, 'ariaHidden': 'true', 'inert': True, 'ids': 0, 'pe': 'none'} fxPlain=0
+  after M5-rm mode=system fx=[] card=False
+  after M5-rm mode=flag fx=[] card=False
+  after reg main: small=[] clip=[] ovx=False
+  after reg up-farm: small=[] clip=[] ovx=False
+  after reg up-collection: small=[] clip=[] ovx=False

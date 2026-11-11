@@ -1,0 +1,34 @@
+{
+ "farmLevel": 10,
+ "collectionLevel": 9,
+ "hensLevel": 13,
+ "eggValueLevel": 9,
+ "celebratedMilestones": [],
+ "coinsCents": 250000,
+ "basket": 120,
+ "customers": [
+  {
+   "id": 901,
+   "demand": 40,
+   "filled": 0,
+   "waitedS": 1
+  },
+  {
+   "id": 902,
+   "demand": 60,
+   "filled": 10,
+   "waitedS": 2
+  }
+ ],
+ "workers": {
+  "market_hand": {
+   "energy": 45,
+   "cdS": 5
+  },
+  "coop_hand": {
+   "energy": 45,
+   "cdS": 5
+  }
+ },
+ "nextCustomerInS": 600
+}

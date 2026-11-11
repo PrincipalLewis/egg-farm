@@ -1,0 +1,7 @@
+2026-10-17 04:07:26 CEST guard chromium release=0 qa=0 BUILD OK 3930a4c chromium
+2026-10-17 04:08:40 CEST toast chromium exit=1 FAILS 18 pr chromium
+2026-10-17 04:11:10 CEST rc0 chromium exit=0 199/199 passed
+2026-10-17 04:49:39 CEST box reset: worktree recreated, build/build:qa rerun (unit 468+2skip, tsc 0 from 03:4x run kept)
+2026-10-17 04:50:00 CEST NOTE toast v1 18 FAILs were all transient (op 0.3-0.6 animation frames); v2 judges settled frames (op>=0.95) and lists transient overlaps separately
+2026-10-17 06:13:27 CEST toast chromium exit=0 NO FAILS pr chromium
+2026-10-17 06:54:20 CEST SKIPPED: PR #5 retargeted to 37524aa; 3930a4c runs cancelled (chromium guard/rc0 199/199 + toast v1 only)

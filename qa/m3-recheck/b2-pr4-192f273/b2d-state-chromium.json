@@ -1,0 +1,72 @@
+{
+ "seen-after-show+manage-comeback-390x640": {
+  "ok": false,
+  "shownT": true,
+  "u1": {
+   "tiredSeen": true
+  },
+  "manBack": false,
+  "tiredAgain": false,
+  "afterReloadTips": 35,
+  "u3": {
+   "tiredSeen": true,
+   "skips": 0,
+   "manageSeen": true
+  },
+  "errs": []
+ },
+ "seen-after-3-skips-1024x474": {
+  "ok": true,
+  "skips": [
+   1,
+   2,
+   3
+  ],
+  "tiredShownSamples": 0,
+  "before": {
+   "tiredSeen": true,
+   "skips": 3
+  },
+  "afterReload": {
+   "tiredSeen": true,
+   "skips": 3
+  },
+  "errs": []
+ },
+ "guard-user-scroll-1280x720": {
+  "ok": true,
+  "deltas": [
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10
+  ],
+  "fight": 0,
+  "tipsAfter": [
+   "Workers get ti"
+  ],
+  "errs": []
+ },
+ "guard-user-scroll-390x640": {
+  "ok": true,
+  "deltas": [
+   10,
+   10,
+   10,
+   10,
+   10,
+   0,
+   0,
+   0
+  ],
+  "fight": 0,
+  "tipsAfter": [
+   "Workers get ti"
+  ],
+  "errs": []
+ }
+}

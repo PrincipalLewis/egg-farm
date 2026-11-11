@@ -1,0 +1,30 @@
+[gamer] call 1/10 (pass) model=sonnet effort=medium timeout=600s perms=on
+**REAL BUGS**
+
+1. **Upgrade price hidden by an icon (m390-13, m390-24).** The green ↑ badge sits on top of the cost text, so the button reads "▢.00" or "▢1.00". I can't see what an upgrade costs until I read the "Need $X more" line below it. Disabled and enabled states may both do this.
+2. **"No eggs to sell" shown while I hold eggs (m390-11, -12, -15, -19).** The header says 8, 6 or 14 eggs, but the big bottom button says "No eggs to sell". That contradicts itself. It is probably "no open orders", but the label doesn't say so.
+3. **The sold card keeps its old look (m390-11, -15, -19).** It reads "0/8 eggs · $8.00" with a faded "Sell 8 +$8.00" button, so it looks like an unsold order I can't afford. After the sale it should say "Sold ✓" or disappear. The "Thanks! +$8.00" chip in the top slot says the sale happened, which makes the leftover card more confusing. In m390-19 a partial card ("9/11 · Sell 2") is also greyed out beside the "No eggs" button, so I can't tell whether it is waiting or done.
+3b. The events log shows "0/8" after the sale but "9/11" after a partial one. The count means "remaining to give" in one case and "given" in the other.
+4. **Tutorial toast covers UI (m390-14).** The "Your next goal is always shown here" toast sits right on top of the goal bar it describes and hides the XP bar. Also, in m390-13 the Upgrades panel's "Workers" tab already has coins on it.
+
+**FEEL FEEDBACK**
+
+- **Tutorial step 1 doesn't tell me to tap Collect (m390-02).** "Your hens are laying eggs…" has no pointer or instruction.
+- **Step 2 is a dead 8-second wait (m390-03 to -08).** "A customer is on the way… 8 s" gives me nothing to do.
+- **The Sell step then works well (m390-10).** The pointing hand, the glowing customer slot and the "Tap them to sell eggs" text are clear, and it advanced right away. The market-tab red dot in m390-10 is a good cue.
+- **Step 3 sent me to the wrong place.** "Sell a few more eggs to afford it · $2 to go" has no arrow to Upgrades. The cost is $10, and I only found that by opening the Upgrades panel.
+- **Reward feedback is good.** The floating "+$8.00" and coin pile feel nice. The market panel's idle space is large and empty, with a stray "+2" in the middle of it.
+- **After the tutorial the loop gets grindy (events log).** It is endless 2-3-egg partial sells at ~1.5 s each. Orders fill in chunks, so I never get one satisfying big sale.
+- **The Farm cap stalls me (m390-24).** "Limited by coop · Upgrade Farm →" appears around 1:23. I stay stuck at "Farm L1 ~42 s" until about 2:48, with $137 unspent at the end (m390-50).
+
+**TOP 3 LIKES**
+1. The Sell step is clear, with a highlighted customer and a pointing hand.
+2. The "+$ / coins" burst and "Thanks!" chip feel rewarding.
+3. The order cards (m390-50) show the egg count, are colour-coded, and are cute.
+
+**TOP 3 FRUSTRATIONS**
+1. Upgrade prices are obscured by the icon.
+2. A sold card and "No eggs to sell" are shown next to eggs I still have.
+3. Dead 8-second wait in the tutorial, then a long Farm-cap stall.
+
+**Verdict:** The tutorial Sell step works and the early money loop is charming. It needs the price-label overlap and the post-sale card state fixed, plus a less passive first minute, before RC.
