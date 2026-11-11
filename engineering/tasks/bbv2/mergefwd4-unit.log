@@ -1,0 +1,52 @@
+TSC_OK
+
+ RUN  v2.1.9 /workspace/wt-gen-bbv2-m12
+
+ ✓ tests/v5-abilities-sim.test.ts (29 tests) 28ms
+ ✓ tests/v5-pause-sim.test.ts (21 tests) 18ms
+ ✓ tests/v5-breeds-hatch.test.ts (37 tests) 161ms
+ ✓ tests/v5-tap-coins.test.ts (22 tests) 40ms
+ ✓ tests/v5-income-ref.test.ts (27 tests) 115ms
+ ✓ tests/bbv2-telemetry.test.ts (22 tests) 32ms
+ ✓ tests/v5-golden-rewards.test.ts (21 tests) 23ms
+ ✓ tests/v5-f3-config.test.ts (28 tests) 41ms
+ ✓ tests/telemetry-m3.test.ts (10 tests) 86ms
+ ✓ tests/next-goal.test.ts (12 tests) 5ms
+ ✓ tests/telemetry-ring-export.test.ts (6 tests) 5ms
+ ✓ tests/bbv2-m2-ship-nopick.test.ts (4 tests) 9ms
+stderr | tests/telemetry.test.ts > telemetry > events carry ts + sessionMs
+[telemetry] unknown event type: x
+
+stderr | tests/telemetry.test.ts > telemetry > ring buffer capped at ring_size
+[telemetry] unknown event type: e
+
+stderr | tests/telemetry.test.ts > telemetry > flush writes only when dirty; persisted buffer reloads
+[telemetry] unknown event type: a
+
+ ✓ tests/telemetry.test.ts (6 tests) 114ms
+ ✓ tests/bbv2-m1-hatch-qe2.test.ts (2 tests) 5ms
+ ✓ tests/bbv2-qe2.test.ts (9 tests) 23ms
+ ✓ tests/export-global.test.ts (1 test) 6ms
+stderr | tests/zg-telemetry-annotate.test.ts > Minor 1: Telemetry.annotateLast tags the newest matching event only > two upgrade events: only the second is annotated, and the buffer is marked dirty (flushed)
+[telemetry] unknown event type: tap_other
+
+ ✓ tests/zg-telemetry-annotate.test.ts (2 tests) 3ms
+stderr | tests/zg-telemetry-annotate.test.ts > Minor 1: Telemetry.annotateLast tags the newest matching event only > no match: nothing changes and nothing is written
+[telemetry] unknown event type: tap_other
+
+ ✓ tests/bbv2-parta.test.ts (15 tests) 8179ms
+   ✓ BBV2-AC1 [B] zero-gain never ranked while a meaningful row is offered (all §1 paths + ★) > generated grid: hint, highlight, next-goal, tracks highlight, bestPaybackAmong, bot pick and ★ are meaningful (0 violations) 3534ms
+   ✓ BBV2-AC2 (c) / BBV2-AC3 [B] hysteresis never protects a zero-gain pick > generated: every state where the flag-off picker shows a zero-gain pick and a meaningful row is offered drops it on the next evaluate (100%) 403ms
+   ✓ BBV2-AC11 [B] flag 0 = pre-BBv2 behaviour > rankable is the identity and bestPaybackAmong / DualPicker / selectGoal / highlightPick equal m4.flags.bestBuyV2 absent 4150ms
+ ✓ tests/bbv2-qapicker.test.ts (14 tests) 11575ms
+   ✓ BBV2-AC15 [B] qaPicker v1 fields unchanged with the flag on; read-only > bestBuyV2 0: exactly the SG-12 field names and types (pick = key/affordable/costCents/payback) 460ms
+   ✓ PMFU BB12: mark is the exact ★ the chip and the strip render; suppressed = hint !== null && mark === null > ship config (bestBuyV2 1 + zeroGainUi 1): never an affordable hint with a null ★ at any Farm (D-HOP-14; post-L30 empty BBv2 → no-pick) 5124ms
+   ✓ BBV2-AC2 (a)/(b) jsdom analog on FX-L17 (DOM/page.clock checks on the RC dist and build:qa are QA browser runs) > (b) $3,000 + 240 s sim, no buy input: no history entry with key or mark COLL; every non-null mark meaningful; hint starts FARM unaffordable/null; at >= $37,300 hint = mark = FARM 4965ms
+
+ Test Files  19 passed (19)
+      Tests  288 passed (288)
+   Start at  03:41:17
+   Duration  22.18s (transform 1.11s, setup 0ms, collect 1.78s, tests 20.47s, environment 398ms, prepare 729ms)
+
+VITEST_EXIT=0
+DONE

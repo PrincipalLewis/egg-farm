@@ -1,0 +1,19 @@
+WAIT_LOCK 2026-11-10T00:34:54+01:00
+LOCK_ACQUIRED 2026-11-10T00:38:44+01:00 node=v20.19.2 head=23317e7ab0eb8f6b08078398ec39d2638a583c24 tree=82d467e8f12eb26c710a4d36b19953099f456b21
+== tsc exit=0 2026-11-10T00:38:49+01:00
+== focused exit=0 2026-11-10T00:39:39+01:00
+== npm-test exit=0 2026-11-10T00:43:07+01:00
+== slow-bot-m5-trace exit=0 2026-11-10T00:43:24+01:00
+== build exit=0 2026-11-10T00:43:30+01:00
+== check-globals exit=0 2026-11-10T00:43:38+01:00
+== reasons exit=0 2026-11-10T00:43:38+01:00
+== base-existing exit=0 2026-11-10T00:44:45+01:00
+== base-slow-bot-m5-trace exit=0 2026-11-10T00:45:05+01:00
+MUT clone-step exit=1 (nonzero = test went red)
+MUT clone-end exit=1 (nonzero = test went red)
+MUT r0-twice exit=1 (nonzero = test went red)
+MUT variance-late exit=1 (nonzero = test went red)
+MUT pyrandom-rename exit=1 (nonzero = test went red)
+MUT footer-count exit=1 (nonzero = test went red)
+MUT tie-order exit=0 (nonzero = test went red)
+DONE 2026-11-10T00:45:20+01:00

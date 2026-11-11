@@ -1,0 +1,13 @@
+pause.ts same=YES
+tick.ts same=YES
+workers.ts same=YES
+income.ts same=YES
+fixture same=YES
+commit
+offline_vs_409=882
+409fa6af032b offlineAccrualFrozen=0
+8e7532e41aa3 offlineAccrualFrozen=0
+2465b366ae5a offlineAccrualFrozen=0
+ src/sim/offline.ts | 2 ++
+ 1 file changed, 2 insertions(+)
+contains_409=YES

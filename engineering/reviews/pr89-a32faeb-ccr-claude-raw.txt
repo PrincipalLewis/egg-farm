@@ -1,0 +1,146 @@
+VERDICT: FAIL
+
+COUNTS: blocking/major/minor/nit = 0/1/4/4
+
+I reviewed `git diff 2fa7318 HEAD -- scripts tests` at a32faeb34585db0d62c0c559e09e112b1a301e7d. That diff has no `src/`, `package.json`, `package-lock.json` or `.github` changes. Saves, sim, RNG streams, money math and the goldens are therefore not touched by this PR. I re-ran `npx vitest run tests/rule21-source.test.ts` (55/55 pass) and `npm run check-economy-copy` (opt-in, skipped). I did not run `check-globals` (it launches vite and a browser), `npm test`, or any test that spawns processes. I could not execute `node`, so the Node `process.exit` semantics in m1 rest on the documented behaviour and a code trace.
+
+## Findings
+
+**M1 — major — `scripts/d2-guard.mjs:58-64`, `scripts/d2-kill-browser.mjs:57,63`: Playwright's own force-kill during `ctx.close()` is NOT detected, so F5(b) does not hold as claimed.**
+- **Trace:** a persistent context's `doClose` returns "close-browser" (`node_modules/playwright-core/lib/coreBundle.js:40165-40168`). That calls `browserProcess.close`, which is `closeOrKill(DEFAULT_PLAYWRIGHT_TIMEOUT)` (`coreBundle.js:41264`). The timeout is 3e4 ms (`coreBundle.js:4733`).
+- **What Playwright does:** if graceful close takes longer than 30 s, `closeOrKill` calls `kill()` (`coreBundle.js:41255`). That reaches `process.kill(-spawnedProcess.pid,'SIGKILL')` at `coreBundle.js:10115`. `ctx.close()` then resolves normally.
+- **Why d2 misses it:** `closeCtx` (`d2-guard.mjs:58-64`) uses a 90 s watchdog, which is longer than 30 s. `close()` resolves as `'closed'`, so there is no timeout halt. `expectExit(launch)` (`d2-guard.mjs:59`) already announced the exit, so the unannounced-`close` watcher (`d2-guard.mjs:52`) stays silent. Result: no halt, no stop list, `playwrightKillPossible` stays unset, and the row can print PASS.
+- **Test gap:** `tests/d2-guard.test.ts:80-87` uses `fakeCtx(() => new Promise(() => {}))`, a close that never resolves. Real Playwright resolves after its force-kill. The "close() never finishes → HALT" test therefore gives false assurance.
+- **Scope:** the group signalled is `-spawnedProcess.pid`, which is d2's own unexited child, so nothing foreign is hit. The defect is that HoO's "detected-and-halted" condition is not met.
+- **Repro:** run d2 with a browser whose graceful close stalls (for example, SIGSTOP its group from outside) for more than 30 s, on the normal end-of-rep `closeCtx` (`d2-kill-browser.mjs:63`).
+- **Fix:** make the watchdog shorter than 30 s, or treat `close()` taking 30 s or more as "force-kill may have fired" and halt.
+- **Add a test:** a fake whose `close()` resolves after the threshold.
+
+**m1 — minor — `scripts/serve-own.mjs:25` and 9 callers: the survivors exit code 3 is lost wherever the caller ends with `process.exit(n)`.**
+- **Claim:** `serve-own.mjs:25` says "never exit 0". Commit 568784e says "non-zero exit".
+- **Mechanism:** Node's `process.exit(code)` with an explicit argument overwrites `process.exitCode`. `stopOne` and `stopOrReport` set `exitCode = 3` earlier.
+- **Moved scripts affected:** `scripts/mk24-1-overflow.mjs:152-154` (`stopSrv(); … process.exit(ok ? 0 : 1)`) and `scripts/queue-qa.mjs:91-92` (`finally { stopOrReport }` then `process.exit(all pass ? 0 : 1)`).
+- **serveOwn callers affected:**
+  - `scripts/release-globals-browser.mjs:30` (`npm run check-globals`)
+  - `scripts/tab-guard-browser.mjs:97`
+  - `scripts/m41-8-shots.mjs:111`
+  - `scripts/m41-8-f4-14a.mjs:93`
+  - `scripts/m41-9-scroll-sweep.mjs:121`
+  - `scripts/m41-9-uxm-shots.mjs:164`
+- **Not affected:** `artux-shots`, `m41-9-bignum-shots` and `pt1-13-webkit` use `stopped ? 0 : 3`. `d2-kill-browser.mjs:82` uses `process.exitCode || 0`.
+- **Impact:** the loud stderr SURVIVORS line is still printed, so this is not silent. Exit-code gating (CI, `check-globals`) will not see it.
+- **Repro:** make a stop non-clean (a TERM-ignoring vite grandchild), then run any listed script. It exits 0 or 1, never 3.
+- **Fix:** `process.exit(code || process.exitCode)`, or the `stopped ? … : 3` pattern.
+
+**m2 — minor — `tests/rule21-rules.ts:14-19`, `tests/rule21-source.test.ts:14`: the source check is a regression guard, not a control.**
+See Q4 below for the bypasses and scope gaps.
+
+**m3 — minor — `scripts/d2-kill-browser.mjs:76-82`: the Playwright exit-time group SIGKILL still fires after a Halt, so "halt never signals" is false.**
+- **Trace:** a Halt (refusal, leftovers or `pwHalt`) throws before `closeCtx`, leaving the context open. The `finally` block runs, then `process.exit(3)`.
+- **Playwright's exit hook:** the `exit` handler (`coreBundle.js:10081`) runs `exitHandler` (`:9982-9985`). That calls `killProcessAndCleanup` and then `process.kill(-pid,'SIGKILL')` at `:10115`. The only guard is `!processClosed`.
+- **Consequences:**
+  - The group d2 just refused to signal is SIGKILLed at exit, unlogged.
+  - The stop list written by `halt` can list members as ALIVE that die moments later.
+  - Playwright's default `handleSIGINT/TERM/HUP` handlers (`:41210-41212`) stay active, and `PW_FORCE` (`d2-guard.test.ts:60`) forbids turning them off. A second SIGTERM/SIGINT reaches `killProcess` (`:10092-10094`, `:9994-9998`).
+- **Scope:** all of these target d2's own unexited child, so nothing foreign.
+- **Fix:** document it in the HoO ruling, or write the "Playwright exit hook may SIGKILL" caveat into the stop list. Better: close or detect before exit.
+
+**m4 — minor — d2 and the moved scripts have no SIGINT/SIGTERM path to `stop()`.**
+- **d2:** F7 is only fixed for thrown errors (`d2-kill-browser.mjs:22,79-81`). Playwright's SIGINT handler ends in `process.exit(130)` (`coreBundle.js:9986-10003`) without running d2's `finally`, so s1 and s2 are left running with no report.
+- **Moved scripts:** none installs signal handlers.
+  - `perf-sm9`, `screenshot` and `smoke` previously did not spawn detached (`srv.kill()`). They now do, so a terminal Ctrl-C no longer reaches vite.
+  - The other six were already detached, so no change there.
+- **Repro:** run `node scripts/smoke.mjs` and press Ctrl-C. A vite preview group survives.
+- **Not in scope of the F-list.**
+
+Nits:
+- **n1:** `scripts/d2-kill-browser.mjs:52` appends `groupMembers` to `L.members` without dedupe. `survivors` (`recorded-pid.mjs:103`) then yields duplicate PIDs, so `d2-guard.mjs:30-33` writes duplicate stop-list lines. `stopGroup` does dedupe (`recorded-pid.mjs:114`).
+- **n2:** `scripts/d2-guard.mjs:29` lists an unrecorded `launch.pid` from the pid file as ALIVE with no start time. It is labelled "identity NOT verified", but a forged pid file can put any same-user PID on a list HoO may act on. Prefer omitting it or marking it "do not signal".
+- **n3:** `scripts/recorded-pid.mjs:106,119` — `stopGroup` is synchronous, so Node cannot reap the leader and the probe is 'leader-unreaped'. `clean` is then true without a group probe. Members outside the snapshot (double-forked or reparented, not reachable via `children`) ignore TERM silently. Narrow, and the code comment documents it.
+- **n4:** `tests/rule21-source.test.ts:43` is titled "only it would need" but only asserts that some fixture matches each rule. The allowlist is also line-level: a guarded line's content can change as long as the count (6) and the marker stay.
+
+## Answers
+
+### 1. Can anything signal a process the run didn't start?
+
+For the moved kills, `recorded-pid.mjs`, `serve-own.mjs`, `d2-kill-browser.mjs` and `d2-guard.mjs`, I found no path to a foreign process.
+- **Single signalling site:** `process.kill` at `recorded-pid.mjs:53`. It is reached only via `recordProblem` (`:35-47`), which enforces all of these:
+  - the record is well-formed (`malformed`, `:28-33`);
+  - `rec.parent === process.pid` (`:38`);
+  - the boot id matches (`:39`);
+  - the process exists and is not a zombie (`:41-42`);
+  - the start time matches (`:43`);
+  - the live `ppid === process.pid` (`:44`);
+  - for a group signal, `pgrp === pid` (`:45`).
+- **Forged records:** a forged record can at worst name another live child of the same node process. That includes a pid-file forgery (`d2-kill-browser.mjs:35` → `recordPid`, which requires a live non-zombie child). The worst case is d2's own vite leader.
+- **TOCTOU:** the check and the kill run in one synchronous turn. An unreaped child holds its PID, because libuv reaps on the event loop. A group's PGID cannot be reused while any member, including a zombie leader, exists. So the window is bounded to our own group.
+- **Group kills:** `detached` makes Node call `setsid`, so the browser or vite group is its own session. Foreign processes cannot join that group. Descendants that `setsid` away are not hit. They are reported only if they were in the snapshot.
+- **`stopChild` and `stopGroup`:** `stopChild` refuses once Node has seen the exit. `stopGroup` does the same and signals nothing when the leader exited first; it reports only.
+- **Leader reaped and PID reused:**
+  - `survivors` (`recorded-pid.mjs:102-106`) never probes `-pid` when the PID shows a different start time. The kernel allows that only when no group with that id exists.
+  - When the PID is absent, `groupProbe` sends signal 0 to `-pid` (`:93`). That delivers nothing. The worst case is a false 'members' report if the PID were reused as a group leader.
+- **/proc reads:** they are `/proc/<one recorded pid>/stat` and `/proc/<pid>/task/*/children`. `groupMembers` (`:80-88`) is a bounded (512) BFS over the descendants of our own recorded leader. It is not a /proc enumeration and not name matching, and it never signals. In effect it is a descendant-tree walk, which HoO may want to rule on explicitly. A PID reused between `readStat(k)` and `childrenOf(k)` could in theory list a foreign process as a "member" in a report. It would never be signalled.
+- **Pattern kills:** none.
+- **Claude and other agents:** a process is reachable only if it is a live child of the node process that spawned it. Claude and other agents' processes are not, so they cannot be hit by these paths.
+- **Outside the guarded API:** the only signals not routed through `killRecorded` are Playwright's own (m3, M1).
+
+### 2. Status of the 58ad41b findings
+
+| ID | Status | Evidence |
+|---|---|---|
+| F1 | Fixed | No parent option (`recorded-pid.mjs:21`). Checks at `:24`, `:38`, `:44`. Test `recorded-pid.test.ts:49-67` forges a foreign process's real PPID, and `parent: process.pid`, for both `group` modes. |
+| F2 | Fixed, with caveats | `stopGroup` (`recorded-pid.mjs:112`) reports survivors by PID with start time and returns `ok:false`, never dropped. `serve-own.mjs:18-28,43` prints the SURVIVORS line. Tests `recorded-pid.test.ts:126-172`. Caveats: m1 (exit code), n3. |
+| F3 | Mostly fixed | 14 rules and 49 fixtures. Scope is now all of `scripts/` plus `tests/*.ts` helpers. Residual bypasses and scope gaps (m2, Q4). |
+| F4 | Fixed (except as in m3) | `d2-guard.mjs:10-14` (`leftovers`), `:39-44` (`afterKill`), `:23-37` (stop list), `d2-kill-browser.mjs:56,82`. A refusal halts and exits 3. Tests `d2-guard.test.ts:24-53`. |
+| F5(a) | Satisfied for d2's own calls | d2 uses no forced-kill API, `close()` options or timeout patches. The source check (`d2-guard.test.ts:58-77`) is regex-based over d2's two files. Playwright's defaults still force-kill at 30 s (M1). |
+| F5(b) | Not met | M1 and m3. |
+| F5(c) | Fixed | `playwrightPinProblem` (`d2-guard.mjs:74-88`), called at `d2-kill-browser.mjs:16`. Installed, lockfile and package.json versions must agree. Tests `d2-guard.test.ts:109-126`. |
+| F6 | Fixed | `recorded-pid.test.ts:88-103` covers invalid, own and malformed records, at `killRecorded` and `stopChild` level, with a zero-signal spy. |
+| F7 | Partly | Fixed for thrown errors (`d2-kill-browser.mjs:22,79-81`). Signal paths are not covered (m4). |
+| F8 | Unchanged, as expected | `tests/serve-own.test.ts:101-109` is untouched. The harness exclusion remains the control. |
+| N1 | Fixed | The `spawn` import is gone (`d2-kill-browser.mjs:12`). |
+| N2 | Fixed | `recorded-pid.test.ts:13,18` and `d2-guard.test.ts:14` use `spawnRecorded` and `killRecorded`. |
+| N3 | Mitigated | `recordPid` requires `ppid === process.pid`. See n2 for the stop-list side. |
+| N4 | Unchanged | The reason is renamed `signal failed`. The `catch` still swallows a throw from a spy, which is why the zero-call assertions matter. |
+
+### 3. The 9 moved scripts
+
+- **Routing:** every normal-end and `die()` path goes through `stopOrReport`. This includes `queue-qa`'s `finally` and `mk24-1-overflow`'s 180 s timer. No raw `process.kill` or `srv.kill()` remains in them. The source check passes.
+- **Behaviour changes:**
+  - `perf-sm9`, `screenshot` and `smoke` now spawn detached and kill the group. They previously killed only npx and orphaned vite, so this is an improvement, apart from m4.
+  - `stopOrReport` blocks for up to about 3 s per call.
+  - A non-clean stop prints SURVIVORS to stderr.
+  - The exit-code part is overridden in `mk24-1-overflow` and `queue-qa` (m1).
+  - An uncaught throw still orphans the server, as before. Only `queue-qa` has a `try/finally`.
+
+### 4. Rating of `tests/rule21-source.test.ts`
+
+I rate it as a decent regression guard for the exact historical forms, and not a rule-21 control. Minor (m2).
+- **Strengths:**
+  - It scans `scripts/**` recursively plus `tests/*.ts` helpers.
+  - Exactly 6 marked guarded sites in `recorded-pid.mjs` are allowed.
+  - 49 fixtures are each caught.
+  - There are look-alike negative controls.
+- **Bypasses (by regex trace; I could not run node):**
+  - `const k='ki'+'ll'; process[k](…)` is not caught. The `''` normalisation only removes empty strings.
+  - A template-built `execSync(\`${'k'}ill …\`)` is not caught, because no rule sees a literal `kill`.
+  - `process.kill?.(…)`, `process.kill.call(…)`, `const k = process.kill`, `Reflect.apply(process.kill, …)` and `import { kill } from 'node:process'` are not caught. `js-kill-call` needs `.kill(`.
+  - A `process.kill` / `(pid)` split across two lines, or `process.` / `kill(pid)`, is not caught. A split with `.kill(` at the start of the next line is caught.
+- **Scope gaps:**
+  - `*.test.ts` files (for example `tests/serve-own.test.ts:106` and `tests/verify.test.ts:426`, both `ChildProcess.kill` on their own children) and anything under `tests/` subdirectories.
+  - Extensions outside `.mjs|.cjs|.js|.ts|.sh|.bash|.py` (`.mts`, `.tsx`, `.yml`, `package.json` scripts).
+  - Option-driven kills such as `spawnSync(..., { timeout })` (`scripts/verify.ts:128`), which kills its own child.
+  - Anything outside `scripts/` and `tests/`.
+- **Mitigation:** the real control is the single guarded site plus the runtime `process.kill` spy, not the regexes.
+
+## CHECKED, NO ISSUE
+- Single signal site and its refusal ordering (`recorded-pid.mjs:35-56`).
+- PID reuse, with start time, boot id and live `ppid === process.pid`.
+- Zombie leader handling, group-leader requirement, and the signal-0 probe being harmless.
+- `-pid` kills confined to a `setsid` session.
+- The d2 launch wrapper and pid-file race: the worst case is another child of d2.
+- `readStat` field parsing (last `)`, `starttime` at index 19).
+- The `pidProblem` precedence and the 4194304 PID ceiling.
+- The 6 guarded sites match the 6 markers (lines 14, 53, 68, 73, 75, 93).
+- The rule21 suite passes 55/55.
+- No source changes vs the merge-base, so schemaVersion 4, offline earnings, sim, RNG isolation, money math and the goldens (f90d1678, a54c9cf9, 2c0d3ec3) are untouched by this PR.

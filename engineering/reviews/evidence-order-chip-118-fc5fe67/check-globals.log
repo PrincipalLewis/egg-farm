@@ -1,0 +1,6 @@
+=== check-globals chromium 2026-11-10T00:12:42+01:00 ===
+serveOwn: dist on port 37863 (free port; set PORT to pin)
+check-globals: dist m4.1+fc5fe67 on port 37863
+PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+PASS [chromium] refused newer-save boot window globals vs blank page: []
+PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]

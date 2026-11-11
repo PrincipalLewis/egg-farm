@@ -1,0 +1,49 @@
+HEAD=dc3c60f390fd2da4cebf0cc9075df9a59d17dbc0
+P1=bf1e554f9d3e6a99aac919d2133648bbc223477c
+P2=19121b75b44199beebf44fdb34a69b1120035cb0
+tree=5e56ccd56406157be8ea74fe37d6b898ef66bb51
+origin=dc3c60f390fd2da4cebf0cc9075df9a59d17dbc0
+contains_rc=YES
+A	public/assets/ico_ability_inspect.svg
+A	public/assets/ico_ability_rush.svg
+A	public/assets/ico_ability_shout.svg
+A	public/assets/ico_ability_sweep.svg
+A	public/assets/ico_boost_combo.svg
+A	public/assets/icon-bolt.svg
+M	src/main.ts
+M	src/sim/actions.ts
+A	src/ui/abilities-ui.ts
+M	src/ui/app.ts
+M	src/ui/styles.css
+M	src/ui/workers-ui.ts
+A	tests/v5-abilities-ui.test.ts
+ public/assets/ico_ability_inspect.svg |   1 +
+ public/assets/ico_ability_rush.svg    |   1 +
+ public/assets/ico_ability_shout.svg   |   1 +
+ public/assets/ico_ability_sweep.svg   |   1 +
+ public/assets/ico_boost_combo.svg     |   1 +
+ public/assets/icon-bolt.svg           |   1 +
+ src/main.ts                           |   2 +-
+ src/sim/actions.ts                    |  15 ++-
+ src/ui/abilities-ui.ts                | 224 ++++++++++++++++++++++++++++++++++
+ src/ui/app.ts                         |  65 +++++++++-
+ src/ui/styles.css                     |  22 ++++
+ src/ui/workers-ui.ts                  |  28 ++++-
+ tests/v5-abilities-ui.test.ts         | 152 +++++++++++++++++++++++
+ 13 files changed, 506 insertions(+), 8 deletions(-)
+=== blobs vs bf1e554 ===
+public/assets/ico_ability_inspect.svg same=YES
+public/assets/ico_ability_rush.svg same=YES
+public/assets/ico_ability_shout.svg same=YES
+public/assets/ico_ability_sweep.svg same=YES
+public/assets/ico_boost_combo.svg same=YES
+public/assets/icon-bolt.svg same=YES
+src/main.ts same=YES
+src/sim/actions.ts same=NO
+src/ui/abilities-ui.ts same=YES
+src/ui/app.ts same=YES
+src/ui/styles.css same=YES
+src/ui/workers-ui.ts same=YES
+tests/v5-abilities-ui.test.ts same=YES
+flags:
+{"golden":0,"streak":0,"tapCoins":0,"abilities":0,"broody":0,"salesStopped":0,"fatigueCue":0,"pause":0,"rc2Refill":0,"autoRefill":0,"clockWage":0,"breeds":0,"zeroGainUi":0,"bestBuyV2":0}

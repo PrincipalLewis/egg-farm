@@ -1,0 +1,13 @@
+tree=36a14831871dfd240661c08152056dbd54e60fac node=v20.19.2
+
+ RUN  v2.1.9 /workspace/wt-arch-review108-mfwd
+
+ ✓ tests/zz-arch-probe-108.test.ts (2 tests) 1228ms
+   ✓ timer order: state + event multiset invariant across orders 1226ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  02:01:58
+   Duration  1.57s (transform 154ms, setup 0ms, collect 193ms, tests 1.23s, environment 0ms, prepare 41ms)
+
+EXIT:0

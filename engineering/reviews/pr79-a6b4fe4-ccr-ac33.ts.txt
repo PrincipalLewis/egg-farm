@@ -1,0 +1,9 @@
+import { balance } from '../review-pr79-a6b4fe4/src/config/balance';
+import { initialState, mixSeed } from '../review-pr79-a6b4fe4/src/sim/state';
+import { step } from '../review-pr79-a6b4fe4/src/sim/tick';
+const b = { ...balance, m4: { ...balance.m4!, enabled: 1, flags: { golden: 1 } } } as any;
+const s0 = initialState(b, 7), s1 = step(s0, 0.1, b);
+console.log(JSON.stringify({ rngMovedAtTick0: s1.rng !== s0.rng, ac33: s1.evRngState === mixSeed((mixSeed(7) ^ 0x6576526e) >>> 0) }));
+// hostile: first_customer_s = 0 (a valid CSV value?) -> tick 0 draws
+const b0 = { ...b, customers: { ...b.customers, first_customer_s: 0 } }; const t0 = initialState(b0, 7), t1 = step(t0, 0.1, b0);
+console.log(JSON.stringify({ firstCustomer0_rngMoved: t1.rng !== t0.rng, ac33_holds: t1.evRngState === mixSeed((mixSeed(7) ^ 0x6576526e) >>> 0) }));

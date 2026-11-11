@@ -1,0 +1,42 @@
+# CCR pr78 CLI cases. PR worktree runs cases.sh, base 22eac98 runs cases-base.sh
+#!/bin/bash
+# CCR pr78 CLI cases: run in a worktree ($1), out dirs under $2
+W=$1; O=$2; cd $W
+c() { local name=$1; shift; TMPDIR=/workspace/.pr78-ev/tmp timeout 600 node node_modules/vite-node/vite-node.mjs scripts/verify.ts -- "$@" --out $O/$name > $O/$name.log 2>&1; local e=$?
+  local st=$(node -e 'try{const j=require(process.argv[1]);console.log(j.verdict??"-",j.complete,j.profile,j.stage??"",(j.reason??"").slice(0,90))}catch(e){console.log("no-json")}' $O/$name/verify.json)
+  printf '%-28s exit=%s  %s | %s\n' "$name" "$e" "$st" "$(grep -m1 -E 'verify: ' $O/$name.log | cut -c1-120)"; }
+c prof-nope --hours 1 --profile nope --skip-build
+c prof-empty --hours 1 --profile '' --skip-build
+c prof-novalue --hours 1 --skip-build --profile
+c prof-upper --hours 1 --profile M5X-CASUAL --skip-build
+c prof-eq --hours 1 --profile=m5x-casual --skip-build
+c prof-proto --hours 1 --profile __proto__ --skip-build
+c prof-tostring --hours 1 --profile toString --skip-build
+c prof-repeat-m5-idle --hours 0.25 --profile m5x-casual --profile idle --skip-build
+c m5-hours0 --hours 0 --profile m5x-casual --skip-build
+c m5-flags-m4off --hours 0.25 --profile m5x-casual --flags m4.enabled=0 --skip-build
+c m5-flags-m4on --hours 0.25 --profile m5x-casual --flags m4.enabled=1 --skip-build
+c m5-flags-unknown --hours 0.25 --profile m5x-casual --flags nope=1 --skip-build
+c m5-flags-twice --hours 0.25 --profile m5x-casual --flags m4.enabled=1 --flags m4.enabled=1 --skip-build
+c idle-flags-m4off --hours 0.25 --flags m4.enabled=0 --skip-build
+c m5-tiny --hours 0.0001 --profile m5x-casual --skip-build
+c idle-tiny --hours 0.0001 --skip-build
+c m5-frac --hours 0.0005 --profile m5x-casual --skip-build
+c idle-frac --hours 0.0005 --skip-build
+c m5-seed0 --hours 0.25 --profile m5x-casual --seed 0 --skip-build
+c m5-seedbig --hours 0.25 --profile m5x-casual --seed 9007199254740991 --skip-build
+c m5-noshot --hours 0.25 --profile m5x-casual --skip-build --no-shot
+c m5-1h --hours 1 --profile m5x-casual --skip-build
+c idle-1h --hours 1 --skip-build
+
+# ---- cases-base.sh (case lines only)
+c prof-nope --hours 1 --profile nope --skip-build
+c prof-empty --hours 1 --profile '' --skip-build
+c prof-novalue --hours 1 --skip-build --profile
+c prof-m5 --hours 1 --profile m5x-casual --skip-build
+c prof-repeat-m5-idle --hours 0.25 --profile m5x-casual --profile idle --skip-build
+c idle-flags-m4off --hours 0.25 --flags m4.enabled=0 --skip-build
+c idle-tiny --hours 0.0001 --skip-build
+c idle-frac --hours 0.0005 --skip-build
+c idle-1h --hours 1 --skip-build
+c idle-seedbig --hours 0.25 --seed 9007199254740991 --skip-build

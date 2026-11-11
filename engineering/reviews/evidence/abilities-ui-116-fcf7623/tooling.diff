@@ -1,0 +1,49 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index f011178..6e670e0 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -43,6 +43,21 @@ jobs:
+       - name: Release globals allowlist (chromium)
+         # Required (QA rc1): release window globals must be exactly eggfarmExportTelemetry. Serves dist/ from the build above.
+         run: npm run check-globals -- chromium
++      - name: QA build for abilities-ui browser (dist-qa; release dist above is untouched)
++        run: npm run build:qa
++      - name: Abilities UI browser (Chromium 360x640; flag 0 + test-only runtime abilities=1 O1/O2, #116)
++        # QA-D-1106-PR116-CI: shipped balance keeps abilities=0; flag-on is an in-page overlay (tests/fixtures/abilities-ui-browser-flag-on.json).
++        run: npm run abilities-ui-browser
++        env:
++          CHROME: /usr/bin/google-chrome
++          SHOTS: artifacts/abilities-ui-browser
++      - name: Upload abilities-ui browser screenshots
++        if: always()
++        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
++        with:
++          name: abilities-ui-browser
++          path: artifacts/abilities-ui-browser/
++          retention-days: 14
+       - name: Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+         # PR #13 / Code Reviewer M1: build id = HEAD, window globals = eggfarmExportTelemetry only, no external refs / sourcemaps / QA hooks.
+         run: npm run build:html
+diff --git a/.gitignore b/.gitignore
+index 711f08a..747c7b6 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -6,3 +6,4 @@ qa-out/
+ __pycache__/
+ dist-html
+ verify-out/
++artifacts/
+diff --git a/package.json b/package.json
+index 069f592..24ed6a1 100644
+--- a/package.json
++++ b/package.json
+@@ -20,7 +20,8 @@
+     "check-economy-copy": "node scripts/check-economy-copy.mjs",
+     "check-globals": "node scripts/release-globals-browser.mjs",
+     "verify": "vite-node scripts/verify.ts --",
+-    "measure:l30plus": "vite-node scripts/measure-l30plus.ts --"
++    "measure:l30plus": "vite-node scripts/measure-l30plus.ts --",
++    "abilities-ui-browser": "node scripts/abilities-ui-browser.mjs"
+   },
+   "devDependencies": {
+     "@fontsource/fredoka": "^5.3.0",

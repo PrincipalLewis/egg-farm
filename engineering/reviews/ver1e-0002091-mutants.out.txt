@@ -1,0 +1,98 @@
+M1: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 5 failed | 44 passed (49)
+M2: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M3: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M4: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M5: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 3 failed | 46 passed (49)
+M6: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M7: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M8: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 5 failed | 44 passed (49)
+M9: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 4 failed | 45 passed (49)
+M10: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M11: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M12: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 4 failed | 45 passed (49)
+M13: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M14: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M15: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M16: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 3 failed | 46 passed (49)
+M17-clear-noop: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M18-clear-json-only: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M19-clear-png-only: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M20-fail-writes-PASS: tests exit=1 ⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 10 failed | 39 passed (49)
+M21-no-writeEarly-normal: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 8 failed | 41 passed (49)
+M22-no-writeEarly-catch: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 6 failed | 43 passed (49)
+M23-done-early: tests exit=1 ⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 14 failed | 35 passed (49)
+M24-outArg-null: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 8 failed | 41 passed (49)
+M25-no-seenFlags: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M26-no-dupkey: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M27-writeEarly-keeps-png: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 3 failed | 46 passed (49)
+M28-default-dir-not-cleared: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M29-default-dir-no-write: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M30-no-rethrow: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 4 failed | 45 passed (49)
+M31-build-exit-1: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+M32-html-exit-1: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M33-html-dir-not-claimed: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 2 failed | 47 passed (49)
+M34-no-mkdir-out: tests exit=0  Tests 49 passed (49)
+NC1-loop-rethrows: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 5 failed | 44 passed (49)
+NC2-text-rethrows: tests exit=0  Tests 49 passed (49)
+NC3-writerFailed-silent: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 5 failed | 44 passed (49)
+NC4-writerFailed-unsanitised: MUTATION NOT APPLIED
+NC5-one-bad-dir-stops-rest: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+H1-OUT_ROOT-ignored: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 4 failed | 45 passed (49)
+H2-aftershot-no-standin: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ Tests 1 failed | 48 passed (49)
+ALLDONE
+NC4v-writerFailed-unscrubbed: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+NC4s-writerFailed-old-sanitize-only: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+N1a-scrub-no-redaction: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+N1b-scrub-no-sanitize: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+NC5-one-bad-dir-stops-rest: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+H2-aftershot-no-standin: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+O1a-raw-build-id-dir: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+O1b-no-escape-throw: tests exit=0 Tests 49 passed (49)
+O1c-regex-allows-dots: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+O1d-no-invalid-log: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+O2a-report-write-unguarded: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+O2b-catch-rethrows: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+O2c-pass-without-report-exits-0: tests exit=0 Tests 49 passed (49)
+O2d-done-not-set-on-failure: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+O2e-catch-keeps-png: tests exit=0 Tests 49 passed (49)
+O2f-log-silent: tests exit=1 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+N3-afterEach-noop: tests exit=0 Tests 49 passed (49)
+NEWDONE

@@ -1,0 +1,68 @@
+== T1 normal start/kill
+pid=6
+6 628295 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T09:04:59+01:00 sleep 100
+TERM 6 (group)
+T1 gone
+== T2 forged line, wrong start time, for an unrelated process
+REFUSED 27 (start time differs: reused PID)
+rc=1
+== T3 forged line copying real start time (same-user forgery)
+TERM 27
+rc=0
+T3 victim killed
+== T4 other lane name
+REFUSED 57 (not started by lane uiqa)
+rc=1
+== T5 args: leading zeros / 10# / 8 digits / -0 / self
+TERM 57 (group)
+REFUSED 00000001 (not numeric, <=1, or self)
+REFUSED 12345678 (not numeric, <=1, or self)
+REFUSED -0 (not numeric, <=1, or self)
+REFUSED 2 (not started by lane ccr)
+REFUSED x (not numeric, <=1, or self)
+rc=1
+== T6 newline/vt/ff in command
+5 /workspace/egg-farm-studio/.pids/ccr.pids
+57 628340 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T09:05:00+01:00 sleep 100$
+86 628343 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T09:05:00+01:00 bash -c sleep 100 #^K^L x 4242 1 b 2026-10-30T00:00:00 fake$
+== T7 command starting with '-'
+lane-run: leader 102 exited before it was recorded; not recorded.
+rc=1
+== T8 '--' omitted
+p3=133
+133 628348 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T09:05:00+01:00 sleep 100
+== T9 comm with newline and ') '
+p4=[147] rc=0
+133 628348 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T09:05:00+01:00 sleep 100$
+147 628349 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T09:05:00+01:00 /workspace/.ccr-tmp/lanebox/x/a ) 1 2$
+TERM 147 (group)
+== T10 orphaned group (leader exits, child stays)
+GONE 172 (group members remain, not signalled: 179)
+rc=1
+== T11 leader exits before record
+238
+rc=0
+== T12 child that setsid'd escapes group TERM
+TERM 250 (group)
+1
+== T13 legacy line, future timestamp, unrelated victim
+TERM 275
+rc=0
+== T14 missing pidfile
+REFUSED 5 (not started by lane nolane)
+rc=1
+== T15 pgid==p but member forged group? setpgid join
+(setpgid into another session's group is EPERM by kernel; skipped)
+    PID    PGID     SID CMD
+      1       1       1 bwrap --ro-bind / / --dev /dev --tmpfs /workspace/egg-farm-studio/.pids --bind /workspace/.ccr-tmp/lanebox /workspace/.ccr-tmp/lanebox --proc /proc --unshare-pid --die-with-parent --new-session /workspace/.ccr-tmp/lanebox/t.sh
+      2       1       1 /bin/bash /workspace/.ccr-tmp/lanebox/t.sh
+     53       1       1 sleep 100
+     86      86      86 bash -c sleep 100 #?? x 4242 1 b 2026-10-30T00:00:00 fake
+     90      86      86 sleep 100
+    133     133     133 sleep 100
+    179     172     172 sleep 100
+    242     238     238 sleep 100
+    254     254     254 sleep 101
+    300     300     300 sleep 100
+    309       1       1 sleep 100
+    310       1       1 ps -eo pid,pgid,sid,cmd

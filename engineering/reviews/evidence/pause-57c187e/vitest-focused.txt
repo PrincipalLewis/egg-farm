@@ -1,0 +1,15 @@
+
+ RUN  v2.1.9 /workspace/wt-review-115-57c187e
+
+ ✓ tests/offline.test.ts (6 tests) 3ms
+ ✓ tests/v5-f2-m5-fields.test.ts (37 tests) 16ms
+ ✓ tests/v5-abilities-sim.test.ts (29 tests) 44ms
+ ✓ tests/v5-pause-sim.test.ts (21 tests) 20ms
+ ✓ tests/m4a-flag-off.test.ts (2 tests) 871ms
+   ✓ M4-A flag off = main > sim trace hash equals main (rc1 economy, flag off) 869ms
+
+ Test Files  5 passed (5)
+      Tests  95 passed (95)
+   Start at  00:14:39
+   Duration  1.35s (transform 576ms, setup 0ms, collect 1.21s, tests 955ms, environment 1ms, prepare 227ms)
+

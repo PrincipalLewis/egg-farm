@@ -1,0 +1,177 @@
+=== vitest-focused tinypool-omit-maxWorkers 2026-11-10T00:12:32+01:00 ===
+NOTE: --maxWorkers=1 rejected by tinypool RangeError (minThreads/maxThreads conflict); flock serializes lane (established architect exception).
+LOCK_ACQUIRED loadavg=5.04 3.68 2.58 8/2592 129196 node=v20.19.2 head=fc5fe67f18085784661b10bc292c67d90a24f8f0
+
+ RUN  v2.1.9 /tmp/rev118
+
+ ✓ tests/m41-p2-ui-minors.test.ts > m8 .cooptip (UI-M8-1) > UI-M8-1 m8: valid font shorthand 700 14px/1.3 var(--f-body), width max-content, max-width min(320px, 100vw - 32px), radius 12 kept
+ ✓ tests/m41-p2-ui-minors.test.ts > m9 asleep/unpaid card undim (UI-M9-1/2/6 source rules) > UI-M9-1/2/6 m9: only .ebar dims on an .is-off card; no .wk-body opacity rule; unpaid word var(--c-danger)
+ ✓ tests/m41-p2-ui-minors.test.ts > m5 card state word: text + inline SVG, no pictograph (UI-M5-1..8, UI-WARN-1..3) > UI-M5-8 (Engineering ask): each mood renders exactly Working/Tired/Asleep/Unpaid with no \p{Extended_Pictographic} or U+26A0
+ ✓ tests/m41-p2-ui-minors.test.ts > m5 card state word: text + inline SVG, no pictograph (UI-M5-1..8, UI-WARN-1..3) > UI-M5-1 grep: no U+1F4A4 or U+26A0 left in workers-ui.ts
+ ✓ tests/m41-p2-ui-minors.test.ts > m5 card state word: text + inline SVG, no pictograph (UI-M5-1..8, UI-WARN-1..3) > UI-WARN-2 / UI-M5-2: icons are the signed assets (sha1), aria-hidden, focusable=false, no other hex than #3E2C23
+ ✓ tests/m41-p2-ui-minors.test.ts > m5 card state word: text + inline SVG, no pictograph (UI-M5-1..8, UI-WARN-1..3) > UI-WARN-4 / UI-M5-4/5 CSS: 14px, -2px, 4px gap, white fill; the moon takes the .st ink (color:inherit, load-bearing)
+ ✓ tests/m41-p2-ui-minors.test.ts > m5 card state word: text + inline SVG, no pictograph (UI-M5-1..8, UI-WARN-1..3) > UI-M5-6 / Q-WARN-1: banners keep the pinned <img> icons (icon-moon.svg / icon-warning.svg)
+ ✓ tests/m41-p2-ui-minors.test.ts > m6 HUD rate CSS (UI-M6-2/6/7) > UI-M6-2/6/7 m6: 11px icon at -1.5px, 2px gap, white fill; hidden without .warn; no U+FE0E route; the model strings keep the ⚠ marker (option A)
+ ✓ tests/m41-p2-ui-minors.test.ts > m1 yard reduced motion (UI-M1-9 source rules; bob/popin unchanged, UI-M1-4) > UI-M1-9 UI-M1-4 m1: media + .rm rules right after the .hen.pop rule; bob 1.6s infinite and popin 300ms x1 unchanged
+ ✓ tests/m41-p2-ui-minors.test.ts > m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, CSS only) > UI-M10-8 m10: token defined exactly once, in the first :root colour row next to --c-muted, = #5A4C42
+ ✓ tests/m41-p2-ui-minors.test.ts > m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, CSS only) > UI-M10-1/9 m10: shared :39 rule and PT1-14 both use var(--c-muted-strong); cursor:not-allowed; no #5A4C42 literal in either
+ ✓ tests/m41-p2-ui-minors.test.ts > m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, CSS only) > UI-M10-2 m10: contrast: #5A4C42 on #CFC6BA >= 4.5 (4.88); old #6B5D52 was 3.76
+ ✓ tests/m41-p2-ui-minors.test.ts > m10 disabled Buy text >= 4.5:1 via --c-muted-strong (UI-M10-1/2/8/9, CSS only) > UI-M10-5 m10: Buy stays aria-disabled, never native disabled (UI-M10-5)
+ ✓ tests/m41-p2-ui-minors.test.ts > CCR #70 nits (n1 income.ts comment + test-only marks, n2 workerBanner without GameState) > CCR-70-n1: n1: grossSalesPerSec / salesStopped are marked TEST-ONLY and the stale "Used by the header aria and the worker banners" is gone
+ ✓ tests/m41-p2-ui-minors.test.ts > CCR #70 nits (n1 income.ts comment + test-only marks, n2 workerBanner without GameState) > CCR-70-n2: n2: workerBanner / workerBannerText take no GameState
+ ✓ tests/m41-p2-ui-minors.test.ts > Art nit n1 on #70: refund pop never covers #rate (geometry; per-frame overlap is measured in scripts/m41-p2-browser.mjs) > ART-70-n1: exppop rises REFUND_RISE_PX (8) at most; the start line leaves the 1.1x box (<= POP_BOX_H) >= 4px below the pill/#rate; coins end on that line
+ ✓ tests/m41-p2-ui-minors.test.ts > WCAG 2.4.11 port from rc1 7380b86 (source; keyboard sweep at 360/390/1280 x 3 engines in scripts/m41-p2-browser.mjs) > WCAG-2.4.11: --refill-bar-h = measured sticky bar + scroller padding-top + 8px (0 without), re-measured on resize/dock; cards and their focusables use it as scroll-margin-top
+ ✓ tests/m41-p2-ui-minors.test.ts > P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; reduced motion = static refused flash, no translate > P2b-U / Art-c2: the shake keyframes translate (motion kept for full-motion users)
+ ✓ tests/m41-p2-ui-minors.test.ts > P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; reduced motion = static refused flash, no translate > P2b-U / Art-c2: refusedFlash is static: a 2px inset --c-danger ring, no transform/translate, steps(1) (no tween)
+ ✓ tests/m41-p2-ui-minors.test.ts > P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; reduced motion = static refused flash, no translate > P2b-U / Art-c2: prefers-reduced-motion and the .reduced-motion / .rm classes swap the Refill shake for refusedFlash (300ms, not --t-med = 0)
+ ✓ tests/m41-p2-ui-minors.test.ts > P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; reduced motion = static refused flash, no translate > P2b-U / Art-c2: the worker-card Refill is .btn.manage (the selector the swap keys on) and an Unpaid tap still goes through cantAfford (shake)
+ ✓ tests/m41-p2-ui-minors.test.ts > P2b-U / Art-c2 (2026-10-29 23:20): Unpaid Refill refused tap = shake; reduced motion = static refused flash, no translate > P2b-U / Art-c2: the full-motion shake beats .btn[aria-disabled=true]{animation:none} on a refused Refill (.btn.manage.shake, before the reduced-motion swap)
+ ✓ tests/m41-p2-ui-minors.test.ts > Art-c2 (all Refill buttons, Art 2026-10-30 08:59; QA F4): refused tap on the nav / header and Workers-bar Refill > Art-c2: the nav / docked-header Refill is .manage.nav-manage (no .btn) and a refused tap goes through cantAfford (shake)
+ ✓ tests/m41-p2-ui-minors.test.ts > Art-c2 (all Refill buttons, Art 2026-10-30 08:59; QA F4): refused tap on the nav / header and Workers-bar Refill > Art-c2: the Workers-tab Refill bar is .btn.manage.manage-all; the shake / refusedFlash rule (0,4,0) outranks its [aria-disabled=true]{animation:none} (0,3,0)
+ ✓ tests/m41-p2-ui-minors.test.ts > Art-c2 (all Refill buttons, Art 2026-10-30 08:59; QA F4): refused tap on the nav / header and Workers-bar Refill > Art-c2: every Refill surface (card, nav/header, Workers bar) has both the full-motion shake and the reduced-motion refusedFlash (media query + .reduced-motion + .rm)
+ ✓ tests/m41-p2-ui-minors.test.ts > Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, same place on screen, no CSS-generated count > Art-c1: the nav badge sits on the icon's top-right -6/-6 (flex static position + margin, out of flow), the Workers tab badge rule unchanged
+ ✓ tests/m41-p2-ui-minors.test.ts > Art-c1 (HoE 2026-10-30 00:19): Upgrades count badge after the label, same place on screen, no CSS-generated count > Art-c1: no generated content (content:) on the badge or the Upgrades nav button
+ ✓ tests/m41-p2-ui-minors.test.ts > AC-R17 D-HOP-2026-10-30-02: cooldown Refill label CSS > AC-R17 D-HOP-2026-10-30-02: the countdown is generated content from data-cd, one line, tabular digits (no jump as it ticks)
+ ✓ tests/m41-p2-ui-minors.test.ts > AC-R17 D-HOP-2026-10-30-02: cooldown Refill label CSS > AC-R17 D-HOP-2026-10-30-02: docked header pill reserves the widest Fredoka countdown (2.65em >= measured 2.609em), only while a countdown shows
+ ✓ tests/m41-p2-ui-minors.test.ts > AC-R17 D-HOP-2026-10-30-02: cooldown Refill label CSS > AC-R17 D-HOP-2026-10-30-02: fmtCooldown is m:ss; every countdown up to manage_cooldown_s has the same glyph count
+ ✓ tests/m41-p2-ui-minors.test.ts > D-HOP-2026-10-30-02 m:ss: cooldown countdown formatter (workers-ui fmtCooldown, as navManageView renders it) > D-HOP-2026-10-30-02 m:ss: 1 -> 0:01, 30 -> 0:30, 59 -> 0:59, 60 -> 1:00, 65 -> 1:05, 600 -> 10:00
+ ✓ tests/m41-p2-ui-minors.test.ts > D-HOP-2026-10-30-02 m:ss: cooldown countdown formatter (workers-ui fmtCooldown, as navManageView renders it) > D-HOP-2026-10-30-02 m:ss: fractional seconds round up like the UI (Math.ceil(cdS - 1e-9)) in the nav and docked copy
+ ✓ tests/m41-7-ui-fixes.test.ts > P1 (Major): M5 uses the coop icon + "!" warn badge like M4, never the green restored badge > M5 renders the warn badge, not the restored badge
+ ✓ tests/m41-7-ui-fixes.test.ts > P1 (Major): M5 uses the coop icon + "!" warn badge like M4, never the green restored badge > M5 badge/icon equal M4; M1 keeps the restored badge
+ ✓ tests/m41-7-ui-fixes.test.ts > P2 (WCAG 2.5.3): the accessible name starts with the visible label > M1 copy_failed
+ ✓ tests/m41-7-ui-fixes.test.ts > P2 (WCAG 2.5.3): the accessible name starts with the visible label > M2 copy_failed
+ ✓ tests/m41-7-ui-fixes.test.ts > P2 (WCAG 2.5.3): the accessible name starts with the visible label > M4
+ ✓ tests/m41-7-ui-fixes.test.ts > P2 (WCAG 2.5.3): the accessible name starts with the visible label > M5
+ ✓ tests/m41-7-ui-fixes.test.ts > P2 (WCAG 2.5.3): the accessible name starts with the visible label > M3 (unchanged: visible label is "Export old save file")
+ ✓ tests/m41-7-ui-fixes.test.ts > P2 (WCAG 2.5.3): the accessible name starts with the visible label > legacy EXPORT_ARIA still renders with the legacy "Export old save" label (unchanged; P2 names would not start with it)
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > legacy restored (would be M1): no notice event
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > legacy restored + storage blocked (would be M5): no notice event
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > legacy fresh (would be M3): no notice event
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > M1 (CSR copy): exactly one shown, one dismissed on close
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > M2 (CSR copy): exactly one shown, one dismissed on close
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > M3 (CSR copy): exactly one shown, one dismissed on close
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > M4 (CSR copy): exactly one shown, one dismissed on close
+ ✓ tests/m41-7-ui-fixes.test.ts > CCR #58 m3: notice telemetry only when the CSR-9 copy is rendered > M5 (CSR copy): exactly one shown, one dismissed on close
+ ✓ tests/m4a-tracks-ui.test.ts > M4-A track copy (art-ux/m4-tracks-copy.md) > Balanced strip strings
+ ✓ tests/m4a-tracks-ui.test.ts > M4-A track copy (art-ux/m4-tracks-copy.md) > lock and milestone toasts
+ ✓ tests/m4a-tracks-ui.test.ts > M4-A track copy (art-ux/m4-tracks-copy.md) > toasts read mult from balance; all three Hens milestones
+ ✓ tests/m4a-tracks-ui.test.ts > M4-A track copy (art-ux/m4-tracks-copy.md) > M4A-19 one segment per track, fill min(L,N)/N, weakest marked (ties all)
+ ✓ tests/m4a-tracks-ui.test.ts > M4-A track copy (art-ux/m4-tracks-copy.md) > M4A-22 next-goal labels
+ ✓ tests/m4a-tracks-ui.test.ts > M4A-18 highlight = best payback (HoP 15:29) + next-goal > highlights the best-payback AFFORDABLE row; none affordable => no highlight, pick carries the best-payback row
+ ✓ tests/m4a-tracks-ui.test.ts > M4A-18 highlight = best payback (HoP 15:29) + next-goal > only affordable rows compete: when just one row is affordable it wins even with a worse payback
+ ✓ tests/m4a-tracks-ui.test.ts > M4A-18 highlight = best payback (HoP 15:29) + next-goal > deterministic tie-breaks: equal payback => lower cost, then BUY_ORDER (Farm > Hens > Egg value)
+ ✓ tests/m4a-tracks-ui.test.ts > M4A-18 highlight = best payback (HoP 15:29) + next-goal > ETA copy when nothing is affordable (fmtAffordableIn)
+ ✓ tests/m4a-tracks-ui.test.ts > M4A-18 highlight = best payback (HoP 15:29) + next-goal > next-goal: GOAL_ORDER; HENS/VALUE only with the flag on, never capped/MAX; flag on uses the same best-payback pick
+ ✓ tests/m4a-tracks-ui.test.ts > m4-tracks-copy v1.1 milestone hint > shown only within 5 levels of the next milestone (Hens)
+ ✓ tests/m4a-tracks-ui.test.ts > m4-tracks-copy v1.1 milestone hint > hidden at the milestone level itself and at MAX
+ ✓ tests/m4a-tracks-ui.test.ts > m4-tracks-copy v1.1 milestone hint > Egg value grades: window and copy from balance
+ ✓ tests/orders.test.ts > order card (P2) > NBSP between count and eggs (Art & UX 16c2248)
+ ✓ tests/orders.test.ts > order card (P2) > shows full order value and delivered/demand, never $0.00 (MK-23)
+ ✓ tests/orders.test.ts > order card (P2) > three button states: Need N / Sell k · +$X / Sell N · +$X (MK-24)
+ ✓ tests/orders.test.ts > order card (P2) > row 2 fixture: 4/17 delivered with Sell 13 (Product delivered-eggs + Art & UX)
+ ✓ tests/orders.test.ts > order card (P2) > have is filled only; Sell does not inflate the count (MK-8/MK-10 + Product)
+ ✓ tests/orders.test.ts > order card (P2) > progress bar + row aria use delivered eggs; $ is full order (Art & UX)
+ ✓ tests/orders.test.ts > order card (P2) > big numbers stay compact
+ ✓ tests/orders.test.ts > order card (P2) > Sell button floors short money; aria keeps exact (HoP 15:14)
+ ✓ tests/orders.test.ts > queue display (P1q) > 4 cards at 360x640/375x667, 5 at 390x844, all on desktop
+ ✓ tests/orders.test.ts > queue display (P1q) > chip label + accessible name
+ ✓ tests/orders.test.ts > queue display (P1q) > farm strip: <= 5 chips, 4 + "+N" past 5
+ ✓ tests/ui-logic.test.ts > tap combine + flying eggs (config feel tunables) > config values
+ ✓ tests/ui-logic.test.ts > tap combine + flying eggs (config feel tunables) > taps within the window combine into one floater total
+ ✓ tests/ui-logic.test.ts > tap combine + flying eggs (config feel tunables) > never more than max_flying_eggs live flyers; budget frees after flight
+ ✓ tests/ui-logic.test.ts > tap combine + flying eggs (config feel tunables) > empty coop tap: no flyers, no merge
+ ✓ tests/ui-logic.test.ts > queue full cue throttle > at most once per queue_full_cue_min_gap_ms (3s)
+ ✓ tests/ui-logic.test.ts > formatters > money: 2 dp under 1K, K/M above
+ ✓ tests/ui-logic.test.ts > formatters > counts
+ ✓ tests/ui-logic.test.ts > formatters > away
+ ✓ tests/ui-logic.test.ts > formatters > F7 time to afford
+ ✓ tests/ui-logic.test.ts > formatters > rolling 60s income
+ ✓ tests/zg-ui-onestrip.test.ts > ZG-AC10 one strip at a time > opening Hens closes Egg value: one cancel, its aria-expanded false, no buy 528ms
+ ✓ tests/order-chip-a11y.test.ts > orderChipLabel copy helper (one swappable string) > singular only at raw 1; plural at 0 and >1; uses the given visible string verbatim 318ms
+ ✓ tests/order-chip-a11y.test.ts > OC-A11Y-1/2: rendered .chip.arrive names > name starts with .tag .num and is exactly "<num> egg(s) wanted by customer" (1, 0, 3, 1,500, 12.3K)
+ ✓ tests/order-chip-a11y.test.ts > OC-A11Y-1/2: rendered .chip.arrive names > no aria-label="Customer" remains in chip markup; no role / live region added
+ ✓ tests/order-chip-a11y.test.ts > OC-A11Y-3: name follows the count on re-render > 4 -> 3 -> 1 -> 0: name updates in the same render as .num, never stale
+ ✓ tests/m41-p2-ui-dom.test.ts > m6 HUD #rate: static WARN_SVG + aria-hidden ▼ (UI-M6-1/5/6/8) > UI-M6-1/5/8 m6: neg (Market Hand asleep, nothing else): no U+26A0 text, ▼ in .tri[aria-hidden], money in .rt, one svg.wi from WARN_SVG, aria unchanged 459ms
+ ✓ tests/m41-p2-ui-dom.test.ts > m6 HUD #rate: static WARN_SVG + aria-hidden ▼ (UI-M6-1/5/6/8) > UI-M6-1 m6: pos: no .warn (icon hidden by CSS), .tri empty, text "+$X/s"
+ ✓ tests/m41-p2-ui-dom.test.ts > m1 yard: keyed per-slot diff (UI-M1-1/3/4/5/6) > UI-M1-1/3/4/5/6 m1: first render: no .pop; Hens buys keep every existing node, add only new hens with .pop + "0s, <stagger>", cap 12 = 0 mutations
+ ✓ tests/m41-p2-ui-dom.test.ts > P2b AC-R11 / TP1-U2: a Refill tap on an Unpaid worker dispatches nothing > AC-R11 TP1-U2 P2b: MH Unpaid at 30% (<= T), cooldown 0: tap -> no manage dispatch, energy/cooldown unchanged; a Tired worker still refills
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 F3: the starts-with-visible-text check fails on empty visible text (all aria-hidden)
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: MH asleep: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: CH asleep: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: MH + CH asleep: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: MH unpaid: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: CH unpaid: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: MH + CH unpaid: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: MH asleep + CH unpaid: Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a / Art-c1: none (N = 0): Upgrades nav (badge after label, aria-hidden), Workers tab, Refill nav
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 P2a (D-HOP-2026-10-29-10): count 0 → nav Refill not rendered: not focusable, no "Refill…" name in nav, Tab order Market → Upgrades → Farm
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > Art-c1: upgradesNavName pluralises: N = 0 "Upgrades", N = 1 "Upgrades, 1 worker needs attention", N = 2/3 "… workers need attention"
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > D-HOP-10-addendum: count 0 during the cooldown -> nav Refill visible, name starts with its visible text, not actionable
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > AC-R17 D-HOP-2026-10-30-02: cooldown Refill accessible name starts with the visible label text
+ ✓ tests/m41-p2-ui-dom.test.ts > P2a AC-R17 (m-P1-1, WCAG 2.5.3): name starts with the visible text in DOM order, count announced > D-HOP-10-addendum: the cooldown ends at count 0 -> nav Refill leaves the nav; Tab order Market → Upgrades → Farm (no gap, no trap), also with focus on Refill
+ ✓ tests/m41-8-best-chip.test.ts > UX-M4 chip and the strip ★ agree (F4-13) > pick HENS: chip on exactly that row; strip ★ (if its template has one) on the same target 547ms
+ ✓ tests/m41-8-best-chip.test.ts > UX-M4 chip and the strip ★ agree (F4-13) > pick VALUE: chip on exactly that row; strip ★ (if its template has one) on the same target
+ ✓ tests/m41-8-best-chip.test.ts > UX-M4 chip and the strip ★ agree (F4-13) > pick COLL: chip on exactly that row; strip ★ (if its template has one) on the same target
+ ✓ tests/m41-8-best-chip.test.ts > UX-M4 chip and the strip ★ agree (F4-13) > pick FARM: chip on exactly that row; strip ★ (if its template has one) on the same target
+ ✓ tests/m41-8-best-chip.test.ts > UX-M4 chip and the strip ★ agree (F4-13) > nothing affordable: no chip anywhere and no ★ / "best buy" on the strip
+ ✓ tests/m41-8-best-chip.test.ts > UX-M4 chip and the strip ★ agree (F4-13) > a capped row never carries the chip
+ ✓ tests/m41-8-best-chip.test.ts > UX-M4 chip and the strip ★ agree (F4-13) > the chip moves on purchase (one row at a time)
+ ✓ tests/m41-8-best-chip.test.ts > F4 markup (art file): spans, NBSP, aria untruncated > Hens / Egg value target renders .ng-name / .ng-lv / .ng-sfx with NBSP and an aria with "level" and "percent"
+ ✓ tests/m41-8-best-chip.test.ts > F4-14a label-in-name (m4a-spec v1.25): name = visible text, F4-14 sentence + status = description > HENS target: no aria-label; name from content = visible text minus ★ / …; describedby = sentence + status
+ ✓ tests/m41-8-best-chip.test.ts > F4-14a label-in-name (m4a-spec v1.25): name = visible text, F4-14 sentence + status = description > VALUE target: no aria-label; name from content = visible text minus ★ / …; describedby = sentence + status
+ ✓ tests/m41-8-best-chip.test.ts > F4-14a label-in-name (m4a-spec v1.25): name = visible text, F4-14 sentence + status = description > COLL target: no aria-label; name from content = visible text minus ★ / …; describedby = sentence + status
+ ✓ tests/m41-8-best-chip.test.ts > F4-14a label-in-name (m4a-spec v1.25): name = visible text, F4-14 sentence + status = description > a JS-truncated name keeps its `…` out of the name (aria-hidden) and the ★ span is aria-hidden
+ ✓ tests/m41-8-best-chip.test.ts > same-frame agreement: strip ★ and chip from ONE render (CCR #62 m1 + m2) > m1 (CCR repro /tmp/ccr-stale.test.ts.keep): coins cross the cost without a purchase → chip and strip ★ agree 100 ms later, in that same render
+ ✓ tests/m41-8-best-chip.test.ts > same-frame agreement: strip ★ and chip from ONE render (CCR #62 m1 + m2) > m2: after an offline grant and after each buy, ONE render() leaves chip and strip ★ on the same key (fails if the strip is drawn after the rows)
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > FARM ready: no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > FARM waiting: no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > W1 Market Hand ready: no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > W3 Hawker waiting: no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > W4 Grader tier ready: no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > done: no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > flag-off W1 (AC5): no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > flag-off W2 (AC5): no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > flag-off Collection (AC5, `L{n}` kept): no aria-label; name from content = visible label + status; describedby = the spoken sentence
+ ✓ tests/m41-8-best-chip.test.ts > Art 2.5.3 ruling: FARM / W1–W4 / done / flag-off targets — name = visible text, B3 sentence = description > goalAria: M4 on spells L{n} out for non-F4 labels (Art: `Next goal: Farm level 2. Ready now.`); flag-off keeps AC5
+ ✓ tests/m41-8-best-chip.test.ts > CCR m1-new: the description check rejects a wrong / stale target > descMatchesTarget
+ ✓ tests/zg-ui.test.ts > ZG-AC4 [UI] display > affordable ZG Collection row: .up.zg[data-zero-gain=COLL], one chip, muted line markup, plain Buy, describedby 536ms
+ ✓ tests/zg-ui.test.ts > ZG-AC4 [UI] display > unaffordable ZG Collection: disabled Buy + Need $X more; unaffordable ZG Hens: disabled Buy, no Need / ETA
+ ✓ tests/zg-ui.test.ts > ZG-AC4 [UI] display > non-ZG rows: no .zg / data-zero-gain / chip / zg-desc describedby; .affordable follows coins
+ ✓ tests/zg-ui.test.ts > ZG-AC6 [UI] not offered > FX-L30: MAX Hens / Egg value / Farm never carry data-zero-gain; only COLL does
+ ✓ tests/zg-ui.test.ts > ZG-AC5/16/17/17b/18 [UI] ★ never on a ZG row > FX-L30 (all ZG): no [data-best-buy], strip has no ★, COLL muted
+ ✓ tests/zg-ui.test.ts > ZG-AC5/16/17/17b/18 [UI] ★ never on a ZG row > flag off, same FX-L30: the stock picker may mark COLL (baseline behaviour kept)
+ ✓ tests/zg-ui.test.ts > ZG-AC5/16/17/17b/18 [UI] ★ never on a ZG row > FX-L30u (E18): no [data-best-buy] anywhere; strip names Farm without ★
+ ✓ tests/zg-ui.test.ts > ZG-AC5/16/17/17b/18 [UI] ★ never on a ZG row > FX-FLIP after the COLL buy: no row has both data-zero-gain and data-best-buy; the chip key (if any) is non-ZG
+ ✓ tests/zg-ui.test.ts > ZG-AC21 [UI] Upgrades nav dot > FX-L30 (COLL affordable + ZG, Farm MAX): hidden; flag off: shown (baseline)
+ ✓ tests/zg-ui.test.ts > ZG-AC21 [UI] Upgrades nav dot > FX-FLIP after the COLL buy, coins >= C1 cost and < Farm cost: hidden; before the buy: shown
+ ✓ tests/zg-ui.test.ts > ZG-AC9 / ZG-AC15 [UI + telemetry] Buy works with confirm 0; upgrade.zero_gain > one Buy tap on an affordable ZG row: sim event deep-equal to flag-off; telemetry = flag-off record + zero_gain: true
+ ✓ tests/zg-ui.test.ts > ZG-AC9 / ZG-AC15 [UI + telemetry] Buy works with confirm 0; upgrade.zero_gain > flag on: zero_gain = isZeroGain(pre-buy) for collection/hens/eggValue (true and false cases); absent for farm; flag off absent 429ms
+ ✓ tests/zg-ui.test.ts > ZG-AC9 / ZG-AC15 [UI + telemetry] Buy works with confirm 0; upgrade.zero_gain > confirm 0 (shipped tunable): no .zg-confirm, no aria-expanded / aria-controls; no zero_gain_confirm
+ ✓ tests/zg-ui.test.ts > ZG-AC12 [no-regression] flag off: no ZG markup, stock picker, no zero_gain; save bytes equal on vs off > (0, m4 1): no ZG nodes on every fixture
+ ✓ tests/zg-ui.test.ts > ZG-AC12 [no-regression] flag off: no ZG markup, stock picker, no zero_gain; save bytes equal on vs off > (1, m4 0): no ZG nodes on every fixture
+ ✓ tests/zg-ui.test.ts > ZG-AC12 [no-regression] flag off: no ZG markup, stock picker, no zero_gain; save bytes equal on vs off > (0, 0): no ZG nodes on every fixture
+ ✓ tests/zg-ui.test.ts > ZG-AC12 [no-regression] flag off: no ZG markup, stock picker, no zero_gain; save bytes equal on vs off > save JSON after the same actions is byte-identical with the flag on and off
+ ✓ tests/zg-ui.test.ts > bestBuyV2 interaction (errata E-3; BBv2 mechanics are row 29, not built: the flag alone changes nothing here) > zeroGainUi on: markup, nav dot and ★ are identical with m4.flags.bestBuyV2 = 0 and 1 on every fixture 336ms
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > rendered once, hidden; Buy is a disclosure (aria-controls resolves, aria-expanded false); non-ZG rows have neither
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > tap opens (no buy, focus Buy anyway); Buy anyway at +80 ms ignored; at +450 ms: one confirm then the upgrade (zero_gain true), focus row Buy
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > E16: Buy anyway with coins < cost -> confirm logged, no upgrade
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > re-tap on Buy (also within 350 ms) closes: no buy, one cancel, focus stays on Buy, no tab re-render
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > Cancel / Esc / outside pointerdown close with one cancel each and focus the row Buy; Esc does not close the panel
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > one strip at a time: unreachable via two rows on shipped data (Egg value is never ZG on the F5–28 grid, spec E5); see zg-ui-onestrip.test.ts
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > UI-ZG-18: repeat Enter/Space keydown on Buy anyway / Cancel is defaultPrevented and does nothing, any time after opening
+ ✓ tests/zg-ui.test.ts > ZG-AC10 [UI] confirm strip (m4.zeroGain.confirm = 1, test config only) — UI-ZG-11/13/14/15/16/18 > the open strip survives an unrelated re-render (coins tick) and stays the same open state
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (a): every opened strip ends in exactly one confirm or one cancel (ZG-AC10, spec L379-382) > re-tap on Buy while open: closes, no buy, exactly one cancel, focus stays on Buy
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (a): every opened strip ends in exactly one confirm or one cancel (ZG-AC10, spec L379-382) > tab switch while open: exactly one cancel, no buy; the strip is not re-opened on return
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (a): every opened strip ends in exactly one confirm or one cancel (ZG-AC10, spec L379-382) > re-render that drops the strip (row no longer ZG): exactly one cancel, no buy
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (a): every opened strip ends in exactly one confirm or one cancel (ZG-AC10, spec L379-382) > closing the Upgrades panel while open: exactly one cancel, no buy; reopening shows it closed
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (a): every opened strip ends in exactly one confirm or one cancel (ZG-AC10, spec L379-382) > unrelated re-render keeps the strip open with no event; the later confirm is the only event
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (b): an unaffordable ZG row keeps its disabled Buy, opens no strip, logs no event (spec L212, E11) > confirm=0: unaffordable ZG Collection and Hens: aria-disabled, no disclosure attrs, tap = no strip, no event, no buy
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (b): an unaffordable ZG row keeps its disabled Buy, opens no strip, logs no event (spec L212, E11) > confirm=1: unaffordable ZG Collection and Hens: aria-disabled, no disclosure attrs, tap = no strip, no event, no buy
+ ✓ tests/zg-ui.test.ts > D-COL-2026-10-30-29 (b): an unaffordable ZG row keeps its disabled Buy, opens no strip, logs no event (spec L212, E11) > confirm=1, stale markup (rendered affordable, live coins now short): the tap opens no strip and logs nothing (live state decides, S2-4a)
+
+ Test Files  10 passed (10)
+      Tests  164 passed (164)
+   Start at  00:12:32
+   Duration  4.56s (transform 1.58s, setup 0ms, collect 3.16s, tests 8.44s, environment 3.51s, prepare 900ms)
+
+vitest_exit:0

@@ -1,0 +1,29 @@
+HEAD=fcf76237dca81039b1f4fcf473b7a9090f9f45ed
+tree=ec0bf3bb819800d3123eb9db96c568ebd8e77633
+parents=9ee76a0aa1d9e83fd28a7196844d2a00c32c1a86
+subject=test(abilities-ui): Chromium 360 O1/O2 browser gate (#116)
+fcf7623 test(abilities-ui): Chromium 360 O1/O2 browser gate (#116)
+ .github/workflows/ci.yml                         | 15 ++++
+ .gitignore                                       |  1 +
+ package.json                                     |  3 +-
+ scripts/abilities-ui-browser.mjs                 | 98 ++++++++++++++++++++++++
+ tests/fixtures/abilities-ui-browser-flag-on.json |  4 +
+ 5 files changed, 120 insertions(+), 1 deletion(-)
+=== vs 9ee76a0 content APPROVE ===
+ .github/workflows/ci.yml                         | 15 ++++
+ .gitignore                                       |  1 +
+ package.json                                     |  3 +-
+ scripts/abilities-ui-browser.mjs                 | 98 ++++++++++++++++++++++++
+ tests/fixtures/abilities-ui-browser-flag-on.json |  4 +
+ 5 files changed, 120 insertions(+), 1 deletion(-)
+M	.github/workflows/ci.yml
+M	.gitignore
+M	package.json
+A	scripts/abilities-ui-browser.mjs
+A	tests/fixtures/abilities-ui-browser-flag-on.json
+=== src/product touch? ===
+.github/workflows/ci.yml
+.gitignore
+package.json
+scripts/abilities-ui-browser.mjs
+tests/fixtures/abilities-ui-browser-flag-on.json

@@ -1,0 +1,58 @@
+{
+ "overlap": {
+  "seeds": 8,
+  "drawsPerStream": 1000000,
+  "overlaps": 0,
+  "minLagFound": null,
+  "maxAbsCorr": 0.009515773452259776
+ },
+ "seedByTick": [
+  "4db5c514",
+  "b64f15e1",
+  "1e33889e",
+  "229df7cb",
+  "5ecc575f"
+ ],
+ "isolation2h": [
+  {
+   "seed": 1,
+   "rngEqual": true,
+   "stateEqual": true,
+   "evEqual": true
+  },
+  {
+   "seed": 7,
+   "rngEqual": true,
+   "stateEqual": true,
+   "evEqual": true
+  },
+  {
+   "seed": 42,
+   "rngEqual": true,
+   "stateEqual": true,
+   "evEqual": true
+  }
+ ],
+ "saveLoad": {
+  "evSavedAndRestored": true,
+  "evRngState": "9e62d078",
+  "stableAfterMore": true
+ },
+ "preM5Load": {
+  "seededFromPostTickRng": true,
+  "reloadSameSeed": true
+ },
+ "offline": {
+  "rngUntouched": true,
+  "evUntouched": true,
+  "keys": [
+   "state",
+   "eggs",
+   "awayS"
+  ]
+ },
+ "catchUp": {
+  "sameSeedWithOrWithoutClock": true
+ },
+ "brReloadReplays": true
+}

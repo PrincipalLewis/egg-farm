@@ -1,0 +1,11 @@
+#!/bin/bash
+# VER-1e mutant runner (from CCR pr75 mut.sh; per-mutant verify run dropped: killed = tests/verify.test.ts fails)
+cd /workspace/.ver1e-mut/repo
+name=$1; f=$2; expr=$3; M=/workspace/.ver1e-mut/mut
+perl -0pi -e "$expr" "$f"
+if git diff --quiet; then echo "$name: MUTATION NOT APPLIED"; exit; fi
+git diff > $M/$name.diff
+npx vitest run tests/verify.test.ts --minWorkers=1 --maxWorkers=2 > $M/$name.tlog 2>&1; te=$?
+tf=$(grep -aE "Tests " $M/$name.tlog | tr -s ' ')
+git checkout -q -- .
+echo "$name: tests exit=$te $tf"

@@ -1,0 +1,14 @@
+# Parked PRs: revive-or-kill sheet (due 2026-10-31) — Architect, 2026-10-28 08:05 CET. HoE decides.
+Paper only. Read-only sources: engineering/parked.md, `gh pr view` / issue events, local `git merge-tree` of each PR head against main 22eac98 (scratch bare clone, nothing pushed). Owner = commit author role on the branch.
+
+**State note:** all five PRs are already **CLOSED** on GitHub (closed 2026-10-24 21:16 CEST, "Closed as stale after M4.1 and patch 1 shipped (CEO ask); branch kept; reopen or re-cut on current main"), and all branches still exist. parked.md calls them "parked". So REVIVE means reopening or re-cutting the PR, and KILL means dropping the parked.md row and the revive date (the branch stays). Cross-check: #52 already contains #45's port and the bulk of #50, #51 and #57.
+
+| PR | What it does | State vs main 22eac98 (merge / size / owner) | Rec. | Reason |
+|---|---|---|---|---|
+| #45 `rc/m4-t3-l30plus` | L30+ pack (T3) + `test:flagoff` CI step | CONFLICT (ci.yml, src/ui/app.ts, src/ui/tracks-ui.ts); +464/−82, 31 files, 115 behind; Architect | **KILL** | superseded by #52 (its port), and its ci.yml step targets the `unit` job #68 removed |
+| #50 `feat/collection-cost-table` | D-HOP-23 per-level Collection cost table behind `collectionCostFromCsv` (flag off, no-op) | clean; +145/−5, 7 files, 1 commit; Senior Engineer, UI & rc1 Fixes | **KEEP PARKED** | small, clean and flag-off, but it is src/ code under the freeze (D-CEO-20261025-01), and it's wanted only with M4.2 L30+ |
+| #51 `arch/l30plus-cand-b` | L30+ step-gate harness (`measure:l30plus`), l30plus-trace, cand (b) and D-HOP-22 reviews | CONFLICT (scripts/measure-l30plus.ts); +520/−3, 9 files; Architect | **KILL** | its harness is already on main (`measure:l30plus` re-added from 47f0c12 in #71 31e1538), and the rest of its content is inside #52 |
+| #52 `arch/m41-l30plus-unlock` | M41-2 L30+ unlock code (#45 port) plus harness, cost table, csv-columns check; DO NOT MERGE until G1–G10 + HoP | CONFLICT (scripts/measure-l30plus.ts, src/ui/app.ts, src/ui/tracks-ui.ts); +1532/−91, 44 files, 32 commits; Architect (+1 UI-eng commit) | **KEEP PARKED** | it's the L30+ carrier for M4.2, which waits on Vadim's go and the G1–G10 + HoP gates; on revive, re-cut it as small one-area PRs rather than merge it at 44 files |
+| #57 `arch/m41-5-dead-cols-v2` | D-HOP-25: drop 2 dead economy.csv columns + unread-column CI check (csv-columns.ts) | clean; +263/−39, 14 files, 8 commits; Architect | **KEEP PARKED** | it merges clean, but it changes data/economy.csv, and L0–30 economy data stays frozen until the post-M5.0 unfreeze (D-CEO-20261024-08) |
+
+If HoE accepts: drop the #45 and #51 rows from parked.md (branches kept). For the KEEP PARKED rows, set the next date to the M4.2 / M5.1 go instead of 2026-10-31, because under D-CEO-20261019-13 (a) a row past its date is closed by default.

@@ -1,0 +1,17 @@
+#116 HoE/116-browser-ci (HoQA QA-D-1106-PR116-CI) — Senior Engineer, Features & Economy Wiring
+Tip fcf76237dca81039b1f4fcf473b7a9090f9f45ed  tree ec0bf3bb819800d3123eb9db96c568ebd8e77633  (parent 9ee76a0)  PR #116 stays DRAFT
+Landed (1 commit): scripts/abilities-ui-browser.mjs, tests/fixtures/abilities-ui-browser-flag-on.json (test-only overlay),
+  package.json "abilities-ui-browser", .github/workflows/ci.yml gate: build:qa -> abilities-ui-browser -> upload-artifact
+  "abilities-ui-browser" (if: always(), 14d), .gitignore artifacts/. src/ unchanged vs 9ee76a0; balance.json abilities=0.
+Local (Chromium /usr/bin/google-chrome, lane-2 lock, clean build m4.1+fcf7623): ALL PASS 16/16 + 1 INFO. Shots in ./shots.
+Release npm run build (tsc + check-release-build dist): green. vitest tests/v5-abilities-ui.test.ts 15/15.
+Notes / flake mitigation:
+ - Flag 0 close via openPanel(null) hides the sheet synchronously (no close transition in product), so "close mid-animation"
+   asserts the 60 ms state is already closed/hidden and settles that way.
+ - At 360x640 the open sheet (75dvh) covers the nav; the switch-panels step uses a DOM click on [data-nav=market] (same handler).
+   O2 reopen uses a REAL tap (pending layer is pointer-events:none).
+ - O1/O2 act inside the 240 ms --t-med transform; F1-2/pend2 assert the sheet is mid-transform (translateY>0, not hidden) before
+   docking/reopening, so a slow runner cannot silently skip the pending window. Different workers for O1 (market_hand) and O2 (coop_hand) to avoid cooldown.
+ - Gate timeout kept 30m.
+FINDING (INFO, not gated): flag on, Workers tab @360 overflows horizontally (body scrollWidth 417 > 360; .wk-body 26..405) —
+  visible in flag1-workers.png / flag1-o2-reopen-pending.png (card text and "Active" call clipped). For UI QA / Architect.

@@ -1,0 +1,44 @@
+#!/bin/bash
+m=/workspace/.ver1e-mut/mut.sh; V=scripts/verify.ts; R=scripts/verify/roundtrip.ts; C=scripts/verify/cli.ts
+$m M1 $V 's/skipMarker \? run\.end : markFreshM4\(run\.end, b\)/run.end/'
+$m M2 $R "s/'eggValueLevel', //"
+$m M3 $R "s/, 'coinsCents'//"
+$m M4 $R "s/'workers', //"
+$m M5 $R 's/migrated = tracksMigrated \|\| version !== SAVE_VERSION \|\| r\.file\.version !== SAVE_VERSION/migrated = false/'
+$m M6 $R 's/pass: !migrated && mismatches/pass: mismatches/'
+$m M7 $R 's/end: \(end as any\)\[f\]/end: (r.file.state as any)[f]/'
+$m M8 $V 's/saveRoundTrip\(raw, run\.end, shipped\)/saveRoundTrip(save(mem, { ...run.end, seenTracksExplainer: true }, savedAt, b), run.end, shipped)/'
+$m M9 $V 's/  if \(!rt\.pass\) return 4;/  if (false) return 4;/'
+$m M10 $V 's/if \(!o\.noShot && rt\.pass\)/if (!o.noShot)/'
+$m M11 $V "s/check\('save-roundtrip', rt\.pass,/check('save-roundtrip', true,/"
+$m M12 $R 's/pass: !migrated && mismatches\.length === 0/pass: true/'
+$m M13 $V 's/saveRoundTrip\(raw, run\.end, shipped\)/saveRoundTrip(raw, run.end, b)/'
+$m M14 $V 's/pass: rt0\.pass && !flagsDifferFromBuild/pass: rt0.pass/'
+$m M15 $V 's/flagsDifferFromBuild = overridden;/flagsDifferFromBuild = false;/'
+$m M16 $V 's/saveRoundTrip\(raw, run\.end, shipped\), flagsDifferFromBuild = overridden;/saveRoundTrip(raw, run.end, b), flagsDifferFromBuild = false;/'
+$m M17-clear-noop $V "s/for \(const f of \['verify\.json', 'verify\.png'\]\) rmSync/for (const f of [] as string[]) rmSync/"
+$m M18-clear-json-only $V "s/for \(const f of \['verify\.json', 'verify\.png'\]\)/for (const f of ['verify.json'])/"
+$m M19-clear-png-only $V "s/for \(const f of \['verify\.json', 'verify\.png'\]\)/for (const f of ['verify.png'])/"
+$m M20-fail-writes-PASS $V "s/complete: false, result: 'FAIL', exit/complete: false, result: 'PASS', exit/"
+$m M21-no-writeEarly-normal $V 's/\nif \(!ctx\.done\) writeEarly\(ctx, code\);/\n/'
+$m M22-no-writeEarly-catch $V 's/  if \(!ctx\.done\) writeEarly\(ctx, 1\);\n//'
+$m M23-done-early $V "s/const ctx: Ctx = \{ outs: new Map\(\), stage: 'usage', reason: '', done: false \}/const ctx: Ctx = { outs: new Map(), stage: 'usage', reason: '', done: true }/"
+$m M24-outArg-null $V 's/outRaw = outArg\(argv\)/outRaw = null as string | null/'
+$m M25-no-seenFlags $C 's/if \(seenFlags\) throw/if (false) throw/'
+$m M26-no-dupkey $C 's/if \(Object\.prototype\.hasOwnProperty\.call\(out, m\[1\]\)\) throw/if (false) throw/'
+$m M27-writeEarly-keeps-png $V "s/    rmSync\(join\(dir, 'verify\.png'\), \{ force: true \}\); \/\/ a crash/    \/\/ a crash/"
+$m M28-default-dir-not-cleared $V "s/claimOut\(ctx, d, existsSync\(d\)\);/void d;/"
+$m M29-default-dir-no-write $V "s/claimOut\(ctx, d, existsSync\(d\)\);/claimOut(ctx, d, false);/"
+$m M30-no-rethrow $V 's/  throw e; \/\/ node prints/  void e; \/\/ node prints/'
+$m M31-build-exit-1 $V 's/earlyFail\(ctx, 3, `FAIL build/earlyFail(ctx, 1, `FAIL build/'
+$m M32-html-exit-1 $V 's/earlyFail\(ctx, 3, `FAIL \$\{HTML_LABEL\} missing`\)/earlyFail(ctx, 1, `FAIL ${HTML_LABEL} missing`)/'
+$m M33-html-dir-not-claimed $V 's/mkdirSync\(outDir, \{ recursive: true \}\); claimOut\(ctx, outDir, true\);/mkdirSync(outDir, { recursive: true });/'
+$m M34-no-mkdir-out $V 's/if \(outRaw !== null\) \{ mkdirSync\(resolveOut\(outRaw\), \{ recursive: true \}\); claimOut/if (outRaw !== null) { claimOut/'
+$m NC1-loop-rethrows $V 's/\} catch \(w\) \{ writerFailed\(dir, w, exit\); \}/} catch (w) { throw w; }/'
+$m NC2-text-rethrows $V "s/\} catch \(w\) \{ writerFailed\('report text', w, exit\); \}/} catch (w) { throw w; }/"
+$m NC3-writerFailed-silent $V 's/const writerFailed = \(what: string, w: unknown, exit: number\) =>\n  log\(/const writerFailed = (what: string, w: unknown, exit: number) =>\n  void (/'
+$m NC4-writerFailed-unsanitised $V 's/log\(sanitize\(`could not write the FAIL report \((.*?)`, ROOT\)\);/log(`could not write the FAIL report ($1`);/'
+$m NC5-one-bad-dir-stops-rest $V 's/\} catch \(w\) \{ writerFailed\(dir, w, exit\); \}/} catch (w) { writerFailed(dir, w, exit); break; }/'
+$m H1-OUT_ROOT-ignored $V "s/const OUT_ROOT = process\.env\.VERIFY_OUT_ROOT \? resolve\(process\.env\.VERIFY_OUT_ROOT\) : join\(ROOT, 'verify-out'\);/const OUT_ROOT = join(ROOT, 'verify-out');/"
+$m H2-aftershot-no-standin $V "s/\{ writeFileSync\(png, 'VERIFY_TEST_THROW stand-in'\); throw/{ throw/"
+echo ALLDONE

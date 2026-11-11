@@ -1,0 +1,14 @@
+HEAD=9ee76a0aa1d9e83fd28a7196844d2a00c32c1a86
+tree=c914276c901a0c780689abc336fab87356595eb5
+parents=a3c6dc510b5f0126a437fc13b9a5788ef8d34206
+subject=fix(abilities-ui): O1 dock cancel + O2 reopen pending close (#116)
+9ee76a0 fix(abilities-ui): O1 dock cancel + O2 reopen pending close (#116)
+ src/ui/app.ts                 |  5 ++++-
+ tests/v5-abilities-ui.test.ts | 34 ++++++++++++++++++++++++++++++++++
+ 2 files changed, 38 insertions(+), 1 deletion(-)
+=== vs a3c6dc5 ===
+ src/ui/app.ts                 |  5 ++++-
+ tests/v5-abilities-ui.test.ts | 34 ++++++++++++++++++++++++++++++++++
+ 2 files changed, 38 insertions(+), 1 deletion(-)
+M	src/ui/app.ts
+M	tests/v5-abilities-ui.test.ts

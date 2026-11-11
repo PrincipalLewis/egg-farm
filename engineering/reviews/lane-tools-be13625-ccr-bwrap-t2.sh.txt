@@ -1,0 +1,5 @@
+#!/bin/bash
+cd /workspace/.ccr-tmp/lanebox; P=/workspace/egg-farm-studio/.pids
+echo "== F3a job control (bash -m)"; p=$(bash -m ./lane-run.sh jc -- sleep 100); echo "recorded=$p"; sleep 0.3; ./lane-kill.sh jc $p; echo rc=$?; ps -eo pid,pgid,cmd | grep "[s]leep 100"
+echo "== F5 self-kill via own group"; ./lane-run.sh sg -- bash -c 'echo $$ > /workspace/.ccr-tmp/lanebox/sgpid; sleep 0.5; ./lane-kill.sh sg $(cat /workspace/.ccr-tmp/lanebox/sgpid) > /workspace/.ccr-tmp/lanebox/sgout 2>&1; touch /workspace/.ccr-tmp/lanebox/sgafter' >/dev/null; sleep 2; echo "after exists: $([ -e sgafter ] && echo yes || echo no)"; cat sgout 2>/dev/null
+echo "== F3b exec failure x20"; for i in $(seq 20); do ./lane-run.sh ef -- /nonexistent >/dev/null 2>&1; echo -n "$? "; done; echo; wc -l < $P/ef.pids 2>/dev/null || echo "0 lines"

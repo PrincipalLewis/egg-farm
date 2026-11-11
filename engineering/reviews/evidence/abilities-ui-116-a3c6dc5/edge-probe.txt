@@ -1,0 +1,49 @@
+
+ RUN  v2.1.9 /workspace/wt-review-116-a3c6dc5
+
+ × arch116-edge-close.test.ts > Architect edge: reopen / docked mid-close > reopen upgrades while close pending: stale transitionend must not hide open sheet 340ms
+   → TransitionEvent is not defined
+stdout | arch116-edge-close.test.ts > Architect edge: reopen / docked mid-close > docked mid-close without transitionend must not leave dangling freeze
+DOCKED {"sheets":true,"attended":false}
+
+ × arch116-edge-close.test.ts > Architect edge: reopen / docked mid-close > docked mid-close without transitionend must not leave dangling freeze
+   → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  arch116-edge-close.test.ts > Architect edge: reopen / docked mid-close > reopen upgrades while close pending: stale transitionend must not hide open sheet
+ReferenceError: TransitionEvent is not defined
+ ❯ arch116-edge-close.test.ts:65:62
+     63|     ui.openPanel('upgrades');
+     64|     expect(document.getElementById('p-upgrades')?.hidden).toBe(false);
+     65|     document.getElementById('p-upgrades')!.dispatchEvent(new Transitio…
+       |                                                              ^
+     66|     const hidden = document.getElementById('p-upgrades')?.hidden;
+     67|     const sheets = anySheetOpen();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  arch116-edge-close.test.ts > Architect edge: reopen / docked mid-close > docked mid-close without transitionend must not leave dangling freeze
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ arch116-edge-close.test.ts:85:20
+     83|     // eslint-disable-next-line no-console
+     84|     console.log('DOCKED', JSON.stringify({ sheets, attended }));
+     85|     expect(sheets).toBe(false);
+       |                    ^
+     86|     expect(attended).toBe(true);
+     87|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  02:07:03
+   Duration  1.28s (transform 466ms, setup 0ms, collect 371ms, tests 434ms, environment 301ms, prepare 46ms)
+

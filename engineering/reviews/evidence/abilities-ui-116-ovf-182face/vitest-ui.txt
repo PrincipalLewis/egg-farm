@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /workspace/wt-review-116-overflow
+
+ ✓ tests/v5-abilities-ui.test.ts (15 tests) 428ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  03:17:47
+   Duration  1.18s (transform 418ms, setup 0ms, collect 345ms, tests 428ms, environment 249ms, prepare 44ms)
+

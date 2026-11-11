@@ -1,0 +1,100 @@
+diff --git a/tests/v5-pause-sim.test.ts b/tests/v5-pause-sim.test.ts
+index b83652a..dedd8fc 100644
+--- a/tests/v5-pause-sim.test.ts
++++ b/tests/v5-pause-sim.test.ts
+@@ -1,5 +1,6 @@
+ // HoE/pause-sim (manifest row 31): Pause/Resume sim behind m4.flags.pause.
+-// Spec citations in tree: product/workers/m5-worker-pause-spec.md v1.3.6 rule 1, rule 3 / §6, rule 7 (B5), E2/E9/E12;
++// Spec citations in tree: product/workers/m5-worker-pause-spec.md v1.3.6 rule 1, rule 3 / §6, rule 7 (B5), E2/E9/E12.
++// D-HOP-2026-11-06-01 (a): Pause v1.3.15 — offline egg grant ignores pause and hire. Wages, recovery, and call lockout still freeze.
+ // lockout tc_pause_call_lockout_s = 45 sim seconds (Market Hand). UI and the G5-P driver are out of scope.
+ // AC-P1 flag-off has no behavioural effect. AC-P2 / rule 1: below tc_pause_unlock_farm the toggle does nothing.
+ import { describe, it, expect } from 'vitest';
+@@ -242,45 +243,70 @@ describe('[AC-P13][§15] committed tracksV7 save with a hired worker', () => {
+     expect(round.state.workers.market_hand!.callLockoutS).toBe(LOCK);
+   });
+ 
+-  it('[AC-P13][§15] pause freezes income and offline accrual: a clock change while paused grants 0', () => {
++  it('[AC-P13][§15] pause freezes online wages; an offline egg grant matches the unpaused grant', () => {
+     const { g } = boot(raw, t0);
+-    const open = g.state;
++    const open = { ...g.state, workers: { market_hand: { energy: 40, cdS: 0 }, coop_hand: { energy: 40, cdS: 0 } } };
+     const ev: SimEvent[] = [];
+     const working = step(open, 5, P, ev);
+     expect(working.coinsCents).toBeLessThan(open.coinsCents);
+     expect(ev.some(e => e.type === 'wage')).toBe(true);
+     const paused = bothPaused(open);
++    const mixed = pauseWorker(open, 'market_hand', P);
++    const none = { ...open, workers: {} };
+     expect(wagesPerSec(paused, P)).toBe(0);
+     const held: SimEvent[] = [];
+     const still = step(paused, 5, P, held);
+     expect(still.coinsCents).toBe(paused.coinsCents);
+     expect(still.basket).toBe(paused.basket);
++    expect(still.workers.market_hand!.energy).toBeCloseTo(40 + RECOVER * 5 / DRAIN, 6);
+     expect(held.filter(e => e.type === 'wage' || e.type === 'worker_collect')).toEqual([]);
+     expect(still.workers.market_hand!.cdS).toBe(paused.workers.market_hand!.cdS);
++    const grant = applyOffline(open, GAP, P).eggs;
++    expect(grant).toBeGreaterThan(0);
++    expect(applyOffline(paused, GAP, P).eggs).toBe(grant);
++    expect(applyOffline(mixed, GAP, P).eggs).toBe(grant);
++    expect(applyOffline(none, GAP, P).eggs).toBe(grant);
++    expect(applyOffline(paused, GAP, OFF).eggs).toBe(applyOffline(open, GAP, OFF).eggs);
++    expect(applyOffline(open, GAP, OFF).eggs).toBe(grant);
++    const under = b.offline.offlineMinSeconds * 1000 - 1000;
++    const over = b.offline.offlineCapSeconds * 1000 + 3_600_000;
++    expect(applyOffline(paused, under, P).eggs).toBe(applyOffline(open, under, P).eggs);
++    expect(applyOffline(paused, over, P).eggs).toBe(applyOffline(open, over, P).eggs);
+     g.state = paused;
+-    const coins = g.state.coinsCents, pending = g.state.pendingOfflineEggs, basket = g.state.basket;
++    const coins = g.state.coinsCents, basket = g.state.basket;
+     g.onHidden(t0);
+-    expect(g.onShown(t0 + GAP)).toBe(0);
+-    expect(g.state.pendingOfflineEggs).toBe(pending);
++    expect(g.onShown(t0 + GAP)).toBe(grant);
++    expect(g.state.pendingOfflineEggs).toBe(grant);
+     expect(g.state.coinsCents).toBe(coins);
+     expect(g.state.basket).toBe(basket);
+-    expect(applyOffline(open, GAP, P).eggs).toBeGreaterThan(0);
++    expect(g.state.workers.market_hand).toMatchObject({ energy: 40, cdS: 0, paused: true });
+   });
+ 
+-  it('[AC-P13][§15] resume does not double-credit the paused clock change', () => {
++  it('[AC-P13][§15] resume does not double-credit wages or recovery for the paused gap', () => {
+     const { g } = boot(raw, t0);
+-    const openGrant = applyOffline(g.state, GAP, P).eggs;
+-    expect(openGrant).toBeGreaterThan(0);
+-    g.state = bothPaused(g.state);
++    const open = { ...g.state, workers: { market_hand: { energy: 40, cdS: 0 }, coop_hand: { energy: 40, cdS: 0 } } };
++    const grant = applyOffline(open, GAP, P).eggs;
++    expect(grant).toBeGreaterThan(0);
++    g.state = bothPaused(open);
++    const coins = g.state.coinsCents, basket = g.state.basket;
+     g.onHidden(t0);
+-    const pausedGrant = g.onShown(t0 + GAP);
+-    expect(pausedGrant).toBe(0);
++    expect(g.onShown(t0 + GAP)).toBe(grant);
++    expect(g.state.pendingOfflineEggs).toBe(grant);
++    expect(g.state.coinsCents).toBe(coins);
++    expect(g.state.workers.market_hand!.energy).toBe(40);
+     g.state = bothResumed(g.state);
+-    const t1 = t0 + GAP;
+-    g.onHidden(t1);
+-    const resumedGrant = g.onShown(t1 + GAP);
+-    expect(resumedGrant).toBe(openGrant);
+-    expect(pausedGrant + resumedGrant).toBe(openGrant);
++    expect(g.state.pendingOfflineEggs).toBe(grant);
++    expect(g.state.coinsCents).toBe(coins);
++    expect(g.state.basket).toBe(basket);
++    expect(g.state.workers.market_hand!.energy).toBe(40);
++    const ev: SimEvent[] = [];
++    const stepped = step(g.state, 5, P, ev);
++    const twin = step(bothResumed(open), 5, P, []);
++    expect(stepped.coinsCents - coins).toBe(twin.coinsCents - open.coinsCents);
++    expect(stepped.coinsCents).toBeLessThan(coins);
++    expect(stepped.workers.market_hand!.energy).toBeCloseTo(40 - 5 / DRAIN, 6);
++    expect(stepped.workers.market_hand!.energy).toBeGreaterThan(step(bothResumed(open), GAP / 1000, P, []).workers.market_hand!.energy);
++    expect(ev.some(e => e.type === 'wage')).toBe(true);
+   });
+ 
+   it('[AC-P13][§15] paused survives save/load', () => {

@@ -1,0 +1,15 @@
+// Copy to the repo root as pr71-goalpill-repro.ts and run: npx vite-node pr71-goalpill-repro.ts
+import { balance as b } from './src/config/balance';
+import { save, migrate, type KV } from './src/save/save';
+import { runVerify } from './scripts/verify/sim';
+for (const hours of [1, 24]) {
+  const run = runVerify(b, { hours, seed: 1, profile: 'idle' });
+  const kv = new Map<string, string>(), mem: KV = { getItem: k => kv.get(k) ?? null, setItem: (k, v) => { kv.set(k, v); }, removeItem: k => { kv.delete(k); } };
+  const raw = save(mem, { ...run.end, seenTracksExplainer: true }, Date.UTC(2026,0,1) + hours*3600e3, b);
+  const d = JSON.parse(raw); const m = migrate(JSON.parse(raw), b);
+  const pick = (s: any) => ({ F: s.farmLevel, H: s.hensLevel, V: s.eggValueLevel, C: s.collectionLevel, coins: s.coinsCents, tracksV7: s.tracksV7 ?? null, v6BackupId: s.v6BackupId ?? null });
+  console.log(hours + 'h', 'version', d.version, 'stored', JSON.stringify(pick(d.state)), '-> loaded', JSON.stringify(pick(m.state)), 'tracksMigrated', !!m.tracksMigrated);
+  // control: with the marker
+  const raw2 = save(mem, { ...run.end, seenTracksExplainer: true, tracksV7: 1, v6BackupId: '0123456789abcdef' } as any, Date.UTC(2026,0,1), b);
+  const m2 = migrate(JSON.parse(raw2), b); console.log('  control (tracksV7:1)', JSON.stringify(pick(m2.state)), 'tracksMigrated', !!m2.tracksMigrated);
+}

@@ -1,0 +1,19 @@
+delete s4 | INVALID exit 3 | after: s4: stream missing
+drop the footer of s2 | INVALID exit 3 | after: s2: footer missing
+truncate s1 mid-file | INVALID exit 3 | after: s1: not newline-terminated (truncated)
+truncate s1 at a line boundary | INVALID exit 3 | after: s1: footer missing
+footer count off by one | INVALID exit 3 | after: s3: footer count 391 != 390 records
+footer body hash wrong | INVALID exit 3 | after: s3: footer body sha256 mismatch
+one seed missing from s3 | INVALID exit 3 | after: s3: footer seeds != seeds present
+manifest missing cfg.ship_tc_streak_cap | INVALID exit 3 | after: cfg.ship_tc_streak_cap missing
+empty stream | INVALID exit 3 | after: s2: stream empty
+runtime.node = v24 | INVALID exit 3 | after: runtime.node must be v20.* (got v24.1.0)
+src_flags_on non-empty | INVALID exit 3 | after: cfg.src_flags_on must be an empty array
+card sha1 not of record | INVALID exit 3 | after: card is not the version of record (sha1 7891bfbc00000000000000000000000000000000 != da3de91cd1dec39c4e1fc290671acabd9a3f720d)
+contract hash wrong | INVALID exit 3 | after: inputs.contract_sha256 != EC-2 contract fc6a9382…
+harness hashes differ | INVALID exit 3 | manifests differ in harness.files
+side label wrong | INVALID exit 3 | after: side != after
+seed missing from per_seed | INVALID exit 3 | seed 3 missing from per_seed
+extra manifest key | INVALID exit 3 | after: manifest.exclusions not allowed (additionalProperties false)
+TIE tick12 s2+s3 -> {"stream":"s2","tick":12}
+EARLIEST s2@30 vs s4@5 -> {"stream":"s4","tick":5}

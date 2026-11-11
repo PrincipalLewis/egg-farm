@@ -1,0 +1,45 @@
+# #108 mergefwd CONFLICT — stop (D-HOE escalate)
+
+- **branch:** feat/v5-golden-spawn @ `811c7da251ee276f5962557cb90c2871922a7168` (unchanged; merge aborted; Ready)
+- **attempted parent:** feat/v5-golden-rewards @ `27660196a081f379f467499d667fbe4f5ef3bda3` (#107 tip)
+- **merge-base:** `a6d44c250b043250b56885e289fd4210270ad988`
+- **conflict files:** `src/sim/timers.ts`, `src/save/m5-fields.ts`
+- **not pushed.** Do not invent TIMER_SYSTEMS order without Architect.
+
+## timers.ts
+
+| side | frenzyTick call | systems after incomeRef |
+|------|-----------------|-------------------------|
+| HEAD (spawn #108) | `frenzyTick(s, f, b, ev)` + `goldenTick` | `[frenzy, golden]` |
+| parent (#107) | `frenzyTick(s, f, b)` (no ev) + `abilitiesTick` | `[frenzy, abilities]` |
+
+`golden.ts` on spawn already exports `frenzyTick(..., ev?: Sink)` and `goldenTick`. Parent's abilities import/`abilitiesTick` must stay.
+
+### Proposed both-sides keep (NOT applied — needs Architect)
+
+```ts
+import { frenzyTick, goldenTick } from './golden';
+import { abilitiesTick } from './abilities';
+const frenzy: TimerSystem = (s, _dt, f, b, _c, ev) => frenzyTick(s, f, b, ev);
+const golden: TimerSystem = (s, _dt, f, b, _c, ev) => goldenTick(s, f, b, ev);
+const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
+export const TIMER_SYSTEMS: readonly TimerSystem[] = [
+  seedEvRng, streak, breeds, incomeRef, frenzy, golden, abilities,
+];
+```
+
+Order rationale (tentative): preserve spawn's `frenzy → golden`, then append `abilities` (#4) after golden tick. Alternative Architect may prefer `[..., frenzy, abilities, golden]` to keep #107's approved `[..., frenzy, abilities]` prefix and append golden last. **Not choosing without Architect.**
+
+## m5-fields.ts
+
+Conflict is comment/`m5Persist` only; `endCalls` body already took parent's D-HOE-41 `durS` path.
+
+### Proposed both-sides keep (NOT applied)
+
+- Keep HEAD `m5Persist` (Architect B golden persist: drawGap on detached copy when golden egg on screen).
+- Keep parent's `endCalls` JSDoc (D-HOE-41 / abilities v1.3.12 granted-seconds wording).
+- Keep parent's `endCalls` body (already in merge result).
+
+## Next
+
+Await Architect APPROVE (or CHANGES) on TIMER_SYSTEMS order + m5Persist keep; then commit merge, plain-push, stay Ready, base remains `feat/v5-golden-rewards`.

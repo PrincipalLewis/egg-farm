@@ -1,0 +1,18 @@
+{
+  "frenzyTouchedAbilities": false,
+  "abilitiesTouchedFrenzy": false,
+  "frenzyExpired": true,
+  "mhExpired": true,
+  "orderReversibleFrenzy": true,
+  "orderReversibleMh": true,
+  "saleEffectIds": [
+    "streak",
+    "frenzy",
+    "rush",
+    "shout"
+  ],
+  "productCommute": true,
+  "saleCents": 22467,
+  "suspendedEqualsPlainBasePath": true,
+  "note": "saleValueCents rounds once on product; SALE_EFFECTS order docs-only for that product"
+}

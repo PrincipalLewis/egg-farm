@@ -1,0 +1,7 @@
+FAIL [chromium] MK-16 served card shows "Thanks! +$X" ~1.5 s then leaves — {"n":25,"min":900,"max":1501,"txt":["Thanks!+$349.65","Thanks!+$382.95","Thanks!+$492.84","Thanks!+$329.67"]}
+PASS [chromium] MK-21 Market Hand, F12, 1500 stock: card on screen >= 40% over 60 s — {"share":70.2,"liveShare":16.2,"txt":["Thanks!+$349.65","Thanks!+$382.95","Thanks!+$492.84","Thanks!+$329.67"],"maxServed":4,"errs":[]}
+PASS [chromium] MK-21b no workers: card on screen ~91.8% (>= 85%) — {"share":100,"liveShare":100,"txt":[],"maxServed":0}
+PASS [chromium] MK-18 served card: pointer-events none, aria-hidden, click does nothing — {"pe":"none","hitIsServed":false,"aria":"true","coinsSame":true,"opened":false,"ids":0}
+PASS [chromium] MK-19 reduced motion: static "Thanks!" card, same ~1.5 s dwell — {"rm":{"rm":true,"anim":"none"},"life":[1300,1600,1600,1600,1600]}
+PASS [chromium] MK-22 first customer appears within 1 s of closing welcome-back — {"before":0,"ms":60}
+SUMMARY [chromium] s2-3a: 5/6 pass

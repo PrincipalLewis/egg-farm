@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1
+
+ ✓ tests/trace10/selftest.test.ts (6 tests) 199ms
+ ✓ tests/v5-golden-rewards.test.ts (21 tests) 87ms
+ ✓ tests/v5-golden-m5persist.test.ts (7 tests) 21ms
+ ✓ tests/trace10/rngcursor.test.ts (5 tests) 31ms
+ ✓ tests/trace10/record.test.ts (4 tests) 10ms
+ ✓ tests/trace10/encode.test.ts (6 tests) 9ms
+ ✓ tests/trace10/invalid.test.ts (21 tests) 2279ms
+   ✓ EC-2 self-test (c): invalid inputs are never MATCH_ALL > the same variants on the BEFORE side are also INVALID 345ms
+   ✓ EC-2 (c) on disk + CLI exit codes > CLI: identity exit 0 with synthetic label; deleted stream exit 3; usage exit 2 1300ms
+ ✓ tests/trace10/hooks.test.ts (4 tests) 2489ms
+   ✓ trace10 hooks in tests/bot-m5.ts are observe-only (G0 cond. c) > onRunnerDraw: R calls R0 exactly once per draw, same values, same run 2043ms
+ ✓ tests/v5-golden-spawn.test.ts (25 tests) 5385ms
+   ✓ #1 slice 2: lifetime and expiry (R3, GE-AC3, GE-AC5) > GE-AC3: 200 seeded resolutions: every gap in [120, 300), mean 210 +- 15; same seed same gaps; customer arrivals identical golden on vs off 4999ms
+ ✓ tests/bot-m5.test.ts (24 tests) 48380ms
+   ✓ bot-m5: parity with m5x.ts > [F-1][AC5] windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual) 4849ms
+   ✓ bot-m5: run() > observers are read-only: same end state, reach and mechanics totals with and without them 788ms
+   ✓ bot-m5: run() > is deterministic per seed, and the stack changes the outcome 587ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.2] pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2 13415ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.1] refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32 3558ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.1] charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only 2069ms
+   ✓ [Q4] bot-m5: onObserve (QA seam Q4) is observe-only > [Q4][AC7] windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given 3664ms
+   ✓ [Q4] bot-m5: onObserve (QA seam Q4) is observe-only > [Q4] M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call 7094ms
+   ✓ bot-m5: driver input (CCR N-1, N-2 on #78) > [VER-1h N-1][VER-1h N-2] the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts) 3490ms
+   ✓ [REQ-L35] bot-m5 B: parity-break report and toggle metric > [REQ-L35 FDT] scripts/bot-m5-diverge.ts exits 0 on identical files, 1 with the first divergence, 2 on usage 1186ms
+   ✓ [REQ-L35] bot-m5 B: parity-break report and toggle metric > [REQ-L35 D6] toggle sidecar: Asleep<->Unpaid flips per 30 min = tog / tAll * 1800, F10 variant on t10, casual seeds 1-2 within the D6 bar (<= 12) 6905ms
+   ✓ bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1) > [F-1][O-3][AC3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4) 488ms
+
+ Test Files  10 passed (10)
+      Tests  123 passed (123)
+   Start at  00:38:49
+   Duration  49.38s (transform 1.46s, setup 0ms, collect 3.85s, tests 58.89s, environment 2ms, prepare 994ms)
+

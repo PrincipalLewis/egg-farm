@@ -1,0 +1,394 @@
+
+ RUN  v2.1.9 /workspace/wt-gen-bbv2-r
+
+stdout | tests/telemetry-schema.test.ts > [G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2) > [G-8] worst-case 1 h session: every event valid and pinned; serialized <= 200 KB
+G-8 pinned bytes (base): 155374
+
+stdout | tests/telemetry-schema.test.ts > [G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2) > [G-8] worst-case 1 h session + buy-spam fixture: every event valid and pinned; serialized <= 200 KB
+G-8 pinned bytes (buy-spam): 175905
+
+ ✓ tests/telemetry-schema.test.ts (50 tests) 53ms
+ ✓ tests/m4a-v3-backup.test.ts (32 tests) 205ms
+ ✓ tests/bot-m5.test.ts (24 tests) 30568ms
+   ✓ bot-m5: parity with m5x.ts > [F-1][AC5] windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual) 2171ms
+   ✓ bot-m5: run() > observers are read-only: same end state, reach and mechanics totals with and without them 431ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.2] pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2 5752ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.1] refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32 1848ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.1] charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only 1140ms
+   ✓ [Q4] bot-m5: onObserve (QA seam Q4) is observe-only > [Q4][AC7] windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given 2188ms
+   ✓ [Q4] bot-m5: onObserve (QA seam Q4) is observe-only > [Q4] M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call 4468ms
+   ✓ bot-m5: driver input (CCR N-1, N-2 on #78) > [VER-1h N-1][VER-1h N-2] the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts) 5468ms
+   ✓ [REQ-L35] bot-m5 B: parity-break report and toggle metric > [REQ-L35 FDT] scripts/bot-m5-diverge.ts exits 0 on identical files, 1 with the first divergence, 2 on usage 1852ms
+   ✓ [REQ-L35] bot-m5 B: parity-break report and toggle metric > [REQ-L35 D6] toggle sidecar: Asleep<->Unpaid flips per 30 min = tog / tAll * 1800, F10 variant on t10, casual seeds 1-2 within the D6 bar (<= 12) 3987ms
+   ✓ bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1) > [F-1][O-3][AC3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4) 690ms
+ ✓ tests/v5-breeds-hatch.test.ts (37 tests) 235ms
+ ✓ tests/csr-loadsafe.test.ts (64 tests) 181ms
+ ✓ tests/m41-p2-ui-minors.test.ts (32 tests) 102ms
+ ✓ tests/m41-p1-asleep-signal.test.ts (26 tests) 56ms
+ ✓ tests/pacing-x1.test.ts (22 tests) 1122ms
+   ✓ QA-D-1030-SHIPFLAGS: the run records balance.json sha256 + m4 flags (results/ and SHA256SUMS) > `pacing-x1-stack.ts -- inputs` writes balance.txt (sha256 first, every m4 flag) and a byte copy whose sha256 is the tree file 1040ms
+ ✓ tests/m41-8-f4-label.test.ts (27 tests) 462ms
+ ✓ tests/m41-7-csr8b-race.test.ts (15 tests) 233ms
+ ✓ tests/v5-f1c-effects.test.ts (21 tests) 103ms
+ ✓ tests/v5-breeds-state.test.ts (35 tests) 262ms
+ ✓ tests/v5-streak-sim.test.ts (22 tests) 58ms
+ ✓ tests/verify.test.ts (56 tests) 44180ms
+   ✓ verify: the run > m5x-casual is available and is tests/bot-m5.ts run() (casual, AssZ): same end state and Farm reach 541ms
+   ✓ verify: end-state save round-trip (QA-D-1027-GOALPILL) > 24 h seed 1: the loaded end state has nothing left to buy (pill = All upgrades done!) 2223ms
+   ✓ verify: goldens > the copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree 800ms
+   ✓ verify: arguments and flags > [VER-1h N-4] CLI: usage errors exit 2 before building anything (no UNAVAILABLE path) 755ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > m5x-casual: the marked end state round-trips under the shipped balance (not migrated, no mismatches) 337ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > CLI: --profile m5x-casual runs (no exit 2) and records its profile and bot in verify.json 1260ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > CLI: with the marker skipped (VERIFY_TEST_SKIP_MARKER=1) verify exits 4, records saveRoundTrip FAIL, and leaves no PNG 1219ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > CLI: with the marker applied the same run passes the round-trip (exit 1 here only for the fake html / no shot) 1169ms
+   ✓ verify: VER-1b (CCR F1/N2 on #72) > F1: --flags m4.enabled=0 no longer gives a false PASS: exit 4, flagsDifferFromBuild, no screenshot, no PNG 1108ms
+   ✓ verify: VER-1b (CCR F1/N2 on #72) > F1: --flags equal to the shipped flags (m4.enabled=1) is not an override and passes the round-trip 1188ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > S1: a usage error (exit 2) leaves no stale PASS verify.json and no verify.png in --out 1241ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > S1: a build failure (exit 3) leaves no stale PASS verify.json and no verify.png in --out 523ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > S1: an uncaught throw (exit 1) leaves no stale PASS verify.json and no verify.png in --out 767ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > N-a: --flags m4.enabled=2 (round-trips under the shipped balance, but differs from the build) exits 4, no PNG 2046ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > N-b: the CLI exits 2 with a clear message for both, and writes no PASS 1476ms
+   ✓ verify: exit codes and the browser step (CCR n1/n3) > exit 3 when the html to verify is missing 696ms
+   ✓ verify: exit codes and the browser step (CCR n1/n3) > exit 1 on a failed check (wrong build id, no screenshot); verify.json says FAIL and names no PNG 1958ms
+   ✓ verify: exit codes and the browser step (CCR n1/n3) > n1: a Chromium launch failure gives ok:false with the launch error and leaves no (stale) PNG 410ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M31): a real tsc break in a temp copy of the repo exits 3 (stage build), not 1, and leaves no stale PASS 7767ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M28/M29): without --out, a usage error clears the existing default dir verify-out/<HEAD id>/ and writes the FAIL report there 1433ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M17/M18/M19): a run SIGKILLed mid-sim (no handler runs) leaves neither verify.json nor verify.png 718ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M33): --skip-build with an older html clears that html's default dir; a crash then writes the FAIL report there 904ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M27): a crash after the browser step wrote verify.png removes that PNG with the FAIL report 1858ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > N-c: <out>/verify.json being a directory: the original error (rm EISDIR) is what fails the run; the writer failure is only logged 628ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > N-c: an unwritable out dir keeps the original exit code (usage 2, not 1) and logs the writer failure 687ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-1 (NC4): the writer-failure line is sanitised: an out dir under the home dir prints as ~ 588ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-1: an out dir outside the repo and home prints <redacted>, never an absolute path 613ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-4 (NC5): when the first of two claimed dirs cannot take the FAIL report, the second still gets it and loses its PNG 1989ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-4 (H2): the after-shot hook really writes its stand-in verify.png before the crash (seen by a watcher), and the writer removes it 2408ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > O-1: a hostile html build id (../../victim) cannot move the default out dir outside the out root 2012ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > O-2: a read-only out dir on a run that fails the save round-trip keeps exit 4 (not an uncaught 1) and logs one line 1847ms
+ ✓ tests/m41-7-hop-rulings.test.ts (26 tests) 235ms
+ ✓ tests/workers-v11.test.ts (23 tests) 30ms
+ ✓ tests/qa-rc1-bugs.test.ts (45 tests) 55ms
+ ✓ tests/m4a-pick-hysteresis.test.ts (17 tests) 567ms
+ ✓ tests/bbv2-telemetry.test.ts (22 tests) 60ms
+ ✓ tests/v5-f2-m5-fields.test.ts (34 tests) 16ms
+ ✓ tests/hidden-time.test.ts (18 tests) 80ms
+ ✓ tests/economy-copy.test.ts (13 tests) 2343ms
+   ✓ --strict: each vendored sim file in SOURCE must match product/ by sha256 (fail closed on drift or missing) 774ms
+ ✓ tests/m41-9-big-number.test.ts (35 tests) 12795ms
+   ✓ K–T golden byte-identity (old dd223f5 vs new, 0..1e15) > fmtCount over 24554 values 320ms
+   ✓ K–T golden byte-identity (old dd223f5 vs new, 0..1e15) > fmtMoney / fmtMoneyShort / fmtMoneyPreview / fmtMoneyExact over the same values as dollars (cents < 1e17) 11923ms
+   ✓ QA4-1: no thousands separator in a suffixed value, widest strings are 8 chars > log-spaced 1e4..1e40 413ms
+ ✓ tests/cost-segments.test.ts (8 tests) 65ms
+ ✓ tests/v5-f1b-clock-rng.test.ts (17 tests) 246ms
+ ✓ tests/m4a-tracks.test.ts (31 tests) 16ms
+ ✓ tests/v5-f3-config.test.ts (28 tests) 70ms
+ ✓ tests/idb-mirror.test.ts (12 tests) 61ms
+ ✓ tests/save-level-tolerance.test.ts (72 tests) 71ms
+ ✓ tests/m41-p2-unpaid.test.ts (11 tests) 23ms
+ ✓ tests/release-html.test.ts (51 tests) 3655ms
+   ✓ --build-id <id> and --build-id=<id> 433ms
+ ✓ tests/save-majors-2959ba0.test.ts (20 tests) 77ms
+ ✓ tests/save-hardening.test.ts (27 tests) 24ms
+ ✓ tests/zg-verdict.test.ts (21 tests) 1719ms
+   ✓ ZG-AC20 [sim] parity with the Best buy verdict (bounded trace; full seeds 1–200 x 12,000 s is QA P2) > isZeroGain === optionGain.gain <= 0 for every offered COLL/HENS/VALUE, except HENS milestone steps with Δcap > 0 1503ms
+ ✓ tests/save-recovery-v21.test.ts (16 tests) 8ms
+ ✓ tests/s2-3a.test.ts (12 tests) 116ms
+ ✓ tests/hidden-tab.test.ts (20 tests) 49ms
+ ✓ tests/onboarding.test.ts (13 tests) 11ms
+ ✓ tests/bbv2-parta.test.ts (15 tests) 8278ms
+   ✓ BBV2-AC1 [B] zero-gain never ranked while a meaningful row is offered (all §1 paths + ★) > generated grid: hint, highlight, next-goal, tracks highlight, bestPaybackAmong, bot pick and ★ are meaningful (0 violations) 4210ms
+   ✓ BBV2-AC2 (c) / BBV2-AC3 [B] hysteresis never protects a zero-gain pick > generated: every state where the flag-off picker shows a zero-gain pick and a meaningful row is offered drops it on the next evaluate (100%) 412ms
+   ✓ BBV2-AC11 [B] flag 0 = pre-BBv2 behaviour > rankable is the identity and bestPaybackAmong / DualPicker / selectGoal / highlightPick equal m4.flags.bestBuyV2 absent 3550ms
+ ✓ tests/m4a-tracks-ui.test.ts (13 tests) 19ms
+stderr | tests/serve-own.test.ts > expectHeadBuild wiring (a real git tree + a served page) > git unavailable (not a repo) is an error, also with ALLOW_DIRTY; only ALLOW_NO_GIT skips it
+serveOwn: WARNING git unavailable in /tmp/so-nogit-kisVhT; ALLOW_NO_GIT=1, served build m3-rc1-pre+abcdef1 NOT checked
+
+ ✓ tests/serve-own.test.ts (15 tests | 1 skipped) 2542ms
+   ✓ serveForRun wiring: one line, exit 2 > n5: vite cannot be spawned (no npx on PATH) -> exit 2, one line 1934ms
+ ✓ tests/csr-idb1-mirror.test.ts (15 tests) 211ms
+ ✓ tests/market.test.ts (24 tests) 74ms
+ ✓ tests/ac14.test.ts (13 tests) 20ms
+stdout | tests/economy.test.ts > parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) > vendored SOURCE provenance equals the SHA256SUMS pins (unmodified copies)
+economy-sim vendored sim/economy_sim.py from product/sim/economy_sim.py sha256 10f29a4a38c8b22d3b952736c2627c0b83892fb5b299e257e4db9c7adf9fa6d6 on 2026-10-17
+economy-sim vendored economy.f1-m4cols.csv from product/economy.f1-m4cols.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f on 2026-10-17
+economy-sim vendored sim/seller_variance_sim.py from product/sim/seller_variance_sim.py sha256 68a64c59f0db10e67d4edc3a68a9a86bc559db72bc33102d3d9e3c7b669d98f1 on 2026-10-17
+economy-sim vendored sim/seller-variance-proposal.md from product/sim/seller-variance-proposal.md sha256 17877b4106116951ec9d41987bd03aec43af45f0b79bfd157f81abc984e4d4e5 on 2026-10-17
+
+ ✓ tests/economy.test.ts (70 tests) 66ms
+ ✓ tests/k10-breeds-offset.test.ts (9 tests) 786ms
+   ✓ k10 harness > seed 1 equals the scratch harness of record (g1csv.ts -> g1tap/m5tap/breeds 76c07ecf, SEEDS=1, g1max @0.27) 773ms
+ ✓ tests/s2-8-10.test.ts (11 tests) 81ms
+ ✓ tests/pacing-x1-ac7.test.ts (11 tests) 403ms
+ ✓ tests/v5-f1a-fields.test.ts (10 tests) 71ms
+ ✓ tests/newer-save.test.ts (14 tests) 9ms
+ ✓ tests/tab-guard-tg.test.ts (8 tests) 21ms
+ ✓ tests/workers.test.ts (10 tests) 48ms
+ ✓ tests/orders.test.ts (11 tests) 19ms
+ ✓ tests/m41-9-art-rulings.test.ts (11 tests) 35ms
+ ✓ tests/pacing-guards.test.ts (16 tests) 36ms
+ ✓ tests/v5-m5load-pause-sanitize.test.ts (10 tests) 7ms
+ ✓ tests/telemetry-m3.test.ts (10 tests) 78ms
+ ✓ tests/m41-p1-mh-copy.test.ts (19 tests) 17ms
+ ✓ tests/next-goal.test.ts (12 tests) 5ms
+ ✓ tests/v5-f2-game-settle.test.ts (8 tests) 19ms
+ ✓ tests/save-durability-v4.test.ts (12 tests) 9ms
+ ✓ tests/m4a-migrate-v7.test.ts (29 tests) 42ms
+ ✓ tests/s2-money.test.ts (8 tests) 20ms
+ ✓ tests/save.test.ts (9 tests) 11ms
+ ✓ tests/v5-f3-qa-seam.test.ts (9 tests) 133ms
+ ✓ tests/ftue-v11.test.ts (9 tests) 14ms
+ ✓ tests/m41-p1-live-income.test.ts (31 tests) 40ms
+ ✓ tests/v5-f2-roundtrip.test.ts (4 tests) 205ms
+ ✓ tests/v7-marker-run-once.test.ts (6 tests) 7ms
+ ✓ tests/payout-parity.test.ts (2 tests) 213ms
+ ✓ tests/hidden-save-paths.test.ts (5 tests) 10ms
+ ✓ tests/v5-f3-is-paused.test.ts (9 tests) 13ms
+stdout | engineering/golden/m4on-golden.90a9c84.test.ts > golden > storage bytes
+GOLDEN2 {"m1-rc2-v4-12min":"b1e07c13a21b6059ececdc898a4ddfe03b5286ea9133a4def6ae25992ec139dc","m2-rc1-v5-12min":"a425f0135a78b44615468a81fc99f955032e046a6003a9c180b973d51d346297","m2-rc1-v5-40min":"48b1fa43497a912c700461ddd4a2cf0abe59ba685977e7841c012ce8f7e6f1ef","m2-rc1-v5-40min-edge":"78b97634d0bbc3b4a174751917ad573889ec57bc22cc3163deb4c6fec0e4a4bc"}
+
+stdout | engineering/golden/m4on-golden.90a9c84.test.ts > golden > sim trace
+GOLDEN1 a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+
+ ✓ engineering/golden/m4on-golden.90a9c84.test.ts (2 tests) 512ms
+   ✓ golden > sim trace 491ms
+ ✓ tests/sellall-label-grader.test.ts (9 tests) 5ms
+ ✓ tests/m41-6-roundtrip-migrate.test.ts (13 tests) 16ms
+stdout | engineering/golden/flagoff-golden.a01faea.test.ts > golden > storage bytes
+GOLDEN2 {"m1-rc2-v4-12min":"b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9","m2-rc1-v5-12min":"2ac7070d0c5e7ea2d8fcdd1642732cf44871fe9c5b126d1b5873fcd8244f3a00","m2-rc1-v5-40min":"4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431","m2-rc1-v5-40min-edge":"652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb"}
+
+stdout | engineering/golden/flagoff-golden.a01faea.test.ts > golden > sim trace
+GOLDEN1 f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+
+ ✓ engineering/golden/flagoff-golden.a01faea.test.ts (2 tests) 246ms
+ ✓ tests/ios-tip.test.ts (12 tests) 3ms
+ ✓ tests/tick.test.ts (9 tests) 17ms
+ ✓ tests/m4a-pacing.test.ts (4 tests) 48ms
+stdout | tests/m4a-pacing.test.ts > M4-A pacing (game sim, flag on) > report (diagnostic, not gating: in-game farm_cost is main's, not the F1 + M3 taper table TR-5 uses)
+M4A-PACING {"highlightF30":[22,22,22,22,21,22,22,22,22,22],"H":[24,24,24,24,24,24,24,24,24,24],"V":[24,24,24,24,24,24,24,24,24,24],"farmOnlyF30":[7,7,7,7,7,7,7,7,7,7],"worstGapS":[105,105,105,90,90,105,90,105,105,105]}
+
+ ✓ tests/post-rc1.test.ts (5 tests) 31ms
+ ✓ tests/release-build-id.test.ts (6 tests) 394ms
+stderr | tests/telemetry.test.ts > telemetry > events carry ts + sessionMs
+[telemetry] unknown event type: x
+
+stderr | tests/telemetry.test.ts > telemetry > ring buffer capped at ring_size
+[telemetry] unknown event type: e
+
+stderr | tests/telemetry.test.ts > telemetry > flush writes only when dirty; persisted buffer reloads
+[telemetry] unknown event type: a
+
+ ✓ tests/telemetry.test.ts (6 tests) 109ms
+ ✓ tests/rc2-fmt.test.ts (13 tests) 15ms
+ ✓ tests/sync-economy.test.ts (7 tests) 26ms
+ ✓ tests/m4a-save-migrate.test.ts (10 tests) 11ms
+ ✓ tests/m4a-sync.test.ts (7 tests) 16ms
+ ✓ tests/v5-f1b-focus-wiring.test.ts (6 tests) 12ms
+ ✓ tests/staging-f1-m4cols.test.ts (5 tests) 58ms
+ ✓ tests/ui-logic.test.ts (10 tests) 14ms
+ ✓ tests/resume.test.ts (8 tests) 15ms
+ ✓ tests/m4a-offline-csv.test.ts (6 tests) 5ms
+ ✓ tests/bbv2-qe2.test.ts (9 tests) 21ms
+ ✓ tests/art-ux-rc0.test.ts (6 tests) 14ms
+stdout | tests/p4.test.ts > P4 build numbers vs Economy re-sim > report
+P4 build { W4: 3, W4b: 3.25, managePer15: 6.75 }
+
+ ✓ tests/p4.test.ts (3 tests) 10ms
+ ✓ tests/m4a-flag-off.test.ts (2 tests) 227ms
+ ✓ tests/seen-tracks-explainer-save.test.ts (12 tests) 5ms
+stdout | tests/pacing.test.ts > AC7 pacing bot on the real sim > report
+AC7 seller15: {
+  first: 15,
+  up5: 21,
+  f10m: 10,
+  L10min: 9.875,
+  L18min: 21.25,
+  f30m: 20
+} cheapest: { up5: 19, f10m: 8, f30m: 20 }
+
+ ✓ tests/pacing.test.ts (7 tests) 4ms
+ ✓ tests/bug6-savedat.test.ts (5 tests) 9ms
+ ✓ tests/m4a-saveseq-carry.test.ts (2 tests) 3ms
+stdout | tests/bbv2-sim.test.ts > BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > seeds 1–200, 15 s check-in sells (gating cadence): 0 violating seeds
+AC8 fixed cadence: max first ★ 30 s; keys HENS; violating 0
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > VAR_DEFAULT check-in cadence: REPORT-ONLY (the bot's random first check-in), every seed gets a meaningful ★
+AC8 variance cadence (report-only): 61/200 first ★ after 30 s, max 57.8 s
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC9 [B] seller15 bots (runBot band + runM2 workers, VAR_DEFAULT): zero-gain buys below L30 = 0 > flag on, seeds 1–10 (1–200 in the slow test)
+AC9 seeds 1-10: 0 zero-gain of 2137 buys
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > DECISIVE bestBuyV2=1 zeroGainUi=0: seeds 1–3 (1–200 in the slow test)
+AC14 DECISIVE bestBuyV2=1 zeroGainUi=0 seeds 1-3: {"states":32400,"violations":0,"suppressed":19925,"suppressedAffordable":334,"suppressedAffordableBelow30":0,"examples":[]}
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1: seeds 1–3 (1–200 in the slow test)
+AC14 CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1 seeds 1-3: {"states":32400,"violations":0,"suppressed":5577,"suppressedAffordable":0,"suppressedAffordableBelow30":0,"examples":[]}
+
+ ✓ tests/bbv2-sim.test.ts (5 tests) 12103ms
+   ✓ BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > seeds 1–200, 15 s check-in sells (gating cadence): 0 violating seeds 368ms
+   ✓ BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > VAR_DEFAULT check-in cadence: REPORT-ONLY (the bot's random first check-in), every seed gets a meaningful ★ 408ms
+   ✓ BBV2-AC9 [B] seller15 bots (runBot band + runM2 workers, VAR_DEFAULT): zero-gain buys below L30 = 0 > flag on, seeds 1–10 (1–200 in the slow test) 2281ms
+   ✓ BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > DECISIVE bestBuyV2=1 zeroGainUi=0: seeds 1–3 (1–200 in the slow test) 4345ms
+   ✓ BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1: seeds 1–3 (1–200 in the slow test) 4700ms
+ ✓ tests/csr-recovery-types.test.ts (2 tests) 2ms
+ ✓ tests/r1-dialog-spacing.test.ts (4 tests) 4ms
+ ✓ tests/vendor-pins.test.ts (4 tests) 195ms
+ ✓ tests/offline-modal.test.ts (5 tests) 7ms
+ ✓ tests/m4a-maxlevel-data.test.ts (3 tests) 3ms
+ ✓ tests/v5-f2-downgrade.test.ts (3 tests) 8ms
+ ✓ tests/offline.test.ts (6 tests) 3ms
+ ✓ tests/m41-p1-acr7.test.ts (2 tests) 14ms
+ ✓ tests/release-bundle.test.ts (4 tests) 3415ms
+   ✓ release bundle > has no ?ios= override (the flag reader is dead-code eliminated) 1144ms
+   ✓ release bundle > has no window.eggfarmOnb onboarding debug handle (QA builds only) 762ms
+   ✓ release bundle > D3/D4: no ?perf=1 SM-9 sampler and no ?debug=1 cheat panel in release (QA builds keep both) 718ms
+   ✓ release bundle > has no window.eggfarm game handle in release (QA/dev builds keep it) 790ms
+ ✓ tests/contrast.test.ts (11 tests) 3ms
+ ✓ tests/export-global.test.ts (1 test) 6ms
+stderr | tests/zg-telemetry-annotate.test.ts > Minor 1: Telemetry.annotateLast tags the newest matching event only > two upgrade events: only the second is annotated, and the buffer is marked dirty (flushed)
+[telemetry] unknown event type: tap_other
+
+ ✓ tests/zg-telemetry-annotate.test.ts (2 tests) 4ms
+stderr | tests/zg-telemetry-annotate.test.ts > Minor 1: Telemetry.annotateLast tags the newest matching event only > no match: nothing changes and nothing is written
+[telemetry] unknown event type: tap_other
+
+stdout | tests/ac7-first-purchase.test.ts > AC7 new save: first purchase within 30 s (seeds 1-200, M4 on) > deterministic bot (fixed 1 s taps, 15 s check-ins): every seed's first purchase <= 30 s
+first purchase deterministic: max 15 s
+
+stdout | tests/ac7-first-purchase.test.ts > AC7 new save: first purchase within 30 s (seeds 1-200, M4 on) > variance bot (random timing): REPORT-ONLY, non-gating, first-purchase time logged
+first purchase variance: 40/200 over 30 s, max 57.8 s
+
+ ✓ tests/ac7-first-purchase.test.ts (3 tests) 1038ms
+   ✓ AC7 new save: first purchase within 30 s (seeds 1-200, M4 on) > deterministic bot (fixed 1 s taps, 15 s check-ins): every seed's first purchase <= 30 s 531ms
+   ✓ AC7 new save: first purchase within 30 s (seeds 1-200, M4 on) > variance bot (random timing): REPORT-ONLY, non-gating, first-purchase time logged 505ms
+ ✓ tests/audio-unlock.test.ts (4 tests) 558ms
+   ✓ PT1-3 audio unlock timeout > unlock returns within ~AUDIO_UNLOCK_MS when resume never resolves 504ms
+ ✓ tests/slot-preview.test.ts (3 tests) 3ms
+ ✓ tests/zg-ac13-sim.test.ts (2 tests) 3492ms
+   ✓ ZG-AC13 AC7 bots unchanged by zeroGainUi > seller15 seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 (bestBuyV2 0; seeds 1–3 also at bestBuyV2 1) 2635ms
+   ✓ ZG-AC13 AC7 bots unchanged by zeroGainUi > cheapest seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 (bestBuyV2 0; seeds 1–3 also at bestBuyV2 1) 856ms
+ ✓ tests/frame-sampler.test.ts (6 tests) 3ms
+stdout | tests/pacing-m2.test.ts > M2 pacing: managed workers > report
+M2 seller15 {
+  none: [ 9.875, 21.25, 52.75 ],
+  managed: [ 10.25, 21, 36 ],
+  step: 3,
+  cheapestStep: 3.25,
+  managesPer10min: 4.5
+}
+
+stdout | tests/pacing-m2.test.ts > M2 pacing: managed workers > AC-W4b (soft, non-gating): cheapest managed steps F18->F25 <= 8 min
+AC-W4b soft pass: 3.25 min
+
+ ✓ tests/pacing-m2.test.ts (4 tests) 4ms
+ ✓ tests/pacing-m2b.test.ts (2 tests) 5ms
+ ✓ tests/recovery-v11.test.ts (3 tests) 3ms
+ ✓ tests/s2-6-qtag.test.ts (3 tests) 2ms
+ ✓ tests/save-fixtures.test.ts (4 tests) 4ms
+ ✓ tests/bot-farm-log.test.ts (1 test) 4ms
+ ✓ tests/p3-collection-card.test.ts (2 tests) 3ms
+ ✓ tests/m4a-max-label.test.ts (3 tests) 2ms
+ ✓ tests/d5-goal-pill.test.ts (2 tests) 2ms
+ ✓ tests/m4-exp1-explainer.test.ts (25 tests) 451ms
+ ✓ tests/zg-ui.test.ts (36 tests) 1798ms
+ ✓ tests/m41-p2-ui-dom.test.ts (18 tests) 470ms
+ ✓ tests/m41-8-best-chip.test.ts (25 tests) 715ms
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE > EXP-SB-QE-LATE commit-in-session
+QE_LATE commit-in-session {"storageFailed":false,"mem":false,"persistedBefore":null,"cardsDuringQE":0,"persistedAfterAutosave":null,"storageFailedAfter":false,"cardsOnReload":1,"cardsOnReload2":0}
+
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE > EXP-SB-QE-LATE reload-committed-unseen
+QE_LATE reload-committed-unseen {"storageFailed":true,"mem":false,"persistedBefore":null,"cardsDuringQE":0,"persistedAfterAutosave":false,"storageFailedAfter":true,"cardsOnReload":1,"cardsOnReload2":0}
+
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE mirror/reload variants > EXP-SB-QE-LATE-a
+QE_LATE_a {"v":"a","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":null,"lsAfter":false,"idbAfter":null,"lsSeqAtDeath":5,"idbSeqAtDeath":null,"reloadSrc":"ls","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[],"shownDuringQE":0,"total":1}
+
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE mirror/reload variants > EXP-SB-QE-LATE-b
+QE_LATE_b {"v":"b","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,5,6,7,8,9],"shownDuringQE":0,"total":1}
+
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE mirror/reload variants > EXP-SB-QE-LATE-c
+QE_LATE_c {"v":"c","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":false,"idbAfter":false,"lsSeqAtDeath":5,"idbSeqAtDeath":5,"reloadSrc":"ls","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,5,6,7,8,9],"shownDuringQE":0,"total":1}
+
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE mirror/reload variants > EXP-SB-QE-LATE-d
+QE_LATE_d {"v":"d","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,6,7,8,9],"shownDuringQE":0,"total":1}
+
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE mirror/reload variants > EXP-SB-QE-LATE-e
+QE_LATE_e {"v":"e","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,6,7,8,9],"shownDuringQE":0,"total":1}
+
+stdout | tests/m41-6-explainer-storage.test.ts > EXP-SB-QE-LATE mirror/reload variants > EXP-SB-QE-LATE-f
+QE_LATE_f {"v":"f","s1":{"mig":"committed","coins":123456789,"F":30,"H":30,"V":20,"bid":"fdb4fb973d405e98","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":3,"idbSeqAtDeath":4,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"fdb4fb973d405e98","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"fdb4fb973d405e98","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[2,3,4,5,6,7,8],"idbSeqs":[3,4,5,6,7,8],"shownDuringQE":0,"total":1}
+
+ ✓ tests/m41-6-explainer-storage.test.ts (17 tests) 65ms
+ ✓ tests/m41-7-csr-copy.test.ts (26 tests) 34ms
+ ✓ tests/m41-9-ux-ccr-m1.test.ts (16 tests) 4121ms
+   ✓ CCR M1: the scrolled sheet (no fallback exemption) > sweep: every scrollTop 0..359 at 360/375/390, card 154 and 206: the placed card never meets a visible Buy; every state is named 3943ms
+ ✓ tests/m41-9-ux-minors.test.ts (18 tests) 100ms
+ ✓ tests/m41-6-save-mirror-canpersist.test.ts (16 tests) 152ms
+ ✓ tests/m41-9-ux-rulings.test.ts (10 tests) 266ms
+ ✓ tests/bbv2-qapicker.test.ts (14 tests) 9371ms
+   ✓ PMFU BB12: mark is the exact ★ the chip and the strip render; suppressed = hint !== null && mark === null > ship config (bestBuyV2 1 + zeroGainUi 1), below Farm L30: never an affordable hint with a null ★ (fixtures + a 240 s FX-L17 run; post-L30 needs the #97 ZG filter) 4411ms
+   ✓ BBV2-AC2 (a)/(b) jsdom analog on FX-L17 (DOM/page.clock checks on the RC dist and build:qa are QA browser runs) > (b) $3,000 + 240 s sim, no buy input: no history entry with key or mark COLL; every non-null mark meaningful; hint starts FARM unaffordable/null; at >= $37,300 hint = mark = FARM 3960ms
+ ✓ tests/m41-11-egg-unlock.test.ts (30 tests) 324ms
+ ✓ tests/v5-p8-slim.test.ts (27 tests) 193ms
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config
+AC-W1 build 1-200 {
+  pass10: 91,
+  pass10at16: 98,
+  pass10gate: 98,
+  medF10: 13.67,
+  medF18: 25,
+  at900: 16
+}
+
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config
+AC-W1 build 201-299 {
+  pass10: 90.91,
+  pass10at16: 96.97,
+  pass10gate: 96.97,
+  medF10: 14,
+  medF18: 25,
+  at900: 7
+}
+
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > BB-AC13 flag-on regression baseline seeds 1-200 (bestBuyV2=1, zeroGainUi=0)
+AC-W1 BBv2 flag-on 1-200 {
+  pass10: 100,
+  pass10at16: 100,
+  pass10gate: 100,
+  medF10: 10.333333333333334,
+  medF18: 19.666666666666668,
+  at900: 0
+} signed baseline { pass10: 100, medF10: 10.333333, medF18: 19.666667 }
+
+ ✓ tests/pacing-acw1.test.ts (4 tests) 91648ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config 35871ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config 18163ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > BB-AC13 flag-on regression baseline seeds 1-200 (bestBuyV2=1, zeroGainUi=0) 37612ms
+ ✓ tests/m41-p1-scene-tap-guard.test.ts (6 tests) 264ms
+ ✓ tests/m41-11-farm-max.test.ts (7 tests) 1344ms
+   ✓ B1-10 / F4-19: best_roi, the ★ and the strip never target a Max-for-this-farm row > grid over F0..20 and Egg value / Hens L23..29 on the farm-max-20 balance, broke and rich 1109ms
+ ✓ tests/m41-p1-yard-hens.test.ts (10 tests) 297ms
+ ✓ tests/m41-7-explainer-recovery.test.ts (7 tests) 59ms
+ ✓ tests/zg-matrix.test.ts (16 tests) 3966ms
+   ✓ ZG matrix zeroGainUi=1, bestBuyV2=0, confirm=0 > verdict + ★ filter parity with (same bb, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) 606ms
+   ✓ ZG matrix zeroGainUi=1, bestBuyV2=0, confirm=1 > verdict + ★ filter parity with (same bb, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) 402ms
+   ✓ ZG matrix zeroGainUi=1, bestBuyV2=1, confirm=0 > verdict + ★ filter parity with (same bb, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) 399ms
+   ✓ ZG matrix zeroGainUi=1, bestBuyV2=1, confirm=1 > verdict + ★ filter parity with (same bb, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) 380ms
+   ✓ ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=0 > confirm=0: DOM byte-identical to the zeroGainUi-0 config at the same bestBuyV2 on every fixture/tab; no ZG nodes (ZG-AC12/19) 448ms
+   ✓ ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=0 > confirm=1: DOM byte-identical to the zeroGainUi-0 config at the same bestBuyV2 on every fixture/tab; no ZG nodes (ZG-AC12/19) 432ms
+   ✓ ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=1 > confirm=0: DOM byte-identical to the zeroGainUi-0 config at the same bestBuyV2 on every fixture/tab; no ZG nodes (ZG-AC12/19) 393ms
+   ✓ ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=1 > confirm=1: DOM byte-identical to the zeroGainUi-0 config at the same bestBuyV2 on every fixture/tab; no ZG nodes (ZG-AC12/19) 400ms
+ ✓ tests/m41-9-card-wrap.test.ts (12 tests) 57ms
+ ✓ tests/m41-7-ui-fixes.test.ts (16 tests) 49ms
+ ✓ tests/zg-followup.test.ts (6 tests) 295ms
+ ✓ tests/m41-p1-acr8-coop-copy.test.ts (9 tests) 31ms
+ ✓ tests/pl1-key-guard.test.ts (4 tests) 272ms
+stdout | tests/zg-flagoff-dom.test.ts > ZG-AC12/19 flag-off DOM byte-identical to 65a7443 > sha256 over (config x fixture x tab) markup + nav dot + strip
+ZG-FLAGOFF-DOM 9c4b6439016e5d5b6a779b34643f70793fda5df8d44728f9bcc32844c662ee35
+
+ ✓ tests/zg-flagoff-dom.test.ts (1 test) 779ms
+   ✓ ZG-AC12/19 flag-off DOM byte-identical to 65a7443 > sha256 over (config x fixture x tab) markup + nav dot + strip 777ms
+ ✓ tests/zg-ui-onestrip.test.ts (1 test) 128ms
+
+ Test Files  152 passed (152)
+      Tests  2179 passed | 1 skipped (2180)
+   Start at  22:33:56
+   Duration  164.40s (transform 2.37s, setup 0ms, collect 45.73s, tests 253.75s, environment 5.24s, prepare 6.43s)
+

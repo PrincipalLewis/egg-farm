@@ -1,0 +1,102 @@
+{
+ "13_no_flicker_positions_only_on_serve_leave": {
+  "pass": true,
+  "moves": 0,
+  "replaced": 0,
+  "removals": 18
+ },
+ "15_CLS_and_long_tasks": {
+  "pass": true,
+  "cls": 0,
+  "sources": {},
+  "clsMeasured": true,
+  "longTasks": 0
+ },
+ "17_chip_live_coalesced_identity": {
+  "pass": true,
+  "chipWrites": 25,
+  "minChipGapMs": 2000,
+  "liveWrites": 20,
+  "minLiveGapMs": 2000
+ },
+ "14_scroll_anchor": {
+  "pass": true,
+  "worstPx": 0,
+  "reAnchors": 0,
+  "scrollable": true
+ },
+ "16_tap_target_stable_while_held": {
+  "pass": true,
+  "rects": [
+   "16,378,328,60,224,8,88,44"
+  ]
+ },
+ "18_partial_leave": {
+  "pass": true,
+  "afterSell": {
+   "coins": 1496,
+   "w": 24.80000000000001,
+   "filled": 2
+  },
+  "afterTimeout": {
+   "coins": 1496,
+   "n": 0,
+   "card": false
+  }
+ },
+ "19_farm_strip": {
+  "pass": true,
+  "chips": 4,
+  "more": "+6",
+  "marketOpened": true
+ },
+ "20_farm_row_preview": {
+  "3": {
+   "slot": null,
+   "orders": null,
+   "single": true,
+   "aria": null
+  },
+  "4": {
+   "slot": "+1 customer slot (6 → 7)",
+   "orders": "Orders 17–33 → 19–38 eggs",
+   "single": true,
+   "aria": "Next level: plus 1 customer slot, 6 to 7"
+  },
+  "9": {
+   "slot": "+1 customer slot (7 → 8)",
+   "orders": "Orders 26–51 → 27–53 eggs",
+   "single": true,
+   "aria": "Next level: plus 1 customer slot, 7 to 8"
+  },
+  "14": {
+   "slot": "+1 customer slot (8 → 9)",
+   "orders": "Orders 30–59 → 30–60 eggs",
+   "single": true,
+   "aria": "Next level: plus 1 customer slot, 8 to 9"
+  },
+  "19": {
+   "slot": "+1 customer slot (9 → 10)",
+   "orders": null,
+   "single": true,
+   "aria": "Next level: plus 1 customer slot, 9 to 10"
+  },
+  "20": {
+   "slot": null,
+   "orders": null,
+   "single": true,
+   "aria": null
+  },
+  "pass": true
+ },
+ "F24_frame_sampler": {
+  "pass": false,
+  "frames": 1216,
+  "p50": 25,
+  "p95": 28,
+  "max": 42,
+  "over20Pct": 96.29934210526315,
+  "over100": 0,
+  "durationMs": 30000
+ }
+}

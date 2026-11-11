@@ -1,0 +1,14 @@
+// CCR #80 @1a64e95: preview vs credit for a player Sell all when the attended probe is false (default) and an effect is live.
+import { balance } from '../review-pr80-1a64e95/src/config/balance';
+import { Game } from '../review-pr80-1a64e95/src/game';
+import { SALE_EFFECTS } from '../review-pr80-1a64e95/src/sim/effects';
+import { sellAllPreview } from '../review-pr80-1a64e95/src/sim/payout';
+import { mem } from '../review-pr80-1a64e95/tests/helpers';
+const b = { ...balance, m4: { ...balance.m4!, flags: { ...(balance.m4 as any).flags, golden: 1 } } } as any;
+SALE_EFFECTS.push({ id: 'frenzy-fixture', flag: 'golden', factor: () => 2 });
+for (const probe of [undefined, true]) {
+  let t = Date.UTC(2026, 9, 29, 12); const g = new Game(b, mem(), () => t, 7); if (probe !== undefined) g.setAttendedProbe(() => probe);
+  g.state = { ...g.state, farmLevel: 6, basket: 50, customers: [{ id: 1, demand: 10, filled: 0, waitedS: 0 }] };
+  const prev = sellAllPreview(g.state, b).cents, c0 = g.state.coinsCents; g.dispatch({ type: 'sellAll' });
+  console.log(JSON.stringify({ probe: probe ?? 'default(false)', preview: prev, credited: g.state.coinsCents - c0 }));
+}

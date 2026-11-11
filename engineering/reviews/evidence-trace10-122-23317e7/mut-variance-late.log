@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1-mut
+
+ ❯ tests/trace10/hooks.test.ts (4 tests | 1 failed) 1229ms
+   ✓ trace10 hooks in tests/bot-m5.ts are observe-only (G0 cond. c) > onRunnerDraw: R calls R0 exactly once per draw, same values, same run 965ms
+   × trace10 hooks in tests/bot-m5.ts are observe-only (G0 cond. c) > onVariance fires once, after construction and before the first method call 112ms
+     → expected { mti: 12, …(1) } to deeply equal { mti: 4, …(1) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/trace10/hooks.test.ts > trace10 hooks in tests/bot-m5.ts are observe-only (G0 cond. c) > onVariance fires once, after construction and before the first method call
+AssertionError: expected { mti: 12, …(1) } to deeply equal { mti: 4, …(1) }
+
+- Expected
++ Received
+
+  Object {
+    "mtSha": "d6cb738802762c36cc81cc0a48302f327b367b9b12a87df6ba5ec7514a70ce98",
+-   "mti": 4,
++   "mti": 12,
+  }
+
+ ❯ tests/trace10/hooks.test.ts:32:20
+     30|       calls++; atHook = varianceCursor(V); V.trace = k => { traced++; …
+     31|     expect(calls).toBe(1);
+     32|     expect(atHook).toEqual(varianceCursor(new SellerVariance(VAR_DEFAU…
+       |                    ^
+     33|     expect(firstKind).toBe('check'); expect(traced).toBeGreaterThan(0)…
+     34|     expect(enc(hooked)).toBe(enc(plain));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  00:45:14
+   Duration  1.74s (transform 273ms, setup 0ms, collect 329ms, tests 1.23s, environment 0ms, prepare 47ms)
+

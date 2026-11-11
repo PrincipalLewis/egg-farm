@@ -1,0 +1,43 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1-mut
+
+ ❯ tests/trace10/rngcursor.test.ts (5 tests | 2 failed) 9ms
+   × trace10 rngcursor (§7) > PyRandom private fields exist with the expected types; cursor moves per draw 4ms
+     → PyRandom private fields mt (Uint32Array[624]) / mti (int) not found: py-random.ts changed
+   × trace10 rngcursor (§7) > variance cursor is identical for the same seed and call sequence 1ms
+     → PyRandom private fields mt (Uint32Array[624]) / mti (int) not found: py-random.ts changed
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/trace10/rngcursor.test.ts > trace10 rngcursor (§7) > PyRandom private fields exist with the expected types; cursor moves per draw
+Error: PyRandom private fields mt (Uint32Array[624]) / mti (int) not found: py-random.ts changed
+ ❯ Module.pyCursor tests/trace10/rngcursor.ts:23:11
+     21|   const o = r as unknown as { mt?: unknown; mti?: unknown };
+     22|   if (!(o.mt instanceof Uint32Array) || o.mt.length !== 624 || typeof …
+     23|     throw new RngCursorError('PyRandom private fields mt (Uint32Array[…
+       |           ^
+     24|   return { mti: o.mti, mtSha: sha256(new Uint8Array(o.mt.buffer, o.mt.…
+     25| }
+ ❯ tests/trace10/rngcursor.test.ts:18:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/trace10/rngcursor.test.ts > trace10 rngcursor (§7) > variance cursor is identical for the same seed and call sequence
+Error: PyRandom private fields mt (Uint32Array[624]) / mti (int) not found: py-random.ts changed
+ ❯ pyCursor tests/trace10/rngcursor.ts:23:11
+     21|   const o = r as unknown as { mt?: unknown; mti?: unknown };
+     22|   if (!(o.mt instanceof Uint32Array) || o.mt.length !== 624 || typeof …
+     23|     throw new RngCursorError('PyRandom private fields mt (Uint32Array[…
+       |           ^
+     24|   return { mti: o.mti, mtSha: sha256(new Uint8Array(o.mt.buffer, o.mt.…
+     25| }
+ ❯ Module.varianceCursor tests/trace10/rngcursor.ts:26:64
+ ❯ tests/trace10/rngcursor.test.ts:27:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  00:45:16
+   Duration  280ms (transform 66ms, setup 0ms, collect 85ms, tests 9ms, environment 0ms, prepare 52ms)
+

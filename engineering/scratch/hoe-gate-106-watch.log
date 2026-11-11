@@ -1,0 +1,2343 @@
+START 2026-11-05T23:50:43+01:00 tip=dc58705a3ca86902ef0a0d4a58e1799671800ac0 run=42124406327
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 3 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 3 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 3 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 3 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 3 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 3 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  * Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 4 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 5 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 6 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 7 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 8 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 9 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  * Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  * Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  * Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 10 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  * Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  ✓ Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  ✓ Release globals allowlist (chromium)
+  * Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  * check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  * Upload egg-farm-html artifact
+  * Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+Refreshing run status every 3 seconds. Press Ctrl+C to quit.
+
+* feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+* gate (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  ✓ Release globals allowlist (chromium)
+  ✓ Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  ✓ check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  ✓ Upload egg-farm-html artifact
+  ✓ Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  * Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+✓ feat/v5-tapcoins ci PrincipalLewis/egg-farm#106 · 42124406327
+Triggered via pull_request about 11 minutes ago
+
+JOBS
+✓ gate in 11m40s (ID 127584770718)
+  ✓ Set up job
+  ✓ Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ npm ci
+  ✓ Unit tests (npm test; includes sync-economy --check)
+  ✓ Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR
+  ✓ Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)
+  ✓ Install browser (chromium)
+  ✓ Release globals allowlist (chromium)
+  ✓ Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)
+  ✓ check-release-build --build-id (expected id = BUILD_PREFIX + this commit)
+  ✓ Upload egg-farm-html artifact
+  ✓ Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+  ✓ Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+  ✓ Complete job
+- release-globals in 0s (ID 127590161412)
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+gate: .github#2
+
+- "The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+gate: .github#1
+
+DONE tip_expected=dc58705a3ca86902ef0a0d4a58e1799671800ac0 tip_now=dc58705a3ca86902ef0a0d4a58e1799671800ac0 gate=success 2026-11-05T23:59:04+01:00
+JOBS [{"conclusion":"success","name":"gate","status":"completed"},{"conclusion":"skipped","name":"release-globals","status":"completed"}]
+ROLLUP [{"conclusion":"","name":"k10-breeds-offset (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53)","status":"IN_PROGRESS"},{"conclusion":"","name":"pacing-x1-stack shard (optimal)","status":"IN_PROGRESS"},{"conclusion":"SUCCESS","name":"gate","status":"COMPLETED"},{"conclusion":"","name":"pacing-x1-stack shard (seller15)","status":"IN_PROGRESS"},{"conclusion":"","name":"pacing-x1-stack shard (casual)","status":"IN_PROGRESS"},{"conclusion":"SKIPPED","name":"release-globals","status":"COMPLETED"}]

@@ -1,0 +1,67 @@
+{
+ "persist": {
+  "noEgg": true,
+  "noPending": true,
+  "noFrenzyRun": true,
+  "gapOk": true,
+  "rngOneDraw": true,
+  "frenzyKept": true,
+  "abilitiesKept": true,
+  "inputUnchanged": true,
+  "idempotent": true
+ },
+ "load": {
+  "gap": true,
+  "rng": true,
+  "noEgg": true,
+  "events": [
+   [
+    "ability_ended",
+    "hawker",
+    "offline",
+    13,
+    null
+   ],
+   [
+    "ability_ended",
+    "grader",
+    "offline",
+    27,
+    null
+   ]
+  ],
+  "callsCleared": true
+ },
+ "noEggNoDraw": true,
+ "goldenOffStripOnly": true,
+ "offline": {
+  "events": [
+   [
+    "ability_ended",
+    "hawker",
+    "offline",
+    13,
+    null
+   ],
+   [
+    "ability_ended",
+    "grader",
+    "offline",
+    27,
+    null
+   ],
+   [
+    "collectible_expired",
+    null,
+    null,
+    null,
+    "offline"
+   ]
+  ],
+  "gap": true,
+  "rng": true,
+  "noEgg": true,
+  "inputUnchanged": true
+ },
+ "persistAfterOfflineNoSecondDraw": true
+}

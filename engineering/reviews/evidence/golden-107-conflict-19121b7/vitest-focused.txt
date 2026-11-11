@@ -1,0 +1,13 @@
+
+ RUN  v2.1.9 /workspace/iso-review-107-proposed-19121b7
+
+ ✓ tests/v5-golden-rewards.test.ts (21 tests) 37ms
+ ✓ tests/v5-abilities-sim.test.ts (29 tests) 47ms
+ ✓ tests/v5-f1a-fields.test.ts (10 tests) 124ms
+ ✓ tests/v5-income-ref.test.ts (27 tests) 227ms
+
+ Test Files  4 passed (4)
+      Tests  87 passed (87)
+   Start at  01:49:27
+   Duration  705ms (transform 379ms, setup 0ms, collect 921ms, tests 435ms, environment 1ms, prepare 176ms)
+

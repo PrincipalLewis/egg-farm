@@ -1,0 +1,32 @@
+
+ RUN  v2.1.9 /workspace/wt-gen-bbv2-r
+
+stdout | tests/acw1-investigation-probe.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+AC-W1 build 1-200 {
+  pass10: 91,
+  pass10at16: 98,
+  pass10gate: 98,
+  medF10: 13.67,
+  medF18: 25,
+  at900: 16
+} M4 baseline { pass10: 91, medF10: 13.67, medF18: 25 }
+
+stdout | tests/acw1-investigation-probe.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+AC-W1 build 201-299 {
+  pass10: 90.91,
+  pass10at16: 96.97,
+  pass10gate: 96.97,
+  medF10: 14,
+  medF18: 25,
+  at900: 7
+} M4 baseline { pass10: 91, medF10: 13.67, medF18: 25 }
+
+ ✓ tests/acw1-investigation-probe.test.ts (3 tests) 54529ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) 37131ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) 17396ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  20:45:25
+   Duration  54.93s (transform 168ms, setup 0ms, collect 224ms, tests 54.53s, environment 0ms, prepare 48ms)
+

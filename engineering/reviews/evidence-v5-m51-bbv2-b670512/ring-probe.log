@@ -1,0 +1,51 @@
+{
+ "cfgHasBbv2": true,
+ "bbv2": {
+  "shown_min_gap_s": 5,
+  "zero_gain_eta_max_s": 60,
+  "dead_zone_min_s": 30,
+  "zero_gain_purchase_cap": 50
+ },
+ "bare": {
+  "loaded": 1,
+  "legacy": [
+   true
+  ]
+ },
+ "vless": {
+  "loaded": 1,
+  "legacy": [
+   true
+  ]
+ },
+ "versioned": {
+  "loaded": 1,
+  "legacy": [
+   null
+  ]
+ },
+ "corrupt": {
+  "loaded": 0,
+  "legacy": []
+ },
+ "stored": {
+  "v": "0.6.2",
+  "isObj": true,
+  "n": 7,
+  "pinnedKept": 2
+ },
+ "reload": {
+  "n": 7,
+  "anyLegacy": false
+ },
+ "export": {
+  "schema_version": "0.6.2",
+  "matches": true,
+  "keys": [
+   "schema_version",
+   "exportedAt",
+   "events"
+  ]
+ }
+}
+EXIT:0

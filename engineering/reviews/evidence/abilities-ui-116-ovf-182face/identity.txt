@@ -1,0 +1,24 @@
+HEAD=a1f5c232fa54113549ee70a11e9a2a7508bee682
+tree=dca78ec17e351dbd367076a41c7962c91d97b85a
+log:
+a1f5c23 chore(abilities-ui): point #116 OVF status at pushed tip 182face
+182face fix(abilities-ui): fit Workers call row at 360 (#116)
+=== vs tooling fcf7623 ===
+ engineering/status.md            |  1 +
+ scripts/abilities-ui-browser.mjs | 29 ++++++++++++++++++++++++++---
+ src/ui/styles.css                | 12 ++++++++++--
+ src/ui/workers-ui.ts             | 11 +++++++++--
+ 4 files changed, 46 insertions(+), 7 deletions(-)
+M	engineering/status.md
+M	scripts/abilities-ui-browser.mjs
+M	src/ui/styles.css
+M	src/ui/workers-ui.ts
+=== product tip 182face vs tooling ===
+63010a43ca5693627a600bfd7ebce25c3c414642
+182face7470a2889a5e907a3acf0dc5aa227c7ee fcf76237dca81039b1f4fcf473b7a9090f9f45ed fix(abilities-ui): fit Workers call row at 360 (#116)
+=== claimed a1f5c23 vs 182face ===
+dca78ec17e351dbd367076a41c7962c91d97b85a
+63010a43ca5693627a600bfd7ebce25c3c414642
+ engineering/status.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+M	engineering/status.md

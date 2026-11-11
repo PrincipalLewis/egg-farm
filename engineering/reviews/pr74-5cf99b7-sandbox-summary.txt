@@ -1,0 +1,53 @@
+=== C1-dot exit=1
+< F /work/verify.json a971f6e95d92
+> F /work/verify.json dedd681a65ea
+< F /work/verify.png bd87fd1b47ce
+=== C2-root exit=1
+< F /verify.json a971f6e95d92
+> F /verify.json dedd681a65ea
+< F /verify.png bd87fd1b47ce
+=== C3-dotdot exit=1
+=== C4-symlinked-dir exit=1
+< F /target/outdir/verify.json a971f6e95d92
+> F /target/outdir/verify.json dedd681a65ea
+< F /target/outdir/verify.png bd87fd1b47ce
+=== C5-symlinked-files exit=1
+< L /symfiles/verify.json -> /target/precious.json
+< L /symfiles/verify.png -> /target/precious.png
+> F /symfiles/verify.json dedd681a65ea
+=== C6-repo-root exit=1
+< F /repo/verify.json a971f6e95d92
+> F /repo/verify.json dedd681a65ea
+< F /repo/verify.png bd87fd1b47ce
+=== C7-default exit=1
+< F /repo/verify-out/m4.1+5cf99b7/verify.json a971f6e95d92
+> F /repo/verify-out/m4.1+5cf99b7/verify.json dedd681a65ea
+< F /repo/verify-out/m4.1+5cf99b7/verify.png bd87fd1b47ce
+=== C8-json-is-dir exit=1
+< F /dirjson/verify.png bd87fd1b47ce
+=== C9-usage-root exit=2
+< F /verify.json dedd681a65ea
+> F /verify.json 3c569f5e987a
+=== C10-usage-newdir exit=2
+> D /work/new
+> D /work/new/deep
+> F /work/new/deep/verify.json 3c569f5e987a
+=== C11-usage-default exit=2
+--- /verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": false,   "result": "FAIL",   "exit": 2,   "stage": "usage",   "reason": "usage: --hours must be a number in (0, 720]",   "sha": "5cf99b767bd2115ee6c2833ea1d402016922d402",   "screenshot": {     "file": null   } } 
+--- /work/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": true,   "buildId": "m4.1+5cf99b7",   "sha": "5cf99b767bd2115ee6c2833ea1d402016922d402",   "dirty": false,   "asset": {     "path": "dist-html/egg-farm.html",     "sha256": "cf86a7c575573aed97b022582058df0e1482a34e0c5f2b6511550520c3
+--- /linkdir/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": true,   "buildId": "m4.1+5cf99b7",   "sha": "5cf99b767bd2115ee6c2833ea1d402016922d402",   "dirty": false,   "asset": {     "path": "dist-html/egg-farm.html",     "sha256": "cf86a7c575573aed97b022582058df0e1482a34e0c5f2b6511550520c3
+--- /repo/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": true,   "buildId": "m4.1+5cf99b7",   "sha": "5cf99b767bd2115ee6c2833ea1d402016922d402",   "dirty": false,   "asset": {     "path": "dist-html/egg-farm.html",     "sha256": "cf86a7c575573aed97b022582058df0e1482a34e0c5f2b6511550520c3
+--- /repo/verify-out/m4.1+5cf99b7/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": true,   "buildId": "m4.1+5cf99b7",   "sha": "5cf99b767bd2115ee6c2833ea1d402016922d402",   "dirty": false,   "asset": {     "path": "dist-html/egg-farm.html",     "sha256": "cf86a7c575573aed97b022582058df0e1482a34e0c5f2b6511550520c3
+--- precious:
+PRECIOUS-JSON
+PRECIOUS-PNG
+total 8
+drwxr-xr-x  2 box box   80 Oct 28 00:30 .
+drwxr-xr-x 15 box box  520 Oct 28 00:30 ..
+-rw-r--r--  1 box box    6 Oct 28 00:30 decoy.json
+-rw-r--r--  1 box box 3802 Oct 28 00:30 verify.json

@@ -1,0 +1,26 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1-mut
+
+ ✓ tests/v5-golden-rewards.test.ts (21 tests) 51ms
+ ✓ tests/v5-golden-m5persist.test.ts (7 tests) 11ms
+ ✓ tests/v5-golden-spawn.test.ts (25 tests) 4900ms
+   ✓ #1 slice 2: lifetime and expiry (R3, GE-AC3, GE-AC5) > GE-AC3: 200 seeded resolutions: every gap in [120, 300), mean 210 +- 15; same seed same gaps; customer arrivals identical golden on vs off 4631ms
+ ✓ tests/bot-m5.test.ts (24 tests) 65335ms
+   ✓ bot-m5: parity with m5x.ts > [F-1][AC5] windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual) 3857ms
+   ✓ bot-m5: run() > observers are read-only: same end state, reach and mechanics totals with and without them 978ms
+   ✓ bot-m5: run() > is deterministic per seed, and the stack changes the outcome 865ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.2] pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2 20634ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.1] refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32 6557ms
+   ✓ bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off) > [REQ-d M5.1] charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only 7164ms
+   ✓ [Q4] bot-m5: onObserve (QA seam Q4) is observe-only > [Q4][AC7] windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given 5286ms
+   ✓ [Q4] bot-m5: onObserve (QA seam Q4) is observe-only > [Q4] M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call 6989ms
+   ✓ bot-m5: driver input (CCR N-1, N-2 on #78) > [VER-1h N-1][VER-1h N-2] the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts) 3726ms
+   ✓ [REQ-L35] bot-m5 B: parity-break report and toggle metric > [REQ-L35 FDT] scripts/bot-m5-diverge.ts exits 0 on identical files, 1 with the first divergence, 2 on usage 1232ms
+   ✓ [REQ-L35] bot-m5 B: parity-break report and toggle metric > [REQ-L35 D6] toggle sidecar: Asleep<->Unpaid flips per 30 min = tog / tAll * 1800, F10 variant on t10, casual seeds 1-2 within the D6 bar (<= 12) 7208ms
+   ✓ bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1) > [F-1][O-3][AC3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4) 517ms
+
+ Test Files  4 passed (4)
+      Tests  77 passed (77)
+   Start at  00:43:39
+   Duration  65.91s (transform 590ms, setup 0ms, collect 1.19s, tests 70.30s, environment 1ms, prepare 207ms)
+

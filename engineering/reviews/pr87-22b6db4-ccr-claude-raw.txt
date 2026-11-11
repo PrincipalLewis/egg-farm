@@ -1,0 +1,61 @@
+VERDICT: PASS
+COUNTS: blocking/major/minor/nit = 0/0/4/2
+
+Reviewed at 22b6db41a7424285f10aa003ada774a415d4e9c5. I did not edit or write any file.
+
+**Test results**
+- `npx vitest run tests/v5-streak-sim.test.ts tests/v5-f1c-effects.test.ts tests/v5-f2-m5-fields.test.ts tests/m4a-flag-off.test.ts` passed: 4 files, 78 of 78 tests.
+- `npm test` passed: 125 files, 1698 passed, 1 skipped. The output printed GOLDEN1 f90d1678… for the flag-off golden and GOLDEN1 a54c9cf9… for the M4-on golden.
+- `npm run check-economy-copy` skipped itself (opt-in only).
+- `npm run check-globals` could not run. It exited 2 with `ENOENT … dist/assets` because it needs a build, and I wasn't allowed to run one. I did not verify it. `tests/release-bundle.test.ts` and `tests/release-html.test.ts` passed.
+
+**Findings**
+
+- **N-1, minor — `src/game.ts:396-402` (the `attendedProbe` default and `attendedNow`); call site `src/game.ts:308`.** Nothing in `src` calls `setAttendedProbe`, so with `m4.flags.streak` on in the real `Game`, player sales get no streak factor and streak hold/decay never advance.
+  - **Evidence:** `rg -n "setAttendedProbe|attendedProbe" src` finds only `game.ts:397-398`, the definition and the default `() => false`. The only callers are tests: `v5-streak-sim.test.ts:134`, `v5-f1c-effects.test.ts:111,132`, and two others.
+  - **Trace:** `dispatch` passes `attendedNow()`, which is false. `apply` then calls `sellTo(..., 'player', !attended = true)`, so `playerSaleCtx(false)` gives `suspended: true`, `saleEffectFactors` returns `[]`, and the sale is paid without the streak.
+  - **Regression:** at 14894bd, `dispatch` called `apply` with no `attended`, so a player sale got the streak. The new behavior is the intended Q-F1c-1 rule (D-HOP-2026-10-29-06): suspended only when not attended.
+  - **Pre-existing:** hold and decay were already frozen at 14894bd. The `frame()` focus expression was identical, so `focusMs` was 0 with an unwired probe. A built streak never decayed there.
+  - **Gating:** `rg -n "flags" src/config/balance.json` finds no flags block, so every M5 flag is off in the shipped build. There is no streak UI yet ("No UI here (row 17)"). No test covers streak on in `Game` with no probe.
+  - **Rating:** minor. It would be major if the streak flag could go on before the probe is wired. Land the probe wiring with row 17, or add a loud check.
+  - **Repro:** `new Game(B({streak:1}))`, set `g.state` to a state with `streakS` of 0.1 and a customer, call `g.dispatch({type:'sell',customerId:1})` with no probe. The credit is the plain `k*base*g`.
+
+- **N-2, minor — `src/ui/app.ts:607` and `:613`.** The market previews don't use `Game.playerSaleCtx()`. `saleValueCents(s,k,b)` and `sellAllPreview(s,b)` use the default attended `PLAYER_SALE` context.
+  - **Evidence:** the JSDoc at `payout.ts:19-20` and `game.ts:403-405` says UI previews pass `Game.playerSaleCtx()`. `rg playerSaleCtx src` shows no caller in `src/ui`.
+  - **Effect:** with an M5 flag on and the probe reading false, the Sell button and Sell all label show the (1+s) uplift but the credit gives none. The registry's preview == credit guarantee is only tested via `Game.playerSaleCtx` in `v5-f1c-effects.test.ts:128-139`, not through the real UI.
+  - **Rating:** minor. It has no effect with every flag off.
+  - **Repro:** same setup as N-1, then compare `saleValueCents(s,k,b)` with the credited coins.
+
+- **F1 (earlier finding) still stands, minor — `src/game.ts:304`.** `endSession` emits `streak_peak` with reason `'reload'` via `streakPeak(this.state,…)` and does not end the run or clear `streakS`. A second `endSession` on a surviving page (for example `pagehide` then `visibilitychange`) emits it again. The code is unchanged from 14894bd.
+
+- **F2 / O-3 (earlier finding) still stands, minor — `tests/bot-m5.ts:41,100,114`.** The bot keeps its own `streak` variable and has no guard against `m4.flags.streak` also being on. `rg -n -i streak tests/bot-m5.ts` finds no assertion on the real flag. The 22b6db4 changes to `bot-m5.test.ts` only add the CSV fixture.
+
+- **Nit — `src/game.ts:399-402`.** Two consecutive `/** */` blocks sit above `attendedNow`. The first, "The one attended read…", is orphaned from the second. The earlier stacked-JSDoc nit in `actions.ts` is resolved: the stale comment was merged into one at `actions.ts:18`. This one is new.
+
+- **Nit — `src/sim/payout.ts:16-17`, still standing.** `Math.round(k * base * m)` with `m = (1*g)*(1+s)` associates floats differently from `k*base*g*(1+s)`. It is deterministic and identical to 14894bd.
+
+**Answers to your questions**
+
+1. **Q1 (exactly once, consistent extra_coins).** The (1+s) factor is applied once per sale, through `SALE_EFFECTS` only.
+   - **Where it enters:** `payout.ts` no longer imports `streakSaleFactor`. `saleMultipliers` is `[g, ...fx]`. Every sale and preview path goes through `saleValueCents`: player sell, sellAll, Market Hand, `sellAllPreview`, and previews via `playerSaleCtx` (the UI caveat is N-2).
+   - **Gates:** `streakSaleFactor` and `saleEffectFactors` agree. `streakOn` is `m4On && flags.streak===1` and `flagOn` is `m4.enabled && flags.streak===1`; `m4On` is `!!m4.enabled`. Both need `s>0`: the effect factor is 1 at s=0 and is filtered.
+   - **Suspension:** `sellTo` passes the same flag to both. For a player sale, `playerSaleCtx(!suspended).suspended === suspended`. For Market Hand, `ctx.suspended === suspended`. When suspended, the gate returns 1 and `addStreakExtra` is skipped, so extra cents can't be credited without the factor.
+   - **Extra cents:** `value - saleValueCents({...s,streakS:0}, k, b, ctx)` uses the same ctx. At s=0 the registry gives no streak factor, so the extra is exactly the streak share, and this path uses a single rounding.
+   - **Not checked:** I did not confirm that streak `extra_coins` stays right once other effects such as Frenzy compose with it. The test `v5-f1c-effects.test.ts:116-122` expects `Math.round(k*base*g*2*1.28)`, which is the combined value.
+
+2. **Q2.** Covered by N-1: a regression for streak-on in `Game`, but gated, intended per Q-F1c-1, and rated minor.
+
+3. **Q3 (flag-off identity and determinism).**
+   - **Goldens:** f90d1678 and a54c9cf9 reproduce.
+   - **Trace hash 2c0d3ec3:** I could not verify it. The string appears nowhere in the repo (`rg 2c0d3ec3` returned nothing), so the pin lives outside the tree.
+   - **`live` gating in `tick.ts`:** with every flag off, `live` is false, so `fx` is undefined and `prodEggsPerSec` gets no ctx (`layFactor` returns 1). `stepTimers` is not called. With a flag on and no clock, `suspended = !undefined = true`, as before, and the streak gate also checks `streakOn`.
+   - **RNG:** the diff adds no RNG use. `effects.ts` has none, `streak.ts` has none, and `rng` in `tick.ts` is only touched by the pre-existing arrival code.
+
+4. **Q4.** F1 and F2 still stand, as above.
+
+CHECKED, NO ISSUE:
+- The `SALE_EFFECTS` streak entry, `saleMultipliers` and `saleValueCents` rounding (once, with an exact `k*base` path when `m===1`).
+- Equivalence of the `sellTo` ctx construction for player and market_hand.
+- `workerActions` suspension (`!!fx?.suspended`) against the old `!clock?.focus` in streak-relevant cases.
+- `streak.ts`, `m5-fields.ts`, `state.ts`, `timers.ts` and `tests/v5-streak-sim.test.ts` are byte-identical to 14894bd, as you stated; I did not re-diff them.
+- `goldenEEggsPerSec` and offline paths call `prodEggsPerSec` with no ctx, so a timed effect can't enter offline grants. `applyOffline` and `incomePerSec` are exercised by the F1c tests.

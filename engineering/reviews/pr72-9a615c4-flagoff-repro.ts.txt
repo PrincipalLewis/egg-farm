@@ -1,0 +1,15 @@
+// F1 repro: copy to the repo root as pr72-fo.ts, run: npx vite-node pr72-fo.ts
+import { balance as shipped } from './src/config/balance';
+import { save, validate, type KV } from './src/save/save';
+import { runVerify, markFreshM4 } from './scripts/verify/sim';
+import { withFlags } from './scripts/verify/cli';
+import { saveRoundTrip } from './scripts/verify/roundtrip';
+const b = withFlags(shipped, { 'm4.enabled': 0 });
+const run = runVerify(b, { hours: 24, seed: 1, profile: 'idle' });
+const kv = new Map<string,string>(), mem: KV = { getItem: k => kv.get(k) ?? null, setItem: (k, v) => { kv.set(k, v); } };
+const raw = save(mem, { ...markFreshM4(run.end, b), seenTracksExplainer: true }, 1, b);
+const p = (s: any) => JSON.stringify({ F: s.farmLevel, H: s.hensLevel, V: s.eggValueLevel, C: s.collectionLevel, coins: s.coinsCents, tracksV7: s.tracksV7 ?? null });
+console.log('end', p(run.end));
+console.log('verify roundtrip (flag-off balance):', JSON.stringify({ pass: saveRoundTrip(raw, run.end, b).pass }));
+const g = validate(raw, shipped); console.log('browser-equivalent validate (shipped balance, M4 on):', g.ok && p(g.file.state), 'tracksMigrated', g.ok && !!g.file.tracksMigrated);
+console.log('roundtrip vs shipped:', JSON.stringify(saveRoundTrip(raw, run.end, shipped).mismatches));

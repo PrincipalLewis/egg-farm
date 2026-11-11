@@ -1,0 +1,6 @@
+src/config/formulas.ts
+src/config/m5-rules.ts
+src/sim/effects.ts
+src/sim/golden.ts
+src/sim/timers.ts
+tests/v5-golden-rewards.test.ts
