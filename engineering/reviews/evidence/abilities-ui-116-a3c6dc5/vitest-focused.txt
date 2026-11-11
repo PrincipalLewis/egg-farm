@@ -1,0 +1,14 @@
+
+ RUN  v2.1.9 /workspace/wt-review-116-a3c6dc5
+
+ ✓ tests/v5-abilities-sim.test.ts (29 tests) 40ms
+ ✓ tests/v5-abilities-ui.test.ts (13 tests) 396ms
+   ✓ AB-14 / AC-M5A-22 sheetCloseComplete hold [Architect CHANGES] > fireAbility from portrait sheet keeps attendance frozen until sheetCloseComplete 312ms
+ ✓ tests/m4a-flag-off.test.ts (2 tests) 900ms
+   ✓ M4-A flag off = main > sim trace hash equals main (rc1 economy, flag off) 898ms
+
+ Test Files  3 passed (3)
+      Tests  44 passed (44)
+   Start at  02:06:21
+   Duration  1.34s (transform 654ms, setup 0ms, collect 793ms, tests 1.34s, environment 283ms, prepare 135ms)
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+# usage: race-loop.sh N maxWorkers load(0/1) tag
+cd /workspace/review-pr75-75efc4f; N=$1; W=$2; L=$3; T=$4; E=/workspace/.pr75-ev
+pids=(); if [ "$L" = 1 ]; then for i in $(seq $(nproc)); do (while :; do :; done) & pids+=($!); done; fi
+fail=0
+for i in $(seq $N); do
+  npx vitest run tests/verify.test.ts -t "M28/M29|M33|M17/M18/M19" --minWorkers=1 --maxWorkers=$W > $E/race-$T-$i.log 2>&1 || { fail=$((fail+1)); echo "iter $i FAILED"; }
+done
+for p in "${pids[@]}"; do kill $p; done
+echo "$T: $fail/$N failed (maxWorkers=$W load=$L)"
+#!/bin/bash
+# 3 parallel loops of the 3 race-prone tests + one full vitest (maxWorkers=8) as real load
+cd /workspace/review-pr75-75efc4f; E=/workspace/.pr75-ev; mkdir -p $E/raceC
+npx vitest run --minWorkers=1 --maxWorkers=8 > $E/raceC/full-load.log 2>&1 &
+for k in 1 2 3; do ( f=0; for i in $(seq 15); do npx vitest run tests/verify.test.ts -t "M28/M29|M33|M17/M18/M19" --maxWorkers=8 > $E/raceC/p$k-$i.log 2>&1 || { f=$((f+1)); echo "p$k iter $i FAILED"; }; done; echo "p$k: $f/15 failed" ) & done
+wait; grep -aE "Tests " $E/raceC/full-load.log | sed 's/^/full-under-load: /'

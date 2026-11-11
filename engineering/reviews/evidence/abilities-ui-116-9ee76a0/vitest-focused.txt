@@ -1,0 +1,55 @@
+
+ RUN  v2.1.9 /workspace/wt-review-116-9ee76a0
+
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > ready by default (absent readyAt) at F >= unlock with the flag on
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > first-reason order: asleep, unpaid, paused, lockout, cooldown
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > cooldown uses wallReady on injected nowMs, E2b cap; ready exactly at readyAt
+ ✓ tests/v5-abilities-sim.test.ts > eligibility (rule 4) and blocked results > not hired / below unlock / flag off / bad clock: not available, no telemetry reason
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > success: readyAt = nowMs + cd*1000, activeS = tc_ability_s, ability_used with combo:false, closeSheet only inSheet
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > absent readyAt -> t_since_ready_s 0; Tired applies (rule 5), energy untouched (energy_cost 0)
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > blocked: emits exactly one ability_blocked{count:1}, state unchanged, no close (E14 d)
+ ✓ tests/v5-abilities-sim.test.ts > fireAbility > viaAll fire never emits ability_blocked (Activate-all skips silently)
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > comboQualifies: inclusive sim ms (10000 in, 10001 out), needs both flags
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > sheet Boost in window -> activeS = combo_boost_duration_s, combo:true; card / Activate-all / out of window -> 30 s, combo:false
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > refillAgoSimMs guards (Architect #112 §2): non-finite / negative / absent -> no combo; ignored unless abilities && rc2Refill && inSheet && !viaAll
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > combo window reads tc_combo_window_s from balance (no literal): widening the tc key widens the window
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > combo call ends expired with effect_s = combo duration
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > combo early end: effect_s = durS - activeS (focus seconds run), durS cleared with activeS
+ ✓ tests/v5-abilities-sim.test.ts > combo (rule 11): direct sheet Boost within the manual-refill window > a running entry with no durS (older tip / save) falls back to tc_ability_s for effect_s
+ ✓ tests/v5-abilities-sim.test.ts > activateAll (rule 7, E14 c, AC-M5A-7) > AC-M5A-7: W1 asleep, W2 cooldown, W3 ready, W4 unpaid -> exactly W3, one ability_used{via_all:true}, no ability_blocked
+ ✓ tests/v5-abilities-sim.test.ts > activateAll (rule 7, E14 c, AC-M5A-7) > order MH -> CH -> Hawker -> Grader, same tick; sheet success -> one close
+ ✓ tests/v5-abilities-sim.test.ts > activateAll (rule 7, E14 c, AC-M5A-7) > 0 eligible: fires nothing, no events, no close, same state
+ ✓ tests/v5-abilities-sim.test.ts > timer system: suspension, expiry, early end (rules 6, 10) > activeS counts down only on focus ticks (suspended under a closing sheet / menu); expires with effect_s = tc_ability_s
+ ✓ tests/v5-abilities-sim.test.ts > timer system: suspension, expiry, early end (rules 6, 10) > early end: asleep / unpaid / paused ends that tick, readyAt unchanged, effect_s = focus seconds run
+ ✓ tests/v5-abilities-sim.test.ts > timer system: suspension, expiry, early end (rules 6, 10) > paused flag off: a stray paused:true does not end the call
+ ✓ tests/v5-abilities-sim.test.ts > effects (rule 2) through the F1c registry / graderMult; suspended = no multiplier > Rush: Market Hand sales only; Shout: all sales; stack x1.3225 (rule 8)
+ ✓ tests/v5-abilities-sim.test.ts > effects (rule 2) through the F1c registry / graderMult; suspended = no multiplier > Sweep A: laying x tc_ability_w2_lay_mult (live ctx only), suspended = 1
+ ✓ tests/v5-abilities-sim.test.ts > effects (rule 2) through the F1c registry / graderMult; suspended = no multiplier > Inspect: graderMult = 1 + (tier mult + tier_add - 1) x share(mood); tier 3 working -> x3.0 (AC-M5A-2)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > abilities flag 0: a stray abilities.activeS is inert (no events, no countdown, no multipliers)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > no top-level abilityDurS anywhere in src (Architect #112: rejected persisted shape; durS lives on AbilityState)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > m5Persist save view of a running combo call carries durS on the entry and no top-level duration map
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > no prod 10 / 45 literals in abilities.ts (combo values via tcNum only)
+ ✓ tests/v5-abilities-sim.test.ts > flags off: byte-identical step (AC-M5A-16) > no Date.now in the abilities sim
+ ✓ tests/v5-abilities-ui.test.ts > AB-UI-1 flag off > abilities=0: no chrome, no call buttons
+ ✓ tests/v5-abilities-ui.test.ts > Activate-all Q8 compact/full [AC-M5A-8][AB-UI-7][AC-M5A-10] > full labels when Refill hidden / not docked
+ ✓ tests/v5-abilities-ui.test.ts > Activate-all Q8 compact/full [AC-M5A-8][AB-UI-7][AC-M5A-10] > compact N / 4:51 / — when docked + Refill visible; .sr-in carries exact name
+ ✓ tests/v5-abilities-ui.test.ts > Card call names [Art §5.6 / D2] > Ready name is Call, Role with no space before comma; no aria-label
+ ✓ tests/v5-abilities-ui.test.ts > Card call names [Art §5.6 / D2] > Active uses AbilityState.durS for progress semantics; name Active, Call, Role
+ ✓ tests/v5-abilities-ui.test.ts > Card call names [Art §5.6 / D2] > Asleep / Unpaid / Paused exact names
+ ✓ tests/v5-abilities-ui.test.ts > apply fireAbility / activateAll wiring > fireAbility writes abilities[id].durS and never top-level abilityDurS
+ ✓ tests/v5-abilities-ui.test.ts > apply fireAbility / activateAll wiring > activateAll fires eligible workers via_all; no combo
+ ✓ tests/v5-abilities-ui.test.ts > apply fireAbility / activateAll wiring > blocked fireAbility emits ability_blocked and keeps state identity
+ ✓ tests/v5-abilities-ui.test.ts > CALL_NAME map > maps all four workers
+ ✓ tests/v5-abilities-ui.test.ts > AB-14 / AC-M5A-22 sheetCloseComplete hold [Architect CHANGES] > fireAbility from portrait sheet keeps attendance frozen until sheetCloseComplete
+ ✓ tests/v5-abilities-ui.test.ts > AB-14 / AC-M5A-22 sheetCloseComplete hold [Architect CHANGES] > activateAll from portrait sheet keeps freeze until sheetCloseComplete
+ ✓ tests/v5-abilities-ui.test.ts > ability_blocked from aria-disabled chrome [Architect CHANGES] > asleep call button still dispatches and emits ability_blocked
+ ✓ tests/v5-abilities-ui.test.ts > sheet close cancel edges [Architect O1/O2] > O1: docking mid-close completes pending sheet and restores attendance
+ ✓ tests/v5-abilities-ui.test.ts > sheet close cancel edges [Architect O1/O2] > O2: reopen Upgrades during pending close cancels stale listener before open
+ ✓ tests/m4a-flag-off.test.ts > M4-A flag off = main > balance.m4.enabled ships 1 (flag-off parity below is forced)
+ ✓ tests/m4a-flag-off.test.ts > M4-A flag off = main > sim trace hash equals main (rc1 economy, flag off) 806ms
+
+ Test Files  3 passed (3)
+      Tests  46 passed (46)
+   Start at  02:25:56
+   Duration  1.31s (transform 670ms, setup 0ms, collect 858ms, tests 1.28s, environment 273ms, prepare 124ms)
+

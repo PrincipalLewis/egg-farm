@@ -1,0 +1,37 @@
+LOCK_ACQUIRED node=v20.19.2 head=fc5fe67f18085784661b10bc292c67d90a24f8f0
+=== tsc 2026-11-10T00:09:45+01:00 ===
+EXIT:0
+=== sync 2026-11-10T00:09:50+01:00 ===
+balance.json up to date with economy.csv
+EXIT:0
+=== vitest-focused 2026-11-10T00:09:51+01:00 ===
+
+ RUN  v2.1.9 /tmp/rev118
+
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+RangeError: options.minThreads and options.maxThreads must not conflict
+ ❯ new Tinypool node_modules/tinypool/dist/index.js:745:120
+ ❯ createForksPool node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:6756:16
+ ❯ forks node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:7664:20
+ ❯ node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:7690:27
+ ❯ executeTests node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:7681:5
+ ❯ node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10818:9
+ ❯ Vitest.runFiles node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10840:12
+ ❯ Vitest.start node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:10682:7
+ ❯ startVitest node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:11848:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  no tests
+      Tests  no tests
+     Errors  1 error
+   Start at  00:09:51
+   Duration  21ms (transform 0ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 0ms)
+
+vitest_exit:1

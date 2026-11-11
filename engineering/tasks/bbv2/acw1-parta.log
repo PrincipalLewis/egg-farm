@@ -1,0 +1,47 @@
+
+ RUN  v2.1.9 /workspace/wt-gen-bbv2-r
+
+stdout | tests/acw1-investigation-probe.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+AC-W1 build 1-200 {
+  pass10: 100,
+  pass10at16: 100,
+  pass10gate: 100,
+  medF10: 10.67,
+  medF18: 20.67,
+  at900: 0
+} M4 baseline { pass10: 91, medF10: 13.67, medF18: 25 }
+
+stdout | tests/acw1-investigation-probe.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+AC-W1 build 201-299 {
+  pass10: 100,
+  pass10at16: 100,
+  pass10gate: 100,
+  medF10: 10.67,
+  medF18: 20.67,
+  at900: 0
+} M4 baseline { pass10: 91, medF10: 13.67, medF18: 25 }
+
+ ❯ tests/acw1-investigation-probe.test.ts (3 tests | 1 failed) 52228ms
+   × AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) 34690ms
+     → expected 9 to be less than or equal to 5
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) 17536ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/acw1-investigation-probe.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+AssertionError: expected 9 to be less than or equal to 5
+ ❯ tests/pacing-acw1.test.ts:37:48
+     35|       console.log(`AC-W1 build ${a}-${z}`, Object.fromEntries(Object.e…
+     36|       if (a === 1) { // REGRESSION BASELINE ONLY; Python has no M4 mod…
+     37|         expect(Math.abs(m.pass10 - PY.pass10)).toBeLessThanOrEqual(5);
+       |                                                ^
+     38|         expect(Math.abs(m.medF10 / PY.medF10 - 1)).toBeLessThanOrEqual…
+     39|         expect(Math.abs(m.medF18 / PY.medF18 - 1)).toBeLessThanOrEqual…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  20:46:39
+   Duration  52.64s (transform 159ms, setup 0ms, collect 220ms, tests 52.23s, environment 0ms, prepare 47ms)
+

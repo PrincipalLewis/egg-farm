@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 /workspace/wt-review-116-fcf7623
+
+ ✓ tests/v5-abilities-ui.test.ts (15 tests) 495ms
+   ✓ AB-14 / AC-M5A-22 sheetCloseComplete hold [Architect CHANGES] > fireAbility from portrait sheet keeps attendance frozen until sheetCloseComplete 358ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  03:09:23
+   Duration  1.36s (transform 505ms, setup 0ms, collect 397ms, tests 495ms, environment 263ms, prepare 45ms)
+

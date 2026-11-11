@@ -1,0 +1,68 @@
+// CCR #79 evidence: evRng/brRng soundness (run from the PR worktree with vite-node). Read-only: imports src, writes nothing.
+import { balance } from '../review-pr79-a6b4fe4/src/config/balance';
+import { initialState, mixSeed, nextRand, type GameState } from '../review-pr79-a6b4fe4/src/sim/state';
+import { step, advance } from '../review-pr79-a6b4fe4/src/sim/tick';
+import { apply } from '../review-pr79-a6b4fe4/src/sim/actions';
+import { applyOffline } from '../review-pr79-a6b4fe4/src/sim/offline';
+import { serialize, validate } from '../review-pr79-a6b4fe4/src/save/save';
+import { deriveEvRngState, deriveBrRngState, evDraw, brDraw, ensureEvRng } from '../review-pr79-a6b4fe4/src/sim/rng';
+const B = (flags?: any, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } }) as any;
+const out: Record<string, unknown> = {};
+// 1. overlap / lag between main, ev and br xorshift32 orbits
+const N = 1_000_000; let overlaps = 0, minLagFound = Infinity; const seeds = [1, 2, 3, 7, 42, 99, 12345, 0xdeadbeef];
+const corr: number[] = [];
+for (const sd of seeds) {
+  const r0 = mixSeed(sd), e0 = deriveEvRngState(r0), b0 = deriveBrRngState(e0);
+  const main = new Map<number, number>(); let x = r0; const um: number[] = [];
+  for (let i = 0; i < N; i++) { let u; [x, u] = nextRand(x); main.set(x, i); if (i < 100000) um.push(u); }
+  for (const [name, s0] of [['ev', e0], ['br', b0]] as const) {
+    let y = s0; const ue: number[] = [];
+    for (let i = 0; i < N; i++) { let u; [y, u] = nextRand(y); if (main.has(y)) { overlaps++; minLagFound = Math.min(minLagFound, Math.abs(main.get(y)! - i)); } if (i < 100000) ue.push(u); }
+    for (const lag of [0, 1, 2, 5]) { let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0; const n = 100000 - lag;
+      for (let i = 0; i < n; i++) { const a = um[i + lag], b = ue[i]; sx += a; sy += b; sxx += a * a; syy += b * b; sxy += a * b; }
+      corr.push((n * sxy - sx * sy) / Math.sqrt((n * sxx - sx * sx) * (n * syy - sy * sy))); }
+  }
+}
+out.overlap = { seeds: seeds.length, drawsPerStream: N, overlaps, minLagFound, maxAbsCorr: Math.max(...corr.map(Math.abs)) };
+// 2. the seed depends on WHEN seeding happens (rng at that tick); consecutive-tick seeds are unrelated
+{ let r = mixSeed(7); const ds: number[] = []; for (let i = 0; i < 5; i++) { ds.push(deriveEvRngState(r)); [r] = nextRand(r); } out.seedByTick = ds.map(d => d.toString(16)); }
+// 3. isolation over 2 h of 10 Hz play with all workers, golden+broody on, ev/br drawn every tick
+const play = (b: any, seed: number, ticks: number, draw: boolean, s0?: GameState) => {
+  let s: GameState = s0 ?? { ...initialState(b, seed), coinsCents: 5_000_000 }; const ev: any[] = [];
+  for (let i = 0; i < ticks; i++) {
+    s = step(s, 0.1, b, ev, { focus: i % 3 !== 0, nowMs: 1e12 + i * 100 });
+    if (draw) { [s] = evDraw(s); [s] = brDraw(s); }
+    if (i % 3 === 0) s = apply(s, { type: 'collect' }, b, ev);
+    if (i % 50 === 0) s = apply(s, { type: 'sellAll' }, b, ev);
+    if (i % 97 === 0) s = apply(s, { type: 'buyFarm' }, b, ev);
+    if (i % 400 === 0) for (const w of ['market_hand', 'coop_hand', 'hawker', 'grader'] as const) s = apply(s, { type: 'hire', worker: w }, b, ev);
+  }
+  return { s, ev };
+};
+const strip = (s: any) => { const { evRngState, brRngState, ...r } = s; void evRngState; void brRngState; return r; };
+{ const all = Object.fromEntries(['golden','streak','tapCoins','abilities','broody','salesStopped','pause','rc2Refill','autoRefill','clockWage','breeds','zeroGainUi','bestBuyV2'].map(f => [f, 1]));
+  const res: any[] = [];
+  for (const seed of [1, 7, 42]) { const off = play(B(), seed, 72000, false), on = play(B(all), seed, 72000, true);
+    res.push({ seed, rngEqual: on.s.rng === off.s.rng, stateEqual: JSON.stringify(strip(on.s)) === JSON.stringify(off.s), evEqual: JSON.stringify(on.ev) === JSON.stringify(off.ev) }); }
+  out.isolation2h = res; }
+// 4. save/load + offline consistency
+{ const b = B({ golden: 1 });
+  const cont = play(b, 5, 6000, false).s;               // continuous 10 min
+  const half = play(b, 5, 3000, false).s;
+  const v = validate(serialize(half, 1.9e12, 1), b, 2e12); if (!v.ok) throw new Error('validate ' + v.reason);
+  const loaded = v.file.state as GameState;
+  out.saveLoad = { evSavedAndRestored: loaded.evRngState === half.evRngState, evRngState: half.evRngState?.toString(16), stableAfterMore: cont.evRngState === half.evRngState };
+  // pre-M5 save (flag-off build) loaded into a golden build: seed = derive(rng of the loaded state at the first tick)
+  const pre = play(B(), 5, 3000, false).s; const v2 = validate(serialize(pre, 1.9e12, 1), b, 2e12); if (!v2.ok) throw 0;
+  const l2 = v2.file.state as GameState; const t1 = step(l2, 0.1, b); const t1b = step(validate(serialize(pre, 1.9e12, 1), b, 2e12).ok ? (validate(serialize(pre, 1.9e12, 1), b, 2e12) as any).file.state : null, 0.1, b);
+  out.preM5Load = { seededFromPostTickRng: t1.evRngState === deriveEvRngState(t1.rng), reloadSameSeed: t1.evRngState === t1b.evRngState };
+  // offline: applyOffline never touches rng/evRngState; hidden catch-up via advance (no clock) seeds exactly like live ticks
+  const off = applyOffline(half, 5_400_000, b) as any; out.offline = { rngUntouched: off.state?.rng === half.rng, evUntouched: off.state?.evRngState === half.evRngState, keys: Object.keys(off) };
+  const a1 = advance(pre, 60_000, 0, b), a2 = advance(pre, 60_000, 0, b, undefined, { focusMs: 1000, nowMs: 1 });
+  out.catchUp = { sameSeedWithOrWithoutClock: a1.state.evRngState === a2.state.evRngState };
+  // brRng after reload: re-derived from evRngState -> with golden not drawing (broody only), every session replays the same br draws
+  const bb = B({ broody: 1 }); let s = ensureEvRng(initialState(bb, 3)); const seq1: number[] = []; for (let i = 0; i < 3; i++) { let u; [s, u] = brDraw(s); seq1.push(u); }
+  const { brRngState: _x, ...reloaded } = s as any; let r: any = reloaded; const seq2: number[] = []; for (let i = 0; i < 3; i++) { let u; [r, u] = brDraw(r); seq2.push(u); }
+  out.brReloadReplays = JSON.stringify(seq1) === JSON.stringify(seq2);
+}
+console.log(JSON.stringify(out, null, 1));

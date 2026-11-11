@@ -1,0 +1,42 @@
+diff --git a/tests/v5-abilities-ui.test.ts b/tests/v5-abilities-ui.test.ts
+index b7fbeaf..d1a5c56 100644
+--- a/tests/v5-abilities-ui.test.ts
++++ b/tests/v5-abilities-ui.test.ts
+@@ -265,3 +265,37 @@ describe('ability_blocked from aria-disabled chrome [Architect CHANGES]', () =>
+     expect(tracked.some(e => e.type === 'ability_blocked' && e.rest.worker === 'market_hand' && e.rest.reason === 'asleep')).toBe(true);
+   });
+ });
++
++describe('sheet close cancel edges [Architect O1/O2]', () => {
++  it('O1: docking mid-close completes pending sheet and restores attendance', async () => {
++    const { ui, probe, setDocked } = await mountAbilitiesUi();
++    const btn = document.querySelector('[data-testid="call-market_hand"]') as HTMLButtonElement;
++    btn.click();
++    expect(anySheetOpen()).toBe(true);
++    expect(probe()).toBe(false);
++    setDocked(true);
++    expect(anySheetOpen()).toBe(false);
++    expect(probe()).toBe(true);
++    expect(document.getElementById('p-upgrades')?.hidden).toBe(true);
++  });
++
++  it('O2: reopen Upgrades during pending close cancels stale listener before open', async () => {
++    const { ui, probe } = await mountAbilitiesUi();
++    const btn = document.querySelector('[data-testid="call-market_hand"]') as HTMLButtonElement;
++    btn.click();
++    expect(anySheetOpen()).toBe(true);
++    expect(probe()).toBe(false);
++    ui.openPanel('upgrades');
++    // Pending must be cleared: sheet handle closed, then clean reopen freezes via open==='upgrades'.
++    expect(document.getElementById('p-upgrades')?.hidden).toBe(false);
++    expect(document.getElementById('panel-layer')?.classList.contains('open')).toBe(true);
++    // Synthesize a late transform transitionend — must NOT hide an open Upgrades panel.
++    const te = new Event('transitionend', { bubbles: true }) as TransitionEvent;
++    Object.defineProperty(te, 'propertyName', { value: 'transform' });
++    Object.defineProperty(te, 'target', { value: document.getElementById('p-upgrades') });
++    document.getElementById('p-upgrades')!.dispatchEvent(te);
++    expect(document.getElementById('p-upgrades')?.hidden).toBe(false);
++    expect(document.getElementById('panel-layer')?.classList.contains('open')).toBe(true);
++    expect(probe()).toBe(false); // open upgrades still freezes attendance
++  });
++});

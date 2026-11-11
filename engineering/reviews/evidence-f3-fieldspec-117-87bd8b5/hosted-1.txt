@@ -1,0 +1,40 @@
+PR117 open draft= True head= saves/f3-fieldspec-obj 87bd8b59e89d90c3c592c19e484fe21526caf9ff base= rc/v5 71375901de8b72acfaa49c695c5c18f0d0088080 mergeable= True clean files= 2 + 65 - 21
+TITLE F-3: FieldSpec obj re-encode (EventSpec.records, wire unchanged)
+BODY ## Summary
+D-HOE-39 / D-HOE-47 **F-3** (before G-8): remove FieldSpec kind `obj` (outside D-HOE-25 N-2 allowlist enum|int|count|bucket|bool|float|str|arr).
+
+Nested **wire JSON is unchanged**. Validation for one-level nested records moves to `EventSpec.records` (`RecordSpec`), which is **not** a FieldSpec kind:
+
+| Wire path | Before | After |
+|---|---|---|
+| `session_end.breed_family_s` | `opt(O({P,A,B}))` | `records.breed_family_s: optR(R({P,A,B}))` |
+| `session_summary.start` | `O(START_FIELDS)` | `records.start: R(START_FIELDS)` |
+| `session_summary.end` | `nul(O({...}))` | `records.end: nulR(R({...}))` |
+| `session_summary.first_upgrade` | `nul(O({...}))` | `records.first_upgrade: nulR(R({...}))` |
+| `session_summary.counts` | `O({}, [dynamicFields])` | `records.counts: R({}, [dynamicFields])` — wire-compatible; no new FieldSpec kind / no PMC errata needed |
+
+Base: `rc/v5` @ `71375901`. Scope: `src/telemetry/schema.ts` + `tests/telemetry-schema.test.ts` only.
+
+## Gates (local @ `87bd8b5`)
+- `tsc --noEmit`: 0 errors
+- `sync-economy --check`: OK
+- vitest (flock + nice, maxWorkers=2): **2220 passed / 1 skipped** (telemetry-schema **51/51**)
+
+## Trace table (AC id → test)
+
+| AC id | test file::name |
+|---|---|
+| TEL-AC11 / F-3 | `tests/telemetry-schema.test.ts`::`[TEL-AC11][F-3] every FieldSpec uses a D-HOE-25 N-2 kind (no obj); str anchored; arr has maxLen; records are one-level only` |
+| TEL-AC11 / F-3 / QA-D-1105-SCHEMA | `tests/telemetry-schema.test.ts`::`[TEL-AC11][F-3][QA-D-1105-SCHEMA] EventSpec.records keep nested wire JSON (session_summary start/end/counts/first_upgrade)` |
+| TEL-AC11 / F-3 | `tests/telemetry-schema.test.ts`::`[TEL-AC11][F-3] session_end.breed_family_s keeps wire {P,A,B}; optional whole record; bad child fails` |
+
+## Review
+**Draft** — Architect review before Ready. Not a merge-stack blocker for #107/#108/#111. Before G-8 sign-off.
+
+## Plan
+`engineering/scratch/saves/f3-fieldspec-obj-plan.md`
+pacing-x1-stack | completed | skipped | 2026-11-06T01:45:54Z | 87bd8b59e | 42145976672/job/127657479736
+release-globals | completed | skipped | 2026-11-06T01:45:54Z | 87bd8b59e | 42145976616/job/127657476939
+gate | completed | skipped | 2026-11-06T01:45:54Z | 87bd8b59e | 42145976616/job/127657464765
+pacing-x1-stack shard (${{ matrix.profile }}) | completed | skipped | 2026-11-06T01:45:54Z | 87bd8b59e | 42145976672/job/127657425459
+k10-breeds-offset (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53) | completed | skipped | 2026-11-06T01:45:54Z | 87bd8b59e | 42145976633/job/127657425239

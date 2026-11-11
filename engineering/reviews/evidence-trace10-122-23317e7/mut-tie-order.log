@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1-mut
+
+ ✓ tests/trace10/selftest.test.ts (6 tests) 107ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  00:45:19
+   Duration  476ms (transform 118ms, setup 0ms, collect 156ms, tests 107ms, environment 0ms, prepare 43ms)
+

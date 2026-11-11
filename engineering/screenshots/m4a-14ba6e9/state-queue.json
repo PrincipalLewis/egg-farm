@@ -1,0 +1,38 @@
+{
+ "data": {
+  "360": {
+   "custAfterLoad": 0,
+   "chips": 0,
+   "qtag": null,
+   "turnedAway": {
+    "ghostSeen": true,
+    "bubbles": [
+     "Sold out!",
+     "Sold out!",
+     "Sold out!",
+     "Sold out!",
+     "Sold out!",
+     "Sold out!",
+     "Sold out!",
+     "Sold out!",
+     "Sold out!",
+     "Sold out!"
+    ],
+    "qtags": 0,
+    "overflow": 1
+   }
+  },
+  "1280-docked": {
+   "custAfterLoad": 0,
+   "chips": 0,
+   "qtag": null,
+   "turnedAway": {
+    "ghostSeen": false,
+    "bubbles": [],
+    "qtags": 0,
+    "overflow": 0
+   }
+  }
+ },
+ "errs": []
+}

@@ -1,0 +1,41 @@
+PASS [chromium] 360x640 Collect 48 px at spec rect (>= 44 px target) {"c":[8,328,504,552],"want":[8,328,504,552]}
+PASS [chromium] 360x640 row reserved at s=0 (band 552,576) {"hiddenRow":[8,328,556,576]}
+PASS [chromium] 360x640 bar rect {"bar":[8,240,560,572],"want":[8,240,560,572]}
+PASS [chromium] 360x640 label column + copy {"lab":[248,328,557,576],"want":[248,328],"label":"+7% price"}
+PASS [chromium] 360x640 tier-1 pill copy + 8 px above #meter, inside 8 px edges (§2) {"pill":[33,303,390,424],"meter":[8,328,432,448],"pillT":"Warm streak! +7% price"}
+PASS [chromium] 360x640 pill clear of Collect/goal/meter (CT-AC8) {}
+PASS [chromium] 360x640 coin pop (if paid) +$ text, no overlap with pill/goal/Collect (CT-AC8) {"coin":[140,210,348,370],"coinT":"+$0.05"}
+PASS [chromium] 360x640 1 tick lit at tier 1 {}
+PASS [chromium] 360x640 tier-2 pill "Hot streak! +14% price", 2 ticks {"pill":"Hot streak! +14% price"}
+PASS [chromium] 360x640 MAX: 4 lit tabs, each 4x16 px (combo-tiers §0) {"ticks":[[4,16],[4,16],[4,16],[4,16]]}
+PASS [chromium] 360x640 MAX: label "MAX +28%", pill "MAX +28%!", 4 ticks, gold fill {"label":"MAX +28%","pill":"MAX +28%!","fillBg":"rgb(232, 176, 32) op 1"}
+PASS [chromium] 360x640 cooling: aria ", cooling", label back to +N% price (§1 MAX row, §3) {"vt":"Streak +26% price, tier 3 of 4, cooling","label":"+26% price"}
+PASS [chromium] 360x640 order-card + Sell all chip "+14%", 14 px tall, Sell all chip above the button {"chip":[182,215,252,266],"chipT":"+14%","sellChip":[163,197,550,564],"sa":[16,344,572,628]}
+PASS [chromium] 390x844 Collect 48 px at spec rect (>= 44 px target) {"c":[8,358,708,756],"want":[8,358,708,756]}
+PASS [chromium] 390x844 row reserved at s=0 (band 756,780) {"hiddenRow":[8,358,760,780]}
+PASS [chromium] 390x844 bar rect {"bar":[8,270,764,776],"want":[8,270,764,776]}
+PASS [chromium] 390x844 label column + copy {"lab":[278,358,761,780],"want":[278,358],"label":"+7% price"}
+PASS [chromium] 390x844 tier-1 pill copy + 8 px above #meter, inside 8 px edges (§2) {"pill":[48,318,594,628],"meter":[8,358,636,652],"pillT":"Warm streak! +7% price"}
+PASS [chromium] 390x844 pill clear of Collect/goal/meter (CT-AC8) {}
+PASS [chromium] 390x844 coin pop (if paid) +$ text, no overlap with pill/goal/Collect (CT-AC8) {"coin":[152,222,552,574],"coinT":"+$0.05"}
+PASS [chromium] 390x844 1 tick lit at tier 1 {}
+PASS [chromium] 390x844 tier-2 pill "Hot streak! +14% price", 2 ticks {"pill":"Hot streak! +14% price"}
+PASS [chromium] 390x844 MAX: 4 lit tabs, each 4x16 px (combo-tiers §0) {"ticks":[[4,16],[4,16],[4,16],[4,16]]}
+PASS [chromium] 390x844 MAX: label "MAX +28%", pill "MAX +28%!", 4 ticks, gold fill {"label":"MAX +28%","pill":"MAX +28%!","fillBg":"rgb(232, 176, 32) op 1"}
+PASS [chromium] 390x844 cooling: aria ", cooling", label back to +N% price (§1 MAX row, §3) {"vt":"Streak +26% price, tier 3 of 4, cooling","label":"+25% price"}
+PASS [chromium] 390x844 order-card + Sell all chip "+14%", 14 px tall, Sell all chip above the button {"chip":[221,255,300,314],"chipT":"+14%","sellChip":[178,212,754,768],"sa":[16,374,776,832]}
+PASS [chromium] 1280x800 Collect 48 px at spec rect (>= 44 px target) {"c":[160,720,724,772],"want":[160,720,724,772]}
+PASS [chromium] 1280x800 row reserved at s=0 (band 772,796) {"hiddenRow":[160,720,776,796]}
+PASS [chromium] 1280x800 bar rect {"bar":[160,632,780,792],"want":[160,632,780,792]}
+PASS [chromium] 1280x800 label column + copy {"lab":[640,720,777,796],"want":[640,720],"label":"+7% price"}
+PASS [chromium] 1280x800 tier-1 pill copy + 8 px above #meter, inside 8 px edges (§2) {"pill":[305,575,606,640],"meter":[160,720,648,664],"pillT":"Warm streak! +7% price"}
+PASS [chromium] 1280x800 pill clear of Collect/goal/meter (CT-AC8) {}
+PASS [chromium] 1280x800 coin pop (if paid) +$ text, no overlap with pill/goal/Collect (CT-AC8) {"coin":[404,474,564,586],"coinT":"+$0.05"}
+PASS [chromium] 1280x800 1 tick lit at tier 1 {}
+PASS [chromium] 1280x800 tier-2 pill "Hot streak! +14% price", 2 ticks {"pill":"Hot streak! +14% price"}
+PASS [chromium] 1280x800 MAX: 4 lit tabs, each 4x16 px (combo-tiers §0) {"ticks":[[4,16],[4,16],[4,16],[4,16]]}
+PASS [chromium] 1280x800 MAX: label "MAX +28%", pill "MAX +28%!", 4 ticks, gold fill {"label":"MAX +28%","pill":"MAX +28%!","fillBg":"rgb(232, 176, 32) op 1"}
+PASS [chromium] 1280x800 cooling: aria ", cooling", label back to +N% price (§1 MAX row, §3) {"vt":"Streak +25% price, tier 3 of 4, cooling","label":"+25% price"}
+PASS [chromium] 1280x800 order-card + Sell all chip "+14%", 14 px tall, Sell all chip above the button {"chip":[1103,1137,145,159],"chipT":"+14%","sellChip":[1064,1098,338,352],"sa":[898,1264,360,416]}
+PASS [chromium] 390x844 reduced motion: no spark dots, pill .rm (CT-AC14) {}
+ALL PASS

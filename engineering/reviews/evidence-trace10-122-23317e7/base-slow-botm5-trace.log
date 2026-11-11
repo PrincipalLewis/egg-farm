@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1-mut
+
+ ✓ tests/bot-m5-trace.slow.test.ts (1 test) 19479ms
+   ✓ verify m5x-casual: pinned trace and checkpoint counters (CCR N-5) > [VER-1h N-5] 24 h seed 1: trace 07139bdd, and eggs.collected/sold at each checkpoint equal sums over bot-m5 events 19478ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  00:44:45
+   Duration  20.03s (transform 268ms, setup 0ms, collect 352ms, tests 19.48s, environment 0ms, prepare 58ms)
+

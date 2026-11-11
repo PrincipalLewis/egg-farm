@@ -1,0 +1,71 @@
+{
+ "bb0tap0": {
+  "before": {
+   "ring": false,
+   "warm": null,
+   "bbSimMs": 0
+  },
+  "after": {
+   "ring": false,
+   "warm": null,
+   "bbSimMs": 0,
+   "bbTel": false
+  },
+  "next": {
+   "ring": false,
+   "warm": null
+  }
+ },
+ "bb1tap0": {
+  "before": {
+   "ring": false,
+   "warm": null,
+   "bbSimMs": 90000
+  },
+  "after": {
+   "ring": false,
+   "warm": null,
+   "bbSimMs": 150000,
+   "bbTel": true
+  },
+  "next": {
+   "ring": false,
+   "warm": null
+  }
+ },
+ "bb0tap1": {
+  "before": {
+   "ring": true,
+   "warm": 90,
+   "bbSimMs": 0
+  },
+  "after": {
+   "ring": false,
+   "warm": null,
+   "bbSimMs": 0,
+   "bbTel": false
+  },
+  "next": {
+   "ring": true,
+   "warm": 1
+  }
+ },
+ "bb1tap1": {
+  "before": {
+   "ring": true,
+   "warm": 90,
+   "bbSimMs": 90000
+  },
+  "after": {
+   "ring": false,
+   "warm": null,
+   "bbSimMs": 150000,
+   "bbTel": true
+  },
+  "next": {
+   "ring": true,
+   "warm": 1
+  }
+ }
+}
+EXIT:0

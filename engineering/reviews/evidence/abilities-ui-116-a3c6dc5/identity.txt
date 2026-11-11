@@ -1,0 +1,12 @@
+HEAD=a3c6dc510b5f0126a437fc13b9a5788ef8d34206
+tree=639662d15dc13703f4aad4a6d3aef0ccdea235f4
+P1=11f6b551a288825c64c161882192f3202cd30c94
+parents=11f6b551a288825c64c161882192f3202cd30c94
+subject=chore(abilities-ui): attribute #116 Architect CHANGES tip to Features
+a3c6dc5 chore(abilities-ui): attribute #116 Architect CHANGES tip to Features
+=== vs prior dc3c60f ===
+ src/ui/app.ts                 |  48 ++++++++++++++---
+ tests/v5-abilities-ui.test.ts | 117 +++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 157 insertions(+), 8 deletions(-)
+M	src/ui/app.ts
+M	tests/v5-abilities-ui.test.ts

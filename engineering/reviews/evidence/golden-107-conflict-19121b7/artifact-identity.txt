@@ -1,0 +1,28 @@
+rcv5=19121b75b44199beebf44fdb34a69b1120035cb0
+proposed_tree=1dcd12ec1045ba955d255b38aef4273ed9868591
+head_unchanged=a6d44c250b043250b56885e289fd4210270ad988
+=== sha256 artifacts ===
+bd05b5fdcff35e25134914c5bdb937f3b84af281fe2b25cbd67c18109b4510ac  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/NOTE.md
+0820c252f2001b8e8360dd7e96b915318da336971935bdbddd94b8dc89a6fcd9  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/head-unchanged.sha
+77c90b77dc4db02476b408c03611d11eec32ddc9f4a244bebe0e4d058d44ce81  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/prior-approved.patch
+cd65a4032f14390ae00408353ca09adcf26b8fff45c55adc2b5437390f1e655b  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/proposed-files.txt
+4d7caf46b0a813c32ad34fab63031af32d7132802761302b77729d6e90f1fe86  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/proposed-stat.txt
+c28fc7e95e61c1b632b06da92fb2054dec5755c8567b8cf32f056d8ea3e5005b  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/proposed-tree.sha
+ed3aaf4fdbb14bf84adbaef8e19f075c49aed55d7ceecb10b0a44d883e9df37b  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/proposed-two-dot.patch
+38b5e719ec60a6cdd11c382b3772a4a7ab2ea3db994f8885f3759dad4ea8cea3  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/rcv5.sha
+36c4b5bd50476f388bc4fa6a638d4605093ecb7e385e48f855766bbc3a26d9cc  /workspace/egg-farm-studio/artifacts/v5-107-mergefwd-CONFLICT-19121b7/resolution-vs-a6d44c2.diff
+=== proposed-files ===
+src/config/formulas.ts
+src/config/m5-rules.ts
+src/sim/effects.ts
+src/sim/golden.ts
+src/sim/timers.ts
+tests/v5-golden-rewards.test.ts
+=== proposed-stat ===
+ src/config/formulas.ts          |   2 +-
+ src/config/m5-rules.ts          |   2 +
+ src/sim/effects.ts              |   5 +-
+ src/sim/golden.ts               |  57 +++++++++++++++++
+ src/sim/timers.ts               |   5 +-
+ tests/v5-golden-rewards.test.ts | 136 ++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 204 insertions(+), 3 deletions(-)

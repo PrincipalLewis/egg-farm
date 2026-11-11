@@ -1,0 +1,27 @@
+HEAD=96ac430e7c93307081093a3181ad54a09ce17568
+tree=4110ba5185598c5d3a1fcf64d068d063a1d0ca66
+P1=9ee57c0346dc594dabe4ee00845dccb7acbaa588
+parents=9ee57c0346dc594dabe4ee00845dccb7acbaa588
+subject=test(golden-game): Chromium 360 flag-on browser gate (#111)
+96ac430 test(golden-game): Chromium 360 flag-on browser gate (#111)
+ .github/workflows/ci.yml                        | 16 +++++
+ .gitignore                                      |  1 +
+ package.json                                    |  1 +
+ scripts/golden-game-browser.mjs                 | 95 +++++++++++++++++++++++++
+ tests/fixtures/golden-game-browser-flag-on.json |  4 ++
+ 5 files changed, 117 insertions(+)
+=== vs prior PASS parent ===
+ .github/workflows/ci.yml                        | 16 +++++
+ .gitignore                                      |  1 +
+ package.json                                    |  1 +
+ scripts/golden-game-browser.mjs                 | 95 +++++++++++++++++++++++++
+ tests/fixtures/golden-game-browser-flag-on.json |  4 ++
+ 5 files changed, 117 insertions(+)
+M	.github/workflows/ci.yml
+M	.gitignore
+M	package.json
+A	scripts/golden-game-browser.mjs
+A	tests/fixtures/golden-game-browser-flag-on.json
+=== src/product/public/balance touch? ===
+SRC_PRODUCT_PUBLIC_IDENTICAL=YES
+prior_tree=2ce96970c4006202ecaa32e3a5145cd8c995e36a

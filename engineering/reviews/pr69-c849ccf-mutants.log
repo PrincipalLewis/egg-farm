@@ -1,0 +1,55 @@
+M01 swap tracks KILLED
+M02 always hensLevel KILLED
+M03 always F (revert) KILLED
+M04 flag negated KILLED
+M05 hensLevel+1 KILLED
+M06 hensLevel-1 KILLED
+M07 max(H,F) KILLED
+M08 cap 11 KILLED
+M09 cap 13 SURVIVED
+M10 min->max KILLED
+M11 sprites from F KILLED
+M12 sprites uncapped SURVIVED
+M13 pill <= -> < SURVIVED
+M14 pill thr 11 SURVIVED
+M15 pill thr 13 SURVIVED
+M16 pill thr 14 SURVIVED
+M17 pill thr 9 KILLED
+M18 pill always shown KILLED
+M19 pill never shown KILLED
+M20 pill > (inverted) KILLED
+M21 pill text from F KILLED
+M22 pill hidden from F KILLED
+M23 pill text from hn KILLED
+M24 pill hidden from hn KILLED
+M25 sprite dirty-check stale KILLED
+M26 sprites from S.hens(F) when hn SURVIVED
+19 / 26
+--- with proposed boundary test ---
+M01 swap tracks KILLED
+M02 always hensLevel KILLED
+M03 always F (revert) KILLED
+M04 flag negated KILLED
+M05 hensLevel+1 KILLED
+M06 hensLevel-1 KILLED
+M07 max(H,F) KILLED
+M08 cap 11 KILLED
+M09 cap 13 SURVIVED
+M10 min->max KILLED
+M11 sprites from F KILLED
+M12 sprites uncapped SURVIVED
+M13 pill <= -> < KILLED
+M14 pill thr 11 KILLED
+M15 pill thr 13 KILLED
+M16 pill thr 14 KILLED
+M17 pill thr 9 KILLED
+M18 pill always shown KILLED
+M19 pill never shown KILLED
+M20 pill > (inverted) KILLED
+M21 pill text from F KILLED
+M22 pill hidden from F KILLED
+M23 pill text from hn KILLED
+M24 pill hidden from hn KILLED
+M25 sprite dirty-check stale KILLED
+M26 sprites from S.hens(F) when hn SURVIVED
+23 / 26

@@ -1,0 +1,11 @@
+serveOwn: dist-qa on port 38681 (free port; set PORT to pin)
+serveOwn: WARNING ALLOW_DIRTY=1: testing a +dirty build (working-tree balance.json m4.enabled=1); not a release build
+streak-audio-chromium: dist-qa m4.1+fc33e03+dirty on port 38681
+[["collect:0"],["collect:0"],["collect:0"],["collect:0"],["collect:0"],["collect:0"],["streakTier1:0"],["collect:1"]]
+PASS [chromium] taps 1-6 (tier 0): one collect at semi 0 each [["collect:0"],["collect:0"],["collect:0"],["collect:0"],["collect:0"],["collect:0"]]
+PASS [chromium] tap 7 (tier-up 1): streakTier1 sting, NO collect (§1) ["streakTier1:0"]
+PASS [chromium] tap 8 (tier 1): collect at +1 semitone (R16) ["collect:1"]
+PASS [chromium] tier-up 2: streakTier2, NO collect; next tap collect +2 {"t2":["streakTier2:0"],"t2b":["collect:2"]}
+PASS [chromium] MAX: streakMax, NO collect; next tap collect +4 (cap) {"tm":["streakMax:0"],"tmb":["collect:4"]}
+PASS [chromium] no page errors []
+chromium audio: all PASS

@@ -1,0 +1,165 @@
+--- clone-step diff:
+diff --git a/tests/bot-m5.ts b/tests/bot-m5.ts
+index c7485b7..7e12be9 100644
+--- a/tests/bot-m5.ts
++++ b/tests/bot-m5.ts
+@@ -146,7 +146,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
+     // pause bookkeeping: paused workers held asleep (energy 0) by the runner; recover 0.25x drain into the stored energy
+     for (const [id, e] of paused) { paused.set(id, Math.min(100, e + 0.25 * dt / b.workers.energy.drain_s_per_pct)); s = { ...s, workers: { ...s.workers, [id]: { ...s.workers[id]!, energy: 0 } } }; }
+     s = step(s, dt, b, ev); drain(t); t0.v = t; rm.tAll += dt;
+-    if (opt.onTick) opt.onTick('step', i, t, structuredClone(s));
++    if (opt.onTick) opt.onTick('step', i, t, s);
+     for (const id of ['market_hand', 'coop_hand'] as WorkerId[]) { const w = s.workers[id]; const m = w ? mood(w, b) : null; const p = prevMood[id];
+       if (p != null && m != null && p !== m) { if ((p === 'asleep' && m === 'unpaid') || (p === 'unpaid' && m === 'asleep')) { rm.tog++; if (s.farmLevel >= 10) rm.tog10++; } if (m === 'unpaid') { rm.unpEnter++; if (s.farmLevel >= 10) rm.unpEnter10++; } }
+       prevMood[id] = m; }
+MUT clone-step exit=1 (nonzero = test went red)
+--- clone-end diff:
+diff --git a/tests/bot-m5.ts b/tests/bot-m5.ts
+index c7485b7..c18f3a3 100644
+--- a/tests/bot-m5.ts
++++ b/tests/bot-m5.ts
+@@ -141,7 +141,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
+   let prevT = 0;
+   for (let i = 1; i <= n; i++) {
+     const t = Math.round(i * dt * 10) / 10; curT = t;
+-    if (opt.onTick && i > 1) opt.onTick('end', i - 1, prevT, structuredClone(s));
++    if (opt.onTick && i > 1) opt.onTick('end', i - 1, prevT, s);
+     if (opt.onSecond && i > 1 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s); prevT = t;
+     // pause bookkeeping: paused workers held asleep (energy 0) by the runner; recover 0.25x drain into the stored energy
+     for (const [id, e] of paused) { paused.set(id, Math.min(100, e + 0.25 * dt / b.workers.energy.drain_s_per_pct)); s = { ...s, workers: { ...s.workers, [id]: { ...s.workers[id]!, energy: 0 } } }; }
+@@ -238,7 +238,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
+       if (kind === 'f') { reach.set(s.farmLevel, t); if (opt.snapAt?.includes(s.farmLevel)) snaps.set(s.farmLevel, s); } }
+   }
+   if (bStart !== null && T - bStart > longestB) { longestB = T - bStart; worst = { ...cur, len: longestB, endKey: 'END' }; } if (mStart !== null && T - mStart > longestM) { longestM = T - mStart; worstM = { ...curM, len: longestM, endKey: 'END' }; }
+-  if (opt.onTick && n > 0) opt.onTick('end', n, prevT, structuredClone(s));
++  if (opt.onTick && n > 0) opt.onTick('end', n, prevT, s);
+   if (opt.onSecond && n > 0 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s);
+   if (noAffStart !== null) longestNoAff = Math.max(longestNoAff, T - noAffStart); if (noAff30Start !== null) longestNoAff30 = Math.max(longestNoAff30, T - noAff30Start);
+   const mech = Object.values(src).reduce((a, x) => a + x, 0);
+MUT clone-end exit=1 (nonzero = test went red)
+--- r0-twice diff:
+diff --git a/tests/bot-m5.ts b/tests/bot-m5.ts
+index c7485b7..71e00da 100644
+--- a/tests/bot-m5.ts
++++ b/tests/bot-m5.ts
+@@ -84,7 +84,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
+   const tsnaps: [number, number, GameState][] = [];
+   const b = { ...bal, sim_test: { ...bal.sim_test, poisson_arrivals: true } } as B;
+   const V = new SellerVariance(VAR_DEFAULT, seed), R0 = rng(seed); let rN = 0;
+-  const R = opt.onRunnerDraw ? () => { const u = R0(); opt.onRunnerDraw!(++rN, u); return u; } : R0;
++  const R = opt.onRunnerDraw ? () => { const u = R0(); R0(); opt.onRunnerDraw!(++rN, u); return u; } : R0;
+   opt.onVariance?.(V);
+   let s: GameState = opt.start ?? initialState(b, seed); const dt = 1 / b.tickHz, n = Math.round(T * b.tickHz);
+   const reach = new Map<number, number>([[s.farmLevel, 0]]), snaps = new Map<number, GameState>(), buys: number[] = [];
+MUT r0-twice exit=1 (nonzero = test went red)
+--- variance-late diff:
+diff --git a/tests/bot-m5.ts b/tests/bot-m5.ts
+index c7485b7..e42afc4 100644
+--- a/tests/bot-m5.ts
++++ b/tests/bot-m5.ts
+@@ -85,7 +85,7 @@ export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: Run
+   const b = { ...bal, sim_test: { ...bal.sim_test, poisson_arrivals: true } } as B;
+   const V = new SellerVariance(VAR_DEFAULT, seed), R0 = rng(seed); let rN = 0;
+   const R = opt.onRunnerDraw ? () => { const u = R0(); opt.onRunnerDraw!(++rN, u); return u; } : R0;
+-  opt.onVariance?.(V);
++  V.checkInterval(15); opt.onVariance?.(V);
+   let s: GameState = opt.start ?? initialState(b, seed); const dt = 1 / b.tickHz, n = Math.round(T * b.tickHz);
+   const reach = new Map<number, number>([[s.farmLevel, 0]]), snaps = new Map<number, GameState>(), buys: number[] = [];
+   const ev: SimEvent[] = []; const present = P.tap !== 'idle';
+MUT variance-late exit=1 (nonzero = test went red)
+--- pyrandom-rename diff:
+diff --git a/tests/py-random.ts b/tests/py-random.ts
+index ccc1b5e..2e49c0f 100644
+--- a/tests/py-random.ts
++++ b/tests/py-random.ts
+@@ -3,7 +3,7 @@
+  *  bot replay product/sim/seller_variance_sim.py's variance stream draw-for-draw. Integer seeds >= 0 only. */
+ const N = 624, M = 397;
+ export class PyRandom {
+-  private mt = new Uint32Array(N); private mti = N + 1;
++  private mtx = new Uint32Array(N); private mti = N + 1;
+   constructor(seed: number) {
+     if (!Number.isSafeInteger(seed) || seed < 0) throw new Error('PyRandom: non-negative safe-integer seed only');
+     const key: number[] = []; let x = seed;
+@@ -11,34 +11,34 @@ export class PyRandom {
+     this.initByArray(key);
+   }
+   private initGenrand(s: number) {
+-    const mt = this.mt; mt[0] = s >>> 0;
+-    for (let i = 1; i < N; i++) { const p = mt[i - 1] ^ (mt[i - 1] >>> 30); mt[i] = (Math.imul(1812433253, p) + i) >>> 0; }
++    const mtx = this.mtx; mtx[0] = s >>> 0;
++    for (let i = 1; i < N; i++) { const p = mtx[i - 1] ^ (mtx[i - 1] >>> 30); mtx[i] = (Math.imul(1812433253, p) + i) >>> 0; }
+     this.mti = N;
+   }
+   private initByArray(key: number[]) {
+-    this.initGenrand(19650218); const mt = this.mt; let i = 1, j = 0;
++    this.initGenrand(19650218); const mtx = this.mtx; let i = 1, j = 0;
+     for (let k = Math.max(N, key.length); k; k--) {
+-      const p = mt[i - 1] ^ (mt[i - 1] >>> 30);
+-      mt[i] = ((mt[i] ^ Math.imul(p, 1664525)) + key[j] + j) >>> 0; i++; j++;
+-      if (i >= N) { mt[0] = mt[N - 1]; i = 1; } if (j >= key.length) j = 0;
++      const p = mtx[i - 1] ^ (mtx[i - 1] >>> 30);
++      mtx[i] = ((mtx[i] ^ Math.imul(p, 1664525)) + key[j] + j) >>> 0; i++; j++;
++      if (i >= N) { mtx[0] = mtx[N - 1]; i = 1; } if (j >= key.length) j = 0;
+     }
+     for (let k = N - 1; k; k--) {
+-      const p = mt[i - 1] ^ (mt[i - 1] >>> 30);
+-      mt[i] = ((mt[i] ^ Math.imul(p, 1566083941)) - i) >>> 0; i++;
+-      if (i >= N) { mt[0] = mt[N - 1]; i = 1; }
++      const p = mtx[i - 1] ^ (mtx[i - 1] >>> 30);
++      mtx[i] = ((mtx[i] ^ Math.imul(p, 1566083941)) - i) >>> 0; i++;
++      if (i >= N) { mtx[0] = mtx[N - 1]; i = 1; }
+     }
+-    mt[0] = 0x80000000;
++    mtx[0] = 0x80000000;
+   }
+   private genrand(): number {
+-    const mt = this.mt;
++    const mtx = this.mtx;
+     if (this.mti >= N) {
+       let kk = 0, y: number;
+-      for (; kk < N - M; kk++) { y = (mt[kk] & 0x80000000) | (mt[kk + 1] & 0x7fffffff); mt[kk] = mt[kk + M] ^ (y >>> 1) ^ (y & 1 ? 0x9908b0df : 0); }
+-      for (; kk < N - 1; kk++) { y = (mt[kk] & 0x80000000) | (mt[kk + 1] & 0x7fffffff); mt[kk] = mt[kk + (M - N)] ^ (y >>> 1) ^ (y & 1 ? 0x9908b0df : 0); }
+-      y = (mt[N - 1] & 0x80000000) | (mt[0] & 0x7fffffff); mt[N - 1] = mt[M - 1] ^ (y >>> 1) ^ (y & 1 ? 0x9908b0df : 0);
++      for (; kk < N - M; kk++) { y = (mtx[kk] & 0x80000000) | (mtx[kk + 1] & 0x7fffffff); mtx[kk] = mtx[kk + M] ^ (y >>> 1) ^ (y & 1 ? 0x9908b0df : 0); }
++      for (; kk < N - 1; kk++) { y = (mtx[kk] & 0x80000000) | (mtx[kk + 1] & 0x7fffffff); mtx[kk] = mtx[kk + (M - N)] ^ (y >>> 1) ^ (y & 1 ? 0x9908b0df : 0); }
++      y = (mtx[N - 1] & 0x80000000) | (mtx[0] & 0x7fffffff); mtx[N - 1] = mtx[M - 1] ^ (y >>> 1) ^ (y & 1 ? 0x9908b0df : 0);
+       this.mti = 0;
+     }
+-    let y = mt[this.mti++];
++    let y = mtx[this.mti++];
+     y ^= y >>> 11; y ^= (y << 7) & 0x9d2c5680; y ^= (y << 15) & 0xefc60000; y ^= y >>> 18;
+     return y >>> 0;
+   }
+MUT pyrandom-rename exit=1 (nonzero = test went red)
+--- footer-count diff:
+diff --git a/tests/trace10/compare.ts b/tests/trace10/compare.ts
+index 7d5e78c..74dc2ad 100644
+--- a/tests/trace10/compare.ts
++++ b/tests/trace10/compare.ts
+@@ -24,7 +24,7 @@ export function parseStream(id: StreamId, text: string | undefined, seeds: reado
+   if (foot[1] !== id) throw new Error(`${id}: footer names stream ${String(foot[1])}`);
+   const body = lines.map(l => l + '\n');
+   if (!body.length) throw new Error(`${id}: stream has no records`);
+-  if (foot[2] !== body.length) throw new Error(`${id}: footer count ${String(foot[2])} != ${body.length} records`);
++//   if (foot[2] !== body.length) throw new Error(`${id}: footer count ${String(foot[2])} != ${body.length} records`);
+   if (foot[4] !== sha256(body.join(''))) throw new Error(`${id}: footer body sha256 mismatch`);
+   const bySeed: ParsedStream['bySeed'] = new Map();
+   body.forEach((text, k) => {
+MUT footer-count exit=1 (nonzero = test went red)
+--- tie-order diff:
+diff --git a/tests/trace10/compare.ts b/tests/trace10/compare.ts
+index 7d5e78c..f2f9372 100644
+--- a/tests/trace10/compare.ts
++++ b/tests/trace10/compare.ts
+@@ -107,7 +107,7 @@ export function firstDivergence(pb: Record<StreamId, ParsedStream>, pa: Record<S
+       const tick = b && a ? Math.min(b.i, a.i) : (b ?? a)!.i;
+       const reason = !a ? (afterI10 !== null && afterI10 < C ? 'after_truncated_at_own_cut' : 'after_missing_records') : !b ? 'after_extra_records' : undefined;
+       const d: Divergence = { seed, profile, stream: id, line: b?.line ?? null, seedLine: k + 1, tick, t: tAt(tick), farmLevel: fAt(tick), before_record: b?.rec ?? null, after_record: a?.rec ?? null, ...(reason ? { reason } : {}) };
+-      if (!best || tick < (best.tick ?? Infinity)) best = d;
++      if (!best || tick <= (best.tick ?? Infinity)) best = d;
+       break;
+     }
+   }
+MUT tie-order exit=0 (nonzero = test went red)
+clean-after-mutations: 0 changed files

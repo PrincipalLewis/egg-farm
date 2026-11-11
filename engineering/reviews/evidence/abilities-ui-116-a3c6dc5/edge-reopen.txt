@@ -1,0 +1,35 @@
+
+ RUN  v2.1.9 /workspace/wt-review-116-a3c6dc5
+
+stdout | arch116-edge-close2.test.ts > Architect edge reopen > reopen while pending: stale transitionend hides sheet / clears freeze while panel open
+REOPEN {"hidden":true,"sheets":false,"attended":false,"panelOpen":true}
+
+ × arch116-edge-close2.test.ts > Architect edge reopen > reopen while pending: stale transitionend hides sheet / clears freeze while panel open 335ms
+   → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  arch116-edge-close2.test.ts > Architect edge reopen > reopen while pending: stale transitionend hides sheet / clears freeze while panel open
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ arch116-edge-close2.test.ts:77:33
+     75|     console.log('REOPEN', JSON.stringify({ hidden, sheets, attended, p…
+     76|     // Hazard if hidden true while panelOpen (stale close completed ov…
+     77|     expect(hidden && panelOpen).toBe(false); // fail if hazard
+       |                                 ^
+     78|   });
+     79| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  02:07:24
+   Duration  1.16s (transform 445ms, setup 0ms, collect 348ms, tests 336ms, environment 286ms, prepare 47ms)
+

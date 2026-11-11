@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /workspace/wt-review-111-96ac430
+
+ ✓ tests/v5-golden-game.test.ts (21 tests) 25ms
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Start at  04:00:33
+   Duration  493ms (transform 247ms, setup 0ms, collect 312ms, tests 25ms, environment 0ms, prepare 38ms)
+

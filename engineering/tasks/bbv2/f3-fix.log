@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 /workspace/wt-gen-bbv2-m12
+
+ ✓ tests/v5-f3-config.test.ts (28 tests) 44ms
+ ✓ tests/bbv2-m2-ship-nopick.test.ts (4 tests) 11ms
+ ✓ tests/bbv2-m1-hatch-qe2.test.ts (2 tests) 4ms
+ ✓ tests/bbv2-qe2.test.ts (9 tests) 23ms
+ ✓ tests/zg-verdict.test.ts (21 tests) 1685ms
+   ✓ ZG-AC20 [sim] parity with the Best buy verdict (bounded trace; full seeds 1–200 x 12,000 s is QA P2) > isZeroGain === optionGain.gain <= 0 for every offered COLL/HENS/VALUE, except HENS milestone steps with Δcap > 0 1489ms
+stdout | tests/bbv2-sim.test.ts > BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > seeds 1–200, 15 s check-in sells (gating cadence): 0 violating seeds
+AC8 fixed cadence: max first ★ 30 s; keys HENS; violating 0
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > VAR_DEFAULT check-in cadence: REPORT-ONLY (the bot's random first check-in), every seed gets a meaningful ★
+AC8 variance cadence (report-only): 61/200 first ★ after 30 s, max 57.8 s
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC9 [B] seller15 bots (runBot band + runM2 workers, VAR_DEFAULT): zero-gain buys below L30 = 0 > flag on, seeds 1–10 (1–200 in the slow test)
+AC9 seeds 1-10: 0 zero-gain of 2137 buys
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > DECISIVE bestBuyV2=1 zeroGainUi=0: seeds 1–3 (1–200 in the slow test)
+AC14 DECISIVE bestBuyV2=1 zeroGainUi=0 seeds 1-3: {"states":32400,"violations":0,"suppressed":19925,"suppressedAffordable":334,"suppressedAffordableBelow30":0,"examples":[]}
+
+stdout | tests/bbv2-sim.test.ts > BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1: seeds 1–3 (1–200 in the slow test)
+AC14 CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1 seeds 1-3: {"states":32400,"violations":0,"suppressed":5529,"suppressedAffordable":0,"suppressedAffordableBelow30":0,"examples":[]}
+
+ ✓ tests/bbv2-sim.test.ts (5 tests) 11624ms
+   ✓ BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > seeds 1–200, 15 s check-in sells (gating cadence): 0 violating seeds 380ms
+   ✓ BBV2-AC8 [B] fresh save: first ★ meaningful + affordable <= 30 s (sim time, VAR_DEFAULT taps) > VAR_DEFAULT check-in cadence: REPORT-ONLY (the bot's random first check-in), every seed gets a meaningful ★ 428ms
+   ✓ BBV2-AC9 [B] seller15 bots (runBot band + runM2 workers, VAR_DEFAULT): zero-gain buys below L30 = 0 > flag on, seeds 1–10 (1–200 in the slow test) 2385ms
+   ✓ BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > DECISIVE bestBuyV2=1 zeroGainUi=0: seeds 1–3 (1–200 in the slow test) 4242ms
+   ✓ BBV2-AC14 [B] traces: hint on a zero-gain row while a meaningful row is offered = 0 > CONFIRMATORY ship bestBuyV2=1 zeroGainUi=1: seeds 1–3 (1–200 in the slow test) 4189ms
+
+ Test Files  6 passed (6)
+      Tests  69 passed (69)
+   Start at  23:38:45
+   Duration  14.31s (transform 259ms, setup 0ms, collect 951ms, tests 13.39s, environment 1ms, prepare 247ms)
+
+EXIT:0

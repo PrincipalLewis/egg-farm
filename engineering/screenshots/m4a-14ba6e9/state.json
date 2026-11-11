@@ -1,0 +1,145 @@
+{
+ "data": {
+  "360": {
+   "goal": {
+    "pill": true,
+    "state": "ready",
+    "hit": 44,
+    "pillH": 40,
+    "status": "Ready!",
+    "statusInside": true,
+    "chev": "›",
+    "chevInside": false,
+    "border": "2px",
+    "bg": "rgb(255, 255, 255)"
+   },
+   "max": {
+    "maxButtons": 0,
+    "maxLabels": [
+     {
+      "tag": "SPAN",
+      "tabIndex": -1,
+      "focusable": false
+     },
+     {
+      "tag": "SPAN",
+      "tabIndex": -1,
+      "focusable": false
+     },
+     {
+      "tag": "SPAN",
+      "tabIndex": -1,
+      "focusable": false
+     }
+    ],
+    "rowAria": [
+     "Hens, level 30, max.",
+     "Egg value, level 30, max.",
+     "Farm level, level 30, max."
+    ],
+    "strip": "Balanced farm 5/5 · +30%",
+    "stripAlt": "Balanced farm 5 of 5. Top tier, +30% income."
+   },
+   "lock": [
+    {
+     "text": "Needs Farm L6",
+     "aria": "Hens, level 8, locked. Needs Farm level 6.",
+     "glyph": "\"\"",
+     "glyphW": "12px"
+    },
+    {
+     "text": "Needs Farm L6",
+     "aria": "Egg value, level 8, locked. Needs Farm level 6.",
+     "glyph": "\"\"",
+     "glyphW": "12px"
+    }
+   ],
+   "qtag": null,
+   "turnedAway": {
+    "ghostSeen": false,
+    "bubbles": [],
+    "qtags": 0,
+    "overflow": 0
+   },
+   "hensToast": true,
+   "tier4Toast": true,
+   "gradeToast": true,
+   "tier5Toast": true,
+   "tier5Strip": {
+    "strip": "Balanced farm 5/5 · +30%",
+    "alt": "Balanced farm 5 of 5. Top tier, +30% income."
+   }
+  },
+  "1280-docked": {
+   "goal": {
+    "pill": true,
+    "state": "ready",
+    "hit": 44,
+    "pillH": 44,
+    "status": "Ready!",
+    "statusInside": true,
+    "chev": "›",
+    "chevInside": true,
+    "border": "2px",
+    "bg": "rgb(255, 255, 255)"
+   },
+   "max": {
+    "maxButtons": 0,
+    "maxLabels": [
+     {
+      "tag": "SPAN",
+      "tabIndex": -1,
+      "focusable": false
+     },
+     {
+      "tag": "SPAN",
+      "tabIndex": -1,
+      "focusable": false
+     },
+     {
+      "tag": "SPAN",
+      "tabIndex": -1,
+      "focusable": false
+     }
+    ],
+    "rowAria": [
+     "Hens, level 30, max.",
+     "Egg value, level 30, max.",
+     "Farm level, level 30, max."
+    ],
+    "strip": "Balanced farm 5/5 · +30%",
+    "stripAlt": "Balanced farm 5 of 5. Top tier, +30% income."
+   },
+   "lock": [
+    {
+     "text": "Needs Farm L6",
+     "aria": "Hens, level 8, locked. Needs Farm level 6.",
+     "glyph": "\"\"",
+     "glyphW": "12px"
+    },
+    {
+     "text": "Needs Farm L6",
+     "aria": "Egg value, level 8, locked. Needs Farm level 6.",
+     "glyph": "\"\"",
+     "glyphW": "12px"
+    }
+   ],
+   "qtag": null,
+   "turnedAway": {
+    "ghostSeen": false,
+    "bubbles": [],
+    "qtags": 0,
+    "overflow": 0
+   },
+   "hensToast": true,
+   "tier4Toast": true,
+   "gradeToast": true,
+   "tier5Toast": true,
+   "tier5Strip": {
+    "strip": "Balanced farm 5/5 · +30%",
+    "alt": "Balanced farm 5 of 5. Top tier, +30% income."
+   }
+  }
+ },
+ "errs": []
+}

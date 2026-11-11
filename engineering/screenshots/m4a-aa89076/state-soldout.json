@@ -1,0 +1,99 @@
+{
+ "res": {
+  "360": {
+   "seen": true,
+   "bubbles": [
+    {
+     "text": "Sold out!",
+     "l": -72,
+     "r": -16,
+     "w": 56,
+     "top": 67
+    },
+    {
+     "text": "Sold out!",
+     "l": -8,
+     "r": 48,
+     "w": 56,
+     "top": 67
+    },
+    {
+     "text": "Sold out!",
+     "l": 56,
+     "r": 112,
+     "w": 56,
+     "top": 67
+    },
+    {
+     "text": "Sold out!",
+     "l": 120,
+     "r": 176,
+     "w": 56,
+     "top": 67
+    },
+    {
+     "text": "Sold out!",
+     "l": 184,
+     "r": 240,
+     "w": 56,
+     "top": 67
+    }
+   ],
+   "count": 5,
+   "maxW": 56,
+   "chipW": 56,
+   "overlaps": 0,
+   "minLeft": -72,
+   "stripLeft": 8,
+   "clippedAtX0": true
+  },
+  "1280-docked": {
+   "seen": true,
+   "bubbles": [
+    {
+     "text": "Sold out!",
+     "l": -68,
+     "r": -12,
+     "w": 56,
+     "top": 69
+    },
+    {
+     "text": "Sold out!",
+     "l": -4,
+     "r": 52,
+     "w": 56,
+     "top": 69
+    },
+    {
+     "text": "Sold out!",
+     "l": 60,
+     "r": 116,
+     "w": 56,
+     "top": 69
+    },
+    {
+     "text": "Sold out!",
+     "l": 124,
+     "r": 180,
+     "w": 56,
+     "top": 69
+    },
+    {
+     "text": "Sold out!",
+     "l": 188,
+     "r": 244,
+     "w": 56,
+     "top": 69
+    }
+   ],
+   "count": 5,
+   "maxW": 56,
+   "chipW": 56,
+   "overlaps": 0,
+   "minLeft": -68,
+   "stripLeft": 12,
+   "clippedAtX0": true
+  }
+ },
+ "errs": []
+}

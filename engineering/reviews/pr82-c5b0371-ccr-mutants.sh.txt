@@ -1,0 +1,31 @@
+#!/bin/bash
+# CCR mutants for #79/#80/#82 on a scratch clone at c5b0371 (each: apply sed, run the named tests, restore).
+M=/workspace/.pr82-ev/mut; cd $M
+mut(){ local id=$1 file=$2 from=$3 to=$4 tests=$5; :
+  python3 - "$file" "$from" "$to" <<'PY'
+import sys;f,a,b=sys.argv[1:];t=open(f).read()
+assert t.count(a)==1, ('pattern count',t.count(a),a); open(f,'w').write(t.replace(a,b))
+PY
+  [ $? -ne 0 ] && { echo "$id NOAPPLY"; git checkout -q -- $file; return; }
+  npx vitest run $tests > /workspace/.pr82-ev/mut-$id.log 2>&1; rc=$?
+  f=$(grep -oE "[0-9]+ failed" /workspace/.pr82-ev/mut-$id.log | head -1)
+  [ $rc -ne 0 ] && echo "$id killed ($f)" || echo "$id SURVIVED"; git checkout -q -- $file; }
+T79=tests/v5-f1b-clock-rng.test.ts; T80=tests/v5-f1c-effects.test.ts; T82="tests/v5-f3-is-paused.test.ts tests/m41-p1-live-income.test.ts"
+mut R1 src/sim/rng.ts "{ ...s, evRngState: deriveEvRngState(s.rng) }" "{ ...s, evRngState: deriveEvRngState(s.rng), rng: nextRand(s.rng)[0] }" $T79
+mut R2 src/sim/rng.ts "return [{ ...s, evRngState: x }, u];" "return [{ ...s, evRngState: x, rng: x }, u];" $T79
+mut R3 src/sim/rng.ts "isRngState(s.evRngState) ? s :" "false ? s :" $T79
+mut R4 src/sim/rng.ts "const [x, u] = nextRand(seed); return [{ ...s, brRngState: x }, u];" "const [x, u] = nextRand(seed); return [{ ...s, brRngState: x, evRngState: x }, u];" $T79
+mut R5 src/sim/clock.ts "Math.max(0, Math.min(capMs, atMs - nowMs))" "Math.max(0, atMs - nowMs)" $T79
+mut R6 src/sim/clock.ts "focus: i < nFocus" "focus: i <= nFocus" $T79
+mut E1 src/sim/effects.ts "if (ctx.suspended || !effects.length) return [];" "if (!effects.length) return [];" $T80
+mut E2 src/sim/tick.ts "fx = live ? { suspended: !clock?.focus } : undefined" "fx = live ? { suspended: false } : undefined" $T80
+mut E3 src/sim/payout.ts "return m === 1 ? k * base : Math.round(k * base * m);" "return m === 1 ? k * base : Math.floor(k * base * m);" $T80
+mut P1 src/sim/pause.ts "w.paused === true && flagOn(b, 'pause')" "w.paused === true" "$T82"
+mut P2 src/econ/income.ts "return !!w && !isPaused(w, b) && isOff(mood(w, b));" "return !!w && w.paused !== true && isOff(mood(w, b));" "$T82"
+mut P3 src/sim/pause.ts "w.paused === true && flagOn(b, 'pause')" "!!w.paused && flagOn(b, 'pause')" "$T82"
+#!/bin/bash
+source <(sed -n '/^M=/,/^T79=/p' /workspace/.pr82-ev/mutants.sh | sed '$d')
+T="tests/v5-f1a-fields.test.ts tests/v5-f1b-clock-rng.test.ts"
+mut G1 src/sim/timers.ts "(evRngFlagOn(b) ? ensureEvRng(s) : s)" "ensureEvRng(s)" "$T"
+mut G2 src/sim/timers.ts "export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));" "export const anyM5FlagOn = (_b: Balance) => true;" "$T"
+mut G3 src/config/flags.ts "!!p.m4?.enabled && p.m4.flags?.[f] === 1" "p.m4?.flags?.[f] === 1" "$T"

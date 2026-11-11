@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1-mut
+
+ ❯ tests/trace10/hooks.test.ts (4 tests | 1 failed) 1486ms
+   ✓ trace10 hooks in tests/bot-m5.ts are observe-only (G0 cond. c) > onRunnerDraw: R calls R0 exactly once per draw, same values, same run 1156ms
+   × trace10 hooks in tests/bot-m5.ts are observe-only (G0 cond. c) > onTick: one step + one end per tick, clones only (mutating / freezing them has no effect) 95ms
+     → expected '{"base":0,"baseF":{},"collTap":449,"c…' to be '{"base":85844,"baseF":{"0":33126,"1":…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/trace10/hooks.test.ts > trace10 hooks in tests/bot-m5.ts are observe-only (G0 cond. c) > onTick: one step + one end per tick, clones only (mutating / freezing them has no effect)
+AssertionError: expected '{"base":0,"baseF":{},"collTap":449,"c…' to be '{"base":85844,"baseF":{"0":33126,"1":…' // Object.is equality
+
+Expected: "{"base":85844,"baseF":{"0":33126,"1":39712,"2":13006},"collTap":1110,"collW":0,"final":{"basket":567,"celebratedMilestones":[],"celebratedTier":0,"coinsCents":6344,"collectionLevel":6,"coop":1.7500000000000226,"coopFullS":0,"customers":[],"eggValueLevel":5,"farmLevel":2,"graderTier":0,"hensLevel":4,"manageCdS":0,"nextCustomerId":53,"nextCustomerInS":0.019526605521136414,"pendingOfflineEggs":0,"rng":1035385001,"wageFracCents":{},"workers":{}},"g4m":{"bb5":0,"strict":0,"worst":null,"worstM":null},"longestNoAff":0,"longestNoAff30":0,"mech":0,"ovl":{"peakF18":1,"peakM":1,"peakTot":1,"saleBoth":0,"stallBy":{},"stallS":0,"tAbil":0,"tBoth":0,"tFr":0,"xAll":0,"xBoth":0},"reach":{"0":0,"1":170.1,"2":275.3},"rm":{"asleepWS":0,"l1017T":0,"mhAsleep":0,"pays":0,"refA":0,"refA10":0,"refM":0,"refM10":0,"restEnd100":0,"restS":0,"sc8T":0,"scT29":0,"scT30":0,"t10":0,"t29":0,"tAll":299.9999999999997,"tog":0,"tog10":0,"unpEnter":0,"unpEnter10":0,"unpaidPre10":0,"unpaidWS":0},"snaps":{},"src":{},"srcF":{},"tsnaps":[]}"
+Received: "{"base":0,"baseF":{},"collTap":449,"collW":0,"final":{"basket":449,"celebratedMilestones":[],"celebratedTier":0,"coinsCents":-1,"collectionLevel":0,"coop":1.0000000000000664,"coopFullS":0,"customers":[],"eggValueLevel":0,"farmLevel":0,"graderTier":0,"hensLevel":0,"manageCdS":0.2999999999998426,"nextCustomerId":52,"nextCustomerInS":0.3784876229502018,"pendingOfflineEggs":0,"rng":490899535,"wageFracCents":{},"workers":{"market_hand":{"cdS":0,"energy":0}}},"g4m":{"bb5":0,"strict":0,"worst":null,"worstM":null},"longestNoAff":0,"longestNoAff30":0,"mech":0,"ovl":{"peakF18":1,"peakM":1,"peakTot":1,"saleBoth":0,"stallBy":{"F0-9":299.9999999999997},"stallS":299.9999999999997,"tAbil":0,"tBoth":0,"tFr":0,"xAll":0,"xBoth":0},"reach":{"0":0},"rm":{"asleepWS":0,"l1017T":0,"mhAsleep":0,"pays":0,"refA":0,"refA10":0,"refM":0,"refM10":0,"restEnd100":0,"restS":0,"sc8T":0,"scT29":0,"scT30":0,"t10":0,"t29":0,"tAll":299.9999999999997,"tog":0,"tog10":0,"unpEnter":0,"unpEnter10":0,"unpaidPre10":0,"unpaidWS":0},"snaps":{},"src":{},"srcF":{},"tsnaps":[]}"
+
+ ❯ tests/trace10/hooks.test.ts:41:25
+     39|     const hooked = run(balance, SEED, P, M5X_STACKS.none, 300, { onTic…
+     40|       ph.push(phase + i); (s as any).coinsCents = -1; s.customers.leng…
+     41|     expect(enc(hooked)).toBe(enc(plain));
+       |                         ^
+     42|     const n = 300 * balance.tickHz; expect(ph.length).toBe(2 * n);
+     43|     expect(ph.slice(0, 3)).toEqual(['step1', 'end1', 'step2']); expect…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  00:45:06
+   Duration  2.11s (transform 320ms, setup 0ms, collect 400ms, tests 1.49s, environment 0ms, prepare 51ms)
+

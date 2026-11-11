@@ -1,0 +1,220 @@
+# diff scratch/v2-econ/h/m5.ts (29d423c5) vs tests/bot-m5.ts:1-153
+1,16c1,23
+< /** M5.0 full-stack G3-G5 runner (SCRATCH, Economy). Real sim (src step/apply @ a05bc74 snapshot) + seller15 pickM4All bot (tests/bot-m4.ts),
+<  *  VAR_DEFAULT check-ins/taps, managed (code's manage: 30 s cooldown, refill at <=50%). M5.0 mechanics layered HERE only (none exist in src):
+<  *  D-HOP-2026-10-24-04 inputs: credited tap = >=1.0 s sim time since last credited tap (eggs moved or not); reference income I = trailing 60 s of
+<  *  PASSIVE sale coins (excl. golden cash, frenzy, abilities, Broody, tap coins, streak); streak cap 0.28; pause recovery 0.25x (1%/36 s), no output/wage. */
+< import { balance as b0 } from './src/config/balance';
+< import { initialState, GameState } from './src/sim/state';
+< import { step } from './src/sim/tick';
+< import { apply } from './src/sim/actions';
+< import type { SimEvent } from './src/sim/events';
+< import { showManageAll, WorkerId, mood, graderMult } from './src/sim/workers';
+< import { SellerVariance, VAR_DEFAULT } from './tests/seller-variance';
+< import { pickBuy, pickAction, M1_KEYS } from './tests/bot-m4';
+< import { candidates } from './src/ui/next-goal';
+< import { priceDollars } from './src/econ/income';
+< import { prodEggsPerSec, coopCap } from './src/sim/tracks';
+< type B = typeof b0;
+---
+> // M5 bot (Q-ZG-H3 port, rc/v5): Economy's M5.0 full-stack runner scratch/v2-econ/h/m5.ts (sha256 29d423c5...) and its
+> // window-gate driver m5x.ts (sha256 196e8ed5...), ported verbatim as test tooling. Play logic, RNG draw order and arithmetic
+> // are unchanged, so results equal the original harness's on the same CSV and seeds (artifacts/bot-m5-parity).
+> // Original header: real sim (src step/apply) + seller15 pickM4All bot (tests/bot-m4.ts), VAR_DEFAULT check-ins/taps, managed
+> // (30 s cooldown, refill at <= 50%). M5.0 mechanics are layered HERE only (none exist in src): credited tap = >= 1.0 s of sim
+> // time since the last credited tap (eggs moved or not); reference income I = trailing 60 s of PASSIVE sale coins (excl. golden
+> // cash, frenzy, abilities, Broody, tap coins, streak); streak cap 0.28; pause recovery 0.25x (1%/36 s), no output or wage.
+> // The mechanics model the specs for pacing only; they are not the shipping implementation (that lands behind m4.flags.*).
+> // Port changes vs m5.ts: import paths; types for strict tsc; an optional read-only `onEvents` / `onSecond` observer (used by
+> // `npm run verify -- --profile m5x-casual`); m5x.ts's top-level loop is `windowGate()` below. None of these changes a number.
+> import type { Balance } from '../src/config/balance';
+> import { initialState, type GameState } from '../src/sim/state';
+> import { step } from '../src/sim/tick';
+> import { apply } from '../src/sim/actions';
+> import type { SimEvent } from '../src/sim/events';
+> import { showManageAll, type WorkerId, mood, graderMult } from '../src/sim/workers';
+> import { SellerVariance, VAR_DEFAULT } from './seller-variance';
+> import { pickBuy, pickAction, M1_KEYS } from './bot-m4';
+> import { candidates } from '../src/ui/next-goal';
+> import { priceDollars } from '../src/econ/income';
+> import { prodEggsPerSec, coopCap } from '../src/sim/tracks';
+> import { maxStepRatio, quantile, type PacingTargets } from './pacing-guards';
+> type B = Balance;
+22c29,33
+< export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: { start?: GameState; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number } = {}) {
+---
+> /** Read-only observers (port addition): they see events and states, never change them. */
+> export interface RunOpts { start?: GameState; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number;
+>   /** Every drained batch of sim events, with the run second it happened in. */ onEvents?: (t: number, evs: readonly SimEvent[]) => void;
+>   /** The state at the end of each run second (after taps, check-in and buys). */ onSecond?: (t: number, s: GameState) => void; }
+> export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: RunOpts = {}) {
+44c55
+<   const drain = (t: number) => { for (const e of ev) {
+---
+>   const drain = (t: number) => { if (opt.onEvents && ev.length) opt.onEvents(t, ev); for (const e of ev) {
+66a78
+>   let prevT = 0;
+68a81
+>     if (opt.onSecond && i > 1 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s); prevT = t;
+135a149
+>   if (opt.onSecond && n > 0 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s);
+
+# src/ trees: harness snapshot vs rc/v5 worktree
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/build-id.ts and /workspace/review-pr78-0951aef/src/build-id.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/config/balance.ts and /workspace/review-pr78-0951aef/src/config/balance.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/config/formulas.ts and /workspace/review-pr78-0951aef/src/config/formulas.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/econ/best-buy.ts and /workspace/review-pr78-0951aef/src/econ/best-buy.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/econ/income.ts and /workspace/review-pr78-0951aef/src/econ/income.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/game.ts and /workspace/review-pr78-0951aef/src/game.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/main.ts and /workspace/review-pr78-0951aef/src/main.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/save/idb-mirror.ts and /workspace/review-pr78-0951aef/src/save/idb-mirror.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/save/save.ts and /workspace/review-pr78-0951aef/src/save/save.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/sim/actions.ts and /workspace/review-pr78-0951aef/src/sim/actions.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/sim/migrate-v7.ts and /workspace/review-pr78-0951aef/src/sim/migrate-v7.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/sim/offline.ts and /workspace/review-pr78-0951aef/src/sim/offline.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/sim/tracks.ts and /workspace/review-pr78-0951aef/src/sim/tracks.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/app.ts and /workspace/review-pr78-0951aef/src/ui/app.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/format.ts and /workspace/review-pr78-0951aef/src/ui/format.ts differ
+Only in /workspace/review-pr78-0951aef/src/ui: goal-label.ts
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/next-goal.ts and /workspace/review-pr78-0951aef/src/ui/next-goal.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/order-list.ts and /workspace/review-pr78-0951aef/src/ui/order-list.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/orders.ts and /workspace/review-pr78-0951aef/src/ui/orders.ts differ
+Only in /workspace/review-pr78-0951aef/src/ui: s2-economy-ui.ts
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/save-recovery.ts and /workspace/review-pr78-0951aef/src/ui/save-recovery.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/styles.css and /workspace/review-pr78-0951aef/src/ui/styles.css differ
+Only in /workspace/review-pr78-0951aef/src/ui: toast-safe.ts
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/tracks-explainer.ts and /workspace/review-pr78-0951aef/src/ui/tracks-explainer.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/tracks-ui.ts and /workspace/review-pr78-0951aef/src/ui/tracks-ui.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/ui/workers-ui.ts and /workspace/review-pr78-0951aef/src/ui/workers-ui.ts differ
+Files /workspace/egg-farm-studio/scratch/v2-econ/h/src/vite-env.d.ts and /workspace/review-pr78-0951aef/src/vite-env.d.ts differ
+
+== src/sim/actions.ts
+4c4
+< import { Track, salePriceCents, trackLock, trackBuyCost, trackLevel, reachedMilestones } from './tracks';
+---
+> import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
+36c36
+<   const L = trackLevel(s, t), cost = trackBuyCost(s, t, b) * 100; if (s.coinsCents < cost) return s;
+---
+>   const L = trackLevel(s, t), cost = trackCost(L, t, b) * 100; if (s.coinsCents < cost) return s;
+== src/sim/tracks.ts
+10c10
+< import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensOfflineMult, eggsPerSec, eggPriceCents, coopCapacity, hensCap, eggValueCap, hensCost, eggValueCost, balancedTier, clampL, trackMaxLevel, trackExtraCost } from '../config/formulas';
+---
+> import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensOfflineMult, eggsPerSec, eggPriceCents, coopCapacity, hensCap, eggValueCap, hensCost, eggValueCost, balancedTier, clampL } from '../config/formulas';
+20,21d19
+< /** Price of the next level of a track at the current Farm level: row cost + L30-17 extra-level surcharge. */
+< export const trackBuyCost = (s: GameState, t: Track, b: Balance) => trackCost(trackLevel(s, t), t, b) + trackExtraCost(t, trackLevel(s, t), s.farmLevel, b);
+27c25
+<   trackLevel(s, t) >= trackMaxLevel(t, b) ? 'max' : trackLevel(s, t) >= trackCap(s, t, b) ? 'cap' : null;
+---
+>   trackLevel(s, t) >= b.maxLevel ? 'max' : trackLevel(s, t) >= trackCap(s, t, b) ? 'cap' : null;
+== src/econ/income.ts
+38a39,47
+> /** sales-stopped-spec §4.2 (D-HOP-2026-10-24-13/-14): live mode only. A hired Market Hand that is Asleep or Unpaid sells
+>  *  nothing, so the eggs-sold term is 0. Unchanged: not hired, Working, Tired, or Paused (the player chose to sell by hand;
+>  *  `paused` is the m5-worker-pause flag and reads false until that build ships). The planner path (`assumeWorking`:
+>  *  best-buy, goal-label %, ★ pick, bot) never reaches this branch. */
+> export function marketHandStalled(s: GameState, b: Balance): boolean {
+>   const w = s.workers.market_hand as (Workers['market_hand'] & { paused?: boolean }) | undefined;
+>   return !!w && w.paused !== true && isOff(mood(w, b));
+> }
+> 
+39a49
+>   if (!opts.assumeWorking && marketHandStalled(s, b)) return 0;
+66a77,81
+> /** Gross sales per second ($), before wages. */
+> export const grossSalesPerSec = (s: GameState, b: Balance) => incomePerSec(s, b) + wagesPerSec(s, b);
+> /** PM Workers ruling (a), one shared threshold (review 23a3798 #3): production is "stopped" only when gross sales round to $0.00/s.
+>  *  A negative net rate (wages > sales) is not "stopped": production is running. Used by the header aria and the worker banners. */
+> export const salesStopped = (s: GameState, b: Balance) => Math.round(grossSalesPerSec(s, b) * 100) <= 0;
+== src/config/formulas.ts
+8,14c8
+<   collection: {
+<     baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number;
+<     /** M4.1 D-HOP-23: collection_cost per level, copied verbatim from the CSV by sync-economy when economy-config
+<      *  collectionCostFromCsv is on (index = level, 0..maxLevel). When present it is THE collection cost; costGrowth is then
+<      *  informational only. Absent (flag off, the default) = baseCost * costGrowth^C, unchanged. */
+<     costTable?: number[];
+<   };
+---
+>   collection: { baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number };
+29,31d22
+<     /** D-HOP-10 (HoE): coop_capacity per Farm level, copied from the CSV by sync-economy (index = level, 0..maxLevel) when the
+<      *  column is not linear. Absent = coopCapacityBase + coopCapacityPerLevel x F (unchanged for linear tables). */
+<     coopCapacityTable?: number[];
+42,47c33
+<   /** L30+ (l30plus-spec D2/D4/D8): capOverFarmByFarm[F] = the CSV row's cap (absent = constant capOverFarm, the L0 value);
+<    *  extraCostFarmShareByFarm[F] = hv_extra_cost_farm_share row (absent = 0). Track max level = costs.length - 1 (CSV rows). */
+<   hens: { costs: number[]; capOverFarm: number; capOverFarmByFarm?: number[] };
+<   extraCostFarmShareByFarm?: number[];
+<   /** Multiplier on the 2nd extra level's surcharge (data/economy-config.json hvExtraSecondLevelMult). */
+<   extraSecondLevelMult?: number;
+---
+>   hens: { costs: number[]; capOverFarm: number };
+50c36
+<   eggValue: { costs: number[]; capOverFarm: number; capOverFarmByFarm?: number[]; baseStep: number; levelBonus: number };
+---
+>   eggValue: { costs: number[]; capOverFarm: number; baseStep: number; levelBonus: number };
+64,68c50
+< export const collectionCost = (C: number, p: EconomyParams) => {
+<   const t = p.collection.costTable, L = clampL(C, p);
+== src/config/balance.ts
+5,8c5
+< /** L30+ (type-only, HoE): per-Farm-row caps are optional on the m4 tracks, and tc may be any generated tc_* map (sync-economy fitM4). */
+< type RawM4 = typeof raw.m4;
+< type M4Json = Omit<RawM4, 'hens' | 'eggValue' | 'tc'> & { hens: RawM4['hens'] & { capOverFarmByFarm?: number[] }; eggValue: RawM4['eggValue'] & { capOverFarmByFarm?: number[] }; tc: RawM4['tc'] | Record<string, number> };
+< export type Balance = Omit<typeof raw, 'm4'> & { m4?: M4Json } & EconomyParams & { sim_test?: SimTestHooks };
+---
+> export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
+11c8
+<     if (k.startsWith('_') || (path === '' && k === 'sim_test') || (path === '.farm' && (k === 'costGrowthSegments' || k === 'costTable')) || (path === '.collection' && k === 'costTable')) continue;
+---
+>     if (k.startsWith('_') || (path === '' && k === 'sim_test') || (path === '.farm' && (k === 'costGrowthSegments' || k === 'costTable'))) continue;
+30d26
+<   validateCostTable((b.collection as any).costTable, b.maxLevel, 'collection.costTable');
+== src/ui/next-goal.ts
+9c9
+< import { trackLock, trackBuyCost } from '../sim/tracks';
+---
+> import { trackLock, trackCost, trackLevel } from '../sim/tracks';
+11a12
+> import { goalLabelParts, goalLabelSpec, type GoalLabelParts } from './goal-label';
+19c20,22
+< export interface Goal { key: GoalKey | null; state: GoalState; label: string; status: string; costCents: number; tab: 'farm' | 'collection' | 'workers'; }
+---
+> export interface Goal { key: GoalKey | null; state: GoalState; label: string; status: string; costCents: number; tab: 'farm' | 'collection' | 'workers';
+>   /** M41-8 F4 (M4 on, HENS / VALUE / COLL): rendered spans + untruncated aria; `label` is then parts.text. */
+>   parts?: GoalLabelParts; }
+24c27
+<   if (m4On(b)) for (const [key, t] of [['HENS', 'hens'], ['VALUE', 'eggValue']] as const) if (!trackLock(s, t, b)) out.push({ key, costCents: trackBuyCost(s, t, b) * 100 });
+---
+>   if (m4On(b)) for (const [key, t] of [['HENS', 'hens'], ['VALUE', 'eggValue']] as const) if (!trackLock(s, t, b)) out.push({ key, costCents: trackCost(trackLevel(s, t), t, b) * 100 });
+51c54,55
+< export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shared?: GoalKey | null): Goal {
+---
+> /** `star` (M41-8 F4): the key that carries ★ = goal-label.ts bestBuyMark (the same source as the UX-M4 row chip). */
+> export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shared?: GoalKey | null, star?: GoalKey | null): Goal {
+62c66,69
+<   return { key: t.key, state, label: labelFor(t.key, s, b), status, costCents: t.costCents, tab: t.key === 'FARM' || t.key === 'HENS' || t.key === 'VALUE' ? 'farm' : t.key === 'COLL' ? 'collection' : 'workers' };
+---
+>   // M41-8 F4 (M4 on only; flag-off keeps the AC5 labels byte-identical): ★ / % / truncation for HENS, VALUE, COLL.
+>   // F4-11: the % is hidden while the strip's own income rate is 0 (fresh save before the first sale).
+>   const parts = m4On(b) && (t.key === 'HENS' || t.key === 'VALUE' || t.key === 'COLL') ? goalLabelParts(goalLabelSpec(t.key, s, b, !!star && star === t.key, rateCentsPerS > 0)) : undefined;
+>   return { key: t.key, state, label: parts ? parts.text : labelFor(t.key, s, b), ...(parts ? { parts } : {}), status, costCents: t.costCents, tab: t.key === 'FARM' || t.key === 'HENS' || t.key === 'VALUE' ? 'farm' : t.key === 'COLL' ? 'collection' : 'workers' };
+83,84c90,95
+< export const goalAria = (g: Goal) => g.state === 'done' ? 'Next goal: all upgrades done.' :
+== src/econ/best-buy.ts
+14c14
+< import { trackLock, trackBuyCost } from '../sim/tracks';
+---
+> import { trackLock, trackCost } from '../sim/tracks';
+49,50c49,50
+<     if (!trackLock(s, 'hens', b)) out.push({ key: 'HENS', cost: trackBuyCost(s, 'hens', b), after: { ...s, hensLevel: s.hensLevel + 1 } });
+<     if (!trackLock(s, 'eggValue', b)) out.push({ key: 'VALUE', cost: trackBuyCost(s, 'eggValue', b), after: { ...s, eggValueLevel: s.eggValueLevel + 1 } });
+---
+>     if (!trackLock(s, 'hens', b)) out.push({ key: 'HENS', cost: trackCost(s.hensLevel, 'hens', b), after: { ...s, hensLevel: s.hensLevel + 1 } });
+>     if (!trackLock(s, 'eggValue', b)) out.push({ key: 'VALUE', cost: trackCost(s.eggValueLevel, 'eggValue', b), after: { ...s, eggValueLevel: s.eggValueLevel + 1 } });
+== src/sim/tick.ts
+== src/sim/state.ts
+== src/sim/workers.ts

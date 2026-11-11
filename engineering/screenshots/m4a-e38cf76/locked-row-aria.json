@@ -1,0 +1,27 @@
+[
+ {
+  "tag": "DIV",
+  "cls": "balanced",
+  "text": "Balanced farm 1/5 · next +15% at all ≥ 10",
+  "attrs": {
+   "role": "img",
+   "aria-label": "Balanced farm 1 of 5. Weakest: Farm, level 5 of 10."
+  }
+ },
+ {
+  "tag": "DIV",
+  "cls": "lock",
+  "text": "Needs Farm L6",
+  "attrs": {
+   "aria-label": "Hens, level 8, locked. Needs Farm level 6."
+  }
+ },
+ {
+  "tag": "DIV",
+  "cls": "lock",
+  "text": "Needs Farm L6",
+  "attrs": {
+   "aria-label": "Egg value, level 8, locked. Needs Farm level 6."
+  }
+ }
+]

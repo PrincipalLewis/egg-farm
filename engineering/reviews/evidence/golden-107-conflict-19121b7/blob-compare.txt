@@ -1,0 +1,14 @@
+=== blob identity proposed vs a6d44c2 for golden files ===
+src/config/formulas.ts proposed=45f71ae5f9c7a622303e45085857f68f32bfabcf a6d44c2=45f71ae5f9c7a622303e45085857f68f32bfabcf same=YES
+src/config/m5-rules.ts proposed=5e416bacff1055ba27170e579531e24f530da166 a6d44c2=5e416bacff1055ba27170e579531e24f530da166 same=YES
+src/sim/golden.ts proposed=caadf2724a5d9f9935875e5b310bbdc5aed76803 a6d44c2=caadf2724a5d9f9935875e5b310bbdc5aed76803 same=YES
+tests/v5-golden-rewards.test.ts proposed=c7ccb2544f7a8029ce3c454e2e20970d2426212d a6d44c2=c7ccb2544f7a8029ce3c454e2e20970d2426212d same=YES
+=== effects/timers vs a6d44c2 (expect NO) ===
+src/sim/effects.ts proposed=4e6654c1015c887de3de55b17bb200e3cc5cdf97 a6=90fb3516ea3a13eb5e58f054935df927ab407c53 rc=17561e0bdf070660501fd8e11d9d5c16fac5b6a1
+src/sim/timers.ts proposed=6d3fbed3f4c0f563b98a4dcc5f4696deb6b35cbe a6=241898bd2292facaed27ca1918b323a1eb26842d rc=1a941adc61981f1fdd652e4f41552bc25718178a
+abilities_present=YES
+ * Each feature PR (golden #1, streak #2, income-ref #3, abilities #4, Broody #5) appends one TimerSystem to TIMER_SYSTEMS.
+export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy, abilities];
+export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
+=== patch-id full proposed vs prior-approved ===
+proposed_pid=faee311a2c18a8b14294a476811d9897373bf225 0000000000000000000000000000000000000000

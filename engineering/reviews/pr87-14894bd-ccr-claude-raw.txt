@@ -1,0 +1,109 @@
+VERDICT: PASS
+
+COUNTS: blocking/major/minor/nit = 0/0/2/3
+
+Reviewed `git diff 2fa7318 HEAD` at 14894bd.
+
+**Test results**
+- `npx vitest run tests/v5-streak-sim.test.ts tests/v5-f2-m5-fields.test.ts tests/v5-f1b-clock-rng.test.ts`: 3 files, 72 tests, all passed.
+- `npm test` (sync-economy check, then the full vitest run): 124 files passed, 1677 tests passed, 1 skipped. The goldens printed by the run match the pins:
+  - flag-off trace `f90d1678…`
+  - M4-on trace `a54c9cf9…`
+  - the flag-off and M4-on storage-byte hashes were printed too.
+- `npm run check-economy-copy`: skipped, because it is opt-in.
+- `npm run check-globals`: could not run. It exited 2 with `ENOENT … dist/assets` because there is no build in this worktree, and building is outside the allowed tools. This PR adds no `window.*` globals or entry points, so I have no evidence of a problem, but the check was not exercised.
+- I did not separately re-run the sim trace `2c0d3ec3`, because I did not find where it is pinned. `tests/m4a-flag-off.test.ts` ("sim trace hash equals main") passed.
+
+## Findings
+
+**F1 — minor — `src/game.ts:301-304` (`endSession`) — a pagehide that doesn't unload can send `streak_peak` twice for one run**
+- **What happens:** `endSession` sends `streak_peak{reason:"reload"}` when the streak flag is on, but it neither ends nor clears the run. `state.streakS` and `state.streakRun` stay live in memory.
+- **Evidence (code trace):** if the page survives the `pagehide` (back/forward cache restore, or a platform that fires pagehide on tab switch), the same run later emits again:
+  - from `m5Offline` → `endStreak('offline')` at `src/save/m5-fields.ts:86` (the `src/game.ts:386` and `:416` call sites), or
+  - from `streakTick` → `endStreak('decay')` at `src/sim/streak.ts:67`.
+- **Scope:** on a real unload nothing double-sends. The next load runs `m5Load`, which strips the session keys, and only the one `reload` event exists. Flag-off is unaffected, because the call is gated on `streakOn`.
+- **Test coverage:** the only test for this is `tests/v5-streak-sim.test.ts:136`. It checks that `reload` is emitted once and doesn't cover a session that continues after `endSession`.
+- **Repro (not run, trace only):** flag on, build a streak, call `g.endSession()` (the pagehide handler is `src/main.ts:145`), keep playing, then hide for 60 s or more and show again. Telemetry then holds `streak_peak` with reason `reload` and another with reason `offline`, carrying the same `credited_taps`.
+- **Fix:** have `endSession` mark the run as reported, for example by clearing `streakRun` and keeping `streakS`, or by remembering a `reported` flag.
+
+**F2 — minor — O-3 (`tests/bot-m5.ts:84,113`) — nothing fails loudly if the real streak flag and bot-m5's own streak are both active**
+- **What the PR touches:** it does not modify `tests/bot-m5.ts`, `scripts/bot-m5x.ts` or any flag file.
+- **How both can be active:**
+  - `tests/bot-m5.ts` drives the real `step` and `apply` with whatever balance it is handed.
+  - It models its own streak: `streak` at line 41, the `(1 + streak)` multiplier at line 60, the credited tap at line 114.
+  - If a balance with `m4.flags.streak=1` is passed, the real `creditTap` and `(1 + s)` in `saleValueCents` run as well, so the factor is applied twice.
+  - `rg` finds no guard or assertion on `m4.flags` in `tests/bot-m5.ts` or `scripts/bot-m5x.ts`.
+- **Why it is latent today:** the shipped `balance.json` has no `m4.flags` block (`rg '"flags"'` finds nothing in it). So `scripts/verify/cli.ts:59` (`withFlags`) rejects `--flags m4.flags.streak=1` as an unknown flag, and `bot-m5.test.ts` builds from csv plus `balance.json`.
+- **When it becomes live:** as soon as F3 adds `m4.flags` entries, `npm run verify -- --profile m5x-casual --flags m4.flags.streak=1` would silently double-count.
+- **Fix:** add a throw in the bot-m5 `run()` entry points when `anyM5FlagOn(b)`.
+
+**F3 — nit — `src/sim/payout.ts:13-18` — float association differs from the spec formula and from the test oracle**
+- **The difference:** the implementation computes `(k*base) * (1*g*(1+s))` (a `reduce` over `[g, 1+s]`). The spec and the test oracle at `tests/v5-streak-sim.test.ts:94` compute `((k*price)*g)*(1+x)`.
+- **Impact:** the two can differ by one ulp and therefore at a `.5` tie under `Math.round`.
+- **What I did not do:** I did not find a counterexample, because I couldn't run ad-hoc scripts here. The test cases at x = 0.01, 0.14, 0.28 with Grader none or tier 3 all pass.
+- **Safe for credits and previews:** both go through the same function, so they agree with each other. The risk is only against an external reference such as the Python sim.
+- **Fix:** if a bit-for-bit match with the spec is wanted, fold the factors in spec order.
+
+**F4 — nit — `src/sim/actions.ts:17-18` — stacked doc comments**
+- The old `Sells k=min(...)` JSDoc now sits directly above the new `v5: suspended` JSDoc, so only the latter attaches to `sellTo`. Merge the two.
+
+**F5 — nit — `tests/v5-streak-sim.test.ts:125` — "never saved" is checked on `m5Persist` only**
+- ST-AC12 asserts `m5Persist(...)` has no `streakRun`. It does not check that `serialize` or `Game.save` bytes with the flag on contain none of `streakRun`, `streakS`, `streakHoldS` or `tapCreditCdS`.
+- By code trace the claim holds: `save.ts:146` is the only state serialiser, and it goes through `m5Persist`. A one-line `serialize` assertion would pin it.
+
+## Answers to the specific questions
+
+1. **Flag-off identity: yes.**
+   - **Sim path:** `tick.ts` always passes `suspended = !clock?.focus`, so with no clock it is `true`. With the flag off, `streakSaleFactor` returns 1 whatever `suspended` is, so `saleMultipliers` stays `[g]` and `addStreakExtra` is skipped. `creditTap` and `streakTick` return `s` unchanged, and the `collect` event keeps its old shape.
+   - **Tests:** both goldens reproduced above. `tests/v5-streak-sim.test.ts:113-116` checks flag-off `step` with and without a clock is deep-equal, and that no streak fields appear.
+   - **Flag on, no clock** (fixtures, bots, hidden provisional sim, `debugAdvance`):
+     - Every Market Hand sale is 1×, because it counts as suspended.
+     - Hold and decay never advance, because focus seconds are 0.
+     - The credit window still counts down, because it runs on sim time.
+     - This is as documented in `clock.ts`.
+   - **In the app:** `attendedProbe` defaults to false and nothing in `src` calls `setAttendedProbe` yet. So flag on in the real `Game` also means no decay and no Market Hand bonus until the UI wires the probe. That is by design and gated off.
+   - **Offline settlement:** `applyOffline` doesn't call `sellTo` or the payout functions.
+
+2. **Determinism: isolated.**
+   - `streak.ts` has no RNG use.
+   - `seedEvRng` is gated on `evRngFlagOn` (golden or broody), so streak alone doesn't seed `evRng`.
+   - `state.rng` is touched only by the existing arrival code, and `brRng` is not touched.
+   - **Rounding:** `r12` is applied per tick. Many short steps versus one long step differ by roughly 1e-12 in `s`, far below the 1e-9 EPS used to end a run. Tests at lines 68-81 cover long and short steps and the focus-tick split.
+
+3. **Save: clean.**
+   - `m5Persist` strips all four fields: `streakS`, `streakHoldS` and `tapCreditCdS` through `M5_SESSION_FIELDS`, and `streakRun` through the local `SESSION_ONLY_KEYS` (`m5-fields.ts:32`).
+   - `save.ts:146` is the only state-to-JSON path.
+   - `m5Load` also strips them, so hand-edited values never load.
+   - `save.ts` is untouched by the diff, and `tests/v5-f2-roundtrip.test.ts` and `v5-f2-m5-fields.test.ts` pass, so I found no sign of a schemaVersion change.
+   - After `endStreak` the state keeps `streakS: 0` and `streakHoldS: 0` as keys. They are stripped on save, and a second `m5Offline` pass emits nothing because `streakPeak` returns null at v = 0.
+
+4. **Money: integer cents, order fine.**
+   - `value` is `Math.round(k·base·m)`, or exactly `k·base` when `m === 1`.
+   - `extraCents` is `value − value(s=0)`, a difference of two integers.
+   - It is non-negative, because 1 + s > 1 and `Math.round` is monotonic.
+   - It is only added when > 0.
+   - It is rounded once per sale.
+   - Offline earnings are unaffected: `m5Offline` only zeroes the streak and emits an event.
+
+5. **`tcNum` and `validateBalance`: no existing path throws.**
+   - Production `balance.json` has golden's tc keys (`egg_gap_*`, `frenzy_s`) and abilities' keys (`ability_s`, `ability_cd_s`). It has no `m4.flags` block, so no flag is on.
+   - It lacks `streak_unlock_farm`, `tap_credit_min_s` and `streak_tier_count`. Turning the streak flag on in `balance.json` before Economy row 4 adds them would throw at module load, naming `tc_<key>`. That is loud, and it is covered by the ST-AC18 test.
+   - The full suite passes with the updated fixtures (`v5-f2-helpers`).
+   - `verify --flags` can't enable it today (see F2).
+   - `endSession` double emission is F1.
+
+6. **O-3:** see F2. The PR doesn't change `bot-m5`, and there is no guard.
+
+## CHECKED, NO ISSUE
+- The 2fa7318..HEAD diff was read in full, `src` and tests.
+- There is no import cycle: `state.ts` imports `StreakRun` as a type only, and `streak.ts` imports only config, state and events.
+- `validateBalance` throws only when `m4.enabled` is set and a flag equals 1. Flags set to 0 or absent need nothing.
+- The ST-AC13 and R12 behaviours trace correctly in the code:
+  - The first ⌈focusMs/tick⌉ ticks carry focus (`advance` → `tickClock`).
+  - A Market Hand sale on an unfocused tick is credited at 1×.
+  - The unfocused credit window and cap clamp (K18) behave as the test names say.
+- Credited-tap rules (R3/ST-AC14):
+  - `collectOffline` and Coop Hand collects never call `creditTap`.
+  - A tap below `streak_unlock_farm` gets `credited:false` and no state change.
+- A hidden gap of 60 s or more runs `m5Offline` on `h.state`, the pre-hide snapshot. A shorter gap runs `m5ShortGap`, which leaves the streak untouched.
+- Telemetry: `streak_started` and `streak_peak` go through the generic `track(type, rest)` branch in `Game.emit`.

@@ -1,0 +1,3 @@
+68bf83f3101e34f9512bcc7855e5d6e4b04c7f13d7a241a361f4e03e1e4d2e51  /workspace/artifacts/v5-116-architect-o1o2-9ee76a0/NOTE.md
+2cf4ac41dd9e176599ab0b9feeaba73e5447c1fb985b8c7fc81ead81f096d465  /workspace/artifacts/v5-116-architect-o1o2-9ee76a0/new-head.sha
+b8bbb2fb9f7f95c0fc88617d14e4bfb1896f54c1c5b2bf1c52df25da84f9814f  /workspace/artifacts/v5-116-architect-o1o2-9ee76a0/tree.sha

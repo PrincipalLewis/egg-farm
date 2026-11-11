@@ -1,0 +1,52 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/worktrees/rev-122-m1-mut
+
+ ❯ tests/trace10/invalid.test.ts (21 tests | 2 failed) 1235ms
+   × EC-2 self-test (c): invalid inputs are never MATCH_ALL > footer count off by one -> INVALID, exit 3 22ms
+     → expected 'MATCH_ALL' to be 'INVALID' // Object.is equality
+   × EC-2 self-test (c): invalid inputs are never MATCH_ALL > the same variants on the BEFORE side are also INVALID 75ms
+     → expected +0 to be 3 // Object.is equality
+   ✓ EC-2 (c) on disk + CLI exit codes > CLI: identity exit 0 with synthetic label; deleted stream exit 3; usage exit 2 826ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/trace10/invalid.test.ts > EC-2 self-test (c): invalid inputs are never MATCH_ALL > footer count off by one -> INVALID, exit 3
+AssertionError: expected 'MATCH_ALL' to be 'INVALID' // Object.is equality
+
+Expected: "INVALID"
+Received: "MATCH_ALL"
+
+ ❯ tests/trace10/invalid.test.ts:39:23
+     37|   it.each(VARIANTS)('%s -> INVALID, exit 3', (_n, f) => {
+     38|     const [b, a] = pair(); const v = compareSides(b, f(a));
+     39|     expect(v.verdict).toBe('INVALID'); expect(v.exit).toBe(3); expect(…
+       |                       ^
+     40|     expect(JSON.stringify(v)).not.toContain('MATCH_ALL');
+     41|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/trace10/invalid.test.ts > EC-2 self-test (c): invalid inputs are never MATCH_ALL > the same variants on the BEFORE side are also INVALID
+AssertionError: expected +0 to be 3 // Object.is equality
+
+- Expected
++ Received
+
+- 3
++ 0
+
+ ❯ tests/trace10/invalid.test.ts:43:137
+     41|   });
+     42|   it('the same variants on the BEFORE side are also INVALID', () => {
+     43|     for (const [, f] of VARIANTS.filter(([n]) => n !== 'side label wro…
+       |                                                                                                                                         ^
+     44|   });
+     45|   it('a valid synthetic manifest passes the §8 validator', () => { exp…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  00:45:17
+   Duration  1.61s (transform 134ms, setup 0ms, collect 178ms, tests 1.23s, environment 0ms, prepare 45ms)
+

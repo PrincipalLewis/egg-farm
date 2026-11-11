@@ -1,0 +1,25 @@
+
+> egg-farm@0.1.0 abilities-ui-browser
+> node scripts/abilities-ui-browser.mjs
+
+serveOwn: dist-qa on port 41187 (free port; set PORT to pin)
+abilities-ui-browser: dist-qa m4.1+fcf7623 on port 41187
+PASS [chromium] F0-0 QA build boots at 360x640 with shipped abilities flag 0 and HEAD build-id — {"flag":0,"bid":"m4.1+fcf7623"}
+PASS [chromium] F0-1 open Upgrades: layer open, #p-upgrades visible, nav on=upgrades — {"layerOpen":true,"upHidden":false,"mkHidden":true,"upTransform":"none","navOn":["upgrades"],"f1":"flag0-open.png"}
+PASS [chromium] F0-2 close via .close: layer closed, sheet hidden, nav on=farm — {"layerOpen":false,"upHidden":true,"mkHidden":true,"upTransform":"none","navOn":["farm"],"f2":"flag0-closed.png"}
+PASS [chromium] F0-3 reopen Upgrades: open again — {"layerOpen":true,"upHidden":false,"mkHidden":true,"upTransform":"none","navOn":["upgrades"],"f3":"flag0-reopen.png"}
+PASS [chromium] F0-4 close mid-animation (60 ms): layer not open, scrim not interactive; settles closed + hidden — {"sMid":{"layerOpen":false,"upHidden":true,"mkHidden":true,"upTransform":"none","navOn":["farm"]},"sEnd":{"layerOpen":false,"upHidden":true,"mkHidden":true,"upTransform":"none","navOn":["farm"]},"f4":"flag0-close-mid.png"}
+PASS [chromium] F0-5 switch Upgrades -> Market while open: Market shown, Upgrades hidden, layer open — {"layerOpen":true,"upHidden":true,"mkHidden":false,"upTransform":"none","navOn":["market"],"f5":"flag0-switch.png"}
+PASS [chromium] F0-6 reload while Upgrades open: boots clean, no panel stuck open — {"layerOpen":false,"upHidden":true,"mkHidden":true,"upTransform":"none","navOn":[],"f6a":"flag0-reload.png"}
+PASS [chromium] F0-6b after reload Upgrades opens normally — {"layerOpen":true,"upHidden":false,"mkHidden":true,"upTransform":"none","navOn":["upgrades"],"f6b":"flag0-reload-reopen.png"}
+PASS [chromium] F0-7 flag 0: no call buttons in DOM — {"calls":0}
+PASS [chromium] F1-0 runtime overlay applied in-page only (live balance abilities=1), farm seeded >= unlock — {"abilities":1,"unlock":10,"farmLevel":10}
+PASS [chromium] F1-1 Workers tab shows call buttons (flag on) — {"callN":3}
+INFO [chromium] F1-1i Workers tab @360 horizontal overflow (flag on): YES — {"scrollWidth":417,"clientWidth":360}
+PASS [chromium] F1-2 call fired from sheet -> pending close (layer closed, sheet still in DOM for transform close) — {"layerOpen":false,"upHidden":false,"mkHidden":true,"upTransform":"matrix(1, 0, 0, 1, 0, 78.2012)","navOn":["farm"]}
+PASS [chromium] O1 dock mid-pending: docked media matches, sheetCloseComplete ran (portrait sheet hidden, no layer open); call timer resumes (attendance not frozen) — {"o1":{"docked":true,"upHidden":true,"layerOpen":false},"o1b":{"activeS_afterDock":29.499999999999993,"activeS_1500msLater":27.99999999999997,"abilities":{"readyAt":301761.40000000596,"activeS":27.99999999999997,"durS":30}},"f7":"flag1-o1-dock-mid-pending.png"}
+PASS [chromium] O2 reopen while pending: Upgrades reopens; synthetic late transitionend(transform) does NOT hide it — {"pend2":{"layerOpen":false,"upHidden":false,"mkHidden":true,"upTransform":"matrix(1, 0, 0, 1, 0, 25.7888)","navOn":["farm"]},"o2a":{"layerOpen":true,"upHidden":false,"mkHidden":true,"upTransform":"matrix(1, 0, 0, 1, 0, 39.7236)","navOn":["upgrades"]},"o2b":{"layerOpen":true,"upHidden":false,"mkHidden":true,"upTransform":"none","navOn":["upgrades"]},"f8":"flag1-o2-reopen-pending.png"}
+PASS [chromium] O2b close after reopen works normally — {"layerOpen":false,"upHidden":true,"mkHidden":true,"upTransform":"none","navOn":["farm"]}
+PASS [chromium] No page errors — []
+shots: artifacts/abilities-ui-browser: flag0-close-mid.png, flag0-closed.png, flag0-open.png, flag0-reload-reopen.png, flag0-reload.png, flag0-reopen.png, flag0-switch.png, flag1-o1-dock-mid-pending.png, flag1-o2-closed-after.png, flag1-o2-reopen-pending.png, flag1-workers.png
+ALL PASS

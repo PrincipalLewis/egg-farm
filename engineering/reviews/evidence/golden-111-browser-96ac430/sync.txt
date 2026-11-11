@@ -1,0 +1,5 @@
+
+> egg-farm@0.1.0 sync-economy
+> vite-node scripts/sync-economy-cli.ts --check
+
+balance.json up to date with economy.csv

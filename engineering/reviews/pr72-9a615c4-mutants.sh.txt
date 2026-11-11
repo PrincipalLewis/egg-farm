@@ -1,0 +1,11 @@
+#!/bin/bash
+# usage: mut.sh name file 'perl-subst'
+cd /tmp/pr72-fresh
+name=$1; f=$2; expr=$3
+perl -0pi -e "$expr" "$f"
+if git diff --quiet; then echo "$name: MUTATION NOT APPLIED"; exit; fi
+npm run -s verify -- --hours 1 --out /tmp/pr72-mut/$name > /tmp/pr72-mut-$name.vlog 2>&1; ve=$?
+npx vitest run tests/verify.test.ts > /tmp/pr72-mut-$name.tlog 2>&1; te=$?
+tf=$(grep -aE "Tests " /tmp/pr72-mut-$name.tlog | tr -s ' ')
+git checkout -q -- .
+echo "$name: verify(--hours 1) exit=$ve | tests exit=$te $tf"

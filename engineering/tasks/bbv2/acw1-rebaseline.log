@@ -1,0 +1,43 @@
+
+ RUN  v2.1.9 /workspace/wt-gen-bbv2-r
+
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config
+AC-W1 build 1-200 {
+  pass10: 91,
+  pass10at16: 98,
+  pass10gate: 98,
+  medF10: 13.67,
+  medF18: 25,
+  at900: 16
+}
+
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config
+AC-W1 build 201-299 {
+  pass10: 90.91,
+  pass10at16: 96.97,
+  pass10gate: 96.97,
+  medF10: 14,
+  medF18: 25,
+  at900: 7
+}
+
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (seeds 1-200, 201-299, slow) > BB-AC13 flag-on regression baseline seeds 1-200 (bestBuyV2=1, zeroGainUi=0)
+AC-W1 BBv2 flag-on 1-200 {
+  pass10: 100,
+  pass10at16: 100,
+  pass10gate: 100,
+  medF10: 10.333333333333334,
+  medF18: 19.666666666666668,
+  at900: 0
+} signed baseline { pass10: 100, medF10: 10.333333, medF18: 19.666667 }
+
+ ✓ tests/pacing-acw1.test.ts (4 tests) 115579ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config 60096ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > design gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; ship config 17971ms
+   ✓ AC-W1 casual (seeds 1-200, 201-299, slow) > BB-AC13 flag-on regression baseline seeds 1-200 (bestBuyV2=1, zeroGainUi=0) 37503ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  20:56:29
+   Duration  116.71s (transform 427ms, setup 0ms, collect 630ms, tests 115.58s, environment 0ms, prepare 128ms)
+
